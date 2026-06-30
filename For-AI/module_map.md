@@ -131,6 +131,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   descriptions, PC-admin stream descriptions, PC-monitor stream descriptions,
   `pc_android_lsl_admin_status.json` /
   `pc_android_lsl_command_outbox.jsonl`, command/ack schema/channel order,
+  Controller/PC-admin row-payload versus command-sample-payload consistency,
+  nonblank `operator_note` note payloads,
   phone-run `command_diary.jsonl` / embedded command diary native ack rows,
   phone-run `lsl_marker_mirror.csv` / embedded marker mirror reconstruction,
   phone-run `trigger_codes.csv` expected local `PPSTriggerCodes` sequence when

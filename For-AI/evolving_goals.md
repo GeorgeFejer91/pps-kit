@@ -369,8 +369,10 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `lsl_runtime_status.json`, `validate_android_lsl_runtime_artifact.py` accepts
   `phone_controller_runtime_status.json` and
   `phone_controller_command_outbox.jsonl`, verifies the PC-compatible
-  command/ack channel order and token payload, can require native controller
-  sends with `--expect-native-transport`, and can require matching acks with
+  command/ack channel order and token payload, rejects Controller/PC-admin
+  row-payload versus command-sample-payload drift, requires nonblank
+  `operator_note` note payloads, can require native controller sends with
+  `--expect-native-transport`, and can require matching acks with
   `--expect-command-acks`. Use this for non-emulator audits of the
   phone-to-phone controller contract before claiming live Android LSL evidence.
 - The PC side now has a reusable Android LSL administration sender. The

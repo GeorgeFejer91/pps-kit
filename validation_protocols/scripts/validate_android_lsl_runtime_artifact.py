@@ -3595,6 +3595,13 @@ def _validate_controller_outbox_row(
         token = str(payload.get("token") or payload.get("companion_token") or "")
         if not token:
             failures.append(f"{prefix} command payload is missing the pairing token")
+        _validate_command_outbox_payload(
+            payload,
+            row=row,
+            command=str(sample[4] or ""),
+            prefix=prefix,
+            failures=failures,
+        )
     if expect_native_transport and row.get("native_lsl_sent") is not True:
         failures.append(f"{prefix} was expected to send over native LSL")
     if expect_command_acks:
@@ -3642,6 +3649,13 @@ def _validate_pc_admin_outbox_row(
         token = str(payload.get("token") or payload.get("companion_token") or "")
         if not token:
             failures.append(f"{prefix} command payload is missing the pairing token")
+        _validate_command_outbox_payload(
+            payload,
+            row=row,
+            command=str(sample[4] or ""),
+            prefix=prefix,
+            failures=failures,
+        )
     if expect_native_transport and row.get("native_lsl_sent") is not True:
         failures.append(f"{prefix} was expected to send over native LSL")
     if expect_command_acks:
@@ -3655,6 +3669,28 @@ def _validate_pc_admin_outbox_row(
                 failures.append(f"{prefix} ack sample schema mismatch")
             if ack_sample[1] != sample[1]:
                 failures.append(f"{prefix} ack command_id does not match command sample")
+
+
+def _validate_command_outbox_payload(
+    payload: dict[str, Any],
+    *,
+    row: dict[str, Any],
+    command: str,
+    prefix: str,
+    failures: list[str],
+) -> None:
+    row_payload = row.get("payload")
+    if not isinstance(row_payload, dict):
+        failures.append(f"{prefix} row payload is missing or is not a JSON object")
+        return
+    if _canonical_json(row_payload) != _canonical_json(payload):
+        failures.append(f"{prefix} row payload differs from command sample payload")
+    if command == "operator_note" and not str(payload.get("note") or "").strip():
+        failures.append(f"{prefix} operator_note command payload is missing note")
+
+
+def _canonical_json(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
 
 
 def _validate_pc_monitor_event_row(row: dict[str, Any], *, row_index: int, failures: list[str]) -> None:

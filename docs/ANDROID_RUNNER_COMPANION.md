@@ -310,7 +310,10 @@ when the selected package advertises those commands; Stop After Block sends the
 same `stop_after_block` signal used by the PC helper. When `operator_note` is
 advertised, Controller mode also shows a compact note field and sends the note
 inside the token-gated command payload so operator observations reconstruct
-through the same outbox, LSL command, ack, and receiver diary path.
+through the same outbox, LSL command, ack, and receiver diary path. The Android
+LSL artifact validator rejects Controller or PC-admin command outbox rows whose
+stored `payload` object differs from the serialized command-sample payload, and
+it requires nonblank note text for `operator_note`.
 
 Android vibration calibration is device-limited. The phone-run metadata panel
 now includes a `Haptic Calibration` control. On phones with amplitude control it

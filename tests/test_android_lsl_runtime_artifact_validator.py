@@ -661,6 +661,47 @@ def test_android_lsl_runtime_validator_can_require_controller_acks(tmp_path: Pat
     assert "expected to receive a matching command ack" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_accepts_controller_operator_note_payload(tmp_path: Path):
+    controller_dir = tmp_path / "phone-controller"
+    controller_dir.mkdir()
+    status = _controller_status(native=True)
+    status["command_protocol"]["supported_commands"].append("operator_note")
+    (controller_dir / "phone_controller_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+    row = _controller_row(native_sent=True, ack_received=True)
+    note_payload = {"token": "secret", "package_id": "pkg-001", "note": "participant asked for a pause"}
+    row["command"] = "operator_note"
+    row["command_sample"][4] = "operator_note"
+    row["command_sample"][6] = json.dumps(note_payload)
+    row["payload"] = dict(note_payload)
+    (controller_dir / "phone_controller_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(controller_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_rejects_controller_operator_note_missing_from_sample(tmp_path: Path):
+    controller_dir = tmp_path / "phone-controller"
+    controller_dir.mkdir()
+    status = _controller_status(native=True)
+    status["command_protocol"]["supported_commands"].append("operator_note")
+    (controller_dir / "phone_controller_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+    row = _controller_row(native_sent=True, ack_received=True)
+    row["command"] = "operator_note"
+    row["command_sample"][4] = "operator_note"
+    row["command_sample"][6] = json.dumps({"token": "secret", "package_id": "pkg-001"})
+    row["payload"] = {"token": "secret", "package_id": "pkg-001", "note": "participant asked for a pause"}
+    (controller_dir / "phone_controller_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(controller_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    failures = "\n".join(result.failures)
+    assert "row payload differs from command sample payload" in failures
+    assert "operator_note command payload is missing note" in failures
+
+
 def test_android_lsl_runtime_validator_accepts_pc_admin_outbox_artifact(tmp_path: Path):
     admin_dir = tmp_path / "pc-android-admin"
     admin_dir.mkdir()
@@ -748,6 +789,25 @@ def test_android_lsl_runtime_validator_can_require_pc_admin_acks(tmp_path: Path)
 
     assert result.ok is False
     assert "expected to receive a matching command ack" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_pc_admin_payload_drift(tmp_path: Path):
+    admin_dir = tmp_path / "pc-android-admin"
+    admin_dir.mkdir()
+    (admin_dir / "pc_android_lsl_admin_status.json").write_text(json.dumps(_pc_admin_status()), encoding="utf-8")
+    row = _pc_admin_row(native_sent=True, ack_received=True)
+    row["payload"] = {
+        "token": "secret",
+        "package_id": "pkg-001",
+        "requested_by": "pc_runner_lsl_admin",
+        "note": "console note",
+    }
+    (admin_dir / "pc_android_lsl_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(admin_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "PC admin outbox row 1 row payload differs from command sample payload" in "\n".join(result.failures)
 
 
 def test_android_lsl_runtime_validator_accepts_phone_run_command_diary_ack_evidence(tmp_path: Path):

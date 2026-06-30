@@ -113,7 +113,10 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   second Android phone request a clean boundary stop over the same LSL schema as
   the PC helper. It also exposes `operator_note` when advertised; the typed
   note text is carried in the command payload, written to the controller outbox,
-  and acknowledged by Runner mode as a diary/snapshot action.
+  and acknowledged by Runner mode as a diary/snapshot action. The artifact
+  validator compares the row `payload` object against the serialized
+  `PPSCommandSignalsV1` sample payload and rejects missing operator-note text,
+  so controller diaries cannot drift from what was actually sent.
 - PC-side phone uploads preserve `lsl_runtime_status.json` beside
   `lsl_marker_mirror.csv`, `trigger_codes.csv`, and `command_diary.jsonl`.
   Completion uploads that include Android response/top-up reconstruction fields
@@ -222,7 +225,10 @@ Required validation levels:
     `pps-android-lsl-command`, and PC-monitor
     `pc_android_lsl_monitor_report.json` /
     `pc_android_lsl_monitor_events.jsonl` artifacts from
-    `pps-android-lsl-monitor`. Add `--expect-artifact-inventory` for new
+    `pps-android-lsl-monitor`. Controller and PC-admin outbox rows are checked
+    for exact row-payload versus command-sample-payload consistency, including
+    required `operator_note` note text when that command is used.
+    Add `--expect-artifact-inventory` for new
     phone-run folders/ZIPs where the file inventory should prove relative
     paths, byte sizes, and SHA-256 hashes. Add
     `--expect-phone-owned-data-export` for
