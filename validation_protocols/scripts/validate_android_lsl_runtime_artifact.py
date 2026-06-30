@@ -114,6 +114,7 @@ ANDROID_PHONE_EVENT_CODES = {
     "run_start": 1,
     "run_complete": 2,
     "block_start": 10,
+    "audio_playback_start": 12,
     "block_complete": 11,
     "vibration_cue": 21,
     "tap": 30,
@@ -3417,6 +3418,7 @@ def _validate_phone_audiotrack_timing_evidence(
         return
 
     block_starts = [event for event in events if event.get("type") == "block_start"]
+    playback_start_events = [event for event in events if event.get("type") == "audio_playback_start"]
     cue_events = [event for event in events if event.get("type") == "vibration_cue"]
     if not block_starts:
         if expect_audiotrack_timing_evidence:
@@ -3456,6 +3458,79 @@ def _validate_phone_audiotrack_timing_evidence(
             expected_duration_ms = round(frame_count * 1000.0 / sample_rate)
             if abs(duration_ms - expected_duration_ms) > 2:
                 failures.append(f"{prefix} audio_duration_ms differs from frame_count/sample_rate")
+
+    playback_start_by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    for index, event in enumerate(playback_start_events, start=1):
+        prefix = f"AudioTrack audio_playback_start event {index}"
+        key = _phone_event_block_key(event)
+        if key in playback_start_by_key:
+            failures.append(f"{prefix} duplicates block identity {key}")
+        else:
+            playback_start_by_key[key] = event
+        strategy = str(event.get("audio_timing_strategy") or "")
+        if strategy != ANDROID_AUDIO_TIMING_STRATEGY:
+            if expect_audiotrack_timing_evidence or strategy:
+                failures.append(f"{prefix} audio_timing_strategy must be {ANDROID_AUDIO_TIMING_STRATEGY}")
+        state = str(event.get("audio_playback_start_state") or "")
+        if state != "playing":
+            if expect_audiotrack_timing_evidence or state:
+                failures.append(f"{prefix} audio_playback_start_state must be playing")
+        _validate_positive_int_fields(
+            event,
+            fields=[
+                "audio_playback_start_elapsed_realtime_ms",
+                "audio_track_buffer_size_frames",
+                "audio_track_buffer_size_bytes",
+            ],
+            label=prefix,
+            failures=failures,
+            require_all=expect_audiotrack_timing_evidence,
+        )
+        _validate_nonnegative_int_fields(
+            event,
+            fields=[
+                "audio_start_playback_head_frame",
+            ],
+            label=prefix,
+            failures=failures,
+            require_all=expect_audiotrack_timing_evidence,
+        )
+        block = blocks_by_key.get(key)
+        if block is None:
+            if expect_audiotrack_timing_evidence:
+                failures.append(f"{prefix} has no matching block_start event")
+            continue
+        start_event_id = _clean_int(event.get("event_id"))
+        block_event_id = _clean_int(block.get("event_id"))
+        if start_event_id > 0 and block_event_id > 0 and start_event_id <= block_event_id:
+            failures.append(f"{prefix} event_id must follow matching block_start event_id")
+        start_elapsed_ms = _safe_int(event.get("audio_playback_start_elapsed_realtime_ms"), fallback=-1)
+        block_elapsed_ms = _safe_int(block.get("phone_elapsed_realtime_ms"), fallback=-1)
+        if start_elapsed_ms >= 0 and block_elapsed_ms >= 0 and start_elapsed_ms < block_elapsed_ms:
+            failures.append(f"{prefix} elapsed realtime precedes matching block_start event")
+        start_frame = _safe_int(event.get("audio_start_playback_head_frame"), fallback=-1)
+        frame_count = _safe_int(block.get("audio_frame_count"), fallback=-1)
+        if frame_count >= 0 and start_frame > frame_count:
+            failures.append(f"{prefix} audio_start_playback_head_frame exceeds block audio_frame_count")
+        channel_count = _safe_int(block.get("audio_channel_count"), fallback=-1)
+        bits_per_sample = _safe_int(block.get("audio_bits_per_sample"), fallback=-1)
+        buffer_frames = _safe_int(event.get("audio_track_buffer_size_frames"), fallback=-1)
+        buffer_bytes = _safe_int(event.get("audio_track_buffer_size_bytes"), fallback=-1)
+        bytes_per_frame = channel_count * bits_per_sample // 8 if channel_count > 0 and bits_per_sample > 0 else 0
+        if bytes_per_frame > 0 and buffer_frames > 0 and buffer_bytes > 0:
+            expected_buffer_bytes = buffer_frames * bytes_per_frame
+            if buffer_bytes != expected_buffer_bytes:
+                failures.append(f"{prefix} audio_track_buffer_size_bytes differs from frames and block PCM format")
+
+    if expect_audiotrack_timing_evidence:
+        if not playback_start_events:
+            failures.append("AudioTrack timing validation requires audio_playback_start events")
+        missing_start_keys = sorted(set(blocks_by_key) - set(playback_start_by_key))
+        if missing_start_keys:
+            failures.append(
+                "AudioTrack timing validation is missing audio_playback_start for block identities: "
+                + ", ".join(str(item) for item in missing_start_keys[:10])
+            )
 
     expected_cue_count = _package_manifest_tactile_cue_count(package_manifest)
     if expect_audiotrack_timing_evidence:

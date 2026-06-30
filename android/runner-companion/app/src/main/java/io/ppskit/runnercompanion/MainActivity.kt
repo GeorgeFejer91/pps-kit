@@ -2088,6 +2088,11 @@ private suspend fun runPhonePackage(
             onWhilePaused = {
                 session.pollNativeCommands(runPackage)
             },
+            onPlaybackStart = { start ->
+                withContext(Dispatchers.Main) {
+                    session.addAudioPlaybackStart(playbackBlock, start)
+                }
+            },
             onCue = { cue, delivery ->
                 session.pollNativeCommands(runPackage)
                 withContext(Dispatchers.Main) {
@@ -2253,6 +2258,11 @@ private suspend fun runPhoneTopupIfNeeded(
         playbackGate = session.playbackGate,
         onWhilePaused = {
             session.pollNativeCommands(runPackage)
+        },
+        onPlaybackStart = { start ->
+            withContext(Dispatchers.Main) {
+                session.addAudioPlaybackStart(result.block, start)
+            }
         },
         onCue = { cue, delivery ->
             session.pollNativeCommands(runPackage)
@@ -2421,6 +2431,27 @@ private class PhoneRunSession(
                 .put("audio_data_size_bytes", wavInfo.dataSizeBytes)
         }
         addEventLocked("block_start", payload)
+    }
+
+    @Synchronized
+    fun addAudioPlaybackStart(block: MobileBlock, start: PhoneAudioPlaybackStart) {
+        activeBlock = block
+        blockStartElapsedMs = start.startElapsedRealtimeMs
+        blockPausedAccumulatedMs = 0L
+        pauseStartedElapsedMs = if (playbackGate.isPaused()) blockStartElapsedMs else 0L
+        addEventLocked(
+            "audio_playback_start",
+            JSONObject()
+                .put("block_id", block.blockId)
+                .put("block_index", block.index)
+                .put("block_label", block.label)
+                .put("audio_timing_strategy", "audiotrack_pcm_wav_playback_head")
+                .put("audio_playback_start_elapsed_realtime_ms", start.startElapsedRealtimeMs)
+                .put("audio_start_playback_head_frame", start.playbackHeadFrame)
+                .put("audio_playback_start_state", start.playStateLabel)
+                .put("audio_track_buffer_size_frames", start.bufferSizeFrames)
+                .put("audio_track_buffer_size_bytes", start.bufferSizeBytes),
+        )
     }
 
     @Synchronized
@@ -3483,6 +3514,7 @@ private fun phoneEventCode(eventType: String): Int =
         "run_start" -> 1
         "run_complete" -> 2
         "block_start" -> 10
+        "audio_playback_start" -> 12
         "block_complete" -> 11
         "vibration_cue" -> 21
         "tap" -> 30

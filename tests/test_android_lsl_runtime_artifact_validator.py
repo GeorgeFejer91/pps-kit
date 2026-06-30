@@ -640,6 +640,23 @@ def test_android_lsl_runtime_validator_rejects_audiotrack_strategy_drift(tmp_pat
     assert "audio_timing_strategy must be audiotrack_pcm_wav_playback_head" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_missing_audiotrack_playback_start(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    completion["events"] = [event for event in completion["events"] if event["type"] != "audio_playback_start"]
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_audiotrack_timing_evidence=True)
+
+    assert result.ok is False
+    failures = "\n".join(result.failures)
+    assert "AudioTrack timing validation requires audio_playback_start events" in failures
+    assert "missing audio_playback_start for block identities" in failures
+
+
 def test_android_lsl_runtime_validator_rejects_audiotrack_cue_jitter_drift(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -1575,6 +1592,7 @@ PHONE_EVENT_CODES = {
     "run_start": 1,
     "run_complete": 2,
     "block_start": 10,
+    "audio_playback_start": 12,
     "block_complete": 11,
     "vibration_cue": 21,
     "tap": 30,
@@ -1646,6 +1664,22 @@ def _phone_audiotrack_block_start_event(event_id: int, *, block_id: str, block_i
         audio_frame_count=44100,
         audio_duration_ms=1000,
         audio_data_size_bytes=176400,
+    )
+
+
+def _phone_audiotrack_playback_start_event(event_id: int, *, block_id: str, block_index: int, block_label: str) -> dict:
+    return _phone_event(
+        event_id,
+        "audio_playback_start",
+        block_id=block_id,
+        block_index=block_index,
+        block_label=block_label,
+        audio_timing_strategy="audiotrack_pcm_wav_playback_head",
+        audio_playback_start_elapsed_realtime_ms=123456 + event_id,
+        audio_start_playback_head_frame=0,
+        audio_playback_start_state="playing",
+        audio_track_buffer_size_frames=11025,
+        audio_track_buffer_size_bytes=44100,
     )
 
 
@@ -2210,16 +2244,18 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
     if include_materialization_event:
         events.append(_phone_event(2, "phone_scheduled_block_materialization", **materialization))
     events.append(_phone_audiotrack_block_start_event(3, block_id="block-01", block_index=1, block_label="Block 01"))
-    events.append(_phone_audiotrack_cue_event(4, block_id="block-01", block_index=1, trial_uid="trial-001"))
-    events.append(_phone_event(5, "block_complete", block_id="block-01", block_index=1, trial_count=1))
-    events.append(_phone_event(6, "phone_topup_materialization", **topup_materialization))
-    events.append(_phone_audiotrack_block_start_event(7, block_id="phone-topup-01", block_index=2, block_label="Phone top-up"))
-    events.append(_phone_audiotrack_cue_event(8, block_id="phone-topup-01", block_index=2, trial_uid="phone-topup-1-trial-001"))
-    events.append(_phone_event(9, "block_complete", block_id="phone-topup-01", block_index=2, trial_count=1))
-    events.append(_phone_event(10, "tap", block_id="phone-topup-01", block_index=2, trial_uid="phone-topup-1-trial-001", rt_ms=200))
+    events.append(_phone_audiotrack_playback_start_event(4, block_id="block-01", block_index=1, block_label="Block 01"))
+    events.append(_phone_audiotrack_cue_event(5, block_id="block-01", block_index=1, trial_uid="trial-001"))
+    events.append(_phone_event(6, "block_complete", block_id="block-01", block_index=1, trial_count=1))
+    events.append(_phone_event(7, "phone_topup_materialization", **topup_materialization))
+    events.append(_phone_audiotrack_block_start_event(8, block_id="phone-topup-01", block_index=2, block_label="Phone top-up"))
+    events.append(_phone_audiotrack_playback_start_event(9, block_id="phone-topup-01", block_index=2, block_label="Phone top-up"))
+    events.append(_phone_audiotrack_cue_event(10, block_id="phone-topup-01", block_index=2, trial_uid="phone-topup-1-trial-001"))
+    events.append(_phone_event(11, "block_complete", block_id="phone-topup-01", block_index=2, trial_count=1))
+    events.append(_phone_event(12, "tap", block_id="phone-topup-01", block_index=2, trial_uid="phone-topup-1-trial-001", rt_ms=200))
     events.append(
         _phone_session_metadata_event(
-            11,
+            13,
             status=status,
             participant_metadata=participant_metadata,
             haptic_capability=haptic_capability,

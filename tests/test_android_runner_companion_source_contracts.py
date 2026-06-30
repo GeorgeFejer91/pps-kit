@@ -206,8 +206,15 @@ def test_android_phone_runtime_uses_audiotrack_timing_not_mediaplayer() -> None:
     assert "internal suspend fun playBlockAudioWithAudioTrack" in playback
     assert "playbackHeadPosition" in playback
     assert "PhoneAudioCueDelivery" in playback
+    assert "PhoneAudioPlaybackStart" in playback
+    assert "onPlaybackStart(" in playback
     assert '.put("audio_timing_strategy", "audiotrack_pcm_wav_playback_head")' in main_activity
+    assert "fun addAudioPlaybackStart" in main_activity
+    assert '"audio_playback_start"' in main_activity
+    assert '.put("audio_playback_start_state", start.playStateLabel)' in main_activity
+    assert '.put("audio_track_buffer_size_frames", start.bufferSizeFrames)' in main_activity
     assert '.put("audio_scheduler", "audiotrack_playback_head")' in main_activity
+    assert '"audio_playback_start" -> 12' in main_activity
     assert "MediaPlayer" not in all_sources
 
 

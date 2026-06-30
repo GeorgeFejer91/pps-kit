@@ -53,6 +53,14 @@ internal data class PhoneAudioCueDelivery(
     val jitterMs: Double,
 )
 
+internal data class PhoneAudioPlaybackStart(
+    val playbackHeadFrame: Long,
+    val startElapsedRealtimeMs: Long,
+    val playStateLabel: String,
+    val bufferSizeFrames: Int,
+    val bufferSizeBytes: Long,
+)
+
 internal class PhoneAudioPlaybackGate {
     private val paused = AtomicBoolean(false)
 
@@ -143,12 +151,22 @@ internal suspend fun playBlockAudioWithAudioTrack(
     cues: List<MobileCue>,
     playbackGate: PhoneAudioPlaybackGate? = null,
     onWhilePaused: suspend () -> Unit = {},
+    onPlaybackStart: suspend (PhoneAudioPlaybackStart) -> Unit = {},
     onCue: suspend (MobileCue, PhoneAudioCueDelivery) -> Unit,
     onProgress: suspend (Long, Long) -> Unit,
 ) = withContext(Dispatchers.IO) {
     val audioTrack = buildPhoneAudioTrack(wavInfo)
     try {
         audioTrack.play()
+        onPlaybackStart(
+            PhoneAudioPlaybackStart(
+                playbackHeadFrame = playbackHeadFrame(audioTrack),
+                startElapsedRealtimeMs = SystemClock.elapsedRealtime(),
+                playStateLabel = audioTrackPlayStateLabel(audioTrack.playState),
+                bufferSizeFrames = audioTrack.bufferSizeInFrames,
+                bufferSizeBytes = audioTrack.bufferSizeInFrames.toLong() * wavInfo.bytesPerFrame.toLong(),
+            ),
+        )
         coroutineScope {
             val cueJob = launch {
                 deliverCuesFromAudioTrack(audioTrack, wavInfo, cues, playbackGate, onWhilePaused, onCue)
@@ -299,6 +317,14 @@ private suspend fun emitAudioTrackProgress(
 
 private fun playbackHeadFrame(audioTrack: AudioTrack): Long =
     audioTrack.playbackHeadPosition.toLong() and 0xFFFF_FFFFL
+
+private fun audioTrackPlayStateLabel(playState: Int): String =
+    when (playState) {
+        AudioTrack.PLAYSTATE_PLAYING -> "playing"
+        AudioTrack.PLAYSTATE_PAUSED -> "paused"
+        AudioTrack.PLAYSTATE_STOPPED -> "stopped"
+        else -> "unknown_$playState"
+    }
 
 private fun RandomAccessFile.readFourCc(): String {
     val bytes = ByteArray(4)
