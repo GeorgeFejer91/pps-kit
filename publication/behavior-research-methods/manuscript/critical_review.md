@@ -880,3 +880,64 @@ Methods manuscript draft. It is a working audit, not manuscript text.
 - The ledger prevents overclaiming only if it is kept current. Any new empirical
   result, profile-recreation claim, hardware timing claim, or final figure must
   update the claim boundary audit and the readiness audit before submission.
+
+## Iteration 25: Same-Journal Article Recommendation Pass
+
+### Main Critiques
+
+- The manuscript had a cluster-level BRM comparator table, but the user's
+  practical question was article-level: which papers from the same journal are
+  most similar, and what exactly should this paper borrow from them?
+- Without an article-level ledger, future edits could cite large software
+  papers generically while missing the more useful style lessons: calibration
+  boundary language, device-specific validation, analysis handoff, and
+  orchestration boundaries.
+
+### Resolution In This Revision
+
+- Added `brm_recommended_article_models.csv`, an article-level recommendation
+  ledger for same-journal BRM comparators. It records the closest suite,
+  experiment-builder, multimodal/tactile, calibration, device-evaluation,
+  analysis-handoff, embodied-threat, and interoperability models.
+- Updated the journal-fit prose to point readers and future drafters to this
+  article-level ledger alongside the existing comparator-cluster audit.
+- Updated the manuscript README and readiness audit so the recommendation
+  ledger is treated as a style/drafting aid rather than a systematic corpus or
+  evidence that PPS Toolkit has the same validation scope as the comparator
+  tools.
+
+### Residual Concerns
+
+- Several recommended papers are currently source-pointer recommendations only.
+  Convert them to verified BibTeX entries before citing them directly in
+  manuscript prose.
+
+## Iteration 26: Permanent Windows PDF Render Path
+
+### Main Critiques
+
+- The manuscript depends on the Springer Nature template and multiple
+  bibliography/rerun passes. Relying only on `latexmk` is brittle on this PC
+  because MiKTeX reports that it cannot find the Perl script engine.
+- The README described `latexmk`, but the working local route was an informal
+  manual `pdflatex`/`bibtex` sequence. That is too easy to forget and too easy
+  to perform inconsistently during repeated manuscript revisions.
+
+### Resolution In This Revision
+
+- Added `render_pdf.ps1` as the durable Windows build path. It sets
+  `TEXINPUTS` and `BSTINPUTS` to the local Springer template folders, runs
+  `pdflatex`, `bibtex`, and two final `pdflatex` passes by default, checks the
+  log for unresolved citations/references, and removes auxiliary build files
+  unless `-KeepAux` is supplied.
+- Added `render_pdf.cmd` as a stable PC/double-click wrapper for the PowerShell
+  script.
+- Added a manuscript-local `.gitignore` for LaTeX render outputs, including
+  `main.pdf`, so local PDF review does not create accidental staged artifacts.
+- Updated the manuscript README and readiness audit so future builds use the
+  permanent script instead of rediscovering the manual fallback.
+
+### Residual Concerns
+
+- The generated `main.pdf` remains a local review artifact and should not be
+  committed unless an explicit release snapshot is requested.

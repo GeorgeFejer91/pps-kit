@@ -233,6 +233,18 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   evidence, safe phrasing, unsafe or premature phrasing, and the artifact needed
   before stronger claims can be made, protecting suite, recreation, validation,
   HRTF, tactile, and analysis language from overclaiming.
+- Continued the BRM manuscript self-review loop with a same-journal article
+  recommendation pass. `brm_recommended_article_models.csv` records
+  article-level BRM comparators for PPS Toolkit, including suite/toolbox,
+  experiment-builder, multimodal/tactile calibration, route/device validation,
+  analysis-handoff, embodied-threat, and interoperability models, with style
+  transfer notes and caveats for each.
+- Added a permanent Windows PDF render path for the BRM manuscript.
+  `publication/behavior-research-methods/manuscript/render_pdf.ps1` sets the
+  local Springer template paths, runs the `pdflatex`/`bibtex`/rerun sequence,
+  checks for unresolved references/citations, and cleans auxiliary files by
+  default; `render_pdf.cmd` is the stable double-click/PC wrapper. Use this
+  route on this PC because MiKTeX `latexmk.exe` currently cannot find Perl.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

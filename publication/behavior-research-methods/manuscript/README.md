@@ -25,6 +25,9 @@ manuscript for PPS Toolkit.
 - `brm_comparator_articles.csv`: source-pointer table of same-journal BRM
   software, toolbox, tutorial, sharing, and timing-validation papers used as
   article-style comparators.
+- `brm_recommended_article_models.csv`: article-level recommendation ledger
+  mapping the closest same-journal BRM comparators to their PPS Toolkit style
+  transfer, limits, and Consensus source pointers.
 - `profile_family_examples.csv`: source-pointer map from common published PPS
   method families to toolkit profile/scaffold representations and caveats.
 - `figure_source_plan.csv`: planned figure/source-artifact map for the final
@@ -40,6 +43,12 @@ manuscript for PPS Toolkit.
   source-ready, partial, not-claimed, and blocked-until-artifact statuses.
 - `critical_review.md`: self-review audit recording critique points and
   revision decisions for the manuscript draft.
+- `render_pdf.ps1`: durable Windows build script for this PC. It sets the
+  Springer template paths, runs the manual `pdflatex`/`bibtex`/rerun sequence,
+  validates the log, and leaves `main.pdf` for local review.
+- `render_pdf.cmd`: double-clickable wrapper around `render_pdf.ps1`.
+- `.gitignore`: ignores local LaTeX render outputs, including `main.pdf`, so
+  repeated PC renders do not pollute the tracked manuscript source set.
 - `latexmkrc`: local build configuration that points LaTeX/BibTeX at the
   preserved Springer Nature template under
   `../springer-nature-latex-template/sn-article-template/`.
@@ -49,8 +58,18 @@ manuscript for PPS Toolkit.
 From this folder:
 
 ```powershell
-latexmk -pdf main.tex
+.\render_pdf.ps1
 ```
+
+The script sets the Springer template path, runs `pdflatex`/`bibtex`/reruns on
+Windows, verifies that no unresolved references remain, and removes auxiliary
+build files by default while leaving `main.pdf` for local review. Use
+`.\render_pdf.cmd` for a stable double-clickable PC entry point, `-OpenPdf` to
+open the rendered PDF, or `-KeepAux` when debugging LaTeX.
+
+`latexmk -pdf main.tex` remains supported when MiKTeX has a Perl engine
+installed; on this PC, `render_pdf.ps1` is the durable build path because
+MiKTeX's `latexmk.exe` currently cannot find Perl.
 
 Do not commit generated LaTeX build artifacts or compiled PDFs unless a release
 workflow explicitly asks for an archived submission snapshot.
@@ -72,6 +91,10 @@ workflow explicitly asks for an archived submission snapshot.
 - `brm_comparator_articles.csv` is a style and journal-fit audit, not a claim
   that PPS Toolkit has the same maturity, user base, or validation scope as the
   comparator tools.
+- `brm_recommended_article_models.csv` preserves article-level reading/style
+  recommendations for drafting. It is not a systematic corpus, and source
+  pointer rows should be converted to verified bibliography entries before
+  their papers are cited directly in manuscript prose.
 - `profile_family_examples.csv` is a profile-family map, not a claim that every
   listed paradigm has been exactly replicated with original apparatus and
   stimuli.
