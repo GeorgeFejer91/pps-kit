@@ -95,7 +95,10 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   `artifact_file_inventory.csv`. The inventory excludes itself, but lists the
   rest of the run-folder files with relative paths, byte sizes, SHA-256 hashes,
   and modification timestamps so ZIP exports and app-private folders can be
-  checked for missing, extra, or tampered files.
+  checked for missing, extra, or tampered files. Completion/latest-events JSON
+  must advertise both inventory sidecars with the expected schema and
+  `self_included=false`, giving validators a stable pointer to the file diary
+  without creating a self-hashing loop.
 - Completed phone-owned run folders now also write
   `phone_owned_data_export.json` and an app-private `phone_owned_exports/`
   snapshot. `1.Data_min/` contains a participant CSV and

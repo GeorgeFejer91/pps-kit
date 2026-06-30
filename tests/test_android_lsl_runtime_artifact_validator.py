@@ -297,6 +297,70 @@ def test_android_lsl_runtime_validator_rejects_artifact_file_inventory_hash_drif
     assert "sha256 mismatch for events.csv" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_requires_completion_artifact_inventory_advertisement(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _write_artifact_file_inventory(run_dir)
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    completion.pop("artifact_file_inventory_artifact")
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_artifact_inventory=True)
+
+    assert result.ok is False
+    assert "completion artifact_file_inventory_artifact is required" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_artifact_inventory_advertised_filename_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _write_artifact_file_inventory(run_dir)
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    completion["artifact_file_inventory_artifact"]["csv_filename"] = "wrong_inventory.csv"
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_artifact_inventory=True)
+
+    assert result.ok is False
+    assert "artifact_file_inventory_artifact csv_filename must be artifact_file_inventory.csv" in "\n".join(
+        result.failures
+    )
+
+
+def test_android_lsl_runtime_validator_rejects_missing_artifact_inventory_csv_sidecar(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _write_artifact_file_inventory(run_dir)
+    (run_dir / "artifact_file_inventory.csv").unlink()
+
+    result = validator.validate_run_artifact(run_dir, expect_artifact_inventory=True)
+
+    assert result.ok is False
+    assert "advertised CSV sidecar artifact_file_inventory.csv is missing" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_accepts_artifact_inventory_from_zip(tmp_path: Path):
+    source_dir = tmp_path / "phone-run-source"
+    source_dir.mkdir()
+    _write_lightweight_phone_run(source_dir)
+    _write_artifact_file_inventory(source_dir)
+    archive_path = tmp_path / "phone-run.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        for path in source_dir.rglob("*"):
+            if path.is_file():
+                archive.write(path, f"phone-run/{path.relative_to(source_dir).as_posix()}")
+
+    result = validator.validate_run_artifact(archive_path, expect_artifact_inventory=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
 def test_android_lsl_runtime_validator_accepts_phone_event_diary(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()

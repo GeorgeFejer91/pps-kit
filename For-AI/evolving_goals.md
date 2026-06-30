@@ -415,6 +415,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   command diary and marker counts, native LSL status booleans, completion
   reason, and privacy-safe participant metadata summaries; they explicitly keep
   demographics out of stream names.
+- Strict Android phone-run artifact inventory validation now also checks the
+  completion/latest-events `artifact_file_inventory_artifact` pointer. The
+  inventory rows still exclude `artifact_file_inventory.json` and
+  `artifact_file_inventory.csv` to avoid self-hashing, but the validator
+  separately requires the advertised JSON/CSV filenames, schema, and
+  `self_included=false` contract to match present sidecars in folders or ZIPs.
 - The Android LSL artifact validator now understands the phone-run catalog
   entry. `validate_android_lsl_runtime_artifact.py` loads
   `phone_run_catalog_entry.json` from phone-run folders and ZIPs, checks schema,

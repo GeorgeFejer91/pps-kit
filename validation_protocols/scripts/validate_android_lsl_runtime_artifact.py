@@ -202,6 +202,7 @@ def validate_runtime_status(
     topup_wav_hashes: dict[str, str] | None = None,
     phone_owned_data_export: dict[str, Any] | None = None,
     artifact_file_inventory: dict[str, Any] | None = None,
+    artifact_inventory_sidecars: dict[str, dict[str, Any]] | None = None,
     artifact_file_hashes: dict[str, dict[str, Any]] | None = None,
     phone_data_min_header: list[str] | None = None,
     phone_data_min_rows: list[dict[str, Any]] | None = None,
@@ -398,6 +399,7 @@ def validate_runtime_status(
         status=status,
         completion=completion,
         inventory=artifact_file_inventory,
+        inventory_sidecars=artifact_inventory_sidecars or {},
         observed_files=artifact_file_hashes or {},
         failures=failures,
         warnings=warnings,
@@ -702,6 +704,7 @@ def validate_run_artifact(
         topup_wav_hashes=loaded.get("topup_wav_hashes") or {},
         phone_owned_data_export=loaded.get("phone_owned_data_export"),
         artifact_file_inventory=loaded.get("artifact_file_inventory"),
+        artifact_inventory_sidecars=loaded.get("artifact_inventory_sidecars") or {},
         artifact_file_hashes=loaded.get("artifact_file_hashes") or {},
         phone_data_min_header=loaded.get("phone_data_min_header") or [],
         phone_data_min_rows=loaded.get("phone_data_min_rows") or [],
@@ -1023,6 +1026,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 archive.extract(data_export_name, temp_root)
                 phone_owned_data_export = _read_json(temp_root / data_export_name)
             artifact_file_inventory = None
+            artifact_inventory_sidecars: dict[str, dict[str, Any]] = {}
             artifact_file_hashes: dict[str, dict[str, Any]] = {}
             if artifact_inventory_members:
                 inventory_name = sorted(artifact_inventory_members)[0]
@@ -1033,6 +1037,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                     inventory_prefix = ""
                 elif inventory_prefix:
                     inventory_prefix += "/"
+                artifact_inventory_sidecars = _phone_run_inventory_sidecars_from_zip(archive, inventory_prefix)
                 artifact_file_hashes = _phone_run_file_hashes_from_zip(archive, inventory_prefix)
             phone_data_min_header: list[str] = []
             phone_data_min_rows: list[dict[str, Any]] = []
@@ -1083,6 +1088,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 "response_ledger_rows": response_ledger_rows,
                 "phone_owned_data_export": phone_owned_data_export,
                 "artifact_file_inventory": artifact_file_inventory,
+                "artifact_inventory_sidecars": artifact_inventory_sidecars,
                 "artifact_file_hashes": artifact_file_hashes,
                 "phone_data_min_header": phone_data_min_header,
                 "phone_data_min_rows": phone_data_min_rows,
@@ -1143,6 +1149,7 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
         "response_ledger_rows": _read_csv(response_ledger_path) if response_ledger_path.is_file() else [],
         "phone_owned_data_export": _read_json(data_export_path) if data_export_path.is_file() else None,
         "artifact_file_inventory": _read_json(artifact_inventory_path) if artifact_inventory_path.is_file() else None,
+        "artifact_inventory_sidecars": _phone_run_inventory_sidecars_from_dir(path),
         "artifact_file_hashes": _phone_run_file_hashes_from_dir(path),
         "phone_data_min_header": phone_data_min_header,
         "phone_data_min_rows": phone_data_min_rows,
@@ -1256,6 +1263,20 @@ def _phone_run_file_hashes_from_dir(path: Path) -> dict[str, dict[str, Any]]:
     return rows
 
 
+def _phone_run_inventory_sidecars_from_dir(path: Path) -> dict[str, dict[str, Any]]:
+    rows: dict[str, dict[str, Any]] = {}
+    if not path.is_dir():
+        return rows
+    for rel in (ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY, ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV):
+        file_path = path / rel
+        if file_path.is_file():
+            rows[rel] = {
+                "size_bytes": file_path.stat().st_size,
+                "sha256": _sha256_file(file_path),
+            }
+    return rows
+
+
 def _phone_run_file_hashes_from_zip(archive: zipfile.ZipFile, prefix: str) -> dict[str, dict[str, Any]]:
     rows: dict[str, dict[str, Any]] = {}
     for info in archive.infolist():
@@ -1278,6 +1299,20 @@ def _phone_run_file_hashes_from_zip(archive: zipfile.ZipFile, prefix: str) -> di
             "size_bytes": info.file_size,
             "sha256": _sha256_bytes(archive.read(info.filename)),
         }
+    return rows
+
+
+def _phone_run_inventory_sidecars_from_zip(archive: zipfile.ZipFile, prefix: str) -> dict[str, dict[str, Any]]:
+    rows: dict[str, dict[str, Any]] = {}
+    members_by_name = {info.filename.replace("\\", "/"): info for info in archive.infolist() if not info.is_dir()}
+    for rel in (ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY, ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV):
+        member_name = f"{prefix}{rel}"
+        info = members_by_name.get(member_name)
+        if info is not None:
+            rows[rel] = {
+                "size_bytes": info.file_size,
+                "sha256": _sha256_bytes(archive.read(info.filename)),
+            }
     return rows
 
 
@@ -3052,12 +3087,37 @@ def _validate_phone_run_artifact_file_inventory(
     status: dict[str, Any],
     completion: dict[str, Any] | None,
     inventory: dict[str, Any] | None,
+    inventory_sidecars: dict[str, dict[str, Any]],
     observed_files: dict[str, dict[str, Any]],
     failures: list[str],
     warnings: list[str],
     expect_artifact_inventory: bool,
 ) -> None:
-    advertised = isinstance((completion or {}).get("artifact_file_inventory_artifact"), dict)
+    advertised_artifact = (completion or {}).get("artifact_file_inventory_artifact")
+    advertised = isinstance(advertised_artifact, dict)
+    if completion and expect_artifact_inventory and not advertised:
+        failures.append("completion artifact_file_inventory_artifact is required when artifact inventory is expected")
+    if advertised:
+        if advertised_artifact.get("filename") != ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY:
+            failures.append(
+                f"artifact_file_inventory_artifact filename must be {ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY}"
+            )
+        if advertised_artifact.get("csv_filename") != ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV:
+            failures.append(
+                f"artifact_file_inventory_artifact csv_filename must be {ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV}"
+            )
+        if advertised_artifact.get("schema") != ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY_SCHEMA:
+            failures.append("artifact_file_inventory_artifact schema mismatch")
+        if advertised_artifact.get("self_included") is not False:
+            failures.append("artifact_file_inventory_artifact must declare self_included=false")
+        if ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY not in inventory_sidecars:
+            failures.append(
+                f"artifact_file_inventory_artifact advertised JSON sidecar {ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY} is missing"
+            )
+        if ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV not in inventory_sidecars:
+            failures.append(
+                f"artifact_file_inventory_artifact advertised CSV sidecar {ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV} is missing"
+            )
     if not inventory:
         if expect_artifact_inventory or advertised:
             failures.append("phone-run artifact file inventory is required but missing")

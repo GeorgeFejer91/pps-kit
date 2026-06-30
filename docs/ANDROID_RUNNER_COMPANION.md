@@ -207,7 +207,11 @@ older `phone_ui_or_runtime` label for historical artifacts.
 For strict run-folder file reconstruction, add `--expect-artifact-inventory`;
 this requires `artifact_file_inventory.json` to list every run-folder file
 except the inventory sidecars themselves with relative paths, byte sizes, and
-SHA-256 hashes that match the folder or ZIP contents.
+SHA-256 hashes that match the folder or ZIP contents. Completed runs must also
+advertise the JSON and CSV inventory sidecars through
+`completion.json`/`latest_events.json` `artifact_file_inventory_artifact`, and
+strict validation checks that the advertised filenames, schema, and
+`self_included=false` flag match the sidecars on disk or in the ZIP.
 For strict local numeric-trigger reconstruction, add
 `--expect-trigger-code-mirror`; this requires `trigger_codes.csv` to be present
 and to match the `event_id`, `event_code`, `event_type`, `trigger_key`, and
