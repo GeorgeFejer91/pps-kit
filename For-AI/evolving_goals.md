@@ -36,6 +36,17 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   only, distinguishes software scheduling/marker evidence from electrical
   loopback and mechanical/perceptual tactile validation, and compiles cleanly to
   an 18-page PDF with generated build artifacts removed afterward.
+- Continued the BRM manuscript critique/revision loop with a third self-review
+  pass. The draft now adds a `Reporting Checklist` table, converts the condensed
+  evidence matrix from `longtable` to a cleaner `tabularx` float, strengthens
+  constrained-randomization discussion with `Jadoul2023` and `French2009`,
+  sharpens tactile adaptation/recovery language with `Leung2005`, corrects the
+  Ferri affective-sound bibliography record, and rewrites the validation section
+  as four reproducible protocols rather than a future to-do list. The evidence
+  matrix remains 40 rows, the manuscript folder is ASCII-clean, and the
+  Springer `sn-apa` source compiles to a 20-page PDF with no unresolved
+  citations/references or table overfull/splitting warnings; generated LaTeX
+  artifacts and PDF were removed afterward.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

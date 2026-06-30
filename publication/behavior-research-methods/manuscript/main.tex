@@ -95,20 +95,15 @@ The runner writes a minimal public-data layer and a reconstructive private/sessi
 
 Table~\ref{tab:matrix} summarizes the manuscript-level matrix. The complete editable source is provided as \code{evidence\_matrix.csv}. The matrix is not a formal systematic review. It is a source-pointer scaffold: each row connects a visible toolkit control to methodological variation in the literature, a design rationale, and a caveat that should be preserved in reporting.
 
-\begingroup
+\begin{table}[t]
+\caption{Condensed design-decision matrix for PPS Toolkit. The accompanying CSV contains the full row-level audit for Segment 0-6 controls and runner decisions.}
+\label{tab:matrix}
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{longtable}{>{\raggedright\arraybackslash}p{0.18\textwidth} >{\raggedright\arraybackslash}p{0.24\textwidth} >{\raggedright\arraybackslash}p{0.34\textwidth} >{\raggedright\arraybackslash}p{0.18\textwidth}}
-\caption{Condensed design-decision matrix for PPS Toolkit. The accompanying CSV contains the full row-level audit for Segment 0-6 controls and runner decisions.}
-\label{tab:matrix}\\
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.16\textwidth} >{\raggedright\arraybackslash}p{0.22\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.17\textwidth}}
 \toprule
 Decision cluster & Toolkit control & Literature variation and rationale & Main caveat \\
 \midrule
-\endfirsthead
-\toprule
-Decision cluster & Toolkit control & Literature variation and rationale & Main caveat \\
-\midrule
-\endhead
 Auditory source form & Burst-train or smooth generated sources; imported custom sounds & PPS studies use continuous noise, burst trains, rough sounds, and affective/ecological sounds \citep{Canzoneri2012,Farne2002,Hug2019,Taffou2021,Roussel2025}. & Source mode is not a control condition unless it is explicitly crossed and analyzed. \\
 Trajectory and spatial frame & Distance, azimuth, elevation, direction, duration, speed & Front/rear/left/right, walking, and 3D tasks show that PPS is body-relative and direction-sensitive \citep{Matsuda2021,Noel2015,Teraoka2024,Amiel2025}. & Binaural trajectories approximate apparatus geometry; unsupported social or VR context remains metadata. \\
 Spatial rendering & SOFA/FABIAN reference path and 3DTI-compatible manifests & Near-field HRTFs, renderer interpolation, and open binaural engines matter for peribody distances \citep{Salvador2018,CuevasRodriguez2019,Hoene2017}. & Generic rendering is not individualized localization evidence. \\
@@ -118,8 +113,8 @@ Tactile calibration and misses & Pre-run threshold assay; run-local adaptive nud
 Randomization and blocks & Repetition pools, seeded distribution, block acceptance, participant permutations & Reproducible experiment-builder workflows benefit from saved schedules and auditable randomization \citep{AnwylIrvine2018,Peirce2019,Ellis2024}. & Randomization artifacts do not replace preregistration or power analysis. \\
 Analysis choices & Raw RT curves, baseline-corrected facilitation, sigmoid, log-decay, linear fits & Canonical sigmoid boundaries and logarithmic/linear distance arguments coexist with small-effect and control-condition critiques \citep{Canzoneri2012,Hobeika2019,Holmes2020}. & Instant analysis is exploratory operator feedback, not confirmatory inference. \\
 \bottomrule
-\end{longtable}
-\endgroup
+\end{tabularx}
+\end{table}
 
 \subsection{Profile and Provenance Decisions}
 
@@ -129,7 +124,7 @@ The same logic applies to project naming, citation export, and profile snapshots
 
 \subsection{Auditory Source, Trajectory, and Rendering Decisions}
 
-Segment 1 exposes source form because the field has never used a single auditory stimulus. Continuous or smoothly enveloped looming noise emphasizes a stable motion cue, while burst trains provide salient repeated onsets that can improve detectability and resemble recent DynaSpace/mobile implementations. Rough, affective, speech, animal, and ecological sounds add semantic or defensive value rather than merely carrying distance information \citep{Taffou2021,Bahadori2021,Tonelli2019}. The toolkit's source-mode toggle is therefore not a cosmetic preference. It asks researchers to decide whether the auditory event should be a smooth motion signal, a punctate warning-like train, or a locally imported stimulus with its own provenance.
+Segment 1 exposes source form because the field has never used a single auditory stimulus. Continuous or smoothly enveloped looming noise emphasizes a stable motion cue, while burst trains provide salient repeated onsets that can improve detectability and resemble recent DynaSpace/mobile implementations. Rough, affective, speech, animal, and ecological sounds add semantic or defensive value rather than merely carrying distance information \citep{Taffou2021,Ferri2015,Bahadori2021,Tonelli2019}. The toolkit's source-mode toggle is therefore not a cosmetic preference. It asks researchers to decide whether the auditory event should be a smooth motion signal, a punctate warning-like train, or a locally imported stimulus with its own provenance.
 
 Trajectory controls are similarly methodological. In dynamic PPS tasks, SOA is usually interpreted through the sound's estimated position at tactile onset. That estimate depends on start distance, end distance, speed, approach/recede direction, azimuth, elevation, and the coordinate frame attached to the body. Front, rear, left, right, trunk-centered, hand-centered, and full-body designs are not interchangeable \citep{Matsuda2021,Teraoka2024,Amiel2025,Serino2015,Noel2015}. PPS Toolkit therefore stores trajectory samples and body-relative labels rather than assuming that a list of SOAs is sufficient.
 
@@ -147,17 +142,40 @@ The toolkit keeps these variants explicit because baseline correction can change
 
 Segments 4 and 5 treat trial counts and randomization as methods artifacts. PPS studies often differ in repetitions per SOA, catch proportion, block factors, and direction balancing. Those decisions affect response probability, fatigue, statistical precision, and the possibility of estimating a model at all. The repetition pool and block preview make the actual trial composition visible before participant data are collected.
 
-Segment 5 also protects within-trial family structure. Some protocols require a meaningful row order, such as alternating inhale and exhale families or preserving a direction-specific sequence. Other protocols may allow freer randomization. The toolkit's seeded, inspectable block generation lets researchers accept a concrete schedule, regenerate it, or download it for reporting. This is consistent with the broader behavioral-software lesson that experiment logic should be testable and reconstructable, not only executable \citep{DeLeeuw2022,Ellis2024}.
+Segment 5 also protects within-trial family structure. Some protocols require a meaningful row order, such as alternating inhale and exhale families or preserving a direction-specific sequence. Other protocols may allow freer randomization. Constrained sequence generation has a long history in behavioral methods because naive randomization can produce clusters, while ad hoc constraints can create new sequential structure \citep{Jadoul2023,French2009}. The toolkit's seeded, inspectable block generation therefore treats a concrete schedule as an object for review, not as an invisible runtime side effect. Researchers can accept the schedule, regenerate it, or download it for reporting. This is consistent with the broader behavioral-software lesson that experiment logic should be testable and reconstructable, not only executable \citep{DeLeeuw2022,Ellis2024}.
 
 Segment 6 separates study design from runtime acquisition. The browser prepares participant order, one-part or two-part structure, profile snapshots, and output folders; the native runner owns timing-sensitive playback, responses, LSL markers, LabRecorder capture, and local evidence files. This boundary is important because timing validation is hardware- and configuration-dependent. Broad timing comparisons show that experiment platforms can differ substantially across operating systems, browsers, audio paths, and response devices \citep{Bridges2020}. PPS Toolkit therefore treats local validation outputs as part of the methods package rather than as optional troubleshooting.
 
 \subsection{Tactile Calibration, Top-up, and Analysis Decisions}
 
-The tactile-calibration controls illustrate a tension that should be made explicit in the final paper. Individual calibration is desirable because vibrotactile thresholds vary across participants and measurement procedures \citep{Merchel2020,Mikkelsen2020,Morioka2002,Pate2024}. Yet a calibrated near-threshold stimulus can increase misses during a long task, and vibrotactile adaptation can raise detection thresholds over time \citep{Goble1993,Hollins1990}. The runner's two-miss output nudge is a narrow operational response to that risk. It is logged as evidence, capped, and not written back as a new calibration estimate.
+The tactile-calibration controls illustrate a tension that should be made explicit in the final paper. Individual calibration is desirable because vibrotactile thresholds vary across participants and measurement procedures \citep{Merchel2020,Mikkelsen2020,Morioka2002,Pate2024}. Yet a calibrated near-threshold stimulus can increase misses during a long task, and vibrotactile adaptation can raise detection thresholds over time, with recovery and peripheral time courses depending on stimulus history and receptor class \citep{Goble1993,Hollins1990,Leung2005}. The runner's two-miss output nudge is a narrow operational response to that risk. It is logged as evidence, capped, and not written back as a new calibration estimate.
 
 Missed-trial top-up is likewise a design safeguard, not a statistical cure. It can preserve participant exposure to planned tactile trials and make missingness visible to the operator. It cannot make the original trial never have been missed, and it should not be merged silently into primary RT estimates. The analysis layer therefore shows hits, misses, catch false alarms, top-up rows, and low-N warnings before it displays model fits.
 
 Finally, the instant-analysis model buttons are intentionally plural. A sigmoid boundary summarizes PPS as a transition between far and near space, while logarithmic-decay or linear summaries fit a graded interpretation of distance-dependent facilitation \citep{Canzoneri2012,Hobeika2019}. The toolkit makes these alternatives easy to inspect, but it labels them exploratory unless the study has a preregistered model, adequate cell counts, and a declared baseline correction.
+
+\section{Reporting Checklist}
+
+The evidence matrix is intended to support reporting, not merely development. Table~\ref{tab:reporting} gives a minimum checklist for manuscripts, preregistrations, or shared profiles built with \toolkit{}. The checklist keeps the paper parsimonious by separating what the software can document directly from what still requires laboratory validation or participant data.
+
+\begin{table}[t]
+\caption{Minimum reporting checklist for PPS Toolkit experiments.}
+\label{tab:reporting}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.20\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.26\textwidth}}
+\toprule
+Topic & Report from toolkit artifacts & Boundary to state \\
+\midrule
+Profile and provenance & Profile id, project id, profile citation, verification status, design manifest hash, and local asset exceptions. & A profile is a represented implementation, not proof of exact original-apparatus equivalence. \\
+Auditory source and trajectory & Source mode, imported or generated asset hashes, start/end distance, azimuth, elevation, duration, speed, looming/receding label, and body-relative frame. & Source class and trajectory are manipulations; do not relabel them as controls unless crossed in the design. \\
+Spatial rendering & SOFA/HRTF resource, renderer path or engine, trajectory sample table, channel layout, and renderer QC files. & Renderer provenance does not establish individualized localization, externalization, or perceived distance. \\
+Trial sequence and SOA & Sequence rows, audio boxes, jitter durations, looming onset anchor, tactile SOAs, response windows, and catch rules. & SOA interpretation depends on the temporal anchor used for tactile insertion. \\
+Baseline and repetition pool & Baseline strategy, baseline SOAs, stationary/fixed-distance source files, catch proportion, repetition counts, and condition totals. & Baseline correction changes the estimand; raw and corrected curves should remain distinguishable. \\
+Randomization and participant structure & Random seed, accepted block CSVs, family-order constraints, participant block-order manifest, and one-part or two-part schedule. & Constrained randomization should be justified and inspectable; it does not replace counterbalancing. \\
+Runner and validation evidence & Output levels, tactile threshold file, adaptive-threshold log, top-up ledger, event logs, LSL/XDF files, audio evidence, and loopback report when available. & Software, digital audio, electrical loopback, mechanical tactile output, and perception are separate evidence tiers. \\
+Analysis & Response integrity summary, baseline method, included trials, exclusion rules, model families, AICc table, low-N warnings, and exploratory labels. & Instant analysis is review support unless the model and exclusions were prespecified. \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \section{Technical Method}
 
@@ -175,7 +193,7 @@ The toolkit separates four evidence tiers. First, software schedule evidence rec
 
 \subsection{Tactile Threshold Calibration}
 
-Focus Mode includes a participant-specific tactile detection-threshold assay named \code{two\_down\_one\_up\_detection\_threshold.v2}. The assay uses a transformed adaptive staircase over a fine Output 3/4 range from 0.01\% to 0.5\%, includes catch trials, and requires a confirmation phase with consecutive tactile hits and clean catch responses before saving a participant preset. The procedure is motivated by tactile psychophysics: vibrotactile thresholds vary across participants and methods, detection thresholds can be reliable but method-dependent, and adaptation can elevate detection thresholds during sustained stimulation \citep{Merchel2020,Mikkelsen2020,Morioka2002,Goble1993,Hollins1990}.
+Focus Mode includes a participant-specific tactile detection-threshold assay named \code{two\_down\_one\_up\_detection\_threshold.v2}. The assay uses a transformed adaptive staircase over a fine Output 3/4 range from 0.01\% to 0.5\%, includes catch trials, and requires a confirmation phase with consecutive tactile hits and clean catch responses before saving a participant preset. The procedure is motivated by tactile psychophysics: vibrotactile thresholds vary across participants and methods, detection thresholds can be reliable but method-dependent, and adaptation can elevate detection thresholds during sustained stimulation \citep{Merchel2020,Mikkelsen2020,Morioka2002,Goble1993,Hollins1990,Leung2005}.
 
 The runner also implements a narrow run-local safeguard. After every two tactile misses, including top-up misses, the live Output 3/4 level is raised by 0.01 percentage points up to the 0.5\% cap. The runner logs \code{tactile\_threshold\_adapted} events and writes \code{adaptive\_tactile\_threshold\_summary.json} and \code{adaptive\_tactile\_threshold\_adjustments.csv} under the runner-log folder. This rule should be described as an operator safeguard, not as a validated correction for tactile habituation. The user's observation that hit rates fell during a long calibrated task is retained only as anecdotal motivation for this safeguard until a traceable dataset and analysis artifact are attached.
 
@@ -187,23 +205,23 @@ Model choices include sigmoid, logarithmic-decay, and linear fits. This is impor
 
 \section{Validation and Use Cases}
 
-The manuscript draft proposes four validation use cases for the final submitted paper.
+Validation is organized around four reusable use cases. In the present draft they are specified as reproducible protocols rather than as new participant-level findings. A submitted version should attach the exact run folders, hashes, screenshots, and hardware notes generated for the publication release.
 
 \subsection{Study 5-style Workflow}
 
-The first use case should run the bundled \code{study5\_box\_breathing\_pps} profile. This profile uses original local breathing-instruction assets, white and pink frontal burst-train looming sources, stationary-burst baselines, six 34-trial blocks, and runner-owned instruction clips. The validation should show that Segment 0 activates the profile, Segment 1 materializes source assets, Segment 2 bakes inhale/exhale trial families, Segment 3 creates target/baseline/catch assets, Segment 4 writes the trial repetition pool, Segment 5 accepts block CSVs, and Segment 6 prepares a participant package.
+The first use case runs the bundled \code{study5\_box\_breathing\_pps} profile. This profile uses local breathing-instruction assets, white and pink frontal burst-train looming sources, stationary-burst baselines, six 34-trial blocks, and runner-owned instruction clips. The validation report records that Segment 0 activates the profile, Segment 1 materializes source assets, Segment 2 bakes inhale/exhale trial families, Segment 3 creates target/baseline/catch assets, Segment 4 writes the trial repetition pool, Segment 5 accepts block CSVs, and Segment 6 prepares a participant package.
 
 \subsection{Published-profile Recreation}
 
-The second use case should recreate one published profile, such as \code{canzoneri\_2012\_dynamic\_sounds}, \code{matsuda\_2021\_four\_directions}, or \code{roussel\_2025\_dynaspace\_mobile\_pps}. The aim is not to claim full equivalence to the original apparatus, but to demonstrate how the toolkit represents reported timing, SOA/distance anchors, direction labels, baselines, catch trials, and missing-parameter caveats.
+The second use case recreates one published profile, such as \code{canzoneri\_2012\_dynamic\_sounds}, \code{matsuda\_2021\_four\_directions}, or \code{roussel\_2025\_dynaspace\_mobile\_pps}. The aim is not to claim full equivalence to the original apparatus, but to demonstrate how the toolkit represents reported timing, SOA/distance anchors, direction labels, baselines, catch trials, and missing-parameter caveats.
 
 \subsection{Timing and Output Evidence}
 
-The third use case should demonstrate the evidence-tier distinction. A software-only run can verify manifest-to-event-log reconstruction. A digital audio evidence WAV can verify mixed sample content. An electrical loopback route can estimate audio-interface skew or trigger visibility. A tactile threshold report can document the perceptual preset. These outputs should not be collapsed into a single timing claim. The final paper should state which tiers were run on the publication hardware and which remain future validation.
+The third use case demonstrates the evidence-tier distinction. A software-only run verifies manifest-to-event-log reconstruction. A digital audio evidence WAV verifies mixed sample content. An electrical loopback route estimates audio-interface skew or trigger visibility when loopback hardware is connected. A tactile threshold report documents the perceptual preset. These outputs should not be collapsed into a single timing claim. The final paper should state which tiers were run on the publication hardware and which remain future validation.
 
 \subsection{Post-run Analysis Review}
 
-The fourth use case should load a completed sample or deidentified run and show the instant-analysis outputs: response integrity, baseline assumption, PPS assumption, model-fit families, low-N warnings, and artifact paths. The key validation criterion is not that the sample produces a strong PPS effect. It is that the analysis labels its own limits, preserves baseline metadata, and prevents exploratory operator feedback from becoming a hidden confirmatory pipeline.
+The fourth use case loads a completed sample or deidentified run and shows the instant-analysis outputs: response integrity, baseline assumption, PPS assumption, model-fit families, low-N warnings, and artifact paths. The key validation criterion is not that the sample produces a strong PPS effect. It is that the analysis labels its own limits, preserves baseline metadata, and prevents exploratory operator feedback from becoming a hidden confirmatory pipeline.
 
 \section{Discussion}
 

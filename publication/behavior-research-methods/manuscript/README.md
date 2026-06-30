@@ -5,7 +5,8 @@ manuscript for PPS Toolkit.
 
 ## Files
 
-- `main.tex`: single-file Springer Nature `sn-apa` manuscript draft.
+- `main.tex`: single-file Springer Nature `sn-apa` manuscript draft with the
+  design-decision matrix and reporting checklist.
 - `references.bib`: bibliography assembled from Consensus searches, existing
   repo paper-audit notes, and Springer/software policy pointers.
 - `evidence_matrix.csv`: source-pointer design-decision matrix mapping visible

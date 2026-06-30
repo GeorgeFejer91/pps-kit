@@ -61,3 +61,44 @@ Methods manuscript draft. It is a working audit, not manuscript text.
 - The manuscript is now more complete but still intentionally source-heavy. A
   later copyedit can shorten repeated caveats once the validation evidence is
   fixed.
+
+## Iteration 3: Parsimony, Reporting, And Remaining Evidence Gaps
+
+### Main Critiques
+
+- The revised text made the design logic clearer, but it still lacked a compact
+  BRM-style reporting checklist that tells readers exactly what to report from
+  the toolkit artifacts.
+- The randomization discussion was too positive. It said block schedules are
+  inspectable, but it did not warn that constrained randomization can solve one
+  bias while introducing another sequential structure.
+- The tactile adaptation language needed one more precision layer. The draft
+  correctly avoided a quantitative hit-rate claim, but adaptation/recovery
+  should be framed as stimulus-history-dependent tactile physiology and
+  psychophysics, not as a simple one-way habituation story.
+- The Ferri affective-sound citation metadata was still rough and should not
+  remain as `Unknown Journal` in a paper-style bibliography.
+
+### Resolution In This Revision
+
+- Added a `Reporting Checklist` section with a compact table separating
+  profile, source, rendering, sequence, baseline, randomization, runner,
+  validation, and analysis reporting duties.
+- Added constrained-randomization citations and language that randomized block
+  schedules should be accepted as inspectable artifacts, not trusted because
+  they are random.
+- Added tactile adaptation/recovery support and clarified that the runner's
+  adaptive threshold rule remains an operator safeguard.
+- Corrected the Ferri affective-sound bibliography record and aligned the CSV
+  evidence matrix with the new randomization and tactile citations.
+- Reworded the validation section as four reproducible protocols rather than a
+  loose future to-do list, while keeping clear that publication-hardware
+  results still require attached artifacts.
+
+### Residual Concerns
+
+- The paper now has a stronger reporting apparatus, but final submission still
+  needs at least one real, citable validation artifact table or figure generated
+  from a redistributable run.
+- Several bibliography records still use abbreviated author lists. That is
+  acceptable for drafting but not for final journal submission.
