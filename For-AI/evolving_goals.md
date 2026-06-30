@@ -207,6 +207,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   section and adds same-journal BRM citations for auditory synchronization,
   web timing, headphone screening, web psychoacoustics, touchscreen/keyboard
   timing, and browser/mobile tactile delivery.
+- Continued the BRM manuscript self-review loop with a paragraph-parsimony pass.
+  Dense prose paragraphs in the introduction, contribution framing, toolkit
+  overview, evidence-matrix explanation, Segment 0/1/3 rationale, spatial
+  rendering caveat, evidence-tier explanation, and discussion were split so each
+  paragraph carries a clearer single job. `critical_review.md` records the
+  density audit; remaining long manuscript blocks are mainly table rows, with a
+  final human copy edit still required after release links, declarations,
+  figures, and validation artifacts are added.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

@@ -751,3 +751,36 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   scripts, hardware route diagrams, loopback reports, tactile actuator evidence,
   profile rights/source checks, and preregistered analysis choices where claims
   require them.
+
+## Iteration 21: Paragraph Parsimony Pass
+
+### Main Critiques
+
+- The manuscript was well scaffolded, but several prose paragraphs still
+  carried multiple jobs at once: field heterogeneity plus inferential problem,
+  suite components plus contribution, GUI gates plus validation principle, or
+  tactile calibration plus adaptation caveat.
+- Long table rows are expected in the Springer source, but long prose
+  paragraphs can make a BRM methods paper feel like a ledger rather than a
+  tutorial. The user's explicit standard was one main idea per paragraph.
+- The densest prose was mostly in the introduction, overview, evidence-matrix
+  explanation, Segment 0/1/3 rationale, spatial-rendering caveat, evidence-tier
+  description, and discussion.
+
+### Resolution In This Revision
+
+- Split the longest prose paragraphs into smaller units with a clearer
+  sequence: field use, methodological problem, toolkit response, and evidence
+  boundary.
+- Preserved the same claims and citations while reducing the number of
+  paragraphs that mix tool description with interpretive caveat.
+- Re-ran a paragraph-density check after editing. The remaining longest entries
+  are table rows; ordinary prose now sits near or below roughly 100 words per
+  paragraph.
+
+### Residual Concerns
+
+- The abstract is still necessarily dense because it summarizes the whole
+  article in the journal style. Final submission should still receive a human
+  copy edit after release links, author metadata, and validation artifacts are
+  finalized.
