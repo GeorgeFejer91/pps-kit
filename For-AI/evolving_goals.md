@@ -256,9 +256,10 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   cannot silently diverge from the exported completion or marker snapshot.
 - Android phone-owned local UI actions are now reconstructable from the same
   command diary path. `MainActivity.kt` records local Runner-mode start button
-  presses as `command_source=phone_ui`, internal phone-runtime materialization
-  and completion bookkeeping as `command_source=phone_runtime`, and native
-  receiver commands as `command_source=native_lsl`; each row is mirrored to an
+  presses plus local Runner-mode Pause, Resume, and Stop After Block controls
+  as `command_source=phone_ui`, internal phone-runtime materialization and
+  completion bookkeeping as `command_source=phone_runtime`, and native receiver
+  commands as `command_source=native_lsl`; each row is mirrored to an
   `operator_command` event, and the Android runtime artifact validator checks
   that command-source labels match the event mirror while still accepting
   historical `phone_ui_or_runtime` rows.
@@ -406,6 +407,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   traps the runner inside the paused audio wait loop; a PC runner or second
   phone Controller can send `resume` and have it applied during the pause,
   with the existing pause-adjusted block elapsed-time accounting preserved.
+- Android Runner mode now exposes local active-run Pause, Resume, and Stop After
+  Block buttons instead of relying only on a PC helper or second Controller
+  phone for administration. These buttons call the same phone-owned
+  AudioTrack/pause-gate and clean block-boundary stop paths used by native LSL
+  commands, then write `command_source=phone_ui` command diary rows mirrored as
+  `operator_command` marker events.
 - Android Runner mode now has a native idle command-listener boundary for
   validation builds with the local liblsl AAR. When a selected package is synced
   and the phone is idle, Runner mode resolves `PPSCommandSignalsV1`, emits a

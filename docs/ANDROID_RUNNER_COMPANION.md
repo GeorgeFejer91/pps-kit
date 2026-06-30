@@ -129,14 +129,15 @@ After pairing, choose `Run Experiment On Phone`.
 - `Start Full Experiment` runs all synced packages in listed order, so a synced
   Study 5 pre/post preparation plays Part 1 and Part 2 on the phone and uploads
   a completion artifact for each part.
-- Each local start button press is recorded in `command_diary.jsonl` as
-  `command_source=phone_ui` and mirrored as an `operator_command` event. Runtime
-  bookkeeping such as scheduled-block or top-up materialization uses
-  `command_source=phone_runtime`, while PC/controller LSL commands use
-  `command_source=native_lsl` with ack evidence when native LSL is enabled. If
-  the phone is started remotely through the idle Runner-mode LSL listener, the
-  resulting run artifact records the remote `start_experiment`/`start_part`
-  signal and ack as `native_lsl`, not as a local phone UI start.
+- Each local start, `Pause`, `Resume`, and `Stop After Block` button press is
+  recorded in `command_diary.jsonl` as `command_source=phone_ui` and mirrored as
+  an `operator_command` event. Runtime bookkeeping such as scheduled-block or
+  top-up materialization uses `command_source=phone_runtime`, while
+  PC/controller LSL commands use `command_source=native_lsl` with ack evidence
+  when native LSL is enabled. If the phone is started remotely through the idle
+  Runner-mode LSL listener, the resulting run artifact records the remote
+  `start_experiment`/`start_part` signal and ack as `native_lsl`, not as a local
+  phone UI start.
 
 Packages served from the native runner's `Send To Phone` entry point are
 lightweight by default: they omit prepared `block_audio` assets and transfer
@@ -339,6 +340,9 @@ the local Start button. Current active-run command handling records
 snapshot/note/continue actions, applies pause/resume through the phone-owned
 `AudioTrack` pause gate during active phone blocks, and records
 `phone_playback_pause` / `phone_playback_resume` diary and marker-mirror events.
+The local Runner-mode Pause and Resume buttons call the same phone-owned pause
+gate and write the same command diary/operator-command evidence with
+`command_source=phone_ui`.
 While paused, the AudioTrack wait loop keeps polling native commands so a
 PC-runner or Controller-phone `resume` command can actually release the gate.
 Stop-after-block now records a request, lets the active phone block finish,

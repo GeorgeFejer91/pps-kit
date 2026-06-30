@@ -48,6 +48,7 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -460,6 +461,9 @@ private fun PhoneRuntimeScreen(
     var error by remember { mutableStateOf("") }
     var syncing by remember { mutableStateOf(false) }
     var running by remember { mutableStateOf(false) }
+    var runnerPaused by remember { mutableStateOf(false) }
+    var runnerBlockActive by remember { mutableStateOf(false) }
+    var runnerStopAfterBlockRequested by remember { mutableStateOf(false) }
     var activeBlockLabel by remember { mutableStateOf("") }
     var runProgress by remember { mutableStateOf("") }
     var uploadedArtifact by remember { mutableStateOf("") }
@@ -537,6 +541,19 @@ private fun PhoneRuntimeScreen(
         }
     }
 
+    LaunchedEffect(running, session) {
+        while (running) {
+            val activeSession = session
+            runnerPaused = activeSession?.isPlaybackPaused() == true
+            runnerBlockActive = activeSession?.hasActiveBlock() == true
+            runnerStopAfterBlockRequested = activeSession?.stopAfterBlockRequested() == true
+            delay(250L)
+        }
+        runnerPaused = false
+        runnerBlockActive = false
+        runnerStopAfterBlockRequested = false
+    }
+
     val selectedSummary = packages.firstOrNull { it.packageId == selectedPackageId } ?: packages.firstOrNull()
     val selectedManifest = selectedSummary?.let { syncedPackages[it.packageId] }
     val phoneOwnedSession = pairing.isPhoneExport || selectedManifest?.phoneOwnedSession == true || selectedSummary?.phoneOwnedSession == true
@@ -557,6 +574,9 @@ private fun PhoneRuntimeScreen(
         val activeSession = newPhoneRunSession(runPackage)
         session = activeSession
         running = true
+        runnerPaused = false
+        runnerBlockActive = false
+        runnerStopAfterBlockRequested = false
         activeBlockLabel = ""
         runProgress = ""
         status = "Running"
@@ -594,6 +614,9 @@ private fun PhoneRuntimeScreen(
                 log(error)
             }
             running = false
+            runnerPaused = false
+            runnerBlockActive = false
+            runnerStopAfterBlockRequested = false
             activeBlockLabel = ""
             runProgress = ""
         }
@@ -605,6 +628,9 @@ private fun PhoneRuntimeScreen(
         if (running || syncing || runPackages.isEmpty()) return false
         if (!connected && !phoneOwnedSession && runPackages.none { it.phoneOwnedSession }) return false
         running = true
+        runnerPaused = false
+        runnerBlockActive = false
+        runnerStopAfterBlockRequested = false
         activeBlockLabel = ""
         runProgress = ""
         status = "Running full experiment"
@@ -654,11 +680,31 @@ private fun PhoneRuntimeScreen(
                 log(error)
             }
             running = false
+            runnerPaused = false
+            runnerBlockActive = false
+            runnerStopAfterBlockRequested = false
             activeBlockLabel = ""
             runProgress = ""
         }
         runJob = job
         return true
+    }
+
+    fun applyRunnerUiCommand(command: String, label: String) {
+        val activeSession = session
+        if (!running || activeSession == null) {
+            status = "$label unavailable"
+            log("$label unavailable")
+            return
+        }
+        val result = activeSession.applyLocalUiCommand(command)
+        runnerPaused = activeSession.isPlaybackPaused()
+        runnerBlockActive = activeSession.hasActiveBlock()
+        runnerStopAfterBlockRequested = activeSession.stopAfterBlockRequested()
+        val applied = result.status == "applied"
+        status = if (applied) "$label applied" else "$label rejected"
+        val reason = result.reason.ifBlank { result.status }
+        log("$label $reason")
     }
 
     DisposableEffect(
@@ -1132,15 +1178,29 @@ private fun PhoneRuntimeScreen(
                     Spacer(Modifier.padding(3.dp))
                     Text("Start Full Experiment")
                 }
-                OutlinedButton(
-                    onClick = {
-                        runJob?.cancel()
-                        running = false
-                        status = "Stopped"
-                    },
-                    enabled = running,
+                Button(
+                    onClick = { applyRunnerUiCommand("pause", "Pause") },
+                    enabled = running && session != null && runnerBlockActive && !runnerPaused,
                 ) {
-                    Text("Stop")
+                    Icon(Icons.Default.Pause, contentDescription = null)
+                    Spacer(Modifier.padding(3.dp))
+                    Text("Pause")
+                }
+                Button(
+                    onClick = { applyRunnerUiCommand("resume", "Resume") },
+                    enabled = running && session != null && runnerBlockActive && runnerPaused,
+                ) {
+                    Icon(Icons.Default.PlayArrow, contentDescription = null)
+                    Spacer(Modifier.padding(3.dp))
+                    Text("Resume")
+                }
+                OutlinedButton(
+                    onClick = { applyRunnerUiCommand("stop_after_block", "Stop after block") },
+                    enabled = running && session != null && !runnerStopAfterBlockRequested,
+                ) {
+                    Icon(Icons.Default.Stop, contentDescription = null)
+                    Spacer(Modifier.padding(3.dp))
+                    Text("Stop After Block")
                 }
             }
             OutlinedButton(onClick = onChooseMode, enabled = !running) {
@@ -2404,6 +2464,12 @@ private class PhoneRunSession(
     fun stopAfterBlockRequested(): Boolean = stopAfterBlockRequested
 
     @Synchronized
+    fun isPlaybackPaused(): Boolean = playbackGate.isPaused()
+
+    @Synchronized
+    fun hasActiveBlock(): Boolean = activeBlock != null
+
+    @Synchronized
     fun addStopAfterBlockBoundary(
         lastCompletedBlock: MobileBlock?,
         skippedBlocks: List<MobileBlock>,
@@ -2537,12 +2603,13 @@ private class PhoneRunSession(
         payload: JSONObject = JSONObject(),
         commandSource: String = "phone_runtime",
         senderId: String = commandSource,
+        commandId: String = "",
     ) {
         val sessionId = participantMetadata.optString("part_session_id")
             .ifBlank { participantMetadata.optString("session_id", "") }
         val row = JSONObject()
             .put("schema", "pps-android-command-diary.v1")
-            .put("command_id", "phone-${commandDiary.size + 1}")
+            .put("command_id", commandId.ifBlank { "phone-${commandDiary.size + 1}" })
             .put("command_source", commandSource)
             .put("sender_id", senderId)
             .put("session_id", sessionId)
@@ -2567,7 +2634,43 @@ private class PhoneRunSession(
                 .put("reason", reason)
                 .put("ack_sent", false)
                 .put("payload", JSONObject(payload.toString())),
+            )
+    }
+
+    @Synchronized
+    fun applyLocalUiCommand(command: String): PhoneLslCommandApplicationResult {
+        val commandId = "phone-${commandDiary.size + 1}"
+        val sessionId = participantMetadata.optString("part_session_id")
+            .ifBlank { participantMetadata.optString("session_id", "") }
+        val result = when (command) {
+            "pause" -> applyPhonePauseLocked(command)
+            "resume" -> applyPhoneResumeLocked(command)
+            "stop_after_block" -> applyPhoneStopAfterBlockLocked(
+                PhoneLslCommandSignal(
+                    commandId = commandId,
+                    sessionId = sessionId,
+                    senderId = "android_phone_ui",
+                    command = command,
+                    issuedLslTime = 0.0,
+                    payload = JSONObject().put("command_source", "phone_ui"),
+                ),
+            )
+            else -> PhoneLslCommandApplicationResult(
+                status = "rejected",
+                reason = "unsupported_phone_ui_command",
+                payload = nativeCommandStatePayloadLocked(command),
+            )
+        }
+        recordCommand(
+            command = command,
+            status = result.status,
+            reason = result.reason,
+            payload = result.payload,
+            commandSource = "phone_ui",
+            senderId = "android_phone_ui",
+            commandId = commandId,
         )
+        return result
     }
 
     @Synchronized

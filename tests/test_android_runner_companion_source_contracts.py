@@ -218,6 +218,24 @@ def test_android_phone_run_command_diary_separates_local_ui_runtime_and_native_s
     assert '.put("command_source", "native_lsl")' in main_activity
 
 
+def test_android_runner_mode_local_controls_use_command_diary_path() -> None:
+    main_activity = _source("MainActivity.kt")
+
+    assert 'applyRunnerUiCommand("pause", "Pause")' in main_activity
+    assert 'applyRunnerUiCommand("resume", "Resume")' in main_activity
+    assert 'applyRunnerUiCommand("stop_after_block", "Stop after block")' in main_activity
+    assert "fun applyLocalUiCommand(command: String): PhoneLslCommandApplicationResult" in main_activity
+    assert '"pause" -> applyPhonePauseLocked(command)' in main_activity
+    assert '"resume" -> applyPhoneResumeLocked(command)' in main_activity
+    assert '"stop_after_block" -> applyPhoneStopAfterBlockLocked(' in main_activity
+    assert 'PhoneLslCommandSignal(' in main_activity
+    assert 'senderId = "android_phone_ui"' in main_activity
+    assert 'commandSource = "phone_ui"' in main_activity
+    assert "commandId = commandId" in main_activity
+    assert "fun isPlaybackPaused(): Boolean = playbackGate.isPaused()" in main_activity
+    assert "fun hasActiveBlock(): Boolean = activeBlock != null" in main_activity
+
+
 def test_android_phone_run_writes_phone_owned_min_max_export() -> None:
     main_activity = _source("MainActivity.kt")
     catalog = _source("PhoneRunCatalog.kt")

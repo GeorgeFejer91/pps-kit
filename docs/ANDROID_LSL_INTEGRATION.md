@@ -47,10 +47,11 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   handler returns.
 - Phone-owned command diaries now distinguish `phone_ui`,
   `phone_runtime`, and `native_lsl` command sources. Local Runner-mode start
-  buttons write `phone_ui` rows, internal scheduled-block/top-up bookkeeping
-  writes `phone_runtime` rows, and every row is mirrored into an
-  `operator_command` marker so the local artifact can reconstruct both received
-  LSL commands and direct phone UI actions.
+  buttons plus local Pause, Resume, and Stop After Block controls write
+  `phone_ui` rows, internal scheduled-block/top-up bookkeeping writes
+  `phone_runtime` rows, and every row is mirrored into an `operator_command`
+  marker so the local artifact can reconstruct both received LSL commands and
+  direct phone UI actions.
 - When the ignored local `liblsl-Android.aar` is present, Runner mode opens
   long-lived `PPSMarkersV2` / `PPSTriggerCodes` outlets and attempts to resolve
   a `PPSCommandSignalsV1` stream. If command resolution succeeds, it opens a
@@ -66,7 +67,9 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   During active playback, those start commands are acknowledged as
   already-running no-ops; `continue_instruction`, `request_snapshot`, and
   `operator_note` are diary/snapshot actions, and `pause`/`resume` go through
-  the phone-owned `AudioTrack` pause gate during active phone blocks.
+  the phone-owned `AudioTrack` pause gate during active phone blocks. The local
+  Runner-mode Pause and Resume buttons use the same pause gate and diary/event
+  evidence, with `command_source=phone_ui`.
   Pause/resume commands record `phone_playback_pause` /
   `phone_playback_resume` diary and marker-mirror events with pause-adjusted
   block elapsed time. `stop_after_block` now records
@@ -349,12 +352,12 @@ Android runner is idle with a synced package or actively playing a block:
 .\.venv\Scripts\pps-android-lsl-command.exe operator_note --session-id <part_session_id> --token <pairing-token> --note "participant asked for a pause" --require-ack
 ```
 
-The `Send To Phone` window can send the same Start/Pause/Resume/Snapshot/
-Stop-after-block/Note commands after package preparation. The Note command
-requires text in the operator-note field and sends it as `operator_note`. The
-window stores the same PC-admin outbox/status artifacts under runner logs for
-that phone transfer, including the row-derived command source ID in
-`pc_android_lsl_admin_status.json`.
+The `Send To Phone` window can send the same Start/Pause/Resume/Continue/
+Snapshot/Stop-after-block/Note commands after package preparation. The Note
+command requires text in the operator-note field and sends it as
+`operator_note`. The window stores the same PC-admin outbox/status artifacts
+under runner logs for that phone transfer, including the row-derived command
+source ID in `pc_android_lsl_admin_status.json`.
 
 Then validate the PC-admin outbox/status pair:
 
