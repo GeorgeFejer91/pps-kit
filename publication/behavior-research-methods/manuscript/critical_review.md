@@ -1156,3 +1156,46 @@ Methods manuscript draft. It is a working audit, not manuscript text.
 - The edit closes an internal consistency gap only. It still does not provide
   publication-hardware validation plots, deidentified empirical analysis
   figures, author metadata, release DOI, or final declaration text.
+
+## Iteration 33: Pre-run Qualification Checklist Pass
+
+### Main Critiques
+
+- The manuscript named the major procedural gaps, but a BRM reader could still
+  ask what a laboratory should do before the first participant sits down. The
+  operator table described what the runner writes during a session; the gap
+  register described what remains missing. Neither one presented a crisp
+  pre-run qualification checklist.
+- Targeted Consensus searches reinforced that auditory and multisensory
+  methods papers separate playback/listening checks, hearing or headphone
+  screening, route-specific timing validation, tactile delivery, and analysis
+  governance. The draft needed to express that separation as a procedure, not
+  only as limitations.
+- The checklist had to avoid becoming a false validation certificate. It should
+  say what to record and what evidence tier is still required, not imply that
+  the current source package already supplies every hearing, SPL, localization,
+  loopback, tactile, rights, or preregistration artifact.
+
+### Resolution In This Revision
+
+- Added `pre_run_qualification_checklist.csv`, a source-level ledger covering
+  listening eligibility, spatial rendering/perception, route timing and
+  synchronization, tactile perceptual/mechanical readiness, task/response
+  governance, and profile provenance/rights.
+- Added a `Pre-run Qualification Checklist` subsection and table to `main.tex`
+  between timing evidence and operator procedure. This makes the manuscript's
+  practical workflow read as design archive -> pre-run qualification ->
+  session execution -> post-run review.
+- Updated the manuscript README and `submission_readiness_audit.md` so the new
+  checklist is maintained as a reporting scaffold with explicit boundaries.
+
+### Residual Concerns
+
+- The checklist is source-ready, but the final submission still needs the
+  underlying lab artifacts for any strong claim: screening results or policy,
+  measured or justified level setting, spatial-perception or localization
+  checks when claimed, hardware timing/loopback reports, tactile delivery
+  evidence, rights review, profile hashes, and preregistered confirmatory
+  analysis decisions.
+- The table may need layout tuning after LaTeX render because it is dense and
+  citation-heavy.

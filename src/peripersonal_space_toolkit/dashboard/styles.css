@@ -6,6 +6,15 @@
   --line-strong: #bcc7bd;
   --text: #202621;
   --muted: #68746c;
+  /* Neutral scale — single source for hover/disabled greys */
+  --neutral-100: #f3f6f2;
+  --neutral-200: #eef0eb;
+  --neutral-300: #d7ded5;
+  --neutral-400: #9ba59d;
+  --neutral-500: #819389;
+  --neutral-600: #5e695f;
+  /* Standard interaction transition */
+  --transition-ui: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
   --primary: #246b55;
   --primary-hover: #1d5846;
   --warning: #8a5a16;
@@ -62,18 +71,19 @@ button {
   color: var(--text);
   padding: 6px 11px;
   cursor: pointer;
+  transition: var(--transition-ui);
 }
 
 button:hover {
-  border-color: #819389;
-  background: #f3f6f2;
+  border-color: var(--neutral-500);
+  background: var(--neutral-100);
 }
 
 button:disabled {
   cursor: default;
-  color: #9ba59d;
-  background: #eef0eb;
-  border-color: #d7ded5;
+  color: var(--neutral-400);
+  background: var(--neutral-200);
+  border-color: var(--neutral-300);
 }
 
 button.primary {
@@ -181,6 +191,7 @@ code {
   text-decoration: none;
   padding: 8px 9px;
   border-radius: 6px;
+  transition: var(--transition-ui);
 }
 
 .rail nav a:hover,
@@ -289,6 +300,7 @@ code {
   padding: 6px 11px;
   text-decoration: none;
   font-weight: 600;
+  transition: var(--transition-ui);
 }
 
 .button-link:hover {
@@ -1796,6 +1808,7 @@ select {
   background: var(--surface);
   color: var(--text);
   padding: 6px 8px;
+  transition: var(--transition-ui);
 }
 
 input:focus,
@@ -1806,7 +1819,7 @@ select:focus {
 
 .split-fields {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -2247,31 +2260,143 @@ select:focus {
   padding: 4px 7px;
 }
 
+/* Generate Looming Noise quick-pick buttons (replaces the noise-type dropdown).
+   White/Pink are the publication-backed common types (larger primary buttons);
+   Blue/Violet/Brown are spectral variants (smaller, with a hover tooltip). */
+.noise-picker-label {
+  color: #37433b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.noise-type-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.noise-type-row {
+  display: grid;
+  gap: 6px;
+}
+
+.noise-type-row-primary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.noise-type-row-secondary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.noise-type-button {
+  position: relative;
+  width: 100%;
+}
+
+.noise-type-primary {
+  min-height: 46px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.noise-type-secondary {
+  min-height: 30px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.noise-type-button.active {
+  border-color: var(--primary);
+  background: var(--ok-bg);
+  color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+/* Hover/focus tooltip for the spectral variants (Blue/Violet/Brown) */
+.noise-type-secondary[data-noise-hint]:hover::after,
+.noise-type-secondary[data-noise-hint]:focus-visible::after {
+  content: attr(data-noise-hint);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 9px);
+  transform: translateX(-50%);
+  z-index: 40;
+  width: max-content;
+  max-width: 230px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: var(--text);
+  color: #f4f5f1;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: left;
+  white-space: normal;
+  box-shadow: 0 10px 26px rgba(28, 38, 31, 0.22);
+  pointer-events: none;
+}
+
+.noise-type-secondary[data-noise-hint]:hover::before,
+.noise-type-secondary[data-noise-hint]:focus-visible::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 4px);
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--text);
+  z-index: 40;
+  pointer-events: none;
+}
+
 .bake-panel {
   display: grid;
-  grid-template-columns: minmax(170px, 0.55fr) minmax(360px, 1.45fr) auto auto;
-  gap: 8px;
-  align-items: end;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
   margin-top: 10px;
   padding-top: 10px;
   border-top: 1px solid var(--line);
+}
+
+.bake-configure {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bake-action-row {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+#bake-stimulus {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 180px;
 }
 
 .bake-panel .field-row {
   margin-bottom: 0;
 }
 
-.bake-panel .status-label {
-  align-self: center;
-  justify-self: end;
+.bake-action-row .status-label {
+  flex: 0 1 auto;
 }
 
 .source-mode-row {
   display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: minmax(88px, 120px) minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: 1fr;
+  gap: 8px;
   align-items: stretch;
+  min-width: 0;
 }
 
 .source-mode-row > span {
@@ -2406,8 +2531,8 @@ select:focus {
 
 .loudness-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(72px, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 10px;
   align-items: end;
 }
 
@@ -4245,11 +4370,7 @@ body.modal-open {
   }
 
   .bake-panel {
-    grid-template-columns: minmax(180px, 1fr) 110px auto;
-  }
-
-  .bake-panel .status-label {
-    justify-self: start;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .source-card-fields {
@@ -4395,7 +4516,7 @@ body.modal-open {
   }
 
   .bake-panel {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .loudness-grid {

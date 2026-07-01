@@ -255,7 +255,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260630-source-mode-widgets"
+    static_version = "20260701-noise-quick-picks-lock"
     assert f'href="styles.css?v={static_version}"' in html
     assert f'src="hardware_pixel_art.js?v={static_version}"' in html
     assert f'src="app.js?v={static_version}"' in html
@@ -1006,6 +1006,13 @@ def test_dashboard_pages_companion_contract(tmp_path: Path):
     root = client.get("/", follow_redirects=False)
     assert root.status_code in {302, 307}
     assert root.headers["location"] == "/dashboard/index.html"
+
+    static_inventory = client.get("/assets/preloads/preload_inventory.json")
+    assert static_inventory.status_code == 200
+    assert static_inventory.json()["schema"] == "pps-preload-asset-inventory.v1"
+    static_template = client.get("/study_templates/study5_box_breathing_pps.json")
+    assert static_template.status_code == 200
+    assert static_template.json()["template_id"] == "study5_box_breathing_pps"
 
     for origin in ("https://georgefejer91.github.io", "https://ppskit.qzz.io"):
         health = client.get("/api/health", headers={"Origin": origin})

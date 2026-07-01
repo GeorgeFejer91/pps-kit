@@ -2686,10 +2686,30 @@ function renderGeneratedNoiseSelect() {
   select.value = PROCEDURAL_NOISE_TYPES.some((item) => item.value === current) ? current : "";
 }
 
+function syncNoiseTypeButtons() {
+  const activeType = pendingBakeRecipe && pendingBakeRecipe.kind === "generated_noise"
+    ? pendingBakeRecipe.noise_type
+    : "";
+  const select = $("generated-noise-select");
+  if (select) {
+    select.value = PROCEDURAL_NOISE_TYPES.some((item) => item.value === activeType) ? activeType : "";
+  }
+  for (const button of document.querySelectorAll(".noise-type-button")) {
+    button.classList.toggle("active", Boolean(activeType) && button.dataset.noiseType === activeType);
+  }
+}
+
 function renderBakePanel() {
   const status = $("bake-status");
   const button = $("bake-stimulus");
   if (!status || !button) return;
+  syncNoiseTypeButtons();
+  const controlsLocked = staticModeActive || isProfileReadonlyMode() || customViewModeLocked();
+  const select = $("generated-noise-select");
+  if (select) select.disabled = controlsLocked;
+  for (const noiseButton of document.querySelectorAll(".noise-type-button")) {
+    noiseButton.disabled = controlsLocked;
+  }
   if (!pendingBakeRecipe) {
     status.textContent = "No source staged";
     status.className = "status-label required";
@@ -2714,7 +2734,7 @@ function renderBakePanel() {
   const kind = pendingBakeRecipe.kind === "imported_audio" ? audioRoleTitle(pendingBakeRecipe.render_mode) : `${noiseTypeLabel(pendingBakeRecipe.noise_type)} noise`;
   status.textContent = `Staged: ${kind}`;
   status.className = "status-label ready";
-  button.disabled = false;
+  button.disabled = controlsLocked;
 }
 
 function renderNoiseTable() {
@@ -5364,7 +5384,7 @@ function renderWorkflow() {
         ? `: ${step.missing.join(" ")}`
         : "";
       const status = complete ? "ready" : "not ready";
-      stateLabel.textContent = complete ? "\u2713" : "X";
+      stateLabel.textContent = complete ? "\u2713" : "\u2715";
       stateLabel.className = `decision-state ${complete ? "ready" : "not-ready"}`;
       stateLabel.title = `${label} ${status}${missing}`;
       stateLabel.setAttribute("aria-label", `${label} ${status}`);
@@ -7141,8 +7161,19 @@ function wireEvents() {
   $("generated-noise-select").addEventListener("change", () => {
     const selectedNoise = $("generated-noise-select").value;
     if (!selectedNoise) return;
+    if (!ensureEditableProject()) {
+      renderBakePanel();
+      return;
+    }
     stageGeneratedNoise(selectedNoise);
   });
+  for (const button of document.querySelectorAll(".noise-type-button")) {
+    button.addEventListener("click", () => {
+      const type = button.dataset.noiseType;
+      if (!ensureEditableProject()) return;
+      if (type) stageGeneratedNoise(type);
+    });
+  }
   $("bake-label").addEventListener("input", () => {
     if (pendingBakeRecipe) pendingBakeRecipe.label = $("bake-label").value.trim();
   });

@@ -298,6 +298,17 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   boundary remains: stronger release-state screenshots, validation-output plots,
   or deidentified analysis figures still need archived source files, hashes,
   and visual QA before final submission.
+- Continued the BRM manuscript critical loop with a pre-run qualification pass.
+  Targeted Consensus searches reinforced that auditory/tactile methods papers
+  separate headphone/listening checks, hearing or level-setting policy,
+  route-specific timing validation, tactile delivery evidence, and analysis
+  governance. `pre_run_qualification_checklist.csv` and a matching `main.tex`
+  table now turn the procedural gap register into a participant/session
+  readiness checklist for listening eligibility, spatial rendering/perception,
+  route timing, tactile readiness, task/response governance, and profile
+  provenance/rights. This is a reporting scaffold only; final claims still need
+  actual screening, SPL/level, localization, loopback/timing, tactile,
+  rights/hash, and preregistration artifacts.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation
@@ -306,7 +317,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   word `control` so it is not mistaken for an experimental control condition.
   The SVG generator writes synchronized copies under both package `assets/` and
   dashboard static assets for publication/documentation reuse and local GUI
-  rendering.
+  rendering. `Generate Looming Noise` now stages noise type through visible
+  White/Pink quick-pick buttons plus smaller Blue/Violet/Brown spectral
+  variants with hover caveats, while the old select remains only as hidden state
+  for the existing JavaScript hook. Dashboard and public wrapper cache tokens
+  now use `20260701-noise-quick-picks-lock`. The local companion also mounts the
+  committed `/assets` and `/study_templates` static roots so connected
+  read-only profile inspection can load the same preload inventory and template
+  JSON as GitHub Pages without falling back to a broken static-relative path.
 - Focus Mode participant runs now use a run-local adaptive tactile threshold
   safeguard in addition to the pre-run participant calibration. The runner
   always tracks tactile hit/miss state internally, even when missed-trial top-up

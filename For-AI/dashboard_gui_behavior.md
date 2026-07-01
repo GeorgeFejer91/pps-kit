@@ -36,6 +36,12 @@ records only the researcher decision. The local backend validates the two
 supported modes, normalizes burst-train parameters, clears stale burst
 parameters for smooth-linear bakes, and then owns WAV generation.
 
+Noise type is selected through visible quick-pick buttons rather than a dropdown:
+White and Pink are the primary publication-backed choices, while Blue, Violet,
+and Brown are smaller spectral variants with hover caveats. The legacy
+`generated-noise-select` remains hidden as a JavaScript state mirror so existing
+render/reset hooks keep working.
+
 Existing generated source cards display a compact `Burst train` or
 `Smooth linear` chip and keep the saved `source_profile`,
 `source_profile_parameters`, and `motion_mode` fields in hidden form state.
@@ -46,6 +52,11 @@ outside this generated-noise toggle.
 ## Static Profile Segment 3-5 Previews
 
 Hosted/static mode cannot write WAVs or CSVs, but finished bundled profiles must still show the same downstream decisions that the local companion would materialize. `staticStateForTemplate()` therefore derives read-only virtual Segment 3 trial files, Segment 4 repetition-pool rows, and already-randomized Segment 5 block previews from the committed profile parameters. Canonical Study 5 should show 44 virtual Segment 3 WAVs, 204 planned Segment 4 pool rows, and 6 accepted static block previews of 34 trials each. The lateral DynaSpace Study 5 profile should show 52 virtual Segment 3 WAVs, 204 planned Segment 4 pool rows, and the same six 34-trial block previews. Static previews must use the same seeded, row-order-preserving Gellermann-style block scheduler concept as the local companion and expose `Download Randomization` for the browser-generated CSV/manifest. The local companion still performs actual file/CSV materialization when launching or preparing a run.
+
+The local companion must also serve the committed public static asset roots at
+`/assets` and `/study_templates`. Connected read-only profile inspection uses
+the same `staticStateForTemplate()` overlay as hosted/static mode, so these
+routes must stay mounted alongside `/dashboard`, `/viewer`, and `/api/*`.
 
 ## Static Preview Parity Audit
 

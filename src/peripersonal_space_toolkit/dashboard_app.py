@@ -2108,6 +2108,11 @@ def create_app(
 
     app.mount("/dashboard", StaticFiles(directory=str(dashboard_dir)), name="dashboard")
     app.mount("/viewer", StaticFiles(directory=str(viewer_dir)), name="viewer")
+    public_assets_dir = REPO_ROOT / "assets"
+    if _path_exists(public_assets_dir):
+        app.mount("/assets", StaticFiles(directory=str(public_assets_dir)), name="public_assets")
+    if _path_exists(TEMPLATE_DIR):
+        app.mount("/study_templates", StaticFiles(directory=str(TEMPLATE_DIR)), name="study_templates")
     _ensure_dir(controller.preview_dir)
     app.mount("/api/trial-row-previews", StaticFiles(directory=str(controller.preview_dir)), name="trial_row_previews")
 
