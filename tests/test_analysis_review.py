@@ -336,6 +336,46 @@ def test_session_analysis_writes_condition_lens_outputs_and_quality_gate(tmp_pat
     assert {row["model"] for row in model_button_rows(data)} == {"sigmoid", "logarithmic_decay", "linear"}
 
 
+def test_analysis_displays_part_labels_while_preserving_part_number_order():
+    rows: list[dict[str, object]] = []
+    for part_number, part_label in ((1, "Pre"), (2, "Post")):
+        for trial_type, rt_base in (("Baseline", 500.0), ("Audio-Tactile", 430.0)):
+            for soa in (100, 200, 400, 800):
+                for repeat in range(4):
+                    rows.append(
+                        {
+                            "trial_uid": f"P{part_number}-{trial_type[0]}-{soa}-{repeat}",
+                            "trial_type": trial_type,
+                            "hit": True,
+                            "soa_ms": soa,
+                            "rt_ms": rt_base - (soa / 100.0) + repeat,
+                            "part_number": part_number,
+                            "part_label": part_label,
+                            "respiratory_phase": "Inhale",
+                            "noise_type": "pink",
+                            "primary_analysis_included": True,
+                        }
+                    )
+
+    result = analyze_analysis_ready_trials(rows)
+
+    two_by_two = [
+        row
+        for row in result.condition_lens_curve_rows
+        if row.get("analysis_lens") == CONDITION_LENS_TWO_BY_TWO and int(float(row.get("soa_ms"))) == 100
+    ]
+    assert [row["part_label"] for row in two_by_two] == ["Pre (Part 1)", "Post (Part 2)"]
+    assert [int(row["part_number"]) for row in two_by_two] == [1, 2]
+    assert [row["display_scope"] for row in two_by_two] == ["Pre (Part 1) / Inhale", "Post (Part 2) / Inhale"]
+    separate = [
+        row
+        for row in result.curve_rows
+        if row.get("aggregation_mode") == PARTS_SEPARATE and int(float(row.get("soa_ms"))) == 100
+    ]
+    assert [int(row["part_number"]) for row in separate] == [1, 2]
+    assert [row["scope"] for row in separate] == ["Pre (Part 1) / Inhale / pink", "Post (Part 2) / Inhale / pink"]
+
+
 def test_basic_assumption_baseline_green_when_no_significant_proximity_trend():
     result = analyze_analysis_ready_trials(_basic_assumption_rows(audio_kind="flat"))
     baseline = result.basic_assumption_checks["baseline_assumption"]

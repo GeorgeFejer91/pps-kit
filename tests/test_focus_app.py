@@ -1390,6 +1390,108 @@ def test_focus_mode_participant_setup_ledger_restores_submitted_fields(tmp_path:
     restored.dialog.close()
 
 
+def test_focus_mode_split_part_labels_history_defaults_and_counterbalanced_restore(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+        from peripersonal_space_toolkit.session_runner import prepare_segment_run_package
+        from test_session_runner import _two_part_segment_run_setup_fixture
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    run_manifest = _two_part_segment_run_setup_fixture(tmp_path)
+    session_root = tmp_path / "sessions"
+    package_p001 = prepare_segment_run_package(run_manifest, "P001", session_root=session_root)
+    package_p002 = prepare_segment_run_package(run_manifest, "P002", session_root=session_root)
+    created: list[dict[str, object]] = []
+
+    class FakeController:
+        def __init__(self, package_obj, *, capture_options=None, runner_metadata=None, **_kwargs):
+            self.package = package_obj
+            self.capture_options = capture_options
+            self.runner_metadata = dict(runner_metadata or {})
+            self.audio_engine = None
+            created.append(self.runner_metadata)
+
+    def combo_items(combo) -> set[str]:
+        return {combo.itemText(index) for index in range(combo.count()) if combo.itemText(index)}
+
+    first = focus_app.FocusModeWindow(
+        q,
+        package_p001,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        controller_factory=FakeController,
+    )
+    first.dialog.show()
+    app.processEvents()
+
+    assert first.part1_label_combo.isVisible()
+    assert first.part2_label_combo.isVisible()
+    assert first.part1_label_combo.isEditable()
+    assert first.part2_label_combo.isEditable()
+    _fill_required_setup(first)
+    first.part1_label_combo.setEditText("Pre")
+    first.part2_label_combo.setEditText("Post")
+    QTest.mouseClick(first.setup_submit_button, q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
+
+    assert created[-1]["part_labels"] == {"1": "Pre", "2": "Post"}
+    assert created[-1]["part_label"] == "Pre"
+    history = json.loads(focus_app.part_label_history_path(session_root).read_text(encoding="utf-8"))
+    record = next(iter(history["experiments"].values()))
+    assert record["last_pair"] == {"1": "Pre", "2": "Post"}
+    assert set(record["labels"]) == {"Pre", "Post"}
+    first.dialog.close()
+
+    second = focus_app.FocusModeWindow(
+        q,
+        package_p002,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        controller_factory=FakeController,
+    )
+    second.dialog.show()
+    app.processEvents()
+
+    assert second.part1_label_combo.currentText() == "Pre"
+    assert second.part2_label_combo.currentText() == "Post"
+    assert combo_items(second.part1_label_combo) == {"Pre", "Post"}
+    _fill_required_setup(second)
+    second.part1_label_combo.setEditText("Post")
+    second.part2_label_combo.setEditText("Pre")
+    QTest.mouseClick(second.setup_submit_button, q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
+
+    assert created[-1]["part_labels"] == {"1": "Post", "2": "Pre"}
+    assert created[-1]["part_label"] == "Post"
+    second.dialog.close()
+
+    restored = focus_app.FocusModeWindow(
+        q,
+        package_p001,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        controller_factory=FakeController,
+    )
+    restored.dialog.show()
+    app.processEvents()
+
+    assert restored.part1_label_combo.currentText() == "Pre"
+    assert restored.part2_label_combo.currentText() == "Post"
+    assert combo_items(restored.part2_label_combo) == {"Pre", "Post"}
+    setup_snapshot = restored._companion_snapshot()["setup"]
+    assert setup_snapshot["part_labels"] == {"1": "Pre", "2": "Post"}
+    assert set(setup_snapshot["part_label_options"]) == {"Pre", "Post"}
+    assert setup_snapshot["part_label_controls_visible"] is True
+    ledger = json.loads(focus_app.participant_ledger_path(session_root).read_text(encoding="utf-8"))
+    assert ledger["participants"]["P001"]["part_labels"] == {"1": "Pre", "2": "Post"}
+    assert ledger["participants"]["P002"]["part_labels"] == {"1": "Post", "2": "Pre"}
+    assert ledger["participants"]["P001"]["run_setup_sha256"]
+    restored.dialog.close()
+
+
 def test_focus_mode_loads_participant_tactile_calibration_into_output_field(tmp_path: Path):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:

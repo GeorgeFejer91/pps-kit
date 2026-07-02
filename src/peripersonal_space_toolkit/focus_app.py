@@ -5,11 +5,13 @@ from __future__ import annotations
 import argparse
 import csv
 from datetime import datetime
+import hashlib
 from html import escape
 import json
 import math
 import os
 import queue
+import re
 import subprocess
 import sys
 import threading
@@ -201,6 +203,9 @@ STUDY5_PROFILE_ID = "study5_box_breathing_pps"
 DATA_COLLECTED_MARK = "[collected]"
 PARTICIPANT_LEDGER_FILENAME = "participant_ledger.v1.json"
 PARTICIPANT_LEDGER_SCHEMA = "pps-focus-participant-ledger.v1"
+PART_LABEL_HISTORY_FILENAME = "part_label_history.v1.json"
+PART_LABEL_HISTORY_SCHEMA = "pps-focus-part-label-history.v1"
+PART_LABEL_MAX_CHARS = 80
 TIMELINE_LABEL_WIDTH = 58
 TIMELINE_RIGHT_MARGIN = 12
 TIMELINE_ROW_NAMES = ("Resp", "Type", "Noise", "SOA", "Tactile", "Clicks")
@@ -6075,6 +6080,115 @@ def participant_ledger_entry(output_root: Path | str, participant_id: str) -> di
     return dict(entry) if isinstance(entry, dict) else {}
 
 
+def part_label_history_path(output_root: Path | str) -> Path:
+    return output_project_state_dir(output_root) / PART_LABEL_HISTORY_FILENAME
+
+
+def load_part_label_history(output_root: Path | str) -> dict[str, Any]:
+    path = part_label_history_path(output_root)
+    try:
+        with open(_focus_filesystem_path(path), "r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except Exception:
+        return {"schema": PART_LABEL_HISTORY_SCHEMA, "experiments": {}}
+    if not isinstance(data, dict):
+        return {"schema": PART_LABEL_HISTORY_SCHEMA, "experiments": {}}
+    experiments = data.get("experiments")
+    if not isinstance(experiments, dict):
+        experiments = {}
+    return {
+        **data,
+        "schema": PART_LABEL_HISTORY_SCHEMA,
+        "experiments": experiments,
+    }
+
+
+def save_part_label_history(output_root: Path | str, history: dict[str, Any]) -> Path:
+    path = part_label_history_path(output_root)
+    data = dict(history or {})
+    experiments = data.get("experiments")
+    if not isinstance(experiments, dict):
+        experiments = {}
+    data["schema"] = PART_LABEL_HISTORY_SCHEMA
+    data["experiments"] = experiments
+    data["updated_at"] = datetime.now().isoformat(timespec="seconds")
+    os.makedirs(_focus_filesystem_path(path.parent), exist_ok=True)
+    with open(_focus_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False) + "\n")
+    return path
+
+
+def _normalize_part_label(value: Any) -> str:
+    text = str(value or "")
+    text = re.sub(r"[\x00-\x1f\x7f]+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    if len(text) > PART_LABEL_MAX_CHARS:
+        text = text[:PART_LABEL_MAX_CHARS].rstrip()
+    return text
+
+
+def _part_label_number_text(value: Any) -> str:
+    text = str(value or "").strip().lower()
+    match = re.search(r"\d+", text)
+    if not match:
+        return ""
+    try:
+        number = int(match.group(0))
+    except ValueError:
+        return ""
+    return str(number) if number > 0 else ""
+
+
+def _normalize_part_label_map(value: Any) -> dict[str, str]:
+    if not isinstance(value, dict):
+        return {}
+    labels: dict[str, str] = {}
+    for key, label in value.items():
+        part = _part_label_number_text(key)
+        if not part:
+            continue
+        normalized = _normalize_part_label(label)
+        labels[part] = normalized
+    return labels
+
+
+def _part_label_run_setup_sha256(run_setup_manifest_path: Any) -> str:
+    if run_setup_manifest_path in (None, ""):
+        return ""
+    path = Path(run_setup_manifest_path)
+    if not _focus_path_is_file(path):
+        return ""
+    digest = hashlib.sha256()
+    try:
+        with open(_focus_filesystem_path(path), "rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(chunk)
+    except Exception:
+        return ""
+    return digest.hexdigest()
+
+
+def _part_label_experiment_key(run_setup_manifest_path: Any, run_setup_sha256: str = "") -> str:
+    digest = str(run_setup_sha256 or _part_label_run_setup_sha256(run_setup_manifest_path) or "").strip()
+    if digest:
+        return f"sha256:{digest}"
+    if run_setup_manifest_path not in (None, ""):
+        try:
+            return f"path:{Path(run_setup_manifest_path).expanduser().resolve()}"
+        except Exception:
+            return f"path:{run_setup_manifest_path}"
+    return "unknown"
+
+
+def _append_unique_part_label(labels: list[str], value: Any) -> None:
+    label = _normalize_part_label(value)
+    if not label:
+        return
+    label_key = label.casefold()
+    labels[:] = [item for item in labels if _normalize_part_label(item).casefold() != label_key]
+    labels.insert(0, label)
+
+
 def _read_latest_output_diary_context(path: Any) -> dict[str, Any]:
     if path in (None, ""):
         return {}
@@ -9046,6 +9160,8 @@ class FocusModeWindow:
         self.participant_decrement_button.clicked.connect(lambda _checked=False: self._step_participant_selection(-1))
         self.participant_name_input = q["QLineEdit"]("")
         self.participant_name_input.setPlaceholderText("Participant name")
+        self.part1_label_combo = self._create_part_label_combo("part01LabelCombo", "Part 01 label")
+        self.part2_label_combo = self._create_part_label_combo("part02LabelCombo", "Part 02 label")
         self.include_name_lsl_checkbox = q["QCheckBox"]("Include name in LSL/session markers (opt-in)")
         self.include_name_lsl_checkbox.setObjectName("nameSharingCheckbox")
         self.include_name_lsl_checkbox.setToolTip("Opt in only when the participant's real name may be stored in local session metadata and LSL markers.")
@@ -9078,7 +9194,7 @@ class FocusModeWindow:
         setup_fields.setHorizontalSpacing(8)
         setup_fields.setVerticalSpacing(6)
 
-        def _add_setup_field(row: int, label: str, widget: Any) -> None:
+        def _add_setup_field(row: int, label: str, widget: Any) -> Any:
             key = q["QLabel"](label)
             key.setObjectName("metricLabel")
             key.setMinimumHeight(max(16, profile.input_min_height - 8))
@@ -9086,12 +9202,15 @@ class FocusModeWindow:
                 widget.setMinimumHeight(profile.input_min_height)
             setup_fields.addWidget(key, row, 0)
             setup_fields.addWidget(widget, row, 1)
+            return key
 
         _add_setup_field(0, "Participant", self.participant_selector_widget)
         _add_setup_field(1, "Name", self.participant_name_input)
-        _add_setup_field(2, "Age", self.age_input)
-        _add_setup_field(3, "Handedness", self.handedness_combo)
-        _add_setup_field(4, "Gender", self.gender_combo)
+        self.part1_label_field_label = _add_setup_field(2, "Part 01 label", self.part1_label_combo)
+        self.part2_label_field_label = _add_setup_field(3, "Part 02 label", self.part2_label_combo)
+        _add_setup_field(4, "Age", self.age_input)
+        _add_setup_field(5, "Handedness", self.handedness_combo)
+        _add_setup_field(6, "Gender", self.gender_combo)
         setup_fields.setColumnStretch(1, 1)
         data_logging_layout.addLayout(setup_fields)
         self.participant_status_summary_label = q["QLabel"]("")
@@ -9118,6 +9237,8 @@ class FocusModeWindow:
                 self.participant_increment_button,
                 self.participant_decrement_button,
                 self.participant_name_input,
+                self.part1_label_combo,
+                self.part2_label_combo,
                 self.include_name_lsl_checkbox,
                 self.age_input,
                 self.handedness_combo,
@@ -9851,6 +9972,9 @@ class FocusModeWindow:
             "age": str(self.age_input.text() or ""),
             "handedness": str(self.handedness_combo.currentData() or ""),
             "gender": str(self.gender_combo.currentData() or ""),
+            "part_labels": self._part_labels_from_fields(),
+            "part_label_options": self._part_label_options() if self._part_label_controls_visible() else [],
+            "part_label_controls_visible": self._part_label_controls_visible(),
         }
 
     def _companion_run_plan_payload(self) -> list[dict[str, Any]]:
@@ -10044,6 +10168,13 @@ class FocusModeWindow:
         age = str(payload.get("age") or payload.get("age_years") or "").strip()
         handedness = str(payload.get("handedness") or "").strip()
         gender = str(payload.get("gender") or "").strip()
+        part_label_payload = payload.get("part_labels")
+        if not isinstance(part_label_payload, dict):
+            part_label_payload = {
+                "1": payload.get("part01_label", payload.get("part1_label", payload.get("part_01_label", ""))),
+                "2": payload.get("part02_label", payload.get("part2_label", payload.get("part_02_label", ""))),
+            }
+        part_labels = _normalize_part_label_map(part_label_payload)
         share_name = bool(
             payload.get("name_sharing_opt_in")
             if "name_sharing_opt_in" in payload
@@ -10052,6 +10183,9 @@ class FocusModeWindow:
         self.participant_name_input.setText(name)
         self.age_input.setText(age)
         self.include_name_lsl_checkbox.setChecked(share_name)
+        if self._part_label_controls_visible():
+            self._set_part_label_combo_text(getattr(self, "part1_label_combo", None), part_labels.get("1", ""))
+            self._set_part_label_combo_text(getattr(self, "part2_label_combo", None), part_labels.get("2", ""))
         if handedness and not self._companion_select_combo_data(self.handedness_combo, handedness):
             raise CompanionCommandError(reason="invalid_handedness")
         if gender and not self._companion_select_combo_data(self.gender_combo, gender):
@@ -11275,6 +11409,165 @@ class FocusModeWindow:
         self._refresh_topup_draft_widget()
         self.tactile_timeline_widget.update()
 
+    def _create_part_label_combo(self, object_name: str, placeholder: str) -> Any:
+        combo = self.q["QComboBox"]()
+        combo.setObjectName(object_name)
+        combo.setEditable(True)
+        combo.setInsertPolicy(self.q["QComboBox"].InsertPolicy.NoInsert)
+        combo.setToolTip("Optional experiment label for this split part, such as Pre, Post, Control, or Treatment.")
+        line_edit = combo.lineEdit()
+        if line_edit is not None:
+            line_edit.setPlaceholderText(placeholder)
+            line_edit.setMaxLength(PART_LABEL_MAX_CHARS)
+        return combo
+
+    def _part_label_controls_visible(self) -> bool:
+        return bool(_package_is_split_part(self.package))
+
+    def _part_label_controls(self) -> list[tuple[str, Any]]:
+        return [
+            ("1", getattr(self, "part1_label_combo", None)),
+            ("2", getattr(self, "part2_label_combo", None)),
+        ]
+
+    def _part_label_row_widgets(self) -> list[Any]:
+        return [
+            getattr(self, "part1_label_field_label", None),
+            getattr(self, "part1_label_combo", None),
+            getattr(self, "part2_label_field_label", None),
+            getattr(self, "part2_label_combo", None),
+        ]
+
+    def _current_run_setup_sha256(self) -> str:
+        return _part_label_run_setup_sha256(getattr(self.package, "source_run_setup_manifest_path", None))
+
+    def _current_part_label_experiment_key(self) -> str:
+        return _part_label_experiment_key(
+            getattr(self.package, "source_run_setup_manifest_path", None),
+            self._current_run_setup_sha256(),
+        )
+
+    def _part_label_entry_matches_current_setup(self, entry: dict[str, Any]) -> bool:
+        current_hash = self._current_run_setup_sha256()
+        entry_hash = str(entry.get("run_setup_sha256") or "").strip()
+        if current_hash and entry_hash:
+            return current_hash == entry_hash
+        current_run_setup = str(getattr(self.package, "source_run_setup_manifest_path", "") or "")
+        entry_run_setup = str(entry.get("run_setup_manifest_path") or "")
+        if current_run_setup and entry_run_setup:
+            try:
+                return Path(current_run_setup).resolve() == Path(entry_run_setup).resolve()
+            except Exception:
+                return current_run_setup == entry_run_setup
+        return not current_run_setup and not entry_run_setup
+
+    def _part_label_history_record(self) -> dict[str, Any]:
+        history = load_part_label_history(self.output_root)
+        experiments = history.get("experiments") if isinstance(history.get("experiments"), dict) else {}
+        record = experiments.get(self._current_part_label_experiment_key())
+        return dict(record) if isinstance(record, dict) else {}
+
+    def _part_label_options(self) -> list[str]:
+        labels: list[str] = []
+        record = self._part_label_history_record()
+        for label in reversed(list(record.get("labels") or [])):
+            _append_unique_part_label(labels, label)
+        ledger = load_participant_ledger(self.output_root)
+        participants = ledger.get("participants") if isinstance(ledger.get("participants"), dict) else {}
+        entries = [entry for entry in participants.values() if isinstance(entry, dict) and self._part_label_entry_matches_current_setup(entry)]
+        entries.sort(key=lambda entry: str(entry.get("updated_at") or entry.get("submitted_at") or ""))
+        for entry in entries:
+            for label in _normalize_part_label_map(entry.get("part_labels")).values():
+                _append_unique_part_label(labels, label)
+        return labels
+
+    def _set_part_label_combo_text(self, combo: Any, value: Any) -> None:
+        if combo is None:
+            return
+        text = _normalize_part_label(value)
+        try:
+            combo.setEditText(text)
+        except Exception:
+            pass
+        line_edit = combo.lineEdit() if hasattr(combo, "lineEdit") else None
+        if line_edit is not None:
+            line_edit.setText(text)
+
+    def _refresh_part_label_options(self) -> None:
+        options = self._part_label_options()
+        for _part, combo in self._part_label_controls():
+            if combo is None:
+                continue
+            current = _normalize_part_label(combo.currentText())
+            combo.blockSignals(True)
+            try:
+                combo.clear()
+                for label in options:
+                    combo.addItem(label, label)
+                self._set_part_label_combo_text(combo, current)
+            finally:
+                combo.blockSignals(False)
+
+    def _part_labels_from_fields(self) -> dict[str, str]:
+        labels: dict[str, str] = {}
+        if not self._part_label_controls_visible():
+            return labels
+        for part, combo in self._part_label_controls():
+            if combo is None:
+                continue
+            labels[part] = _normalize_part_label(combo.currentText())
+        return labels
+
+    def _part_label_for_current_part(self, labels: dict[str, str] | None = None) -> str:
+        part = _part_key_text(getattr(self.package, "part_number", "")) or self._ensure_selected_part_key() or "1"
+        return _normalize_part_label_map(labels or self._part_labels_from_fields()).get(part, "")
+
+    def _refresh_part_label_controls(self) -> None:
+        visible = self._part_label_controls_visible()
+        for widget in self._part_label_row_widgets():
+            if widget is not None:
+                widget.setVisible(visible)
+        if visible:
+            self._refresh_part_label_options()
+
+    def _apply_part_label_defaults(self, entry: dict[str, Any] | None = None) -> None:
+        self._refresh_part_label_controls()
+        if not self._part_label_controls_visible():
+            return
+        labels = _normalize_part_label_map((entry or {}).get("part_labels") if isinstance(entry, dict) else {})
+        if not any(labels.values()):
+            labels = _normalize_part_label_map(self._part_label_history_record().get("last_pair"))
+        self._set_part_label_combo_text(getattr(self, "part1_label_combo", None), labels.get("1", ""))
+        self._set_part_label_combo_text(getattr(self, "part2_label_combo", None), labels.get("2", ""))
+
+    def _save_part_label_history(self, runner_metadata: dict[str, Any]) -> Path | None:
+        labels = _normalize_part_label_map(runner_metadata.get("part_labels"))
+        used = [label for label in labels.values() if label]
+        if not used:
+            return None
+        history = load_part_label_history(self.output_root)
+        experiments = history.get("experiments") if isinstance(history.get("experiments"), dict) else {}
+        key = self._current_part_label_experiment_key()
+        record = dict(experiments.get(key) or {}) if isinstance(experiments.get(key), dict) else {}
+        label_options: list[str] = []
+        for label in reversed(list(record.get("labels") or [])):
+            _append_unique_part_label(label_options, label)
+        for label in used:
+            _append_unique_part_label(label_options, label)
+        now = datetime.now().isoformat(timespec="seconds")
+        record.update(
+            {
+                "run_setup_manifest_path": str(getattr(self.package, "source_run_setup_manifest_path", "") or ""),
+                "run_setup_sha256": self._current_run_setup_sha256(),
+                "labels": label_options,
+                "last_pair": labels,
+                "updated_at": now,
+            }
+        )
+        experiments[key] = record
+        history["experiments"] = experiments
+        return save_part_label_history(self.output_root, history)
+
     def _step_participant_selection(self, delta: int) -> None:
         if not hasattr(self, "participant_code_combo"):
             return
@@ -11310,6 +11603,8 @@ class FocusModeWindow:
         entry = participant_ledger_entry(self.output_root, participant_id)
         if not entry:
             return {}
+        if self._part_label_entry_matches_current_setup(entry):
+            return entry
         current_run_setup = str(getattr(self.package, "source_run_setup_manifest_path", "") or "")
         entry_run_setup = str(entry.get("run_setup_manifest_path") or "")
         if current_run_setup and entry_run_setup:
@@ -11327,12 +11622,14 @@ class FocusModeWindow:
         participant = str(participant_id or self._selected_participant_code() or self.package.participant_id or "").strip()
         entry = self._participant_ledger_entry_for(participant)
         if not entry:
+            self._apply_part_label_defaults({})
             return False
         self.participant_name_input.setText(str(entry.get("participant_name") or ""))
         self.age_input.setText(str(entry.get("age_years") or ""))
         _set_combo_data(self.handedness_combo, str(entry.get("handedness") or ""))
         _set_combo_data(self.gender_combo, str(entry.get("gender") or ""))
         self.include_name_lsl_checkbox.setChecked(bool(entry.get("include_name_in_lsl", False)))
+        self._apply_part_label_defaults(entry)
         return True
 
     def _save_participant_ledger_entry(self, runner_metadata: dict[str, Any]) -> Path:
@@ -11349,12 +11646,14 @@ class FocusModeWindow:
             "handedness": str(runner_metadata.get("handedness") or ""),
             "gender": str(runner_metadata.get("gender") or ""),
             "include_name_in_lsl": bool(runner_metadata.get("include_name_in_lsl")),
+            "part_labels": _normalize_part_label_map(runner_metadata.get("part_labels")),
             "tactile_calibration": _json_ready(runner_metadata.get("tactile_calibration") or {}),
             "submitted_at": now,
             "updated_at": now,
             "session_id": str(getattr(self.package, "session_id", "") or ""),
             "session_manifest_path": str(getattr(self.package, "manifest_path", "") or ""),
             "run_setup_manifest_path": str(getattr(self.package, "source_run_setup_manifest_path", "") or ""),
+            "run_setup_sha256": self._current_run_setup_sha256(),
         }
         ledger["participants"] = participants
         return save_participant_ledger(self.output_root, ledger)
@@ -11592,6 +11891,10 @@ class FocusModeWindow:
         self._release_prepared_controller()
         if hasattr(self, "participant_name_input"):
             self.participant_name_input.clear()
+        if hasattr(self, "part1_label_combo"):
+            self._set_part_label_combo_text(self.part1_label_combo, "")
+        if hasattr(self, "part2_label_combo"):
+            self._set_part_label_combo_text(self.part2_label_combo, "")
         if hasattr(self, "age_input"):
             self.age_input.clear()
         if hasattr(self, "include_name_lsl_checkbox"):
@@ -11603,6 +11906,8 @@ class FocusModeWindow:
         if hasattr(self, "setup_submit_button"):
             self.setup_submit_button.setEnabled(True)
             self._set_setup_status_message("Submit setup to unlock start controls.")
+        if hasattr(self, "part1_label_combo"):
+            self._refresh_part_label_controls()
 
     def _refresh_loaded_package_display(self) -> None:
         profile = self.layout_profile
@@ -12308,6 +12613,7 @@ class FocusModeWindow:
         )
 
     def _runner_metadata(self) -> dict[str, Any]:
+        part_labels = self._part_labels_from_fields()
         return {
             "participant_code": self._selected_participant_code() or self.package.participant_id,
             "participant_name": self.participant_name_input.text().strip(),
@@ -12315,6 +12621,8 @@ class FocusModeWindow:
             "age_years": self.age_input.text().strip(),
             "handedness": self.handedness_combo.currentData() or "",
             "gender": self.gender_combo.currentData() or "",
+            "part_labels": part_labels,
+            "part_label": self._part_label_for_current_part(part_labels),
             "playback_output_levels": self._output_channel_volume_payload(),
             "tactile_calibration": self._current_tactile_calibration_metadata(),
         }
@@ -12557,10 +12865,18 @@ class FocusModeWindow:
         self._refresh_part_controls()
         ledger_path_text = ""
         ledger_error = ""
+        part_label_history_path_text = ""
+        part_label_history_error = ""
         try:
             ledger_path_text = str(self._save_participant_ledger_entry(runner_metadata))
         except Exception as exc:
             ledger_error = str(exc)
+        try:
+            history_path = self._save_part_label_history(runner_metadata)
+            part_label_history_path_text = "" if history_path is None else str(history_path)
+        except Exception as exc:
+            part_label_history_error = str(exc)
+        self._refresh_part_label_options()
         self._refresh_participant_step_buttons()
         self._refresh_participant_ledger_summary()
         self.start_button.setEnabled(True)
@@ -12586,6 +12902,11 @@ class FocusModeWindow:
                 "participant_ledger_path": ledger_path_text,
                 "participant_ledger_saved": bool(ledger_path_text) and not ledger_error,
                 "participant_ledger_error": ledger_error,
+                "part_labels": _normalize_part_label_map(runner_metadata.get("part_labels")),
+                "part_label": str(runner_metadata.get("part_label") or ""),
+                "part_label_history_path": part_label_history_path_text,
+                "part_label_history_saved": bool(part_label_history_path_text) and not part_label_history_error,
+                "part_label_history_error": part_label_history_error,
                 "participant_metadata_fields": sorted(key for key, value in runner_metadata.items() if str(value or "").strip()),
             },
             create=True,

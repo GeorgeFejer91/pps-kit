@@ -907,7 +907,10 @@ def _build_condition_lens_curves_for_lens(
     curve_rows: list[dict[str, Any]] = []
     model_fit_rows: list[dict[str, Any]] = []
     model_comparison_rows: list[dict[str, Any]] = []
-    for (scope, part_label, state_label), rows in sorted(groups.items(), key=lambda item: item[0]):
+    for (scope, part_label, state_label), rows in sorted(
+        groups.items(),
+        key=lambda item: (_part_number_from_label(item[0][1]) or 999, tuple(str(part) for part in item[0])),
+    ):
         by_soa: dict[int, list[float]] = {}
         for row in rows:
             soa = _as_int(row.get("soa_ms"), None)
@@ -1017,7 +1020,7 @@ def _condition_lens_baseline_means(response_rows: list[dict[str, Any]], *, analy
 
 def _condition_lens_context(row: dict[str, Any], *, analysis_lens: str) -> tuple[str, str, str]:
     part_number = _as_int(row.get("part_number"), None)
-    part_label = f"Part {part_number}" if part_number is not None else "All parts"
+    part_label = _part_display_label(row) if part_number is not None else "All parts"
     state_label = _state_label(row)
     if analysis_lens == CONDITION_LENS_TWO_BY_TWO:
         scope = _condition_lens_scope(part_label, state_label)
@@ -1915,7 +1918,7 @@ def _quality_condition_cells(rows: list[dict[str, Any]]) -> dict[str, list[dict[
     cells: dict[str, list[dict[str, Any]]] = {}
     for row in rows:
         part_number = _as_int(row.get("part_number"), None)
-        part_label = f"Part {part_number}" if part_number is not None else "All parts"
+        part_label = _part_display_label(row) if part_number is not None else "All parts"
         state = _state_label(row)
         cells.setdefault(_condition_lens_scope(part_label, state), []).append(row)
     return cells
@@ -1984,7 +1987,10 @@ def _build_pps_curves_for_mode(
     model_fit_rows: list[dict[str, Any]] = []
     model_comparison_rows: list[dict[str, Any]] = []
     warnings: list[str] = []
-    for key, rows in sorted(groups.items(), key=lambda item: tuple(str(part) for part in item[0])):
+    for key, rows in sorted(
+        groups.items(),
+        key=lambda item: (_part_number_from_label(item[0][0]) or 999, tuple(str(part) for part in item[0])),
+    ):
         part_label, condition, phase, noise = key
         part_number = _part_number_from_label(part_label)
         by_soa: dict[int, list[float]] = {}
@@ -2362,8 +2368,18 @@ def _analysis_context(row: dict[str, Any], *, aggregation_mode: str) -> tuple[st
     if aggregation_mode == AGGREGATION_POOL_PARTS:
         part_label = "All parts" if part_number is not None else ""
     else:
-        part_label = f"Part {part_number}" if part_number is not None else ""
+        part_label = _part_display_label(row) if part_number is not None else ""
     return part_label, condition, phase, noise
+
+
+def _part_display_label(row: dict[str, Any]) -> str:
+    part_number = _as_int(row.get("part_number"), None)
+    label = str(row.get("part_label") or row.get("Part_Label") or "").strip()
+    if label and part_number is not None:
+        return f"{label} (Part {part_number})"
+    if label:
+        return label
+    return f"Part {part_number}" if part_number is not None else "All parts"
 
 
 def _condition_without_part_label(value: Any) -> str:
@@ -2372,7 +2388,7 @@ def _condition_without_part_label(value: Any) -> str:
 
 
 def _part_number_from_label(value: Any) -> int | None:
-    match = re.fullmatch(r"part\s+(\d+)", str(value or "").strip(), flags=re.IGNORECASE)
+    match = re.search(r"\bpart\s+(\d+)\b", str(value or "").strip(), flags=re.IGNORECASE)
     if not match:
         return None
     return int(match.group(1))
@@ -2476,6 +2492,8 @@ def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
         row["participant_id"] = row.get("Participant_ID")
     if "part_number" not in row and "Part_Number" in row:
         row["part_number"] = row.get("Part_Number")
+    if "part_label" not in row and "Part_Label" in row:
+        row["part_label"] = row.get("Part_Label")
     return row
 
 

@@ -92,11 +92,13 @@ PARTICIPANT_TRIAL_CSV_SUFFIX = "_trials.csv"
 EXTERNAL_LABRECORDER_SCOPE_PART = "part"
 EXTERNAL_LABRECORDER_SCOPE_SESSION_GROUP = "session_group_same_window"
 PART1_TOPUP_REPEAT_BLOCK_INDEXES = (1, 2)
+PART_LABEL_MAX_CHARS = 80
 DATA_MIN_FIELDNAMES = [
     "participant_id",
     "session_id",
     "part_session_id",
     "part_number",
+    "part_label",
     "block_number",
     "block_label",
     "trial_number",
@@ -215,6 +217,45 @@ def _package_part_identity(package: "RunPackage") -> dict[str, Any]:
         "part_session_id": _package_part_session_id(package) if _package_is_split_part(package) else "",
         "part_number": getattr(package, "part_number", None) if _package_is_split_part(package) else "",
     }
+
+
+def _normalize_part_label(value: Any) -> str:
+    text = re.sub(r"[\x00-\x1f\x7f]+", " ", str(value or ""))
+    text = re.sub(r"\s+", " ", text).strip()
+    if len(text) > PART_LABEL_MAX_CHARS:
+        text = text[:PART_LABEL_MAX_CHARS].rstrip()
+    return text
+
+
+def _part_label_number_text(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    match = re.search(r"(\d+)", text)
+    if not match:
+        return ""
+    number = int(match.group(1))
+    return str(number) if number in {1, 2} else ""
+
+
+def _normalize_part_label_map(value: Any) -> dict[str, str]:
+    if not isinstance(value, dict):
+        return {}
+    labels: dict[str, str] = {}
+    for key, label in value.items():
+        part = _part_label_number_text(key)
+        if not part:
+            continue
+        labels[part] = _normalize_part_label(label)
+    return labels
+
+
+def _part_label_for_package(package: "RunPackage", labels: dict[str, str] | None, fallback: Any = "") -> str:
+    normalized = _normalize_part_label_map(labels or {})
+    part = _package_part_number_value(package)
+    if part and normalized.get(part):
+        return normalized[part]
+    return _normalize_part_label(fallback)
 
 
 def _package_split_part_count(package: "RunPackage") -> int:
@@ -427,6 +468,7 @@ PARTICIPANT_TRIAL_FIELDNAMES = [
     "session_group_id",
     "part_session_id",
     "part_number",
+    "part_label",
     "condition",
     "block_number",
     "block_label",
@@ -467,12 +509,14 @@ class ParticipantTrialCsvWriter:
         *,
         package: RunPackage,
         participant_metadata: dict[str, Any] | None = None,
+        part_label: str = "",
         min_rt_s: float = TACTILE_RESPONSE_MIN_RT_S,
         max_rt_s: float = TACTILE_RESPONSE_MAX_RT_S,
     ):
         self.path = Path(path)
         self.package = package
         self.participant_metadata = dict(participant_metadata or {})
+        self.part_label = _normalize_part_label(part_label)
         self.min_rt_s = max(0.0, float(min_rt_s))
         self.max_rt_s = max(self.min_rt_s, float(max_rt_s))
         self._trial_states: dict[tuple[str, str], dict[str, Any]] = {}
@@ -614,6 +658,7 @@ class ParticipantTrialCsvWriter:
             "session_group_id": str(getattr(self.package, "session_group_id", "") or ""),
             "part_session_id": _package_part_session_id(self.package) if _package_is_split_part(self.package) else "",
             "part_number": _row_value(base, "part_number", "Part_Number", default=""),
+            "part_label": _row_value(base, "part_label", "Part_Label", default=self.part_label),
             "condition": _row_value(base, "condition", "Condition", default=""),
             "block_number": _row_value(base, "block_number", "block_index", "Block_Number", default=""),
             "block_label": _row_value(base, "block_label", "Block_Label", default=""),
@@ -727,6 +772,7 @@ def _data_min_row_from_rich(row: dict[str, Any], *, trial_number_global: int) ->
         "session_id": _row_value(row, "session_id", "Session_ID", default=""),
         "part_session_id": _row_value(row, "part_session_id", "Part_Session_ID", default=""),
         "part_number": _row_value(row, "part_number", "Part_Number", default=""),
+        "part_label": _row_value(row, "part_label", "Part_Label", default=""),
         "block_number": _row_value(row, "block_number", "block_index", "Block_Number", default=""),
         "block_label": _row_value(row, "block_label", "Block_Label", default=""),
         "trial_number": _row_value(row, "trial_number", "trial_index", "Trial_Number", default=""),
@@ -979,6 +1025,8 @@ def mirror_data_max_outputs(package: "RunPackage", *, analysis_outputs: dict[str
             "session_group_id": package.session_group_id,
             "part_session_id": package.part_session_id,
             "part_number": package.part_number,
+            "part_label": str(metadata.get("part_label") or ""),
+            "part_labels_by_part_number": _json_ready(metadata.get("part_labels_by_part_number") or {}),
             "participant": participant_metadata,
         }
         _write_json_file(demographics_dir / "participant_metadata.private.json", payload)
@@ -2942,9 +2990,12 @@ def _write_session_group_manifest(
     part_entries = []
     for package in sorted(packages, key=lambda item: int(item.part_number or 0)):
         completed, message = _session_package_has_completed_data(package)
+        status = _load_json_if_exists(_part_completion_status_path(package))
+        part_label = str(status.get("part_label") or "").strip() if isinstance(status, dict) else ""
         part_entries.append(
             {
                 "part_number": package.part_number,
+                "part_label": part_label,
                 "part_session_id": package.part_session_id,
                 "part_folder_name": package.part_folder_name,
                 "session_manifest_path": str(package.manifest_path),
@@ -3028,6 +3079,13 @@ class SessionRunnerController:
         self._analytics_dir = _package_analytics_dir(package)
         self._topup_dir = self._runner_log_dir / "topup"
         self._runner_metadata_input = dict(runner_metadata or {})
+        part_labels = _normalize_part_label_map(self._runner_metadata_input.get("part_labels"))
+        self._runner_metadata_input["part_labels"] = part_labels
+        self._runner_metadata_input["part_label"] = _part_label_for_package(
+            package,
+            part_labels,
+            self._runner_metadata_input.get("part_label", ""),
+        )
         self._tactile_response_ledger = TopUpLedger(
             self._topup_dir,
             participant_id=package.participant_id,
@@ -3040,7 +3098,10 @@ class SessionRunnerController:
         self._runner_metadata_input["adaptive_tactile_threshold"] = self._adaptive_tactile_threshold.policy_payload()
         self._part_identity = {
             key: value
-            for key, value in _package_part_identity(package).items()
+            for key, value in {
+                **_package_part_identity(package),
+                "part_label": self._runner_metadata_input.get("part_label", ""),
+            }.items()
             if value not in (None, "")
         }
         self._session_metadata_path = _session_metadata_path(package)
@@ -3055,6 +3116,7 @@ class SessionRunnerController:
             self._participant_trials_csv_path,
             package=package,
             participant_metadata=dict(self._session_metadata.get("participant") or {}),
+            part_label=str(self._session_metadata.get("part_label") or ""),
         )
         self._lsl_session_metadata = _redact_session_metadata_for_lsl(self._session_metadata)
         self._topup_approval_callback = topup_approval_callback
@@ -3599,6 +3661,7 @@ class SessionRunnerController:
             "session_group_id": self.package.session_group_id,
             "part_session_id": self.package.part_session_id,
             "part_number": self.package.part_number,
+            "part_label": str(self._session_metadata.get("part_label") or ""),
             "participant_id": self.package.participant_id,
             "lsl_stream_session_id": self._lsl_stream_session_id,
             "external_labrecorder_scope": self.capture_options.external_labrecorder_scope,
@@ -4860,6 +4923,7 @@ class SessionRunnerController:
                     "session_group_id": self.package.session_group_id,
                     "part_session_id": self.package.part_session_id,
                     "part_number": self.package.part_number,
+                    "part_label": str(self._session_metadata.get("part_label") or ""),
                     "lsl_stream_session_id": self._lsl_stream_session_id,
                     "session_manifest": str(self.package.manifest_path),
                     "session_metadata": str(self._session_metadata_path),
@@ -4918,6 +4982,8 @@ class SessionRunnerController:
             "session_id": self.package.session_id,
             "participant_id": self.package.participant_id,
             "part_number": self.package.part_number,
+            "part_label": str(self._session_metadata.get("part_label") or ""),
+            "part_labels_by_part_number": _json_ready(self._session_metadata.get("part_labels_by_part_number") or {}),
             "part_folder_name": self.package.part_folder_name,
             "completed": bool(completed),
             "interrupted": bool(interrupted),
@@ -5327,6 +5393,8 @@ def _build_runner_session_metadata(
     lsl_status: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     raw = dict(runner_metadata or {})
+    part_labels = _normalize_part_label_map(raw.get("part_labels"))
+    part_label = _part_label_for_package(package, part_labels, raw.get("part_label", ""))
     participant_code = str(raw.get("participant_code") or package.participant_id or "").strip()
     participant_name = str(raw.get("participant_name") or "").strip()
     include_name = _truthy(raw.get("include_name_in_lsl", False))
@@ -5349,6 +5417,8 @@ def _build_runner_session_metadata(
         "session_group_id": package.session_group_id,
         "part_session_id": _package_part_session_id(package),
         "part_number": package.part_number,
+        "part_label": part_label,
+        "part_labels_by_part_number": part_labels,
         "part_folder_name": package.part_folder_name,
         "part_split_schema": package.part_split_schema,
         "sibling_part_manifest_paths": [str(path) for path in package.sibling_part_manifest_paths],

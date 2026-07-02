@@ -2,6 +2,24 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-07-02
+
+- Added optional Focus Mode split-part labels for prepared Part 01 and Part 02
+  setup. Split packages now show editable dropdown fields under Participant
+  Setup; submitted labels are normalized, saved in the participant ledger,
+  remembered per Segment 6 run setup in
+  `Experiment_context_folder_DO_NOT_DELETE/project_state/part_label_history.v1.json`,
+  restored from participant-specific saved setup when present, otherwise
+  defaulted from the last submitted pair, and exposed to the companion setup
+  snapshot/options. Labels are metadata/display labels only: `part_01` and
+  `part_02` folder names and stable `part_number` identities are unchanged.
+- Runner outputs now carry `part_label` beside `part_number` in rich
+  participant trial CSVs, public `1.Data_min` CSVs, LSL marker mirrors/XDF
+  payloads, trigger dictionaries, `session_metadata.json`, split
+  `part_completion_status.json`, session-group manifests, and private
+  demographics/setup sidecars. Instant-analysis display scopes use the label
+  when present while keeping numeric `part_number` ordering/grouping.
+
 ## 2026-06-30
 
 - Added `publication/behavior-research-methods/` as the tracked manuscript

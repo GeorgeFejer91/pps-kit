@@ -421,10 +421,12 @@ def test_setup_and_commands_route_through_bridge():
             "handedness": "right",
             "gender": "prefer_not_to_say",
             "name_sharing_opt_in": False,
+            "part_labels": {"1": "Pre", "2": "Post"},
         },
     )
     assert setup.status_code == 200
     assert bridge.setup_payloads[-1]["participant_name"] == "Participant One"
+    assert bridge.setup_payloads[-1]["part_labels"] == {"1": "Pre", "2": "Post"}
 
     continue_response = client.post("/api/runner/commands/continue-instruction", headers=headers)
     assert continue_response.status_code == 200

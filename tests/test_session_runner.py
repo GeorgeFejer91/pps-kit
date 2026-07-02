@@ -1207,6 +1207,7 @@ def test_data_min_export_keeps_original_and_real_topup_trials_only(tmp_path: Pat
             "session_id": "P001_20260102_030405",
             "part_session_id": "P001_20260102_030405_part01",
             "part_number": "1",
+            "part_label": "Pre",
             "condition": "near",
             "block_number": "1",
             "block_label": "Block 01",
@@ -1229,6 +1230,7 @@ def test_data_min_export_keeps_original_and_real_topup_trials_only(tmp_path: Pat
             "session_id": "P001_20260102_030405",
             "part_session_id": "P001_20260102_030405_part01",
             "part_number": "1",
+            "part_label": "Pre",
             "condition": "near",
             "block_number": "2",
             "block_label": "Top-up",
@@ -1252,6 +1254,7 @@ def test_data_min_export_keeps_original_and_real_topup_trials_only(tmp_path: Pat
             "session_id": "P001_20260102_030405",
             "part_session_id": "P001_20260102_030405_part01",
             "part_number": "1",
+            "part_label": "Pre",
             "condition": "near",
             "block_number": "2",
             "block_label": "Top-up",
@@ -1281,6 +1284,7 @@ def test_data_min_export_keeps_original_and_real_topup_trials_only(tmp_path: Pat
     assert list(data_min_rows[0].keys()) == session_runner_module.DATA_MIN_FIELDNAMES
     assert len(data_min_rows) == 2
     assert [row["trial_uid"] for row in data_min_rows] == ["P001-B01-T001", "P001-B02-T001"]
+    assert [row["part_label"] for row in data_min_rows] == ["Pre", "Pre"]
     assert [row["trial_number_global"] for row in data_min_rows] == ["1", "2"]
     assert [row["hit_miss"] for row in data_min_rows] == ["Miss", "Hit"]
     assert [row["reaction_time_ms"] for row in data_min_rows] == ["", "420.000"]
@@ -1620,7 +1624,8 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     assert initial_status["next_part_number"] == 1
     assert "Part 1 ready" in initial_status["part_inventory"]
 
-    controller1 = SessionRunnerController(part1, audio_engine=_MockAudioEngine())
+    part_labels = {"1": "Pre", "2": "Post"}
+    controller1 = SessionRunnerController(part1, audio_engine=_MockAudioEngine(), runner_metadata={"part_labels": part_labels})
     result1 = controller1.run()
 
     assert result1.completed
@@ -1636,6 +1641,8 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     assert completion_status["session_group_id"] == part1.session_group_id
     assert completion_status["part_session_id"] == part1.part_session_id
     assert completion_status["part_number"] == 1
+    assert completion_status["part_label"] == "Pre"
+    assert completion_status["part_labels_by_part_number"] == part_labels
 
     with result1.events_csv.open(newline="", encoding="utf-8") as handle:
         event_rows = list(csv.DictReader(handle))
@@ -1646,6 +1653,7 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     assert part_start["session_group_id"] == part1.session_group_id
     assert part_start["part_session_id"] == part1.part_session_id
     assert part_start["part_number"] == 1
+    assert part_start["part_label"] == "Pre"
 
     with result1.lsl_markers_csv.open(newline="", encoding="utf-8") as handle:
         marker_rows = list(csv.DictReader(handle))
@@ -1653,18 +1661,25 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     assert marker_rows[0]["session_group_id"] == part1.session_group_id
     assert marker_rows[0]["part_session_id"] == part1.part_session_id
     assert marker_rows[0]["part_number"] == "1"
+    assert marker_rows[0]["part_label"] == "Pre"
+    marker_payload = json.loads(marker_rows[0]["payload_json"])
+    assert marker_payload["part_label"] == "Pre"
 
     trigger_dictionary = json.loads(result1.trigger_dictionary_path.read_text(encoding="utf-8"))
     assert trigger_dictionary["session_group_id"] == part1.session_group_id
     assert trigger_dictionary["part_session_id"] == part1.part_session_id
     assert trigger_dictionary["part_number"] == 1
+    assert trigger_dictionary["part_label"] == "Pre"
     session_metadata = json.loads(result1.session_metadata_path.read_text(encoding="utf-8"))
     assert session_metadata["session_group_id"] == part1.session_group_id
     assert session_metadata["part_session_id"] == part1.part_session_id
     assert session_metadata["part_number"] == 1
+    assert session_metadata["part_label"] == "Pre"
+    assert session_metadata["part_labels_by_part_number"] == part_labels
     participant_rows = list(csv.DictReader(result1.analysis_outputs["participant_trials"].open(encoding="utf-8")))
     assert participant_rows[0]["session_group_id"] == part1.session_group_id
     assert participant_rows[0]["part_session_id"] == part1.part_session_id
+    assert participant_rows[0]["part_label"] == "Pre"
     assert not output_data_min_participant_csv(session_root, "P001").exists()
     data_max_part1 = output_data_max_participant_dir(session_root, "P001") / "sessions" / part1.session_group_id / "part_01"
     assert data_max_part1.joinpath(f"{part1.session_id}_trials.csv").exists()
@@ -1691,7 +1706,7 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     )
     assert claim_prepared_session(run_manifest, "P001", state_root=state_root, session_root=session_root) == part2.manifest_path.resolve()
 
-    controller2 = SessionRunnerController(part2, audio_engine=_MockAudioEngine())
+    controller2 = SessionRunnerController(part2, audio_engine=_MockAudioEngine(), runner_metadata={"part_labels": part_labels})
     result2 = controller2.run()
     assert result2.completed
     assert result2.analysis_outputs["analysis_catalog"].exists()
@@ -1710,6 +1725,9 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     assert part_numbers[:first_part2_index] == ["1"] * first_part2_index
     assert part_numbers[first_part2_index:] == ["2"] * (len(part_numbers) - first_part2_index)
     assert {row["part_session_id"] for row in data_min_rows} == {part1.part_session_id, part2.part_session_id}
+    assert {row["part_label"] for row in data_min_rows} == {"Pre", "Post"}
+    assert all(row["part_label"] == "Pre" for row in data_min_rows[:first_part2_index])
+    assert all(row["part_label"] == "Post" for row in data_min_rows[first_part2_index:])
     assert [row["trial_number_global"] for row in data_min_rows] == [str(index) for index in range(1, len(data_min_rows) + 1)]
     assert output_data_min_master_csv(session_root).exists()
     data_max_part2 = output_data_max_participant_dir(session_root, "P001") / "sessions" / part2.session_group_id / "part_02"

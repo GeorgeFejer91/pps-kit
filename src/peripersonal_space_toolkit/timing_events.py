@@ -37,6 +37,7 @@ LSL_MARKER_CHANNELS = [
     "session_group_id",
     "part_session_id",
     "part_number",
+    "part_label",
     "block_index",
     "trial_uid",
     "sample_index",
@@ -117,6 +118,7 @@ class TriggerDictionary:
                     "session_group_id": payload.get("session_group_id", ""),
                     "part_session_id": payload.get("part_session_id", ""),
                     "part_number": payload.get("part_number", ""),
+                    "part_label": payload.get("part_label", ""),
                     "block_index": payload.get("block_index", payload.get("block_number", "")),
                     "trial_index": payload.get("trial_index", payload.get("trial_number", "")),
                     "trial_uid": payload.get("trial_uid", payload.get("Trial_UID", "")),
@@ -153,6 +155,7 @@ class TriggerDictionary:
                 "session_group_id": payload.get("session_group_id", ""),
                 "part_session_id": payload.get("part_session_id", ""),
                 "part_number": payload.get("part_number", ""),
+                "part_label": payload.get("part_label", ""),
                 "block_index": payload.get("block_index", payload.get("block_number", "")),
                 "trial_index": payload.get("trial_index", payload.get("trial_number", "")),
                 "trial_uid": payload.get("trial_uid", payload.get("Trial_UID", "")),
@@ -170,6 +173,7 @@ class TriggerDictionary:
         session_group_id: str = "",
         part_session_id: str = "",
         part_number: str | int = "",
+        part_label: str = "",
     ) -> Path:
         path = Path(path)
         payload = {
@@ -180,6 +184,7 @@ class TriggerDictionary:
             "session_group_id": session_group_id,
             "part_session_id": part_session_id,
             "part_number": part_number,
+            "part_label": part_label,
             "reserved_codes": dict(sorted(RESERVED_TRIGGER_CODES.items(), key=lambda item: item[1])),
             "triggers": [
                 {
@@ -281,6 +286,7 @@ class LSLMarkerOutlet:
             str(marker.get("session_group_id", "")),
             str(marker.get("part_session_id", "")),
             str(marker.get("part_number", "")),
+            str(marker.get("part_label", "")),
             str(marker.get("block_index", "")),
             str(marker.get("trial_uid", "")),
             str(marker.get("sample_index", "")),
@@ -423,6 +429,7 @@ class TimingEventHub:
             "session_group_id",
             "part_session_id",
             "part_number",
+            "part_label",
             "lsl_timestamp",
             "timestamp_quality",
             "sample_index",
@@ -456,6 +463,7 @@ class TimingEventHub:
             session_group_id=str(self.default_payload.get("session_group_id") or ""),
             part_session_id=str(self.default_payload.get("part_session_id") or ""),
             part_number=self.default_payload.get("part_number", ""),
+            part_label=str(self.default_payload.get("part_label") or ""),
         )
 
     def push_deferred_event_marker(self, event: SessionEvent) -> None:
@@ -612,6 +620,7 @@ class TimingEventHub:
             "session_group_id": payload.get("session_group_id", ""),
             "part_session_id": payload.get("part_session_id", ""),
             "part_number": payload.get("part_number", ""),
+            "part_label": payload.get("part_label", ""),
             "block_index": block_index,
             "trial_uid": payload.get("trial_uid", payload.get("Trial_UID", "")),
             "sample_index": payload.get("sample_index", payload.get("planned_sample_index", "")),
@@ -865,6 +874,7 @@ def _rich_marker_samples_chunk(stream_id: int, markers: list[dict[str, Any]]) ->
             str(marker.get("session_group_id", "")),
             str(marker.get("part_session_id", "")),
             str(marker.get("part_number", "")),
+            str(marker.get("part_label", "")),
             str(marker.get("block_index", "")),
             str(marker.get("trial_uid", "")),
             str(marker.get("sample_index", "")),
