@@ -215,9 +215,9 @@ const STIMULUS_TRAJECTORY_COLORS = {
   white: "#d8dde2",
   brown: "#8b623f",
   violet: "#8364b9",
-  custom_audio: "#246b55",
-  preserve: "#246b55",
-  spatialize: "#246b55",
+  custom_audio: "#1c7a86",
+  preserve: "#1c7a86",
+  spatialize: "#1c7a86",
   prestimulus: "#7b8288"
 };
 const SOURCE_COLOR_OPTIONS = [
@@ -226,10 +226,11 @@ const SOURCE_COLOR_OPTIONS = [
   { value: "white", label: "White" },
   { value: "brown", label: "Brown" },
   { value: "violet", label: "Violet" },
-  { value: "custom_audio", label: "Green / custom" }
+  { value: "custom_audio", label: "Teal / custom" }
 ];
+// Keep in sync with --family-* tokens in styles.css (:root).
 const TRIAL_FAMILY_COLORS = {
-  audio_tactile: "#246b55",
+  audio_tactile: "#1c7a86",
   baseline: "#4b5fa8",
   catch: "#a4631b"
 };
@@ -523,13 +524,23 @@ function renderEditModePanel() {
   viewButton.classList.toggle("active", !editModeActive);
   editButton.classList.toggle("active", editModeActive);
   viewButton.setAttribute("aria-pressed", String(!editModeActive));
-  editButton.setAttribute("aria-pressed", String(editModeActive));
   editButton.disabled = !canEnterEdit;
   editButton.title = staticModeActive
     ? STATIC_COMPANION_REQUIRED_MESSAGE
     : isProfileReadonlyMode()
       ? "Create a named custom copy before editing this loaded profile."
       : "Unlock editable custom-study decisions.";
+  if (isProfileReadonlyMode()) {
+    // Acts as a dialog launcher (opens the customize-naming modal), not a
+    // toggle; advertising aria-pressed here would be a lie to screen readers.
+    editButton.textContent = "Customize";
+    editButton.removeAttribute("aria-pressed");
+    editButton.setAttribute("aria-haspopup", "dialog");
+  } else {
+    editButton.textContent = "Edit";
+    editButton.setAttribute("aria-pressed", String(editModeActive));
+    editButton.removeAttribute("aria-haspopup");
+  }
   status.textContent = editModeActive ? "edit mode" : "view mode";
   status.className = `status-label ${editModeActive ? "ready" : "optional"}`;
 }
@@ -1485,7 +1496,7 @@ function staticBlockPreviewRow(row, blockIndex, blockTrialIndex, soaMin, soaMax)
     trial_pool_index: row.trial_pool_index,
     family,
     family_label: familyDisplayName(family),
-    family_color_hex: TRIAL_FAMILY_COLORS[family] || "#68746c",
+    family_color_hex: TRIAL_FAMILY_COLORS[family] || "#5e695f",
     row_label: row.row_label || "",
     row_color_hex: staticRowColor(row.row_label || row.folder_key || ""),
     folder_key: row.folder_key || "",
@@ -3232,7 +3243,7 @@ function renderBlockPreviewCard(block, index = 0) {
   const distribution = ["audio_tactile", "baseline", "catch"].map((family) => {
     const count = Number(familyCounts[family] || 0);
     return `
-      <div class="block-distribution-segment" style="--segment-color:${escapeAttr(TRIAL_FAMILY_COLORS[family] || "#68746c")}">
+      <div class="block-distribution-segment" style="--segment-color:${escapeAttr(TRIAL_FAMILY_COLORS[family] || "#5e695f")}">
         ${escapeHtml(familyDisplayName(family))}: ${count}
       </div>
     `;
@@ -3282,13 +3293,13 @@ function blockFeatureChips(counts = {}, prefix, rows, valueKey, colorKey, limit)
   const colorByValue = new Map();
   for (const row of rows || []) {
     const value = String(row[valueKey] || "");
-    if (value && !colorByValue.has(value)) colorByValue.set(value, row[colorKey] || "#68746c");
+    if (value && !colorByValue.has(value)) colorByValue.set(value, row[colorKey] || "#5e695f");
   }
   return Object.entries(counts)
     .filter(([value]) => value)
     .slice(0, limit)
     .map(([value, count]) => `
-      <span class="feature-chip" style="--chip-color:${escapeAttr(colorByValue.get(value) || "#68746c")}">
+      <span class="feature-chip" style="--chip-color:${escapeAttr(colorByValue.get(value) || "#5e695f")}">
         ${escapeHtml(prefix)} ${escapeHtml(value)}: ${escapeHtml(count)}
       </span>
     `);
@@ -3783,7 +3794,6 @@ function compositionSliderRow(kind, label, family, composition) {
         aria-valuemax="100"
         aria-valuenow="${escapeAttr(percent.toFixed(1))}">
         <span class="pool-slider-fill"></span>
-        <span class="pool-slider-thumb"></span>
       </div>
       <div class="pool-slider-meta">
         <span>${escapeHtml(count)} trial${count === 1 ? "" : "s"}</span>
@@ -5381,7 +5391,7 @@ function renderWorkflow() {
     if (stateLabel) {
       const label = step.label || humanize(stepId);
       const missing = Array.isArray(step.missing) && step.missing.length
-        ? `: ${step.missing.join(" ")}`
+        ? `: ${step.missing.join(", ")}`
         : "";
       const status = complete ? "ready" : "not ready";
       stateLabel.textContent = complete ? "\u2713" : "\u2715";
@@ -5389,8 +5399,15 @@ function renderWorkflow() {
       stateLabel.title = `${label} ${status}${missing}`;
       stateLabel.setAttribute("aria-label", `${label} ${status}`);
     }
+    const missingSummary = !complete && Array.isArray(step.missing) && step.missing.length
+      ? step.missing.join(", ")
+      : "";
     for (const badge of badges) {
-      badge.textContent = profileReadonly ? "read-only" : locked ? "locked" : complete ? "ready" : "required";
+      const baseText = profileReadonly ? "read-only" : locked ? "locked" : complete ? "ready" : "required";
+      badge.textContent = baseText === "required" && missingSummary
+        ? `required - ${missingSummary}`
+        : baseText;
+      badge.title = missingSummary ? `Needs: ${missingSummary}` : "";
       badge.className = `step-badge ${profileReadonly ? "readonly" : locked ? "locked" : complete ? "complete" : current ? "current" : ""}`;
     }
   }

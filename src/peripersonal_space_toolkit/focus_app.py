@@ -2010,12 +2010,21 @@ def _create_focus_mode_dialog(q: dict[str, Any], owner: Any) -> Any:
         def eventFilter(self, watched: Any, event: Any) -> bool:  # noqa: N802 - Qt API
             try:
                 mouse_press = q["QEvent"].Type.MouseButtonPress
+                key_press = q["QEvent"].Type.KeyPress
+                key_release = q["QEvent"].Type.KeyRelease
             except AttributeError:
                 mouse_press = q["QEvent"].MouseButtonPress
-            if event.type() == mouse_press:
+                key_press = q["QEvent"].KeyPress
+                key_release = q["QEvent"].KeyRelease
+            event_type = event.type()
+            if event_type == mouse_press:
                 handler = getattr(owner, "_handle_response_mouse_press", None)
                 if callable(handler):
                     handler(watched, event)
+            elif event_type in (key_press, key_release):
+                handler = getattr(owner, "_handle_mouse_lock_chord_event", None)
+                if callable(handler):
+                    handler(event, event_type == key_press)
             return False
 
         def _restore_locked_geometry(self) -> None:
@@ -8804,6 +8813,10 @@ class FocusModeWindow:
         self._experiment_window_locked_window_state: Any | None = None
         self._experiment_window_previous_minimum_size: Any | None = None
         self._experiment_window_previous_maximum_size: Any | None = None
+        self._mouse_area_lock_active = False
+        self._mouse_lock_chord_down: set[int] = set()
+        self._mouse_lock_chord_fired = False
+        self._mouse_lock_reassert_timer: Any | None = None
         self.all_block_plan_items: list[dict[str, Any]] = []
         self.block_plan_items: list[dict[str, Any]] = []
         self.instruction_plan_items: list[dict[str, Any]] = []
@@ -8939,6 +8952,9 @@ class FocusModeWindow:
         self.target_button = _create_response_target_button(q, profile)
         self.target_button.setEnabled(False)
         self.target_button.clicked.connect(self._click)
+        self.target_button.setToolTip(
+            "Hold Ctrl+A+S+D to lock or unlock the mouse cursor inside this response target."
+        )
         response_layout.addWidget(self.target_button, 0, q["Qt"].AlignmentFlag.AlignHCenter)
         response_layout.addStretch(1)
         self.instruction_button = q["QPushButton"]("Continue")
@@ -12768,6 +12784,7 @@ class FocusModeWindow:
         self.controller = None
 
     def _handle_dialog_finished(self, _code: int) -> None:
+        self._set_mouse_area_lock(False)
         cancel_event = getattr(self, "_tactile_calibration_cancel_event", None)
         if cancel_event is not None:
             cancel_event.set()
@@ -12937,6 +12954,7 @@ class FocusModeWindow:
             "select_part_1": ["Alt+1"],
             "select_part_2": ["Alt+2"],
             "select_topup_preview": ["Ctrl+T"],
+            "mouse_area_lock": ["Ctrl+A+S+D (hold together)"],
         }
         if _env_flag("PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT"):
             shortcuts["validation_synthetic_click"] = ["Ctrl+Alt+Shift+F12"]
@@ -12985,6 +13003,151 @@ class FocusModeWindow:
     def _handle_topup_preview_shortcut(self) -> None:
         if self._topup_slots_enabled_for_plan():
             self._select_current_part_topup_slot()
+
+    def _mouse_lock_chord_keys(self) -> set[int]:
+        qt = self.q["Qt"]
+        keys = getattr(qt, "Key", qt)
+        return {int(keys.Key_A), int(keys.Key_S), int(keys.Key_D)}
+
+    def _handle_mouse_lock_chord_event(self, event: Any, pressed: bool) -> None:
+        # Software alternative to taping the mouse sensor: holding Ctrl+A+S+D
+        # toggles an OS-level cursor clip (ClipCursor) confining the pointer to
+        # the response target, so the participant's click-only mouse cannot be
+        # dislodged and the researcher can release it without touching the rig.
+        try:
+            if bool(event.isAutoRepeat()):
+                return
+            key = int(event.key())
+        except Exception:
+            return
+        chord = self._mouse_lock_chord_keys()
+        if key not in chord:
+            return
+        down = getattr(self, "_mouse_lock_chord_down", None)
+        if down is None:
+            down = set()
+            self._mouse_lock_chord_down = down
+        if pressed:
+            qt = self.q["Qt"]
+            modifiers = getattr(qt, "KeyboardModifier", qt)
+            try:
+                ctrl_held = bool(event.modifiers() & modifiers.ControlModifier)
+            except Exception:
+                ctrl_held = False
+            if not ctrl_held:
+                down.clear()
+                self._mouse_lock_chord_fired = False
+                return
+            down.add(key)
+            if down == chord and not getattr(self, "_mouse_lock_chord_fired", False):
+                self._mouse_lock_chord_fired = True
+                self._toggle_mouse_area_lock()
+        else:
+            down.discard(key)
+            if not down:
+                self._mouse_lock_chord_fired = False
+
+    def _toggle_mouse_area_lock(self) -> None:
+        self._set_mouse_area_lock(not bool(getattr(self, "_mouse_area_lock_active", False)))
+
+    def _set_mouse_area_lock(self, active: bool) -> None:
+        if bool(active) == bool(getattr(self, "_mouse_area_lock_active", False)):
+            return
+        if active:
+            if sys.platform != "win32":
+                self.event_label.setText("Mouse lock is unavailable on this platform (needs Windows ClipCursor).")
+                return
+            if not self._apply_mouse_area_clip():
+                self.event_label.setText("Mouse lock failed: response-target area could not be resolved.")
+                return
+            self._mouse_area_lock_active = True
+            x, y, _source = _widget_screen_center(self.target_button)
+            try:
+                self._move_os_cursor_to_global_center(x, y)
+            except Exception:
+                pass
+            timer = getattr(self, "_mouse_lock_reassert_timer", None)
+            if timer is None:
+                timer = self.q["QTimer"](self.dialog)
+                timer.setInterval(1000)
+                timer.timeout.connect(self._reassert_mouse_area_clip)
+                self._mouse_lock_reassert_timer = timer
+            timer.start()
+            self.event_label.setText("Mouse locked to the response target. Hold Ctrl+A+S+D to unlock.")
+            _append_output_diary_event(
+                "mouse_area_lock_enabled",
+                package=self.package,
+                capture_options=self.capture_options.as_dict(),
+                create=True,
+            )
+        else:
+            timer = getattr(self, "_mouse_lock_reassert_timer", None)
+            if timer is not None:
+                timer.stop()
+            self._release_mouse_area_clip()
+            self._mouse_area_lock_active = False
+            self.event_label.setText("Mouse lock released. Hold Ctrl+A+S+D to lock the cursor to the response target.")
+            _append_output_diary_event(
+                "mouse_area_lock_disabled",
+                package=self.package,
+                capture_options=self.capture_options.as_dict(),
+                create=True,
+            )
+
+    def _mouse_area_clip_rect(self) -> tuple[int, int, int, int] | None:
+        button = getattr(self, "target_button", None)
+        if button is None:
+            return None
+        try:
+            top_left = button.mapToGlobal(button.rect().topLeft())
+            bottom_right = button.mapToGlobal(button.rect().bottomRight())
+            left, top = int(top_left.x()), int(top_left.y())
+            right, bottom = int(bottom_right.x()), int(bottom_right.y())
+            ratio = 1.0
+            try:
+                screen = button.screen()
+                ratio = float(screen.devicePixelRatio()) if screen is not None else 1.0
+            except Exception:
+                ratio = 1.0
+            if ratio > 1.01:
+                left, top = int(round(left * ratio)), int(round(top * ratio))
+                right, bottom = int(round(right * ratio)), int(round(bottom * ratio))
+            if right > left and bottom > top:
+                # RECT right/bottom bounds are exclusive.
+                return left, top, right + 1, bottom + 1
+        except Exception:
+            pass
+        return None
+
+    def _apply_mouse_area_clip(self) -> bool:
+        rect_values = self._mouse_area_clip_rect()
+        if rect_values is None:
+            return False
+        try:
+            import ctypes
+            from ctypes import wintypes
+
+            rect = wintypes.RECT(*rect_values)
+            return bool(ctypes.windll.user32.ClipCursor(ctypes.byref(rect)))
+        except Exception:
+            return False
+
+    def _reassert_mouse_area_clip(self) -> None:
+        # Windows silently clears cursor clips on focus changes and system
+        # popups; while the lock is on, re-apply it every second so the clip
+        # also tracks any window move.
+        if getattr(self, "_mouse_area_lock_active", False):
+            self._apply_mouse_area_clip()
+
+    def _release_mouse_area_clip(self) -> None:
+        if sys.platform != "win32":
+            return
+        try:
+            import ctypes
+
+            ctypes.windll.user32.ClipCursor(None)
+        except Exception:
+            pass
 
     def _handle_validation_synthetic_click_shortcut(self) -> None:
         if not _env_flag("PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT"):
@@ -13214,7 +13377,9 @@ class FocusModeWindow:
                 if rect.get("width", 0) < 220:
                     failures.append(f"{name} is too narrow for operator controls: {rect}")
         required_shortcut_names = set(self.keyboard_shortcut_map())
-        installed_shortcut_names = {"start_or_continue"} | {
+        # start_or_continue is registered separately; mouse_area_lock is a held
+        # chord handled by the application event filter, not a QShortcut.
+        installed_shortcut_names = {"start_or_continue", "mouse_area_lock"} | {
             name for name, shortcuts in self.operator_action_shortcuts.items() if shortcuts
         }
         missing_shortcuts = sorted(required_shortcut_names - installed_shortcut_names)
@@ -13661,6 +13826,7 @@ class FocusModeWindow:
             capture_options=self.capture_options.as_dict(),
             create=True,
         )
+        self._set_mouse_area_lock(False)
         self._stop()
         self.dialog.accept()
 

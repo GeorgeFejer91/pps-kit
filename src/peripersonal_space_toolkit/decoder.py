@@ -826,6 +826,33 @@ def _decode_mp3_to_mono_float(path: Path, target_sample_rate: int) -> np.ndarray
     return audio
 
 
+def _load_wav_template_to_mono_float(path: Path, target_sample_rate: int) -> np.ndarray:
+    """Load a WAV template to mono float32 at the target sample rate."""
+    samples, info = read_wav_frames(path)
+    if samples.shape[1] == 1:
+        mono = samples[:, 0]
+    else:
+        mono = np.mean(samples, axis=1)
+
+    if info.sample_rate != target_sample_rate:
+        from scipy.signal import resample_poly
+
+        divisor = math.gcd(info.sample_rate, target_sample_rate)
+        mono = resample_poly(
+            mono.astype(np.float32, copy=False),
+            target_sample_rate // divisor,
+            info.sample_rate // divisor,
+        )
+
+    return mono.astype(np.float32, copy=False)
+
+
+def _decode_template_to_mono_float(path: Path, target_sample_rate: int) -> np.ndarray:
+    if path.suffix.lower() == ".wav":
+        return _load_wav_template_to_mono_float(path, target_sample_rate)
+    return _decode_mp3_to_mono_float(path, target_sample_rate)
+
+
 def load_breathing_templates(sample_rate: int) -> dict[str, np.ndarray] | None:
     """Load the Inhale / Exhale TTS templates as mono float32 at sample_rate.
 
@@ -839,7 +866,7 @@ def load_breathing_templates(sample_rate: int) -> dict[str, np.ndarray] | None:
         path = BREATHING_INSTRUCTION_ROOT / filename
         if not path.exists():
             return None
-        samples = _decode_mp3_to_mono_float(path, sample_rate)
+        samples = _decode_template_to_mono_float(path, sample_rate)
         # Trim trailing silence so correlation isn't diluted.
         env = np.abs(samples)
         nonzero = np.flatnonzero(env > 0.01 * env.max())

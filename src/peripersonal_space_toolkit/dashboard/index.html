@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260701-noise-quick-picks-lock">
+  <link rel="stylesheet" href="styles.css?v=20260703-runner-gui-compat">
 </head>
 <body>
   <div class="app-shell">
@@ -208,7 +208,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260701-noise-quick-picks-lock"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260703-runner-gui-compat"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -228,13 +228,13 @@
                   </select>
                   <div class="noise-type-buttons" role="group" aria-label="Generate looming noise type">
                     <div class="noise-type-row noise-type-row-primary">
-                      <button type="button" class="noise-type-button noise-type-primary" data-noise-type="white">White</button>
-                      <button type="button" class="noise-type-button noise-type-primary" data-noise-type="pink">Pink</button>
+                      <button type="button" class="noise-type-button noise-type-primary" data-noise-type="white" data-noise-hint="White noise - flat spectrum. Rated the most pleasant and least arousing of the five colours in Ferri et al. (2015), who used it as the neutral looming sound.">White</button>
+                      <button type="button" class="noise-type-button noise-type-primary" data-noise-type="pink" data-noise-hint="Pink noise - power falls ~3 dB/octave (1/f). Rated more arousing and less pleasant than white in Ferri et al. (2015).">Pink</button>
                     </div>
                     <div class="noise-type-row noise-type-row-secondary">
-                      <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="blue" data-noise-hint="Blue noise: power rises about +3 dB/octave, emphasizing high frequencies. No documented PPS study uses this variant.">Blue</button>
-                      <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="violet" data-noise-hint="Violet noise: power rises about +6 dB/octave (the derivative of white noise), strongly emphasizing high frequencies. No documented PPS study uses this variant.">Violet</button>
-                      <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="brown" data-noise-hint="Brown noise: power falls about -6 dB/octave, a low-frequency rumble. No documented PPS study uses this variant.">Brown</button>
+                      <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="blue" data-noise-hint="Blue noise - power rises ~3 dB/octave (f); high-frequency emphasis. One of the five colours validated in Ferri et al. (2015) Experiment 1.">Blue</button>
+                      <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="violet" data-noise-hint="Violet noise - power rises ~6 dB/octave (f^2), the derivative of white noise. Validated in Ferri et al. (2015); its valence differed from white.">Violet</button>
+                      <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="brown" data-noise-hint="Brown noise - power falls ~6 dB/octave (1/f^2); low rumble. Ferri et al. (2015) used it as the negative-valence sound, which expanded peripersonal space.">Brown</button>
                     </div>
                   </div>
                 </div>
@@ -1165,7 +1165,7 @@
       </form>
     </div>
   </div>
-  <script src="hardware_pixel_art.js?v=20260701-noise-quick-picks-lock"></script>
-  <script src="app.js?v=20260701-noise-quick-picks-lock"></script>
+  <script src="hardware_pixel_art.js?v=20260703-runner-gui-compat"></script>
+  <script src="app.js?v=20260703-runner-gui-compat"></script>
 </body>
 </html>

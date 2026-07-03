@@ -3210,6 +3210,81 @@ def test_focus_mode_validation_synthetic_click_shortcut_is_opt_in(tmp_path: Path
     window.dialog.close()
 
 
+def test_focus_mode_mouse_area_lock_chord_toggles_and_releases_on_close(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_focus_preview_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+    )
+    window.dialog.show()
+    app.processEvents()
+
+    calls: list[str] = []
+    monkeypatch.setattr(focus_app.sys, "platform", "win32")
+    monkeypatch.setattr(focus_app, "_append_output_diary_event", lambda event_type, **_kwargs: calls.append(event_type))
+    monkeypatch.setattr(window, "_apply_mouse_area_clip", lambda: calls.append("apply_clip") or True)
+    monkeypatch.setattr(window, "_release_mouse_area_clip", lambda: calls.append("release_clip"))
+    monkeypatch.setattr(window, "_move_os_cursor_to_global_center", lambda *_args: calls.append("move_cursor") or "test")
+
+    ctrl = q["Qt"].KeyboardModifier.ControlModifier
+    keys = q["Qt"].Key
+
+    class FakeKeyEvent:
+        def __init__(self, key, *, modifiers=ctrl, auto_repeat: bool = False):
+            self._key = key
+            self._modifiers = modifiers
+            self._auto_repeat = auto_repeat
+
+        def isAutoRepeat(self) -> bool:  # noqa: N802 - Qt API shape
+            return self._auto_repeat
+
+        def key(self):
+            return self._key
+
+        def modifiers(self):
+            return self._modifiers
+
+    for key in (keys.Key_A, keys.Key_S, keys.Key_D):
+        window._handle_mouse_lock_chord_event(FakeKeyEvent(key), True)
+    assert window._mouse_area_lock_active is True
+    assert "mouse_area_lock_enabled" in calls
+    assert calls.count("apply_clip") == 1
+
+    window._handle_mouse_lock_chord_event(FakeKeyEvent(keys.Key_D), True)
+    assert calls.count("mouse_area_lock_enabled") == 1
+
+    for key in (keys.Key_A, keys.Key_S, keys.Key_D):
+        window._handle_mouse_lock_chord_event(FakeKeyEvent(key), False)
+    for key in (keys.Key_A, keys.Key_S, keys.Key_D):
+        window._handle_mouse_lock_chord_event(FakeKeyEvent(key), True)
+
+    assert window._mouse_area_lock_active is False
+    assert "mouse_area_lock_disabled" in calls
+    assert "release_clip" in calls
+
+    calls.clear()
+    for key in (keys.Key_A, keys.Key_S, keys.Key_D):
+        window._handle_mouse_lock_chord_event(FakeKeyEvent(key), False)
+    for key in (keys.Key_A, keys.Key_S, keys.Key_D):
+        window._handle_mouse_lock_chord_event(FakeKeyEvent(key), True)
+    assert window._mouse_area_lock_active is True
+
+    window._handle_dialog_finished(0)
+    assert window._mouse_area_lock_active is False
+    assert "mouse_area_lock_disabled" in calls
+    window.dialog.close()
+
+
 def test_focus_mode_hardware_start_injects_ui_thread_audio_engine(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:

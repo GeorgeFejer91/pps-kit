@@ -2,6 +2,34 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-07-03
+
+- Focus Mode now exposes a software cursor-confinement shortcut for the
+  response target: holding `Ctrl+A+S+D` toggles a Windows `ClipCursor` lock
+  around the visible click target, logs `mouse_area_lock_enabled` /
+  `mouse_area_lock_disabled` diary events, and releases the clip from both the
+  normal close path and the common dialog-finished cleanup path. The shortcut
+  is advertised in the runner keyboard map as a held chord rather than a
+  `QShortcut`; `PPSExperimentRunner.exe` was rebuilt and its packaged Qt
+  runtime/help route was verified after the source change.
+- Breathing-instruction template decoding now accepts tracked WAV templates
+  directly as well as MP3-backed templates, avoiding an FFmpeg dependency for
+  the current Study 5 original instruction assets. The decoder test
+  `tests/test_decoder_audio_templates.py` pins the WAV path.
+- The HTML dashboard and hosted/static wrappers now use the synchronized cache
+  token `20260703-runner-gui-compat` for the package dashboard, root Pages
+  wrapper, `/documentation`, and `/download`. Segment 1 noise quick-picks now
+  carry Ferri-style spectrum/valence hover text and calmer colored tints, the
+  read-only profile mode button is labelled `Customize` with dialog semantics,
+  read-only composition meters no longer draw a fake draggable thumb, and
+  required workflow badges summarize missing upstream gates without adding
+  nested segment scrollbars.
+- The release/privacy audit now hash-pins the intentionally tracked Springer
+  Nature BRM template ZIP
+  `publication/behavior-research-methods/springer-nature-latex-template-dec-2024.zip`
+  as the only allowed public ZIP archive. `tools/check_all.ps1 -Tier Quick`
+  passes with that documented publication-workspace exception.
+
 ## 2026-07-02
 
 - Added optional Focus Mode split-part labels for prepared Part 01 and Part 02
