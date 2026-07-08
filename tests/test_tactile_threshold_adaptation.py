@@ -38,15 +38,38 @@ def test_adaptive_tactile_threshold_raises_after_every_two_misses() -> None:
     assert controller.summary()["adjustment_count"] == 2
 
 
-def test_adaptive_tactile_threshold_caps_at_output_34_max() -> None:
-    controller = AdaptiveTactileThresholdController(initial_output_34_percent=0.495)
+def test_adaptive_tactile_threshold_expands_software_ceiling_after_old_max() -> None:
+    controller = AdaptiveTactileThresholdController(initial_output_34_percent=0.7)
 
     first = controller.observe_missed_entries([_miss(1), _miss(2)])
     second = controller.observe_missed_entries([_miss(1), _miss(2), _miss(3), _miss(4)])
 
-    assert first[0]["new_output_34_percent"] == pytest.approx(0.5)
+    assert first[0]["new_output_34_percent"] == pytest.approx(0.71)
+    assert first[0]["final_software_ceiling_output_34_percent"] == pytest.approx(0.71)
+    assert second[0]["new_output_34_percent"] == pytest.approx(0.72)
+    summary = controller.summary()
+    assert summary["final_output_34_percent"] == pytest.approx(0.72)
+    assert summary["initial_software_ceiling_output_34_percent"] == pytest.approx(0.7)
+    assert summary["final_software_ceiling_output_34_percent"] == pytest.approx(0.72)
+    assert summary["dynamic_ceiling_expansion_count"] == 2
+    assert summary["suppressed_at_cap_count"] == 0
+    assert summary["suppressed_at_hard_guard_count"] == 0
+    assert summary["capped_at_max"] is False
+
+
+def test_adaptive_tactile_threshold_suppresses_only_at_hard_guard() -> None:
+    controller = AdaptiveTactileThresholdController(initial_output_34_percent=0.995)
+
+    first = controller.observe_missed_entries([_miss(1), _miss(2)])
+    second = controller.observe_missed_entries([_miss(1), _miss(2), _miss(3), _miss(4)])
+
+    assert first[0]["new_output_34_percent"] == pytest.approx(1.0)
+    assert first[0]["final_software_ceiling_output_34_percent"] == pytest.approx(1.0)
     assert second == []
     summary = controller.summary()
-    assert summary["final_output_34_percent"] == pytest.approx(0.5)
+    assert summary["final_output_34_percent"] == pytest.approx(1.0)
+    assert summary["final_software_ceiling_output_34_percent"] == pytest.approx(1.0)
+    assert summary["hard_output_34_guard_percent"] == pytest.approx(1.0)
     assert summary["suppressed_at_cap_count"] == 1
+    assert summary["suppressed_at_hard_guard_count"] == 1
     assert summary["capped_at_max"] is True

@@ -187,6 +187,7 @@ from .tactile_calibration import (
     CONFIRMATION_REQUIRED_CLEAN_CATCHES,
     CONFIRMATION_REQUIRED_CONSECUTIVE_HITS,
     PROTOCOL_NAME as TACTILE_CALIBRATION_PROTOCOL_NAME,
+    TACTILE_OUTPUT_34_HARD_GUARD_PERCENT,
     TACTILE_OUTPUT_34_MAX_PERCENT,
     TactileCalibrationRunner,
     VALID_RESPONSE_END_MS,
@@ -517,7 +518,7 @@ def _coerce_volume_percent(value: Any, *, default: float = 100.0, maximum: float
 
 
 def _coerce_tactile_output_percent(value: Any, *, default: float = TACTILE_OUTPUT_34_MAX_PERCENT) -> float:
-    return _coerce_volume_percent(value, default=default, maximum=TACTILE_OUTPUT_34_MAX_PERCENT)
+    return _coerce_volume_percent(value, default=default, maximum=TACTILE_OUTPUT_34_HARD_GUARD_PERCENT)
 
 
 def _volume_percent_to_slider_value(value: Any, *, maximum: float = 100.0) -> int:
@@ -546,8 +547,10 @@ def _output_channel_volume_payload(output_12_percent: Any, output_34_percent: An
         "output_1_2_percent": output_12,
         "output_3_4_percent": output_34,
         "output_1_2_linear_gain": _output_volume_gain(output_12),
-        "output_3_4_linear_gain": _output_volume_gain(output_34, maximum=TACTILE_OUTPUT_34_MAX_PERCENT),
-        "output_3_4_max_percent": TACTILE_OUTPUT_34_MAX_PERCENT,
+        "output_3_4_linear_gain": _output_volume_gain(output_34, maximum=TACTILE_OUTPUT_34_HARD_GUARD_PERCENT),
+        "output_3_4_max_percent": TACTILE_OUTPUT_34_HARD_GUARD_PERCENT,
+        "output_3_4_initial_software_ceiling_percent": TACTILE_OUTPUT_34_MAX_PERCENT,
+        "output_3_4_hard_guard_percent": TACTILE_OUTPUT_34_HARD_GUARD_PERCENT,
     }
 
 
@@ -2326,7 +2329,7 @@ def _create_tactile_calibration_monitor_dialog(q: dict[str, Any], owner: Any, pa
                 label.setObjectName("metricValue")
                 label.setWordWrap(True)
             self.intensity_bar = q["QProgressBar"]()
-            self.intensity_bar.setRange(0, int(round(TACTILE_OUTPUT_34_MAX_PERCENT * OUTPUT_VOLUME_SLIDER_SCALE)))
+            self.intensity_bar.setRange(0, int(round(TACTILE_OUTPUT_34_HARD_GUARD_PERCENT * OUTPUT_VOLUME_SLIDER_SCALE)))
             self.intensity_bar.setTextVisible(True)
             self.intensity_bar.setValue(0)
             metrics_layout.addWidget(self.intensity_label, 0, 0)
@@ -9025,9 +9028,12 @@ class FocusModeWindow:
             label="Output 3/4",
             value=self.output_34_volume_percent,
             object_name="output34VolumeSlider",
-            tooltip="Linear gain for tactile output 3 and its output 4 mirror. Capped at 0.5% for participant comfort.",
+            tooltip=(
+                "Linear gain for tactile output 3 and its output 4 mirror. "
+                "The software ceiling starts conservatively and can expand up to the hard guard during calibration or missed-trial adaptation."
+            ),
             on_change=lambda value: self._set_output_volume("output_3_4", value),
-            maximum_percent=TACTILE_OUTPUT_34_MAX_PERCENT,
+            maximum_percent=TACTILE_OUTPUT_34_HARD_GUARD_PERCENT,
         )
         output_levels_layout.addWidget(output_12_row)
         output_levels_layout.addWidget(output_34_row)
@@ -9043,7 +9049,7 @@ class FocusModeWindow:
         self.test_tactile_button = q["QPushButton"]("Test Tactile")
         self.test_tactile_button.setObjectName("testTactileOutputButton")
         self.test_tactile_button.setMinimumHeight(output_test_button_min_height)
-        self.test_tactile_button.setToolTip("Play four standardized tactile pulses one second apart through output 3, mirrored to output 4, using the capped current Output 3/4 level.")
+        self.test_tactile_button.setToolTip("Play four standardized tactile pulses one second apart through output 3, mirrored to output 4, using the current Output 3/4 level.")
         self.test_tactile_button.clicked.connect(lambda _checked=False: self._run_output_test("tactile"))
         self.tactile_calibration_button = q["QPushButton"]("Tactile Threshold")
         self.tactile_calibration_button.setObjectName("tactileCalibrationButton")
@@ -9625,6 +9631,12 @@ class FocusModeWindow:
             "adaptive_staircase",
             "staircase_criteria",
             "confirmation_criteria",
+            "max_output_34_percent",
+            "initial_software_ceiling_output_34_percent",
+            "final_software_ceiling_output_34_percent",
+            "hard_output_34_guard_percent",
+            "dynamic_ceiling_expansions",
+            "dynamic_ceiling_expansion_count",
             "report_path",
             "trials_csv_path",
             "latest_path",
@@ -9642,7 +9654,25 @@ class FocusModeWindow:
                 except (TypeError, ValueError):
                     payload[percent_key] = payload.get(percent_key, "")
         if payload:
-            payload["max_output_34_percent"] = TACTILE_OUTPUT_34_MAX_PERCENT
+            final_ceiling = payload.get("final_software_ceiling_output_34_percent", payload.get("max_output_34_percent", ""))
+            try:
+                final_ceiling = _coerce_tactile_output_percent(float(final_ceiling))
+            except (TypeError, ValueError):
+                try:
+                    recommended = float(payload.get("recommended_output_34_percent", 0.0) or 0.0)
+                except (TypeError, ValueError):
+                    recommended = 0.0
+                final_ceiling = max(TACTILE_OUTPUT_34_MAX_PERCENT, recommended)
+                final_ceiling = _coerce_tactile_output_percent(final_ceiling)
+            payload["max_output_34_percent"] = final_ceiling
+            payload["final_software_ceiling_output_34_percent"] = final_ceiling
+            initial_ceiling = payload.get("initial_software_ceiling_output_34_percent", TACTILE_OUTPUT_34_MAX_PERCENT)
+            try:
+                initial_ceiling = _coerce_tactile_output_percent(float(initial_ceiling))
+            except (TypeError, ValueError):
+                initial_ceiling = TACTILE_OUTPUT_34_MAX_PERCENT
+            payload["initial_software_ceiling_output_34_percent"] = initial_ceiling
+            payload["hard_output_34_guard_percent"] = TACTILE_OUTPUT_34_HARD_GUARD_PERCENT
         return payload
 
     def _apply_latest_tactile_calibration(self, participant_id: str | None = None, *, show_message: bool = True) -> bool:
@@ -9664,7 +9694,9 @@ class FocusModeWindow:
             ):
                 if percent_key in self._latest_tactile_calibration:
                     self._latest_tactile_calibration[percent_key] = percent
-            self._latest_tactile_calibration["max_output_34_percent"] = TACTILE_OUTPUT_34_MAX_PERCENT
+            self._latest_tactile_calibration["max_output_34_percent"] = percent
+            self._latest_tactile_calibration["final_software_ceiling_output_34_percent"] = percent
+            self._latest_tactile_calibration["hard_output_34_guard_percent"] = TACTILE_OUTPUT_34_HARD_GUARD_PERCENT
         self._set_output_volume("output_3_4", percent)
         if show_message and hasattr(self, "event_label"):
             if percent != raw_percent:
@@ -12058,7 +12090,7 @@ class FocusModeWindow:
         if engine is None:
             return
         audio_gain = _output_volume_gain(self.output_12_volume_percent)
-        tactile_gain = _output_volume_gain(self.output_34_volume_percent, maximum=TACTILE_OUTPUT_34_MAX_PERCENT)
+        tactile_gain = _output_volume_gain(self.output_34_volume_percent, maximum=TACTILE_OUTPUT_34_HARD_GUARD_PERCENT)
         setter = getattr(engine, "set_main_volume", None)
         if callable(setter):
             try:
@@ -12086,7 +12118,7 @@ class FocusModeWindow:
             if hasattr(self, "output_34_volume_slider"):
                 previous = self.output_34_volume_slider.blockSignals(True)
                 self.output_34_volume_slider.setValue(
-                    _volume_percent_to_slider_value(percent, maximum=TACTILE_OUTPUT_34_MAX_PERCENT)
+                    _volume_percent_to_slider_value(percent, maximum=TACTILE_OUTPUT_34_HARD_GUARD_PERCENT)
                 )
                 self.output_34_volume_slider.blockSignals(previous)
             if hasattr(self, "output_34_volume_percent_box"):

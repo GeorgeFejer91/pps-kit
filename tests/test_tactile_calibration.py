@@ -29,6 +29,7 @@ from peripersonal_space_toolkit.tactile_calibration.schema import (
     STAIRCASE_MIN_CATCH_TRIALS,
     STAIRCASE_STOP_REVERSALS,
     STAIRCASE_TARGET_DETECTION_RATE,
+    TACTILE_OUTPUT_34_HARD_GUARD_PERCENT,
     TACTILE_OUTPUT_34_MAX_PERCENT,
     VALID_RESPONSE_END_MS,
     VALID_RESPONSE_START_MS,
@@ -198,7 +199,7 @@ def _run_protocol(tmp_path: Path, collector: _ScriptedCollector) -> dict:
         participant_id="P001",
         output_root=tmp_path,
         source_pulse_path=DEFAULT_TACTILE_CUE,
-        current_output_34_percent=40.0,
+        current_output_34_percent=0.4,
         rng_seed=123,
     )
     return runner.run()
@@ -214,10 +215,15 @@ def test_tactile_calibration_protocol_accepts_adaptive_staircase_threshold(tmp_p
     assert report["protocol"] == PROTOCOL_NAME
     assert report["threshold_method"] == "two_down_one_up_transformed_adaptive_staircase_with_catches"
     assert 0.075 <= threshold <= 0.1
-    assert threshold <= final <= TACTILE_OUTPUT_34_MAX_PERCENT
+    assert threshold <= final <= report["max_output_34_percent"] <= TACTILE_OUTPUT_34_HARD_GUARD_PERCENT
     assert report["recommended_output_34_percent"] == pytest.approx(report["final_output_34_percent"])
     assert report["max_output_34_percent"] == pytest.approx(TACTILE_OUTPUT_34_MAX_PERCENT)
+    assert report["initial_software_ceiling_output_34_percent"] == pytest.approx(TACTILE_OUTPUT_34_MAX_PERCENT)
+    assert report["final_software_ceiling_output_34_percent"] == pytest.approx(TACTILE_OUTPUT_34_MAX_PERCENT)
+    assert report["hard_output_34_guard_percent"] == pytest.approx(TACTILE_OUTPUT_34_HARD_GUARD_PERCENT)
+    assert report["dynamic_ceiling_expansion_count"] == 0
     assert report["search_levels_percent"] == pytest.approx(list(SEARCH_LEVELS_PERCENT))
+    assert report["staircase_levels_percent"][-1] == pytest.approx(TACTILE_OUTPUT_34_MAX_PERCENT)
     assert report["adaptive_staircase"]["target_detection_rate"] == pytest.approx(STAIRCASE_TARGET_DETECTION_RATE)
     assert report["adaptive_staircase"]["valid_response_start_ms"] == pytest.approx(VALID_RESPONSE_START_MS)
     assert report["adaptive_staircase"]["valid_response_end_ms"] == pytest.approx(VALID_RESPONSE_END_MS)
@@ -239,6 +245,22 @@ def test_tactile_calibration_protocol_accepts_adaptive_staircase_threshold(tmp_p
     jittered = [trial["inter_trial_interval_ms"] for trial in result["trials"] if trial["phase"] == "staircase"]
     assert jittered
     assert all(INTER_TRIAL_INTERVAL_MIN_MS <= float(value) <= INTER_TRIAL_INTERVAL_MAX_MS for value in jittered)
+
+
+def test_tactile_calibration_expands_software_ceiling_above_initial_max(tmp_path: Path):
+    result = _run_protocol(tmp_path, _ScriptedCollector(detection_threshold=0.82))
+
+    report = result["report"]
+    assert report["accepted"] is True
+    assert float(report["final_output_34_percent"]) >= 0.82
+    assert report["initial_software_ceiling_output_34_percent"] == pytest.approx(TACTILE_OUTPUT_34_MAX_PERCENT)
+    assert report["final_software_ceiling_output_34_percent"] > TACTILE_OUTPUT_34_MAX_PERCENT
+    assert report["max_output_34_percent"] == pytest.approx(report["final_software_ceiling_output_34_percent"])
+    assert report["hard_output_34_guard_percent"] == pytest.approx(TACTILE_OUTPUT_34_HARD_GUARD_PERCENT)
+    assert report["dynamic_ceiling_expansion_count"] == len(report["dynamic_ceiling_expansions"])
+    assert report["dynamic_ceiling_expansion_count"] > 0
+    assert max(report["staircase_levels_percent"]) > TACTILE_OUTPUT_34_MAX_PERCENT
+    assert max(trial["level_percent"] for trial in result["trials"]) > TACTILE_OUTPUT_34_MAX_PERCENT
 
 
 def test_tactile_calibration_protocol_tracks_lower_thresholds(tmp_path: Path):
@@ -353,8 +375,9 @@ def test_tactile_calibration_protocol_fails_without_any_detection(tmp_path: Path
     report = result["report"]
     assert report["accepted"] is False
     assert report["final_output_34_percent"] == ""
-    assert report["status"] == "failed_no_detection_at_max"
-    assert "did not report" in report["message"]
+    assert report["status"] == "failed_no_detection_at_hard_guard"
+    assert "hard safety guard" in report["message"]
+    assert report["final_software_ceiling_output_34_percent"] == pytest.approx(TACTILE_OUTPUT_34_HARD_GUARD_PERCENT)
 
 
 def test_latest_calibration_json_is_small_summary(tmp_path: Path):
@@ -365,10 +388,23 @@ def test_latest_calibration_json_is_small_summary(tmp_path: Path):
         "protocol": PROTOCOL_NAME,
         "accepted": True,
         "status": "accepted",
-        "final_output_34_percent": 50.01,
-        "detection_threshold_output_34_percent": 50.0,
-        "recommended_output_34_percent": 50.01,
-        "confirmation_level_output_34_percent": 50.01,
+        "final_output_34_percent": 0.82,
+        "detection_threshold_output_34_percent": 0.81,
+        "recommended_output_34_percent": 0.82,
+        "confirmation_level_output_34_percent": 0.82,
+        "max_output_34_percent": 0.82,
+        "initial_software_ceiling_output_34_percent": 0.7,
+        "final_software_ceiling_output_34_percent": 0.82,
+        "hard_output_34_guard_percent": 1.0,
+        "dynamic_ceiling_expansions": [
+            {
+                "index": 1,
+                "old_software_ceiling_output_34_percent": 0.7,
+                "new_software_ceiling_output_34_percent": 0.82,
+                "hard_output_34_guard_percent": 1.0,
+            }
+        ],
+        "dynamic_ceiling_expansion_count": 1,
         "adaptive_staircase": {
             "target_detection_rate": STAIRCASE_TARGET_DETECTION_RATE,
             "stop_reversals": STAIRCASE_STOP_REVERSALS,
@@ -401,8 +437,8 @@ def test_latest_calibration_json_is_small_summary(tmp_path: Path):
             "false_alarms": 0,
             "catch_trials": STAIRCASE_MIN_CATCH_TRIALS,
             "reversals": STAIRCASE_STOP_REVERSALS,
-            "reversal_levels_percent": [70.0, 50.0, 35.0, 50.0, 35.0, 50.0],
-            "reversal_levels_used_percent": [35.0, 50.0, 35.0, 50.0],
+            "reversal_levels_percent": [0.7, 0.5, 0.35, 0.5, 0.35, 0.5],
+            "reversal_levels_used_percent": [0.35, 0.5, 0.35, 0.5],
             "hit_rate": 16 / 22,
             "false_alarm_rate": 0.0,
         },
@@ -417,9 +453,15 @@ def test_latest_calibration_json_is_small_summary(tmp_path: Path):
 
     latest_payload = json.loads(latest_calibration_path(tmp_path, "P002").read_text(encoding="utf-8"))
     assert latest_payload["schema"] == LATEST_CALIBRATION_SCHEMA
-    assert latest_payload["final_output_34_percent"] == 50.01
-    assert latest_payload["recommended_output_34_percent"] == 50.01
-    assert latest_payload["detection_threshold_output_34_percent"] == 50.0
+    assert latest_payload["final_output_34_percent"] == 0.82
+    assert latest_payload["recommended_output_34_percent"] == 0.82
+    assert latest_payload["detection_threshold_output_34_percent"] == 0.81
+    assert latest_payload["max_output_34_percent"] == 0.82
+    assert latest_payload["initial_software_ceiling_output_34_percent"] == 0.7
+    assert latest_payload["final_software_ceiling_output_34_percent"] == 0.82
+    assert latest_payload["hard_output_34_guard_percent"] == 1.0
+    assert latest_payload["dynamic_ceiling_expansion_count"] == 1
+    assert latest_payload["dynamic_ceiling_expansions"][0]["new_software_ceiling_output_34_percent"] == 0.82
     assert latest_payload["staircase_reversals"] == STAIRCASE_STOP_REVERSALS
     assert latest_payload["staircase_target_detection_rate"] == pytest.approx(STAIRCASE_TARGET_DETECTION_RATE)
     assert latest_payload["staircase_signal_trials"] == 22

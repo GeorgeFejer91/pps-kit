@@ -811,12 +811,12 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.output_12_volume_slider.minimum() == 0
     assert window.output_12_volume_slider.maximum() == 100_000
     assert window.output_34_volume_slider.minimum() == 0
-    assert window.output_34_volume_slider.maximum() == 500
+    assert window.output_34_volume_slider.maximum() == 1000
     assert window.output_12_volume_percent_box.objectName() == "output12VolumePercentBox"
     assert window.output_34_volume_percent_box.objectName() == "output34VolumePercentBox"
     assert window.output_34_volume_percent_box.decimals() == 3
     assert window.output_34_volume_percent_box.singleStep() == pytest.approx(0.001)
-    assert window.output_34_volume_percent_box.maximum() == pytest.approx(0.5)
+    assert window.output_34_volume_percent_box.maximum() == pytest.approx(1.0)
     assert window.test_audio_button.objectName() == "testAudioOutputButton"
     assert window.test_tactile_button.objectName() == "testTactileOutputButton"
     assert window.tactile_calibration_button.objectName() == "tactileCalibrationButton"
@@ -1542,17 +1542,18 @@ def test_focus_mode_loads_participant_tactile_calibration_into_output_field(tmp_
     window.dialog.show()
     app.processEvents()
 
-    assert window.output_34_volume_percent == pytest.approx(0.5)
-    assert window.output_34_volume_percent_box.value() == pytest.approx(0.5)
-    assert "tactile threshold 0.5%" in window.participant_status_summary_label.text()
+    assert window.output_34_volume_percent == pytest.approx(1.0)
+    assert window.output_34_volume_percent_box.value() == pytest.approx(1.0)
+    assert "tactile threshold 1%" in window.participant_status_summary_label.text()
     metadata = window._runner_metadata()
-    assert metadata["tactile_calibration"]["final_output_34_percent"] == pytest.approx(0.5)
-    assert metadata["tactile_calibration"]["recommended_output_34_percent"] == pytest.approx(0.5)
-    assert metadata["tactile_calibration"]["max_output_34_percent"] == pytest.approx(0.5)
+    assert metadata["tactile_calibration"]["final_output_34_percent"] == pytest.approx(1.0)
+    assert metadata["tactile_calibration"]["recommended_output_34_percent"] == pytest.approx(1.0)
+    assert metadata["tactile_calibration"]["max_output_34_percent"] == pytest.approx(1.0)
+    assert metadata["tactile_calibration"]["hard_output_34_guard_percent"] == pytest.approx(1.0)
 
     _fill_required_setup(window)
     assert window._submit_participant_setup()
-    assert created[-1]["tactile_calibration"]["final_output_34_percent"] == pytest.approx(0.5)
+    assert created[-1]["tactile_calibration"]["final_output_34_percent"] == pytest.approx(1.0)
     assert window.tactile_calibration_button.isEnabled()
     window.dialog.close()
 
@@ -1952,20 +1953,20 @@ def test_focus_mode_adaptive_threshold_progress_updates_live_output_without_savi
         {
             "ui_event": "tactile_threshold_adapted",
             "old_output_34_percent": 0.35,
-            "new_output_34_percent": 0.36,
+            "new_output_34_percent": 0.82,
             "triggering_miss_count": 2,
-            "message": "Tactile threshold nudged to Output 3/4 0.36% after 2 tactile misses.",
+            "message": "Tactile threshold nudged to Output 3/4 0.82% after 2 tactile misses.",
         }
     )
     app.processEvents()
 
-    assert window.output_34_volume_percent == pytest.approx(0.36)
-    assert window.output_34_volume_percent_box.value() == pytest.approx(0.36)
-    assert engine.tactile_volume == pytest.approx(0.0036)
+    assert window.output_34_volume_percent == pytest.approx(0.82)
+    assert window.output_34_volume_percent_box.value() == pytest.approx(0.82)
+    assert engine.tactile_volume == pytest.approx(0.0082)
     assert window._latest_tactile_calibration["recommended_output_34_percent"] == pytest.approx(0.35)
     settings = json.loads((state_root / "focus_runner_settings.v1.json").read_text(encoding="utf-8"))
     assert settings["output_3_4_volume_percent"] == pytest.approx(0.35)
-    assert "0.36%" in window.event_label.text()
+    assert "0.82%" in window.event_label.text()
     window.dialog.close()
 
 
@@ -2020,14 +2021,14 @@ def test_focus_mode_output_test_buttons_use_standard_assets_and_current_gains(tm
 
     window.output_12_volume_percent_box.setValue(41)
     window.output_34_volume_percent_box.setValue(23)
-    assert window.output_34_volume_percent_box.value() == pytest.approx(0.5)
+    assert window.output_34_volume_percent_box.value() == pytest.approx(1.0)
     QTest.mouseClick(window.test_audio_button, q["Qt"].MouseButton.LeftButton)
     app.processEvents()
     window._drain()
 
     assert engine.instruction_paths == [str(focus_app.OUTPUT_TEST_AUDIO_PATH)]
     assert engine.audio_volume == pytest.approx(0.41)
-    assert engine.tactile_volume == pytest.approx(0.005)
+    assert engine.tactile_volume == pytest.approx(0.01)
     assert window.test_audio_button.isEnabled()
     assert "Test Audio complete" in window.event_label.text()
 
