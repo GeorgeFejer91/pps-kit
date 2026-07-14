@@ -1,6 +1,6 @@
 {
   "schema": "pps-audiotactile-literature-coverage.v1",
-  "generated_on": "2026-06-13",
+  "generated_on": "2026-07-15",
   "audit_scope": {
     "include": "Published tasks that use auditory and tactile stimuli to estimate or probe peripersonal-space related audio-tactile integration.",
     "exclude": "Clinical population labels, intervention labels, social/mannequin/VR/locomotion context, and extra non-audiotactile manipulations are not blockers unless they change the auditory stimulus, tactile stimulus, response, timing, trial design, spatial geometry, or apparatus used by the PPS task.",
@@ -106,6 +106,17 @@
       "date_run": "2026-06-13",
       "screening_file": "assets/preloads/audiotactile_web_sanity_screening.json",
       "relevance": "Manual live-web sanity screen for newly visible search hits, current PDFs, and adjacent auditory-only PPS records."
+    },
+    {
+      "id": "consensus_mcp_spot_check_2026_07_15",
+      "kind": "consensus_mcp_spot_check",
+      "queries": [
+        "audio tactile peripersonal space looming sound tactile reaction time",
+        "audiotactile peripersonal space auditory tactile integration boundary looming",
+        "peripersonal space auditory tactile dynamic sounds tool use social audio tactile task"
+      ],
+      "date_run": "2026-07-15",
+      "relevance": "Spot-check against Consensus MCP after the profile library reached 23 preloads. The returned methodological families matched the tracked audit scope: dynamic looming, direction/body-frame, social/tool-use, VR/3D boundary, emotional/roughness, mobile/smartphone, EEG/ERP/static near-far, and adjacent auditory-only or visual/audiovisual records. This spot-check did not replace the 74-record source audit or resolve missing PDFs/supplements."
     }
   ],
   "coverage_summary": {
@@ -119,9 +130,10 @@
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
-    "current_template_count": 22,
-    "current_profile_check_pass_count": 8,
+    "current_template_count": 23,
+    "current_profile_check_pass_count": 9,
     "published_profile_check_pass_count": 7,
+    "local_unpublished_profile_check_pass_count": 2,
     "current_templates_with_missing_publication_parameters": 12,
     "current_templates_with_toolkit_structural_gaps": 7,
     "holmes_2020_reported_articles": 23,
@@ -498,6 +510,12 @@
     {
       "template_id": "pfeiffer_2018_lateral_perihead_left_to_right",
       "published": true,
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": []
+    },
+    {
+      "template_id": "study5_dynaspace_lateral_45_pps",
+      "published": false,
       "current_recreation_category": "gui_recreatable",
       "primary_constraint_ids": []
     },

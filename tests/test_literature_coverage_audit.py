@@ -42,9 +42,12 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
-    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 22
-    assert coverage["coverage_summary"]["current_profile_check_pass_count"] == 8
+    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 23
+    assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
+        status["categories"]["gui_recreatable"]
+    ) == 9
     assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 7
+    assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
     assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 7
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
     assert coverage["coverage_summary"]["openalex_broad_candidate_like_hits"] == 103
@@ -100,10 +103,24 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         == "assets/preloads/audiotactile_web_sanity_screening.json"
         for source in coverage["evidence_sources"]
     )
+    assert any(
+        source.get("id") == "consensus_mcp_spot_check_2026_07_15"
+        and source.get("kind") == "consensus_mcp_spot_check"
+        and len(source.get("queries") or []) == 3
+        for source in coverage["evidence_sources"]
+    )
 
     status_ids = {profile["template_id"] for profile in status["profiles"]}
     coverage_ids = {entry["template_id"] for entry in coverage["current_template_coverage"]}
     assert coverage_ids == status_ids
+
+    by_template = {entry["template_id"]: entry for entry in coverage["current_template_coverage"]}
+    assert by_template["study5_dynaspace_lateral_45_pps"] == {
+        "template_id": "study5_dynaspace_lateral_45_pps",
+        "published": False,
+        "current_recreation_category": "gui_recreatable",
+        "primary_constraint_ids": [],
+    }
 
     published_ready = [
         entry
