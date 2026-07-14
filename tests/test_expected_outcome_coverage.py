@@ -17,21 +17,28 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "cell_reports_medicine_2026_consciousness",
     "disorders_consciousness_2019",
     "farne_ladavas_2002_auditory_pps_humans",
+    "ferri_2015_artificial_valence",
+    "ferri_2015_ecological_valence",
     "finisguerra_2015_moving_sounds_motor",
     "ieeg_trunk_2018",
     "lamia_2026_arm_movement",
     "matsuda_2021_four_directions",
+    "mindfulness_pps_2024",
     "noel_2015_bodily_self",
     "pfeiffer_2018_vestibular",
     "ronga_2021_newborn_erp",
+    "schizophrenia_tool_use_2022",
     "serino_2007_blind_cane_users",
     "serino_2015_exps_4_to_6",
     "serino_2015_front_back_trunk_exp2",
     "serino_2015_peri_hand_exp3",
     "serino_2015_peri_trunk_exp1",
     "smartphone_rt_methods_2025",
+    "social_coding_2019",
     "taffou_2021_auditory_roughness",
     "tajadura_jimenez_2009_visual_deprivation",
+    "teneggi_2013_social_face",
+    "teraoka_2024_front_rear",
     "tonelli_2019_echolocation",
 }
 
@@ -83,8 +90,8 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
     assert structured_ids == STRUCTURED_EXPECTED_OUTCOME_IDS
     assert outcome["summary"] == {
         "literature_record_count": 74,
-        "structured_expected_outcome_record_count": 21,
-        "pending_expected_outcome_record_count": 49,
+        "structured_expected_outcome_record_count": 28,
+        "pending_expected_outcome_record_count": 42,
         "adjacent_or_out_of_scope_record_count": 4,
         "runnable_profile_parameter_record_count": 6,
         "observed_behavioral_comparison_record_count": 0,
@@ -93,10 +100,9 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {
             "main_pdf_unavailable_or_paywalled": 24,
-            "manual_review_needs_results_direction_structuring": 1,
             "manual_review_partial_or_supplement_blocked": 1,
-            "needs_user_pdf_download": 9,
-            "source_mined_needs_results_visual_review": 14,
+            "needs_user_pdf_download": 4,
+            "source_mined_needs_results_visual_review": 13,
         },
     }
 
@@ -143,12 +149,8 @@ def test_expected_outcome_pending_blockers_are_actionable():
         if record["expected_outcome_status"] == "pending_expected_outcome_extraction"
     ]
     blocker_total = sum(outcome["summary"]["pending_expected_outcome_blocker_counts"].values())
-    assert blocker_total == len(pending_records) == 49
+    assert blocker_total == len(pending_records) == 42
 
-    assert (
-        records["mindfulness_pps_2024"]["expected_outcome_extraction_blocker"]
-        == "manual_review_needs_results_direction_structuring"
-    )
     assert records["depersonalisation_2024"]["expected_outcome_extraction_blocker"] == (
         "manual_review_partial_or_supplement_blocked"
     )
@@ -168,6 +170,18 @@ def test_expected_outcome_pending_blockers_are_actionable():
         "high_confidence_extraction"
     )
 
+    mindfulness = records["mindfulness_pps_2024"]
+    assert mindfulness["expected_outcome_status"] == "structured_expected_outcome_extracted"
+    assert mindfulness["expected_outcome"]["expected_effect_direction"] == (
+        "fam_reduces_pps_boundary_sharpness_without_extension_reduction"
+    )
+
+    front_rear = records["teraoka_2024_front_rear"]
+    assert front_rear["expected_outcome_status"] == "structured_expected_outcome_extracted"
+    assert front_rear["expected_outcome"]["expected_effect_direction"] == (
+        "rear_space_audio_tactile_facilitation_exceeds_front_space"
+    )
+
 
 def test_expected_outcome_blocked_and_adjacent_records_do_not_claim_observed_comparison():
     outcome = json.loads(OUTCOME_PATH.read_text(encoding="utf-8"))
@@ -176,8 +190,8 @@ def test_expected_outcome_blocked_and_adjacent_records_do_not_claim_observed_com
     for record_id in [
         "canzoneri_2013_tool_use_reshaping",
         "canzoneri_2013_amputation_prosthesis",
-        "ferri_2015_artificial_valence",
         "hobeika_2020_methods",
+        "amemiya_2017_pseudowalking_footsole",
     ]:
         record = records[record_id]
         assert record["runnable_status"] != "runnable_profile_parameters_ready"
@@ -207,7 +221,9 @@ def test_expected_outcome_blocked_and_adjacent_records_do_not_claim_observed_com
     adjacent = records["barumerli_2026_semantic_looming_auditory_only"]
     assert adjacent["expected_outcome_status"] == "adjacent_out_of_scope"
     assert adjacent["observed_vs_expected_status"] == "adjacent_not_applicable"
-    assert adjacent["required_next_evidence"] == "No outcome comparison required unless the record is reclassified as in scope."
+    assert adjacent["required_next_evidence"] == (
+        "No outcome comparison required unless the record is reclassified as in scope."
+    )
 
 
 def test_expected_outcome_current_observed_evidence_is_software_only():

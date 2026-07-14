@@ -345,6 +345,116 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
             "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#tonelli_2019_echolocation",
         ],
     },
+    "mindfulness_pps_2024": {
+        "outcome_family": "focused_attention_meditation_pps_boundary_sharpness_reduction",
+        "primary_expected_effect": (
+            "A 15-minute focused-attention meditation induction is expected to "
+            "reduce the sharpness of the PPS boundary without producing a "
+            "significant reduction in PPS extension."
+        ),
+        "expected_effect_direction": "fam_reduces_pps_boundary_sharpness_without_extension_reduction",
+        "observable_metric": "PPS psychometric boundary sharpness/slope and extension before versus after FAM",
+        "condition_contrast": "pre- versus post-focused-attention meditation audio-tactile PPS task",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/mindfulness_pps_2024.json",
+            "Consensus MCP 2026-07-15 query: Mindfulness and peripersonal space boundaries 2024 audio tactile PPS",
+        ],
+    },
+    "schizophrenia_tool_use_2022": {
+        "outcome_family": "tool_use_pps_plasticity_in_schizophrenia",
+        "primary_expected_effect": (
+            "Schizophrenia patients are expected to show narrower baseline PPS "
+            "extent and shallower boundary slope than controls, while tool-use "
+            "training expands PPS in both groups and sharpens patients' boundary "
+            "demarcation after training."
+        ),
+        "expected_effect_direction": "tool_use_expands_pps_with_scz_baseline_narrowing",
+        "observable_metric": "PPS size/boundary and psychometric slope before and after tool-use training",
+        "condition_contrast": "schizophrenia versus healthy controls, pre/post tool-use sessions",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#schizophrenia_tool_use_2022",
+            "Consensus MCP 2026-07-15 query: Mindfulness and peripersonal space boundaries 2024 audio tactile PPS",
+        ],
+    },
+    "social_coding_2019": {
+        "outcome_family": "collaboration_selective_pps_boundary_extension",
+        "primary_expected_effect": (
+            "Collaborative social interaction is expected to extend PPS boundaries "
+            "in the right hemispace, whereas competitive or inactive social "
+            "contexts are not expected to produce the same boundary modulation."
+        ),
+        "expected_effect_direction": "collaboration_extends_right_hemispace_pps",
+        "observable_metric": "PPS boundary estimate by social context and hemispace",
+        "condition_contrast": "collaborative dyad versus competitive dyad versus inactive-person context",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#social_coding_2019",
+            "Consensus MCP 2026-07-15 query: Mindfulness and peripersonal space boundaries 2024 audio tactile PPS",
+        ],
+    },
+    "teneggi_2013_social_face": {
+        "outcome_family": "social_context_modulation_of_face_pps_boundaries",
+        "primary_expected_effect": (
+            "Face-centered PPS boundaries are expected to shrink when another "
+            "person is faced in far space compared with a mannequin, and to merge "
+            "between self and other after cooperative interaction."
+        ),
+        "expected_effect_direction": "social_presence_shrinks_and_cooperation_merges_face_pps",
+        "observable_metric": "critical auditory distance where looming/receding sounds facilitate face tactile RT",
+        "condition_contrast": (
+            "person versus mannequin and cooperative versus noncooperative "
+            "post-game partner contexts"
+        ),
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#teneggi_2013_social_face",
+            "Consensus MCP 2026-07-15 query: Mindfulness and peripersonal space boundaries 2024 audio tactile PPS",
+        ],
+    },
+    "ferri_2015_artificial_valence": {
+        "outcome_family": "negative_valence_expansion_of_artificial_sound_pps",
+        "primary_expected_effect": (
+            "Artificial approaching sounds with negative emotional valence are "
+            "expected to yield a larger PPS boundary than neutral artificial "
+            "approaching sounds."
+        ),
+        "expected_effect_direction": "negative_artificial_sounds_expand_pps_boundary",
+        "observable_metric": "PPS boundary/RT facilitation curve by artificial sound valence",
+        "condition_contrast": "negative versus neutral artificial approaching sound sources",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#ferri_2015_artificial_valence",
+            "Consensus MCP 2026-07-15 query: Mindfulness and peripersonal space boundaries 2024 audio tactile PPS",
+        ],
+    },
+    "ferri_2015_ecological_valence": {
+        "outcome_family": "negative_valence_expansion_of_ecological_sound_pps",
+        "primary_expected_effect": (
+            "Ecological approaching sounds with negative emotional content are "
+            "expected to yield a larger PPS boundary than neutral or positive "
+            "ecological approaching sounds."
+        ),
+        "expected_effect_direction": "negative_ecological_sounds_expand_pps_boundary",
+        "observable_metric": "PPS boundary/RT facilitation curve by ecological sound valence",
+        "condition_contrast": "negative versus neutral and positive ecological approaching sound sources",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#ferri_2015_ecological_valence",
+            "Consensus MCP 2026-07-15 query: Mindfulness and peripersonal space boundaries 2024 audio tactile PPS",
+        ],
+    },
+    "teraoka_2024_front_rear": {
+        "outcome_family": "front_rear_asymmetry_in_audio_tactile_pps_facilitation",
+        "primary_expected_effect": (
+            "Approaching auditory probes are expected to facilitate tactile "
+            "responses more strongly in rear space than in front space, while "
+            "auditory distance and speed perception controls do not explain the "
+            "front/rear difference."
+        ),
+        "expected_effect_direction": "rear_space_audio_tactile_facilitation_exceeds_front_space",
+        "observable_metric": "auditory facilitation effect on vibrotactile detection by front/rear direction",
+        "condition_contrast": "front versus rear approaching auditory probe with tactile-only baseline controls",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#teraoka_2024_front_rear",
+            "Consensus MCP 2026-07-15 query: Mindfulness and peripersonal space boundaries 2024 audio tactile PPS",
+        ],
+    },
 }
 
 
