@@ -337,6 +337,7 @@ def test_expected_outcome_current_observed_evidence_is_software_only():
         "static_dashboard_parity",
         "runner_mock",
         "ready_profile_runner_smoke",
+        "ready_profile_response_marker_loopback",
         "click_path_mock",
         "synthetic_response_marker_loopback",
         "synthetic_expected_outcome_smoke",
@@ -344,6 +345,9 @@ def test_expected_outcome_current_observed_evidence_is_software_only():
     assert evidence["profile_materialization"].endswith("profile_recreation_interface_matrix_report.json")
     assert evidence["runner_mock"].endswith("one_block_trial_runner_report.json")
     assert evidence["ready_profile_runner_smoke"].endswith("ready_profile_runner_smoke_report.json")
+    assert evidence["ready_profile_response_marker_loopback"].endswith(
+        "ready_profile_response_marker_loopback_report.json"
+    )
     assert evidence["synthetic_response_marker_loopback"].endswith("response_marker_loopback_report.json")
     assert evidence["synthetic_expected_outcome_smoke"].endswith("synthetic_expected_outcome_smoke_report.json")
     assert all(value.startswith("artifacts/validation_runs/") for value in evidence.values())
