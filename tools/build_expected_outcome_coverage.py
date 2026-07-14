@@ -1207,6 +1207,10 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
                 "artifacts/validation_runs/current_goal_one_block_runner_20260714_duration500ms/"
                 "one_block_trial_runner_report.json"
             ),
+            "ready_profile_runner_smoke": (
+                "artifacts/validation_runs/current_goal_ready_profile_runner_smoke_20260715/"
+                "ready_profile_runner_smoke_report.json"
+            ),
             "click_path_mock": (
                 "artifacts/validation_runs/current_goal_session_click_path_20260714/"
                 "session_runner_click_path_report.json"
