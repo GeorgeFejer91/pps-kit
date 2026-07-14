@@ -8,17 +8,15 @@
   },
   "summary": {
     "literature_record_count": 74,
-    "structured_expected_outcome_record_count": 66,
-    "pending_expected_outcome_record_count": 4,
+    "structured_expected_outcome_record_count": 70,
+    "pending_expected_outcome_record_count": 0,
     "adjacent_or_out_of_scope_record_count": 4,
     "runnable_profile_parameter_record_count": 6,
     "observed_behavioral_comparison_record_count": 0,
     "parameter_run_evidence_only_record_count": 6,
     "not_runnable_no_observed_comparison_record_count": 64,
     "adjacent_not_applicable_record_count": 4,
-    "pending_expected_outcome_blocker_counts": {
-      "main_pdf_unavailable_or_paywalled": 4
-    }
+    "pending_expected_outcome_blocker_counts": {}
   },
   "expected_outcome_extraction_sources": {
     "paper_audit_checklist": "For-AI/audiotactile-paper-metadata-audit/running_checklist.csv",
@@ -39,9 +37,19 @@
       "coverage_category": "not_yet_templated_requires_toolkit_structure",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
-      "expected_outcome_status": "pending_expected_outcome_extraction",
-      "expected_outcome": {},
-      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "single_case_perihead_audio_tactile_extinction",
+        "primary_expected_effect": "In a right-brain-damaged patient with tactile extinction, a complex sound close to the ipsilesional side of the head is expected to extinguish contralesional head touch more than a far sound; pure tones are not expected to produce the same spatially specific near-head extinction pattern.",
+        "expected_effect_direction": "near_ipsilesional_complex_sounds_increase_contralesional_head_tactile_extinction",
+        "observable_metric": "contralesional tactile extinction/report rate by auditory distance and sound complexity",
+        "condition_contrast": "near versus far ipsilesional head sounds and white-noise/complex sounds versus pure tones",
+        "source_basis": [
+          "assets/preloads/audiotactile_literature_coverage.json#ladavas_2001_auditory_tactile_extinction",
+          "Consensus MCP 2026-07-15 query: 10.1093/neucas/7.2.97 auditory tactile extinction peripersonal space Ladavas 2001"
+        ]
+      },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
       "expected_outcome_source_audit": {
         "paper_audit_pdf_status": "paywalled",
         "paper_audit_supplement_status": "paywalled",
@@ -52,7 +60,7 @@
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "farne_ladavas_2002_auditory_pps_humans",
@@ -1658,9 +1666,19 @@
       "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
-      "expected_outcome_status": "pending_expected_outcome_extraction",
-      "expected_outcome": {},
-      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "musical_joint_action_modulation_of_hand_pps",
+        "primary_expected_effect": "After an uncooperative jazz duet, tactile-auditory near-space reaction times are expected to increase, consistent with PPS suppression or withdrawal from the uncooperative partner; the predicted cooperative-extension pattern was not observed in the reported abstract.",
+        "expected_effect_direction": "uncooperative_jazz_interaction_slows_near_audio_tactile_rt",
+        "observable_metric": "hand tactile RT to bimodal audio-tactile stimuli by auditory distance after duet condition",
+        "condition_contrast": "cooperative correct-harmony duet versus uncooperative incorrect-harmony duet, near-subject versus near-partner sound locations",
+        "source_basis": [
+          "assets/preloads/audiotactile_literature_coverage.json#jazz_duet_2021",
+          "Consensus MCP 2026-07-15 query: 10.1007/s00426-020-01365-6 jazz duet peripersonal space audio tactile 2021"
+        ]
+      },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
       "expected_outcome_source_audit": {
         "paper_audit_pdf_status": "paywalled",
         "paper_audit_supplement_status": "downloaded",
@@ -1671,7 +1689,7 @@
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "taffou_2021_auditory_roughness",
@@ -1910,9 +1928,19 @@
       "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
-      "expected_outcome_status": "pending_expected_outcome_extraction",
-      "expected_outcome": {},
-      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "pseudowalking_footsole_vibration_extension_of_chest_pps",
+        "primary_expected_effect": "Cyclic foot-sole vibration based on low-pass-filtered walking sounds is expected to evoke a walking sensation and reduce chest tactile reaction times during looming sounds, indicating a forward expansion of PPS without physical body movement.",
+        "expected_effect_direction": "footsole_pseudowalking_vibration_expands_forward_pps",
+        "observable_metric": "chest vibrotactile RT by looming-sound position/SOA and foot-sole vibration pattern",
+        "condition_contrast": "walking-sensation foot-sole vibration pattern versus other/no vibration patterns during seated looming-sound PPS task",
+        "source_basis": [
+          "assets/preloads/audiotactile_literature_coverage.json#amemiya_2017_pseudowalking_footsole",
+          "Consensus MCP 2026-07-15 query: 10.1109/WHC.2017.7989970 pseudowalking footsole vibration peripersonal space audio tactile"
+        ]
+      },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
       "expected_outcome_source_audit": {
         "paper_audit_pdf_status": "paywalled",
         "paper_audit_supplement_status": "not_found",
@@ -1923,7 +1951,7 @@
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "novel_two_phase_audio_tactile_2025",
@@ -1932,9 +1960,20 @@
       "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
-      "expected_outcome_status": "pending_expected_outcome_extraction",
-      "expected_outcome": {},
-      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "proposed_self_nonself_association_modulation_of_pps",
+        "primary_expected_effect": "The conference abstract proposes a two-phase sound-label association and PPS measurement paradigm. Its structured expected outcome is conditional: if PPS depends only on bodily self-modulation, no self versus non-self difference is expected; if abstract cognitive self-associations modulate PPS, non-self-associated sounds are expected to elicit a wider and more rigid PPS than self-associated sounds.",
+        "expected_effect_direction": "conditional_nonself_associated_sounds_widen_and_rigidify_pps_if_cognitive_self_associations_modulate_pps",
+        "observable_metric": "tactile RT as a function of auditory proximity, converted to PPS size and strength estimates",
+        "condition_contrast": "self-labeled versus non-self-labeled neutral auditory stimuli in a two-phase association/PPS measurement design",
+        "source_basis": [
+          "assets/preloads/audiotactile_literature_coverage.json#novel_two_phase_audio_tactile_2025",
+          "IRIS/Sapienza handle 11573/1757869 live abstract review 2026-07-15",
+          "SISSA Indico AIP Sperimentale 2025 contribution 3965 live abstract review 2026-07-15"
+        ]
+      },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
       "expected_outcome_source_audit": {
         "paper_audit_pdf_status": "open_access_unavailable",
         "paper_audit_supplement_status": "not_checked",
@@ -1945,7 +1984,7 @@
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "looming_duration_2025",

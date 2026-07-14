@@ -120,6 +120,23 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
             "Consensus MCP 2026-07-15 query: audio tactile peripersonal space looming sound tactile reaction time",
         ],
     },
+    "jazz_duet_2021": {
+        "outcome_family": "musical_joint_action_modulation_of_hand_pps",
+        "primary_expected_effect": (
+            "After an uncooperative jazz duet, tactile-auditory near-space "
+            "reaction times are expected to increase, consistent with PPS "
+            "suppression or withdrawal from the uncooperative partner; the "
+            "predicted cooperative-extension pattern was not observed in the "
+            "reported abstract."
+        ),
+        "expected_effect_direction": "uncooperative_jazz_interaction_slows_near_audio_tactile_rt",
+        "observable_metric": "hand tactile RT to bimodal audio-tactile stimuli by auditory distance after duet condition",
+        "condition_contrast": "cooperative correct-harmony duet versus uncooperative incorrect-harmony duet, near-subject versus near-partner sound locations",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#jazz_duet_2021",
+            "Consensus MCP 2026-07-15 query: 10.1007/s00426-020-01365-6 jazz duet peripersonal space audio tactile 2021",
+        ],
+    },
     "looming_duration_2025": {
         "outcome_family": "duration_comparison_lateral_looming_audio_tactile_pps",
         "primary_expected_effect": (
@@ -138,6 +155,26 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
             "assets/preloads/audiotactile_literature_coverage.json#looming_duration_2025",
             "Publisher PDF live result/figure review 2026-07-15: DOI 10.61782/fa.2025.0866, Fig. 1-2 and Results/Discussion pp. 3552-3554",
             "Consensus MCP 2026-07-15 query: 10.61782/fa.2025.0866 looming sound duration peripersonal space measurement",
+        ],
+    },
+    "novel_two_phase_audio_tactile_2025": {
+        "outcome_family": "proposed_self_nonself_association_modulation_of_pps",
+        "primary_expected_effect": (
+            "The conference abstract proposes a two-phase sound-label association "
+            "and PPS measurement paradigm. Its structured expected outcome is "
+            "conditional: if PPS depends only on bodily self-modulation, no "
+            "self versus non-self difference is expected; if abstract cognitive "
+            "self-associations modulate PPS, non-self-associated sounds are "
+            "expected to elicit a wider and more rigid PPS than self-associated "
+            "sounds."
+        ),
+        "expected_effect_direction": "conditional_nonself_associated_sounds_widen_and_rigidify_pps_if_cognitive_self_associations_modulate_pps",
+        "observable_metric": "tactile RT as a function of auditory proximity, converted to PPS size and strength estimates",
+        "condition_contrast": "self-labeled versus non-self-labeled neutral auditory stimuli in a two-phase association/PPS measurement design",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#novel_two_phase_audio_tactile_2025",
+            "IRIS/Sapienza handle 11573/1757869 live abstract review 2026-07-15",
+            "SISSA Indico AIP Sperimentale 2025 contribution 3965 live abstract review 2026-07-15",
         ],
     },
     "biggio_2017_racket_tool_use": {
@@ -213,6 +250,23 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
         "source_basis": [
             "For-AI/audiotactile-paper-metadata-audit/manual_reviews/farne_ladavas_2002_auditory_pps_humans.json",
             "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv#farne_ladavas_2002_auditory_pps_humans",
+        ],
+    },
+    "ladavas_2001_auditory_tactile_extinction": {
+        "outcome_family": "single_case_perihead_audio_tactile_extinction",
+        "primary_expected_effect": (
+            "In a right-brain-damaged patient with tactile extinction, a complex "
+            "sound close to the ipsilesional side of the head is expected to "
+            "extinguish contralesional head touch more than a far sound; pure "
+            "tones are not expected to produce the same spatially specific "
+            "near-head extinction pattern."
+        ),
+        "expected_effect_direction": "near_ipsilesional_complex_sounds_increase_contralesional_head_tactile_extinction",
+        "observable_metric": "contralesional tactile extinction/report rate by auditory distance and sound complexity",
+        "condition_contrast": "near versus far ipsilesional head sounds and white-noise/complex sounds versus pure tones",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#ladavas_2001_auditory_tactile_extinction",
+            "Consensus MCP 2026-07-15 query: 10.1093/neucas/7.2.97 auditory tactile extinction peripersonal space Ladavas 2001",
         ],
     },
     "kitagawa_2005_sound_complexity": {
@@ -1054,6 +1108,22 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
         "source_basis": [
             "assets/preloads/audiotactile_literature_coverage.json#footsole_vibration_2019",
             "Consensus MCP 2026-07-15 query: pregnancy ageing newborn boundaries peripersonal space audio tactile PPS",
+        ],
+    },
+    "amemiya_2017_pseudowalking_footsole": {
+        "outcome_family": "pseudowalking_footsole_vibration_extension_of_chest_pps",
+        "primary_expected_effect": (
+            "Cyclic foot-sole vibration based on low-pass-filtered walking "
+            "sounds is expected to evoke a walking sensation and reduce chest "
+            "tactile reaction times during looming sounds, indicating a forward "
+            "expansion of PPS without physical body movement."
+        ),
+        "expected_effect_direction": "footsole_pseudowalking_vibration_expands_forward_pps",
+        "observable_metric": "chest vibrotactile RT by looming-sound position/SOA and foot-sole vibration pattern",
+        "condition_contrast": "walking-sensation foot-sole vibration pattern versus other/no vibration patterns during seated looming-sound PPS task",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#amemiya_2017_pseudowalking_footsole",
+            "Consensus MCP 2026-07-15 query: 10.1109/WHC.2017.7989970 pseudowalking footsole vibration peripersonal space audio tactile",
         ],
     },
 }

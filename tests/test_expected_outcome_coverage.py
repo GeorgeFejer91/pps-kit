@@ -14,6 +14,7 @@ BUILDER_PATH = ROOT / "tools" / "build_expected_outcome_coverage.py"
 STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "ageing_2021",
     "amiel_2025_front_rear",
+    "amemiya_2017_pseudowalking_footsole",
     "ardizzi_ferri_2018_interoceptive",
     "autism_2019",
     "avenanti_2012_motor_cortex",
@@ -40,7 +41,9 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "holmes_2020_four_experiments",
     "ieeg_trunk_2018",
     "interoception_exteroception_2025",
+    "jazz_duet_2021",
     "kitagawa_2005_sound_complexity",
+    "ladavas_2001_auditory_tactile_extinction",
     "lamia_2026_arm_movement",
     "lerner_2021_3d_boundary",
     "looming_duration_2025",
@@ -48,6 +51,7 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "matsuda_2021_four_directions",
     "mindfulness_pps_2024",
     "newborn_boundaries_2019",
+    "novel_two_phase_audio_tactile_2025",
     "noel_2015_bodily_self",
     "noel_2015_walking",
     "noel_2018_neural_adaptation",
@@ -128,17 +132,15 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
     assert structured_ids == STRUCTURED_EXPECTED_OUTCOME_IDS
     assert outcome["summary"] == {
         "literature_record_count": 74,
-        "structured_expected_outcome_record_count": 66,
-        "pending_expected_outcome_record_count": 4,
+        "structured_expected_outcome_record_count": 70,
+        "pending_expected_outcome_record_count": 0,
         "adjacent_or_out_of_scope_record_count": 4,
         "runnable_profile_parameter_record_count": 6,
         "observed_behavioral_comparison_record_count": 0,
         "parameter_run_evidence_only_record_count": 6,
         "not_runnable_no_observed_comparison_record_count": 64,
         "adjacent_not_applicable_record_count": 4,
-        "pending_expected_outcome_blocker_counts": {
-            "main_pdf_unavailable_or_paywalled": 4,
-        },
+        "pending_expected_outcome_blocker_counts": {},
     }
 
     for record_id in structured_ids:
@@ -184,15 +186,7 @@ def test_expected_outcome_pending_blockers_are_actionable():
         if record["expected_outcome_status"] == "pending_expected_outcome_extraction"
     ]
     blocker_total = sum(outcome["summary"]["pending_expected_outcome_blocker_counts"].values())
-    assert blocker_total == len(pending_records) == 4
-
-    assert records["ladavas_2001_auditory_tactile_extinction"]["expected_outcome_extraction_blocker"] == (
-        "main_pdf_unavailable_or_paywalled"
-    )
-    assert records["jazz_duet_2021"]["expected_outcome_extraction_blocker"] == "main_pdf_unavailable_or_paywalled"
-    assert records["amemiya_2017_pseudowalking_footsole"]["expected_outcome_extraction_blocker"] == (
-        "main_pdf_unavailable_or_paywalled"
-    )
+    assert blocker_total == len(pending_records) == 0
 
     structured = records["canzoneri_2012_dynamic_sounds"]
     assert structured["expected_outcome_extraction_blocker"] == "structured_expected_outcome_available"
@@ -240,6 +234,26 @@ def test_expected_outcome_pending_blockers_are_actionable():
     looming_duration = records["looming_duration_2025"]
     assert looming_duration["expected_outcome"]["expected_effect_direction"] == (
         "both_2s_and_3s_looming_sounds_facilitate_late_tactile_rt_with_duration_specific_boundaries"
+    )
+
+    ladavas = records["ladavas_2001_auditory_tactile_extinction"]
+    assert ladavas["expected_outcome"]["expected_effect_direction"] == (
+        "near_ipsilesional_complex_sounds_increase_contralesional_head_tactile_extinction"
+    )
+
+    jazz = records["jazz_duet_2021"]
+    assert jazz["expected_outcome"]["expected_effect_direction"] == (
+        "uncooperative_jazz_interaction_slows_near_audio_tactile_rt"
+    )
+
+    amemiya = records["amemiya_2017_pseudowalking_footsole"]
+    assert amemiya["expected_outcome"]["expected_effect_direction"] == (
+        "footsole_pseudowalking_vibration_expands_forward_pps"
+    )
+
+    two_phase = records["novel_two_phase_audio_tactile_2025"]
+    assert two_phase["expected_outcome"]["expected_effect_direction"] == (
+        "conditional_nonself_associated_sounds_widen_and_rigidify_pps_if_cognitive_self_associations_modulate_pps"
     )
 
 
