@@ -8,8 +8,8 @@
   },
   "summary": {
     "literature_record_count": 74,
-    "structured_expected_outcome_record_count": 65,
-    "pending_expected_outcome_record_count": 5,
+    "structured_expected_outcome_record_count": 66,
+    "pending_expected_outcome_record_count": 4,
     "adjacent_or_out_of_scope_record_count": 4,
     "runnable_profile_parameter_record_count": 6,
     "observed_behavioral_comparison_record_count": 0,
@@ -17,8 +17,7 @@
     "not_runnable_no_observed_comparison_record_count": 64,
     "adjacent_not_applicable_record_count": 4,
     "pending_expected_outcome_blocker_counts": {
-      "main_pdf_unavailable_or_paywalled": 4,
-      "source_mined_needs_results_visual_review": 1
+      "main_pdf_unavailable_or_paywalled": 4
     }
   },
   "expected_outcome_extraction_sources": {
@@ -1955,9 +1954,20 @@
       "coverage_category": "not_yet_templated_requires_toolkit_structure",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
-      "expected_outcome_status": "pending_expected_outcome_extraction",
-      "expected_outcome": {},
-      "expected_outcome_extraction_blocker": "source_mined_needs_results_visual_review",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "duration_comparison_lateral_looming_audio_tactile_pps",
+        "primary_expected_effect": "Both the 2 s and 3 s right-lateral looming pink-noise tasks are expected to show audio-tactile RT facilitation compared with tactile-only baseline at late/near temporal delays. The 2 s task places the PPS boundary between T3 and T4 (875-1125 ms), while the 3 s task places it between T2 and T3 (937.5-1312.5 ms); the similar timing does not imply the same physical distance because the two durations use different starting distances.",
+        "expected_effect_direction": "both_2s_and_3s_looming_sounds_facilitate_late_tactile_rt_with_duration_specific_boundaries",
+        "observable_metric": "baseline versus audio-tactile tactile RT by temporal delay plus sigmoid xc/k parameters",
+        "condition_contrast": "2 s versus 3 s lateral looming pink-noise duration, tactile-only baseline versus audio-tactile rows",
+        "source_basis": [
+          "assets/preloads/audiotactile_literature_coverage.json#looming_duration_2025",
+          "Publisher PDF live result/figure review 2026-07-15: DOI 10.61782/fa.2025.0866, Fig. 1-2 and Results/Discussion pp. 3552-3554",
+          "Consensus MCP 2026-07-15 query: 10.61782/fa.2025.0866 looming sound duration peripersonal space measurement"
+        ]
+      },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
       "expected_outcome_source_audit": {
         "paper_audit_pdf_status": "downloaded",
         "paper_audit_supplement_status": "not_found",
@@ -1968,7 +1978,7 @@
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "depersonalisation_2024",

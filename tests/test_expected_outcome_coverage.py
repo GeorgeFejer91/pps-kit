@@ -43,6 +43,7 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "kitagawa_2005_sound_complexity",
     "lamia_2026_arm_movement",
     "lerner_2021_3d_boundary",
+    "looming_duration_2025",
     "maister_2015_shared_sensory",
     "matsuda_2021_four_directions",
     "mindfulness_pps_2024",
@@ -127,8 +128,8 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
     assert structured_ids == STRUCTURED_EXPECTED_OUTCOME_IDS
     assert outcome["summary"] == {
         "literature_record_count": 74,
-        "structured_expected_outcome_record_count": 65,
-        "pending_expected_outcome_record_count": 5,
+        "structured_expected_outcome_record_count": 66,
+        "pending_expected_outcome_record_count": 4,
         "adjacent_or_out_of_scope_record_count": 4,
         "runnable_profile_parameter_record_count": 6,
         "observed_behavioral_comparison_record_count": 0,
@@ -137,7 +138,6 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {
             "main_pdf_unavailable_or_paywalled": 4,
-            "source_mined_needs_results_visual_review": 1,
         },
     }
 
@@ -184,15 +184,15 @@ def test_expected_outcome_pending_blockers_are_actionable():
         if record["expected_outcome_status"] == "pending_expected_outcome_extraction"
     ]
     blocker_total = sum(outcome["summary"]["pending_expected_outcome_blocker_counts"].values())
-    assert blocker_total == len(pending_records) == 5
+    assert blocker_total == len(pending_records) == 4
 
-    assert records["looming_duration_2025"]["expected_outcome_extraction_blocker"] == (
-        "source_mined_needs_results_visual_review"
-    )
     assert records["ladavas_2001_auditory_tactile_extinction"]["expected_outcome_extraction_blocker"] == (
         "main_pdf_unavailable_or_paywalled"
     )
     assert records["jazz_duet_2021"]["expected_outcome_extraction_blocker"] == "main_pdf_unavailable_or_paywalled"
+    assert records["amemiya_2017_pseudowalking_footsole"]["expected_outcome_extraction_blocker"] == (
+        "main_pdf_unavailable_or_paywalled"
+    )
 
     structured = records["canzoneri_2012_dynamic_sounds"]
     assert structured["expected_outcome_extraction_blocker"] == "structured_expected_outcome_available"
@@ -235,6 +235,11 @@ def test_expected_outcome_pending_blockers_are_actionable():
     interoception = records["interoception_exteroception_2025"]
     assert interoception["expected_outcome"]["expected_effect_direction"] == (
         "cardiac_interoception_competes_with_tactile_rt_and_facilitates_self_relevance_encoding"
+    )
+
+    looming_duration = records["looming_duration_2025"]
+    assert looming_duration["expected_outcome"]["expected_effect_direction"] == (
+        "both_2s_and_3s_looming_sounds_facilitate_late_tactile_rt_with_duration_specific_boundaries"
     )
 
 

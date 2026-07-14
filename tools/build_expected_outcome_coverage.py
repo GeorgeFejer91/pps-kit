@@ -120,6 +120,26 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
             "Consensus MCP 2026-07-15 query: audio tactile peripersonal space looming sound tactile reaction time",
         ],
     },
+    "looming_duration_2025": {
+        "outcome_family": "duration_comparison_lateral_looming_audio_tactile_pps",
+        "primary_expected_effect": (
+            "Both the 2 s and 3 s right-lateral looming pink-noise tasks are "
+            "expected to show audio-tactile RT facilitation compared with tactile-only "
+            "baseline at late/near temporal delays. The 2 s task places the PPS "
+            "boundary between T3 and T4 (875-1125 ms), while the 3 s task places it "
+            "between T2 and T3 (937.5-1312.5 ms); the similar timing does not imply "
+            "the same physical distance because the two durations use different "
+            "starting distances."
+        ),
+        "expected_effect_direction": "both_2s_and_3s_looming_sounds_facilitate_late_tactile_rt_with_duration_specific_boundaries",
+        "observable_metric": "baseline versus audio-tactile tactile RT by temporal delay plus sigmoid xc/k parameters",
+        "condition_contrast": "2 s versus 3 s lateral looming pink-noise duration, tactile-only baseline versus audio-tactile rows",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#looming_duration_2025",
+            "Publisher PDF live result/figure review 2026-07-15: DOI 10.61782/fa.2025.0866, Fig. 1-2 and Results/Discussion pp. 3552-3554",
+            "Consensus MCP 2026-07-15 query: 10.61782/fa.2025.0866 looming sound duration peripersonal space measurement",
+        ],
+    },
     "biggio_2017_racket_tool_use": {
         "outcome_family": "tool_condition_modulation_of_static_audio_tactile_pps",
         "primary_expected_effect": (
