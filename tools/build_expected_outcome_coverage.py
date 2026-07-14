@@ -1196,7 +1196,7 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
         },
         "current_observed_evidence": {
             "profile_materialization": (
-                "artifacts/validation_runs/current_goal_profile_recreation_ready_all_20260714/"
+                "artifacts/validation_runs/current_goal_profile_recreation_ready_all_20260715_profile_local_sessions/"
                 "profile_recreation_interface_matrix_report.json"
             ),
             "static_dashboard_parity": (

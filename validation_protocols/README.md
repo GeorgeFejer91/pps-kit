@@ -58,7 +58,8 @@ analysis, and operator failure modes.
 Protocol 12 is the published-profile recreation interface matrix. It verifies
 that ready published preloads pass the Segment 0-4 profile gate, remain
 read-only in the interface, materialize through local Segments 0-6, and produce
-runner-handoff artifacts before a profile is treated as runnable evidence.
+profile-local runner-handoff artifacts before a profile is treated as runnable
+evidence.
 
 ## Scripts
 

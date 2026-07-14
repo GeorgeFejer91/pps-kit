@@ -260,3 +260,34 @@ def test_protocol12_matrix_metadata_only_report_accepts_ready_and_blocked(tmp_pa
     assert report["blocked_results"][0]["blocked"]
     assert (tmp_path / "profile_recreation_interface_matrix_report.json").exists()
     assert (tmp_path / "profile_recreation_interface_matrix_report.md").exists()
+
+
+def test_protocol12_matrix_materializes_session_packages_under_each_profile_root(tmp_path: Path):
+    matrix = _load_validation_script("run_profile_recreation_interface_matrix.py")
+
+    report = matrix.run_matrix(
+        output_dir=tmp_path,
+        templates=["roussel_2025_dynaspace_mobile_pps", "matsuda_2021_four_directions"],
+        skip_blocked_samples=True,
+    )
+
+    assert report["schema"] == matrix.SCHEMA
+    assert report["passed"]
+    local_criteria = [
+        criterion
+        for criterion in report["criteria"]
+        if criterion["name"].endswith(":participant_package_profile_local")
+    ]
+    assert len(local_criteria) == 2
+    assert all(criterion["passed"] for criterion in local_criteria)
+
+    for result in report["profile_results"]:
+        materialization = result["materialization"]
+        expected_root = Path(materialization["expected_session_root"]).resolve()
+        session_dir = Path(materialization["session_dir"]).resolve()
+        session_manifest = Path(materialization["session_manifest_path"]).resolve()
+
+        assert result["template_id"] in str(expected_root)
+        assert session_dir == expected_root or expected_root in session_dir.parents
+        assert session_manifest == expected_root or expected_root in session_manifest.parents
+        assert session_manifest.exists()
