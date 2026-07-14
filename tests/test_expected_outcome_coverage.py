@@ -11,6 +11,39 @@ COVERAGE_PATH = ROOT / "assets" / "preloads" / "audiotactile_literature_coverage
 OUTCOME_PATH = ROOT / "assets" / "preloads" / "audiotactile_expected_outcome_coverage.json"
 BUILDER_PATH = ROOT / "tools" / "build_expected_outcome_coverage.py"
 
+STRUCTURED_EXPECTED_OUTCOME_IDS = {
+    "biggio_2017_racket_tool_use",
+    "canzoneri_2012_dynamic_sounds",
+    "cell_reports_medicine_2026_consciousness",
+    "disorders_consciousness_2019",
+    "farne_ladavas_2002_auditory_pps_humans",
+    "finisguerra_2015_moving_sounds_motor",
+    "ieeg_trunk_2018",
+    "lamia_2026_arm_movement",
+    "matsuda_2021_four_directions",
+    "noel_2015_bodily_self",
+    "pfeiffer_2018_vestibular",
+    "ronga_2021_newborn_erp",
+    "serino_2007_blind_cane_users",
+    "serino_2015_exps_4_to_6",
+    "serino_2015_front_back_trunk_exp2",
+    "serino_2015_peri_hand_exp3",
+    "serino_2015_peri_trunk_exp1",
+    "smartphone_rt_methods_2025",
+    "taffou_2021_auditory_roughness",
+    "tajadura_jimenez_2009_visual_deprivation",
+    "tonelli_2019_echolocation",
+}
+
+RUNNABLE_STRUCTURED_IDS = {
+    "noel_2015_bodily_self",
+    "serino_2015_peri_trunk_exp1",
+    "pfeiffer_2018_vestibular",
+    "matsuda_2021_four_directions",
+    "lamia_2026_arm_movement",
+    "smartphone_rt_methods_2025",
+}
+
 
 def _load_builder():
     spec = importlib.util.spec_from_file_location("build_expected_outcome_coverage", BUILDER_PATH)
@@ -47,18 +80,11 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         for record_id, record in records.items()
         if record["expected_outcome_status"] == "structured_expected_outcome_extracted"
     }
-    assert structured_ids == {
-        "noel_2015_bodily_self",
-        "serino_2015_peri_trunk_exp1",
-        "pfeiffer_2018_vestibular",
-        "matsuda_2021_four_directions",
-        "lamia_2026_arm_movement",
-        "smartphone_rt_methods_2025",
-    }
+    assert structured_ids == STRUCTURED_EXPECTED_OUTCOME_IDS
     assert outcome["summary"] == {
         "literature_record_count": 74,
-        "structured_expected_outcome_record_count": 6,
-        "pending_expected_outcome_record_count": 64,
+        "structured_expected_outcome_record_count": 21,
+        "pending_expected_outcome_record_count": 49,
         "adjacent_or_out_of_scope_record_count": 4,
         "runnable_profile_parameter_record_count": 6,
         "observed_behavioral_comparison_record_count": 0,
@@ -70,13 +96,23 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
     for record_id in structured_ids:
         record = records[record_id]
         expected = record["expected_outcome"]
-        assert record["runnable_status"] == "runnable_profile_parameters_ready"
-        assert record["observed_vs_expected_status"] == "parameter_run_evidence_only_behavioral_effect_unobserved"
         assert expected["primary_expected_effect"]
         assert expected["expected_effect_direction"]
         assert expected["observable_metric"]
         assert expected["condition_contrast"]
         assert expected["source_basis"]
+
+    for record_id in RUNNABLE_STRUCTURED_IDS:
+        record = records[record_id]
+        assert record["runnable_status"] == "runnable_profile_parameters_ready"
+        assert record["observed_vs_expected_status"] == "parameter_run_evidence_only_behavioral_effect_unobserved"
+
+    nonrunnable_structured = structured_ids - RUNNABLE_STRUCTURED_IDS
+    assert nonrunnable_structured
+    for record_id in nonrunnable_structured:
+        record = records[record_id]
+        assert record["runnable_status"] != "runnable_profile_parameters_ready"
+        assert record["observed_vs_expected_status"] == "not_runnable_no_observed_comparison"
 
     assert all(
         record["observed_vs_expected_status"] != "observed_behavioral_comparison_available"
@@ -90,15 +126,35 @@ def test_expected_outcome_blocked_and_adjacent_records_do_not_claim_observed_com
     records = {record["record_id"]: record for record in outcome["records"]}
 
     for record_id in [
-        "canzoneri_2012_dynamic_sounds",
-        "tonelli_2019_echolocation",
-        "taffou_2021_auditory_roughness",
-        "farne_ladavas_2002_auditory_pps_humans",
+        "canzoneri_2013_tool_use_reshaping",
+        "canzoneri_2013_amputation_prosthesis",
+        "ferri_2015_artificial_valence",
+        "hobeika_2020_methods",
     ]:
         record = records[record_id]
         assert record["runnable_status"] != "runnable_profile_parameters_ready"
         assert record["observed_vs_expected_status"] == "not_runnable_no_observed_comparison"
         assert record["required_next_evidence"].startswith("Extract a short structured expected outcome")
+
+    for record_id in [
+        "canzoneri_2012_dynamic_sounds",
+        "tonelli_2019_echolocation",
+        "serino_2015_front_back_trunk_exp2",
+    ]:
+        record = records[record_id]
+        assert record["runnable_status"] == "template_present_but_blocked"
+        assert record["expected_outcome_status"] == "structured_expected_outcome_extracted"
+        assert record["required_next_evidence"].startswith("Resolve profile blockers")
+
+    for record_id in [
+        "farne_ladavas_2002_auditory_pps_humans",
+        "taffou_2021_auditory_roughness",
+        "cell_reports_medicine_2026_consciousness",
+    ]:
+        record = records[record_id]
+        assert record["runnable_status"] == "not_yet_templated"
+        assert record["expected_outcome_status"] == "structured_expected_outcome_extracted"
+        assert record["required_next_evidence"].startswith("Create a profile template")
 
     adjacent = records["barumerli_2026_semantic_looming_auditory_only"]
     assert adjacent["expected_outcome_status"] == "adjacent_out_of_scope"

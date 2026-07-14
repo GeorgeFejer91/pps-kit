@@ -113,6 +113,231 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
             "Consensus MCP 2026-07-15 query: audio tactile peripersonal space looming sound tactile reaction time",
         ],
     },
+    "biggio_2017_racket_tool_use": {
+        "outcome_family": "tool_condition_modulation_of_static_audio_tactile_pps",
+        "primary_expected_effect": (
+            "Racket-related conditions are expected to modulate the static near/far "
+            "audio-tactile interaction around the stimulated wrist, shifting the "
+            "near-versus-far tactile-response benefit relative to the no-racket condition."
+        ),
+        "expected_effect_direction": "racket_context_changes_near_far_audio_tactile_facilitation",
+        "observable_metric": "tactile response performance by near/far sound position and racket condition",
+        "condition_contrast": "no-racket versus common-racket versus personal-racket blocked sessions",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/biggio_2017_racket_tool_use.json",
+            "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv#biggio_2017_racket_tool_use",
+        ],
+    },
+    "canzoneri_2012_dynamic_sounds": {
+        "outcome_family": "dynamic_looming_audio_tactile_pps_boundary",
+        "primary_expected_effect": (
+            "Dynamic approaching sounds are expected to facilitate tactile responses "
+            "as they enter near body space, producing a distance/SOA-dependent PPS "
+            "function that is weaker or differently shaped for receding sounds."
+        ),
+        "expected_effect_direction": "approaching_near_body_sounds_speed_tactile_rt",
+        "observable_metric": "tactile RT/facilitation curve and sigmoid-derived boundary by T1-T5 timing",
+        "condition_contrast": "approaching/IN versus receding/OUT pink-noise trajectories plus tactile-only baselines",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/canzoneri_2012_dynamic_sounds.json",
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#canzoneri_2012_dynamic_sounds",
+        ],
+    },
+    "cell_reports_medicine_2026_consciousness": {
+        "outcome_family": "passive_near_far_audio_tactile_eeg_consciousness_index",
+        "primary_expected_effect": (
+            "Static near/far audio-tactile stimulation is expected to produce EEG "
+            "multisensory-integration signatures that vary with conscious state, "
+            "with near-space audio-tactile responses serving as the PPS-sensitive endpoint."
+        ),
+        "expected_effect_direction": "near_far_audio_tactile_eeg_integration_tracks_conscious_state",
+        "observable_metric": "EEG multisensory response or classifier feature for ATNear/ATFar versus unisensory rows",
+        "condition_contrast": "healthy wake/sleep or DoC state groups crossed with near/far audio-tactile conditions",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/cell_reports_medicine_2026_consciousness.json",
+            "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv#cell_reports_medicine_2026_consciousness",
+        ],
+    },
+    "disorders_consciousness_2019": {
+        "outcome_family": "passive_near_far_audio_tactile_eeg_doc_encoding",
+        "primary_expected_effect": (
+            "Passive arm-centered near/far audio-tactile stimulation is expected to "
+            "show multisensory EEG encoding of PPS that is preserved or graded by "
+            "disorder-of-consciousness status rather than appearing as a behavioral RT effect."
+        ),
+        "expected_effect_direction": "near_far_audio_tactile_eeg_encoding_differs_by_consciousness_state",
+        "observable_metric": "EEG response to ATNear/ATFar relative to tactile-only and auditory-only controls",
+        "condition_contrast": "DoC/patient status and healthy controls crossed with tactile, auditory-near/far, and AT-near/far rows",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/disorders_consciousness_2019.json",
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#disorders_consciousness_2019",
+        ],
+    },
+    "farne_ladavas_2002_auditory_pps_humans": {
+        "outcome_family": "static_perihead_audio_tactile_extinction_modulation",
+        "primary_expected_effect": (
+            "Static sounds close to the body are expected to modulate tactile "
+            "extinction/detection more strongly than far sounds, establishing a "
+            "near-space auditory-tactile interaction without a looming trajectory."
+        ),
+        "expected_effect_direction": "near_sounds_modulate_tactile_extinction_more_than_far_sounds",
+        "observable_metric": "tactile report/extinction rate by speaker distance and front/back position",
+        "condition_contrast": "near versus far and front/back static auditory positions with tactile-only/no-stimulation rows",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/farne_ladavas_2002_auditory_pps_humans.json",
+            "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv#farne_ladavas_2002_auditory_pps_humans",
+        ],
+    },
+    "finisguerra_2015_moving_sounds_motor": {
+        "outcome_family": "moving_sound_modulation_of_hand_motor_excitability",
+        "primary_expected_effect": (
+            "Moving sounds within the hand-centered PPS are expected to modulate "
+            "hand motor-cortex excitability, with MEP amplitude varying by sound "
+            "position and motion direction rather than by tactile RT."
+        ),
+        "expected_effect_direction": "near_hand_moving_sounds_modulate_mep_excitability",
+        "observable_metric": "TMS-evoked MEP amplitude by sampled sound position and IN/OUT direction",
+        "condition_contrast": "approaching versus receding moving sounds, sampled positions, and pre/post no-noise baselines",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/finisguerra_2015_moving_sounds_motor.json",
+            "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv#finisguerra_2015_moving_sounds_motor",
+        ],
+    },
+    "ieeg_trunk_2018": {
+        "outcome_family": "intracranial_trunk_pps_multisensory_neural_map",
+        "primary_expected_effect": (
+            "Passive trunk-centered audio-tactile trials are expected to reveal "
+            "distance-sensitive multisensory neural responses in intracranial "
+            "recordings, strongest for PPS-relevant front-approach timings."
+        ),
+        "expected_effect_direction": "near_trunk_audio_tactile_trials_show_stronger_neural_integration",
+        "observable_metric": "iEEG multisensory response to AT trials relative to A-only and T-only rows by tactile timing",
+        "condition_contrast": "A, T, and AT randomized trials across trunk-centered tactile timings/distances",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/ieeg_trunk_2018.json",
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#ieeg_trunk_2018",
+        ],
+    },
+    "ronga_2021_newborn_erp": {
+        "outcome_family": "newborn_near_far_audio_tactile_erp_spatial_tuning",
+        "primary_expected_effect": (
+            "Near hand-centered audio-tactile stimulation is expected to evoke a "
+            "different ERP multisensory response than far stimulation, showing "
+            "spatial tuning of audio-tactile PPS responses in newborns and adults."
+        ),
+        "expected_effect_direction": "near_audio_tactile_erp_response_differs_from_far",
+        "observable_metric": "ERP amplitude/latency response for near/far audio-tactile versus unisensory controls",
+        "condition_contrast": "near versus far speaker positions and audio-tactile versus unisensory condition rows",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/ronga_2021_newborn_erp.json",
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#ronga_2021_newborn_erp",
+        ],
+    },
+    "serino_2007_blind_cane_users": {
+        "outcome_family": "cane_use_static_near_far_pps_extension",
+        "primary_expected_effect": (
+            "Cane/tool-use conditions are expected to extend or reshape the "
+            "near/far audio-tactile interaction, so far sounds aligned with cane "
+            "use show stronger tactile-detection benefit than in baseline/handle conditions."
+        ),
+        "expected_effect_direction": "cane_use_extends_audio_tactile_facilitation_toward_far_space",
+        "observable_metric": "tactile target detection/RT by near/far sound position and cane/handle/training condition",
+        "condition_contrast": "cane versus handle/tool-use conditions, blind versus sighted groups, near versus far sounds",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/serino_2007_blind_cane_users.json",
+            "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv#serino_2007_blind_cane_users",
+        ],
+    },
+    "serino_2015_front_back_trunk_exp2": {
+        "outcome_family": "front_back_trunk_audio_tactile_pps_boundary",
+        "primary_expected_effect": (
+            "Dynamic sounds moving through front and back trunk space are expected "
+            "to facilitate tactile responses most when the sound is close to the "
+            "corresponding trunk tactile anchor, yielding front/back PPS functions."
+        ),
+        "expected_effect_direction": "near_trunk_front_back_sounds_speed_corresponding_tactile_rt",
+        "observable_metric": "tactile RT/facilitation by front/back trajectory distance and tactile site",
+        "condition_contrast": "front-to-back versus back-to-front 16-speaker motion and sternum/back tactile anchors",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/serino_2015_front_back_trunk_exp2.json",
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#serino_2015_front_back_trunk_exp2",
+        ],
+    },
+    "serino_2015_peri_hand_exp3": {
+        "outcome_family": "lateralized_perihand_audio_tactile_pps_boundary",
+        "primary_expected_effect": (
+            "Hand-centered moving sounds are expected to facilitate tactile "
+            "responses most near the stimulated hand, producing a peri-hand PPS "
+            "function across the reported D1-D5 distance table."
+        ),
+        "expected_effect_direction": "near_hand_sounds_speed_hand_tactile_rt",
+        "observable_metric": "hand tactile RT/facilitation by D1-D5 distance and looming/receding direction",
+        "condition_contrast": "lateralized two-speaker moving sounds, tactile-only D1/D5 baselines, and sound-only catches",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/serino_2015_peri_hand_exp3.json",
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#serino_2015_peri_hand_exp3",
+        ],
+    },
+    "serino_2015_exps_4_to_6": {
+        "outcome_family": "body_part_centered_pps_remapping_across_hand_trunk_face",
+        "primary_expected_effect": (
+            "Experiments 4-6 are expected to show that audio-tactile facilitation "
+            "follows the currently relevant body-part anchor and sound-location "
+            "congruency, rather than a single fixed trunk-centered boundary."
+        ),
+        "expected_effect_direction": "audio_tactile_facilitation_tracks_body_part_anchor_and_congruency",
+        "observable_metric": "tactile RT/facilitation by hand/trunk/face tactile site, distance, posture, and sound-location congruency",
+        "condition_contrast": "Exp. 4 hand versus trunk, Exp. 5 hand near versus far from trunk, Exp. 6 face/trunk congruent versus incongruent locations",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/serino_2015_exps_4_to_6.json",
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#serino_2015_exps_4_to_6",
+        ],
+    },
+    "taffou_2021_auditory_roughness": {
+        "outcome_family": "affective_roughness_expansion_of_audio_tactile_pps",
+        "primary_expected_effect": (
+            "Rough looming sounds are expected to expand or strengthen PPS-related "
+            "tactile facilitation relative to non-rough looming sounds, shifting "
+            "the response benefit farther into rear-left space."
+        ),
+        "expected_effect_direction": "rough_sounds_expand_distance_range_of_tactile_facilitation",
+        "observable_metric": "tactile RT/facilitation by Tbefore/T1-T5/Tafter timing and rough versus non-rough sound type",
+        "condition_contrast": "rough versus non-rough rear-left binaural looming sounds plus silent baseline timings",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/taffou_2021_auditory_roughness.json",
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#taffou_2021_auditory_roughness",
+        ],
+    },
+    "tajadura_jimenez_2009_visual_deprivation": {
+        "outcome_family": "static_left_right_audio_tactile_spatial_congruency",
+        "primary_expected_effect": (
+            "Static left/right audio-tactile trials are expected to show "
+            "spatial-congruency and posture-dependent multisensory facilitation, "
+            "with visual-deprivation history affecting how external space is coded."
+        ),
+        "expected_effect_direction": "spatially_congruent_audio_tactile_trials_show_posture_dependent_facilitation",
+        "observable_metric": "response speed/accuracy or redundancy-gain metric by side congruency and crossed/uncrossed posture",
+        "condition_contrast": "auditory-only, tactile-only, and congruent audio-tactile rows in crossed versus uncrossed posture blocks",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/tajadura_jimenez_2009_visual_deprivation.json",
+            "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv#tajadura_jimenez_2009_visual_deprivation",
+        ],
+    },
+    "tonelli_2019_echolocation": {
+        "outcome_family": "echolocation_training_modulation_of_lateral_head_pps",
+        "primary_expected_effect": (
+            "Echolocation training is expected to reshape lateral head/neck PPS, "
+            "changing the distance-dependent tactile facilitation curve from pre "
+            "to post training relative to control conditions."
+        ),
+        "expected_effect_direction": "echolocation_training_changes_lateral_head_pps_boundary",
+        "observable_metric": "neck tactile RT/facilitation by seven speaker-defined distances before and after training",
+        "condition_contrast": "pre versus post echolocation training, lateral seven-speaker looming trajectory, baselines, and catches",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/tonelli_2019_echolocation.json",
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#tonelli_2019_echolocation",
+        ],
+    },
 }
 
 
@@ -260,6 +485,11 @@ def _required_next_evidence(expected_status: str, runnable_status: str) -> str:
         return (
             "Extract a short structured expected outcome from the paper's Results/figures/tables "
             "and link it to an observable analysis metric."
+        )
+    if runnable_status == "not_yet_templated":
+        return (
+            "Create a profile template or add the missing toolkit structure before attempting "
+            "observed-vs-expected evaluation."
         )
     if runnable_status != "runnable_profile_parameters_ready":
         return "Resolve profile blockers before attempting observed-vs-expected evaluation."
