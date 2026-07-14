@@ -15,7 +15,18 @@
     "observed_behavioral_comparison_record_count": 0,
     "parameter_run_evidence_only_record_count": 6,
     "not_runnable_no_observed_comparison_record_count": 64,
-    "adjacent_not_applicable_record_count": 4
+    "adjacent_not_applicable_record_count": 4,
+    "pending_expected_outcome_blocker_counts": {
+      "main_pdf_unavailable_or_paywalled": 24,
+      "manual_review_needs_results_direction_structuring": 1,
+      "manual_review_partial_or_supplement_blocked": 1,
+      "needs_user_pdf_download": 9,
+      "source_mined_needs_results_visual_review": 14
+    }
+  },
+  "expected_outcome_extraction_sources": {
+    "paper_audit_checklist": "For-AI/audiotactile-paper-metadata-audit/running_checklist.csv",
+    "manual_review_index": "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv"
   },
   "current_observed_evidence": {
     "profile_materialization": "artifacts/validation_runs/current_goal_profile_recreation_ready_all_20260714/profile_recreation_interface_matrix_report.json",
@@ -34,6 +45,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "paywalled",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -57,6 +77,18 @@
           "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv#farne_ladavas_2002_auditory_pps_humans"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "paywalled",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0",
+        "manual_review_status": "manual_review_completed_main_pdf",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
@@ -70,6 +102,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "open_access_unavailable",
+        "paper_audit_supplement_status": "not_checked",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -93,6 +134,18 @@
           "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv#serino_2007_blind_cane_users"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "paywalled",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0",
+        "manual_review_status": "manual_review_completed_main_pdf_supplement_limited",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_static_near_far_tool_condition"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
@@ -106,6 +159,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "open_access_unavailable",
+        "paper_audit_supplement_status": "not_checked",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -129,6 +191,18 @@
           "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv#tajadura_jimenez_2009_visual_deprivation"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0",
+        "manual_review_status": "manual_review_completed_main_pdf_and_supporting_figure_no_methods_supplement",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_static_left_right_lateralization_not_looming"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
@@ -142,6 +216,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -155,6 +238,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "paywalled",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -168,6 +260,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "open_access_unavailable",
+        "paper_audit_supplement_status": "not_checked",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -181,6 +282,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "open_access_unavailable",
+        "paper_audit_supplement_status": "not_checked",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -206,6 +316,18 @@
           "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#canzoneri_2012_dynamic_sounds"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "8",
+        "manual_review_status": "manual_review_completed_main_pdf",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
@@ -221,6 +343,15 @@
       "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "needs_user_pdf_download",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "needs_user_download",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "pending_source",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -236,6 +367,15 @@
       "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "source_mined_needs_results_visual_review",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "6"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -249,6 +389,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "open_access_unavailable",
+        "paper_audit_supplement_status": "not_checked",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -262,6 +411,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -277,6 +435,15 @@
       "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "needs_user_pdf_download",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "needs_user_download",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "pending_source",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -292,6 +459,15 @@
       "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "needs_user_pdf_download",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "needs_user_download",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "pending_source",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -307,6 +483,15 @@
       "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "needs_user_pdf_download",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "needs_user_download",
+        "paper_audit_supplement_status": "paywalled",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "pending_source",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -322,6 +507,15 @@
       "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "needs_user_pdf_download",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "needs_user_download",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "pending_source",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -335,6 +529,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "source_mined_needs_results_visual_review",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "paywalled",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "7"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -350,6 +553,15 @@
       "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "source_mined_needs_results_visual_review",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "7"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -363,6 +575,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "open_access_unavailable",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -388,6 +609,18 @@
           "Consensus MCP 2026-07-15 query: audiotactile peripersonal space auditory tactile integration boundary looming"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "5",
+        "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_front_back_fbi_trunk_profiles"
+      },
       "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
       "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
       "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
@@ -403,6 +636,15 @@
       "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "needs_user_pdf_download",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "needs_user_download",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "pending_source",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -427,6 +669,18 @@
           "For-AI/audiotactile-paper-metadata-audit/manual_reviews/serino_2015_peri_trunk_exp1.json",
           "assets/preloads/audiotactile_holmes2020_consensus_screening.json"
         ]
+      },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "downloaded",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "6",
+        "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats"
       },
       "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
       "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
@@ -453,6 +707,18 @@
           "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#serino_2015_front_back_trunk_exp2"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "downloaded",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "6",
+        "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_16_speaker_front_back_trunk_profile"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
@@ -478,6 +744,18 @@
           "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#serino_2015_peri_hand_exp3"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "downloaded",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "6",
+        "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_lateralized_peri_hand_profile"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
@@ -501,6 +779,18 @@
           "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#serino_2015_exps_4_to_6"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "downloaded",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "6",
+        "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_split_into_exp4_exp5_exp6_profiles"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
@@ -516,6 +806,15 @@
       "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "source_mined_needs_results_visual_review",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "7"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -529,6 +828,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -542,6 +850,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -555,6 +872,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "source_mined_needs_results_visual_review",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "paywalled",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "9"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -580,6 +906,15 @@
           "Consensus MCP 2026-07-15 query: audiotactile peripersonal space auditory tactile integration boundary looming"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "needs_user_download",
+        "paper_audit_supplement_status": "paywalled",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "pending_source",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
       "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
       "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
@@ -602,6 +937,18 @@
           "For-AI/audiotactile-paper-metadata-audit/manual_reviews/ieeg_trunk_2018.json",
           "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#ieeg_trunk_2018"
         ]
+      },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "6",
+        "manual_review_status": "manual_review_completed_main_pdf_supplement_blocked",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_passive_ieeg_trunk_looming_profile"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
@@ -628,6 +975,18 @@
           "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#tonelli_2019_echolocation"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "downloaded",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "6",
+        "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_lateral_head_looming_echolocation_profile"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
@@ -641,6 +1000,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "source_mined_needs_results_visual_review",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "7"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -654,6 +1022,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "source_mined_needs_results_visual_review",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "7"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -677,6 +1054,18 @@
           "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#ronga_2021_newborn_erp"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "paywalled",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "4",
+        "manual_review_status": "manual_review_completed_main_pdf_and_pnas_supplements",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_static_near_far_passive_erp_profile"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
@@ -690,6 +1079,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "open_access_unavailable",
+        "paper_audit_supplement_status": "paywalled",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -713,6 +1111,18 @@
           "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#disorders_consciousness_2019"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "5",
+        "manual_review_status": "manual_review_completed_main_pdf_no_supplement_found",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_static_near_far_doc_arm_erp_profile"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
@@ -726,6 +1136,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "needs_user_pdf_download",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "needs_user_download",
+        "paper_audit_supplement_status": "paywalled",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "pending_source",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -739,6 +1158,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "open_access_unavailable",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -752,6 +1180,15 @@
       "runnable_status": "adjacent_not_applicable",
       "expected_outcome_status": "adjacent_out_of_scope",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "adjacent_out_of_scope",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "not_applicable",
+        "paper_audit_supplement_status": "not_applicable",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "not_applicable",
+        "paper_audit_visualization_status": "not_applicable",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "adjacent_not_applicable",
       "observed_evidence_boundary": "The record is adjacent or out of scope for audiotactile PPS outcome comparison.",
       "required_next_evidence": "No outcome comparison required unless the record is reclassified as in scope."
@@ -765,6 +1202,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "paywalled",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -778,6 +1224,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -791,6 +1246,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "open_access_unavailable",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -804,6 +1268,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "source_mined_needs_results_visual_review",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "8"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -817,6 +1290,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "source_mined_needs_results_visual_review",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "6"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -830,6 +1312,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -843,6 +1334,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "downloaded",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "no_visualization_terms_found",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -866,6 +1366,18 @@
           "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#taffou_2021_auditory_roughness"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "downloaded",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "7",
+        "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_rear_left_binaural_roughness_looming_profile"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
@@ -879,6 +1391,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "source_mined_needs_results_visual_review",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "downloaded",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "7"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -892,6 +1413,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "needs_user_pdf_download",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "needs_user_download",
+        "paper_audit_supplement_status": "paywalled",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "pending_source",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -905,6 +1435,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "source_mined_needs_results_visual_review",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "downloaded",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "3"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -918,6 +1457,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "open_access_unavailable",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -931,6 +1479,18 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "manual_review_needs_results_direction_structuring",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "needs_user_download",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "pending_source",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0",
+        "manual_review_status": "manual_review_completed_main_pdf",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -944,6 +1504,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "source_mined_needs_results_visual_review",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "7"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -957,6 +1526,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -970,6 +1548,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "open_access_unavailable",
+        "paper_audit_supplement_status": "not_checked",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -983,6 +1570,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "source_mined_needs_results_visual_review",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "8"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -996,6 +1592,18 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "manual_review_partial_or_supplement_blocked",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "paywalled",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0",
+        "manual_review_status": "manual_review_completed_main_pdf_supplement_blocked",
+        "manual_review_confidence_label": "partial_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -1009,6 +1617,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "open_access_unavailable",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -1022,6 +1639,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "needs_user_pdf_download",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "needs_user_download",
+        "paper_audit_supplement_status": "paywalled",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "pending_source",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -1044,6 +1670,18 @@
           "For-AI/audiotactile-paper-metadata-audit/manual_reviews/cell_reports_medicine_2026_consciousness.json",
           "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv#cell_reports_medicine_2026_consciousness"
         ]
+      },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "needs_user_download",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "pending_source",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0",
+        "manual_review_status": "manual_review_completed_main_pdf_and_cell_press_source_pdf",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_task_free_eeg_pps_two_variants"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
@@ -1070,6 +1708,18 @@
           "Consensus MCP 2026-07-15 query: audio tactile peripersonal space looming sound tactile reaction time"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "8",
+        "manual_review_status": "manual_review_completed_main_pdf_and_publisher_html_no_supplement_found",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_four_direction_dynamic_trunk_pps_profile"
+      },
       "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
       "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
       "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
@@ -1085,6 +1735,15 @@
       "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "source_mined_needs_results_visual_review",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "5"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -1111,6 +1770,18 @@
           "Consensus MCP 2026-07-15 query: audio tactile peripersonal space looming sound tactile reaction time"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "downloaded",
+        "paper_audit_supplement_status": "downloaded",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_visualization_status": "source_mined",
+        "paper_audit_visualization_candidate_count": "6",
+        "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_two_experiment_arm_movement_profiles"
+      },
       "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
       "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
       "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
@@ -1136,6 +1807,15 @@
           "Consensus MCP 2026-07-15 query: audio tactile peripersonal space looming sound tactile reaction time"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "needs_user_download",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "pending_source",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
       "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
       "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
@@ -1149,6 +1829,15 @@
       "runnable_status": "adjacent_not_applicable",
       "expected_outcome_status": "adjacent_out_of_scope",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "adjacent_out_of_scope",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "not_applicable",
+        "paper_audit_supplement_status": "not_applicable",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "not_applicable",
+        "paper_audit_visualization_status": "not_applicable",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "adjacent_not_applicable",
       "observed_evidence_boundary": "The record is adjacent or out of scope for audiotactile PPS outcome comparison.",
       "required_next_evidence": "No outcome comparison required unless the record is reclassified as in scope."
@@ -1162,6 +1851,15 @@
       "runnable_status": "adjacent_not_applicable",
       "expected_outcome_status": "adjacent_out_of_scope",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "adjacent_out_of_scope",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "not_applicable",
+        "paper_audit_supplement_status": "not_applicable",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "not_applicable",
+        "paper_audit_visualization_status": "not_applicable",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "adjacent_not_applicable",
       "observed_evidence_boundary": "The record is adjacent or out of scope for audiotactile PPS outcome comparison.",
       "required_next_evidence": "No outcome comparison required unless the record is reclassified as in scope."
@@ -1175,6 +1873,15 @@
       "runnable_status": "adjacent_not_applicable",
       "expected_outcome_status": "adjacent_out_of_scope",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "adjacent_out_of_scope",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "not_applicable",
+        "paper_audit_supplement_status": "not_applicable",
+        "paper_audit_extraction_status": "parsed_with_warnings",
+        "paper_audit_metadata_confidence_label": "not_applicable",
+        "paper_audit_visualization_status": "not_applicable",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "adjacent_not_applicable",
       "observed_evidence_boundary": "The record is adjacent or out of scope for audiotactile PPS outcome comparison.",
       "required_next_evidence": "No outcome comparison required unless the record is reclassified as in scope."
@@ -1188,6 +1895,15 @@
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "pending_expected_outcome_extraction",
       "expected_outcome": {},
+      "expected_outcome_extraction_blocker": "main_pdf_unavailable_or_paywalled",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "needs_user_download",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
@@ -1211,6 +1927,18 @@
           "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv#finisguerra_2015_moving_sounds_motor"
         ]
       },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "open_access_unavailable",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0",
+        "manual_review_status": "manual_review_completed_main_pdf_no_supplement_found",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_tms_specific"
+      },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
@@ -1233,6 +1961,18 @@
           "For-AI/audiotactile-paper-metadata-audit/manual_reviews/biggio_2017_racket_tool_use.json",
           "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv#biggio_2017_racket_tool_use"
         ]
+      },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "paywalled",
+        "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0",
+        "manual_review_status": "manual_review_completed_main_pdf_no_supplement_found",
+        "manual_review_confidence_label": "high_confidence_extraction",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_static_near_far_racket_condition"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",

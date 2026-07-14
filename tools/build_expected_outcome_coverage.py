@@ -10,6 +10,7 @@ analysis plumbing; they do not validate human PPS effects.
 
 from __future__ import annotations
 
+import csv
 import json
 from collections import Counter
 from pathlib import Path
@@ -19,6 +20,12 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[1]
 COVERAGE_PATH = REPO_ROOT / "assets" / "preloads" / "audiotactile_literature_coverage.json"
 OUTPUT_PATH = REPO_ROOT / "assets" / "preloads" / "audiotactile_expected_outcome_coverage.json"
+PAPER_AUDIT_CHECKLIST_PATH = (
+    REPO_ROOT / "For-AI" / "audiotactile-paper-metadata-audit" / "running_checklist.csv"
+)
+MANUAL_REVIEW_INDEX_PATH = (
+    REPO_ROOT / "For-AI" / "audiotactile-paper-metadata-audit" / "manual_review_index.csv"
+)
 
 SCHEMA = "pps-audiotactile-expected-outcome-coverage.v1"
 
@@ -350,9 +357,23 @@ def main() -> int:
 
 
 def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
-    records = [build_record(record) for record in coverage.get("literature_records", [])]
+    paper_audit_index = _load_csv_index(PAPER_AUDIT_CHECKLIST_PATH, key="record_id")
+    manual_review_index = _load_csv_index(MANUAL_REVIEW_INDEX_PATH, key="record_id")
+    records = [
+        build_record(
+            record,
+            paper_audit_index.get(str(record.get("record_id") or ""), {}),
+            manual_review_index.get(str(record.get("record_id") or ""), {}),
+        )
+        for record in coverage.get("literature_records", [])
+    ]
     expected_counts = Counter(record["expected_outcome_status"] for record in records)
     observed_counts = Counter(record["observed_vs_expected_status"] for record in records)
+    blocker_counts = Counter(
+        record["expected_outcome_extraction_blocker"]
+        for record in records
+        if record["expected_outcome_status"] == "pending_expected_outcome_extraction"
+    )
     runnable_records = [record for record in records if record["runnable_status"] == "runnable_profile_parameters_ready"]
     return {
         "schema": SCHEMA,
@@ -384,6 +405,11 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
             ],
             "not_runnable_no_observed_comparison_record_count": observed_counts["not_runnable_no_observed_comparison"],
             "adjacent_not_applicable_record_count": observed_counts["adjacent_not_applicable"],
+            "pending_expected_outcome_blocker_counts": dict(sorted(blocker_counts.items())),
+        },
+        "expected_outcome_extraction_sources": {
+            "paper_audit_checklist": "For-AI/audiotactile-paper-metadata-audit/running_checklist.csv",
+            "manual_review_index": "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv",
         },
         "current_observed_evidence": {
             "profile_materialization": (
@@ -411,12 +437,18 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def build_record(record: dict[str, Any]) -> dict[str, Any]:
+def build_record(
+    record: dict[str, Any],
+    paper_audit_row: dict[str, str] | None = None,
+    manual_review_row: dict[str, str] | None = None,
+) -> dict[str, Any]:
     record_id = str(record.get("record_id") or "")
     coverage_category = str(record.get("coverage_category") or "")
     template_ids = [str(value) for value in record.get("current_template_ids") or []]
     expected = EXPECTED_OUTCOMES.get(record_id)
     adjacent = coverage_category == "adjacent_out_of_scope"
+    paper_audit = paper_audit_row or {}
+    manual_review = manual_review_row or {}
 
     if adjacent:
         expected_status = "adjacent_out_of_scope"
@@ -427,6 +459,7 @@ def build_record(record: dict[str, Any]) -> dict[str, Any]:
 
     runnable_status = _runnable_status(record, coverage_category, template_ids, adjacent)
     observed_status = _observed_status(expected_status, runnable_status)
+    extraction_blocker = _expected_outcome_extraction_blocker(expected_status, paper_audit, manual_review)
 
     return {
         "record_id": record_id,
@@ -437,10 +470,77 @@ def build_record(record: dict[str, Any]) -> dict[str, Any]:
         "runnable_status": runnable_status,
         "expected_outcome_status": expected_status,
         "expected_outcome": expected or {},
+        "expected_outcome_extraction_blocker": extraction_blocker,
+        "expected_outcome_source_audit": _expected_outcome_source_audit(paper_audit, manual_review),
         "observed_vs_expected_status": observed_status,
         "observed_evidence_boundary": _observed_boundary(observed_status),
         "required_next_evidence": _required_next_evidence(expected_status, runnable_status),
     }
+
+
+def _load_csv_index(path: Path, key: str) -> dict[str, dict[str, str]]:
+    if not path.exists():
+        return {}
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        rows = csv.DictReader(handle)
+        return {
+            str(row.get(key) or ""): {str(k): str(v or "") for k, v in row.items()}
+            for row in rows
+            if row.get(key)
+        }
+
+
+def _expected_outcome_extraction_blocker(
+    expected_status: str,
+    paper_audit: dict[str, str],
+    manual_review: dict[str, str],
+) -> str:
+    if expected_status == "structured_expected_outcome_extracted":
+        return "structured_expected_outcome_available"
+    if expected_status == "adjacent_out_of_scope":
+        return "adjacent_out_of_scope"
+
+    manual_status = manual_review.get("manual_review_status", "")
+    manual_confidence = manual_review.get("confidence_label", "")
+    if manual_status:
+        if manual_confidence == "partial_extraction" or "supplement_blocked" in manual_status:
+            return "manual_review_partial_or_supplement_blocked"
+        return "manual_review_needs_results_direction_structuring"
+
+    pdf_status = paper_audit.get("pdf_status", "")
+    extraction_status = paper_audit.get("extraction_status", "")
+    metadata_confidence = paper_audit.get("metadata_confidence_label", "")
+    visualization_status = paper_audit.get("pps_visualization_audit_status", "")
+
+    if visualization_status == "source_mined":
+        return "source_mined_needs_results_visual_review"
+    if pdf_status == "needs_user_download":
+        return "needs_user_pdf_download"
+    if pdf_status in {"paywalled", "open_access_unavailable"}:
+        return "main_pdf_unavailable_or_paywalled"
+    if extraction_status == "pending_pdf":
+        return "pending_pdf_extraction"
+    if metadata_confidence in {"pending_source", "source_unavailable"}:
+        return "source_unavailable_or_pending"
+    return "expected_outcome_not_yet_reviewed"
+
+
+def _expected_outcome_source_audit(
+    paper_audit: dict[str, str],
+    manual_review: dict[str, str],
+) -> dict[str, str]:
+    fields = {
+        "paper_audit_pdf_status": paper_audit.get("pdf_status", ""),
+        "paper_audit_supplement_status": paper_audit.get("supplement_status", ""),
+        "paper_audit_extraction_status": paper_audit.get("extraction_status", ""),
+        "paper_audit_metadata_confidence_label": paper_audit.get("metadata_confidence_label", ""),
+        "paper_audit_visualization_status": paper_audit.get("pps_visualization_audit_status", ""),
+        "paper_audit_visualization_candidate_count": paper_audit.get("pps_visualization_candidate_count", ""),
+        "manual_review_status": manual_review.get("manual_review_status", ""),
+        "manual_review_confidence_label": manual_review.get("confidence_label", ""),
+        "manual_review_profile_recreation_assessment": manual_review.get("profile_recreation_assessment", ""),
+    }
+    return {key: value for key, value in fields.items() if value}
 
 
 def _runnable_status(

@@ -91,6 +91,13 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "parameter_run_evidence_only_record_count": 6,
         "not_runnable_no_observed_comparison_record_count": 64,
         "adjacent_not_applicable_record_count": 4,
+        "pending_expected_outcome_blocker_counts": {
+            "main_pdf_unavailable_or_paywalled": 24,
+            "manual_review_needs_results_direction_structuring": 1,
+            "manual_review_partial_or_supplement_blocked": 1,
+            "needs_user_pdf_download": 9,
+            "source_mined_needs_results_visual_review": 14,
+        },
     }
 
     for record_id in structured_ids:
@@ -119,6 +126,47 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         for record in records.values()
     )
     assert "do not prove human behavioral PPS effects" in outcome["scope"]["evidence_boundary"]
+
+
+def test_expected_outcome_pending_blockers_are_actionable():
+    outcome = json.loads(OUTCOME_PATH.read_text(encoding="utf-8"))
+    records = {record["record_id"]: record for record in outcome["records"]}
+
+    assert outcome["expected_outcome_extraction_sources"] == {
+        "paper_audit_checklist": "For-AI/audiotactile-paper-metadata-audit/running_checklist.csv",
+        "manual_review_index": "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv",
+    }
+
+    pending_records = [
+        record
+        for record in records.values()
+        if record["expected_outcome_status"] == "pending_expected_outcome_extraction"
+    ]
+    blocker_total = sum(outcome["summary"]["pending_expected_outcome_blocker_counts"].values())
+    assert blocker_total == len(pending_records) == 49
+
+    assert (
+        records["mindfulness_pps_2024"]["expected_outcome_extraction_blocker"]
+        == "manual_review_needs_results_direction_structuring"
+    )
+    assert records["depersonalisation_2024"]["expected_outcome_extraction_blocker"] == (
+        "manual_review_partial_or_supplement_blocked"
+    )
+    assert records["ferri_2015_jneurosci_itv"]["expected_outcome_extraction_blocker"] == (
+        "source_mined_needs_results_visual_review"
+    )
+    assert records["ladavas_2001_auditory_tactile_extinction"]["expected_outcome_extraction_blocker"] == (
+        "main_pdf_unavailable_or_paywalled"
+    )
+    assert records["canzoneri_2013_tool_use_reshaping"]["expected_outcome_extraction_blocker"] == (
+        "needs_user_pdf_download"
+    )
+
+    structured = records["canzoneri_2012_dynamic_sounds"]
+    assert structured["expected_outcome_extraction_blocker"] == "structured_expected_outcome_available"
+    assert structured["expected_outcome_source_audit"]["manual_review_confidence_label"] == (
+        "high_confidence_extraction"
+    )
 
 
 def test_expected_outcome_blocked_and_adjacent_records_do_not_claim_observed_comparison():
