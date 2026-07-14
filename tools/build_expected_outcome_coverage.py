@@ -455,6 +455,254 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
             "Consensus MCP 2026-07-15 query: Mindfulness and peripersonal space boundaries 2024 audio tactile PPS",
         ],
     },
+    "canzoneri_2013_tool_use_reshaping": {
+        "outcome_family": "tool_use_extension_of_hand_pps_and_body_representation",
+        "primary_expected_effect": (
+            "Brief use of a long tool is expected to extend hand-centered PPS "
+            "along the tool axis and concurrently reshape body representation, "
+            "whereas a pointing control task is not expected to do so."
+        ),
+        "expected_effect_direction": "tool_use_extends_pps_along_tool_axis_and_elongates_body_representation",
+        "observable_metric": "PPS boundary and tactile-distance/body-landmark body-representation metrics before and after tool use",
+        "condition_contrast": "tool-use training versus pointing control and pre/post audio-tactile PPS task",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#canzoneri_2013_tool_use_reshaping",
+            "Consensus MCP 2026-07-15 query: Canzoneri 2013 amputation prosthesis peripersonal space audio tactile",
+        ],
+    },
+    "canzoneri_2013_amputation_prosthesis": {
+        "outcome_family": "prosthesis_dependent_remapping_of_amputated_limb_pps",
+        "primary_expected_effect": (
+            "For the amputated limb, PPS boundaries are expected to shift toward "
+            "the stump without the prosthesis and to extend to include the "
+            "prosthetic hand when the prosthesis is worn."
+        ),
+        "expected_effect_direction": "prosthesis_extends_amputated_side_pps_after_stump_shift_without_prosthesis",
+        "observable_metric": "audio-tactile PPS boundary and tactile-distance body-representation metrics by limb/prosthesis state",
+        "condition_contrast": "amputated limb with versus without prosthesis, healthy limb, and healthy controls",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#canzoneri_2013_amputation_prosthesis",
+            "Consensus MCP 2026-07-15 query: Canzoneri 2013 amputation prosthesis peripersonal space audio tactile",
+        ],
+    },
+    "serino_2011_rtms": {
+        "outcome_family": "frontoparietal_causal_role_in_hand_pps_facilitation",
+        "primary_expected_effect": (
+            "Near sounds are expected to speed tactile responses around the hand "
+            "without rTMS; virtual lesions to ventral premotor or posterior "
+            "parietal cortex are expected to eliminate that near-sound benefit."
+        ),
+        "expected_effect_direction": "vpmc_or_ppc_rtms_removes_near_sound_tactile_facilitation",
+        "observable_metric": "tactile RT near-sound benefit under rTMS target site",
+        "condition_contrast": "no-rTMS/V1 control versus vPMc and PPc rTMS, near versus far sound",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#serino_2011_rtms",
+            "Consensus MCP 2026-07-15 query: Canzoneri 2013 amputation prosthesis peripersonal space audio tactile",
+        ],
+    },
+    "serino_2011_professional_fencers": {
+        "outcome_family": "expert_weapon_use_extension_of_hand_pps",
+        "primary_expected_effect": (
+            "Professional fencers are expected to show hand PPS extension while "
+            "holding their weapon, so far auditory stimuli interact with tactile "
+            "stimulation at the hand, unlike the short-handle condition."
+        ),
+        "expected_effect_direction": "weapon_holding_shifts_hand_pps_to_weapon_tip",
+        "observable_metric": "audio-tactile facilitation by sound distance while holding weapon versus handle",
+        "condition_contrast": "professional fencers holding weapon versus short handle, with weapon-type variation",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#serino_2011_professional_fencers",
+            "Consensus MCP 2026-07-15 query: Canzoneri 2013 amputation prosthesis peripersonal space audio tactile",
+        ],
+    },
+    "galli_2015_wheelchair": {
+        "outcome_family": "wheelchair_mediated_full_body_pps_extension",
+        "primary_expected_effect": (
+            "Wheelchair-mediated passive exploration with vision is expected to "
+            "extend full-body PPS, whereas active nonexpert training and "
+            "blindfolded passive exploration are not expected to produce the same "
+            "extension."
+        ),
+        "expected_effect_direction": "visible_passive_wheelchair_exploration_extends_full_body_pps",
+        "observable_metric": "full-body PPS boundary before and after wheelchair training condition",
+        "condition_contrast": "active wheelchair training, passive wheelchair training with vision, and blindfolded passive training",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#galli_2015_wheelchair",
+            "Consensus MCP 2026-07-15 query: Canzoneri 2013 amputation prosthesis peripersonal space audio tactile",
+        ],
+    },
+    "serino_2018_mixed_reality_pps": {
+        "outcome_family": "mixed_reality_audio_visual_tactile_pps_boundary_capture",
+        "primary_expected_effect": (
+            "Mixed-reality looming stimuli are expected to enhance tactile "
+            "detection when close to the body and to support individual PPS "
+            "boundary estimation, with audio-visual looming producing stronger "
+            "sigmoidal boundary fits than visual-only looming."
+        ),
+        "expected_effect_direction": "close_mixed_reality_audio_visual_stimuli_enhance_tactile_detection",
+        "observable_metric": "tactile RT facilitation and sigmoidal PPS boundary fit by virtual stimulus distance",
+        "condition_contrast": "visual-only versus audio-visual looming stimuli across near/far virtual distances",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#serino_2018_mixed_reality_pps",
+            "Consensus MCP 2026-07-15 query: Canzoneri 2013 amputation prosthesis peripersonal space audio tactile",
+        ],
+    },
+    "noel_2018_neural_adaptation": {
+        "outcome_family": "velocity_dependent_dynamic_resizing_of_pps",
+        "primary_expected_effect": (
+            "Peri-trunk PPS is expected to be larger than peri-face PPS, and both "
+            "representations are expected to enlarge as the velocity of incoming "
+            "approaching auditory stimuli increases."
+        ),
+        "expected_effect_direction": "faster_approaching_sounds_expand_face_and_trunk_pps",
+        "observable_metric": "peri-face/peri-trunk PPS size by incoming auditory-stimulus velocity",
+        "condition_contrast": "body part and approaching-sound velocity conditions in the psychophysical-computational task",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#noel_2018_neural_adaptation",
+            "Consensus MCP 2026-07-15 query: Noel 2018 neural adaptation peripersonal space audio tactile",
+        ],
+    },
+    "noel_2015_walking": {
+        "outcome_family": "walking_induced_expansion_of_full_body_pps",
+        "primary_expected_effect": (
+            "Walking is expected to expand chest-centered PPS so that tactile "
+            "processing is facilitated by sounds at farther distances than while "
+            "standing still, with the expansion driven by kinematic/proprioceptive "
+            "cues rather than optic flow."
+        ),
+        "expected_effect_direction": "walking_expands_chest_pps_to_farther_looming_sound_distances",
+        "observable_metric": "audio-tactile PPS boundary while standing versus walking",
+        "condition_contrast": "standing still versus treadmill walking with and without congruent optic flow",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#noel_2015_walking",
+            "Consensus MCP 2026-07-15 query: Noel 2018 neural adaptation peripersonal space audio tactile",
+        ],
+    },
+    "spadone_2021_connectivity": {
+        "outcome_family": "frontoparietal_connectivity_correlates_of_pps_extension",
+        "primary_expected_effect": (
+            "Premotor connectivity with dorsal-attention and frontoparietal nodes "
+            "is expected to be stronger during near-space processing, and "
+            "individual PPS extension is expected to relate to premotor-parietal "
+            "connectivity and dynamic connectivity variability."
+        ),
+        "expected_effect_direction": "near_space_processing_strengthens_premotor_frontoparietal_connectivity",
+        "observable_metric": "fMRI functional connectivity and across-trial variability by near/far audio-tactile PPS condition",
+        "condition_contrast": "near versus far audio-tactile trials and individual PPS boundary estimates",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#spadone_2021_connectivity",
+            "Consensus MCP 2026-07-15 query: Noel 2018 neural adaptation peripersonal space audio tactile",
+        ],
+    },
+    "seeming_confines_2021": {
+        "outcome_family": "tool_use_reduces_near_far_rt_erp_difference",
+        "primary_expected_effect": (
+            "Before tool use, bimodal-near trials are expected to show faster RTs "
+            "and greater ERP super-additivity than bimodal-far trials; after "
+            "tool-use training, this near-far differential is expected to be "
+            "reduced, indicating PPS extension."
+        ),
+        "expected_effect_direction": "tool_use_reduces_far_near_differential_by_extending_pps",
+        "observable_metric": "RT facilitation and ERP super-additivity for near versus far bimodal trials",
+        "condition_contrast": "tool-use training versus far-space visual-discrimination control training",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#seeming_confines_2021",
+            "Consensus MCP 2026-07-15 query: Noel 2018 neural adaptation peripersonal space audio tactile",
+        ],
+    },
+    "holmes_2020_four_experiments": {
+        "outcome_family": "mixed_support_for_near_sound_tactile_rt_benefit",
+        "primary_expected_effect": (
+            "Across four experiments, the expected outcome is weak or mixed "
+            "support: no robust distance-dependent enhancement in error rates or "
+            "task performance, but a small general RT speeding for near sounds "
+            "and a meta-analytic near-versus-far benefit."
+        ),
+        "expected_effect_direction": "small_near_sound_rt_benefit_without_robust_distance_gradient",
+        "observable_metric": "tactile RT/error performance for near versus far sounds plus meta-analytic RT benefit",
+        "condition_contrast": "near versus far sound conditions across four experiments and meta-analysis filters",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#holmes_2020_four_experiments",
+            "Consensus MCP 2026-07-15 query: Noel 2018 neural adaptation peripersonal space audio tactile",
+        ],
+    },
+    "lerner_2021_3d_boundary": {
+        "outcome_family": "vr_3d_audio_tactile_pps_boundary_mapping",
+        "primary_expected_effect": (
+            "The VR audio-tactile setup is expected to infer an individual 3D PPS "
+            "boundary by measuring how tactile processing varies with virtual "
+            "sound-source location around the body."
+        ),
+        "expected_effect_direction": "audio_tactile_vr_task_maps_individual_3d_pps_boundary",
+        "observable_metric": "individual 3D PPS boundary/localization from audio-tactile interaction across virtual directions",
+        "condition_contrast": "virtual audio-tactile source locations spanning the 3D peribody volume",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#lerner_2021_3d_boundary",
+            "Consensus MCP 2026-07-15 query: Noel 2018 neural adaptation peripersonal space audio tactile",
+        ],
+    },
+    "amiel_2025_front_rear": {
+        "outcome_family": "quadrant_specific_front_rear_defensive_pps_asymmetry",
+        "primary_expected_effect": (
+            "Defensive audio-tactile PPS is expected to be nonhomogeneous: in "
+            "front space, left-approaching sounds must be closer than right "
+            "approaching sounds to facilitate tactile detection, whereas rear "
+            "space shows similar facilitation distances for left and right."
+        ),
+        "expected_effect_direction": "front_space_lateral_asymmetry_but_rear_space_symmetric_facilitation",
+        "observable_metric": "tactile detection facilitation distance by front/rear and left/right virtual approach quadrant",
+        "condition_contrast": "front-left, front-right, rear-left, and rear-right looming 3D sound quadrants",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#amiel_2025_front_rear",
+            "Consensus MCP 2026-07-15 query: Noel 2018 neural adaptation peripersonal space audio tactile",
+        ],
+    },
+    "newborn_boundaries_2019": {
+        "outcome_family": "newborn_intensity_defined_auditory_pps_boundary",
+        "primary_expected_effect": (
+            "Newborn saccadic reaction times to tactile stimulation are expected "
+            "to vary with simultaneous sound intensity, becoming faster above a "
+            "critical intensity that functions as a rudimentary PPS boundary cue."
+        ),
+        "expected_effect_direction": "louder_near_sound_intensity_speeds_newborn_tactile_saccadic_rt",
+        "observable_metric": "newborn saccadic RT to tactile stimulation by simultaneous sound intensity",
+        "condition_contrast": "sound intensities interpreted as distance cues in newborns and adults",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#newborn_boundaries_2019",
+            "Consensus MCP 2026-07-15 query: pregnancy ageing newborn boundaries peripersonal space audio tactile PPS",
+        ],
+    },
+    "pregnancy_2019": {
+        "outcome_family": "third_trimester_expansion_of_pps",
+        "primary_expected_effect": (
+            "PPS is expected to be larger and the near/far transition more "
+            "gradual in the third trimester of pregnancy, while second-trimester "
+            "and postpartum PPS size are not expected to differ from controls."
+        ),
+        "expected_effect_direction": "third_trimester_expands_pps_and_softens_boundary_transition",
+        "observable_metric": "audio-tactile PPS boundary size and psychometric slope by pregnancy stage",
+        "condition_contrast": "second trimester, third trimester, postpartum, and non-pregnant controls",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#pregnancy_2019",
+            "Consensus MCP 2026-07-15 query: pregnancy ageing newborn boundaries peripersonal space audio tactile PPS",
+        ],
+    },
+    "footsole_vibration_2019": {
+        "outcome_family": "pseudo_walking_footsole_vibration_pps_extension",
+        "primary_expected_effect": (
+            "Rhythmic walking-sound vibrations applied to the soles of the feet, "
+            "but not the forearms, are expected to boost tactile processing when "
+            "looming sounds are near the body, suggesting PPS extension without "
+            "actual body movement."
+        ),
+        "expected_effect_direction": "footsole_walking_vibration_boosts_near_looming_tactile_processing",
+        "observable_metric": "tactile processing/RT benefit for looming sounds by vibration site",
+        "condition_contrast": "foot-sole walking-sound vibration versus forearm vibration/no-body-movement controls",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#footsole_vibration_2019",
+            "Consensus MCP 2026-07-15 query: pregnancy ageing newborn boundaries peripersonal space audio tactile PPS",
+        ],
+    },
 }
 
 

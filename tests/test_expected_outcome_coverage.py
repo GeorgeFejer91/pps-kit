@@ -13,6 +13,9 @@ BUILDER_PATH = ROOT / "tools" / "build_expected_outcome_coverage.py"
 
 STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "biggio_2017_racket_tool_use",
+    "amiel_2025_front_rear",
+    "canzoneri_2013_amputation_prosthesis",
+    "canzoneri_2013_tool_use_reshaping",
     "canzoneri_2012_dynamic_sounds",
     "cell_reports_medicine_2026_consciousness",
     "disorders_consciousness_2019",
@@ -20,21 +23,34 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "ferri_2015_artificial_valence",
     "ferri_2015_ecological_valence",
     "finisguerra_2015_moving_sounds_motor",
+    "footsole_vibration_2019",
+    "galli_2015_wheelchair",
+    "holmes_2020_four_experiments",
     "ieeg_trunk_2018",
     "lamia_2026_arm_movement",
+    "lerner_2021_3d_boundary",
     "matsuda_2021_four_directions",
     "mindfulness_pps_2024",
+    "newborn_boundaries_2019",
     "noel_2015_bodily_self",
+    "noel_2015_walking",
+    "noel_2018_neural_adaptation",
     "pfeiffer_2018_vestibular",
+    "pregnancy_2019",
     "ronga_2021_newborn_erp",
+    "seeming_confines_2021",
+    "serino_2011_professional_fencers",
+    "serino_2011_rtms",
     "schizophrenia_tool_use_2022",
     "serino_2007_blind_cane_users",
+    "serino_2018_mixed_reality_pps",
     "serino_2015_exps_4_to_6",
     "serino_2015_front_back_trunk_exp2",
     "serino_2015_peri_hand_exp3",
     "serino_2015_peri_trunk_exp1",
     "smartphone_rt_methods_2025",
     "social_coding_2019",
+    "spadone_2021_connectivity",
     "taffou_2021_auditory_roughness",
     "tajadura_jimenez_2009_visual_deprivation",
     "teneggi_2013_social_face",
@@ -90,8 +106,8 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
     assert structured_ids == STRUCTURED_EXPECTED_OUTCOME_IDS
     assert outcome["summary"] == {
         "literature_record_count": 74,
-        "structured_expected_outcome_record_count": 28,
-        "pending_expected_outcome_record_count": 42,
+        "structured_expected_outcome_record_count": 44,
+        "pending_expected_outcome_record_count": 26,
         "adjacent_or_out_of_scope_record_count": 4,
         "runnable_profile_parameter_record_count": 6,
         "observed_behavioral_comparison_record_count": 0,
@@ -99,10 +115,10 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "not_runnable_no_observed_comparison_record_count": 64,
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {
-            "main_pdf_unavailable_or_paywalled": 24,
+            "main_pdf_unavailable_or_paywalled": 19,
             "manual_review_partial_or_supplement_blocked": 1,
-            "needs_user_pdf_download": 4,
-            "source_mined_needs_results_visual_review": 13,
+            "needs_user_pdf_download": 2,
+            "source_mined_needs_results_visual_review": 4,
         },
     }
 
@@ -149,7 +165,7 @@ def test_expected_outcome_pending_blockers_are_actionable():
         if record["expected_outcome_status"] == "pending_expected_outcome_extraction"
     ]
     blocker_total = sum(outcome["summary"]["pending_expected_outcome_blocker_counts"].values())
-    assert blocker_total == len(pending_records) == 42
+    assert blocker_total == len(pending_records) == 26
 
     assert records["depersonalisation_2024"]["expected_outcome_extraction_blocker"] == (
         "manual_review_partial_or_supplement_blocked"
@@ -160,7 +176,7 @@ def test_expected_outcome_pending_blockers_are_actionable():
     assert records["ladavas_2001_auditory_tactile_extinction"]["expected_outcome_extraction_blocker"] == (
         "main_pdf_unavailable_or_paywalled"
     )
-    assert records["canzoneri_2013_tool_use_reshaping"]["expected_outcome_extraction_blocker"] == (
+    assert records["taffou_2014_cynophobic_rear_looming"]["expected_outcome_extraction_blocker"] == (
         "needs_user_pdf_download"
     )
 
@@ -182,24 +198,41 @@ def test_expected_outcome_pending_blockers_are_actionable():
         "rear_space_audio_tactile_facilitation_exceeds_front_space"
     )
 
+    amputation = records["canzoneri_2013_amputation_prosthesis"]
+    assert amputation["expected_outcome"]["expected_effect_direction"] == (
+        "prosthesis_extends_amputated_side_pps_after_stump_shift_without_prosthesis"
+    )
+
+    walking = records["noel_2015_walking"]
+    assert walking["expected_outcome"]["expected_effect_direction"] == (
+        "walking_expands_chest_pps_to_farther_looming_sound_distances"
+    )
+
+    holmes = records["holmes_2020_four_experiments"]
+    assert holmes["expected_outcome"]["expected_effect_direction"] == (
+        "small_near_sound_rt_benefit_without_robust_distance_gradient"
+    )
+
 
 def test_expected_outcome_blocked_and_adjacent_records_do_not_claim_observed_comparison():
     outcome = json.loads(OUTCOME_PATH.read_text(encoding="utf-8"))
     records = {record["record_id"]: record for record in outcome["records"]}
 
     for record_id in [
-        "canzoneri_2013_tool_use_reshaping",
-        "canzoneri_2013_amputation_prosthesis",
+        "taffou_2014_cynophobic_rear_looming",
+        "noel_2015_walking",
         "hobeika_2020_methods",
         "amemiya_2017_pseudowalking_footsole",
     ]:
         record = records[record_id]
         assert record["runnable_status"] != "runnable_profile_parameters_ready"
         assert record["observed_vs_expected_status"] == "not_runnable_no_observed_comparison"
-        assert record["required_next_evidence"].startswith("Extract a short structured expected outcome")
+        if record["expected_outcome_status"] == "pending_expected_outcome_extraction":
+            assert record["required_next_evidence"].startswith("Extract a short structured expected outcome")
 
     for record_id in [
         "canzoneri_2012_dynamic_sounds",
+        "canzoneri_2013_tool_use_reshaping",
         "tonelli_2019_echolocation",
         "serino_2015_front_back_trunk_exp2",
     ]:
