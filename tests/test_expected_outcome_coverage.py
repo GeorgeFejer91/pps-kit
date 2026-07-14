@@ -141,6 +141,14 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "not_runnable_no_observed_comparison_record_count": 64,
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {},
+        "observed_comparison_gap_counts": {
+            "not_applicable_adjacent_out_of_scope": 4,
+            "not_yet_templated_missing_publication_parameters": 21,
+            "not_yet_templated_requires_toolkit_structure": 29,
+            "ready_profile_needs_behavioral_or_synthetic_outcome_comparison": 6,
+            "template_present_blocked_missing_publication_parameters": 7,
+            "template_present_blocked_toolkit_structure": 7,
+        },
     }
 
     for record_id in structured_ids:
@@ -156,6 +164,9 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         record = records[record_id]
         assert record["runnable_status"] == "runnable_profile_parameters_ready"
         assert record["observed_vs_expected_status"] == "parameter_run_evidence_only_behavioral_effect_unobserved"
+        assert record["observed_comparison_gap"] == (
+            "ready_profile_needs_behavioral_or_synthetic_outcome_comparison"
+        )
 
     nonrunnable_structured = structured_ids - RUNNABLE_STRUCTURED_IDS
     assert nonrunnable_structured
@@ -163,6 +174,12 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         record = records[record_id]
         assert record["runnable_status"] != "runnable_profile_parameters_ready"
         assert record["observed_vs_expected_status"] == "not_runnable_no_observed_comparison"
+        assert record["observed_comparison_gap"] in {
+            "template_present_blocked_missing_publication_parameters",
+            "template_present_blocked_toolkit_structure",
+            "not_yet_templated_missing_publication_parameters",
+            "not_yet_templated_requires_toolkit_structure",
+        }
 
     assert all(
         record["observed_vs_expected_status"] != "observed_behavioral_comparison_available"
@@ -282,6 +299,10 @@ def test_expected_outcome_blocked_and_adjacent_records_do_not_claim_observed_com
         record = records[record_id]
         assert record["runnable_status"] == "template_present_but_blocked"
         assert record["expected_outcome_status"] == "structured_expected_outcome_extracted"
+        assert record["observed_comparison_gap"] in {
+            "template_present_blocked_missing_publication_parameters",
+            "template_present_blocked_toolkit_structure",
+        }
         assert record["required_next_evidence"].startswith("Resolve profile blockers")
 
     for record_id in [
@@ -292,11 +313,16 @@ def test_expected_outcome_blocked_and_adjacent_records_do_not_claim_observed_com
         record = records[record_id]
         assert record["runnable_status"] == "not_yet_templated"
         assert record["expected_outcome_status"] == "structured_expected_outcome_extracted"
+        assert record["observed_comparison_gap"] in {
+            "not_yet_templated_missing_publication_parameters",
+            "not_yet_templated_requires_toolkit_structure",
+        }
         assert record["required_next_evidence"].startswith("Create a profile template")
 
     adjacent = records["barumerli_2026_semantic_looming_auditory_only"]
     assert adjacent["expected_outcome_status"] == "adjacent_out_of_scope"
     assert adjacent["observed_vs_expected_status"] == "adjacent_not_applicable"
+    assert adjacent["observed_comparison_gap"] == "not_applicable_adjacent_out_of_scope"
     assert adjacent["required_next_evidence"] == (
         "No outcome comparison required unless the record is reclassified as in scope."
     )

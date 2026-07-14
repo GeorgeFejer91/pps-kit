@@ -1150,6 +1150,7 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
     ]
     expected_counts = Counter(record["expected_outcome_status"] for record in records)
     observed_counts = Counter(record["observed_vs_expected_status"] for record in records)
+    observed_gap_counts = Counter(record["observed_comparison_gap"] for record in records)
     blocker_counts = Counter(
         record["expected_outcome_extraction_blocker"]
         for record in records
@@ -1187,6 +1188,7 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
             "not_runnable_no_observed_comparison_record_count": observed_counts["not_runnable_no_observed_comparison"],
             "adjacent_not_applicable_record_count": observed_counts["adjacent_not_applicable"],
             "pending_expected_outcome_blocker_counts": dict(sorted(blocker_counts.items())),
+            "observed_comparison_gap_counts": dict(sorted(observed_gap_counts.items())),
         },
         "expected_outcome_extraction_sources": {
             "paper_audit_checklist": "For-AI/audiotactile-paper-metadata-audit/running_checklist.csv",
@@ -1240,6 +1242,7 @@ def build_record(
 
     runnable_status = _runnable_status(record, coverage_category, template_ids, adjacent)
     observed_status = _observed_status(expected_status, runnable_status)
+    observed_gap = _observed_comparison_gap(expected_status, runnable_status, coverage_category)
     extraction_blocker = _expected_outcome_extraction_blocker(expected_status, paper_audit, manual_review)
 
     return {
@@ -1254,6 +1257,7 @@ def build_record(
         "expected_outcome_extraction_blocker": extraction_blocker,
         "expected_outcome_source_audit": _expected_outcome_source_audit(paper_audit, manual_review),
         "observed_vs_expected_status": observed_status,
+        "observed_comparison_gap": observed_gap,
         "observed_evidence_boundary": _observed_boundary(observed_status),
         "required_next_evidence": _required_next_evidence(expected_status, runnable_status),
     }
@@ -1345,6 +1349,24 @@ def _observed_status(expected_status: str, runnable_status: str) -> str:
     if runnable_status != "runnable_profile_parameters_ready":
         return "not_runnable_no_observed_comparison"
     return "parameter_run_evidence_only_behavioral_effect_unobserved"
+
+
+def _observed_comparison_gap(expected_status: str, runnable_status: str, coverage_category: str) -> str:
+    if expected_status == "adjacent_out_of_scope":
+        return "not_applicable_adjacent_out_of_scope"
+    if expected_status != "structured_expected_outcome_extracted":
+        return "expected_outcome_extraction_pending"
+    if runnable_status == "runnable_profile_parameters_ready":
+        return "ready_profile_needs_behavioral_or_synthetic_outcome_comparison"
+    if coverage_category == "covered_blocked_missing_publication_parameters":
+        return "template_present_blocked_missing_publication_parameters"
+    if coverage_category == "covered_blocked_toolkit_structure":
+        return "template_present_blocked_toolkit_structure"
+    if coverage_category == "not_yet_templated_missing_publication_parameters":
+        return "not_yet_templated_missing_publication_parameters"
+    if coverage_category == "not_yet_templated_requires_toolkit_structure":
+        return "not_yet_templated_requires_toolkit_structure"
+    return "not_runnable_unclassified"
 
 
 def _observed_boundary(observed_status: str) -> str:
