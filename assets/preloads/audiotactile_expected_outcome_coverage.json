@@ -1,0 +1,1092 @@
+{
+  "schema": "pps-audiotactile-expected-outcome-coverage.v1",
+  "generated_on": "2026-07-15",
+  "source_literature_coverage": "assets/preloads/audiotactile_literature_coverage.json",
+  "scope": {
+    "goal": "Track whether each known audiotactile PPS literature record has a structured expected outcome and whether the current toolkit has observed evidence that can be compared against it.",
+    "evidence_boundary": "Protocol 12, static preview parity, one-block fake-audio runner stress, and synthetic loopback prove software scheduling, WAV generation, event/marker, and artifact contracts. They do not prove human behavioral PPS effects. Observed scientific outcomes require either collected participant data or an explicit synthetic-participant model whose assumptions are documented separately."
+  },
+  "summary": {
+    "literature_record_count": 74,
+    "structured_expected_outcome_record_count": 6,
+    "pending_expected_outcome_record_count": 64,
+    "adjacent_or_out_of_scope_record_count": 4,
+    "runnable_profile_parameter_record_count": 6,
+    "observed_behavioral_comparison_record_count": 0,
+    "parameter_run_evidence_only_record_count": 6,
+    "not_runnable_no_observed_comparison_record_count": 64,
+    "adjacent_not_applicable_record_count": 4
+  },
+  "current_observed_evidence": {
+    "profile_materialization": "artifacts/validation_runs/current_goal_profile_recreation_ready_all_20260714/profile_recreation_interface_matrix_report.json",
+    "static_dashboard_parity": "artifacts/validation_runs/current_goal_static_dashboard_parity_all_20260714_after_static_baseline_fix/static_dashboard_preview_parity_audit_report.json",
+    "runner_mock": "artifacts/validation_runs/current_goal_one_block_runner_20260714_duration500ms/one_block_trial_runner_report.json",
+    "click_path_mock": "artifacts/validation_runs/current_goal_session_click_path_20260714/session_runner_click_path_report.json",
+    "synthetic_response_marker_loopback": "artifacts/validation_runs/current_goal_mock_response_marker_loopback_20260714/comparison/response_marker_loopback_report.json"
+  },
+  "records": [
+    {
+      "record_id": "ladavas_2001_auditory_tactile_extinction",
+      "citation_short": "LÃ davas et al. (2001)",
+      "doi": "10.1093/neucas/7.2.97",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "farne_ladavas_2002_auditory_pps_humans",
+      "citation_short": "FarnÃ¨ & LÃ davas (2002)",
+      "doi": "10.1162/089892902320474481",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "kitagawa_2005_sound_complexity",
+      "citation_short": "Kitagawa et al. (2005)",
+      "doi": "10.1007/s00221-005-2393-8",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "serino_2007_blind_cane_users",
+      "citation_short": "Serino et al. (2007)",
+      "doi": "10.1111/j.1467-9280.2007.01952.x",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "serino_2009_tms",
+      "citation_short": "Serino et al. (2009)",
+      "doi": "10.1371/journal.pone.0006582",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "tajadura_jimenez_2009_visual_deprivation",
+      "citation_short": "Tajadura-Jimenez et al. (2009)",
+      "doi": "10.1016/j.neuropsychologia.2009.07.025",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "bassolino_2010_mouse_use",
+      "citation_short": "Bassolino et al. (2010)",
+      "doi": "10.1016/j.neuropsychologia.2009.11.009",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "serino_2011_rtms",
+      "citation_short": "Serino et al. (2011)",
+      "doi": "10.1162/jocn_a_00006",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "avenanti_2012_motor_cortex",
+      "citation_short": "Avenanti et al. (2012)",
+      "doi": "10.1016/j.neuroimage.2012.06.063",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "serino_2011_professional_fencers",
+      "citation_short": "Serino et al. (2011 professional fencers)",
+      "doi": "",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "canzoneri_2012_dynamic_sounds",
+      "citation_short": "Canzoneri et al. (2012)",
+      "doi": "10.1371/journal.pone.0044306",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "canzoneri_2012_dynamic_sounds"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "canzoneri_2013_tool_use_reshaping",
+      "citation_short": "Canzoneri et al. (2013a)",
+      "doi": "10.1007/s00221-013-3532-2",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "canzoneri_2013_tool_use_reshaping"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "canzoneri_2013_amputation_prosthesis",
+      "citation_short": "Canzoneri et al. (2013b)",
+      "doi": "10.1038/srep02844",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "canzoneri_2013_amputation_prosthesis"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "cimmino_2013_surgical_arm_elongation",
+      "citation_short": "Cimmino et al. (2013)",
+      "doi": "10.3233/RNN-120286",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "teramoto_2013_visual_deprivation",
+      "citation_short": "Teramoto et al. (2013)",
+      "doi": "10.1037/a0028416",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "teneggi_2013_social_face",
+      "citation_short": "Teneggi et al. (2013)",
+      "doi": "10.1016/j.cub.2013.01.043",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "teneggi_2013_social_face_pps"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "taffou_2014_cynophobic_rear_looming",
+      "citation_short": "Taffou & Viaud-Delmon (2014)",
+      "doi": "10.3389/fpsyt.2014.00122",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "taffou_2014_cynophobic_rear_looming"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "ferri_2015_artificial_valence",
+      "citation_short": "Ferri et al. (2015A)",
+      "doi": "10.1016/j.neuropsychologia.2015.03.001",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "ferri_2015_artificial_looming_valence"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "ferri_2015_ecological_valence",
+      "citation_short": "Ferri et al. (2015B)",
+      "doi": "10.1016/j.neuropsychologia.2015.03.001",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "ferri_2015_ecological_looming_valence"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "ferri_2015_jneurosci_itv",
+      "citation_short": "Ferri et al. (2015), JNeurosci",
+      "doi": "10.1523/jneurosci.1696-15.2015",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "galli_2015_wheelchair",
+      "citation_short": "Galli et al. (2015)",
+      "doi": "10.3389/fpsyg.2015.00639",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "galli_2015_wheelchair_full_body"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "maister_2015_shared_sensory",
+      "citation_short": "Maister et al. (2015)",
+      "doi": "10.1016/j.neuropsychologia.2014.10.027",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "noel_2015_bodily_self",
+      "citation_short": "Noel et al. (2015a)",
+      "doi": "10.1016/j.cognition.2015.07.012",
+      "coverage_category": "covered_runnable_profile",
+      "current_template_ids": [
+        "noel_2015_bodily_self"
+      ],
+      "runnable_status": "runnable_profile_parameters_ready",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "body-location-dependent_pps_boundary_shift",
+        "primary_expected_effect": "Synchronous full-body-illusion stroking shifts PPS toward the virtual body: front-space PPS expands toward the avatar and back-space PPS shrinks relative to asynchronous stroking.",
+        "expected_effect_direction": "synchronous_front_expansion_and_back_reduction",
+        "observable_metric": "tactile RT facilitation as a function of looming-sound distance/SOA",
+        "condition_contrast": "synchronous versus asynchronous visuo-tactile stroking, front versus back space",
+        "source_basis": [
+          "For-AI/audiotactile-paper-metadata-audit/manual_reviews/noel_2015_bodily_self.json",
+          "Consensus MCP 2026-07-15 query: audiotactile peripersonal space auditory tactile integration boundary looming"
+        ]
+      },
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
+      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
+      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+    },
+    {
+      "record_id": "noel_2015_walking",
+      "citation_short": "Noel et al. (2015b)",
+      "doi": "10.1016/j.neuropsychologia.2014.08.030",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "noel_2015_walking_full_body_action"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "serino_2015_peri_trunk_exp1",
+      "citation_short": "Serino et al. (2015), Exp. 1",
+      "doi": "10.1038/srep18603",
+      "coverage_category": "covered_runnable_profile",
+      "current_template_ids": [
+        "serino_2015_peri_trunk_exp1"
+      ],
+      "runnable_status": "runnable_profile_parameters_ready",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "distance_dependent_audio_tactile_facilitation",
+        "primary_expected_effect": "Task-irrelevant moving sounds closer to the trunk facilitate tactile responses more than far sounds, yielding an estimated peri-trunk PPS boundary from the RT-by-distance function.",
+        "expected_effect_direction": "near_or_approaching_trunk_sounds_speed_tactile_rt",
+        "observable_metric": "baseline-corrected tactile RT/facilitation across D1-D6 distances",
+        "condition_contrast": "near versus far trunk-centered auditory distances and looming/receding motion",
+        "source_basis": [
+          "For-AI/audiotactile-paper-metadata-audit/manual_reviews/serino_2015_peri_trunk_exp1.json",
+          "assets/preloads/audiotactile_holmes2020_consensus_screening.json"
+        ]
+      },
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
+      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
+      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+    },
+    {
+      "record_id": "serino_2015_front_back_trunk_exp2",
+      "citation_short": "Serino et al. (2015), Exp. 2",
+      "doi": "10.1038/srep18603",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "serino_2015_front_back_trunk_exp2"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "serino_2015_peri_hand_exp3",
+      "citation_short": "Serino et al. (2015), Exp. 3",
+      "doi": "10.1038/srep18603",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "serino_2015_peri_hand_exp3"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "serino_2015_exps_4_to_6",
+      "citation_short": "Serino et al. (2015), Exp. 4-6",
+      "doi": "10.1038/srep18603",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "serino_2015_toolless_sync_training",
+      "citation_short": "Serino/Canzoneri 2015 toolless sync training",
+      "doi": "10.3389/fnbeh.2015.00004",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "serino_2015_toolless_sync_training"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "ardizzi_ferri_2018_interoceptive",
+      "citation_short": "Ardizzi & Ferri (2018)",
+      "doi": "10.1016/j.cognition.2018.04.001",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "hobeika_2018_anisotropy",
+      "citation_short": "Hobeika et al. (2018)",
+      "doi": "10.1007/s00221-017-5158-2",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "noel_2018_neural_adaptation",
+      "citation_short": "Noel et al. (2018)",
+      "doi": "10.1152/jn.00652.2017",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "pfeiffer_2018_vestibular",
+      "citation_short": "Pfeiffer et al. (2018)",
+      "doi": "10.1111/ejn.13872",
+      "coverage_category": "covered_runnable_profile",
+      "current_template_ids": [
+        "pfeiffer_2018_lateral_perihead_left_to_right"
+      ],
+      "runnable_status": "runnable_profile_parameters_ready",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "vestibular_modulation_of_perihead_pps",
+        "primary_expected_effect": "Vestibular stimulation speeds tactile detection, and congruent audio-vestibular motion expands peri-head PPS farther from the body relative to no rotation or incongruent motion.",
+        "expected_effect_direction": "congruent_audio_vestibular_motion_expands_pps",
+        "observable_metric": "maximal auditory distance/SOA at which tactile RT facilitation is present",
+        "condition_contrast": "congruent versus incongruent vestibular/auditory motion and no-rotation baselines",
+        "source_basis": [
+          "assets/preloads/audiotactile_literature_coverage.json#pfeiffer_2018_vestibular",
+          "Consensus MCP 2026-07-15 query: audiotactile peripersonal space auditory tactile integration boundary looming"
+        ]
+      },
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
+      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
+      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+    },
+    {
+      "record_id": "ieeg_trunk_2018",
+      "citation_short": "Bernasconi/Noel et al. (2018)",
+      "doi": "10.1093/cercor/bhy156",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "tonelli_2019_echolocation",
+      "citation_short": "Tonelli et al. (2019)",
+      "doi": "10.1007/s00221-019-05469-3",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "tonelli_2019_echolocation"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "pregnancy_2019",
+      "citation_short": "Pregnancy PPS study (2019)",
+      "doi": "10.1038/s41598-019-45224-w",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "newborn_boundaries_2019",
+      "citation_short": "Identifying PPS boundaries in newborns (2019)",
+      "doi": "10.1038/s41598-019-45084-4",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "ronga_2021_newborn_erp",
+      "citation_short": "Spatial tuning of multisensory responses in newborns (2021)",
+      "doi": "10.1073/pnas.2024548118",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "autism_2019",
+      "citation_short": "Altered bodily self-consciousness and PPS in autism (2019)",
+      "doi": "10.1177/1362361319838950",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "disorders_consciousness_2019",
+      "citation_short": "PPS encoding in disorders of consciousness (2019)",
+      "doi": "10.1016/j.nicl.2019.101940",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "social_coding_2019",
+      "citation_short": "Social coding of multisensory space (2019)",
+      "doi": "10.1098/rsos.181878",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "social_perception_2017",
+      "citation_short": "Social perception shapes multisensory PPS (2017)",
+      "doi": "10.1016/j.cortex.2017.08.033",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "lower_limb_pps_2017",
+      "citation_short": "Lower-limb PPS boundaries (2017)",
+      "doi": "10.1007/s00221-017-5115-0",
+      "coverage_category": "adjacent_out_of_scope",
+      "current_template_ids": [],
+      "runnable_status": "adjacent_not_applicable",
+      "expected_outcome_status": "adjacent_out_of_scope",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "adjacent_not_applicable",
+      "observed_evidence_boundary": "The record is adjacent or out of scope for audiotactile PPS outcome comparison.",
+      "required_next_evidence": "No outcome comparison required unless the record is reclassified as in scope."
+    },
+    {
+      "record_id": "footsole_vibration_2019",
+      "citation_short": "Foot-sole vibration PPS remapping (2019)",
+      "doi": "10.1177/0956797619869337",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "hobeika_2020_methods",
+      "citation_short": "Hobeika et al. (2020)",
+      "doi": "10.1016/j.jneumeth.2019.108534",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "ferroni_2020_tool_observation",
+      "citation_short": "Tool-use observation PPS (2020)",
+      "doi": "10.1016/j.neuropsychologia.2020.107622",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "spadone_2021_connectivity",
+      "citation_short": "Spadone et al. (2021)",
+      "doi": "10.1038/s41598-021-00048-5",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "ageing_2021",
+      "citation_short": "How ageing shapes body and space representations (2021)",
+      "doi": "10.1016/j.cortex.2020.11.021",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "seeming_confines_2021",
+      "citation_short": "Seeming confines (2021)",
+      "doi": "10.1016/j.cortex.2021.08.004",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "jazz_duet_2021",
+      "citation_short": "Jazz duet PPS (2021)",
+      "doi": "10.1007/s00426-020-01365-6",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "taffou_2021_auditory_roughness",
+      "citation_short": "Taffou et al. (2021)",
+      "doi": "10.1038/s41598-020-79767-0",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "holmes_2020_four_experiments",
+      "citation_short": "Holmes et al. (2020), four experiments",
+      "doi": "10.1007/s00221-020-05771-5",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "schizophrenia_tool_use_2022",
+      "citation_short": "Tool-use extends PPS boundaries in schizophrenia (2022)",
+      "doi": "10.1093/schbul/sbac067",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "teraoka_2024_front_rear",
+      "citation_short": "Teraoka et al. (2024)",
+      "doi": "10.1007/s00221-024-06782-2",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "body_image_social_cognition_2024",
+      "citation_short": "Body image and social cognition PPS task (2024)",
+      "doi": "10.1016/j.bodyim.2024.101777",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "mindfulness_pps_2024",
+      "citation_short": "Mindfulness and PPS boundaries (2024)",
+      "doi": "10.3390/bs14040306",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "serino_2018_mixed_reality_pps",
+      "citation_short": "Serino et al. (2018 mixed reality)",
+      "doi": "10.3389/fict.2017.00031",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "amemiya_2017_pseudowalking_footsole",
+      "citation_short": "Amemiya et al. (2017 pseudo-walking foot-sole vibration)",
+      "doi": "10.1109/WHC.2017.7989970",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "novel_two_phase_audio_tactile_2025",
+      "citation_short": "Self and PPS two-phase audio-tactile paradigm (2025)",
+      "doi": "",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "looming_duration_2025",
+      "citation_short": "Impact of looming sound duration on PPS measurement (2025)",
+      "doi": "10.61782/fa.2025.0866",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "depersonalisation_2024",
+      "citation_short": "Lost in time and space? (2024)",
+      "doi": "10.1177/17470218241261645",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "amiel_2025_front_rear",
+      "citation_short": "Functional organization of rear/front PPS (2025/2026)",
+      "doi": "10.1016/j.cortex.2025.11.015",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "interoception_exteroception_2025",
+      "citation_short": "Interoception vs. Exteroception (2025)",
+      "doi": "10.1073/pnas.2516229122",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "cell_reports_medicine_2026_consciousness",
+      "citation_short": "Multisensory integration in PPS indexes consciousness states (2026)",
+      "doi": "10.1016/j.xcrm.2026.102705",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "matsuda_2021_four_directions",
+      "citation_short": "Matsuda et al. (2021)",
+      "doi": "10.1038/s41598-021-90784-5",
+      "coverage_category": "covered_runnable_profile",
+      "current_template_ids": [
+        "matsuda_2021_four_directions"
+      ],
+      "runnable_status": "runnable_profile_parameters_ready",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "directional_peritrunk_pps_for_approaching_sounds",
+        "primary_expected_effect": "Peri-trunk PPS representations are observed for approaching sounds in front, rear, left, and right directions; receding sounds are not expected to produce the same direction-general PPS facilitation pattern.",
+        "expected_effect_direction": "approaching_sounds_show_pps_facilitation_across_four_directions",
+        "observable_metric": "tactile RT/facilitation by T1-T5 SOA and body-relative direction",
+        "condition_contrast": "approaching versus receding sounds across front/rear/left/right blocks",
+        "source_basis": [
+          "For-AI/audiotactile-paper-metadata-audit/manual_reviews/matsuda_2021_four_directions.json",
+          "Consensus MCP 2026-07-15 query: audio tactile peripersonal space looming sound tactile reaction time"
+        ]
+      },
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
+      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
+      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+    },
+    {
+      "record_id": "lerner_2021_3d_boundary",
+      "citation_short": "Lerner et al. (2021)",
+      "doi": "10.3389/frvir.2021.644214",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "lerner_2021_3d_audio_tactile_boundary"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "lamia_2026_arm_movement",
+      "citation_short": "Lamia, Shabani, & Candidi (2026)",
+      "doi": "10.1038/s41598-026-36796-5",
+      "coverage_category": "covered_runnable_profile",
+      "current_template_ids": [
+        "barumerli_2026_arm_movement_exp1",
+        "barumerli_2026_arm_movement_exp2"
+      ],
+      "runnable_status": "runnable_profile_parameters_ready",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "arm_movement_reduction_of_audio_tactile_facilitation",
+        "primary_expected_effect": "Looming sounds enhance tactile reactivity near the hand and trunk when still, but arm movement execution reduces or eliminates the distance-dependent audio-tactile facilitation irrespective of the stimulated body part.",
+        "expected_effect_direction": "movement_blunts_looming_distance_facilitation",
+        "observable_metric": "baseline-corrected tactile RT/facilitation across tactile delays and movement state",
+        "condition_contrast": "motor versus static blocks, hand versus trunk tactile site, looming versus receding sounds",
+        "source_basis": [
+          "For-AI/audiotactile-paper-metadata-audit/manual_reviews/lamia_2026_arm_movement.json",
+          "Consensus MCP 2026-07-15 query: audio tactile peripersonal space looming sound tactile reaction time"
+        ]
+      },
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
+      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
+      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+    },
+    {
+      "record_id": "smartphone_rt_methods_2025",
+      "citation_short": "Using Android smartphones to collect RTs to multisensory stimuli (2025)",
+      "doi": "10.3390/s25196072",
+      "coverage_category": "covered_runnable_profile",
+      "current_template_ids": [
+        "roussel_2025_dynaspace_mobile_pps"
+      ],
+      "runnable_status": "runnable_profile_parameters_ready",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "mobile_looming_versus_static_tactile_rt_facilitation",
+        "primary_expected_effect": "On validated Android devices, looming sounds reduce tactile RTs by about 20-25 ms compared with static sounds in the smartphone PPS task.",
+        "expected_effect_direction": "looming_faster_than_static",
+        "observable_metric": "tactile RT difference between looming and fixed/static auditory conditions",
+        "condition_contrast": "looming headphone sound versus fixed/static comparator sound",
+        "source_basis": [
+          "assets/preloads/audiotactile_literature_coverage.json#smartphone_rt_methods_2025",
+          "Consensus MCP 2026-07-15 query: audio tactile peripersonal space looming sound tactile reaction time"
+        ]
+      },
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
+      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
+      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+    },
+    {
+      "record_id": "spiousas_2025_auditory_only",
+      "citation_short": "Spiousas et al. (2025)",
+      "doi": "10.3758/s13414-025-03071-0",
+      "coverage_category": "adjacent_out_of_scope",
+      "current_template_ids": [],
+      "runnable_status": "adjacent_not_applicable",
+      "expected_outcome_status": "adjacent_out_of_scope",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "adjacent_not_applicable",
+      "observed_evidence_boundary": "The record is adjacent or out of scope for audiotactile PPS outcome comparison.",
+      "required_next_evidence": "No outcome comparison required unless the record is reclassified as in scope."
+    },
+    {
+      "record_id": "barumerli_2026_semantic_looming_auditory_only",
+      "citation_short": "Barumerli et al. (2026 semantic looming)",
+      "doi": "10.1038/s41598-026-48067-4",
+      "coverage_category": "adjacent_out_of_scope",
+      "current_template_ids": [],
+      "runnable_status": "adjacent_not_applicable",
+      "expected_outcome_status": "adjacent_out_of_scope",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "adjacent_not_applicable",
+      "observed_evidence_boundary": "The record is adjacent or out of scope for audiotactile PPS outcome comparison.",
+      "required_next_evidence": "No outcome comparison required unless the record is reclassified as in scope."
+    },
+    {
+      "record_id": "rossi_sebastiano_2022_visuotactile",
+      "citation_short": "Rossi Sebastiano et al. (2022)",
+      "doi": "10.1038/s41598-022-21469-w",
+      "coverage_category": "adjacent_out_of_scope",
+      "current_template_ids": [],
+      "runnable_status": "adjacent_not_applicable",
+      "expected_outcome_status": "adjacent_out_of_scope",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "adjacent_not_applicable",
+      "observed_evidence_boundary": "The record is adjacent or out of scope for audiotactile PPS outcome comparison.",
+      "required_next_evidence": "No outcome comparison required unless the record is reclassified as in scope."
+    },
+    {
+      "record_id": "teramoto_2013_beyond_head_audiotactile",
+      "citation_short": "Teramoto et al. (2013 beyond head)",
+      "doi": "10.1007/s00221-013-3574-5",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "finisguerra_2015_moving_sounds_motor",
+      "citation_short": "Finisguerra et al. (2015)",
+      "doi": "10.1016/j.neuropsychologia.2014.09.043",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    },
+    {
+      "record_id": "biggio_2017_racket_tool_use",
+      "citation_short": "Biggio et al. (2017)",
+      "doi": "10.1016/j.neuropsychologia.2017.07.018",
+      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "pending_expected_outcome_extraction",
+      "expected_outcome": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Extract a short structured expected outcome from the paper's Results/figures/tables and link it to an observable analysis metric."
+    }
+  ]
+}
