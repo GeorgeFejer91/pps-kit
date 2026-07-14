@@ -1132,7 +1132,9 @@ function staticBaselineSoaValues(protocol, soaValues) {
   if (strategy === "min_anchor") return soaValues.length ? [soaValues[0]] : [];
   if (strategy === "max_anchor") return soaValues.length ? [soaValues[soaValues.length - 1]] : [];
   if (strategy === "min_max") return Array.from(new Set([soaValues[0], soaValues[soaValues.length - 1]].filter((value) => Number.isFinite(Number(value)))));
+  if (strategy === "tactile_only" || strategy === "stationary_burst") return soaValues;
   if (strategy === "soa_zero") return [0];
+  if (strategy === "custom") return custom;
   return custom.length ? custom : soaValues;
 }
 
@@ -1596,6 +1598,7 @@ function normalizeStaticTemplateDesign(data, status) {
   design.custom_looming_files = Array.isArray(design.custom_looming_files) ? design.custom_looming_files : [];
   design.prestimulus_files = Array.isArray(design.prestimulus_files) ? design.prestimulus_files : [];
   design.trajectory = design.trajectory || {};
+  const rawProtocol = design.protocol || {};
   design.protocol = {
     repetitions_per_condition: 1,
     trial_pool_repetition_defaults: {},
@@ -1605,9 +1608,10 @@ function normalizeStaticTemplateDesign(data, status) {
     auditory_motion_directions: ["looming"],
     tactile_sites: ["hand"],
     include_catch_trials: false,
-    catch_trial_percentage: 0,
-    include_baseline_trials: false,
-    baseline_strategy: "none",
+    catch_trial_percentage: 10,
+    catch_trials_exact: null,
+    include_baseline_trials: true,
+    baseline_strategy: "tactile_only",
     baseline_trial_percentage: 0,
     baseline_soa_values_ms: [],
     baseline_custom_trial_mode: "tactile_only",
@@ -1620,20 +1624,35 @@ function normalizeStaticTemplateDesign(data, status) {
     max_consecutive_same_trial_type: 2,
     participants: 1,
     random_seed: 20250604,
-    ...(design.protocol || {})
+    ...rawProtocol
   };
+  if (!Object.prototype.hasOwnProperty.call(rawProtocol, "include_catch_trials")) {
+    const catchExact = rawProtocol.catch_trials_exact;
+    design.protocol.include_catch_trials = Boolean(
+      Number(rawProtocol.catch_trial_percentage || 0) > 0
+      || (catchExact !== null && catchExact !== undefined && catchExact !== 0 && catchExact !== "")
+    );
+  }
   hydrateStaticSourceAssets(design, status);
   return design;
 }
 
 function hydrateStaticSourceAssets(design, status) {
   const assetsByLabel = new Map();
+  const consumed = new Set();
+  const directionLabels = new Set();
   for (const asset of status.assets || []) {
-    assetsByLabel.set(normalizeSourceKey(asset.label), asset);
+    const key = normalizeSourceKey(asset.label);
+    if (!key) continue;
+    assetsByLabel.set(key, asset);
+    const directionLabel = String(asset.direction_label || "").trim();
+    if (directionLabel) directionLabels.add(directionLabel);
   }
   for (const noise of design.noises || []) {
-    const asset = assetsByLabel.get(normalizeSourceKey(noise.label));
+    const key = normalizeSourceKey(noise.label);
+    const asset = assetsByLabel.get(key);
     if (!asset) continue;
+    consumed.add(key);
     noise.prebaked_path = noise.prebaked_path || asset.path;
     noise.noise_type = noise.noise_type || asset.noise_type || asset.tone_type || "pink";
     noise.motion_mode = noise.motion_mode || asset.motion_mode || "looming";
@@ -1642,14 +1661,61 @@ function hydrateStaticSourceAssets(design, status) {
       : clone(asset.trajectory_snapshot || {});
   }
   for (const source of design.custom_looming_files || []) {
-    const asset = assetsByLabel.get(normalizeSourceKey(source.label));
+    const key = normalizeSourceKey(source.label);
+    const asset = assetsByLabel.get(key);
     if (!asset) continue;
+    consumed.add(key);
     source.path = source.path || asset.path;
     source.tone_type = source.tone_type || asset.tone_type || asset.noise_type || "custom_audio";
     source.motion_mode = source.motion_mode || asset.motion_mode || "looming";
     source.trajectory_snapshot = Object.keys(source.trajectory_snapshot || {}).length
       ? source.trajectory_snapshot
       : clone(asset.trajectory_snapshot || {});
+  }
+  for (const [key, asset] of assetsByLabel.entries()) {
+    if (consumed.has(key)) continue;
+    const label = String(asset.label || "").trim();
+    const path = String(asset.path || "").trim();
+    if (!label || !path) continue;
+    design.custom_looming_files.push({
+      label,
+      path,
+      target_duration_s: Number(asset.duration_s || design.trajectory?.total_duration_s || 4),
+      render_mode: "preserve",
+      tone_type: asset.noise_type || asset.tone_type || "custom_audio",
+      gain: 1.0,
+      motion_mode: asset.motion_mode || "looming",
+      trajectory_snapshot: clone(asset.trajectory_snapshot || {}),
+    });
+  }
+  expandStaticTrialStripSourceLabels(
+    design,
+    [...assetsByLabel.values()].map((asset) => String(asset.label || "").trim()).filter(Boolean)
+  );
+  if (directionLabels.size > 1) {
+    design.protocol.auditory_motion_directions = ["source_trajectory"];
+  }
+}
+
+function expandStaticTrialStripSourceLabels(design, availableSourceLabels) {
+  const available = (availableSourceLabels || []).map((label) => String(label || "").trim()).filter(Boolean);
+  if (!available.length) return;
+  for (const strip of design.protocol?.trial_strips || []) {
+    for (const element of strip.elements || []) {
+      if (element.kind !== "looming_stimulus") continue;
+      const labels = Array.isArray(element.source_labels) && element.source_labels.length
+        ? element.source_labels
+        : [element.source_label || element.label || ""];
+      const expanded = [];
+      for (const rawLabel of labels) {
+        const label = String(rawLabel || "").trim();
+        if (!label) continue;
+        const matches = available.filter((candidate) => candidate === label || candidate.startsWith(`${label} - `));
+        expanded.push(...(matches.length ? matches : [label]));
+      }
+      element.source_labels = [...new Set(expanded)];
+      element.source_label = element.source_labels[0] || "";
+    }
   }
 }
 
