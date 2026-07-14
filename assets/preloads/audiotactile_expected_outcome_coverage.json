@@ -35,7 +35,8 @@
     "static_dashboard_parity": "artifacts/validation_runs/current_goal_static_dashboard_parity_all_20260714_after_static_baseline_fix/static_dashboard_preview_parity_audit_report.json",
     "runner_mock": "artifacts/validation_runs/current_goal_one_block_runner_20260714_duration500ms/one_block_trial_runner_report.json",
     "click_path_mock": "artifacts/validation_runs/current_goal_session_click_path_20260714/session_runner_click_path_report.json",
-    "synthetic_response_marker_loopback": "artifacts/validation_runs/current_goal_mock_response_marker_loopback_20260714/comparison/response_marker_loopback_report.json"
+    "synthetic_response_marker_loopback": "artifacts/validation_runs/current_goal_mock_response_marker_loopback_20260714/comparison/response_marker_loopback_report.json",
+    "synthetic_expected_outcome_smoke": "artifacts/validation_runs/current_goal_synthetic_expected_outcome_smoke_20260715/synthetic_expected_outcome_smoke_report.json"
   },
   "records": [
     {

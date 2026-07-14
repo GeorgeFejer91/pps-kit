@@ -1215,6 +1215,10 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
                 "artifacts/validation_runs/current_goal_mock_response_marker_loopback_20260714/comparison/"
                 "response_marker_loopback_report.json"
             ),
+            "synthetic_expected_outcome_smoke": (
+                "artifacts/validation_runs/current_goal_synthetic_expected_outcome_smoke_20260715/"
+                "synthetic_expected_outcome_smoke_report.json"
+            ),
         },
         "records": records,
     }
