@@ -338,6 +338,7 @@ def test_expected_outcome_current_observed_evidence_is_software_only():
         "runner_mock",
         "ready_profile_runner_smoke",
         "ready_profile_response_marker_loopback",
+        "ready_profile_expected_contrast_audit",
         "click_path_mock",
         "synthetic_response_marker_loopback",
         "synthetic_expected_outcome_smoke",
@@ -347,6 +348,9 @@ def test_expected_outcome_current_observed_evidence_is_software_only():
     assert evidence["ready_profile_runner_smoke"].endswith("ready_profile_runner_smoke_report.json")
     assert evidence["ready_profile_response_marker_loopback"].endswith(
         "ready_profile_response_marker_loopback_report.json"
+    )
+    assert evidence["ready_profile_expected_contrast_audit"].endswith(
+        "ready_profile_expected_contrast_audit_report.json"
     )
     assert evidence["synthetic_response_marker_loopback"].endswith("response_marker_loopback_report.json")
     assert evidence["synthetic_expected_outcome_smoke"].endswith("synthetic_expected_outcome_smoke_report.json")

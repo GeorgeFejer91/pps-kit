@@ -4,7 +4,7 @@
   "source_literature_coverage": "assets/preloads/audiotactile_literature_coverage.json",
   "scope": {
     "goal": "Track whether each known audiotactile PPS literature record has a structured expected outcome and whether the current toolkit has observed evidence that can be compared against it.",
-    "evidence_boundary": "Protocol 12, static preview parity, one-block and ready-profile fake-audio runner stress, and synthetic loopback prove software scheduling, WAV generation, event/marker, and artifact contracts. They do not prove human behavioral PPS effects. Observed scientific outcomes require either collected participant data or an explicit synthetic-participant model whose assumptions are documented separately."
+    "evidence_boundary": "Protocol 12, static preview parity, one-block and ready-profile fake-audio runner stress, synthetic loopback, and ready-profile contrast audits prove software scheduling, WAV generation, event/marker, artifact, and comparison-readiness contracts. They do not prove human behavioral PPS effects. Observed scientific outcomes require either collected participant data or an explicit synthetic-participant model whose assumptions are documented separately."
   },
   "summary": {
     "literature_record_count": 74,
@@ -36,6 +36,7 @@
     "runner_mock": "artifacts/validation_runs/current_goal_one_block_runner_20260714_duration500ms/one_block_trial_runner_report.json",
     "ready_profile_runner_smoke": "artifacts/validation_runs/current_goal_ready_profile_runner_smoke_20260715/ready_profile_runner_smoke_report.json",
     "ready_profile_response_marker_loopback": "artifacts/validation_runs/current_goal_ready_profile_response_marker_loopback_20260715/ready_profile_response_marker_loopback_report.json",
+    "ready_profile_expected_contrast_audit": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
     "click_path_mock": "artifacts/validation_runs/current_goal_session_click_path_20260714/session_runner_click_path_report.json",
     "synthetic_response_marker_loopback": "artifacts/validation_runs/current_goal_mock_response_marker_loopback_20260714/comparison/response_marker_loopback_report.json",
     "synthetic_expected_outcome_smoke": "artifacts/validation_runs/current_goal_synthetic_expected_outcome_smoke_20260715/synthetic_expected_outcome_smoke_report.json"

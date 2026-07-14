@@ -1169,10 +1169,11 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
             ),
             "evidence_boundary": (
                 "Protocol 12, static preview parity, one-block and ready-profile fake-audio runner "
-                "stress, and synthetic loopback prove software scheduling, WAV generation, "
-                "event/marker, and artifact contracts. They do not prove human behavioral PPS "
-                "effects. Observed scientific outcomes require either collected participant data "
-                "or an explicit synthetic-participant model whose assumptions are documented separately."
+                "stress, synthetic loopback, and ready-profile contrast audits prove software "
+                "scheduling, WAV generation, event/marker, artifact, and comparison-readiness "
+                "contracts. They do not prove human behavioral PPS effects. Observed scientific "
+                "outcomes require either collected participant data or an explicit synthetic-participant "
+                "model whose assumptions are documented separately."
             ),
         },
         "summary": {
@@ -1214,6 +1215,10 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
             "ready_profile_response_marker_loopback": (
                 "artifacts/validation_runs/current_goal_ready_profile_response_marker_loopback_20260715/"
                 "ready_profile_response_marker_loopback_report.json"
+            ),
+            "ready_profile_expected_contrast_audit": (
+                "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/"
+                "ready_profile_expected_contrast_audit_report.json"
             ),
             "click_path_mock": (
                 "artifacts/validation_runs/current_goal_session_click_path_20260714/"
