@@ -195,6 +195,339 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
             "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv#farne_ladavas_2002_auditory_pps_humans",
         ],
     },
+    "kitagawa_2005_sound_complexity": {
+        "outcome_family": "rear_perihead_complex_sound_audio_tactile_interference",
+        "primary_expected_effect": (
+            "Complex rear-space sounds are expected to modulate audio-tactile "
+            "spatial processing more strongly when close to the back of the "
+            "head than when far away; pure tones are expected to show weaker "
+            "or no distance-dependent modulation."
+        ),
+        "expected_effect_direction": "near_rear_complex_sounds_increase_audio_tactile_interference",
+        "observable_metric": "tactile side-discrimination latency/error and TOJ accuracy by auditory side, distance, and sound type",
+        "condition_contrast": "white-noise versus pure-tone auditory distractors, close versus far behind-head positions, same versus opposite side",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#kitagawa_2005_sound_complexity",
+            "Consensus MCP 2026-07-15 query: 10.1007/s00221-005-2393-8 Kitagawa sound complexity peripersonal space audio tactile",
+        ],
+    },
+    "serino_2009_tms": {
+        "outcome_family": "time_dependent_motor_coding_of_hand_centered_pps",
+        "primary_expected_effect": (
+            "Near-hand sounds are expected to enhance hand MEPs at short "
+            "sound-to-TMS intervals, while longer intervals reverse the pattern "
+            "toward greater far-sound excitability; the effect is hand-centered "
+            "rather than body-centered."
+        ),
+        "expected_effect_direction": "early_near_hand_mep_facilitation_late_far_sound_reversal",
+        "observable_metric": "TMS-evoked MEP amplitude by near/far sound position and sound-to-TMS interval",
+        "condition_contrast": "near versus far sounds at early and late TMS delays in a hand-centered frame",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#serino_2009_tms",
+            "Consensus MCP 2026-07-15 query: 10.1371/journal.pone.0006582 Serino 2009 TMS peripersonal space audio tactile",
+        ],
+    },
+    "bassolino_2010_mouse_use": {
+        "outcome_family": "mouse_use_extension_of_hand_audio_pps",
+        "primary_expected_effect": (
+            "When habitual users neither hold nor use a mouse, near-hand sounds "
+            "are expected to speed tactile responses more than sounds near the "
+            "screen; actively using or passively holding the mouse is expected "
+            "to eliminate that near-versus-screen difference for the mouse hand, "
+            "indicating PPS extension toward screen space."
+        ),
+        "expected_effect_direction": "mouse_holding_or_use_extends_right_hand_audio_pps_to_screen_space",
+        "observable_metric": "hand tactile RT by sound location, mouse state, and stimulated hand",
+        "condition_contrast": "no-mouse, passive holding, and active mouse-use conditions for right versus left hand",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#bassolino_2010_mouse_use",
+            "Consensus MCP 2026-07-15 query: 10.1371/journal.pone.0006582 Serino 2009 TMS peripersonal space audio tactile",
+        ],
+    },
+    "avenanti_2012_motor_cortex": {
+        "outcome_family": "premotor_dependency_of_motor_pps_coding",
+        "primary_expected_effect": (
+            "Near-hand sounds are expected to produce a spatially dependent "
+            "motor response in hand MEPs after sham or V1 stimulation, while "
+            "cathodal suppression of premotor cortex is expected to abolish the "
+            "near-far motor coding effect."
+        ),
+        "expected_effect_direction": "pmc_suppression_abolishes_near_hand_motor_coding",
+        "observable_metric": "TMS-evoked MEP amplitude by sound distance and tDCS target",
+        "condition_contrast": "sham, V1, posterior parietal, and premotor tDCS crossed with near/far hand-centered sounds",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#avenanti_2012_motor_cortex",
+            "Consensus MCP 2026-07-15 query: 10.1016/j.neuroimage.2012.06.063 Avenanti motor cortex peripersonal space audio tactile",
+        ],
+    },
+    "cimmino_2013_surgical_arm_elongation": {
+        "outcome_family": "body_size_change_updates_body_and_pps_representation",
+        "primary_expected_effect": (
+            "Surgical arm elongation is expected to change body-size measures "
+            "and the audio-tactile PPS task outcome, bringing the patient's "
+            "body and space representations closer to healthy-control patterns."
+        ),
+        "expected_effect_direction": "arm_elongation_updates_body_and_audio_tactile_pps_representation",
+        "observable_metric": "audio-tactile PPS task measure plus tactile distance/body-image measures before versus after surgery",
+        "condition_contrast": "pre- versus post-arm elongation single-case measures and healthy-control comparison",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#cimmino_2013_surgical_arm_elongation",
+            "Consensus MCP 2026-07-15 query: Cimmino 2013 surgical arm elongation peripersonal space body image social cognition 2024 audio tactile",
+        ],
+    },
+    "teramoto_2013_visual_deprivation": {
+        "outcome_family": "visual_deprivation_changes_audio_tactile_reference_frames",
+        "primary_expected_effect": (
+            "Visual deprivation is expected to alter the spatial coordinate "
+            "systems supporting auditory-tactile processing: blind participants "
+            "are expected to show reduced spatial multisensory binding in tasks "
+            "requiring explicit cross-modal combination but stronger ability to "
+            "handle distractor/attention demands in unimodal-target tasks."
+        ),
+        "expected_effect_direction": "visual_deprivation_reduces_spatial_multisensory_binding_and_alters_reference_frames",
+        "observable_metric": "audio-tactile integration/interference or attention performance by visual-history group and posture/reference frame",
+        "condition_contrast": "early blind, late blind, and sighted groups across auditory, tactile, and audio-tactile processing tasks",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#teramoto_2013_visual_deprivation",
+            "Consensus MCP 2026-07-15 query: 10.1037/a0028416 Teramoto visual deprivation audiotactile peripersonal space",
+        ],
+    },
+    "teramoto_2013_beyond_head_audiotactile": {
+        "outcome_family": "audio_tactile_interference_beyond_perihead_space",
+        "primary_expected_effect": (
+            "Opposite-side sounds are expected to impair tactile spatial "
+            "discrimination for multiple body parts, and sounds near the head "
+            "are expected to exert stronger influence than far-head sounds; hand "
+            "surface and hand position further modulate the interference."
+        ),
+        "expected_effect_direction": "opposite_side_and_near_head_sounds_increase_tactile_spatial_interference_across_body_parts",
+        "observable_metric": "tactile side-discrimination latency/error by auditory congruency, body part, hand surface, and sound distance",
+        "condition_contrast": "same versus opposite auditory side, cheek/hand/knee tactile sites, near versus far head sound positions",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#teramoto_2013_beyond_head_audiotactile",
+            "Consensus MCP 2026-07-15 query: 10.1007/s00221-013-3574-5 Teramoto beyond head audiotactile interaction peripersonal space",
+        ],
+    },
+    "taffou_2014_cynophobic_rear_looming": {
+        "outcome_family": "fear_relevant_sound_expansion_of_rear_defensive_pps",
+        "primary_expected_effect": (
+            "Dog-fearful participants are expected to show a larger rear-space "
+            "PPS boundary when looming dog growls are present than non-fearful "
+            "participants, while non-threatening animal sounds should not "
+            "produce the same fear-specific expansion."
+        ),
+        "expected_effect_direction": "dog_fear_extends_rear_pps_for_threatening_dog_sounds",
+        "observable_metric": "PPS boundary or tactile RT facilitation by rear-looming sound distance and animal sound category",
+        "condition_contrast": "dog-fearful versus non-fearful groups, dog growl versus sheep bleat rear-looming sounds",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#taffou_2014_cynophobic_rear_looming",
+            "Consensus MCP 2026-07-15 query: Teramoto visual deprivation beyond head audiotactile Hobeika anisotropy cynophobic rear looming peripersonal space",
+        ],
+    },
+    "ferri_2015_jneurosci_itv": {
+        "outcome_family": "premotor_response_variability_predicts_individual_pps_boundary",
+        "primary_expected_effect": (
+            "Individual PPS boundary differences are expected to be predicted by "
+            "intertrial variability of premotor BOLD responses to far dynamic "
+            "approaching stimuli, rather than by trial-averaged response "
+            "amplitude."
+        ),
+        "expected_effect_direction": "premotor_far_stimulus_itv_predicts_individual_pps_extension",
+        "observable_metric": "behavioral PPS boundary estimate and premotor BOLD intertrial variability for far versus near dynamic stimuli",
+        "condition_contrast": "far versus near approaching auditory stimuli and individual PPS boundary locations",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#ferri_2015_jneurosci_itv",
+            "Consensus MCP 2026-07-15 query: 10.1523/jneurosci.1696-15.2015 Ferri heartbeat intertrial variability peripersonal space audio tactile",
+        ],
+    },
+    "maister_2015_shared_sensory": {
+        "outcome_family": "shared_sensory_experience_remaps_other_pps",
+        "primary_expected_effect": (
+            "After an enfacement-style shared sensory experience, audio-tactile "
+            "integration is expected to increase in the space close to the "
+            "confederate's body without extending continuously across the space "
+            "between participant and confederate."
+        ),
+        "expected_effect_direction": "shared_sensory_experience_remaps_confederate_pps_without_self_space_expansion",
+        "observable_metric": "audio-tactile integration/facilitation by distance from participant and confederate before versus after shared sensory experience",
+        "condition_contrast": "pre/post shared sensory experience and self-near, between-person, and confederate-near space",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#maister_2015_shared_sensory",
+            "Consensus MCP 2026-07-15 query: social perception shapes multisensory peripersonal space 2017 body image social cognition 2024 depersonalisation audio tactile",
+        ],
+    },
+    "serino_2015_toolless_sync_training": {
+        "outcome_family": "synchronous_audio_tactile_training_extends_pps_without_tool",
+        "primary_expected_effect": (
+            "Synchronous pairing of tactile stimulation at the hand with far "
+            "auditory stimulation is expected to extend hand PPS even without "
+            "tool use; the same auditory and tactile inputs presented "
+            "asynchronously are not expected to produce the extension."
+        ),
+        "expected_effect_direction": "synchronous_far_audio_hand_tactile_pairing_extends_hand_pps_without_tool",
+        "observable_metric": "audio-tactile PPS boundary or near/far tactile RT facilitation before versus after training",
+        "condition_contrast": "synchronous versus asynchronous tactile-hand and far-auditory stimulation training",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#serino_2015_toolless_sync_training",
+            "Consensus MCP 2026-07-15 query: 10.1371/journal.pone.0006582 Serino 2009 TMS peripersonal space audio tactile",
+        ],
+    },
+    "social_perception_2017": {
+        "outcome_family": "social_moral_evaluation_modulates_pps_boundary",
+        "primary_expected_effect": (
+            "PPS is expected to be more extended when participants face a person "
+            "perceived as moral than when they face a person perceived as "
+            "immoral; the social manipulation is not expected to affect PPS in "
+            "the same way when the target is an object."
+        ),
+        "expected_effect_direction": "moral_social_target_extends_pps_relative_to_immoral_person",
+        "observable_metric": "Social PPS task boundary estimate from multisensory interaction by social-target evaluation",
+        "condition_contrast": "moral versus immoral person and person versus object target context",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#social_perception_2017",
+            "Consensus MCP 2026-07-15 query: social perception shapes multisensory peripersonal space 2017 body image social cognition 2024 depersonalisation audio tactile",
+        ],
+    },
+    "ardizzi_ferri_2018_interoceptive": {
+        "outcome_family": "interoceptive_accuracy_predicts_pps_boundary_size",
+        "primary_expected_effect": (
+            "Higher cardiac interoceptive accuracy is expected to predict a "
+            "narrower audio-tactile PPS boundary, with the relation moderated "
+            "by private self-consciousness traits."
+        ),
+        "expected_effect_direction": "higher_interoceptive_accuracy_predicts_narrower_pps_boundary",
+        "observable_metric": "audio-tactile PPS boundary estimate and heartbeat-counting interoceptive accuracy",
+        "condition_contrast": "individual-difference association between PPS boundary, interoceptive accuracy, and self-consciousness traits",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#ardizzi_ferri_2018_interoceptive",
+            "Consensus MCP 2026-07-15 query: social perception shapes multisensory peripersonal space 2017 body image social cognition 2024 depersonalisation audio tactile",
+        ],
+    },
+    "hobeika_2018_anisotropy": {
+        "outcome_family": "handedness_linked_lateral_pps_anisotropy",
+        "primary_expected_effect": (
+            "Right-handers are expected to show larger peri-trunk PPS in the "
+            "left than the right hemispace, whereas left-handers are expected "
+            "to show a more symmetric lateral PPS representation."
+        ),
+        "expected_effect_direction": "right_handers_show_left_hemispace_pps_expansion_left_handers_symmetric",
+        "observable_metric": "PPS boundary/distance at which looming sound speeds tactile detection by hemispace and handedness",
+        "condition_contrast": "right versus left hemispace and right-handed versus left-handed participant groups",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#hobeika_2018_anisotropy",
+            "Consensus MCP 2026-07-15 query: 10.1007/s00221-017-5158-2 Hobeika anisotropy audiotactile peripersonal space",
+        ],
+    },
+    "autism_2019": {
+        "outcome_family": "autism_smaller_sharper_pps_and_reduced_body_illusion",
+        "primary_expected_effect": (
+            "Autistic adults are expected to show reduced susceptibility to the "
+            "full-body illusion and a smaller, sharper PPS boundary than "
+            "neurotypical adults in the audio-tactile reaction-time task."
+        ),
+        "expected_effect_direction": "autism_smaller_sharper_pps_and_reduced_full_body_illusion",
+        "observable_metric": "PPS boundary size/slope plus self-location and self-identification measures",
+        "condition_contrast": "autism versus neurotypical group and synchronous versus asynchronous full-body-illusion stroking",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#autism_2019",
+            "Consensus MCP 2026-07-15 query: social perception shapes multisensory peripersonal space 2017 body image social cognition 2024 depersonalisation audio tactile",
+        ],
+    },
+    "hobeika_2020_methods": {
+        "outcome_family": "expectancy_corrected_log_distance_pps_method",
+        "primary_expected_effect": (
+            "A fixed-distance baseline is expected to separate expectancy from "
+            "true audio-tactile proximity effects; after correction, the "
+            "proximity effect is expected to vary linearly on a logarithmic "
+            "distance scale rather than requiring a binary near/far boundary."
+        ),
+        "expected_effect_direction": "expectancy_corrected_audio_tactile_effect_varies_linearly_on_log_distance",
+        "observable_metric": "baseline-subtracted tactile RT effect by logarithmically spaced looming-sound distance",
+        "condition_contrast": "looming auditory distance samples versus fixed-distance baseline and sigmoid versus log-linear fit",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#hobeika_2020_methods",
+            "Consensus MCP 2026-07-15 query: 10.1007/s00221-017-5158-2 Hobeika anisotropy audiotactile peripersonal space",
+        ],
+    },
+    "ferroni_2020_tool_observation": {
+        "outcome_family": "active_tool_use_but_not_observation_modulates_pps",
+        "primary_expected_effect": (
+            "Active tool use is expected to change body representation and PPS, "
+            "including comparable tactile facilitation from near and far sounds "
+            "after training, whereas first-person observation of tool use is "
+            "not expected to significantly modulate BR or PPS."
+        ),
+        "expected_effect_direction": "active_tool_use_modulates_pps_but_observation_does_not",
+        "observable_metric": "body-landmark localization and audio-tactile PPS boundary/facilitation before versus after training",
+        "condition_contrast": "active tool-use training versus observational tool-use training",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#ferroni_2020_tool_observation",
+            "Consensus MCP 2026-07-15 query: 10.1016/j.cortex.2020.11.021 ageing body space representations peripersonal space audio tactile",
+        ],
+    },
+    "ageing_2021": {
+        "outcome_family": "ageing_alters_body_representation_but_preserves_pps",
+        "primary_expected_effect": (
+            "Older adults are expected to show stronger distortions in implicit "
+            "and explicit upper-limb body representations than young adults, "
+            "while retaining comparable near-hand PPS multisensory facilitation."
+        ),
+        "expected_effect_direction": "ageing_alters_body_representation_but_preserves_near_hand_pps_facilitation",
+        "observable_metric": "audio-tactile PPS facilitation plus body-landmark, tactile-distance, and avatar-adjustment measures",
+        "condition_contrast": "healthy older versus young adults in upper-limb BR and PPS tasks",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#ageing_2021",
+            "Consensus MCP 2026-07-15 query: 10.1016/j.cortex.2020.11.021 ageing body space representations peripersonal space audio tactile",
+        ],
+    },
+    "body_image_social_cognition_2024": {
+        "outcome_family": "body_image_links_to_interpersonal_distance_not_pps",
+        "primary_expected_effect": (
+            "Body surveillance and fear of negative evaluation are expected to "
+            "relate to interpersonal-distance measures, but the audio-tactile "
+            "PPS boundary is not expected to show the same body-image "
+            "association pattern."
+        ),
+        "expected_effect_direction": "body_image_measures_link_to_interpersonal_distance_not_pps_boundary",
+        "observable_metric": "PPS boundary from audio-tactile RT task and interpersonal-distance comfort boundary",
+        "condition_contrast": "body image and social-evaluation individual differences predicting IPD versus PPS estimates",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#body_image_social_cognition_2024",
+            "Consensus MCP 2026-07-15 query: 10.1016/j.bodyim.2024.101777 body image social cognition peripersonal space audio tactile",
+        ],
+    },
+    "depersonalisation_2024": {
+        "outcome_family": "depersonalisation_spares_pps_but_alters_time_perception",
+        "primary_expected_effect": (
+            "Frequent depersonalisation experiences are not expected to change "
+            "audio-tactile PPS perception relative to low-DP participants, but "
+            "are expected to impair egocentric mental time-travel performance."
+        ),
+        "expected_effect_direction": "depersonalisation_experiences_do_not_shift_pps_but_affect_time_perception",
+        "observable_metric": "audio-tactile PPS boundary plus mental time-travel accuracy/performance",
+        "condition_contrast": "high versus low depersonalisation-experience groups",
+        "source_basis": [
+            "For-AI/audiotactile-paper-metadata-audit/manual_reviews/depersonalisation_2024.json",
+            "Consensus MCP 2026-07-15 query: social perception shapes multisensory peripersonal space 2017 body image social cognition 2024 depersonalisation audio tactile",
+        ],
+    },
+    "interoception_exteroception_2025": {
+        "outcome_family": "cardiac_interoception_competition_and_self_relevance_facilitation",
+        "primary_expected_effect": (
+            "Prestimulus heartbeat-evoked potentials are expected to show two "
+            "independent effects: somatosensory competition associated with "
+            "slower tactile/audio-tactile responses, and integrative-region "
+            "facilitation of self-relevance encoding for audio-tactile stimuli "
+            "inside versus outside PPS."
+        ),
+        "expected_effect_direction": "cardiac_interoception_competes_with_tactile_rt_and_facilitates_self_relevance_encoding",
+        "observable_metric": "RT and audio-tactile evoked EEG response by HEP amplitude and self-relevance/PPS location",
+        "condition_contrast": "audio source inside versus outside PPS and prestimulus HEP topography/amplitude",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#interoception_exteroception_2025",
+            "Consensus MCP 2026-07-15 query: 10.1523/jneurosci.1696-15.2015 Ferri heartbeat intertrial variability peripersonal space audio tactile",
+        ],
+    },
     "finisguerra_2015_moving_sounds_motor": {
         "outcome_family": "moving_sound_modulation_of_hand_motor_excitability",
         "primary_expected_effect": (

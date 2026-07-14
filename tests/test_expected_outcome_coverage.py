@@ -12,23 +12,38 @@ OUTCOME_PATH = ROOT / "assets" / "preloads" / "audiotactile_expected_outcome_cov
 BUILDER_PATH = ROOT / "tools" / "build_expected_outcome_coverage.py"
 
 STRUCTURED_EXPECTED_OUTCOME_IDS = {
-    "biggio_2017_racket_tool_use",
+    "ageing_2021",
     "amiel_2025_front_rear",
+    "ardizzi_ferri_2018_interoceptive",
+    "autism_2019",
+    "avenanti_2012_motor_cortex",
+    "bassolino_2010_mouse_use",
+    "biggio_2017_racket_tool_use",
+    "body_image_social_cognition_2024",
     "canzoneri_2013_amputation_prosthesis",
     "canzoneri_2013_tool_use_reshaping",
     "canzoneri_2012_dynamic_sounds",
     "cell_reports_medicine_2026_consciousness",
+    "cimmino_2013_surgical_arm_elongation",
+    "depersonalisation_2024",
     "disorders_consciousness_2019",
     "farne_ladavas_2002_auditory_pps_humans",
     "ferri_2015_artificial_valence",
     "ferri_2015_ecological_valence",
+    "ferri_2015_jneurosci_itv",
+    "ferroni_2020_tool_observation",
     "finisguerra_2015_moving_sounds_motor",
     "footsole_vibration_2019",
     "galli_2015_wheelchair",
+    "hobeika_2018_anisotropy",
+    "hobeika_2020_methods",
     "holmes_2020_four_experiments",
     "ieeg_trunk_2018",
+    "interoception_exteroception_2025",
+    "kitagawa_2005_sound_complexity",
     "lamia_2026_arm_movement",
     "lerner_2021_3d_boundary",
+    "maister_2015_shared_sensory",
     "matsuda_2021_four_directions",
     "mindfulness_pps_2024",
     "newborn_boundaries_2019",
@@ -43,17 +58,23 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "serino_2011_rtms",
     "schizophrenia_tool_use_2022",
     "serino_2007_blind_cane_users",
+    "serino_2009_tms",
     "serino_2018_mixed_reality_pps",
     "serino_2015_exps_4_to_6",
     "serino_2015_front_back_trunk_exp2",
     "serino_2015_peri_hand_exp3",
     "serino_2015_peri_trunk_exp1",
+    "serino_2015_toolless_sync_training",
     "smartphone_rt_methods_2025",
     "social_coding_2019",
+    "social_perception_2017",
     "spadone_2021_connectivity",
+    "taffou_2014_cynophobic_rear_looming",
     "taffou_2021_auditory_roughness",
     "tajadura_jimenez_2009_visual_deprivation",
     "teneggi_2013_social_face",
+    "teramoto_2013_beyond_head_audiotactile",
+    "teramoto_2013_visual_deprivation",
     "teraoka_2024_front_rear",
     "tonelli_2019_echolocation",
 }
@@ -106,8 +127,8 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
     assert structured_ids == STRUCTURED_EXPECTED_OUTCOME_IDS
     assert outcome["summary"] == {
         "literature_record_count": 74,
-        "structured_expected_outcome_record_count": 44,
-        "pending_expected_outcome_record_count": 26,
+        "structured_expected_outcome_record_count": 65,
+        "pending_expected_outcome_record_count": 5,
         "adjacent_or_out_of_scope_record_count": 4,
         "runnable_profile_parameter_record_count": 6,
         "observed_behavioral_comparison_record_count": 0,
@@ -115,10 +136,8 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "not_runnable_no_observed_comparison_record_count": 64,
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {
-            "main_pdf_unavailable_or_paywalled": 19,
-            "manual_review_partial_or_supplement_blocked": 1,
-            "needs_user_pdf_download": 2,
-            "source_mined_needs_results_visual_review": 4,
+            "main_pdf_unavailable_or_paywalled": 4,
+            "source_mined_needs_results_visual_review": 1,
         },
     }
 
@@ -165,20 +184,15 @@ def test_expected_outcome_pending_blockers_are_actionable():
         if record["expected_outcome_status"] == "pending_expected_outcome_extraction"
     ]
     blocker_total = sum(outcome["summary"]["pending_expected_outcome_blocker_counts"].values())
-    assert blocker_total == len(pending_records) == 26
+    assert blocker_total == len(pending_records) == 5
 
-    assert records["depersonalisation_2024"]["expected_outcome_extraction_blocker"] == (
-        "manual_review_partial_or_supplement_blocked"
-    )
-    assert records["ferri_2015_jneurosci_itv"]["expected_outcome_extraction_blocker"] == (
+    assert records["looming_duration_2025"]["expected_outcome_extraction_blocker"] == (
         "source_mined_needs_results_visual_review"
     )
     assert records["ladavas_2001_auditory_tactile_extinction"]["expected_outcome_extraction_blocker"] == (
         "main_pdf_unavailable_or_paywalled"
     )
-    assert records["taffou_2014_cynophobic_rear_looming"]["expected_outcome_extraction_blocker"] == (
-        "needs_user_pdf_download"
-    )
+    assert records["jazz_duet_2021"]["expected_outcome_extraction_blocker"] == "main_pdf_unavailable_or_paywalled"
 
     structured = records["canzoneri_2012_dynamic_sounds"]
     assert structured["expected_outcome_extraction_blocker"] == "structured_expected_outcome_available"
@@ -211,6 +225,16 @@ def test_expected_outcome_pending_blockers_are_actionable():
     holmes = records["holmes_2020_four_experiments"]
     assert holmes["expected_outcome"]["expected_effect_direction"] == (
         "small_near_sound_rt_benefit_without_robust_distance_gradient"
+    )
+
+    kitagawa = records["kitagawa_2005_sound_complexity"]
+    assert kitagawa["expected_outcome"]["expected_effect_direction"] == (
+        "near_rear_complex_sounds_increase_audio_tactile_interference"
+    )
+
+    interoception = records["interoception_exteroception_2025"]
+    assert interoception["expected_outcome"]["expected_effect_direction"] == (
+        "cardiac_interoception_competes_with_tactile_rt_and_facilitates_self_relevance_encoding"
     )
 
 
