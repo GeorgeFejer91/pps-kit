@@ -1048,12 +1048,14 @@ function staticTrialFileBakePayload(design, status) {
   const soaValues = (protocol.soa_values_ms || []).filter((value) => Number.isFinite(Number(value))).map((value) => Number(value));
   const baselineSoas = staticBaselineSoaValues(protocol, soaValues);
   const includeCatch = Boolean(protocol.include_catch_trials);
+  const baselineCrossesVariants = protocol.baseline_crosses_sequence_variants !== false;
+  const catchCrossesVariants = protocol.catch_crosses_sequence_variants !== false;
   const files = [];
   let variantCounter = 1;
   for (const [rowIndex, strip] of (protocol.trial_strips || []).entries()) {
     const variants = stripPreviewVariants(strip);
     const rowLabel = strip.label || `Trial type ${rowIndex + 1}`;
-    for (const variant of variants) {
+    for (const [variantListIndex, variant] of variants.entries()) {
       const durationMs = staticVariantDurationMs(variant, sourceInventory);
       const noiseType = staticVariantNoiseType(variant, sourceInventory);
       const variantIndex = variantCounter;
@@ -1072,22 +1074,24 @@ function staticTrialFileBakePayload(design, status) {
           noiseType,
         }));
       }
-      for (const soaMs of baselineSoas) {
-        files.push(staticTrialFileRow({
-          templateId: design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID,
-          rowIndex,
-          rowLabel,
-          family: "baseline",
-          folderName: "baseline",
-          variant,
-          variantIndex,
-          durationMs,
-          soaMs,
-          baselineMode: protocol.baseline_custom_trial_mode || protocol.baseline_strategy || "tactile_only",
-          noiseType,
-        }));
+      if (baselineCrossesVariants || variantListIndex === 0) {
+        for (const soaMs of baselineSoas) {
+          files.push(staticTrialFileRow({
+            templateId: design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID,
+            rowIndex,
+            rowLabel,
+            family: "baseline",
+            folderName: "baseline",
+            variant,
+            variantIndex,
+            durationMs,
+            soaMs,
+            baselineMode: protocol.baseline_custom_trial_mode || protocol.baseline_strategy || "tactile_only",
+            noiseType,
+          }));
+        }
       }
-      if (includeCatch) {
+      if (includeCatch && (catchCrossesVariants || variantListIndex === 0)) {
         files.push(staticTrialFileRow({
           templateId: design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID,
           rowIndex,
@@ -1132,7 +1136,7 @@ function staticBaselineSoaValues(protocol, soaValues) {
   if (strategy === "min_anchor") return soaValues.length ? [soaValues[0]] : [];
   if (strategy === "max_anchor") return soaValues.length ? [soaValues[soaValues.length - 1]] : [];
   if (strategy === "min_max") return Array.from(new Set([soaValues[0], soaValues[soaValues.length - 1]].filter((value) => Number.isFinite(Number(value)))));
-  if (strategy === "tactile_only" || strategy === "stationary_burst") return soaValues;
+  if (strategy === "tactile_only" || strategy === "stationary_burst") return custom.length ? custom : soaValues;
   if (strategy === "soa_zero") return [0];
   if (strategy === "custom") return custom;
   return custom.length ? custom : soaValues;
@@ -1610,11 +1614,13 @@ function normalizeStaticTemplateDesign(data, status) {
     include_catch_trials: false,
     catch_trial_percentage: 10,
     catch_trials_exact: null,
+    catch_crosses_sequence_variants: true,
     include_baseline_trials: true,
     baseline_strategy: "tactile_only",
     baseline_trial_percentage: 0,
     baseline_soa_values_ms: [],
     baseline_custom_trial_mode: "tactile_only",
+    baseline_crosses_sequence_variants: true,
     respiratory_phases: ["Inhale", "Exhale"],
     blocks: 1,
     block_specs: [],
@@ -2128,7 +2134,9 @@ function dashboardAuditSnapshot() {
       baseline_strategy: protocol.baseline_strategy || "",
       baseline_soa_values_ms: clone(protocol.baseline_soa_values_ms || []),
       baseline_custom_trial_mode: protocol.baseline_custom_trial_mode || "",
+      baseline_crosses_sequence_variants: protocol.baseline_crosses_sequence_variants !== false,
       include_catch_trials: Boolean(protocol.include_catch_trials),
+      catch_crosses_sequence_variants: protocol.catch_crosses_sequence_variants !== false,
       trial_pool_repetition_defaults: clone(protocol.trial_pool_repetition_defaults || {}),
       trial_strips: (protocol.trial_strips || []).map(auditTrialStripSnapshot)
     },
@@ -4023,10 +4031,16 @@ function baselineAnchorSpecsFromInputs() {
       .map((soa, index) => ({ label: index === 0 ? "minimum" : "maximum", soa_ms: soa, mode: "audio_tactile" }));
   }
   if (strategy === "tactile_only") {
-    return soaValues.map((soa) => ({ label: "full SOA tactile-only", soa_ms: soa, mode: "tactile_only" }));
+    const customSoas = parseIntegerList($("baseline-soa-values").value);
+    const values = customSoas.length ? customSoas : soaValues;
+    const label = customSoas.length ? "custom tactile-only" : "full SOA tactile-only";
+    return values.map((soa) => ({ label, soa_ms: soa, mode: "tactile_only" }));
   }
   if (strategy === "stationary_burst") {
-    return soaValues.map((soa) => ({ label: "full SOA stationary burst", soa_ms: soa, mode: "stationary_burst" }));
+    const customSoas = parseIntegerList($("baseline-soa-values").value);
+    const values = customSoas.length ? customSoas : soaValues;
+    const label = customSoas.length ? "custom stationary burst" : "full SOA stationary burst";
+    return values.map((soa) => ({ label, soa_ms: soa, mode: "stationary_burst" }));
   }
   if (strategy === "custom") {
     const mode = $("baseline-custom-audio-tactile")?.checked ? "audio_tactile" : "tactile_only";
@@ -5664,7 +5678,7 @@ function collectPayload() {
     ? design.protocol.spatial_values_cm
     : [trajectoryControls.end_distance_cm];
   const baselineStrategy = currentBaselineStrategy();
-  const baselineTimings = baselineStrategy === "custom"
+  const baselineTimings = baselineStrategyIsActive(baselineStrategy)
     ? parseIntegerList($("baseline-soa-values").value)
     : [];
   design.protocol = {
@@ -5674,12 +5688,14 @@ function collectPayload() {
     spatial_values_cm: legacySpatial,
     pair_spatial_values_with_soas: false,
     include_catch_trials: $("include-catch-trials")?.checked || false,
+    catch_crosses_sequence_variants: design.protocol?.catch_crosses_sequence_variants !== false,
     catch_trial_percentage: numberValue("catch-percent", 0),
     include_baseline_trials: baselineStrategyIsActive(baselineStrategy),
     baseline_strategy: baselineStrategy,
     baseline_trial_percentage: baselineStrategyIsActive(baselineStrategy) ? numberValue("baseline-percent", 0) : 0,
     baseline_soa_values_ms: baselineTimings,
     baseline_custom_trial_mode: $("baseline-custom-audio-tactile")?.checked ? "audio_tactile" : "tactile_only",
+    baseline_crosses_sequence_variants: design.protocol?.baseline_crosses_sequence_variants !== false,
     blocks: Math.max(1, Math.round(numberValue("block-count", numberValue("blocks", 1)))),
     participants: Math.max(1, Math.round(numberValue("participants", 1))),
     trial_strips: trialStrips

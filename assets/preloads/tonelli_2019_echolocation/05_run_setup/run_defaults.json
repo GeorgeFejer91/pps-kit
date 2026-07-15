@@ -6,5 +6,7 @@
   "random_seed": 20190101,
   "trial_randomization_strategy": "no_immediate_repeats",
   "block_order_randomization": "counterbalanced_rotation",
-  "repeat_trial_pool_per_block": false
+  "repeat_trial_pool_per_block": false,
+  "baseline_crosses_sequence_variants": true,
+  "catch_crosses_sequence_variants": true
 }

@@ -32,6 +32,7 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 | noel_2015_bodily_self_back_space | B | ready | All required current-GUI fields are present and materializable. |
 | pfeiffer_2018_lateral_perihead_left_to_right | - | ready | All required current-GUI fields are present and materializable. |
 | study5_dynaspace_lateral_45_pps | - | ready | All required current-GUI fields are present and materializable. |
+| serino_2015_peri_hand_exp3 | B | ready | All required current-GUI fields are present and materializable. |
 | serino_2015_peri_trunk_exp1 | C | ready | All required current-GUI fields are present and materializable. |
 
 ## Missing publication parameters
@@ -60,7 +61,6 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 | galli_2015_wheelchair_full_body | - | blocked_unsupported_toolkit_structure | speaker-array Gaussian amplitude control |
 | lerner_2021_3d_audio_tactile_boundary | - | blocked_unsupported_toolkit_structure | body-scaled distance mode; exact Unity/3D Tune-In stimulus engine behavior |
 | serino_2015_front_back_trunk_exp2 | A | blocked_unsupported_toolkit_structure | physical 16-speaker array |
-| serino_2015_peri_hand_exp3 | B | blocked_unsupported_toolkit_structure | lateralized hand coordinate |
 | taffou_2014_cynophobic_rear_looming | - | blocked_unsupported_toolkit_structure | left/right rear hemifield as separate trajectories |
 
 ## Machine-Readable Source

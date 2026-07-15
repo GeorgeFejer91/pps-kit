@@ -155,7 +155,7 @@ def render_audit_report(status: dict[str, Any], materialization: dict[str, Any])
             "task-execution element that cannot yet be represented as a faithful Segment "
             "0--4 dashboard/backend profile. Examples in this ledger include "
             "direction-coupled tactile-only baseline subtypes, body-scaled distance modes, "
-            "lateralized tactile coordinate fields, separate rear-hemifield trajectory "
+            "separate rear-hemifield trajectory "
             "families, speaker-array switching, Gaussian amplitude "
             "fields, and Unity/3D Tune-In audio-engine behavior."
         ),

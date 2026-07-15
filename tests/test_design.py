@@ -18,6 +18,8 @@ from peripersonal_space_toolkit.design import (
     NoiseDefinition,
     PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
     ProtocolSpec,
+    TrialStripElementSpec,
+    TrialStripSpec,
     horizontal_point_from_distance_rotation,
     block_trial_rows,
     default_design,
@@ -966,6 +968,50 @@ def test_protocol_can_use_full_factorial_soa_by_spatial_values():
     summary = protocol_summary(design)
     assert summary["audio_tactile_trials"] == 6
     assert summary["total_trials"] == 6
+
+
+def test_non_target_controls_can_skip_sequence_variant_crossing():
+    design = default_design()
+    design.noises = [
+        NoiseDefinition("Approach", "pink", 0.0),
+        NoiseDefinition("Recede", "pink", 0.0),
+    ]
+    design.protocol = ProtocolSpec(
+        repetitions_per_condition=1,
+        soa_values_ms=[0, 4000],
+        spatial_values_cm=[93.0, 5.0],
+        pair_spatial_values_with_soas=True,
+        include_catch_trials=True,
+        catch_trial_percentage=0.0,
+        catch_trials_exact=1,
+        catch_crosses_sequence_variants=False,
+        include_baseline_trials=True,
+        baseline_soa_values_ms=[0, 4000],
+        baseline_crosses_sequence_variants=False,
+        respiratory_phases=["Any"],
+        blocks=1,
+        trial_strips=[
+            TrialStripSpec(
+                strip_id="moving-sound",
+                label="Moving sound",
+                elements=[
+                    TrialStripElementSpec(
+                        kind="looming_stimulus",
+                        label="Moving sound",
+                        source_labels=["Approach", "Recede"],
+                    )
+                ],
+            )
+        ],
+    )
+
+    rows = block_trial_rows(design)
+    counts: dict[str, int] = {}
+    for row in rows:
+        counts[str(row["trial_type"])] = counts.get(str(row["trial_type"]), 0) + 1
+
+    assert counts == {"Audio-Tactile": 4, "Baseline": 2, "Catch": 1}
+    assert protocol_summary(design)["total_trials"] == 7
 
 
 def test_block_specs_partition_trial_pool_by_stimulus_type():

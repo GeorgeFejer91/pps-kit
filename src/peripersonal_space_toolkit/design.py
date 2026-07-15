@@ -207,11 +207,13 @@ class ProtocolSpec:
     include_catch_trials: bool = True
     catch_trial_percentage: float = 10.0
     catch_trials_exact: int | None = None
+    catch_crosses_sequence_variants: bool = True
     include_baseline_trials: bool = True
     baseline_strategy: str = "tactile_only"
     baseline_trial_percentage: float = 0.0
     baseline_soa_values_ms: list[int] = field(default_factory=list)
     baseline_custom_trial_mode: str = "tactile_only"
+    baseline_crosses_sequence_variants: bool = True
     respiratory_phases: list[str] = field(default_factory=lambda: ["Inhale", "Exhale"])
     blocks: int = 6
     block_specs: list[BlockSpec] = field(default_factory=list)
@@ -1261,6 +1263,8 @@ def _filmstrip_baseline_rows_for_strip(
     if not baseline_pairs:
         return []
     variants = _strip_variant_choices(design, strip)
+    if not protocol.baseline_crosses_sequence_variants:
+        variants = variants[:1]
     strip_id = strip.strip_id or f"strip-{strip_index}"
     strip_label = strip.label or f"Event {strip_index}"
     trial_type_label = strip_label
@@ -1331,9 +1335,10 @@ def _with_filmstrip_catches(
         catch_count = 0
     if not rows or catch_count <= 0:
         return rows
+    template_rows = rows if protocol.catch_crosses_sequence_variants else rows[:1]
     with_catches = list(rows)
     for index in range(catch_count):
-        template = dict(rows[index % len(rows)])
+        template = dict(template_rows[index % len(template_rows)])
         template["trial_type"] = "Catch"
         template["repetition"] = ""
         template["tactile_enabled"] = False

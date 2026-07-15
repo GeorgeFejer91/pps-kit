@@ -285,7 +285,7 @@
         "serino_2015_front_back_trunk_exp2",
         "serino_2015_peri_hand_exp3"
       ],
-      "reason": "Experiment 1 is now profile-check runnable via analog-apparatus trajectory reconstruction; Experiments 2-3 are templated but still blocked by multi-speaker/body-coordinate issues, and Experiments 4-6 still need extraction."
+      "reason": "Experiments 1 and 3 are now profile-check runnable via analog-apparatus trajectory reconstruction, with Experiment 3 using a caveated hand-anchored cartesian path; Experiment 2 remains templated but blocked by multi-speaker/internal-distance issues, and Experiments 4-6 still need extraction."
     },
     {
       "source_label": "Ardizzi & Ferri (2018)",

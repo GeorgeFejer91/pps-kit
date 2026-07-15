@@ -61,6 +61,10 @@ REQUIRED_CONTRASTS = {
         "required": ["soa_or_distance_rank", "auditory_motion_direction"],
         "note": "The rows retain SOA but do not name looming versus receding motion direction.",
     },
+    "serino_2015_peri_hand_exp3": {
+        "required": ["soa_or_distance_rank", "auditory_motion_direction"],
+        "note": "The rows must retain the hand-centered near/far SOA rank and looming/receding labels.",
+    },
     "pfeiffer_2018_vestibular": {
         "required": ["vestibular_condition", "audio_vestibular_congruence"],
         "note": "The rows retain lateral audio timing but not vestibular/no-rotation or congruent/incongruent context.",
@@ -127,7 +131,7 @@ def run_audit(
                 "looming-vs-fixed, Noel front/back synchrony, Serino peri-trunk "
                 "near-vs-far, Matsuda four-direction approaching-vs-receding, "
                 "Lamia movement-state, and Pfeiffer vestibular-congruence RT "
-                "comparisons"
+                "comparisons, plus Serino peri-hand near-vs-far RT comparison"
             ),
             "assumption_boundary": EVIDENCE_BOUNDARY,
         },
@@ -217,6 +221,20 @@ def _audit_record(
             "required_next_step": (
                 "Replace deterministic synthetic RTs with collected participant data before making a scientific "
                 "peri-trunk PPS replication claim."
+            ),
+        }
+    if not missing and record_id == "serino_2015_peri_hand_exp3":
+        comparison = _compare_serino_peri_hand_near_far(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "peri-hand PPS replication claim."
             ),
         }
     if not missing and record_id == "matsuda_2021_four_directions":
@@ -588,6 +606,83 @@ def _serino_motion_direction(row: dict[str, Any]) -> str:
         for key in ("sequence_labels", "sequence_variant_key", "row_label", "respiratory_phase")
     ).lower()
     return "receding" if "reced" in text else "looming"
+
+
+def _compare_serino_peri_hand_near_far(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    rows = [
+        row
+        for profile in profile_rows
+        for row in profile["rows"]
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    motions: set[str] = set()
+    for row in rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        motion = _serino_motion_direction(row)
+        motions.add(motion)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        if motion == "receding":
+            proximity = 1.0 - proximity
+        condition = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        rt_ms = 522.0 - (40.0 * proximity)
+        if motion == "looming":
+            rt_ms -= 8.0 * proximity
+        out = dict(row)
+        out["synthetic_condition"] = f"{motion}_{condition}"
+        out["synthetic_motion_direction"] = motion
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "serino_2015_peri_hand_exp3_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    looming_delta = means.get("looming_far", math.nan) - means.get("looming_near", math.nan)
+    receding_delta = means.get("receding_far", math.nan) - means.get("receding_near", math.nan)
+    complete_motions = {"looming", "receding"}.issubset(motions)
+    observed_direction = (
+        "near_hand_sounds_speed_hand_tactile_rt"
+        if complete_motions
+        and math.isfinite(looming_delta)
+        and looming_delta > 0.0
+        and (not math.isfinite(receding_delta) or receding_delta > 0.0)
+        else "near_hand_sounds_do_not_speed_hand_tactile_rt"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "motions_observed": sorted(motions),
+        "looming_far_minus_near_ms": looming_delta if math.isfinite(looming_delta) else None,
+        "receding_far_minus_near_ms": receding_delta if math.isfinite(receding_delta) else None,
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "looming far_mean_rt_ms - near_mean_rt_ms >= 20, looming/receding factors present, "
+            "and observed direction equals expected direction"
+        ),
+        "pass": (
+            observed_direction == expected_direction
+            and complete_motions
+            and math.isfinite(looming_delta)
+            and looming_delta >= 20.0
+        ),
+    }
 
 
 def _compare_matsuda_four_direction(

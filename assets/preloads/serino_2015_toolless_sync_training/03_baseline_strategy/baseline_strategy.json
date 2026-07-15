@@ -5,6 +5,8 @@
   "include_baseline_trials": false,
   "baseline_trial_percentage": 0.0,
   "baseline_soa_values_ms": [],
+  "baseline_crosses_sequence_variants": true,
   "catch_trial_percentage": 23.0,
-  "catch_trials_exact": null
+  "catch_trials_exact": null,
+  "catch_crosses_sequence_variants": true
 }

@@ -8,6 +8,8 @@
     -700,
     3600
   ],
+  "baseline_crosses_sequence_variants": true,
   "catch_trial_percentage": 30.0,
-  "catch_trials_exact": null
+  "catch_trials_exact": null,
+  "catch_crosses_sequence_variants": true
 }

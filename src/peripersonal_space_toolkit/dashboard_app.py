@@ -4945,14 +4945,18 @@ def _baseline_anchor_specs(design: StimulusDesign) -> list[dict[str, Any]]:
             for index, soa_ms in enumerate(values)
         ]
     if strategy == "tactile_only":
+        anchor_soas = custom_soas or soas
+        prefix = "custom" if custom_soas else "full_soa"
         return [
-            {"anchor_label": f"full_soa_{soa_ms}ms", "soa_ms": soa_ms, "mode": "tactile_only"}
-            for soa_ms in soas
+            {"anchor_label": f"{prefix}_{soa_ms}ms", "soa_ms": soa_ms, "mode": "tactile_only"}
+            for soa_ms in anchor_soas
         ]
     if strategy == "stationary_burst":
+        anchor_soas = custom_soas or soas
+        prefix = "custom_stationary_burst" if custom_soas else "stationary_burst"
         return [
-            {"anchor_label": f"stationary_burst_{soa_ms}ms", "soa_ms": soa_ms, "mode": "stationary_burst"}
-            for soa_ms in soas
+            {"anchor_label": f"{prefix}_{soa_ms}ms", "soa_ms": soa_ms, "mode": "stationary_burst"}
+            for soa_ms in anchor_soas
         ]
     if strategy == "custom":
         return [
@@ -5495,17 +5499,23 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
         soa_values = [int(value) for value in design.protocol.soa_values_ms]
         baseline_anchors = _baseline_anchor_specs(design)
         include_catch = bool(getattr(design.protocol, "include_catch_trials", False))
+        catch_crosses_variants = bool(getattr(design.protocol, "catch_crosses_sequence_variants", True))
+        baseline_crosses_variants = bool(getattr(design.protocol, "baseline_crosses_sequence_variants", True))
+        catch_rows_seen: set[tuple[int, str]] = set()
+        baseline_rows_seen: set[tuple[int, str]] = set()
         for variant in variants:
             _validate_trial_sequence_variant(variant)
             row_index = int(variant.get("row_index") or 0)
             row_label = str(variant.get("row_label") or f"Row {row_index}")
+            row_key = (row_index, row_label)
             variant_index = int(variant.get("variant_index") or 0)
             variant_key = str(variant.get("variant_key") or f"variant_{variant_index:03d}")
             source_path = Path(str(variant.get("file_path") or ""))
             looming_onset_s = float(variant.get("looming_segment_onset_s") or 0.0)
             audio_folder = root / _trial_bake_output_folder_name("audio_tactile", row_index, row_label)
             _ensure_dir(audio_folder)
-            if include_catch:
+            if include_catch and (catch_crosses_variants or row_key not in catch_rows_seen):
+                catch_rows_seen.add(row_key)
                 source_info = _audio_file_info(source_path)
                 output_stem = _trial_bake_file_stem(
                     family="catch",
@@ -5558,7 +5568,8 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
                     tactile_onset_s=tactile_onset_s,
                     row_folder=audio_folder,
                 )
-            if baseline_anchors:
+            if baseline_anchors and (baseline_crosses_variants or row_key not in baseline_rows_seen):
+                baseline_rows_seen.add(row_key)
                 segments = _variant_segments(variant)
                 baseline_folder = root / _trial_bake_output_folder_name("baseline", row_index, row_label)
                 _ensure_dir(baseline_folder)

@@ -534,8 +534,33 @@ def refresh_radius_from_xyz(trajectory: Any) -> None:
     trajectory.end_radius_m = float(end_spherical["radius_m"])
 
 
-def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Path, source_assets: list[dict[str, Any]]) -> None:
+def _metadata_design_with_source_assets(design: Any, source_assets: list[dict[str, Any]]) -> Any:
     metadata_design = design_from_dict(design_to_dict(design))
+    existing_labels = {str(noise.label or "").strip() for noise in metadata_design.noises}
+    for asset in source_assets:
+        label = str(asset.get("label") or "").strip()
+        if not label or label in existing_labels:
+            continue
+        metadata_design.noises.append(
+            NoiseDefinition(
+                label=label,
+                noise_type=str(asset.get("noise_type") or asset.get("tone_type") or "pink"),
+                azimuth_deg=float(asset.get("azimuth_deg") or 0.0),
+                elevation_deg=float(asset.get("elevation_deg") or 0.0),
+                gain=1.0,
+                prebaked_path=str(asset.get("path") or ""),
+                motion_mode=str(asset.get("motion_mode") or "looming"),
+                trajectory_snapshot=dict(asset.get("trajectory_snapshot") or {}),
+                source_profile=str(asset.get("source_profile") or ""),
+                source_profile_parameters=dict(asset.get("source_profile_parameters") or {}),
+            )
+        )
+        existing_labels.add(label)
+    return metadata_design
+
+
+def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Path, source_assets: list[dict[str, Any]]) -> None:
+    metadata_design = _metadata_design_with_source_assets(design, source_assets)
     expand_trial_strip_source_labels(
         metadata_design,
         [str(asset.get("label") or "") for asset in source_assets],
@@ -599,8 +624,10 @@ def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Pa
             "include_baseline_trials": protocol.include_baseline_trials,
             "baseline_trial_percentage": protocol.baseline_trial_percentage,
             "baseline_soa_values_ms": protocol.baseline_soa_values_ms,
+            "baseline_crosses_sequence_variants": protocol.baseline_crosses_sequence_variants,
             "catch_trial_percentage": protocol.catch_trial_percentage,
             "catch_trials_exact": protocol.catch_trials_exact,
+            "catch_crosses_sequence_variants": protocol.catch_crosses_sequence_variants,
         },
     )
     write_json(
@@ -626,6 +653,8 @@ def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Pa
         "trial_randomization_strategy": protocol.trial_randomization_strategy,
         "block_order_randomization": protocol.block_order_randomization,
         "repeat_trial_pool_per_block": protocol.repeat_trial_pool_per_block,
+        "baseline_crosses_sequence_variants": protocol.baseline_crosses_sequence_variants,
+        "catch_crosses_sequence_variants": protocol.catch_crosses_sequence_variants,
     }
     if protocol.block_specs:
         run_setup_defaults["block_specs"] = [asdict(block) for block in protocol.block_specs]

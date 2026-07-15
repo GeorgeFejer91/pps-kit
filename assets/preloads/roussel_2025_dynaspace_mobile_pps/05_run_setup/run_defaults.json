@@ -7,6 +7,8 @@
   "trial_randomization_strategy": "balanced_shuffle",
   "block_order_randomization": "fixed",
   "repeat_trial_pool_per_block": false,
+  "baseline_crosses_sequence_variants": true,
+  "catch_crosses_sequence_variants": true,
   "block_specs": [
     {
       "label": "DynaSpace recorded 72-trial block",

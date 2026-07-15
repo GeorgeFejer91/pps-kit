@@ -12,35 +12,29 @@
   "visible_variant_label": "B",
   "variant_display": "Serino 2015 peri-hand PPS Experiment 3 - Variant B",
   "recreation_status": {
-    "primary_category": "toolkit_structural_gap",
-    "category_label": "Toolkit structural gap",
-    "runner_readiness": "blocked_unsupported_toolkit_structure",
-    "profile_checks_passed": false,
-    "gui_recreatable": false,
-    "segment_0_to_4_profile_checks_passed": false,
-    "segment_1_to_6_materializable": false,
-    "finished_profile": false,
-    "segment_6_launchable": false,
-    "profile_completion_status": "unfinished_preload",
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
     "missing_parameter_count": 0,
-    "unsupported_structure_count": 1
+    "unsupported_structure_count": 0
   },
   "segment_0_to_4_profile_checks": {
     "gate": "segments_0_to_4",
-    "passed": false,
+    "passed": true,
     "segments": [
       {
         "segment": "0",
         "segment_label": "Segment 0 profile manifest and provenance",
-        "passed": false,
-        "field_count": 4,
-        "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
-            "status": "unsupported_toolkit_structure",
-            "reason": "lateralized hand coordinate"
-          }
-        ]
+        "passed": true,
+        "field_count": 3,
+        "blocking_reasons": []
       },
       {
         "segment": "1",
@@ -101,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 6,
+      "value": 9,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -233,24 +227,10 @@
       "status": "defaulted",
       "value": "1 part",
       "note": "Current dashboard default; phase/intervention context is non-blocking unless it changes the audiotactile PPS task execution."
-    },
-    {
-      "segment": "0",
-      "segment_label": "Segment 0 profile manifest and provenance",
-      "parameter": "profile_gap",
-      "status": "unsupported_toolkit_structure",
-      "value": "lateralized hand coordinate",
-      "note": "lateralized hand coordinate"
     }
   ],
   "missing_publication_parameters": [],
-  "unsupported_toolkit_structures": [
-    {
-      "segment": "0",
-      "parameter": "profile_gap",
-      "reason": "lateralized hand coordinate"
-    }
-  ],
+  "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
       "profile_metadata": "assets/preloads/serino_2015_peri_hand_exp3/01_profile/profile_metadata.json",
@@ -291,6 +271,10 @@
     {
       "field": "trial count",
       "source": "Methods report 208 trials for Experiment 3 with 16 repetitions."
+    },
+    {
+      "field": "lateralized hand anchor",
+      "source": "Manual review records that the hand was placed at shoulder width and the near/far speaker line was hand-relative. The profile encodes this with a positive-x cartesian offset and keeps the exact hand side as an unresolved caveat."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."

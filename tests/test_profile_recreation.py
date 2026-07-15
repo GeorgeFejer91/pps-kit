@@ -50,7 +50,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     assert status["categories"]["missing_publication_parameters"]
     assert status["categories"]["toolkit_structural_gap"]
     assert len(status["categories"]["missing_publication_parameters"]) == 12
-    assert len(status["categories"]["toolkit_structural_gap"]) == 7
+    assert len(status["categories"]["toolkit_structural_gap"]) == 6
 
     allowed_statuses = {
         STATUS_REPORTED,
@@ -108,7 +108,7 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert study5["segment_0_to_4_profile_checks_passed"] is True
     assert study5["missing_parameter_count"] == 0
     assert study5["unsupported_structure_count"] == 0
-    assert len(status["categories"]["gui_recreatable"]) == 10
+    assert len(status["categories"]["gui_recreatable"]) == 11
 
     study5_lateral = profiles[STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID]
     assert study5_lateral["primary_category"] == "gui_recreatable"
@@ -158,9 +158,12 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     } == {"speaker-array Gaussian amplitude control"}
 
     serino_hand = profiles["serino_2015_peri_hand_exp3"]
-    assert {
-        item["reason"] for item in serino_hand["unsupported_toolkit_structures"]
-    } == {"lateralized hand coordinate"}
+    assert serino_hand["primary_category"] == "gui_recreatable"
+    assert serino_hand["runner_readiness"] == "ready"
+    assert serino_hand["profile_checks_passed"] is True
+    assert serino_hand["segment_0_to_4_profile_checks_passed"] is True
+    assert serino_hand["missing_parameter_count"] == 0
+    assert serino_hand["unsupported_structure_count"] == 0
 
     report = (root / "docs" / "PUBLISHED_STUDY_RECREATION_STATUS.md").read_text(encoding="utf-8")
     assert "## GUI-recreatable" in report
@@ -170,7 +173,7 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert "Ordinary trial randomization and block order" in report
 
     tex_report = (root / "docs" / "audit_report.tex").read_text(encoding="utf-8")
-    assert "Published-paper profiles passing checks & 8" in tex_report
+    assert "Published-paper profiles passing checks & 9" in tex_report
     assert "study5" in tex_report and "box" in tex_report and "breathing" in tex_report
     assert "No visible GUI progress indicator" in tex_report
     assert "Clinical populations, interventions, non-audiotactile stimuli" in tex_report
@@ -232,7 +235,7 @@ def test_protocol12_matrix_targets_ready_published_profiles_and_blocked_samples(
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID not in ready_published
     assert DEFAULT_STUDY_TEMPLATE_ID in ready_all
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID in ready_all
-    assert len(ready_published) == 8
+    assert len(ready_published) == 9
     assert set(ready_published) < set(ready_all)
     assert len(blocked_samples) == 2
 

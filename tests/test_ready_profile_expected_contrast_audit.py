@@ -38,6 +38,7 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     rows_path = tmp_path / "roussel_analysis_ready_trials.csv"
     noel_rows_path = tmp_path / "noel_analysis_ready_trials.csv"
     serino_rows_path = tmp_path / "serino_analysis_ready_trials.csv"
+    serino_hand_rows_path = tmp_path / "serino_hand_analysis_ready_trials.csv"
     matsuda_rows_path = tmp_path / "matsuda_analysis_ready_trials.csv"
     lamia_rows_path = tmp_path / "lamia_analysis_ready_trials.csv"
     pfeiffer_rows_path = tmp_path / "pfeiffer_analysis_ready_trials.csv"
@@ -113,6 +114,43 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
             },
         ],
     )
+    _write_csv(
+        serino_hand_rows_path,
+        [
+            {
+                "row_label": "Peri-hand moving-sound trial",
+                "respiratory_phase": "Peri-hand moving-sound trial",
+                "sequence_labels": "Hand moving sound",
+                "sequence_variant_key": "hand_moving_sound",
+                "family": "audio_tactile",
+                "soa_ms": "0",
+            },
+            {
+                "row_label": "Peri-hand moving-sound trial",
+                "respiratory_phase": "Peri-hand moving-sound trial",
+                "sequence_labels": "Hand moving sound",
+                "sequence_variant_key": "hand_moving_sound",
+                "family": "audio_tactile",
+                "soa_ms": "4000",
+            },
+            {
+                "row_label": "Peri-hand moving-sound trial",
+                "respiratory_phase": "Peri-hand moving-sound trial",
+                "sequence_labels": "Hand moving sound - receding",
+                "sequence_variant_key": "hand_moving_sound_receding",
+                "family": "audio_tactile",
+                "soa_ms": "0",
+            },
+            {
+                "row_label": "Peri-hand moving-sound trial",
+                "respiratory_phase": "Peri-hand moving-sound trial",
+                "sequence_labels": "Hand moving sound - receding",
+                "sequence_variant_key": "hand_moving_sound_receding",
+                "family": "audio_tactile",
+                "soa_ms": "4000",
+            },
+        ],
+    )
     matsuda_rows: list[dict[str, str]] = []
     for block_label in ("Front direction", "Rear direction", "Left direction", "Right direction"):
         for sequence_label in ("Pink moving sound", "Pink moving sound - receding"):
@@ -184,6 +222,10 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                         "outputs": {"analysis_ready_trials": str(serino_rows_path)},
                     },
                     {
+                        "template_id": "serino_2015_peri_hand_exp3",
+                        "outputs": {"analysis_ready_trials": str(serino_hand_rows_path)},
+                    },
+                    {
                         "template_id": "matsuda_2021_four_directions",
                         "outputs": {"analysis_ready_trials": str(matsuda_rows_path)},
                     },
@@ -234,6 +276,15 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                         },
                     },
                     {
+                        "record_id": "serino_2015_peri_hand_exp3",
+                        "citation_short": "Serino 2015 Exp. 3",
+                        "observed_comparison_gap": audit.READY_GAP,
+                        "current_template_ids": ["serino_2015_peri_hand_exp3"],
+                        "expected_outcome": {
+                            "expected_effect_direction": "near_hand_sounds_speed_hand_tactile_rt"
+                        },
+                    },
+                    {
                         "record_id": "matsuda_2021_four_directions",
                         "citation_short": "Matsuda 2021",
                         "observed_comparison_gap": audit.READY_GAP,
@@ -277,9 +328,9 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert report["schema"] == audit.SCHEMA
     assert report["passed"]
     assert report["summary"] == {
-        "ready_profile_record_count": 6,
-        "synthetic_comparison_record_count": 6,
-        "synthetic_comparison_passed_count": 6,
+        "ready_profile_record_count": 7,
+        "synthetic_comparison_record_count": 7,
+        "synthetic_comparison_passed_count": 7,
         "synthetic_comparison_failed_count": 0,
         "contrast_metadata_blocked_record_count": 0,
         "contrast_metadata_present_model_missing_record_count": 0,
@@ -305,6 +356,15 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert serino["synthetic_comparison"]["far_minus_near_ms"] == 45.0
     assert serino["synthetic_comparison"]["observed_effect_direction"] == (
         "near_or_approaching_trunk_sounds_speed_tactile_rt"
+    )
+
+    serino_hand = by_id["serino_2015_peri_hand_exp3"]
+    assert serino_hand["status"] == "synthetic_behavioral_comparison_passed"
+    assert serino_hand["missing_contrasts"] == []
+    assert serino_hand["synthetic_comparison"]["motions_observed"] == ["looming", "receding"]
+    assert serino_hand["synthetic_comparison"]["looming_far_minus_near_ms"] >= 20.0
+    assert serino_hand["synthetic_comparison"]["observed_effect_direction"] == (
+        "near_hand_sounds_speed_hand_tactile_rt"
     )
 
     matsuda = by_id["matsuda_2021_four_directions"]
