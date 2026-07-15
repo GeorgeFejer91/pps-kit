@@ -1624,6 +1624,7 @@ function normalizeStaticTemplateDesign(data, status) {
     respiratory_phases: ["Inhale", "Exhale"],
     blocks: 1,
     block_specs: [],
+    distribute_trial_pool_across_blocks: false,
     trial_strips: [],
     trial_randomization_strategy: "no_immediate_repeats",
     block_order_randomization: "counterbalanced_rotation",
@@ -2137,6 +2138,7 @@ function dashboardAuditSnapshot() {
       baseline_crosses_sequence_variants: protocol.baseline_crosses_sequence_variants !== false,
       include_catch_trials: Boolean(protocol.include_catch_trials),
       catch_crosses_sequence_variants: protocol.catch_crosses_sequence_variants !== false,
+      distribute_trial_pool_across_blocks: Boolean(protocol.distribute_trial_pool_across_blocks),
       trial_pool_repetition_defaults: clone(protocol.trial_pool_repetition_defaults || {}),
       trial_strips: (protocol.trial_strips || []).map(auditTrialStripSnapshot)
     },
@@ -5696,6 +5698,7 @@ function collectPayload() {
     baseline_soa_values_ms: baselineTimings,
     baseline_custom_trial_mode: $("baseline-custom-audio-tactile")?.checked ? "audio_tactile" : "tactile_only",
     baseline_crosses_sequence_variants: design.protocol?.baseline_crosses_sequence_variants !== false,
+    distribute_trial_pool_across_blocks: Boolean(design.protocol?.distribute_trial_pool_across_blocks),
     blocks: Math.max(1, Math.round(numberValue("block-count", numberValue("blocks", 1)))),
     participants: Math.max(1, Math.round(numberValue("participants", 1))),
     trial_strips: trialStrips

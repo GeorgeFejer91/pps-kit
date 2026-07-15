@@ -8511,6 +8511,7 @@ def _study_settings_manifest(context: DashboardProjectContext, design: StimulusD
                 "baseline_trial_percentage": protocol.baseline_trial_percentage,
                 "repetitions_per_condition": protocol.repetitions_per_condition,
                 "blocks": protocol.blocks,
+                "distribute_trial_pool_across_blocks": bool(getattr(protocol, "distribute_trial_pool_across_blocks", False)),
                 "participants": protocol.participants,
             },
             "baseline_generation": {
@@ -8544,6 +8545,7 @@ def _study_settings_manifest(context: DashboardProjectContext, design: StimulusD
                 "output_files": ["trial_repetition_pool.csv", "trial_repetition_pool_manifest.json"],
                 "duplicates_wavs": False,
                 "blocks_defined_here": False,
+                "distribute_trial_pool_across_blocks": bool(getattr(protocol, "distribute_trial_pool_across_blocks", False)),
             },
             "loudness_policy": loudness_policy,
             "trial_rows": trial_rows,

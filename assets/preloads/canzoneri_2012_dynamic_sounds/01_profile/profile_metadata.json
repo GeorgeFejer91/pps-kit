@@ -6,7 +6,7 @@
   "doi": "10.1371/journal.pone.0044306",
   "source_url": "https://pubmed.ncbi.nlm.nih.gov/23028516/",
   "verification_status": "partial",
-  "notes": "Canonical dynamic audio-tactile PPS task. The preload now follows the original paper's accessible method values where the current scheduler can express them. The original two-speaker analog setup is treated as apparatus provenance and recreated as a binaural moving-sound trajectory. Exact replication still needs direction-coupled tactile-only T0/T6 baseline trials, which the current Trial Assembler cannot yet encode as a distinct baseline subtype.",
+  "notes": "Canonical dynamic audio-tactile PPS task. The preload follows the original paper's accessible method values with reported T1-T5 audio-tactile timings, direction-coupled tactile-only T0/T6 baselines, and 76 auditory-only catch trials. The original two-speaker SoundForge apparatus is treated as provenance and recreated as a binaural moving-sound trajectory with caveats for exact author gain files, room transfer, electrical threshold calibration, and voice-key hardware.",
   "reference_parameters": {
     "profile_type": "canonical_dynamic_audio_tactile_pps",
     "sound_duration_ms": 3000,
@@ -29,8 +29,9 @@
     "response_rule": "vocal response to tactile target, ignore sound",
     "analysis_outlier_rule": "trim RTs exceeding 2 SD from participant/condition mean",
     "analog_apparatus_recreation": "Original near/far speakers and SoundForge motion are modeled as the reported 110 cm to 10 cm moving-sound trajectory in the binaural renderer when exact author gain files are not available.",
-    "implementation_gaps": [
-      "direction-coupled tactile-only T0/T6 baseline trials",
+    "profile_check_complete": true,
+    "reported_trial_formula": "80 audio-tactile trials (2 IN/OUT directions x 5 T1-T5 timings x 8 repetitions), 32 direction-coupled tactile-only T0/T6 baselines, and 76 auditory-only catch trials, split into two paper blocks.",
+    "remaining_caveats": [
       "exact original SoundForge exponential gain/envelope files",
       "voice-key response capture",
       "electrical tactile threshold calibration"

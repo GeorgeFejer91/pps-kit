@@ -53,6 +53,10 @@ EVIDENCE_BOUNDARY = (
 )
 
 REQUIRED_CONTRASTS = {
+    "canzoneri_2012_dynamic_sounds": {
+        "required": ["soa_or_distance_rank", "auditory_motion_direction", "audio_tactile_vs_baseline"],
+        "note": "The rows must retain IN/approaching versus OUT/receding labels, T1-T5 SOA ranks, and tactile-only T0/T6 baseline rows.",
+    },
     "noel_2015_bodily_self": {
         "required": ["stroking_synchrony", "front_back_space"],
         "note": "The current front-space ready rows encode synchronous/asynchronous stroking but not the separate back-space/back-tactile experiment.",
@@ -131,7 +135,7 @@ def run_audit(
                 "looming-vs-fixed, Noel front/back synchrony, Serino peri-trunk "
                 "near-vs-far, Matsuda four-direction approaching-vs-receding, "
                 "Lamia movement-state, and Pfeiffer vestibular-congruence RT "
-                "comparisons, plus Serino peri-hand near-vs-far RT comparison"
+                "comparisons, plus Serino peri-hand and Canzoneri near-vs-far RT comparisons"
             ),
             "assumption_boundary": EVIDENCE_BOUNDARY,
         },
@@ -235,6 +239,20 @@ def _audit_record(
             "required_next_step": (
                 "Replace deterministic synthetic RTs with collected participant data before making a scientific "
                 "peri-hand PPS replication claim."
+            ),
+        }
+    if not missing and record_id == "canzoneri_2012_dynamic_sounds":
+        comparison = _compare_canzoneri_near_far(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "Canzoneri dynamic-sound PPS replication claim."
             ),
         }
     if not missing and record_id == "matsuda_2021_four_directions":
@@ -681,6 +699,88 @@ def _compare_serino_peri_hand_near_far(
             and complete_motions
             and math.isfinite(looming_delta)
             and looming_delta >= 20.0
+        ),
+    }
+
+
+def _compare_canzoneri_near_far(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    all_rows = [row for profile in profile_rows for row in profile["rows"]]
+    rows = [
+        row
+        for row in all_rows
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    families = {str(row.get("family") or "").strip().lower() for row in all_rows}
+    soas = sorted({_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    motions: set[str] = set()
+    for row in rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        motion = _approach_recede_direction(row)
+        motions.add(motion)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        if motion == "receding":
+            proximity = 1.0 - proximity
+        distance_bin = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        if motion == "approaching":
+            rt_ms = 532.0 - (46.0 * proximity)
+        else:
+            rt_ms = 515.0 - (6.0 * proximity)
+        out = dict(row)
+        out["synthetic_condition"] = f"{motion}_{distance_bin}"
+        out["synthetic_motion_direction"] = motion
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "canzoneri_2012_dynamic_sounds_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    approaching_delta = means.get("approaching_far", math.nan) - means.get("approaching_near", math.nan)
+    receding_delta = means.get("receding_far", math.nan) - means.get("receding_near", math.nan)
+    complete_motions = {"approaching", "receding"}.issubset(motions)
+    baseline_present = "baseline" in families
+    observed_direction = (
+        "approaching_near_body_sounds_speed_tactile_rt"
+        if complete_motions
+        and baseline_present
+        and math.isfinite(approaching_delta)
+        and approaching_delta > 0.0
+        else "approaching_near_body_sounds_do_not_speed_tactile_rt"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "motions_observed": sorted(motions),
+        "baseline_family_present": baseline_present,
+        "approaching_far_minus_near_ms": approaching_delta if math.isfinite(approaching_delta) else None,
+        "receding_far_minus_near_ms": receding_delta if math.isfinite(receding_delta) else None,
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "approaching far_mean_rt_ms - near_mean_rt_ms >= 20, approaching/receding factors present, "
+            "tactile-only baseline family present, and observed direction equals expected direction"
+        ),
+        "pass": (
+            observed_direction == expected_direction
+            and complete_motions
+            and baseline_present
+            and math.isfinite(approaching_delta)
+            and approaching_delta >= 20.0
         ),
     }
 

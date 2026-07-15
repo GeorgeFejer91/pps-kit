@@ -4,7 +4,7 @@ Status: working audit for converting published audio-tactile peripersonal-space 
 
 ## Result
 
-The current preload library contains 23 JSON profiles in `study_templates/`: two unpublished Study 5 workflows and 21 published-study profiles. A profile is considered runnable for exact toolkit recreation only when its `01_profile/profile_parameters_manifest.json` passes the profile checks. Loading through `load_templates()` or having generated preload WAVs is not sufficient by itself.
+The current preload library contains 24 JSON profiles in `study_templates/`: two unpublished Study 5 workflows and 22 published-study profiles. A profile is considered runnable for exact toolkit recreation only when its `01_profile/profile_parameters_manifest.json` passes the profile checks. Loading through `load_templates()` or having generated preload WAVs is not sufficient by itself.
 
 The strongest current coverage is the Canzoneri-style dynamic audio-tactile family: a moving task-irrelevant sound, speeded tactile detection, SOA/distance mapping, baseline or catch trials, and RT-based PPS estimation. Current standardization gaps should be interpreted narrowly as PPS-task execution constraints: unsupported trial families, baseline/catch logic, audio rendering or source-asset types, tactile/response mappings, core timing/repetition rules, body-relative coordinate systems, or apparatus geometry. Clinical populations, interventions, non-audiotactile stimuli, and experimental contexts are notes only unless they change those audiotactile task mechanics.
 
@@ -23,7 +23,7 @@ The audit separates parameters into four groups so the GUI does not become a lon
 
 | Profile | Trial families | SOA/spatial contract | Jitter/procedure contract | Current gap |
 |---|---|---|---|---|
-| `canzoneri_2012_dynamic_sounds` | Bimodal IN/OUT target trials, tactile-only T0/T6 controls, auditory-only catch trials | T1-T5 at 300, 800, 1500, 2200, 2700 ms from sound onset; T0/T6 during 1000 ms pre/post silence | Original paper reports 8 target repetitions per temporal delay and 76 catch trials; randomization and two-block procedure are not acceptance blockers | Current baseline model cannot duplicate direction-coupled tactile-only T0/T6 rows exactly. |
+| `canzoneri_2012_dynamic_sounds` | Bimodal IN/OUT target trials, tactile-only T0/T6 controls, auditory-only catch trials | T1-T5 at 300, 800, 1500, 2200, 2700 ms from sound onset; T0/T6 during 1000 ms pre/post silence | Original paper reports 8 target repetitions per temporal delay and 76 catch trials; randomization and two-block procedure are not acceptance blockers | Current profile passes the PPS-task recreation gate with direction-coupled tactile-only baselines and a distributed two-block trial pool. |
 | `canzoneri_2013_tool_use_reshaping` | Canonical dynamic PPS measurement before/after tool-use training | Canzoneri-family T1-T5 scaffold | Training/control context is non-blocking for the PPS-task profile | Needs exact trial count and ITI table from the paper. |
 | `canzoneri_2013_amputation_prosthesis` | Canonical dynamic PPS measurement across prosthesis states | Canzoneri-family T1-T5 scaffold | Clinical/prosthesis context is non-blocking for the PPS-task profile | Needs exact trial count and tactile calibration table. |
 | `serino_2015_toolless_sync_training` | Bimodal IN/OUT target trials plus auditory-only catch trials | T1-T5 at 300, 800, 1500, 2200, 2700 ms | Training context is non-blocking for the PPS-task profile | Needs electrocutaneous tactile calibration and voice-key response capture details. |

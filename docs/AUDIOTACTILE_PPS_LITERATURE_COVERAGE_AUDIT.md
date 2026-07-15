@@ -15,7 +15,7 @@ The Holmes consensus-corpus screening trail is `assets/preloads/audiotactile_hol
 The PubMed screening audit trail is `assets/preloads/audiotactile_pubmed_screening.json`, with the supplemental PubMed query-variant trail in `assets/preloads/audiotactile_pubmed_query_variant_screening.json`.
 The OpenAlex broad-screen trail is `assets/preloads/audiotactile_openalex_broad_screening.json`, with per-hit screening decisions in `assets/preloads/audiotactile_openalex_candidate_screening.json`. The additional query-variant exhaustiveness screen is `assets/preloads/audiotactile_openalex_query_variant_screening.json`. The live web sanity trail is `assets/preloads/audiotactile_web_sanity_screening.json`.
 
-Current ledger size: 74 literature records. Across the separate preload gate, 11 profile variants currently pass runnable checks. In the broader literature ledger, 29 not-yet-templated records expose toolkit-structure gaps, 21 not-yet-templated records are structurally close but lack extracted/published PPS-task parameters, and 4 records are adjacent/out of scope. The previous generic candidate bucket is now cleared: tracked records are classified by whether the PPS task is runnable, missing exact task details, blocked by an unsupported task structure, or not actually an audiotactile PPS target.
+Current ledger size: 74 literature records. Across the separate preload gate, 12 profile variants currently pass runnable checks. In the broader literature ledger, 8 literature records have covered runnable profiles, 5 covered records still need toolkit structure, 29 not-yet-templated records expose toolkit-structure gaps, 21 not-yet-templated records are structurally close but lack extracted/published PPS-task parameters, and 4 records are adjacent/out of scope. The previous generic candidate bucket is now cleared: tracked records are classified by whether the PPS task is runnable, missing exact task details, blocked by an unsupported task structure, or not actually an audiotactile PPS target.
 
 ## Evidence Base
 
@@ -49,8 +49,8 @@ The PubMed screen is fully accounted for in the machine-readable screening file:
 
 | Screen decision | Count |
 |---|---:|
-| Current runnable profile | 5 |
-| Current blocked profile | 6 |
+| Current runnable profile | 6 |
+| Current blocked profile | 5 |
 | Included task needing exact PPS-task extraction | 22 |
 | Candidate requiring toolkit structure | 6 |
 | Candidate requiring static near/far support | 1 |
@@ -58,7 +58,7 @@ The PubMed screen is fully accounted for in the machine-readable screening file:
 | Review/theory/commentary/methods-only exclusion | 4 |
 | Adjacent non-PPS or non-audiotactile exclusion | 3 |
 
-The count of runnable PubMed records is lower than the runnable published-template count because Noel 2015 maps to paired front/back variants and the 2026 Lamia paper maps to two runnable experiment variants in the toolkit. Across the whole screen, 40 records are included/current/candidate-like PPS task records and 8 are exclusions, duplicate corrections, or adjacent non-task hits.
+The count of runnable PubMed records is lower than the runnable published-template count because Noel 2015 maps to paired front/back variants and the 2026 Lamia paper maps to two runnable experiment variants in the toolkit. Across the whole screen, 39 records are included/current/candidate-like PPS task records and 9 are exclusions, duplicate corrections, or adjacent non-task hits.
 
 An OpenAlex title/abstract sanity route was also run with broader queries. It confirmed several existing records, corrected the Ferri 2015, Galli 2015, and PNAS interoception/exteroception DOI/source mappings, and added or checked `social_perception_2017`, `lower_limb_pps_2017`, `newborn_boundaries_2019`, `ronga_2021_newborn_erp`, `ferri_2015_jneurosci_itv`, `taffou_2021_auditory_roughness`, `novel_two_phase_audio_tactile_2025`, and `looming_duration_2025`. A follow-up pass promoted `serino_2018_mixed_reality_pps`, `amemiya_2017_pseudowalking_footsole`, and `serino_2011_professional_fencers`, linked obvious preprint/source/duplicate hits to existing records, and retained the lower-limb record as an adjacent false positive after source checking because it uses a visuo-tactile lower-limb task rather than an audiotactile PPS task. The main OpenAlex broad route retrieved all 755 records for `audio-tactile peripersonal space`; its automated candidate triage is stored at `artifacts/literature_audit/openalex_broad_candidate_triage.json` and now links 47 of 103 candidate-like hits to coverage records. The remaining 56 candidate-like hits are explicitly screened in `assets/preloads/audiotactile_openalex_candidate_screening.json` as visual-tactile/non-auditory, auditory-only/no-tactile, non-PPS audiotactile/haptic, review/model/theory, or grey-literature/source records rather than unresolved tasks.
 
@@ -74,9 +74,9 @@ The current profile gate covers 24 templates:
 
 | Outcome | Count | Meaning |
 |---|---:|---|
-| GUI-recreatable | 11 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Nine are published profiles, including paired Noel front/back variants; two are unpublished local examples. |
-| Missing publication parameters | 12 | The task looks structurally expressible, but published or encoded details are insufficient. |
-| Toolkit structural gap | 6 | The task uses a trial, audio, tactile, response, timing, coordinate, or apparatus feature that the toolkit schema does not yet model. |
+| GUI-recreatable | 12 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Ten are published profiles, including paired Noel front/back variants; two are unpublished local examples. |
+| Missing publication parameters | 11 | The task looks structurally expressible, but published or encoded details are insufficient. |
+| Toolkit structural gap | 5 | The task uses a trial, audio, tactile, response, timing, coordinate, or apparatus feature that the toolkit schema does not yet model. |
 
 Runnable published-paper profiles today:
 
@@ -108,7 +108,7 @@ This table is generated from `assets/preloads/audiotactile_literature_coverage.j
 | Serino et al. (2011) | static near/far audio-tactile PPS task with rTMS context | Not templated; toolkit structure gap | Toolkit/task constraints: `static_near_far_trial_family`, `weak_strong_no_target_gonogo` Missing/extract: full audio, tactile, and response settings need extraction |
 | Avenanti et al. (2012) | audio-tactile PPS stimulation with motor-evoked-potential endpoint | Not templated; toolkit structure gap | Toolkit/task constraints: `external_event_trigger_sync_contract` Missing/extract: not a standalone behavioral tactile RT profile in the current toolkit |
 | Serino et al. (2011 professional fencers) | audio-tactile PPS task around the right hand while holding a fencing weapon or short handle | Not templated; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: conference abstract reports an audio-tactile right-hand PPS task but not enough timing, distance, tactile, response, trial-count, and weapon/handle geometry parameters for a runnable profile |
-| Canzoneri et al. (2012) | canonical dynamic looming/receding sound with tactile detection | Template exists; toolkit structure gap | Toolkit/task constraints: `direction_coupled_tactile_only_baseline`, `exact_audio_envelope_or_gain_files`, `voice_key_response_capture`, `electrical_tactile_calibration` Missing/extract: exact original SoundForge gain/envelope files; voice-key response capture; electrical tactile threshold calibration |
+| Canzoneri et al. (2012) | canonical dynamic looming/receding sound with tactile detection | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate with direction-coupled tactile-only T0/T6 baselines, 80 audio-tactile trials, 32 tactile-only baseline trials, and 76 auditory-only catch trials; exact author SoundForge gain files, voice-key hardware, and electrical calibration remain provenance caveats. |
 | Canzoneri et al. (2013a) | Canzoneri-style dynamic PPS task | Template exists; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: exact trial count and ITI table |
 | Canzoneri et al. (2013b) | Canzoneri-style dynamic PPS task | Template exists; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters`, `electrical_tactile_calibration` Missing/extract: exact trial count and tactile calibration table |
 | Cimmino et al. (2013) | static near/far audio-tactile PPS task | Not templated; toolkit structure gap | Toolkit/task constraints: `static_near_far_trial_family`, `weak_strong_no_target_gonogo` Missing/extract: full audio/tactile/timing parameters need extraction |
@@ -193,7 +193,7 @@ These are the main standardization constraints to flag when deciding whether the
 | Audiovisual/trisensory trial family | Some PPS readouts combine visual or audiovisual looming stimuli with tactile targets; exact replication needs a visual/audiovisual stimulus slot rather than pretending it is pure audiotactile. | Serino 2018 mixed-reality task |
 | Tactile discrimination/localization response | Some studies are not simple speeded tactile detection tasks. | Kitagawa 2005; Teramoto 2013 |
 | Cross-modal extinction response mapping | Early neuropsychological auditory-PPS studies use auditory-tactile extinction/neglect-style response scoring rather than speeded tactile RT. | LÃ davas 2001; FarnÃ¨ & LÃ davas 2002 |
-| Direction-coupled tactile-only baselines | Baseline timing may be tied to omitted sound positions such as T0/T6. | Canzoneri 2012 |
+| Direction-coupled tactile-only baselines | Baseline timing may be tied to omitted sound positions such as T0/T6. | Implemented for Canzoneri 2012; no current blocker examples |
 | Core SOA, ITI, baseline, and repetition parameters | Missing SOA/distance, ITI/jitter, baseline timing, or trial-repetition values prevent honest profile checks even when the structure is otherwise compatible. Randomization and block order alone do not. | Canzoneri 2013; Teneggi 2013; Noel 2015 walking |
 | Analog two-speaker apparatus provenance | Near/far speaker setups are original apparatus descriptions. They are not blockers by themselves when reported trajectory/timing/source parameters can be recreated with the binaural renderer; exact original gain/envelope files remain missing provenance when required for author-stimulus equivalence. | Canzoneri 2012; Serino 2015 peri-trunk/peri-hand |
 | Multi-speaker array switching | A physical array may switch speakers or schedule discrete positions rather than render one virtual source. | Tonelli 2019; Serino 2015 front/back |
@@ -202,8 +202,8 @@ These are the main standardization constraints to flag when deciding whether the
 | Body-scaled distances | Distances depend on the participant's body dimensions rather than absolute cm/m. | Lerner 2021 |
 | Body-part anchored coordinate frames | Space may be hand-, trunk-, head-, rear-, or hemifield-relative. | Hobeika 2018; Teramoto 2013; Teraoka 2024 |
 | Ecological/licensed audio | The original PPS-task sounds may be proprietary, ecological, emotional, animal, music, or voice stimuli. Contextual music/social material is not a blocker unless it is actually part of the audiotactile PPS stimulus. | Ferri 2015; Taffou 2014 |
-| Voice-key response capture | Original response timing can be vocal rather than button/mouse. | Canzoneri 2012; Serino/Canzoneri training profile |
-| Electrical tactile calibration | Exact pulse parameters and thresholding are required. | Canzoneri 2012; Serino/Canzoneri training profile |
+| Voice-key response capture | Original response timing can be vocal rather than button/mouse. | Serino/Canzoneri training profile |
+| Electrical tactile calibration | Exact pulse parameters and thresholding are required. | Serino/Canzoneri training profile |
 | Tactile waveform/frequency profile | Some haptic stimuli are defined by waveform and frequency, not only site/channel/duration. | 2025 looming-duration proceedings |
 | External event-trigger/sync contract | fMRI, EEG, iEEG, TMS/MEP, or sleep endpoints are not blockers for the PPS task. Flag only the required event-trigger timing or external synchronization contract when that contract is needed to recreate the audiotactile task execution. | Serino 2009; Avenanti 2012; EEG/fMRI tasks when trigger timing is part of the run contract |
 
@@ -227,7 +227,6 @@ These already expose real standardized-toolkit gaps:
 
 | Profile | Main unsupported task structure |
 |---|---|
-| `canzoneri_2012_dynamic_sounds` | Direction-coupled tactile-only T0/T6 baselines. |
 | `tonelli_2019_echolocation` | Seven-speaker switching/timing. |
 | `galli_2015_wheelchair_full_body` | Speaker-array Gaussian amplitude control. |
 | `lerner_2021_3d_audio_tactile_boundary` | Body-scaled distance mode and Unity/3D Tune-In stimulus behavior. |
@@ -282,7 +281,7 @@ Some search hits should not become audiotactile PPS preloads:
 To generalize across the literature, the next toolkit schema work should prioritize:
 
 1. Static near/far auditory trial families.
-2. Richer baseline/catch families, including direction-coupled tactile-only baselines.
+2. Richer baseline/catch families beyond the current direction-coupled tactile-only baseline implementation.
 3. Audiovisual/trisensory trial-family metadata, so audio-tactile components embedded in audiovisual PPS tasks can be flagged honestly rather than silently approximated.
 4. Response modes beyond mouse/button detection, especially voice-key and tactile discrimination/localization.
 5. Audio renderer/source modes for multi-speaker arrays, Gaussian amplitude fields, HRTF provenance, and Unity/3D Tune-In equivalence notes; two-speaker analog setups should instead be extracted as reported trajectories and recreated binaurally when parameters are sufficient.

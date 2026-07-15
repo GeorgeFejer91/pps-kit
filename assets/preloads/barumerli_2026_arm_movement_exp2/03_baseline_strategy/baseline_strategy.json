@@ -14,5 +14,6 @@
   "baseline_crosses_sequence_variants": true,
   "catch_trial_percentage": 9.09,
   "catch_trials_exact": 10,
-  "catch_crosses_sequence_variants": true
+  "catch_crosses_sequence_variants": true,
+  "distribute_trial_pool_across_blocks": false
 }

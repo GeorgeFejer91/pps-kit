@@ -42,6 +42,7 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     matsuda_rows_path = tmp_path / "matsuda_analysis_ready_trials.csv"
     lamia_rows_path = tmp_path / "lamia_analysis_ready_trials.csv"
     pfeiffer_rows_path = tmp_path / "pfeiffer_analysis_ready_trials.csv"
+    canzoneri_rows_path = tmp_path / "canzoneri_analysis_ready_trials.csv"
     _write_csv(
         rows_path,
         [
@@ -200,6 +201,51 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                 }
             )
     _write_csv(pfeiffer_rows_path, pfeiffer_rows)
+    _write_csv(
+        canzoneri_rows_path,
+        [
+            {
+                "row_label": "Canzoneri dynamic-sound trial",
+                "respiratory_phase": "Canzoneri dynamic-sound trial",
+                "sequence_labels": "Pink moving sound",
+                "sequence_variant_key": "pink_moving_sound",
+                "family": "audio_tactile",
+                "soa_ms": "300",
+            },
+            {
+                "row_label": "Canzoneri dynamic-sound trial",
+                "respiratory_phase": "Canzoneri dynamic-sound trial",
+                "sequence_labels": "Pink moving sound",
+                "sequence_variant_key": "pink_moving_sound",
+                "family": "audio_tactile",
+                "soa_ms": "2700",
+            },
+            {
+                "row_label": "Canzoneri dynamic-sound trial",
+                "respiratory_phase": "Canzoneri dynamic-sound trial",
+                "sequence_labels": "Pink moving sound - receding",
+                "sequence_variant_key": "pink_moving_sound_receding",
+                "family": "audio_tactile",
+                "soa_ms": "300",
+            },
+            {
+                "row_label": "Canzoneri dynamic-sound trial",
+                "respiratory_phase": "Canzoneri dynamic-sound trial",
+                "sequence_labels": "Pink moving sound - receding",
+                "sequence_variant_key": "pink_moving_sound_receding",
+                "family": "audio_tactile",
+                "soa_ms": "2700",
+            },
+            {
+                "row_label": "Baseline tactile",
+                "respiratory_phase": "Baseline tactile",
+                "sequence_labels": "Baseline tactile | Pink moving sound",
+                "sequence_variant_key": "pink_moving_sound",
+                "family": "baseline",
+                "soa_ms": "-700",
+            },
+        ],
+    )
     smoke_path = tmp_path / "runner_smoke.json"
     smoke_path.write_text(
         json.dumps(
@@ -236,6 +282,10 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                     {
                         "template_id": "pfeiffer_2018_lateral_perihead_left_to_right",
                         "outputs": {"analysis_ready_trials": str(pfeiffer_rows_path)},
+                    },
+                    {
+                        "template_id": "canzoneri_2012_dynamic_sounds",
+                        "outputs": {"analysis_ready_trials": str(canzoneri_rows_path)},
                     },
                 ]
             }
@@ -313,6 +363,15 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                             "expected_effect_direction": "congruent_audio_vestibular_motion_expands_pps"
                         },
                     },
+                    {
+                        "record_id": "canzoneri_2012_dynamic_sounds",
+                        "citation_short": "Canzoneri 2012",
+                        "observed_comparison_gap": audit.READY_GAP,
+                        "current_template_ids": ["canzoneri_2012_dynamic_sounds"],
+                        "expected_outcome": {
+                            "expected_effect_direction": "approaching_near_body_sounds_speed_tactile_rt"
+                        },
+                    },
                 ]
             }
         ),
@@ -328,9 +387,9 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert report["schema"] == audit.SCHEMA
     assert report["passed"]
     assert report["summary"] == {
-        "ready_profile_record_count": 7,
-        "synthetic_comparison_record_count": 7,
-        "synthetic_comparison_passed_count": 7,
+        "ready_profile_record_count": 8,
+        "synthetic_comparison_record_count": 8,
+        "synthetic_comparison_passed_count": 8,
         "synthetic_comparison_failed_count": 0,
         "contrast_metadata_blocked_record_count": 0,
         "contrast_metadata_present_model_missing_record_count": 0,
@@ -400,6 +459,16 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert pfeiffer["synthetic_comparison"]["congruent_far_control_minus_congruent_ms"] >= 15.0
     assert pfeiffer["synthetic_comparison"]["observed_effect_direction"] == (
         "congruent_audio_vestibular_motion_expands_pps"
+    )
+
+    canzoneri = by_id["canzoneri_2012_dynamic_sounds"]
+    assert canzoneri["status"] == "synthetic_behavioral_comparison_passed"
+    assert canzoneri["missing_contrasts"] == []
+    assert canzoneri["synthetic_comparison"]["motions_observed"] == ["approaching", "receding"]
+    assert canzoneri["synthetic_comparison"]["baseline_family_present"] is True
+    assert canzoneri["synthetic_comparison"]["approaching_far_minus_near_ms"] >= 20.0
+    assert canzoneri["synthetic_comparison"]["observed_effect_direction"] == (
+        "approaching_near_body_sounds_speed_tactile_rt"
     )
 
 

@@ -628,6 +628,7 @@ def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Pa
             "catch_trial_percentage": protocol.catch_trial_percentage,
             "catch_trials_exact": protocol.catch_trials_exact,
             "catch_crosses_sequence_variants": protocol.catch_crosses_sequence_variants,
+            "distribute_trial_pool_across_blocks": protocol.distribute_trial_pool_across_blocks,
         },
     )
     write_json(
@@ -653,6 +654,7 @@ def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Pa
         "trial_randomization_strategy": protocol.trial_randomization_strategy,
         "block_order_randomization": protocol.block_order_randomization,
         "repeat_trial_pool_per_block": protocol.repeat_trial_pool_per_block,
+        "distribute_trial_pool_across_blocks": protocol.distribute_trial_pool_across_blocks,
         "baseline_crosses_sequence_variants": protocol.baseline_crosses_sequence_variants,
         "catch_crosses_sequence_variants": protocol.catch_crosses_sequence_variants,
     }

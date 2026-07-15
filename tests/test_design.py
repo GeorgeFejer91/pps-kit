@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 import xml.etree.ElementTree as ET
+from collections import Counter
 from importlib.resources import files
 from pathlib import Path
 
@@ -1064,6 +1065,27 @@ def test_repeat_trial_pool_per_block_repeats_eligible_rows_in_each_block():
         "Incongruent": {100, 300},
     }
     assert protocol_summary(design)["total_trials"] == 4
+
+
+def test_canzoneri_profile_distributes_reported_trial_pool_across_two_blocks():
+    templates = load_templates(Path(__file__).resolve().parents[1] / "study_templates")
+    canzoneri = next(template for template in templates if template.template_id == "canzoneri_2012_dynamic_sounds")
+
+    rows = block_trial_rows(canzoneri.design)
+
+    assert len(rows) == 188
+    assert Counter(row["trial_type"] for row in rows) == {
+        "Audio-Tactile": 80,
+        "Baseline": 32,
+        "Catch": 76,
+    }
+    assert Counter(row["block_label"] for row in rows) == {"Block 1": 94, "Block 2": 94}
+    assert Counter(
+        row["motion_direction"] for row in rows if row["trial_type"] == "Audio-Tactile"
+    ) == {"looming": 40, "receding": 40}
+    assert Counter(
+        row["motion_direction"] for row in rows if row["trial_type"] == "Baseline"
+    ) == {"looming": 16, "receding": 16}
 
 
 def test_participant_block_order_is_randomized_but_block_contents_are_fixed():

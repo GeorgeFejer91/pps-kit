@@ -122,20 +122,20 @@
   "coverage_summary": {
     "literature_record_count": 74,
     "literature_record_category_counts": {
-      "covered_runnable_profile": 7,
+      "covered_runnable_profile": 8,
       "covered_blocked_missing_publication_parameters": 7,
-      "covered_blocked_toolkit_structure": 6,
+      "covered_blocked_toolkit_structure": 5,
       "not_yet_templated_requires_toolkit_structure": 29,
       "not_yet_templated_missing_publication_parameters": 21,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
     "current_template_count": 24,
-    "current_profile_check_pass_count": 11,
-    "published_profile_check_pass_count": 9,
+    "current_profile_check_pass_count": 12,
+    "published_profile_check_pass_count": 10,
     "local_unpublished_profile_check_pass_count": 2,
-    "current_templates_with_missing_publication_parameters": 12,
-    "current_templates_with_toolkit_structural_gaps": 6,
+    "current_templates_with_missing_publication_parameters": 11,
+    "current_templates_with_toolkit_structural_gaps": 5,
     "holmes_2020_reported_articles": 23,
     "holmes_2020_reported_experiments": 46,
     "pubmed_screened_records": 48,
@@ -314,10 +314,8 @@
       "id": "direction_coupled_tactile_only_baseline",
       "dimension": "trial_family_and_baseline_logic",
       "description": "Tactile-only baseline trials whose timing is coupled to specific sound-motion endpoints such as T0/T6.",
-      "toolkit_status": "blocked_current_profile",
-      "example_records": [
-        "canzoneri_2012_dynamic_sounds"
-      ]
+      "toolkit_status": "implemented_current_profile",
+      "example_records": []
     },
     {
       "id": "missing_core_soa_iti_baseline_repetition_parameters",
@@ -423,7 +421,6 @@
       "description": "Exact amplitude envelope, SoundForge gain file, or rendered source file is part of the task and is missing.",
       "toolkit_status": "requires_publication_reaudit",
       "example_records": [
-        "canzoneri_2012_dynamic_sounds",
         "ferri_2015_artificial_looming_valence",
         "ferri_2015_ecological_looming_valence"
       ]
@@ -434,7 +431,6 @@
       "description": "Original response was vocal/voice-key rather than mouse/button timing.",
       "toolkit_status": "not_first_class",
       "example_records": [
-        "canzoneri_2012_dynamic_sounds",
         "serino_2015_toolless_sync_training"
       ]
     },
@@ -444,7 +440,6 @@
       "description": "Electrical tactile stimulation requires pulse parameters and participant threshold calibration.",
       "toolkit_status": "requires_publication_reaudit_or_tactile_extension",
       "example_records": [
-        "canzoneri_2012_dynamic_sounds",
         "serino_2015_toolless_sync_training"
       ]
     },
@@ -545,13 +540,8 @@
     {
       "template_id": "canzoneri_2012_dynamic_sounds",
       "published": true,
-      "current_recreation_category": "toolkit_structural_gap",
-      "primary_constraint_ids": [
-        "direction_coupled_tactile_only_baseline",
-        "exact_audio_envelope_or_gain_files",
-        "voice_key_response_capture",
-        "electrical_tactile_calibration"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": []
     },
     {
       "template_id": "tonelli_2019_echolocation",
@@ -865,20 +855,11 @@
       "current_template_ids": [
         "canzoneri_2012_dynamic_sounds"
       ],
-      "coverage_category": "covered_blocked_toolkit_structure",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "canonical dynamic looming/receding sound with tactile detection",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "direction_coupled_tactile_only_baseline",
-        "exact_audio_envelope_or_gain_files",
-        "voice_key_response_capture",
-        "electrical_tactile_calibration"
-      ],
-      "missing_publication_parameters": [
-        "exact original SoundForge gain/envelope files",
-        "voice-key response capture",
-        "electrical tactile threshold calibration"
-      ]
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": []
     },
     {
       "record_id": "canzoneri_2013_tool_use_reshaping",

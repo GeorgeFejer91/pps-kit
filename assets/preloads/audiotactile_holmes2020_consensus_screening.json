@@ -99,14 +99,14 @@
       "holmes_experiments": [
         "1"
       ],
-      "decision": "consensus_current_blocked_profile",
+      "decision": "consensus_current_runnable_profile",
       "linked_literature_record_ids": [
         "canzoneri_2012_dynamic_sounds"
       ],
       "current_template_ids": [
         "canzoneri_2012_dynamic_sounds"
       ],
-      "reason": "Profile exists but direction-coupled tactile-only baselines, exact gain files, voice-key capture, and tactile calibration block exact recreation."
+      "reason": "Current profile passes the audiotactile task recreation gate with direction-coupled tactile-only baselines and reported trial counts; exact author SoundForge gain files, voice-key hardware, and electrical calibration remain provenance caveats."
     },
     {
       "source_label": "Canzoneri et al. (2013a)",

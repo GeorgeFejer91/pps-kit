@@ -49,6 +49,7 @@ def test_static_dashboard_preview_parity_audit_targets_all_previewable_profiles(
         "noel_2015_bodily_self_back_space",
         "pfeiffer_2018_lateral_perihead_left_to_right",
         "study5_dynaspace_lateral_45_pps",
+        "canzoneri_2012_dynamic_sounds",
         "serino_2015_peri_hand_exp3",
         "serino_2015_peri_trunk_exp1",
     ]

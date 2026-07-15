@@ -1042,15 +1042,15 @@ def test_dashboard_pages_companion_contract(tmp_path: Path):
     assert study5["missing_parameter_count"] == 0
     assert study5["unsupported_structure_count"] == 0
 
-    partial = next(item for item in preloads["profiles"] if item["template_id"] == "canzoneri_2012_dynamic_sounds")
-    assert partial["runner_readiness"] == "blocked_unsupported_toolkit_structure"
-    assert partial["profile_checks_passed"] is False
-    assert partial["segment_0_to_4_profile_checks_passed"] is False
-    assert partial["finished_profile"] is False
-    assert partial["segment_6_launchable"] is False
-    assert partial["profile_completion_status"] == "unfinished_preload"
-    assert partial["missing_parameter_count"] > 0
-    assert partial["unsupported_structure_count"] > 0
+    canzoneri = next(item for item in preloads["profiles"] if item["template_id"] == "canzoneri_2012_dynamic_sounds")
+    assert canzoneri["runner_readiness"] == "ready"
+    assert canzoneri["profile_checks_passed"] is True
+    assert canzoneri["segment_0_to_4_profile_checks_passed"] is True
+    assert canzoneri["finished_profile"] is True
+    assert canzoneri["segment_6_launchable"] is True
+    assert canzoneri["profile_completion_status"] == "finished_segment_6_launchable"
+    assert canzoneri["missing_parameter_count"] == 0
+    assert canzoneri["unsupported_structure_count"] == 0
 
     synced = client.post("/api/preloads/study5_box_breathing_pps/sync").json()
     assert synced["status"] == "ready"
@@ -1361,10 +1361,10 @@ def test_dashboard_startup_overwrites_stale_study5_canonical_ingredient(tmp_path
 def test_dashboard_blocks_runner_launch_for_incomplete_published_profile(tmp_path: Path):
     client = _client(tmp_path)
 
-    loaded = client.post("/api/templates/canzoneri_2012_dynamic_sounds/load").json()
-    assert loaded["selected_template"] == "canzoneri_2012_dynamic_sounds"
+    loaded = client.post("/api/templates/tonelli_2019_echolocation/load").json()
+    assert loaded["selected_template"] == "tonelli_2019_echolocation"
     assert loaded["templates"]
-    template = next(item for item in loaded["templates"] if item["template_id"] == "canzoneri_2012_dynamic_sounds")
+    template = next(item for item in loaded["templates"] if item["template_id"] == "tonelli_2019_echolocation")
     assert template["runner_readiness"] == "blocked_unsupported_toolkit_structure"
     assert template["profile_checks_passed"] is False
 
@@ -1385,7 +1385,7 @@ def test_dashboard_blocks_runner_launch_for_incomplete_published_profile(tmp_pat
     state = client.get("/api/state").json()
     assert state["participant_id"] == "P999"
     assert state["design"]["name"] == loaded["design"]["name"]
-    assert state["design"]["study_profile_id"] == "canzoneri_2012_dynamic_sounds"
+    assert state["design"]["study_profile_id"] == "tonelli_2019_echolocation"
 
 
 def test_dashboard_launches_every_finished_profile_from_segment6(tmp_path: Path, monkeypatch):

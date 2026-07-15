@@ -218,6 +218,7 @@ class ProtocolSpec:
     blocks: int = 6
     block_specs: list[BlockSpec] = field(default_factory=list)
     repeat_trial_pool_per_block: bool = False
+    distribute_trial_pool_across_blocks: bool = False
     trial_strips: list[TrialStripSpec] = field(default_factory=list)
     trial_randomization_strategy: str = "no_immediate_repeats"
     block_order_randomization: str = "counterbalanced_rotation"
@@ -985,6 +986,44 @@ def _audio_choice_labels(element: TrialStripElementSpec) -> list[str]:
     return list(dict.fromkeys(labels))
 
 
+def _normalized_motion_direction_labels(protocol: ProtocolSpec) -> list[str]:
+    labels: list[str] = []
+    for value in protocol.auditory_motion_directions or []:
+        label = re.sub(r"[\s-]+", "_", str(value or "").strip().lower())
+        if label:
+            labels.append(label)
+    return list(dict.fromkeys(labels))
+
+
+def _motion_direction_display_label(direction: str) -> str:
+    return str(direction or "").replace("_", " ").strip()
+
+
+def _directional_source_choices(
+    design: StimulusDesign,
+    label: str,
+    source: dict[str, Any],
+    selected_labels: list[str],
+) -> list[dict[str, Any]]:
+    directions = _normalized_motion_direction_labels(design.protocol)
+    if len(directions) <= 1 or len(selected_labels) != 1:
+        return []
+    choices: list[dict[str, Any]] = []
+    for index, direction in enumerate(directions):
+        variant_source = dict(source)
+        variant_label = str(label) if index == 0 else f"{label} - {_motion_direction_display_label(direction)}"
+        variant_source["label"] = variant_label
+        variant_source["motion_direction"] = direction
+        choices.append(
+            {
+                "kind": "looming_stimulus",
+                "label": variant_label,
+                "source": variant_source,
+            }
+        )
+    return choices
+
+
 def _strip_element_choices(design: StimulusDesign, element: TrialStripElementSpec) -> list[dict[str, Any]]:
     fixed = _fixed_audio_by_label(design)
     sources = _source_by_label(design)
@@ -1016,6 +1055,10 @@ def _strip_element_choices(design: StimulusDesign, element: TrialStripElementSpe
             )
         elif label in sources:
             source = sources[label]
+            directional_choices = _directional_source_choices(design, label, source, labels)
+            if directional_choices:
+                choices.extend(directional_choices)
+                continue
             choices.append(
                 {
                     "kind": "looming_stimulus",
@@ -1222,6 +1265,7 @@ def _filmstrip_condition_rows_for_strip(
                     metadata = _variant_metadata(strip, variant)
                     source = metadata.pop("primary_source", {})
                     source_label = str(source.get("label") or metadata.get("sequence_variant_label") or "")
+                    motion_direction = str(source.get("motion_direction") or ("looming" if source else ""))
                     variant_key = str(metadata.get("sequence_variant_key") or f"variant_{variant_index}")
                     unit_key = f"{strip_id}_{variant_key}_{soa_ms}_{repetition}"
                     rows.append(
@@ -1229,7 +1273,7 @@ def _filmstrip_condition_rows_for_strip(
                             "trial_type": "Audio-Tactile",
                             "repetition": repetition,
                             "tactile_site": tactile_site,
-                            "motion_direction": "looming" if source else "",
+                            "motion_direction": motion_direction,
                             "phase": strip_label,
                             "soa_ms": soa_ms,
                             "spatial_value_cm": spatial_cm,
@@ -1277,7 +1321,8 @@ def _filmstrip_baseline_rows_for_strip(
             for soa_ms, spatial_cm in baseline_pairs:
                 for variant_index, variant in enumerate(variants, start=1):
                     metadata = _variant_metadata(strip, variant)
-                    metadata.pop("primary_source", None)
+                    source = dict(metadata.pop("primary_source", {}) or {})
+                    motion_direction = str(source.get("motion_direction") or "")
                     sequence_labels = [
                         label
                         for label in str(metadata.get("sequence_labels") or "").split(" | ")
@@ -1294,7 +1339,7 @@ def _filmstrip_baseline_rows_for_strip(
                             "trial_type": "Baseline",
                             "repetition": repetition,
                             "tactile_site": tactile_site,
-                            "motion_direction": "",
+                            "motion_direction": motion_direction,
                             "phase": strip_label,
                             "soa_ms": soa_ms,
                             "spatial_value_cm": spatial_cm,
@@ -1363,8 +1408,116 @@ def _row_baseline_target_count(
     return _row_extra_count(reference_trial_count, mix["baseline"], mix["audio_tactile"])
 
 
+def _filmstrip_rows_for_stimulus_types(
+    design: StimulusDesign,
+    stimulus_types: set[str],
+) -> list[dict[str, Any]]:
+    protocol = design.protocol
+    strips = [strip for strip in protocol.trial_strips if strip.elements]
+    rows_by_strip: list[tuple[int, list[dict[str, Any]]]] = []
+    baseline_candidates: list[dict[str, Any]] = []
+    legacy_baseline_audio_count = 0
+    for strip_index, strip in enumerate(strips, start=1):
+        audio_rows = (
+            _filmstrip_condition_rows_for_strip(design, strip, strip_index)
+            if "Audio-Tactile" in stimulus_types or "Catch" in stimulus_types
+            else []
+        )
+        rows = list(audio_rows) if "Audio-Tactile" in stimulus_types else []
+        if "Catch" in stimulus_types:
+            rows.extend(
+                row
+                for row in _with_filmstrip_catches(audio_rows, protocol, strip)
+                if row.get("trial_type") == "Catch"
+            )
+        if "Baseline" in stimulus_types:
+            strip_baseline_candidates = _filmstrip_baseline_rows_for_strip(design, strip, strip_index)
+            if _strip_has_explicit_mix(strip):
+                rows.extend(
+                    _select_baseline_rows(
+                        strip_baseline_candidates,
+                        _row_baseline_target_count(
+                            strip,
+                            protocol,
+                            len(audio_rows),
+                            len(strip_baseline_candidates),
+                        ),
+                    )
+                )
+            else:
+                baseline_candidates.extend(strip_baseline_candidates)
+                legacy_baseline_audio_count += len(audio_rows)
+        rows_by_strip.append((strip_index, rows))
+    selected_baselines = _select_baseline_rows(
+        baseline_candidates,
+        baseline_target_count(protocol, legacy_baseline_audio_count, len(baseline_candidates)),
+    )
+    baselines_by_strip: dict[int, list[dict[str, Any]]] = {}
+    for row in selected_baselines:
+        baselines_by_strip.setdefault(int(row.get("trial_strip_index") or 0), []).append(row)
+    combined: list[dict[str, Any]] = []
+    for strip_index, rows in rows_by_strip:
+        combined.extend(rows)
+        combined.extend(baselines_by_strip.get(strip_index, []))
+    return combined
+
+
+def _filmstrip_distributed_block_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
+    protocol = design.protocol
+    blocks = effective_block_specs(protocol)
+    available_types = {
+        trial_type
+        for block in blocks
+        for trial_type in block.stimulus_types
+        if trial_type in {"Audio-Tactile", "Baseline", "Catch"}
+    }
+    pool_rows = _filmstrip_rows_for_stimulus_types(design, available_types)
+    block_rows: dict[str, list[dict[str, Any]]] = {block.label: [] for block in blocks}
+    rows_by_type: dict[str, list[dict[str, Any]]] = {trial_type: [] for trial_type in SUPPORTED_TRIAL_TYPES}
+    for row in pool_rows:
+        rows_by_type.setdefault(str(row.get("trial_type") or ""), []).append(row)
+
+    for trial_type, rows in rows_by_type.items():
+        if not rows:
+            continue
+        eligible_blocks = [block for block in blocks if trial_type in block.stimulus_types]
+        if not eligible_blocks:
+            continue
+        shuffled = list(rows)
+        random.Random(protocol.random_seed + sum(ord(ch) for ch in trial_type)).shuffle(shuffled)
+        for idx, row in enumerate(shuffled):
+            min_count = min(len(block_rows[block.label]) for block in eligible_blocks)
+            candidates = [
+                block
+                for block in eligible_blocks
+                if len(block_rows[block.label]) == min_count
+            ]
+            block = candidates[idx % len(candidates)]
+            block_rows[block.label].append(dict(row))
+
+    scheduled: list[dict[str, Any]] = []
+    for block_index, block in enumerate(blocks, start=1):
+        randomized = _randomize_rows(
+            block_rows.get(block.label, []),
+            protocol,
+            seed=protocol.random_seed + block_index * 1009,
+        )
+        for block_trial_index, row in enumerate(randomized, start=1):
+            scheduled.append(
+                {
+                    "block_index": block_index,
+                    "block_label": block.label,
+                    "block_trial_index": block_trial_index,
+                    **row,
+                }
+            )
+    return scheduled
+
+
 def _filmstrip_block_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
     protocol = design.protocol
+    if protocol.distribute_trial_pool_across_blocks and not protocol.repeat_trial_pool_per_block:
+        return _filmstrip_distributed_block_trial_rows(design)
     scheduled: list[dict[str, Any]] = []
     strips = [strip for strip in protocol.trial_strips if strip.elements]
     for block_index, block in enumerate(effective_block_specs(protocol), start=1):
