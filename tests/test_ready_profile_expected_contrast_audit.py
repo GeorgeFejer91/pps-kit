@@ -46,6 +46,7 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     canzoneri_rows_path = tmp_path / "canzoneri_analysis_ready_trials.csv"
     tonelli_rows_path = tmp_path / "tonelli_analysis_ready_trials.csv"
     galli_rows_path = tmp_path / "galli_analysis_ready_trials.csv"
+    lerner_rows_path = tmp_path / "lerner_analysis_ready_trials.csv"
     _write_csv(
         rows_path,
         [
@@ -166,6 +167,24 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                 "sequence_variant_key": "front_to_back",
                 "family": "audio_tactile",
                 "soa_ms": "143",
+            },
+            {
+                "block_label": "Front/back trunk PPS block",
+                "row_label": "Front-back trunk moving-sound trial",
+                "respiratory_phase": "Front-back trunk moving-sound trial",
+                "sequence_labels": "Front-back moving sound",
+                "sequence_variant_key": "front_to_back",
+                "family": "audio_tactile",
+                "soa_ms": "2714",
+            },
+            {
+                "block_label": "Front/back trunk PPS block",
+                "row_label": "Front-back trunk moving-sound trial",
+                "respiratory_phase": "Front-back trunk moving-sound trial",
+                "sequence_labels": "Front-back moving sound - back to front",
+                "sequence_variant_key": "back_to_front",
+                "family": "audio_tactile",
+                "soa_ms": "2714",
             },
             {
                 "block_label": "Front/back trunk PPS block",
@@ -337,6 +356,23 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
             },
         ],
     )
+    lerner_rows: list[dict[str, str]] = []
+    for direction in range(1, 13):
+        for source_label in ("Dynamic pink 3D sound", "Flat pink 3D sound"):
+            for soa_ms in ("0", "5500"):
+                variant_base = source_label.lower().replace(" ", "_")
+                lerner_rows.append(
+                    {
+                        "block_label": "3D boundary block",
+                        "row_label": "3D boundary source trial",
+                        "respiratory_phase": "3D boundary source trial",
+                        "sequence_labels": f"{source_label} - direction {direction:02d}",
+                        "sequence_variant_key": f"{variant_base}_direction_{direction:02d}",
+                        "family": "audio_tactile",
+                        "soa_ms": soa_ms,
+                    }
+                )
+    _write_csv(lerner_rows_path, lerner_rows)
     smoke_path = tmp_path / "runner_smoke.json"
     smoke_path.write_text(
         json.dumps(
@@ -389,6 +425,10 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                     {
                         "template_id": "galli_2015_wheelchair_full_body",
                         "outputs": {"analysis_ready_trials": str(galli_rows_path)},
+                    },
+                    {
+                        "template_id": "lerner_2021_3d_audio_tactile_boundary",
+                        "outputs": {"analysis_ready_trials": str(lerner_rows_path)},
                     },
                 ]
             }
@@ -502,7 +542,18 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                         "current_template_ids": ["galli_2015_wheelchair_full_body"],
                         "expected_outcome": {
                             "expected_effect_direction": (
-                                "wheelchair_training_or_active_use_modulates_full_body_pps_boundary"
+                                "visible_passive_wheelchair_exploration_extends_full_body_pps"
+                            )
+                        },
+                    },
+                    {
+                        "record_id": "lerner_2021_3d_boundary",
+                        "citation_short": "Lerner 2021",
+                        "observed_comparison_gap": audit.READY_GAP,
+                        "current_template_ids": ["lerner_2021_3d_audio_tactile_boundary"],
+                        "expected_outcome": {
+                            "expected_effect_direction": (
+                                "individual_3d_pps_maps_without_systematic_dynamic_flat_advantage"
                             )
                         },
                     },
@@ -521,12 +572,12 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert report["schema"] == audit.SCHEMA
     assert report["passed"]
     assert report["summary"] == {
-        "ready_profile_record_count": 11,
-        "synthetic_comparison_record_count": 9,
-        "synthetic_comparison_passed_count": 9,
+        "ready_profile_record_count": 12,
+        "synthetic_comparison_record_count": 12,
+        "synthetic_comparison_passed_count": 12,
         "synthetic_comparison_failed_count": 0,
         "contrast_metadata_blocked_record_count": 0,
-        "contrast_metadata_present_model_missing_record_count": 2,
+        "contrast_metadata_present_model_missing_record_count": 0,
     }
     by_id = {row["record_id"]: row for row in report["records"]}
     smartphone = by_id["smartphone_rt_methods_2025"]
@@ -561,12 +612,18 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     )
 
     serino_front_back = by_id["serino_2015_front_back_trunk_exp2"]
-    assert serino_front_back["status"] == "contrast_metadata_present_comparison_model_missing"
+    assert serino_front_back["status"] == "synthetic_behavioral_comparison_passed"
     assert serino_front_back["missing_contrasts"] == []
     assert serino_front_back["contrast_availability"]["front_back_space"] is True
+    assert serino_front_back["contrast_availability"]["front_back_trunk_paths"] is True
     assert serino_front_back["contrast_availability"]["soa_or_distance_rank"] is True
     assert serino_front_back["contrast_availability"]["audio_tactile_vs_baseline"] is True
-    assert serino_front_back["synthetic_comparison"] == {}
+    assert serino_front_back["synthetic_comparison"]["paths_observed"] == ["back_to_front", "front_to_back"]
+    assert serino_front_back["synthetic_comparison"]["baseline_family_present"] is True
+    assert serino_front_back["synthetic_comparison"]["far_endpoint_minus_near_crossing_ms"] >= 20.0
+    assert serino_front_back["synthetic_comparison"]["observed_effect_direction"] == (
+        "near_trunk_front_back_sounds_speed_corresponding_tactile_rt"
+    )
 
     matsuda = by_id["matsuda_2021_four_directions"]
     assert matsuda["status"] == "synthetic_behavioral_comparison_passed"
@@ -625,9 +682,29 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     )
 
     galli = by_id["galli_2015_wheelchair"]
-    assert galli["status"] == "contrast_metadata_present_comparison_model_missing"
+    assert galli["status"] == "synthetic_behavioral_comparison_passed"
     assert galli["missing_contrasts"] == []
-    assert galli["synthetic_comparison"] == {}
+    assert galli["contrast_availability"]["wheelchair_front_back_paths"] is True
+    assert galli["synthetic_comparison"]["paths_observed"] == ["back", "front"]
+    assert galli["synthetic_comparison"]["baseline_family_present"] is True
+    assert galli["synthetic_comparison"]["visible_passive_far_control_minus_visible_ms"] >= 15.0
+    assert galli["synthetic_comparison"]["observed_effect_direction"] == (
+        "visible_passive_wheelchair_exploration_extends_full_body_pps"
+    )
+
+    lerner = by_id["lerner_2021_3d_boundary"]
+    assert lerner["status"] == "synthetic_behavioral_comparison_passed"
+    assert lerner["missing_contrasts"] == []
+    assert lerner["contrast_availability"]["dynamic_flat_source_profile"] is True
+    assert lerner["contrast_availability"]["twelve_direction_3d_profile"] is True
+    assert lerner["synthetic_comparison"]["source_types_observed"] == ["dynamic", "flat"]
+    assert lerner["synthetic_comparison"]["directions_observed"] == 12
+    assert abs(lerner["synthetic_comparison"]["dynamic_minus_flat_mean_rt_ms"]) <= 5.0
+    assert lerner["synthetic_comparison"]["dynamic_closer_direction_count"] == 6
+    assert lerner["synthetic_comparison"]["flat_closer_direction_count"] == 6
+    assert lerner["synthetic_comparison"]["observed_effect_direction"] == (
+        "individual_3d_pps_maps_without_systematic_dynamic_flat_advantage"
+    )
 
 
 def test_contrast_availability_requires_both_factor_poles_for_lamia():
