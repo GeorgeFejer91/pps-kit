@@ -6,13 +6,12 @@ claim. This audit consumes the ready-profile runner smoke report and the
 expected-outcome ledger, then reports which ready records have enough contrast
 metadata for an explicit synthetic behavioral comparison.
 
-For the DynaSpace/mobile profile, the runner rows currently retain the
-looming-versus-fixed source labels, so the audit writes a deterministic
-synthetic RT table and checks that the observed synthetic direction matches the
-paper-derived expected direction. Other ready records are reported as blocked
-when the current rows lack required factors such as synchrony, vestibular
-congruence, movement state, body-relative direction, or auditory motion
-direction.
+For profile records whose runner rows currently retain the required labels, the
+audit writes deterministic synthetic RT tables and checks that the observed
+synthetic direction matches the paper-derived expected direction. Other ready
+records are reported as blocked when the current rows lack required factors
+such as synchrony, vestibular congruence, movement state, body-relative
+direction, or auditory motion direction.
 """
 
 from __future__ import annotations
@@ -43,12 +42,13 @@ DEFAULT_OUTPUT_DIR = (
 
 SCHEMA = "pps-ready-profile-expected-contrast-audit.v1"
 READY_GAP = "ready_profile_needs_behavioral_or_synthetic_outcome_comparison"
-MODEL_ID = "profile_contrast_readiness_and_dynaspace_synthetic_rt.v1"
+MODEL_ID = "profile_contrast_readiness_synthetic_rt.v2"
 EVIDENCE_BOUNDARY = (
     "This audit checks whether ready-profile runner rows retain the contrast "
-    "variables needed for expected-outcome comparison. The DynaSpace/mobile "
-    "comparison uses deterministic synthetic RTs; it is not human behavioral "
-    "PPS evidence, collected participant data, or publication replication."
+    "variables needed for expected-outcome comparison. Profile-specific "
+    "comparisons use deterministic synthetic RTs; they are not human "
+    "behavioral PPS evidence, collected participant data, or publication "
+    "replication."
 )
 
 REQUIRED_CONTRASTS = {
@@ -121,7 +121,10 @@ def run_audit(
         "summary": summary,
         "model": {
             "model_id": MODEL_ID,
-            "model_role": "contrast metadata readiness audit plus deterministic DynaSpace looming-vs-fixed RT comparison",
+            "model_role": (
+                "contrast metadata readiness audit plus deterministic DynaSpace "
+                "looming-vs-fixed and Serino peri-trunk near-vs-far RT comparisons"
+            ),
             "assumption_boundary": EVIDENCE_BOUNDARY,
         },
         "evidence_boundary": EVIDENCE_BOUNDARY,
@@ -184,6 +187,20 @@ def _audit_record(
         for contrast in REQUIRED_CONTRASTS.get(record_id, {}).get("required", [])
         if not availability.get(contrast)
     ]
+    if not missing and record_id == "serino_2015_peri_trunk_exp1":
+        comparison = _compare_serino_near_far(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "peri-trunk PPS replication claim."
+            ),
+        }
     if not missing:
         return {
             **base,
@@ -289,6 +306,72 @@ def _compare_dynaspace_looming_fixed(
         "criterion": "fixed_mean_rt_ms - looming_mean_rt_ms > 0 and observed direction equals expected direction",
         "pass": observed_direction == expected_direction and math.isfinite(delta) and delta >= 20.0,
     }
+
+
+def _compare_serino_near_far(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    rows = [
+        row
+        for profile in profile_rows
+        for row in profile["rows"]
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    for row in rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        motion = _serino_motion_direction(row)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        if motion == "receding":
+            proximity = 1.0 - proximity
+        condition = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        rt_ms = 525.0 - (45.0 * proximity)
+        out = dict(row)
+        out["synthetic_condition"] = condition
+        out["synthetic_motion_direction"] = motion
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "serino_2015_peri_trunk_exp1_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    delta = means.get("far", math.nan) - means.get("near", math.nan)
+    observed_direction = (
+        "near_or_approaching_trunk_sounds_speed_tactile_rt"
+        if math.isfinite(delta) and delta > 0.0
+        else "near_or_approaching_trunk_sounds_do_not_speed_tactile_rt"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "far_minus_near_ms": delta if math.isfinite(delta) else None,
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": "far_mean_rt_ms - near_mean_rt_ms > 0 and observed direction equals expected direction",
+        "pass": observed_direction == expected_direction and math.isfinite(delta) and delta >= 20.0,
+    }
+
+
+def _serino_motion_direction(row: dict[str, Any]) -> str:
+    text = " ".join(
+        str(row.get(key) or "")
+        for key in ("sequence_labels", "sequence_variant_key", "row_label", "respiratory_phase")
+    ).lower()
+    return "receding" if "reced" in text else "looming"
 
 
 def _has_dynaspace_looming_and_fixed(rows: list[dict[str, Any]]) -> bool:

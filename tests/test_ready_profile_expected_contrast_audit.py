@@ -36,6 +36,7 @@ def _write_csv(path: Path, rows: list[dict[str, str]]) -> None:
 def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_contrasts(tmp_path: Path):
     audit = _load_script()
     rows_path = tmp_path / "roussel_analysis_ready_trials.csv"
+    serino_rows_path = tmp_path / "serino_analysis_ready_trials.csv"
     _write_csv(
         rows_path,
         [
@@ -53,6 +54,43 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
             },
         ],
     )
+    _write_csv(
+        serino_rows_path,
+        [
+            {
+                "row_label": "Peri-trunk moving-sound trial",
+                "respiratory_phase": "Peri-trunk moving-sound trial",
+                "sequence_labels": "Trunk moving sound",
+                "sequence_variant_key": "trunk_moving_sound",
+                "family": "audio_tactile",
+                "soa_ms": "0",
+            },
+            {
+                "row_label": "Peri-trunk moving-sound trial",
+                "respiratory_phase": "Peri-trunk moving-sound trial",
+                "sequence_labels": "Trunk moving sound",
+                "sequence_variant_key": "trunk_moving_sound",
+                "family": "audio_tactile",
+                "soa_ms": "4318",
+            },
+            {
+                "row_label": "Peri-trunk moving-sound trial",
+                "respiratory_phase": "Peri-trunk moving-sound trial",
+                "sequence_labels": "Trunk moving sound - receding",
+                "sequence_variant_key": "trunk_moving_sound_receding",
+                "family": "audio_tactile",
+                "soa_ms": "0",
+            },
+            {
+                "row_label": "Peri-trunk moving-sound trial",
+                "respiratory_phase": "Peri-trunk moving-sound trial",
+                "sequence_labels": "Trunk moving sound - receding",
+                "sequence_variant_key": "trunk_moving_sound_receding",
+                "family": "audio_tactile",
+                "soa_ms": "4318",
+            },
+        ],
+    )
     smoke_path = tmp_path / "runner_smoke.json"
     smoke_path.write_text(
         json.dumps(
@@ -65,6 +103,10 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                     {
                         "template_id": "noel_2015_bodily_self",
                         "outputs": {"analysis_ready_trials": str(tmp_path / "missing.csv")},
+                    },
+                    {
+                        "template_id": "serino_2015_peri_trunk_exp1",
+                        "outputs": {"analysis_ready_trials": str(serino_rows_path)},
                     },
                 ]
             }
@@ -92,6 +134,15 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                             "expected_effect_direction": "synchronous_front_expansion_and_back_reduction"
                         },
                     },
+                    {
+                        "record_id": "serino_2015_peri_trunk_exp1",
+                        "citation_short": "Serino 2015",
+                        "observed_comparison_gap": audit.READY_GAP,
+                        "current_template_ids": ["serino_2015_peri_trunk_exp1"],
+                        "expected_outcome": {
+                            "expected_effect_direction": "near_or_approaching_trunk_sounds_speed_tactile_rt"
+                        },
+                    },
                 ]
             }
         ),
@@ -107,9 +158,9 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert report["schema"] == audit.SCHEMA
     assert report["passed"]
     assert report["summary"] == {
-        "ready_profile_record_count": 2,
-        "synthetic_comparison_record_count": 1,
-        "synthetic_comparison_passed_count": 1,
+        "ready_profile_record_count": 3,
+        "synthetic_comparison_record_count": 2,
+        "synthetic_comparison_passed_count": 2,
         "synthetic_comparison_failed_count": 0,
         "contrast_metadata_blocked_record_count": 1,
         "contrast_metadata_present_model_missing_record_count": 0,
@@ -124,3 +175,11 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert noel["status"] == "contrast_metadata_missing"
     assert noel["missing_contrasts"] == ["stroking_synchrony", "front_back_space"]
     assert "Propagate stroking_synchrony, front_back_space" in noel["required_next_step"]
+
+    serino = by_id["serino_2015_peri_trunk_exp1"]
+    assert serino["status"] == "synthetic_behavioral_comparison_passed"
+    assert serino["missing_contrasts"] == []
+    assert serino["synthetic_comparison"]["far_minus_near_ms"] == 45.0
+    assert serino["synthetic_comparison"]["observed_effect_direction"] == (
+        "near_or_approaching_trunk_sounds_speed_tactile_rt"
+    )
