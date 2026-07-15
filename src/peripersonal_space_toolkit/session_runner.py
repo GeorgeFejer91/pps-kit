@@ -7385,7 +7385,7 @@ def _tactile_waveform_spec(row: dict[str, Any], family: str) -> dict[str, Any] |
         ),
         default=0.0,
     )
-    if not shape and frequency_hz <= 0.0 and duration_ms <= 0.0:
+    if not shape and frequency_hz <= 0.0:
         return None
     if shape not in {"sawtooth", "sine", "square"}:
         raise ValueError(f"Unsupported tactile waveform shape: {shape or '<blank>'}")
@@ -7833,6 +7833,18 @@ def _materialize_segment_block_wav(
             row,
             sample_rate=sample_rate,
         )
+        iti_ms = max(
+            0.0,
+            _as_float(
+                _row_value(row, "iti_ms", "ITI_ms", "Intertrial_Interval_ms", default=""),
+                default=0.0,
+            ),
+        )
+        if iti_ms > 0.0:
+            iti_frames = int(round((iti_ms / 1000.0) * sample_rate))
+            if iti_frames > 0:
+                silence = np.zeros((iti_frames, data.shape[1]), dtype=data.dtype)
+                data = np.concatenate([data, silence], axis=0)
         target_channels = max(target_channels, int(data.shape[1]))
         clips.append(data)
         wav_infos.append(_wav_info(trial_path, sha256=actual_hash, label=trial_path.stem))

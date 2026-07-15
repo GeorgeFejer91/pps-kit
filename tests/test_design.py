@@ -1015,6 +1015,134 @@ def test_non_target_controls_can_skip_sequence_variant_crossing():
     assert protocol_summary(design)["total_trials"] == 7
 
 
+def test_trial_strip_overrides_preserve_paper_row_contract():
+    design = default_design()
+    design.noises = [
+        NoiseDefinition("Near burst", "white", 0.0),
+        NoiseDefinition("Far burst", "white", 0.0),
+    ]
+    design.protocol = ProtocolSpec(
+        repetitions_per_condition=1,
+        soa_values_ms=[10, 50],
+        spatial_values_cm=[80.0, 120.0],
+        pair_spatial_values_with_soas=True,
+        auditory_motion_directions=["static"],
+        tactile_sites=["right index finger"],
+        include_catch_trials=False,
+        catch_trial_percentage=0.0,
+        include_baseline_trials=False,
+        baseline_trial_percentage=0.0,
+        respiratory_phases=["Any"],
+        blocks=1,
+        participants=1,
+        trial_strips=[
+            TrialStripSpec(
+                strip_id="weak-near",
+                label="Weak target near",
+                soa_values_ms=[0],
+                spatial_values_cm=[30.0],
+                metadata={
+                    "expected_response": "respond",
+                    "target_role": "weak_target",
+                    "tactile_stimulation_modality": "electrical",
+                },
+                elements=[
+                    TrialStripElementSpec(
+                        kind="looming_stimulus",
+                        label="Near sound",
+                        source_labels=["Near burst"],
+                    )
+                ],
+            ),
+            TrialStripSpec(
+                strip_id="strong-far",
+                label="Strong nontarget far",
+                soa_values_ms=[5],
+                spatial_values_cm=[125.0],
+                metadata={
+                    "expected_response": "withhold",
+                    "target_role": "strong_nontarget",
+                    "tactile_stimulation_modality": "electrical",
+                },
+                elements=[
+                    TrialStripElementSpec(
+                        kind="looming_stimulus",
+                        label="Far sound",
+                        source_labels=["Far burst"],
+                    )
+                ],
+            ),
+        ],
+    )
+
+    rows = block_trial_rows(design)
+
+    assert len(rows) == 2
+    by_label = {str(row["trial_strip_label"]): row for row in rows}
+    assert by_label["Weak target near"]["soa_ms"] == 0
+    assert by_label["Weak target near"]["spatial_value_cm"] == pytest.approx(30.0)
+    assert by_label["Weak target near"]["expected_response"] == "respond"
+    assert by_label["Weak target near"]["target_role"] == "weak_target"
+    assert by_label["Strong nontarget far"]["soa_ms"] == 5
+    assert by_label["Strong nontarget far"]["spatial_value_cm"] == pytest.approx(125.0)
+    assert by_label["Strong nontarget far"]["expected_response"] == "withhold"
+    assert by_label["Strong nontarget far"]["target_role"] == "strong_nontarget"
+
+
+def test_exact_catch_trials_are_total_across_trial_strips():
+    design = default_design()
+    design.noises = [
+        NoiseDefinition("Near burst", "white", 0.0),
+        NoiseDefinition("Far burst", "white", 0.0),
+    ]
+    design.protocol = ProtocolSpec(
+        repetitions_per_condition=1,
+        soa_values_ms=[0],
+        spatial_values_cm=[30.0],
+        auditory_motion_directions=["static"],
+        tactile_sites=["right index finger"],
+        include_catch_trials=True,
+        catch_trials_exact=3,
+        catch_crosses_sequence_variants=True,
+        include_baseline_trials=False,
+        respiratory_phases=["Any"],
+        blocks=1,
+        participants=1,
+        trial_strips=[
+            TrialStripSpec(
+                strip_id="near",
+                label="Near row",
+                metadata={"expected_response": "respond", "target_role": "weak_target"},
+                elements=[
+                    TrialStripElementSpec(
+                        kind="looming_stimulus",
+                        label="Near sound",
+                        source_labels=["Near burst"],
+                    )
+                ],
+            ),
+            TrialStripSpec(
+                strip_id="far",
+                label="Far row",
+                elements=[
+                    TrialStripElementSpec(
+                        kind="looming_stimulus",
+                        label="Far sound",
+                        source_labels=["Far burst"],
+                    )
+                ],
+            ),
+        ],
+    )
+
+    rows = block_trial_rows(design)
+    counts = Counter(str(row["trial_type"]) for row in rows)
+
+    assert counts == {"Audio-Tactile": 2, "Catch": 3}
+    assert {row["expected_response"] for row in rows if row["trial_type"] == "Catch"} == {"withhold"}
+    assert {row["target_role"] for row in rows if row["trial_type"] == "Catch"} == {"catch_no_target"}
+
+
 def test_block_specs_partition_trial_pool_by_stimulus_type():
     design = default_design()
     design.noises = design.noises[:1]

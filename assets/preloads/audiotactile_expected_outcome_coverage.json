@@ -21,9 +21,9 @@
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
-      "not_yet_templated_missing_publication_parameters": 51,
+      "not_yet_templated_missing_publication_parameters": 50,
       "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 12,
-      "template_present_blocked_missing_publication_parameters": 8
+      "template_present_blocked_missing_publication_parameters": 9
     }
   },
   "expected_outcome_extraction_sources": {
@@ -149,9 +149,11 @@
       "record_id": "serino_2007_blind_cane_users",
       "citation_short": "Serino et al. (2007)",
       "doi": "10.1111/j.1467-9280.2007.01952.x",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "serino_2007_blind_cane_users"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "cane_use_static_near_far_pps_extension",
@@ -177,9 +179,9 @@
         "manual_review_profile_recreation_assessment": "possible_with_caveats_static_near_far_tool_condition"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "serino_2009_tms",

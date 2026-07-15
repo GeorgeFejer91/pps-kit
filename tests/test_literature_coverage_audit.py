@@ -35,14 +35,14 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
         "covered_runnable_profile": 12,
-        "covered_blocked_missing_publication_parameters": 8,
+        "covered_blocked_missing_publication_parameters": 9,
         "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 0,
-        "not_yet_templated_missing_publication_parameters": 51,
+        "not_yet_templated_missing_publication_parameters": 50,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
-    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 24
+    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 25
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
     ) == 16
@@ -767,21 +767,40 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["cimmino_2013_surgical_arm_elongation"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["cimmino_2013_surgical_arm_elongation"]["blocking_constraint_ids"] == []
     assert records["serino_2007_blind_cane_users"]["coverage_category"] == (
-        "not_yet_templated_missing_publication_parameters"
+        "covered_blocked_missing_publication_parameters"
     )
-    assert records["serino_2007_blind_cane_users"]["blocking_constraint_ids"] == []
+    assert records["serino_2007_blind_cane_users"]["current_template_ids"] == [
+        "serino_2007_blind_cane_users"
+    ]
+    assert records["serino_2007_blind_cane_users"]["blocking_constraint_ids"] == [
+        "exact_audio_envelope_or_gain_files",
+        "electrical_tactile_calibration",
+        "fixed_iti_or_hazard_control_policy",
+        "voice_key_response_capture",
+    ]
+    assert records["serino_2007_blind_cane_users"]["known_parameter_validation_report"] == (
+        "artifacts/validation_runs/current_goal_serino_2007_known_parameter_20260715/"
+        "serino_2007_known_parameter_validation_report.json"
+    )
     assert records["serino_2015_toolless_sync_training"]["blocking_constraint_ids"] == []
     assert records["canzoneri_2013_amputation_prosthesis"]["blocking_constraint_ids"] == [
         "missing_core_soa_iti_baseline_repetition_parameters"
     ]
-    assert all(
-        "voice_key_response_capture" not in record["blocking_constraint_ids"]
+    assert {
+        record["record_id"]
         for record in records.values()
-    )
-    assert all(
-        "electrical_tactile_calibration" not in record["blocking_constraint_ids"]
+        if "voice_key_response_capture" in record["blocking_constraint_ids"]
+    } == {"serino_2007_blind_cane_users"}
+    assert {
+        record["record_id"]
         for record in records.values()
-    )
+        if "electrical_tactile_calibration" in record["blocking_constraint_ids"]
+    } == {"serino_2007_blind_cane_users"}
+    assert {
+        record["record_id"]
+        for record in records.values()
+        if "fixed_iti_or_hazard_control_policy" in record["blocking_constraint_ids"]
+    } == {"serino_2007_blind_cane_users"}
     assert records["teneggi_2013_social_face"]["doi"] == "10.1016/j.cub.2013.01.043"
     assert records["serino_2009_tms"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["serino_2009_tms"]["blocking_constraint_ids"] == []
@@ -796,7 +815,6 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         assert "weak_strong_no_target_gonogo" not in record["blocking_constraint_ids"], record["record_id"]
         assert "tactile_waveform_frequency_profile" not in record["blocking_constraint_ids"], record["record_id"]
         assert "external_event_trigger_sync_contract" not in record["blocking_constraint_ids"], record["record_id"]
-        assert "fixed_iti_or_hazard_control_policy" not in record["blocking_constraint_ids"], record["record_id"]
         assert "tactile_discrimination_or_localization_response" not in record["blocking_constraint_ids"], record["record_id"]
         assert "body_part_anchored_coordinate_frames" not in record["blocking_constraint_ids"], record["record_id"]
         assert "multi_speaker_array_switching" not in record["blocking_constraint_ids"], record["record_id"]

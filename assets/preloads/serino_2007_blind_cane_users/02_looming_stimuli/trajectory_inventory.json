@@ -1,0 +1,80 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "serino_2007_blind_cane_users",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Near hand white-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 30.0,
+        "end_distance_cm": 30.0,
+        "start_rotation_deg": 90.0,
+        "end_rotation_deg": 90.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.3,
+          "y_m": 0.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.3,
+          "y_m": 0.0,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Near hand white-noise burst"
+      ],
+      "tone_types": [
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/serino_2007_blind_cane_users/02_looming_stimuli/looming_Near_hand_white-noise_burst.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Far cane-tip white-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 125.0,
+        "end_distance_cm": 125.0,
+        "start_rotation_deg": 90.0,
+        "end_rotation_deg": 90.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 1.25,
+          "y_m": 0.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 1.25,
+          "y_m": 0.0,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Far cane-tip white-noise burst"
+      ],
+      "tone_types": [
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/serino_2007_blind_cane_users/02_looming_stimuli/looming_Far_cane-tip_white-noise_burst.wav"
+      ]
+    }
+  ]
+}

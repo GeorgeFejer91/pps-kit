@@ -43,6 +43,9 @@
       "audio_tactile_percentage": 100.0,
       "catch_percentage": 0.0,
       "baseline_percentage": 0.0,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {},
       "elements": [
         {
           "element_id": "study5-inhale-instruction",
@@ -75,6 +78,9 @@
       "audio_tactile_percentage": 100.0,
       "catch_percentage": 0.0,
       "baseline_percentage": 0.0,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {},
       "elements": [
         {
           "element_id": "study5-exhale-instruction",

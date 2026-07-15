@@ -39,7 +39,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     template_ids = {template.template_id for template in templates}
     status = json.loads((root / "assets" / "preloads" / "profile_recreation_status.json").read_text(encoding="utf-8"))
 
-    assert len(templates) == 24
+    assert len(templates) == 25
     assert status["schema"] == PROFILE_RECREATION_STATUS_SCHEMA
     assert status["profile_count"] == len(templates)
     assert {profile["template_id"] for profile in status["profiles"]} == template_ids
@@ -48,7 +48,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     assert categorized == template_ids
     assert status["categories"]["gui_recreatable"]
     assert status["categories"]["missing_publication_parameters"]
-    assert len(status["categories"]["missing_publication_parameters"]) == 8
+    assert len(status["categories"]["missing_publication_parameters"]) == 9
     assert len(status["categories"]["toolkit_structural_gap"]) == 0
 
     allowed_statuses = {
@@ -153,6 +153,14 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert tonelli["segment_0_to_4_profile_checks_passed"] is True
     assert tonelli["missing_parameter_count"] == 0
     assert tonelli["unsupported_structure_count"] == 0
+
+    serino_2007 = profiles["serino_2007_blind_cane_users"]
+    assert serino_2007["primary_category"] == "missing_publication_parameters"
+    assert serino_2007["runner_readiness"] == "blocked_missing_parameters"
+    assert serino_2007["profile_checks_passed"] is False
+    assert serino_2007["segment_0_to_4_profile_checks_passed"] is False
+    assert serino_2007["missing_parameter_count"] == 4
+    assert serino_2007["unsupported_structure_count"] == 0
 
     serino_front_back = profiles["serino_2015_front_back_trunk_exp2"]
     assert serino_front_back["primary_category"] == "gui_recreatable"

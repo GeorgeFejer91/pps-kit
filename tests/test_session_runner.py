@@ -396,6 +396,35 @@ def test_prepare_segment_run_package_uses_segment5_and_segment6_csvs(tmp_path: P
     assert manifest["source_run_setup_sha256"] == _sha256(run_manifest)
 
 
+def test_prepare_segment_run_package_applies_row_iti_padding(tmp_path: Path):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    block_csv = run_manifest.parent.parent / "5_block_csv_preview" / "block_01_final.csv"
+    with block_csv.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    fieldnames = list(rows[0].keys()) + ["ITI_ms"]
+    rows[0]["ITI_ms"] = "300"
+    rows[1]["ITI_ms"] = ""
+    with block_csv.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    package = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+
+    block_audio, sample_rate = sf.read(package.blocks[0].wav_path, always_2d=True)
+    iti_frames = int(round(0.300 * sample_rate))
+    assert block_audio.shape == (441 + iti_frames + 220, 3)
+    assert np.max(np.abs(block_audio[441 : 441 + iti_frames, :])) == pytest.approx(0.0)
+    with package.blocks[0].manifest_path.open(newline="", encoding="utf-8") as handle:
+        prepared_rows = list(csv.DictReader(handle))
+    assert prepared_rows[1]["Trial_Start_Sample"] == str(441 + iti_frames)
+
+
 def test_prepare_segment_run_package_creates_split_part_packages(tmp_path: Path):
     run_manifest = _two_part_segment_run_setup_fixture(tmp_path)
     session_root = tmp_path / "sessions"

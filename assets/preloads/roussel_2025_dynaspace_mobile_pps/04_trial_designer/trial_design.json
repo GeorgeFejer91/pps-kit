@@ -26,6 +26,9 @@
       "audio_tactile_percentage": 66.666667,
       "catch_percentage": 33.333333,
       "baseline_percentage": 0.0,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {},
       "elements": [
         {
           "element_id": "dynaspace-looming-source",
@@ -46,6 +49,9 @@
       "audio_tactile_percentage": 66.666667,
       "catch_percentage": 33.333333,
       "baseline_percentage": 0.0,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {},
       "elements": [
         {
           "element_id": "dynaspace-fixed-source",

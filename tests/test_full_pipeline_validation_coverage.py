@@ -53,12 +53,12 @@ def test_full_pipeline_validation_summary_is_conservative():
     assert summary["pipeline_status_counts"] == {
         "adjacent_not_applicable": 4,
         "full_emulated_source_to_runner_pipeline_validated": 12,
-        "profile_present_but_source_parameters_missing": 8,
-        "source_parameters_missing_before_profile_creation": 51,
+        "profile_present_but_source_parameters_missing": 9,
+        "source_parameters_missing_before_profile_creation": 50,
     }
     assert summary["primary_gap_counts"] == {
-        "profile_present_but_source_parameters_missing": 8,
-        "source_parameters_missing_before_profile_creation": 51,
+        "profile_present_but_source_parameters_missing": 9,
+        "source_parameters_missing_before_profile_creation": 50,
         "toolkit_structure_or_response_contract_missing": 0,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
@@ -146,11 +146,25 @@ def test_full_pipeline_blocks_at_the_first_unproven_layer():
     assert farne["blocking_constraint_ids"] == []
 
     serino_2007 = records["serino_2007_blind_cane_users"]
-    assert serino_2007["pipeline_status"] == "source_parameters_missing_before_profile_creation"
+    assert serino_2007["pipeline_status"] == "profile_present_but_source_parameters_missing"
+    assert serino_2007["gates"]["parsimonious_profile_saved"]["status"] == (
+        "profile_scaffold_present_but_incomplete"
+    )
     assert serino_2007["gates"]["toolkit_gui_implementation"]["status"] == (
         "blocked_by_missing_profile_parameters"
     )
-    assert serino_2007["blocking_constraint_ids"] == []
+    assert serino_2007["gates"]["wav_generation_and_runner_execution"]["status"] == (
+        "runner_execution_not_available_for_record"
+    )
+    assert serino_2007["blocking_constraint_ids"] == [
+        "exact_audio_envelope_or_gain_files",
+        "electrical_tactile_calibration",
+        "fixed_iti_or_hazard_control_policy",
+        "voice_key_response_capture",
+    ]
+    assert serino_2007["known_parameter_validation_report"].endswith(
+        "serino_2007_known_parameter_validation_report.json"
+    )
 
     ronga = records["ronga_2021_newborn_erp"]
     assert ronga["pipeline_status"] == "source_parameters_missing_before_profile_creation"

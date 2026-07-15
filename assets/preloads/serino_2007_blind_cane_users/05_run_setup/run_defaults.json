@@ -1,0 +1,13 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "serino_2007_blind_cane_users",
+  "blocks": 1,
+  "participants": 26,
+  "random_seed": 20070701,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "fixed",
+  "repeat_trial_pool_per_block": false,
+  "distribute_trial_pool_across_blocks": true,
+  "baseline_crosses_sequence_variants": true,
+  "catch_crosses_sequence_variants": true
+}

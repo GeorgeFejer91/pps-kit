@@ -1,0 +1,92 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "serino_2007_blind_cane_users",
+  "assets": [
+    {
+      "label": "Near hand white-noise burst",
+      "path": "assets/preloads/serino_2007_blind_cane_users/02_looming_stimuli/looming_Near_hand_white-noise_burst.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2007_blind_cane_users/02_looming_stimuli/looming_Near_hand_white-noise_burst.wav",
+      "sha256": "82f6d7485c6142bf1517ccd5e2878acd589b0a6b26e0548772d6e9865c1e3201",
+      "duration_s": 0.15,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Near hand white-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 30.0,
+        "end_distance_cm": 30.0,
+        "start_rotation_deg": 90.0,
+        "end_rotation_deg": 90.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.3,
+          "y_m": 0.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.3,
+          "y_m": 0.0,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Far cane-tip white-noise burst",
+      "path": "assets/preloads/serino_2007_blind_cane_users/02_looming_stimuli/looming_Far_cane-tip_white-noise_burst.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2007_blind_cane_users/02_looming_stimuli/looming_Far_cane-tip_white-noise_burst.wav",
+      "sha256": "14cb654d886b7132c6e5290daa47648b8f09aaa326669161b92d3a62b009f226",
+      "duration_s": 0.15,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Far cane-tip white-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 125.0,
+        "end_distance_cm": 125.0,
+        "start_rotation_deg": 90.0,
+        "end_rotation_deg": 90.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 1.25,
+          "y_m": 0.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 1.25,
+          "y_m": 0.0,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

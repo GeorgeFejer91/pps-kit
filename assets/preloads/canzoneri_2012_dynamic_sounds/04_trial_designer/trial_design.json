@@ -24,6 +24,9 @@
       "audio_tactile_percentage": null,
       "catch_percentage": null,
       "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {},
       "elements": [
         {
           "element_id": "canzoneri-2012-moving-sound",

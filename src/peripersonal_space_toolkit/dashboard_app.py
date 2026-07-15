@@ -173,6 +173,187 @@ PROJECT_METADATA_KEY = "dashboard_project"
 RUN_SETUP_METADATA_KEY = "dashboard_run_setup"
 CUSTOM_PROJECT_ID_SLUG_MAX_LENGTH = 21
 TRIAL_POOL_FAMILIES = ("audio_tactile", "baseline", "catch")
+ROW_CONTRACT_FIELDS = (
+    "spatial_value_cm",
+    "expected_response",
+    "response_rule",
+    "target_role",
+    "response_mode",
+    "response_choice_set",
+    "correct_response",
+    "response_scoring_policy",
+    "response_capture_device",
+    "response_input_modality",
+    "multisensory_trial_family",
+    "exteroceptive_modality_set",
+    "visual_stimulus_type",
+    "visual_motion_profile",
+    "visual_start_distance_cm",
+    "visual_end_distance_cm",
+    "visual_speed_cm_s",
+    "visual_duration_ms",
+    "visual_renderer_engine",
+    "visual_display_device",
+    "mixed_reality_context",
+    "body_rendering_mode",
+    "audiovisual_synchrony_policy",
+    "mixed_reality_equivalence_boundary",
+    "voice_key_enabled",
+    "voice_key_response_label",
+    "voice_key_threshold",
+    "voice_key_latency_correction_ms",
+    "spatial_coordinate_frame",
+    "body_anchor",
+    "body_part",
+    "body_side",
+    "spatial_hemifield",
+    "body_relative_axis",
+    "auditory_trajectory_family",
+    "auditory_trajectory_direction",
+    "trajectory_coordinate_frame",
+    "trajectory_start_hemifield",
+    "trajectory_end_hemifield",
+    "trajectory_start_distance_cm",
+    "trajectory_end_distance_cm",
+    "trajectory_start_azimuth_deg",
+    "trajectory_end_azimuth_deg",
+    "spatial_renderer_engine",
+    "spatial_renderer_version",
+    "hrtf_database",
+    "hrtf_subject_id",
+    "hrtf_filter_id",
+    "hrtf_near_field_compensation",
+    "source_asset_equivalence",
+    "renderer_equivalence_boundary",
+    "primary_analysis_included",
+    "audio_output_mode",
+    "speaker_array_id",
+    "speaker_array_layout",
+    "speaker_switch_sequence",
+    "speaker_switch_times_ms",
+    "speaker_switch_channels",
+    "speaker_switch_gains",
+    "speaker_source_channel",
+    "speaker_switch_generated",
+    "iti_policy",
+    "iti_ms",
+    "foreperiod_ms",
+    "hazard_control_policy",
+    "expectancy_control_role",
+    "tactile_stimulation_modality",
+    "tactile_calibration_method",
+    "tactile_threshold_reference",
+    "tactile_intensity",
+    "tactile_intensity_unit",
+    "tactile_pulse_duration_ms",
+    "electrical_stimulator_model",
+    "electrical_electrode_site",
+    "tactile_waveform_shape",
+    "tactile_frequency_hz",
+    "tactile_duration_ms",
+    "tactile_amplitude",
+    "tactile_waveform_generated",
+    "external_trigger_required",
+    "external_trigger_modality",
+    "external_trigger_role",
+    "external_trigger_code",
+    "external_trigger_tolerance_ms",
+    "external_trigger_channel",
+)
+
+
+def _row_contract_payload(source: dict[str, Any]) -> dict[str, Any]:
+    return {field: source.get(field, "") for field in ROW_CONTRACT_FIELDS}
+
+
+def _trial_family_contract_payload(source: dict[str, Any], family: str) -> dict[str, Any]:
+    payload = _row_contract_payload(source)
+    if family == "catch":
+        payload["expected_response"] = "withhold"
+        payload["target_role"] = "catch_no_target"
+        payload["response_rule"] = payload.get("response_rule") or "withhold_response_to_audio_only_catch"
+    return payload
+
+
+def _row_contract_nonempty(source: dict[str, Any]) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    for field in ROW_CONTRACT_FIELDS:
+        value = source.get(field, "")
+        if value not in (None, ""):
+            payload[field] = value
+    return payload
+
+
+def _trial_strip_contract_metadata(strip: Any) -> dict[str, Any]:
+    metadata = getattr(strip, "metadata", {}) or {}
+    if not isinstance(metadata, dict):
+        return {}
+    return _row_contract_nonempty(metadata)
+
+
+def _coerced_sequence_values(value: Any) -> list[Any]:
+    if value in (None, ""):
+        return []
+    if isinstance(value, list):
+        return value
+    if isinstance(value, tuple):
+        return list(value)
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return []
+        if text.startswith("["):
+            try:
+                loaded = json.loads(text)
+            except json.JSONDecodeError:
+                loaded = None
+            if isinstance(loaded, list):
+                return loaded
+        return [piece for piece in re.split(r"\s*[;,|]\s*", text) if piece]
+    return [value]
+
+
+def _int_sequence_values(value: Any) -> list[int]:
+    parsed: list[int] = []
+    for item in _coerced_sequence_values(value):
+        try:
+            parsed.append(int(round(float(item))))
+        except (TypeError, ValueError):
+            continue
+    return parsed
+
+
+def _float_sequence_values(value: Any) -> list[float]:
+    parsed: list[float] = []
+    for item in _coerced_sequence_values(value):
+        try:
+            parsed.append(float(item))
+        except (TypeError, ValueError):
+            continue
+    return parsed
+
+
+def _variant_soa_values(variant: dict[str, Any], protocol: ProtocolSpec) -> list[int]:
+    return _int_sequence_values(variant.get("soa_values_ms")) or [
+        int(value)
+        for value in protocol.soa_values_ms
+        if isinstance(value, (int, float))
+    ]
+
+
+def _variant_spatial_value_for_soa(variant: dict[str, Any], protocol: ProtocolSpec, soa_index: int) -> float | str:
+    spatial_values = _float_sequence_values(variant.get("spatial_values_cm")) or [
+        float(value)
+        for value in protocol.spatial_values_cm
+        if isinstance(value, (int, float))
+    ]
+    if not spatial_values:
+        return ""
+    if protocol.pair_spatial_values_with_soas:
+        return spatial_values[min(soa_index, len(spatial_values) - 1)]
+    return spatial_values[0]
+
+
 EXPERIMENT_STRUCTURES = ("single", "pre_post")
 RUN_INSTRUCTION_PROFILE_SCHEMA = "pps-run-instructions.v1"
 RUN_INSTRUCTION_SLOTS = (
@@ -3523,6 +3704,8 @@ def _bake_trial_sequence_variants(design: StimulusDesign, render_dir: Path) -> d
                     "sequence_labels": " | ".join(sequence_labels),
                     "source_labels": "; ".join(source_labels),
                     "jitter_values_ms": "; ".join(jitter_values),
+                    "soa_values_ms": list(strip.soa_values_ms),
+                    "spatial_values_cm": list(strip.spatial_values_cm),
                     "duration_ms": duration_ms,
                     "duration_s": round(duration_s, 6),
                     "segment_duration_ms": total_duration_ms,
@@ -3532,6 +3715,7 @@ def _bake_trial_sequence_variants(design: StimulusDesign, render_dir: Path) -> d
                     "segments": segments,
                     "segments_json": json.dumps(segments, separators=(",", ":")),
                     "sha256": digest,
+                    **_trial_strip_contract_metadata(strip),
                 })
                 row_count += 1
             try:
@@ -4804,7 +4988,14 @@ def _expected_segment_counts(design: StimulusDesign, project_dir: Path) -> dict[
             variant_count = sum(_estimated_trial_strip_variant_counts(design, project_dir))
         except Exception:
             variant_count = 0
-    expected_audio_tactile = variant_count * len([value for value in design.protocol.soa_values_ms if isinstance(value, (int, float))])
+    if segment2_variants:
+        expected_audio_tactile = sum(
+            len(_variant_soa_values(dict(variant), design.protocol))
+            for variant in segment2_variants
+            if isinstance(variant, dict)
+        )
+    else:
+        expected_audio_tactile = variant_count * len([value for value in design.protocol.soa_values_ms if isinstance(value, (int, float))])
     expected_baseline = variant_count * len(_baseline_anchor_specs(design))
     expected_catch = variant_count if bool(getattr(design.protocol, "include_catch_trials", False)) else 0
     segment3_manifest = _load_json(_baseline_tactile_bake_root(project_dir) / "baseline_tactile_trial_files_manifest.json")
@@ -5436,6 +5627,7 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
         duration_s: float,
         merge_engine: str,
         tactile_onset_s: float,
+        spatial_value_cm: float | str,
         row_folder: Path,
     ) -> None:
         digest = _local_file_sha256(output_path)
@@ -5462,6 +5654,7 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
         }
         file_rows.append(
             {
+                **_trial_family_contract_payload(variant, family),
                 "family": family,
                 "row_index": row_index,
                 "row_id": str(variant.get("row_id") or ""),
@@ -5483,6 +5676,7 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
                 "jitter_values_ms": str(variant.get("jitter_values_ms") or ""),
                 "duration_ms": int(output_info["duration_ms"]),
                 "duration_s": round(duration_s, 6),
+                "spatial_value_cm": spatial_value_cm,
                 "sample_rate_hz": int(output_info["sample_rate"]),
                 "channels": int(output_info["channels"]),
                 "channel_role_map": channel_role_map,
@@ -5497,7 +5691,7 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
         record_row_summary(family, row_index, row_label, row_folder)
 
     try:
-        soa_values = [int(value) for value in design.protocol.soa_values_ms]
+        global_soa_values = [int(value) for value in design.protocol.soa_values_ms]
         baseline_anchors = _baseline_anchor_specs(design)
         include_catch = bool(getattr(design.protocol, "include_catch_trials", False))
         catch_crosses_variants = bool(getattr(design.protocol, "catch_crosses_sequence_variants", True))
@@ -5540,9 +5734,11 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
                     duration_s=float(source_info["duration_s"]),
                     merge_engine="copy_segment2_audio",
                     tactile_onset_s=0.0,
+                    spatial_value_cm=_variant_spatial_value_for_soa(variant, design.protocol, 0),
                     row_folder=catch_folder,
                 )
-            for soa_ms in soa_values:
+            variant_soa_values = _variant_soa_values(variant, design.protocol)
+            for soa_index, soa_ms in enumerate(variant_soa_values):
                 tactile_onset_s = looming_onset_s + int(soa_ms) / 1000.0
                 source_info = _audio_file_info(source_path)
                 tactile_duration_ms = _tactile_cue_duration_ms(int(source_info["sample_rate"]))
@@ -5567,6 +5763,7 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
                     duration_s=duration_s,
                     merge_engine=merge_engine,
                     tactile_onset_s=tactile_onset_s,
+                    spatial_value_cm=_variant_spatial_value_for_soa(variant, design.protocol, soa_index),
                     row_folder=audio_folder,
                 )
             if baseline_anchors and (baseline_crosses_variants or row_key not in baseline_rows_seen):
@@ -5631,6 +5828,7 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
                         duration_s=duration_s,
                         merge_engine=merge_engine,
                         tactile_onset_s=tactile_onset_s,
+                        spatial_value_cm=_variant_spatial_value_for_soa(variant, design.protocol, 0),
                         row_folder=baseline_folder,
                     )
         try:
@@ -5640,6 +5838,11 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
 
         rows = list(row_summaries.values())
         trial_sequence_manifest_path = _trial_sequence_bake_root(render_dir) / "trial_sequence_variants_manifest.json"
+        realized_soa_values = sorted({
+            int(row["soa_ms"])
+            for row in file_rows
+            if row.get("family") == "audio_tactile"
+        })
         manifest_payload = {
             "schema": "pps-baseline-tactile-trials.v1",
             "status": "baked",
@@ -5649,7 +5852,7 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
             "trial_sequence_manifest_sha256": _local_file_sha256(trial_sequence_manifest_path),
             "tactile_cue_path": str(DEFAULT_TACTILE_CUE_PATH),
             "loudness_policy": loudness_policy_for_design(design),
-            "soa_values_ms": soa_values,
+            "soa_values_ms": realized_soa_values or global_soa_values,
             "include_catch_trials": include_catch,
             "baseline_strategy": design.protocol.baseline_strategy,
             "baseline_custom_trial_mode": design.protocol.baseline_custom_trial_mode,
@@ -6086,6 +6289,7 @@ def _trial_pool_row_from_record(
         "sequence_labels": str(source.get("sequence_labels") or ""),
         "channels": int(source.get("channels") or 0),
         "tactile_channel": source.get("tactile_channel") if source.get("tactile_channel") not in (None, "") else "",
+        **_row_contract_payload(source),
     }
 
 
@@ -6137,6 +6341,7 @@ def _bake_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recipe
         "sequence_labels",
         "channels",
         "tactile_channel",
+        *ROW_CONTRACT_FIELDS,
     ]
     rows: list[dict[str, Any]] = []
     folder_summaries: dict[str, dict[str, Any]] = {}
@@ -6590,6 +6795,7 @@ def _block_csv_row(
         "fractional_extra": source.get("fractional_extra", ""),
         "channels": source.get("channels", ""),
         "tactile_channel": source.get("tactile_channel", ""),
+        **_row_contract_payload(source),
     }
 
 
@@ -6696,6 +6902,7 @@ def _bake_block_csv_preview(
         "fractional_extra",
         "channels",
         "tactile_channel",
+        *ROW_CONTRACT_FIELDS,
     ]
     block_summaries: list[dict[str, Any]] = []
     total_duration_ms = 0

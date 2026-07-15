@@ -168,6 +168,7 @@ def _build_record(
         "paper_audit": _paper_audit_summary(paper_record, manual_reviews.get(record_id, {})),
         "blocking_constraint_ids": list(literature.get("blocking_constraint_ids") or []),
         "missing_publication_parameters": list(literature.get("missing_publication_parameters") or []),
+        "known_parameter_validation_report": literature.get("known_parameter_validation_report", ""),
         "expected_outcome_status": expected.get("expected_outcome_status", ""),
         "expected_effect_direction": (expected.get("expected_outcome") or {}).get("expected_effect_direction", ""),
         "runnable_status": expected.get("runnable_status", ""),

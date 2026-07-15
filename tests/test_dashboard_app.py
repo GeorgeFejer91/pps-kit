@@ -3317,6 +3317,162 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     assert "already prepared" in second_prepare.json()["detail"]
 
 
+def test_dashboard_preserves_row_contract_fields_and_strip_soas_through_block_csv(tmp_path: Path):
+    client = _client(tmp_path)
+    custom = client.post("/api/templates/__custom__/load").json()
+    sample_rate = 44100
+    frames = int(0.10 * sample_rate)
+
+    near = _register_segment1_wav(
+        client,
+        custom["design"],
+        "Near white burst",
+        np.ones((frames, 2), dtype=np.float32) * 0.10,
+        sample_rate=sample_rate,
+        motion_mode="stationary",
+        source_kind="test_looming_audio",
+    )
+    far = _register_segment1_wav(
+        client,
+        custom["design"],
+        "Far white burst",
+        np.ones((frames, 2), dtype=np.float32) * 0.08,
+        sample_rate=sample_rate,
+        motion_mode="stationary",
+        source_kind="test_looming_audio",
+    )
+    custom["design"]["name"] = "Row contract static near/far"
+    custom["design"]["noises"] = [
+        {"label": "Near white burst", "noise_type": "white", "prebaked_path": str(near)},
+        {"label": "Far white burst", "noise_type": "white", "prebaked_path": str(far)},
+    ]
+    custom["design"]["protocol"]["repetitions_per_condition"] = 1
+    custom["design"]["protocol"]["soa_values_ms"] = [10, 50, 90]
+    custom["design"]["protocol"]["spatial_values_cm"] = [99.0, 199.0, 299.0]
+    custom["design"]["protocol"]["pair_spatial_values_with_soas"] = True
+    custom["design"]["protocol"]["include_catch_trials"] = False
+    custom["design"]["protocol"]["include_baseline_trials"] = False
+    custom["design"]["protocol"]["blocks"] = 1
+    custom["design"]["protocol"]["trial_strips"] = [
+        {
+            "strip_id": "weak-near",
+            "label": "Weak target near",
+            "soa_values_ms": [0],
+            "spatial_values_cm": [30.0],
+            "metadata": {
+                "expected_response": "respond",
+                "response_rule": "respond_to_weak_target",
+                "target_role": "weak_target",
+                "response_mode": "mouse_click_voice_key_proxy",
+                "tactile_stimulation_modality": "electrical",
+                "tactile_threshold_reference": "90_percent_perception",
+            },
+            "elements": [
+                {
+                    "kind": "looming_stimulus",
+                    "label": "Near sound",
+                    "source_labels": ["Near white burst"],
+                    "randomized": True,
+                }
+            ],
+        },
+        {
+            "strip_id": "strong-far",
+            "label": "Strong nontarget far",
+            "soa_values_ms": [5],
+            "spatial_values_cm": [125.0],
+            "metadata": {
+                "expected_response": "withhold",
+                "response_rule": "withhold_to_strong_nontarget",
+                "target_role": "strong_nontarget",
+                "response_mode": "mouse_click_voice_key_proxy",
+                "tactile_stimulation_modality": "electrical",
+                "tactile_threshold_reference": "100_percent_perception",
+            },
+            "elements": [
+                {
+                    "kind": "looming_stimulus",
+                    "label": "Far sound",
+                    "source_labels": ["Far white burst"],
+                    "randomized": True,
+                }
+            ],
+        },
+    ]
+    custom = client.post("/api/design", json={"design": custom["design"]}).json()
+
+    sequence_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {"kind": "trial_sequence_batch", "label": "2_trial_sequence_designs"},
+        },
+    ).json()
+    sequence_done = _wait_job(client, sequence_job["job_id"])
+    assert sequence_done["status"] == "succeeded"
+    sequence_manifest = _read_json_file(sequence_done["result"]["manifest_path"])
+    assert {tuple(row["soa_values_ms"]) for row in sequence_manifest["variants"]} == {(0,), (5,)}
+
+    tactile_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {"kind": "audiotactile_trial_batch", "label": "3_tactile_and_baseline_trials"},
+        },
+    ).json()
+    tactile_done = _wait_job(client, tactile_job["job_id"])
+    assert tactile_done["status"] == "succeeded"
+    tactile_manifest = _read_json_file(tactile_done["result"]["manifest_path"])
+    assert tactile_manifest["audio_tactile_count"] == 2
+    by_role = {row["target_role"]: row for row in tactile_manifest["files"]}
+    assert by_role["weak_target"]["soa_ms"] == 0
+    assert by_role["weak_target"]["spatial_value_cm"] == pytest.approx(30.0)
+    assert by_role["strong_nontarget"]["soa_ms"] == 5
+    assert by_role["strong_nontarget"]["spatial_value_cm"] == pytest.approx(125.0)
+    assert client.get("/api/state").json()["project_segments"]["3_tactile_and_baseline_trials"]["status"] == "ready"
+
+    pool_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {
+                "kind": "trial_repetition_pool",
+                "label": "4_trial_repetition_pool",
+                "default_repetitions": 1,
+            },
+        },
+    ).json()
+    pool_done = _wait_job(client, pool_job["job_id"])
+    assert pool_done["status"] == "succeeded"
+    pool_rows = list(csv.DictReader(Path(pool_done["result"]["csv_path"]).open(encoding="utf-8")))
+    assert {row["expected_response"] for row in pool_rows} == {"respond", "withhold"}
+    assert {row["soa_ms"] for row in pool_rows} == {"0", "5"}
+
+    block_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {"kind": "block_csv_preview", "label": "5_block_csv_preview", "block_count": 1},
+        },
+    ).json()
+    block_done = _wait_job(client, block_job["job_id"])
+    assert block_done["status"] == "succeeded"
+    block_manifest = _read_json_file(block_done["result"]["manifest_path"])
+    block_rows = list(csv.DictReader(Path(block_manifest["blocks"][0]["csv_path"]).open(encoding="utf-8")))
+    block_by_role = {row["target_role"]: row for row in block_rows}
+    assert block_by_role["weak_target"]["expected_response"] == "respond"
+    assert block_by_role["weak_target"]["soa_ms"] == "0"
+    assert block_by_role["weak_target"]["spatial_value_cm"] == "30.0"
+    assert block_by_role["strong_nontarget"]["expected_response"] == "withhold"
+    assert block_by_role["strong_nontarget"]["soa_ms"] == "5"
+    assert block_by_role["strong_nontarget"]["spatial_value_cm"] == "125.0"
+    assert block_by_role["strong_nontarget"]["tactile_stimulation_modality"] == "electrical"
+
+
 def test_auditory_only_bake_render_writes_stereo_wav(tmp_path: Path):
     design = _compact_design()
     design_path = tmp_path / "design.json"

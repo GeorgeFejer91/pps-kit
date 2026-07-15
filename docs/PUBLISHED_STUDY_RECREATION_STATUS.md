@@ -44,12 +44,13 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 
 | Profile | Variant | Status | Main reasons |
 |---|---|---|---|
-| canzoneri_2013_amputation_prosthesis | - | blocked_missing_parameters | exact trial count, ITI/baseline/repetition details, and tactile calibration table from full paper |
+| canzoneri_2013_amputation_prosthesis | - | blocked_missing_parameters | exact trial count and tactile calibration table from full paper |
 | canzoneri_2013_tool_use_reshaping | - | blocked_missing_parameters | exact trial count and ITI table from full paper |
 | ferri_2015_artificial_looming_valence | A | blocked_missing_parameters | exact auditory files; paper-specific gain envelope |
 | ferri_2015_ecological_looming_valence | B | blocked_missing_parameters | licensed ecological sounds; exact amplitude envelopes |
 | noel_2015_walking_full_body_action | - | blocked_missing_parameters | exact sound distances and trial counts |
-| serino_2015_toolless_sync_training | - | blocked_missing_parameters | electrocutaneous tactile calibration source values |
+| serino_2007_blind_cane_users | - | blocked_missing_parameters | exact white-noise source asset, seed, and spectral recipe; exact electrical tactile pulse duration, waveform, current, and electrode impedance calibration; exact ITI or jitter distribution and numeric response window |
+| serino_2015_toolless_sync_training | - | blocked_missing_parameters | electrocutaneous tactile calibration; voice-key response capture |
 | taffou_2014_cynophobic_rear_looming | - | blocked_missing_parameters | exact dog/sheep source audio and Audacity amplitude/dynamic matching settings; LISTEN HRTF subject/filter identifier and renderer settings |
 | teneggi_2013_social_face_pps | - | blocked_missing_parameters | exact distance/timing table from supplement |
 
