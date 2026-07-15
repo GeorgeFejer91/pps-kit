@@ -661,6 +661,7 @@ class DashboardController:
         design.protocol.catch_trial_percentage = 0.0
         design.protocol.include_baseline_trials = False
         design.protocol.baseline_strategy = ""
+        design.protocol.baseline_trials_exact = None
         design.protocol.baseline_trial_percentage = 0.0
         design.protocol.baseline_custom_trial_mode = "tactile_only"
         design.protocol.blocks = 1
@@ -5764,6 +5765,16 @@ def _protocol_trial_pool_repetition_defaults(design: StimulusDesign) -> dict[str
     }
 
 
+def _protocol_trial_pool_exact_family_counts(design: StimulusDesign) -> dict[str, int]:
+    protocol = design.protocol
+    exact_counts: dict[str, int] = {}
+    if getattr(protocol, "baseline_trials_exact", None) is not None:
+        exact_counts["baseline"] = max(0, int(protocol.baseline_trials_exact or 0))
+    if getattr(protocol, "catch_trials_exact", None) is not None:
+        exact_counts["catch"] = max(0, int(protocol.catch_trials_exact or 0))
+    return exact_counts
+
+
 def _trial_pool_recipe_settings(recipe: dict[str, Any], design: StimulusDesign) -> dict[str, Any]:
     payload = recipe.get("trial_pool") if isinstance(recipe.get("trial_pool"), dict) else recipe
     protocol_defaults = _protocol_trial_pool_repetition_defaults(design)
@@ -5804,13 +5815,17 @@ def _trial_pool_recipe_settings(recipe: dict[str, Any], design: StimulusDesign) 
         fractional_seed = int(payload.get("fractional_seed", getattr(design.protocol, "random_seed", 20250604)) or 20250604)
     except (TypeError, ValueError):
         fractional_seed = 20250604
-    return {
+    exact_family_counts = _protocol_trial_pool_exact_family_counts(design)
+    settings = {
         "default_repetitions": _json_repetition_value(default_repetitions),
         "family_repetitions": {key: _json_repetition_value(value) for key, value in family_repetitions.items()},
         "folder_repetitions": {key: _json_repetition_value(value) for key, value in folder_repetitions.items()},
         "file_repetition_overrides": {key: _json_repetition_value(value) for key, value in file_repetition_overrides.items()},
         "fractional_seed": fractional_seed,
     }
+    if exact_family_counts:
+        settings["exact_family_trial_counts"] = exact_family_counts
+    return settings
 
 
 def _family_label(family: str) -> str:
@@ -5972,6 +5987,65 @@ def _trial_pool_fractional_records(
     return records, warnings, signature
 
 
+def _trial_pool_exact_record_key(record: dict[str, Any], seed: int, family: str) -> tuple[int, str, str, str]:
+    source = record["source"]
+    file_key = str(source.get("file_key") or "")
+    sequence_key = str(source.get("sequence_variant_key") or source.get("variant_key") or "")
+    file_name = str(source.get("source_file_name") or Path(str(source.get("file_path") or "")).name)
+    order_key = f"{seed}|exact_family_count|{family}|{file_key}|{sequence_key}|{file_name}"
+    return (_stable_int(order_key), file_key, sequence_key, file_name)
+
+
+def _apply_trial_pool_exact_family_counts(
+    records: list[dict[str, Any]],
+    settings: dict[str, Any],
+    warnings: list[str],
+) -> tuple[dict[str, int], str | None]:
+    raw_exact_counts = settings.get("exact_family_trial_counts", {})
+    if not isinstance(raw_exact_counts, dict):
+        return {}, None
+    exact_counts = {
+        family: max(0, int(value))
+        for family, value in raw_exact_counts.items()
+        if family in {"baseline", "catch"} and value not in (None, "")
+    }
+    if not exact_counts:
+        return {}, None
+    seed = int(settings.get("fractional_seed", 20250604) or 20250604)
+    signature_payload: list[dict[str, Any]] = []
+    for family, target_count in sorted(exact_counts.items()):
+        family_records = [
+            record
+            for record in records
+            if _trial_pool_family_key(record["source"].get("family")) == family
+        ]
+        if not family_records:
+            if target_count:
+                warnings.append(f"Exact {family} trial count {target_count} could not be applied because Segment 3 has no {family} files.")
+            continue
+        base_count, extra_count = divmod(target_count, len(family_records))
+        ordered = sorted(family_records, key=lambda record: _trial_pool_exact_record_key(record, seed, family))
+        for rank, record in enumerate(ordered, start=1):
+            occurrence_count = base_count + (1 if rank <= extra_count else 0)
+            record["configured_repetitions"] = float(occurrence_count)
+            record["base_repetitions"] = int(occurrence_count)
+            record["fractional_remainder"] = 0.0
+            record["fractional_extra"] = False
+            record["fractional_selection_rank"] = ""
+            record["balancing_stratum"] = f"{family}|exact_count|target{target_count}|files{len(family_records)}"
+            record["balancing_parent_stratum"] = record["balancing_stratum"]
+            signature_payload.append(
+                {
+                    "family": family,
+                    "file_key": str(record["source"].get("file_key") or ""),
+                    "target_count": target_count,
+                    "occurrence_count": occurrence_count,
+                }
+            )
+    signature = hashlib.sha256(json.dumps(signature_payload, sort_keys=True).encode("utf-8")).hexdigest()[:16]
+    return exact_counts, signature
+
+
 def _trial_pool_row_from_record(
     record: dict[str, Any],
     *,
@@ -6027,6 +6101,9 @@ def _bake_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recipe
 
     settings = _trial_pool_recipe_settings(recipe, design)
     records, balance_warnings, balancing_signature = _trial_pool_fractional_records(source_files, settings)
+    exact_family_counts, exact_signature = _apply_trial_pool_exact_family_counts(records, settings, balance_warnings)
+    if exact_signature is not None:
+        balancing_signature = hashlib.sha256(f"{balancing_signature}|exact|{exact_signature}".encode("utf-8")).hexdigest()[:16]
     balancing_seed = int(settings.get("fractional_seed", 20250604) or 20250604)
     root = _trial_pool_root(render_dir)
     _remove_tree(root)
@@ -6159,6 +6236,8 @@ def _bake_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recipe
         "folder_summaries": folder_summary_rows,
         "csv_columns": fieldnames,
     }
+    if exact_family_counts:
+        manifest_payload["exact_family_trial_counts"] = exact_family_counts
     errors = _validate_trial_pool_manifest(manifest_payload, project_dir=render_dir, design=design)
     if errors:
         _remove_tree(root)
@@ -8508,6 +8587,7 @@ def _study_settings_manifest(context: DashboardProjectContext, design: StimulusD
                 "baseline_custom_trial_mode": protocol.baseline_custom_trial_mode,
                 "baseline_soa_values_ms": list(protocol.baseline_soa_values_ms),
                 "catch_trial_percentage": protocol.catch_trial_percentage,
+                "baseline_trials_exact": getattr(protocol, "baseline_trials_exact", None),
                 "baseline_trial_percentage": protocol.baseline_trial_percentage,
                 "repetitions_per_condition": protocol.repetitions_per_condition,
                 "blocks": protocol.blocks,

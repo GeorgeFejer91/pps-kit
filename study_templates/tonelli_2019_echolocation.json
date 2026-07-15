@@ -5,10 +5,16 @@
   "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6394550/",
   "doi": "10.1007/s00221-019-05469-3",
   "verification_status": "partial",
-  "notes": "Seven-speaker looming apparatus on the participant's left side. Total counts are verified; exact temporal delays depend on the apparatus timing and should be checked from the full methods/figure before exact replication.",
+  "notes": "Seven-speaker looming apparatus on the participant's left side. The preload recreates the reported seven-distance lateral audio-tactile PPS task as a virtual moving white-noise trajectory with paired distance/timing rows, 28 tactile-only baselines, and 28 auditory-only catches. Exact original loudspeaker-switch code, gain transfer, response timeout, and unfixed experimenter-started ITI remain provenance caveats rather than blockers for a runnable toolkit profile.",
   "reference_parameters": {
-    "implementation_gaps": [
-      "apparatus-specific seven-speaker switching/timing details"
+    "profile_check_complete": true,
+    "reported_trial_formula": "84 audio-tactile trials (7 distances/timings x 12 repetitions), 28 tactile-only baseline trials, and 28 auditory-only catch trials = 140 trials per pre/post PPS session.",
+    "apparatus_recreation_policy": "The physical seven-loudspeaker array is represented with the toolkit's lateral binaural moving-source renderer using the reported 119-to-17 cm path and paired seven distance/timing samples.",
+    "remaining_caveats": [
+      "exact original white-noise asset",
+      "exact loudspeaker-switch/gain transfer law",
+      "numeric response timeout",
+      "unfixed experimenter-started ITI distribution"
     ]
   },
   "design": {
@@ -47,6 +53,7 @@
       "catch_trial_percentage": 20.0,
       "catch_trials_exact": 28,
       "include_baseline_trials": true,
+      "baseline_trials_exact": 28,
       "baseline_soa_values_ms": [-500, 3500],
       "respiratory_phases": ["Any"],
       "blocks": 1,
@@ -54,9 +61,6 @@
         {
           "strip_id": "tonelli-echolocation-array-row",
           "label": "Echolocation array PPS trial",
-          "audio_tactile_percentage": 100.0,
-          "catch_percentage": 0.0,
-          "baseline_percentage": 0.0,
           "elements": [
             {
               "element_id": "tonelli-array-looming-source",

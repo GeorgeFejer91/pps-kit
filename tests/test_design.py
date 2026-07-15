@@ -1088,6 +1088,27 @@ def test_canzoneri_profile_distributes_reported_trial_pool_across_two_blocks():
     ) == {"looming": 16, "receding": 16}
 
 
+def test_tonelli_profile_uses_exact_baseline_and_catch_counts():
+    templates = load_templates(Path(__file__).resolve().parents[1] / "study_templates")
+    tonelli = next(template for template in templates if template.template_id == "tonelli_2019_echolocation")
+
+    rows = block_trial_rows(tonelli.design)
+
+    assert validate_design(tonelli.design) == []
+    assert protocol_summary(tonelli.design)["total_trials"] == 140
+    assert Counter(row["trial_type"] for row in rows) == {
+        "Audio-Tactile": 84,
+        "Baseline": 28,
+        "Catch": 28,
+    }
+    assert Counter(row["soa_ms"] for row in rows if row["trial_type"] == "Baseline") == {
+        -500: 14,
+        3500: 14,
+    }
+    assert {row["tactile_enabled"] for row in rows if row["trial_type"] == "Baseline"} == {True}
+    assert {row["tactile_enabled"] for row in rows if row["trial_type"] == "Catch"} == {False}
+
+
 def test_participant_block_order_is_randomized_but_block_contents_are_fixed():
     design = default_design()
     design.noises = design.noises[:1]

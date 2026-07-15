@@ -85,6 +85,10 @@ REQUIRED_CONTRASTS = {
         "required": ["looming_vs_fixed_source"],
         "note": "The rows retain DynaSpace looming versus fixed source labels.",
     },
+    "tonelli_2019_echolocation": {
+        "required": ["soa_or_distance_rank", "audio_tactile_vs_baseline", "seven_distance_lateral_profile"],
+        "note": "The rows must retain the seven lateral sound-distance timings plus tactile-only baseline rows; pre/post echolocation training context is modeled synthetically because it is not a WAV/run-time factor.",
+    },
 }
 
 
@@ -135,7 +139,8 @@ def run_audit(
                 "looming-vs-fixed, Noel front/back synchrony, Serino peri-trunk "
                 "near-vs-far, Matsuda four-direction approaching-vs-receding, "
                 "Lamia movement-state, and Pfeiffer vestibular-congruence RT "
-                "comparisons, plus Serino peri-hand and Canzoneri near-vs-far RT comparisons"
+                "comparisons, plus Serino peri-hand, Canzoneri near-vs-far, "
+                "and Tonelli echolocation pre/post RT comparisons"
             ),
             "assumption_boundary": EVIDENCE_BOUNDARY,
         },
@@ -298,6 +303,21 @@ def _audit_record(
                 "external apparatus context, not a generated WAV component."
             ),
         }
+    if not missing and record_id == "tonelli_2019_echolocation":
+        comparison = _compare_tonelli_echolocation(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected pre/post echolocation participant data before "
+                "making a scientific lateral head/neck PPS training-modulation claim. The seven-loudspeaker array "
+                "remains represented as a virtual lateral moving-source trajectory with explicit apparatus caveats."
+            ),
+        }
     if not missing:
         return {
             **base,
@@ -370,6 +390,9 @@ def _contrast_availability(record_id: str, profile_rows: list[dict[str, Any]]) -
         "front_back_space": "front" in tokens and ("back" in tokens or "rear" in tokens),
         "vestibular_condition": _has_vestibular_condition_poles(tokens, text_values),
         "audio_vestibular_congruence": _has_congruence_poles(tokens),
+        "seven_distance_lateral_profile": record_id == "tonelli_2019_echolocation" and len(
+            {value for value in soa_values if value >= 0}
+        ) >= 7,
     }
     if record_id == "smartphone_rt_methods_2025":
         availability["looming_vs_fixed_source"] = _has_dynaspace_looming_and_fixed(rows)
@@ -1086,6 +1109,114 @@ def _dynaspace_condition(row: dict[str, Any]) -> str:
     if "fixed" in text or "static" in text:
         return "fixed"
     return ""
+
+
+def _compare_tonelli_echolocation(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    all_rows = [row for profile in profile_rows for row in profile["rows"]]
+    audio_rows = [
+        row
+        for row in all_rows
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    baseline_rows = [
+        row
+        for row in all_rows
+        if str(row.get("family") or "").strip().lower() == "baseline"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in audio_rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    distance_levels: set[float] = set()
+    for row in audio_rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        distance_levels.add(soa_ms)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        distance_bin = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        for session in ("pre_echolocation", "post_echolocation"):
+            if session == "pre_echolocation":
+                rt_ms = 532.0 - (18.0 * proximity)
+            else:
+                rt_ms = 532.0 - (36.0 * proximity)
+                if distance_bin == "middle":
+                    rt_ms -= 7.0
+            out = dict(row)
+            out["synthetic_condition"] = f"{session}_{distance_bin}"
+            out["synthetic_training_session"] = session
+            out["synthetic_distance_bin"] = distance_bin
+            out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+            out["hit"] = "True"
+            out["original_hit"] = "True"
+            out["rt_ms"] = f"{rt_ms:.3f}"
+            out["synthetic_model_id"] = MODEL_ID
+            synthetic_rows.append(out)
+    for row in baseline_rows:
+        for session in ("pre_echolocation", "post_echolocation"):
+            out = dict(row)
+            out["synthetic_condition"] = f"{session}_baseline"
+            out["synthetic_training_session"] = session
+            out["synthetic_distance_bin"] = "baseline"
+            out["synthetic_proximity_rank"] = ""
+            out["hit"] = "True"
+            out["original_hit"] = "True"
+            out["rt_ms"] = "535.000"
+            out["synthetic_model_id"] = MODEL_ID
+            synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "tonelli_2019_echolocation_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    pre_near = means.get("pre_echolocation_near", math.nan)
+    post_near = means.get("post_echolocation_near", math.nan)
+    pre_middle = means.get("pre_echolocation_middle", math.nan)
+    post_middle = means.get("post_echolocation_middle", math.nan)
+    pre_baseline = means.get("pre_echolocation_baseline", math.nan)
+    post_baseline = means.get("post_echolocation_baseline", math.nan)
+    near_training_gain = pre_near - post_near if math.isfinite(pre_near) and math.isfinite(post_near) else math.nan
+    middle_training_gain = (
+        pre_middle - post_middle if math.isfinite(pre_middle) and math.isfinite(post_middle) else math.nan
+    )
+    baseline_shift = (
+        post_baseline - pre_baseline if math.isfinite(pre_baseline) and math.isfinite(post_baseline) else math.nan
+    )
+    seven_distance_profile = len(distance_levels) >= 7
+    observed_direction = (
+        "echolocation_training_changes_lateral_head_pps_boundary"
+        if seven_distance_profile
+        and baseline_rows
+        and math.isfinite(near_training_gain)
+        and math.isfinite(middle_training_gain)
+        and near_training_gain >= 15.0
+        and middle_training_gain >= 8.0
+        and (not math.isfinite(baseline_shift) or abs(baseline_shift) <= 5.0)
+        else "echolocation_training_change_not_recovered"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "distance_levels_observed": len(distance_levels),
+        "baseline_family_present": bool(baseline_rows),
+        "near_pre_minus_post_ms": near_training_gain if math.isfinite(near_training_gain) else None,
+        "middle_pre_minus_post_ms": middle_training_gain if math.isfinite(middle_training_gain) else None,
+        "baseline_post_minus_pre_ms": baseline_shift if math.isfinite(baseline_shift) else None,
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "seven lateral distance/timing levels and tactile-only baseline rows present; synthetic post-training "
+            "near RT gain >= 15 ms, middle RT gain >= 8 ms, baseline pre/post shift <= 5 ms, and observed direction "
+            "equals expected direction"
+        ),
+        "pass": observed_direction == expected_direction,
+    }
 
 
 def _mean_rt_by_condition(rows: list[dict[str, Any]]) -> dict[str, float]:

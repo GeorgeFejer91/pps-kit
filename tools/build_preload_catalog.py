@@ -622,6 +622,7 @@ def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Pa
             "template_id": template.template_id,
             "baseline_strategy": protocol.baseline_strategy,
             "include_baseline_trials": protocol.include_baseline_trials,
+            "baseline_trials_exact": protocol.baseline_trials_exact,
             "baseline_trial_percentage": protocol.baseline_trial_percentage,
             "baseline_soa_values_ms": protocol.baseline_soa_values_ms,
             "baseline_crosses_sequence_variants": protocol.baseline_crosses_sequence_variants,

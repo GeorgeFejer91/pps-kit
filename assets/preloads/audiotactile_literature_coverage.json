@@ -116,26 +116,27 @@
         "peripersonal space auditory tactile dynamic sounds tool use social audio tactile task"
       ],
       "date_run": "2026-07-15",
-      "relevance": "Spot-check against Consensus MCP after the profile library reached 23 preloads. The returned methodological families matched the tracked audit scope: dynamic looming, direction/body-frame, social/tool-use, VR/3D boundary, emotional/roughness, mobile/smartphone, EEG/ERP/static near-far, and adjacent auditory-only or visual/audiovisual records. This spot-check did not replace the 74-record source audit or resolve missing PDFs/supplements."
+      "relevance": "Spot-check against Consensus MCP after the profile library reached 23 preloads. The returned methodological families matched the tracked audit scope: dynamic looming, direction/body-frame, social/tool-use, VR/3D boundary, emotional/roughness, mobile/smartphone, EEG/ERP/static near-far, and adjacent auditory-only or visual/audiovisual records. This spot-check did not replace the 74-record source audit or resolve missing PDFs/supplements.",
+      "note": "Current July 15, 2026 Consensus MCP spot-check returned the same broad audiotactile PPS families already represented by the tracked audit, including Tonelli 2019, newer front/rear records, and Lamia 2026. Tonelli is now runnable as a virtual lateral moving-source recreation with explicit apparatus caveats."
     }
   ],
   "coverage_summary": {
     "literature_record_count": 74,
     "literature_record_category_counts": {
-      "covered_runnable_profile": 8,
+      "covered_runnable_profile": 9,
       "covered_blocked_missing_publication_parameters": 7,
-      "covered_blocked_toolkit_structure": 5,
+      "covered_blocked_toolkit_structure": 4,
       "not_yet_templated_requires_toolkit_structure": 29,
       "not_yet_templated_missing_publication_parameters": 21,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
     "current_template_count": 24,
-    "current_profile_check_pass_count": 12,
-    "published_profile_check_pass_count": 10,
+    "current_profile_check_pass_count": 13,
+    "published_profile_check_pass_count": 11,
     "local_unpublished_profile_check_pass_count": 2,
-    "current_templates_with_missing_publication_parameters": 11,
-    "current_templates_with_toolkit_structural_gaps": 5,
+    "current_templates_with_missing_publication_parameters": 10,
+    "current_templates_with_toolkit_structural_gaps": 4,
     "holmes_2020_reported_articles": 23,
     "holmes_2020_reported_experiments": 46,
     "pubmed_screened_records": 48,
@@ -341,10 +342,9 @@
     {
       "id": "multi_speaker_array_switching",
       "dimension": "spatial_trajectory_coordinate_frame_or_apparatus_geometry",
-      "description": "Physical multi-speaker array with speaker switching or scheduled source hops.",
-      "toolkit_status": "blocked_current_profile",
+      "description": "Physical multi-speaker arrays can be represented when the paper reports a single serial trajectory with distances and timing that map onto the toolkit moving-source renderer; true front/back or concurrently switched arrays still need explicit source-switching support.",
+      "toolkit_status": "partially_modeled",
       "example_records": [
-        "tonelli_2019_echolocation",
         "serino_2015_front_back_trunk_exp2"
       ]
     },
@@ -546,10 +546,8 @@
     {
       "template_id": "tonelli_2019_echolocation",
       "published": true,
-      "current_recreation_category": "toolkit_structural_gap",
-      "primary_constraint_ids": [
-        "multi_speaker_array_switching"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": []
     },
     {
       "template_id": "ferri_2015_artificial_looming_valence",
@@ -1328,14 +1326,14 @@
       "current_template_ids": [
         "tonelli_2019_echolocation"
       ],
-      "coverage_category": "covered_blocked_toolkit_structure",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "seven-speaker audio-tactile PPS task",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "multi_speaker_array_switching"
-      ],
-      "missing_publication_parameters": [
-        "apparatus-specific seven-speaker switching/timing details"
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "recreation_caveats": [
+        "The physical seven-loudspeaker array is recreated as a virtual lateral moving-source trajectory with seven reported distance/timing anchors.",
+        "The exact original white-noise asset, loudspeaker switching/gain transfer law, numeric response timeout, and unfixed experimenter-started ITI distribution remain provenance caveats rather than runnable blockers."
       ]
     },
     {

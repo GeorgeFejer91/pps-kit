@@ -1152,18 +1152,84 @@ function staticTrialPoolSettings(protocol) {
       familyRepetitions[family] = normalizeRepetitionValue(value, defaultRepetitions);
     }
   }
-  return {
+  const exactFamilyCounts = trialPoolExactFamilyCounts(protocol);
+  const settings = {
     default_repetitions: defaultRepetitions,
     family_repetitions: familyRepetitions,
     folder_repetitions: {},
     file_repetition_overrides: {},
     fractional_seed: Number(protocol.random_seed || 20250604) || 20250604,
   };
+  if (Object.keys(exactFamilyCounts).length) settings.exact_family_trial_counts = exactFamilyCounts;
+  return settings;
 }
 
 function staticConfiguredRepetitions(file, settings) {
   const family = trialPoolFamilyKey(file.family);
   return normalizeRepetitionValue(settings.family_repetitions?.[family] ?? settings.default_repetitions ?? 1, 1);
+}
+
+function trialPoolExactFamilyCounts(source = {}) {
+  const raw = (
+    source?.exact_family_trial_counts
+    && typeof source.exact_family_trial_counts === "object"
+    && !Array.isArray(source.exact_family_trial_counts)
+  ) ? source.exact_family_trial_counts : source;
+  const exactCounts = {};
+  for (const [family, key] of [["baseline", "baseline_trials_exact"], ["catch", "catch_trials_exact"]]) {
+    const value = raw?.[family] ?? raw?.[key];
+    if (value === null || value === undefined || value === "") continue;
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) exactCounts[family] = Math.max(0, Math.trunc(parsed));
+  }
+  return exactCounts;
+}
+
+function trialPoolExactRecordSortKey(record, seed, family) {
+  const file = record?.file || {};
+  const fileKey = String(file.file_key || "");
+  const sequenceKey = String(file.sequence_variant_key || file.variant_key || "");
+  const sourceFileName = String(file.source_file_name || (file.file_path || "").split(/[\\/]/).pop() || "");
+  const orderKey = `${seed}|exact_family_count|${family}|${fileKey}|${sequenceKey}|${sourceFileName}`;
+  return [stableHashInt(orderKey), fileKey, sequenceKey, sourceFileName];
+}
+
+function applyTrialPoolExactFamilyCounts(records, settings = {}, warnings = []) {
+  const exactCounts = trialPoolExactFamilyCounts(settings);
+  if (!Object.keys(exactCounts).length) return {};
+  const seed = Number(settings.fractional_seed || state?.design?.protocol?.random_seed || 20250604) || 20250604;
+  for (const family of Object.keys(exactCounts).sort()) {
+    const targetCount = exactCounts[family];
+    const familyRecords = records.filter((record) => trialPoolFamilyKey(record?.file?.family) === family);
+    if (!familyRecords.length) {
+      if (targetCount) warnings.push(`Exact ${family} trial count ${targetCount} could not be applied because Segment 3 has no ${family} files.`);
+      continue;
+    }
+    const baseCount = Math.floor(targetCount / familyRecords.length);
+    const extraCount = targetCount % familyRecords.length;
+    const ordered = [...familyRecords].sort((left, right) => {
+      const leftKey = trialPoolExactRecordSortKey(left, seed, family);
+      const rightKey = trialPoolExactRecordSortKey(right, seed, family);
+      for (let index = 0; index < leftKey.length; index += 1) {
+        if (leftKey[index] === rightKey[index]) continue;
+        if (typeof leftKey[index] === "number" && typeof rightKey[index] === "number") {
+          return leftKey[index] - rightKey[index];
+        }
+        return String(leftKey[index]).localeCompare(String(rightKey[index]));
+      }
+      return 0;
+    });
+    for (const [index, record] of ordered.entries()) {
+      const occurrenceCount = baseCount + (index < extraCount ? 1 : 0);
+      record.configured = occurrenceCount;
+      record.baseRepetitions = occurrenceCount;
+      record.fractionalRemainder = 0;
+      record.fractionalExtra = false;
+      record.balancingStratum = `${family}|exact_count|target${targetCount}|files${familyRecords.length}`;
+      record.balancingParentStratum = record.balancingStratum;
+    }
+  }
+  return exactCounts;
 }
 
 function staticTrialPoolRows(files, settings) {
@@ -1202,6 +1268,7 @@ function staticTrialPoolRows(files, settings) {
     const rotated = ordered.slice(offset).concat(ordered.slice(0, offset));
     for (const record of rotated.slice(0, extraCount)) record.fractionalExtra = true;
   }
+  applyTrialPoolExactFamilyCounts(records, settings);
   const rows = [];
   let trialPoolIndex = 1;
   for (const record of records) {
@@ -1617,6 +1684,7 @@ function normalizeStaticTemplateDesign(data, status) {
     catch_crosses_sequence_variants: true,
     include_baseline_trials: true,
     baseline_strategy: "tactile_only",
+    baseline_trials_exact: null,
     baseline_trial_percentage: 0,
     baseline_soa_values_ms: [],
     baseline_custom_trial_mode: "tactile_only",
@@ -3718,6 +3786,14 @@ function trialPoolCompositionEstimate() {
       record.fractionalExtra = true;
     }
   }
+  applyTrialPoolExactFamilyCounts(
+    records,
+    {
+      exact_family_trial_counts: trialPoolExactFamilyCounts(state?.design?.protocol || {}),
+      fractional_seed: seed,
+    },
+    warnings
+  );
   const occurrenceByFileKey = new Map();
   for (const record of records) {
     const key = record.file.file_key || `source-${record.index}`;
@@ -5694,6 +5770,7 @@ function collectPayload() {
     catch_trial_percentage: numberValue("catch-percent", 0),
     include_baseline_trials: baselineStrategyIsActive(baselineStrategy),
     baseline_strategy: baselineStrategy,
+    baseline_trials_exact: baselineStrategyIsActive(baselineStrategy) ? (design.protocol?.baseline_trials_exact ?? null) : null,
     baseline_trial_percentage: baselineStrategyIsActive(baselineStrategy) ? numberValue("baseline-percent", 0) : 0,
     baseline_soa_values_ms: baselineTimings,
     baseline_custom_trial_mode: $("baseline-custom-audio-tactile")?.checked ? "audio_tactile" : "tactile_only",
@@ -6044,7 +6121,8 @@ async function startBakeTrialFiles() {
 }
 
 function trialPoolBakeRecipe() {
-  return {
+  const exactFamilyCounts = trialPoolExactFamilyCounts(state?.design?.protocol || {});
+  const recipe = {
     kind: "trial_repetition_pool",
     label: "4_trial_repetition_pool",
     default_repetitions: normalizeRepetitionValue(trialPoolRepetitionDraft.defaultRepetitions || 0, 0),
@@ -6053,6 +6131,8 @@ function trialPoolBakeRecipe() {
     file_repetition_overrides: { ...trialPoolRepetitionDraft.fileRepetitionOverrides },
     fractional_seed: Number(trialPoolRepetitionDraft.fractionalSeed || state?.design?.protocol?.random_seed || 20250604) || 20250604,
   };
+  if (Object.keys(exactFamilyCounts).length) recipe.exact_family_trial_counts = exactFamilyCounts;
+  return recipe;
 }
 
 async function startBakeTrialPool() {

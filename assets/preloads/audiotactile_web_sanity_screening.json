@@ -73,7 +73,7 @@
       "linked_literature_record_ids": [
         "tonelli_2019_echolocation"
       ],
-      "reason": "Live search result is the existing Tonelli 2019 echolocation template/ledger record; its blocker remains the seven-speaker switching/timing structure."
+      "reason": "Live search result is the existing Tonelli 2019 echolocation template/ledger record; it is now runnable as a virtual seven-distance lateral moving-source recreation, with exact speaker switching/gain, original noise asset, response timeout, and unfixed ITI retained as caveats."
     },
     {
       "source_url": "https://pubmed.ncbi.nlm.nih.gov/29461657/",

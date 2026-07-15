@@ -3,6 +3,7 @@
   "template_id": "barumerli_2026_arm_movement_exp2",
   "baseline_strategy": "tactile_only",
   "include_baseline_trials": true,
+  "baseline_trials_exact": null,
   "baseline_trial_percentage": 0.0,
   "baseline_soa_values_ms": [
     800,

@@ -3,15 +3,15 @@
 - Record ID: `serino_2015_peri_hand_exp3`
 - DOI: `10.1038/srep18603`
 - DOI URL: https://doi.org/10.1038/srep18603
-- Coverage category: `covered_blocked_toolkit_structure`
-- Task family: hand tactile PPS with lateralized hand coordinate
+- Coverage category: `covered_runnable_profile`
+- Task family: hand tactile PPS with lateralized hand-anchored cartesian trajectory
 - PDF status: `downloaded`
 - Supplement status: `downloaded`
 - Supplement acquisition attempts: `9` (`downloaded`)
 - Supplement extracted text files: `1`
 - Extraction status: `parsed_with_warnings`
 - Metadata confidence: `0.56` (`partial_extraction`)
-- Confidence basis: Publication PDF is parsed and the automated Segment 1-4 miner found candidate values for 22/25 fields; values still require critical PDF/supplement review.
+- Confidence basis: Manual review and current template checks support a runnable lateralized peri-hand audio-tactile recreation; remaining source-mined fields still need visual/source verification before claims beyond toolkit parameter recreation.
 - Automated evidence mining: `source_mined`; 22/25 fields with candidate values
 - PPS visualization mining: `source_mined`; 6/9 visualization-form candidates
 

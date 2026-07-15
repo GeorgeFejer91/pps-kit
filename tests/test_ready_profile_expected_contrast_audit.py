@@ -43,6 +43,7 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     lamia_rows_path = tmp_path / "lamia_analysis_ready_trials.csv"
     pfeiffer_rows_path = tmp_path / "pfeiffer_analysis_ready_trials.csv"
     canzoneri_rows_path = tmp_path / "canzoneri_analysis_ready_trials.csv"
+    tonelli_rows_path = tmp_path / "tonelli_analysis_ready_trials.csv"
     _write_csv(
         rows_path,
         [
@@ -246,6 +247,30 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
             },
         ],
     )
+    tonelli_rows: list[dict[str, str]] = []
+    for soa_ms in ("0", "500", "1000", "1500", "2000", "2500", "3000"):
+        tonelli_rows.append(
+            {
+                "row_label": "Tonelli lateral echolocation PPS trial",
+                "respiratory_phase": "Tonelli lateral echolocation PPS trial",
+                "sequence_labels": "Lateral white-noise moving source",
+                "sequence_variant_key": "lateral_white_noise_moving_source",
+                "family": "audio_tactile",
+                "soa_ms": soa_ms,
+            }
+        )
+    for soa_ms in ("-500", "3500"):
+        tonelli_rows.append(
+            {
+                "row_label": "Tonelli tactile-only baseline",
+                "respiratory_phase": "Tonelli tactile-only baseline",
+                "sequence_labels": "Lateral white-noise moving source",
+                "sequence_variant_key": "lateral_white_noise_moving_source",
+                "family": "baseline",
+                "soa_ms": soa_ms,
+            }
+        )
+    _write_csv(tonelli_rows_path, tonelli_rows)
     smoke_path = tmp_path / "runner_smoke.json"
     smoke_path.write_text(
         json.dumps(
@@ -286,6 +311,10 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                     {
                         "template_id": "canzoneri_2012_dynamic_sounds",
                         "outputs": {"analysis_ready_trials": str(canzoneri_rows_path)},
+                    },
+                    {
+                        "template_id": "tonelli_2019_echolocation",
+                        "outputs": {"analysis_ready_trials": str(tonelli_rows_path)},
                     },
                 ]
             }
@@ -372,6 +401,15 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                             "expected_effect_direction": "approaching_near_body_sounds_speed_tactile_rt"
                         },
                     },
+                    {
+                        "record_id": "tonelli_2019_echolocation",
+                        "citation_short": "Tonelli 2019",
+                        "observed_comparison_gap": audit.READY_GAP,
+                        "current_template_ids": ["tonelli_2019_echolocation"],
+                        "expected_outcome": {
+                            "expected_effect_direction": "echolocation_training_changes_lateral_head_pps_boundary"
+                        },
+                    },
                 ]
             }
         ),
@@ -387,9 +425,9 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert report["schema"] == audit.SCHEMA
     assert report["passed"]
     assert report["summary"] == {
-        "ready_profile_record_count": 8,
-        "synthetic_comparison_record_count": 8,
-        "synthetic_comparison_passed_count": 8,
+        "ready_profile_record_count": 9,
+        "synthetic_comparison_record_count": 9,
+        "synthetic_comparison_passed_count": 9,
         "synthetic_comparison_failed_count": 0,
         "contrast_metadata_blocked_record_count": 0,
         "contrast_metadata_present_model_missing_record_count": 0,
@@ -469,6 +507,17 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert canzoneri["synthetic_comparison"]["approaching_far_minus_near_ms"] >= 20.0
     assert canzoneri["synthetic_comparison"]["observed_effect_direction"] == (
         "approaching_near_body_sounds_speed_tactile_rt"
+    )
+
+    tonelli = by_id["tonelli_2019_echolocation"]
+    assert tonelli["status"] == "synthetic_behavioral_comparison_passed"
+    assert tonelli["missing_contrasts"] == []
+    assert tonelli["synthetic_comparison"]["distance_levels_observed"] == 7
+    assert tonelli["synthetic_comparison"]["baseline_family_present"] is True
+    assert tonelli["synthetic_comparison"]["near_pre_minus_post_ms"] >= 15.0
+    assert tonelli["synthetic_comparison"]["middle_pre_minus_post_ms"] >= 8.0
+    assert tonelli["synthetic_comparison"]["observed_effect_direction"] == (
+        "echolocation_training_changes_lateral_head_pps_boundary"
     )
 
 

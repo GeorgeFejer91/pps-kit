@@ -3,6 +3,7 @@
   "template_id": "roussel_2025_dynaspace_mobile_pps",
   "baseline_strategy": "none",
   "include_baseline_trials": false,
+  "baseline_trials_exact": null,
   "baseline_trial_percentage": 0.0,
   "baseline_soa_values_ms": [],
   "baseline_crosses_sequence_variants": true,

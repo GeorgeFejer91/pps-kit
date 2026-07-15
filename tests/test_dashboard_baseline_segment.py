@@ -140,6 +140,7 @@ def test_dashboard_static_assets_keep_numbered_baseline_and_block_segments():
     assert "renderLiveTrialPreviewTables" in app_js
     assert "min_max" in app_js
     assert "baseline_trial_percentage" in app_js
+    assert "baseline_trials_exact" in app_js
 
 
 def test_dashboard_saves_baseline_strategy_and_updates_summary(tmp_path: Path):
@@ -155,6 +156,7 @@ def test_dashboard_saves_baseline_strategy_and_updates_summary(tmp_path: Path):
     summary = updated["protocol_summary"]
     assert protocol["include_baseline_trials"] is True
     assert protocol["baseline_strategy"] == "soa_zero"
+    assert protocol["baseline_trials_exact"] is None
     assert protocol["baseline_trial_percentage"] == pytest.approx(20.0)
     assert summary["baseline_trials"] == 1
     assert summary["baseline_actual_percent"] == pytest.approx(50.0)

@@ -49,8 +49,8 @@ The PubMed screen is fully accounted for in the machine-readable screening file:
 
 | Screen decision | Count |
 |---|---:|
-| Current runnable profile | 6 |
-| Current blocked profile | 5 |
+| Current runnable profile | 7 |
+| Current blocked profile | 4 |
 | Included task needing exact PPS-task extraction | 22 |
 | Candidate requiring toolkit structure | 6 |
 | Candidate requiring static near/far support | 1 |
@@ -74,9 +74,9 @@ The current profile gate covers 24 templates:
 
 | Outcome | Count | Meaning |
 |---|---:|---|
-| GUI-recreatable | 12 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Ten are published profiles, including paired Noel front/back variants; two are unpublished local examples. |
-| Missing publication parameters | 11 | The task looks structurally expressible, but published or encoded details are insufficient. |
-| Toolkit structural gap | 5 | The task uses a trial, audio, tactile, response, timing, coordinate, or apparatus feature that the toolkit schema does not yet model. |
+| GUI-recreatable | 13 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Eleven are published profiles, including paired Noel front/back variants; two are unpublished local examples. |
+| Missing publication parameters | 10 | The task looks structurally expressible, but published or encoded details are insufficient. |
+| Toolkit structural gap | 4 | The task uses a trial, audio, tactile, response, timing, coordinate, or apparatus feature that the toolkit schema does not yet model. |
 
 Runnable published-paper profiles today:
 
@@ -87,6 +87,8 @@ Runnable published-paper profiles today:
 - `noel_2015_bodily_self`
 - `noel_2015_bodily_self_back_space`
 - `pfeiffer_2018_lateral_perihead_left_to_right`
+- `canzoneri_2012_dynamic_sounds`
+- `tonelli_2019_echolocation`
 - `serino_2015_peri_hand_exp3`
 - `serino_2015_peri_trunk_exp1`
 
@@ -132,7 +134,7 @@ This table is generated from `assets/preloads/audiotactile_literature_coverage.j
 | Noel et al. (2018) | psychophysical-computational PPS resizing task | Not templated; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: extract velocity levels, peri-face/peri-trunk mapping, timing, tactile settings, response settings, and whether the psychophysical task reuses an existing dynamic PPS scaffold |
 | Pfeiffer et al. (2018) | bilateral lateral peri-head PPS trajectory profile | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate. |
 | Bernasconi/Noel et al. (2018) | approaching auditory stimuli plus trunk tactile stimulation during iEEG | Not templated; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: extract exact approaching-sound trajectory, far/intermediate/close tactile timings, trunk tactile apparatus, and response/event settings; iEEG endpoint is non-blocking for audiotactile recreation |
-| Tonelli et al. (2019) | seven-speaker audio-tactile PPS task | Template exists; toolkit structure gap | Toolkit/task constraints: `multi_speaker_array_switching` Missing/extract: apparatus-specific seven-speaker switching/timing details |
+| Tonelli et al. (2019) | seven-speaker audio-tactile PPS task | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate using a virtual seven-distance lateral moving-source trajectory with exact 84 audio-tactile, 28 tactile-only baseline, and 28 auditory-only catch rows; exact original white-noise asset, loudspeaker switching/gain transfer, response timeout, and unfixed experimenter-started ITI remain provenance caveats. |
 | Pregnancy PPS study (2019) | audio-tactile PPS measurement in pregnancy context | Not templated; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: extract exact audio-tactile PPS timing, distances, trial counts, and response settings; pregnancy context is non-blocking |
 | Identifying PPS boundaries in newborns (2019) | newborn audio-tactile PPS boundary task with sound-intensity/distance and tactile response measures | Not templated; toolkit structure gap | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters`, `static_near_far_trial_family` Missing/extract: extract auditory intensity/distance levels, tactile timing, response measure, and infant-specific apparatus separately from participant age |
 | Spatial tuning of multisensory responses in newborns (2021) | near/far auditory plus electrical tactile stimulation with ERP endpoint | Not templated; toolkit structure gap | Toolkit/task constraints: `static_near_far_trial_family`, `electrical_tactile_calibration`, `external_event_trigger_sync_contract` Missing/extract: extract near/far auditory apparatus, electrical tactile parameters, timing offset, and ERP trigger needs |
@@ -196,7 +198,7 @@ These are the main standardization constraints to flag when deciding whether the
 | Direction-coupled tactile-only baselines | Baseline timing may be tied to omitted sound positions such as T0/T6. | Implemented for Canzoneri 2012; no current blocker examples |
 | Core SOA, ITI, baseline, and repetition parameters | Missing SOA/distance, ITI/jitter, baseline timing, or trial-repetition values prevent honest profile checks even when the structure is otherwise compatible. Randomization and block order alone do not. | Canzoneri 2013; Teneggi 2013; Noel 2015 walking |
 | Analog two-speaker apparatus provenance | Near/far speaker setups are original apparatus descriptions. They are not blockers by themselves when reported trajectory/timing/source parameters can be recreated with the binaural renderer; exact original gain/envelope files remain missing provenance when required for author-stimulus equivalence. | Canzoneri 2012; Serino 2015 peri-trunk/peri-hand |
-| Multi-speaker array switching | A physical array may switch speakers or schedule discrete positions rather than render one virtual source. | Tonelli 2019; Serino 2015 front/back |
+| Multi-speaker array switching | A physical array may switch speakers or schedule discrete positions rather than render one virtual source. Serial arrays can be represented when reported distances/timings map to a single virtual trajectory; true front/back source switching still needs first-class support. | Serino 2015 front/back |
 | Gaussian speaker-array amplitude field | The auditory source is an amplitude field across speakers. | Galli 2015 |
 | HRTF or binaural engine mismatch | Exact HRTF database or renderer behavior can define the stimulus. | Taffou 2014 LISTEN HRTF; Pfeiffer reference simulator; Lerner Unity/3D Tune-In |
 | Body-scaled distances | Distances depend on the participant's body dimensions rather than absolute cm/m. | Lerner 2021 |
@@ -227,7 +229,6 @@ These already expose real standardized-toolkit gaps:
 
 | Profile | Main unsupported task structure |
 |---|---|
-| `tonelli_2019_echolocation` | Seven-speaker switching/timing. |
 | `galli_2015_wheelchair_full_body` | Speaker-array Gaussian amplitude control. |
 | `lerner_2021_3d_audio_tactile_boundary` | Body-scaled distance mode and Unity/3D Tune-In stimulus behavior. |
 | `serino_2015_front_back_trunk_exp2` | Physical 16-speaker array plus internal distance schedule. |

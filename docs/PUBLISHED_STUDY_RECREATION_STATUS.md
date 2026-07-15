@@ -33,6 +33,7 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 | pfeiffer_2018_lateral_perihead_left_to_right | - | ready | All required current-GUI fields are present and materializable. |
 | study5_dynaspace_lateral_45_pps | - | ready | All required current-GUI fields are present and materializable. |
 | canzoneri_2012_dynamic_sounds | - | ready | All required current-GUI fields are present and materializable. |
+| tonelli_2019_echolocation | - | ready | All required current-GUI fields are present and materializable. |
 | serino_2015_peri_hand_exp3 | B | ready | All required current-GUI fields are present and materializable. |
 | serino_2015_peri_trunk_exp1 | C | ready | All required current-GUI fields are present and materializable. |
 
@@ -42,7 +43,6 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 |---|---|---|---|
 | canzoneri_2013_amputation_prosthesis | - | blocked_missing_parameters | exact trial count and tactile calibration table from full paper |
 | canzoneri_2013_tool_use_reshaping | - | blocked_missing_parameters | exact trial count and ITI table from full paper |
-| tonelli_2019_echolocation | - | blocked_unsupported_toolkit_structure | apparatus-specific seven-speaker switching/timing details |
 | ferri_2015_artificial_looming_valence | A | blocked_missing_parameters | exact auditory files; paper-specific gain envelope |
 | ferri_2015_ecological_looming_valence | B | blocked_missing_parameters | licensed ecological sounds; exact amplitude envelopes |
 | lerner_2021_3d_audio_tactile_boundary | - | blocked_unsupported_toolkit_structure | exact Unity/3D Tune-In stimulus engine behavior |
@@ -56,7 +56,6 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 
 | Profile | Variant | Status | Main reasons |
 |---|---|---|---|
-| tonelli_2019_echolocation | - | blocked_unsupported_toolkit_structure | apparatus-specific seven-speaker switching/timing details |
 | galli_2015_wheelchair_full_body | - | blocked_unsupported_toolkit_structure | speaker-array Gaussian amplitude control |
 | lerner_2021_3d_audio_tactile_boundary | - | blocked_unsupported_toolkit_structure | body-scaled distance mode; exact Unity/3D Tune-In stimulus engine behavior |
 | serino_2015_front_back_trunk_exp2 | A | blocked_unsupported_toolkit_structure | physical 16-speaker array |

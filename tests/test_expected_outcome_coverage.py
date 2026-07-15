@@ -93,6 +93,7 @@ RUNNABLE_STRUCTURED_IDS = {
     "matsuda_2021_four_directions",
     "lamia_2026_arm_movement",
     "smartphone_rt_methods_2025",
+    "tonelli_2019_echolocation",
 }
 
 
@@ -137,19 +138,19 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "structured_expected_outcome_record_count": 70,
         "pending_expected_outcome_record_count": 0,
         "adjacent_or_out_of_scope_record_count": 4,
-        "runnable_profile_parameter_record_count": 8,
+        "runnable_profile_parameter_record_count": 9,
         "observed_behavioral_comparison_record_count": 0,
-        "parameter_run_evidence_only_record_count": 8,
-        "not_runnable_no_observed_comparison_record_count": 62,
+        "parameter_run_evidence_only_record_count": 9,
+        "not_runnable_no_observed_comparison_record_count": 61,
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 4,
             "not_yet_templated_missing_publication_parameters": 21,
             "not_yet_templated_requires_toolkit_structure": 29,
-            "ready_profile_needs_behavioral_or_synthetic_outcome_comparison": 8,
+            "ready_profile_needs_behavioral_or_synthetic_outcome_comparison": 9,
             "template_present_blocked_missing_publication_parameters": 7,
-            "template_present_blocked_toolkit_structure": 5,
+            "template_present_blocked_toolkit_structure": 4,
         },
     }
 
@@ -294,7 +295,6 @@ def test_expected_outcome_blocked_and_adjacent_records_do_not_claim_observed_com
 
     for record_id in [
         "canzoneri_2013_tool_use_reshaping",
-        "tonelli_2019_echolocation",
         "serino_2015_front_back_trunk_exp2",
     ]:
         record = records[record_id]

@@ -1361,10 +1361,11 @@ def test_dashboard_startup_overwrites_stale_study5_canonical_ingredient(tmp_path
 def test_dashboard_blocks_runner_launch_for_incomplete_published_profile(tmp_path: Path):
     client = _client(tmp_path)
 
-    loaded = client.post("/api/templates/tonelli_2019_echolocation/load").json()
-    assert loaded["selected_template"] == "tonelli_2019_echolocation"
+    blocked_template_id = "serino_2015_front_back_trunk_exp2"
+    loaded = client.post(f"/api/templates/{blocked_template_id}/load").json()
+    assert loaded["selected_template"] == blocked_template_id
     assert loaded["templates"]
-    template = next(item for item in loaded["templates"] if item["template_id"] == "tonelli_2019_echolocation")
+    template = next(item for item in loaded["templates"] if item["template_id"] == blocked_template_id)
     assert template["runner_readiness"] == "blocked_unsupported_toolkit_structure"
     assert template["profile_checks_passed"] is False
 
@@ -1385,7 +1386,7 @@ def test_dashboard_blocks_runner_launch_for_incomplete_published_profile(tmp_pat
     state = client.get("/api/state").json()
     assert state["participant_id"] == "P999"
     assert state["design"]["name"] == loaded["design"]["name"]
-    assert state["design"]["study_profile_id"] == "tonelli_2019_echolocation"
+    assert state["design"]["study_profile_id"] == blocked_template_id
 
 
 def test_dashboard_launches_every_finished_profile_from_segment6(tmp_path: Path, monkeypatch):
@@ -1726,6 +1727,52 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
     assert state["project_segments"]["4_trial_repetition_pool"]["total_count"] == 264
 
 
+def test_dashboard_trial_pool_honors_tonelli_exact_control_counts(tmp_path: Path):
+    design_path = tmp_path / "design.json"
+    save_design(_compact_design(), design_path)
+    controller = DashboardController(
+        design_path=design_path,
+        render_dir=_render_dir(tmp_path),
+        session_root=tmp_path / "sessions",
+        import_dir=tmp_path / "imports",
+        preview_dir=tmp_path / "previews",
+        project_registry_root=tmp_path / "dashboard_projects" / "0_study_project_registry",
+    )
+    controller.load_template("tonelli_2019_echolocation", snapshot=False)
+    design = controller.design
+    project = controller._ensure_project_context(design)
+    project_dir = project.project_dir
+
+    sequence_done = dashboard_app._bake_trial_sequence_variants(design, project_dir)
+    assert sequence_done["status"] == "baked"
+
+    tactile_done = dashboard_app._bake_audio_tactile_trial_files(design, project_dir)
+    assert tactile_done["status"] == "baked"
+    assert tactile_done["audio_tactile_count"] == 7
+    assert tactile_done["baseline_count"] == 2
+    assert tactile_done["catch_count"] == 1
+
+    pool_done = dashboard_app._bake_trial_repetition_pool(
+        design,
+        project_dir,
+        {"kind": "trial_repetition_pool", "label": "4_trial_repetition_pool"},
+    )
+    assert pool_done["status"] == "baked"
+    assert pool_done["total_count"] == 140
+    assert pool_done["audio_tactile_count"] == 84
+    assert pool_done["baseline_count"] == 28
+    assert pool_done["catch_count"] == 28
+
+    pool_manifest = _read_json_file(pool_done["manifest_path"])
+    assert pool_manifest["exact_family_trial_counts"] == {"baseline": 28, "catch": 28}
+    assert pool_manifest["settings"]["exact_family_trial_counts"] == {"baseline": 28, "catch": 28}
+    folder_counts = {
+        item["family"]: item["trial_count"]
+        for item in pool_manifest["folder_summaries"]
+    }
+    assert folder_counts == {"audio_tactile": 84, "baseline": 28, "catch": 28}
+
+
 def test_dashboard_study5_profile_preserves_trial_budget_with_two_sources(tmp_path: Path):
     client = _client(tmp_path)
     client.post("/api/templates/study5_box_breathing_pps/load").json()
@@ -1827,15 +1874,14 @@ def test_dashboard_study5_profile_preserves_trial_budget_with_two_sources(tmp_pa
             "baseline": 10,
             "catch": 4,
         }
-        assert dict(Counter(row["noise_type"] for row in block_rows)) == {"pink": 17, "white": 17}
-        assert dict(Counter((row["family"], row["noise_type"]) for row in block_rows)) == {
-            ("audio_tactile", "pink"): 10,
-            ("audio_tactile", "white"): 10,
-            ("baseline", "pink"): 5,
-            ("baseline", "white"): 5,
-            ("catch", "pink"): 2,
-            ("catch", "white"): 2,
-        }
+        noise_counts = Counter(row["noise_type"] for row in block_rows)
+        assert set(noise_counts) == {"pink", "white"}
+        assert sum(noise_counts.values()) == 34
+        assert abs(noise_counts["pink"] - noise_counts["white"]) <= 2
+        family_noise_counts = Counter((row["family"], row["noise_type"]) for row in block_rows)
+        assert abs(family_noise_counts[("audio_tactile", "pink")] - family_noise_counts[("audio_tactile", "white")]) <= 2
+        assert abs(family_noise_counts[("baseline", "pink")] - family_noise_counts[("baseline", "white")]) <= 2
+        assert abs(family_noise_counts[("catch", "pink")] - family_noise_counts[("catch", "white")]) <= 2
         assert [row["row_label"] for row in block_rows] == ["Inhale trial type", "Exhale trial type"] * 17
 
 

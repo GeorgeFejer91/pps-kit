@@ -19,6 +19,7 @@ READY_PROFILE_IDS = {
     "serino_2015_peri_hand_exp3",
     "serino_2015_peri_trunk_exp1",
     "smartphone_rt_methods_2025",
+    "tonelli_2019_echolocation",
 }
 
 
@@ -40,9 +41,9 @@ def test_synthetic_expected_outcome_smoke_generates_ready_profile_rows(tmp_path)
     assert report["schema"] == module.SCHEMA
     assert report["passed"] is True
     assert report["summary"] == {
-        "ready_profile_record_count": 8,
-        "synthetic_comparison_record_count": 8,
-        "synthetic_direction_match_count": 8,
+        "ready_profile_record_count": 9,
+        "synthetic_comparison_record_count": 9,
+        "synthetic_direction_match_count": 9,
         "synthetic_direction_mismatch_count": 0,
         "human_behavioral_comparison_count_from_ledger": 0,
         "all_synthetic_direction_checks_passed": True,

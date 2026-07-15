@@ -31,16 +31,16 @@ The batch materializer then attempted every profile. It prepared Segment 6 only 
 Measure & Count \\
 \midrule
 Catalogued profiles & 24 \\
-Profiles passing checks & 12 \\
-Published-paper profiles passing checks & 10 \\
-Profiles with missing publication parameters & 11 \\
-Profiles with toolkit structural gaps & 5 \\
+Profiles passing checks & 13 \\
+Published-paper profiles passing checks & 11 \\
+Profiles with missing publication parameters & 10 \\
+Profiles with toolkit structural gaps & 4 \\
 Runner launched during audit & no \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-The current audit found 12 profile(s) that can be materialized end-to-end. The unpublished lab profile(s) passing current checks are \texttt{study5\_\allowbreak{}box\_\allowbreak{}breathing\_\allowbreak{}pps}, \texttt{study5\_\allowbreak{}dynaspace\_\allowbreak{}lateral\_\allowbreak{}45\_\allowbreak{}pps}; the published-paper profile(s) passing current checks are \texttt{roussel\_\allowbreak{}2025\_\allowbreak{}dynaspace\_\allowbreak{}mobile\_\allowbreak{}pps}, \texttt{matsuda\_\allowbreak{}2021\_\allowbreak{}four\_\allowbreak{}directions}, \texttt{barumerli\_\allowbreak{}2026\_\allowbreak{}arm\_\allowbreak{}movement\_\allowbreak{}exp1}, \texttt{barumerli\_\allowbreak{}2026\_\allowbreak{}arm\_\allowbreak{}movement\_\allowbreak{}exp2}, \texttt{noel\_\allowbreak{}2015\_\allowbreak{}bodily\_\allowbreak{}self}, \texttt{noel\_\allowbreak{}2015\_\allowbreak{}bodily\_\allowbreak{}self\_\allowbreak{}back\_\allowbreak{}space}, \texttt{pfeiffer\_\allowbreak{}2018\_\allowbreak{}lateral\_\allowbreak{}perihead\_\allowbreak{}left\_\allowbreak{}to\_\allowbreak{}right}, \texttt{canzoneri\_\allowbreak{}2012\_\allowbreak{}dynamic\_\allowbreak{}sounds}, \texttt{serino\_\allowbreak{}2015\_\allowbreak{}peri\_\allowbreak{}hand\_\allowbreak{}exp3}, \texttt{serino\_\allowbreak{}2015\_\allowbreak{}peri\_\allowbreak{}trunk\_\allowbreak{}exp1}.
+The current audit found 13 profile(s) that can be materialized end-to-end. The unpublished lab profile(s) passing current checks are \texttt{study5\_\allowbreak{}box\_\allowbreak{}breathing\_\allowbreak{}pps}, \texttt{study5\_\allowbreak{}dynaspace\_\allowbreak{}lateral\_\allowbreak{}45\_\allowbreak{}pps}; the published-paper profile(s) passing current checks are \texttt{roussel\_\allowbreak{}2025\_\allowbreak{}dynaspace\_\allowbreak{}mobile\_\allowbreak{}pps}, \texttt{matsuda\_\allowbreak{}2021\_\allowbreak{}four\_\allowbreak{}directions}, \texttt{barumerli\_\allowbreak{}2026\_\allowbreak{}arm\_\allowbreak{}movement\_\allowbreak{}exp1}, \texttt{barumerli\_\allowbreak{}2026\_\allowbreak{}arm\_\allowbreak{}movement\_\allowbreak{}exp2}, \texttt{noel\_\allowbreak{}2015\_\allowbreak{}bodily\_\allowbreak{}self}, \texttt{noel\_\allowbreak{}2015\_\allowbreak{}bodily\_\allowbreak{}self\_\allowbreak{}back\_\allowbreak{}space}, \texttt{pfeiffer\_\allowbreak{}2018\_\allowbreak{}lateral\_\allowbreak{}perihead\_\allowbreak{}left\_\allowbreak{}to\_\allowbreak{}right}, \texttt{canzoneri\_\allowbreak{}2012\_\allowbreak{}dynamic\_\allowbreak{}sounds}, \texttt{tonelli\_\allowbreak{}2019\_\allowbreak{}echolocation}, \texttt{serino\_\allowbreak{}2015\_\allowbreak{}peri\_\allowbreak{}hand\_\allowbreak{}exp3}, \texttt{serino\_\allowbreak{}2015\_\allowbreak{}peri\_\allowbreak{}trunk\_\allowbreak{}exp1}.
 
 \section*{Profiles Successfully Materialized}
 {\small
@@ -59,6 +59,7 @@ Profile & Segment 2 variants & Segment 3 files & Segment 4 rows & Segment 5 bloc
 \texttt{pfeiffer\_\allowbreak{}2018\_\allowbreak{}lateral\_\allowbreak{}perihead\_\allowbreak{}left\_\allowbreak{}to\_\allowbreak{}right} & not run & not run & not run & not run \\
 \texttt{study5\_\allowbreak{}dynaspace\_\allowbreak{}lateral\_\allowbreak{}45\_\allowbreak{}pps} & not run & not run & not run & not run \\
 \texttt{canzoneri\_\allowbreak{}2012\_\allowbreak{}dynamic\_\allowbreak{}sounds} & not run & not run & not run & not run \\
+\texttt{tonelli\_\allowbreak{}2019\_\allowbreak{}echolocation} & 1 & 10 & 140 & 1 \\
 \texttt{serino\_\allowbreak{}2015\_\allowbreak{}peri\_\allowbreak{}hand\_\allowbreak{}exp3} & not run & not run & not run & not run \\
 \texttt{serino\_\allowbreak{}2015\_\allowbreak{}peri\_\allowbreak{}trunk\_\allowbreak{}exp1} & not run & not run & not run & not run \\
 \bottomrule
@@ -74,7 +75,6 @@ Profile & Primary outcome & Missing & Gaps & Short reason \\
 \endhead
 \texttt{canzoneri\_\allowbreak{}2013\_\allowbreak{}amputation\_\allowbreak{}prosthesis} & Missing publication parameters & 1 & 0 & exact trial count and tactile calibration table from full paper \\
 \texttt{canzoneri\_\allowbreak{}2013\_\allowbreak{}tool\_\allowbreak{}use\_\allowbreak{}reshaping} & Missing publication parameters & 1 & 0 & exact trial count and ITI table from full paper \\
-\texttt{tonelli\_\allowbreak{}2019\_\allowbreak{}echolocation} & Toolkit structural gap & 1 & 1 & apparatus-specific seven-speaker switching/timing details \\
 \texttt{ferri\_\allowbreak{}2015\_\allowbreak{}artificial\_\allowbreak{}looming\_\allowbreak{}valence} & Missing publication parameters & 2 & 0 & exact auditory files \\
 \texttt{ferri\_\allowbreak{}2015\_\allowbreak{}ecological\_\allowbreak{}looming\_\allowbreak{}valence} & Missing publication parameters & 2 & 0 & licensed ecological sounds \\
 \texttt{galli\_\allowbreak{}2015\_\allowbreak{}wheelchair\_\allowbreak{}full\_\allowbreak{}body} & Toolkit structural gap & 0 & 1 & speaker-array Gaussian amplitude control \\
@@ -96,10 +96,6 @@ Profile & Primary outcome & Missing & Gaps & Short reason \\
 \paragraph{\texttt{canzoneri\_\allowbreak{}2013\_\allowbreak{}tool\_\allowbreak{}use\_\allowbreak{}reshaping}}
 \begin{itemize}
 \item exact trial count and ITI table from full paper
-\end{itemize}
-\paragraph{\texttt{tonelli\_\allowbreak{}2019\_\allowbreak{}echolocation}}
-\begin{itemize}
-\item apparatus-specific seven-speaker switching/timing details
 \end{itemize}
 \paragraph{\texttt{ferri\_\allowbreak{}2015\_\allowbreak{}artificial\_\allowbreak{}looming\_\allowbreak{}valence}}
 \begin{itemize}
@@ -139,10 +135,6 @@ Profile & Primary outcome & Missing & Gaps & Short reason \\
 \end{itemize}
 
 \section*{Toolkit Structural Gaps}
-\paragraph{\texttt{tonelli\_\allowbreak{}2019\_\allowbreak{}echolocation}}
-\begin{itemize}
-\item apparatus-specific seven-speaker switching/timing details
-\end{itemize}
 \paragraph{\texttt{galli\_\allowbreak{}2015\_\allowbreak{}wheelchair\_\allowbreak{}full\_\allowbreak{}body}}
 \begin{itemize}
 \item speaker-array Gaussian amplitude control

@@ -46,10 +46,10 @@ def test_paper_audit_package_summarizes_core_pipeline_without_source_artifacts()
 
     assert summary["schema"] == "pps-paper-audit-profile-candidate-summary.v1"
     assert summary["record_count"] == 74
-    assert summary["category_counts"]["covered_runnable_profile"] == 6
-    assert len(summary["runnable_profile_records"]) == 6
+    assert summary["category_counts"]["covered_runnable_profile"] == 9
+    assert len(summary["runnable_profile_records"]) == 9
     assert len(summary["missing_parameter_records"]) == 28
-    assert len(summary["toolkit_structure_gap_records"]) == 36
+    assert len(summary["toolkit_structure_gap_records"]) == 33
     assert len(summary["adjacent_out_of_scope_records"]) == 4
     assert blockers
     assert summary["blocker_counts"] == blockers

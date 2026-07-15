@@ -3,6 +3,7 @@
   "template_id": "ferri_2015_artificial_looming_valence",
   "baseline_strategy": "tactile_only",
   "include_baseline_trials": true,
+  "baseline_trials_exact": null,
   "baseline_trial_percentage": 0.0,
   "baseline_soa_values_ms": [],
   "baseline_crosses_sequence_variants": true,

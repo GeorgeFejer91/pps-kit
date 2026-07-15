@@ -210,6 +210,7 @@ class ProtocolSpec:
     catch_crosses_sequence_variants: bool = True
     include_baseline_trials: bool = True
     baseline_strategy: str = "tactile_only"
+    baseline_trials_exact: int | None = None
     baseline_trial_percentage: float = 0.0
     baseline_soa_values_ms: list[int] = field(default_factory=list)
     baseline_custom_trial_mode: str = "tactile_only"
@@ -695,6 +696,8 @@ def validate_design(design: StimulusDesign) -> list[str]:
         warnings.append("Catch-trial percentage must be between 0 and 99.9.")
     if p.catch_trials_exact is not None and p.catch_trials_exact < 0:
         warnings.append("Exact catch-trial count cannot be negative.")
+    if p.baseline_trials_exact is not None and p.baseline_trials_exact < 0:
+        warnings.append("Exact baseline-trial count cannot be negative.")
     if p.baseline_strategy not in SUPPORTED_BASELINE_STRATEGIES:
         warnings.append(f"Unsupported baseline strategy: {p.baseline_strategy}")
     if p.baseline_custom_trial_mode not in SUPPORTED_BASELINE_CUSTOM_TRIAL_MODES:
@@ -884,6 +887,8 @@ def baseline_target_count(protocol: ProtocolSpec, reference_trial_count: int, ca
         return 0
     if candidate_count <= 0:
         return 0
+    if protocol.baseline_trials_exact is not None:
+        return int(protocol.baseline_trials_exact)
     percentage = float(protocol.baseline_trial_percentage or 0.0)
     if percentage <= 0:
         return candidate_count

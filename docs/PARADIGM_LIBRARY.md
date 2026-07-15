@@ -30,7 +30,7 @@ The current catalog contains two unpublished Study 5 workflows plus 22 published
 | `canzoneri_2013_amputation_prosthesis.json` | partial | Clinical amputation/prosthesis PPS scaffold using the dynamic audio-tactile task family. | Clinical group, prosthesis-worn state, tested-limb assignment, and calibration details are metadata only. |
 | `noel_2015_bodily_self.json` | verified | Full-body-illusion PPS trial schedule and chest tactile site. | Full-body illusion stroking context remains outside the GUI. |
 | `matsuda_2021_four_directions.json` | verified | Front/rear/left/right audio-tactile PPS block structure. | Original Unity/audio implementation details are represented as labels, not a full VR scene. |
-| `tonelli_2019_echolocation.json` | partial | Seven-distance echolocation-style PPS scaffold. | Exact speaker control and training materials require original protocol/code. |
+| `tonelli_2019_echolocation.json` | partial | Seven-distance echolocation-style PPS scaffold. | Current profile passes as a virtual lateral moving-source recreation with exact baseline/catch counts; original speaker switching/gain, noise asset, response timeout, unfixed ITI, and training materials remain provenance caveats. |
 | `barumerli_2026_arm_movement_exp1.json` | verified | Arm-movement PPS Experiment 1 structure from open methods. | Exact motor-task apparatus remains protocol-level metadata. |
 | `barumerli_2026_arm_movement_exp2.json` | verified | Arm-movement PPS Experiment 2 structure from open methods. | Exact motor-task apparatus remains protocol-level metadata. |
 | `ferri_2015_artificial_looming_valence.json` | partial | Artificial negative/neutral looming-sound PPS scaffold. | Original emotional sound files, ratings, and gain envelopes are not bundled. |

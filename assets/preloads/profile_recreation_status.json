@@ -13,13 +13,13 @@
       "pfeiffer_2018_lateral_perihead_left_to_right",
       "study5_dynaspace_lateral_45_pps",
       "canzoneri_2012_dynamic_sounds",
+      "tonelli_2019_echolocation",
       "serino_2015_peri_hand_exp3",
       "serino_2015_peri_trunk_exp1"
     ],
     "missing_publication_parameters": [
       "canzoneri_2013_amputation_prosthesis",
       "canzoneri_2013_tool_use_reshaping",
-      "tonelli_2019_echolocation",
       "ferri_2015_artificial_looming_valence",
       "ferri_2015_ecological_looming_valence",
       "lerner_2021_3d_audio_tactile_boundary",
@@ -30,7 +30,6 @@
       "teneggi_2013_social_face_pps"
     ],
     "toolkit_structural_gap": [
-      "tonelli_2019_echolocation",
       "galli_2015_wheelchair_full_body",
       "lerner_2021_3d_audio_tactile_boundary",
       "serino_2015_front_back_trunk_exp2",
@@ -94,7 +93,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -161,7 +160,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -228,7 +227,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -295,7 +294,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -362,7 +361,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -429,7 +428,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -496,7 +495,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -563,7 +562,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -630,7 +629,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -703,7 +702,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -782,7 +781,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -855,7 +854,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -881,21 +880,21 @@
       "profile_type": "",
       "visible_variant_label": "",
       "variant_display": "Enhanced audio-tactile PPS after echolocation training",
-      "primary_category": "toolkit_structural_gap",
-      "category_label": "Toolkit structural gap",
-      "runner_readiness": "blocked_unsupported_toolkit_structure",
-      "profile_checks_passed": false,
-      "gui_recreatable": false,
-      "segment_0_to_4_profile_checks_passed": false,
-      "segment_1_to_6_materializable": false,
-      "finished_profile": false,
-      "segment_6_launchable": false,
-      "profile_completion_status": "unfinished_preload",
-      "missing_parameter_count": 1,
-      "unsupported_structure_count": 1,
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
       "segment_0_to_4_profile_checks": {
         "gate": "segments_0_to_4",
-        "passed": false,
+        "passed": true,
         "segments": [
           {
             "segment": "0",
@@ -907,20 +906,9 @@
           {
             "segment": "1",
             "segment_label": "Segment 1 source/stimulus assets",
-            "passed": false,
-            "field_count": 5,
-            "blocking_reasons": [
-              {
-                "parameter": "profile_gap",
-                "status": "unsupported_toolkit_structure",
-                "reason": "apparatus-specific seven-speaker switching/timing details"
-              },
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "apparatus-specific seven-speaker switching/timing details"
-              }
-            ]
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
           },
           {
             "segment": "2",
@@ -933,7 +921,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -945,20 +933,8 @@
           }
         ]
       },
-      "missing_publication_parameters": [
-        {
-          "segment": "1",
-          "parameter": "profile_gap",
-          "reason": "apparatus-specific seven-speaker switching/timing details"
-        }
-      ],
-      "unsupported_toolkit_structures": [
-        {
-          "segment": "1",
-          "parameter": "profile_gap",
-          "reason": "apparatus-specific seven-speaker switching/timing details"
-        }
-      ],
+      "missing_publication_parameters": [],
+      "unsupported_toolkit_structures": [],
       "profile_parameters_manifest": "assets/preloads/tonelli_2019_echolocation/01_profile/profile_parameters_manifest.json"
     },
     {
@@ -1024,7 +1000,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -1113,7 +1089,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -1197,7 +1173,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -1286,7 +1262,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -1376,7 +1352,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -1461,7 +1437,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -1540,7 +1516,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -1607,7 +1583,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -1674,7 +1650,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": false,
-            "field_count": 6,
+            "field_count": 7,
             "blocking_reasons": [
               {
                 "parameter": "profile_gap",
@@ -1780,7 +1756,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {
@@ -1870,7 +1846,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 4,
+            "field_count": 5,
             "blocking_reasons": []
           },
           {

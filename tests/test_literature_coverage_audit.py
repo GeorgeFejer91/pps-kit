@@ -34,9 +34,9 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 74
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 8,
+        "covered_runnable_profile": 9,
         "covered_blocked_missing_publication_parameters": 7,
-        "covered_blocked_toolkit_structure": 5,
+        "covered_blocked_toolkit_structure": 4,
         "not_yet_templated_requires_toolkit_structure": 29,
         "not_yet_templated_missing_publication_parameters": 21,
         "candidate_needs_full_text_task_audit": 0,
@@ -45,10 +45,10 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 24
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
-    ) == 12
-    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 10
+    ) == 13
+    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 11
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
-    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 5
+    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 4
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
     assert coverage["coverage_summary"]["openalex_broad_candidate_like_hits"] == 103
     assert coverage["coverage_summary"]["openalex_broad_linked_candidate_like_hits"] == 47
@@ -127,13 +127,19 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "current_recreation_category": "gui_recreatable",
         "primary_constraint_ids": [],
     }
+    assert by_template["tonelli_2019_echolocation"] == {
+        "template_id": "tonelli_2019_echolocation",
+        "published": True,
+        "current_recreation_category": "gui_recreatable",
+        "primary_constraint_ids": [],
+    }
 
     published_ready = [
         entry
         for entry in coverage["current_template_coverage"]
         if entry["published"] and entry["current_recreation_category"] == "gui_recreatable"
     ]
-    assert len(published_ready) == 10
+    assert len(published_ready) == 11
 
 
 def test_literature_coverage_constraints_focus_on_task_execution():
@@ -157,6 +163,11 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert "tactile_waveform_frequency_profile" in constraint_ids
     assert "missing_core_soa_iti_baseline_repetition_parameters" in constraint_ids
     assert "exact_trial_timing_randomization_tables" not in constraint_ids
+    multi_speaker_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "multi_speaker_array_switching"
+    )
+    assert multi_speaker_constraint["toolkit_status"] == "partially_modeled"
+    assert multi_speaker_constraint["example_records"] == ["serino_2015_front_back_trunk_exp2"]
     assert {
         "trial_design_families",
         "audio_source_and_renderer",
@@ -266,6 +277,11 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["canzoneri_2012_dynamic_sounds"]["can_recreate_audiotactile_components_now"] is True
     assert records["canzoneri_2012_dynamic_sounds"]["blocking_constraint_ids"] == []
     assert records["canzoneri_2012_dynamic_sounds"]["missing_publication_parameters"] == []
+    assert records["tonelli_2019_echolocation"]["coverage_category"] == "covered_runnable_profile"
+    assert records["tonelli_2019_echolocation"]["can_recreate_audiotactile_components_now"] is True
+    assert records["tonelli_2019_echolocation"]["blocking_constraint_ids"] == []
+    assert records["tonelli_2019_echolocation"]["missing_publication_parameters"] == []
+    assert records["tonelli_2019_echolocation"]["recreation_caveats"]
     assert records["teramoto_2013_beyond_head_audiotactile"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert "body_part_anchored_coordinate_frames" in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]
     assert "tactile_discrimination_or_localization_response" in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]
