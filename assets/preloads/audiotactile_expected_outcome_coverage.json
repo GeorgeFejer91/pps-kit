@@ -21,8 +21,8 @@
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
-      "not_yet_templated_missing_publication_parameters": 22,
-      "not_yet_templated_requires_toolkit_structure": 28,
+      "not_yet_templated_missing_publication_parameters": 24,
+      "not_yet_templated_requires_toolkit_structure": 26,
       "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 12,
       "template_present_blocked_missing_publication_parameters": 8
     }
@@ -1382,7 +1382,7 @@
       "record_id": "newborn_boundaries_2019",
       "citation_short": "Identifying PPS boundaries in newborns (2019)",
       "doi": "10.1038/s41598-019-45084-4",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -1407,7 +1407,7 @@
         "paper_audit_visualization_candidate_count": "7"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },
@@ -2280,7 +2280,7 @@
       "record_id": "cell_reports_medicine_2026_consciousness",
       "citation_short": "Multisensory integration in PPS indexes consciousness states (2026)",
       "doi": "10.1016/j.xcrm.2026.102705",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -2308,7 +2308,7 @@
         "manual_review_profile_recreation_assessment": "possible_with_caveats_task_free_eeg_pps_two_variants"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },

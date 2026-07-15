@@ -118,6 +118,13 @@
       "date_run": "2026-07-15",
       "relevance": "Spot-check against Consensus MCP after the profile library reached 23 preloads. The returned methodological families matched the tracked audit scope: dynamic looming, direction/body-frame, social/tool-use, VR/3D boundary, emotional/roughness, mobile/smartphone, EEG/ERP/static near-far, and adjacent auditory-only or visual/audiovisual records. This spot-check did not replace the 74-record source audit or resolve missing PDFs/supplements.",
       "note": "Current July 15, 2026 Consensus MCP spot-check returned the same broad audiotactile PPS families already represented by the tracked audit, including Tonelli 2019, newer front/rear records, and Lamia 2026. Tonelli is now runnable as a virtual lateral moving-source recreation with explicit apparatus caveats."
+    },
+    {
+      "id": "static_near_far_capability_smoke_2026_07_15",
+      "kind": "validation_protocol",
+      "date_run": "2026-07-15",
+      "local_summary_file": "artifacts/validation_runs/current_goal_static_near_far_capability_20260715/static_near_far_capability_smoke_report.json",
+      "relevance": "Capability smoke proving that the runner/package contract can execute stationary static near/far audio-tactile rows, tactile-only baseline rows, and auditory-only catch rows with generated WAV output, event markers, mouse-click simulated responses, and analysis rows. This is not paper-specific parameter extraction, physical loopback evidence, or collected participant evidence."
     }
   ],
   "coverage_summary": {
@@ -126,8 +133,8 @@
       "covered_runnable_profile": 12,
       "covered_blocked_missing_publication_parameters": 8,
       "covered_blocked_toolkit_structure": 0,
-      "not_yet_templated_requires_toolkit_structure": 28,
-      "not_yet_templated_missing_publication_parameters": 22,
+      "not_yet_templated_requires_toolkit_structure": 26,
+      "not_yet_templated_missing_publication_parameters": 24,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
@@ -263,14 +270,15 @@
     {
       "id": "static_near_far_trial_family",
       "dimension": "trial_family_and_baseline_logic",
-      "description": "Static near/far auditory positions paired with tactile targets, rather than a generated looming/receding trajectory.",
-      "toolkit_status": "not_first_class",
+      "description": "Static near/far auditory positions paired with tactile targets are supported through stationary source rows in generated Segment 5/6 blocks; paper-specific profiles still need exact distances, timing, response mapping, and apparatus parameters.",
+      "toolkit_status": "supported_by_static_near_far_capability_smoke",
       "example_records": [
         "kitagawa_2005_sound_complexity",
         "serino_2007_blind_cane_users",
         "bassolino_2010_mouse_use",
         "cimmino_2013_surgical_arm_elongation"
-      ]
+      ],
+      "validation_report": "artifacts/validation_runs/current_goal_static_near_far_capability_20260715/static_near_far_capability_smoke_report.json"
     },
     {
       "id": "weak_strong_no_target_gonogo",
@@ -647,7 +655,6 @@
       "audiotactile_task_family": "near/far auditory-tactile extinction task around the head in a right-brain-damaged patient",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "static_near_far_trial_family",
         "body_part_anchored_coordinate_frames",
         "cross_modal_extinction_response_mapping"
       ],
@@ -669,7 +676,6 @@
       "audiotactile_task_family": "front/back near/far auditory-tactile extinction task around the head in right-brain-damaged patients",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "static_near_far_trial_family",
         "body_part_anchored_coordinate_frames",
         "cross_modal_extinction_response_mapping"
       ],
@@ -689,7 +695,6 @@
       "audiotactile_task_family": "static near/far audio-tactile sound-complexity task",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "static_near_far_trial_family",
         "tactile_discrimination_or_localization_response"
       ],
       "missing_publication_parameters": [
@@ -709,7 +714,6 @@
       "audiotactile_task_family": "static near/far weak-target Go/NoGo tactile detection",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "static_near_far_trial_family",
         "weak_strong_no_target_gonogo",
         "voice_key_response_capture",
         "electrical_tactile_calibration"
@@ -730,8 +734,7 @@
       "audiotactile_task_family": "audio-tactile PPS stimulation with TMS/MEP endpoint",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "external_event_trigger_sync_contract",
-        "static_near_far_trial_family"
+        "external_event_trigger_sync_contract"
       ],
       "missing_publication_parameters": [
         "requires full task-method extraction if we later support neurophysiology trigger profiles"
@@ -770,7 +773,6 @@
       "audiotactile_task_family": "static near/far tactile detection around hand/tool space",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "static_near_far_trial_family",
         "weak_strong_no_target_gonogo"
       ],
       "missing_publication_parameters": [
@@ -790,7 +792,6 @@
       "audiotactile_task_family": "static near/far audio-tactile PPS task with rTMS context",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "static_near_far_trial_family",
         "weak_strong_no_target_gonogo"
       ],
       "missing_publication_parameters": [
@@ -906,7 +907,6 @@
       "audiotactile_task_family": "static near/far audio-tactile PPS task",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "static_near_far_trial_family",
         "weak_strong_no_target_gonogo"
       ],
       "missing_publication_parameters": [
@@ -926,8 +926,7 @@
       "audiotactile_task_family": "auditory/tactile/audiotactile information processing with tactile response mapping",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "tactile_discrimination_or_localization_response",
-        "static_near_far_trial_family"
+        "tactile_discrimination_or_localization_response"
       ],
       "missing_publication_parameters": [
         "full response mapping, stimulus timing, and apparatus details need extraction"
@@ -1353,12 +1352,11 @@
         "openalex_audiotactile_pps_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "newborn audio-tactile PPS boundary task with sound-intensity/distance and tactile response measures",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters",
-        "static_near_far_trial_family"
+        "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
         "extract auditory intensity/distance levels, tactile timing, response measure, and infant-specific apparatus separately from participant age"
@@ -1376,7 +1374,6 @@
       "audiotactile_task_family": "near/far auditory plus electrical tactile stimulation with ERP endpoint",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "static_near_far_trial_family",
         "electrical_tactile_calibration",
         "external_event_trigger_sync_contract"
       ],
@@ -1414,7 +1411,6 @@
       "audiotactile_task_family": "audio-tactile PPS task with neuroclinical endpoint",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "static_near_far_trial_family",
         "external_event_trigger_sync_contract",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
@@ -1638,7 +1634,6 @@
       "audiotactile_task_family": "static near/far sounds paired with weak vibrotactile targets and Go/NoGo response logic",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "static_near_far_trial_family",
         "weak_strong_no_target_gonogo"
       ],
       "missing_publication_parameters": [
@@ -1847,7 +1842,6 @@
       "audiotactile_task_family": "audio-tactile self-relevance task placing the auditory source inside versus outside PPS with tactile responses and EEG/HEP endpoint",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "static_near_far_trial_family",
         "external_event_trigger_sync_contract",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
@@ -1864,11 +1858,10 @@
         "web_search_sanity_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "audio-tactile PPS task in sleep/disorders-of-consciousness setting",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "static_near_far_trial_family",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
@@ -2001,7 +1994,6 @@
       "audiotactile_task_family": "audiotactile interaction task manipulating cheek, hand, and knee tactile sites with spatially related sounds",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "static_near_far_trial_family",
         "body_part_anchored_coordinate_frames",
         "tactile_discrimination_or_localization_response"
       ],
@@ -2043,7 +2035,6 @@
       "audiotactile_task_family": "near/far audio-tactile PPS task while tennis players or novices hold a racket",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "static_near_far_trial_family",
         "voice_key_response_capture",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],

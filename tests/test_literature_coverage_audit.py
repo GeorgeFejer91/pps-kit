@@ -37,8 +37,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_runnable_profile": 12,
         "covered_blocked_missing_publication_parameters": 8,
         "covered_blocked_toolkit_structure": 0,
-        "not_yet_templated_requires_toolkit_structure": 28,
-        "not_yet_templated_missing_publication_parameters": 22,
+        "not_yet_templated_requires_toolkit_structure": 26,
+        "not_yet_templated_missing_publication_parameters": 24,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
@@ -107,6 +107,16 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         source.get("id") == "consensus_mcp_spot_check_2026_07_15"
         and source.get("kind") == "consensus_mcp_spot_check"
         and len(source.get("queries") or []) == 3
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "static_near_far_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_static_near_far_capability_20260715/"
+            "static_near_far_capability_smoke_report.json"
+        )
         for source in coverage["evidence_sources"]
     )
 
@@ -195,6 +205,14 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert "tactile_waveform_frequency_profile" in constraint_ids
     assert "missing_core_soa_iti_baseline_repetition_parameters" in constraint_ids
     assert "exact_trial_timing_randomization_tables" not in constraint_ids
+    static_near_far_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "static_near_far_trial_family"
+    )
+    assert static_near_far_constraint["toolkit_status"] == "supported_by_static_near_far_capability_smoke"
+    assert static_near_far_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_static_near_far_capability_20260715/"
+        "static_near_far_capability_smoke_report.json"
+    )
     multi_speaker_constraint = next(
         item for item in coverage["constraint_taxonomy"] if item["id"] == "multi_speaker_array_switching"
     )
@@ -263,7 +281,10 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["holmes_2020_four_experiments"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert records["tajadura_jimenez_2009_visual_deprivation"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert records["mindfulness_pps_2024"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["newborn_boundaries_2019"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
+    assert records["newborn_boundaries_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["newborn_boundaries_2019"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+    ]
     assert records["ronga_2021_newborn_erp"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert records["ferri_2015_jneurosci_itv"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["autism_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
@@ -278,8 +299,10 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["depersonalisation_2024"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["lower_limb_pps_2017"]["coverage_category"] == "adjacent_out_of_scope"
     assert records["lower_limb_pps_2017"]["blocking_constraint_ids"] == []
-    assert records["cell_reports_medicine_2026_consciousness"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert "static_near_far_trial_family" in records["cell_reports_medicine_2026_consciousness"]["blocking_constraint_ids"]
+    assert records["cell_reports_medicine_2026_consciousness"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["cell_reports_medicine_2026_consciousness"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+    ]
     assert records["serino_2018_mixed_reality_pps"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert "audiovisual_or_trisensory_trial_family" in records["serino_2018_mixed_reality_pps"]["blocking_constraint_ids"]
     assert records["amemiya_2017_pseudowalking_footsole"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
@@ -353,7 +376,10 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["finisguerra_2015_moving_sounds_motor"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert "voice_key_response_capture" in records["finisguerra_2015_moving_sounds_motor"]["blocking_constraint_ids"]
     assert records["biggio_2017_racket_tool_use"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert "static_near_far_trial_family" in records["biggio_2017_racket_tool_use"]["blocking_constraint_ids"]
+    assert records["biggio_2017_racket_tool_use"]["blocking_constraint_ids"] == [
+        "voice_key_response_capture",
+        "missing_core_soa_iti_baseline_repetition_parameters",
+    ]
     assert records["bassolino_2010_mouse_use"]["doi"] == "10.1016/j.neuropsychologia.2009.11.009"
     assert records["teneggi_2013_social_face"]["doi"] == "10.1016/j.cub.2013.01.043"
     assert records["serino_2009_tms"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
@@ -365,6 +391,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
 
     for record in coverage["literature_records"]:
         assert set(record["blocking_constraint_ids"]) <= constraint_ids, record["record_id"]
+        assert "static_near_far_trial_family" not in record["blocking_constraint_ids"], record["record_id"]
         assert not (set(record["blocking_constraint_ids"]) & non_blocking_tokens), record["record_id"]
         for constraint_id in record["blocking_constraint_ids"]:
             assert constraint_dimensions[constraint_id] in task_execution_dimensions, record["record_id"]
