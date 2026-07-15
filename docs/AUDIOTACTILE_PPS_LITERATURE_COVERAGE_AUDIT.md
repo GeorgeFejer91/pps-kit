@@ -11,11 +11,18 @@ Clinical population, intervention, social, locomotion, VR, prosthesis, or emotio
 For profile acceptance, the required published/task parameters are narrower than a full methods clone and must be complete through Segment 0-4: profile metadata/provenance, stimulus type and asset provenance, trajectory, Segment 2 trial sequence including ITI or jitter boxes when task-relevant, SOAs or distance-at-tactile values, baseline strategy/timing, and trial repetition count. Routine trial randomization, block order, Segment 5 block generation, and Segment 6 runner handoff are standard toolkit-native behavior rather than publication rejection criteria.
 
 The machine-readable source is `assets/preloads/audiotactile_literature_coverage.json`.
+The full source-to-runner validation gate ledger is `assets/preloads/audiotactile_full_pipeline_validation.json`.
 The Holmes consensus-corpus screening trail is `assets/preloads/audiotactile_holmes2020_consensus_screening.json`.
 The PubMed screening audit trail is `assets/preloads/audiotactile_pubmed_screening.json`, with the supplemental PubMed query-variant trail in `assets/preloads/audiotactile_pubmed_query_variant_screening.json`.
 The OpenAlex broad-screen trail is `assets/preloads/audiotactile_openalex_broad_screening.json`, with per-hit screening decisions in `assets/preloads/audiotactile_openalex_candidate_screening.json`. The additional query-variant exhaustiveness screen is `assets/preloads/audiotactile_openalex_query_variant_screening.json`. The live web sanity trail is `assets/preloads/audiotactile_web_sanity_screening.json`.
 
 Current ledger size: 74 literature records. Across the separate preload gate, 16 profile variants currently pass runnable checks. In the broader literature ledger, 12 literature records have covered runnable profiles, 0 covered records still need toolkit structure, 26 not-yet-templated records expose toolkit-structure gaps, 24 not-yet-templated records are structurally close but lack extracted/published PPS-task parameters, and 4 records are adjacent/out of scope. The previous generic candidate bucket is now cleared: tracked records are classified by whether the PPS task is runnable, missing exact task details, blocked by an unsupported task structure, or not actually an audiotactile PPS target.
+
+## Full Pipeline Validation
+
+The current full-pipeline gate starts at the original paper/PDF/source parameter extraction and ends at observed mouse-click emulated runner behavior compared against the extracted expected outcome. A record passes only when all of these gates are proven: minimum source parameters captured, expected outcome extracted, parsimonious profile saved, Segment 0-6 GUI/toolkit path ready, runnable WAV/session execution available, and runner-produced emulated behavior matching the extracted expected direction.
+
+Current full-pipeline result: 12 in-scope literature records pass the emulated source-to-runner chain. Fifty-eight in-scope records do not: 8 have profile scaffolds but still need source/publication parameters, 24 have no complete profile because source parameters remain missing, and 26 require toolkit structure or response-contract work before the GUI/runner chain can honestly execute them. Four records are adjacent/out of scope. This full-pipeline pass is still software evidence from deterministic participant-like mouse clicks, not collected participant data, not physical loopback or tactile-onset evidence, and not a scientific PPS-effect replication claim.
 
 ## Evidence Base
 
