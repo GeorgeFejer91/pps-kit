@@ -11,19 +11,19 @@
     "structured_expected_outcome_record_count": 71,
     "pending_expected_outcome_record_count": 0,
     "adjacent_or_out_of_scope_record_count": 4,
-    "runnable_profile_parameter_record_count": 15,
+    "runnable_profile_parameter_record_count": 16,
     "observed_behavioral_comparison_record_count": 0,
-    "mouse_click_simulated_participant_like_comparison_record_count": 15,
-    "synthetic_profile_contrast_comparison_record_count": 15,
+    "mouse_click_simulated_participant_like_comparison_record_count": 16,
+    "synthetic_profile_contrast_comparison_record_count": 16,
     "parameter_run_evidence_only_record_count": 0,
-    "not_runnable_no_observed_comparison_record_count": 56,
+    "not_runnable_no_observed_comparison_record_count": 55,
     "adjacent_not_applicable_record_count": 4,
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
       "not_yet_templated_missing_publication_parameters": 48,
-      "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 15,
-      "template_present_blocked_missing_publication_parameters": 8
+      "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 16,
+      "template_present_blocked_missing_publication_parameters": 7
     }
   },
   "expected_outcome_extraction_sources": {
@@ -484,11 +484,11 @@
       "record_id": "canzoneri_2013_amputation_prosthesis",
       "citation_short": "Canzoneri et al. (2013b)",
       "doi": "10.1038/srep02844",
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "canzoneri_2013_amputation_prosthesis"
       ],
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "prosthesis_dependent_remapping_of_amputated_limb_pps",
@@ -505,15 +505,28 @@
       "expected_outcome_source_audit": {
         "paper_audit_pdf_status": "downloaded",
         "paper_audit_supplement_status": "needs_user_download",
-        "paper_audit_extraction_status": "parsed_with_warnings",
-        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_extraction_status": "manual_review_completed",
+        "paper_audit_metadata_confidence_label": "high_confidence_extraction_with_source_count_caveat",
         "paper_audit_visualization_status": "source_mined",
-        "paper_audit_visualization_candidate_count": "6"
+        "paper_audit_visualization_candidate_count": "6",
+        "manual_review_status": "manual_review_completed_open_access_pdf_no_supplement_found",
+        "manual_review_confidence_label": "high_confidence_extraction_with_source_count_caveat",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_dynamic_upper_arm_prosthesis_context"
       },
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison",
+      "observed_evidence_boundary": "The ready-profile mouse-click expected-outcome audit runs deterministic participant-like mouse clicks through SessionRunnerController after response windows and compares the runner-produced analysis RTs with the paper's structured expected effect. This proves runner-level software comparison behavior only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
+      "required_next_evidence": "Collect participant data before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic mouse-click simulated participant-like software evidence only.",
+      "observed_profile_contrast_evidence": {
+        "status": "deterministic_synthetic_profile_contrast_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+      },
+      "observed_mouse_click_participant_like_evidence": {
+        "status": "mouse_click_simulated_participant_like_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/canzoneri_2013_amputation_known_parameter_validation_report.json",
+        "model_boundary": "Paper-specific deterministic participant-like mouse clicks were injected through SessionRunnerController and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
+      }
     },
     {
       "record_id": "cimmino_2013_surgical_arm_elongation",

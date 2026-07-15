@@ -34,8 +34,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 15,
-        "covered_blocked_missing_publication_parameters": 8,
+        "covered_runnable_profile": 16,
+        "covered_blocked_missing_publication_parameters": 7,
         "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 0,
         "not_yet_templated_missing_publication_parameters": 48,
@@ -45,8 +45,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 30
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
-    ) == 22
-    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 20
+    ) == 23
+    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 21
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
     assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 0
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
@@ -264,6 +264,16 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         and source.get("doi") == "10.1016/j.neuropsychologia.2026.109490"
         for source in coverage["evidence_sources"]
     )
+    assert any(
+        source.get("id") == "canzoneri_2013_amputation_known_parameter_validation_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/"
+            "canzoneri_2013_amputation_known_parameter_validation_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
 
     status_ids = {profile["template_id"] for profile in status["profiles"]}
     coverage_ids = {entry["template_id"] for entry in coverage["current_template_coverage"]}
@@ -361,7 +371,7 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for entry in coverage["current_template_coverage"]
         if entry["published"] and entry["current_recreation_category"] == "gui_recreatable"
     ]
-    assert len(published_ready) == 20
+    assert len(published_ready) == 21
 
 
 def test_literature_coverage_constraints_focus_on_task_execution():
@@ -826,9 +836,14 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "serino_2007_known_parameter_validation_report.json"
     )
     assert records["serino_2015_toolless_sync_training"]["blocking_constraint_ids"] == []
-    assert records["canzoneri_2013_amputation_prosthesis"]["blocking_constraint_ids"] == [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-    ]
+    assert records["canzoneri_2013_amputation_prosthesis"]["coverage_category"] == "covered_runnable_profile"
+    assert records["canzoneri_2013_amputation_prosthesis"]["can_recreate_audiotactile_components_now"] is True
+    assert records["canzoneri_2013_amputation_prosthesis"]["blocking_constraint_ids"] == []
+    assert records["canzoneri_2013_amputation_prosthesis"]["missing_publication_parameters"] == []
+    assert records["canzoneri_2013_amputation_prosthesis"]["known_parameter_validation_report"] == (
+        "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/"
+        "canzoneri_2013_amputation_known_parameter_validation_report.json"
+    )
     assert {
         record["record_id"]
         for record in records.values()

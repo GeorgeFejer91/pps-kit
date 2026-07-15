@@ -230,13 +230,19 @@
       "kind": "validation_protocol",
       "local_summary_file": "artifacts/validation_runs/current_goal_noel_2015_known_parameter_20260715/noel_2015_known_parameter_validation_report.json",
       "relevance": "Paper-specific source-to-runner validation for Noel et al. 2015 walking PPS: public PDF parameters, Segments 0-6 GUI materialization, generated block WAVs, software wired-loopback sidecars, and mouse-click simulated responses to chest vibration. This is software evidence, not collected human behavior."
+    },
+    {
+      "id": "canzoneri_2013_amputation_known_parameter_validation_2026_07_15",
+      "kind": "validation_protocol",
+      "local_summary_file": "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/canzoneri_2013_amputation_known_parameter_validation_report.json",
+      "relevance": "Paper-specific source-to-runner validation for Canzoneri et al. 2013 amputation/prosthesis PPS: open-access Scientific Reports/PDF parameters, Segments 0-6 GUI materialization, generated block WAVs, software wired-loopback sidecars, and mouse-click simulated responses to upper-arm tactile target rows with catch withholds. This is software evidence, not collected amputee/prosthesis behavior, physical loopback, or a scientific PPS-effect replication claim."
     }
   ],
   "coverage_summary": {
     "literature_record_count": 75,
     "literature_record_category_counts": {
-      "covered_runnable_profile": 15,
-      "covered_blocked_missing_publication_parameters": 8,
+      "covered_runnable_profile": 16,
+      "covered_blocked_missing_publication_parameters": 7,
       "covered_blocked_toolkit_structure": 0,
       "not_yet_templated_requires_toolkit_structure": 0,
       "not_yet_templated_missing_publication_parameters": 48,
@@ -244,10 +250,10 @@
       "adjacent_out_of_scope": 4
     },
     "current_template_count": 30,
-    "current_profile_check_pass_count": 22,
-    "published_profile_check_pass_count": 20,
+    "current_profile_check_pass_count": 23,
+    "published_profile_check_pass_count": 21,
     "local_unpublished_profile_check_pass_count": 2,
-    "current_templates_with_missing_publication_parameters": 8,
+    "current_templates_with_missing_publication_parameters": 7,
     "current_templates_with_toolkit_structural_gaps": 0,
     "holmes_2020_reported_articles": 23,
     "holmes_2020_reported_experiments": 46,
@@ -665,10 +671,8 @@
     {
       "template_id": "canzoneri_2013_amputation_prosthesis",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": []
     },
     {
       "template_id": "canzoneri_2013_tool_use_reshaping",
@@ -1059,15 +1063,12 @@
       "current_template_ids": [
         "canzoneri_2013_amputation_prosthesis"
       ],
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "Canzoneri-style dynamic PPS task",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-      ],
-      "missing_publication_parameters": [
-        "exact trial count, ITI/baseline/repetition details, and tactile calibration table; electrical tactile metadata is now runner-supported"
-      ]
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/canzoneri_2013_amputation_known_parameter_validation_report.json"
     },
     {
       "record_id": "cimmino_2013_surgical_arm_elongation",

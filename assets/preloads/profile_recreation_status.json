@@ -16,6 +16,7 @@
       "biggio_2017_common_racket",
       "biggio_2017_no_racket",
       "biggio_2017_personal_racket",
+      "canzoneri_2013_amputation_prosthesis",
       "tajadura_jimenez_2009_crossed_visual_deprivation",
       "tajadura_jimenez_2009_uncrossed_visual_deprivation",
       "canzoneri_2012_dynamic_sounds",
@@ -27,7 +28,6 @@
       "serino_2015_peri_trunk_exp1"
     ],
     "missing_publication_parameters": [
-      "canzoneri_2013_amputation_prosthesis",
       "canzoneri_2013_tool_use_reshaping",
       "ferri_2015_artificial_looming_valence",
       "ferri_2015_ecological_looming_valence",
@@ -925,21 +925,21 @@
       "profile_type": "audio_tactile_clinical_upper_limb_pps",
       "visible_variant_label": "",
       "variant_display": "Canzoneri 2013 amputation/prosthesis PPS",
-      "primary_category": "missing_publication_parameters",
-      "category_label": "Missing publication parameters",
-      "runner_readiness": "blocked_missing_parameters",
-      "profile_checks_passed": false,
-      "gui_recreatable": false,
-      "segment_0_to_4_profile_checks_passed": false,
-      "segment_1_to_6_materializable": false,
-      "finished_profile": false,
-      "segment_6_launchable": false,
-      "profile_completion_status": "unfinished_preload",
-      "missing_parameter_count": 1,
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
       "unsupported_structure_count": 0,
       "segment_0_to_4_profile_checks": {
         "gate": "segments_0_to_4",
-        "passed": false,
+        "passed": true,
         "segments": [
           {
             "segment": "0",
@@ -958,15 +958,9 @@
           {
             "segment": "2",
             "segment_label": "Segment 2 trial rows and sequences",
-            "passed": false,
-            "field_count": 4,
-            "blocking_reasons": [
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "exact trial count and tactile calibration table from full paper"
-              }
-            ]
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
           },
           {
             "segment": "3",
@@ -984,13 +978,7 @@
           }
         ]
       },
-      "missing_publication_parameters": [
-        {
-          "segment": "2",
-          "parameter": "profile_gap",
-          "reason": "exact trial count and tactile calibration table from full paper"
-        }
-      ],
+      "missing_publication_parameters": [],
       "unsupported_toolkit_structures": [],
       "profile_parameters_manifest": "assets/preloads/canzoneri_2013_amputation_prosthesis/01_profile/profile_parameters_manifest.json"
     },

@@ -1277,18 +1277,16 @@
     },
     {
       "audiotactile_task_family": "Canzoneri-style dynamic PPS task",
-      "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Canzoneri et al. (2013b)",
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "canzoneri_2013_amputation_prosthesis"
       ],
       "doi": "10.1038/srep02844",
       "expected_effect_direction": "prosthesis_extends_amputated_side_pps_after_stump_shift_without_prosthesis",
       "expected_outcome_status": "structured_expected_outcome_extracted",
-      "full_emulated_pipeline_validated": false,
+      "full_emulated_pipeline_validated": true,
       "gates": {
         "expected_outcome_extraction": {
           "evidence": "Structured expected effect direction is available.",
@@ -1301,91 +1299,83 @@
           "status": "structured_expected_outcome_extracted"
         },
         "observed_emulated_expected_match": {
-          "evidence": "No observed emulated comparison exists for this record.",
-          "evidence_boundary": "",
-          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-          "passed": false,
-          "source_report": "",
-          "status": "no_observed_emulated_comparison"
+          "evidence": "Runner-produced analysis rows are recorded as matching the extracted expected direction in the mouse-click audit.",
+          "evidence_boundary": "Paper-specific deterministic participant-like mouse clicks were injected through SessionRunnerController and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim.",
+          "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
+          "passed": true,
+          "source_report": "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/canzoneri_2013_amputation_known_parameter_validation_report.json",
+          "status": "emulated_observed_direction_matches_expected"
         },
         "parsimonious_profile_saved": {
-          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
-          "passed": false,
+          "evidence": "All current template IDs are finished profiles and source parameters are complete.",
+          "passed": true,
           "profile_completion_statuses": [
-            "unfinished_preload"
+            "finished_segment_6_launchable"
           ],
-          "status": "profile_scaffold_present_but_incomplete",
+          "status": "parsimonious_profile_complete",
           "template_ids": [
             "canzoneri_2013_amputation_prosthesis"
           ]
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
-          ],
-          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
-          "missing_parameters": [
-            "exact trial count, ITI/baseline/repetition details, and tactile calibration table; electrical tactile metadata is now runner-supported"
-          ],
+          "blockers": [],
+          "evidence": "Literature ledger marks the task as currently recreatable with no blocking constraints or missing publication parameters.",
+          "missing_parameters": [],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
             "extraction_status": "parsed_with_warnings",
-            "manual_review_confidence_label": "",
-            "manual_review_profile_recreation_assessment": "",
-            "manual_review_status": "",
+            "manual_review_confidence_label": "high_confidence_extraction_with_source_count_caveat",
+            "manual_review_profile_recreation_assessment": "possible_with_caveats_dynamic_upper_arm_prosthesis_context",
+            "manual_review_status": "manual_review_completed_open_access_pdf_no_supplement_found",
             "metadata_confidence_label": "partial_extraction",
             "metadata_confidence_score": 0.43,
             "pdf_status": "downloaded",
             "supplement_status": "needs_user_download"
           },
-          "passed": false,
-          "status": "source_parameters_missing_or_unresolved"
+          "passed": true,
+          "status": "minimum_source_parameters_captured"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
-          ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
-          "passed": false,
+          "blocker_ids": [],
+          "evidence": "Profile status reports Segment 0-4 checks, Segment 1-6 materialization, and Segment 6 launch readiness.",
+          "passed": true,
           "profile_readiness": [
             {
-              "runner_readiness": "blocked_missing_parameters",
-              "segment_0_to_4_profile_checks_passed": false,
-              "segment_1_to_6_materializable": false,
-              "segment_6_launchable": false,
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
               "template_id": "canzoneri_2013_amputation_prosthesis"
             }
           ],
-          "status": "blocked_by_missing_profile_parameters"
+          "status": "segment_0_to_6_gui_toolkit_path_ready"
         },
         "wav_generation_and_runner_execution": {
-          "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
-          "passed": false,
-          "runnable_status": "template_present_but_blocked",
-          "source_report": "",
-          "status": "runner_execution_not_available_for_record"
+          "evidence": "Ready profile was materialized and evaluated through SessionRunnerController with deterministic mouse clicks.",
+          "passed": true,
+          "runnable_status": "runnable_profile_parameters_ready",
+          "source_report": "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/canzoneri_2013_amputation_known_parameter_validation_report.json",
+          "status": "wav_runner_mouse_click_emulation_available"
         }
       },
-      "known_parameter_validation_report": "",
-      "missing_publication_parameters": [
-        "exact trial count, ITI/baseline/repetition details, and tactile calibration table; electrical tactile metadata is now runner-supported"
-      ],
-      "next_required_action": "Extract or source the missing paper parameters: exact trial count, ITI/baseline/repetition details, and tactile calibration table; electrical tactile metadata is now runner-supported",
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/canzoneri_2013_amputation_known_parameter_validation_report.json",
+      "missing_publication_parameters": [],
+      "next_required_action": "Emulated source-to-runner pipeline is available; collect participant and physical timing/loopback evidence before making a scientific replication claim.",
+      "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
         "extraction_status": "parsed_with_warnings",
-        "manual_review_confidence_label": "",
-        "manual_review_profile_recreation_assessment": "",
-        "manual_review_status": "",
+        "manual_review_confidence_label": "high_confidence_extraction_with_source_count_caveat",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_dynamic_upper_arm_prosthesis_context",
+        "manual_review_status": "manual_review_completed_open_access_pdf_no_supplement_found",
         "metadata_confidence_label": "partial_extraction",
         "metadata_confidence_score": 0.43,
         "pdf_status": "downloaded",
         "supplement_status": "needs_user_download"
       },
-      "pipeline_status": "profile_present_but_source_parameters_missing",
+      "pipeline_status": "full_emulated_source_to_runner_pipeline_validated",
       "record_id": "canzoneri_2013_amputation_prosthesis",
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "source_basis": [
         "holmes_2020_systematic_review",
         "pubmed_audio_tactile_pps_2026_06_13"
@@ -7693,37 +7683,37 @@
   },
   "summary": {
     "adjacent_not_applicable_record_count": 4,
-    "full_emulated_pipeline_validated_record_count": 15,
+    "full_emulated_pipeline_validated_record_count": 16,
     "gate_status_counts": {
       "expected_outcome_extraction": {
         "not_applicable_adjacent_record": 4,
         "structured_expected_outcome_extracted": 71
       },
       "observed_emulated_expected_match": {
-        "emulated_observed_direction_matches_expected": 15,
-        "no_observed_emulated_comparison": 56,
+        "emulated_observed_direction_matches_expected": 16,
+        "no_observed_emulated_comparison": 55,
         "not_applicable_adjacent_record": 4
       },
       "parsimonious_profile_saved": {
         "not_applicable_adjacent_record": 4,
-        "parsimonious_profile_complete": 15,
+        "parsimonious_profile_complete": 16,
         "profile_not_yet_created": 48,
-        "profile_scaffold_present_but_incomplete": 8
+        "profile_scaffold_present_but_incomplete": 7
       },
       "source_parameter_extraction": {
-        "minimum_source_parameters_captured": 15,
+        "minimum_source_parameters_captured": 16,
         "not_applicable_adjacent_record": 4,
-        "source_parameters_missing_or_unresolved": 56
+        "source_parameters_missing_or_unresolved": 55
       },
       "toolkit_gui_implementation": {
-        "blocked_by_missing_profile_parameters": 56,
+        "blocked_by_missing_profile_parameters": 55,
         "not_applicable_adjacent_record": 4,
-        "segment_0_to_6_gui_toolkit_path_ready": 15
+        "segment_0_to_6_gui_toolkit_path_ready": 16
       },
       "wav_generation_and_runner_execution": {
         "not_applicable_adjacent_record": 4,
-        "runner_execution_not_available_for_record": 56,
-        "wav_runner_mouse_click_emulation_available": 15
+        "runner_execution_not_available_for_record": 55,
+        "wav_runner_mouse_click_emulation_available": 16
       }
     },
     "human_behavioral_observed_record_count": 0,
@@ -7732,12 +7722,12 @@
     "physical_loopback_observed_record_count": 0,
     "pipeline_status_counts": {
       "adjacent_not_applicable": 4,
-      "full_emulated_source_to_runner_pipeline_validated": 15,
-      "profile_present_but_source_parameters_missing": 8,
+      "full_emulated_source_to_runner_pipeline_validated": 16,
+      "profile_present_but_source_parameters_missing": 7,
       "source_parameters_missing_before_profile_creation": 48
     },
     "primary_gap_counts": {
-      "profile_present_but_source_parameters_missing": 8,
+      "profile_present_but_source_parameters_missing": 7,
       "source_parameters_missing_before_profile_creation": 48,
       "toolkit_structure_or_response_contract_missing": 0
     }

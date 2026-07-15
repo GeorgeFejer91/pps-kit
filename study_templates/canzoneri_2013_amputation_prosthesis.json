@@ -2,22 +2,37 @@
   "template_id": "canzoneri_2013_amputation_prosthesis",
   "title": "Canzoneri 2013 amputation/prosthesis PPS",
   "citation": "Canzoneri, E., Marzolla, M., Amoresano, A., Verni, G., & Serino, A. (2013). Amputation and prosthesis implantation shape body and peripersonal space representations. Scientific Reports, 3, 2844.",
-  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3789144/",
+  "source_url": "https://www.nature.com/articles/srep02844",
   "doi": "10.1038/srep02844",
   "verification_status": "partial",
-  "notes": "Upper-limb amputation/prosthesis PPS profile. The publication confirms use of an auditory-tactile interaction task; this preload captures the dynamic sound/tactile scaffold while patient group, prosthesis-worn state, and tested limb/body-part factors remain metadata.",
+  "notes": "Upper-limb amputation/prosthesis PPS profile. The profile captures the reported dynamic IN/OUT pink-noise task, T1-T5 tactile timing, upper-arm electrical tactile target, auditory-only catch rows, and two-block runner contract. Clinical group, prosthesis-worn state, and tested limb/body-part assignment are retained as analysis/context metadata rather than separate audio-tactile task mechanics.",
   "reference_parameters": {
     "profile_type": "audio_tactile_clinical_upper_limb_pps",
     "reported_groups": ["upper-limb amputees", "healthy controls"],
-    "prosthesis_factor": "prosthesis worn versus not worn, not yet a GUI factor",
-    "trial_family_scaffold": "Canzoneri-style dynamic IN/OUT pink-noise task",
+    "prosthesis_factor": "healthy limb, amputated limb without prosthesis, and amputated limb with prosthesis are paper-level condition/context factors",
+    "trial_family_scaffold": "Canzoneri-style dynamic IN/OUT pink-noise task without tactile-only T0/T6 baselines",
+    "sound_duration_ms": 3000,
+    "pre_sound_silence_ms": 1000,
+    "post_sound_silence_ms": 1000,
+    "target_trial_repetitions_reported": 8,
+    "reported_target_trials_literal": 76,
+    "arithmetic_target_trials_from_factorial_sentence": 80,
+    "reported_catch_trials": 76,
+    "reported_trial_count_caveat": "The PDF Methods sentence reports 8 target stimuli for each T1-T5 temporal delay for IN and OUT sounds, which implies 80 target rows, but the same sentence says this resulted in 76 tactile-target trials. The runnable profile preserves the factorial T1-T5 x IN/OUT x 8 structure and the reported 76 auditory-only catches; the literal 76-target wording remains a source inconsistency caveat.",
     "catch_subtype": "auditory-only no tactile target",
+    "baseline_subtype": "none reported for Experiment 2/3 audio-tactile task",
     "response_rule": "speeded response to tactile target, ignore sound",
+    "profile_check_complete": true,
+    "remaining_caveats": [
+      "internal paper count inconsistency: 8 x 5 x 2 implies 80 tactile-target rows, while the PDF says 76 tactile-target trials",
+      "exact original pink-noise seed/asset and SoundForge-style gain envelope are not available",
+      "electrical current/electrode calibration was reported as above threshold but not as a participant-level current table",
+      "voice-key hardware threshold and latency correction are approximated by the mouse-click response proxy"
+    ],
     "implementation_gaps": [
       "clinical group/session metadata",
       "prosthesis-worn state",
-      "tested limb/body-part assignment",
-      "exact trial count and tactile calibration table from full paper"
+      "tested limb/body-part assignment"
     ]
   },
   "design": {
@@ -57,17 +72,28 @@
     },
     "protocol": {
       "repetitions_per_condition": 8,
+      "trial_pool_repetition_defaults": {
+        "default": 8,
+        "audio_tactile": 8,
+        "catch": 38
+      },
       "soa_values_ms": [300, 800, 1500, 2200, 2700],
       "spatial_values_cm": [100.0, 83.3, 60.0, 36.7, 20.0],
       "pair_spatial_values_with_soas": true,
       "auditory_motion_directions": ["looming", "receding"],
-      "tactile_sites": ["upper limb / hand"],
-      "catch_trial_percentage": 30.0,
-      "catch_trials_exact": null,
-      "include_baseline_trials": true,
-      "baseline_soa_values_ms": [-700, 3600],
-      "respiratory_phases": ["prosthesis metadata required"],
+      "tactile_sites": ["upper arm"],
+      "include_catch_trials": true,
+      "catch_trial_percentage": 48.72,
+      "catch_trials_exact": 76,
+      "catch_crosses_sequence_variants": true,
+      "include_baseline_trials": false,
+      "baseline_strategy": "none",
+      "baseline_trial_percentage": 0.0,
+      "baseline_trials_exact": 0,
+      "baseline_soa_values_ms": [],
+      "respiratory_phases": ["PPS assessment context"],
       "blocks": 2,
+      "distribute_trial_pool_across_blocks": true,
       "trial_randomization_strategy": "no_immediate_repeats",
       "block_order_randomization": "fixed",
       "max_consecutive_same_trial_type": 2,
@@ -75,16 +101,28 @@
         {
           "strip_id": "canzoneri-amputation-dynamic-sound-row",
           "label": "Dynamic sound PPS trial",
-          "audio_tactile_percentage": 100.0,
-          "catch_percentage": 0.0,
-          "baseline_percentage": 0.0,
+          "metadata": {
+            "expected_response": "respond",
+            "response_rule": "verbal_response_to_tactile_target_ignore_sound",
+            "target_role": "tactile_target",
+            "response_mode": "voice_key_mouse_click_proxy",
+            "response_capture_device": "microphone",
+            "voice_key_enabled": "true",
+            "tactile_stimulation_modality": "electrical",
+            "electrical_stimulator_model": "Digitimer DS7A",
+            "electrical_electrode_site": "dorsal upper arm",
+            "source_asset_equivalence": "procedural pink-noise proxy for unshared original sound file",
+            "renderer_equivalence_boundary": "binaural virtual trajectory proxy for physical near/far speakers",
+            "iti_policy": "toolkit_default_unreported_in_source",
+            "iti_ms": "300"
+          },
           "elements": [
             {
               "element_id": "canzoneri-amputation-moving-sound",
               "kind": "looming_stimulus",
               "label": "Pink moving sound",
-              "source_label": "",
-              "source_labels": [],
+              "source_label": "Pink moving sound",
+              "source_labels": ["Pink moving sound"],
               "randomized": true
             }
           ]
@@ -97,11 +135,15 @@
   "provenance": [
     {
       "field": "study scope",
-      "source": "Open Scientific Reports abstract and article report PPS testing in upper-limb amputees with an audio-tactile interaction task."
+      "source": "Scientific Reports article reports PPS testing in upper-limb amputees with healthy limb, amputated limb without prosthesis, and amputated limb with prosthesis conditions."
     },
     {
-      "field": "task scaffold",
-      "source": "Profile uses the Canzoneri-family dynamic sound scaffold pending full-method verification."
+      "field": "task parameters",
+      "source": "Scientific Reports Methods report 3000 ms pink-noise IN/OUT sounds, 1000 ms pre/post silence, T1-T5 at 300, 800, 1500, 2200, and 2700 ms from sound onset, 76 auditory-only catch trials, and two blocks."
+    },
+    {
+      "field": "trial count caveat",
+      "source": "The Methods sentence simultaneously reports 8 target stimuli per T1-T5 x IN/OUT cell and a 76-trial tactile-target total; the profile preserves the coherent factorial target structure and records the literal total as a caveat."
     }
   ]
 }
