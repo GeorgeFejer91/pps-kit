@@ -95,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 2,
+      "value": 3,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -272,6 +272,10 @@
     {
       "field": "SOAs and distances",
       "source": "Methods lines report six sound distances D6-D1 with tactile timing corresponding to the spatial dimension."
+    },
+    {
+      "field": "stroking-condition blocks",
+      "source": "Manual review records synchronous and asynchronous visuo-tactile stroking as separate counterbalanced blocks for the front-space chest-vibration experiment."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."

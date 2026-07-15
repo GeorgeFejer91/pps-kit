@@ -319,3 +319,105 @@ def test_contrast_availability_requires_both_factor_poles_for_lamia():
 
     assert complete["movement_state"]
     assert complete["tactile_site"]
+
+
+def test_contrast_availability_requires_complete_noel_and_pfeiffer_factor_poles():
+    audit = _load_script()
+
+    noel_front_async_only = audit._contrast_availability(
+        "noel_2015_bodily_self",
+        [
+            {
+                "template_id": "noel_2015_bodily_self",
+                "analysis_ready_trials": "",
+                "rows": [
+                    {
+                        "family": "audio_tactile",
+                        "block_label": "Front asynchronous stroking block",
+                        "row_label": "Bodily-self PPS trial",
+                        "soa_ms": "190",
+                    },
+                    {
+                        "family": "audio_tactile",
+                        "block_label": "Front asynchronous stroking block",
+                        "row_label": "Bodily-self PPS trial",
+                        "soa_ms": "1140",
+                    },
+                ],
+            }
+        ],
+    )
+    assert not noel_front_async_only["stroking_synchrony"]
+    assert not noel_front_async_only["front_back_space"]
+
+    noel_front_sync_async = audit._contrast_availability(
+        "noel_2015_bodily_self",
+        [
+            {
+                "template_id": "noel_2015_bodily_self",
+                "analysis_ready_trials": "",
+                "rows": [
+                    {
+                        "family": "audio_tactile",
+                        "block_label": "Front synchronous stroking block",
+                        "row_label": "Bodily-self PPS trial",
+                        "soa_ms": "190",
+                    },
+                    {
+                        "family": "audio_tactile",
+                        "block_label": "Front asynchronous stroking block",
+                        "row_label": "Bodily-self PPS trial",
+                        "soa_ms": "1140",
+                    },
+                ],
+            }
+        ],
+    )
+    assert noel_front_sync_async["stroking_synchrony"]
+    assert not noel_front_sync_async["front_back_space"]
+
+    pfeiffer_incomplete = audit._contrast_availability(
+        "pfeiffer_2018_vestibular",
+        [
+            {
+                "template_id": "pfeiffer_2018_lateral_perihead_left_to_right",
+                "analysis_ready_trials": "",
+                "rows": [
+                    {
+                        "family": "audio_tactile",
+                        "block_label": "Incongruent vestibular rotation block",
+                        "row_label": "Lateral motion PPS trial",
+                        "soa_ms": "300",
+                    }
+                ],
+            }
+        ],
+    )
+    assert not pfeiffer_incomplete["vestibular_condition"]
+    assert not pfeiffer_incomplete["audio_vestibular_congruence"]
+
+    pfeiffer_complete = audit._contrast_availability(
+        "pfeiffer_2018_vestibular",
+        [
+            {
+                "template_id": "pfeiffer_2018_lateral_perihead_left_to_right",
+                "analysis_ready_trials": "",
+                "rows": [
+                    {
+                        "family": "audio_tactile",
+                        "block_label": "Congruent vestibular rotation block",
+                        "row_label": "Lateral motion PPS trial",
+                        "soa_ms": "300",
+                    },
+                    {
+                        "family": "audio_tactile",
+                        "block_label": "Incongruent no rotation block",
+                        "row_label": "Lateral motion PPS trial",
+                        "soa_ms": "2700",
+                    },
+                ],
+            }
+        ],
+    )
+    assert pfeiffer_complete["vestibular_condition"]
+    assert pfeiffer_complete["audio_vestibular_congruence"]

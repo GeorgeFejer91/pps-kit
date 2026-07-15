@@ -20,6 +20,7 @@ import argparse
 import csv
 import json
 import math
+import re
 from pathlib import Path
 from typing import Any
 
@@ -54,7 +55,7 @@ EVIDENCE_BOUNDARY = (
 REQUIRED_CONTRASTS = {
     "noel_2015_bodily_self": {
         "required": ["stroking_synchrony", "front_back_space"],
-        "note": "The current ready rows encode the PPS trial schedule but not synchronous/asynchronous stroking or front/back space.",
+        "note": "The current front-space ready rows encode synchronous/asynchronous stroking but not the separate back-space/back-tactile experiment.",
     },
     "serino_2015_peri_trunk_exp1": {
         "required": ["soa_or_distance_rank", "auditory_motion_direction"],
@@ -277,31 +278,61 @@ def _contrast_availability(record_id: str, profile_rows: list[dict[str, Any]]) -
         )
         for row in rows
     ).lower()
+    tokens = _word_tokens(text_values)
     soa_values = {_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))}
     families = {str(row.get("family") or "").strip().lower() for row in rows}
-    has_body_directions = {direction for direction in ("front", "rear", "left", "right") if direction in text_values}
-    has_movement_state = any(token in text_values for token in ("moving", "movement", "motor"))
-    has_static_state = any(token in text_values for token in ("static", "still", "rest"))
-    has_hand_site = any(token in text_values for token in ("hand", "finger"))
-    has_trunk_site = any(token in text_values for token in ("chest", "trunk", "sternum"))
+    has_body_directions = {direction for direction in ("front", "rear", "left", "right") if direction in tokens}
+    has_movement_state = any(token in tokens for token in ("moving", "movement", "motor"))
+    has_static_state = any(token in tokens for token in ("static", "still", "rest"))
+    has_hand_site = any(token in tokens for token in ("hand", "finger"))
+    has_trunk_site = any(token in tokens for token in ("chest", "trunk", "sternum"))
+    has_recede_label = any(token.startswith("reced") for token in tokens)
+    has_motion_context = any(token in tokens for token in ("moving", "motion"))
+    has_approach_label = (
+        any(token in tokens for token in ("approach", "approaching", "looming"))
+        or (has_recede_label and has_motion_context)
+    )
     availability = {
         "soa_or_distance_rank": len(soa_values) >= 2,
         "audio_tactile_vs_baseline": {"audio_tactile", "baseline"}.issubset(families),
         "looming_vs_fixed_source": "looming" in text_values and "fixed" in text_values,
-        "auditory_motion_direction": any(token in text_values for token in ("reced", "approach", "looming")) and (
-            "reced" in text_values
-        ),
+        "auditory_motion_direction": has_approach_label and has_recede_label,
         "body_relative_direction": {"front", "rear", "left", "right"}.issubset(has_body_directions),
         "movement_state": has_movement_state and has_static_state,
         "tactile_site": has_hand_site and has_trunk_site,
-        "stroking_synchrony": any(token in text_values for token in ("synchronous", "asynchronous", "sync")),
-        "front_back_space": "front" in text_values and ("back" in text_values or "rear" in text_values),
-        "vestibular_condition": "vestibular" in text_values or "rotation" in text_values,
-        "audio_vestibular_congruence": "congruent" in text_values or "incongruent" in text_values,
+        "stroking_synchrony": _has_stroking_synchrony_poles(tokens),
+        "front_back_space": "front" in tokens and ("back" in tokens or "rear" in tokens),
+        "vestibular_condition": _has_vestibular_condition_poles(tokens, text_values),
+        "audio_vestibular_congruence": _has_congruence_poles(tokens),
     }
     if record_id == "smartphone_rt_methods_2025":
         availability["looming_vs_fixed_source"] = _has_dynaspace_looming_and_fixed(rows)
     return availability
+
+
+def _word_tokens(text: str) -> set[str]:
+    return set(re.findall(r"[a-z0-9]+", text.lower()))
+
+
+def _has_stroking_synchrony_poles(tokens: set[str]) -> bool:
+    has_sync = bool({"synchronous", "sync"} & tokens)
+    has_async = bool({"asynchronous", "async"} & tokens)
+    return has_sync and has_async
+
+
+def _has_vestibular_condition_poles(tokens: set[str], text_values: str) -> bool:
+    has_rotation = bool({"vestibular", "rotation", "rotating", "rotated"} & tokens)
+    has_no_rotation = (
+        "no rotation" in text_values
+        or "no-rotation" in text_values
+        or "no_rotation" in text_values
+        or bool({"stationary", "static", "rest"} & tokens)
+    )
+    return has_rotation and has_no_rotation
+
+
+def _has_congruence_poles(tokens: set[str]) -> bool:
+    return "congruent" in tokens and "incongruent" in tokens
 
 
 def _compare_dynaspace_looming_fixed(
