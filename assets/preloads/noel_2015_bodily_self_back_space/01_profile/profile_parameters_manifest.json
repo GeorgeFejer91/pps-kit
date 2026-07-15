@@ -1,16 +1,16 @@
 {
   "schema": "pps-study-profile-parameters.v1",
-  "template_id": "noel_2015_bodily_self",
-  "title": "PPS as the space of the bodily self",
+  "template_id": "noel_2015_bodily_self_back_space",
+  "title": "PPS as the space of the bodily self, back-space profile",
   "citation": "Noel, J.-P., Pfeiffer, C., Blanke, O., & Serino, A. (2015). Peripersonal space as the space of the bodily self. Cognition, 144, 49-57.",
   "doi": "10.1016/j.cognition.2015.07.012",
   "source_url": "https://noel-lab.org/wp-content/uploads/2024/05/noet-et-al-cognition-2015.pdf",
   "verification_status": "verified",
   "publication_status": "published",
-  "profile_type": "",
+  "profile_type": "published_variant",
   "paper_group_key": "doi:10.1016/j.cognition.2015.07.012",
-  "visible_variant_label": "A",
-  "variant_display": "PPS as the space of the bodily self - Variant A",
+  "visible_variant_label": "B",
+  "variant_display": "PPS as the space of the bodily self, back-space profile - Variant B",
   "recreation_status": {
     "primary_category": "gui_recreatable",
     "category_label": "GUI-recreatable",
@@ -73,8 +73,8 @@
       "parameter": "profile_identity",
       "status": "reported",
       "value": {
-        "template_id": "noel_2015_bodily_self",
-        "title": "PPS as the space of the bodily self"
+        "template_id": "noel_2015_bodily_self_back_space",
+        "title": "PPS as the space of the bodily self, back-space profile"
       },
       "note": "Profile ID and title are encoded."
     },
@@ -95,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 3,
+      "value": 9,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -169,7 +169,7 @@
       "parameter": "tactile_sites",
       "status": "reported",
       "value": [
-        "chest"
+        "back"
       ],
       "note": "Tactile site labels are encoded."
     },
@@ -234,23 +234,23 @@
   "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
-      "profile_metadata": "assets/preloads/noel_2015_bodily_self/01_profile/profile_metadata.json",
-      "profile_parameters_manifest": "assets/preloads/noel_2015_bodily_self/01_profile/profile_parameters_manifest.json"
+      "profile_metadata": "assets/preloads/noel_2015_bodily_self_back_space/01_profile/profile_metadata.json",
+      "profile_parameters_manifest": "assets/preloads/noel_2015_bodily_self_back_space/01_profile/profile_parameters_manifest.json"
     },
     "02_looming_stimuli": {
-      "stimulus_sources": "assets/preloads/noel_2015_bodily_self/02_looming_stimuli/stimulus_sources.json",
-      "trajectory_inventory": "assets/preloads/noel_2015_bodily_self/02_looming_stimuli/trajectory_inventory.json",
+      "stimulus_sources": "assets/preloads/noel_2015_bodily_self_back_space/02_looming_stimuli/stimulus_sources.json",
+      "trajectory_inventory": "assets/preloads/noel_2015_bodily_self_back_space/02_looming_stimuli/trajectory_inventory.json",
       "asset_count": 1
     },
     "03_baseline_strategy": {
-      "baseline_strategy": "assets/preloads/noel_2015_bodily_self/03_baseline_strategy/baseline_strategy.json"
+      "baseline_strategy": "assets/preloads/noel_2015_bodily_self_back_space/03_baseline_strategy/baseline_strategy.json"
     },
     "04_trial_designer": {
-      "trial_design": "assets/preloads/noel_2015_bodily_self/04_trial_designer/trial_design.json",
+      "trial_design": "assets/preloads/noel_2015_bodily_self_back_space/04_trial_designer/trial_design.json",
       "trial_row_count": 1
     },
     "05_run_setup": {
-      "run_defaults": "assets/preloads/noel_2015_bodily_self/05_run_setup/run_defaults.json",
+      "run_defaults": "assets/preloads/noel_2015_bodily_self_back_space/05_run_setup/run_defaults.json",
       "block_count": 2,
       "participant_count": 19
     },
@@ -266,16 +266,24 @@
   },
   "provenance": [
     {
-      "field": "trial counts",
-      "source": "Methods lines report 72 PPS trials, 24 baseline trials, and 12 catch trials per block."
+      "field": "front/back experiment mapping",
+      "source": "Manual review records Experiment 1 as front-space looming toward chest and Experiment 2 as back-space looming toward back."
     },
     {
       "field": "SOAs and distances",
-      "source": "Methods lines report six sound distances D6-D1 with tactile timing corresponding to the spatial dimension."
+      "source": "Manual review records T1-T6 at 190, 380, 570, 760, 950, and 1140 ms with D6-to-D1 looming mapping over 90-15 cm."
+    },
+    {
+      "field": "tactile site",
+      "source": "Manual review records Precision MicroDrives 100 ms vibration at stern level: chest in Experiment 1 and back in Experiment 2."
     },
     {
       "field": "stroking-condition blocks",
-      "source": "Manual review records synchronous and asynchronous visuo-tactile stroking as separate counterbalanced blocks for the front-space chest-vibration experiment."
+      "source": "Manual review records synchronous and asynchronous visuo-tactile stroking as separate counterbalanced blocks for each main experiment."
+    },
+    {
+      "field": "trial counts",
+      "source": "Manual review records 72 PPS, 24 tactile-only baseline, and 12 auditory-only catch trials per stroking block."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."

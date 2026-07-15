@@ -1,6 +1,6 @@
 {
   "schema": "pps-profile-recreation-status.v1",
-  "profile_count": 23,
+  "profile_count": 24,
   "categories": {
     "gui_recreatable": [
       "study5_box_breathing_pps",
@@ -9,6 +9,7 @@
       "barumerli_2026_arm_movement_exp1",
       "barumerli_2026_arm_movement_exp2",
       "noel_2015_bodily_self",
+      "noel_2015_bodily_self_back_space",
       "pfeiffer_2018_lateral_perihead_left_to_right",
       "study5_dynaspace_lateral_45_pps",
       "serino_2015_peri_trunk_exp1"
@@ -386,8 +387,8 @@
       "verification_status": "verified",
       "publication_status": "published",
       "profile_type": "",
-      "visible_variant_label": "",
-      "variant_display": "PPS as the space of the bodily self",
+      "visible_variant_label": "A",
+      "variant_display": "PPS as the space of the bodily self - Variant A",
       "primary_category": "gui_recreatable",
       "category_label": "GUI-recreatable",
       "runner_readiness": "ready",
@@ -444,6 +445,73 @@
       "missing_publication_parameters": [],
       "unsupported_toolkit_structures": [],
       "profile_parameters_manifest": "assets/preloads/noel_2015_bodily_self/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "noel_2015_bodily_self_back_space",
+      "title": "PPS as the space of the bodily self, back-space profile",
+      "citation": "Noel, J.-P., Pfeiffer, C., Blanke, O., & Serino, A. (2015). Peripersonal space as the space of the bodily self. Cognition, 144, 49-57.",
+      "doi": "10.1016/j.cognition.2015.07.012",
+      "verification_status": "verified",
+      "publication_status": "published",
+      "profile_type": "published_variant",
+      "visible_variant_label": "B",
+      "variant_display": "PPS as the space of the bodily self, back-space profile - Variant B",
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": true,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/noel_2015_bodily_self_back_space/01_profile/profile_parameters_manifest.json"
     },
     {
       "template_id": "pfeiffer_2018_lateral_perihead_left_to_right",

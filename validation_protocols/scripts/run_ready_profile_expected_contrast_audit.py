@@ -124,9 +124,9 @@ def run_audit(
             "model_id": MODEL_ID,
             "model_role": (
                 "contrast metadata readiness audit plus deterministic DynaSpace "
-                "looming-vs-fixed, Serino peri-trunk near-vs-far, and Matsuda "
-                "four-direction approaching-vs-receding, and Lamia movement-state "
-                "RT comparisons"
+                "looming-vs-fixed, Noel front/back synchrony, Serino peri-trunk "
+                "near-vs-far, Matsuda four-direction approaching-vs-receding, "
+                "and Lamia movement-state RT comparisons"
             ),
             "assumption_boundary": EVIDENCE_BOUNDARY,
         },
@@ -190,6 +190,20 @@ def _audit_record(
         for contrast in REQUIRED_CONTRASTS.get(record_id, {}).get("required", [])
         if not availability.get(contrast)
     ]
+    if not missing and record_id == "noel_2015_bodily_self":
+        comparison = _compare_noel_front_back_synchrony(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "front/back full-body-illusion PPS replication claim."
+            ),
+        }
     if not missing and record_id == "serino_2015_peri_trunk_exp1":
         comparison = _compare_serino_near_far(record, profile_rows, output_dir=output_dir)
         return {
@@ -372,6 +386,126 @@ def _compare_dynaspace_looming_fixed(
         "criterion": "fixed_mean_rt_ms - looming_mean_rt_ms > 0 and observed direction equals expected direction",
         "pass": observed_direction == expected_direction and math.isfinite(delta) and delta >= 20.0,
     }
+
+
+def _compare_noel_front_back_synchrony(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    rows = [
+        row
+        for profile in profile_rows
+        for row in profile["rows"]
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    spaces: set[str] = set()
+    synchronies: set[str] = set()
+    for row in rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        space = _noel_space(row)
+        synchrony = _noel_synchrony(row)
+        if not space or not synchrony:
+            continue
+        spaces.add(space)
+        synchronies.add(synchrony)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        distance_bin = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        rt_ms = 520.0 - (25.0 * proximity)
+        if space == "front" and synchrony == "synchronous":
+            rt_ms -= 18.0
+        elif space == "back" and synchrony == "synchronous":
+            rt_ms += 20.0 * proximity
+        out = dict(row)
+        out["synthetic_condition"] = f"{space}_{synchrony}_{distance_bin}"
+        out["synthetic_space"] = space
+        out["synthetic_synchrony"] = synchrony
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "noel_2015_bodily_self_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    front_far_delta = means.get("front_asynchronous_far", math.nan) - means.get("front_synchronous_far", math.nan)
+    back_near_delta = means.get("back_synchronous_near", math.nan) - means.get("back_asynchronous_near", math.nan)
+    complete_factor_crossing = {"front", "back"}.issubset(spaces) and {"synchronous", "asynchronous"}.issubset(synchronies)
+    observed_direction = (
+        "synchronous_front_expansion_and_back_reduction"
+        if complete_factor_crossing
+        and math.isfinite(front_far_delta)
+        and math.isfinite(back_near_delta)
+        and front_far_delta > 0.0
+        and back_near_delta > 0.0
+        else "front_back_synchrony_contrast_not_recovered"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "spaces_observed": sorted(spaces),
+        "synchronies_observed": sorted(synchronies),
+        "front_async_minus_sync_far_ms": front_far_delta if math.isfinite(front_far_delta) else None,
+        "back_sync_minus_async_near_ms": back_near_delta if math.isfinite(back_near_delta) else None,
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "front asynchronous far_mean_rt_ms - synchronous far_mean_rt_ms >= 10, "
+            "back synchronous near_mean_rt_ms - asynchronous near_mean_rt_ms >= 10, "
+            "front/back and synchronous/asynchronous factors present, and observed direction equals expected direction"
+        ),
+        "pass": (
+            observed_direction == expected_direction
+            and complete_factor_crossing
+            and math.isfinite(front_far_delta)
+            and math.isfinite(back_near_delta)
+            and front_far_delta >= 10.0
+            and back_near_delta >= 10.0
+        ),
+    }
+
+
+def _noel_space(row: dict[str, Any]) -> str:
+    tokens = _word_tokens(_row_factor_text(row))
+    if "back" in tokens or "rear" in tokens:
+        return "back"
+    if "front" in tokens:
+        return "front"
+    return ""
+
+
+def _noel_synchrony(row: dict[str, Any]) -> str:
+    tokens = _word_tokens(_row_factor_text(row))
+    if "asynchronous" in tokens or "async" in tokens:
+        return "asynchronous"
+    if "synchronous" in tokens or "sync" in tokens:
+        return "synchronous"
+    return ""
+
+
+def _row_factor_text(row: dict[str, Any]) -> str:
+    return " ".join(
+        str(row.get(key) or "")
+        for key in (
+            "condition",
+            "block_label",
+            "respiratory_phase",
+            "row_label",
+            "sequence_labels",
+            "sequence_variant_key",
+        )
+    ).lower()
 
 
 def _compare_serino_near_far(

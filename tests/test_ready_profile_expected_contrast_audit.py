@@ -36,6 +36,7 @@ def _write_csv(path: Path, rows: list[dict[str, str]]) -> None:
 def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_contrasts(tmp_path: Path):
     audit = _load_script()
     rows_path = tmp_path / "roussel_analysis_ready_trials.csv"
+    noel_rows_path = tmp_path / "noel_analysis_ready_trials.csv"
     serino_rows_path = tmp_path / "serino_analysis_ready_trials.csv"
     matsuda_rows_path = tmp_path / "matsuda_analysis_ready_trials.csv"
     lamia_rows_path = tmp_path / "lamia_analysis_ready_trials.csv"
@@ -56,6 +57,24 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
             },
         ],
     )
+    noel_rows: list[dict[str, str]] = []
+    for block_label in (
+        "Front synchronous stroking block",
+        "Front asynchronous stroking block",
+        "Back synchronous stroking block",
+        "Back asynchronous stroking block",
+    ):
+        for soa_ms in ("190", "1140"):
+            noel_rows.append(
+                {
+                    "block_label": block_label,
+                    "row_label": "Bodily-self PPS trial",
+                    "respiratory_phase": "Bodily-self PPS trial",
+                    "family": "audio_tactile",
+                    "soa_ms": soa_ms,
+                }
+            )
+    _write_csv(noel_rows_path, noel_rows)
     _write_csv(
         serino_rows_path,
         [
@@ -136,7 +155,11 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                     },
                     {
                         "template_id": "noel_2015_bodily_self",
-                        "outputs": {"analysis_ready_trials": str(tmp_path / "missing.csv")},
+                        "outputs": {"analysis_ready_trials": str(noel_rows_path)},
+                    },
+                    {
+                        "template_id": "noel_2015_bodily_self_back_space",
+                        "outputs": {"analysis_ready_trials": str(noel_rows_path)},
                     },
                     {
                         "template_id": "serino_2015_peri_trunk_exp1",
@@ -171,7 +194,10 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                         "record_id": "noel_2015_bodily_self",
                         "citation_short": "Noel 2015",
                         "observed_comparison_gap": audit.READY_GAP,
-                        "current_template_ids": ["noel_2015_bodily_self"],
+                        "current_template_ids": [
+                            "noel_2015_bodily_self",
+                            "noel_2015_bodily_self_back_space",
+                        ],
                         "expected_outcome": {
                             "expected_effect_direction": "synchronous_front_expansion_and_back_reduction"
                         },
@@ -221,10 +247,10 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert report["passed"]
     assert report["summary"] == {
         "ready_profile_record_count": 5,
-        "synthetic_comparison_record_count": 4,
-        "synthetic_comparison_passed_count": 4,
+        "synthetic_comparison_record_count": 5,
+        "synthetic_comparison_passed_count": 5,
         "synthetic_comparison_failed_count": 0,
-        "contrast_metadata_blocked_record_count": 1,
+        "contrast_metadata_blocked_record_count": 0,
         "contrast_metadata_present_model_missing_record_count": 0,
     }
     by_id = {row["record_id"]: row for row in report["records"]}
@@ -234,9 +260,13 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert Path(smartphone["synthetic_comparison"]["synthetic_rows_csv"]).is_file()
 
     noel = by_id["noel_2015_bodily_self"]
-    assert noel["status"] == "contrast_metadata_missing"
-    assert noel["missing_contrasts"] == ["stroking_synchrony", "front_back_space"]
-    assert "Propagate stroking_synchrony, front_back_space" in noel["required_next_step"]
+    assert noel["status"] == "synthetic_behavioral_comparison_passed"
+    assert noel["missing_contrasts"] == []
+    assert noel["synthetic_comparison"]["spaces_observed"] == ["back", "front"]
+    assert noel["synthetic_comparison"]["synchronies_observed"] == ["asynchronous", "synchronous"]
+    assert noel["synthetic_comparison"]["observed_effect_direction"] == (
+        "synchronous_front_expansion_and_back_reduction"
+    )
 
     serino = by_id["serino_2015_peri_trunk_exp1"]
     assert serino["status"] == "synthetic_behavioral_comparison_passed"

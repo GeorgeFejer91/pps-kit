@@ -42,11 +42,11 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
-    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 23
+    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 24
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
-    ) == 9
-    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 7
+    ) == 10
+    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 8
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
     assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 7
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
@@ -127,7 +127,7 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for entry in coverage["current_template_coverage"]
         if entry["published"] and entry["current_recreation_category"] == "gui_recreatable"
     ]
-    assert len(published_ready) == 7
+    assert len(published_ready) == 8
 
 
 def test_literature_coverage_constraints_focus_on_task_execution():

@@ -1,10 +1,10 @@
 {
   "schema": "pps-preload-profile-assets.v1",
-  "template_id": "noel_2015_bodily_self",
-  "title": "PPS as the space of the bodily self",
-  "visible_variant_label": "A",
+  "template_id": "noel_2015_bodily_self_back_space",
+  "title": "PPS as the space of the bodily self, back-space profile",
+  "visible_variant_label": "B",
   "publication_status": "published",
-  "profile_type": "",
+  "profile_type": "published_variant",
   "asset_mode": "bundled_local",
   "retrieval_strategy": "bundled_or_download_from_github_pages",
   "local_only": true,
@@ -12,30 +12,30 @@
     {
       "folder": "01_profile",
       "label": "Profile",
-      "path": "assets/preloads/noel_2015_bodily_self/01_profile"
+      "path": "assets/preloads/noel_2015_bodily_self_back_space/01_profile"
     },
     {
       "folder": "02_looming_stimuli",
       "label": "Looming Stimuli Builder",
-      "path": "assets/preloads/noel_2015_bodily_self/02_looming_stimuli"
+      "path": "assets/preloads/noel_2015_bodily_self_back_space/02_looming_stimuli"
     },
     {
       "folder": "03_baseline_strategy",
       "label": "Baseline Strategy",
-      "path": "assets/preloads/noel_2015_bodily_self/03_baseline_strategy"
+      "path": "assets/preloads/noel_2015_bodily_self_back_space/03_baseline_strategy"
     },
     {
       "folder": "04_trial_designer",
       "label": "Trial Designer",
-      "path": "assets/preloads/noel_2015_bodily_self/04_trial_designer"
+      "path": "assets/preloads/noel_2015_bodily_self_back_space/04_trial_designer"
     },
     {
       "folder": "05_run_setup",
       "label": "Run Setup",
-      "path": "assets/preloads/noel_2015_bodily_self/05_run_setup"
+      "path": "assets/preloads/noel_2015_bodily_self_back_space/05_run_setup"
     }
   ],
-  "profile_parameters_manifest": "assets/preloads/noel_2015_bodily_self/01_profile/profile_parameters_manifest.json",
+  "profile_parameters_manifest": "assets/preloads/noel_2015_bodily_self_back_space/01_profile/profile_parameters_manifest.json",
   "recreation_status": {
     "primary_category": "gui_recreatable",
     "category_label": "GUI-recreatable",
@@ -58,10 +58,10 @@
   },
   "assets": [
     {
-      "label": "Looming sound",
-      "path": "assets/preloads/noel_2015_bodily_self/02_looming_stimuli/looming_Looming_sound.wav",
-      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/noel_2015_bodily_self/02_looming_stimuli/looming_Looming_sound.wav",
-      "sha256": "7fe751308d5152d6b7f70531ebff566916419a140de4733c58e4a7f0206add9e",
+      "label": "Back-space looming sound",
+      "path": "assets/preloads/noel_2015_bodily_self_back_space/02_looming_stimuli/looming_Back-space_looming_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/noel_2015_bodily_self_back_space/02_looming_stimuli/looming_Back-space_looming_sound.wav",
+      "sha256": "58b9a3dabd6e432a555bc3b1d663f51a61e45707823c94cc9d149fec707fdfe8",
       "duration_s": 1.14,
       "sample_rate": 44100,
       "channels": 2,
@@ -74,13 +74,13 @@
       "include_tactile": false,
       "trajectory_snapshot": {
         "schema": "pps-stimulus-trajectory.v1",
-        "label": "Looming sound",
+        "label": "Back-space looming sound",
         "source_kind": "generated_noise",
         "noise_type": "pink",
         "start_distance_cm": 90.0,
         "end_distance_cm": 15.0,
-        "start_rotation_deg": 0.0,
-        "end_rotation_deg": 0.0,
+        "start_rotation_deg": 180.0,
+        "end_rotation_deg": 180.0,
         "movement_duration_s": 1.14,
         "start_hold_s": 0.0,
         "end_hold_s": 0.0,
@@ -89,12 +89,12 @@
         "path_direction": "approach",
         "start": {
           "x_m": 0.0,
-          "y_m": 0.9,
+          "y_m": -0.9,
           "z_m": 0.0
         },
         "end": {
           "x_m": 0.0,
-          "y_m": 0.15,
+          "y_m": -0.15,
           "z_m": 0.0
         }
       },

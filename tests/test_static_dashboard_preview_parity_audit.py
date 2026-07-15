@@ -38,7 +38,7 @@ def test_static_dashboard_preview_parity_audit_targets_all_previewable_profiles(
     all_ids = module._target_template_ids(inventory, status, profile_set="all")
     ready_ids = module._target_template_ids(inventory, status, profile_set="ready-all")
 
-    assert len(all_ids) == 23
+    assert len(all_ids) == 24
     assert ready_ids == [
         "study5_box_breathing_pps",
         "roussel_2025_dynaspace_mobile_pps",
@@ -46,6 +46,7 @@ def test_static_dashboard_preview_parity_audit_targets_all_previewable_profiles(
         "barumerli_2026_arm_movement_exp1",
         "barumerli_2026_arm_movement_exp2",
         "noel_2015_bodily_self",
+        "noel_2015_bodily_self_back_space",
         "pfeiffer_2018_lateral_perihead_left_to_right",
         "study5_dynaspace_lateral_45_pps",
         "serino_2015_peri_trunk_exp1",

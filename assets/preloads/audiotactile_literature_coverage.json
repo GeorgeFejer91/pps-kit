@@ -130,9 +130,9 @@
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
-    "current_template_count": 23,
-    "current_profile_check_pass_count": 9,
-    "published_profile_check_pass_count": 7,
+    "current_template_count": 24,
+    "current_profile_check_pass_count": 10,
+    "published_profile_check_pass_count": 8,
     "local_unpublished_profile_check_pass_count": 2,
     "current_templates_with_missing_publication_parameters": 12,
     "current_templates_with_toolkit_structural_gaps": 7,
@@ -503,6 +503,12 @@
     },
     {
       "template_id": "noel_2015_bodily_self",
+      "published": true,
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": []
+    },
+    {
+      "template_id": "noel_2015_bodily_self_back_space",
       "published": true,
       "current_recreation_category": "gui_recreatable",
       "primary_constraint_ids": []
@@ -1112,10 +1118,11 @@
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
       "current_template_ids": [
-        "noel_2015_bodily_self"
+        "noel_2015_bodily_self",
+        "noel_2015_bodily_self_back_space"
       ],
       "coverage_category": "covered_runnable_profile",
-      "audiotactile_task_family": "chest tactile PPS with looming sound",
+      "audiotactile_task_family": "front chest and back tactile PPS with looming sound under full-body-illusion stroking",
       "can_recreate_audiotactile_components_now": true,
       "blocking_constraint_ids": [],
       "missing_publication_parameters": []

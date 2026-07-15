@@ -1080,6 +1080,7 @@ def test_all_study_templates_load_and_summarize():
         "lerner_2021_3d_audio_tactile_boundary",
         "matsuda_2021_four_directions",
         "noel_2015_bodily_self",
+        "noel_2015_bodily_self_back_space",
         "noel_2015_walking_full_body_action",
         "pfeiffer_2018_lateral_perihead_left_to_right",
         "serino_2015_front_back_trunk_exp2",

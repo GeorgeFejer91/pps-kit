@@ -1,0 +1,27 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "noel_2015_bodily_self_back_space",
+  "blocks": 2,
+  "participants": 19,
+  "random_seed": 20150723,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "counterbalanced_rotation",
+  "block_specs": [
+    {
+      "label": "Back synchronous stroking block",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Back asynchronous stroking block",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    }
+  ]
+}

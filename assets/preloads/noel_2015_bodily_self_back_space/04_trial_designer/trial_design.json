@@ -1,0 +1,46 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "noel_2015_bodily_self_back_space",
+  "repetitions_per_condition": 12,
+  "soa_values_ms": [
+    190,
+    380,
+    570,
+    760,
+    950,
+    1140
+  ],
+  "spatial_values_cm": [
+    15.0,
+    30.0,
+    45.0,
+    60.0,
+    75.0,
+    90.0
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "noel-bodily-self-back-looming-row",
+      "label": "Back bodily-self PPS trial",
+      "audio_tactile_percentage": 100.0,
+      "catch_percentage": 0.0,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "noel-bodily-self-back-looming-source",
+          "kind": "looming_stimulus",
+          "label": "Back-space looming sound",
+          "source_label": "Back-space looming sound",
+          "source_labels": [
+            "Back-space looming sound"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 144
+}

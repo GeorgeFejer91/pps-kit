@@ -15,7 +15,7 @@ The Holmes consensus-corpus screening trail is `assets/preloads/audiotactile_hol
 The PubMed screening audit trail is `assets/preloads/audiotactile_pubmed_screening.json`, with the supplemental PubMed query-variant trail in `assets/preloads/audiotactile_pubmed_query_variant_screening.json`.
 The OpenAlex broad-screen trail is `assets/preloads/audiotactile_openalex_broad_screening.json`, with per-hit screening decisions in `assets/preloads/audiotactile_openalex_candidate_screening.json`. The additional query-variant exhaustiveness screen is `assets/preloads/audiotactile_openalex_query_variant_screening.json`. The live web sanity trail is `assets/preloads/audiotactile_web_sanity_screening.json`.
 
-Current ledger size: 74 literature records. Across the separate preload gate, 8 profile variants currently pass runnable checks. In the broader literature ledger, 29 not-yet-templated records expose toolkit-structure gaps, 21 not-yet-templated records are structurally close but lack extracted/published PPS-task parameters, and 4 records are adjacent/out of scope. The previous generic candidate bucket is now cleared: tracked records are classified by whether the PPS task is runnable, missing exact task details, blocked by an unsupported task structure, or not actually an audiotactile PPS target.
+Current ledger size: 74 literature records. Across the separate preload gate, 10 profile variants currently pass runnable checks. In the broader literature ledger, 29 not-yet-templated records expose toolkit-structure gaps, 21 not-yet-templated records are structurally close but lack extracted/published PPS-task parameters, and 4 records are adjacent/out of scope. The previous generic candidate bucket is now cleared: tracked records are classified by whether the PPS task is runnable, missing exact task details, blocked by an unsupported task structure, or not actually an audiotactile PPS target.
 
 ## Evidence Base
 
@@ -58,7 +58,7 @@ The PubMed screen is fully accounted for in the machine-readable screening file:
 | Review/theory/commentary/methods-only exclusion | 4 |
 | Adjacent non-PPS or non-audiotactile exclusion | 3 |
 
-The count of runnable PubMed records is lower than the runnable published-template count because the 2026 Lamia paper maps to two runnable experiment variants in the toolkit. Across the whole screen, 40 records are included/current/candidate-like PPS task records and 8 are exclusions, duplicate corrections, or adjacent non-task hits.
+The count of runnable PubMed records is lower than the runnable published-template count because Noel 2015 maps to paired front/back variants and the 2026 Lamia paper maps to two runnable experiment variants in the toolkit. Across the whole screen, 40 records are included/current/candidate-like PPS task records and 8 are exclusions, duplicate corrections, or adjacent non-task hits.
 
 An OpenAlex title/abstract sanity route was also run with broader queries. It confirmed several existing records, corrected the Ferri 2015, Galli 2015, and PNAS interoception/exteroception DOI/source mappings, and added or checked `social_perception_2017`, `lower_limb_pps_2017`, `newborn_boundaries_2019`, `ronga_2021_newborn_erp`, `ferri_2015_jneurosci_itv`, `taffou_2021_auditory_roughness`, `novel_two_phase_audio_tactile_2025`, and `looming_duration_2025`. A follow-up pass promoted `serino_2018_mixed_reality_pps`, `amemiya_2017_pseudowalking_footsole`, and `serino_2011_professional_fencers`, linked obvious preprint/source/duplicate hits to existing records, and retained the lower-limb record as an adjacent false positive after source checking because it uses a visuo-tactile lower-limb task rather than an audiotactile PPS task. The main OpenAlex broad route retrieved all 755 records for `audio-tactile peripersonal space`; its automated candidate triage is stored at `artifacts/literature_audit/openalex_broad_candidate_triage.json` and now links 47 of 103 candidate-like hits to coverage records. The remaining 56 candidate-like hits are explicitly screened in `assets/preloads/audiotactile_openalex_candidate_screening.json` as visual-tactile/non-auditory, auditory-only/no-tactile, non-PPS audiotactile/haptic, review/model/theory, or grey-literature/source records rather than unresolved tasks.
 
@@ -70,11 +70,11 @@ A live web sanity pass checked eight currently visible search hits and full-text
 
 ## Current Toolkit Verdict
 
-The current profile gate covers 22 templates:
+The current profile gate covers 24 templates:
 
 | Outcome | Count | Meaning |
 |---|---:|---|
-| GUI-recreatable | 8 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Seven are published profiles; the canonical Study 5 white/pink profile is the unpublished lab profile. |
+| GUI-recreatable | 10 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Eight are published profiles, including paired Noel front/back variants; two are unpublished local examples. |
 | Missing publication parameters | 12 | The task looks structurally expressible, but published or encoded details are insufficient. |
 | Toolkit structural gap | 7 | The task uses a trial, audio, tactile, response, timing, coordinate, or apparatus feature that the toolkit schema does not yet model. |
 
@@ -85,6 +85,7 @@ Runnable published-paper profiles today:
 - `barumerli_2026_arm_movement_exp1`
 - `barumerli_2026_arm_movement_exp2`
 - `noel_2015_bodily_self`
+- `noel_2015_bodily_self_back_space`
 - `pfeiffer_2018_lateral_perihead_left_to_right`
 - `serino_2015_peri_trunk_exp1`
 
@@ -118,7 +119,7 @@ This table is generated from `assets/preloads/audiotactile_literature_coverage.j
 | Ferri et al. (2015), JNeurosci | approaching auditory stimuli plus tactile RT PPS boundary task with fMRI endpoint | Not templated; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: extract exact behavioral audio-tactile PPS timing, distances, response settings, and auditory trajectory; fMRI/BOLD endpoint is non-blocking for audiotactile recreation |
 | Galli et al. (2015) | front/back trunk tactile PPS with dynamic auditory field | Template exists; toolkit structure gap | Toolkit/task constraints: `gaussian_speaker_array_amplitude_field` |
 | Maister et al. (2015) | PPS measurement after shared sensory/social context | Not templated; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: extract exact audiotactile PPS timing, distances, trial counts, tactile settings, and response settings; shared sensory/social context is non-blocking |
-| Noel et al. (2015a) | chest tactile PPS with looming sound | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate. |
+| Noel et al. (2015a) | front chest and back tactile PPS with looming sound under full-body-illusion stroking | GUI-recreatable now | Current paired front/back profiles pass the Segment 0-4 audiotactile recreation gate. |
 | Noel et al. (2015b) | walking/full-body PPS audio-tactile task | Template exists; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: exact sound distances and trial counts |
 | Serino et al. (2015), Exp. 1 | trunk tactile PPS with two-speaker analog looming/receding setup reconstructed as a binaural trajectory | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate. |
 | Serino et al. (2015), Exp. 2 | front/back trunk tactile PPS with physical speaker array | Template exists; toolkit structure gap | Toolkit/task constraints: `multi_speaker_array_switching`, `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: 13-distance internal schedule |
