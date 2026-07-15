@@ -12,9 +12,9 @@
   "visible_variant_label": "",
   "variant_display": "Taffou 2014 rear-field dog/sheep looming PPS",
   "recreation_status": {
-    "primary_category": "toolkit_structural_gap",
-    "category_label": "Toolkit structural gap",
-    "runner_readiness": "blocked_unsupported_toolkit_structure",
+    "primary_category": "missing_publication_parameters",
+    "category_label": "Missing publication parameters",
+    "runner_readiness": "blocked_missing_parameters",
     "profile_checks_passed": false,
     "gui_recreatable": false,
     "segment_0_to_4_profile_checks_passed": false,
@@ -23,7 +23,7 @@
     "segment_6_launchable": false,
     "profile_completion_status": "unfinished_preload",
     "missing_parameter_count": 2,
-    "unsupported_structure_count": 1
+    "unsupported_structure_count": 0
   },
   "segment_0_to_4_profile_checks": {
     "gate": "segments_0_to_4",
@@ -32,31 +32,25 @@
       {
         "segment": "0",
         "segment_label": "Segment 0 profile manifest and provenance",
+        "passed": true,
+        "field_count": 3,
+        "blocking_reasons": []
+      },
+      {
+        "segment": "1",
+        "segment_label": "Segment 1 source/stimulus assets",
         "passed": false,
         "field_count": 5,
         "blocking_reasons": [
           {
             "parameter": "profile_gap",
             "status": "missing_publication_parameter",
-            "reason": "exact dog/sheep audio"
+            "reason": "exact dog/sheep source audio and Audacity amplitude/dynamic matching settings"
           },
           {
             "parameter": "profile_gap",
-            "status": "unsupported_toolkit_structure",
-            "reason": "left/right rear hemifield as separate trajectories"
-          }
-        ]
-      },
-      {
-        "segment": "1",
-        "segment_label": "Segment 1 source/stimulus assets",
-        "passed": false,
-        "field_count": 4,
-        "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
             "status": "missing_publication_parameter",
-            "reason": "LISTEN HRTF rather than bundled FABIAN"
+            "reason": "LISTEN HRTF subject/filter identifier and renderer settings"
           }
         ]
       },
@@ -112,7 +106,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 8,
+      "value": 17,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -137,7 +131,7 @@
       "parameter": "stimulus_duration",
       "status": "reported",
       "value": [
-        6.666667
+        3.0
       ],
       "note": "Duration comes from generated WAV metadata."
     },
@@ -202,7 +196,7 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "baseline_count",
       "status": "reported",
-      "value": 0.0,
+      "value": 64,
       "note": "Baseline count/percentage settings are encoded."
     },
     {
@@ -217,9 +211,14 @@
       "segment": "4",
       "segment_label": "Segment 4 repetition pool settings",
       "parameter": "trial_pool_repetitions",
-      "status": "inferred",
-      "value": 8,
-      "note": "Segment 4 can infer repetitions from repetitions_per_condition."
+      "status": "reported",
+      "value": {
+        "default": 8,
+        "audio_tactile": 8,
+        "baseline": 8,
+        "catch": 8
+      },
+      "note": "Segment 4 repetition defaults are encoded."
     },
     {
       "segment": "5",
@@ -254,49 +253,35 @@
       "note": "Current dashboard default; phase/intervention context is non-blocking unless it changes the audiotactile PPS task execution."
     },
     {
-      "segment": "0",
-      "segment_label": "Segment 0 profile manifest and provenance",
+      "segment": "1",
+      "segment_label": "Segment 1 source/stimulus assets",
       "parameter": "profile_gap",
       "status": "missing_publication_parameter",
-      "value": "exact dog/sheep audio",
-      "note": "exact dog/sheep audio"
-    },
-    {
-      "segment": "0",
-      "segment_label": "Segment 0 profile manifest and provenance",
-      "parameter": "profile_gap",
-      "status": "unsupported_toolkit_structure",
-      "value": "left/right rear hemifield as separate trajectories",
-      "note": "left/right rear hemifield as separate trajectories"
+      "value": "exact dog/sheep source audio and Audacity amplitude/dynamic matching settings",
+      "note": "exact dog/sheep source audio and Audacity amplitude/dynamic matching settings"
     },
     {
       "segment": "1",
       "segment_label": "Segment 1 source/stimulus assets",
       "parameter": "profile_gap",
       "status": "missing_publication_parameter",
-      "value": "LISTEN HRTF rather than bundled FABIAN",
-      "note": "LISTEN HRTF rather than bundled FABIAN"
+      "value": "LISTEN HRTF subject/filter identifier and renderer settings",
+      "note": "LISTEN HRTF subject/filter identifier and renderer settings"
     }
   ],
   "missing_publication_parameters": [
     {
-      "segment": "0",
+      "segment": "1",
       "parameter": "profile_gap",
-      "reason": "exact dog/sheep audio"
+      "reason": "exact dog/sheep source audio and Audacity amplitude/dynamic matching settings"
     },
     {
       "segment": "1",
       "parameter": "profile_gap",
-      "reason": "LISTEN HRTF rather than bundled FABIAN"
+      "reason": "LISTEN HRTF subject/filter identifier and renderer settings"
     }
   ],
-  "unsupported_toolkit_structures": [
-    {
-      "segment": "0",
-      "parameter": "profile_gap",
-      "reason": "left/right rear hemifield as separate trajectories"
-    }
-  ],
+  "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
       "profile_metadata": "assets/preloads/taffou_2014_cynophobic_rear_looming/01_profile/profile_metadata.json",

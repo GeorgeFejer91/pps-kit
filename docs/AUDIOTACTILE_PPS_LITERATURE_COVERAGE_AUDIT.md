@@ -76,7 +76,7 @@ The current profile gate covers 24 templates:
 |---|---:|---|
 | GUI-recreatable | 16 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Fourteen are published profiles, including paired Noel front/back variants; two are unpublished local examples. |
 | Missing publication parameters | 8 | The task looks structurally expressible, but published or encoded details are insufficient. |
-| Toolkit structural gap | 1 | The task uses a trial, audio, tactile, response, timing, coordinate, or apparatus feature that the toolkit schema does not yet model. |
+| Toolkit structural gap | 0 | The task uses a trial, audio, tactile, response, timing, coordinate, or apparatus feature that the toolkit schema does not yet model. |
 
 Runnable published-paper profiles today:
 
@@ -119,7 +119,7 @@ This table is generated from `assets/preloads/audiotactile_literature_coverage.j
 | Cimmino et al. (2013) | static near/far audio-tactile PPS task | Not templated; toolkit structure gap | Toolkit/task constraints: `static_near_far_trial_family`, `weak_strong_no_target_gonogo` Missing/extract: full audio/tactile/timing parameters need extraction |
 | Teramoto et al. (2013) | auditory/tactile/audiotactile information processing with tactile response mapping | Not templated; toolkit structure gap | Toolkit/task constraints: `tactile_discrimination_or_localization_response`, `static_near_far_trial_family` Missing/extract: full response mapping, stimulus timing, and apparatus details need extraction |
 | Teneggi et al. (2013) | face tactile detection with approaching/receding sound labels | Template exists; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: exact distance/timing table from supplement |
-| Taffou & Viaud-Delmon (2014) | rear-field dog/sheep audio-tactile PPS task | Template exists; toolkit structure gap | Toolkit/task constraints: `rear_hemifield_trajectory_families`, `ecological_or_licensed_audio_assets`, `hrtf_database_or_binaural_engine_mismatch` Missing/extract: exact dog/sheep audio; LISTEN HRTF provenance |
+| Taffou & Viaud-Delmon (2014) | rear-field dog/sheep audio-tactile PPS task | Template exists; missing task parameters | Toolkit/task constraints: `ecological_or_licensed_audio_assets`, `hrtf_database_or_binaural_engine_mismatch` Missing/extract: exact dog/sheep source audio and Audacity amplitude/dynamic matching settings; LISTEN HRTF subject/filter identifier and renderer settings |
 | Ferri et al. (2015A) | dynamic emotional artificial looming sounds with tactile detection | Template exists; missing task parameters | Toolkit/task constraints: `exact_audio_envelope_or_gain_files` Missing/extract: exact auditory files; paper-specific gain envelope |
 | Ferri et al. (2015B) | dynamic ecological emotional sounds with tactile detection | Template exists; missing task parameters | Toolkit/task constraints: `ecological_or_licensed_audio_assets`, `exact_audio_envelope_or_gain_files` Missing/extract: licensed ecological sounds; exact amplitude envelopes |
 | Ferri et al. (2015), JNeurosci | approaching auditory stimuli plus tactile RT PPS boundary task with fMRI endpoint | Not templated; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: extract exact behavioral audio-tactile PPS timing, distances, response settings, and auditory trajectory; fMRI/BOLD endpoint is non-blocking for audiotactile recreation |
@@ -228,11 +228,7 @@ These are structurally close enough that the next step is mainly paper/supplemen
 
 ## Current Profiles That Need Toolkit Expansion
 
-This still exposes a real standardized-toolkit gap:
-
-| Profile | Main unsupported task structure |
-|---|---|
-| `taffou_2014_cynophobic_rear_looming` | Separate rear-left/rear-right trajectory families plus exact ecological audio/HRTF provenance. |
+No current preload profile remains blocked by a toolkit structural gap. The Taffou 2014 profile now expands the reported rear-left and rear-right trajectories as source assets; it remains blocked by exact ecological audio and LISTEN-rendering provenance.
 
 ## Known Literature Not Yet Templated
 

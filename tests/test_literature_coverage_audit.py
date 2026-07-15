@@ -35,8 +35,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 74
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
         "covered_runnable_profile": 12,
-        "covered_blocked_missing_publication_parameters": 7,
-        "covered_blocked_toolkit_structure": 1,
+        "covered_blocked_missing_publication_parameters": 8,
+        "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 29,
         "not_yet_templated_missing_publication_parameters": 21,
         "candidate_needs_full_text_task_audit": 0,
@@ -48,7 +48,7 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     ) == 16
     assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 14
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
-    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 1
+    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 0
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
     assert coverage["coverage_summary"]["openalex_broad_candidate_like_hits"] == 103
     assert coverage["coverage_summary"]["openalex_broad_linked_candidate_like_hits"] == 47
@@ -144,6 +144,25 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
             "arm-length-scaled tactile timepoints represented using a declared 70 cm "
             "reference arm length, and 144 preview trial rows; exact Unity/3D Tune-In "
             "rendering and per-subject body/head scaling remain recreation caveats."
+        ),
+    }
+    assert by_template["taffou_2014_cynophobic_rear_looming"] == {
+        "template_id": "taffou_2014_cynophobic_rear_looming",
+        "published": True,
+        "current_recreation_category": "missing_publication_parameters",
+        "primary_constraint_ids": [
+            "ecological_or_licensed_audio_assets",
+            "hrtf_database_or_binaural_engine_mismatch",
+        ],
+        "source_notes": (
+            "Profile now expands both reported rear hemispaces into four source assets: "
+            "dog/sheep x rear-left/rear-right. Publisher HTML methods review on 2026-07-15 "
+            "confirmed 3000 ms sounds, 520-to-20 cm rear trajectories at -135 and +135 "
+            "degrees, Tbefore/T1-T5/Tafter tactile timings, 224 tactile-target trials, "
+            "32 auditory-only catches, and eight 32-trial blocks. The profile remains "
+            "blocked because the exact dog/sheep source audio, Audacity matching settings, "
+            "LISTEN HRTF subject/filter choice, and renderer settings are not available "
+            "in the public toolkit."
         ),
     }
 
@@ -309,6 +328,17 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["lerner_2021_3d_boundary"]["blocking_constraint_ids"] == []
     assert records["lerner_2021_3d_boundary"]["missing_publication_parameters"] == []
     assert records["lerner_2021_3d_boundary"]["recreation_caveats"]
+    assert records["taffou_2014_cynophobic_rear_looming"]["coverage_category"] == (
+        "covered_blocked_missing_publication_parameters"
+    )
+    assert records["taffou_2014_cynophobic_rear_looming"]["blocking_constraint_ids"] == [
+        "ecological_or_licensed_audio_assets",
+        "hrtf_database_or_binaural_engine_mismatch",
+    ]
+    assert records["taffou_2014_cynophobic_rear_looming"]["missing_publication_parameters"] == [
+        "exact dog/sheep source audio and Audacity amplitude/dynamic matching settings",
+        "LISTEN HRTF subject/filter identifier and renderer settings",
+    ]
     assert records["teramoto_2013_beyond_head_audiotactile"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert "body_part_anchored_coordinate_frames" in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]
     assert "tactile_discrimination_or_localization_response" in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]

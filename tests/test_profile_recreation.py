@@ -48,9 +48,8 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     assert categorized == template_ids
     assert status["categories"]["gui_recreatable"]
     assert status["categories"]["missing_publication_parameters"]
-    assert status["categories"]["toolkit_structural_gap"]
     assert len(status["categories"]["missing_publication_parameters"]) == 8
-    assert len(status["categories"]["toolkit_structural_gap"]) == 1
+    assert len(status["categories"]["toolkit_structural_gap"]) == 0
 
     allowed_statuses = {
         STATUS_REPORTED,
@@ -251,11 +250,11 @@ def test_protocol12_matrix_targets_ready_published_profiles_and_blocked_samples(
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID in ready_all
     assert len(ready_published) == 14
     assert set(ready_published) < set(ready_all)
-    assert len(blocked_samples) == 2
+    assert len(blocked_samples) == 1
 
     profiles = {profile["template_id"]: profile for profile in status["profiles"]}
     assert any(profiles[item]["missing_parameter_count"] > 0 for item in blocked_samples)
-    assert any(profiles[item]["unsupported_structure_count"] > 0 for item in blocked_samples)
+    assert all(profiles[item]["unsupported_structure_count"] == 0 for item in blocked_samples)
 
 
 def test_protocol12_matrix_metadata_only_report_accepts_ready_and_blocked(tmp_path: Path):

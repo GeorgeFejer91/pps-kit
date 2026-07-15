@@ -152,8 +152,7 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
             "not_yet_templated_missing_publication_parameters": 21,
             "not_yet_templated_requires_toolkit_structure": 29,
             "ready_profile_needs_behavioral_or_synthetic_outcome_comparison": 12,
-            "template_present_blocked_missing_publication_parameters": 7,
-            "template_present_blocked_toolkit_structure": 1,
+            "template_present_blocked_missing_publication_parameters": 8,
         },
     }
 

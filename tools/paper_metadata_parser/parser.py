@@ -62,6 +62,7 @@ CONFIDENCE_LABELS = (
     "source_unavailable",
     "source_acquired_unreviewed",
     "partial_extraction",
+    "publisher_html_methods_review",
     "high_confidence_extraction",
 )
 

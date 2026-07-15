@@ -6,10 +6,18 @@
   "doi": "10.3389/fpsyt.2014.00122",
   "source_url": "https://www.frontiersin.org/journals/psychiatry/articles/10.3389/fpsyt.2014.00122/full",
   "verification_status": "partial",
-  "notes": "Rear hemi-field binaural looming dog/sheep design. The GUI represents one representative rear-left path plus condition labels; exact dog/sheep sounds and LISTEN-HRTF rendering are not bundled.",
+  "notes": "Rear hemi-field binaural looming dog/sheep design. The GUI expands the reported rear-left and rear-right paths into separate source assets, but exact dog/sheep source audio and LISTEN-HRTF rendering are not bundled.",
   "reference_parameters": {
     "source_database": "LISTEN HRTF in original paper",
+    "headphones": "Sennheiser HD650",
+    "stimulus_sample_rate_hz": 44100,
+    "stimulus_bit_depth": 32,
     "sound_duration_ms": 3000,
+    "pre_sound_silence_ms": 1000,
+    "post_sound_silence_jitter_ms": [
+      2700,
+      3300
+    ],
     "tactile_delays_from_sound_onset_ms": [
       0,
       750,
@@ -21,14 +29,25 @@
       350,
       4650
     ],
+    "baseline_trial_times_relative_to_sound_onset_ms": [
+      -650,
+      3650
+    ],
     "hemispaces": [
       "rear-left",
       "rear-right"
     ],
+    "tactile_stimulus": {
+      "site": "palmar surface of the left index finger",
+      "duration_ms": 20,
+      "frequency_hz": 250,
+      "delivery": "small loudspeaker vibration"
+    },
+    "reported_trial_formula": "224 tactile-target trials (2 sound types x 2 hemispaces x 7 tactile timings x 8 repetitions) plus 32 auditory-only catch trials = 256 trials split equally into eight 32-trial blocks.",
+    "profile_reaudit_2026_07_15": "Publisher HTML methods report both rear-left and rear-right trajectories at -135 and +135 degrees; the current preload cabinet already expands these as separate assets, so rear hemifield direction is no longer a toolkit structural blocker.",
     "implementation_gaps": [
-      "exact dog/sheep audio",
-      "left/right rear hemifield as separate trajectories",
-      "LISTEN HRTF rather than bundled FABIAN"
+      "exact dog/sheep source audio and Audacity amplitude/dynamic matching settings",
+      "LISTEN HRTF subject/filter identifier and renderer settings"
     ]
   },
   "provenance": [

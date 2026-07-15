@@ -22,8 +22,7 @@
       "not_yet_templated_missing_publication_parameters": 21,
       "not_yet_templated_requires_toolkit_structure": 29,
       "ready_profile_needs_behavioral_or_synthetic_outcome_comparison": 12,
-      "template_present_blocked_missing_publication_parameters": 7,
-      "template_present_blocked_toolkit_structure": 1
+      "template_present_blocked_missing_publication_parameters": 8
     }
   },
   "expected_outcome_extraction_sources": {
@@ -594,7 +593,7 @@
       "record_id": "taffou_2014_cynophobic_rear_looming",
       "citation_short": "Taffou & Viaud-Delmon (2014)",
       "doi": "10.3389/fpsyt.2014.00122",
-      "coverage_category": "covered_blocked_toolkit_structure",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "current_template_ids": [
         "taffou_2014_cynophobic_rear_looming"
       ],
@@ -616,12 +615,12 @@
         "paper_audit_pdf_status": "needs_user_download",
         "paper_audit_supplement_status": "needs_user_download",
         "paper_audit_extraction_status": "pending_pdf",
-        "paper_audit_metadata_confidence_label": "pending_source",
+        "paper_audit_metadata_confidence_label": "publisher_html_methods_review",
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },

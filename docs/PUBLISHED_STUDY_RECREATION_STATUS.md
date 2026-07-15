@@ -50,14 +50,12 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 | ferri_2015_ecological_looming_valence | B | blocked_missing_parameters | licensed ecological sounds; exact amplitude envelopes |
 | noel_2015_walking_full_body_action | - | blocked_missing_parameters | exact sound distances and trial counts |
 | serino_2015_toolless_sync_training | - | blocked_missing_parameters | electrocutaneous tactile calibration; voice-key response capture |
-| taffou_2014_cynophobic_rear_looming | - | blocked_unsupported_toolkit_structure | exact dog/sheep audio; LISTEN HRTF rather than bundled FABIAN |
+| taffou_2014_cynophobic_rear_looming | - | blocked_missing_parameters | exact dog/sheep source audio and Audacity amplitude/dynamic matching settings; LISTEN HRTF subject/filter identifier and renderer settings |
 | teneggi_2013_social_face_pps | - | blocked_missing_parameters | exact distance/timing table from supplement |
 
 ## Toolkit structural gap
 
-| Profile | Variant | Status | Main reasons |
-|---|---|---|---|
-| taffou_2014_cynophobic_rear_looming | - | blocked_unsupported_toolkit_structure | left/right rear hemifield as separate trajectories |
+No profiles currently fall in this category.
 
 ## Machine-Readable Source
 

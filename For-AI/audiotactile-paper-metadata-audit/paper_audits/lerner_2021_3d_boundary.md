@@ -3,7 +3,7 @@
 - Record ID: `lerner_2021_3d_boundary`
 - DOI: `10.3389/frvir.2021.644214`
 - DOI URL: https://doi.org/10.3389/frvir.2021.644214
-- Coverage category: `covered_blocked_toolkit_structure`
+- Coverage category: `covered_runnable_profile`
 - Task family: VR 3D audio-tactile PPS boundary estimation
 - PDF status: `downloaded`
 - Supplement status: `needs_user_download`
@@ -15,9 +15,9 @@
 - Automated evidence mining: `source_mined`; 13/25 fields with candidate values
 - PPS visualization mining: `source_mined`; 5/9 visualization-form candidates
 
-## Known Prior Gaps
+## Known Provenance Caveats
 
-- exact Unity/3D Tune-In stimulus engine behavior
+- exact Unity/3D Tune-In stimulus engine behavior and per-subject head/arm scaling are not reproduced exactly
 
 ## Review Attempts
 

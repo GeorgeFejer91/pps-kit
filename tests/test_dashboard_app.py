@@ -1366,7 +1366,7 @@ def test_dashboard_blocks_runner_launch_for_incomplete_published_profile(tmp_pat
     assert loaded["selected_template"] == blocked_template_id
     assert loaded["templates"]
     template = next(item for item in loaded["templates"] if item["template_id"] == blocked_template_id)
-    assert template["runner_readiness"] == "blocked_unsupported_toolkit_structure"
+    assert template["runner_readiness"] == "blocked_missing_parameters"
     assert template["profile_checks_passed"] is False
 
     blocked = client.post("/api/run-sequence/open-runner")
