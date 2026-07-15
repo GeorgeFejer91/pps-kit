@@ -2,7 +2,7 @@ record_id,citation_short,doi,doi_url,coverage_category,pdf_status,supplement_sta
 ladavas_2001_auditory_tactile_extinction,L\xc3\xa0davas et al. (2001),10.1093/neucas/7.2.97,https://doi.org/10.1093/neucas/7.2.97,not_yet_templated_requires_toolkit_structure,paywalled,paywalled
 farne_ladavas_2002_auditory_pps_humans,Farn\xc3\xa8 & L\xc3\xa0davas (2002),10.1162/089892902320474481,https://doi.org/10.1162/089892902320474481,not_yet_templated_requires_toolkit_structure,paywalled,paywalled
 kitagawa_2005_sound_complexity,Kitagawa et al. (2005),10.1007/s00221-005-2393-8,https://doi.org/10.1007/s00221-005-2393-8,not_yet_templated_missing_publication_parameters,open_access_unavailable,not_checked
-serino_2007_blind_cane_users,Serino et al. (2007),10.1111/j.1467-9280.2007.01952.x,https://doi.org/10.1111/j.1467-9280.2007.01952.x,not_yet_templated_requires_toolkit_structure,paywalled,paywalled
+serino_2007_blind_cane_users,Serino et al. (2007),10.1111/j.1467-9280.2007.01952.x,https://doi.org/10.1111/j.1467-9280.2007.01952.x,not_yet_templated_missing_publication_parameters,paywalled,paywalled
 serino_2009_tms,Serino et al. (2009),10.1371/journal.pone.0006582,https://doi.org/10.1371/journal.pone.0006582,not_yet_templated_missing_publication_parameters,open_access_unavailable,not_checked
 tajadura_jimenez_2009_visual_deprivation,Tajadura-Jimenez et al. (2009),10.1016/j.neuropsychologia.2009.07.025,https://doi.org/10.1016/j.neuropsychologia.2009.07.025,not_yet_templated_missing_publication_parameters,paywalled,not_found
 bassolino_2010_mouse_use,Bassolino et al. (2010),10.1016/j.neuropsychologia.2009.11.009,https://doi.org/10.1016/j.neuropsychologia.2009.11.009,not_yet_templated_missing_publication_parameters,paywalled,not_found
@@ -36,7 +36,7 @@ ieeg_trunk_2018,Bernasconi/Noel et al. (2018),10.1093/cercor/bhy156,https://doi.
 tonelli_2019_echolocation,Tonelli et al. (2019),10.1007/s00221-019-05469-3,https://doi.org/10.1007/s00221-019-05469-3,covered_runnable_profile,downloaded,downloaded
 pregnancy_2019,Pregnancy PPS study (2019),10.1038/s41598-019-45224-w,https://doi.org/10.1038/s41598-019-45224-w,not_yet_templated_missing_publication_parameters,downloaded,needs_user_download
 newborn_boundaries_2019,Identifying PPS boundaries in newborns (2019),10.1038/s41598-019-45084-4,https://doi.org/10.1038/s41598-019-45084-4,not_yet_templated_missing_publication_parameters,downloaded,needs_user_download
-ronga_2021_newborn_erp,Spatial tuning of multisensory responses in newborns (2021),10.1073/pnas.2024548118,https://doi.org/10.1073/pnas.2024548118,not_yet_templated_requires_toolkit_structure,downloaded,paywalled
+ronga_2021_newborn_erp,Spatial tuning of multisensory responses in newborns (2021),10.1073/pnas.2024548118,https://doi.org/10.1073/pnas.2024548118,not_yet_templated_missing_publication_parameters,downloaded,paywalled
 autism_2019,Altered bodily self-consciousness and PPS in autism (2019),10.1177/1362361319838950,https://doi.org/10.1177/1362361319838950,not_yet_templated_missing_publication_parameters,open_access_unavailable,paywalled
 disorders_consciousness_2019,PPS encoding in disorders of consciousness (2019),10.1016/j.nicl.2019.101940,https://doi.org/10.1016/j.nicl.2019.101940,not_yet_templated_missing_publication_parameters,downloaded,not_found
 social_coding_2019,Social coding of multisensory space (2019),10.1098/rsos.181878,https://doi.org/10.1098/rsos.181878,not_yet_templated_missing_publication_parameters,needs_user_download,paywalled

@@ -337,11 +337,9 @@
     },
     {
       "audiotactile_task_family": "static near/far weak-target Go/NoGo tactile detection",
-      "blocking_constraint_ids": [
-        "electrical_tactile_calibration"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Serino et al. (2007)",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.1111/j.1467-9280.2007.01952.x",
       "expected_effect_direction": "cane_use_extends_audio_tactile_facilitation_toward_far_space",
@@ -374,12 +372,10 @@
           "template_ids": []
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "electrical_tactile_calibration"
-          ],
+          "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "full electrical tactile calibration details still need extraction; voice-key response metadata is now runner-supported"
+            "extract exact electrical tactile pulse/current/duration/threshold values plus timing/ITI parameters; weak/strong/no-target response logic, row-level voice-key metadata, and electrical tactile metadata are now runner-supported"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -396,13 +392,11 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "electrical_tactile_calibration"
-          ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "blocker_ids": [],
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -413,9 +407,9 @@
         }
       },
       "missing_publication_parameters": [
-        "full electrical tactile calibration details still need extraction; voice-key response metadata is now runner-supported"
+        "extract exact electrical tactile pulse/current/duration/threshold values plus timing/ITI parameters; weak/strong/no-target response logic, row-level voice-key metadata, and electrical tactile metadata are now runner-supported"
       ],
-      "next_required_action": "Implement or validate toolkit support for: electrical_tactile_calibration; also extract/source missing paper parameters: full electrical tactile calibration details still need extraction; voice-key response metadata is now runner-supported",
+      "next_required_action": "Extract or source the missing paper parameters: extract exact electrical tactile pulse/current/duration/threshold values plus timing/ITI parameters; weak/strong/no-target response logic, row-level voice-key metadata, and electrical tactile metadata are now runner-supported",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -428,7 +422,7 @@
         "pdf_status": "paywalled",
         "supplement_status": "paywalled"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "serino_2007_blind_cane_users",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -1233,8 +1227,7 @@
     {
       "audiotactile_task_family": "Canzoneri-style dynamic PPS task",
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters",
-        "electrical_tactile_calibration"
+        "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "citation_short": "Canzoneri et al. (2013b)",
       "coverage_category": "covered_blocked_missing_publication_parameters",
@@ -1277,12 +1270,11 @@
         },
         "source_parameter_extraction": {
           "blockers": [
-            "missing_core_soa_iti_baseline_repetition_parameters",
-            "electrical_tactile_calibration"
+            "missing_core_soa_iti_baseline_repetition_parameters"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "exact trial count and tactile calibration table"
+            "exact trial count, ITI/baseline/repetition details, and tactile calibration table; electrical tactile metadata is now runner-supported"
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -1300,8 +1292,7 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "missing_core_soa_iti_baseline_repetition_parameters",
-            "electrical_tactile_calibration"
+            "missing_core_soa_iti_baseline_repetition_parameters"
           ],
           "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
@@ -1325,9 +1316,9 @@
         }
       },
       "missing_publication_parameters": [
-        "exact trial count and tactile calibration table"
+        "exact trial count, ITI/baseline/repetition details, and tactile calibration table; electrical tactile metadata is now runner-supported"
       ],
-      "next_required_action": "Extract or source the missing paper parameters: exact trial count and tactile calibration table",
+      "next_required_action": "Extract or source the missing paper parameters: exact trial count, ITI/baseline/repetition details, and tactile calibration table; electrical tactile metadata is now runner-supported",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -2959,9 +2950,7 @@
     },
     {
       "audiotactile_task_family": "bimodal IN/OUT target trials plus auditory-only catch trials",
-      "blocking_constraint_ids": [
-        "electrical_tactile_calibration"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Serino/Canzoneri 2015 toolless sync training",
       "coverage_category": "covered_blocked_missing_publication_parameters",
       "current_template_ids": [
@@ -3002,12 +2991,10 @@
           ]
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "electrical_tactile_calibration"
-          ],
+          "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "electrocutaneous tactile calibration"
+            "electrocutaneous tactile calibration source values; row-level voice-key and electrical tactile metadata are now runner-supported"
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -3024,9 +3011,7 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "electrical_tactile_calibration"
-          ],
+          "blocker_ids": [],
           "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [
@@ -3049,9 +3034,9 @@
         }
       },
       "missing_publication_parameters": [
-        "electrocutaneous tactile calibration"
+        "electrocutaneous tactile calibration source values; row-level voice-key and electrical tactile metadata are now runner-supported"
       ],
-      "next_required_action": "Extract or source the missing paper parameters: electrocutaneous tactile calibration",
+      "next_required_action": "Extract or source the missing paper parameters: electrocutaneous tactile calibration source values; row-level voice-key and electrical tactile metadata are now runner-supported",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -3889,11 +3874,9 @@
     },
     {
       "audiotactile_task_family": "near/far auditory plus electrical tactile stimulation with ERP endpoint",
-      "blocking_constraint_ids": [
-        "electrical_tactile_calibration"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Spatial tuning of multisensory responses in newborns (2021)",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.1073/pnas.2024548118",
       "expected_effect_direction": "near_audio_tactile_erp_response_differs_from_far",
@@ -3926,12 +3909,10 @@
           "template_ids": []
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "electrical_tactile_calibration"
-          ],
+          "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract near/far auditory apparatus, electrical tactile parameters, timing offset, and ERP trigger codes; remaining toolkit blocker is electrical tactile calibration"
+            "extract exact near/far auditory apparatus, electrical tactile pulse/calibration values, timing offset, and ERP trigger codes; electrical tactile metadata is now runner-supported"
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -3948,13 +3929,11 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "electrical_tactile_calibration"
-          ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "blocker_ids": [],
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -3965,9 +3944,9 @@
         }
       },
       "missing_publication_parameters": [
-        "extract near/far auditory apparatus, electrical tactile parameters, timing offset, and ERP trigger codes; remaining toolkit blocker is electrical tactile calibration"
+        "extract exact near/far auditory apparatus, electrical tactile pulse/calibration values, timing offset, and ERP trigger codes; electrical tactile metadata is now runner-supported"
       ],
-      "next_required_action": "Implement or validate toolkit support for: electrical_tactile_calibration; also extract/source missing paper parameters: extract near/far auditory apparatus, electrical tactile parameters, timing offset, and ERP trigger codes; remaining toolkit blocker is electrical tactile calibration",
+      "next_required_action": "Extract or source the missing paper parameters: extract exact near/far auditory apparatus, electrical tactile pulse/calibration values, timing offset, and ERP trigger codes; electrical tactile metadata is now runner-supported",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -3980,7 +3959,7 @@
         "pdf_status": "downloaded",
         "supplement_status": "paywalled"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "ronga_2021_newborn_erp",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -7616,8 +7595,8 @@
         "source_parameters_missing_or_unresolved": 59
       },
       "toolkit_gui_implementation": {
-        "blocked_by_missing_profile_parameters": 51,
-        "blocked_by_toolkit_structure_or_response_contract": 8,
+        "blocked_by_missing_profile_parameters": 53,
+        "blocked_by_toolkit_structure_or_response_contract": 6,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 12
       },
@@ -7635,13 +7614,13 @@
       "adjacent_not_applicable": 4,
       "full_emulated_source_to_runner_pipeline_validated": 12,
       "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 43,
-      "toolkit_structure_or_response_contract_missing": 8
+      "source_parameters_missing_before_profile_creation": 45,
+      "toolkit_structure_or_response_contract_missing": 6
     },
     "primary_gap_counts": {
       "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 43,
-      "toolkit_structure_or_response_contract_missing": 8
+      "source_parameters_missing_before_profile_creation": 45,
+      "toolkit_structure_or_response_contract_missing": 6
     }
   }
 }

@@ -54,13 +54,13 @@ def test_full_pipeline_validation_summary_is_conservative():
         "adjacent_not_applicable": 4,
         "full_emulated_source_to_runner_pipeline_validated": 12,
         "profile_present_but_source_parameters_missing": 8,
-        "source_parameters_missing_before_profile_creation": 43,
-        "toolkit_structure_or_response_contract_missing": 8,
+        "source_parameters_missing_before_profile_creation": 45,
+        "toolkit_structure_or_response_contract_missing": 6,
     }
     assert summary["primary_gap_counts"] == {
         "profile_present_but_source_parameters_missing": 8,
-        "source_parameters_missing_before_profile_creation": 43,
-        "toolkit_structure_or_response_contract_missing": 8,
+        "source_parameters_missing_before_profile_creation": 45,
+        "toolkit_structure_or_response_contract_missing": 6,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
         "minimum_source_parameters_captured": 12,
@@ -73,8 +73,8 @@ def test_full_pipeline_validation_summary_is_conservative():
         "not_applicable_adjacent_record": 4,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
-        "blocked_by_missing_profile_parameters": 51,
-        "blocked_by_toolkit_structure_or_response_contract": 8,
+        "blocked_by_missing_profile_parameters": 53,
+        "blocked_by_toolkit_structure_or_response_contract": 6,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 12,
     }
@@ -136,6 +136,20 @@ def test_full_pipeline_blocks_at_the_first_unproven_layer():
         "blocked_by_missing_profile_parameters"
     )
     assert kitagawa["blocking_constraint_ids"] == []
+
+    serino_2007 = records["serino_2007_blind_cane_users"]
+    assert serino_2007["pipeline_status"] == "source_parameters_missing_before_profile_creation"
+    assert serino_2007["gates"]["toolkit_gui_implementation"]["status"] == (
+        "blocked_by_missing_profile_parameters"
+    )
+    assert serino_2007["blocking_constraint_ids"] == []
+
+    ronga = records["ronga_2021_newborn_erp"]
+    assert ronga["pipeline_status"] == "source_parameters_missing_before_profile_creation"
+    assert ronga["gates"]["toolkit_gui_implementation"]["status"] == (
+        "blocked_by_missing_profile_parameters"
+    )
+    assert ronga["blocking_constraint_ids"] == []
 
     spiousas = records["spiousas_2025_auditory_only"]
     assert spiousas["pipeline_status"] == "adjacent_not_applicable"

@@ -175,6 +175,13 @@
       "relevance": "Capability smoke proving that Segment 5/6 rows can declare vocal/voice-key response-capture metadata, preserve response device, input modality, voice-key enabled flag, spoken label, threshold label/value, and latency correction through prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated participant-like responses with a software wired-loopback sidecar. This is not physical microphone capture, physical voice-onset detection, acoustic threshold calibration, collected participant evidence, physical timing-loopback, or scientific PPS-effect validation."
     },
     {
+      "id": "electrical_tactile_contract_capability_smoke_2026_07_15",
+      "kind": "validation_protocol",
+      "date_run": "2026-07-15",
+      "local_summary_file": "artifacts/validation_runs/current_goal_electrical_tactile_contract_20260715/electrical_tactile_contract_capability_smoke_report.json",
+      "relevance": "Capability smoke proving that Segment 5/6 rows can declare electrical tactile stimulation and calibration metadata, preserve tactile modality, calibration method, threshold reference, intensity/unit, pulse duration, stimulator model, and electrode site through prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated participant-like responses with a software wired-loopback sidecar. This is not physical electrical stimulation, current delivery, participant thresholding, electrode impedance, hardware synchronization, collected participant evidence, physical timing-loopback, or scientific PPS-effect validation."
+    },
+    {
       "id": "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15",
       "kind": "pubmed_live_spot_check",
       "date_run": "2026-07-15",
@@ -190,8 +197,8 @@
       "covered_runnable_profile": 12,
       "covered_blocked_missing_publication_parameters": 8,
       "covered_blocked_toolkit_structure": 0,
-      "not_yet_templated_requires_toolkit_structure": 8,
-      "not_yet_templated_missing_publication_parameters": 43,
+      "not_yet_templated_requires_toolkit_structure": 6,
+      "not_yet_templated_missing_publication_parameters": 45,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
@@ -519,11 +526,15 @@
     {
       "id": "electrical_tactile_calibration",
       "dimension": "tactile_site_channel_modality_duration_or_calibration",
-      "description": "Electrical tactile stimulation requires pulse parameters and participant threshold calibration.",
-      "toolkit_status": "requires_publication_reaudit_or_tactile_extension",
+      "description": "Electrical tactile stimulation/calibration can now be represented as row-level software metadata: tactile modality, calibration method, threshold reference, intensity/unit, pulse duration, stimulator model, and electrode/body site. Physical current delivery, participant thresholding, electrode impedance, and stimulator synchronization remain outside the toolkit contract.",
+      "toolkit_status": "supported_by_electrical_tactile_contract_capability_smoke",
       "example_records": [
-        "serino_2015_toolless_sync_training"
-      ]
+        "serino_2007_blind_cane_users",
+        "ronga_2021_newborn_erp",
+        "serino_2015_toolless_sync_training",
+        "canzoneri_2013_amputation_prosthesis"
+      ],
+      "validation_report": "artifacts/validation_runs/current_goal_electrical_tactile_contract_20260715/electrical_tactile_contract_capability_smoke_report.json"
     },
     {
       "id": "tactile_waveform_frequency_profile",
@@ -609,8 +620,7 @@
       "published": true,
       "current_recreation_category": "missing_publication_parameters",
       "primary_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters",
-        "electrical_tactile_calibration"
+        "missing_core_soa_iti_baseline_repetition_parameters"
       ]
     },
     {
@@ -694,9 +704,7 @@
       "template_id": "serino_2015_toolless_sync_training",
       "published": true,
       "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "electrical_tactile_calibration"
-      ]
+      "primary_constraint_ids": []
     },
     {
       "template_id": "taffou_2014_cynophobic_rear_looming",
@@ -783,14 +791,12 @@
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "static near/far weak-target Go/NoGo tactile detection",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "electrical_tactile_calibration"
-      ],
+      "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "full electrical tactile calibration details still need extraction; voice-key response metadata is now runner-supported"
+        "extract exact electrical tactile pulse/current/duration/threshold values plus timing/ITI parameters; weak/strong/no-target response logic, row-level voice-key metadata, and electrical tactile metadata are now runner-supported"
       ]
     },
     {
@@ -948,11 +954,10 @@
       "audiotactile_task_family": "Canzoneri-style dynamic PPS task",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters",
-        "electrical_tactile_calibration"
+        "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "exact trial count and tactile calibration table"
+        "exact trial count, ITI/baseline/repetition details, and tactile calibration table; electrical tactile metadata is now runner-supported"
       ]
     },
     {
@@ -1255,11 +1260,9 @@
       "coverage_category": "covered_blocked_missing_publication_parameters",
       "audiotactile_task_family": "bimodal IN/OUT target trials plus auditory-only catch trials",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "electrical_tactile_calibration"
-      ],
+      "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "electrocutaneous tactile calibration"
+        "electrocutaneous tactile calibration source values; row-level voice-key and electrical tactile metadata are now runner-supported"
       ]
     },
     {
@@ -1422,14 +1425,12 @@
         "openalex_audiotactile_pps_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "near/far auditory plus electrical tactile stimulation with ERP endpoint",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "electrical_tactile_calibration"
-      ],
+      "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "extract near/far auditory apparatus, electrical tactile parameters, timing offset, and ERP trigger codes; remaining toolkit blocker is electrical tactile calibration"
+        "extract exact near/far auditory apparatus, electrical tactile pulse/calibration values, timing offset, and ERP trigger codes; electrical tactile metadata is now runner-supported"
       ]
     },
     {

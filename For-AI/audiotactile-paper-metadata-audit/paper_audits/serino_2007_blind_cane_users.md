@@ -3,7 +3,7 @@
 - Record ID: `serino_2007_blind_cane_users`
 - DOI: `10.1111/j.1467-9280.2007.01952.x`
 - DOI URL: https://doi.org/10.1111/j.1467-9280.2007.01952.x
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: static near/far weak-target Go/NoGo tactile detection
 - PDF status: `paywalled`
 - Supplement status: `paywalled`
@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- full electrical tactile calibration details still need extraction; row-level voice-key response metadata is now runner-supported
+- extract exact electrical tactile pulse/current/duration/threshold values plus timing/ITI parameters; weak/strong/no-target response logic, row-level voice-key metadata, and electrical tactile metadata are now runner-supported
 
 ## Review Attempts
 

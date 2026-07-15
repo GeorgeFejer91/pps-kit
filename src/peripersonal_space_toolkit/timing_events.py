@@ -160,6 +160,38 @@ class TriggerDictionary:
                         "voice_key_latency_correction_ms",
                         payload.get("Voice_Key_Latency_Correction_ms", ""),
                     ),
+                    "tactile_stimulation_modality": payload.get(
+                        "tactile_stimulation_modality",
+                        payload.get("Tactile_Stimulation_Modality", ""),
+                    ),
+                    "tactile_calibration_method": payload.get(
+                        "tactile_calibration_method",
+                        payload.get("Tactile_Calibration_Method", ""),
+                    ),
+                    "tactile_threshold_reference": payload.get(
+                        "tactile_threshold_reference",
+                        payload.get("Tactile_Threshold_Reference", ""),
+                    ),
+                    "tactile_intensity": payload.get(
+                        "tactile_intensity",
+                        payload.get("Tactile_Intensity", ""),
+                    ),
+                    "tactile_intensity_unit": payload.get(
+                        "tactile_intensity_unit",
+                        payload.get("Tactile_Intensity_Unit", ""),
+                    ),
+                    "tactile_pulse_duration_ms": payload.get(
+                        "tactile_pulse_duration_ms",
+                        payload.get("Tactile_Pulse_Duration_ms", ""),
+                    ),
+                    "electrical_stimulator_model": payload.get(
+                        "electrical_stimulator_model",
+                        payload.get("Electrical_Stimulator_Model", ""),
+                    ),
+                    "electrical_electrode_site": payload.get(
+                        "electrical_electrode_site",
+                        payload.get("Electrical_Electrode_Site", ""),
+                    ),
                     "spatial_coordinate_frame": payload.get(
                         "spatial_coordinate_frame",
                         payload.get("Spatial_Coordinate_Frame", ""),
@@ -279,6 +311,38 @@ class TriggerDictionary:
                 "voice_key_latency_correction_ms": payload.get(
                     "voice_key_latency_correction_ms",
                     payload.get("Voice_Key_Latency_Correction_ms", ""),
+                ),
+                "tactile_stimulation_modality": payload.get(
+                    "tactile_stimulation_modality",
+                    payload.get("Tactile_Stimulation_Modality", ""),
+                ),
+                "tactile_calibration_method": payload.get(
+                    "tactile_calibration_method",
+                    payload.get("Tactile_Calibration_Method", ""),
+                ),
+                "tactile_threshold_reference": payload.get(
+                    "tactile_threshold_reference",
+                    payload.get("Tactile_Threshold_Reference", ""),
+                ),
+                "tactile_intensity": payload.get(
+                    "tactile_intensity",
+                    payload.get("Tactile_Intensity", ""),
+                ),
+                "tactile_intensity_unit": payload.get(
+                    "tactile_intensity_unit",
+                    payload.get("Tactile_Intensity_Unit", ""),
+                ),
+                "tactile_pulse_duration_ms": payload.get(
+                    "tactile_pulse_duration_ms",
+                    payload.get("Tactile_Pulse_Duration_ms", ""),
+                ),
+                "electrical_stimulator_model": payload.get(
+                    "electrical_stimulator_model",
+                    payload.get("Electrical_Stimulator_Model", ""),
+                ),
+                "electrical_electrode_site": payload.get(
+                    "electrical_electrode_site",
+                    payload.get("Electrical_Electrode_Site", ""),
                 ),
                 "spatial_coordinate_frame": payload.get(
                     "spatial_coordinate_frame",

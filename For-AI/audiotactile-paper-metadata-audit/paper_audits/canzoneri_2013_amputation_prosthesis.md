@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- exact trial count and tactile calibration table
+- exact trial count, ITI/baseline/repetition details, and tactile calibration table; electrical tactile metadata is now runner-supported
 
 ## Review Attempts
 

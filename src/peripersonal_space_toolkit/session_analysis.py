@@ -886,6 +886,80 @@ def _response_base(event: dict[str, Any]) -> dict[str, Any]:
             "vocal_onset_correction_ms",
             "Vocal_Onset_Correction_ms",
         ),
+        "tactile_stimulation_modality": _field(
+            event,
+            "tactile_stimulation_modality",
+            "Tactile_Stimulation_Modality",
+            "tactile_modality",
+            "Tactile_Modality",
+            "stimulation_modality",
+            "Stimulation_Modality",
+        ),
+        "tactile_calibration_method": _field(
+            event,
+            "tactile_calibration_method",
+            "Tactile_Calibration_Method",
+            "calibration_method",
+            "Calibration_Method",
+            "electrical_calibration_method",
+            "Electrical_Calibration_Method",
+        ),
+        "tactile_threshold_reference": _field(
+            event,
+            "tactile_threshold_reference",
+            "Tactile_Threshold_Reference",
+            "tactile_threshold",
+            "Tactile_Threshold",
+            "threshold_reference",
+            "Threshold_Reference",
+            "electrical_threshold_reference",
+            "Electrical_Threshold_Reference",
+        ),
+        "tactile_intensity": _field(
+            event,
+            "tactile_intensity",
+            "Tactile_Intensity",
+            "electrical_current",
+            "Electrical_Current",
+            "tactile_current",
+            "Tactile_Current",
+        ),
+        "tactile_intensity_unit": _field(
+            event,
+            "tactile_intensity_unit",
+            "Tactile_Intensity_Unit",
+            "electrical_current_unit",
+            "Electrical_Current_Unit",
+            "tactile_current_unit",
+            "Tactile_Current_Unit",
+        ),
+        "tactile_pulse_duration_ms": _field(
+            event,
+            "tactile_pulse_duration_ms",
+            "Tactile_Pulse_Duration_ms",
+            "electrical_pulse_duration_ms",
+            "Electrical_Pulse_Duration_ms",
+            "pulse_duration_ms",
+            "Pulse_Duration_ms",
+        ),
+        "electrical_stimulator_model": _field(
+            event,
+            "electrical_stimulator_model",
+            "Electrical_Stimulator_Model",
+            "stimulator_model",
+            "Stimulator_Model",
+            "tactile_stimulator_model",
+            "Tactile_Stimulator_Model",
+        ),
+        "electrical_electrode_site": _field(
+            event,
+            "electrical_electrode_site",
+            "Electrical_Electrode_Site",
+            "electrode_site",
+            "Electrode_Site",
+            "tactile_electrode_site",
+            "Tactile_Electrode_Site",
+        ),
         "spatial_coordinate_frame": _field(
             event,
             "spatial_coordinate_frame",
@@ -2944,6 +3018,22 @@ def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
         row["voice_key_threshold"] = row.get("Voice_Key_Threshold")
     if "voice_key_latency_correction_ms" not in row and "Voice_Key_Latency_Correction_ms" in row:
         row["voice_key_latency_correction_ms"] = row.get("Voice_Key_Latency_Correction_ms")
+    if "tactile_stimulation_modality" not in row and "Tactile_Stimulation_Modality" in row:
+        row["tactile_stimulation_modality"] = row.get("Tactile_Stimulation_Modality")
+    if "tactile_calibration_method" not in row and "Tactile_Calibration_Method" in row:
+        row["tactile_calibration_method"] = row.get("Tactile_Calibration_Method")
+    if "tactile_threshold_reference" not in row and "Tactile_Threshold_Reference" in row:
+        row["tactile_threshold_reference"] = row.get("Tactile_Threshold_Reference")
+    if "tactile_intensity" not in row and "Tactile_Intensity" in row:
+        row["tactile_intensity"] = row.get("Tactile_Intensity")
+    if "tactile_intensity_unit" not in row and "Tactile_Intensity_Unit" in row:
+        row["tactile_intensity_unit"] = row.get("Tactile_Intensity_Unit")
+    if "tactile_pulse_duration_ms" not in row and "Tactile_Pulse_Duration_ms" in row:
+        row["tactile_pulse_duration_ms"] = row.get("Tactile_Pulse_Duration_ms")
+    if "electrical_stimulator_model" not in row and "Electrical_Stimulator_Model" in row:
+        row["electrical_stimulator_model"] = row.get("Electrical_Stimulator_Model")
+    if "electrical_electrode_site" not in row and "Electrical_Electrode_Site" in row:
+        row["electrical_electrode_site"] = row.get("Electrical_Electrode_Site")
     if "spatial_coordinate_frame" not in row and "Spatial_Coordinate_Frame" in row:
         row["spatial_coordinate_frame"] = row.get("Spatial_Coordinate_Frame")
     if "body_anchor" not in row and "Body_Anchor" in row:

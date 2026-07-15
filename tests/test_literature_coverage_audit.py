@@ -37,8 +37,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_runnable_profile": 12,
         "covered_blocked_missing_publication_parameters": 8,
         "covered_blocked_toolkit_structure": 0,
-        "not_yet_templated_requires_toolkit_structure": 8,
-        "not_yet_templated_missing_publication_parameters": 43,
+        "not_yet_templated_requires_toolkit_structure": 6,
+        "not_yet_templated_missing_publication_parameters": 45,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
@@ -192,6 +192,17 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for source in coverage["evidence_sources"]
     )
     assert any(
+        source.get("id") == "electrical_tactile_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_electrical_tactile_contract_20260715/"
+            "electrical_tactile_contract_capability_smoke_report.json"
+        )
+        and "physical electrical stimulation" in source.get("relevance", "")
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
         source.get("id") == "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15"
         and source.get("kind") == "pubmed_live_spot_check"
         and source.get("pmid") == "42128086"
@@ -220,7 +231,7 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "template_id": "serino_2015_toolless_sync_training",
         "published": True,
         "current_recreation_category": "missing_publication_parameters",
-        "primary_constraint_ids": ["electrical_tactile_calibration"],
+        "primary_constraint_ids": [],
     }
     assert by_template["tonelli_2019_echolocation"] == {
         "template_id": "tonelli_2019_echolocation",
@@ -373,6 +384,22 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "biggio_2017_racket_tool_use",
         "serino_2015_toolless_sync_training",
     }
+    electrical_tactile_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "electrical_tactile_calibration"
+    )
+    assert electrical_tactile_constraint["toolkit_status"] == (
+        "supported_by_electrical_tactile_contract_capability_smoke"
+    )
+    assert electrical_tactile_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_electrical_tactile_contract_20260715/"
+        "electrical_tactile_contract_capability_smoke_report.json"
+    )
+    assert set(electrical_tactile_constraint["example_records"]) == {
+        "serino_2007_blind_cane_users",
+        "ronga_2021_newborn_erp",
+        "serino_2015_toolless_sync_training",
+        "canzoneri_2013_amputation_prosthesis",
+    }
     multi_speaker_constraint = next(
         item for item in coverage["constraint_taxonomy"] if item["id"] == "multi_speaker_array_switching"
     )
@@ -464,7 +491,8 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["newborn_boundaries_2019"]["blocking_constraint_ids"] == [
         "missing_core_soa_iti_baseline_repetition_parameters"
     ]
-    assert records["ronga_2021_newborn_erp"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
+    assert records["ronga_2021_newborn_erp"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["ronga_2021_newborn_erp"]["blocking_constraint_ids"] == []
     assert records["ferri_2015_jneurosci_itv"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["autism_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["social_coding_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
@@ -602,11 +630,20 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["serino_2011_rtms"]["blocking_constraint_ids"] == []
     assert records["cimmino_2013_surgical_arm_elongation"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["cimmino_2013_surgical_arm_elongation"]["blocking_constraint_ids"] == []
-    assert records["serino_2007_blind_cane_users"]["blocking_constraint_ids"] == [
-        "electrical_tactile_calibration",
+    assert records["serino_2007_blind_cane_users"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["serino_2007_blind_cane_users"]["blocking_constraint_ids"] == []
+    assert records["serino_2015_toolless_sync_training"]["blocking_constraint_ids"] == []
+    assert records["canzoneri_2013_amputation_prosthesis"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters"
     ]
     assert all(
         "voice_key_response_capture" not in record["blocking_constraint_ids"]
+        for record in records.values()
+    )
+    assert all(
+        "electrical_tactile_calibration" not in record["blocking_constraint_ids"]
         for record in records.values()
     )
     assert records["teneggi_2013_social_face"]["doi"] == "10.1016/j.cub.2013.01.043"
