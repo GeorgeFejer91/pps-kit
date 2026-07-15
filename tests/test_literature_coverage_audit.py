@@ -37,8 +37,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_runnable_profile": 12,
         "covered_blocked_missing_publication_parameters": 8,
         "covered_blocked_toolkit_structure": 0,
-        "not_yet_templated_requires_toolkit_structure": 26,
-        "not_yet_templated_missing_publication_parameters": 24,
+        "not_yet_templated_requires_toolkit_structure": 22,
+        "not_yet_templated_missing_publication_parameters": 28,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
@@ -116,6 +116,16 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         == (
             "artifacts/validation_runs/current_goal_static_near_far_capability_20260715/"
             "static_near_far_capability_smoke_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "gonogo_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_gonogo_capability_20260715/"
+            "gonogo_capability_smoke_report.json"
         )
         for source in coverage["evidence_sources"]
     )
@@ -213,6 +223,14 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "artifacts/validation_runs/current_goal_static_near_far_capability_20260715/"
         "static_near_far_capability_smoke_report.json"
     )
+    gonogo_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "weak_strong_no_target_gonogo"
+    )
+    assert gonogo_constraint["toolkit_status"] == "supported_by_gonogo_capability_smoke"
+    assert gonogo_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_gonogo_capability_20260715/"
+        "gonogo_capability_smoke_report.json"
+    )
     multi_speaker_constraint = next(
         item for item in coverage["constraint_taxonomy"] if item["id"] == "multi_speaker_array_switching"
     )
@@ -278,7 +296,8 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert "cross_modal_extinction_response_mapping" in records["farne_ladavas_2002_auditory_pps_humans"]["blocking_constraint_ids"]
     assert records["rossi_sebastiano_2022_visuotactile"]["coverage_category"] == "adjacent_out_of_scope"
     assert records["teraoka_2024_front_rear"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert records["holmes_2020_four_experiments"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
+    assert records["holmes_2020_four_experiments"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["holmes_2020_four_experiments"]["blocking_constraint_ids"] == []
     assert records["tajadura_jimenez_2009_visual_deprivation"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert records["mindfulness_pps_2024"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["newborn_boundaries_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
@@ -381,6 +400,16 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "missing_core_soa_iti_baseline_repetition_parameters",
     ]
     assert records["bassolino_2010_mouse_use"]["doi"] == "10.1016/j.neuropsychologia.2009.11.009"
+    assert records["bassolino_2010_mouse_use"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["bassolino_2010_mouse_use"]["blocking_constraint_ids"] == []
+    assert records["serino_2011_rtms"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["serino_2011_rtms"]["blocking_constraint_ids"] == []
+    assert records["cimmino_2013_surgical_arm_elongation"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["cimmino_2013_surgical_arm_elongation"]["blocking_constraint_ids"] == []
+    assert records["serino_2007_blind_cane_users"]["blocking_constraint_ids"] == [
+        "voice_key_response_capture",
+        "electrical_tactile_calibration",
+    ]
     assert records["teneggi_2013_social_face"]["doi"] == "10.1016/j.cub.2013.01.043"
     assert records["serino_2009_tms"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert "external_event_trigger_sync_contract" in records["serino_2009_tms"]["blocking_constraint_ids"]
@@ -392,6 +421,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     for record in coverage["literature_records"]:
         assert set(record["blocking_constraint_ids"]) <= constraint_ids, record["record_id"]
         assert "static_near_far_trial_family" not in record["blocking_constraint_ids"], record["record_id"]
+        assert "weak_strong_no_target_gonogo" not in record["blocking_constraint_ids"], record["record_id"]
         assert not (set(record["blocking_constraint_ids"]) & non_blocking_tokens), record["record_id"]
         for constraint_id in record["blocking_constraint_ids"]:
             assert constraint_dimensions[constraint_id] in task_execution_dimensions, record["record_id"]

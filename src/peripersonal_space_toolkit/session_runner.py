@@ -483,6 +483,9 @@ PARTICIPANT_TRIAL_FIELDNAMES = [
     "sequence_labels",
     "sequence_variant_key",
     "soa_ms",
+    "expected_response",
+    "response_rule",
+    "target_role",
     "tactile_present",
     "catch_trial",
     "audio_present",
@@ -617,6 +620,14 @@ class ParticipantTrialCsvWriter:
         tactile_present = _trial_has_tactile(trial_type, family, bool(tactile_onset))
         catch_trial = _trial_is_catch(trial_type, family)
         audio_present = _trial_has_audio(trial_type, family, bool(looming_onset))
+        response_metadata = _trial_response_metadata(
+            base,
+            trial_type=trial_type,
+            family=family,
+            tactile_present=tactile_present,
+            catch_trial=catch_trial,
+        )
+        response_required = bool(response_metadata["response_required"])
         trial_start_unix = _as_float(trial_start.get("unix_time", base.get("unix_time")), default=0.0)
         stimulus_start_unix = _as_float(
             looming_onset.get("unix_time", tactile_onset.get("unix_time", response_onset.get("unix_time", trial_start_unix))),
@@ -633,14 +644,18 @@ class ParticipantTrialCsvWriter:
             trial_end_unix=trial_end_unix,
             tactile_present=tactile_present,
             catch_trial=catch_trial,
+            response_required=response_required,
         )
         click_unix = _as_float(click.get("unix_time"), default=0.0) if click else 0.0
         rt_ms = ""
-        if valid_response and tactile_present and tactile_unix > 0.0 and click_unix > 0.0:
+        if valid_response and tactile_present and response_required and tactile_unix > 0.0 and click_unix > 0.0:
             rt_ms = f"{(click_unix - tactile_unix) * 1000.0:.3f}"
-        if tactile_present:
+        if tactile_present and response_required:
             outcome = "Hit" if valid_response else "Miss"
             correctness_rule = f"response within {TACTILE_RESPONSE_RULE_LABEL}"
+        elif tactile_present:
+            outcome = "Miss" if response_given else "Hit"
+            correctness_rule = "withhold response during no-go/strong tactile trial"
         elif catch_trial:
             outcome = "Miss" if response_given else "Hit"
             correctness_rule = "withhold response during catch/audio-only trial"
@@ -675,6 +690,9 @@ class ParticipantTrialCsvWriter:
             "sequence_labels": _row_value(base, "sequence_labels", "Sequence_Labels", default=""),
             "sequence_variant_key": _row_value(base, "sequence_variant_key", "Sequence_Variant_Key", default=""),
             "soa_ms": _row_value(base, "soa_ms", "SOA_ms", default=""),
+            "expected_response": response_metadata["expected_response"],
+            "response_rule": response_metadata["response_rule"],
+            "target_role": response_metadata["target_role"],
             "tactile_present": str(tactile_present).lower(),
             "catch_trial": str(catch_trial).lower(),
             "audio_present": str(audio_present).lower(),
@@ -703,6 +721,7 @@ class ParticipantTrialCsvWriter:
         trial_end_unix: float,
         tactile_present: bool,
         catch_trial: bool,
+        response_required: bool,
     ) -> tuple[dict[str, Any], bool, bool]:
         start = response_window_unix if response_window_unix > 0.0 else trial_start_unix
         end = trial_end_unix if trial_end_unix > start else start + self.max_rt_s
@@ -722,6 +741,8 @@ class ParticipantTrialCsvWriter:
         if not candidates:
             return {}, False, False
         if tactile_present:
+            if not response_required:
+                return candidates[0], False, True
             tactile_start = tactile_unix if tactile_unix > 0.0 else start
             valid_start = tactile_start + self.min_rt_s
             valid_end = tactile_start + self.max_rt_s
@@ -5241,6 +5262,209 @@ def _trial_is_catch(trial_type: str, family: str) -> bool:
     return "catch" in text or "audio_only" in text or "audio-only" in text
 
 
+def _trial_response_metadata(
+    row: dict[str, Any],
+    *,
+    trial_type: str,
+    family: str,
+    tactile_present: bool,
+    catch_trial: bool,
+) -> dict[str, Any]:
+    response_required = _trial_requires_response(
+        row,
+        trial_type=trial_type,
+        family=family,
+        tactile_present=tactile_present,
+        catch_trial=catch_trial,
+    )
+    explicit_expected = _row_value(
+        row,
+        "expected_response",
+        "Expected_Response",
+        "response_expected",
+        "Response_Expected",
+        "required_response",
+        "Required_Response",
+        "correct_response",
+        "Correct_Response",
+        default="",
+    )
+    explicit_rule = _row_value(
+        row,
+        "response_rule",
+        "Response_Rule",
+        "response_mapping",
+        "Response_Mapping",
+        "task_response_rule",
+        "Task_Response_Rule",
+        default="",
+    )
+    explicit_role = _row_value(
+        row,
+        "target_role",
+        "Target_Role",
+        "go_nogo_role",
+        "Go_NoGo_Role",
+        "stimulus_role",
+        "Stimulus_Role",
+        "tactile_role",
+        "Tactile_Role",
+        default="",
+    )
+    expected_response = _normal_expected_response(explicit_expected)
+    if not expected_response:
+        expected_response = "respond" if response_required and tactile_present else "withhold"
+    response_rule = str(explicit_rule or "").strip()
+    if not response_rule:
+        response_rule = "respond_to_tactile_target" if response_required and tactile_present else "withhold_response"
+    target_role = str(explicit_role or "").strip()
+    if not target_role:
+        target_role = "target" if response_required and tactile_present else "no_target"
+    return {
+        "response_required": bool(response_required),
+        "expected_response": expected_response,
+        "response_rule": response_rule,
+        "target_role": target_role,
+    }
+
+
+def _trial_requires_response(
+    row: dict[str, Any],
+    *,
+    trial_type: str,
+    family: str,
+    tactile_present: bool,
+    catch_trial: bool,
+) -> bool:
+    if catch_trial or not tactile_present:
+        return False
+    expected = _row_value(
+        row,
+        "expected_response",
+        "Expected_Response",
+        "response_expected",
+        "Response_Expected",
+        "required_response",
+        "Required_Response",
+        "correct_response",
+        "Correct_Response",
+        default="",
+    )
+    decision = _response_expectation_decision(expected)
+    if decision is not None:
+        return decision
+    for value in (
+        _row_value(
+            row,
+            "target_role",
+            "Target_Role",
+            "go_nogo_role",
+            "Go_NoGo_Role",
+            "stimulus_role",
+            "Stimulus_Role",
+            "tactile_role",
+            "Tactile_Role",
+            default="",
+        ),
+        _row_value(
+            row,
+            "response_rule",
+            "Response_Rule",
+            "response_mapping",
+            "Response_Mapping",
+            "task_response_rule",
+            "Task_Response_Rule",
+            default="",
+        ),
+        trial_type,
+        family,
+    ):
+        decision = _response_expectation_decision(value)
+        if decision is not None:
+            return decision
+    return True
+
+
+def _normal_expected_response(value: Any) -> str:
+    decision = _response_expectation_decision(value)
+    if decision is None:
+        return ""
+    return "respond" if decision else "withhold"
+
+
+def _response_expectation_decision(value: Any) -> bool | None:
+    text = str(value or "").strip().lower()
+    if not text:
+        return None
+    token = re.sub(r"[^a-z0-9]+", "_", text).strip("_")
+    if not token:
+        return None
+    no_response_exact = {
+        "0",
+        "false",
+        "no",
+        "none",
+        "withhold",
+        "withhold_response",
+        "no_response",
+        "noresponse",
+        "no_go",
+        "nogo",
+        "no_target",
+        "not_target",
+        "non_target",
+        "nontarget",
+        "strong",
+        "strong_nontarget",
+        "strong_non_target",
+        "distractor",
+    }
+    response_exact = {
+        "1",
+        "true",
+        "yes",
+        "respond",
+        "response",
+        "click",
+        "button_press",
+        "go",
+        "target",
+        "weak",
+        "weak_target",
+        "weak_go",
+    }
+    if token in no_response_exact:
+        return False
+    if token in response_exact:
+        return True
+    parts = set(token.split("_"))
+    no_go_markers = {
+        "withhold",
+        "nogo",
+        "not",
+        "none",
+        "strong",
+        "distractor",
+        "nontarget",
+    }
+    has_no_marker = (
+        "no_response" in token
+        or "no_target" in token
+        or "non_target" in token
+        or "nontarget" in token
+        or parts.intersection(no_go_markers)
+    )
+    strong_response_marker = "respond" in parts or "click" in parts or "go" in parts or "weak" in parts
+    has_response_marker = strong_response_marker or ("target" in parts and not has_no_marker)
+    if has_no_marker and strong_response_marker:
+        return None
+    if has_no_marker:
+        return False
+    if has_response_marker:
+        return True
+    return None
+
+
 def _trial_has_tactile(trial_type: str, family: str, tactile_event_seen: bool) -> bool:
     if tactile_event_seen:
         return True
@@ -6469,6 +6693,46 @@ def _segment_session_trial_row(
     drive_onset_s = max(0.0, float(tactile_drive_onset_s))
     soa_ms = _row_value(source, "soa_ms", "SOA_ms", default="")
     row_label = str(_row_value(source, "row_label", "Row_Label", "Row", default="")).strip()
+    expected_response = _row_value(
+        source,
+        "expected_response",
+        "Expected_Response",
+        "response_expected",
+        "Response_Expected",
+        "required_response",
+        "Required_Response",
+        "correct_response",
+        "Correct_Response",
+        default="",
+    )
+    response_rule = _row_value(
+        source,
+        "response_rule",
+        "Response_Rule",
+        "response_mapping",
+        "Response_Mapping",
+        "task_response_rule",
+        "Task_Response_Rule",
+        default="",
+    )
+    target_role = _row_value(
+        source,
+        "target_role",
+        "Target_Role",
+        "go_nogo_role",
+        "Go_NoGo_Role",
+        "stimulus_role",
+        "Stimulus_Role",
+        "tactile_role",
+        "Tactile_Role",
+        default="",
+    )
+    primary_analysis_included = _row_value(
+        source,
+        "primary_analysis_included",
+        "Primary_Analysis_Included",
+        default="true",
+    )
     trial_uid = f"{participant_id}_{phase}_B{output_block_index:02d}_T{trial_index:03d}_{_row_value(source, 'trial_pool_index', default=trial_index)}"
     return {
         "Participant_ID": participant_id,
@@ -6488,6 +6752,10 @@ def _segment_session_trial_row(
         "Trial_Type": _segment_trial_type(family),
         "Family": family,
         "SOA_ms": soa_ms,
+        "Expected_Response": expected_response,
+        "Response_Rule": response_rule,
+        "Target_Role": target_role,
+        "Primary_Analysis_Included": primary_analysis_included,
         "Row": row_label,
         "Row_Label": row_label,
         "Respiratory_Phase": row_label,
@@ -6555,6 +6823,10 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "Trial_Type",
         "Family",
         "SOA_ms",
+        "Expected_Response",
+        "Response_Rule",
+        "Target_Role",
+        "Primary_Analysis_Included",
         "Row",
         "Row_Label",
         "Respiratory_Phase",

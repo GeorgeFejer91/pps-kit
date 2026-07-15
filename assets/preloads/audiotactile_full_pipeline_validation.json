@@ -350,7 +350,6 @@
     {
       "audiotactile_task_family": "static near/far weak-target Go/NoGo tactile detection",
       "blocking_constraint_ids": [
-        "weak_strong_no_target_gonogo",
         "voice_key_response_capture",
         "electrical_tactile_calibration"
       ],
@@ -389,7 +388,6 @@
         },
         "source_parameter_extraction": {
           "blockers": [
-            "weak_strong_no_target_gonogo",
             "voice_key_response_capture",
             "electrical_tactile_calibration"
           ],
@@ -413,7 +411,6 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "weak_strong_no_target_gonogo",
             "voice_key_response_capture",
             "electrical_tactile_calibration"
           ],
@@ -433,7 +430,7 @@
       "missing_publication_parameters": [
         "full calibration and response-capture implementation details need extraction"
       ],
-      "next_required_action": "Implement or validate toolkit support for: weak_strong_no_target_gonogo, voice_key_response_capture, electrical_tactile_calibration; also extract/source missing paper parameters: full calibration and response-capture implementation details need extraction",
+      "next_required_action": "Implement or validate toolkit support for: voice_key_response_capture, electrical_tactile_calibration; also extract/source missing paper parameters: full calibration and response-capture implementation details need extraction",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -660,11 +657,9 @@
     },
     {
       "audiotactile_task_family": "static near/far tactile detection around hand/tool space",
-      "blocking_constraint_ids": [
-        "weak_strong_no_target_gonogo"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Bassolino et al. (2010)",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.1016/j.neuropsychologia.2009.11.009",
       "expected_effect_direction": "mouse_holding_or_use_extends_right_hand_audio_pps_to_screen_space",
@@ -697,9 +692,7 @@
           "template_ids": []
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "weak_strong_no_target_gonogo"
-          ],
+          "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
             "full trial counts, tactile calibration, and response mapping need extraction"
@@ -719,13 +712,11 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "weak_strong_no_target_gonogo"
-          ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "blocker_ids": [],
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -738,7 +729,7 @@
       "missing_publication_parameters": [
         "full trial counts, tactile calibration, and response mapping need extraction"
       ],
-      "next_required_action": "Implement or validate toolkit support for: weak_strong_no_target_gonogo; also extract/source missing paper parameters: full trial counts, tactile calibration, and response mapping need extraction",
+      "next_required_action": "Extract or source the missing paper parameters: full trial counts, tactile calibration, and response mapping need extraction",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -751,7 +742,7 @@
         "pdf_status": "paywalled",
         "supplement_status": "not_found"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "bassolino_2010_mouse_use",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -761,11 +752,9 @@
     },
     {
       "audiotactile_task_family": "static near/far audio-tactile PPS task with rTMS context",
-      "blocking_constraint_ids": [
-        "weak_strong_no_target_gonogo"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Serino et al. (2011)",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.1162/jocn_a_00006",
       "expected_effect_direction": "vpmc_or_ppc_rtms_removes_near_sound_tactile_facilitation",
@@ -798,9 +787,7 @@
           "template_ids": []
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "weak_strong_no_target_gonogo"
-          ],
+          "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
             "full audio, tactile, and response settings need extraction"
@@ -820,13 +807,11 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "weak_strong_no_target_gonogo"
-          ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "blocker_ids": [],
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -839,7 +824,7 @@
       "missing_publication_parameters": [
         "full audio, tactile, and response settings need extraction"
       ],
-      "next_required_action": "Implement or validate toolkit support for: weak_strong_no_target_gonogo; also extract/source missing paper parameters: full audio, tactile, and response settings need extraction",
+      "next_required_action": "Extract or source the missing paper parameters: full audio, tactile, and response settings need extraction",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -852,7 +837,7 @@
         "pdf_status": "paywalled",
         "supplement_status": "paywalled"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "serino_2011_rtms",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -1401,11 +1386,9 @@
     },
     {
       "audiotactile_task_family": "static near/far audio-tactile PPS task",
-      "blocking_constraint_ids": [
-        "weak_strong_no_target_gonogo"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Cimmino et al. (2013)",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.3233/RNN-120286",
       "expected_effect_direction": "arm_elongation_updates_body_and_audio_tactile_pps_representation",
@@ -1438,9 +1421,7 @@
           "template_ids": []
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "weak_strong_no_target_gonogo"
-          ],
+          "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
             "full audio/tactile/timing parameters need extraction"
@@ -1460,13 +1441,11 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "weak_strong_no_target_gonogo"
-          ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "blocker_ids": [],
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -1479,7 +1458,7 @@
       "missing_publication_parameters": [
         "full audio/tactile/timing parameters need extraction"
       ],
-      "next_required_action": "Implement or validate toolkit support for: weak_strong_no_target_gonogo; also extract/source missing paper parameters: full audio/tactile/timing parameters need extraction",
+      "next_required_action": "Extract or source the missing paper parameters: full audio/tactile/timing parameters need extraction",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -1492,7 +1471,7 @@
         "pdf_status": "open_access_unavailable",
         "supplement_status": "not_checked"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "cimmino_2013_surgical_arm_elongation",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -5349,11 +5328,9 @@
     },
     {
       "audiotactile_task_family": "static near/far sounds paired with weak vibrotactile targets and Go/NoGo response logic",
-      "blocking_constraint_ids": [
-        "weak_strong_no_target_gonogo"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Holmes et al. (2020), four experiments",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.1007/s00221-020-05771-5",
       "expected_effect_direction": "small_near_sound_rt_benefit_without_robust_distance_gradient",
@@ -5386,9 +5363,7 @@
           "template_ids": []
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "weak_strong_no_target_gonogo"
-          ],
+          "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
             "task is publicly documented but needs translation into a static near/far toolkit profile"
@@ -5408,13 +5383,11 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "weak_strong_no_target_gonogo"
-          ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "blocker_ids": [],
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -5427,7 +5400,7 @@
       "missing_publication_parameters": [
         "task is publicly documented but needs translation into a static near/far toolkit profile"
       ],
-      "next_required_action": "Implement or validate toolkit support for: weak_strong_no_target_gonogo; also extract/source missing paper parameters: task is publicly documented but needs translation into a static near/far toolkit profile",
+      "next_required_action": "Extract or source the missing paper parameters: task is publicly documented but needs translation into a static near/far toolkit profile",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -5440,7 +5413,7 @@
         "pdf_status": "downloaded",
         "supplement_status": "downloaded"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "holmes_2020_four_experiments",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -7644,8 +7617,8 @@
         "source_parameters_missing_or_unresolved": 58
       },
       "toolkit_gui_implementation": {
-        "blocked_by_missing_profile_parameters": 32,
-        "blocked_by_toolkit_structure_or_response_contract": 26,
+        "blocked_by_missing_profile_parameters": 36,
+        "blocked_by_toolkit_structure_or_response_contract": 22,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 12
       },
@@ -7663,13 +7636,13 @@
       "adjacent_not_applicable": 4,
       "full_emulated_source_to_runner_pipeline_validated": 12,
       "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 24,
-      "toolkit_structure_or_response_contract_missing": 26
+      "source_parameters_missing_before_profile_creation": 28,
+      "toolkit_structure_or_response_contract_missing": 22
     },
     "primary_gap_counts": {
       "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 24,
-      "toolkit_structure_or_response_contract_missing": 26
+      "source_parameters_missing_before_profile_creation": 28,
+      "toolkit_structure_or_response_contract_missing": 22
     }
   }
 }

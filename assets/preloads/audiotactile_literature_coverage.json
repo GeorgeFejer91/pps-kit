@@ -125,6 +125,13 @@
       "date_run": "2026-07-15",
       "local_summary_file": "artifacts/validation_runs/current_goal_static_near_far_capability_20260715/static_near_far_capability_smoke_report.json",
       "relevance": "Capability smoke proving that the runner/package contract can execute stationary static near/far audio-tactile rows, tactile-only baseline rows, and auditory-only catch rows with generated WAV output, event markers, mouse-click simulated responses, and analysis rows. This is not paper-specific parameter extraction, physical loopback evidence, or collected participant evidence."
+    },
+    {
+      "id": "gonogo_capability_smoke_2026_07_15",
+      "kind": "validation_protocol",
+      "date_run": "2026-07-15",
+      "local_summary_file": "artifacts/validation_runs/current_goal_gonogo_capability_20260715/gonogo_capability_smoke_report.json",
+      "relevance": "Capability smoke proving that the runner/package contract can execute row-level respond-vs-withhold tactile expectations for weak targets, strong no-go/non-target rows, sound-only catches, software wired-loopback sidecars, mouse-click simulated responses, participant-trial outcomes, analysis-ready rows, and top-up exclusion of no-go controls. This is not paper-specific parameter extraction, physical hardware-loopback evidence, or collected participant evidence."
     }
   ],
   "coverage_summary": {
@@ -133,8 +140,8 @@
       "covered_runnable_profile": 12,
       "covered_blocked_missing_publication_parameters": 8,
       "covered_blocked_toolkit_structure": 0,
-      "not_yet_templated_requires_toolkit_structure": 26,
-      "not_yet_templated_missing_publication_parameters": 24,
+      "not_yet_templated_requires_toolkit_structure": 22,
+      "not_yet_templated_missing_publication_parameters": 28,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
@@ -283,12 +290,16 @@
     {
       "id": "weak_strong_no_target_gonogo",
       "dimension": "response_capture_or_response_mapping",
-      "description": "Go/NoGo tactile target logic with weak targets, strong non-targets, no-target catch trials, and vocal or button responses.",
-      "toolkit_status": "not_first_class",
+      "description": "Go/NoGo tactile target logic with weak target rows, strong/non-target tactile rows, sound-only/no-target catches, and explicit respond-vs-withhold scoring. The runner now supports this as row-level Expected_Response/Target_Role metadata; paper-specific voice-key, electrical calibration, timing, and profile-translation parameters can still block individual studies.",
+      "toolkit_status": "supported_by_gonogo_capability_smoke",
       "example_records": [
         "serino_2007_blind_cane_users",
+        "bassolino_2010_mouse_use",
+        "serino_2011_rtms",
+        "cimmino_2013_surgical_arm_elongation",
         "holmes_2020_four_experiments"
-      ]
+      ],
+      "validation_report": "artifacts/validation_runs/current_goal_gonogo_capability_20260715/gonogo_capability_smoke_report.json"
     },
     {
       "id": "tactile_discrimination_or_localization_response",
@@ -643,7 +654,7 @@
   "literature_records": [
     {
       "record_id": "ladavas_2001_auditory_tactile_extinction",
-      "citation_short": "LÃ davas et al. (2001)",
+      "citation_short": "L\u00c3\u00a0davas et al. (2001)",
       "doi": "10.1093/neucas/7.2.97",
       "source_basis": [
         "openalex_query_variant_exhaustiveness_2026_06_13",
@@ -664,7 +675,7 @@
     },
     {
       "record_id": "farne_ladavas_2002_auditory_pps_humans",
-      "citation_short": "FarnÃ¨ & LÃ davas (2002)",
+      "citation_short": "Farn\u00c3\u00a8 & L\u00c3\u00a0davas (2002)",
       "doi": "10.1162/089892902320474481",
       "source_basis": [
         "openalex_query_variant_exhaustiveness_2026_06_13",
@@ -714,7 +725,6 @@
       "audiotactile_task_family": "static near/far weak-target Go/NoGo tactile detection",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "weak_strong_no_target_gonogo",
         "voice_key_response_capture",
         "electrical_tactile_calibration"
       ],
@@ -769,12 +779,10 @@
         "pubmed_query_variant_exhaustiveness_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "static near/far tactile detection around hand/tool space",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "weak_strong_no_target_gonogo"
-      ],
+      "blocking_constraint_ids": [],
       "missing_publication_parameters": [
         "full trial counts, tactile calibration, and response mapping need extraction"
       ]
@@ -788,12 +796,10 @@
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "static near/far audio-tactile PPS task with rTMS context",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "weak_strong_no_target_gonogo"
-      ],
+      "blocking_constraint_ids": [],
       "missing_publication_parameters": [
         "full audio, tactile, and response settings need extraction"
       ]
@@ -903,12 +909,10 @@
         "holmes_2020_systematic_review"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "static near/far audio-tactile PPS task",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "weak_strong_no_target_gonogo"
-      ],
+      "blocking_constraint_ids": [],
       "missing_publication_parameters": [
         "full audio/tactile/timing parameters need extraction"
       ]
@@ -1630,12 +1634,10 @@
         "holmes_2020_systematic_review"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "static near/far sounds paired with weak vibrotactile targets and Go/NoGo response logic",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "weak_strong_no_target_gonogo"
-      ],
+      "blocking_constraint_ids": [],
       "missing_publication_parameters": [
         "task is publicly documented but needs translation into a static near/far toolkit profile"
       ]

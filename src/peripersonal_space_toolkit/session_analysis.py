@@ -707,6 +707,7 @@ def _pair_tactile_responses(events: list[dict[str, Any]], *, min_rt_s: float, ma
     for tactile in tactile_events:
         onset = _as_float(tactile.get("unix_time"), 0.0)
         response_deadline = onset + max_rt_s
+        response_required = _trial_requires_response(tactile)
         click = None
         for candidate in clicks:
             click_time = _as_float(candidate.get("unix_time"), 0.0)
@@ -714,24 +715,33 @@ def _pair_tactile_responses(events: list[dict[str, Any]], *, min_rt_s: float, ma
                 continue
             if not _same_trial_context(tactile, candidate):
                 continue
-            if click_time < onset + min_rt_s or click_time > response_deadline:
+            valid_start = onset + min_rt_s if response_required else onset
+            if click_time < valid_start or click_time > response_deadline:
                 continue
             click = candidate
             used_click_ids.add(candidate.get("event_id"))
             break
         row = _response_base(tactile)
         row["tactile_unix_time"] = onset
-        row["hit"] = click is not None
+        row["response_required"] = response_required
+        row["expected_response"] = row.get("expected_response") or ("respond" if response_required else "withhold")
+        row["hit"] = (click is not None) if response_required else (click is None)
         if click is not None:
             click_time = _as_float(click.get("unix_time"), 0.0)
             row["click_unix_time"] = click_time
-            row["rt_ms"] = round((click_time - onset) * 1000.0, 6)
+            if response_required:
+                row["rt_ms"] = round((click_time - onset) * 1000.0, 6)
+                row["false_alarm_rt_ms"] = ""
+            else:
+                row["rt_ms"] = ""
+                row["false_alarm_rt_ms"] = round((click_time - onset) * 1000.0, 6)
             row["click_x"] = click.get("x", "")
             row["click_y"] = click.get("y", "")
             row["click_event_id"] = click.get("event_id", "")
         else:
             row["click_unix_time"] = ""
             row["rt_ms"] = ""
+            row["false_alarm_rt_ms"] = ""
             row["click_x"] = ""
             row["click_y"] = ""
             row["click_event_id"] = ""
@@ -754,6 +764,37 @@ def _response_base(event: dict[str, Any]) -> dict[str, Any]:
         "family": _field(event, "family", "Family"),
         "row_label": _field(event, "row_label", "Row_Label", "Row"),
         "soa_ms": _as_int(_field(event, "soa_ms", "SOA_ms"), ""),
+        "expected_response": _field(
+            event,
+            "expected_response",
+            "Expected_Response",
+            "response_expected",
+            "Response_Expected",
+            "required_response",
+            "Required_Response",
+            "correct_response",
+            "Correct_Response",
+        ),
+        "response_rule": _field(
+            event,
+            "response_rule",
+            "Response_Rule",
+            "response_mapping",
+            "Response_Mapping",
+            "task_response_rule",
+            "Task_Response_Rule",
+        ),
+        "target_role": _field(
+            event,
+            "target_role",
+            "Target_Role",
+            "go_nogo_role",
+            "Go_NoGo_Role",
+            "stimulus_role",
+            "Stimulus_Role",
+            "tactile_role",
+            "Tactile_Role",
+        ),
         "noise_type": _field(event, "noise_type", "Noise_Type"),
         "sequence_labels": _field(event, "sequence_labels", "Sequence_Labels"),
         "sequence_variant_key": _field(event, "sequence_variant_key", "Sequence_Variant_Key"),
@@ -2452,6 +2493,113 @@ def _field(row: dict[str, Any], *names: str) -> Any:
     return ""
 
 
+def _trial_requires_response(row: dict[str, Any]) -> bool:
+    expected = _field(
+        row,
+        "expected_response",
+        "Expected_Response",
+        "response_expected",
+        "Response_Expected",
+        "required_response",
+        "Required_Response",
+        "correct_response",
+        "Correct_Response",
+    )
+    decision = _response_expectation_decision(expected)
+    if decision is not None:
+        return decision
+    for value in (
+        _field(
+            row,
+            "target_role",
+            "Target_Role",
+            "go_nogo_role",
+            "Go_NoGo_Role",
+            "stimulus_role",
+            "Stimulus_Role",
+            "tactile_role",
+            "Tactile_Role",
+        ),
+        _field(
+            row,
+            "response_rule",
+            "Response_Rule",
+            "response_mapping",
+            "Response_Mapping",
+            "task_response_rule",
+            "Task_Response_Rule",
+        ),
+        _field(row, "trial_type", "Trial_Type"),
+        _field(row, "family", "Family"),
+    ):
+        decision = _response_expectation_decision(value)
+        if decision is not None:
+            return decision
+    return True
+
+
+def _response_expectation_decision(value: Any) -> bool | None:
+    text = str(value or "").strip().lower()
+    if not text:
+        return None
+    token = re.sub(r"[^a-z0-9]+", "_", text).strip("_")
+    if not token:
+        return None
+    if token in {
+        "0",
+        "false",
+        "no",
+        "none",
+        "withhold",
+        "withhold_response",
+        "no_response",
+        "noresponse",
+        "no_go",
+        "nogo",
+        "no_target",
+        "not_target",
+        "non_target",
+        "nontarget",
+        "strong",
+        "strong_nontarget",
+        "strong_non_target",
+        "distractor",
+    }:
+        return False
+    if token in {
+        "1",
+        "true",
+        "yes",
+        "respond",
+        "response",
+        "click",
+        "button_press",
+        "go",
+        "target",
+        "weak",
+        "weak_target",
+        "weak_go",
+    }:
+        return True
+    parts = set(token.split("_"))
+    has_no_marker = (
+        "no_response" in token
+        or "no_target" in token
+        or "non_target" in token
+        or "nontarget" in token
+        or parts.intersection({"withhold", "nogo", "not", "none", "strong", "distractor", "nontarget"})
+    )
+    strong_response_marker = "respond" in parts or "click" in parts or "go" in parts or "weak" in parts
+    has_response_marker = strong_response_marker or ("target" in parts and not has_no_marker)
+    if has_no_marker and strong_response_marker:
+        return None
+    if has_no_marker:
+        return False
+    if has_response_marker:
+        return True
+    return None
+
+
 def _truthy(value: Any) -> bool:
     if isinstance(value, bool):
         return value
@@ -2472,6 +2620,7 @@ def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
         "during_playback",
         "catch_trial",
         "baseline_trial",
+        "response_required",
     }
     for field in boolean_fields:
         if field in row and row[field] not in (None, ""):

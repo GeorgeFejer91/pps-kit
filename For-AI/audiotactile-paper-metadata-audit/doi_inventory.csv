@@ -5,14 +5,14 @@ kitagawa_2005_sound_complexity,Kitagawa et al. (2005),10.1007/s00221-005-2393-8,
 serino_2007_blind_cane_users,Serino et al. (2007),10.1111/j.1467-9280.2007.01952.x,https://doi.org/10.1111/j.1467-9280.2007.01952.x,not_yet_templated_requires_toolkit_structure,paywalled,paywalled
 serino_2009_tms,Serino et al. (2009),10.1371/journal.pone.0006582,https://doi.org/10.1371/journal.pone.0006582,not_yet_templated_requires_toolkit_structure,open_access_unavailable,not_checked
 tajadura_jimenez_2009_visual_deprivation,Tajadura-Jimenez et al. (2009),10.1016/j.neuropsychologia.2009.07.025,https://doi.org/10.1016/j.neuropsychologia.2009.07.025,not_yet_templated_requires_toolkit_structure,paywalled,not_found
-bassolino_2010_mouse_use,Bassolino et al. (2010),10.1016/j.neuropsychologia.2009.11.009,https://doi.org/10.1016/j.neuropsychologia.2009.11.009,not_yet_templated_requires_toolkit_structure,paywalled,not_found
-serino_2011_rtms,Serino et al. (2011),10.1162/jocn_a_00006,https://doi.org/10.1162/jocn_a_00006,not_yet_templated_requires_toolkit_structure,paywalled,paywalled
+bassolino_2010_mouse_use,Bassolino et al. (2010),10.1016/j.neuropsychologia.2009.11.009,https://doi.org/10.1016/j.neuropsychologia.2009.11.009,not_yet_templated_missing_publication_parameters,paywalled,not_found
+serino_2011_rtms,Serino et al. (2011),10.1162/jocn_a_00006,https://doi.org/10.1162/jocn_a_00006,not_yet_templated_missing_publication_parameters,paywalled,paywalled
 avenanti_2012_motor_cortex,Avenanti et al. (2012),10.1016/j.neuroimage.2012.06.063,https://doi.org/10.1016/j.neuroimage.2012.06.063,not_yet_templated_requires_toolkit_structure,open_access_unavailable,not_checked
 serino_2011_professional_fencers,Serino et al. (2011 professional fencers),,,not_yet_templated_missing_publication_parameters,open_access_unavailable,not_checked
 canzoneri_2012_dynamic_sounds,Canzoneri et al. (2012),10.1371/journal.pone.0044306,https://doi.org/10.1371/journal.pone.0044306,covered_runnable_profile,downloaded,needs_user_download
 canzoneri_2013_tool_use_reshaping,Canzoneri et al. (2013a),10.1007/s00221-013-3532-2,https://doi.org/10.1007/s00221-013-3532-2,covered_blocked_missing_publication_parameters,needs_user_download,needs_user_download
 canzoneri_2013_amputation_prosthesis,Canzoneri et al. (2013b),10.1038/srep02844,https://doi.org/10.1038/srep02844,covered_blocked_missing_publication_parameters,downloaded,needs_user_download
-cimmino_2013_surgical_arm_elongation,Cimmino et al. (2013),10.3233/RNN-120286,https://doi.org/10.3233/RNN-120286,not_yet_templated_requires_toolkit_structure,open_access_unavailable,not_checked
+cimmino_2013_surgical_arm_elongation,Cimmino et al. (2013),10.3233/RNN-120286,https://doi.org/10.3233/RNN-120286,not_yet_templated_missing_publication_parameters,open_access_unavailable,not_checked
 teramoto_2013_visual_deprivation,Teramoto et al. (2013),10.1037/a0028416,https://doi.org/10.1037/a0028416,not_yet_templated_requires_toolkit_structure,paywalled,not_found
 teneggi_2013_social_face,Teneggi et al. (2013),10.1016/j.cub.2013.01.043,https://doi.org/10.1016/j.cub.2013.01.043,covered_blocked_missing_publication_parameters,needs_user_download,not_found
 taffou_2014_cynophobic_rear_looming,Taffou & Viaud-Delmon (2014),10.3389/fpsyt.2014.00122,https://doi.org/10.3389/fpsyt.2014.00122,covered_blocked_missing_publication_parameters,needs_user_download,needs_user_download
@@ -50,7 +50,7 @@ ageing_2021,How ageing shapes body and space representations (2021),10.1016/j.co
 seeming_confines_2021,Seeming confines (2021),10.1016/j.cortex.2021.08.004,https://doi.org/10.1016/j.cortex.2021.08.004,not_yet_templated_missing_publication_parameters,paywalled,not_found
 jazz_duet_2021,Jazz duet PPS (2021),10.1007/s00426-020-01365-6,https://doi.org/10.1007/s00426-020-01365-6,not_yet_templated_missing_publication_parameters,paywalled,downloaded
 taffou_2021_auditory_roughness,Taffou et al. (2021),10.1038/s41598-020-79767-0,https://doi.org/10.1038/s41598-020-79767-0,not_yet_templated_missing_publication_parameters,downloaded,downloaded
-holmes_2020_four_experiments,"Holmes et al. (2020), four experiments",10.1007/s00221-020-05771-5,https://doi.org/10.1007/s00221-020-05771-5,not_yet_templated_requires_toolkit_structure,downloaded,downloaded
+holmes_2020_four_experiments,"Holmes et al. (2020), four experiments",10.1007/s00221-020-05771-5,https://doi.org/10.1007/s00221-020-05771-5,not_yet_templated_missing_publication_parameters,downloaded,downloaded
 schizophrenia_tool_use_2022,Tool-use extends PPS boundaries in schizophrenia (2022),10.1093/schbul/sbac067,https://doi.org/10.1093/schbul/sbac067,not_yet_templated_missing_publication_parameters,needs_user_download,paywalled
 teraoka_2024_front_rear,Teraoka et al. (2024),10.1007/s00221-024-06782-2,https://doi.org/10.1007/s00221-024-06782-2,not_yet_templated_requires_toolkit_structure,paywalled,downloaded
 body_image_social_cognition_2024,Body image and social cognition PPS task (2024),10.1016/j.bodyim.2024.101777,https://doi.org/10.1016/j.bodyim.2024.101777,not_yet_templated_missing_publication_parameters,open_access_unavailable,needs_user_download
