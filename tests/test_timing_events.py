@@ -10,7 +10,12 @@ import pytest
 
 from peripersonal_space_toolkit import timing_schedule as timing_schedule_module
 from peripersonal_space_toolkit.session_events import SessionEventLogger
-from peripersonal_space_toolkit.timing_events import LSL_STREAM_NAME, LSL_NUMERIC_STREAM_NAME, TimingEventHub
+from peripersonal_space_toolkit.timing_events import (
+    LSL_MARKER_CHANNELS,
+    LSL_NUMERIC_STREAM_NAME,
+    LSL_STREAM_NAME,
+    TimingEventHub,
+)
 from peripersonal_space_toolkit.timing_schedule import BlockEventSchedule, ScheduledBlockEvent
 
 
@@ -71,7 +76,7 @@ def test_timing_event_hub_fans_out_to_logger_and_dual_lsl(monkeypatch):
     assert rich.samples[0][0][11] == ""
     assert rich.samples[0][0][12] == ""
     assert rich.samples[0][0][13] == ""
-    assert rich.samples[0][0][14] == "software_log"
+    assert rich.samples[0][0][LSL_MARKER_CHANNELS.index("timestamp_quality")] == "software_log"
     assert numeric.samples[0][0] == [30]
     assert rich.samples[0][1] == pytest.approx(1000.0)
 

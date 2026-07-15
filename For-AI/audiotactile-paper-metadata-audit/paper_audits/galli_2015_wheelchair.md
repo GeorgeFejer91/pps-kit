@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- Resolved in the runnable profile: the physical Gaussian speaker-array amplitude field is represented as front/back virtual moving-source trajectories, preserving the reported PPS timing/count parameters while retaining exact gain/SPL as provenance caveats.
+- No remaining publication-parameter gap recorded in the current coverage ledger.
 
 ## Review Attempts
 

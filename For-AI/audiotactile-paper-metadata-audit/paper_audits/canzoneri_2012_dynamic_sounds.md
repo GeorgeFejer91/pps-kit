@@ -17,9 +17,7 @@
 
 ## Known Prior Gaps
 
-- exact original SoundForge gain/envelope files
-- voice-key response capture
-- electrical tactile threshold calibration
+- No remaining publication-parameter gap recorded in the current coverage ledger.
 
 ## Review Attempts
 

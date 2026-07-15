@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- extract near/far, flat/dynamic, and fMRI block timing separately from scanner context
+- extract near/far, flat/dynamic, and fMRI block timing separately from scanner context; remaining toolkit blocker is fixed ITI/hazard timing policy
 
 ## Review Attempts
 

@@ -3,7 +3,7 @@
 - Record ID: `cell_reports_medicine_2026_consciousness`
 - DOI: `10.1016/j.xcrm.2026.102705`
 - DOI URL: https://doi.org/10.1016/j.xcrm.2026.102705
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: audio-tactile PPS task in sleep/disorders-of-consciousness setting
 - PDF status: `needs_user_download`
 - Supplement status: `not_found`

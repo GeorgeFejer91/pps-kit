@@ -3,7 +3,7 @@
 - Record ID: `holmes_2020_four_experiments`
 - DOI: `10.1007/s00221-020-05771-5`
 - DOI URL: https://doi.org/10.1007/s00221-020-05771-5
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: static near/far sounds paired with weak vibrotactile targets and Go/NoGo response logic
 - PDF status: `downloaded`
 - Supplement status: `downloaded`

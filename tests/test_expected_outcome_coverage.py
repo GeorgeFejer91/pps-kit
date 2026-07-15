@@ -33,6 +33,7 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "ferri_2015_ecological_valence",
     "ferri_2015_jneurosci_itv",
     "ferroni_2020_tool_observation",
+    "ferroni_2026_pps_plasticity",
     "finisguerra_2015_moving_sounds_motor",
     "footsole_vibration_2019",
     "galli_2015_wheelchair",
@@ -119,7 +120,7 @@ def test_expected_outcome_coverage_matches_literature_records_and_builder():
     assert outcome["source_literature_coverage"] == "assets/preloads/audiotactile_literature_coverage.json"
     assert outcome["summary"]["literature_record_count"] == len(outcome["records"]) == len(
         coverage["literature_records"]
-    ) == 74
+    ) == 75
 
     coverage_ids = {record["record_id"] for record in coverage["literature_records"]}
     outcome_ids = {record["record_id"] for record in outcome["records"]}
@@ -137,8 +138,8 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
     }
     assert structured_ids == STRUCTURED_EXPECTED_OUTCOME_IDS
     assert outcome["summary"] == {
-        "literature_record_count": 74,
-        "structured_expected_outcome_record_count": 70,
+        "literature_record_count": 75,
+        "structured_expected_outcome_record_count": 71,
         "pending_expected_outcome_record_count": 0,
         "adjacent_or_out_of_scope_record_count": 4,
         "runnable_profile_parameter_record_count": 12,
@@ -146,13 +147,13 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "mouse_click_simulated_participant_like_comparison_record_count": 12,
         "synthetic_profile_contrast_comparison_record_count": 12,
         "parameter_run_evidence_only_record_count": 0,
-        "not_runnable_no_observed_comparison_record_count": 58,
+        "not_runnable_no_observed_comparison_record_count": 59,
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 4,
-            "not_yet_templated_missing_publication_parameters": 28,
-            "not_yet_templated_requires_toolkit_structure": 22,
+            "not_yet_templated_missing_publication_parameters": 33,
+            "not_yet_templated_requires_toolkit_structure": 18,
             "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 12,
             "template_present_blocked_missing_publication_parameters": 8,
         },

@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- extract moving-sound trajectory, tactile target schedule, vocal response capture, TMS/MEP trigger timing, baseline timing strategy, and trial counts before templating
+- extract moving-sound trajectory, tactile target schedule, vocal response capture, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating
 
 ## Review Attempts
 

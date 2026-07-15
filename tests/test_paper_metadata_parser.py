@@ -45,11 +45,11 @@ def test_paper_audit_package_summarizes_core_pipeline_without_source_artifacts()
     blockers = blocker_counts(records)
 
     assert summary["schema"] == "pps-paper-audit-profile-candidate-summary.v1"
-    assert summary["record_count"] == 74
+    assert summary["record_count"] == 75
     assert summary["category_counts"]["covered_runnable_profile"] == 12
     assert len(summary["runnable_profile_records"]) == 12
-    assert len(summary["missing_parameter_records"]) == 36
-    assert len(summary["toolkit_structure_gap_records"]) == 22
+    assert len(summary["missing_parameter_records"]) == 41
+    assert len(summary["toolkit_structure_gap_records"]) == 18
     assert len(summary["adjacent_out_of_scope_records"]) == 4
     assert blockers
     assert summary["blocker_counts"] == blockers
@@ -75,16 +75,16 @@ def test_paper_metadata_audit_covers_literature_database():
     checklist_ids = {row["record_id"] for row in checklist_rows}
 
     assert summary["schema"] == "pps-paper-metadata-audit-summary.v1"
-    assert summary["record_count"] == len(coverage["literature_records"]) == 74
+    assert summary["record_count"] == len(coverage["literature_records"]) == 75
     assert audit_ids == coverage_ids
     assert checklist_ids == coverage_ids
-    assert len(paper_audits) == 74
-    assert sum(summary["pdf_status_counts"].values()) == 74
-    assert sum(summary["supplement_status_counts"].values()) == 74
-    assert sum(summary["extraction_status_counts"].values()) == 74
+    assert len(paper_audits) == 75
+    assert sum(summary["pdf_status_counts"].values()) == 75
+    assert sum(summary["supplement_status_counts"].values()) == 75
+    assert sum(summary["extraction_status_counts"].values()) == 75
     assert summary["pdf_status_counts"].get("not_applicable") == 4
     assert summary["supplement_status_counts"].get("not_applicable") == 4
-    assert sum(summary["automated_evidence_status_counts"].values()) == 74
+    assert sum(summary["automated_evidence_status_counts"].values()) == 75
     assert summary["automated_evidence_field_total"] == sum(
         int(record["automated_evidence_mining"]["field_count"]) for record in audit_records
     )
@@ -93,7 +93,7 @@ def test_paper_metadata_audit_covers_literature_database():
     assert sum(summary["semantic_review_pass_status_counts"].values()) == summary["semantic_review_pass_total"]
     assert summary["pps_visualization_type_count"] == len(PPS_VISUALIZATION_TYPES)
     assert summary["pps_visualization_candidate_total"] == len(visualization_rows)
-    assert sum(summary["pps_visualization_status_counts"].values()) == 74
+    assert sum(summary["pps_visualization_status_counts"].values()) == 75
     assert sum(summary["pps_visualization_type_counts"].values()) == len(visualization_rows)
     assert all(row["visual_verification_required"] == "yes" for row in visualization_rows)
     assert all(row["plotted_parameter_visual_checklist"] for row in visualization_rows)
@@ -210,7 +210,7 @@ def test_doi_inventory_tracks_every_literature_record():
     doi_ids = {row["record_id"] for row in doi_rows}
 
     assert doi_ids == coverage_ids
-    assert len(doi_rows) == summary["record_count"] == 74
+    assert len(doi_rows) == summary["record_count"] == 75
     assert summary["doi_record_count"] == sum(1 for row in doi_rows if row["doi"])
     assert summary["missing_doi_record_count"] == sum(1 for row in doi_rows if not row["doi"])
     for row in doi_rows:
@@ -228,7 +228,7 @@ def test_pdf_retrieval_inventory_tracks_every_publication_pdf():
     retrieval_ids = {row["record_id"] for row in retrieval_rows}
 
     assert retrieval_ids == set(records)
-    assert len(retrieval_rows) == summary["record_count"] == 74
+    assert len(retrieval_rows) == summary["record_count"] == 75
     assert sum(1 for row in retrieval_rows if row["pdf_retrieved"] == "yes") == summary[
         "pdf_retrieved_record_count"
     ]
@@ -399,7 +399,7 @@ def test_missing_pdf_request_list_tracks_main_pdfs_and_supplements():
         if record["coverage_category"] != "adjacent_out_of_scope"
     }
 
-    assert len(in_scope_ids) == 70
+    assert len(in_scope_ids) == 71
     by_record: dict[str, set[str]] = {}
     for request in requests:
         by_record.setdefault(request["record_id"], set()).add(request["requested_item"])

@@ -7,8 +7,8 @@
     "evidence_boundary": "Protocol 12, static preview parity, one-block and ready-profile fake-audio runner stress, synthetic loopback, ready-profile contrast audits, and mouse-click participant-like expected-outcome audits prove software scheduling, WAV generation, event/marker, artifact, and comparison-readiness contracts. They do not prove human behavioral PPS effects. Observed scientific outcomes require collected participant data."
   },
   "summary": {
-    "literature_record_count": 74,
-    "structured_expected_outcome_record_count": 70,
+    "literature_record_count": 75,
+    "structured_expected_outcome_record_count": 71,
     "pending_expected_outcome_record_count": 0,
     "adjacent_or_out_of_scope_record_count": 4,
     "runnable_profile_parameter_record_count": 12,
@@ -16,13 +16,13 @@
     "mouse_click_simulated_participant_like_comparison_record_count": 12,
     "synthetic_profile_contrast_comparison_record_count": 12,
     "parameter_run_evidence_only_record_count": 0,
-    "not_runnable_no_observed_comparison_record_count": 58,
+    "not_runnable_no_observed_comparison_record_count": 59,
     "adjacent_not_applicable_record_count": 4,
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
-      "not_yet_templated_missing_publication_parameters": 28,
-      "not_yet_templated_requires_toolkit_structure": 22,
+      "not_yet_templated_missing_publication_parameters": 33,
+      "not_yet_templated_requires_toolkit_structure": 18,
       "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 12,
       "template_present_blocked_missing_publication_parameters": 8
     }
@@ -186,7 +186,7 @@
       "record_id": "serino_2009_tms",
       "citation_short": "Serino et al. (2009)",
       "doi": "10.1371/journal.pone.0006582",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -211,7 +211,7 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },
@@ -321,7 +321,7 @@
       "record_id": "avenanti_2012_motor_cortex",
       "citation_short": "Avenanti et al. (2012)",
       "doi": "10.1016/j.neuroimage.2012.06.063",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -346,7 +346,7 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },
@@ -1484,7 +1484,7 @@
       "record_id": "disorders_consciousness_2019",
       "citation_short": "PPS encoding in disorders of consciousness (2019)",
       "doi": "10.1016/j.nicl.2019.101940",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -1512,7 +1512,7 @@
         "manual_review_profile_recreation_assessment": "possible_with_caveats_static_near_far_doc_arm_erp_profile"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },
@@ -1694,6 +1694,39 @@
       "expected_outcome_source_audit": {
         "paper_audit_pdf_status": "open_access_unavailable",
         "paper_audit_supplement_status": "not_found",
+        "paper_audit_extraction_status": "pending_pdf",
+        "paper_audit_metadata_confidence_label": "source_unavailable",
+        "paper_audit_visualization_status": "no_extracted_source",
+        "paper_audit_visualization_candidate_count": "0"
+      },
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+    },
+    {
+      "record_id": "ferroni_2026_pps_plasticity",
+      "citation_short": "Ferroni et al. (2026 PPS plasticity)",
+      "doi": "10.1016/j.neuropsychologia.2026.109490",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "runnable_status": "not_yet_templated",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "motor_and_spatial_determinants_shape_pps_plasticity",
+        "primary_expected_effect": "PPS plasticity is expected to depend on motor and spatial determinants, while sensory and bodily-posture determinants are not expected to exert a significant influence on its plastic properties.",
+        "expected_effect_direction": "motor_and_spatial_determinants_shape_pps_plasticity_sensory_and_posture_do_not",
+        "observable_metric": "PPS plasticity or audio-tactile PPS facilitation/boundary change across determinant manipulations",
+        "condition_contrast": "motor and spatial determinant manipulations versus sensory and bodily-posture determinant manipulations",
+        "source_basis": [
+          "assets/preloads/audiotactile_literature_coverage.json#ferroni_2026_pps_plasticity",
+          "PubMed 42128086 abstract fetched 2026-07-15; DOI 10.1016/j.neuropsychologia.2026.109490"
+        ]
+      },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {
+        "paper_audit_pdf_status": "open_access_unavailable",
+        "paper_audit_supplement_status": "not_checked",
         "paper_audit_extraction_status": "pending_pdf",
         "paper_audit_metadata_confidence_label": "source_unavailable",
         "paper_audit_visualization_status": "no_extracted_source",
@@ -2247,7 +2280,7 @@
       "record_id": "interoception_exteroception_2025",
       "citation_short": "Interoception vs. Exteroception (2025)",
       "doi": "10.1073/pnas.2516229122",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -2272,7 +2305,7 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },

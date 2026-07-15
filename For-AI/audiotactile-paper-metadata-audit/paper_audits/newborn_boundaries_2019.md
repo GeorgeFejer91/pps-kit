@@ -3,7 +3,7 @@
 - Record ID: `newborn_boundaries_2019`
 - DOI: `10.1038/s41598-019-45084-4`
 - DOI URL: https://doi.org/10.1038/s41598-019-45084-4
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: newborn audio-tactile PPS boundary task with sound-intensity/distance and tactile response measures
 - PDF status: `downloaded`
 - Supplement status: `needs_user_download`

@@ -109,7 +109,7 @@ The detailed tucked-away parameter triage matrix lives in `parameter_checklist.m
 
 ## Current Inventory
 
-- Literature records: 74
+- Literature records: 75
 - PDF status counts: `{"downloaded": 26, "needs_user_download": 12, "not_applicable": 5, "open_access_unavailable": 13, "paywalled": 18}`
 - Main PDFs retrieved/missing/not applicable: 26 / 43 / 5
 - Supplement status counts: `{"downloaded": 10, "needs_user_download": 17, "not_applicable": 5, "not_checked": 6, "not_found": 21, "paywalled": 15}`

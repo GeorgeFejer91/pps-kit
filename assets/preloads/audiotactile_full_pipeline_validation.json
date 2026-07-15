@@ -453,11 +453,9 @@
     },
     {
       "audiotactile_task_family": "audio-tactile PPS stimulation with TMS/MEP endpoint",
-      "blocking_constraint_ids": [
-        "external_event_trigger_sync_contract"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Serino et al. (2009)",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.1371/journal.pone.0006582",
       "expected_effect_direction": "early_near_hand_mep_facilitation_late_far_sound_reversal",
@@ -490,12 +488,10 @@
           "template_ids": []
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "external_event_trigger_sync_contract"
-          ],
+          "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "requires full task-method extraction if we later support neurophysiology trigger profiles"
+            "extract audio-tactile task timing, tactile stimulation, MEP/TMS timing, trigger markers, baseline/ITI policy, and trial counts before templating; runner can now preserve declared external trigger metadata but hardware TTL validation remains outside software-runner scope"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -512,13 +508,11 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "external_event_trigger_sync_contract"
-          ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "blocker_ids": [],
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -529,9 +523,9 @@
         }
       },
       "missing_publication_parameters": [
-        "requires full task-method extraction if we later support neurophysiology trigger profiles"
+        "extract audio-tactile task timing, tactile stimulation, MEP/TMS timing, trigger markers, baseline/ITI policy, and trial counts before templating; runner can now preserve declared external trigger metadata but hardware TTL validation remains outside software-runner scope"
       ],
-      "next_required_action": "Implement or validate toolkit support for: external_event_trigger_sync_contract; also extract/source missing paper parameters: requires full task-method extraction if we later support neurophysiology trigger profiles",
+      "next_required_action": "Extract or source the missing paper parameters: extract audio-tactile task timing, tactile stimulation, MEP/TMS timing, trigger markers, baseline/ITI policy, and trial counts before templating; runner can now preserve declared external trigger metadata but hardware TTL validation remains outside software-runner scope",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -544,7 +538,7 @@
         "pdf_status": "open_access_unavailable",
         "supplement_status": "not_checked"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "serino_2009_tms",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -847,11 +841,9 @@
     },
     {
       "audiotactile_task_family": "audio-tactile PPS stimulation with motor-evoked-potential endpoint",
-      "blocking_constraint_ids": [
-        "external_event_trigger_sync_contract"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Avenanti et al. (2012)",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.1016/j.neuroimage.2012.06.063",
       "expected_effect_direction": "pmc_suppression_abolishes_near_hand_motor_coding",
@@ -884,12 +876,10 @@
           "template_ids": []
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "external_event_trigger_sync_contract"
-          ],
+          "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "not a standalone behavioral tactile RT profile in the current toolkit"
+            "extract audio-tactile task timing, tactile stimulation, motor-evoked-potential timing, trigger markers, baseline/ITI policy, and trial counts before templating; runner can now preserve declared external trigger metadata but hardware TTL validation remains outside software-runner scope"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -906,13 +896,11 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "external_event_trigger_sync_contract"
-          ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "blocker_ids": [],
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -923,9 +911,9 @@
         }
       },
       "missing_publication_parameters": [
-        "not a standalone behavioral tactile RT profile in the current toolkit"
+        "extract audio-tactile task timing, tactile stimulation, motor-evoked-potential timing, trigger markers, baseline/ITI policy, and trial counts before templating; runner can now preserve declared external trigger metadata but hardware TTL validation remains outside software-runner scope"
       ],
-      "next_required_action": "Implement or validate toolkit support for: external_event_trigger_sync_contract; also extract/source missing paper parameters: not a standalone behavioral tactile RT profile in the current toolkit",
+      "next_required_action": "Extract or source the missing paper parameters: extract audio-tactile task timing, tactile stimulation, motor-evoked-potential timing, trigger markers, baseline/ITI policy, and trial counts before templating; runner can now preserve declared external trigger metadata but hardware TTL validation remains outside software-runner scope",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -938,7 +926,7 @@
         "pdf_status": "open_access_unavailable",
         "supplement_status": "not_checked"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "avenanti_2012_motor_cortex",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -3943,8 +3931,7 @@
     {
       "audiotactile_task_family": "near/far auditory plus electrical tactile stimulation with ERP endpoint",
       "blocking_constraint_ids": [
-        "electrical_tactile_calibration",
-        "external_event_trigger_sync_contract"
+        "electrical_tactile_calibration"
       ],
       "citation_short": "Spatial tuning of multisensory responses in newborns (2021)",
       "coverage_category": "not_yet_templated_requires_toolkit_structure",
@@ -3981,12 +3968,11 @@
         },
         "source_parameter_extraction": {
           "blockers": [
-            "electrical_tactile_calibration",
-            "external_event_trigger_sync_contract"
+            "electrical_tactile_calibration"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract near/far auditory apparatus, electrical tactile parameters, timing offset, and ERP trigger needs"
+            "extract near/far auditory apparatus, electrical tactile parameters, timing offset, and ERP trigger codes; remaining toolkit blocker is electrical tactile calibration"
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -4004,8 +3990,7 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "electrical_tactile_calibration",
-            "external_event_trigger_sync_contract"
+            "electrical_tactile_calibration"
           ],
           "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
@@ -4021,9 +4006,9 @@
         }
       },
       "missing_publication_parameters": [
-        "extract near/far auditory apparatus, electrical tactile parameters, timing offset, and ERP trigger needs"
+        "extract near/far auditory apparatus, electrical tactile parameters, timing offset, and ERP trigger codes; remaining toolkit blocker is electrical tactile calibration"
       ],
-      "next_required_action": "Implement or validate toolkit support for: electrical_tactile_calibration, external_event_trigger_sync_contract; also extract/source missing paper parameters: extract near/far auditory apparatus, electrical tactile parameters, timing offset, and ERP trigger needs",
+      "next_required_action": "Implement or validate toolkit support for: electrical_tactile_calibration; also extract/source missing paper parameters: extract near/far auditory apparatus, electrical tactile parameters, timing offset, and ERP trigger codes; remaining toolkit blocker is electrical tactile calibration",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -4146,11 +4131,10 @@
     {
       "audiotactile_task_family": "audio-tactile PPS task with neuroclinical endpoint",
       "blocking_constraint_ids": [
-        "external_event_trigger_sync_contract",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "citation_short": "PPS encoding in disorders of consciousness (2019)",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.1016/j.nicl.2019.101940",
       "expected_effect_direction": "near_far_audio_tactile_eeg_encoding_differs_by_consciousness_state",
@@ -4184,12 +4168,11 @@
         },
         "source_parameter_extraction": {
           "blockers": [
-            "external_event_trigger_sync_contract",
             "missing_core_soa_iti_baseline_repetition_parameters"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract 5 cm/75 cm auditory-tactile timing, tactile apparatus, response/EEG triggers, and task execution separately from clinical endpoint"
+            "extract 5 cm/75 cm auditory-tactile timing, tactile apparatus, response/EEG trigger codes, baseline/ITI policy, and trial counts separately from clinical endpoint"
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -4207,13 +4190,12 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "external_event_trigger_sync_contract",
             "missing_core_soa_iti_baseline_repetition_parameters"
           ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -4224,9 +4206,9 @@
         }
       },
       "missing_publication_parameters": [
-        "extract 5 cm/75 cm auditory-tactile timing, tactile apparatus, response/EEG triggers, and task execution separately from clinical endpoint"
+        "extract 5 cm/75 cm auditory-tactile timing, tactile apparatus, response/EEG trigger codes, baseline/ITI policy, and trial counts separately from clinical endpoint"
       ],
-      "next_required_action": "Implement or validate toolkit support for: external_event_trigger_sync_contract, missing_core_soa_iti_baseline_repetition_parameters; also extract/source missing paper parameters: extract 5 cm/75 cm auditory-tactile timing, tactile apparatus, response/EEG triggers, and task execution separately from clinical endpoint",
+      "next_required_action": "Extract or source the missing paper parameters: extract 5 cm/75 cm auditory-tactile timing, tactile apparatus, response/EEG trigger codes, baseline/ITI policy, and trial counts separately from clinical endpoint",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -4239,7 +4221,7 @@
         "pdf_status": "downloaded",
         "supplement_status": "not_found"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "disorders_consciousness_2019",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -4815,10 +4797,109 @@
       ]
     },
     {
+      "audiotactile_task_family": "audio-tactile PPS plasticity task manipulating sensory, motor, spatial, and bodily-posture determinants",
+      "blocking_constraint_ids": [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+      ],
+      "citation_short": "Ferroni et al. (2026 PPS plasticity)",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [],
+      "doi": "10.1016/j.neuropsychologia.2026.109490",
+      "expected_effect_direction": "motor_and_spatial_determinants_shape_pps_plasticity_sensory_and_posture_do_not",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "full_emulated_pipeline_validated": false,
+      "gates": {
+        "expected_outcome_extraction": {
+          "evidence": "Structured expected effect direction is available.",
+          "expected_effect_direction": "motor_and_spatial_determinants_shape_pps_plasticity_sensory_and_posture_do_not",
+          "passed": true,
+          "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#ferroni_2026_pps_plasticity",
+            "PubMed 42128086 abstract fetched 2026-07-15; DOI 10.1016/j.neuropsychologia.2026.109490"
+          ],
+          "status": "structured_expected_outcome_extracted"
+        },
+        "observed_emulated_expected_match": {
+          "evidence": "No observed emulated comparison exists for this record.",
+          "evidence_boundary": "",
+          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+          "passed": false,
+          "source_report": "",
+          "status": "no_observed_emulated_comparison"
+        },
+        "parsimonious_profile_saved": {
+          "evidence": "No current toolkit profile is linked to this literature record.",
+          "passed": false,
+          "profile_completion_statuses": [],
+          "status": "profile_not_yet_created",
+          "template_ids": []
+        },
+        "source_parameter_extraction": {
+          "blockers": [
+            "missing_core_soa_iti_baseline_repetition_parameters"
+          ],
+          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
+          "missing_parameters": [
+            "extract the four-experiment audiotactile PPS plasticity task parameters, including auditory trajectories/locations, tactile timing/site/device, determinant manipulations, response rules, baseline/ITI policy, and trial counts before templating"
+          ],
+          "paper_audit": {
+            "automated_evidence_status": "no_extracted_source",
+            "extraction_status": "pending_pdf",
+            "manual_review_confidence_label": "",
+            "manual_review_profile_recreation_assessment": "",
+            "manual_review_status": "",
+            "metadata_confidence_label": "source_unavailable",
+            "metadata_confidence_score": 0.0,
+            "pdf_status": "open_access_unavailable",
+            "supplement_status": "not_checked"
+          },
+          "passed": false,
+          "status": "source_parameters_missing_or_unresolved"
+        },
+        "toolkit_gui_implementation": {
+          "blocker_ids": [
+            "missing_core_soa_iti_baseline_repetition_parameters"
+          ],
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "passed": false,
+          "profile_readiness": [],
+          "status": "blocked_by_missing_profile_parameters"
+        },
+        "wav_generation_and_runner_execution": {
+          "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
+          "passed": false,
+          "runnable_status": "not_yet_templated",
+          "source_report": "",
+          "status": "runner_execution_not_available_for_record"
+        }
+      },
+      "missing_publication_parameters": [
+        "extract the four-experiment audiotactile PPS plasticity task parameters, including auditory trajectories/locations, tactile timing/site/device, determinant manipulations, response rules, baseline/ITI policy, and trial counts before templating"
+      ],
+      "next_required_action": "Extract or source the missing paper parameters: extract the four-experiment audiotactile PPS plasticity task parameters, including auditory trajectories/locations, tactile timing/site/device, determinant manipulations, response rules, baseline/ITI policy, and trial counts before templating",
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "paper_audit": {
+        "automated_evidence_status": "no_extracted_source",
+        "extraction_status": "pending_pdf",
+        "manual_review_confidence_label": "",
+        "manual_review_profile_recreation_assessment": "",
+        "manual_review_status": "",
+        "metadata_confidence_label": "source_unavailable",
+        "metadata_confidence_score": 0.0,
+        "pdf_status": "open_access_unavailable",
+        "supplement_status": "not_checked"
+      },
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "record_id": "ferroni_2026_pps_plasticity",
+      "runnable_status": "not_yet_templated",
+      "source_basis": [
+        "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15"
+      ]
+    },
+    {
       "audiotactile_task_family": "fMRI audio-tactile task with looming/flat and near/far conditions",
       "blocking_constraint_ids": [
-        "fixed_iti_or_hazard_control_policy",
-        "external_event_trigger_sync_contract"
+        "fixed_iti_or_hazard_control_policy"
       ],
       "citation_short": "Spadone et al. (2021)",
       "coverage_category": "not_yet_templated_requires_toolkit_structure",
@@ -4855,12 +4936,11 @@
         },
         "source_parameter_extraction": {
           "blockers": [
-            "fixed_iti_or_hazard_control_policy",
-            "external_event_trigger_sync_contract"
+            "fixed_iti_or_hazard_control_policy"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract near/far, flat/dynamic, and fMRI block timing separately from scanner context"
+            "extract near/far, flat/dynamic, and fMRI block timing separately from scanner context; remaining toolkit blocker is fixed ITI/hazard timing policy"
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -4878,8 +4958,7 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "fixed_iti_or_hazard_control_policy",
-            "external_event_trigger_sync_contract"
+            "fixed_iti_or_hazard_control_policy"
           ],
           "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
@@ -4895,9 +4974,9 @@
         }
       },
       "missing_publication_parameters": [
-        "extract near/far, flat/dynamic, and fMRI block timing separately from scanner context"
+        "extract near/far, flat/dynamic, and fMRI block timing separately from scanner context; remaining toolkit blocker is fixed ITI/hazard timing policy"
       ],
-      "next_required_action": "Implement or validate toolkit support for: fixed_iti_or_hazard_control_policy, external_event_trigger_sync_contract; also extract/source missing paper parameters: extract near/far, flat/dynamic, and fMRI block timing separately from scanner context",
+      "next_required_action": "Implement or validate toolkit support for: fixed_iti_or_hazard_control_policy; also extract/source missing paper parameters: extract near/far, flat/dynamic, and fMRI block timing separately from scanner context; remaining toolkit blocker is fixed ITI/hazard timing policy",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -6442,11 +6521,10 @@
     {
       "audiotactile_task_family": "audio-tactile self-relevance task placing the auditory source inside versus outside PPS with tactile responses and EEG/HEP endpoint",
       "blocking_constraint_ids": [
-        "external_event_trigger_sync_contract",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "citation_short": "Interoception vs. Exteroception (2025)",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.1073/pnas.2516229122",
       "expected_effect_direction": "cardiac_interoception_competes_with_tactile_rt_and_facilitates_self_relevance_encoding",
@@ -6480,12 +6558,11 @@
         },
         "source_parameter_extraction": {
           "blockers": [
-            "external_event_trigger_sync_contract",
             "missing_core_soa_iti_baseline_repetition_parameters"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract auditory inside/outside-PPS locations, tactile timing, response window, and EEG/HEP trigger timing requirements"
+            "extract auditory inside/outside-PPS locations, tactile timing, response window, baseline/ITI policy, trial counts, and EEG/HEP trigger timing requirements"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -6503,13 +6580,12 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "external_event_trigger_sync_contract",
             "missing_core_soa_iti_baseline_repetition_parameters"
           ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -6520,9 +6596,9 @@
         }
       },
       "missing_publication_parameters": [
-        "extract auditory inside/outside-PPS locations, tactile timing, response window, and EEG/HEP trigger timing requirements"
+        "extract auditory inside/outside-PPS locations, tactile timing, response window, baseline/ITI policy, trial counts, and EEG/HEP trigger timing requirements"
       ],
-      "next_required_action": "Implement or validate toolkit support for: external_event_trigger_sync_contract, missing_core_soa_iti_baseline_repetition_parameters; also extract/source missing paper parameters: extract auditory inside/outside-PPS locations, tactile timing, response window, and EEG/HEP trigger timing requirements",
+      "next_required_action": "Extract or source the missing paper parameters: extract auditory inside/outside-PPS locations, tactile timing, response window, baseline/ITI policy, trial counts, and EEG/HEP trigger timing requirements",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -6535,7 +6611,7 @@
         "pdf_status": "needs_user_download",
         "supplement_status": "paywalled"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "interoception_exteroception_2025",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -7369,7 +7445,6 @@
       "audiotactile_task_family": "moving-sound hand-PPS task with rare tactile targets and motor-system/TMS endpoint",
       "blocking_constraint_ids": [
         "voice_key_response_capture",
-        "external_event_trigger_sync_contract",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "citation_short": "Finisguerra et al. (2015)",
@@ -7408,12 +7483,11 @@
         "source_parameter_extraction": {
           "blockers": [
             "voice_key_response_capture",
-            "external_event_trigger_sync_contract",
             "missing_core_soa_iti_baseline_repetition_parameters"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract moving-sound trajectory, tactile target schedule, vocal response capture, TMS/MEP trigger timing, baseline timing strategy, and trial counts before templating"
+            "extract moving-sound trajectory, tactile target schedule, vocal response capture, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -7432,7 +7506,6 @@
         "toolkit_gui_implementation": {
           "blocker_ids": [
             "voice_key_response_capture",
-            "external_event_trigger_sync_contract",
             "missing_core_soa_iti_baseline_repetition_parameters"
           ],
           "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
@@ -7449,9 +7522,9 @@
         }
       },
       "missing_publication_parameters": [
-        "extract moving-sound trajectory, tactile target schedule, vocal response capture, TMS/MEP trigger timing, baseline timing strategy, and trial counts before templating"
+        "extract moving-sound trajectory, tactile target schedule, vocal response capture, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating"
       ],
-      "next_required_action": "Implement or validate toolkit support for: voice_key_response_capture, external_event_trigger_sync_contract, missing_core_soa_iti_baseline_repetition_parameters; also extract/source missing paper parameters: extract moving-sound trajectory, tactile target schedule, vocal response capture, TMS/MEP trigger timing, baseline timing strategy, and trial counts before templating",
+      "next_required_action": "Implement or validate toolkit support for: voice_key_response_capture, missing_core_soa_iti_baseline_repetition_parameters; also extract/source missing paper parameters: extract moving-sound trajectory, tactile target schedule, vocal response capture, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -7595,51 +7668,51 @@
     "gate_status_counts": {
       "expected_outcome_extraction": {
         "not_applicable_adjacent_record": 4,
-        "structured_expected_outcome_extracted": 70
+        "structured_expected_outcome_extracted": 71
       },
       "observed_emulated_expected_match": {
         "emulated_observed_direction_matches_expected": 12,
-        "no_observed_emulated_comparison": 58,
+        "no_observed_emulated_comparison": 59,
         "not_applicable_adjacent_record": 4
       },
       "parsimonious_profile_saved": {
         "not_applicable_adjacent_record": 4,
         "parsimonious_profile_complete": 12,
-        "profile_not_yet_created": 50,
+        "profile_not_yet_created": 51,
         "profile_scaffold_present_but_incomplete": 8
       },
       "source_parameter_extraction": {
         "minimum_source_parameters_captured": 12,
         "not_applicable_adjacent_record": 4,
-        "source_parameters_missing_or_unresolved": 58
+        "source_parameters_missing_or_unresolved": 59
       },
       "toolkit_gui_implementation": {
-        "blocked_by_missing_profile_parameters": 36,
-        "blocked_by_toolkit_structure_or_response_contract": 22,
+        "blocked_by_missing_profile_parameters": 41,
+        "blocked_by_toolkit_structure_or_response_contract": 18,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 12
       },
       "wav_generation_and_runner_execution": {
         "not_applicable_adjacent_record": 4,
-        "runner_execution_not_available_for_record": 58,
+        "runner_execution_not_available_for_record": 59,
         "wav_runner_mouse_click_emulation_available": 12
       }
     },
     "human_behavioral_observed_record_count": 0,
-    "in_scope_record_count": 70,
-    "literature_record_count": 74,
+    "in_scope_record_count": 71,
+    "literature_record_count": 75,
     "physical_loopback_observed_record_count": 0,
     "pipeline_status_counts": {
       "adjacent_not_applicable": 4,
       "full_emulated_source_to_runner_pipeline_validated": 12,
       "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 28,
-      "toolkit_structure_or_response_contract_missing": 22
+      "source_parameters_missing_before_profile_creation": 33,
+      "toolkit_structure_or_response_contract_missing": 18
     },
     "primary_gap_counts": {
       "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 28,
-      "toolkit_structure_or_response_contract_missing": 22
+      "source_parameters_missing_before_profile_creation": 33,
+      "toolkit_structure_or_response_contract_missing": 18
     }
   }
 }

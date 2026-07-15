@@ -32,13 +32,13 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     status = json.loads(STATUS_PATH.read_text(encoding="utf-8"))
 
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
-    assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 74
+    assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
         "covered_runnable_profile": 12,
         "covered_blocked_missing_publication_parameters": 8,
         "covered_blocked_toolkit_structure": 0,
-        "not_yet_templated_requires_toolkit_structure": 22,
-        "not_yet_templated_missing_publication_parameters": 28,
+        "not_yet_templated_requires_toolkit_structure": 18,
+        "not_yet_templated_missing_publication_parameters": 33,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
@@ -137,6 +137,23 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
             "artifacts/validation_runs/current_goal_tactile_waveform_capability_20260715/"
             "tactile_waveform_capability_smoke_report.json"
         )
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "external_trigger_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_external_trigger_contract_20260715/"
+            "external_trigger_contract_capability_smoke_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15"
+        and source.get("kind") == "pubmed_live_spot_check"
+        and source.get("pmid") == "42128086"
+        and source.get("doi") == "10.1016/j.neuropsychologia.2026.109490"
         for source in coverage["evidence_sources"]
     )
 
@@ -249,6 +266,14 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "artifacts/validation_runs/current_goal_tactile_waveform_capability_20260715/"
         "tactile_waveform_capability_smoke_report.json"
     )
+    external_trigger_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "external_event_trigger_sync_contract"
+    )
+    assert external_trigger_constraint["toolkit_status"] == "supported_by_external_trigger_contract_capability_smoke"
+    assert external_trigger_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_external_trigger_contract_20260715/"
+        "external_trigger_contract_capability_smoke_report.json"
+    )
     multi_speaker_constraint = next(
         item for item in coverage["constraint_taxonomy"] if item["id"] == "multi_speaker_array_switching"
     )
@@ -328,6 +353,11 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["social_coding_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["social_perception_2017"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["ferroni_2020_tool_observation"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["ferroni_2026_pps_plasticity"]["doi"] == "10.1016/j.neuropsychologia.2026.109490"
+    assert records["ferroni_2026_pps_plasticity"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["ferroni_2026_pps_plasticity"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+    ]
     assert records["ageing_2021"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["seeming_confines_2021"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["jazz_duet_2021"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
@@ -345,7 +375,10 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["amemiya_2017_pseudowalking_footsole"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["serino_2011_professional_fencers"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["interoception_exteroception_2025"]["doi"] == "10.1073/pnas.2516229122"
-    assert records["interoception_exteroception_2025"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
+    assert records["interoception_exteroception_2025"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["interoception_exteroception_2025"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+    ]
     assert records["amiel_2025_front_rear"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert records["body_image_social_cognition_2024"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["taffou_2021_auditory_roughness"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
@@ -431,10 +464,10 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "electrical_tactile_calibration",
     ]
     assert records["teneggi_2013_social_face"]["doi"] == "10.1016/j.cub.2013.01.043"
-    assert records["serino_2009_tms"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert "external_event_trigger_sync_contract" in records["serino_2009_tms"]["blocking_constraint_ids"]
-    assert records["avenanti_2012_motor_cortex"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert records["avenanti_2012_motor_cortex"]["blocking_constraint_ids"] == ["external_event_trigger_sync_contract"]
+    assert records["serino_2009_tms"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["serino_2009_tms"]["blocking_constraint_ids"] == []
+    assert records["avenanti_2012_motor_cortex"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["avenanti_2012_motor_cortex"]["blocking_constraint_ids"] == []
     assert records["barumerli_2026_semantic_looming_auditory_only"]["coverage_category"] == "adjacent_out_of_scope"
     assert records["barumerli_2026_semantic_looming_auditory_only"]["doi"] == "10.1038/s41598-026-48067-4"
 
@@ -443,6 +476,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         assert "static_near_far_trial_family" not in record["blocking_constraint_ids"], record["record_id"]
         assert "weak_strong_no_target_gonogo" not in record["blocking_constraint_ids"], record["record_id"]
         assert "tactile_waveform_frequency_profile" not in record["blocking_constraint_ids"], record["record_id"]
+        assert "external_event_trigger_sync_contract" not in record["blocking_constraint_ids"], record["record_id"]
         assert not (set(record["blocking_constraint_ids"]) & non_blocking_tokens), record["record_id"]
         for constraint_id in record["blocking_constraint_ids"]:
             assert constraint_dimensions[constraint_id] in task_execution_dimensions, record["record_id"]

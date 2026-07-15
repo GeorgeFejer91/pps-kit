@@ -84,7 +84,7 @@ SEGMENT_BLOCK_PREVIEW_SCHEMA = "pps-block-csv-preview.v1"
 LAST_EXPERIMENT_SCHEMA = "pps-last-experiment.v1"
 PREPARED_SESSION_QUEUE_SCHEMA = "pps-prepared-session-queue.v1"
 BLOCK_WAV_CACHE_SCHEMA = "pps-session-block-cache.v1"
-BLOCK_WAV_CACHE_VERSION = "2026-07-15.tactile-waveform.v1"
+BLOCK_WAV_CACHE_VERSION = "2026-07-15.external-trigger-contract.v1"
 RESPONSE_MARKER_GAIN = 0.05
 EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S = 1.0
 LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_launched"}
@@ -493,6 +493,12 @@ PARTICIPANT_TRIAL_FIELDNAMES = [
     "tactile_duration_ms",
     "tactile_amplitude",
     "tactile_waveform_generated",
+    "external_trigger_required",
+    "external_trigger_modality",
+    "external_trigger_role",
+    "external_trigger_code",
+    "external_trigger_tolerance_ms",
+    "external_trigger_channel",
     "catch_trial",
     "audio_present",
     "stimulus_start_unix_time",
@@ -723,6 +729,42 @@ class ParticipantTrialCsvWriter:
                 base,
                 "tactile_waveform_generated",
                 "Tactile_Waveform_Generated",
+                default="",
+            ),
+            "external_trigger_required": _row_value(
+                base,
+                "external_trigger_required",
+                "External_Trigger_Required",
+                default="",
+            ),
+            "external_trigger_modality": _row_value(
+                base,
+                "external_trigger_modality",
+                "External_Trigger_Modality",
+                default="",
+            ),
+            "external_trigger_role": _row_value(
+                base,
+                "external_trigger_role",
+                "External_Trigger_Role",
+                default="",
+            ),
+            "external_trigger_code": _row_value(
+                base,
+                "external_trigger_code",
+                "External_Trigger_Code",
+                default="",
+            ),
+            "external_trigger_tolerance_ms": _row_value(
+                base,
+                "external_trigger_tolerance_ms",
+                "External_Trigger_Tolerance_ms",
+                default="",
+            ),
+            "external_trigger_channel": _row_value(
+                base,
+                "external_trigger_channel",
+                "External_Trigger_Channel",
                 default="",
             ),
             "catch_trial": str(catch_trial).lower(),
@@ -2282,6 +2324,12 @@ def _cache_manifest_trial_payload(trial_rows: list[dict[str, Any]]) -> list[dict
                 "tactile_duration_ms": row.get("Tactile_Duration_ms", ""),
                 "tactile_amplitude": row.get("Tactile_Amplitude", ""),
                 "tactile_waveform_generated": row.get("Tactile_Waveform_Generated", ""),
+                "external_trigger_required": row.get("External_Trigger_Required", ""),
+                "external_trigger_modality": row.get("External_Trigger_Modality", ""),
+                "external_trigger_role": row.get("External_Trigger_Role", ""),
+                "external_trigger_code": row.get("External_Trigger_Code", ""),
+                "external_trigger_tolerance_ms": row.get("External_Trigger_Tolerance_ms", ""),
+                "external_trigger_channel": row.get("External_Trigger_Channel", ""),
             }
         )
     return trials
@@ -6999,6 +7047,42 @@ def _segment_session_trial_row(
             else ""
         ),
         "Tactile_Waveform_Generated": str(bool(tactile_waveform.get("generated"))).lower() if has_tactile else "",
+        "External_Trigger_Required": _row_value(
+            source,
+            "external_trigger_required",
+            "External_Trigger_Required",
+            default="",
+        ),
+        "External_Trigger_Modality": _row_value(
+            source,
+            "external_trigger_modality",
+            "External_Trigger_Modality",
+            default="",
+        ),
+        "External_Trigger_Role": _row_value(
+            source,
+            "external_trigger_role",
+            "External_Trigger_Role",
+            default="",
+        ),
+        "External_Trigger_Code": _row_value(
+            source,
+            "external_trigger_code",
+            "External_Trigger_Code",
+            default="",
+        ),
+        "External_Trigger_Tolerance_ms": _row_value(
+            source,
+            "external_trigger_tolerance_ms",
+            "External_Trigger_Tolerance_ms",
+            default="",
+        ),
+        "External_Trigger_Channel": _row_value(
+            source,
+            "external_trigger_channel",
+            "External_Trigger_Channel",
+            default="",
+        ),
         "Trial_Start_S": f"{trial_start_s:.9f}",
         "Trial_Start_Sample": trial_start_sample,
         "Looming_Onset_S": f"{looming_onset_s:.9f}" if family in {"audio_tactile", "catch"} else "",
@@ -7075,6 +7159,12 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "Tactile_Duration_ms",
         "Tactile_Amplitude",
         "Tactile_Waveform_Generated",
+        "External_Trigger_Required",
+        "External_Trigger_Modality",
+        "External_Trigger_Role",
+        "External_Trigger_Code",
+        "External_Trigger_Tolerance_ms",
+        "External_Trigger_Channel",
         "Trial_Start_S",
         "Trial_Start_Sample",
         "Looming_Onset_S",

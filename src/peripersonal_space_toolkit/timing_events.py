@@ -126,6 +126,30 @@ class TriggerDictionary:
                     "family": payload.get("family", payload.get("Family", "")),
                     "row_label": payload.get("row_label", payload.get("Row_Label", "")),
                     "soa_ms": payload.get("soa_ms", payload.get("SOA_ms", "")),
+                    "external_trigger_required": payload.get(
+                        "external_trigger_required",
+                        payload.get("External_Trigger_Required", ""),
+                    ),
+                    "external_trigger_modality": payload.get(
+                        "external_trigger_modality",
+                        payload.get("External_Trigger_Modality", ""),
+                    ),
+                    "external_trigger_role": payload.get(
+                        "external_trigger_role",
+                        payload.get("External_Trigger_Role", ""),
+                    ),
+                    "external_trigger_code": payload.get(
+                        "external_trigger_code",
+                        payload.get("External_Trigger_Code", ""),
+                    ),
+                    "external_trigger_tolerance_ms": payload.get(
+                        "external_trigger_tolerance_ms",
+                        payload.get("External_Trigger_Tolerance_ms", ""),
+                    ),
+                    "external_trigger_channel": payload.get(
+                        "external_trigger_channel",
+                        payload.get("External_Trigger_Channel", ""),
+                    ),
                     "sample_index": getattr(event, "sample_index", ""),
                 }
 
@@ -159,6 +183,30 @@ class TriggerDictionary:
                 "block_index": payload.get("block_index", payload.get("block_number", "")),
                 "trial_index": payload.get("trial_index", payload.get("trial_number", "")),
                 "trial_uid": payload.get("trial_uid", payload.get("Trial_UID", "")),
+                "external_trigger_required": payload.get(
+                    "external_trigger_required",
+                    payload.get("External_Trigger_Required", ""),
+                ),
+                "external_trigger_modality": payload.get(
+                    "external_trigger_modality",
+                    payload.get("External_Trigger_Modality", ""),
+                ),
+                "external_trigger_role": payload.get(
+                    "external_trigger_role",
+                    payload.get("External_Trigger_Role", ""),
+                ),
+                "external_trigger_code": payload.get(
+                    "external_trigger_code",
+                    payload.get("External_Trigger_Code", ""),
+                ),
+                "external_trigger_tolerance_ms": payload.get(
+                    "external_trigger_tolerance_ms",
+                    payload.get("External_Trigger_Tolerance_ms", ""),
+                ),
+                "external_trigger_channel": payload.get(
+                    "external_trigger_channel",
+                    payload.get("External_Trigger_Channel", ""),
+                ),
                 "sample_index": payload.get("sample_index", ""),
                 "dynamic": True,
             }

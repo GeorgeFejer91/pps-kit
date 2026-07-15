@@ -3,7 +3,7 @@
 - Record ID: `serino_2009_tms`
 - DOI: `10.1371/journal.pone.0006582`
 - DOI URL: https://doi.org/10.1371/journal.pone.0006582
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: audio-tactile PPS stimulation with TMS/MEP endpoint
 - PDF status: `open_access_unavailable`
 - Supplement status: `not_checked`
@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- requires full task-method extraction if we later support neurophysiology trigger profiles
+- extract audio-tactile task timing, tactile stimulation, MEP/TMS timing, trigger markers, baseline/ITI policy, and trial counts before templating; runner can now preserve declared external trigger metadata but hardware TTL validation remains outside software-runner scope
 
 ## Review Attempts
 

@@ -17,10 +17,7 @@
 
 ## Known Prior Gaps
 
-- exact original white-noise asset
-- exact loudspeaker switching/gain transfer law
-- numeric response timeout
-- unfixed experimenter-started ITI distribution
+- No remaining publication-parameter gap recorded in the current coverage ledger.
 
 ## Review Attempts
 

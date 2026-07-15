@@ -3,7 +3,7 @@
 - Record ID: `bassolino_2010_mouse_use`
 - DOI: `10.1016/j.neuropsychologia.2009.11.009`
 - DOI URL: https://doi.org/10.1016/j.neuropsychologia.2009.11.009
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: static near/far tactile detection around hand/tool space
 - PDF status: `paywalled`
 - Supplement status: `not_found`

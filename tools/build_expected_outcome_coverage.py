@@ -547,6 +547,22 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
             "Consensus MCP 2026-07-15 query: 10.1016/j.cortex.2020.11.021 ageing body space representations peripersonal space audio tactile",
         ],
     },
+    "ferroni_2026_pps_plasticity": {
+        "outcome_family": "motor_and_spatial_determinants_shape_pps_plasticity",
+        "primary_expected_effect": (
+            "PPS plasticity is expected to depend on motor and spatial "
+            "determinants, while sensory and bodily-posture determinants are "
+            "not expected to exert a significant influence on its plastic "
+            "properties."
+        ),
+        "expected_effect_direction": "motor_and_spatial_determinants_shape_pps_plasticity_sensory_and_posture_do_not",
+        "observable_metric": "PPS plasticity or audio-tactile PPS facilitation/boundary change across determinant manipulations",
+        "condition_contrast": "motor and spatial determinant manipulations versus sensory and bodily-posture determinant manipulations",
+        "source_basis": [
+            "assets/preloads/audiotactile_literature_coverage.json#ferroni_2026_pps_plasticity",
+            "PubMed 42128086 abstract fetched 2026-07-15; DOI 10.1016/j.neuropsychologia.2026.109490",
+        ],
+    },
     "ageing_2021": {
         "outcome_family": "ageing_alters_body_representation_but_preserves_pps",
         "primary_expected_effect": (

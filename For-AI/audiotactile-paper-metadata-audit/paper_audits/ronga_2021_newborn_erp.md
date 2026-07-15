@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- extract near/far auditory apparatus, electrical tactile parameters, timing offset, and ERP trigger needs
+- extract near/far auditory apparatus, electrical tactile parameters, timing offset, and ERP trigger codes; remaining toolkit blocker is electrical tactile calibration
 
 ## Review Attempts
 

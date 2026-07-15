@@ -813,6 +813,16 @@ def _response_base(event: dict[str, Any]) -> dict[str, Any]:
         ),
         "tactile_amplitude": _field(event, "tactile_amplitude", "Tactile_Amplitude"),
         "tactile_waveform_generated": _field(event, "tactile_waveform_generated", "Tactile_Waveform_Generated"),
+        "external_trigger_required": _field(event, "external_trigger_required", "External_Trigger_Required"),
+        "external_trigger_modality": _field(event, "external_trigger_modality", "External_Trigger_Modality"),
+        "external_trigger_role": _field(event, "external_trigger_role", "External_Trigger_Role"),
+        "external_trigger_code": _field(event, "external_trigger_code", "External_Trigger_Code"),
+        "external_trigger_tolerance_ms": _field(
+            event,
+            "external_trigger_tolerance_ms",
+            "External_Trigger_Tolerance_ms",
+        ),
+        "external_trigger_channel": _field(event, "external_trigger_channel", "External_Trigger_Channel"),
         "noise_type": _field(event, "noise_type", "Noise_Type"),
         "sequence_labels": _field(event, "sequence_labels", "Sequence_Labels"),
         "sequence_variant_key": _field(event, "sequence_variant_key", "Sequence_Variant_Key"),
@@ -2640,6 +2650,7 @@ def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
         "baseline_trial",
         "response_required",
         "tactile_waveform_generated",
+        "external_trigger_required",
     }
     for field in boolean_fields:
         if field in row and row[field] not in (None, ""):
