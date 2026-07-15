@@ -1,6 +1,6 @@
 record_id,citation_short,doi,doi_url,coverage_category,pdf_status,supplement_status
-ladavas_2001_auditory_tactile_extinction,L\xc3\xa0davas et al. (2001),10.1093/neucas/7.2.97,https://doi.org/10.1093/neucas/7.2.97,not_yet_templated_requires_toolkit_structure,paywalled,paywalled
-farne_ladavas_2002_auditory_pps_humans,Farn\xc3\xa8 & L\xc3\xa0davas (2002),10.1162/089892902320474481,https://doi.org/10.1162/089892902320474481,not_yet_templated_requires_toolkit_structure,paywalled,paywalled
+ladavas_2001_auditory_tactile_extinction,L\xc3\xa0davas et al. (2001),10.1093/neucas/7.2.97,https://doi.org/10.1093/neucas/7.2.97,not_yet_templated_missing_publication_parameters,paywalled,paywalled
+farne_ladavas_2002_auditory_pps_humans,Farn\xc3\xa8 & L\xc3\xa0davas (2002),10.1162/089892902320474481,https://doi.org/10.1162/089892902320474481,not_yet_templated_missing_publication_parameters,paywalled,paywalled
 kitagawa_2005_sound_complexity,Kitagawa et al. (2005),10.1007/s00221-005-2393-8,https://doi.org/10.1007/s00221-005-2393-8,not_yet_templated_missing_publication_parameters,open_access_unavailable,not_checked
 serino_2007_blind_cane_users,Serino et al. (2007),10.1111/j.1467-9280.2007.01952.x,https://doi.org/10.1111/j.1467-9280.2007.01952.x,not_yet_templated_missing_publication_parameters,paywalled,paywalled
 serino_2009_tms,Serino et al. (2009),10.1371/journal.pone.0006582,https://doi.org/10.1371/journal.pone.0006582,not_yet_templated_missing_publication_parameters,open_access_unavailable,not_checked

@@ -84,7 +84,7 @@ SEGMENT_BLOCK_PREVIEW_SCHEMA = "pps-block-csv-preview.v1"
 LAST_EXPERIMENT_SCHEMA = "pps-last-experiment.v1"
 PREPARED_SESSION_QUEUE_SCHEMA = "pps-prepared-session-queue.v1"
 BLOCK_WAV_CACHE_SCHEMA = "pps-session-block-cache.v1"
-BLOCK_WAV_CACHE_VERSION = "2026-07-15.electrical-tactile-contract.v1"
+BLOCK_WAV_CACHE_VERSION = "2026-07-15.extinction-contract.v1"
 RESPONSE_MARKER_GAIN = 0.05
 EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S = 1.0
 LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_launched"}
@@ -5807,6 +5807,12 @@ def _trial_requires_choice_scoring(choice_metadata: dict[str, Any]) -> bool:
             "tactile_localization",
             "tactile_localisation",
             "spatial_choice",
+            "extinction",
+            "cross_modal_extinction",
+            "cross_modal_extinction_report",
+            "tactile_extinction",
+            "tactile_report",
+            "percept_report",
             "forced_choice",
             "two_alternative_forced_choice",
             "2afc",
@@ -5834,6 +5840,8 @@ def _response_choice_from_click(click: dict[str, Any], choice_metadata: dict[str
         return choices[0]
     policy = _response_choice_token(choice_metadata.get("response_scoring_policy"))
     mode = _response_choice_token(choice_metadata.get("response_mode"))
+    if "mouse_quadrant" in policy or ("quadrant" in policy and "mouse" in policy):
+        return _choice_by_mouse_quadrant(click, choices)
     if "mouse_y_split" in policy or ("vertical" in policy and "mouse" in policy):
         axis_value = _as_float(click.get("y"), default=math.nan)
         low_side = "up"
@@ -5856,6 +5864,28 @@ def _response_choice_from_click(click: dict[str, Any], choice_metadata: dict[str
     return choices[0] if axis_value < threshold else choices[1]
 
 
+def _choice_by_mouse_quadrant(click: dict[str, Any], choices: list[str]) -> str:
+    x = _as_float(click.get("x"), default=math.nan)
+    y = _as_float(click.get("y"), default=math.nan)
+    if not math.isfinite(x) or not math.isfinite(y):
+        return ""
+    x_threshold = 0.5 if abs(x) <= 1.0 else 500.0
+    y_threshold = 0.5 if abs(y) <= 1.0 else 500.0
+    if x < x_threshold and y < y_threshold:
+        label = "left"
+    elif x >= x_threshold and y < y_threshold:
+        label = "right"
+    elif x < x_threshold and y >= y_threshold:
+        label = "bilateral"
+    else:
+        label = "none"
+    labelled = _choice_by_report_label(choices, label)
+    if labelled:
+        return labelled
+    index = {"left": 0, "right": 1, "bilateral": 2, "none": 3}[label]
+    return choices[index] if index < len(choices) else choices[-1]
+
+
 def _split_response_choice_set(value: Any) -> list[str]:
     text = str(value or "").strip()
     if not text:
@@ -5868,6 +5898,22 @@ def _choice_by_side(choices: list[str], side: str) -> str:
     for choice in choices:
         token = _response_choice_token(choice)
         if token == side_token or side_token in token.split("_"):
+            return choice
+    return ""
+
+
+def _choice_by_report_label(choices: list[str], label: str) -> str:
+    aliases = {
+        "left": {"left", "left_side", "contralesional_left", "ipsilesional_left"},
+        "right": {"right", "right_side", "contralesional_right", "ipsilesional_right"},
+        "bilateral": {"bilateral", "both", "both_sides", "left_and_right", "right_and_left", "double"},
+        "none": {"none", "no_touch", "absent", "nothing", "no_report", "not_detected", "undetected"},
+    }
+    wanted = aliases.get(label, {_response_choice_token(label)})
+    for choice in choices:
+        token = _response_choice_token(choice)
+        parts = set(token.split("_"))
+        if token in wanted or wanted.intersection(parts):
             return choice
     return ""
 

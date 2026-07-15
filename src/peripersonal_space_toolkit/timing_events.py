@@ -126,6 +126,9 @@ class TriggerDictionary:
                     "family": payload.get("family", payload.get("Family", "")),
                     "row_label": payload.get("row_label", payload.get("Row_Label", "")),
                     "soa_ms": payload.get("soa_ms", payload.get("SOA_ms", "")),
+                    "expected_response": payload.get("expected_response", payload.get("Expected_Response", "")),
+                    "response_rule": payload.get("response_rule", payload.get("Response_Rule", "")),
+                    "target_role": payload.get("target_role", payload.get("Target_Role", "")),
                     "response_mode": payload.get("response_mode", payload.get("Response_Mode", "")),
                     "response_choice_set": payload.get(
                         "response_choice_set",
@@ -278,6 +281,9 @@ class TriggerDictionary:
                 "block_index": payload.get("block_index", payload.get("block_number", "")),
                 "trial_index": payload.get("trial_index", payload.get("trial_number", "")),
                 "trial_uid": payload.get("trial_uid", payload.get("Trial_UID", "")),
+                "expected_response": payload.get("expected_response", payload.get("Expected_Response", "")),
+                "response_rule": payload.get("response_rule", payload.get("Response_Rule", "")),
+                "target_role": payload.get("target_role", payload.get("Target_Role", "")),
                 "response_mode": payload.get("response_mode", payload.get("Response_Mode", "")),
                 "response_choice_set": payload.get(
                     "response_choice_set",

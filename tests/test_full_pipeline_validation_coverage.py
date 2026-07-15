@@ -54,13 +54,13 @@ def test_full_pipeline_validation_summary_is_conservative():
         "adjacent_not_applicable": 4,
         "full_emulated_source_to_runner_pipeline_validated": 12,
         "profile_present_but_source_parameters_missing": 8,
-        "source_parameters_missing_before_profile_creation": 45,
-        "toolkit_structure_or_response_contract_missing": 6,
+        "source_parameters_missing_before_profile_creation": 47,
+        "toolkit_structure_or_response_contract_missing": 4,
     }
     assert summary["primary_gap_counts"] == {
         "profile_present_but_source_parameters_missing": 8,
-        "source_parameters_missing_before_profile_creation": 45,
-        "toolkit_structure_or_response_contract_missing": 6,
+        "source_parameters_missing_before_profile_creation": 47,
+        "toolkit_structure_or_response_contract_missing": 4,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
         "minimum_source_parameters_captured": 12,
@@ -73,8 +73,8 @@ def test_full_pipeline_validation_summary_is_conservative():
         "not_applicable_adjacent_record": 4,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
-        "blocked_by_missing_profile_parameters": 53,
-        "blocked_by_toolkit_structure_or_response_contract": 6,
+        "blocked_by_missing_profile_parameters": 55,
+        "blocked_by_toolkit_structure_or_response_contract": 4,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 12,
     }
@@ -136,6 +136,16 @@ def test_full_pipeline_blocks_at_the_first_unproven_layer():
         "blocked_by_missing_profile_parameters"
     )
     assert kitagawa["blocking_constraint_ids"] == []
+
+    ladavas = records["ladavas_2001_auditory_tactile_extinction"]
+    assert ladavas["pipeline_status"] == "source_parameters_missing_before_profile_creation"
+    assert ladavas["gates"]["toolkit_gui_implementation"]["status"] == "blocked_by_missing_profile_parameters"
+    assert ladavas["blocking_constraint_ids"] == []
+
+    farne = records["farne_ladavas_2002_auditory_pps_humans"]
+    assert farne["pipeline_status"] == "source_parameters_missing_before_profile_creation"
+    assert farne["gates"]["toolkit_gui_implementation"]["status"] == "blocked_by_missing_profile_parameters"
+    assert farne["blocking_constraint_ids"] == []
 
     serino_2007 = records["serino_2007_blind_cane_users"]
     assert serino_2007["pipeline_status"] == "source_parameters_missing_before_profile_creation"

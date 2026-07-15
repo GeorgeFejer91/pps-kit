@@ -37,8 +37,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_runnable_profile": 12,
         "covered_blocked_missing_publication_parameters": 8,
         "covered_blocked_toolkit_structure": 0,
-        "not_yet_templated_requires_toolkit_structure": 6,
-        "not_yet_templated_missing_publication_parameters": 45,
+        "not_yet_templated_requires_toolkit_structure": 4,
+        "not_yet_templated_missing_publication_parameters": 47,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
@@ -167,6 +167,17 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
             "artifacts/validation_runs/current_goal_response_choice_contract_20260715/"
             "response_choice_contract_capability_smoke_report.json"
         )
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "cross_modal_extinction_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_cross_modal_extinction_contract_20260715/"
+            "cross_modal_extinction_contract_capability_smoke_report.json"
+        )
+        and "clinical neglect/extinction behavior" in source.get("relevance", "")
         for source in coverage["evidence_sources"]
     )
     assert any(
@@ -352,6 +363,20 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "artifacts/validation_runs/current_goal_response_choice_contract_20260715/"
         "response_choice_contract_capability_smoke_report.json"
     )
+    cross_modal_extinction_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "cross_modal_extinction_response_mapping"
+    )
+    assert cross_modal_extinction_constraint["toolkit_status"] == (
+        "supported_by_cross_modal_extinction_contract_capability_smoke"
+    )
+    assert cross_modal_extinction_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_cross_modal_extinction_contract_20260715/"
+        "cross_modal_extinction_contract_capability_smoke_report.json"
+    )
+    assert set(cross_modal_extinction_constraint["example_records"]) == {
+        "ladavas_2001_auditory_tactile_extinction",
+        "farne_ladavas_2002_auditory_pps_humans",
+    }
     body_frame_constraint = next(
         item for item in coverage["constraint_taxonomy"] if item["id"] == "body_part_anchored_coordinate_frames"
     )
@@ -459,14 +484,20 @@ def test_literature_coverage_constraints_focus_on_task_execution():
 
     records = {record["record_id"]: record for record in coverage["literature_records"]}
     assert records["spiousas_2025_auditory_only"]["coverage_category"] == "adjacent_out_of_scope"
-    assert records["ladavas_2001_auditory_tactile_extinction"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert records["ladavas_2001_auditory_tactile_extinction"]["blocking_constraint_ids"] == [
-        "cross_modal_extinction_response_mapping"
-    ]
-    assert records["farne_ladavas_2002_auditory_pps_humans"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert records["farne_ladavas_2002_auditory_pps_humans"]["blocking_constraint_ids"] == [
-        "cross_modal_extinction_response_mapping"
-    ]
+    assert records["ladavas_2001_auditory_tactile_extinction"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["ladavas_2001_auditory_tactile_extinction"]["blocking_constraint_ids"] == []
+    assert "runner-supported" in records["ladavas_2001_auditory_tactile_extinction"][
+        "missing_publication_parameters"
+    ][0]
+    assert records["farne_ladavas_2002_auditory_pps_humans"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["farne_ladavas_2002_auditory_pps_humans"]["blocking_constraint_ids"] == []
+    assert "runner-supported" in records["farne_ladavas_2002_auditory_pps_humans"][
+        "missing_publication_parameters"
+    ][0]
     assert records["rossi_sebastiano_2022_visuotactile"]["coverage_category"] == "adjacent_out_of_scope"
     assert records["teraoka_2024_front_rear"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["teraoka_2024_front_rear"]["blocking_constraint_ids"] == [

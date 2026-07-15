@@ -189,6 +189,13 @@
       "doi": "10.1016/j.neuropsychologia.2026.109490",
       "url": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
       "relevance": "Live web/PubMed fallback after Consensus OAuth failure found a 2026 Neuropsychologia journal article using an audiotactile PPS plasticity design. The PubMed abstract supports a structured expected outcome but does not expose enough Segment 0-4 task parameters for a runnable profile."
+    },
+    {
+      "id": "cross_modal_extinction_contract_capability_smoke_2026_07_15",
+      "kind": "validation_protocol",
+      "date_run": "2026-07-15",
+      "local_summary_file": "artifacts/validation_runs/current_goal_cross_modal_extinction_contract_20260715/cross_modal_extinction_contract_capability_smoke_report.json",
+      "relevance": "Capability smoke proving that Segment 5/6 rows can declare cross-modal auditory-tactile extinction tactile-report metadata, preserve response mode, choice set, correct report, scoring policy, response rule, and target role through prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated participant-like left/right/bilateral/none reports with a software wired-loopback sidecar. This is not clinical neglect/extinction behavior, patient evidence, tactile perception, physical timing-loopback, exact original apparatus reconstruction, or scientific PPS-effect validation."
     }
   ],
   "coverage_summary": {
@@ -197,8 +204,8 @@
       "covered_runnable_profile": 12,
       "covered_blocked_missing_publication_parameters": 8,
       "covered_blocked_toolkit_structure": 0,
-      "not_yet_templated_requires_toolkit_structure": 6,
-      "not_yet_templated_missing_publication_parameters": 45,
+      "not_yet_templated_requires_toolkit_structure": 4,
+      "not_yet_templated_missing_publication_parameters": 47,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
@@ -375,12 +382,13 @@
     {
       "id": "cross_modal_extinction_response_mapping",
       "dimension": "response_capture_or_response_mapping",
-      "description": "Auditory-tactile extinction or neglect-style response mapping rather than speeded tactile detection.",
-      "toolkit_status": "not_first_class",
+      "description": "Row-level cross-modal auditory-tactile extinction/report mapping can now be represented as a software response contract with response mode, choice set, expected report, scoring policy, response rule, and target role; clinical extinction behavior remains outside the toolkit.",
+      "toolkit_status": "supported_by_cross_modal_extinction_contract_capability_smoke",
       "example_records": [
         "ladavas_2001_auditory_tactile_extinction",
         "farne_ladavas_2002_auditory_pps_humans"
-      ]
+      ],
+      "validation_report": "artifacts/validation_runs/current_goal_cross_modal_extinction_contract_20260715/cross_modal_extinction_contract_capability_smoke_report.json"
     },
     {
       "id": "audiovisual_or_trisensory_trial_family",
@@ -736,14 +744,12 @@
         "web_search_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "near/far auditory-tactile extinction task around the head in a right-brain-damaged patient",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "cross_modal_extinction_response_mapping"
-      ],
+      "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "extract exact near/far sound distances, sound types, tactile site and response scoring, trial counts, and clinical extinction-response procedure before any scaffolded profile"
+        "extract exact near/far sound distances, sound types, tactile site, trial counts, and clinical extinction-response procedure before any scaffolded profile; row-level cross-modal extinction/report response mapping is now runner-supported"
       ]
     },
     {
@@ -756,14 +762,12 @@
         "web_search_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "front/back near/far auditory-tactile extinction task around the head in right-brain-damaged patients",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "cross_modal_extinction_response_mapping"
-      ],
+      "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "extract front/back and near/far auditory positions, pure-tone versus complex-sound settings, tactile site and response scoring, trial counts, and extinction-response procedure before templating"
+        "extract front/back and near/far auditory positions, pure-tone versus complex-sound settings, tactile site, trial counts, and extinction-response procedure; row-level cross-modal extinction/report response mapping is now runner-supported"
       ]
     },
     {
