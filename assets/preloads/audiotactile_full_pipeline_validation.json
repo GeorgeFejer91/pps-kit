@@ -2838,11 +2838,9 @@
     },
     {
       "audiotactile_task_family": "additional body-part/front-back PPS variants from the same six-experiment paper",
-      "blocking_constraint_ids": [
-        "multi_speaker_array_switching"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Serino et al. (2015), Exp. 4-6",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.1038/srep18603",
       "expected_effect_direction": "audio_tactile_facilitation_tracks_body_part_anchor_and_congruency",
@@ -2875,12 +2873,10 @@
           "template_ids": []
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "multi_speaker_array_switching"
-          ],
+          "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "experiment-specific distance, tactile-site, and apparatus mappings need extraction"
+            "experiment-specific distance, tactile-site, speaker layout/channel schedule, gain/SPL transfer, and apparatus mappings need extraction; row-level multi-speaker switching is now runner-supported"
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -2897,13 +2893,11 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "multi_speaker_array_switching"
-          ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "blocker_ids": [],
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -2914,9 +2908,9 @@
         }
       },
       "missing_publication_parameters": [
-        "experiment-specific distance, tactile-site, and apparatus mappings need extraction"
+        "experiment-specific distance, tactile-site, speaker layout/channel schedule, gain/SPL transfer, and apparatus mappings need extraction; row-level multi-speaker switching is now runner-supported"
       ],
-      "next_required_action": "Implement or validate toolkit support for: multi_speaker_array_switching; also extract/source missing paper parameters: experiment-specific distance, tactile-site, and apparatus mappings need extraction",
+      "next_required_action": "Extract or source the missing paper parameters: experiment-specific distance, tactile-site, speaker layout/channel schedule, gain/SPL transfer, and apparatus mappings need extraction; row-level multi-speaker switching is now runner-supported",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -2929,7 +2923,7 @@
         "pdf_status": "downloaded",
         "supplement_status": "downloaded"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "serino_2015_exps_4_to_6",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -7583,8 +7577,8 @@
         "source_parameters_missing_or_unresolved": 59
       },
       "toolkit_gui_implementation": {
-        "blocked_by_missing_profile_parameters": 55,
-        "blocked_by_toolkit_structure_or_response_contract": 4,
+        "blocked_by_missing_profile_parameters": 56,
+        "blocked_by_toolkit_structure_or_response_contract": 3,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 12
       },
@@ -7602,13 +7596,13 @@
       "adjacent_not_applicable": 4,
       "full_emulated_source_to_runner_pipeline_validated": 12,
       "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 47,
-      "toolkit_structure_or_response_contract_missing": 4
+      "source_parameters_missing_before_profile_creation": 48,
+      "toolkit_structure_or_response_contract_missing": 3
     },
     "primary_gap_counts": {
       "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 47,
-      "toolkit_structure_or_response_contract_missing": 4
+      "source_parameters_missing_before_profile_creation": 48,
+      "toolkit_structure_or_response_contract_missing": 3
     }
   }
 }

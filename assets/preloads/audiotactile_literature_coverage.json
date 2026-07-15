@@ -182,6 +182,13 @@
       "relevance": "Capability smoke proving that Segment 5/6 rows can declare electrical tactile stimulation and calibration metadata, preserve tactile modality, calibration method, threshold reference, intensity/unit, pulse duration, stimulator model, and electrode site through prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated participant-like responses with a software wired-loopback sidecar. This is not physical electrical stimulation, current delivery, participant thresholding, electrode impedance, hardware synchronization, collected participant evidence, physical timing-loopback, or scientific PPS-effect validation."
     },
     {
+      "id": "multi_speaker_switch_contract_capability_smoke_2026_07_15",
+      "kind": "validation_protocol",
+      "date_run": "2026-07-15",
+      "local_summary_file": "artifacts/validation_runs/current_goal_multi_speaker_switch_contract_20260715/multi_speaker_switch_contract_capability_smoke_report.json",
+      "relevance": "Capability smoke proving that Segment 5/6 rows can declare multi-speaker output switching metadata, materialize runnable multichannel WAVs from channel/time/gain schedules, preserve the contract through prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated participant-like responses with a software wired-loopback sidecar. This is not physical loudspeaker-array validation, room acoustics, SPL transfer, hardware route calibration, collected participant evidence, physical timing-loopback, exact original apparatus reconstruction, or scientific PPS-effect validation."
+    },
+    {
       "id": "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15",
       "kind": "pubmed_live_spot_check",
       "date_run": "2026-07-15",
@@ -204,8 +211,8 @@
       "covered_runnable_profile": 12,
       "covered_blocked_missing_publication_parameters": 8,
       "covered_blocked_toolkit_structure": 0,
-      "not_yet_templated_requires_toolkit_structure": 4,
-      "not_yet_templated_missing_publication_parameters": 47,
+      "not_yet_templated_requires_toolkit_structure": 3,
+      "not_yet_templated_missing_publication_parameters": 48,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
@@ -431,11 +438,12 @@
     {
       "id": "multi_speaker_array_switching",
       "dimension": "spatial_trajectory_coordinate_frame_or_apparatus_geometry",
-      "description": "Physical multi-speaker arrays can be represented when the paper reports a single serial trajectory with distances and timing that map onto the toolkit moving-source renderer; true front/back or concurrently switched arrays still need explicit source-switching support.",
-      "toolkit_status": "partially_modeled",
+      "description": "Physical multi-speaker arrays can be represented either as reducible virtual moving-source trajectories when the paper reports one serial trajectory, or as row-level switched-speaker output schedules when the paper reports discrete speaker channel/time/gain routing. Physical loudspeaker calibration, room acoustics, SPL transfer, and exact hardware validation remain outside the software contract.",
+      "toolkit_status": "supported_by_multi_speaker_switch_contract_capability_smoke",
       "example_records": [
         "serino_2015_exps_4_to_6"
-      ]
+      ],
+      "validation_report": "artifacts/validation_runs/current_goal_multi_speaker_switch_contract_20260715/multi_speaker_switch_contract_capability_smoke_report.json"
     },
     {
       "id": "gaussian_speaker_array_amplitude_field",
@@ -1241,14 +1249,12 @@
         "holmes_2020_systematic_review"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "additional body-part/front-back PPS variants from the same six-experiment paper",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "multi_speaker_array_switching"
-      ],
+      "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "experiment-specific distance, tactile-site, and apparatus mappings need extraction"
+        "experiment-specific distance, tactile-site, speaker layout/channel schedule, gain/SPL transfer, and apparatus mappings need extraction; row-level multi-speaker switching is now runner-supported"
       ]
     },
     {

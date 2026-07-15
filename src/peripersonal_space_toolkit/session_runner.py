@@ -84,7 +84,7 @@ SEGMENT_BLOCK_PREVIEW_SCHEMA = "pps-block-csv-preview.v1"
 LAST_EXPERIMENT_SCHEMA = "pps-last-experiment.v1"
 PREPARED_SESSION_QUEUE_SCHEMA = "pps-prepared-session-queue.v1"
 BLOCK_WAV_CACHE_SCHEMA = "pps-session-block-cache.v1"
-BLOCK_WAV_CACHE_VERSION = "2026-07-15.extinction-contract.v1"
+BLOCK_WAV_CACHE_VERSION = "2026-07-15.multi-speaker-switch-contract.v1"
 RESPONSE_MARKER_GAIN = 0.05
 EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S = 1.0
 LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_launched"}
@@ -482,6 +482,15 @@ PARTICIPANT_TRIAL_FIELDNAMES = [
     "noise_type",
     "sequence_labels",
     "sequence_variant_key",
+    "audio_output_mode",
+    "speaker_array_id",
+    "speaker_array_layout",
+    "speaker_switch_sequence",
+    "speaker_switch_times_ms",
+    "speaker_switch_channels",
+    "speaker_switch_gains",
+    "speaker_source_channel",
+    "speaker_switch_generated",
     "spatial_coordinate_frame",
     "body_anchor",
     "body_part",
@@ -750,6 +759,51 @@ class ParticipantTrialCsvWriter:
             "noise_type": _row_value(base, "noise_type", "Noise_Type", "noise_label", "Noise_Label", default=""),
             "sequence_labels": _row_value(base, "sequence_labels", "Sequence_Labels", default=""),
             "sequence_variant_key": _row_value(base, "sequence_variant_key", "Sequence_Variant_Key", default=""),
+            "audio_output_mode": _row_value(
+                base,
+                "audio_output_mode",
+                "Audio_Output_Mode",
+                "speaker_array_mode",
+                "Speaker_Array_Mode",
+                default="",
+            ),
+            "speaker_array_id": _row_value(base, "speaker_array_id", "Speaker_Array_ID", default=""),
+            "speaker_array_layout": _row_value(base, "speaker_array_layout", "Speaker_Array_Layout", default=""),
+            "speaker_switch_sequence": _row_value(
+                base,
+                "speaker_switch_sequence",
+                "Speaker_Switch_Sequence",
+                default="",
+            ),
+            "speaker_switch_times_ms": _row_value(
+                base,
+                "speaker_switch_times_ms",
+                "Speaker_Switch_Times_ms",
+                "speaker_switch_boundaries_ms",
+                "Speaker_Switch_Boundaries_ms",
+                default="",
+            ),
+            "speaker_switch_channels": _row_value(
+                base,
+                "speaker_switch_channels",
+                "Speaker_Switch_Channels",
+                "speaker_output_channels",
+                "Speaker_Output_Channels",
+                default="",
+            ),
+            "speaker_switch_gains": _row_value(base, "speaker_switch_gains", "Speaker_Switch_Gains", default=""),
+            "speaker_source_channel": _row_value(
+                base,
+                "speaker_source_channel",
+                "Speaker_Source_Channel",
+                default="",
+            ),
+            "speaker_switch_generated": _row_value(
+                base,
+                "speaker_switch_generated",
+                "Speaker_Switch_Generated",
+                default="",
+            ),
             "spatial_coordinate_frame": _row_value(
                 base,
                 "spatial_coordinate_frame",
@@ -2620,6 +2674,15 @@ def _cache_manifest_trial_payload(trial_rows: list[dict[str, Any]]) -> list[dict
                 "voice_key_response_label": row.get("Voice_Key_Response_Label", ""),
                 "voice_key_threshold": row.get("Voice_Key_Threshold", ""),
                 "voice_key_latency_correction_ms": row.get("Voice_Key_Latency_Correction_ms", ""),
+                "audio_output_mode": row.get("Audio_Output_Mode", ""),
+                "speaker_array_id": row.get("Speaker_Array_ID", ""),
+                "speaker_array_layout": row.get("Speaker_Array_Layout", ""),
+                "speaker_switch_sequence": row.get("Speaker_Switch_Sequence", ""),
+                "speaker_switch_times_ms": row.get("Speaker_Switch_Times_ms", ""),
+                "speaker_switch_channels": row.get("Speaker_Switch_Channels", ""),
+                "speaker_switch_gains": row.get("Speaker_Switch_Gains", ""),
+                "speaker_source_channel": row.get("Speaker_Source_Channel", ""),
+                "speaker_switch_generated": row.get("Speaker_Switch_Generated", ""),
                 "spatial_coordinate_frame": row.get("Spatial_Coordinate_Frame", ""),
                 "body_anchor": row.get("Body_Anchor", ""),
                 "body_part": row.get("Body_Part", ""),
@@ -2749,6 +2812,10 @@ def _segment_trial_rows_from_cache(
         family = _segment_family(row)
         spec = _tactile_waveform_spec(row, family)
         tactile_waveform = _tactile_waveform_metadata(row, spec, generated=bool(spec))
+        speaker_switching = _speaker_switching_row_metadata(
+            row,
+            generated=_truthy(cached.get("speaker_switch_generated")),
+        )
         tactile_compensation = {
             "requested_compensation_ms": _as_float(cached.get("tactile_latency_compensation_requested_ms"), default=0.0),
             "applied_compensation_ms": _as_float(cached.get("tactile_latency_compensation_applied_ms"), default=0.0),
@@ -2785,6 +2852,7 @@ def _segment_trial_rows_from_cache(
                 tactile_drive_onset_s=float(tactile_compensation.get("drive_onset_s") or tactile_onset_s),
                 tactile_compensation=tactile_compensation,
                 tactile_waveform=tactile_waveform,
+                speaker_switching=speaker_switching,
             )
         )
         wav_infos.append(_wav_info(trial_path, sha256=trial_hash, label=trial_path.stem))
@@ -5120,6 +5188,11 @@ class SessionRunnerController:
                 family=family,
                 tactile_onset_s=tactile_onset_s,
             )
+            data, speaker_switching = _apply_speaker_switching_profile(
+                data,
+                source_row,
+                sample_rate=sample_rate,
+            )
             target_channels = max(target_channels, int(data.shape[1]))
             clips.append(data)
             duration_frames = int(data.shape[0])
@@ -5161,6 +5234,7 @@ class SessionRunnerController:
                 tactile_drive_onset_s=float(tactile_compensation.get("drive_onset_s") or tactile_onset_s),
                 tactile_compensation=tactile_compensation,
                 tactile_waveform=tactile_waveform,
+                speaker_switching=speaker_switching,
             )
             row["Session_Group_ID"] = self.package.session_group_id
             row["Part_Session_ID"] = _package_part_session_id(self.package) if _package_is_split_part(self.package) else ""
@@ -7193,6 +7267,177 @@ def _apply_tactile_waveform_profile(
     return adjusted, _tactile_waveform_metadata(row, spec, generated=True)
 
 
+def _speaker_switching_spec(row: dict[str, Any], *, duration_s: float) -> dict[str, Any] | None:
+    channels_text = str(
+        _row_value(
+            row,
+            "speaker_switch_channels",
+            "Speaker_Switch_Channels",
+            "speaker_output_channels",
+            "Speaker_Output_Channels",
+            default="",
+        )
+        or ""
+    ).strip()
+    times_text = str(
+        _row_value(
+            row,
+            "speaker_switch_times_ms",
+            "Speaker_Switch_Times_ms",
+            "speaker_switch_boundaries_ms",
+            "Speaker_Switch_Boundaries_ms",
+            default="",
+        )
+        or ""
+    ).strip()
+    if not channels_text and not times_text:
+        return None
+    channels = [_as_int(part, default=0) for part in _split_contract_list(channels_text)]
+    channels = [channel for channel in channels if channel > 0]
+    times_ms = [_as_float(part, default=math.nan) for part in _split_contract_list(times_text)]
+    times_ms = [float(value) for value in times_ms if math.isfinite(value) and value >= 0.0]
+    if not channels:
+        raise ValueError("Speaker switching requires one or more 1-based output channels.")
+    if not times_ms:
+        raise ValueError("Speaker switching requires millisecond boundary times.")
+    if len(times_ms) == len(channels):
+        times_ms.append(max(times_ms[-1], float(duration_s) * 1000.0))
+    if len(times_ms) != len(channels) + 1:
+        raise ValueError("Speaker switching times must contain either N starts or N+1 boundaries for N channels.")
+    if any(later < earlier for earlier, later in zip(times_ms, times_ms[1:])):
+        raise ValueError("Speaker switching times must be non-decreasing.")
+    gains_text = str(_row_value(row, "speaker_switch_gains", "Speaker_Switch_Gains", default="") or "").strip()
+    gains = [_as_float(part, default=math.nan) for part in _split_contract_list(gains_text)]
+    gains = [float(value) for value in gains if math.isfinite(value)]
+    if not gains:
+        gains = [1.0 for _ in channels]
+    if len(gains) != len(channels):
+        raise ValueError("Speaker switching gains must be blank or contain one value per channel segment.")
+    source_channel = str(_row_value(row, "speaker_source_channel", "Speaker_Source_Channel", default="1") or "1").strip()
+    mode = str(
+        _row_value(
+            row,
+            "audio_output_mode",
+            "Audio_Output_Mode",
+            "speaker_array_mode",
+            "Speaker_Array_Mode",
+            default="switched_speaker_array",
+        )
+        or "switched_speaker_array"
+    ).strip()
+    return {
+        "mode": mode,
+        "array_id": str(_row_value(row, "speaker_array_id", "Speaker_Array_ID", default="") or "").strip(),
+        "layout": str(_row_value(row, "speaker_array_layout", "Speaker_Array_Layout", default="") or "").strip(),
+        "sequence": str(_row_value(row, "speaker_switch_sequence", "Speaker_Switch_Sequence", default="") or "").strip(),
+        "times_ms": _format_contract_number_list(times_ms),
+        "channels": "|".join(str(channel) for channel in channels),
+        "gains": _format_contract_number_list(gains),
+        "source_channel": source_channel,
+        "generated": True,
+        "_channels": channels,
+        "_times_ms": times_ms,
+        "_gains": gains,
+    }
+
+
+def _speaker_switching_row_metadata(row: dict[str, Any], *, generated: bool = False) -> dict[str, Any]:
+    fields = {
+        "mode": _row_value(
+            row,
+            "audio_output_mode",
+            "Audio_Output_Mode",
+            "speaker_array_mode",
+            "Speaker_Array_Mode",
+            default="",
+        ),
+        "array_id": _row_value(row, "speaker_array_id", "Speaker_Array_ID", default=""),
+        "layout": _row_value(row, "speaker_array_layout", "Speaker_Array_Layout", default=""),
+        "sequence": _row_value(row, "speaker_switch_sequence", "Speaker_Switch_Sequence", default=""),
+        "times_ms": _row_value(
+            row,
+            "speaker_switch_times_ms",
+            "Speaker_Switch_Times_ms",
+            "speaker_switch_boundaries_ms",
+            "Speaker_Switch_Boundaries_ms",
+            default="",
+        ),
+        "channels": _row_value(
+            row,
+            "speaker_switch_channels",
+            "Speaker_Switch_Channels",
+            "speaker_output_channels",
+            "Speaker_Output_Channels",
+            default="",
+        ),
+        "gains": _row_value(row, "speaker_switch_gains", "Speaker_Switch_Gains", default=""),
+        "source_channel": _row_value(row, "speaker_source_channel", "Speaker_Source_Channel", default=""),
+    }
+    if not any(value not in (None, "") for value in fields.values()) and not generated:
+        return {}
+    fields["generated"] = bool(generated)
+    return fields
+
+
+def _apply_speaker_switching_profile(
+    data: Any,
+    row: dict[str, Any],
+    *,
+    sample_rate: int,
+) -> tuple[Any, dict[str, Any]]:
+    import numpy as np
+
+    source = np.asarray(data, dtype=np.float32)
+    if getattr(source, "ndim", 0) != 2:
+        raise ValueError("Speaker switching expects a 2-D audio array.")
+    duration_s = float(source.shape[0] / sample_rate) if sample_rate > 0 else 0.0
+    spec = _speaker_switching_spec(row, duration_s=duration_s)
+    if spec is None:
+        return data, {}
+    if sample_rate <= 0:
+        raise ValueError("Cannot apply speaker switching without a positive sample rate.")
+    channels = [int(value) for value in spec["_channels"]]
+    times_ms = [float(value) for value in spec["_times_ms"]]
+    gains = [float(value) for value in spec["_gains"]]
+    tactile_channel = _as_int(_row_value(row, "tactile_channel", "Tactile_Channel", default=0), default=0)
+    target_channels = max(source.shape[1], max(channels), tactile_channel)
+    routed = np.zeros((source.shape[0], target_channels), dtype=np.float32)
+    if tactile_channel > 0 and tactile_channel <= source.shape[1]:
+        routed[:, tactile_channel - 1] = source[:, tactile_channel - 1]
+    signal = _speaker_switch_source_signal(source, spec)
+    for index, channel in enumerate(channels):
+        start = max(0, min(source.shape[0], int(round((times_ms[index] / 1000.0) * sample_rate))))
+        stop = max(0, min(source.shape[0], int(round((times_ms[index + 1] / 1000.0) * sample_rate))))
+        if stop <= start:
+            continue
+        routed[start:stop, channel - 1] += signal[start:stop] * float(gains[index])
+    public_spec = {key: value for key, value in spec.items() if not key.startswith("_")}
+    return routed, public_spec
+
+
+def _speaker_switch_source_signal(source: Any, spec: dict[str, Any]) -> Any:
+    source_channel = str(spec.get("source_channel") or "1").strip().lower()
+    if source_channel in {"mix", "mixdown", "mean", "mono", "mono_mixdown"}:
+        count = max(1, min(2, int(source.shape[1])))
+        return source[:, :count].mean(axis=1)
+    channel = _as_int(source_channel, default=1)
+    channel_index = max(0, int(channel) - 1)
+    if channel_index >= source.shape[1]:
+        raise ValueError(f"Speaker source channel {channel} is not present in the trial WAV.")
+    return source[:, channel_index]
+
+
+def _split_contract_list(value: Any) -> list[str]:
+    text = str(value or "").strip()
+    if not text:
+        return []
+    return [part.strip() for part in re.split(r"[|;,]+", text) if part.strip()]
+
+
+def _format_contract_number_list(values: list[float]) -> str:
+    return "|".join(f"{float(value):.6g}" for value in values)
+
+
 def _tactile_drive_onset_for_trial(family: str, tactile_onset_s: float) -> tuple[float, float]:
     policy = woojer_tactile_latency_policy()
     requested_ms = float(policy.get("compensation_ms") or 0.0)
@@ -7363,6 +7608,11 @@ def _materialize_segment_block_wav(
             family=family,
             tactile_onset_s=tactile_onset_s,
         )
+        data, speaker_switching = _apply_speaker_switching_profile(
+            data,
+            row,
+            sample_rate=sample_rate,
+        )
         target_channels = max(target_channels, int(data.shape[1]))
         clips.append(data)
         wav_infos.append(_wav_info(trial_path, sha256=actual_hash, label=trial_path.stem))
@@ -7398,6 +7648,7 @@ def _materialize_segment_block_wav(
                 tactile_drive_onset_s=float(tactile_compensation.get("drive_onset_s") or tactile_onset_s),
                 tactile_compensation=tactile_compensation,
                 tactile_waveform=tactile_waveform,
+                speaker_switching=speaker_switching,
             )
         )
         frame_cursor = trial_end_sample
@@ -7444,12 +7695,14 @@ def _segment_session_trial_row(
     tactile_drive_onset_s: float,
     tactile_compensation: dict[str, Any] | None = None,
     tactile_waveform: dict[str, Any] | None = None,
+    speaker_switching: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     trial_start_s = trial_start_sample / float(sample_rate)
     trial_end_s = trial_end_sample / float(sample_rate)
     response_window_onset_s = looming_onset_s if family in {"audio_tactile", "catch"} else tactile_onset_s
     tactile_compensation = dict(tactile_compensation or {})
     tactile_waveform = dict(tactile_waveform or {})
+    speaker_switching = dict(speaker_switching or {})
     has_tactile = family in {"audio_tactile", "baseline"}
     drive_onset_s = max(0.0, float(tactile_drive_onset_s))
     soa_ms = _row_value(source, "soa_ms", "SOA_ms", default="")
@@ -7529,6 +7782,60 @@ def _segment_session_trial_row(
         "response_mapping_policy",
         "Response_Mapping_Policy",
         default="",
+    )
+    audio_output_mode = _row_value(
+        source,
+        "audio_output_mode",
+        "Audio_Output_Mode",
+        "speaker_array_mode",
+        "Speaker_Array_Mode",
+        default=speaker_switching.get("mode", ""),
+    )
+    speaker_array_id = _row_value(
+        source,
+        "speaker_array_id",
+        "Speaker_Array_ID",
+        default=speaker_switching.get("array_id", ""),
+    )
+    speaker_array_layout = _row_value(
+        source,
+        "speaker_array_layout",
+        "Speaker_Array_Layout",
+        default=speaker_switching.get("layout", ""),
+    )
+    speaker_switch_sequence = _row_value(
+        source,
+        "speaker_switch_sequence",
+        "Speaker_Switch_Sequence",
+        default=speaker_switching.get("sequence", ""),
+    )
+    speaker_switch_times_ms = _row_value(
+        source,
+        "speaker_switch_times_ms",
+        "Speaker_Switch_Times_ms",
+        "speaker_switch_boundaries_ms",
+        "Speaker_Switch_Boundaries_ms",
+        default=speaker_switching.get("times_ms", ""),
+    )
+    speaker_switch_channels = _row_value(
+        source,
+        "speaker_switch_channels",
+        "Speaker_Switch_Channels",
+        "speaker_output_channels",
+        "Speaker_Output_Channels",
+        default=speaker_switching.get("channels", ""),
+    )
+    speaker_switch_gains = _row_value(
+        source,
+        "speaker_switch_gains",
+        "Speaker_Switch_Gains",
+        default=speaker_switching.get("gains", ""),
+    )
+    speaker_source_channel = _row_value(
+        source,
+        "speaker_source_channel",
+        "Speaker_Source_Channel",
+        default=speaker_switching.get("source_channel", ""),
     )
     response_capture_device = _row_value(
         source,
@@ -7784,6 +8091,17 @@ def _segment_session_trial_row(
         "Baseline_Mode": _row_value(source, "baseline_mode", "Baseline_Mode", default=""),
         "Sequence_Labels": _row_value(source, "sequence_labels", "Sequence_Labels", default=""),
         "Sequence_Variant_Key": _row_value(source, "sequence_variant_key", "Sequence_Variant_Key", default=""),
+        "Audio_Output_Mode": audio_output_mode,
+        "Speaker_Array_ID": speaker_array_id,
+        "Speaker_Array_Layout": speaker_array_layout,
+        "Speaker_Switch_Sequence": speaker_switch_sequence,
+        "Speaker_Switch_Times_ms": speaker_switch_times_ms,
+        "Speaker_Switch_Channels": speaker_switch_channels,
+        "Speaker_Switch_Gains": speaker_switch_gains,
+        "Speaker_Source_Channel": speaker_source_channel,
+        "Speaker_Switch_Generated": str(bool(speaker_switching.get("generated"))).lower()
+        if speaker_switching
+        else _row_value(source, "speaker_switch_generated", "Speaker_Switch_Generated", default=""),
         "ITI_Policy": _row_value(source, "iti_policy", "ITI_Policy", default=""),
         "ITI_ms": _row_value(source, "iti_ms", "ITI_ms", "Intertrial_Interval_ms", default=""),
         "Foreperiod_ms": _row_value(source, "foreperiod_ms", "Foreperiod_ms", default=""),
@@ -7952,6 +8270,15 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "Baseline_Mode",
         "Sequence_Labels",
         "Sequence_Variant_Key",
+        "Audio_Output_Mode",
+        "Speaker_Array_ID",
+        "Speaker_Array_Layout",
+        "Speaker_Switch_Sequence",
+        "Speaker_Switch_Times_ms",
+        "Speaker_Switch_Channels",
+        "Speaker_Switch_Gains",
+        "Speaker_Source_Channel",
+        "Speaker_Switch_Generated",
         "ITI_Policy",
         "ITI_ms",
         "Foreperiod_ms",

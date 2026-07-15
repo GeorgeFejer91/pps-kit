@@ -37,8 +37,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_runnable_profile": 12,
         "covered_blocked_missing_publication_parameters": 8,
         "covered_blocked_toolkit_structure": 0,
-        "not_yet_templated_requires_toolkit_structure": 4,
-        "not_yet_templated_missing_publication_parameters": 47,
+        "not_yet_templated_requires_toolkit_structure": 3,
+        "not_yet_templated_missing_publication_parameters": 48,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
@@ -211,6 +211,17 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
             "electrical_tactile_contract_capability_smoke_report.json"
         )
         and "physical electrical stimulation" in source.get("relevance", "")
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "multi_speaker_switch_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_multi_speaker_switch_contract_20260715/"
+            "multi_speaker_switch_contract_capability_smoke_report.json"
+        )
+        and "physical loudspeaker-array validation" in source.get("relevance", "")
         for source in coverage["evidence_sources"]
     )
     assert any(
@@ -428,7 +439,13 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     multi_speaker_constraint = next(
         item for item in coverage["constraint_taxonomy"] if item["id"] == "multi_speaker_array_switching"
     )
-    assert multi_speaker_constraint["toolkit_status"] == "partially_modeled"
+    assert multi_speaker_constraint["toolkit_status"] == (
+        "supported_by_multi_speaker_switch_contract_capability_smoke"
+    )
+    assert multi_speaker_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_multi_speaker_switch_contract_20260715/"
+        "multi_speaker_switch_contract_capability_smoke_report.json"
+    )
     assert multi_speaker_constraint["example_records"] == ["serino_2015_exps_4_to_6"]
     assert {
         "trial_design_families",
@@ -546,6 +563,13 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["cell_reports_medicine_2026_consciousness"]["blocking_constraint_ids"] == [
         "missing_core_soa_iti_baseline_repetition_parameters"
     ]
+    assert records["serino_2015_exps_4_to_6"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["serino_2015_exps_4_to_6"]["blocking_constraint_ids"] == []
+    assert "runner-supported" in records["serino_2015_exps_4_to_6"][
+        "missing_publication_parameters"
+    ][0]
     assert records["serino_2018_mixed_reality_pps"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert "audiovisual_or_trisensory_trial_family" in records["serino_2018_mixed_reality_pps"]["blocking_constraint_ids"]
     assert records["amemiya_2017_pseudowalking_footsole"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
@@ -694,6 +718,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         assert "fixed_iti_or_hazard_control_policy" not in record["blocking_constraint_ids"], record["record_id"]
         assert "tactile_discrimination_or_localization_response" not in record["blocking_constraint_ids"], record["record_id"]
         assert "body_part_anchored_coordinate_frames" not in record["blocking_constraint_ids"], record["record_id"]
+        assert "multi_speaker_array_switching" not in record["blocking_constraint_ids"], record["record_id"]
         assert not (set(record["blocking_constraint_ids"]) & non_blocking_tokens), record["record_id"]
         for constraint_id in record["blocking_constraint_ids"]:
             assert constraint_dimensions[constraint_id] in task_execution_dimensions, record["record_id"]

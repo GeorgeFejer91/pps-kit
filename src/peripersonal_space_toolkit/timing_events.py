@@ -147,6 +147,36 @@ class TriggerDictionary:
                         "response_input_modality",
                         payload.get("Response_Input_Modality", ""),
                     ),
+                    "audio_output_mode": payload.get("audio_output_mode", payload.get("Audio_Output_Mode", "")),
+                    "speaker_array_id": payload.get("speaker_array_id", payload.get("Speaker_Array_ID", "")),
+                    "speaker_array_layout": payload.get(
+                        "speaker_array_layout",
+                        payload.get("Speaker_Array_Layout", ""),
+                    ),
+                    "speaker_switch_sequence": payload.get(
+                        "speaker_switch_sequence",
+                        payload.get("Speaker_Switch_Sequence", ""),
+                    ),
+                    "speaker_switch_times_ms": payload.get(
+                        "speaker_switch_times_ms",
+                        payload.get("Speaker_Switch_Times_ms", ""),
+                    ),
+                    "speaker_switch_channels": payload.get(
+                        "speaker_switch_channels",
+                        payload.get("Speaker_Switch_Channels", ""),
+                    ),
+                    "speaker_switch_gains": payload.get(
+                        "speaker_switch_gains",
+                        payload.get("Speaker_Switch_Gains", ""),
+                    ),
+                    "speaker_source_channel": payload.get(
+                        "speaker_source_channel",
+                        payload.get("Speaker_Source_Channel", ""),
+                    ),
+                    "speaker_switch_generated": payload.get(
+                        "speaker_switch_generated",
+                        payload.get("Speaker_Switch_Generated", ""),
+                    ),
                     "voice_key_enabled": payload.get(
                         "voice_key_enabled",
                         payload.get("Voice_Key_Enabled", ""),
@@ -301,6 +331,36 @@ class TriggerDictionary:
                 "response_input_modality": payload.get(
                     "response_input_modality",
                     payload.get("Response_Input_Modality", ""),
+                ),
+                "audio_output_mode": payload.get("audio_output_mode", payload.get("Audio_Output_Mode", "")),
+                "speaker_array_id": payload.get("speaker_array_id", payload.get("Speaker_Array_ID", "")),
+                "speaker_array_layout": payload.get(
+                    "speaker_array_layout",
+                    payload.get("Speaker_Array_Layout", ""),
+                ),
+                "speaker_switch_sequence": payload.get(
+                    "speaker_switch_sequence",
+                    payload.get("Speaker_Switch_Sequence", ""),
+                ),
+                "speaker_switch_times_ms": payload.get(
+                    "speaker_switch_times_ms",
+                    payload.get("Speaker_Switch_Times_ms", ""),
+                ),
+                "speaker_switch_channels": payload.get(
+                    "speaker_switch_channels",
+                    payload.get("Speaker_Switch_Channels", ""),
+                ),
+                "speaker_switch_gains": payload.get(
+                    "speaker_switch_gains",
+                    payload.get("Speaker_Switch_Gains", ""),
+                ),
+                "speaker_source_channel": payload.get(
+                    "speaker_source_channel",
+                    payload.get("Speaker_Source_Channel", ""),
+                ),
+                "speaker_switch_generated": payload.get(
+                    "speaker_switch_generated",
+                    payload.get("Speaker_Switch_Generated", ""),
                 ),
                 "voice_key_enabled": payload.get(
                     "voice_key_enabled",
