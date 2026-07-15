@@ -755,6 +755,8 @@ def _response_base(event: dict[str, Any]) -> dict[str, Any]:
         "row_label": _field(event, "row_label", "Row_Label", "Row"),
         "soa_ms": _as_int(_field(event, "soa_ms", "SOA_ms"), ""),
         "noise_type": _field(event, "noise_type", "Noise_Type"),
+        "sequence_labels": _field(event, "sequence_labels", "Sequence_Labels"),
+        "sequence_variant_key": _field(event, "sequence_variant_key", "Sequence_Variant_Key"),
         "respiratory_phase": _field(event, "respiratory_phase", "Respiratory_Phase"),
         "stimulus_modality": _field(event, "stimulus_modality"),
         "is_topup": _truthy(_field(event, "is_topup", "Is_Topup")),
@@ -2484,6 +2486,10 @@ def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
         row["respiratory_phase"] = row.get("Respiratory_Phase")
     if "noise_type" not in row and "Noise_Type" in row:
         row["noise_type"] = row.get("Noise_Type")
+    if "sequence_labels" not in row and "Sequence_Labels" in row:
+        row["sequence_labels"] = row.get("Sequence_Labels")
+    if "sequence_variant_key" not in row and "Sequence_Variant_Key" in row:
+        row["sequence_variant_key"] = row.get("Sequence_Variant_Key")
     if "soa_ms" not in row and "SOA_ms" in row:
         row["soa_ms"] = row.get("SOA_ms")
     if "rt_ms" not in row and "RT_ms" in row:

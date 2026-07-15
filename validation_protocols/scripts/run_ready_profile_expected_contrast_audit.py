@@ -184,6 +184,17 @@ def _audit_record(
         for contrast in REQUIRED_CONTRASTS.get(record_id, {}).get("required", [])
         if not availability.get(contrast)
     ]
+    if not missing:
+        return {
+            **base,
+            "status": "contrast_metadata_present_comparison_model_missing",
+            "missing_contrasts": [],
+            "synthetic_comparison": {},
+            "required_next_step": (
+                "Add an outcome-specific collected-data or synthetic-participant comparator for this expected "
+                "effect now that the runner rows expose the required contrast metadata."
+            ),
+        }
     return {
         **base,
         "status": "contrast_metadata_missing",
@@ -206,7 +217,17 @@ def _profile_rows(template_id: str, profile: dict[str, Any]) -> dict[str, Any]:
 def _contrast_availability(record_id: str, profile_rows: list[dict[str, Any]]) -> dict[str, bool]:
     rows = [row for profile in profile_rows for row in profile["rows"]]
     text_values = " | ".join(
-        " ".join(str(row.get(key) or "") for key in ("condition", "block_label", "respiratory_phase", "row_label"))
+        " ".join(
+            str(row.get(key) or "")
+            for key in (
+                "condition",
+                "block_label",
+                "respiratory_phase",
+                "row_label",
+                "sequence_labels",
+                "sequence_variant_key",
+            )
+        )
         for row in rows
     ).lower()
     soa_values = {_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))}
@@ -311,6 +332,9 @@ def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
             1 for row in rows if row.get("status") == "synthetic_behavioral_comparison_failed"
         ),
         "contrast_metadata_blocked_record_count": sum(1 for row in rows if row.get("status") == "contrast_metadata_missing"),
+        "contrast_metadata_present_model_missing_record_count": sum(
+            1 for row in rows if row.get("status") == "contrast_metadata_present_comparison_model_missing"
+        ),
     }
 
 

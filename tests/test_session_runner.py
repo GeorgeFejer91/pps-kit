@@ -1088,6 +1088,8 @@ def test_participant_trial_csv_writer_classifies_hit_miss_for_tactile_and_catch(
             "respiratory_phase": "Inhale",
             "soa_ms": "300",
             "noise_type": "pink",
+            "sequence_labels": "Inhale | Pink moving sound - receding",
+            "sequence_variant_key": "inhale_pink_moving_sound_receding",
         }
         writer.observe_event({"event_id": event_id, "event_type": "trial_start", "unix_time": start_unix, **base})
         event_id += 1
@@ -1158,6 +1160,8 @@ def test_participant_trial_csv_writer_classifies_hit_miss_for_tactile_and_catch(
     assert rows[1]["catch_trial"] == "true"
     assert rows[2]["response_given"] == "true"
     assert rows[3]["stimulus_modality"] == "tactile"
+    assert rows[0]["sequence_labels"] == "Inhale | Pink moving sound - receding"
+    assert rows[0]["sequence_variant_key"] == "inhale_pink_moving_sound_receding"
 
 
 def test_participant_trial_csv_rewrite_uses_tactile_window_after_trial_end(tmp_path: Path):
@@ -1180,6 +1184,8 @@ def test_participant_trial_csv_rewrite_uses_tactile_window_after_trial_end(tmp_p
         "respiratory_phase": "Inhale",
         "soa_ms": "300",
         "noise_type": "pink",
+        "sequence_labels": "Inhale | Pink moving sound - receding",
+        "sequence_variant_key": "inhale_pink_moving_sound_receding",
     }
     events = [
         {"event_id": 1, "event_type": "trial_start", "unix_time": 100.0, **base},
@@ -1197,6 +1203,8 @@ def test_participant_trial_csv_rewrite_uses_tactile_window_after_trial_end(tmp_p
     assert rows[0]["rt_ms"] == "1000.000"
     assert rows[0]["response_event_id"] == "6"
     assert rows[0]["correctness_rule"] == "response within 100-1300 ms after tactile onset"
+    assert rows[0]["sequence_labels"] == "Inhale | Pink moving sound - receding"
+    assert rows[0]["sequence_variant_key"] == "inhale_pink_moving_sound_receding"
 
 
 def test_data_min_export_keeps_original_and_real_topup_trials_only(tmp_path: Path):

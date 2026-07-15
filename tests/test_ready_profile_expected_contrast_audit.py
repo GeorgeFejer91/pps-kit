@@ -112,6 +112,7 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
         "synthetic_comparison_passed_count": 1,
         "synthetic_comparison_failed_count": 0,
         "contrast_metadata_blocked_record_count": 1,
+        "contrast_metadata_present_model_missing_record_count": 0,
     }
     by_id = {row["record_id"]: row for row in report["records"]}
     smartphone = by_id["smartphone_rt_methods_2025"]

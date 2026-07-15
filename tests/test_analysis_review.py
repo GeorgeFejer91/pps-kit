@@ -287,6 +287,8 @@ def test_session_analysis_writes_condition_lens_outputs_and_quality_gate(tmp_pat
                         "soa_ms": soa,
                         "respiratory_phase": state,
                         "noise_type": "pink" if repeat == 0 else "white",
+                        "sequence_labels": "Pink moving sound - receding" if repeat == 0 else "White moving sound - looming",
+                        "sequence_variant_key": "pink_receding" if repeat == 0 else "white_looming",
                         "timestamp_quality": "dac_time_sample_exact",
                     }
                     events.append({"event_id": event_id, "event_type": "trial_start", "unix_time": onset - 0.25, **context})
@@ -309,6 +311,8 @@ def test_session_analysis_writes_condition_lens_outputs_and_quality_gate(tmp_pat
     result = analyze_session_events(events)
     outputs = write_analysis_csvs(result, tmp_path, "S001")
 
+    assert result.response_rows[0]["sequence_labels"] == "Pink moving sound - receding"
+    assert result.response_rows[0]["sequence_variant_key"] == "pink_receding"
     assert outputs["condition_lens_curves"].exists()
     assert outputs["condition_lens_model_fits"].exists()
     assert outputs["condition_lens_model_fit_comparison"].exists()
@@ -334,6 +338,9 @@ def test_session_analysis_writes_condition_lens_outputs_and_quality_gate(tmp_pat
     assert predictions
     assert {row["label"] for row in condition_lens_button_rows(data)} == {"2 x 2", "Part 1 | Part 2", "Inhale | Exhale"}
     assert {row["model"] for row in model_button_rows(data)} == {"sigmoid", "logarithmic_decay", "linear"}
+    analysis_rows = list(csv.DictReader(outputs["analysis_ready_trials"].open(encoding="utf-8")))
+    assert analysis_rows[0]["sequence_labels"] == "Pink moving sound - receding"
+    assert analysis_rows[0]["sequence_variant_key"] == "pink_receding"
 
 
 def test_analysis_displays_part_labels_while_preserving_part_number_order():
