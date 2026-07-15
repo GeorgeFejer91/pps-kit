@@ -125,7 +125,7 @@ This table is generated from `assets/preloads/audiotactile_literature_coverage.j
 | Noel et al. (2015a) | front chest and back tactile PPS with looming sound under full-body-illusion stroking | GUI-recreatable now | Current paired front/back profiles pass the Segment 0-4 audiotactile recreation gate. |
 | Noel et al. (2015b) | walking/full-body PPS audio-tactile task | Template exists; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: exact sound distances and trial counts |
 | Serino et al. (2015), Exp. 1 | trunk tactile PPS with two-speaker analog looming/receding setup reconstructed as a binaural trajectory | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate. |
-| Serino et al. (2015), Exp. 2 | front/back trunk tactile PPS with physical speaker array | Template exists; toolkit structure gap | Toolkit/task constraints: `multi_speaker_array_switching`, `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: 13-distance internal schedule |
+| Serino et al. (2015), Exp. 2 | front/back trunk tactile PPS with 16-speaker array recreated as a reported linear moving-source trajectory | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate with the published 372-trial formula: 13 multisensory distance samples x 2 directions, 3 tactile-only baselines, and 2 auditory-only catches repeated 12 times; exact Gaussian speaker-array synthesis and the article's 14-delay/13-distance wording mismatch remain provenance caveats. |
 | Serino et al. (2015), Exp. 3 | hand tactile PPS with lateralized hand-anchored cartesian trajectory | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate using a caveated hand-anchored cartesian path; exact original hand side and WAV/envelope files remain provenance caveats rather than current profile blockers. |
 | Serino et al. (2015), Exp. 4-6 | additional body-part/front-back PPS variants from the same six-experiment paper | Not templated; toolkit structure gap | Toolkit/task constraints: `body_part_anchored_coordinate_frames`, `multi_speaker_array_switching` Missing/extract: experiment-specific distance, tactile-site, and apparatus mappings need extraction |
 | Serino/Canzoneri 2015 toolless sync training | bimodal IN/OUT target trials plus auditory-only catch trials | Template exists; missing task parameters | Toolkit/task constraints: `voice_key_response_capture`, `electrical_tactile_calibration` Missing/extract: electrocutaneous tactile calibration; voice-key response capture |
@@ -231,7 +231,6 @@ These already expose real standardized-toolkit gaps:
 |---|---|
 | `galli_2015_wheelchair_full_body` | Speaker-array Gaussian amplitude control. |
 | `lerner_2021_3d_audio_tactile_boundary` | Body-scaled distance mode and Unity/3D Tune-In stimulus behavior. |
-| `serino_2015_front_back_trunk_exp2` | Physical 16-speaker array plus internal distance schedule. |
 | `taffou_2014_cynophobic_rear_looming` | Separate rear-left/rear-right trajectory families plus exact ecological audio/HRTF provenance. |
 
 ## Known Literature Not Yet Templated

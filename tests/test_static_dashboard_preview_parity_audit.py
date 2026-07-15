@@ -51,6 +51,7 @@ def test_static_dashboard_preview_parity_audit_targets_all_previewable_profiles(
         "study5_dynaspace_lateral_45_pps",
         "canzoneri_2012_dynamic_sounds",
         "tonelli_2019_echolocation",
+        "serino_2015_front_back_trunk_exp2",
         "serino_2015_peri_hand_exp3",
         "serino_2015_peri_trunk_exp1",
     ]

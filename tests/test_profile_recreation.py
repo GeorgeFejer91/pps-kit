@@ -49,8 +49,8 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     assert status["categories"]["gui_recreatable"]
     assert status["categories"]["missing_publication_parameters"]
     assert status["categories"]["toolkit_structural_gap"]
-    assert len(status["categories"]["missing_publication_parameters"]) == 10
-    assert len(status["categories"]["toolkit_structural_gap"]) == 4
+    assert len(status["categories"]["missing_publication_parameters"]) == 9
+    assert len(status["categories"]["toolkit_structural_gap"]) == 3
 
     allowed_statuses = {
         STATUS_REPORTED,
@@ -108,7 +108,7 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert study5["segment_0_to_4_profile_checks_passed"] is True
     assert study5["missing_parameter_count"] == 0
     assert study5["unsupported_structure_count"] == 0
-    assert len(status["categories"]["gui_recreatable"]) == 13
+    assert len(status["categories"]["gui_recreatable"]) == 14
 
     study5_lateral = profiles[STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID]
     assert study5_lateral["primary_category"] == "gui_recreatable"
@@ -155,6 +155,14 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert tonelli["missing_parameter_count"] == 0
     assert tonelli["unsupported_structure_count"] == 0
 
+    serino_front_back = profiles["serino_2015_front_back_trunk_exp2"]
+    assert serino_front_back["primary_category"] == "gui_recreatable"
+    assert serino_front_back["runner_readiness"] == "ready"
+    assert serino_front_back["profile_checks_passed"] is True
+    assert serino_front_back["segment_0_to_4_profile_checks_passed"] is True
+    assert serino_front_back["missing_parameter_count"] == 0
+    assert serino_front_back["unsupported_structure_count"] == 0
+
     galli = profiles["galli_2015_wheelchair_full_body"]
     assert galli["template_id"] in status["categories"]["toolkit_structural_gap"]
     assert {
@@ -177,7 +185,7 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert "Ordinary trial randomization and block order" in report
 
     tex_report = (root / "docs" / "audit_report.tex").read_text(encoding="utf-8")
-    assert "Published-paper profiles passing checks & 11" in tex_report
+    assert "Published-paper profiles passing checks & 12" in tex_report
     assert "study5" in tex_report and "box" in tex_report and "breathing" in tex_report
     assert "No visible GUI progress indicator" in tex_report
     assert "Clinical populations, interventions, non-audiotactile stimuli" in tex_report
@@ -239,7 +247,7 @@ def test_protocol12_matrix_targets_ready_published_profiles_and_blocked_samples(
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID not in ready_published
     assert DEFAULT_STUDY_TEMPLATE_ID in ready_all
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID in ready_all
-    assert len(ready_published) == 11
+    assert len(ready_published) == 12
     assert set(ready_published) < set(ready_all)
     assert len(blocked_samples) == 2
 
@@ -254,7 +262,7 @@ def test_protocol12_matrix_metadata_only_report_accepts_ready_and_blocked(tmp_pa
     report = matrix.run_matrix(
         output_dir=tmp_path,
         templates=["pfeiffer_2018_lateral_perihead_left_to_right"],
-        blocked_templates=["serino_2015_front_back_trunk_exp2"],
+        blocked_templates=["galli_2015_wheelchair_full_body"],
         metadata_only=True,
     )
 

@@ -34,6 +34,7 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 | study5_dynaspace_lateral_45_pps | - | ready | All required current-GUI fields are present and materializable. |
 | canzoneri_2012_dynamic_sounds | - | ready | All required current-GUI fields are present and materializable. |
 | tonelli_2019_echolocation | - | ready | All required current-GUI fields are present and materializable. |
+| serino_2015_front_back_trunk_exp2 | A | ready | All required current-GUI fields are present and materializable. |
 | serino_2015_peri_hand_exp3 | B | ready | All required current-GUI fields are present and materializable. |
 | serino_2015_peri_trunk_exp1 | C | ready | All required current-GUI fields are present and materializable. |
 
@@ -47,7 +48,6 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 | ferri_2015_ecological_looming_valence | B | blocked_missing_parameters | licensed ecological sounds; exact amplitude envelopes |
 | lerner_2021_3d_audio_tactile_boundary | - | blocked_unsupported_toolkit_structure | exact Unity/3D Tune-In stimulus engine behavior |
 | noel_2015_walking_full_body_action | - | blocked_missing_parameters | exact sound distances and trial counts |
-| serino_2015_front_back_trunk_exp2 | A | blocked_unsupported_toolkit_structure | 13-distance internal schedule |
 | serino_2015_toolless_sync_training | - | blocked_missing_parameters | electrocutaneous tactile calibration; voice-key response capture |
 | taffou_2014_cynophobic_rear_looming | - | blocked_unsupported_toolkit_structure | exact dog/sheep audio; LISTEN HRTF rather than bundled FABIAN |
 | teneggi_2013_social_face_pps | - | blocked_missing_parameters | exact distance/timing table from supplement |
@@ -58,7 +58,6 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 |---|---|---|---|
 | galli_2015_wheelchair_full_body | - | blocked_unsupported_toolkit_structure | speaker-array Gaussian amplitude control |
 | lerner_2021_3d_audio_tactile_boundary | - | blocked_unsupported_toolkit_structure | body-scaled distance mode; exact Unity/3D Tune-In stimulus engine behavior |
-| serino_2015_front_back_trunk_exp2 | A | blocked_unsupported_toolkit_structure | physical 16-speaker array |
 | taffou_2014_cynophobic_rear_looming | - | blocked_unsupported_toolkit_structure | left/right rear hemifield as separate trajectories |
 
 ## Machine-Readable Source

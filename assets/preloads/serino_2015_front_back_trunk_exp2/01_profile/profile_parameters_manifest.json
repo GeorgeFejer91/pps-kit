@@ -12,48 +12,36 @@
   "visible_variant_label": "A",
   "variant_display": "Serino 2015 front/back peri-trunk Experiment 2 - Variant A",
   "recreation_status": {
-    "primary_category": "toolkit_structural_gap",
-    "category_label": "Toolkit structural gap",
-    "runner_readiness": "blocked_unsupported_toolkit_structure",
-    "profile_checks_passed": false,
-    "gui_recreatable": false,
-    "segment_0_to_4_profile_checks_passed": false,
-    "segment_1_to_6_materializable": false,
-    "finished_profile": false,
-    "segment_6_launchable": false,
-    "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 1,
-    "unsupported_structure_count": 1
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
+    "missing_parameter_count": 0,
+    "unsupported_structure_count": 0
   },
   "segment_0_to_4_profile_checks": {
     "gate": "segments_0_to_4",
-    "passed": false,
+    "passed": true,
     "segments": [
       {
         "segment": "0",
         "segment_label": "Segment 0 profile manifest and provenance",
-        "passed": false,
-        "field_count": 4,
-        "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
-            "status": "missing_publication_parameter",
-            "reason": "13-distance internal schedule"
-          }
-        ]
+        "passed": true,
+        "field_count": 3,
+        "blocking_reasons": []
       },
       {
         "segment": "1",
         "segment_label": "Segment 1 source/stimulus assets",
-        "passed": false,
-        "field_count": 4,
-        "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
-            "status": "unsupported_toolkit_structure",
-            "reason": "physical 16-speaker array"
-          }
-        ]
+        "passed": true,
+        "field_count": 3,
+        "blocking_reasons": []
       },
       {
         "segment": "2",
@@ -107,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 5,
+      "value": 11,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -132,7 +120,7 @@
       "parameter": "stimulus_duration",
       "status": "reported",
       "value": [
-        2.666667
+        5.714286
       ],
       "note": "Duration comes from generated WAV metadata."
     },
@@ -172,7 +160,13 @@
         1429,
         1857,
         2286,
-        2714
+        2714,
+        3429,
+        3857,
+        4286,
+        4714,
+        5143,
+        5571
       ],
       "note": "SOA values are encoded."
     },
@@ -182,8 +176,7 @@
       "parameter": "tactile_sites",
       "status": "reported",
       "value": [
-        "sternum/chest",
-        "back"
+        "front/back trunk site (sternum/back mapped by trajectory side)"
       ],
       "note": "Tactile site labels are encoded."
     },
@@ -200,7 +193,7 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "baseline_count",
       "status": "reported",
-      "value": 0.0,
+      "value": 36,
       "note": "Baseline count/percentage settings are encoded."
     },
     {
@@ -250,46 +243,10 @@
       "status": "defaulted",
       "value": "1 part",
       "note": "Current dashboard default; phase/intervention context is non-blocking unless it changes the audiotactile PPS task execution."
-    },
-    {
-      "segment": "5",
-      "segment_label": "Segment 5 block CSV settings",
-      "parameter": "profile_gap",
-      "status": "defaulted",
-      "value": "front/back block factor",
-      "note": "front/back block factor"
-    },
-    {
-      "segment": "0",
-      "segment_label": "Segment 0 profile manifest and provenance",
-      "parameter": "profile_gap",
-      "status": "missing_publication_parameter",
-      "value": "13-distance internal schedule",
-      "note": "13-distance internal schedule"
-    },
-    {
-      "segment": "1",
-      "segment_label": "Segment 1 source/stimulus assets",
-      "parameter": "profile_gap",
-      "status": "unsupported_toolkit_structure",
-      "value": "physical 16-speaker array",
-      "note": "physical 16-speaker array"
     }
   ],
-  "missing_publication_parameters": [
-    {
-      "segment": "0",
-      "parameter": "profile_gap",
-      "reason": "13-distance internal schedule"
-    }
-  ],
-  "unsupported_toolkit_structures": [
-    {
-      "segment": "1",
-      "parameter": "profile_gap",
-      "reason": "physical 16-speaker array"
-    }
-  ],
+  "missing_publication_parameters": [],
+  "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
       "profile_metadata": "assets/preloads/serino_2015_front_back_trunk_exp2/01_profile/profile_metadata.json",
@@ -325,11 +282,11 @@
   "provenance": [
     {
       "field": "distances",
-      "source": "Scientific Reports Experiment 2 reports tactile stimulation at 14 delays mapping 5-95 cm in front and back."
+      "source": "Scientific Reports Experiment 2 reports tactile stimulation around 5-95 cm front/back and an explicit 372-trial formula with 13 multisensory distances."
     },
     {
       "field": "speed/rendering",
-      "source": "The original used speaker arrays; this profile approximates with one linear 3D path."
+      "source": "The original 16-speaker array used Gaussian per-speaker amplitude modulation; this profile recreates the reported 35 cm/s front/back path with one linear 3D renderer path."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."

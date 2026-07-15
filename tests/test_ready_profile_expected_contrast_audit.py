@@ -39,6 +39,7 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     noel_rows_path = tmp_path / "noel_analysis_ready_trials.csv"
     serino_rows_path = tmp_path / "serino_analysis_ready_trials.csv"
     serino_hand_rows_path = tmp_path / "serino_hand_analysis_ready_trials.csv"
+    serino_front_back_rows_path = tmp_path / "serino_front_back_analysis_ready_trials.csv"
     matsuda_rows_path = tmp_path / "matsuda_analysis_ready_trials.csv"
     lamia_rows_path = tmp_path / "lamia_analysis_ready_trials.csv"
     pfeiffer_rows_path = tmp_path / "pfeiffer_analysis_ready_trials.csv"
@@ -150,6 +151,38 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                 "sequence_variant_key": "hand_moving_sound_receding",
                 "family": "audio_tactile",
                 "soa_ms": "4000",
+            },
+        ],
+    )
+    _write_csv(
+        serino_front_back_rows_path,
+        [
+            {
+                "block_label": "Front/back trunk PPS block",
+                "row_label": "Front-back trunk moving-sound trial",
+                "respiratory_phase": "Front-back trunk moving-sound trial",
+                "sequence_labels": "Front-back moving sound",
+                "sequence_variant_key": "front_to_back",
+                "family": "audio_tactile",
+                "soa_ms": "143",
+            },
+            {
+                "block_label": "Front/back trunk PPS block",
+                "row_label": "Front-back trunk moving-sound trial",
+                "respiratory_phase": "Front-back trunk moving-sound trial",
+                "sequence_labels": "Front-back moving sound - back to front",
+                "sequence_variant_key": "back_to_front",
+                "family": "audio_tactile",
+                "soa_ms": "5571",
+            },
+            {
+                "block_label": "Front/back trunk PPS block",
+                "row_label": "Front/back tactile-only baseline",
+                "respiratory_phase": "Front/back tactile-only baseline",
+                "sequence_labels": "Front-back moving sound",
+                "sequence_variant_key": "front_to_back",
+                "family": "baseline",
+                "soa_ms": "2714",
             },
         ],
     )
@@ -297,6 +330,10 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                         "outputs": {"analysis_ready_trials": str(serino_hand_rows_path)},
                     },
                     {
+                        "template_id": "serino_2015_front_back_trunk_exp2",
+                        "outputs": {"analysis_ready_trials": str(serino_front_back_rows_path)},
+                    },
+                    {
                         "template_id": "matsuda_2021_four_directions",
                         "outputs": {"analysis_ready_trials": str(matsuda_rows_path)},
                     },
@@ -364,6 +401,17 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                         },
                     },
                     {
+                        "record_id": "serino_2015_front_back_trunk_exp2",
+                        "citation_short": "Serino 2015 Exp. 2",
+                        "observed_comparison_gap": audit.READY_GAP,
+                        "current_template_ids": ["serino_2015_front_back_trunk_exp2"],
+                        "expected_outcome": {
+                            "expected_effect_direction": (
+                                "near_trunk_front_back_sounds_speed_corresponding_tactile_rt"
+                            )
+                        },
+                    },
+                    {
                         "record_id": "matsuda_2021_four_directions",
                         "citation_short": "Matsuda 2021",
                         "observed_comparison_gap": audit.READY_GAP,
@@ -425,12 +473,12 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert report["schema"] == audit.SCHEMA
     assert report["passed"]
     assert report["summary"] == {
-        "ready_profile_record_count": 9,
+        "ready_profile_record_count": 10,
         "synthetic_comparison_record_count": 9,
         "synthetic_comparison_passed_count": 9,
         "synthetic_comparison_failed_count": 0,
         "contrast_metadata_blocked_record_count": 0,
-        "contrast_metadata_present_model_missing_record_count": 0,
+        "contrast_metadata_present_model_missing_record_count": 1,
     }
     by_id = {row["record_id"]: row for row in report["records"]}
     smartphone = by_id["smartphone_rt_methods_2025"]
@@ -463,6 +511,14 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert serino_hand["synthetic_comparison"]["observed_effect_direction"] == (
         "near_hand_sounds_speed_hand_tactile_rt"
     )
+
+    serino_front_back = by_id["serino_2015_front_back_trunk_exp2"]
+    assert serino_front_back["status"] == "contrast_metadata_present_comparison_model_missing"
+    assert serino_front_back["missing_contrasts"] == []
+    assert serino_front_back["contrast_availability"]["front_back_space"] is True
+    assert serino_front_back["contrast_availability"]["soa_or_distance_rank"] is True
+    assert serino_front_back["contrast_availability"]["audio_tactile_vs_baseline"] is True
+    assert serino_front_back["synthetic_comparison"] == {}
 
     matsuda = by_id["matsuda_2021_four_directions"]
     assert matsuda["status"] == "synthetic_behavioral_comparison_passed"
