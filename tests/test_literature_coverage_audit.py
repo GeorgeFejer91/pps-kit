@@ -37,8 +37,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_runnable_profile": 12,
         "covered_blocked_missing_publication_parameters": 8,
         "covered_blocked_toolkit_structure": 0,
-        "not_yet_templated_requires_toolkit_structure": 2,
-        "not_yet_templated_missing_publication_parameters": 49,
+        "not_yet_templated_requires_toolkit_structure": 1,
+        "not_yet_templated_missing_publication_parameters": 50,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
@@ -233,6 +233,17 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
             "auditory_trajectory_contract_capability_smoke_report.json"
         )
         and "physical speaker or HRTF spatialization validation" in source.get("relevance", "")
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "spatial_renderer_provenance_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_spatial_renderer_provenance_contract_20260715/"
+            "spatial_renderer_provenance_contract_capability_smoke_report.json"
+        )
+        and "not bit-matched MATLAB or HRTF rendering" in source.get("relevance", "")
         for source in coverage["evidence_sources"]
     )
     assert any(
@@ -469,6 +480,21 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "auditory_trajectory_contract_capability_smoke_report.json"
     )
     assert auditory_trajectory_constraint["example_records"] == ["amiel_2025_front_rear"]
+    hrtf_provenance_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "hrtf_database_or_binaural_engine_mismatch"
+    )
+    assert hrtf_provenance_constraint["toolkit_status"] == (
+        "supported_by_spatial_renderer_provenance_contract_capability_smoke"
+    )
+    assert hrtf_provenance_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_spatial_renderer_provenance_contract_20260715/"
+        "spatial_renderer_provenance_contract_capability_smoke_report.json"
+    )
+    assert set(hrtf_provenance_constraint["example_records"]) == {
+        "taffou_2014_cynophobic_rear_looming",
+        "pfeiffer_2018_lateral_perihead_left_to_right",
+        "looming_duration_2025",
+    }
     assert {
         "trial_design_families",
         "audio_source_and_renderer",
@@ -619,10 +645,15 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "Max/MSP Spat LISTEN HRTF subject/filter, near-field compensation, and renderer settings for the rear-left trajectory",
         "exact SPL/gain transfer for the reported 76.5/77.3 dBA source levels",
     ]
-    assert records["looming_duration_2025"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
+    assert records["looming_duration_2025"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
     assert records["looming_duration_2025"]["blocking_constraint_ids"] == [
         "hrtf_database_or_binaural_engine_mismatch"
     ]
+    assert "renderer/HRTF provenance metadata are now runner-supported" in records["looming_duration_2025"][
+        "missing_publication_parameters"
+    ][0]
     assert records["hobeika_2020_methods"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["hobeika_2020_methods"]["blocking_constraint_ids"] == [
         "missing_core_soa_iti_baseline_repetition_parameters"

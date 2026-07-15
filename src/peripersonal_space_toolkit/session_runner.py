@@ -84,7 +84,7 @@ SEGMENT_BLOCK_PREVIEW_SCHEMA = "pps-block-csv-preview.v1"
 LAST_EXPERIMENT_SCHEMA = "pps-last-experiment.v1"
 PREPARED_SESSION_QUEUE_SCHEMA = "pps-prepared-session-queue.v1"
 BLOCK_WAV_CACHE_SCHEMA = "pps-session-block-cache.v1"
-BLOCK_WAV_CACHE_VERSION = "2026-07-15.auditory-trajectory-contract.v1"
+BLOCK_WAV_CACHE_VERSION = "2026-07-15.spatial-renderer-provenance-contract.v1"
 RESPONSE_MARKER_GAIN = 0.05
 EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S = 1.0
 LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_launched"}
@@ -506,6 +506,14 @@ PARTICIPANT_TRIAL_FIELDNAMES = [
     "trajectory_end_distance_cm",
     "trajectory_start_azimuth_deg",
     "trajectory_end_azimuth_deg",
+    "spatial_renderer_engine",
+    "spatial_renderer_version",
+    "hrtf_database",
+    "hrtf_subject_id",
+    "hrtf_filter_id",
+    "hrtf_near_field_compensation",
+    "source_asset_equivalence",
+    "renderer_equivalence_boundary",
     "iti_policy",
     "iti_ms",
     "foreperiod_ms",
@@ -929,6 +937,43 @@ class ParticipantTrialCsvWriter:
                 base,
                 "trajectory_end_azimuth_deg",
                 "Trajectory_End_Azimuth_deg",
+                default="",
+            ),
+            "spatial_renderer_engine": _row_value(
+                base,
+                "spatial_renderer_engine",
+                "Spatial_Renderer_Engine",
+                "renderer_engine",
+                "Renderer_Engine",
+                default="",
+            ),
+            "spatial_renderer_version": _row_value(
+                base,
+                "spatial_renderer_version",
+                "Spatial_Renderer_Version",
+                "renderer_version",
+                "Renderer_Version",
+                default="",
+            ),
+            "hrtf_database": _row_value(base, "hrtf_database", "HRTF_Database", default=""),
+            "hrtf_subject_id": _row_value(base, "hrtf_subject_id", "HRTF_Subject_ID", default=""),
+            "hrtf_filter_id": _row_value(base, "hrtf_filter_id", "HRTF_Filter_ID", default=""),
+            "hrtf_near_field_compensation": _row_value(
+                base,
+                "hrtf_near_field_compensation",
+                "HRTF_Near_Field_Compensation",
+                default="",
+            ),
+            "source_asset_equivalence": _row_value(
+                base,
+                "source_asset_equivalence",
+                "Source_Asset_Equivalence",
+                default="",
+            ),
+            "renderer_equivalence_boundary": _row_value(
+                base,
+                "renderer_equivalence_boundary",
+                "Renderer_Equivalence_Boundary",
                 default="",
             ),
             "iti_policy": _row_value(base, "iti_policy", "ITI_Policy", default=""),
@@ -2765,6 +2810,14 @@ def _cache_manifest_trial_payload(trial_rows: list[dict[str, Any]]) -> list[dict
                 "trajectory_end_distance_cm": row.get("Trajectory_End_Distance_cm", ""),
                 "trajectory_start_azimuth_deg": row.get("Trajectory_Start_Azimuth_deg", ""),
                 "trajectory_end_azimuth_deg": row.get("Trajectory_End_Azimuth_deg", ""),
+                "spatial_renderer_engine": row.get("Spatial_Renderer_Engine", ""),
+                "spatial_renderer_version": row.get("Spatial_Renderer_Version", ""),
+                "hrtf_database": row.get("HRTF_Database", ""),
+                "hrtf_subject_id": row.get("HRTF_Subject_ID", ""),
+                "hrtf_filter_id": row.get("HRTF_Filter_ID", ""),
+                "hrtf_near_field_compensation": row.get("HRTF_Near_Field_Compensation", ""),
+                "source_asset_equivalence": row.get("Source_Asset_Equivalence", ""),
+                "renderer_equivalence_boundary": row.get("Renderer_Equivalence_Boundary", ""),
                 "iti_policy": row.get("ITI_Policy", ""),
                 "iti_ms": row.get("ITI_ms", ""),
                 "foreperiod_ms": row.get("Foreperiod_ms", ""),
@@ -8173,6 +8226,43 @@ def _segment_session_trial_row(
         "Trajectory_End_Azimuth_deg",
         default="",
     )
+    spatial_renderer_engine = _row_value(
+        source,
+        "spatial_renderer_engine",
+        "Spatial_Renderer_Engine",
+        "renderer_engine",
+        "Renderer_Engine",
+        default="",
+    )
+    spatial_renderer_version = _row_value(
+        source,
+        "spatial_renderer_version",
+        "Spatial_Renderer_Version",
+        "renderer_version",
+        "Renderer_Version",
+        default="",
+    )
+    hrtf_database = _row_value(source, "hrtf_database", "HRTF_Database", default="")
+    hrtf_subject_id = _row_value(source, "hrtf_subject_id", "HRTF_Subject_ID", default="")
+    hrtf_filter_id = _row_value(source, "hrtf_filter_id", "HRTF_Filter_ID", default="")
+    hrtf_near_field_compensation = _row_value(
+        source,
+        "hrtf_near_field_compensation",
+        "HRTF_Near_Field_Compensation",
+        default="",
+    )
+    source_asset_equivalence = _row_value(
+        source,
+        "source_asset_equivalence",
+        "Source_Asset_Equivalence",
+        default="",
+    )
+    renderer_equivalence_boundary = _row_value(
+        source,
+        "renderer_equivalence_boundary",
+        "Renderer_Equivalence_Boundary",
+        default="",
+    )
     primary_analysis_included = _row_value(
         source,
         "primary_analysis_included",
@@ -8226,6 +8316,14 @@ def _segment_session_trial_row(
         "Trajectory_End_Distance_cm": trajectory_end_distance_cm,
         "Trajectory_Start_Azimuth_deg": trajectory_start_azimuth_deg,
         "Trajectory_End_Azimuth_deg": trajectory_end_azimuth_deg,
+        "Spatial_Renderer_Engine": spatial_renderer_engine,
+        "Spatial_Renderer_Version": spatial_renderer_version,
+        "HRTF_Database": hrtf_database,
+        "HRTF_Subject_ID": hrtf_subject_id,
+        "HRTF_Filter_ID": hrtf_filter_id,
+        "HRTF_Near_Field_Compensation": hrtf_near_field_compensation,
+        "Source_Asset_Equivalence": source_asset_equivalence,
+        "Renderer_Equivalence_Boundary": renderer_equivalence_boundary,
         "Primary_Analysis_Included": primary_analysis_included,
         "Row": row_label,
         "Row_Label": row_label,
@@ -8414,6 +8512,14 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "Trajectory_End_Distance_cm",
         "Trajectory_Start_Azimuth_deg",
         "Trajectory_End_Azimuth_deg",
+        "Spatial_Renderer_Engine",
+        "Spatial_Renderer_Version",
+        "HRTF_Database",
+        "HRTF_Subject_ID",
+        "HRTF_Filter_ID",
+        "HRTF_Near_Field_Compensation",
+        "Source_Asset_Equivalence",
+        "Renderer_Equivalence_Boundary",
         "Primary_Analysis_Included",
         "Row",
         "Row_Label",

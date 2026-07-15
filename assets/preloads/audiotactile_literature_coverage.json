@@ -196,6 +196,13 @@
       "relevance": "Capability smoke proving that Segment 5/6 rows can declare row-level auditory trajectory-family metadata, including family, direction, coordinate frame, start/end hemifields, distances, and azimuths, preserve the contract through prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated participant-like responses with a software wired-loopback sidecar. This is not physical speaker or HRTF spatialization validation, exact front/rear apparatus reconstruction, room acoustics, collected participant evidence, physical timing-loopback, or scientific PPS-effect validation."
     },
     {
+      "id": "spatial_renderer_provenance_contract_capability_smoke_2026_07_15",
+      "kind": "validation_protocol",
+      "date_run": "2026-07-15",
+      "local_summary_file": "artifacts/validation_runs/current_goal_spatial_renderer_provenance_contract_20260715/spatial_renderer_provenance_contract_capability_smoke_report.json",
+      "relevance": "Capability smoke proving that Segment 5/6 rows can declare spatial renderer and HRTF provenance metadata, including renderer engine/version, HRTF database, subject/filter identifiers, near-field compensation, source-asset equivalence, and renderer-equivalence boundary, preserve the contract through prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated participant-like responses with a software wired-loopback sidecar. This is not bit-matched MATLAB or HRTF rendering, physical headphone/speaker spatialization validation, room acoustics, collected participant evidence, physical timing-loopback, or scientific PPS-effect validation."
+    },
+    {
       "id": "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15",
       "kind": "pubmed_live_spot_check",
       "date_run": "2026-07-15",
@@ -218,8 +225,8 @@
       "covered_runnable_profile": 12,
       "covered_blocked_missing_publication_parameters": 8,
       "covered_blocked_toolkit_structure": 0,
-      "not_yet_templated_requires_toolkit_structure": 2,
-      "not_yet_templated_missing_publication_parameters": 49,
+      "not_yet_templated_requires_toolkit_structure": 1,
+      "not_yet_templated_missing_publication_parameters": 50,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
@@ -462,12 +469,14 @@
     {
       "id": "hrtf_database_or_binaural_engine_mismatch",
       "dimension": "auditory_stimulus_type_asset_provenance_rendering_or_gain_law",
-      "description": "Study-specific HRTF or binaural rendering resource differs from the bundled toolkit renderer.",
-      "toolkit_status": "requires_publication_reaudit_or_renderer_extension",
+      "description": "Study-specific HRTF or binaural rendering provenance can now be represented as row-level renderer/HRTF/source-equivalence metadata. Exact original renderer assets, subject/filter values, source equivalence, and physical spatialization validation remain source/provenance boundaries for individual studies.",
+      "toolkit_status": "supported_by_spatial_renderer_provenance_contract_capability_smoke",
       "example_records": [
         "taffou_2014_cynophobic_rear_looming",
-        "pfeiffer_2018_lateral_perihead_left_to_right"
-      ]
+        "pfeiffer_2018_lateral_perihead_left_to_right",
+        "looming_duration_2025"
+      ],
+      "validation_report": "artifacts/validation_runs/current_goal_spatial_renderer_provenance_contract_20260715/spatial_renderer_provenance_contract_capability_smoke_report.json"
     },
     {
       "id": "unity_3d_tune_in_engine_behavior",
@@ -1860,14 +1869,14 @@
         "web_search_sanity_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "looming-cue tactile-response PPS task varying auditory duration",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
         "hrtf_database_or_binaural_engine_mismatch"
       ],
       "missing_publication_parameters": [
-        "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis is runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation is not yet validated as a first-class toolkit/source-equivalence input"
+        "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation, HRTF/source assets, and source-equivalence validation remain unresolved"
       ]
     },
     {

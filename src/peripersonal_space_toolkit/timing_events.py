@@ -276,6 +276,29 @@ class TriggerDictionary:
                         "trajectory_end_azimuth_deg",
                         payload.get("Trajectory_End_Azimuth_deg", ""),
                     ),
+                    "spatial_renderer_engine": payload.get(
+                        "spatial_renderer_engine",
+                        payload.get("Spatial_Renderer_Engine", ""),
+                    ),
+                    "spatial_renderer_version": payload.get(
+                        "spatial_renderer_version",
+                        payload.get("Spatial_Renderer_Version", ""),
+                    ),
+                    "hrtf_database": payload.get("hrtf_database", payload.get("HRTF_Database", "")),
+                    "hrtf_subject_id": payload.get("hrtf_subject_id", payload.get("HRTF_Subject_ID", "")),
+                    "hrtf_filter_id": payload.get("hrtf_filter_id", payload.get("HRTF_Filter_ID", "")),
+                    "hrtf_near_field_compensation": payload.get(
+                        "hrtf_near_field_compensation",
+                        payload.get("HRTF_Near_Field_Compensation", ""),
+                    ),
+                    "source_asset_equivalence": payload.get(
+                        "source_asset_equivalence",
+                        payload.get("Source_Asset_Equivalence", ""),
+                    ),
+                    "renderer_equivalence_boundary": payload.get(
+                        "renderer_equivalence_boundary",
+                        payload.get("Renderer_Equivalence_Boundary", ""),
+                    ),
                     "external_trigger_required": payload.get(
                         "external_trigger_required",
                         payload.get("External_Trigger_Required", ""),
@@ -496,6 +519,29 @@ class TriggerDictionary:
                 "trajectory_end_azimuth_deg": payload.get(
                     "trajectory_end_azimuth_deg",
                     payload.get("Trajectory_End_Azimuth_deg", ""),
+                ),
+                "spatial_renderer_engine": payload.get(
+                    "spatial_renderer_engine",
+                    payload.get("Spatial_Renderer_Engine", ""),
+                ),
+                "spatial_renderer_version": payload.get(
+                    "spatial_renderer_version",
+                    payload.get("Spatial_Renderer_Version", ""),
+                ),
+                "hrtf_database": payload.get("hrtf_database", payload.get("HRTF_Database", "")),
+                "hrtf_subject_id": payload.get("hrtf_subject_id", payload.get("HRTF_Subject_ID", "")),
+                "hrtf_filter_id": payload.get("hrtf_filter_id", payload.get("HRTF_Filter_ID", "")),
+                "hrtf_near_field_compensation": payload.get(
+                    "hrtf_near_field_compensation",
+                    payload.get("HRTF_Near_Field_Compensation", ""),
+                ),
+                "source_asset_equivalence": payload.get(
+                    "source_asset_equivalence",
+                    payload.get("Source_Asset_Equivalence", ""),
+                ),
+                "renderer_equivalence_boundary": payload.get(
+                    "renderer_equivalence_boundary",
+                    payload.get("Renderer_Equivalence_Boundary", ""),
                 ),
                 "external_trigger_required": payload.get(
                     "external_trigger_required",

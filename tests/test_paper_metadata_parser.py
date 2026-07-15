@@ -48,8 +48,8 @@ def test_paper_audit_package_summarizes_core_pipeline_without_source_artifacts()
     assert summary["record_count"] == 75
     assert summary["category_counts"]["covered_runnable_profile"] == 12
     assert len(summary["runnable_profile_records"]) == 12
-    assert len(summary["missing_parameter_records"]) == 57
-    assert len(summary["toolkit_structure_gap_records"]) == 2
+    assert len(summary["missing_parameter_records"]) == 58
+    assert len(summary["toolkit_structure_gap_records"]) == 1
     assert len(summary["adjacent_out_of_scope_records"]) == 4
     assert blockers
     assert summary["blocker_counts"] == blockers

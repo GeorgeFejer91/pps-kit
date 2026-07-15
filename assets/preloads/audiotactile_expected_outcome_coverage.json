@@ -21,8 +21,8 @@
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
-      "not_yet_templated_missing_publication_parameters": 49,
-      "not_yet_templated_requires_toolkit_structure": 2,
+      "not_yet_templated_missing_publication_parameters": 50,
+      "not_yet_templated_requires_toolkit_structure": 1,
       "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 12,
       "template_present_blocked_missing_publication_parameters": 8
     }
@@ -2177,7 +2177,7 @@
       "record_id": "looming_duration_2025",
       "citation_short": "Impact of looming sound duration on PPS measurement (2025)",
       "doi": "10.61782/fa.2025.0866",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -2203,9 +2203,9 @@
         "paper_audit_visualization_candidate_count": "8"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Add the missing toolkit structure or response contract, then create a profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "depersonalisation_2024",

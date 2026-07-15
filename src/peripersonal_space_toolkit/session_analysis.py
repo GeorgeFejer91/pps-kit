@@ -1090,6 +1090,38 @@ def _response_base(event: dict[str, Any]) -> dict[str, Any]:
             "trajectory_end_azimuth_deg",
             "Trajectory_End_Azimuth_deg",
         ),
+        "spatial_renderer_engine": _field(
+            event,
+            "spatial_renderer_engine",
+            "Spatial_Renderer_Engine",
+            "renderer_engine",
+            "Renderer_Engine",
+        ),
+        "spatial_renderer_version": _field(
+            event,
+            "spatial_renderer_version",
+            "Spatial_Renderer_Version",
+            "renderer_version",
+            "Renderer_Version",
+        ),
+        "hrtf_database": _field(event, "hrtf_database", "HRTF_Database"),
+        "hrtf_subject_id": _field(event, "hrtf_subject_id", "HRTF_Subject_ID"),
+        "hrtf_filter_id": _field(event, "hrtf_filter_id", "HRTF_Filter_ID"),
+        "hrtf_near_field_compensation": _field(
+            event,
+            "hrtf_near_field_compensation",
+            "HRTF_Near_Field_Compensation",
+        ),
+        "source_asset_equivalence": _field(
+            event,
+            "source_asset_equivalence",
+            "Source_Asset_Equivalence",
+        ),
+        "renderer_equivalence_boundary": _field(
+            event,
+            "renderer_equivalence_boundary",
+            "Renderer_Equivalence_Boundary",
+        ),
         "tactile_channel": _field(event, "tactile_channel", "Tactile_Channel"),
         "tactile_waveform_shape": _field(event, "tactile_waveform_shape", "Tactile_Waveform_Shape"),
         "tactile_frequency_hz": _field(
@@ -3186,6 +3218,22 @@ def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
         row["trajectory_start_azimuth_deg"] = row.get("Trajectory_Start_Azimuth_deg")
     if "trajectory_end_azimuth_deg" not in row and "Trajectory_End_Azimuth_deg" in row:
         row["trajectory_end_azimuth_deg"] = row.get("Trajectory_End_Azimuth_deg")
+    if "spatial_renderer_engine" not in row and "Spatial_Renderer_Engine" in row:
+        row["spatial_renderer_engine"] = row.get("Spatial_Renderer_Engine")
+    if "spatial_renderer_version" not in row and "Spatial_Renderer_Version" in row:
+        row["spatial_renderer_version"] = row.get("Spatial_Renderer_Version")
+    if "hrtf_database" not in row and "HRTF_Database" in row:
+        row["hrtf_database"] = row.get("HRTF_Database")
+    if "hrtf_subject_id" not in row and "HRTF_Subject_ID" in row:
+        row["hrtf_subject_id"] = row.get("HRTF_Subject_ID")
+    if "hrtf_filter_id" not in row and "HRTF_Filter_ID" in row:
+        row["hrtf_filter_id"] = row.get("HRTF_Filter_ID")
+    if "hrtf_near_field_compensation" not in row and "HRTF_Near_Field_Compensation" in row:
+        row["hrtf_near_field_compensation"] = row.get("HRTF_Near_Field_Compensation")
+    if "source_asset_equivalence" not in row and "Source_Asset_Equivalence" in row:
+        row["source_asset_equivalence"] = row.get("Source_Asset_Equivalence")
+    if "renderer_equivalence_boundary" not in row and "Renderer_Equivalence_Boundary" in row:
+        row["renderer_equivalence_boundary"] = row.get("Renderer_Equivalence_Boundary")
     if "rt_ms" not in row and "RT_ms" in row:
         row["rt_ms"] = row.get("RT_ms")
     if "participant_id" not in row and "Participant_ID" in row:

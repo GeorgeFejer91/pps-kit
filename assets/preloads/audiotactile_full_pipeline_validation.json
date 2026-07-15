@@ -6124,7 +6124,7 @@
         "hrtf_database_or_binaural_engine_mismatch"
       ],
       "citation_short": "Impact of looming sound duration on PPS measurement (2025)",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.61782/fa.2025.0866",
       "expected_effect_direction": "both_2s_and_3s_looming_sounds_facilitate_late_tactile_rt_with_duration_specific_boundaries",
@@ -6163,7 +6163,7 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis is runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation is not yet validated as a first-class toolkit/source-equivalence input"
+            "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation, HRTF/source assets, and source-equivalence validation remain unresolved"
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -6183,10 +6183,10 @@
           "blocker_ids": [
             "hrtf_database_or_binaural_engine_mismatch"
           ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -6197,9 +6197,9 @@
         }
       },
       "missing_publication_parameters": [
-        "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis is runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation is not yet validated as a first-class toolkit/source-equivalence input"
+        "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation, HRTF/source assets, and source-equivalence validation remain unresolved"
       ],
-      "next_required_action": "Implement or validate toolkit support for: hrtf_database_or_binaural_engine_mismatch; also extract/source missing paper parameters: live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis is runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation is not yet validated as a first-class toolkit/source-equivalence input",
+      "next_required_action": "Extract or source the missing paper parameters: live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation, HRTF/source assets, and source-equivalence validation remain unresolved",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -6212,7 +6212,7 @@
         "pdf_status": "downloaded",
         "supplement_status": "not_found"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "looming_duration_2025",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -7574,8 +7574,8 @@
         "source_parameters_missing_or_unresolved": 59
       },
       "toolkit_gui_implementation": {
-        "blocked_by_missing_profile_parameters": 57,
-        "blocked_by_toolkit_structure_or_response_contract": 2,
+        "blocked_by_missing_profile_parameters": 58,
+        "blocked_by_toolkit_structure_or_response_contract": 1,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 12
       },
@@ -7593,13 +7593,13 @@
       "adjacent_not_applicable": 4,
       "full_emulated_source_to_runner_pipeline_validated": 12,
       "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 49,
-      "toolkit_structure_or_response_contract_missing": 2
+      "source_parameters_missing_before_profile_creation": 50,
+      "toolkit_structure_or_response_contract_missing": 1
     },
     "primary_gap_counts": {
       "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 49,
-      "toolkit_structure_or_response_contract_missing": 2
+      "source_parameters_missing_before_profile_creation": 50,
+      "toolkit_structure_or_response_contract_missing": 1
     }
   }
 }
