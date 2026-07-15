@@ -3,7 +3,7 @@
 - Record ID: `amiel_2025_front_rear`
 - DOI: `10.1016/j.cortex.2025.11.015`
 - DOI URL: https://doi.org/10.1016/j.cortex.2025.11.015
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: distance-dependent audio-tactile integration in rear and front spaces
 - PDF status: `open_access_unavailable`
 - Supplement status: `not_found`
@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- extract front/rear sound-spatialization method, distance levels, tactile timing, and body-relative trajectory mappings
+- extract front/rear sound-spatialization method, distance levels, tactile timing, and exact body-relative trajectory mappings; row-level auditory trajectory-family metadata is now runner-supported
 
 ## Review Attempts
 

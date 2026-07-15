@@ -21,8 +21,8 @@
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
-      "not_yet_templated_missing_publication_parameters": 48,
-      "not_yet_templated_requires_toolkit_structure": 3,
+      "not_yet_templated_missing_publication_parameters": 49,
+      "not_yet_templated_requires_toolkit_structure": 2,
       "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 12,
       "template_present_blocked_missing_publication_parameters": 8
     }
@@ -75,7 +75,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "farne_ladavas_2002_auditory_pps_humans",
@@ -111,7 +111,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "kitagawa_2005_sound_complexity",
@@ -144,7 +144,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "serino_2007_blind_cane_users",
@@ -180,7 +180,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "serino_2009_tms",
@@ -213,7 +213,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "tajadura_jimenez_2009_visual_deprivation",
@@ -249,7 +249,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "bassolino_2010_mouse_use",
@@ -282,7 +282,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "serino_2011_rtms",
@@ -315,7 +315,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "avenanti_2012_motor_cortex",
@@ -348,7 +348,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "serino_2011_professional_fencers",
@@ -381,7 +381,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "canzoneri_2012_dynamic_sounds",
@@ -532,7 +532,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "teramoto_2013_visual_deprivation",
@@ -565,7 +565,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "teneggi_2013_social_face",
@@ -738,7 +738,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "galli_2015_wheelchair",
@@ -816,7 +816,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "noel_2015_bodily_self",
@@ -1080,7 +1080,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "serino_2015_toolless_sync_training",
@@ -1148,7 +1148,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "hobeika_2018_anisotropy",
@@ -1181,7 +1181,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "noel_2018_neural_adaptation",
@@ -1214,7 +1214,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "pfeiffer_2018_vestibular",
@@ -1295,7 +1295,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "tonelli_2019_echolocation",
@@ -1376,7 +1376,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "newborn_boundaries_2019",
@@ -1409,7 +1409,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "ronga_2021_newborn_erp",
@@ -1445,7 +1445,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "autism_2019",
@@ -1478,7 +1478,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "disorders_consciousness_2019",
@@ -1514,7 +1514,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "social_coding_2019",
@@ -1547,7 +1547,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "social_perception_2017",
@@ -1580,7 +1580,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "lower_limb_pps_2017",
@@ -1636,7 +1636,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "hobeika_2020_methods",
@@ -1669,7 +1669,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "ferroni_2020_tool_observation",
@@ -1702,7 +1702,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "ferroni_2026_pps_plasticity",
@@ -1735,7 +1735,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "spadone_2021_connectivity",
@@ -1768,7 +1768,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "ageing_2021",
@@ -1801,7 +1801,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "seeming_confines_2021",
@@ -1834,7 +1834,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "jazz_duet_2021",
@@ -1867,7 +1867,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "taffou_2021_auditory_roughness",
@@ -1903,7 +1903,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "holmes_2020_four_experiments",
@@ -1936,7 +1936,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "schizophrenia_tool_use_2022",
@@ -1969,7 +1969,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "teraoka_2024_front_rear",
@@ -2002,7 +2002,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "body_image_social_cognition_2024",
@@ -2035,7 +2035,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "mindfulness_pps_2024",
@@ -2071,7 +2071,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "serino_2018_mixed_reality_pps",
@@ -2104,7 +2104,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Add the missing toolkit structure or response contract, then create a profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "amemiya_2017_pseudowalking_footsole",
@@ -2137,7 +2137,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "novel_two_phase_audio_tactile_2025",
@@ -2171,7 +2171,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "looming_duration_2025",
@@ -2205,7 +2205,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Add the missing toolkit structure or response contract, then create a profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "depersonalisation_2024",
@@ -2241,13 +2241,13 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "amiel_2025_front_rear",
       "citation_short": "Functional organization of rear/front PPS (2025/2026)",
       "doi": "10.1016/j.cortex.2025.11.015",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -2272,9 +2272,9 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "interoception_exteroception_2025",
@@ -2307,7 +2307,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "cell_reports_medicine_2026_consciousness",
@@ -2343,7 +2343,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "matsuda_2021_four_directions",
@@ -2633,7 +2633,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "finisguerra_2015_moving_sounds_motor",
@@ -2669,7 +2669,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "biggio_2017_racket_tool_use",
@@ -2705,7 +2705,7 @@
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
     }
   ]
 }

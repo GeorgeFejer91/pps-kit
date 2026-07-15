@@ -1041,6 +1041,55 @@ def _response_base(event: dict[str, Any]) -> dict[str, Any]:
             "spatial_axis",
             "Spatial_Axis",
         ),
+        "auditory_trajectory_family": _field(
+            event,
+            "auditory_trajectory_family",
+            "Auditory_Trajectory_Family",
+            "trajectory_family",
+            "Trajectory_Family",
+        ),
+        "auditory_trajectory_direction": _field(
+            event,
+            "auditory_trajectory_direction",
+            "Auditory_Trajectory_Direction",
+            "trajectory_direction",
+            "Trajectory_Direction",
+        ),
+        "trajectory_coordinate_frame": _field(
+            event,
+            "trajectory_coordinate_frame",
+            "Trajectory_Coordinate_Frame",
+        ),
+        "trajectory_start_hemifield": _field(
+            event,
+            "trajectory_start_hemifield",
+            "Trajectory_Start_Hemifield",
+        ),
+        "trajectory_end_hemifield": _field(
+            event,
+            "trajectory_end_hemifield",
+            "Trajectory_End_Hemifield",
+        ),
+        "trajectory_start_distance_cm": _field(
+            event,
+            "trajectory_start_distance_cm",
+            "Trajectory_Start_Distance_cm",
+        ),
+        "trajectory_end_distance_cm": _field(
+            event,
+            "trajectory_end_distance_cm",
+            "Trajectory_End_Distance_cm",
+        ),
+        "trajectory_start_azimuth_deg": _field(
+            event,
+            "trajectory_start_azimuth_deg",
+            "Trajectory_Start_Azimuth_deg",
+        ),
+        "trajectory_end_azimuth_deg": _field(
+            event,
+            "trajectory_end_azimuth_deg",
+            "Trajectory_End_Azimuth_deg",
+        ),
         "tactile_channel": _field(event, "tactile_channel", "Tactile_Channel"),
         "tactile_waveform_shape": _field(event, "tactile_waveform_shape", "Tactile_Waveform_Shape"),
         "tactile_frequency_hz": _field(
@@ -3119,6 +3168,24 @@ def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
         row["spatial_hemifield"] = row.get("Spatial_Hemifield")
     if "body_relative_axis" not in row and "Body_Relative_Axis" in row:
         row["body_relative_axis"] = row.get("Body_Relative_Axis")
+    if "auditory_trajectory_family" not in row and "Auditory_Trajectory_Family" in row:
+        row["auditory_trajectory_family"] = row.get("Auditory_Trajectory_Family")
+    if "auditory_trajectory_direction" not in row and "Auditory_Trajectory_Direction" in row:
+        row["auditory_trajectory_direction"] = row.get("Auditory_Trajectory_Direction")
+    if "trajectory_coordinate_frame" not in row and "Trajectory_Coordinate_Frame" in row:
+        row["trajectory_coordinate_frame"] = row.get("Trajectory_Coordinate_Frame")
+    if "trajectory_start_hemifield" not in row and "Trajectory_Start_Hemifield" in row:
+        row["trajectory_start_hemifield"] = row.get("Trajectory_Start_Hemifield")
+    if "trajectory_end_hemifield" not in row and "Trajectory_End_Hemifield" in row:
+        row["trajectory_end_hemifield"] = row.get("Trajectory_End_Hemifield")
+    if "trajectory_start_distance_cm" not in row and "Trajectory_Start_Distance_cm" in row:
+        row["trajectory_start_distance_cm"] = row.get("Trajectory_Start_Distance_cm")
+    if "trajectory_end_distance_cm" not in row and "Trajectory_End_Distance_cm" in row:
+        row["trajectory_end_distance_cm"] = row.get("Trajectory_End_Distance_cm")
+    if "trajectory_start_azimuth_deg" not in row and "Trajectory_Start_Azimuth_deg" in row:
+        row["trajectory_start_azimuth_deg"] = row.get("Trajectory_Start_Azimuth_deg")
+    if "trajectory_end_azimuth_deg" not in row and "Trajectory_End_Azimuth_deg" in row:
+        row["trajectory_end_azimuth_deg"] = row.get("Trajectory_End_Azimuth_deg")
     if "rt_ms" not in row and "RT_ms" in row:
         row["rt_ms"] = row.get("RT_ms")
     if "participant_id" not in row and "Participant_ID" in row:

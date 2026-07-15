@@ -189,6 +189,13 @@
       "relevance": "Capability smoke proving that Segment 5/6 rows can declare multi-speaker output switching metadata, materialize runnable multichannel WAVs from channel/time/gain schedules, preserve the contract through prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated participant-like responses with a software wired-loopback sidecar. This is not physical loudspeaker-array validation, room acoustics, SPL transfer, hardware route calibration, collected participant evidence, physical timing-loopback, exact original apparatus reconstruction, or scientific PPS-effect validation."
     },
     {
+      "id": "auditory_trajectory_contract_capability_smoke_2026_07_15",
+      "kind": "validation_protocol",
+      "date_run": "2026-07-15",
+      "local_summary_file": "artifacts/validation_runs/current_goal_auditory_trajectory_contract_20260715/auditory_trajectory_contract_capability_smoke_report.json",
+      "relevance": "Capability smoke proving that Segment 5/6 rows can declare row-level auditory trajectory-family metadata, including family, direction, coordinate frame, start/end hemifields, distances, and azimuths, preserve the contract through prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated participant-like responses with a software wired-loopback sidecar. This is not physical speaker or HRTF spatialization validation, exact front/rear apparatus reconstruction, room acoustics, collected participant evidence, physical timing-loopback, or scientific PPS-effect validation."
+    },
+    {
       "id": "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15",
       "kind": "pubmed_live_spot_check",
       "date_run": "2026-07-15",
@@ -211,8 +218,8 @@
       "covered_runnable_profile": 12,
       "covered_blocked_missing_publication_parameters": 8,
       "covered_blocked_toolkit_structure": 0,
-      "not_yet_templated_requires_toolkit_structure": 3,
-      "not_yet_templated_missing_publication_parameters": 48,
+      "not_yet_templated_requires_toolkit_structure": 2,
+      "not_yet_templated_missing_publication_parameters": 49,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
@@ -500,11 +507,12 @@
     {
       "id": "rear_hemifield_trajectory_families",
       "dimension": "spatial_trajectory_coordinate_frame_or_apparatus_geometry",
-      "description": "Rear-left and rear-right trajectories are distinct task families rather than one mirrored direction parameter. Current preload assets can expand them when the paper reports enough coordinates and timings; otherwise rear/front body-relative mapping remains a structural blocker.",
-      "toolkit_status": "partially_modeled_reported_coordinates_supported",
+      "description": "Rear-left, rear-right, front-to-rear, rear-to-front, and other body-relative auditory trajectories can now be represented as row-level trajectory-family metadata when the paper reports enough coordinates and timings; physical speaker/HRTF spatialization remains an apparatus-validation boundary, not a runner schema blocker.",
+      "toolkit_status": "supported_by_auditory_trajectory_contract_capability_smoke",
       "example_records": [
         "amiel_2025_front_rear"
-      ]
+      ],
+      "validation_report": "artifacts/validation_runs/current_goal_auditory_trajectory_contract_20260715/auditory_trajectory_contract_capability_smoke_report.json"
     },
     {
       "id": "ecological_or_licensed_audio_assets",
@@ -1888,15 +1896,14 @@
         "pubmed_post_2020_audio_tactile_pps_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "distance-dependent audio-tactile integration in rear and front spaces",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "rear_hemifield_trajectory_families",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract front/rear sound-spatialization method, distance levels, tactile timing, and body-relative trajectory mappings"
+        "extract front/rear sound-spatialization method, distance levels, tactile timing, and exact body-relative trajectory mappings; row-level auditory trajectory-family metadata is now runner-supported"
       ]
     },
     {

@@ -54,13 +54,13 @@ def test_full_pipeline_validation_summary_is_conservative():
         "adjacent_not_applicable": 4,
         "full_emulated_source_to_runner_pipeline_validated": 12,
         "profile_present_but_source_parameters_missing": 8,
-        "source_parameters_missing_before_profile_creation": 48,
-        "toolkit_structure_or_response_contract_missing": 3,
+        "source_parameters_missing_before_profile_creation": 49,
+        "toolkit_structure_or_response_contract_missing": 2,
     }
     assert summary["primary_gap_counts"] == {
         "profile_present_but_source_parameters_missing": 8,
-        "source_parameters_missing_before_profile_creation": 48,
-        "toolkit_structure_or_response_contract_missing": 3,
+        "source_parameters_missing_before_profile_creation": 49,
+        "toolkit_structure_or_response_contract_missing": 2,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
         "minimum_source_parameters_captured": 12,
@@ -73,8 +73,8 @@ def test_full_pipeline_validation_summary_is_conservative():
         "not_applicable_adjacent_record": 4,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
-        "blocked_by_missing_profile_parameters": 56,
-        "blocked_by_toolkit_structure_or_response_contract": 3,
+        "blocked_by_missing_profile_parameters": 57,
+        "blocked_by_toolkit_structure_or_response_contract": 2,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 12,
     }
@@ -167,6 +167,12 @@ def test_full_pipeline_blocks_at_the_first_unproven_layer():
         "blocked_by_missing_profile_parameters"
     )
     assert serino_2015_exps_4_to_6["blocking_constraint_ids"] == []
+
+    amiel = records["amiel_2025_front_rear"]
+    assert amiel["pipeline_status"] == "source_parameters_missing_before_profile_creation"
+    assert amiel["gates"]["toolkit_gui_implementation"]["status"] == "blocked_by_missing_profile_parameters"
+    assert amiel["blocking_constraint_ids"] == ["missing_core_soa_iti_baseline_repetition_parameters"]
+    assert "trajectory-family metadata is now runner-supported" in amiel["next_required_action"]
 
     spiousas = records["spiousas_2025_auditory_only"]
     assert spiousas["pipeline_status"] == "adjacent_not_applicable"

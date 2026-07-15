@@ -1311,7 +1311,12 @@ def build_record(
         "observed_vs_expected_status": observed_status,
         "observed_comparison_gap": observed_gap,
         "observed_evidence_boundary": _observed_boundary(observed_status),
-        "required_next_evidence": _required_next_evidence(expected_status, runnable_status, observed_status),
+        "required_next_evidence": _required_next_evidence(
+            expected_status,
+            runnable_status,
+            observed_status,
+            coverage_category,
+        ),
     }
     observed_profile_contrast_evidence = _observed_profile_contrast_evidence(observed_status)
     if observed_profile_contrast_evidence:
@@ -1488,7 +1493,12 @@ def _observed_mouse_click_evidence(observed_status: str) -> dict[str, str]:
     }
 
 
-def _required_next_evidence(expected_status: str, runnable_status: str, observed_status: str) -> str:
+def _required_next_evidence(
+    expected_status: str,
+    runnable_status: str,
+    observed_status: str,
+    coverage_category: str,
+) -> str:
     if expected_status == "adjacent_out_of_scope":
         return "No outcome comparison required unless the record is reclassified as in scope."
     if expected_status == "pending_expected_outcome_extraction":
@@ -1497,6 +1507,16 @@ def _required_next_evidence(expected_status: str, runnable_status: str, observed
             "and link it to an observable analysis metric."
         )
     if runnable_status == "not_yet_templated":
+        if coverage_category == "not_yet_templated_missing_publication_parameters":
+            return (
+                "Extract the missing source/PDF profile parameters and create a parsimonious profile before "
+                "attempting observed-vs-expected evaluation."
+            )
+        if coverage_category == "not_yet_templated_requires_toolkit_structure":
+            return (
+                "Add the missing toolkit structure or response contract, then create a profile before "
+                "attempting observed-vs-expected evaluation."
+            )
         return (
             "Create a profile template or add the missing toolkit structure before attempting "
             "observed-vs-expected evaluation."

@@ -84,7 +84,7 @@ SEGMENT_BLOCK_PREVIEW_SCHEMA = "pps-block-csv-preview.v1"
 LAST_EXPERIMENT_SCHEMA = "pps-last-experiment.v1"
 PREPARED_SESSION_QUEUE_SCHEMA = "pps-prepared-session-queue.v1"
 BLOCK_WAV_CACHE_SCHEMA = "pps-session-block-cache.v1"
-BLOCK_WAV_CACHE_VERSION = "2026-07-15.multi-speaker-switch-contract.v1"
+BLOCK_WAV_CACHE_VERSION = "2026-07-15.auditory-trajectory-contract.v1"
 RESPONSE_MARKER_GAIN = 0.05
 EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S = 1.0
 LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_launched"}
@@ -497,6 +497,15 @@ PARTICIPANT_TRIAL_FIELDNAMES = [
     "body_side",
     "spatial_hemifield",
     "body_relative_axis",
+    "auditory_trajectory_family",
+    "auditory_trajectory_direction",
+    "trajectory_coordinate_frame",
+    "trajectory_start_hemifield",
+    "trajectory_end_hemifield",
+    "trajectory_start_distance_cm",
+    "trajectory_end_distance_cm",
+    "trajectory_start_azimuth_deg",
+    "trajectory_end_azimuth_deg",
     "iti_policy",
     "iti_ms",
     "foreperiod_ms",
@@ -862,6 +871,64 @@ class ParticipantTrialCsvWriter:
                 "Trajectory_Axis",
                 "spatial_axis",
                 "Spatial_Axis",
+                default="",
+            ),
+            "auditory_trajectory_family": _row_value(
+                base,
+                "auditory_trajectory_family",
+                "Auditory_Trajectory_Family",
+                "trajectory_family",
+                "Trajectory_Family",
+                default="",
+            ),
+            "auditory_trajectory_direction": _row_value(
+                base,
+                "auditory_trajectory_direction",
+                "Auditory_Trajectory_Direction",
+                "trajectory_direction",
+                "Trajectory_Direction",
+                default="",
+            ),
+            "trajectory_coordinate_frame": _row_value(
+                base,
+                "trajectory_coordinate_frame",
+                "Trajectory_Coordinate_Frame",
+                default="",
+            ),
+            "trajectory_start_hemifield": _row_value(
+                base,
+                "trajectory_start_hemifield",
+                "Trajectory_Start_Hemifield",
+                default="",
+            ),
+            "trajectory_end_hemifield": _row_value(
+                base,
+                "trajectory_end_hemifield",
+                "Trajectory_End_Hemifield",
+                default="",
+            ),
+            "trajectory_start_distance_cm": _row_value(
+                base,
+                "trajectory_start_distance_cm",
+                "Trajectory_Start_Distance_cm",
+                default="",
+            ),
+            "trajectory_end_distance_cm": _row_value(
+                base,
+                "trajectory_end_distance_cm",
+                "Trajectory_End_Distance_cm",
+                default="",
+            ),
+            "trajectory_start_azimuth_deg": _row_value(
+                base,
+                "trajectory_start_azimuth_deg",
+                "Trajectory_Start_Azimuth_deg",
+                default="",
+            ),
+            "trajectory_end_azimuth_deg": _row_value(
+                base,
+                "trajectory_end_azimuth_deg",
+                "Trajectory_End_Azimuth_deg",
                 default="",
             ),
             "iti_policy": _row_value(base, "iti_policy", "ITI_Policy", default=""),
@@ -2689,6 +2756,15 @@ def _cache_manifest_trial_payload(trial_rows: list[dict[str, Any]]) -> list[dict
                 "body_side": row.get("Body_Side", ""),
                 "spatial_hemifield": row.get("Spatial_Hemifield", ""),
                 "body_relative_axis": row.get("Body_Relative_Axis", ""),
+                "auditory_trajectory_family": row.get("Auditory_Trajectory_Family", ""),
+                "auditory_trajectory_direction": row.get("Auditory_Trajectory_Direction", ""),
+                "trajectory_coordinate_frame": row.get("Trajectory_Coordinate_Frame", ""),
+                "trajectory_start_hemifield": row.get("Trajectory_Start_Hemifield", ""),
+                "trajectory_end_hemifield": row.get("Trajectory_End_Hemifield", ""),
+                "trajectory_start_distance_cm": row.get("Trajectory_Start_Distance_cm", ""),
+                "trajectory_end_distance_cm": row.get("Trajectory_End_Distance_cm", ""),
+                "trajectory_start_azimuth_deg": row.get("Trajectory_Start_Azimuth_deg", ""),
+                "trajectory_end_azimuth_deg": row.get("Trajectory_End_Azimuth_deg", ""),
                 "iti_policy": row.get("ITI_Policy", ""),
                 "iti_ms": row.get("ITI_ms", ""),
                 "foreperiod_ms": row.get("Foreperiod_ms", ""),
@@ -8039,6 +8115,64 @@ def _segment_session_trial_row(
         "Spatial_Axis",
         default="",
     )
+    auditory_trajectory_family = _row_value(
+        source,
+        "auditory_trajectory_family",
+        "Auditory_Trajectory_Family",
+        "trajectory_family",
+        "Trajectory_Family",
+        default="",
+    )
+    auditory_trajectory_direction = _row_value(
+        source,
+        "auditory_trajectory_direction",
+        "Auditory_Trajectory_Direction",
+        "trajectory_direction",
+        "Trajectory_Direction",
+        default="",
+    )
+    trajectory_coordinate_frame = _row_value(
+        source,
+        "trajectory_coordinate_frame",
+        "Trajectory_Coordinate_Frame",
+        default=spatial_coordinate_frame,
+    )
+    trajectory_start_hemifield = _row_value(
+        source,
+        "trajectory_start_hemifield",
+        "Trajectory_Start_Hemifield",
+        default="",
+    )
+    trajectory_end_hemifield = _row_value(
+        source,
+        "trajectory_end_hemifield",
+        "Trajectory_End_Hemifield",
+        default="",
+    )
+    trajectory_start_distance_cm = _row_value(
+        source,
+        "trajectory_start_distance_cm",
+        "Trajectory_Start_Distance_cm",
+        default="",
+    )
+    trajectory_end_distance_cm = _row_value(
+        source,
+        "trajectory_end_distance_cm",
+        "Trajectory_End_Distance_cm",
+        default="",
+    )
+    trajectory_start_azimuth_deg = _row_value(
+        source,
+        "trajectory_start_azimuth_deg",
+        "Trajectory_Start_Azimuth_deg",
+        default="",
+    )
+    trajectory_end_azimuth_deg = _row_value(
+        source,
+        "trajectory_end_azimuth_deg",
+        "Trajectory_End_Azimuth_deg",
+        default="",
+    )
     primary_analysis_included = _row_value(
         source,
         "primary_analysis_included",
@@ -8083,6 +8217,15 @@ def _segment_session_trial_row(
         "Body_Side": body_side,
         "Spatial_Hemifield": spatial_hemifield,
         "Body_Relative_Axis": body_relative_axis,
+        "Auditory_Trajectory_Family": auditory_trajectory_family,
+        "Auditory_Trajectory_Direction": auditory_trajectory_direction,
+        "Trajectory_Coordinate_Frame": trajectory_coordinate_frame,
+        "Trajectory_Start_Hemifield": trajectory_start_hemifield,
+        "Trajectory_End_Hemifield": trajectory_end_hemifield,
+        "Trajectory_Start_Distance_cm": trajectory_start_distance_cm,
+        "Trajectory_End_Distance_cm": trajectory_end_distance_cm,
+        "Trajectory_Start_Azimuth_deg": trajectory_start_azimuth_deg,
+        "Trajectory_End_Azimuth_deg": trajectory_end_azimuth_deg,
         "Primary_Analysis_Included": primary_analysis_included,
         "Row": row_label,
         "Row_Label": row_label,
@@ -8262,6 +8405,15 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "Body_Side",
         "Spatial_Hemifield",
         "Body_Relative_Axis",
+        "Auditory_Trajectory_Family",
+        "Auditory_Trajectory_Direction",
+        "Trajectory_Coordinate_Frame",
+        "Trajectory_Start_Hemifield",
+        "Trajectory_End_Hemifield",
+        "Trajectory_Start_Distance_cm",
+        "Trajectory_End_Distance_cm",
+        "Trajectory_Start_Azimuth_deg",
+        "Trajectory_End_Azimuth_deg",
         "Primary_Analysis_Included",
         "Row",
         "Row_Label",

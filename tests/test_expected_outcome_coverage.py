@@ -152,8 +152,8 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 4,
-            "not_yet_templated_missing_publication_parameters": 48,
-            "not_yet_templated_requires_toolkit_structure": 3,
+            "not_yet_templated_missing_publication_parameters": 49,
+            "not_yet_templated_requires_toolkit_structure": 2,
             "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 12,
             "template_present_blocked_missing_publication_parameters": 8,
         },
@@ -351,7 +351,10 @@ def test_expected_outcome_blocked_and_adjacent_records_do_not_claim_observed_com
             "not_yet_templated_missing_publication_parameters",
             "not_yet_templated_requires_toolkit_structure",
         }
-        assert record["required_next_evidence"].startswith("Create a profile template")
+        if record["observed_comparison_gap"] == "not_yet_templated_missing_publication_parameters":
+            assert record["required_next_evidence"].startswith("Extract the missing source/PDF profile parameters")
+        else:
+            assert record["required_next_evidence"].startswith("Add the missing toolkit structure")
 
     adjacent = records["barumerli_2026_semantic_looming_auditory_only"]
     assert adjacent["expected_outcome_status"] == "adjacent_out_of_scope"

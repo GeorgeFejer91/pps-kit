@@ -37,8 +37,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_runnable_profile": 12,
         "covered_blocked_missing_publication_parameters": 8,
         "covered_blocked_toolkit_structure": 0,
-        "not_yet_templated_requires_toolkit_structure": 3,
-        "not_yet_templated_missing_publication_parameters": 48,
+        "not_yet_templated_requires_toolkit_structure": 2,
+        "not_yet_templated_missing_publication_parameters": 49,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
@@ -222,6 +222,17 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
             "multi_speaker_switch_contract_capability_smoke_report.json"
         )
         and "physical loudspeaker-array validation" in source.get("relevance", "")
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "auditory_trajectory_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_auditory_trajectory_contract_20260715/"
+            "auditory_trajectory_contract_capability_smoke_report.json"
+        )
+        and "physical speaker or HRTF spatialization validation" in source.get("relevance", "")
         for source in coverage["evidence_sources"]
     )
     assert any(
@@ -447,6 +458,17 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "multi_speaker_switch_contract_capability_smoke_report.json"
     )
     assert multi_speaker_constraint["example_records"] == ["serino_2015_exps_4_to_6"]
+    auditory_trajectory_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "rear_hemifield_trajectory_families"
+    )
+    assert auditory_trajectory_constraint["toolkit_status"] == (
+        "supported_by_auditory_trajectory_contract_capability_smoke"
+    )
+    assert auditory_trajectory_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_auditory_trajectory_contract_20260715/"
+        "auditory_trajectory_contract_capability_smoke_report.json"
+    )
+    assert auditory_trajectory_constraint["example_records"] == ["amiel_2025_front_rear"]
     assert {
         "trial_design_families",
         "audio_source_and_renderer",
@@ -579,11 +601,13 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["interoception_exteroception_2025"]["blocking_constraint_ids"] == [
         "missing_core_soa_iti_baseline_repetition_parameters"
     ]
-    assert records["amiel_2025_front_rear"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
+    assert records["amiel_2025_front_rear"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["amiel_2025_front_rear"]["blocking_constraint_ids"] == [
-        "rear_hemifield_trajectory_families",
         "missing_core_soa_iti_baseline_repetition_parameters",
     ]
+    assert "trajectory-family metadata is now runner-supported" in records["amiel_2025_front_rear"][
+        "missing_publication_parameters"
+    ][0]
     assert records["body_image_social_cognition_2024"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["taffou_2021_auditory_roughness"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["taffou_2021_auditory_roughness"]["blocking_constraint_ids"] == [
@@ -719,6 +743,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         assert "tactile_discrimination_or_localization_response" not in record["blocking_constraint_ids"], record["record_id"]
         assert "body_part_anchored_coordinate_frames" not in record["blocking_constraint_ids"], record["record_id"]
         assert "multi_speaker_array_switching" not in record["blocking_constraint_ids"], record["record_id"]
+        assert "rear_hemifield_trajectory_families" not in record["blocking_constraint_ids"], record["record_id"]
         assert not (set(record["blocking_constraint_ids"]) & non_blocking_tokens), record["record_id"]
         for constraint_id in record["blocking_constraint_ids"]:
             assert constraint_dimensions[constraint_id] in task_execution_dimensions, record["record_id"]

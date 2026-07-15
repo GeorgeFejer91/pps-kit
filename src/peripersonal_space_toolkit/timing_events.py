@@ -240,6 +240,42 @@ class TriggerDictionary:
                         "body_relative_axis",
                         payload.get("Body_Relative_Axis", ""),
                     ),
+                    "auditory_trajectory_family": payload.get(
+                        "auditory_trajectory_family",
+                        payload.get("Auditory_Trajectory_Family", ""),
+                    ),
+                    "auditory_trajectory_direction": payload.get(
+                        "auditory_trajectory_direction",
+                        payload.get("Auditory_Trajectory_Direction", ""),
+                    ),
+                    "trajectory_coordinate_frame": payload.get(
+                        "trajectory_coordinate_frame",
+                        payload.get("Trajectory_Coordinate_Frame", ""),
+                    ),
+                    "trajectory_start_hemifield": payload.get(
+                        "trajectory_start_hemifield",
+                        payload.get("Trajectory_Start_Hemifield", ""),
+                    ),
+                    "trajectory_end_hemifield": payload.get(
+                        "trajectory_end_hemifield",
+                        payload.get("Trajectory_End_Hemifield", ""),
+                    ),
+                    "trajectory_start_distance_cm": payload.get(
+                        "trajectory_start_distance_cm",
+                        payload.get("Trajectory_Start_Distance_cm", ""),
+                    ),
+                    "trajectory_end_distance_cm": payload.get(
+                        "trajectory_end_distance_cm",
+                        payload.get("Trajectory_End_Distance_cm", ""),
+                    ),
+                    "trajectory_start_azimuth_deg": payload.get(
+                        "trajectory_start_azimuth_deg",
+                        payload.get("Trajectory_Start_Azimuth_deg", ""),
+                    ),
+                    "trajectory_end_azimuth_deg": payload.get(
+                        "trajectory_end_azimuth_deg",
+                        payload.get("Trajectory_End_Azimuth_deg", ""),
+                    ),
                     "external_trigger_required": payload.get(
                         "external_trigger_required",
                         payload.get("External_Trigger_Required", ""),
@@ -424,6 +460,42 @@ class TriggerDictionary:
                 "body_relative_axis": payload.get(
                     "body_relative_axis",
                     payload.get("Body_Relative_Axis", ""),
+                ),
+                "auditory_trajectory_family": payload.get(
+                    "auditory_trajectory_family",
+                    payload.get("Auditory_Trajectory_Family", ""),
+                ),
+                "auditory_trajectory_direction": payload.get(
+                    "auditory_trajectory_direction",
+                    payload.get("Auditory_Trajectory_Direction", ""),
+                ),
+                "trajectory_coordinate_frame": payload.get(
+                    "trajectory_coordinate_frame",
+                    payload.get("Trajectory_Coordinate_Frame", ""),
+                ),
+                "trajectory_start_hemifield": payload.get(
+                    "trajectory_start_hemifield",
+                    payload.get("Trajectory_Start_Hemifield", ""),
+                ),
+                "trajectory_end_hemifield": payload.get(
+                    "trajectory_end_hemifield",
+                    payload.get("Trajectory_End_Hemifield", ""),
+                ),
+                "trajectory_start_distance_cm": payload.get(
+                    "trajectory_start_distance_cm",
+                    payload.get("Trajectory_Start_Distance_cm", ""),
+                ),
+                "trajectory_end_distance_cm": payload.get(
+                    "trajectory_end_distance_cm",
+                    payload.get("Trajectory_End_Distance_cm", ""),
+                ),
+                "trajectory_start_azimuth_deg": payload.get(
+                    "trajectory_start_azimuth_deg",
+                    payload.get("Trajectory_Start_Azimuth_deg", ""),
+                ),
+                "trajectory_end_azimuth_deg": payload.get(
+                    "trajectory_end_azimuth_deg",
+                    payload.get("Trajectory_End_Azimuth_deg", ""),
                 ),
                 "external_trigger_required": payload.get(
                     "external_trigger_required",
