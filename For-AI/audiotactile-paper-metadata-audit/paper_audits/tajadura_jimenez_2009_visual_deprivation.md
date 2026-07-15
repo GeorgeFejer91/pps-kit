@@ -3,7 +3,7 @@
 - Record ID: `tajadura_jimenez_2009_visual_deprivation`
 - DOI: `10.1016/j.neuropsychologia.2009.07.025`
 - DOI URL: https://doi.org/10.1016/j.neuropsychologia.2009.07.025
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: auditory, tactile, and audiotactile lateralization with crossed/uncrossed posture
 - PDF status: `paywalled`
 - Supplement status: `not_found`

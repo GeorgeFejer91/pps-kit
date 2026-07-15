@@ -54,13 +54,13 @@ def test_full_pipeline_validation_summary_is_conservative():
         "adjacent_not_applicable": 4,
         "full_emulated_source_to_runner_pipeline_validated": 12,
         "profile_present_but_source_parameters_missing": 8,
-        "source_parameters_missing_before_profile_creation": 37,
-        "toolkit_structure_or_response_contract_missing": 14,
+        "source_parameters_missing_before_profile_creation": 41,
+        "toolkit_structure_or_response_contract_missing": 10,
     }
     assert summary["primary_gap_counts"] == {
         "profile_present_but_source_parameters_missing": 8,
-        "source_parameters_missing_before_profile_creation": 37,
-        "toolkit_structure_or_response_contract_missing": 14,
+        "source_parameters_missing_before_profile_creation": 41,
+        "toolkit_structure_or_response_contract_missing": 10,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
         "minimum_source_parameters_captured": 12,
@@ -73,8 +73,8 @@ def test_full_pipeline_validation_summary_is_conservative():
         "not_applicable_adjacent_record": 4,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
-        "blocked_by_missing_profile_parameters": 45,
-        "blocked_by_toolkit_structure_or_response_contract": 14,
+        "blocked_by_missing_profile_parameters": 49,
+        "blocked_by_toolkit_structure_or_response_contract": 10,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 12,
     }

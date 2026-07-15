@@ -136,6 +136,21 @@ class TriggerDictionary:
                         "response_scoring_policy",
                         payload.get("Response_Scoring_Policy", ""),
                     ),
+                    "spatial_coordinate_frame": payload.get(
+                        "spatial_coordinate_frame",
+                        payload.get("Spatial_Coordinate_Frame", ""),
+                    ),
+                    "body_anchor": payload.get("body_anchor", payload.get("Body_Anchor", "")),
+                    "body_part": payload.get("body_part", payload.get("Body_Part", "")),
+                    "body_side": payload.get("body_side", payload.get("Body_Side", "")),
+                    "spatial_hemifield": payload.get(
+                        "spatial_hemifield",
+                        payload.get("Spatial_Hemifield", ""),
+                    ),
+                    "body_relative_axis": payload.get(
+                        "body_relative_axis",
+                        payload.get("Body_Relative_Axis", ""),
+                    ),
                     "external_trigger_required": payload.get(
                         "external_trigger_required",
                         payload.get("External_Trigger_Required", ""),
@@ -216,6 +231,21 @@ class TriggerDictionary:
                 "response_scoring_policy": payload.get(
                     "response_scoring_policy",
                     payload.get("Response_Scoring_Policy", ""),
+                ),
+                "spatial_coordinate_frame": payload.get(
+                    "spatial_coordinate_frame",
+                    payload.get("Spatial_Coordinate_Frame", ""),
+                ),
+                "body_anchor": payload.get("body_anchor", payload.get("Body_Anchor", "")),
+                "body_part": payload.get("body_part", payload.get("Body_Part", "")),
+                "body_side": payload.get("body_side", payload.get("Body_Side", "")),
+                "spatial_hemifield": payload.get(
+                    "spatial_hemifield",
+                    payload.get("Spatial_Hemifield", ""),
+                ),
+                "body_relative_axis": payload.get(
+                    "body_relative_axis",
+                    payload.get("Body_Relative_Axis", ""),
                 ),
                 "external_trigger_required": payload.get(
                     "external_trigger_required",

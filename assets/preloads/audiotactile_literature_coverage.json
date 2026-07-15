@@ -162,6 +162,12 @@
       "relevance": "Capability smoke proving that Segment 5/6 rows can declare tactile discrimination/localization response-mode, choice-set, correct-response, and mouse-click scoring-policy metadata, preserve those fields in prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated participant-like choices with a software wired-loopback sidecar. This is not physical button-box, localization-device, collected participant, physical timing-loopback, or scientific PPS-effect validation."
     },
     {
+      "id": "body_frame_contract_capability_smoke_2026_07_15",
+      "kind": "validation_protocol",
+      "local_summary_file": "artifacts/validation_runs/current_goal_body_frame_contract_20260715/body_frame_contract_capability_smoke_report.json",
+      "relevance": "Software runner/package contract evidence that row-level Spatial_Coordinate_Frame, Body_Anchor, Body_Part, Body_Side, Spatial_Hemifield, and Body_Relative_Axis metadata survive prepared block CSVs, trigger dictionaries, marker CSV/XDF output, participant rows, analysis rows, software wired-loopback sidecars, and mouse-click simulated responses. It does not prove physical body tracking, exact body-scaled transforms, speaker-array geometry, participant behavior, physical loopback timing, or scientific PPS effects."
+    },
+    {
       "id": "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15",
       "kind": "pubmed_live_spot_check",
       "date_run": "2026-07-15",
@@ -177,8 +183,8 @@
       "covered_runnable_profile": 12,
       "covered_blocked_missing_publication_parameters": 8,
       "covered_blocked_toolkit_structure": 0,
-      "not_yet_templated_requires_toolkit_structure": 14,
-      "not_yet_templated_missing_publication_parameters": 37,
+      "not_yet_templated_requires_toolkit_structure": 10,
+      "not_yet_templated_missing_publication_parameters": 41,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
@@ -447,13 +453,19 @@
     {
       "id": "body_part_anchored_coordinate_frames",
       "dimension": "spatial_trajectory_coordinate_frame_or_apparatus_geometry",
-      "description": "Spatial coordinates are anchored to hand, trunk, head, lateral hemispace, or a body-landmark frame not represented as a first-class profile coordinate system.",
-      "toolkit_status": "partially_modeled",
+      "description": "Row-level spatial/body metadata can declare the coordinate frame, body anchor, tactile/reference body part, body side, spatial hemifield, and body-relative axis needed to carry paper-reported hand-, trunk-, head-, or hemifield-anchored PPS geometry through the software runner contract.",
+      "toolkit_status": "supported_by_body_frame_contract_capability_smoke",
       "example_records": [
-        "serino_2015_peri_hand_exp3",
+        "ladavas_2001_auditory_tactile_extinction",
+        "farne_ladavas_2002_auditory_pps_humans",
+        "tajadura_jimenez_2009_visual_deprivation",
+        "serino_2015_exps_4_to_6",
         "hobeika_2018_anisotropy",
-        "pfeiffer_2018_vestibular"
-      ]
+        "teraoka_2024_front_rear",
+        "amiel_2025_front_rear",
+        "teramoto_2013_beyond_head_audiotactile"
+      ],
+      "validation_report": "artifacts/validation_runs/current_goal_body_frame_contract_20260715/body_frame_contract_capability_smoke_report.json"
     },
     {
       "id": "rear_hemifield_trajectory_families",
@@ -710,7 +722,6 @@
       "audiotactile_task_family": "near/far auditory-tactile extinction task around the head in a right-brain-damaged patient",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "body_part_anchored_coordinate_frames",
         "cross_modal_extinction_response_mapping"
       ],
       "missing_publication_parameters": [
@@ -731,7 +742,6 @@
       "audiotactile_task_family": "front/back near/far auditory-tactile extinction task around the head in right-brain-damaged patients",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "body_part_anchored_coordinate_frames",
         "cross_modal_extinction_response_mapping"
       ],
       "missing_publication_parameters": [
@@ -799,12 +809,10 @@
         "holmes_2020_systematic_review"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "auditory, tactile, and audiotactile lateralization with crossed/uncrossed posture",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "body_part_anchored_coordinate_frames"
-      ],
+      "blocking_constraint_ids": [],
       "missing_publication_parameters": [
         "extract lateralization response mapping, posture/body-coordinate rules, and stimulus timing"
       ]
@@ -1219,7 +1227,6 @@
       "audiotactile_task_family": "additional body-part/front-back PPS variants from the same six-experiment paper",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "body_part_anchored_coordinate_frames",
         "multi_speaker_array_switching"
       ],
       "missing_publication_parameters": [
@@ -1276,11 +1283,10 @@
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "lateral PPS audio-tactile task linked to handedness",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "body_part_anchored_coordinate_frames",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
@@ -1716,11 +1722,10 @@
         "web_search_sanity_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "front/rear approaching auditory probe with vibrotactile detection and baseline",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "body_part_anchored_coordinate_frames",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
@@ -1869,7 +1874,6 @@
       "audiotactile_task_family": "distance-dependent audio-tactile integration in rear and front spaces",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "body_part_anchored_coordinate_frames",
         "rear_hemifield_trajectory_families",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
@@ -2037,12 +2041,10 @@
         "web_search_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "audiotactile interaction task manipulating cheek, hand, and knee tactile sites with spatially related sounds",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "body_part_anchored_coordinate_frames"
-      ],
+      "blocking_constraint_ids": [],
       "missing_publication_parameters": [
         "extract exact body-site mapping, auditory locations, tactile response/scoring rules, timing, and trial counts before templating"
       ]

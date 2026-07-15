@@ -4,7 +4,7 @@ farne_ladavas_2002_auditory_pps_humans,Farn\xc3\xa8 & L\xc3\xa0davas (2002),10.1
 kitagawa_2005_sound_complexity,Kitagawa et al. (2005),10.1007/s00221-005-2393-8,https://doi.org/10.1007/s00221-005-2393-8,not_yet_templated_missing_publication_parameters,open_access_unavailable,not_checked
 serino_2007_blind_cane_users,Serino et al. (2007),10.1111/j.1467-9280.2007.01952.x,https://doi.org/10.1111/j.1467-9280.2007.01952.x,not_yet_templated_requires_toolkit_structure,paywalled,paywalled
 serino_2009_tms,Serino et al. (2009),10.1371/journal.pone.0006582,https://doi.org/10.1371/journal.pone.0006582,not_yet_templated_missing_publication_parameters,open_access_unavailable,not_checked
-tajadura_jimenez_2009_visual_deprivation,Tajadura-Jimenez et al. (2009),10.1016/j.neuropsychologia.2009.07.025,https://doi.org/10.1016/j.neuropsychologia.2009.07.025,not_yet_templated_requires_toolkit_structure,paywalled,not_found
+tajadura_jimenez_2009_visual_deprivation,Tajadura-Jimenez et al. (2009),10.1016/j.neuropsychologia.2009.07.025,https://doi.org/10.1016/j.neuropsychologia.2009.07.025,not_yet_templated_missing_publication_parameters,paywalled,not_found
 bassolino_2010_mouse_use,Bassolino et al. (2010),10.1016/j.neuropsychologia.2009.11.009,https://doi.org/10.1016/j.neuropsychologia.2009.11.009,not_yet_templated_missing_publication_parameters,paywalled,not_found
 serino_2011_rtms,Serino et al. (2011),10.1162/jocn_a_00006,https://doi.org/10.1162/jocn_a_00006,not_yet_templated_missing_publication_parameters,paywalled,paywalled
 avenanti_2012_motor_cortex,Avenanti et al. (2012),10.1016/j.neuroimage.2012.06.063,https://doi.org/10.1016/j.neuroimage.2012.06.063,not_yet_templated_missing_publication_parameters,open_access_unavailable,not_checked
@@ -29,7 +29,7 @@ serino_2015_peri_hand_exp3,"Serino et al. (2015), Exp. 3",10.1038/srep18603,http
 serino_2015_exps_4_to_6,"Serino et al. (2015), Exp. 4-6",10.1038/srep18603,https://doi.org/10.1038/srep18603,not_yet_templated_requires_toolkit_structure,downloaded,downloaded
 serino_2015_toolless_sync_training,Serino/Canzoneri 2015 toolless sync training,10.3389/fnbeh.2015.00004,https://doi.org/10.3389/fnbeh.2015.00004,covered_blocked_missing_publication_parameters,downloaded,needs_user_download
 ardizzi_ferri_2018_interoceptive,Ardizzi & Ferri (2018),10.1016/j.cognition.2018.04.001,https://doi.org/10.1016/j.cognition.2018.04.001,not_yet_templated_missing_publication_parameters,paywalled,not_found
-hobeika_2018_anisotropy,Hobeika et al. (2018),10.1007/s00221-017-5158-2,https://doi.org/10.1007/s00221-017-5158-2,not_yet_templated_requires_toolkit_structure,paywalled,needs_user_download
+hobeika_2018_anisotropy,Hobeika et al. (2018),10.1007/s00221-017-5158-2,https://doi.org/10.1007/s00221-017-5158-2,not_yet_templated_missing_publication_parameters,paywalled,needs_user_download
 noel_2018_neural_adaptation,Noel et al. (2018),10.1152/jn.00652.2017,https://doi.org/10.1152/jn.00652.2017,not_yet_templated_missing_publication_parameters,downloaded,paywalled
 pfeiffer_2018_vestibular,Pfeiffer et al. (2018),10.1111/ejn.13872,https://doi.org/10.1111/ejn.13872,covered_runnable_profile,needs_user_download,paywalled
 ieeg_trunk_2018,Bernasconi/Noel et al. (2018),10.1093/cercor/bhy156,https://doi.org/10.1093/cercor/bhy156,not_yet_templated_missing_publication_parameters,downloaded,needs_user_download
@@ -53,7 +53,7 @@ jazz_duet_2021,Jazz duet PPS (2021),10.1007/s00426-020-01365-6,https://doi.org/1
 taffou_2021_auditory_roughness,Taffou et al. (2021),10.1038/s41598-020-79767-0,https://doi.org/10.1038/s41598-020-79767-0,not_yet_templated_missing_publication_parameters,downloaded,downloaded
 holmes_2020_four_experiments,"Holmes et al. (2020), four experiments",10.1007/s00221-020-05771-5,https://doi.org/10.1007/s00221-020-05771-5,not_yet_templated_missing_publication_parameters,downloaded,downloaded
 schizophrenia_tool_use_2022,Tool-use extends PPS boundaries in schizophrenia (2022),10.1093/schbul/sbac067,https://doi.org/10.1093/schbul/sbac067,not_yet_templated_missing_publication_parameters,needs_user_download,paywalled
-teraoka_2024_front_rear,Teraoka et al. (2024),10.1007/s00221-024-06782-2,https://doi.org/10.1007/s00221-024-06782-2,not_yet_templated_requires_toolkit_structure,paywalled,downloaded
+teraoka_2024_front_rear,Teraoka et al. (2024),10.1007/s00221-024-06782-2,https://doi.org/10.1007/s00221-024-06782-2,not_yet_templated_missing_publication_parameters,paywalled,downloaded
 body_image_social_cognition_2024,Body image and social cognition PPS task (2024),10.1016/j.bodyim.2024.101777,https://doi.org/10.1016/j.bodyim.2024.101777,not_yet_templated_missing_publication_parameters,open_access_unavailable,needs_user_download
 mindfulness_pps_2024,Mindfulness and PPS boundaries (2024),10.3390/bs14040306,https://doi.org/10.3390/bs14040306,not_yet_templated_missing_publication_parameters,needs_user_download,needs_user_download
 serino_2018_mixed_reality_pps,Serino et al. (2018 mixed reality),10.3389/fict.2017.00031,https://doi.org/10.3389/fict.2017.00031,not_yet_templated_requires_toolkit_structure,downloaded,needs_user_download
@@ -71,6 +71,6 @@ smartphone_rt_methods_2025,Using Android smartphones to collect RTs to multisens
 spiousas_2025_auditory_only,Spiousas et al. (2025),10.3758/s13414-025-03071-0,https://doi.org/10.3758/s13414-025-03071-0,adjacent_out_of_scope,not_applicable,not_applicable
 barumerli_2026_semantic_looming_auditory_only,Barumerli et al. (2026 semantic looming),10.1038/s41598-026-48067-4,https://doi.org/10.1038/s41598-026-48067-4,adjacent_out_of_scope,not_applicable,not_applicable
 rossi_sebastiano_2022_visuotactile,Rossi Sebastiano et al. (2022),10.1038/s41598-022-21469-w,https://doi.org/10.1038/s41598-022-21469-w,adjacent_out_of_scope,not_applicable,not_applicable
-teramoto_2013_beyond_head_audiotactile,Teramoto et al. (2013 beyond head),10.1007/s00221-013-3574-5,https://doi.org/10.1007/s00221-013-3574-5,not_yet_templated_requires_toolkit_structure,paywalled,needs_user_download
+teramoto_2013_beyond_head_audiotactile,Teramoto et al. (2013 beyond head),10.1007/s00221-013-3574-5,https://doi.org/10.1007/s00221-013-3574-5,not_yet_templated_missing_publication_parameters,paywalled,needs_user_download
 finisguerra_2015_moving_sounds_motor,Finisguerra et al. (2015),10.1016/j.neuropsychologia.2014.09.043,https://doi.org/10.1016/j.neuropsychologia.2014.09.043,not_yet_templated_requires_toolkit_structure,open_access_unavailable,not_found
 biggio_2017_racket_tool_use,Biggio et al. (2017),10.1016/j.neuropsychologia.2017.07.018,https://doi.org/10.1016/j.neuropsychologia.2017.07.018,not_yet_templated_requires_toolkit_structure,paywalled,not_found

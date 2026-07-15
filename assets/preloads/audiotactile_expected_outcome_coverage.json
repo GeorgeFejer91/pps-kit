@@ -21,8 +21,8 @@
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
-      "not_yet_templated_missing_publication_parameters": 37,
-      "not_yet_templated_requires_toolkit_structure": 14,
+      "not_yet_templated_missing_publication_parameters": 41,
+      "not_yet_templated_requires_toolkit_structure": 10,
       "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 12,
       "template_present_blocked_missing_publication_parameters": 8
     }
@@ -219,7 +219,7 @@
       "record_id": "tajadura_jimenez_2009_visual_deprivation",
       "citation_short": "Tajadura-Jimenez et al. (2009)",
       "doi": "10.1016/j.neuropsychologia.2009.07.025",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -247,7 +247,7 @@
         "manual_review_profile_recreation_assessment": "possible_with_caveats_static_left_right_lateralization_not_looming"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },
@@ -1154,7 +1154,7 @@
       "record_id": "hobeika_2018_anisotropy",
       "citation_short": "Hobeika et al. (2018)",
       "doi": "10.1007/s00221-017-5158-2",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -1179,7 +1179,7 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },
@@ -1975,7 +1975,7 @@
       "record_id": "teraoka_2024_front_rear",
       "citation_short": "Teraoka et al. (2024)",
       "doi": "10.1007/s00221-024-06782-2",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -2000,7 +2000,7 @@
         "paper_audit_visualization_candidate_count": "3"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },
@@ -2606,7 +2606,7 @@
       "record_id": "teramoto_2013_beyond_head_audiotactile",
       "citation_short": "Teramoto et al. (2013 beyond head)",
       "doi": "10.1007/s00221-013-3574-5",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -2631,7 +2631,7 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },

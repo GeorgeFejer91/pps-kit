@@ -832,6 +832,60 @@ def _response_base(event: dict[str, Any]) -> dict[str, Any]:
             "response_mapping_policy",
             "Response_Mapping_Policy",
         ),
+        "spatial_coordinate_frame": _field(
+            event,
+            "spatial_coordinate_frame",
+            "Spatial_Coordinate_Frame",
+            "coordinate_frame",
+            "Coordinate_Frame",
+            "reference_frame",
+            "Reference_Frame",
+        ),
+        "body_anchor": _field(
+            event,
+            "body_anchor",
+            "Body_Anchor",
+            "anchored_body_part",
+            "Anchored_Body_Part",
+            "body_reference_anchor",
+            "Body_Reference_Anchor",
+        ),
+        "body_part": _field(
+            event,
+            "body_part",
+            "Body_Part",
+            "tactile_body_part",
+            "Tactile_Body_Part",
+            "tactile_site",
+            "Tactile_Site",
+        ),
+        "body_side": _field(
+            event,
+            "body_side",
+            "Body_Side",
+            "reference_side",
+            "Reference_Side",
+            "tactile_side",
+            "Tactile_Side",
+        ),
+        "spatial_hemifield": _field(
+            event,
+            "spatial_hemifield",
+            "Spatial_Hemifield",
+            "hemifield",
+            "Hemifield",
+            "field",
+            "Field",
+        ),
+        "body_relative_axis": _field(
+            event,
+            "body_relative_axis",
+            "Body_Relative_Axis",
+            "trajectory_axis",
+            "Trajectory_Axis",
+            "spatial_axis",
+            "Spatial_Axis",
+        ),
         "tactile_channel": _field(event, "tactile_channel", "Tactile_Channel"),
         "tactile_waveform_shape": _field(event, "tactile_waveform_shape", "Tactile_Waveform_Shape"),
         "tactile_frequency_hz": _field(
@@ -2824,6 +2878,18 @@ def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
         row["observed_response_choice"] = row.get("Observed_Response_Choice")
     if "response_choice_correct" not in row and "Response_Choice_Correct" in row:
         row["response_choice_correct"] = row.get("Response_Choice_Correct")
+    if "spatial_coordinate_frame" not in row and "Spatial_Coordinate_Frame" in row:
+        row["spatial_coordinate_frame"] = row.get("Spatial_Coordinate_Frame")
+    if "body_anchor" not in row and "Body_Anchor" in row:
+        row["body_anchor"] = row.get("Body_Anchor")
+    if "body_part" not in row and "Body_Part" in row:
+        row["body_part"] = row.get("Body_Part")
+    if "body_side" not in row and "Body_Side" in row:
+        row["body_side"] = row.get("Body_Side")
+    if "spatial_hemifield" not in row and "Spatial_Hemifield" in row:
+        row["spatial_hemifield"] = row.get("Spatial_Hemifield")
+    if "body_relative_axis" not in row and "Body_Relative_Axis" in row:
+        row["body_relative_axis"] = row.get("Body_Relative_Axis")
     if "rt_ms" not in row and "RT_ms" in row:
         row["rt_ms"] = row.get("RT_ms")
     if "participant_id" not in row and "Participant_ID" in row:
