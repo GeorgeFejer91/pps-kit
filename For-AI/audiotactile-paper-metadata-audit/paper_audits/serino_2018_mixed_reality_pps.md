@@ -3,7 +3,7 @@
 - Record ID: `serino_2018_mixed_reality_pps`
 - DOI: `10.3389/fict.2017.00031`
 - DOI URL: https://doi.org/10.3389/fict.2017.00031
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: mixed-reality PPS task using visual or audiovisual looming stimuli paired with tactile detection
 - PDF status: `downloaded`
 - Supplement status: `needs_user_download`
@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- extract whether audio-only trials are available separately from audiovisual trials, the acoustic stimulus/rendering details, tactile timing, response settings, MR apparatus synchronization, and trial counts before deciding whether an audio-tactile-only scaffold is honest
+- source PDF reports a trimodal audiovisuotactile Experiment 2 with 2 m virtual-ball approach, 75 cm/s matched dynamic sound, right-cheek 10 ms tactile taps, five delay levels, 540 total trials, and a PPS boundary between D3 and D4/central point near 105 cm; row-level audiovisual/MR provenance metadata are now runner-supported, but exact delay table, original video/3D assets, ExpyVR/RealiSM scripts, binaural source tracks, and physical HMD/audio synchronization remain unresolved before a full runnable profile is honest
 
 ## Review Attempts
 

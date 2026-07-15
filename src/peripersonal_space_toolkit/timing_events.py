@@ -147,6 +147,62 @@ class TriggerDictionary:
                         "response_input_modality",
                         payload.get("Response_Input_Modality", ""),
                     ),
+                    "multisensory_trial_family": payload.get(
+                        "multisensory_trial_family",
+                        payload.get("Multisensory_Trial_Family", ""),
+                    ),
+                    "exteroceptive_modality_set": payload.get(
+                        "exteroceptive_modality_set",
+                        payload.get("Exteroceptive_Modality_Set", ""),
+                    ),
+                    "visual_stimulus_type": payload.get(
+                        "visual_stimulus_type",
+                        payload.get("Visual_Stimulus_Type", ""),
+                    ),
+                    "visual_motion_profile": payload.get(
+                        "visual_motion_profile",
+                        payload.get("Visual_Motion_Profile", ""),
+                    ),
+                    "visual_start_distance_cm": payload.get(
+                        "visual_start_distance_cm",
+                        payload.get("Visual_Start_Distance_cm", ""),
+                    ),
+                    "visual_end_distance_cm": payload.get(
+                        "visual_end_distance_cm",
+                        payload.get("Visual_End_Distance_cm", ""),
+                    ),
+                    "visual_speed_cm_s": payload.get(
+                        "visual_speed_cm_s",
+                        payload.get("Visual_Speed_cm_s", ""),
+                    ),
+                    "visual_duration_ms": payload.get(
+                        "visual_duration_ms",
+                        payload.get("Visual_Duration_ms", ""),
+                    ),
+                    "visual_renderer_engine": payload.get(
+                        "visual_renderer_engine",
+                        payload.get("Visual_Renderer_Engine", ""),
+                    ),
+                    "visual_display_device": payload.get(
+                        "visual_display_device",
+                        payload.get("Visual_Display_Device", ""),
+                    ),
+                    "mixed_reality_context": payload.get(
+                        "mixed_reality_context",
+                        payload.get("Mixed_Reality_Context", ""),
+                    ),
+                    "body_rendering_mode": payload.get(
+                        "body_rendering_mode",
+                        payload.get("Body_Rendering_Mode", ""),
+                    ),
+                    "audiovisual_synchrony_policy": payload.get(
+                        "audiovisual_synchrony_policy",
+                        payload.get("Audiovisual_Synchrony_Policy", ""),
+                    ),
+                    "mixed_reality_equivalence_boundary": payload.get(
+                        "mixed_reality_equivalence_boundary",
+                        payload.get("Mixed_Reality_Equivalence_Boundary", ""),
+                    ),
                     "audio_output_mode": payload.get("audio_output_mode", payload.get("Audio_Output_Mode", "")),
                     "speaker_array_id": payload.get("speaker_array_id", payload.get("Speaker_Array_ID", "")),
                     "speaker_array_layout": payload.get(
@@ -390,6 +446,62 @@ class TriggerDictionary:
                 "response_input_modality": payload.get(
                     "response_input_modality",
                     payload.get("Response_Input_Modality", ""),
+                ),
+                "multisensory_trial_family": payload.get(
+                    "multisensory_trial_family",
+                    payload.get("Multisensory_Trial_Family", ""),
+                ),
+                "exteroceptive_modality_set": payload.get(
+                    "exteroceptive_modality_set",
+                    payload.get("Exteroceptive_Modality_Set", ""),
+                ),
+                "visual_stimulus_type": payload.get(
+                    "visual_stimulus_type",
+                    payload.get("Visual_Stimulus_Type", ""),
+                ),
+                "visual_motion_profile": payload.get(
+                    "visual_motion_profile",
+                    payload.get("Visual_Motion_Profile", ""),
+                ),
+                "visual_start_distance_cm": payload.get(
+                    "visual_start_distance_cm",
+                    payload.get("Visual_Start_Distance_cm", ""),
+                ),
+                "visual_end_distance_cm": payload.get(
+                    "visual_end_distance_cm",
+                    payload.get("Visual_End_Distance_cm", ""),
+                ),
+                "visual_speed_cm_s": payload.get(
+                    "visual_speed_cm_s",
+                    payload.get("Visual_Speed_cm_s", ""),
+                ),
+                "visual_duration_ms": payload.get(
+                    "visual_duration_ms",
+                    payload.get("Visual_Duration_ms", ""),
+                ),
+                "visual_renderer_engine": payload.get(
+                    "visual_renderer_engine",
+                    payload.get("Visual_Renderer_Engine", ""),
+                ),
+                "visual_display_device": payload.get(
+                    "visual_display_device",
+                    payload.get("Visual_Display_Device", ""),
+                ),
+                "mixed_reality_context": payload.get(
+                    "mixed_reality_context",
+                    payload.get("Mixed_Reality_Context", ""),
+                ),
+                "body_rendering_mode": payload.get(
+                    "body_rendering_mode",
+                    payload.get("Body_Rendering_Mode", ""),
+                ),
+                "audiovisual_synchrony_policy": payload.get(
+                    "audiovisual_synchrony_policy",
+                    payload.get("Audiovisual_Synchrony_Policy", ""),
+                ),
+                "mixed_reality_equivalence_boundary": payload.get(
+                    "mixed_reality_equivalence_boundary",
+                    payload.get("Mixed_Reality_Equivalence_Boundary", ""),
                 ),
                 "audio_output_mode": payload.get("audio_output_mode", payload.get("Audio_Output_Mode", "")),
                 "speaker_array_id": payload.get("speaker_array_id", payload.get("Speaker_Array_ID", "")),

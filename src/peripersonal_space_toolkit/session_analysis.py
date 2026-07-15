@@ -850,6 +850,40 @@ def _response_base(event: dict[str, Any]) -> dict[str, Any]:
             "input_modality",
             "Input_Modality",
         ),
+        "multisensory_trial_family": _field(
+            event,
+            "multisensory_trial_family",
+            "Multisensory_Trial_Family",
+            "trial_modality_family",
+            "Trial_Modality_Family",
+        ),
+        "exteroceptive_modality_set": _field(
+            event,
+            "exteroceptive_modality_set",
+            "Exteroceptive_Modality_Set",
+            "external_stimulus_modality_set",
+            "External_Stimulus_Modality_Set",
+        ),
+        "visual_stimulus_type": _field(event, "visual_stimulus_type", "Visual_Stimulus_Type"),
+        "visual_motion_profile": _field(event, "visual_motion_profile", "Visual_Motion_Profile"),
+        "visual_start_distance_cm": _field(event, "visual_start_distance_cm", "Visual_Start_Distance_cm"),
+        "visual_end_distance_cm": _field(event, "visual_end_distance_cm", "Visual_End_Distance_cm"),
+        "visual_speed_cm_s": _field(event, "visual_speed_cm_s", "Visual_Speed_cm_s"),
+        "visual_duration_ms": _field(event, "visual_duration_ms", "Visual_Duration_ms"),
+        "visual_renderer_engine": _field(event, "visual_renderer_engine", "Visual_Renderer_Engine"),
+        "visual_display_device": _field(event, "visual_display_device", "Visual_Display_Device"),
+        "mixed_reality_context": _field(event, "mixed_reality_context", "Mixed_Reality_Context"),
+        "body_rendering_mode": _field(event, "body_rendering_mode", "Body_Rendering_Mode"),
+        "audiovisual_synchrony_policy": _field(
+            event,
+            "audiovisual_synchrony_policy",
+            "Audiovisual_Synchrony_Policy",
+        ),
+        "mixed_reality_equivalence_boundary": _field(
+            event,
+            "mixed_reality_equivalence_boundary",
+            "Mixed_Reality_Equivalence_Boundary",
+        ),
         "audio_output_mode": _field(
             event,
             "audio_output_mode",
@@ -3164,6 +3198,34 @@ def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
         row["response_capture_device"] = row.get("Response_Capture_Device")
     if "response_input_modality" not in row and "Response_Input_Modality" in row:
         row["response_input_modality"] = row.get("Response_Input_Modality")
+    if "multisensory_trial_family" not in row and "Multisensory_Trial_Family" in row:
+        row["multisensory_trial_family"] = row.get("Multisensory_Trial_Family")
+    if "exteroceptive_modality_set" not in row and "Exteroceptive_Modality_Set" in row:
+        row["exteroceptive_modality_set"] = row.get("Exteroceptive_Modality_Set")
+    if "visual_stimulus_type" not in row and "Visual_Stimulus_Type" in row:
+        row["visual_stimulus_type"] = row.get("Visual_Stimulus_Type")
+    if "visual_motion_profile" not in row and "Visual_Motion_Profile" in row:
+        row["visual_motion_profile"] = row.get("Visual_Motion_Profile")
+    if "visual_start_distance_cm" not in row and "Visual_Start_Distance_cm" in row:
+        row["visual_start_distance_cm"] = row.get("Visual_Start_Distance_cm")
+    if "visual_end_distance_cm" not in row and "Visual_End_Distance_cm" in row:
+        row["visual_end_distance_cm"] = row.get("Visual_End_Distance_cm")
+    if "visual_speed_cm_s" not in row and "Visual_Speed_cm_s" in row:
+        row["visual_speed_cm_s"] = row.get("Visual_Speed_cm_s")
+    if "visual_duration_ms" not in row and "Visual_Duration_ms" in row:
+        row["visual_duration_ms"] = row.get("Visual_Duration_ms")
+    if "visual_renderer_engine" not in row and "Visual_Renderer_Engine" in row:
+        row["visual_renderer_engine"] = row.get("Visual_Renderer_Engine")
+    if "visual_display_device" not in row and "Visual_Display_Device" in row:
+        row["visual_display_device"] = row.get("Visual_Display_Device")
+    if "mixed_reality_context" not in row and "Mixed_Reality_Context" in row:
+        row["mixed_reality_context"] = row.get("Mixed_Reality_Context")
+    if "body_rendering_mode" not in row and "Body_Rendering_Mode" in row:
+        row["body_rendering_mode"] = row.get("Body_Rendering_Mode")
+    if "audiovisual_synchrony_policy" not in row and "Audiovisual_Synchrony_Policy" in row:
+        row["audiovisual_synchrony_policy"] = row.get("Audiovisual_Synchrony_Policy")
+    if "mixed_reality_equivalence_boundary" not in row and "Mixed_Reality_Equivalence_Boundary" in row:
+        row["mixed_reality_equivalence_boundary"] = row.get("Mixed_Reality_Equivalence_Boundary")
     if "voice_key_enabled" not in row and "Voice_Key_Enabled" in row:
         row["voice_key_enabled"] = row.get("Voice_Key_Enabled")
     if "voice_key_response_label" not in row and "Voice_Key_Response_Label" in row:

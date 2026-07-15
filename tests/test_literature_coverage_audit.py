@@ -37,8 +37,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_runnable_profile": 12,
         "covered_blocked_missing_publication_parameters": 8,
         "covered_blocked_toolkit_structure": 0,
-        "not_yet_templated_requires_toolkit_structure": 1,
-        "not_yet_templated_missing_publication_parameters": 50,
+        "not_yet_templated_requires_toolkit_structure": 0,
+        "not_yet_templated_missing_publication_parameters": 51,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
@@ -247,6 +247,17 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for source in coverage["evidence_sources"]
     )
     assert any(
+        source.get("id") == "audiovisual_trisensory_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_audiovisual_trisensory_contract_20260715/"
+            "audiovisual_trisensory_contract_capability_smoke_report.json"
+        )
+        and "not VR/HMD rendering" in source.get("relevance", "")
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
         source.get("id") == "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15"
         and source.get("kind") == "pubmed_live_spot_check"
         and source.get("pmid") == "42128086"
@@ -377,6 +388,16 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert external_trigger_constraint["validation_report"] == (
         "artifacts/validation_runs/current_goal_external_trigger_contract_20260715/"
         "external_trigger_contract_capability_smoke_report.json"
+    )
+    audiovisual_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "audiovisual_or_trisensory_trial_family"
+    )
+    assert audiovisual_constraint["toolkit_status"] == (
+        "supported_by_audiovisual_trisensory_contract_capability_smoke"
+    )
+    assert audiovisual_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_audiovisual_trisensory_contract_20260715/"
+        "audiovisual_trisensory_contract_capability_smoke_report.json"
     )
     iti_hazard_constraint = next(
         item for item in coverage["constraint_taxonomy"] if item["id"] == "fixed_iti_or_hazard_control_policy"
@@ -618,8 +639,13 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert "runner-supported" in records["serino_2015_exps_4_to_6"][
         "missing_publication_parameters"
     ][0]
-    assert records["serino_2018_mixed_reality_pps"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
+    assert records["serino_2018_mixed_reality_pps"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
     assert "audiovisual_or_trisensory_trial_family" in records["serino_2018_mixed_reality_pps"]["blocking_constraint_ids"]
+    assert "audiovisual/MR provenance metadata are now runner-supported" in records[
+        "serino_2018_mixed_reality_pps"
+    ]["missing_publication_parameters"][0]
     assert records["amemiya_2017_pseudowalking_footsole"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["serino_2011_professional_fencers"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["interoception_exteroception_2025"]["doi"] == "10.1073/pnas.2516229122"

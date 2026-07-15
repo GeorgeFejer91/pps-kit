@@ -84,7 +84,7 @@ SEGMENT_BLOCK_PREVIEW_SCHEMA = "pps-block-csv-preview.v1"
 LAST_EXPERIMENT_SCHEMA = "pps-last-experiment.v1"
 PREPARED_SESSION_QUEUE_SCHEMA = "pps-prepared-session-queue.v1"
 BLOCK_WAV_CACHE_SCHEMA = "pps-session-block-cache.v1"
-BLOCK_WAV_CACHE_VERSION = "2026-07-15.spatial-renderer-provenance-contract.v1"
+BLOCK_WAV_CACHE_VERSION = "2026-07-15.audiovisual-trisensory-contract.v1"
 RESPONSE_MARKER_GAIN = 0.05
 EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S = 1.0
 LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_launched"}
@@ -479,6 +479,20 @@ PARTICIPANT_TRIAL_FIELDNAMES = [
     "respiratory_phase",
     "row_label",
     "stimulus_modality",
+    "multisensory_trial_family",
+    "exteroceptive_modality_set",
+    "visual_stimulus_type",
+    "visual_motion_profile",
+    "visual_start_distance_cm",
+    "visual_end_distance_cm",
+    "visual_speed_cm_s",
+    "visual_duration_ms",
+    "visual_renderer_engine",
+    "visual_display_device",
+    "mixed_reality_context",
+    "body_rendering_mode",
+    "audiovisual_synchrony_policy",
+    "mixed_reality_equivalence_boundary",
     "noise_type",
     "sequence_labels",
     "sequence_variant_key",
@@ -773,6 +787,69 @@ class ParticipantTrialCsvWriter:
             "respiratory_phase": _row_value(base, "respiratory_phase", "Respiratory_Phase", "row_label", "Row_Label", "Row", default=""),
             "row_label": _row_value(base, "row_label", "Row_Label", "Row", default=""),
             "stimulus_modality": modality,
+            "multisensory_trial_family": _row_value(
+                base,
+                "multisensory_trial_family",
+                "Multisensory_Trial_Family",
+                "trial_modality_family",
+                "Trial_Modality_Family",
+                default="",
+            ),
+            "exteroceptive_modality_set": _row_value(
+                base,
+                "exteroceptive_modality_set",
+                "Exteroceptive_Modality_Set",
+                "external_stimulus_modality_set",
+                "External_Stimulus_Modality_Set",
+                default="",
+            ),
+            "visual_stimulus_type": _row_value(base, "visual_stimulus_type", "Visual_Stimulus_Type", default=""),
+            "visual_motion_profile": _row_value(base, "visual_motion_profile", "Visual_Motion_Profile", default=""),
+            "visual_start_distance_cm": _row_value(
+                base,
+                "visual_start_distance_cm",
+                "Visual_Start_Distance_cm",
+                default="",
+            ),
+            "visual_end_distance_cm": _row_value(
+                base,
+                "visual_end_distance_cm",
+                "Visual_End_Distance_cm",
+                default="",
+            ),
+            "visual_speed_cm_s": _row_value(base, "visual_speed_cm_s", "Visual_Speed_cm_s", default=""),
+            "visual_duration_ms": _row_value(base, "visual_duration_ms", "Visual_Duration_ms", default=""),
+            "visual_renderer_engine": _row_value(
+                base,
+                "visual_renderer_engine",
+                "Visual_Renderer_Engine",
+                default="",
+            ),
+            "visual_display_device": _row_value(
+                base,
+                "visual_display_device",
+                "Visual_Display_Device",
+                default="",
+            ),
+            "mixed_reality_context": _row_value(
+                base,
+                "mixed_reality_context",
+                "Mixed_Reality_Context",
+                default="",
+            ),
+            "body_rendering_mode": _row_value(base, "body_rendering_mode", "Body_Rendering_Mode", default=""),
+            "audiovisual_synchrony_policy": _row_value(
+                base,
+                "audiovisual_synchrony_policy",
+                "Audiovisual_Synchrony_Policy",
+                default="",
+            ),
+            "mixed_reality_equivalence_boundary": _row_value(
+                base,
+                "mixed_reality_equivalence_boundary",
+                "Mixed_Reality_Equivalence_Boundary",
+                default="",
+            ),
             "noise_type": _row_value(base, "noise_type", "Noise_Type", "noise_label", "Noise_Label", default=""),
             "sequence_labels": _row_value(base, "sequence_labels", "Sequence_Labels", default=""),
             "sequence_variant_key": _row_value(base, "sequence_variant_key", "Sequence_Variant_Key", default=""),
@@ -2757,6 +2834,20 @@ def _cache_manifest_trial_payload(trial_rows: list[dict[str, Any]]) -> list[dict
                 "tactile_latency_compensation_status": row.get("Tactile_Latency_Compensation_Status", ""),
                 "tactile_latency_compensation_applied": row.get("Tactile_Latency_Compensation_Applied", ""),
                 "tactile_latency_compensation_note": row.get("Tactile_Latency_Compensation_Note", ""),
+                "multisensory_trial_family": row.get("Multisensory_Trial_Family", ""),
+                "exteroceptive_modality_set": row.get("Exteroceptive_Modality_Set", ""),
+                "visual_stimulus_type": row.get("Visual_Stimulus_Type", ""),
+                "visual_motion_profile": row.get("Visual_Motion_Profile", ""),
+                "visual_start_distance_cm": row.get("Visual_Start_Distance_cm", ""),
+                "visual_end_distance_cm": row.get("Visual_End_Distance_cm", ""),
+                "visual_speed_cm_s": row.get("Visual_Speed_cm_s", ""),
+                "visual_duration_ms": row.get("Visual_Duration_ms", ""),
+                "visual_renderer_engine": row.get("Visual_Renderer_Engine", ""),
+                "visual_display_device": row.get("Visual_Display_Device", ""),
+                "mixed_reality_context": row.get("Mixed_Reality_Context", ""),
+                "body_rendering_mode": row.get("Body_Rendering_Mode", ""),
+                "audiovisual_synchrony_policy": row.get("Audiovisual_Synchrony_Policy", ""),
+                "mixed_reality_equivalence_boundary": row.get("Mixed_Reality_Equivalence_Boundary", ""),
                 "tactile_waveform_shape": row.get("Tactile_Waveform_Shape", ""),
                 "tactile_frequency_hz": row.get("Tactile_Frequency_Hz", ""),
                 "tactile_duration_ms": row.get("Tactile_Duration_ms", ""),
@@ -7986,6 +8077,54 @@ def _segment_session_trial_row(
         "Input_Modality",
         default="",
     )
+    multisensory_trial_family = _row_value(
+        source,
+        "multisensory_trial_family",
+        "Multisensory_Trial_Family",
+        "trial_modality_family",
+        "Trial_Modality_Family",
+        default="",
+    )
+    exteroceptive_modality_set = _row_value(
+        source,
+        "exteroceptive_modality_set",
+        "Exteroceptive_Modality_Set",
+        "external_stimulus_modality_set",
+        "External_Stimulus_Modality_Set",
+        default="",
+    )
+    visual_stimulus_type = _row_value(source, "visual_stimulus_type", "Visual_Stimulus_Type", default="")
+    visual_motion_profile = _row_value(source, "visual_motion_profile", "Visual_Motion_Profile", default="")
+    visual_start_distance_cm = _row_value(
+        source,
+        "visual_start_distance_cm",
+        "Visual_Start_Distance_cm",
+        default="",
+    )
+    visual_end_distance_cm = _row_value(
+        source,
+        "visual_end_distance_cm",
+        "Visual_End_Distance_cm",
+        default="",
+    )
+    visual_speed_cm_s = _row_value(source, "visual_speed_cm_s", "Visual_Speed_cm_s", default="")
+    visual_duration_ms = _row_value(source, "visual_duration_ms", "Visual_Duration_ms", default="")
+    visual_renderer_engine = _row_value(source, "visual_renderer_engine", "Visual_Renderer_Engine", default="")
+    visual_display_device = _row_value(source, "visual_display_device", "Visual_Display_Device", default="")
+    mixed_reality_context = _row_value(source, "mixed_reality_context", "Mixed_Reality_Context", default="")
+    body_rendering_mode = _row_value(source, "body_rendering_mode", "Body_Rendering_Mode", default="")
+    audiovisual_synchrony_policy = _row_value(
+        source,
+        "audiovisual_synchrony_policy",
+        "Audiovisual_Synchrony_Policy",
+        default="",
+    )
+    mixed_reality_equivalence_boundary = _row_value(
+        source,
+        "mixed_reality_equivalence_boundary",
+        "Mixed_Reality_Equivalence_Boundary",
+        default="",
+    )
     voice_key_enabled = _row_value(
         source,
         "voice_key_enabled",
@@ -8297,6 +8436,20 @@ def _segment_session_trial_row(
         "Response_Scoring_Policy": response_scoring_policy,
         "Response_Capture_Device": response_capture_device,
         "Response_Input_Modality": response_input_modality,
+        "Multisensory_Trial_Family": multisensory_trial_family,
+        "Exteroceptive_Modality_Set": exteroceptive_modality_set,
+        "Visual_Stimulus_Type": visual_stimulus_type,
+        "Visual_Motion_Profile": visual_motion_profile,
+        "Visual_Start_Distance_cm": visual_start_distance_cm,
+        "Visual_End_Distance_cm": visual_end_distance_cm,
+        "Visual_Speed_cm_s": visual_speed_cm_s,
+        "Visual_Duration_ms": visual_duration_ms,
+        "Visual_Renderer_Engine": visual_renderer_engine,
+        "Visual_Display_Device": visual_display_device,
+        "Mixed_Reality_Context": mixed_reality_context,
+        "Body_Rendering_Mode": body_rendering_mode,
+        "Audiovisual_Synchrony_Policy": audiovisual_synchrony_policy,
+        "Mixed_Reality_Equivalence_Boundary": mixed_reality_equivalence_boundary,
         "Voice_Key_Enabled": voice_key_enabled,
         "Voice_Key_Response_Label": voice_key_response_label,
         "Voice_Key_Threshold": voice_key_threshold,
@@ -8493,6 +8646,20 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "Response_Scoring_Policy",
         "Response_Capture_Device",
         "Response_Input_Modality",
+        "Multisensory_Trial_Family",
+        "Exteroceptive_Modality_Set",
+        "Visual_Stimulus_Type",
+        "Visual_Motion_Profile",
+        "Visual_Start_Distance_cm",
+        "Visual_End_Distance_cm",
+        "Visual_Speed_cm_s",
+        "Visual_Duration_ms",
+        "Visual_Renderer_Engine",
+        "Visual_Display_Device",
+        "Mixed_Reality_Context",
+        "Body_Rendering_Mode",
+        "Audiovisual_Synchrony_Policy",
+        "Mixed_Reality_Equivalence_Boundary",
         "Voice_Key_Enabled",
         "Voice_Key_Response_Label",
         "Voice_Key_Threshold",

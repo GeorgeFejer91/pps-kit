@@ -217,6 +217,13 @@
       "date_run": "2026-07-15",
       "local_summary_file": "artifacts/validation_runs/current_goal_cross_modal_extinction_contract_20260715/cross_modal_extinction_contract_capability_smoke_report.json",
       "relevance": "Capability smoke proving that Segment 5/6 rows can declare cross-modal auditory-tactile extinction tactile-report metadata, preserve response mode, choice set, correct report, scoring policy, response rule, and target role through prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated participant-like left/right/bilateral/none reports with a software wired-loopback sidecar. This is not clinical neglect/extinction behavior, patient evidence, tactile perception, physical timing-loopback, exact original apparatus reconstruction, or scientific PPS-effect validation."
+    },
+    {
+      "id": "audiovisual_trisensory_contract_capability_smoke_2026_07_15",
+      "kind": "validation_protocol",
+      "date_run": "2026-07-15",
+      "local_summary_file": "artifacts/validation_runs/current_goal_audiovisual_trisensory_contract_20260715/audiovisual_trisensory_contract_capability_smoke_report.json",
+      "relevance": "Capability smoke proving that Segment 5/6 rows can declare audiovisual/trisensory and mixed-reality provenance metadata, including multisensory trial family, exteroceptive modality set, visual object/motion/distance/speed/duration, visual renderer/display context, body rendering mode, audiovisual synchrony policy, and explicit mixed-reality equivalence boundary through prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated participant-like responses with generated audio/tactile WAVs and a software wired-loopback sidecar. This is not VR/HMD rendering, physical mixed-reality synchronization, visual stimulus presentation, collected participant behavior, physical timing-loopback, or scientific PPS-effect validation."
     }
   ],
   "coverage_summary": {
@@ -225,8 +232,8 @@
       "covered_runnable_profile": 12,
       "covered_blocked_missing_publication_parameters": 8,
       "covered_blocked_toolkit_structure": 0,
-      "not_yet_templated_requires_toolkit_structure": 1,
-      "not_yet_templated_missing_publication_parameters": 50,
+      "not_yet_templated_requires_toolkit_structure": 0,
+      "not_yet_templated_missing_publication_parameters": 51,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
@@ -414,11 +421,12 @@
     {
       "id": "audiovisual_or_trisensory_trial_family",
       "dimension": "trial_family_and_baseline_logic",
-      "description": "The PPS readout combines auditory, visual, and tactile stimuli in the same task family, so an exact profile needs more than audio-tactile stimulus fields.",
-      "toolkit_status": "not_first_class",
+      "description": "The PPS readout combines auditory, visual, and tactile stimuli in the same task family; row-level multisensory trial-family, visual stimulus, mixed-reality context, audiovisual synchrony, and equivalence-boundary metadata are now preserved through the runner, while exact visual/MR assets and physical HMD synchronization remain source/provenance boundaries.",
+      "toolkit_status": "supported_by_audiovisual_trisensory_contract_capability_smoke",
       "example_records": [
         "serino_2018_mixed_reality_pps"
-      ]
+      ],
+      "validation_report": "artifacts/validation_runs/current_goal_audiovisual_trisensory_contract_20260715/audiovisual_trisensory_contract_capability_smoke_report.json"
     },
     {
       "id": "direction_coupled_tactile_only_baseline",
@@ -1812,7 +1820,7 @@
         "web_search_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "mixed-reality PPS task using visual or audiovisual looming stimuli paired with tactile detection",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
@@ -1820,7 +1828,7 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract whether audio-only trials are available separately from audiovisual trials, the acoustic stimulus/rendering details, tactile timing, response settings, MR apparatus synchronization, and trial counts before deciding whether an audio-tactile-only scaffold is honest"
+        "source PDF reports a trimodal audiovisuotactile Experiment 2 with 2 m virtual-ball approach, 75 cm/s matched dynamic sound, right-cheek 10 ms tactile taps, five delay levels, 540 total trials, and a PPS boundary between D3 and D4/central point near 105 cm; row-level audiovisual/MR provenance metadata are now runner-supported, but exact delay table, original video/3D assets, ExpyVR/RealiSM scripts, binaural source tracks, and physical HMD/audio synchronization remain unresolved before a full runnable profile is honest"
       ]
     },
     {
