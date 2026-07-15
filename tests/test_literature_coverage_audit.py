@@ -37,8 +37,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_runnable_profile": 12,
         "covered_blocked_missing_publication_parameters": 8,
         "covered_blocked_toolkit_structure": 0,
-        "not_yet_templated_requires_toolkit_structure": 10,
-        "not_yet_templated_missing_publication_parameters": 41,
+        "not_yet_templated_requires_toolkit_structure": 8,
+        "not_yet_templated_missing_publication_parameters": 43,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
@@ -181,6 +181,17 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for source in coverage["evidence_sources"]
     )
     assert any(
+        source.get("id") == "voice_key_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_voice_key_contract_20260715/"
+            "voice_key_contract_capability_smoke_report.json"
+        )
+        and "physical microphone" in source.get("relevance", "")
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
         source.get("id") == "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15"
         and source.get("kind") == "pubmed_live_spot_check"
         and source.get("pmid") == "42128086"
@@ -204,6 +215,12 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "published": True,
         "current_recreation_category": "gui_recreatable",
         "primary_constraint_ids": [],
+    }
+    assert by_template["serino_2015_toolless_sync_training"] == {
+        "template_id": "serino_2015_toolless_sync_training",
+        "published": True,
+        "current_recreation_category": "missing_publication_parameters",
+        "primary_constraint_ids": ["electrical_tactile_calibration"],
     }
     assert by_template["tonelli_2019_echolocation"] == {
         "template_id": "tonelli_2019_echolocation",
@@ -341,6 +358,20 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "teraoka_2024_front_rear",
         "amiel_2025_front_rear",
         "teramoto_2013_beyond_head_audiotactile",
+    }
+    voice_key_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "voice_key_response_capture"
+    )
+    assert voice_key_constraint["toolkit_status"] == "supported_by_voice_key_contract_capability_smoke"
+    assert voice_key_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_voice_key_contract_20260715/"
+        "voice_key_contract_capability_smoke_report.json"
+    )
+    assert set(voice_key_constraint["example_records"]) == {
+        "serino_2007_blind_cane_users",
+        "finisguerra_2015_moving_sounds_motor",
+        "biggio_2017_racket_tool_use",
+        "serino_2015_toolless_sync_training",
     }
     multi_speaker_constraint = next(
         item for item in coverage["constraint_taxonomy"] if item["id"] == "multi_speaker_array_switching"
@@ -552,11 +583,16 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     )
     assert records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"] == []
     assert "tactile_discrimination_or_localization_response" not in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]
-    assert records["finisguerra_2015_moving_sounds_motor"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert "voice_key_response_capture" in records["finisguerra_2015_moving_sounds_motor"]["blocking_constraint_ids"]
-    assert records["biggio_2017_racket_tool_use"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
+    assert records["finisguerra_2015_moving_sounds_motor"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["finisguerra_2015_moving_sounds_motor"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+    ]
+    assert records["biggio_2017_racket_tool_use"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
     assert records["biggio_2017_racket_tool_use"]["blocking_constraint_ids"] == [
-        "voice_key_response_capture",
         "missing_core_soa_iti_baseline_repetition_parameters",
     ]
     assert records["bassolino_2010_mouse_use"]["doi"] == "10.1016/j.neuropsychologia.2009.11.009"
@@ -567,9 +603,12 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["cimmino_2013_surgical_arm_elongation"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["cimmino_2013_surgical_arm_elongation"]["blocking_constraint_ids"] == []
     assert records["serino_2007_blind_cane_users"]["blocking_constraint_ids"] == [
-        "voice_key_response_capture",
         "electrical_tactile_calibration",
     ]
+    assert all(
+        "voice_key_response_capture" not in record["blocking_constraint_ids"]
+        for record in records.values()
+    )
     assert records["teneggi_2013_social_face"]["doi"] == "10.1016/j.cub.2013.01.043"
     assert records["serino_2009_tms"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["serino_2009_tms"]["blocking_constraint_ids"] == []

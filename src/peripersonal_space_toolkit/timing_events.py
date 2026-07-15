@@ -136,6 +136,30 @@ class TriggerDictionary:
                         "response_scoring_policy",
                         payload.get("Response_Scoring_Policy", ""),
                     ),
+                    "response_capture_device": payload.get(
+                        "response_capture_device",
+                        payload.get("Response_Capture_Device", ""),
+                    ),
+                    "response_input_modality": payload.get(
+                        "response_input_modality",
+                        payload.get("Response_Input_Modality", ""),
+                    ),
+                    "voice_key_enabled": payload.get(
+                        "voice_key_enabled",
+                        payload.get("Voice_Key_Enabled", ""),
+                    ),
+                    "voice_key_response_label": payload.get(
+                        "voice_key_response_label",
+                        payload.get("Voice_Key_Response_Label", ""),
+                    ),
+                    "voice_key_threshold": payload.get(
+                        "voice_key_threshold",
+                        payload.get("Voice_Key_Threshold", ""),
+                    ),
+                    "voice_key_latency_correction_ms": payload.get(
+                        "voice_key_latency_correction_ms",
+                        payload.get("Voice_Key_Latency_Correction_ms", ""),
+                    ),
                     "spatial_coordinate_frame": payload.get(
                         "spatial_coordinate_frame",
                         payload.get("Spatial_Coordinate_Frame", ""),
@@ -231,6 +255,30 @@ class TriggerDictionary:
                 "response_scoring_policy": payload.get(
                     "response_scoring_policy",
                     payload.get("Response_Scoring_Policy", ""),
+                ),
+                "response_capture_device": payload.get(
+                    "response_capture_device",
+                    payload.get("Response_Capture_Device", ""),
+                ),
+                "response_input_modality": payload.get(
+                    "response_input_modality",
+                    payload.get("Response_Input_Modality", ""),
+                ),
+                "voice_key_enabled": payload.get(
+                    "voice_key_enabled",
+                    payload.get("Voice_Key_Enabled", ""),
+                ),
+                "voice_key_response_label": payload.get(
+                    "voice_key_response_label",
+                    payload.get("Voice_Key_Response_Label", ""),
+                ),
+                "voice_key_threshold": payload.get(
+                    "voice_key_threshold",
+                    payload.get("Voice_Key_Threshold", ""),
+                ),
+                "voice_key_latency_correction_ms": payload.get(
+                    "voice_key_latency_correction_ms",
+                    payload.get("Voice_Key_Latency_Correction_ms", ""),
                 ),
                 "spatial_coordinate_frame": payload.get(
                     "spatial_coordinate_frame",

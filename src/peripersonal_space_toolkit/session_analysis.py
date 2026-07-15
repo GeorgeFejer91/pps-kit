@@ -832,6 +832,60 @@ def _response_base(event: dict[str, Any]) -> dict[str, Any]:
             "response_mapping_policy",
             "Response_Mapping_Policy",
         ),
+        "response_capture_device": _field(
+            event,
+            "response_capture_device",
+            "Response_Capture_Device",
+            "response_device",
+            "Response_Device",
+            "response_capture",
+            "Response_Capture",
+        ),
+        "response_input_modality": _field(
+            event,
+            "response_input_modality",
+            "Response_Input_Modality",
+            "response_modality",
+            "Response_Modality",
+            "input_modality",
+            "Input_Modality",
+        ),
+        "voice_key_enabled": _field(
+            event,
+            "voice_key_enabled",
+            "Voice_Key_Enabled",
+            "voice_key_required",
+            "Voice_Key_Required",
+            "vocal_response_required",
+            "Vocal_Response_Required",
+        ),
+        "voice_key_response_label": _field(
+            event,
+            "voice_key_response_label",
+            "Voice_Key_Response_Label",
+            "vocal_response_label",
+            "Vocal_Response_Label",
+            "spoken_response_label",
+            "Spoken_Response_Label",
+        ),
+        "voice_key_threshold": _field(
+            event,
+            "voice_key_threshold",
+            "Voice_Key_Threshold",
+            "voice_key_threshold_db",
+            "Voice_Key_Threshold_dB",
+            "microphone_threshold",
+            "Microphone_Threshold",
+        ),
+        "voice_key_latency_correction_ms": _field(
+            event,
+            "voice_key_latency_correction_ms",
+            "Voice_Key_Latency_Correction_ms",
+            "voice_key_latency_ms",
+            "Voice_Key_Latency_ms",
+            "vocal_onset_correction_ms",
+            "Vocal_Onset_Correction_ms",
+        ),
         "spatial_coordinate_frame": _field(
             event,
             "spatial_coordinate_frame",
@@ -2878,6 +2932,18 @@ def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
         row["observed_response_choice"] = row.get("Observed_Response_Choice")
     if "response_choice_correct" not in row and "Response_Choice_Correct" in row:
         row["response_choice_correct"] = row.get("Response_Choice_Correct")
+    if "response_capture_device" not in row and "Response_Capture_Device" in row:
+        row["response_capture_device"] = row.get("Response_Capture_Device")
+    if "response_input_modality" not in row and "Response_Input_Modality" in row:
+        row["response_input_modality"] = row.get("Response_Input_Modality")
+    if "voice_key_enabled" not in row and "Voice_Key_Enabled" in row:
+        row["voice_key_enabled"] = row.get("Voice_Key_Enabled")
+    if "voice_key_response_label" not in row and "Voice_Key_Response_Label" in row:
+        row["voice_key_response_label"] = row.get("Voice_Key_Response_Label")
+    if "voice_key_threshold" not in row and "Voice_Key_Threshold" in row:
+        row["voice_key_threshold"] = row.get("Voice_Key_Threshold")
+    if "voice_key_latency_correction_ms" not in row and "Voice_Key_Latency_Correction_ms" in row:
+        row["voice_key_latency_correction_ms"] = row.get("Voice_Key_Latency_Correction_ms")
     if "spatial_coordinate_frame" not in row and "Spatial_Coordinate_Frame" in row:
         row["spatial_coordinate_frame"] = row.get("Spatial_Coordinate_Frame")
     if "body_anchor" not in row and "Body_Anchor" in row:

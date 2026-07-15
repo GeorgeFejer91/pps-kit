@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- full calibration and response-capture implementation details need extraction
+- full electrical tactile calibration details still need extraction; row-level voice-key response metadata is now runner-supported
 
 ## Review Attempts
 

@@ -17,8 +17,7 @@
 
 ## Known Prior Gaps
 
-- electrocutaneous tactile calibration
-- voice-key response capture
+- electrocutaneous tactile calibration; row-level voice-key response metadata is now runner-supported
 
 ## Review Attempts
 

@@ -168,6 +168,13 @@
       "relevance": "Software runner/package contract evidence that row-level Spatial_Coordinate_Frame, Body_Anchor, Body_Part, Body_Side, Spatial_Hemifield, and Body_Relative_Axis metadata survive prepared block CSVs, trigger dictionaries, marker CSV/XDF output, participant rows, analysis rows, software wired-loopback sidecars, and mouse-click simulated responses. It does not prove physical body tracking, exact body-scaled transforms, speaker-array geometry, participant behavior, physical loopback timing, or scientific PPS effects."
     },
     {
+      "id": "voice_key_contract_capability_smoke_2026_07_15",
+      "kind": "validation_protocol",
+      "date_run": "2026-07-15",
+      "local_summary_file": "artifacts/validation_runs/current_goal_voice_key_contract_20260715/voice_key_contract_capability_smoke_report.json",
+      "relevance": "Capability smoke proving that Segment 5/6 rows can declare vocal/voice-key response-capture metadata, preserve response device, input modality, voice-key enabled flag, spoken label, threshold label/value, and latency correction through prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated participant-like responses with a software wired-loopback sidecar. This is not physical microphone capture, physical voice-onset detection, acoustic threshold calibration, collected participant evidence, physical timing-loopback, or scientific PPS-effect validation."
+    },
+    {
       "id": "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15",
       "kind": "pubmed_live_spot_check",
       "date_run": "2026-07-15",
@@ -183,8 +190,8 @@
       "covered_runnable_profile": 12,
       "covered_blocked_missing_publication_parameters": 8,
       "covered_blocked_toolkit_structure": 0,
-      "not_yet_templated_requires_toolkit_structure": 10,
-      "not_yet_templated_missing_publication_parameters": 41,
+      "not_yet_templated_requires_toolkit_structure": 8,
+      "not_yet_templated_missing_publication_parameters": 43,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
@@ -499,11 +506,15 @@
     {
       "id": "voice_key_response_capture",
       "dimension": "response_capture_or_response_mapping",
-      "description": "Original response was vocal/voice-key rather than mouse/button timing.",
-      "toolkit_status": "not_first_class",
+      "description": "Rows can declare vocal/voice-key response capture metadata including response device, input modality, spoken label, threshold label/value, and latency correction.",
+      "toolkit_status": "supported_by_voice_key_contract_capability_smoke",
       "example_records": [
+        "serino_2007_blind_cane_users",
+        "finisguerra_2015_moving_sounds_motor",
+        "biggio_2017_racket_tool_use",
         "serino_2015_toolless_sync_training"
-      ]
+      ],
+      "validation_report": "artifacts/validation_runs/current_goal_voice_key_contract_20260715/voice_key_contract_capability_smoke_report.json"
     },
     {
       "id": "electrical_tactile_calibration",
@@ -684,7 +695,6 @@
       "published": true,
       "current_recreation_category": "missing_publication_parameters",
       "primary_constraint_ids": [
-        "voice_key_response_capture",
         "electrical_tactile_calibration"
       ]
     },
@@ -777,11 +787,10 @@
       "audiotactile_task_family": "static near/far weak-target Go/NoGo tactile detection",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "voice_key_response_capture",
         "electrical_tactile_calibration"
       ],
       "missing_publication_parameters": [
-        "full calibration and response-capture implementation details need extraction"
+        "full electrical tactile calibration details still need extraction; voice-key response metadata is now runner-supported"
       ]
     },
     {
@@ -1247,12 +1256,10 @@
       "audiotactile_task_family": "bimodal IN/OUT target trials plus auditory-only catch trials",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "voice_key_response_capture",
         "electrical_tactile_calibration"
       ],
       "missing_publication_parameters": [
-        "electrocutaneous tactile calibration",
-        "voice-key response capture"
+        "electrocutaneous tactile calibration"
       ]
     },
     {
@@ -2058,15 +2065,14 @@
         "web_search_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "moving-sound hand-PPS task with rare tactile targets and motor-system/TMS endpoint",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "voice_key_response_capture",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract moving-sound trajectory, tactile target schedule, vocal response capture, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating"
+        "extract moving-sound trajectory, tactile target schedule, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating; vocal/voice-key response metadata is now runner-supported"
       ]
     },
     {
@@ -2078,15 +2084,14 @@
         "web_search_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "near/far audio-tactile PPS task while tennis players or novices hold a racket",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "voice_key_response_capture",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract near/far auditory locations, tactile site/timing, verbal response capture, racket/handle geometry, conditions, and trial counts before templating; sport expertise is non-blocking context"
+        "extract near/far auditory locations, tactile site/timing, racket/handle geometry, conditions, trial counts, ITI/jitter, and numeric response window before templating; verbal/voice-key response metadata is now runner-supported and sport expertise is non-blocking context"
       ]
     }
   ]

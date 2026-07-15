@@ -338,7 +338,6 @@
     {
       "audiotactile_task_family": "static near/far weak-target Go/NoGo tactile detection",
       "blocking_constraint_ids": [
-        "voice_key_response_capture",
         "electrical_tactile_calibration"
       ],
       "citation_short": "Serino et al. (2007)",
@@ -376,12 +375,11 @@
         },
         "source_parameter_extraction": {
           "blockers": [
-            "voice_key_response_capture",
             "electrical_tactile_calibration"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "full calibration and response-capture implementation details need extraction"
+            "full electrical tactile calibration details still need extraction; voice-key response metadata is now runner-supported"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -399,7 +397,6 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "voice_key_response_capture",
             "electrical_tactile_calibration"
           ],
           "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
@@ -416,9 +413,9 @@
         }
       },
       "missing_publication_parameters": [
-        "full calibration and response-capture implementation details need extraction"
+        "full electrical tactile calibration details still need extraction; voice-key response metadata is now runner-supported"
       ],
-      "next_required_action": "Implement or validate toolkit support for: voice_key_response_capture, electrical_tactile_calibration; also extract/source missing paper parameters: full calibration and response-capture implementation details need extraction",
+      "next_required_action": "Implement or validate toolkit support for: electrical_tactile_calibration; also extract/source missing paper parameters: full electrical tactile calibration details still need extraction; voice-key response metadata is now runner-supported",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -2963,7 +2960,6 @@
     {
       "audiotactile_task_family": "bimodal IN/OUT target trials plus auditory-only catch trials",
       "blocking_constraint_ids": [
-        "voice_key_response_capture",
         "electrical_tactile_calibration"
       ],
       "citation_short": "Serino/Canzoneri 2015 toolless sync training",
@@ -3007,13 +3003,11 @@
         },
         "source_parameter_extraction": {
           "blockers": [
-            "voice_key_response_capture",
             "electrical_tactile_calibration"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "electrocutaneous tactile calibration",
-            "voice-key response capture"
+            "electrocutaneous tactile calibration"
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -3031,7 +3025,6 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "voice_key_response_capture",
             "electrical_tactile_calibration"
           ],
           "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
@@ -3056,10 +3049,9 @@
         }
       },
       "missing_publication_parameters": [
-        "electrocutaneous tactile calibration",
-        "voice-key response capture"
+        "electrocutaneous tactile calibration"
       ],
-      "next_required_action": "Extract or source the missing paper parameters: electrocutaneous tactile calibration; voice-key response capture",
+      "next_required_action": "Extract or source the missing paper parameters: electrocutaneous tactile calibration",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -7387,11 +7379,10 @@
     {
       "audiotactile_task_family": "moving-sound hand-PPS task with rare tactile targets and motor-system/TMS endpoint",
       "blocking_constraint_ids": [
-        "voice_key_response_capture",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "citation_short": "Finisguerra et al. (2015)",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.1016/j.neuropsychologia.2014.09.043",
       "expected_effect_direction": "near_hand_moving_sounds_modulate_mep_excitability",
@@ -7425,12 +7416,11 @@
         },
         "source_parameter_extraction": {
           "blockers": [
-            "voice_key_response_capture",
             "missing_core_soa_iti_baseline_repetition_parameters"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract moving-sound trajectory, tactile target schedule, vocal response capture, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating"
+            "extract moving-sound trajectory, tactile target schedule, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating; vocal/voice-key response metadata is now runner-supported"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -7448,13 +7438,12 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "voice_key_response_capture",
             "missing_core_soa_iti_baseline_repetition_parameters"
           ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -7465,9 +7454,9 @@
         }
       },
       "missing_publication_parameters": [
-        "extract moving-sound trajectory, tactile target schedule, vocal response capture, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating"
+        "extract moving-sound trajectory, tactile target schedule, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating; vocal/voice-key response metadata is now runner-supported"
       ],
-      "next_required_action": "Implement or validate toolkit support for: voice_key_response_capture, missing_core_soa_iti_baseline_repetition_parameters; also extract/source missing paper parameters: extract moving-sound trajectory, tactile target schedule, vocal response capture, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating",
+      "next_required_action": "Extract or source the missing paper parameters: extract moving-sound trajectory, tactile target schedule, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating; vocal/voice-key response metadata is now runner-supported",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -7480,7 +7469,7 @@
         "pdf_status": "open_access_unavailable",
         "supplement_status": "not_found"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "finisguerra_2015_moving_sounds_motor",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -7491,11 +7480,10 @@
     {
       "audiotactile_task_family": "near/far audio-tactile PPS task while tennis players or novices hold a racket",
       "blocking_constraint_ids": [
-        "voice_key_response_capture",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "citation_short": "Biggio et al. (2017)",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.1016/j.neuropsychologia.2017.07.018",
       "expected_effect_direction": "racket_context_changes_near_far_audio_tactile_facilitation",
@@ -7529,12 +7517,11 @@
         },
         "source_parameter_extraction": {
           "blockers": [
-            "voice_key_response_capture",
             "missing_core_soa_iti_baseline_repetition_parameters"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract near/far auditory locations, tactile site/timing, verbal response capture, racket/handle geometry, conditions, and trial counts before templating; sport expertise is non-blocking context"
+            "extract near/far auditory locations, tactile site/timing, racket/handle geometry, conditions, trial counts, ITI/jitter, and numeric response window before templating; verbal/voice-key response metadata is now runner-supported and sport expertise is non-blocking context"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -7552,13 +7539,12 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "voice_key_response_capture",
             "missing_core_soa_iti_baseline_repetition_parameters"
           ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -7569,9 +7555,9 @@
         }
       },
       "missing_publication_parameters": [
-        "extract near/far auditory locations, tactile site/timing, verbal response capture, racket/handle geometry, conditions, and trial counts before templating; sport expertise is non-blocking context"
+        "extract near/far auditory locations, tactile site/timing, racket/handle geometry, conditions, trial counts, ITI/jitter, and numeric response window before templating; verbal/voice-key response metadata is now runner-supported and sport expertise is non-blocking context"
       ],
-      "next_required_action": "Implement or validate toolkit support for: voice_key_response_capture, missing_core_soa_iti_baseline_repetition_parameters; also extract/source missing paper parameters: extract near/far auditory locations, tactile site/timing, verbal response capture, racket/handle geometry, conditions, and trial counts before templating; sport expertise is non-blocking context",
+      "next_required_action": "Extract or source the missing paper parameters: extract near/far auditory locations, tactile site/timing, racket/handle geometry, conditions, trial counts, ITI/jitter, and numeric response window before templating; verbal/voice-key response metadata is now runner-supported and sport expertise is non-blocking context",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -7584,7 +7570,7 @@
         "pdf_status": "paywalled",
         "supplement_status": "not_found"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "biggio_2017_racket_tool_use",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -7630,8 +7616,8 @@
         "source_parameters_missing_or_unresolved": 59
       },
       "toolkit_gui_implementation": {
-        "blocked_by_missing_profile_parameters": 49,
-        "blocked_by_toolkit_structure_or_response_contract": 10,
+        "blocked_by_missing_profile_parameters": 51,
+        "blocked_by_toolkit_structure_or_response_contract": 8,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 12
       },
@@ -7649,13 +7635,13 @@
       "adjacent_not_applicable": 4,
       "full_emulated_source_to_runner_pipeline_validated": 12,
       "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 41,
-      "toolkit_structure_or_response_contract_missing": 10
+      "source_parameters_missing_before_profile_creation": 43,
+      "toolkit_structure_or_response_contract_missing": 8
     },
     "primary_gap_counts": {
       "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 41,
-      "toolkit_structure_or_response_contract_missing": 10
+      "source_parameters_missing_before_profile_creation": 43,
+      "toolkit_structure_or_response_contract_missing": 8
     }
   }
 }

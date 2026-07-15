@@ -3,7 +3,7 @@
 - Record ID: `finisguerra_2015_moving_sounds_motor`
 - DOI: `10.1016/j.neuropsychologia.2014.09.043`
 - DOI URL: https://doi.org/10.1016/j.neuropsychologia.2014.09.043
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: moving-sound hand-PPS task with rare tactile targets and motor-system/TMS endpoint
 - PDF status: `open_access_unavailable`
 - Supplement status: `not_found`
@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- extract moving-sound trajectory, tactile target schedule, vocal response capture, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating
+- extract moving-sound trajectory, tactile target schedule, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating; vocal/voice-key response metadata is now runner-supported
 
 ## Review Attempts
 

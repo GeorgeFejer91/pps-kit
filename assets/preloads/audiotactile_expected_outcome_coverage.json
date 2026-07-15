@@ -21,8 +21,8 @@
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
-      "not_yet_templated_missing_publication_parameters": 41,
-      "not_yet_templated_requires_toolkit_structure": 10,
+      "not_yet_templated_missing_publication_parameters": 43,
+      "not_yet_templated_requires_toolkit_structure": 8,
       "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 12,
       "template_present_blocked_missing_publication_parameters": 8
     }
@@ -2639,7 +2639,7 @@
       "record_id": "finisguerra_2015_moving_sounds_motor",
       "citation_short": "Finisguerra et al. (2015)",
       "doi": "10.1016/j.neuropsychologia.2014.09.043",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -2667,7 +2667,7 @@
         "manual_review_profile_recreation_assessment": "possible_with_caveats_tms_specific"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },
@@ -2675,7 +2675,7 @@
       "record_id": "biggio_2017_racket_tool_use",
       "citation_short": "Biggio et al. (2017)",
       "doi": "10.1016/j.neuropsychologia.2017.07.018",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -2703,7 +2703,7 @@
         "manual_review_profile_recreation_assessment": "possible_with_caveats_static_near_far_racket_condition"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     }

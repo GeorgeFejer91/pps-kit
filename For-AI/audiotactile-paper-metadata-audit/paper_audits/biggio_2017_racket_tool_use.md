@@ -3,7 +3,7 @@
 - Record ID: `biggio_2017_racket_tool_use`
 - DOI: `10.1016/j.neuropsychologia.2017.07.018`
 - DOI URL: https://doi.org/10.1016/j.neuropsychologia.2017.07.018
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: near/far audio-tactile PPS task while tennis players or novices hold a racket
 - PDF status: `paywalled`
 - Supplement status: `not_found`
@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- extract near/far auditory locations, tactile site/timing, verbal response capture, racket/handle geometry, conditions, and trial counts before templating; sport expertise is non-blocking context
+- extract near/far auditory locations, tactile site/timing, racket/handle geometry, conditions, trial counts, ITI/jitter, and numeric response window before templating; verbal/voice-key response metadata is now runner-supported and sport expertise is non-blocking context
 
 ## Review Attempts
 
