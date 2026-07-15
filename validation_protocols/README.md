@@ -123,6 +123,12 @@ or detection setup; do not raise the digital test tone into clipping. Equal
 interface knob positions are not evidence of equal recorded levels. Use the
 captured peak/SNR/correlation/clipping reports to balance the inputs.
 
+Ready-profile runner smoke compacts per-profile generated WAV/session trees by
+default after it records CSV/JSON/XDF evidence for downstream loopback and
+expected-contrast audits. Pass `--keep-materialized` only when the full
+generated session tree is the artifact under inspection and sufficient disk
+space is available.
+
 The full validation PC software checklist is tracked in
 `docs/WINDOWS_PC_SOFTWARE_REQUIREMENTS.md`. The current lab install should use:
 

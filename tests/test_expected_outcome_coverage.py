@@ -86,6 +86,7 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
 
 RUNNABLE_STRUCTURED_IDS = {
     "canzoneri_2012_dynamic_sounds",
+    "galli_2015_wheelchair",
     "noel_2015_bodily_self",
     "serino_2015_front_back_trunk_exp2",
     "serino_2015_peri_hand_exp3",
@@ -139,19 +140,19 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "structured_expected_outcome_record_count": 70,
         "pending_expected_outcome_record_count": 0,
         "adjacent_or_out_of_scope_record_count": 4,
-        "runnable_profile_parameter_record_count": 10,
+        "runnable_profile_parameter_record_count": 11,
         "observed_behavioral_comparison_record_count": 0,
-        "parameter_run_evidence_only_record_count": 10,
-        "not_runnable_no_observed_comparison_record_count": 60,
+        "parameter_run_evidence_only_record_count": 11,
+        "not_runnable_no_observed_comparison_record_count": 59,
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 4,
             "not_yet_templated_missing_publication_parameters": 21,
             "not_yet_templated_requires_toolkit_structure": 29,
-            "ready_profile_needs_behavioral_or_synthetic_outcome_comparison": 10,
+            "ready_profile_needs_behavioral_or_synthetic_outcome_comparison": 11,
             "template_present_blocked_missing_publication_parameters": 7,
-            "template_present_blocked_toolkit_structure": 3,
+            "template_present_blocked_toolkit_structure": 2,
         },
     }
 

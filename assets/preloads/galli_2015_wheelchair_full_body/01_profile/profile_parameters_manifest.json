@@ -12,22 +12,22 @@
   "visible_variant_label": "",
   "variant_display": "Galli 2015 wheelchair full-body PPS",
   "recreation_status": {
-    "primary_category": "toolkit_structural_gap",
-    "category_label": "Toolkit structural gap",
-    "runner_readiness": "blocked_unsupported_toolkit_structure",
-    "profile_checks_passed": false,
-    "gui_recreatable": false,
-    "segment_0_to_4_profile_checks_passed": false,
-    "segment_1_to_6_materializable": false,
-    "finished_profile": false,
-    "segment_6_launchable": false,
-    "profile_completion_status": "unfinished_preload",
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
     "missing_parameter_count": 0,
-    "unsupported_structure_count": 1
+    "unsupported_structure_count": 0
   },
   "segment_0_to_4_profile_checks": {
     "gate": "segments_0_to_4",
-    "passed": false,
+    "passed": true,
     "segments": [
       {
         "segment": "0",
@@ -39,21 +39,15 @@
       {
         "segment": "1",
         "segment_label": "Segment 1 source/stimulus assets",
-        "passed": false,
-        "field_count": 4,
-        "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
-            "status": "unsupported_toolkit_structure",
-            "reason": "speaker-array Gaussian amplitude control"
-          }
-        ]
+        "passed": true,
+        "field_count": 3,
+        "blocking_reasons": []
       },
       {
         "segment": "2",
         "segment_label": "Segment 2 trial rows and sequences",
         "passed": true,
-        "field_count": 4,
+        "field_count": 3,
         "blocking_reasons": []
       },
       {
@@ -101,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 7,
+      "value": 11,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -175,8 +169,7 @@
       "parameter": "tactile_sites",
       "status": "reported",
       "value": [
-        "sternum/chest",
-        "back"
+        "front/back trunk site (sternum/back mapped by trajectory side)"
       ],
       "note": "Tactile site labels are encoded."
     },
@@ -193,7 +186,7 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "baseline_count",
       "status": "reported",
-      "value": 0.0,
+      "value": 48,
       "note": "Baseline count/percentage settings are encoded."
     },
     {
@@ -243,40 +236,10 @@
       "status": "defaulted",
       "value": "1 part",
       "note": "Current dashboard default; phase/intervention context is non-blocking unless it changes the audiotactile PPS task execution."
-    },
-    {
-      "segment": "2",
-      "segment_label": "Segment 2 trial rows and sequences",
-      "parameter": "profile_gap",
-      "status": "defaulted",
-      "value": "wheelchair training condition",
-      "note": "wheelchair training condition"
-    },
-    {
-      "segment": "5",
-      "segment_label": "Segment 5 block CSV settings",
-      "parameter": "profile_gap",
-      "status": "defaulted",
-      "value": "front/back block factors",
-      "note": "front/back block factors"
-    },
-    {
-      "segment": "1",
-      "segment_label": "Segment 1 source/stimulus assets",
-      "parameter": "profile_gap",
-      "status": "unsupported_toolkit_structure",
-      "value": "speaker-array Gaussian amplitude control",
-      "note": "speaker-array Gaussian amplitude control"
     }
   ],
   "missing_publication_parameters": [],
-  "unsupported_toolkit_structures": [
-    {
-      "segment": "1",
-      "parameter": "profile_gap",
-      "reason": "speaker-array Gaussian amplitude control"
-    }
-  ],
+  "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
       "profile_metadata": "assets/preloads/galli_2015_wheelchair_full_body/01_profile/profile_metadata.json",

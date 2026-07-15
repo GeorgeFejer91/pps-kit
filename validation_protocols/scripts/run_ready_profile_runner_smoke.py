@@ -172,19 +172,22 @@ def run_smoke(
     templates: list[str] | None = None,
     profile_set: str = "ready-published",
     max_clicks_per_block: int = 1,
+    keep_materialized: bool = False,
 ) -> dict[str, Any]:
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     status = protocol12.load_profile_recreation_status(REPO_ROOT)
     target_ids = templates or protocol12._target_template_ids(status, profile_set=profile_set)
-    profile_results = [
-        _run_profile(
+    profile_results = []
+    for template_id in target_ids:
+        result = _run_profile(
             template_id,
             output_dir=output_dir,
             max_clicks_per_block=max_clicks_per_block,
         )
-        for template_id in target_ids
-    ]
+        if not keep_materialized:
+            result = _compact_profile_evidence(result, output_dir=output_dir)
+        profile_results.append(result)
     passed = bool(profile_results) and all(result["passed"] for result in profile_results)
     summary = _summary(profile_results)
     report = {
@@ -194,6 +197,7 @@ def run_smoke(
         "templates": target_ids,
         "passed": passed,
         "summary": summary,
+        "materialized_artifacts_retained": bool(keep_materialized),
         "evidence_boundary": EVIDENCE_BOUNDARY,
         "profiles": profile_results,
         "report_json": str(output_dir / "ready_profile_runner_smoke_report.json"),
@@ -303,11 +307,101 @@ def _summary(profile_results: list[dict[str, Any]]) -> dict[str, Any]:
         "profile_count": len(profile_results),
         "passed_profile_count": sum(1 for result in profile_results if result.get("passed")),
         "failed_profile_count": sum(1 for result in profile_results if not result.get("passed")),
+        "compacted_profile_count": sum(1 for result in profile_results if (result.get("evidence_compaction") or {}).get("enabled")),
         "total_blocks_played": sum(int(result.get("played_block_count") or 0) for result in profile_results),
         "total_analysis_ready_trials": sum(int(result.get("analysis_ready_trial_count") or 0) for result in profile_results),
         "total_analysis_ready_hits": sum(int(result.get("analysis_ready_hit_count") or 0) for result in profile_results),
         "total_response_markers": sum(int((result.get("event_counts") or {}).get("response_marker_start") or 0) for result in profile_results),
     }
+
+
+def _compact_profile_evidence(profile: dict[str, Any], *, output_dir: Path) -> dict[str, Any]:
+    template_id = str(profile.get("template_id") or "profile")
+    evidence_dir = output_dir / "compact_evidence" / template_id
+    copied: dict[str, str] = {}
+    outputs = dict(profile.get("outputs") or {})
+    for key, value in list(outputs.items()):
+        copied_path = _copy_compact_file(value, evidence_dir=evidence_dir, label=key)
+        if copied_path:
+            outputs[key] = copied_path
+            copied[key] = copied_path
+    session_manifest = _copy_compact_file(
+        profile.get("session_manifest_path"),
+        evidence_dir=evidence_dir,
+        label="session_manifest",
+    )
+    if session_manifest:
+        profile["session_manifest_path"] = session_manifest
+        copied["session_manifest_path"] = session_manifest
+    materialization = dict(profile.get("materialization") or {})
+    for key in ("segment6_manifest_path", "segment6_csv_path"):
+        copied_path = _copy_compact_file(
+            materialization.get(key),
+            evidence_dir=evidence_dir,
+            label=key,
+        )
+        if copied_path:
+            materialization[key] = copied_path
+            copied[f"materialization.{key}"] = copied_path
+    removed_dirs: list[str] = []
+    for candidate in (
+        output_dir / "materialized_profiles" / template_id,
+        Path(str(materialization.get("project_dir") or "")),
+    ):
+        if _remove_tree_if_within(candidate, root=output_dir):
+            removed_dirs.append(str(candidate))
+    profile["outputs"] = outputs
+    profile["materialization"] = materialization
+    profile["evidence_compaction"] = {
+        "enabled": True,
+        "compact_evidence_dir": str(evidence_dir),
+        "copied_outputs": copied,
+        "removed_generated_dirs": removed_dirs,
+        "note": (
+            "Bulky materialized WAV/session trees were removed after the smoke "
+            "checks completed; WAV facts in this report were measured before "
+            "compaction. The retained CSV/JSON/XDF files are sufficient for "
+            "the response-marker loopback and expected-contrast follow-up audits."
+        ),
+    }
+    return profile
+
+
+def _copy_compact_file(value: Any, *, evidence_dir: Path, label: str) -> str:
+    if not value:
+        return ""
+    source = Path(str(value))
+    if not source.is_file() or source.suffix.lower() == ".wav":
+        return ""
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    suffix = source.suffix or ".txt"
+    target = evidence_dir / f"{_safe_filename(label)}{suffix}"
+    if source.resolve() != target.resolve():
+        shutil.copy2(source, target)
+    return str(target)
+
+
+def _remove_tree_if_within(path: Path, *, root: Path) -> bool:
+    try:
+        resolved = path.resolve()
+        root_resolved = root.resolve()
+    except OSError:
+        return False
+    if not resolved.exists() or not resolved.is_dir():
+        return False
+    if resolved == root_resolved:
+        return False
+    try:
+        resolved.relative_to(root_resolved)
+    except ValueError:
+        return False
+    shutil.rmtree(resolved)
+    return True
+
+
+def _safe_filename(value: str) -> str:
+    safe = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in value.strip())
+    return safe or "evidence"
 
 
 def _read_csv(path: Path | str) -> list[dict[str, str]]:
@@ -387,6 +481,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--profile-set", choices=["ready-published", "ready-all"], default="ready-published")
     parser.add_argument("--template", action="append", default=[])
     parser.add_argument("--max-clicks-per-block", type=int, default=1)
+    parser.add_argument(
+        "--keep-materialized",
+        action="store_true",
+        help="Retain the bulky per-profile materialized WAV/session trees instead of compacting to CSV/JSON/XDF evidence.",
+    )
     args = parser.parse_args(argv)
 
     report = run_smoke(
@@ -394,6 +493,7 @@ def main(argv: list[str] | None = None) -> int:
         templates=args.template or None,
         profile_set=args.profile_set,
         max_clicks_per_block=args.max_clicks_per_block,
+        keep_materialized=args.keep_materialized,
     )
     print(f"Wrote ready profile runner smoke report: {report['report_json']}")
     return 0 if report["passed"] else 1

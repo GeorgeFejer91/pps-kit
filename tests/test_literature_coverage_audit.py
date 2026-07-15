@@ -34,9 +34,9 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 74
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 10,
+        "covered_runnable_profile": 11,
         "covered_blocked_missing_publication_parameters": 7,
-        "covered_blocked_toolkit_structure": 3,
+        "covered_blocked_toolkit_structure": 2,
         "not_yet_templated_requires_toolkit_structure": 29,
         "not_yet_templated_missing_publication_parameters": 21,
         "candidate_needs_full_text_task_audit": 0,
@@ -45,10 +45,10 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 24
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
-    ) == 14
-    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 12
+    ) == 15
+    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 13
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
-    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 3
+    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 2
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
     assert coverage["coverage_summary"]["openalex_broad_candidate_like_hits"] == 103
     assert coverage["coverage_summary"]["openalex_broad_linked_candidate_like_hits"] == 47
@@ -139,7 +139,7 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for entry in coverage["current_template_coverage"]
         if entry["published"] and entry["current_recreation_category"] == "gui_recreatable"
     ]
-    assert len(published_ready) == 12
+    assert len(published_ready) == 13
 
 
 def test_literature_coverage_constraints_focus_on_task_execution():
@@ -287,6 +287,10 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["serino_2015_front_back_trunk_exp2"]["blocking_constraint_ids"] == []
     assert records["serino_2015_front_back_trunk_exp2"]["missing_publication_parameters"] == []
     assert records["serino_2015_front_back_trunk_exp2"]["recreation_caveats"]
+    assert records["galli_2015_wheelchair"]["coverage_category"] == "covered_runnable_profile"
+    assert records["galli_2015_wheelchair"]["can_recreate_audiotactile_components_now"] is True
+    assert records["galli_2015_wheelchair"]["blocking_constraint_ids"] == []
+    assert records["galli_2015_wheelchair"]["missing_publication_parameters"] == []
     assert records["teramoto_2013_beyond_head_audiotactile"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert "body_part_anchored_coordinate_frames" in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]
     assert "tactile_discrimination_or_localization_response" in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]

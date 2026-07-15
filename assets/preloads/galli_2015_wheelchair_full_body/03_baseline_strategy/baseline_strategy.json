@@ -3,7 +3,7 @@
   "template_id": "galli_2015_wheelchair_full_body",
   "baseline_strategy": "tactile_only",
   "include_baseline_trials": true,
-  "baseline_trials_exact": null,
+  "baseline_trials_exact": 48,
   "baseline_trial_percentage": 0.0,
   "baseline_soa_values_ms": [
     380,

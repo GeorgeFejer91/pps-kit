@@ -3,7 +3,7 @@
 - Record ID: `galli_2015_wheelchair`
 - DOI: `10.3389/fpsyg.2015.00639`
 - DOI URL: https://doi.org/10.3389/fpsyg.2015.00639
-- Coverage category: `covered_blocked_toolkit_structure`
+- Coverage category: `covered_runnable_profile`
 - Task family: front/back trunk tactile PPS with dynamic auditory field
 - PDF status: `downloaded`
 - Supplement status: `needs_user_download`
@@ -17,12 +17,12 @@
 
 ## Known Prior Gaps
 
-- None recorded in the prior coverage ledger.
+- Resolved in the runnable profile: the physical Gaussian speaker-array amplitude field is represented as front/back virtual moving-source trajectories, preserving the reported PPS timing/count parameters while retaining exact gain/SPL as provenance caveats.
 
 ## Review Attempts
 
 - `main PDF OpenDataLoader extraction`: `available_for_run` - Run parser after placing the publication PDF in artifacts/paper_metadata_audit/publication_pdfs.
-- `targeted methods/table search`: `pending_review` - Search methods, procedure, apparatus, stimuli, trial design, and tables for Segment 1-4 parameters.
+- `targeted methods/table search`: `reviewed_for_profile_recreation` - Frontiers HTML/source review confirmed the array geometry, Gaussian amplitude field, 75 cm/s front/back loom, tactile timing anchors, baseline/catch roles, 500 ms ITI, and 216-trial PPS-assessment formula.
 - `supplement search`: `pending_manual_download` - Supplement-like sources were found or access was limited; manual download/check is still needed.
 - `fallback extractor/source check`: `pending_review` - Use pdfplumber/pypdf, rendered pages, publisher HTML, or supplement files before marking a field missing.
 

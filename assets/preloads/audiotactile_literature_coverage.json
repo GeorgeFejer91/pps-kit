@@ -123,20 +123,20 @@
   "coverage_summary": {
     "literature_record_count": 74,
     "literature_record_category_counts": {
-      "covered_runnable_profile": 10,
+      "covered_runnable_profile": 11,
       "covered_blocked_missing_publication_parameters": 7,
-      "covered_blocked_toolkit_structure": 3,
+      "covered_blocked_toolkit_structure": 2,
       "not_yet_templated_requires_toolkit_structure": 29,
       "not_yet_templated_missing_publication_parameters": 21,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
     "current_template_count": 24,
-    "current_profile_check_pass_count": 14,
-    "published_profile_check_pass_count": 12,
+    "current_profile_check_pass_count": 15,
+    "published_profile_check_pass_count": 13,
     "local_unpublished_profile_check_pass_count": 2,
     "current_templates_with_missing_publication_parameters": 9,
-    "current_templates_with_toolkit_structural_gaps": 3,
+    "current_templates_with_toolkit_structural_gaps": 2,
     "holmes_2020_reported_articles": 23,
     "holmes_2020_reported_experiments": 46,
     "pubmed_screened_records": 48,
@@ -351,11 +351,9 @@
     {
       "id": "gaussian_speaker_array_amplitude_field",
       "dimension": "auditory_stimulus_type_asset_provenance_rendering_or_gain_law",
-      "description": "Speaker-array Gaussian amplitude fields rather than a single virtual trajectory.",
-      "toolkit_status": "blocked_current_profile",
-      "example_records": [
-        "galli_2015_wheelchair_full_body"
-      ]
+      "description": "Speaker-array Gaussian amplitude fields; reducible serial trajectories can be represented as virtual moving-source paths when source papers report enough timing and distance anchors.",
+      "toolkit_status": "provenance_caveat_when_reducible_to_reported_trajectory",
+      "example_records": []
     },
     {
       "id": "hrtf_database_or_binaural_engine_mismatch",
@@ -569,10 +567,9 @@
     {
       "template_id": "galli_2015_wheelchair_full_body",
       "published": true,
-      "current_recreation_category": "toolkit_structural_gap",
-      "primary_constraint_ids": [
-        "gaussian_speaker_array_amplitude_field"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "GUI-recreatable with reported 216-trial PPS-assessment formula; physical Gaussian speaker arrays are represented as front/back virtual moving-source trajectories."
     },
     {
       "template_id": "lerner_2021_3d_audio_tactile_boundary",
@@ -640,7 +637,7 @@
   "literature_records": [
     {
       "record_id": "ladavas_2001_auditory_tactile_extinction",
-      "citation_short": "L\u00c3\u00a0davas et al. (2001)",
+      "citation_short": "LÃ davas et al. (2001)",
       "doi": "10.1093/neucas/7.2.97",
       "source_basis": [
         "openalex_query_variant_exhaustiveness_2026_06_13",
@@ -662,7 +659,7 @@
     },
     {
       "record_id": "farne_ladavas_2002_auditory_pps_humans",
-      "citation_short": "Farn\u00c3\u00a8 & L\u00c3\u00a0davas (2002)",
+      "citation_short": "FarnÃ¨ & LÃ davas (2002)",
       "doi": "10.1162/089892902320474481",
       "source_basis": [
         "openalex_query_variant_exhaustiveness_2026_06_13",
@@ -1056,13 +1053,12 @@
       "current_template_ids": [
         "galli_2015_wheelchair_full_body"
       ],
-      "coverage_category": "covered_blocked_toolkit_structure",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "front/back trunk tactile PPS with dynamic auditory field",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "gaussian_speaker_array_amplitude_field"
-      ],
-      "missing_publication_parameters": []
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "notes": "Current profile passes the Segment 0-4 audiotactile recreation gate with the reported 144 audio-tactile, 48 tactile-only baseline, and 24 auditory-only catch trials. The physical 16-speaker Gaussian-amplitude apparatus is represented as two virtual moving-source trajectories; exact per-speaker gain/SPL and original broadband source remain provenance caveats."
     },
     {
       "record_id": "maister_2015_shared_sensory",

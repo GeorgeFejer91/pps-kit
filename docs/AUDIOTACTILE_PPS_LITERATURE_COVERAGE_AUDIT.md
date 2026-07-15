@@ -120,7 +120,7 @@ This table is generated from `assets/preloads/audiotactile_literature_coverage.j
 | Ferri et al. (2015A) | dynamic emotional artificial looming sounds with tactile detection | Template exists; missing task parameters | Toolkit/task constraints: `exact_audio_envelope_or_gain_files` Missing/extract: exact auditory files; paper-specific gain envelope |
 | Ferri et al. (2015B) | dynamic ecological emotional sounds with tactile detection | Template exists; missing task parameters | Toolkit/task constraints: `ecological_or_licensed_audio_assets`, `exact_audio_envelope_or_gain_files` Missing/extract: licensed ecological sounds; exact amplitude envelopes |
 | Ferri et al. (2015), JNeurosci | approaching auditory stimuli plus tactile RT PPS boundary task with fMRI endpoint | Not templated; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: extract exact behavioral audio-tactile PPS timing, distances, response settings, and auditory trajectory; fMRI/BOLD endpoint is non-blocking for audiotactile recreation |
-| Galli et al. (2015) | front/back trunk tactile PPS with dynamic auditory field | Template exists; toolkit structure gap | Toolkit/task constraints: `gaussian_speaker_array_amplitude_field` |
+| Galli et al. (2015) | front/back trunk tactile PPS with dynamic auditory field | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate with the reported 216-trial PPS-assessment formula: 144 audio-tactile trials, 48 tactile-only baselines, and 24 auditory-only catches; exact Gaussian speaker-array synthesis, SPL field, and original broadband source remain provenance caveats. |
 | Maister et al. (2015) | PPS measurement after shared sensory/social context | Not templated; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: extract exact audiotactile PPS timing, distances, trial counts, tactile settings, and response settings; shared sensory/social context is non-blocking |
 | Noel et al. (2015a) | front chest and back tactile PPS with looming sound under full-body-illusion stroking | GUI-recreatable now | Current paired front/back profiles pass the Segment 0-4 audiotactile recreation gate. |
 | Noel et al. (2015b) | walking/full-body PPS audio-tactile task | Template exists; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: exact sound distances and trial counts |
@@ -198,8 +198,8 @@ These are the main standardization constraints to flag when deciding whether the
 | Direction-coupled tactile-only baselines | Baseline timing may be tied to omitted sound positions such as T0/T6. | Implemented for Canzoneri 2012; no current blocker examples |
 | Core SOA, ITI, baseline, and repetition parameters | Missing SOA/distance, ITI/jitter, baseline timing, or trial-repetition values prevent honest profile checks even when the structure is otherwise compatible. Randomization and block order alone do not. | Canzoneri 2013; Teneggi 2013; Noel 2015 walking |
 | Analog two-speaker apparatus provenance | Near/far speaker setups are original apparatus descriptions. They are not blockers by themselves when reported trajectory/timing/source parameters can be recreated with the binaural renderer; exact original gain/envelope files remain missing provenance when required for author-stimulus equivalence. | Canzoneri 2012; Serino 2015 peri-trunk/peri-hand |
-| Multi-speaker array switching | A physical array may switch speakers or schedule discrete positions rather than render one virtual source. Serial arrays can be represented when reported distances/timings map to a single virtual trajectory; true front/back source switching still needs first-class support. | Serino 2015 front/back |
-| Gaussian speaker-array amplitude field | The auditory source is an amplitude field across speakers. | Galli 2015 |
+| Multi-speaker array switching | A physical array may switch speakers or schedule discrete positions rather than render one virtual source. Serial arrays can be represented when reported distances/timings map to a single virtual trajectory; true unreduced source switching still needs first-class support. | Serino 2015 Exp. 4-6 |
+| Gaussian speaker-array amplitude field | The auditory source is an amplitude field across speakers. When the paper reports a single reducible trajectory with enough timing/distance anchors, this is apparatus provenance rather than a current blocker. | No current blocked profile examples |
 | HRTF or binaural engine mismatch | Exact HRTF database or renderer behavior can define the stimulus. | Taffou 2014 LISTEN HRTF; Pfeiffer reference simulator; Lerner Unity/3D Tune-In |
 | Body-scaled distances | Distances depend on the participant's body dimensions rather than absolute cm/m. | Lerner 2021 |
 | Body-part anchored coordinate frames | Space may be hand-, trunk-, head-, rear-, or hemifield-relative. | Hobeika 2018; Teramoto 2013; Teraoka 2024 |
@@ -229,7 +229,6 @@ These already expose real standardized-toolkit gaps:
 
 | Profile | Main unsupported task structure |
 |---|---|
-| `galli_2015_wheelchair_full_body` | Speaker-array Gaussian amplitude control. |
 | `lerner_2021_3d_audio_tactile_boundary` | Body-scaled distance mode and Unity/3D Tune-In stimulus behavior. |
 | `taffou_2014_cynophobic_rear_looming` | Separate rear-left/rear-right trajectory families plus exact ecological audio/HRTF provenance. |
 

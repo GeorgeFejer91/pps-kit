@@ -1197,11 +1197,11 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
         },
         "current_observed_evidence": {
             "profile_materialization": (
-                "artifacts/validation_runs/current_goal_ready_profiles_protocol12_20260715_after_serino_front_back_unlock/"
+                "artifacts/validation_runs/current_goal_ready_profiles_protocol12_20260715_after_galli_wheelchair_unlock/"
                 "profile_recreation_interface_matrix_report.json"
             ),
             "static_dashboard_parity": (
-                "artifacts/validation_runs/current_goal_ready_profiles_static_dashboard_parity_20260715_after_serino_front_back_unlock/"
+                "artifacts/validation_runs/current_goal_ready_profiles_static_dashboard_parity_20260715_after_galli_wheelchair_unlock/"
                 "static_dashboard_preview_parity_audit_report.json"
             ),
             "runner_mock": (
@@ -1209,15 +1209,15 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
                 "one_block_trial_runner_report.json"
             ),
             "ready_profile_runner_smoke": (
-                "artifacts/validation_runs/current_goal_ready_profiles_runner_smoke_20260715_after_serino_front_back_unlock/"
+                "artifacts/validation_runs/current_goal_ready_profiles_runner_smoke_20260715_after_galli_wheelchair_unlock/"
                 "ready_profile_runner_smoke_report.json"
             ),
             "ready_profile_response_marker_loopback": (
-                "artifacts/validation_runs/current_goal_ready_profiles_response_marker_loopback_20260715_after_serino_front_back_unlock/"
+                "artifacts/validation_runs/current_goal_ready_profiles_response_marker_loopback_20260715_after_galli_wheelchair_unlock/"
                 "ready_profile_response_marker_loopback_report.json"
             ),
             "ready_profile_expected_contrast_audit": (
-                "artifacts/validation_runs/current_goal_ready_profiles_expected_contrast_audit_20260715_after_serino_front_back_unlock/"
+                "artifacts/validation_runs/current_goal_ready_profiles_expected_contrast_audit_20260715_after_galli_wheelchair_unlock/"
                 "ready_profile_expected_contrast_audit_report.json"
             ),
             "click_path_mock": (

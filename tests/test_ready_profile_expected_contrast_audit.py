@@ -45,6 +45,7 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     pfeiffer_rows_path = tmp_path / "pfeiffer_analysis_ready_trials.csv"
     canzoneri_rows_path = tmp_path / "canzoneri_analysis_ready_trials.csv"
     tonelli_rows_path = tmp_path / "tonelli_analysis_ready_trials.csv"
+    galli_rows_path = tmp_path / "galli_analysis_ready_trials.csv"
     _write_csv(
         rows_path,
         [
@@ -304,6 +305,38 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
             }
         )
     _write_csv(tonelli_rows_path, tonelli_rows)
+    _write_csv(
+        galli_rows_path,
+        [
+            {
+                "block_label": "Wheelchair PPS block",
+                "row_label": "Wheelchair PPS moving-sound trial",
+                "respiratory_phase": "Wheelchair PPS moving-sound trial",
+                "sequence_labels": "Wheelchair PPS broadband moving sound",
+                "sequence_variant_key": "wheelchair_pps_broadband_moving_sound",
+                "family": "audio_tactile",
+                "soa_ms": "380",
+            },
+            {
+                "block_label": "Wheelchair PPS block",
+                "row_label": "Wheelchair PPS moving-sound trial",
+                "respiratory_phase": "Wheelchair PPS moving-sound trial",
+                "sequence_labels": "Wheelchair PPS broadband moving sound - back looming",
+                "sequence_variant_key": "wheelchair_pps_broadband_moving_sound_back_looming",
+                "family": "audio_tactile",
+                "soa_ms": "2280",
+            },
+            {
+                "block_label": "Wheelchair PPS block",
+                "row_label": "Wheelchair PPS tactile-only baseline",
+                "respiratory_phase": "Wheelchair PPS tactile-only baseline",
+                "sequence_labels": "Wheelchair PPS broadband moving sound - back looming",
+                "sequence_variant_key": "wheelchair_pps_broadband_moving_sound_back_looming",
+                "family": "baseline",
+                "soa_ms": "380",
+            },
+        ],
+    )
     smoke_path = tmp_path / "runner_smoke.json"
     smoke_path.write_text(
         json.dumps(
@@ -352,6 +385,10 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                     {
                         "template_id": "tonelli_2019_echolocation",
                         "outputs": {"analysis_ready_trials": str(tonelli_rows_path)},
+                    },
+                    {
+                        "template_id": "galli_2015_wheelchair_full_body",
+                        "outputs": {"analysis_ready_trials": str(galli_rows_path)},
                     },
                 ]
             }
@@ -458,6 +495,17 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                             "expected_effect_direction": "echolocation_training_changes_lateral_head_pps_boundary"
                         },
                     },
+                    {
+                        "record_id": "galli_2015_wheelchair",
+                        "citation_short": "Galli 2015",
+                        "observed_comparison_gap": audit.READY_GAP,
+                        "current_template_ids": ["galli_2015_wheelchair_full_body"],
+                        "expected_outcome": {
+                            "expected_effect_direction": (
+                                "wheelchair_training_or_active_use_modulates_full_body_pps_boundary"
+                            )
+                        },
+                    },
                 ]
             }
         ),
@@ -473,12 +521,12 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert report["schema"] == audit.SCHEMA
     assert report["passed"]
     assert report["summary"] == {
-        "ready_profile_record_count": 10,
+        "ready_profile_record_count": 11,
         "synthetic_comparison_record_count": 9,
         "synthetic_comparison_passed_count": 9,
         "synthetic_comparison_failed_count": 0,
         "contrast_metadata_blocked_record_count": 0,
-        "contrast_metadata_present_model_missing_record_count": 1,
+        "contrast_metadata_present_model_missing_record_count": 2,
     }
     by_id = {row["record_id"]: row for row in report["records"]}
     smartphone = by_id["smartphone_rt_methods_2025"]
@@ -575,6 +623,11 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert tonelli["synthetic_comparison"]["observed_effect_direction"] == (
         "echolocation_training_changes_lateral_head_pps_boundary"
     )
+
+    galli = by_id["galli_2015_wheelchair"]
+    assert galli["status"] == "contrast_metadata_present_comparison_model_missing"
+    assert galli["missing_contrasts"] == []
+    assert galli["synthetic_comparison"] == {}
 
 
 def test_contrast_availability_requires_both_factor_poles_for_lamia():

@@ -1361,7 +1361,7 @@ def test_dashboard_startup_overwrites_stale_study5_canonical_ingredient(tmp_path
 def test_dashboard_blocks_runner_launch_for_incomplete_published_profile(tmp_path: Path):
     client = _client(tmp_path)
 
-    blocked_template_id = "galli_2015_wheelchair_full_body"
+    blocked_template_id = "lerner_2021_3d_audio_tactile_boundary"
     loaded = client.post(f"/api/templates/{blocked_template_id}/load").json()
     assert loaded["selected_template"] == blocked_template_id
     assert loaded["templates"]
