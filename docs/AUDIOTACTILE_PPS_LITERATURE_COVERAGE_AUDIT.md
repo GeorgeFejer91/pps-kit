@@ -16,13 +16,13 @@ The Holmes consensus-corpus screening trail is `assets/preloads/audiotactile_hol
 The PubMed screening audit trail is `assets/preloads/audiotactile_pubmed_screening.json`, with the supplemental PubMed query-variant trail in `assets/preloads/audiotactile_pubmed_query_variant_screening.json`.
 The OpenAlex broad-screen trail is `assets/preloads/audiotactile_openalex_broad_screening.json`, with per-hit screening decisions in `assets/preloads/audiotactile_openalex_candidate_screening.json`. The additional query-variant exhaustiveness screen is `assets/preloads/audiotactile_openalex_query_variant_screening.json`. The live web sanity trail is `assets/preloads/audiotactile_web_sanity_screening.json`.
 
-Current ledger size: 75 literature records. Across the separate preload gate, 22 profile variants currently pass runnable checks. In the broader literature ledger, 15 literature records have covered runnable profiles, 8 covered records still need missing publication/source parameters, 0 covered records still need toolkit structure, 0 not-yet-templated records expose a toolkit-structure gap, 48 not-yet-templated records are structurally close but lack extracted/published PPS-task parameters, and 4 records are adjacent/out of scope. The previous generic candidate bucket is now cleared: tracked records are classified by whether the PPS task is runnable, missing exact task details, blocked by an unsupported task structure, or not actually an audiotactile PPS target.
+Current ledger size: 75 literature records. Across the separate preload gate, 24 profile variants currently pass runnable checks. In the broader literature ledger, 17 literature records have covered runnable profiles, 6 covered records still need missing publication/source parameters, 0 covered records still need toolkit structure, 0 not-yet-templated records expose a toolkit-structure gap, 48 not-yet-templated records are structurally close but lack extracted/published PPS-task parameters, and 4 records are adjacent/out of scope. The previous generic candidate bucket is now cleared: tracked records are classified by whether the PPS task is runnable, missing exact task details, blocked by an unsupported task structure, or not actually an audiotactile PPS target.
 
 ## Full Pipeline Validation
 
 The current full-pipeline gate starts at the original paper/PDF/source parameter extraction and ends at observed mouse-click emulated runner behavior compared against the extracted expected outcome. A record passes only when all of these gates are proven: minimum source parameters captured, expected outcome extracted, parsimonious profile saved, Segment 0-6 GUI/toolkit path ready, runnable WAV/session execution available, and runner-produced emulated behavior matching the extracted expected direction.
 
-Current full-pipeline result: 15 in-scope literature records pass the emulated source-to-runner chain. Fifty-six in-scope records do not: 8 have profile scaffolds but still need source/publication parameters, and 48 have no complete profile because source parameters remain missing. No current in-scope record is blocked first by a missing toolkit structure or response contract. Four records are adjacent/out of scope. This full-pipeline pass is still software evidence from deterministic participant-like mouse clicks and software loopback sidecars, not collected participant data, not physical loopback or tactile-onset hardware evidence, and not a scientific PPS-effect replication claim.
+Current full-pipeline result: 17 in-scope literature records pass the emulated source-to-runner chain. Fifty-four in-scope records do not: 6 have profile scaffolds but still need source/publication parameters, and 48 have no complete profile because source parameters remain missing. No current in-scope record is blocked first by a missing toolkit structure or response contract. Four records are adjacent/out of scope. This full-pipeline pass is still software evidence from deterministic participant-like mouse clicks and software loopback sidecars, not collected participant data, not physical loopback or tactile-onset hardware evidence, and not a scientific PPS-effect replication claim.
 
 ## Evidence Base
 
@@ -60,6 +60,7 @@ Primary sources and artifacts:
 - Spatial renderer/HRTF provenance contract capability smoke report: `artifacts/validation_runs/current_goal_spatial_renderer_provenance_contract_20260715/spatial_renderer_provenance_contract_capability_smoke_report.json`
 - Audiovisual/trisensory contract capability smoke report: `artifacts/validation_runs/current_goal_audiovisual_trisensory_contract_20260715/audiovisual_trisensory_contract_capability_smoke_report.json`
 - Noel 2015 walking full-body action paper-parameter validation report: `artifacts/validation_runs/current_goal_noel_2015_known_parameter_20260715/noel_2015_known_parameter_validation_report.json`
+- Serino/Canzoneri 2015 toolless sync-training paper-parameter validation report: `artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/serino_2015_toolless_known_parameter_validation_report.json`
 
 ## Holmes Consensus Corpus Accountability
 
@@ -98,8 +99,8 @@ The current profile gate covers 30 templates:
 
 | Outcome | Count | Meaning |
 |---|---:|---|
-| GUI-recreatable | 22 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Twenty are published profile variants, including paired Noel bodily-self variants and the validated Noel walking profile; two are unpublished local examples. |
-| Missing publication parameters | 8 | The task looks structurally expressible, but published or encoded details are insufficient. |
+| GUI-recreatable | 24 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Twenty-two are published profile variants, including paired Noel bodily-self variants, the validated Noel walking profile, Canzoneri amputation/prosthesis, and Serino/Canzoneri toolless sync training; two are unpublished local examples. |
+| Missing publication parameters | 6 | The task looks structurally expressible, but published or encoded details are insufficient. |
 | Toolkit structural gap | 0 | The task uses a trial, audio, tactile, response, timing, coordinate, or apparatus feature that the toolkit schema does not yet model. |
 
 Runnable published-paper profiles today:
@@ -112,6 +113,12 @@ Runnable published-paper profiles today:
 - `noel_2015_bodily_self`
 - `noel_2015_bodily_self_back_space`
 - `pfeiffer_2018_lateral_perihead_left_to_right`
+- `biggio_2017_common_racket`
+- `biggio_2017_no_racket`
+- `biggio_2017_personal_racket`
+- `canzoneri_2013_amputation_prosthesis`
+- `tajadura_jimenez_2009_crossed_visual_deprivation`
+- `tajadura_jimenez_2009_uncrossed_visual_deprivation`
 - `canzoneri_2012_dynamic_sounds`
 - `tonelli_2019_echolocation`
 - `galli_2015_wheelchair_full_body`
@@ -119,6 +126,7 @@ Runnable published-paper profiles today:
 - `serino_2015_front_back_trunk_exp2`
 - `serino_2015_peri_hand_exp3`
 - `serino_2015_peri_trunk_exp1`
+- `serino_2015_toolless_sync_training`
 
 The stable template IDs `barumerli_2026_*` are retained, but the citation now follows the corrected 2026 author listing: Lamia, Shabani, and Candidi.
 
@@ -156,7 +164,7 @@ This table is generated from `assets/preloads/audiotactile_literature_coverage.j
 | Serino et al. (2015), Exp. 2 | front/back trunk tactile PPS with 16-speaker array recreated as a reported linear moving-source trajectory | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate with the published 372-trial formula: 13 multisensory distance samples x 2 directions, 3 tactile-only baselines, and 2 auditory-only catches repeated 12 times; exact Gaussian speaker-array synthesis and the article's 14-delay/13-distance wording mismatch remain provenance caveats. |
 | Serino et al. (2015), Exp. 3 | hand tactile PPS with lateralized hand-anchored cartesian trajectory | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate using a caveated hand-anchored cartesian path; exact original hand side and WAV/envelope files remain provenance caveats rather than current profile blockers. |
 | Serino et al. (2015), Exp. 4-6 | additional body-part/front-back PPS variants from the same six-experiment paper | Not templated; missing task parameters | Toolkit/task constraints: none after multi-speaker switching contract smoke. Missing/extract: experiment-specific distance, tactile-site, speaker layout/channel schedule, gain/SPL transfer, and apparatus mappings need extraction; row-level multi-speaker switching is now runner-supported |
-| Serino/Canzoneri 2015 toolless sync training | bimodal IN/OUT target trials plus auditory-only catch trials | Template exists; missing task parameters | Toolkit/task constraints: none after voice-key and electrical tactile contract smokes. Missing/extract: electrocutaneous tactile calibration source values. |
+| Serino/Canzoneri 2015 toolless sync training | bimodal IN/OUT target trials plus auditory-only catch trials | GUI-recreatable now | Frontiers publisher-source review and paper-specific runner validation preserve the 3000 ms IN/OUT pink-noise PPS assessment, T1-T5 delays at 300/800/1500/2200/2700 ms, right-hand DS7A electrical tactile target context, vocal response capture, one assessment block, and auditory-only catches. The profile uses the inherited Canzoneri-family 80 target rows plus 24 catches, matching the paper's printed 77% tactile-target rate as 76.9%; exact original noise/gain files, participant-level current calibration, voice-key threshold/latency, and full training-intervention execution remain caveats rather than blockers. |
 | Ardizzi & Ferri (2018) | dynamic audio-tactile PPS boundary task with interoception context | Not templated; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: extract exact audio-tactile PPS task scaffold, timing, distances, tactile settings, response settings, and analysis parameters; interoception context is non-blocking |
 | Hobeika et al. (2018) | lateral PPS audio-tactile task linked to handedness | Not templated; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: exact lateral trajectory, timing, and tactile-site mapping need extraction |
 | Noel et al. (2018) | psychophysical-computational PPS resizing task | Not templated; missing task parameters | Toolkit/task constraints: `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: extract velocity levels, peri-face/peri-trunk mapping, timing, tactile settings, response settings, and whether the psychophysical task reuses an existing dynamic PPS scaffold |
@@ -249,7 +257,6 @@ These are structurally close enough that the next step is mainly paper/supplemen
 | `canzoneri_2013_tool_use_reshaping` | Exact trial count and ITI table. |
 | `ferri_2015_artificial_looming_valence` | Exact artificial audio files and gain envelope. |
 | `ferri_2015_ecological_looming_valence` | Licensed ecological source sounds and amplitude envelopes. |
-| `serino_2015_toolless_sync_training` | Electrocutaneous tactile calibration source values. |
 | `teneggi_2013_social_face_pps` | Exact distance/timing table from the supplement. |
 
 ## Current Profiles That Need Toolkit Expansion

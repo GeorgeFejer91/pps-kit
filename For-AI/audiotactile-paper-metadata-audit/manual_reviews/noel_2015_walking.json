@@ -23,6 +23,12 @@
       "source": "https://doi.org/10.1016/j.neuropsychologia.2014.08.030",
       "status": "checked",
       "scope": "Citation and DOI identity check for the Neuropsychologia article."
+    },
+    {
+      "source_type": "supplement_route",
+      "source": "publisher and DOI-linked supplement routes for 10.1016/j.neuropsychologia.2014.08.030",
+      "status": "checked_no_methods_supplement_needed_for_profile",
+      "scope": "No supplement was needed for the runnable PPS-task profile after the public PDF supplied task parameters."
     }
   ],
   "review_attempts": [
@@ -58,9 +64,9 @@
     }
   ],
   "field_status_counts": {
-    "reported": 25,
-    "reported_with_unit_interpretation": 1,
-    "apparatus_context_not_runnable": 3
+    "reported": 21,
+    "reported_with_caveat": 3,
+    "reported_with_toolkit_distribution": 1
   },
   "segment_field_audit": {
     "segment_1_stimulus_reconstruction": {

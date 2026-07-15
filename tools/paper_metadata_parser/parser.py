@@ -28,6 +28,7 @@ LOCAL_JAVA_ROOT = ARTIFACT_DIR / "tooling" / "jdk"
 
 PDF_STATUSES = (
     "downloaded",
+    "public_pdf_reviewed",
     "open_access_unavailable",
     "paywalled",
     "needs_user_download",
@@ -50,7 +51,12 @@ EXTRACTION_STATUSES = (
 )
 FIELD_STATUSES = (
     "reported",
+    "reported_absent",
+    "reported_with_caveat",
+    "reported_with_toolkit_distribution",
     "derived",
+    "protocol_lineage_derived",
+    "source_inconsistency_caveat",
     "inferred_low_confidence",
     "not_reported_after_review",
     "not_applicable",
@@ -64,6 +70,8 @@ CONFIDENCE_LABELS = (
     "partial_extraction",
     "publisher_html_methods_review",
     "high_confidence_extraction",
+    "high_confidence_extraction_with_source_count_caveat",
+    "high_confidence_extraction_with_count_derivation_caveat",
 )
 
 ADJACENT_CATEGORY = "adjacent_out_of_scope"

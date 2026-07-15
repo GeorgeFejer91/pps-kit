@@ -11,19 +11,19 @@
     "structured_expected_outcome_record_count": 71,
     "pending_expected_outcome_record_count": 0,
     "adjacent_or_out_of_scope_record_count": 4,
-    "runnable_profile_parameter_record_count": 16,
+    "runnable_profile_parameter_record_count": 17,
     "observed_behavioral_comparison_record_count": 0,
-    "mouse_click_simulated_participant_like_comparison_record_count": 16,
-    "synthetic_profile_contrast_comparison_record_count": 16,
+    "mouse_click_simulated_participant_like_comparison_record_count": 17,
+    "synthetic_profile_contrast_comparison_record_count": 17,
     "parameter_run_evidence_only_record_count": 0,
-    "not_runnable_no_observed_comparison_record_count": 55,
+    "not_runnable_no_observed_comparison_record_count": 54,
     "adjacent_not_applicable_record_count": 4,
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
       "not_yet_templated_missing_publication_parameters": 48,
-      "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 16,
-      "template_present_blocked_missing_publication_parameters": 7
+      "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
+      "template_present_blocked_missing_publication_parameters": 6
     }
   },
   "expected_outcome_extraction_sources": {
@@ -1126,11 +1126,11 @@
       "record_id": "serino_2015_toolless_sync_training",
       "citation_short": "Serino/Canzoneri 2015 toolless sync training",
       "doi": "10.3389/fnbeh.2015.00004",
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "serino_2015_toolless_sync_training"
       ],
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "synchronous_audio_tactile_training_extends_pps_without_tool",
@@ -1140,7 +1140,7 @@
         "condition_contrast": "synchronous versus asynchronous tactile-hand and far-auditory stimulation training",
         "source_basis": [
           "assets/preloads/audiotactile_literature_coverage.json#serino_2015_toolless_sync_training",
-          "Consensus MCP 2026-07-15 query: 10.1371/journal.pone.0006582 Serino 2009 TMS peripersonal space audio tactile"
+          "Frontiers publisher HTML 2026-07-15 review: 10.3389/fnbeh.2015.00004"
         ]
       },
       "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
@@ -1148,14 +1148,27 @@
         "paper_audit_pdf_status": "downloaded",
         "paper_audit_supplement_status": "needs_user_download",
         "paper_audit_extraction_status": "parsed_with_warnings",
-        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_metadata_confidence_label": "high_confidence_extraction_with_count_derivation_caveat",
         "paper_audit_visualization_status": "source_mined",
-        "paper_audit_visualization_candidate_count": "7"
+        "paper_audit_visualization_candidate_count": "7",
+        "manual_review_status": "manual_review_completed_publisher_html",
+        "manual_review_confidence_label": "high_confidence_extraction_with_count_derivation_caveat",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_single_assessment_block"
       },
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison",
+      "observed_evidence_boundary": "The ready-profile mouse-click expected-outcome audit runs deterministic participant-like mouse clicks through SessionRunnerController after response windows and compares the runner-produced analysis RTs with the paper's structured expected effect. This proves runner-level software comparison behavior only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
+      "required_next_evidence": "Collect participant data before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic mouse-click simulated participant-like software evidence only.",
+      "observed_profile_contrast_evidence": {
+        "status": "deterministic_synthetic_profile_contrast_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+      },
+      "observed_mouse_click_participant_like_evidence": {
+        "status": "mouse_click_simulated_participant_like_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/serino_2015_toolless_known_parameter_validation_report.json",
+        "model_boundary": "Paper-specific deterministic participant-like mouse clicks were injected through SessionRunnerController and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
+      }
     },
     {
       "record_id": "ardizzi_ferri_2018_interoceptive",

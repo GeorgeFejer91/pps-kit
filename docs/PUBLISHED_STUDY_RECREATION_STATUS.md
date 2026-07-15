@@ -46,6 +46,7 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 | serino_2015_front_back_trunk_exp2 | A | ready | All required current-GUI fields are present and materializable. |
 | serino_2015_peri_hand_exp3 | B | ready | All required current-GUI fields are present and materializable. |
 | serino_2015_peri_trunk_exp1 | C | ready | All required current-GUI fields are present and materializable. |
+| serino_2015_toolless_sync_training | - | ready | All required current-GUI fields are present and materializable. |
 
 ## Missing publication parameters
 
@@ -55,7 +56,6 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 | ferri_2015_artificial_looming_valence | A | blocked_missing_parameters | exact auditory files; paper-specific gain envelope |
 | ferri_2015_ecological_looming_valence | B | blocked_missing_parameters | licensed ecological sounds; exact amplitude envelopes |
 | serino_2007_blind_cane_users | - | blocked_missing_parameters | exact white-noise source asset, seed, and spectral recipe; exact electrical tactile pulse duration, waveform, current, and electrode impedance calibration; exact ITI or jitter distribution and numeric response window |
-| serino_2015_toolless_sync_training | - | blocked_missing_parameters | electrocutaneous tactile calibration; voice-key response capture |
 | taffou_2014_cynophobic_rear_looming | - | blocked_missing_parameters | exact dog/sheep source audio and Audacity amplitude/dynamic matching settings; LISTEN HRTF subject/filter identifier and renderer settings |
 | teneggi_2013_social_face_pps | - | blocked_missing_parameters | exact distance/timing table from supplement |
 

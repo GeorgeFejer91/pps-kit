@@ -96,6 +96,7 @@ RUNNABLE_STRUCTURED_IDS = {
     "serino_2015_front_back_trunk_exp2",
     "serino_2015_peri_hand_exp3",
     "serino_2015_peri_trunk_exp1",
+    "serino_2015_toolless_sync_training",
     "pfeiffer_2018_vestibular",
     "matsuda_2021_four_directions",
     "lamia_2026_arm_movement",
@@ -146,19 +147,19 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "structured_expected_outcome_record_count": 71,
         "pending_expected_outcome_record_count": 0,
         "adjacent_or_out_of_scope_record_count": 4,
-        "runnable_profile_parameter_record_count": 16,
+        "runnable_profile_parameter_record_count": 17,
         "observed_behavioral_comparison_record_count": 0,
-        "mouse_click_simulated_participant_like_comparison_record_count": 16,
-        "synthetic_profile_contrast_comparison_record_count": 16,
+        "mouse_click_simulated_participant_like_comparison_record_count": 17,
+        "synthetic_profile_contrast_comparison_record_count": 17,
         "parameter_run_evidence_only_record_count": 0,
-        "not_runnable_no_observed_comparison_record_count": 55,
+        "not_runnable_no_observed_comparison_record_count": 54,
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 4,
             "not_yet_templated_missing_publication_parameters": 48,
-            "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 16,
-            "template_present_blocked_missing_publication_parameters": 7,
+            "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
+            "template_present_blocked_missing_publication_parameters": 6,
         },
     }
 
@@ -209,8 +210,13 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
                         "canzoneri_2013_amputation_known_parameter_validation_report.json"
                         if record_id == "canzoneri_2013_amputation_prosthesis"
                         else (
-                            "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/"
-                            "ready_profile_mouse_click_expected_outcome_audit_report.json"
+                            "artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/"
+                            "serino_2015_toolless_known_parameter_validation_report.json"
+                            if record_id == "serino_2015_toolless_sync_training"
+                            else (
+                                "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/"
+                                "ready_profile_mouse_click_expected_outcome_audit_report.json"
+                            )
                         )
                     )
                 )
@@ -226,6 +232,7 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
                 "biggio_2017_racket_tool_use",
                 "noel_2015_walking",
                 "canzoneri_2013_amputation_prosthesis",
+                "serino_2015_toolless_sync_training",
             }
             else (
                 "Deterministic participant-like mouse clicks were injected through SessionRunnerController "

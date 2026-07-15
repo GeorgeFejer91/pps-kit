@@ -12,22 +12,22 @@
   "visible_variant_label": "",
   "variant_display": "Serino 2015 synchronous far audio-tactile PPS training",
   "recreation_status": {
-    "primary_category": "missing_publication_parameters",
-    "category_label": "Missing publication parameters",
-    "runner_readiness": "blocked_missing_parameters",
-    "profile_checks_passed": false,
-    "gui_recreatable": false,
-    "segment_0_to_4_profile_checks_passed": false,
-    "segment_1_to_6_materializable": false,
-    "finished_profile": false,
-    "segment_6_launchable": false,
-    "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 2,
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
+    "missing_parameter_count": 0,
     "unsupported_structure_count": 0
   },
   "segment_0_to_4_profile_checks": {
     "gate": "segments_0_to_4",
-    "passed": false,
+    "passed": true,
     "segments": [
       {
         "segment": "0",
@@ -53,20 +53,9 @@
       {
         "segment": "3",
         "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-        "passed": false,
-        "field_count": 7,
-        "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
-            "status": "missing_publication_parameter",
-            "reason": "electrocutaneous tactile calibration"
-          },
-          {
-            "parameter": "profile_gap",
-            "status": "missing_publication_parameter",
-            "reason": "voice-key response capture"
-          }
-        ]
+        "passed": true,
+        "field_count": 5,
+        "blocking_reasons": []
       },
       {
         "segment": "4",
@@ -106,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 10,
+      "value": 19,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -188,7 +177,7 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "baseline_mode",
       "status": "reported",
-      "value": "tactile_only",
+      "value": "none",
       "note": "Baseline strategy is encoded."
     },
     {
@@ -196,7 +185,7 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "baseline_count",
       "status": "defaulted",
-      "value": 0.0,
+      "value": 0,
       "note": "No baseline trials are configured."
     },
     {
@@ -204,23 +193,27 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "catch_mode",
       "status": "reported",
-      "value": 23.0,
+      "value": 24,
       "note": "Catch settings are encoded."
     },
     {
       "segment": "4",
       "segment_label": "Segment 4 repetition pool settings",
       "parameter": "trial_pool_repetitions",
-      "status": "inferred",
-      "value": 8,
-      "note": "Segment 4 can infer repetitions from repetitions_per_condition."
+      "status": "reported",
+      "value": {
+        "default": 8,
+        "audio_tactile": 8,
+        "catch": 12
+      },
+      "note": "Segment 4 repetition defaults are encoded."
     },
     {
       "segment": "5",
       "segment_label": "Segment 5 block CSV settings",
       "parameter": "block_count",
       "status": "reported",
-      "value": 2,
+      "value": 1,
       "note": "Block count is encoded."
     },
     {
@@ -262,36 +255,9 @@
       "status": "defaulted",
       "value": "training train structure and timing",
       "note": "training train structure and timing"
-    },
-    {
-      "segment": "3",
-      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-      "parameter": "profile_gap",
-      "status": "missing_publication_parameter",
-      "value": "electrocutaneous tactile calibration",
-      "note": "electrocutaneous tactile calibration"
-    },
-    {
-      "segment": "3",
-      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-      "parameter": "profile_gap",
-      "status": "missing_publication_parameter",
-      "value": "voice-key response capture",
-      "note": "voice-key response capture"
     }
   ],
-  "missing_publication_parameters": [
-    {
-      "segment": "3",
-      "parameter": "profile_gap",
-      "reason": "electrocutaneous tactile calibration"
-    },
-    {
-      "segment": "3",
-      "parameter": "profile_gap",
-      "reason": "voice-key response capture"
-    }
-  ],
+  "missing_publication_parameters": [],
   "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
@@ -312,7 +278,7 @@
     },
     "05_run_setup": {
       "run_defaults": "assets/preloads/serino_2015_toolless_sync_training/05_run_setup/run_defaults.json",
-      "block_count": 2,
+      "block_count": 1,
       "participant_count": 16
     },
     "local_segment_0_to_4_profile_gate": {
@@ -329,6 +295,14 @@
     {
       "field": "measurement task",
       "source": "Frontiers Methods report 3000 ms pink-noise IN/OUT sounds, right-hand tactile target detection, 77% target trials, and T1-T5 at 300, 800, 1500, 2200, and 2700 ms."
+    },
+    {
+      "field": "response and tactile apparatus",
+      "source": "Frontiers Methods report a DS7A Digitimer constant-current electrical stimulator, Neuroline/Ambu electrodes on the right hand, vocal responses, and voice-activated relay recording."
+    },
+    {
+      "field": "assessment structure",
+      "source": "Frontiers Design reports PPS was measured before and after training; each interleaved assessment session consisted of one audio-tactile interaction task block."
     },
     {
       "field": "training manipulation",

@@ -64,7 +64,10 @@
     }
   ],
   "field_status_counts": {
-    "reported": 21,
+    "not_applicable": 2,
+    "not_reported_after_review": 1,
+    "reported": 15,
+    "reported_absent": 2,
     "reported_with_caveat": 4,
     "source_inconsistency_caveat": 1
   },
@@ -97,6 +100,41 @@
         "source_file": "https://www.nature.com/articles/srep02844.pdf",
         "page_or_section": "PDF p.7, Methods",
         "evidence_note": "Envelope direction is reported, not the original file."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "IN approaching and OUT receding dynamic pink-noise conditions.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The task used looming and receding sounds with T1-T5 tactile delays."
+      },
+      "source_provenance": {
+        "status": "reported_with_caveat",
+        "value": "Pink-noise source is reported; exact original waveform, seed, and gain files are not supplied.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The validator uses generated pink noise while preserving this as source-equivalence caveat."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Two-loudspeaker near/far apparatus with the far loudspeaker about 100 cm from the near loudspeaker.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The toolkit recreates the trajectory in generated audio while preserving apparatus provenance."
+      },
+      "stimulus_speed": {
+        "status": "not_applicable",
+        "value": "No metric speed is reported; apparent motion is defined by 3000 ms duration, gain direction, and T1-T5 delays.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The profile uses timing/delay parameters rather than a speed claim."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two trajectory directions: IN and OUT.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "Both directions are represented in the runnable profile."
       }
     },
     "segment_2_sequence_and_intermixing": {
@@ -120,6 +158,27 @@
         "source_file": "https://www.nature.com/articles/srep02844.pdf",
         "page_or_section": "PDF p.7, Methods",
         "evidence_note": "The profile preserves a two-block run package."
+      },
+      "iti_jitter_policy": {
+        "status": "not_reported_after_review",
+        "value": "Exact ITI or jitter policy is not reported.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "Routine randomization/ITI behavior is not a blocker for the saved minimal profile."
+      },
+      "response_window": {
+        "status": "reported_with_caveat",
+        "value": "Speeded vocal response to tactile target; voice-key threshold and latency correction are not reported.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The runner validation emulates vocal responses with mouse-click responses after tactile onset."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Respond to tactile targets and withhold responses on auditory-only catches.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The validator enforces response rows for targets and withholds catch responses."
       }
     },
     "segment_3_tactile_soa_baseline": {
@@ -150,6 +209,13 @@
         "source_file": "https://www.nature.com/articles/srep02844.pdf",
         "page_or_section": "PDF p.7, Methods",
         "evidence_note": "Catch trial type is explicit."
+      },
+      "baseline_timing": {
+        "status": "not_applicable",
+        "value": "No tactile-only baseline timing is reported because this task reports target and auditory-only catch rows only.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The profile sets baseline rows to zero."
       }
     },
     "segment_4_counts": {
@@ -180,6 +246,13 @@
         "source_file": "https://www.nature.com/articles/srep02844.pdf",
         "page_or_section": "PDF p.7, Methods",
         "evidence_note": "The source inconsistency is preserved in the template and validator report."
+      },
+      "baseline_count": {
+        "status": "reported_absent",
+        "value": "0",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "No tactile-only baseline rows are reported for Experiments 2/3."
       }
     }
   },

@@ -10,10 +10,11 @@
   "pdf_not_applicable_record_count": 4,
   "pdf_status_counts": {
     "downloaded": 26,
-    "needs_user_download": 13,
+    "needs_user_download": 12,
     "not_applicable": 4,
     "open_access_unavailable": 14,
-    "paywalled": 18
+    "paywalled": 18,
+    "public_pdf_reviewed": 1
   },
   "supplement_status_counts": {
     "downloaded": 10,
@@ -28,8 +29,9 @@
     "pending_pdf": 45
   },
   "metadata_confidence_label_counts": {
+    "high_confidence_extraction": 1,
     "not_applicable": 4,
-    "partial_extraction": 27,
+    "partial_extraction": 26,
     "pending_source": 13,
     "publisher_html_methods_review": 1,
     "source_unavailable": 30

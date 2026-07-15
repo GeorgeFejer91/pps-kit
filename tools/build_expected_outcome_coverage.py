@@ -451,7 +451,7 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
         "condition_contrast": "synchronous versus asynchronous tactile-hand and far-auditory stimulation training",
         "source_basis": [
             "assets/preloads/audiotactile_literature_coverage.json#serino_2015_toolless_sync_training",
-            "Consensus MCP 2026-07-15 query: 10.1371/journal.pone.0006582 Serino 2009 TMS peripersonal space audio tactile",
+            "Frontiers publisher HTML 2026-07-15 review: 10.3389/fnbeh.2015.00004",
         ],
     },
     "social_perception_2017": {

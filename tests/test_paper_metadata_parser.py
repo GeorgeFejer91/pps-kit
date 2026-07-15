@@ -46,9 +46,9 @@ def test_paper_audit_package_summarizes_core_pipeline_without_source_artifacts()
 
     assert summary["schema"] == "pps-paper-audit-profile-candidate-summary.v1"
     assert summary["record_count"] == 75
-    assert summary["category_counts"]["covered_runnable_profile"] == 12
-    assert len(summary["runnable_profile_records"]) == 12
-    assert len(summary["missing_parameter_records"]) == 59
+    assert summary["category_counts"]["covered_runnable_profile"] == 17
+    assert len(summary["runnable_profile_records"]) == 17
+    assert len(summary["missing_parameter_records"]) == 54
     assert len(summary["toolkit_structure_gap_records"]) == 0
     assert len(summary["adjacent_out_of_scope_records"]) == 4
     assert blockers
@@ -257,6 +257,13 @@ def test_pdf_retrieval_inventory_tracks_every_publication_pdf():
             assert row["pdf_status"] == "not_applicable"
             assert row["manual_download_target"] == ""
             assert row["manual_download_priority"] == "not_applicable"
+        elif row["pdf_status"] == "public_pdf_reviewed":
+            assert row["pdf_retrieved"] == "no"
+            assert row["pdf_file"].startswith("https://")
+            assert row["manual_download_target"] == (
+                f"artifacts/paper_metadata_audit/publication_pdfs/{row['record_id']}.pdf"
+            )
+            assert row["manual_download_priority"] == "public_pdf_manual_review"
         else:
             assert row["pdf_retrieved"] == "no"
             assert row["pdf_status"] in {"needs_user_download", "bad_pdf", "open_access_unavailable", "paywalled"}
@@ -411,7 +418,7 @@ def test_missing_pdf_request_list_tracks_main_pdfs_and_supplements():
     for record_id in in_scope_ids:
         requested_items = by_record.get(record_id, set())
         record = records[record_id]
-        if record["pdf_status"] != "downloaded":
+        if record["pdf_status"] not in {"downloaded", "public_pdf_reviewed"}:
             assert "publication_pdf" in requested_items
         if record["supplement_status"] not in {"downloaded", "not_found"}:
             assert "supplement_or_methods_files" in requested_items

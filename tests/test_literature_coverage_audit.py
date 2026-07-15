@@ -34,8 +34,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 16,
-        "covered_blocked_missing_publication_parameters": 7,
+        "covered_runnable_profile": 17,
+        "covered_blocked_missing_publication_parameters": 6,
         "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 0,
         "not_yet_templated_missing_publication_parameters": 48,
@@ -45,8 +45,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 30
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
-    ) == 23
-    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 21
+    ) == 24
+    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 22
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
     assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 0
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
@@ -274,6 +274,16 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         )
         for source in coverage["evidence_sources"]
     )
+    assert any(
+        source.get("id") == "serino_2015_toolless_known_parameter_validation_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/"
+            "serino_2015_toolless_known_parameter_validation_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
 
     status_ids = {profile["template_id"] for profile in status["profiles"]}
     coverage_ids = {entry["template_id"] for entry in coverage["current_template_coverage"]}
@@ -292,12 +302,16 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "current_recreation_category": "gui_recreatable",
         "primary_constraint_ids": [],
     }
-    assert by_template["serino_2015_toolless_sync_training"] == {
-        "template_id": "serino_2015_toolless_sync_training",
-        "published": True,
-        "current_recreation_category": "missing_publication_parameters",
-        "primary_constraint_ids": [],
-    }
+    serino_toolless = by_template["serino_2015_toolless_sync_training"]
+    assert serino_toolless["template_id"] == "serino_2015_toolless_sync_training"
+    assert serino_toolless["published"] is True
+    assert serino_toolless["current_recreation_category"] == "gui_recreatable"
+    assert serino_toolless["primary_constraint_ids"] == []
+    assert serino_toolless["known_parameter_validation_report"] == (
+        "artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/"
+        "serino_2015_toolless_known_parameter_validation_report.json"
+    )
+    assert "Frontiers publisher-source review on 2026-07-15" in serino_toolless["source_notes"]
     assert by_template["tonelli_2019_echolocation"] == {
         "template_id": "tonelli_2019_echolocation",
         "published": True,
@@ -371,7 +385,7 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for entry in coverage["current_template_coverage"]
         if entry["published"] and entry["current_recreation_category"] == "gui_recreatable"
     ]
-    assert len(published_ready) == 21
+    assert len(published_ready) == 22
 
 
 def test_literature_coverage_constraints_focus_on_task_execution():
@@ -835,7 +849,14 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "artifacts/validation_runs/current_goal_serino_2007_known_parameter_20260715/"
         "serino_2007_known_parameter_validation_report.json"
     )
+    assert records["serino_2015_toolless_sync_training"]["coverage_category"] == "covered_runnable_profile"
+    assert records["serino_2015_toolless_sync_training"]["can_recreate_audiotactile_components_now"] is True
     assert records["serino_2015_toolless_sync_training"]["blocking_constraint_ids"] == []
+    assert records["serino_2015_toolless_sync_training"]["missing_publication_parameters"] == []
+    assert records["serino_2015_toolless_sync_training"]["known_parameter_validation_report"] == (
+        "artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/"
+        "serino_2015_toolless_known_parameter_validation_report.json"
+    )
     assert records["canzoneri_2013_amputation_prosthesis"]["coverage_category"] == "covered_runnable_profile"
     assert records["canzoneri_2013_amputation_prosthesis"]["can_recreate_audiotactile_components_now"] is True
     assert records["canzoneri_2013_amputation_prosthesis"]["blocking_constraint_ids"] == []

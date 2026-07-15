@@ -236,13 +236,19 @@
       "kind": "validation_protocol",
       "local_summary_file": "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/canzoneri_2013_amputation_known_parameter_validation_report.json",
       "relevance": "Paper-specific source-to-runner validation for Canzoneri et al. 2013 amputation/prosthesis PPS: open-access Scientific Reports/PDF parameters, Segments 0-6 GUI materialization, generated block WAVs, software wired-loopback sidecars, and mouse-click simulated responses to upper-arm tactile target rows with catch withholds. This is software evidence, not collected amputee/prosthesis behavior, physical loopback, or a scientific PPS-effect replication claim."
+    },
+    {
+      "id": "serino_2015_toolless_known_parameter_validation_2026_07_15",
+      "kind": "validation_protocol",
+      "local_summary_file": "artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/serino_2015_toolless_known_parameter_validation_report.json",
+      "relevance": "Paper-specific source-to-runner validation for Serino/Canzoneri 2015 toolless synchronous/asynchronous training PPS: Frontiers publisher-source parameters, Segments 0-6 GUI materialization, generated block WAV, software wired-loopback sidecar, and mouse-click simulated responses to right-hand tactile target rows with catch withholds. This is software evidence, not collected participant behavior, physical loopback, training intervention execution, or a scientific PPS-effect replication claim."
     }
   ],
   "coverage_summary": {
     "literature_record_count": 75,
     "literature_record_category_counts": {
-      "covered_runnable_profile": 16,
-      "covered_blocked_missing_publication_parameters": 7,
+      "covered_runnable_profile": 17,
+      "covered_blocked_missing_publication_parameters": 6,
       "covered_blocked_toolkit_structure": 0,
       "not_yet_templated_requires_toolkit_structure": 0,
       "not_yet_templated_missing_publication_parameters": 48,
@@ -250,10 +256,10 @@
       "adjacent_out_of_scope": 4
     },
     "current_template_count": 30,
-    "current_profile_check_pass_count": 23,
-    "published_profile_check_pass_count": 21,
+    "current_profile_check_pass_count": 24,
+    "published_profile_check_pass_count": 22,
     "local_unpublished_profile_check_pass_count": 2,
-    "current_templates_with_missing_publication_parameters": 7,
+    "current_templates_with_missing_publication_parameters": 6,
     "current_templates_with_toolkit_structural_gaps": 0,
     "holmes_2020_reported_articles": 23,
     "holmes_2020_reported_experiments": 46,
@@ -754,8 +760,10 @@
     {
       "template_id": "serino_2015_toolless_sync_training",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": []
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/serino_2015_toolless_known_parameter_validation_report.json",
+      "source_notes": "Frontiers publisher-source review on 2026-07-15 recovered the measurement-task parameters: 3000 ms IN/OUT pink-noise sounds, near/far hidden loudspeakers, DS7A right-hand electrical tactile target, vocal response capture, T1-T5 delays 300/800/1500/2200/2700 ms, one assessment block, and auditory-only catches. The paper prints a 77% tactile-target rate rather than an exact catch count, so the runnable profile preserves the inherited 80-target Canzoneri-family measurement structure plus 24 catches. The validator materializes Segments 0-6 and runs 104 trials with mouse-click simulated right-hand tactile responses while preserving training-intervention execution, exact gain files, current calibration, and voice-key latency as caveats."
     },
     {
       "template_id": "taffou_2014_cynophobic_rear_looming",
@@ -1360,18 +1368,24 @@
       "citation_short": "Serino/Canzoneri 2015 toolless sync training",
       "doi": "10.3389/fnbeh.2015.00004",
       "source_basis": [
-        "holmes_2020_systematic_review"
+        "holmes_2020_systematic_review",
+        "frontiers_publisher_html_review_2026_07_15",
+        "serino_2015_toolless_known_parameter_validation_2026_07_15"
       ],
       "current_template_ids": [
         "serino_2015_toolless_sync_training"
       ],
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "bimodal IN/OUT target trials plus auditory-only catch trials",
-      "can_recreate_audiotactile_components_now": false,
+      "can_recreate_audiotactile_components_now": true,
       "blocking_constraint_ids": [],
-      "missing_publication_parameters": [
-        "electrocutaneous tactile calibration source values; row-level voice-key and electrical tactile metadata are now runner-supported"
-      ]
+      "missing_publication_parameters": [],
+      "recreation_caveats": [
+        "exact original pink-noise/gain files are not available",
+        "participant-level DS7A current calibration and voice-key threshold/latency are represented as provenance and emulated by mouse-click response proxies",
+        "the training intervention schedule is retained as context; the runnable profile validates the one-block PPS measurement task"
+      ],
+      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/serino_2015_toolless_known_parameter_validation_report.json"
     },
     {
       "record_id": "ardizzi_ferri_2018_interoceptive",
