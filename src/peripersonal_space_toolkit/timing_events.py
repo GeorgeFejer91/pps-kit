@@ -1243,7 +1243,7 @@ def _marker_modality(trial_type: str, family: str) -> str:
         return "audiotactile"
     if "baseline" in text or ("tactile" in text and "audio" not in text):
         return "tactile"
-    if "audio" in text or "catch" in text:
+    if "audio" in text or "auditory" in text or "catch" in text:
         return "audio"
     return ""
 

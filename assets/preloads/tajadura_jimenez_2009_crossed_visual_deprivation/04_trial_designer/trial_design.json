@@ -1,0 +1,140 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "tajadura_jimenez_2009_crossed_visual_deprivation",
+  "repetitions_per_condition": 50,
+  "soa_values_ms": [
+    0
+  ],
+  "spatial_values_cm": [
+    39.1
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "collignon-2009-crossed-left",
+      "label": "Crossed external left",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        0
+      ],
+      "spatial_values_cm": [
+        39.1
+      ],
+      "metadata": {
+        "expected_response": "respond",
+        "response_rule": "choose_external_stimulus_side",
+        "target_role": "left_lateralization_target",
+        "response_mode": "mouse_click_choice_proxy_for_left_right_keypress",
+        "response_choice_set": "left,right",
+        "correct_response": "left",
+        "response_scoring_policy": "external_side_choice_150_to_1000_ms_analysis_window",
+        "response_capture_device": "keyboard",
+        "response_input_modality": "left_right_keypress_mouse_click_proxy",
+        "spatial_coordinate_frame": "external_room_midline",
+        "body_anchor": "hands",
+        "body_part": "right middle finger crossed into left hemispace",
+        "body_side": "right",
+        "posture": "crossed hands",
+        "spatial_hemifield": "external_left",
+        "body_relative_axis": "left_right",
+        "auditory_trajectory_family": "static_left_right",
+        "auditory_trajectory_direction": "stationary_left",
+        "trajectory_start_distance_cm": 39.1,
+        "trajectory_end_distance_cm": 39.1,
+        "trajectory_start_azimuth_deg": -40.0,
+        "trajectory_end_azimuth_deg": -40.0,
+        "source_asset_equivalence": "procedural pink-noise proxy for unshared Adobe Audition 2.0 burst",
+        "renderer_equivalence_boundary": "binaural static speaker proxy for Gigaworks T20 beside left hand position",
+        "speaker_array_layout": "two speakers beside left/right hand positions",
+        "speaker_source_channel": "left",
+        "iti_policy": "reported_mean_1950ms_range_1200_to_2700ms_distribution_unreported",
+        "iti_ms": "1950",
+        "tactile_stimulation_modality": "electrical",
+        "tactile_waveform_shape": "biphasic_square_pulse_train",
+        "tactile_frequency_hz": "40",
+        "tactile_pulse_duration_ms": "1",
+        "tactile_duration_ms": "100",
+        "electrical_electrode_site": "right middle finger ring electrodes crossed into left hemispace"
+      },
+      "elements": [
+        {
+          "element_id": "collignon-2009-crossed-left-speaker",
+          "kind": "looming_stimulus",
+          "label": "Left speaker sound",
+          "source_label": "Left speaker pink-noise burst",
+          "source_labels": [
+            "Left speaker pink-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    },
+    {
+      "strip_id": "collignon-2009-crossed-right",
+      "label": "Crossed external right",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        0
+      ],
+      "spatial_values_cm": [
+        39.1
+      ],
+      "metadata": {
+        "expected_response": "respond",
+        "response_rule": "choose_external_stimulus_side",
+        "target_role": "right_lateralization_target",
+        "response_mode": "mouse_click_choice_proxy_for_left_right_keypress",
+        "response_choice_set": "left,right",
+        "correct_response": "right",
+        "response_scoring_policy": "external_side_choice_150_to_1000_ms_analysis_window",
+        "response_capture_device": "keyboard",
+        "response_input_modality": "left_right_keypress_mouse_click_proxy",
+        "spatial_coordinate_frame": "external_room_midline",
+        "body_anchor": "hands",
+        "body_part": "left middle finger crossed into right hemispace",
+        "body_side": "left",
+        "posture": "crossed hands",
+        "spatial_hemifield": "external_right",
+        "body_relative_axis": "left_right",
+        "auditory_trajectory_family": "static_left_right",
+        "auditory_trajectory_direction": "stationary_right",
+        "trajectory_start_distance_cm": 39.1,
+        "trajectory_end_distance_cm": 39.1,
+        "trajectory_start_azimuth_deg": 40.0,
+        "trajectory_end_azimuth_deg": 40.0,
+        "source_asset_equivalence": "procedural pink-noise proxy for unshared Adobe Audition 2.0 burst",
+        "renderer_equivalence_boundary": "binaural static speaker proxy for Gigaworks T20 beside right hand position",
+        "speaker_array_layout": "two speakers beside left/right hand positions",
+        "speaker_source_channel": "right",
+        "iti_policy": "reported_mean_1950ms_range_1200_to_2700ms_distribution_unreported",
+        "iti_ms": "1950",
+        "tactile_stimulation_modality": "electrical",
+        "tactile_waveform_shape": "biphasic_square_pulse_train",
+        "tactile_frequency_hz": "40",
+        "tactile_pulse_duration_ms": "1",
+        "tactile_duration_ms": "100",
+        "electrical_electrode_site": "left middle finger ring electrodes crossed into right hemispace"
+      },
+      "elements": [
+        {
+          "element_id": "collignon-2009-crossed-right-speaker",
+          "kind": "looming_stimulus",
+          "label": "Right speaker sound",
+          "source_label": "Right speaker pink-noise burst",
+          "source_labels": [
+            "Right speaker pink-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 300
+}

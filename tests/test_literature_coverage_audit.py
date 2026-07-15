@@ -34,19 +34,19 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 12,
+        "covered_runnable_profile": 13,
         "covered_blocked_missing_publication_parameters": 9,
         "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 0,
-        "not_yet_templated_missing_publication_parameters": 50,
+        "not_yet_templated_missing_publication_parameters": 49,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
-    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 25
+    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 27
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
-    ) == 16
-    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 14
+    ) == 18
+    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 16
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
     assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 0
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
@@ -332,7 +332,7 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for entry in coverage["current_template_coverage"]
         if entry["published"] and entry["current_recreation_category"] == "gui_recreatable"
     ]
-    assert len(published_ready) == 14
+    assert len(published_ready) == 16
 
 
 def test_literature_coverage_constraints_focus_on_task_execution():
@@ -595,10 +595,17 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "not_yet_templated_missing_publication_parameters"
     )
     assert records["kitagawa_2005_sound_complexity"]["blocking_constraint_ids"] == []
-    assert records["tajadura_jimenez_2009_visual_deprivation"]["coverage_category"] == (
-        "not_yet_templated_missing_publication_parameters"
-    )
+    assert records["tajadura_jimenez_2009_visual_deprivation"]["coverage_category"] == "covered_runnable_profile"
+    assert records["tajadura_jimenez_2009_visual_deprivation"]["current_template_ids"] == [
+        "tajadura_jimenez_2009_uncrossed_visual_deprivation",
+        "tajadura_jimenez_2009_crossed_visual_deprivation",
+    ]
+    assert records["tajadura_jimenez_2009_visual_deprivation"]["can_recreate_audiotactile_components_now"] is True
     assert records["tajadura_jimenez_2009_visual_deprivation"]["blocking_constraint_ids"] == []
+    assert records["tajadura_jimenez_2009_visual_deprivation"]["known_parameter_validation_report"] == (
+        "artifacts/validation_runs/current_goal_tajadura_2009_known_parameter_20260715/"
+        "tajadura_2009_known_parameter_validation_report.json"
+    )
     assert records["teramoto_2013_visual_deprivation"]["coverage_category"] == (
         "not_yet_templated_missing_publication_parameters"
     )

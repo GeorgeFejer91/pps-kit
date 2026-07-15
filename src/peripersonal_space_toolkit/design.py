@@ -25,7 +25,8 @@ SUPPORTED_STIMULUS_MOTION_MODES = ("looming", "stationary")
 SUPPORTED_TRIAL_STRIP_ELEMENT_TYPES = ("fixed_audio", "looming_stimulus", "jitter")
 SUPPORTED_DIRECTIONS = ("approach", "recede", "left_to_right", "right_to_left", "custom")
 SUPPORTED_COORDINATE_MODES = ("polar", "cartesian")
-SUPPORTED_TRIAL_TYPES = ("Audio-Tactile", "Baseline", "Catch")
+SUPPORTED_TRIAL_TYPES = ("Audio-Tactile", "Baseline", "Catch", "Auditory-Only")
+DEFAULT_BLOCK_STIMULUS_TYPES = ("Audio-Tactile", "Baseline", "Catch")
 SUPPORTED_BASELINE_STRATEGIES = (
     "none",
     "min_anchor",
@@ -138,7 +139,7 @@ class NoiseDefinition:
 @dataclass
 class BlockSpec:
     label: str
-    stimulus_types: list[str] = field(default_factory=lambda: ["Audio-Tactile", "Baseline", "Catch"])
+    stimulus_types: list[str] = field(default_factory=lambda: list(DEFAULT_BLOCK_STIMULUS_TYPES))
 
 
 @dataclass
@@ -211,6 +212,10 @@ class ProtocolSpec:
     catch_trial_percentage: float = 10.0
     catch_trials_exact: int | None = None
     catch_crosses_sequence_variants: bool = True
+    include_auditory_only_trials: bool = False
+    auditory_only_trial_percentage: float = 0.0
+    auditory_only_trials_exact: int | None = None
+    auditory_only_crosses_sequence_variants: bool = True
     include_baseline_trials: bool = True
     baseline_strategy: str = "tactile_only"
     baseline_trials_exact: int | None = None
@@ -397,6 +402,11 @@ def design_from_dict(data: dict[str, Any]) -> StimulusDesign:
         protocol_data["include_catch_trials"] = bool(
             float(protocol_data.get("catch_trial_percentage") or 0.0) > 0.0
             or protocol_data.get("catch_trials_exact") not in (None, 0, "")
+        )
+    if "include_auditory_only_trials" not in protocol_data:
+        protocol_data["include_auditory_only_trials"] = bool(
+            float(protocol_data.get("auditory_only_trial_percentage") or 0.0) > 0.0
+            or protocol_data.get("auditory_only_trials_exact") not in (None, 0, "")
         )
     protocol = ProtocolSpec(**protocol_data)
     return normalize_generated_looming_source_profiles(
@@ -730,6 +740,10 @@ def validate_design(design: StimulusDesign) -> list[str]:
         warnings.append("Catch-trial percentage must be between 0 and 99.9.")
     if p.catch_trials_exact is not None and p.catch_trials_exact < 0:
         warnings.append("Exact catch-trial count cannot be negative.")
+    if not 0 <= p.auditory_only_trial_percentage < 100:
+        warnings.append("Auditory-only trial percentage must be between 0 and 99.9.")
+    if p.auditory_only_trials_exact is not None and p.auditory_only_trials_exact < 0:
+        warnings.append("Exact auditory-only trial count cannot be negative.")
     if p.baseline_trials_exact is not None and p.baseline_trials_exact < 0:
         warnings.append("Exact baseline-trial count cannot be negative.")
     if p.baseline_strategy not in SUPPORTED_BASELINE_STRATEGIES:
@@ -836,6 +850,10 @@ def validate_design(design: StimulusDesign) -> list[str]:
         required_types.add("Catch")
     elif p.catch_trial_percentage > 0 or row_catch_required:
         required_types.add("Catch")
+    if p.auditory_only_trials_exact is not None and p.auditory_only_trials_exact > 0:
+        required_types.add("Auditory-Only")
+    elif p.include_auditory_only_trials and p.auditory_only_trial_percentage >= 0:
+        required_types.add("Auditory-Only")
     if row_baseline_required or row_legacy_baseline_required or protocol_legacy_baseline_required:
         required_types.add("Baseline")
     available_types = {stimulus_type for block in block_specs for stimulus_type in block.stimulus_types}
@@ -856,8 +874,11 @@ def effective_block_specs(protocol: ProtocolSpec) -> list[BlockSpec]:
             )
             for block in protocol.block_specs
         ]
+    stimulus_types = list(DEFAULT_BLOCK_STIMULUS_TYPES)
+    if protocol.include_auditory_only_trials and "Auditory-Only" not in stimulus_types:
+        stimulus_types.append("Auditory-Only")
     return [
-        BlockSpec(label=f"Block {idx + 1}", stimulus_types=["Audio-Tactile", "Baseline", "Catch"])
+        BlockSpec(label=f"Block {idx + 1}", stimulus_types=list(stimulus_types))
         for idx in range(max(1, protocol.blocks))
     ]
 
@@ -1479,6 +1500,28 @@ def _filmstrip_catch_rows(rows: list[dict[str, Any]], protocol: ProtocolSpec, ca
     return catches
 
 
+def _filmstrip_auditory_only_rows(
+    rows: list[dict[str, Any]],
+    protocol: ProtocolSpec,
+    auditory_only_count: int,
+) -> list[dict[str, Any]]:
+    if not rows or auditory_only_count <= 0:
+        return []
+    template_rows = rows if protocol.auditory_only_crosses_sequence_variants else rows[:1]
+    auditory_rows: list[dict[str, Any]] = []
+    for index in range(auditory_only_count):
+        template = dict(template_rows[index % len(template_rows)])
+        template["trial_type"] = "Auditory-Only"
+        template["repetition"] = ""
+        template["tactile_enabled"] = False
+        template["expected_response"] = template.get("expected_response") or "respond"
+        template["target_role"] = template.get("target_role") or "auditory_target"
+        template["response_rule"] = template.get("response_rule") or "respond_to_auditory_target"
+        template["trial_unit_key"] = _slug(f"{template.get('trial_unit_key', 'auditory')}_auditory_only_{index + 1}")
+        auditory_rows.append(template)
+    return auditory_rows
+
+
 def _with_filmstrip_catches(
     rows: list[dict[str, Any]],
     protocol: ProtocolSpec,
@@ -1496,6 +1539,23 @@ def _with_filmstrip_catches(
     if not rows or catch_count <= 0:
         return rows
     return [*rows, *_filmstrip_catch_rows(rows, protocol, catch_count)]
+
+
+def _with_filmstrip_auditory_only(
+    rows: list[dict[str, Any]],
+    protocol: ProtocolSpec,
+) -> list[dict[str, Any]]:
+    if not protocol.include_auditory_only_trials:
+        return rows
+    if protocol.auditory_only_trials_exact is not None:
+        auditory_only_count = protocol.auditory_only_trials_exact
+    elif protocol.auditory_only_trial_percentage > 0:
+        auditory_only_count = int(math.ceil(len(rows) * protocol.auditory_only_trial_percentage / (100.0 - protocol.auditory_only_trial_percentage)))
+    else:
+        auditory_only_count = len(rows)
+    if not rows or auditory_only_count <= 0:
+        return rows
+    return [*rows, *_filmstrip_auditory_only_rows(rows, protocol, auditory_only_count)]
 
 
 def _row_baseline_target_count(
@@ -1523,14 +1583,24 @@ def _filmstrip_rows_for_stimulus_types(
     rows_by_strip: list[tuple[int, list[dict[str, Any]]]] = []
     baseline_candidates: list[dict[str, Any]] = []
     exact_catch_candidates: list[dict[str, Any]] = []
+    exact_auditory_only_candidates: list[dict[str, Any]] = []
     legacy_baseline_audio_count = 0
     for strip_index, strip in enumerate(strips, start=1):
         audio_rows = (
             _filmstrip_condition_rows_for_strip(design, strip, strip_index)
-            if "Audio-Tactile" in stimulus_types or "Catch" in stimulus_types
+            if any(trial_type in stimulus_types for trial_type in ("Audio-Tactile", "Catch", "Auditory-Only"))
             else []
         )
         rows = list(audio_rows) if "Audio-Tactile" in stimulus_types else []
+        if "Auditory-Only" in stimulus_types and protocol.include_auditory_only_trials:
+            if protocol.auditory_only_trials_exact is None:
+                rows.extend(
+                    row
+                    for row in _with_filmstrip_auditory_only(audio_rows, protocol)
+                    if row.get("trial_type") == "Auditory-Only"
+                )
+            else:
+                exact_auditory_only_candidates.extend(audio_rows)
         if "Catch" in stimulus_types:
             if _strip_has_explicit_mix(strip) or protocol.catch_trials_exact is None:
                 rows.extend(
@@ -1567,9 +1637,17 @@ def _filmstrip_rows_for_stimulus_types(
         protocol,
         int(protocol.catch_trials_exact or 0) if protocol.catch_trials_exact is not None else 0,
     )
+    exact_auditory_only = _filmstrip_auditory_only_rows(
+        exact_auditory_only_candidates,
+        protocol,
+        int(protocol.auditory_only_trials_exact or 0) if protocol.auditory_only_trials_exact is not None else 0,
+    )
     catches_by_strip: dict[int, list[dict[str, Any]]] = {}
     for row in exact_catches:
         catches_by_strip.setdefault(int(row.get("trial_strip_index") or 0), []).append(row)
+    auditory_only_by_strip: dict[int, list[dict[str, Any]]] = {}
+    for row in exact_auditory_only:
+        auditory_only_by_strip.setdefault(int(row.get("trial_strip_index") or 0), []).append(row)
     baselines_by_strip: dict[int, list[dict[str, Any]]] = {}
     for row in selected_baselines:
         baselines_by_strip.setdefault(int(row.get("trial_strip_index") or 0), []).append(row)
@@ -1577,6 +1655,7 @@ def _filmstrip_rows_for_stimulus_types(
     for strip_index, rows in rows_by_strip:
         combined.extend(rows)
         combined.extend(catches_by_strip.get(strip_index, []))
+        combined.extend(auditory_only_by_strip.get(strip_index, []))
         combined.extend(baselines_by_strip.get(strip_index, []))
     return combined
 
@@ -1588,7 +1667,7 @@ def _filmstrip_distributed_block_trial_rows(design: StimulusDesign) -> list[dict
         trial_type
         for block in blocks
         for trial_type in block.stimulus_types
-        if trial_type in {"Audio-Tactile", "Baseline", "Catch"}
+        if trial_type in set(SUPPORTED_TRIAL_TYPES)
     }
     pool_rows = _filmstrip_rows_for_stimulus_types(design, available_types)
     block_rows: dict[str, list[dict[str, Any]]] = {block.label: [] for block in blocks}
@@ -1640,19 +1719,29 @@ def _filmstrip_block_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
     scheduled: list[dict[str, Any]] = []
     strips = [strip for strip in protocol.trial_strips if strip.elements]
     for block_index, block in enumerate(effective_block_specs(protocol), start=1):
-        if not any(trial_type in block.stimulus_types for trial_type in ("Audio-Tactile", "Baseline", "Catch")):
+        if not any(trial_type in block.stimulus_types for trial_type in SUPPORTED_TRIAL_TYPES):
             continue
         strip_payloads: list[tuple[int, list[dict[str, Any]]]] = []
         baseline_candidates: list[dict[str, Any]] = []
         exact_catch_candidates: list[dict[str, Any]] = []
+        exact_auditory_only_candidates: list[dict[str, Any]] = []
         legacy_baseline_audio_count = 0
         for strip_index, strip in enumerate(strips, start=1):
             audio_rows = (
                 _filmstrip_condition_rows_for_strip(design, strip, strip_index)
-                if "Audio-Tactile" in block.stimulus_types or "Catch" in block.stimulus_types
+                if any(trial_type in block.stimulus_types for trial_type in ("Audio-Tactile", "Catch", "Auditory-Only"))
                 else []
             )
             rows = list(audio_rows) if "Audio-Tactile" in block.stimulus_types else []
+            if "Auditory-Only" in block.stimulus_types and protocol.include_auditory_only_trials:
+                if protocol.auditory_only_trials_exact is None:
+                    rows.extend(
+                        row
+                        for row in _with_filmstrip_auditory_only(audio_rows, protocol)
+                        if row.get("trial_type") == "Auditory-Only"
+                    )
+                else:
+                    exact_auditory_only_candidates.extend(audio_rows)
             if "Catch" in block.stimulus_types:
                 if _strip_has_explicit_mix(strip) or protocol.catch_trials_exact is None:
                     rows.extend(
@@ -1689,9 +1778,17 @@ def _filmstrip_block_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
             protocol,
             int(protocol.catch_trials_exact or 0) if protocol.catch_trials_exact is not None else 0,
         )
+        exact_auditory_only = _filmstrip_auditory_only_rows(
+            exact_auditory_only_candidates,
+            protocol,
+            int(protocol.auditory_only_trials_exact or 0) if protocol.auditory_only_trials_exact is not None else 0,
+        )
         catches_by_strip: dict[int, list[dict[str, Any]]] = {}
         for row in exact_catches:
             catches_by_strip.setdefault(int(row.get("trial_strip_index") or 0), []).append(row)
+        auditory_only_by_strip: dict[int, list[dict[str, Any]]] = {}
+        for row in exact_auditory_only:
+            auditory_only_by_strip.setdefault(int(row.get("trial_strip_index") or 0), []).append(row)
         baselines_by_strip: dict[int, list[dict[str, Any]]] = {}
         for row in selected_baselines:
             baselines_by_strip.setdefault(int(row.get("trial_strip_index") or 0), []).append(row)
@@ -1699,6 +1796,7 @@ def _filmstrip_block_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
         for strip_index, rows in strip_payloads:
             rows = list(rows)
             rows.extend(catches_by_strip.get(strip_index, []))
+            rows.extend(auditory_only_by_strip.get(strip_index, []))
             rows.extend(baselines_by_strip.get(strip_index, []))
             if not rows:
                 continue
@@ -1754,6 +1852,43 @@ def protocol_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
                                     "elevation_deg": source["elevation_deg"],
                                 }
                             )
+
+    audio_tactile_count = len(rows)
+    if protocol.include_auditory_only_trials:
+        if protocol.auditory_only_trials_exact is not None:
+            auditory_only_count = int(protocol.auditory_only_trials_exact)
+        elif protocol.auditory_only_trial_percentage > 0:
+            auditory_only_count = int(
+                math.ceil(audio_tactile_count * protocol.auditory_only_trial_percentage / (100.0 - protocol.auditory_only_trial_percentage))
+            )
+        else:
+            auditory_only_count = audio_tactile_count
+        noises = sound_sources or [_sound_source_from_noise(NoiseDefinition("Auditory target", "white"))]
+        phases = protocol.respiratory_phases or ["Any"]
+        pairs = factor_pairs or [(0, 0.0)]
+        motion_directions = protocol.auditory_motion_directions or ["looming"]
+        for i in range(max(0, auditory_only_count)):
+            soa_ms, spatial_cm = pairs[i % len(pairs)]
+            noise = noises[i % len(noises)]
+            rows.append(
+                {
+                    "trial_type": "Auditory-Only",
+                    "repetition": "",
+                    "tactile_site": "",
+                    "motion_direction": motion_directions[i % len(motion_directions)],
+                    "phase": phases[i % len(phases)],
+                    "soa_ms": soa_ms,
+                    "spatial_value_cm": spatial_cm,
+                    "noise_label": noise["label"],
+                    "noise_type": noise["noise_type"],
+                    "azimuth_deg": noise["azimuth_deg"],
+                    "elevation_deg": noise["elevation_deg"],
+                    "tactile_enabled": False,
+                    "expected_response": "respond",
+                    "target_role": "auditory_target",
+                    "response_rule": "respond_to_auditory_target",
+                }
+            )
 
     if protocol.include_baseline_trials:
         baseline_pairs = baseline_factor_pairs(protocol, design.trajectory)
@@ -2056,6 +2191,7 @@ def protocol_summary(design: StimulusDesign) -> dict[str, Any]:
     audio_tactile = sum(1 for row in rows if row["trial_type"] == "Audio-Tactile")
     baseline = sum(1 for row in rows if row["trial_type"] == "Baseline")
     catch = sum(1 for row in rows if row["trial_type"] == "Catch")
+    auditory_only = sum(1 for row in rows if row["trial_type"] == "Auditory-Only")
     total = len(rows)
     blocks = max(1, len(effective_block_specs(design.protocol)))
     block_counts: dict[str, int] = {}
@@ -2067,6 +2203,7 @@ def protocol_summary(design: StimulusDesign) -> dict[str, Any]:
         "audio_tactile_trials": audio_tactile,
         "baseline_trials": baseline,
         "catch_trials": catch,
+        "auditory_only_trials": auditory_only,
         "total_trials": total,
         "blocks": blocks,
         "trials_per_block": max(block_counts.values(), default=int(math.ceil(total / blocks))),

@@ -1321,7 +1321,7 @@ def build_record(
     observed_profile_contrast_evidence = _observed_profile_contrast_evidence(observed_status)
     if observed_profile_contrast_evidence:
         result["observed_profile_contrast_evidence"] = observed_profile_contrast_evidence
-    observed_mouse_click_evidence = _observed_mouse_click_evidence(observed_status)
+    observed_mouse_click_evidence = _observed_mouse_click_evidence(observed_status, record)
     if observed_mouse_click_evidence:
         result["observed_mouse_click_participant_like_evidence"] = observed_mouse_click_evidence
     return result
@@ -1439,7 +1439,7 @@ def _observed_boundary(observed_status: str) -> str:
     if observed_status == "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved":
         return (
             "The ready-profile mouse-click expected-outcome audit runs deterministic participant-like "
-            "mouse clicks through SessionRunnerController after tactile onsets and compares the "
+            "mouse clicks through SessionRunnerController after response windows and compares the "
             "runner-produced analysis RTs with the paper's structured expected effect. This proves "
             "runner-level software comparison behavior only; it does not prove human behavioral PPS "
             "effects or exact original apparatus equivalence."
@@ -1479,17 +1479,27 @@ def _observed_profile_contrast_evidence(observed_status: str) -> dict[str, str]:
     }
 
 
-def _observed_mouse_click_evidence(observed_status: str) -> dict[str, str]:
+def _observed_mouse_click_evidence(observed_status: str, record: dict[str, Any]) -> dict[str, str]:
     if observed_status != "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved":
         return {}
-    return {
-        "status": "mouse_click_simulated_participant_like_comparison_available",
-        "source_report": READY_PROFILE_MOUSE_CLICK_COMPARISON_REPORT,
-        "model_boundary": (
+    source_report = str(record.get("known_parameter_validation_report") or "").strip()
+    if not source_report:
+        source_report = READY_PROFILE_MOUSE_CLICK_COMPARISON_REPORT
+        model_boundary = (
             "Deterministic participant-like mouse clicks were injected through SessionRunnerController "
             "after tactile onsets and evaluated from runner-produced analysis rows; not collected "
             "participant data, not physical loopback evidence, and not a scientific replication claim."
-        ),
+        )
+    else:
+        model_boundary = (
+            "Paper-specific deterministic participant-like mouse clicks were injected through "
+            "SessionRunnerController and evaluated from runner-produced analysis rows; not collected "
+            "participant data, not physical loopback evidence, and not a scientific replication claim."
+        )
+    return {
+        "status": "mouse_click_simulated_participant_like_comparison_available",
+        "source_report": source_report,
+        "model_boundary": model_boundary,
     }
 
 

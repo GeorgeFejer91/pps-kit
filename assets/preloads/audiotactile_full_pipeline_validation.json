@@ -551,13 +551,16 @@
     {
       "audiotactile_task_family": "auditory, tactile, and audiotactile lateralization with crossed/uncrossed posture",
       "blocking_constraint_ids": [],
-      "citation_short": "Tajadura-Jimenez et al. (2009)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "citation_short": "Collignon et al. (2009) [legacy ID Tajadura-Jimenez]",
+      "coverage_category": "covered_runnable_profile",
+      "current_template_ids": [
+        "tajadura_jimenez_2009_uncrossed_visual_deprivation",
+        "tajadura_jimenez_2009_crossed_visual_deprivation"
+      ],
       "doi": "10.1016/j.neuropsychologia.2009.07.025",
       "expected_effect_direction": "spatially_congruent_audio_tactile_trials_show_posture_dependent_facilitation",
       "expected_outcome_status": "structured_expected_outcome_extracted",
-      "full_emulated_pipeline_validated": false,
+      "full_emulated_pipeline_validated": true,
       "gates": {
         "expected_outcome_extraction": {
           "evidence": "Structured expected effect direction is available.",
@@ -570,26 +573,30 @@
           "status": "structured_expected_outcome_extracted"
         },
         "observed_emulated_expected_match": {
-          "evidence": "No observed emulated comparison exists for this record.",
-          "evidence_boundary": "",
-          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-          "passed": false,
-          "source_report": "",
-          "status": "no_observed_emulated_comparison"
+          "evidence": "Runner-produced analysis rows are recorded as matching the extracted expected direction in the mouse-click audit.",
+          "evidence_boundary": "Paper-specific deterministic participant-like mouse clicks were injected through SessionRunnerController and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim.",
+          "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
+          "passed": true,
+          "source_report": "artifacts/validation_runs/current_goal_tajadura_2009_known_parameter_20260715/tajadura_2009_known_parameter_validation_report.json",
+          "status": "emulated_observed_direction_matches_expected"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
-          "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "evidence": "All current template IDs are finished profiles and source parameters are complete.",
+          "passed": true,
+          "profile_completion_statuses": [
+            "finished_segment_6_launchable",
+            "finished_segment_6_launchable"
+          ],
+          "status": "parsimonious_profile_complete",
+          "template_ids": [
+            "tajadura_jimenez_2009_uncrossed_visual_deprivation",
+            "tajadura_jimenez_2009_crossed_visual_deprivation"
+          ]
         },
         "source_parameter_extraction": {
           "blockers": [],
-          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
-          "missing_parameters": [
-            "extract lateralization response mapping, posture/body-coordinate rules, and stimulus timing"
-          ],
+          "evidence": "Literature ledger marks the task as currently recreatable with no blocking constraints or missing publication parameters.",
+          "missing_parameters": [],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
             "extraction_status": "pending_pdf",
@@ -601,30 +608,43 @@
             "pdf_status": "paywalled",
             "supplement_status": "not_found"
           },
-          "passed": false,
-          "status": "source_parameters_missing_or_unresolved"
+          "passed": true,
+          "status": "minimum_source_parameters_captured"
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
-          "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "evidence": "Profile status reports Segment 0-4 checks, Segment 1-6 materialization, and Segment 6 launch readiness.",
+          "passed": true,
+          "profile_readiness": [
+            {
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
+              "template_id": "tajadura_jimenez_2009_uncrossed_visual_deprivation"
+            },
+            {
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
+              "template_id": "tajadura_jimenez_2009_crossed_visual_deprivation"
+            }
+          ],
+          "status": "segment_0_to_6_gui_toolkit_path_ready"
         },
         "wav_generation_and_runner_execution": {
-          "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
-          "passed": false,
-          "runnable_status": "not_yet_templated",
-          "source_report": "",
-          "status": "runner_execution_not_available_for_record"
+          "evidence": "Ready profile was materialized and evaluated through SessionRunnerController with deterministic mouse clicks.",
+          "passed": true,
+          "runnable_status": "runnable_profile_parameters_ready",
+          "source_report": "artifacts/validation_runs/current_goal_tajadura_2009_known_parameter_20260715/tajadura_2009_known_parameter_validation_report.json",
+          "status": "wav_runner_mouse_click_emulation_available"
         }
       },
-      "known_parameter_validation_report": "",
-      "missing_publication_parameters": [
-        "extract lateralization response mapping, posture/body-coordinate rules, and stimulus timing"
-      ],
-      "next_required_action": "Extract or source the missing paper parameters: extract lateralization response mapping, posture/body-coordinate rules, and stimulus timing",
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_tajadura_2009_known_parameter_20260715/tajadura_2009_known_parameter_validation_report.json",
+      "missing_publication_parameters": [],
+      "next_required_action": "Emulated source-to-runner pipeline is available; collect participant and physical timing/loopback evidence before making a scientific replication claim.",
+      "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
         "extraction_status": "pending_pdf",
@@ -636,9 +656,9 @@
         "pdf_status": "paywalled",
         "supplement_status": "not_found"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "full_emulated_source_to_runner_pipeline_validated",
       "record_id": "tajadura_jimenez_2009_visual_deprivation",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "runnable_profile_parameters_ready",
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13",
         "holmes_2020_systematic_review"
@@ -7657,37 +7677,37 @@
   },
   "summary": {
     "adjacent_not_applicable_record_count": 4,
-    "full_emulated_pipeline_validated_record_count": 12,
+    "full_emulated_pipeline_validated_record_count": 13,
     "gate_status_counts": {
       "expected_outcome_extraction": {
         "not_applicable_adjacent_record": 4,
         "structured_expected_outcome_extracted": 71
       },
       "observed_emulated_expected_match": {
-        "emulated_observed_direction_matches_expected": 12,
-        "no_observed_emulated_comparison": 59,
+        "emulated_observed_direction_matches_expected": 13,
+        "no_observed_emulated_comparison": 58,
         "not_applicable_adjacent_record": 4
       },
       "parsimonious_profile_saved": {
         "not_applicable_adjacent_record": 4,
-        "parsimonious_profile_complete": 12,
-        "profile_not_yet_created": 50,
+        "parsimonious_profile_complete": 13,
+        "profile_not_yet_created": 49,
         "profile_scaffold_present_but_incomplete": 9
       },
       "source_parameter_extraction": {
-        "minimum_source_parameters_captured": 12,
+        "minimum_source_parameters_captured": 13,
         "not_applicable_adjacent_record": 4,
-        "source_parameters_missing_or_unresolved": 59
+        "source_parameters_missing_or_unresolved": 58
       },
       "toolkit_gui_implementation": {
-        "blocked_by_missing_profile_parameters": 59,
+        "blocked_by_missing_profile_parameters": 58,
         "not_applicable_adjacent_record": 4,
-        "segment_0_to_6_gui_toolkit_path_ready": 12
+        "segment_0_to_6_gui_toolkit_path_ready": 13
       },
       "wav_generation_and_runner_execution": {
         "not_applicable_adjacent_record": 4,
-        "runner_execution_not_available_for_record": 59,
-        "wav_runner_mouse_click_emulation_available": 12
+        "runner_execution_not_available_for_record": 58,
+        "wav_runner_mouse_click_emulation_available": 13
       }
     },
     "human_behavioral_observed_record_count": 0,
@@ -7696,13 +7716,13 @@
     "physical_loopback_observed_record_count": 0,
     "pipeline_status_counts": {
       "adjacent_not_applicable": 4,
-      "full_emulated_source_to_runner_pipeline_validated": 12,
+      "full_emulated_source_to_runner_pipeline_validated": 13,
       "profile_present_but_source_parameters_missing": 9,
-      "source_parameters_missing_before_profile_creation": 50
+      "source_parameters_missing_before_profile_creation": 49
     },
     "primary_gap_counts": {
       "profile_present_but_source_parameters_missing": 9,
-      "source_parameters_missing_before_profile_creation": 50,
+      "source_parameters_missing_before_profile_creation": 49,
       "toolkit_structure_or_response_contract_missing": 0
     }
   }

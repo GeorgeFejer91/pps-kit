@@ -1,6 +1,6 @@
 {
   "schema": "pps-profile-recreation-status.v1",
-  "profile_count": 25,
+  "profile_count": 27,
   "categories": {
     "gui_recreatable": [
       "study5_box_breathing_pps",
@@ -12,6 +12,8 @@
       "noel_2015_bodily_self_back_space",
       "pfeiffer_2018_lateral_perihead_left_to_right",
       "study5_dynaspace_lateral_45_pps",
+      "tajadura_jimenez_2009_crossed_visual_deprivation",
+      "tajadura_jimenez_2009_uncrossed_visual_deprivation",
       "canzoneri_2012_dynamic_sounds",
       "tonelli_2019_echolocation",
       "galli_2015_wheelchair_full_body",
@@ -799,6 +801,140 @@
       ],
       "unsupported_toolkit_structures": [],
       "profile_parameters_manifest": "assets/preloads/canzoneri_2013_tool_use_reshaping/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "tajadura_jimenez_2009_crossed_visual_deprivation",
+      "title": "Collignon 2009 visual-deprivation lateralization - crossed posture",
+      "citation": "Collignon, O., Voss, P., Lassonde, M., & Lepore, F. (2009). Early visual deprivation alters multisensory processing in peripersonal space. Neuropsychologia, 47(14), 3236-3243.",
+      "doi": "10.1016/j.neuropsychologia.2009.07.025",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "static_left_right_audiotactile_lateralization_crossed_posture",
+      "visible_variant_label": "A",
+      "variant_display": "Collignon 2009 visual-deprivation lateralization - crossed posture - Variant A",
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": true,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 5,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/tajadura_jimenez_2009_crossed_visual_deprivation/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "tajadura_jimenez_2009_uncrossed_visual_deprivation",
+      "title": "Collignon 2009 visual-deprivation lateralization - uncrossed posture",
+      "citation": "Collignon, O., Voss, P., Lassonde, M., & Lepore, F. (2009). Early visual deprivation alters multisensory processing in peripersonal space. Neuropsychologia, 47(14), 3236-3243.",
+      "doi": "10.1016/j.neuropsychologia.2009.07.025",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "static_left_right_audiotactile_lateralization_uncrossed_posture",
+      "visible_variant_label": "B",
+      "variant_display": "Collignon 2009 visual-deprivation lateralization - uncrossed posture - Variant B",
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": true,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 5,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/tajadura_jimenez_2009_uncrossed_visual_deprivation/01_profile/profile_parameters_manifest.json"
     },
     {
       "template_id": "canzoneri_2012_dynamic_sounds",

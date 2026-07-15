@@ -635,6 +635,84 @@ def test_prepare_segment_run_package_generates_declared_tactile_waveform(tmp_pat
     assert prepared["Tactile_Channel"] == "3"
 
 
+def test_prepare_segment_run_package_generates_biphasic_square_pulse_train(tmp_path: Path):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    block_csv = run_manifest.parent.parent / "5_block_csv_preview" / "block_01_final.csv"
+    sample_rate = 44100
+    nominal_onset_s = 0.100
+    target = tmp_path / "looming_duration_2025_style.wav"
+    target_audio = np.zeros((int(round(0.500 * sample_rate)), 2), dtype=np.float32)
+    target_audio[:, 0] = 0.03
+    target_audio[:, 1] = 0.02
+    sf.write(target, target_audio, sample_rate)
+
+    with block_csv.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+        fieldnames = list(reader.fieldnames or [])
+    for field in (
+        "tactile_waveform_shape",
+        "tactile_frequency_hz",
+        "tactile_duration_ms",
+        "tactile_pulse_duration_ms",
+        "tactile_amplitude",
+    ):
+        if field not in fieldnames:
+            fieldnames.append(field)
+    rows[0].update(
+        {
+            "source_file_name": target.name,
+            "trial_file_path": str(target),
+            "source_sha256": _sha256(target),
+            "duration_ms": "500",
+            "duration_s": "0.5",
+            "looming_segment_onset_s": "0.000",
+            "tactile_onset_s": f"{nominal_onset_s:.3f}",
+            "channels": "2",
+            "tactile_channel": "3",
+            "tactile_waveform_shape": "biphasic_square_pulse_train",
+            "tactile_frequency_hz": "40",
+            "tactile_duration_ms": "100",
+            "tactile_pulse_duration_ms": "1",
+            "tactile_amplitude": "0.4",
+        }
+    )
+    with block_csv.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    package = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+        use_block_cache=False,
+    )
+
+    block_audio, rate = sf.read(package.blocks[0].wav_path, always_2d=True)
+    assert rate == sample_rate
+    assert block_audio.shape[1] == 3
+    drive_start = int(round((nominal_onset_s - 0.023) * sample_rate))
+    tactile = block_audio[drive_start : drive_start + int(round(0.105 * sample_rate)), 2]
+    active = np.flatnonzero(np.abs(tactile) > 0.1)
+    groups = np.split(active, np.flatnonzero(np.diff(active) > 1) + 1)
+    assert len(groups) == 5
+    assert all(len(group) == pytest.approx(int(round(0.001 * sample_rate)), abs=2) for group in groups)
+    first_pulse = tactile[groups[0]]
+    assert first_pulse.max() == pytest.approx(0.4, abs=0.02)
+    assert first_pulse.min() == pytest.approx(-0.4, abs=0.02)
+
+    with package.blocks[0].manifest_path.open(newline="", encoding="utf-8") as handle:
+        prepared_rows = list(csv.DictReader(handle))
+    prepared = prepared_rows[0]
+    assert prepared["Tactile_Waveform_Shape"] == "biphasic_square_pulse_train"
+    assert float(prepared["Tactile_Frequency_Hz"]) == pytest.approx(40.0)
+    assert float(prepared["Tactile_Duration_ms"]) == pytest.approx(100.0)
+    assert float(prepared["Tactile_Pulse_Duration_ms"]) == pytest.approx(1.0)
+    assert prepared["Tactile_Waveform_Generated"] == "true"
+
+
 def test_prepare_segment_run_package_reports_progress_and_reuses_block_cache(tmp_path: Path):
     run_manifest = _segment_run_setup_fixture(tmp_path)
     cache_root = tmp_path / "block_cache"
@@ -1267,6 +1345,58 @@ def test_participant_trial_csv_writer_classifies_hit_miss_for_tactile_and_catch(
     assert rows[3]["stimulus_modality"] == "tactile"
     assert rows[0]["sequence_labels"] == "Inhale | Pink moving sound - receding"
     assert rows[0]["sequence_variant_key"] == "inhale_pink_moving_sound_receding"
+
+
+def test_participant_trial_csv_writer_scores_auditory_only_response_trial(tmp_path: Path):
+    package = SimpleNamespace(participant_id="P001", session_id="P001_20260102_030405", session_dir=tmp_path / "P001_20260102_030405")
+    writer = ParticipantTrialCsvWriter(
+        package.session_dir / f"{package.session_id}_trials.csv",
+        package=package,
+    )
+    base = {
+        "participant_id": "P001",
+        "session_id": package.session_id,
+        "block_number": 1,
+        "block_label": "Block 01",
+        "trial_number": 1,
+        "trial_uid": "T001",
+        "trial_type": "Auditory-Only",
+        "family": "auditory_only",
+        "row_label": "Left auditory target",
+        "soa_ms": "0",
+        "noise_type": "pink",
+        "expected_response": "respond",
+        "response_rule": "respond_to_auditory_target",
+        "target_role": "auditory_target",
+    }
+
+    writer.observe_event({"event_id": 1, "event_type": "trial_start", "unix_time": 100.0, **base})
+    writer.observe_event({"event_id": 2, "event_type": "looming_onset", "unix_time": 101.0, **base})
+    writer.observe_event({"event_id": 3, "event_type": "response_window_onset", "unix_time": 101.0, **base})
+    writer.observe_event(
+        {
+            "event_id": 4,
+            "event_type": "mouse_click",
+            "unix_time": 101.25,
+            "block_number": 1,
+            "in_target": True,
+            "during_playback": True,
+        }
+    )
+    writer.observe_event({"event_id": 5, "event_type": "trial_end", "unix_time": 106.0, **base})
+
+    rows = list(csv.DictReader(writer.path.open(encoding="utf-8")))
+    assert len(rows) == 1
+    row = rows[0]
+    assert row["trial_type"] == "Auditory-Only"
+    assert row["family"] == "auditory_only"
+    assert row["stimulus_modality"] == "audio"
+    assert row["tactile_present"] == "false"
+    assert row["catch_trial"] == "false"
+    assert row["audio_present"] == "true"
+    assert row["expected_response"] == "respond"
+    assert row["outcome"] == "Hit"
+    assert row["rt_ms"] == "250.000"
 
 
 def test_participant_trial_csv_rewrite_uses_tactile_window_after_trial_end(tmp_path: Path):

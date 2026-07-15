@@ -39,7 +39,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     template_ids = {template.template_id for template in templates}
     status = json.loads((root / "assets" / "preloads" / "profile_recreation_status.json").read_text(encoding="utf-8"))
 
-    assert len(templates) == 25
+    assert len(templates) == 27
     assert status["schema"] == PROFILE_RECREATION_STATUS_SCHEMA
     assert status["profile_count"] == len(templates)
     assert {profile["template_id"] for profile in status["profiles"]} == template_ids
@@ -107,7 +107,7 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert study5["segment_0_to_4_profile_checks_passed"] is True
     assert study5["missing_parameter_count"] == 0
     assert study5["unsupported_structure_count"] == 0
-    assert len(status["categories"]["gui_recreatable"]) == 16
+    assert len(status["categories"]["gui_recreatable"]) == 18
 
     study5_lateral = profiles[STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID]
     assert study5_lateral["primary_category"] == "gui_recreatable"
@@ -186,6 +186,24 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert serino_hand["missing_parameter_count"] == 0
     assert serino_hand["unsupported_structure_count"] == 0
 
+    tajadura_uncrossed = profiles["tajadura_jimenez_2009_uncrossed_visual_deprivation"]
+    assert tajadura_uncrossed["primary_category"] == "gui_recreatable"
+    assert tajadura_uncrossed["publication_status"] == "published"
+    assert tajadura_uncrossed["runner_readiness"] == "ready"
+    assert tajadura_uncrossed["profile_checks_passed"] is True
+    assert tajadura_uncrossed["segment_0_to_4_profile_checks_passed"] is True
+    assert tajadura_uncrossed["missing_parameter_count"] == 0
+    assert tajadura_uncrossed["unsupported_structure_count"] == 0
+
+    tajadura_crossed = profiles["tajadura_jimenez_2009_crossed_visual_deprivation"]
+    assert tajadura_crossed["primary_category"] == "gui_recreatable"
+    assert tajadura_crossed["publication_status"] == "published"
+    assert tajadura_crossed["runner_readiness"] == "ready"
+    assert tajadura_crossed["profile_checks_passed"] is True
+    assert tajadura_crossed["segment_0_to_4_profile_checks_passed"] is True
+    assert tajadura_crossed["missing_parameter_count"] == 0
+    assert tajadura_crossed["unsupported_structure_count"] == 0
+
     report = (root / "docs" / "PUBLISHED_STUDY_RECREATION_STATUS.md").read_text(encoding="utf-8")
     assert "## GUI-recreatable" in report
     assert "## Missing publication parameters" in report
@@ -194,7 +212,7 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert "Ordinary trial randomization and block order" in report
 
     tex_report = (root / "docs" / "audit_report.tex").read_text(encoding="utf-8")
-    assert "Published-paper profiles passing checks & 14" in tex_report
+    assert "Published-paper profiles passing checks & 16" in tex_report
     assert "study5" in tex_report and "box" in tex_report and "breathing" in tex_report
     assert "No visible GUI progress indicator" in tex_report
     assert "Clinical populations, interventions, non-audiotactile stimuli" in tex_report
@@ -256,7 +274,7 @@ def test_protocol12_matrix_targets_ready_published_profiles_and_blocked_samples(
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID not in ready_published
     assert DEFAULT_STUDY_TEMPLATE_ID in ready_all
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID in ready_all
-    assert len(ready_published) == 14
+    assert len(ready_published) == 16
     assert set(ready_published) < set(ready_all)
     assert len(blocked_samples) == 1
 

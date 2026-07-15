@@ -24,7 +24,7 @@ DEFAULT_OUTPUT_DIR = (
 )
 
 SCHEMA = "pps-synthetic-expected-outcome-smoke.v1"
-READY_GAP = "ready_profile_needs_behavioral_or_synthetic_outcome_comparison"
+READY_GAP = "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison"
 MODEL_ID = "direction_label_oracle.v1"
 EVIDENCE_BOUNDARY = (
     "Synthetic comparison rows are deterministic software checks of the "
@@ -39,6 +39,8 @@ def build_report(ledger: dict[str, Any], *, source_ledger: str) -> dict[str, Any
         record
         for record in ledger.get("records", [])
         if record.get("observed_comparison_gap") == READY_GAP
+        and record.get("runnable_status") == "runnable_profile_parameters_ready"
+        and record.get("expected_outcome_status") == "structured_expected_outcome_extracted"
     ]
     rows = [_build_row(record) for record in sorted(records, key=lambda item: str(item.get("record_id") or ""))]
     matches = sum(1 for row in rows if row["comparison"]["pass"])

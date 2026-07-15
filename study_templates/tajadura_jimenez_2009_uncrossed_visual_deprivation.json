@@ -1,0 +1,277 @@
+{
+  "template_id": "tajadura_jimenez_2009_uncrossed_visual_deprivation",
+  "title": "Collignon 2009 visual-deprivation lateralization - uncrossed posture",
+  "citation": "Collignon, O., Voss, P., Lassonde, M., & Lepore, F. (2009). Early visual deprivation alters multisensory processing in peripersonal space. Neuropsychologia, 47(14), 3236-3243.",
+  "source_url": "https://doi.org/10.1016/j.neuropsychologia.2009.07.025",
+  "doi": "10.1016/j.neuropsychologia.2009.07.025",
+  "verification_status": "partial",
+  "notes": "Legacy local record ID is Tajadura-Jimenez 2009, but the DOI/PDF are Collignon et al. (2009). This profile recreates the uncrossed-posture static external left/right lateralization block: auditory-only, tactile-only, and congruent audio-tactile trials, 50 repetitions per side and modality. It uses procedural pink-noise bursts and mouse-click left/right choices as runnable proxies for the unshared Adobe Audition audio file and physical response keys.",
+  "reference_parameters": {
+    "profile_check_complete": true,
+    "publication_status": "published",
+    "profile_type": "static_left_right_audiotactile_lateralization_uncrossed_posture",
+    "record_id": "tajadura_jimenez_2009_visual_deprivation",
+    "manual_review_file": "For-AI/audiotactile-paper-metadata-audit/manual_reviews/tajadura_jimenez_2009_visual_deprivation.json",
+    "reported_sound_type": "pink noise burst",
+    "reported_sound_duration_ms": 100,
+    "reported_sound_plateau_ms": 90,
+    "reported_sound_rise_fall_ms": 5,
+    "reported_sound_level_db_spl": 75,
+    "reported_source_software": "Adobe Audition 2.0",
+    "reported_speaker_model": "Gigaworks T20",
+    "reported_geometry": "hands palm-down 30 cm in front of the body and 25 cm left/right of body midline; speakers immediately beside the hands",
+    "reported_posture": "uncrossed hands",
+    "reported_modalities": ["auditory_only", "tactile_only", "congruent_audio_tactile"],
+    "reported_sides": ["external_left", "external_right"],
+    "reported_soa_ms": 0,
+    "reported_tactile_stimulus": "five 1 ms biphasic square pulses every 25 ms, 40 Hz for 100 ms, ring electrodes on middle fingers",
+    "reported_iti_ms": {"mean": 1950, "range": [1200, 2700], "distribution": "not reported"},
+    "reported_response_window_ms": {"analysis_min": 150, "analysis_max": 1000, "online_timeout": "not reported"},
+    "reported_trial_formula": "Per posture block: 2 external sides x 3 modalities x 50 repetitions = 300 test stimuli.",
+    "minimum_runnable_profile_scope": "Uncrossed posture block only; use the crossed companion template for the second posture block.",
+    "nonblocking_caveats": [
+      "exact pink-noise WAV or seed not supplied",
+      "ISI distribution shape not reported beyond mean and range",
+      "online response timeout not reported; the analysis window is preserved in row metadata"
+    ],
+    "loudness_policy": {
+      "mode": "estimated_spl",
+      "calibration_mode": "estimate_allowed",
+      "calibration_status": "estimated_not_measured",
+      "start_spl_db": 75.0,
+      "end_spl_db": 75.0,
+      "instruction_offset_db": 0.0,
+      "distance_gain_policy": "disable_direct_path_gain_for_calibrated_loudness"
+    }
+  },
+  "design": {
+    "name": "Collignon 2009 visual-deprivation lateralization - uncrossed posture",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Left speaker pink-noise burst",
+        "noise_type": "pink",
+        "source_profile": "continuous_noise",
+        "azimuth_deg": -40.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0,
+        "motion_mode": "stationary",
+        "trajectory_snapshot": {
+          "coordinate_mode": "cartesian",
+          "path_direction": "stationary",
+          "start": {"x_m": -0.25, "y_m": 0.30, "z_m": 0.0},
+          "end": {"x_m": -0.25, "y_m": 0.30, "z_m": 0.0},
+          "start_distance_cm": 39.1,
+          "end_distance_cm": 39.1,
+          "start_rotation_deg": 320.0,
+          "end_rotation_deg": 320.0,
+          "path_length_m": 0.0,
+          "movement_duration_s": 0.1,
+          "start_hold_s": 0.0,
+          "end_hold_s": 0.0
+        }
+      },
+      {
+        "label": "Right speaker pink-noise burst",
+        "noise_type": "pink",
+        "source_profile": "continuous_noise",
+        "azimuth_deg": 40.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0,
+        "motion_mode": "stationary",
+        "trajectory_snapshot": {
+          "coordinate_mode": "cartesian",
+          "path_direction": "stationary",
+          "start": {"x_m": 0.25, "y_m": 0.30, "z_m": 0.0},
+          "end": {"x_m": 0.25, "y_m": 0.30, "z_m": 0.0},
+          "start_distance_cm": 39.1,
+          "end_distance_cm": 39.1,
+          "start_rotation_deg": 40.0,
+          "end_rotation_deg": 40.0,
+          "path_length_m": 0.0,
+          "movement_duration_s": 0.1,
+          "start_hold_s": 0.0,
+          "end_hold_s": 0.0
+        }
+      }
+    ],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "trajectory": {
+      "start_radius_m": 0.391,
+      "end_radius_m": 0.391,
+      "path_direction": "custom",
+      "coordinate_mode": "cartesian",
+      "start_x_m": -0.25,
+      "start_y_m": 0.30,
+      "start_z_m": 0.0,
+      "end_x_m": -0.249,
+      "end_y_m": 0.30,
+      "end_z_m": 0.0,
+      "path_length_m": 0.001,
+      "propagation_speed_mps": 0.01,
+      "azimuth_start_deg": -40.0,
+      "azimuth_end_deg": -40.0,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": false
+    },
+    "protocol": {
+      "repetitions_per_condition": 50,
+      "trial_pool_repetition_defaults": {
+        "default": 50,
+        "audio_tactile": 50,
+        "baseline": 50,
+        "auditory_only": 50
+      },
+      "soa_values_ms": [0],
+      "spatial_values_cm": [39.1],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": ["stationary"],
+      "tactile_sites": ["middle finger"],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0.0,
+      "include_auditory_only_trials": true,
+      "auditory_only_trials_exact": 100,
+      "auditory_only_crosses_sequence_variants": true,
+      "include_baseline_trials": true,
+      "baseline_strategy": "tactile_only",
+      "baseline_trials_exact": 100,
+      "baseline_trial_percentage": 0.0,
+      "baseline_soa_values_ms": [0],
+      "baseline_custom_trial_mode": "tactile_only",
+      "baseline_crosses_sequence_variants": true,
+      "respiratory_phases": ["Uncrossed posture"],
+      "blocks": 1,
+      "block_specs": [
+        {"label": "Uncrossed posture", "stimulus_types": ["Audio-Tactile", "Baseline", "Auditory-Only"]}
+      ],
+      "distribute_trial_pool_across_blocks": true,
+      "trial_randomization_strategy": "no_immediate_repeats",
+      "block_order_randomization": "fixed",
+      "max_consecutive_same_trial_type": 2,
+      "participants": 1,
+      "random_seed": 200907025,
+      "trial_strips": [
+        {
+          "strip_id": "collignon-2009-uncrossed-left",
+          "label": "Uncrossed external left",
+          "soa_values_ms": [0],
+          "spatial_values_cm": [39.1],
+          "metadata": {
+            "expected_response": "respond",
+            "response_rule": "choose_external_stimulus_side",
+            "target_role": "left_lateralization_target",
+            "response_mode": "mouse_click_choice_proxy_for_left_right_keypress",
+            "response_choice_set": "left,right",
+            "correct_response": "left",
+            "response_scoring_policy": "external_side_choice_150_to_1000_ms_analysis_window",
+            "response_capture_device": "keyboard",
+            "response_input_modality": "left_right_keypress_mouse_click_proxy",
+            "spatial_coordinate_frame": "external_room_midline",
+            "body_anchor": "hands",
+            "body_part": "left middle finger",
+            "body_side": "left",
+            "spatial_hemifield": "external_left",
+            "body_relative_axis": "left_right",
+            "auditory_trajectory_family": "static_left_right",
+            "auditory_trajectory_direction": "stationary_left",
+            "trajectory_start_distance_cm": 39.1,
+            "trajectory_end_distance_cm": 39.1,
+            "trajectory_start_azimuth_deg": -40.0,
+            "trajectory_end_azimuth_deg": -40.0,
+            "source_asset_equivalence": "procedural pink-noise proxy for unshared Adobe Audition 2.0 burst",
+            "renderer_equivalence_boundary": "binaural static speaker proxy for Gigaworks T20 beside left hand",
+            "speaker_array_layout": "two speakers beside left/right hands",
+            "speaker_source_channel": "left",
+            "iti_policy": "reported_mean_1950ms_range_1200_to_2700ms_distribution_unreported",
+            "iti_ms": "1950",
+            "tactile_stimulation_modality": "electrical",
+            "tactile_waveform_shape": "biphasic_square_pulse_train",
+            "tactile_frequency_hz": "40",
+            "tactile_pulse_duration_ms": "1",
+            "tactile_duration_ms": "100",
+            "electrical_electrode_site": "left middle finger ring electrodes"
+          },
+          "elements": [
+            {
+              "element_id": "collignon-2009-left-speaker",
+              "kind": "looming_stimulus",
+              "label": "Left speaker sound",
+              "source_label": "Left speaker pink-noise burst",
+              "source_labels": ["Left speaker pink-noise burst"],
+              "randomized": true
+            }
+          ]
+        },
+        {
+          "strip_id": "collignon-2009-uncrossed-right",
+          "label": "Uncrossed external right",
+          "soa_values_ms": [0],
+          "spatial_values_cm": [39.1],
+          "metadata": {
+            "expected_response": "respond",
+            "response_rule": "choose_external_stimulus_side",
+            "target_role": "right_lateralization_target",
+            "response_mode": "mouse_click_choice_proxy_for_left_right_keypress",
+            "response_choice_set": "left,right",
+            "correct_response": "right",
+            "response_scoring_policy": "external_side_choice_150_to_1000_ms_analysis_window",
+            "response_capture_device": "keyboard",
+            "response_input_modality": "left_right_keypress_mouse_click_proxy",
+            "spatial_coordinate_frame": "external_room_midline",
+            "body_anchor": "hands",
+            "body_part": "right middle finger",
+            "body_side": "right",
+            "spatial_hemifield": "external_right",
+            "body_relative_axis": "left_right",
+            "auditory_trajectory_family": "static_left_right",
+            "auditory_trajectory_direction": "stationary_right",
+            "trajectory_start_distance_cm": 39.1,
+            "trajectory_end_distance_cm": 39.1,
+            "trajectory_start_azimuth_deg": 40.0,
+            "trajectory_end_azimuth_deg": 40.0,
+            "source_asset_equivalence": "procedural pink-noise proxy for unshared Adobe Audition 2.0 burst",
+            "renderer_equivalence_boundary": "binaural static speaker proxy for Gigaworks T20 beside right hand",
+            "speaker_array_layout": "two speakers beside left/right hands",
+            "speaker_source_channel": "right",
+            "iti_policy": "reported_mean_1950ms_range_1200_to_2700ms_distribution_unreported",
+            "iti_ms": "1950",
+            "tactile_stimulation_modality": "electrical",
+            "tactile_waveform_shape": "biphasic_square_pulse_train",
+            "tactile_frequency_hz": "40",
+            "tactile_pulse_duration_ms": "1",
+            "tactile_duration_ms": "100",
+            "electrical_electrode_site": "right middle finger ring electrodes"
+          },
+          "elements": [
+            {
+              "element_id": "collignon-2009-right-speaker",
+              "kind": "looming_stimulus",
+              "label": "Right speaker sound",
+              "source_label": "Right speaker pink-noise burst",
+              "source_labels": ["Right speaker pink-noise burst"],
+              "randomized": true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "provenance": [
+    {
+      "field": "stimulus and timing",
+      "source": "Manual PDF review: 100 ms pink-noise burst with 90 ms plateau, 5 ms ramps, simultaneous audio-tactile SOA, five 1 ms tactile pulses at 40 Hz over 100 ms."
+    },
+    {
+      "field": "trial counts",
+      "source": "Manual PDF review: 2 sides x 3 modalities x 50 stimuli = 300 test stimuli per posture block."
+    },
+    {
+      "field": "response mapping",
+      "source": "Manual PDF review and Figure 1: participants responded by external left/right side."
+    }
+  ]
+}

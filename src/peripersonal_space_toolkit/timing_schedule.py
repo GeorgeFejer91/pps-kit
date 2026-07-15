@@ -102,7 +102,7 @@ class BlockEventSchedule:
             trial_type = str(_row_value(row, "Trial_Type", "trial_type", default="")).strip()
             family = str(_row_value(row, "Family", "family", default="")).strip()
             trial_kind = _trial_kind(trial_type, family)
-            has_looming = trial_kind in {"audio_tactile", "catch"}
+            has_looming = trial_kind in {"audio_tactile", "catch", "auditory_only"}
             has_tactile = trial_kind in {"audio_tactile", "baseline"}
             soa_ms = _as_float(_row_value(row, "SOA_ms", "soa_ms", default=0), default=0.0)
             trial_start_default = int(round((trial_number - 1) * max(0.0, trial_duration_s) * inferred_sample_rate)) if inferred_sample_rate else None
@@ -266,6 +266,8 @@ def _trial_kind(trial_type: str, family: str = "") -> str:
             return "baseline"
         if key in {"catch", "catch_trial", "audio_only"}:
             return "catch"
+        if key in {"auditory", "auditory_only", "auditory_only_trial"}:
+            return "auditory_only"
     return ""
 
 
@@ -315,7 +317,11 @@ def _stimulus_modality(event_type: str, trial_type: str) -> str:
         return "tactile"
     if event_type in {"response_window_onset", "trial_start", "trial_end"}:
         text = trial_type.strip().lower()
-        return "audio+tactile" if text == "audio-tactile" else text
+        if text == "audio-tactile":
+            return "audio+tactile"
+        if text == "auditory-only":
+            return "audio"
+        return text
     return ""
 
 

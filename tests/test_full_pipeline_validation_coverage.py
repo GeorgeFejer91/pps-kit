@@ -47,34 +47,34 @@ def test_full_pipeline_validation_summary_is_conservative():
     assert summary["literature_record_count"] == 75
     assert summary["in_scope_record_count"] == 71
     assert summary["adjacent_not_applicable_record_count"] == 4
-    assert summary["full_emulated_pipeline_validated_record_count"] == 12
+    assert summary["full_emulated_pipeline_validated_record_count"] == 13
     assert summary["human_behavioral_observed_record_count"] == 0
     assert summary["physical_loopback_observed_record_count"] == 0
     assert summary["pipeline_status_counts"] == {
         "adjacent_not_applicable": 4,
-        "full_emulated_source_to_runner_pipeline_validated": 12,
+        "full_emulated_source_to_runner_pipeline_validated": 13,
         "profile_present_but_source_parameters_missing": 9,
-        "source_parameters_missing_before_profile_creation": 50,
+        "source_parameters_missing_before_profile_creation": 49,
     }
     assert summary["primary_gap_counts"] == {
         "profile_present_but_source_parameters_missing": 9,
-        "source_parameters_missing_before_profile_creation": 50,
+        "source_parameters_missing_before_profile_creation": 49,
         "toolkit_structure_or_response_contract_missing": 0,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
-        "minimum_source_parameters_captured": 12,
+        "minimum_source_parameters_captured": 13,
         "not_applicable_adjacent_record": 4,
-        "source_parameters_missing_or_unresolved": 59,
+        "source_parameters_missing_or_unresolved": 58,
     }
     assert summary["gate_status_counts"]["observed_emulated_expected_match"] == {
-        "emulated_observed_direction_matches_expected": 12,
-        "no_observed_emulated_comparison": 59,
+        "emulated_observed_direction_matches_expected": 13,
+        "no_observed_emulated_comparison": 58,
         "not_applicable_adjacent_record": 4,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
-        "blocked_by_missing_profile_parameters": 59,
+        "blocked_by_missing_profile_parameters": 58,
         "not_applicable_adjacent_record": 4,
-        "segment_0_to_6_gui_toolkit_path_ready": 12,
+        "segment_0_to_6_gui_toolkit_path_ready": 13,
     }
     assert "not collected participant evidence" in pipeline["scope"]["evidence_boundary"]
 
@@ -86,7 +86,7 @@ def test_full_pipeline_validated_records_pass_every_required_gate():
         record for record in records.values() if record["full_emulated_pipeline_validated"]
     ]
 
-    assert len(full_records) == pipeline["summary"]["full_emulated_pipeline_validated_record_count"] == 12
+    assert len(full_records) == pipeline["summary"]["full_emulated_pipeline_validated_record_count"] == 13
     for record in full_records:
         assert record["pipeline_status"] == "full_emulated_source_to_runner_pipeline_validated"
         assert all(gate["passed"] for gate in record["gates"].values()), record["record_id"]
@@ -100,12 +100,25 @@ def test_full_pipeline_validated_records_pass_every_required_gate():
             "emulated_observed_direction_matches_expected"
         )
         assert record["gates"]["observed_emulated_expected_match"]["source_report"].endswith(
-            "ready_profile_mouse_click_expected_outcome_audit_report.json"
+            (
+                "tajadura_2009_known_parameter_validation_report.json"
+                if record["record_id"] == "tajadura_jimenez_2009_visual_deprivation"
+                else "ready_profile_mouse_click_expected_outcome_audit_report.json"
+            )
         )
 
     canzoneri = records["canzoneri_2012_dynamic_sounds"]
     assert canzoneri["full_emulated_pipeline_validated"]
     assert canzoneri["current_template_ids"] == ["canzoneri_2012_dynamic_sounds"]
+    tajadura = records["tajadura_jimenez_2009_visual_deprivation"]
+    assert tajadura["full_emulated_pipeline_validated"]
+    assert tajadura["current_template_ids"] == [
+        "tajadura_jimenez_2009_uncrossed_visual_deprivation",
+        "tajadura_jimenez_2009_crossed_visual_deprivation",
+    ]
+    assert tajadura["known_parameter_validation_report"].endswith(
+        "tajadura_2009_known_parameter_validation_report.json"
+    )
 
 
 def test_full_pipeline_blocks_at_the_first_unproven_layer():

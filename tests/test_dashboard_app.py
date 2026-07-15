@@ -2716,6 +2716,103 @@ def test_dashboard_sequence_bake_preserves_stereo_looming_after_mono_instruction
     assert np.max(np.abs(audio_tactile[:, 2])) > 0.01
 
 
+def test_dashboard_auditory_only_trials_are_stereo_response_trials(tmp_path: Path):
+    client = _client(tmp_path)
+    custom = client.post("/api/templates/__custom__/load").json()
+    sample_rate = 44100
+    looming_frames = 256
+    stereo_looming = np.column_stack(
+        [
+            np.linspace(0.05, 0.20, looming_frames, dtype=np.float32),
+            np.linspace(-0.20, -0.05, looming_frames, dtype=np.float32),
+        ]
+    )
+    looming = _register_segment1_wav(
+        client,
+        custom["design"],
+        "Pink",
+        stereo_looming,
+        sample_rate=sample_rate,
+        motion_mode="looming",
+        source_kind="test_looming_audio",
+    )
+    custom["design"]["noises"] = [{"label": "Pink", "noise_type": "pink", "prebaked_path": str(looming)}]
+    custom["design"]["protocol"]["soa_values_ms"] = [1]
+    custom["design"]["protocol"]["spatial_values_cm"] = [100.0]
+    custom["design"]["protocol"]["include_catch_trials"] = False
+    custom["design"]["protocol"]["include_auditory_only_trials"] = True
+    custom["design"]["protocol"]["auditory_only_trials_exact"] = 3
+    custom["design"]["protocol"]["include_baseline_trials"] = False
+    custom["design"]["protocol"]["trial_strips"] = [
+        {
+            "strip_id": "row-1",
+            "label": "Auditory response row",
+            "metadata": {
+                "response_mode": "mouse_click_choice",
+                "response_choice_set": "left,right",
+                "correct_response": "left",
+            },
+            "elements": [
+                {"kind": "looming_stimulus", "label": "Looming Stimulus", "source_labels": ["Pink"], "randomized": True},
+            ],
+        }
+    ]
+
+    sequence_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {"kind": "trial_sequence_batch", "label": "2_trial_sequence_designs"},
+        },
+    ).json()
+    sequence_done = _wait_job(client, sequence_job["job_id"])
+    assert sequence_done["status"] == "succeeded"
+    sequence_manifest = _read_json_file(sequence_done["result"]["manifest_path"])
+    sequence_path = Path(sequence_manifest["variants"][0]["file_path"])
+    sequence_audio, sequence_sr = sf.read(dashboard_app._soundfile_path(sequence_path), dtype="float32", always_2d=True)
+
+    tactile_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {"kind": "audiotactile_trial_batch", "label": "3_tactile_and_baseline_trials"},
+        },
+    ).json()
+    tactile_done = _wait_job(client, tactile_job["job_id"])
+    assert tactile_done["status"] == "succeeded"
+    assert tactile_done["result"]["auditory_only_count"] == 1
+    tactile_manifest = _read_json_file(tactile_done["result"]["manifest_path"])
+    auditory_row = next(item for item in tactile_manifest["files"] if item["family"] == "auditory_only")
+    auditory_audio, auditory_sr = sf.read(dashboard_app._soundfile_path(auditory_row["file_path"]), dtype="float32", always_2d=True)
+
+    assert auditory_sr == sequence_sr
+    assert auditory_row["channels"] == 2
+    assert auditory_row["tactile_channel"] == ""
+    assert auditory_row["expected_response"] == "respond"
+    assert auditory_row["target_role"] == "auditory_target"
+    assert auditory_row["response_rule"] == "respond_to_auditory_target"
+    assert auditory_audio.shape == sequence_audio.shape
+    assert np.max(np.abs(auditory_audio - sequence_audio)) <= 1 / 32768
+
+    pool_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {"kind": "trial_repetition_pool", "label": "4_trial_repetition_pool"},
+        },
+    ).json()
+    pool_done = _wait_job(client, pool_job["job_id"])
+    assert pool_done["status"] == "succeeded"
+    assert pool_done["result"]["auditory_only_count"] == 3
+    pool_manifest = _read_json_file(pool_done["result"]["manifest_path"])
+    pool_rows = list(csv.DictReader(Path(pool_done["result"]["csv_path"]).open(encoding="utf-8")))
+    assert pool_manifest["family_counts"]["auditory_only"] == 3
+    assert Counter(row["family"] for row in pool_rows) == {"audio_tactile": 1, "auditory_only": 3}
+
+
 def test_dashboard_previews_each_segment2_source_label(tmp_path: Path):
     client = _client(tmp_path)
     custom = client.post("/api/templates/__custom__/load").json()

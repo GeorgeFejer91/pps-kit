@@ -732,8 +732,10 @@ class ParticipantTrialCsvWriter:
         )
         click_unix = _as_float(click.get("unix_time"), default=0.0) if click else 0.0
         rt_ms = ""
-        if valid_response and tactile_present and response_required and tactile_unix > 0.0 and click_unix > 0.0:
-            rt_ms = f"{(click_unix - tactile_unix) * 1000.0:.3f}"
+        if valid_response and response_required and click_unix > 0.0:
+            response_anchor_unix = tactile_unix if tactile_present and tactile_unix > 0.0 else response_window_unix
+            if response_anchor_unix > 0.0:
+                rt_ms = f"{(click_unix - response_anchor_unix) * 1000.0:.3f}"
         observed_response_choice = _response_choice_from_click(click, choice_metadata) if click else ""
         response_choice_correct_value = _response_choice_correctness(
             observed_response_choice,
@@ -743,7 +745,7 @@ class ParticipantTrialCsvWriter:
             "" if response_choice_correct_value is None else str(bool(response_choice_correct_value)).lower()
         )
         choice_required = _trial_requires_choice_scoring(choice_metadata)
-        if tactile_present and response_required:
+        if response_required:
             if choice_required:
                 outcome = "Hit" if valid_response and response_choice_correct_value is True else "Miss"
                 correctness_rule = (
@@ -753,7 +755,11 @@ class ParticipantTrialCsvWriter:
                 )
             else:
                 outcome = "Hit" if valid_response else "Miss"
-                correctness_rule = f"response within {TACTILE_RESPONSE_RULE_LABEL}"
+                correctness_rule = (
+                    f"response within {TACTILE_RESPONSE_RULE_LABEL}"
+                    if tactile_present
+                    else f"response within {self.min_rt_s * 1000.0:.0f}-{self.max_rt_s * 1000.0:.0f} ms from auditory response window"
+                )
         elif tactile_present:
             outcome = "Miss" if response_given else "Hit"
             correctness_rule = "withhold response during no-go/strong tactile trial"
@@ -1334,6 +1340,14 @@ class ParticipantTrialCsvWriter:
             tactile_start = tactile_unix if tactile_unix > 0.0 else start
             valid_start = tactile_start + self.min_rt_s
             valid_end = tactile_start + self.max_rt_s
+            for click in candidates:
+                click_time = _as_float(click.get("unix_time"), default=0.0)
+                if valid_start <= click_time <= valid_end:
+                    return click, True, True
+            return candidates[0], False, True
+        if response_required:
+            valid_start = start + self.min_rt_s
+            valid_end = start + self.max_rt_s
             for click in candidates:
                 click_time = _as_float(click.get("unix_time"), default=0.0)
                 if valid_start <= click_time <= valid_end:
@@ -5952,6 +5966,11 @@ def _trial_is_catch(trial_type: str, family: str) -> bool:
     return "catch" in text or "audio_only" in text or "audio-only" in text
 
 
+def _trial_is_auditory_only(trial_type: str, family: str) -> bool:
+    text = f"{trial_type} {family}".strip().lower().replace("-", "_").replace(" ", "_")
+    return "auditory_only" in text or "auditoryonly" in text
+
+
 def _trial_response_metadata(
     row: dict[str, Any],
     *,
@@ -6001,13 +6020,16 @@ def _trial_response_metadata(
     )
     expected_response = _normal_expected_response(explicit_expected)
     if not expected_response:
-        expected_response = "respond" if response_required and tactile_present else "withhold"
+        expected_response = "respond" if response_required else "withhold"
     response_rule = str(explicit_rule or "").strip()
     if not response_rule:
-        response_rule = "respond_to_tactile_target" if response_required and tactile_present else "withhold_response"
+        if response_required:
+            response_rule = "respond_to_tactile_target" if tactile_present else "respond_to_auditory_target"
+        else:
+            response_rule = "withhold_response"
     target_role = str(explicit_role or "").strip()
     if not target_role:
-        target_role = "target" if response_required and tactile_present else "no_target"
+        target_role = "target" if response_required else "no_target"
     return {
         "response_required": bool(response_required),
         "expected_response": expected_response,
@@ -6234,7 +6256,7 @@ def _trial_requires_response(
     tactile_present: bool,
     catch_trial: bool,
 ) -> bool:
-    if catch_trial or not tactile_present:
+    if catch_trial:
         return False
     expected = _row_value(
         row,
@@ -6278,6 +6300,8 @@ def _trial_requires_response(
         decision = _response_expectation_decision(value)
         if decision is not None:
             return decision
+    if not tactile_present:
+        return _trial_is_auditory_only(trial_type, family)
     return True
 
 
@@ -6367,6 +6391,8 @@ def _trial_has_tactile(trial_type: str, family: str, tactile_event_seen: bool) -
     text = f"{trial_type} {family}".strip().lower()
     if _trial_is_catch(trial_type, family):
         return False
+    if _trial_is_auditory_only(trial_type, family):
+        return False
     return "tactile" in text or "baseline" in text
 
 
@@ -6374,9 +6400,9 @@ def _trial_has_audio(trial_type: str, family: str, looming_event_seen: bool) -> 
     if looming_event_seen:
         return True
     text = f"{trial_type} {family}".strip().lower()
-    if "baseline" in text and "audio" not in text:
+    if "baseline" in text and "audio" not in text and "auditory" not in text:
         return False
-    return "audio" in text or "catch" in text
+    return "audio" in text or "auditory" in text or "catch" in text
 
 
 def _trial_stimulus_modality(trial_type: str, family: str, tactile_event_seen: bool) -> str:
@@ -6830,6 +6856,7 @@ def _timeline_trial_type_label(payload: dict[str, Any]) -> str:
         "catch": "Catch",
         "catch_trial": "Catch",
         "audio_only": "Catch",
+        "auditory_only": "Auditory-only",
     }
     return labels.get(key, trial_type or family or "Trial")
 
@@ -7281,18 +7308,21 @@ def _segment_trial_type(family: str) -> str:
         "audio_tactile": "Audio-Tactile",
         "baseline": "Baseline",
         "catch": "Catch",
+        "auditory_only": "Auditory-Only",
     }.get(str(family or "").strip().lower(), "Trial")
 
 
 def _segment_family(row: dict[str, Any]) -> str:
     family = str(row.get("family") or row.get("Family") or "").strip().lower().replace("-", "_").replace(" ", "_")
-    if family in {"audio_tactile", "baseline", "catch"}:
+    if family in {"audio_tactile", "baseline", "catch", "auditory_only"}:
         return family
     trial_type = str(row.get("Trial_Type") or "").strip().lower()
     if "baseline" in trial_type:
         return "baseline"
     if "catch" in trial_type:
         return "catch"
+    if "auditory" in trial_type:
+        return "auditory_only"
     return "audio_tactile"
 
 
@@ -7332,7 +7362,7 @@ def _segment_tactile_onset_s(row: dict[str, Any], looming_onset_s: float) -> flo
     if explicit != "":
         return max(0.0, _as_float(explicit, default=looming_onset_s))
     family = _segment_family(row)
-    if family == "catch":
+    if family in {"catch", "auditory_only"}:
         return 0.0
     soa_ms = _as_float(_row_value(row, "soa_ms", "SOA_ms", default=0), default=0.0)
     return round(max(0.0, looming_onset_s + soa_ms / 1000.0), 6)
@@ -7353,6 +7383,11 @@ def _normal_tactile_waveform_shape(value: Any) -> str:
         "sinusoidal": "sine",
         "square": "square",
         "pulse": "square",
+        "pulse_train": "biphasic_square_pulse_train",
+        "square_pulse_train": "biphasic_square_pulse_train",
+        "biphasic_pulse": "biphasic_square_pulse_train",
+        "biphasic_square_pulse": "biphasic_square_pulse_train",
+        "biphasic_square_pulse_train": "biphasic_square_pulse_train",
     }
     return aliases.get(token, token)
 
@@ -7387,12 +7422,25 @@ def _tactile_waveform_spec(row: dict[str, Any], family: str) -> dict[str, Any] |
     )
     if not shape and frequency_hz <= 0.0:
         return None
-    if shape not in {"sawtooth", "sine", "square"}:
+    if shape not in {"sawtooth", "sine", "square", "biphasic_square_pulse_train"}:
         raise ValueError(f"Unsupported tactile waveform shape: {shape or '<blank>'}")
     if frequency_hz <= 0.0:
         raise ValueError("Tactile waveform frequency must be greater than zero.")
     if duration_ms <= 0.0:
         raise ValueError("Tactile waveform duration must be greater than zero.")
+    pulse_duration_ms = _as_float(
+        _row_value(
+            row,
+            "tactile_pulse_duration_ms",
+            "Tactile_Pulse_Duration_ms",
+            "tactile_waveform_pulse_duration_ms",
+            "Tactile_Waveform_Pulse_Duration_ms",
+            default="",
+        ),
+        default=0.0,
+    )
+    if shape == "biphasic_square_pulse_train" and pulse_duration_ms <= 0.0:
+        raise ValueError("Biphasic square pulse trains require tactile_pulse_duration_ms.")
     channel = _as_int(_row_value(row, "tactile_channel", "Tactile_Channel", default=3), default=3)
     amplitude = _as_float(
         _row_value(row, "tactile_amplitude", "Tactile_Amplitude", "tactile_waveform_amplitude", default=0.2),
@@ -7402,6 +7450,7 @@ def _tactile_waveform_spec(row: dict[str, Any], family: str) -> dict[str, Any] |
         "shape": shape,
         "frequency_hz": float(frequency_hz),
         "duration_ms": float(duration_ms),
+        "pulse_duration_ms": float(pulse_duration_ms) if pulse_duration_ms > 0.0 else "",
         "channel_1based": max(1, int(channel)),
         "amplitude": max(0.0, min(1.0, float(amplitude))),
     }
@@ -7418,6 +7467,7 @@ def _tactile_waveform_metadata(
             "shape": spec.get("shape", ""),
             "frequency_hz": spec.get("frequency_hz", ""),
             "duration_ms": spec.get("duration_ms", ""),
+            "pulse_duration_ms": spec.get("pulse_duration_ms", ""),
             "channel_1based": spec.get("channel_1based", ""),
             "amplitude": spec.get("amplitude", ""),
             "generated": bool(generated),
@@ -7438,6 +7488,14 @@ def _tactile_waveform_metadata(
             "Tactile_Duration_ms",
             "tactile_waveform_duration_ms",
             "Tactile_Waveform_Duration_ms",
+            default="",
+        ),
+        "pulse_duration_ms": _row_value(
+            row,
+            "tactile_pulse_duration_ms",
+            "Tactile_Pulse_Duration_ms",
+            "tactile_waveform_pulse_duration_ms",
+            "Tactile_Waveform_Pulse_Duration_ms",
             default="",
         ),
         "channel_1based": _row_value(row, "tactile_channel", "Tactile_Channel", default=""),
@@ -7470,13 +7528,32 @@ def _apply_tactile_waveform_profile(
         source = np.concatenate([source, pad], axis=1)
     start = max(0, int(round(float(tactile_onset_s) * sample_rate)))
     frames = max(1, int(round(float(spec["duration_ms"]) / 1000.0 * sample_rate)))
+    if spec["shape"] == "biphasic_square_pulse_train":
+        period_frames = max(1, int(round(sample_rate / float(spec["frequency_hz"]))))
+        pulse_frames = max(2, int(round(float(spec["pulse_duration_ms"]) / 1000.0 * sample_rate)))
+        pulse_count = max(1, int(math.floor(float(spec["duration_ms"]) / 1000.0 * float(spec["frequency_hz"]) + 1e-9)) + 1)
+        frames = max(frames, (pulse_count - 1) * period_frames + pulse_frames)
     stop = start + frames
     if stop > source.shape[0]:
         pad = np.zeros((stop - source.shape[0], source.shape[1]), dtype=source.dtype)
         source = np.concatenate([source, pad], axis=0)
     t = np.arange(frames, dtype=np.float32) / float(sample_rate)
     phase = (t * float(spec["frequency_hz"])) % 1.0
-    if spec["shape"] == "sawtooth":
+    if spec["shape"] == "biphasic_square_pulse_train":
+        waveform = np.zeros(frames, dtype=np.float32)
+        period_frames = max(1, int(round(sample_rate / float(spec["frequency_hz"]))))
+        pulse_frames = max(2, int(round(float(spec["pulse_duration_ms"]) / 1000.0 * sample_rate)))
+        pulse_count = max(1, int(math.floor(float(spec["duration_ms"]) / 1000.0 * float(spec["frequency_hz"]) + 1e-9)) + 1)
+        split = max(1, pulse_frames // 2)
+        for pulse_index in range(pulse_count):
+            pulse_start = pulse_index * period_frames
+            pulse_stop = min(frames, pulse_start + pulse_frames)
+            if pulse_stop <= pulse_start:
+                continue
+            phase_split = min(pulse_stop, pulse_start + split)
+            waveform[pulse_start:phase_split] = 1.0
+            waveform[phase_split:pulse_stop] = -1.0
+    elif spec["shape"] == "sawtooth":
         waveform = (2.0 * phase) - 1.0
     elif spec["shape"] == "square":
         waveform = np.where(phase < 0.5, 1.0, -1.0)
@@ -7931,11 +8008,12 @@ def _segment_session_trial_row(
 ) -> dict[str, Any]:
     trial_start_s = trial_start_sample / float(sample_rate)
     trial_end_s = trial_end_sample / float(sample_rate)
-    response_window_onset_s = looming_onset_s if family in {"audio_tactile", "catch"} else tactile_onset_s
+    has_audio = family in {"audio_tactile", "catch", "auditory_only"}
+    has_tactile = family in {"audio_tactile", "baseline"}
+    response_window_onset_s = looming_onset_s if has_audio else tactile_onset_s
     tactile_compensation = dict(tactile_compensation or {})
     tactile_waveform = dict(tactile_waveform or {})
     speaker_switching = dict(speaker_switching or {})
-    has_tactile = family in {"audio_tactile", "baseline"}
     drive_onset_s = max(0.0, float(tactile_drive_onset_s))
     soa_ms = _row_value(source, "soa_ms", "SOA_ms", default="")
     row_label = str(_row_value(source, "row_label", "Row_Label", "Row", default="")).strip()
@@ -8599,10 +8677,10 @@ def _segment_session_trial_row(
         ),
         "Trial_Start_S": f"{trial_start_s:.9f}",
         "Trial_Start_Sample": trial_start_sample,
-        "Looming_Onset_S": f"{looming_onset_s:.9f}" if family in {"audio_tactile", "catch"} else "",
-        "Looming_Onset_Sample": int(round((trial_start_s + looming_onset_s) * sample_rate)) if family in {"audio_tactile", "catch"} else "",
-        "Tactile_Onset_S": f"{tactile_onset_s:.9f}" if family in {"audio_tactile", "baseline"} else "",
-        "Tactile_Onset_Sample": int(round((trial_start_s + tactile_onset_s) * sample_rate)) if family in {"audio_tactile", "baseline"} else "",
+        "Looming_Onset_S": f"{looming_onset_s:.9f}" if has_audio else "",
+        "Looming_Onset_Sample": int(round((trial_start_s + looming_onset_s) * sample_rate)) if has_audio else "",
+        "Tactile_Onset_S": f"{tactile_onset_s:.9f}" if has_tactile else "",
+        "Tactile_Onset_Sample": int(round((trial_start_s + tactile_onset_s) * sample_rate)) if has_tactile else "",
         "Tactile_Drive_Onset_S": f"{drive_onset_s:.9f}" if has_tactile else "",
         "Tactile_Drive_Onset_Sample": int(round((trial_start_s + drive_onset_s) * sample_rate)) if has_tactile else "",
         "Tactile_Latency_Compensation_Requested_ms": (
@@ -8876,6 +8954,8 @@ def _attach_trial_file_paths(rows: list[dict[str, Any]], lookup: dict[tuple[str,
             family = "baseline"
         elif trial_type == "Catch":
             family = "catch"
+        elif trial_type == "Auditory-Only":
+            family = "auditory_only"
         else:
             continue
         try:
@@ -8889,6 +8969,8 @@ def _attach_trial_file_paths(rows: list[dict[str, Any]], lookup: dict[tuple[str,
             continue
         path = lookup.get(key)
         if not path and family == "catch":
+            path = lookup.get((family, key[1], key[2], 0))
+        if not path and family == "auditory_only":
             path = lookup.get((family, key[1], key[2], 0))
         if path:
             row["trial_file_path"] = path

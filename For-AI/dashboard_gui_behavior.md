@@ -58,6 +58,17 @@ The local companion must also serve the committed public static asset roots at
 the same `staticStateForTemplate()` overlay as hosted/static mode, so these
 routes must stay mounted alongside `/dashboard`, `/viewer`, and `/api/*`.
 
+## Auditory-Only Response Trials
+
+`Auditory-Only` is a first-class response-required trial family, separate from
+no-response `Catch` rows. The browser static preview, backend Segment 3 bake,
+Segment 4/5 pool counts, and Segment 6 manifests must count `auditory_only`
+separately from `catch`. Its WAVs are stereo audio-only files with no tactile
+channel, but the runner anchors response scoring to the response-window onset
+and expects a mouse/response input when the row declares `expected_response =
+respond`. Legacy `audio_only` labels still map to catch unless the profile uses
+the explicit `auditory_only` / `Auditory-Only` family.
+
 ## Static Preview Parity Audit
 
 Hosted/static no-companion mode must keep every profile visible in the static selector aligned with committed offline/local profile truth. Ready launchable profiles must match local dashboard preview counts and read-only Segment 3-6 summaries; blocked profiles must remain inspectable only as metadata/source/trajectory/blocker previews and must not appear launchable. Editing, baking, file import, saving, output-folder export, local-folder opening, and runner launch remain disabled until the hosted page connects to the local companion.

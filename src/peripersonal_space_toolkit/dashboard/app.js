@@ -1013,7 +1013,9 @@ function staticTrialFileRow({
   const sequenceLabels = variant.map((choice) => choice.label).join(" | ");
   const variantKey = previewVariantKey(variant);
   const folderKey = slugify(`${rowFolderName}__${folderName}`);
-  const familySuffix = family === "audio_tactile" ? `soa${soaMs}ms_tac120ms_ch3` : (family === "baseline" ? `baseline_${baselineMode}_soa${soaMs}ms_tac120ms_ch3` : "catch_audio");
+  const familySuffix = family === "audio_tactile"
+    ? `soa${soaMs}ms_tac120ms_ch3`
+    : (family === "baseline" ? `baseline_${baselineMode}_soa${soaMs}ms_tac120ms_ch3` : `${family}_audio`);
   const sourceFileName = `${slugify(variantKey)}_${familySuffix}_total${durationMs}ms.wav`;
   const filePath = `static://${templateId}/${rowFolderName}/${folderName}/${sourceFileName}`;
   const fileKey = `${family}|${rowFolderName}|${variantIndex}|${soaMs}|${baselineMode}`;
@@ -1037,8 +1039,8 @@ function staticTrialFileRow({
     sequence_labels: sequenceLabels,
     source_labels: sequenceLabels,
     noise_type: noiseType,
-    channels: family === "catch" ? 2 : 3,
-    tactile_channel: family === "catch" ? "" : 3,
+    channels: ["catch", "auditory_only"].includes(family) ? 2 : 3,
+    tactile_channel: ["catch", "auditory_only"].includes(family) ? "" : 3,
   };
 }
 
@@ -1048,8 +1050,10 @@ function staticTrialFileBakePayload(design, status) {
   const soaValues = (protocol.soa_values_ms || []).filter((value) => Number.isFinite(Number(value))).map((value) => Number(value));
   const baselineSoas = staticBaselineSoaValues(protocol, soaValues);
   const includeCatch = Boolean(protocol.include_catch_trials);
+  const includeAuditoryOnly = Boolean(protocol.include_auditory_only_trials);
   const baselineCrossesVariants = protocol.baseline_crosses_sequence_variants !== false;
   const catchCrossesVariants = protocol.catch_crosses_sequence_variants !== false;
+  const auditoryOnlyCrossesVariants = protocol.auditory_only_crosses_sequence_variants !== false;
   const files = [];
   let variantCounter = 1;
   for (const [rowIndex, strip] of (protocol.trial_strips || []).entries()) {
@@ -1104,12 +1108,28 @@ function staticTrialFileBakePayload(design, status) {
           noiseType,
         }));
       }
+      if (includeAuditoryOnly && (auditoryOnlyCrossesVariants || variantListIndex === 0)) {
+        files.push(staticTrialFileRow({
+          templateId: design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID,
+          rowIndex,
+          rowLabel,
+          family: "auditory_only",
+          folderName: "auditory_only",
+          variant,
+          variantIndex,
+          durationMs,
+          soaMs: 0,
+          baselineMode: "auditory_only",
+          noiseType,
+        }));
+      }
     }
   }
   const counts = {
     audio_tactile: files.filter((file) => file.family === "audio_tactile").length,
     baseline: files.filter((file) => file.family === "baseline").length,
     catch: files.filter((file) => file.family === "catch").length,
+    auditory_only: files.filter((file) => file.family === "auditory_only").length,
   };
   return {
     root: "",
@@ -1120,6 +1140,7 @@ function staticTrialFileBakePayload(design, status) {
     audio_tactile_count: counts.audio_tactile,
     baseline_count: counts.baseline,
     catch_count: counts.catch,
+    auditory_only_count: counts.auditory_only,
     total_count: files.length,
     rows: [],
     files,
@@ -1148,7 +1169,7 @@ function staticTrialPoolSettings(protocol) {
   const familyRepetitions = {};
   for (const [key, value] of Object.entries(defaults)) {
     const family = trialPoolFamilyKey(key);
-    if (["audio_tactile", "baseline", "catch"].includes(family)) {
+    if (["audio_tactile", "baseline", "catch", "auditory_only"].includes(family)) {
       familyRepetitions[family] = normalizeRepetitionValue(value, defaultRepetitions);
     }
   }
@@ -1176,7 +1197,7 @@ function trialPoolExactFamilyCounts(source = {}) {
     && !Array.isArray(source.exact_family_trial_counts)
   ) ? source.exact_family_trial_counts : source;
   const exactCounts = {};
-  for (const [family, key] of [["baseline", "baseline_trials_exact"], ["catch", "catch_trials_exact"]]) {
+  for (const [family, key] of [["baseline", "baseline_trials_exact"], ["catch", "catch_trials_exact"], ["auditory_only", "auditory_only_trials_exact"]]) {
     const value = raw?.[family] ?? raw?.[key];
     if (value === null || value === undefined || value === "") continue;
     const parsed = Number(value);
@@ -1314,7 +1335,7 @@ function staticTrialPoolBakePayload(design, trialFileBake) {
   const protocol = design.protocol || {};
   const settings = staticTrialPoolSettings(protocol);
   const poolRows = staticTrialPoolRows(trialFileBake.files || [], settings);
-  const familyCounts = { audio_tactile: 0, baseline: 0, catch: 0 };
+  const familyCounts = { audio_tactile: 0, baseline: 0, catch: 0, auditory_only: 0 };
   for (const row of poolRows) {
     if (Object.prototype.hasOwnProperty.call(familyCounts, row.family)) familyCounts[row.family] += 1;
   }
@@ -1333,6 +1354,7 @@ function staticTrialPoolBakePayload(design, trialFileBake) {
     audio_tactile_count: familyCounts.audio_tactile,
     baseline_count: familyCounts.baseline,
     catch_count: familyCounts.catch,
+    auditory_only_count: familyCounts.auditory_only,
     estimated_total_duration_ms: totalDurationMs,
     family_counts: familyCounts,
     preview_rows: poolRows,
@@ -1682,6 +1704,10 @@ function normalizeStaticTemplateDesign(data, status) {
     catch_trial_percentage: 10,
     catch_trials_exact: null,
     catch_crosses_sequence_variants: true,
+    include_auditory_only_trials: false,
+    auditory_only_trial_percentage: 0,
+    auditory_only_trials_exact: null,
+    auditory_only_crosses_sequence_variants: true,
     include_baseline_trials: true,
     baseline_strategy: "tactile_only",
     baseline_trials_exact: null,
@@ -1706,6 +1732,13 @@ function normalizeStaticTemplateDesign(data, status) {
     design.protocol.include_catch_trials = Boolean(
       Number(rawProtocol.catch_trial_percentage || 0) > 0
       || (catchExact !== null && catchExact !== undefined && catchExact !== 0 && catchExact !== "")
+    );
+  }
+  if (!Object.prototype.hasOwnProperty.call(rawProtocol, "include_auditory_only_trials")) {
+    const auditoryExact = rawProtocol.auditory_only_trials_exact;
+    design.protocol.include_auditory_only_trials = Boolean(
+      Number(rawProtocol.auditory_only_trial_percentage || 0) > 0
+      || (auditoryExact !== null && auditoryExact !== undefined && auditoryExact !== 0 && auditoryExact !== "")
     );
   }
   hydrateStaticSourceAssets(design, status);
@@ -1843,6 +1876,7 @@ function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, b
         audio_tactile_count: trialFileBake.audio_tactile_count || 0,
         baseline_count: trialFileBake.baseline_count || 0,
         catch_count: trialFileBake.catch_count || 0,
+        auditory_only_count: trialFileBake.auditory_only_count || 0,
         total_count: trialFileBake.total_count || 0,
       }
     ),
@@ -1857,6 +1891,7 @@ function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, b
         audio_tactile_count: trialPoolBake.audio_tactile_count || 0,
         baseline_count: trialPoolBake.baseline_count || 0,
         catch_count: trialPoolBake.catch_count || 0,
+        auditory_only_count: trialPoolBake.auditory_only_count || 0,
       }
     ),
     "5_block_csv_preview": segment(
@@ -2161,6 +2196,7 @@ function dashboardAuditSnapshot() {
       audio_tactile_count: segment.audio_tactile_count || 0,
       baseline_count: segment.baseline_count || 0,
       catch_count: segment.catch_count || 0,
+      auditory_only_count: segment.auditory_only_count || 0,
       total_count: segment.total_count || segment.trial_count || 0,
       block_count: segment.block_count || 0,
       csv_count: segment.csv_count || 0
@@ -2206,6 +2242,8 @@ function dashboardAuditSnapshot() {
       baseline_crosses_sequence_variants: protocol.baseline_crosses_sequence_variants !== false,
       include_catch_trials: Boolean(protocol.include_catch_trials),
       catch_crosses_sequence_variants: protocol.catch_crosses_sequence_variants !== false,
+      include_auditory_only_trials: Boolean(protocol.include_auditory_only_trials),
+      auditory_only_crosses_sequence_variants: protocol.auditory_only_crosses_sequence_variants !== false,
       distribute_trial_pool_across_blocks: Boolean(protocol.distribute_trial_pool_across_blocks),
       trial_pool_repetition_defaults: clone(protocol.trial_pool_repetition_defaults || {}),
       trial_strips: (protocol.trial_strips || []).map(auditTrialStripSnapshot)
@@ -2215,6 +2253,7 @@ function dashboardAuditSnapshot() {
       audio_tactile_count: state?.trial_file_bake?.audio_tactile_count || 0,
       baseline_count: state?.trial_file_bake?.baseline_count || 0,
       catch_count: state?.trial_file_bake?.catch_count || 0,
+      auditory_only_count: state?.trial_file_bake?.auditory_only_count || 0,
       total_count: state?.trial_file_bake?.total_count || 0
     },
     trial_pool_bake: {
@@ -2224,6 +2263,7 @@ function dashboardAuditSnapshot() {
       audio_tactile_count: state?.trial_pool_bake?.audio_tactile_count || 0,
       baseline_count: state?.trial_pool_bake?.baseline_count || 0,
       catch_count: state?.trial_pool_bake?.catch_count || 0,
+      auditory_only_count: state?.trial_pool_bake?.auditory_only_count || 0,
       estimated_total_duration_ms: state?.trial_pool_bake?.estimated_total_duration_ms || 0,
       family_counts: clone(state?.trial_pool_bake?.family_counts || {}),
       preview_rows: auditPoolRows(state?.trial_pool_bake?.preview_rows || [])
@@ -3594,6 +3634,7 @@ function trialPoolFamilyKey(value) {
   if (["audio", "target", "target_audio_tactile", "audio_tactile_trials"].includes(key)) return "audio_tactile";
   if (["baseline_trials", "tactile_baseline", "tactile_only"].includes(key)) return "baseline";
   if (["catch_trials", "audio_only"].includes(key)) return "catch";
+  if (["auditory", "auditory_only", "auditory_only_trials", "audio_response", "audio_only_response"].includes(key)) return "auditory_only";
   return key;
 }
 
@@ -3655,13 +3696,13 @@ function syncTrialPoolDraftFromState() {
   const familyRepetitions = {};
   for (const [key, value] of Object.entries(protocolDefaults)) {
     const family = trialPoolFamilyKey(key);
-    if (["audio_tactile", "baseline", "catch"].includes(family)) {
+    if (["audio_tactile", "baseline", "catch", "auditory_only"].includes(family)) {
       familyRepetitions[family] = normalizeRepetitionValue(value, defaultRepetitions);
     }
   }
   for (const [key, value] of Object.entries(settings.family_repetitions || {})) {
     const family = trialPoolFamilyKey(key);
-    if (["audio_tactile", "baseline", "catch"].includes(family)) {
+    if (["audio_tactile", "baseline", "catch", "auditory_only"].includes(family)) {
       familyRepetitions[family] = normalizeRepetitionValue(value, defaultRepetitions);
     }
   }
@@ -5768,6 +5809,10 @@ function collectPayload() {
     include_catch_trials: $("include-catch-trials")?.checked || false,
     catch_crosses_sequence_variants: design.protocol?.catch_crosses_sequence_variants !== false,
     catch_trial_percentage: numberValue("catch-percent", 0),
+    include_auditory_only_trials: Boolean(design.protocol?.include_auditory_only_trials),
+    auditory_only_crosses_sequence_variants: design.protocol?.auditory_only_crosses_sequence_variants !== false,
+    auditory_only_trial_percentage: Number(design.protocol?.auditory_only_trial_percentage || 0),
+    auditory_only_trials_exact: design.protocol?.auditory_only_trials_exact ?? null,
     include_baseline_trials: baselineStrategyIsActive(baselineStrategy),
     baseline_strategy: baselineStrategy,
     baseline_trials_exact: baselineStrategyIsActive(baselineStrategy) ? (design.protocol?.baseline_trials_exact ?? null) : null,

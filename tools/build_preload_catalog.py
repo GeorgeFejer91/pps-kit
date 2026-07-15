@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any
 
 from peripersonal_space_toolkit import render_backend
-from peripersonal_space_toolkit.dashboard_app import _stimulus_trajectory_snapshot
+from peripersonal_space_toolkit.dashboard_app import _stimulus_trajectory_snapshot, _write_generated_profile_noise_wav
 from peripersonal_space_toolkit.design import (
     AudioFileSpec,
     NoiseDefinition,
@@ -242,6 +242,10 @@ def render_noise_source(template: StudyTemplate, design: Any, noise: NoiseDefini
     source_design.noises = [replace(noise, label=f"source_{index:03d}")]
     source_design.custom_looming_files = []
     source_design.prestimulus_files = []
+    if _uses_direct_static_profile_noise(noise):
+        target.parent.mkdir(parents=True, exist_ok=True)
+        _write_generated_profile_noise_wav(target, source_design, noise)
+        return
     design_path = build_dir / "stimulus_design.json"
     save_design(source_design, design_path)
     result = render_backend.render_design_with_3dti(
@@ -258,6 +262,13 @@ def render_noise_source(template: StudyTemplate, design: Any, noise: NoiseDefini
     qc_target = target.with_suffix(".render_qc.csv")
     if result.qc_path.exists():
         shutil.copy2(result.qc_path, qc_target)
+
+
+def _uses_direct_static_profile_noise(noise: NoiseDefinition) -> bool:
+    return (
+        str(getattr(noise, "motion_mode", "") or "").strip().lower() == "stationary"
+        and str(getattr(noise, "source_profile", "") or "").strip().lower() == "continuous_noise"
+    )
 
 
 def asset_metadata(

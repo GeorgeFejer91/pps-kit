@@ -1,0 +1,92 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "tajadura_jimenez_2009_uncrossed_visual_deprivation",
+  "assets": [
+    {
+      "label": "Left speaker pink-noise burst",
+      "path": "assets/preloads/tajadura_jimenez_2009_uncrossed_visual_deprivation/02_looming_stimuli/looming_Left_speaker_pink-noise_burst.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/tajadura_jimenez_2009_uncrossed_visual_deprivation/02_looming_stimuli/looming_Left_speaker_pink-noise_burst.wav",
+      "sha256": "5d0cb23a47675ee520b2dc193d6d88e271480dae328edc8c885d5c4950ae701c",
+      "duration_s": 0.1,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Left speaker pink-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 39.0512,
+        "end_distance_cm": 39.0512,
+        "start_rotation_deg": 320.1944,
+        "end_rotation_deg": 320.1944,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": -0.25,
+          "y_m": 0.3,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": -0.25,
+          "y_m": 0.3,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Right speaker pink-noise burst",
+      "path": "assets/preloads/tajadura_jimenez_2009_uncrossed_visual_deprivation/02_looming_stimuli/looming_Right_speaker_pink-noise_burst.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/tajadura_jimenez_2009_uncrossed_visual_deprivation/02_looming_stimuli/looming_Right_speaker_pink-noise_burst.wav",
+      "sha256": "a2dbf6d1075ec1e9c15bd6b0c9fe914c49514394e92f6dfb56f892d643520162",
+      "duration_s": 0.1,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Right speaker pink-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 39.0512,
+        "end_distance_cm": 39.0512,
+        "start_rotation_deg": 39.8056,
+        "end_rotation_deg": 39.8056,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.25,
+          "y_m": 0.3,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.25,
+          "y_m": 0.3,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

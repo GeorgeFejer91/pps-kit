@@ -97,6 +97,7 @@ RUNNABLE_STRUCTURED_IDS = {
     "matsuda_2021_four_directions",
     "lamia_2026_arm_movement",
     "smartphone_rt_methods_2025",
+    "tajadura_jimenez_2009_visual_deprivation",
     "tonelli_2019_echolocation",
 }
 
@@ -142,18 +143,18 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "structured_expected_outcome_record_count": 71,
         "pending_expected_outcome_record_count": 0,
         "adjacent_or_out_of_scope_record_count": 4,
-        "runnable_profile_parameter_record_count": 12,
+        "runnable_profile_parameter_record_count": 13,
         "observed_behavioral_comparison_record_count": 0,
-        "mouse_click_simulated_participant_like_comparison_record_count": 12,
-        "synthetic_profile_contrast_comparison_record_count": 12,
+        "mouse_click_simulated_participant_like_comparison_record_count": 13,
+        "synthetic_profile_contrast_comparison_record_count": 13,
         "parameter_run_evidence_only_record_count": 0,
-        "not_runnable_no_observed_comparison_record_count": 59,
+        "not_runnable_no_observed_comparison_record_count": 58,
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 4,
-            "not_yet_templated_missing_publication_parameters": 50,
-            "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 12,
+            "not_yet_templated_missing_publication_parameters": 49,
+            "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 13,
             "template_present_blocked_missing_publication_parameters": 9,
         },
     }
@@ -188,17 +189,30 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
                 "replication claim."
             ),
         }
-        assert record["observed_mouse_click_participant_like_evidence"] == {
-            "status": "mouse_click_simulated_participant_like_comparison_available",
-            "source_report": (
+        expected_mouse_source = (
+            "artifacts/validation_runs/current_goal_tajadura_2009_known_parameter_20260715/"
+            "tajadura_2009_known_parameter_validation_report.json"
+            if record_id == "tajadura_jimenez_2009_visual_deprivation"
+            else (
                 "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/"
                 "ready_profile_mouse_click_expected_outcome_audit_report.json"
-            ),
-            "model_boundary": (
+            )
+        )
+        expected_mouse_boundary = (
+            "Paper-specific deterministic participant-like mouse clicks were injected through "
+            "SessionRunnerController and evaluated from runner-produced analysis rows; not collected "
+            "participant data, not physical loopback evidence, and not a scientific replication claim."
+            if record_id == "tajadura_jimenez_2009_visual_deprivation"
+            else (
                 "Deterministic participant-like mouse clicks were injected through SessionRunnerController "
                 "after tactile onsets and evaluated from runner-produced analysis rows; not collected "
                 "participant data, not physical loopback evidence, and not a scientific replication claim."
-            ),
+            )
+        )
+        assert record["observed_mouse_click_participant_like_evidence"] == {
+            "status": "mouse_click_simulated_participant_like_comparison_available",
+            "source_report": expected_mouse_source,
+            "model_boundary": expected_mouse_boundary,
         }
         assert "mouse clicks through SessionRunnerController" in record["observed_evidence_boundary"]
         assert "Deterministic synthetic RT comparisons" in record["observed_profile_contrast_evidence"]["model_boundary"]

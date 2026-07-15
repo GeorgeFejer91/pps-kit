@@ -1143,6 +1143,66 @@ def test_exact_catch_trials_are_total_across_trial_strips():
     assert {row["target_role"] for row in rows if row["trial_type"] == "Catch"} == {"catch_no_target"}
 
 
+def test_exact_auditory_only_trials_are_response_trials_total_across_trial_strips():
+    design = default_design()
+    design.noises = [
+        NoiseDefinition("Left burst", "white", -90.0),
+        NoiseDefinition("Right burst", "white", 90.0),
+    ]
+    design.protocol = ProtocolSpec(
+        repetitions_per_condition=1,
+        soa_values_ms=[0],
+        spatial_values_cm=[30.0],
+        auditory_motion_directions=["static"],
+        tactile_sites=["right index finger"],
+        include_catch_trials=False,
+        catch_trial_percentage=0.0,
+        include_auditory_only_trials=True,
+        auditory_only_trials_exact=3,
+        auditory_only_crosses_sequence_variants=True,
+        include_baseline_trials=False,
+        respiratory_phases=["Any"],
+        blocks=1,
+        participants=1,
+        trial_strips=[
+            TrialStripSpec(
+                strip_id="left",
+                label="Left row",
+                metadata={"correct_response": "left"},
+                elements=[
+                    TrialStripElementSpec(
+                        kind="looming_stimulus",
+                        label="Left sound",
+                        source_labels=["Left burst"],
+                    )
+                ],
+            ),
+            TrialStripSpec(
+                strip_id="right",
+                label="Right row",
+                metadata={"correct_response": "right"},
+                elements=[
+                    TrialStripElementSpec(
+                        kind="looming_stimulus",
+                        label="Right sound",
+                        source_labels=["Right burst"],
+                    )
+                ],
+            ),
+        ],
+    )
+
+    rows = block_trial_rows(design)
+    counts = Counter(str(row["trial_type"]) for row in rows)
+    auditory_rows = [row for row in rows if row["trial_type"] == "Auditory-Only"]
+
+    assert counts == {"Audio-Tactile": 2, "Auditory-Only": 3}
+    assert {row["expected_response"] for row in auditory_rows} == {"respond"}
+    assert {row["target_role"] for row in auditory_rows} == {"auditory_target"}
+    assert {row["tactile_enabled"] for row in auditory_rows} == {False}
+    assert protocol_summary(design)["auditory_only_trials"] == 3
+
+
 def test_block_specs_partition_trial_pool_by_stimulus_type():
     design = default_design()
     design.noises = design.noises[:1]

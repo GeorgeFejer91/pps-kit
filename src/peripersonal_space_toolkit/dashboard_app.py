@@ -172,7 +172,7 @@ DASHBOARD_DESIGN_EXPORT_DIRNAME = "dashboard_design_export"
 PROJECT_METADATA_KEY = "dashboard_project"
 RUN_SETUP_METADATA_KEY = "dashboard_run_setup"
 CUSTOM_PROJECT_ID_SLUG_MAX_LENGTH = 21
-TRIAL_POOL_FAMILIES = ("audio_tactile", "baseline", "catch")
+TRIAL_POOL_FAMILIES = ("audio_tactile", "baseline", "catch", "auditory_only")
 ROW_CONTRACT_FIELDS = (
     "spatial_value_cm",
     "expected_response",
@@ -272,6 +272,10 @@ def _trial_family_contract_payload(source: dict[str, Any], family: str) -> dict[
         payload["expected_response"] = "withhold"
         payload["target_role"] = "catch_no_target"
         payload["response_rule"] = payload.get("response_rule") or "withhold_response_to_audio_only_catch"
+    elif family == "auditory_only":
+        payload["expected_response"] = payload.get("expected_response") or "respond"
+        payload["target_role"] = payload.get("target_role") or "auditory_target"
+        payload["response_rule"] = payload.get("response_rule") or "respond_to_auditory_target"
     return payload
 
 
@@ -409,6 +413,7 @@ TRIAL_FAMILY_COLORS = {
     "audio_tactile": "#246b55",
     "baseline": "#4b5fa8",
     "catch": "#a4631b",
+    "auditory_only": "#8b4d88",
 }
 STUDY5_TRIAL_POOL_REPETITION_DEFAULTS = {
     "default": 6.0,
@@ -4297,6 +4302,7 @@ def _trial_file_bake_status(render_dir: Path) -> dict[str, Any]:
         "audio_tactile_count": int(data.get("audio_tactile_count", 0) or 0) if isinstance(data, dict) else 0,
         "baseline_count": int(data.get("baseline_count", 0) or 0) if isinstance(data, dict) else 0,
         "catch_count": int(data.get("catch_count", 0) or 0) if isinstance(data, dict) else 0,
+        "auditory_only_count": int(data.get("auditory_only_count", 0) or 0) if isinstance(data, dict) else 0,
         "total_count": len(files),
         "rows": data.get("rows", []) if isinstance(data, dict) else [],
         "files": _trial_pool_source_file_rows(files),
@@ -4469,6 +4475,7 @@ def _segment_status_tactile_trials(project_dir: Path, design: StimulusDesign | N
     record["audio_tactile_count"] = int(manifest.get("audio_tactile_count", 0) or 0) if isinstance(manifest, dict) else 0
     record["baseline_count"] = int(manifest.get("baseline_count", 0) or 0) if isinstance(manifest, dict) else 0
     record["catch_count"] = int(manifest.get("catch_count", 0) or 0) if isinstance(manifest, dict) else 0
+    record["auditory_only_count"] = int(manifest.get("auditory_only_count", 0) or 0) if isinstance(manifest, dict) else 0
     record["total_count"] = len(files)
     record["validation_errors"] = errors
     return record
@@ -4495,6 +4502,7 @@ def _trial_pool_bake_status(project_dir: Path, design: StimulusDesign | None = N
         "audio_tactile_count": int(manifest.get("family_counts", {}).get("audio_tactile", 0) or 0) if isinstance(manifest, dict) else 0,
         "baseline_count": int(manifest.get("family_counts", {}).get("baseline", 0) or 0) if isinstance(manifest, dict) else 0,
         "catch_count": int(manifest.get("family_counts", {}).get("catch", 0) or 0) if isinstance(manifest, dict) else 0,
+        "auditory_only_count": int(manifest.get("family_counts", {}).get("auditory_only", 0) or 0) if isinstance(manifest, dict) else 0,
         "estimated_total_duration_ms": int(manifest.get("estimated_total_duration_ms", 0) or 0) if isinstance(manifest, dict) else 0,
         "average_trial_duration_ms": float(manifest.get("average_trial_duration_ms", 0) or 0) if isinstance(manifest, dict) else 0,
         "longest_folder": manifest.get("longest_folder", {}) if isinstance(manifest, dict) else {},
@@ -4560,6 +4568,7 @@ def _segment_status_trial_pool(project_dir: Path, design: StimulusDesign | None 
     record["audio_tactile_count"] = int(manifest.get("family_counts", {}).get("audio_tactile", 0) or 0) if isinstance(manifest, dict) else 0
     record["baseline_count"] = int(manifest.get("family_counts", {}).get("baseline", 0) or 0) if isinstance(manifest, dict) else 0
     record["catch_count"] = int(manifest.get("family_counts", {}).get("catch", 0) or 0) if isinstance(manifest, dict) else 0
+    record["auditory_only_count"] = int(manifest.get("family_counts", {}).get("auditory_only", 0) or 0) if isinstance(manifest, dict) else 0
     record["estimated_total_duration_ms"] = int(manifest.get("estimated_total_duration_ms", 0) or 0) if isinstance(manifest, dict) else 0
     record["validation_errors"] = errors
     return record
@@ -4760,15 +4769,15 @@ def _validate_tactile_trial_manifest(manifest: dict[str, Any], *, design: Stimul
             errors.append(f"Segment 3 trial file hash changed: {path.name}.")
         info = _audio_file_info(path)
         family = str(item.get("family") or "").strip()
-        if family == "catch":
+        if family in {"catch", "auditory_only"}:
             if int(info["channels"]) != 2:
-                errors.append(f"Segment 3 catch trial file is not stereo/binaural audio-only: {path.name}.")
+                errors.append(f"Segment 3 {family.replace('_', '-')} trial file is not stereo/binaural audio-only: {path.name}.")
         elif int(info["channels"]) != 3:
             errors.append(f"Segment 3 tactile/baseline trial file is not 3-channel: {path.name}.")
         expected_duration = int(item.get("duration_ms") or 0)
         if expected_duration and abs(expected_duration - int(info["duration_ms"])) > 1:
             errors.append(f"Segment 3 trial file duration changed: {path.name}.")
-        if family != "catch" and int(item.get("tactile_channel") or 0) != 3:
+        if family not in {"catch", "auditory_only"} and int(item.get("tactile_channel") or 0) != 3:
             errors.append(f"Segment 3 manifest does not mark channel 3 as tactile: {path.name}.")
     return errors
 
@@ -4998,6 +5007,7 @@ def _expected_segment_counts(design: StimulusDesign, project_dir: Path) -> dict[
         expected_audio_tactile = variant_count * len([value for value in design.protocol.soa_values_ms if isinstance(value, (int, float))])
     expected_baseline = variant_count * len(_baseline_anchor_specs(design))
     expected_catch = variant_count if bool(getattr(design.protocol, "include_catch_trials", False)) else 0
+    expected_auditory_only = variant_count if bool(getattr(design.protocol, "include_auditory_only_trials", False)) else 0
     segment3_manifest = _load_json(_baseline_tactile_bake_root(project_dir) / "baseline_tactile_trial_files_manifest.json")
     segment3_files = segment3_manifest.get("files", []) if isinstance(segment3_manifest, dict) else []
     expected_pool = 0
@@ -5024,7 +5034,8 @@ def _expected_segment_counts(design: StimulusDesign, project_dir: Path) -> dict[
             "audio_tactile_count": expected_audio_tactile,
             "baseline_count": expected_baseline,
             "catch_count": expected_catch,
-            "total_count": expected_audio_tactile + expected_baseline + expected_catch,
+            "auditory_only_count": expected_auditory_only,
+            "total_count": expected_audio_tactile + expected_baseline + expected_catch + expected_auditory_only,
         },
         "4_trial_repetition_pool": {
             "source_file_count": len(segment3_files),
@@ -5072,6 +5083,7 @@ def _write_segment_validation_report(
                 "audio_tactile_count": segment.get("audio_tactile_count", 0),
                 "baseline_count": segment.get("baseline_count", 0),
                 "catch_count": segment.get("catch_count", 0),
+                "auditory_only_count": segment.get("auditory_only_count", 0),
                 "block_count": segment.get("block_count", 0),
                 "csv_count": segment.get("csv_count", 0),
                 "total_count": segment.get("total_count", 0),
@@ -5173,6 +5185,7 @@ def _trial_bake_output_folder_name(family: str, row_index: int, row_label: str) 
         "audio_tactile": "target_audio_tactile",
         "baseline": "baseline",
         "catch": "catch_trials",
+        "auditory_only": "auditory_only",
     }.get(family, family or "trial_files")
     return str(Path(_trial_bake_row_folder_name(row_index, row_label)) / suffix)
 
@@ -5632,7 +5645,8 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
     ) -> None:
         digest = _local_file_sha256(output_path)
         output_info = _audio_file_info(output_path)
-        tactile_duration_ms = 0 if family == "catch" else _tactile_cue_duration_ms(int(output_info["sample_rate"]))
+        audio_only_family = family in {"catch", "auditory_only"}
+        tactile_duration_ms = 0 if audio_only_family else _tactile_cue_duration_ms(int(output_info["sample_rate"]))
         row_index = int(variant.get("row_index") or 0)
         row_label = str(variant.get("row_label") or f"Row {row_index}")
         channel_role_map = {
@@ -5642,7 +5656,7 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
                 "0": "left auditory/binaural",
                 "1": "right auditory/binaural",
             },
-        } if family == "catch" else {
+        } if audio_only_family else {
             "1": "left auditory/binaural",
             "2": "right auditory/binaural",
             "3": "tactile cue",
@@ -5680,11 +5694,11 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
                 "sample_rate_hz": int(output_info["sample_rate"]),
                 "channels": int(output_info["channels"]),
                 "channel_role_map": channel_role_map,
-                "tactile_channel": "" if family == "catch" else 3,
-                "tactile_channel_zero_based": "" if family == "catch" else 2,
+                "tactile_channel": "" if audio_only_family else 3,
+                "tactile_channel_zero_based": "" if audio_only_family else 2,
                 "tactile_duration_ms": tactile_duration_ms,
                 "merge_engine": merge_engine,
-                "tactile_cue_path": "" if family == "catch" else str(DEFAULT_TACTILE_CUE_PATH),
+                "tactile_cue_path": "" if audio_only_family else str(DEFAULT_TACTILE_CUE_PATH),
                 "sha256": digest,
             }
         )
@@ -5694,9 +5708,12 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
         global_soa_values = [int(value) for value in design.protocol.soa_values_ms]
         baseline_anchors = _baseline_anchor_specs(design)
         include_catch = bool(getattr(design.protocol, "include_catch_trials", False))
+        include_auditory_only = bool(getattr(design.protocol, "include_auditory_only_trials", False))
         catch_crosses_variants = bool(getattr(design.protocol, "catch_crosses_sequence_variants", True))
+        auditory_only_crosses_variants = bool(getattr(design.protocol, "auditory_only_crosses_sequence_variants", True))
         baseline_crosses_variants = bool(getattr(design.protocol, "baseline_crosses_sequence_variants", True))
         catch_rows_seen: set[tuple[int, str]] = set()
+        auditory_only_rows_seen: set[tuple[int, str]] = set()
         baseline_rows_seen: set[tuple[int, str]] = set()
         for variant in variants:
             _validate_trial_sequence_variant(variant)
@@ -5736,6 +5753,34 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
                     tactile_onset_s=0.0,
                     spatial_value_cm=_variant_spatial_value_for_soa(variant, design.protocol, 0),
                     row_folder=catch_folder,
+                )
+            if include_auditory_only and (auditory_only_crosses_variants or row_key not in auditory_only_rows_seen):
+                auditory_only_rows_seen.add(row_key)
+                source_info = _audio_file_info(source_path)
+                output_stem = _trial_bake_file_stem(
+                    family="auditory_only",
+                    variant=variant,
+                    soa_ms=0,
+                    tactile_duration_ms=0,
+                    total_duration_ms=int(source_info["duration_ms"]),
+                )
+                auditory_folder = root / _trial_bake_output_folder_name("auditory_only", row_index, row_label)
+                _ensure_dir(auditory_folder)
+                output_path = _unique_output_path(auditory_folder, output_stem, ".wav")
+                _copy_file(source_path, output_path)
+                add_manifest_row(
+                    family="auditory_only",
+                    variant=variant,
+                    soa_ms=0,
+                    anchor_label="",
+                    baseline_mode="auditory_only",
+                    source_audio_path=source_path,
+                    output_path=output_path,
+                    duration_s=float(source_info["duration_s"]),
+                    merge_engine="copy_segment2_audio",
+                    tactile_onset_s=0.0,
+                    spatial_value_cm=_variant_spatial_value_for_soa(variant, design.protocol, 0),
+                    row_folder=auditory_folder,
                 )
             variant_soa_values = _variant_soa_values(variant, design.protocol)
             for soa_index, soa_ms in enumerate(variant_soa_values):
@@ -5854,6 +5899,7 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
             "loudness_policy": loudness_policy_for_design(design),
             "soa_values_ms": realized_soa_values or global_soa_values,
             "include_catch_trials": include_catch,
+            "include_auditory_only_trials": include_auditory_only,
             "baseline_strategy": design.protocol.baseline_strategy,
             "baseline_custom_trial_mode": design.protocol.baseline_custom_trial_mode,
             "channel_role_map": {
@@ -5869,6 +5915,7 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
             "audio_tactile_count": sum(1 for row in file_rows if row["family"] == "audio_tactile"),
             "baseline_count": sum(1 for row in file_rows if row["family"] == "baseline"),
             "catch_count": sum(1 for row in file_rows if row["family"] == "catch"),
+            "auditory_only_count": sum(1 for row in file_rows if row["family"] == "auditory_only"),
             "rows": rows,
             "files": file_rows,
         }
@@ -5891,6 +5938,7 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
             "audio_tactile_count": manifest_payload["audio_tactile_count"],
             "baseline_count": manifest_payload["baseline_count"],
             "catch_count": manifest_payload["catch_count"],
+            "auditory_only_count": manifest_payload["auditory_only_count"],
             "total_count": len(file_rows),
             "rows": rows,
         }
@@ -5940,6 +5988,8 @@ def _trial_pool_family_key(value: Any) -> str:
         return "baseline"
     if key in {"catch_trials", "audio_only"}:
         return "catch"
+    if key in {"auditory", "auditory_only", "auditory_only_trials", "audio_response", "audio_only_response"}:
+        return "auditory_only"
     return key
 
 
@@ -5975,6 +6025,8 @@ def _protocol_trial_pool_exact_family_counts(design: StimulusDesign) -> dict[str
         exact_counts["baseline"] = max(0, int(protocol.baseline_trials_exact or 0))
     if getattr(protocol, "catch_trials_exact", None) is not None:
         exact_counts["catch"] = max(0, int(protocol.catch_trials_exact or 0))
+    if getattr(protocol, "auditory_only_trials_exact", None) is not None:
+        exact_counts["auditory_only"] = max(0, int(protocol.auditory_only_trials_exact or 0))
     return exact_counts
 
 
@@ -6036,6 +6088,7 @@ def _family_label(family: str) -> str:
         "audio_tactile": "Audio-Tactile",
         "baseline": "Baseline",
         "catch": "Catch",
+        "auditory_only": "Auditory-Only",
     }.get(str(family or "").strip(), str(family or "Trial"))
 
 
@@ -6043,7 +6096,7 @@ def _trial_pool_percentages(counts: dict[str, int], total: int) -> dict[str, flo
     denominator = max(1, int(total))
     return {
         key: round(100.0 * int(counts.get(key, 0) or 0) / denominator, 2)
-        for key in ("audio_tactile", "baseline", "catch")
+        for key in TRIAL_POOL_FAMILIES
     }
 
 
@@ -6210,7 +6263,7 @@ def _apply_trial_pool_exact_family_counts(
     exact_counts = {
         family: max(0, int(value))
         for family, value in raw_exact_counts.items()
-        if family in {"baseline", "catch"} and value not in (None, "")
+        if family in {"baseline", "catch", "auditory_only"} and value not in (None, "")
     }
     if not exact_counts:
         return {}, None
@@ -6345,7 +6398,7 @@ def _bake_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recipe
     ]
     rows: list[dict[str, Any]] = []
     folder_summaries: dict[str, dict[str, Any]] = {}
-    family_counts = {"audio_tactile": 0, "baseline": 0, "catch": 0}
+    family_counts = {family: 0 for family in TRIAL_POOL_FAMILIES}
     trial_pool_index = 1
     for record in records:
         source = record["source"]
@@ -6458,6 +6511,7 @@ def _bake_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recipe
         "audio_tactile_count": family_counts["audio_tactile"],
         "baseline_count": family_counts["baseline"],
         "catch_count": family_counts["catch"],
+        "auditory_only_count": family_counts["auditory_only"],
         "estimated_total_duration_ms": total_duration_ms,
         "folder_count": len(folder_summary_rows),
         "balancing_signature": balancing_signature,
@@ -6743,6 +6797,7 @@ def _block_csv_family_label(family: str) -> str:
         "audio_tactile": "Audio-tactile",
         "baseline": "Baseline",
         "catch": "Catch",
+        "auditory_only": "Auditory-only",
     }.get(family, family.replace("_", " ").title() if family else "Trial")
 
 
@@ -8462,12 +8517,104 @@ def _copy_materialize_ingredient_audio_file(
     return target
 
 
+def _profile_noise_duration_s(design: StimulusDesign, noise: NoiseDefinition) -> float:
+    snapshot = dict(noise.trajectory_snapshot or {})
+    for key in ("movement_duration_s", "duration_s", "total_duration_s"):
+        try:
+            value = float(snapshot.get(key) or 0.0)
+        except (TypeError, ValueError):
+            value = 0.0
+        if value > 0:
+            return max(0.01, value)
+    return max(0.01, float(getattr(design.trajectory, "total_duration_s", 0.1) or 0.1))
+
+
+def _stereo_pan_gains_from_azimuth(azimuth_deg: float) -> tuple[float, float]:
+    clamped = max(-90.0, min(90.0, float(azimuth_deg)))
+    theta = ((clamped + 90.0) / 180.0) * (math.pi / 2.0)
+    return math.cos(theta), math.sin(theta)
+
+
+def _write_generated_profile_noise_wav(
+    path: Path,
+    design: StimulusDesign,
+    noise: NoiseDefinition,
+) -> None:
+    import numpy as np
+    import soundfile as sf
+
+    sample_rate = int(getattr(design.trajectory, "sample_rate", 44100) or 44100)
+    duration_s = _profile_noise_duration_s(design, noise)
+    frames = max(1, int(round(duration_s * sample_rate)))
+    noise_type = str(noise.noise_type or "white").strip().lower()
+    seed = _stationary_burst_seed(noise.label, noise_type)
+    dry = render_backend._generate_noise(noise_type, frames, sample_rate, seed)
+    dry = np.asarray(dry, dtype=np.float32)
+    edge_samples = min(frames // 2, max(0, int(round(0.005 * sample_rate))))
+    if edge_samples > 0:
+        ramp = np.sin(np.linspace(0.0, math.pi / 2.0, edge_samples, endpoint=True, dtype=np.float32)) ** 2
+        envelope = np.ones(frames, dtype=np.float32)
+        envelope[:edge_samples] = ramp
+        envelope[-edge_samples:] = ramp[::-1]
+        dry = dry * envelope
+    peak = float(np.max(np.abs(dry))) if dry.size else 0.0
+    if peak > 0:
+        dry = dry / peak * 0.8
+    left_gain, right_gain = _stereo_pan_gains_from_azimuth(float(noise.azimuth_deg or 0.0))
+    stereo = np.column_stack([dry * left_gain, dry * right_gain]) * max(0.0, float(noise.gain or 1.0))
+    _ensure_dir(path.parent)
+    sf.write(_soundfile_path(path), stereo.astype(np.float32), sample_rate, subtype="PCM_16")
+
+
+def _materialize_generated_profile_noise_ingredient(
+    project: DashboardProjectContext,
+    design: StimulusDesign,
+    noise: NoiseDefinition,
+    asset: dict[str, Any],
+    trajectory_snapshot: dict[str, Any],
+) -> Path:
+    noise_type = str(noise.noise_type or "").strip().lower()
+    if noise_type not in SUPPORTED_NOISE_TYPES:
+        raise FileNotFoundError(
+            f"Profile source audio is missing for {noise.label}, and {noise_type or 'unknown'} cannot be generated."
+        )
+    duration_ms = _duration_ms_from_seconds(_profile_noise_duration_s(design, noise))
+    descriptor = _descriptor_label(_ingredient_descriptor(noise.label, duration_ms, motion_mode="looming"))
+    target_path = project.segment1_dir / "_generated_profile_noise" / f"{descriptor}.wav"
+    _write_generated_profile_noise_wav(target_path, design, noise)
+    noise.prebaked_path = str(target_path)
+    if trajectory_snapshot:
+        noise.trajectory_snapshot = trajectory_snapshot
+    _record_ingredient_file(
+        project,
+        target_path,
+        label=noise.label,
+        source_kind=str(asset.get("source_kind") or "generated_profile_noise"),
+        trajectory_snapshot=trajectory_snapshot,
+        motion_mode="looming",
+        provenance={
+            "source_catalog_path": "",
+            "source_catalog_sha256": "",
+            "generated_from_profile_noise": True,
+            "read_only_catalog": False,
+            "loudness_policy": loudness_policy_for_design(design),
+        },
+    )
+    return target_path
+
+
 def _materialize_study_profile_segment1_ingredients(project: DashboardProjectContext, design: StimulusDesign) -> None:
     assets = _preload_assets_by_label(design.study_profile_id)
     for noise in design.noises:
         asset = assets.get(_source_key(noise.label), {})
-        source_path = _profile_materialization_source_path(noise.prebaked_path, project, asset)
         trajectory_snapshot = noise.trajectory_snapshot or dict(asset.get("trajectory_snapshot") or {})
+        raw_source_text = str(asset.get("path") or noise.prebaked_path or "").strip()
+        if not raw_source_text:
+            _materialize_generated_profile_noise_ingredient(project, design, noise, asset, trajectory_snapshot)
+            continue
+        source_path = _profile_materialization_source_path(noise.prebaked_path, project, asset)
+        if not _path_exists(source_path) or Path(source_path).is_dir():
+            raise FileNotFoundError(f"Profile source audio is missing: {source_path}")
         target_path = _copy_materialize_ingredient_audio_file(
             source_path,
             project.segment1_dir,
@@ -8700,6 +8847,14 @@ def _study_settings_manifest(context: DashboardProjectContext, design: StimulusD
                 note="Segment 3 only creates audio-only files that can later be used as catch trials; scheduling is not defined here.",
             ),
             _gui_setting_record(
+                key="include_auditory_only_trials",
+                value=bool(getattr(protocol, "include_auditory_only_trials", False)),
+                segment="3_tactile_and_baseline_trials",
+                label="Generate auditory-only response files",
+                control="study profile setting",
+                note="Auditory-only files are stereo response trials, distinct from no-response catch trials.",
+            ),
+            _gui_setting_record(
                 key="include_baseline_trials",
                 value=bool(protocol.include_baseline_trials),
                 segment="3_tactile_and_baseline_trials",
@@ -8797,11 +8952,14 @@ def _study_settings_manifest(context: DashboardProjectContext, design: StimulusD
                 "soa_values_ms": list(protocol.soa_values_ms),
                 "spatial_values_cm": list(protocol.spatial_values_cm),
                 "include_catch_trials": bool(getattr(protocol, "include_catch_trials", False)),
+                "include_auditory_only_trials": bool(getattr(protocol, "include_auditory_only_trials", False)),
                 "include_baseline_trials": bool(protocol.include_baseline_trials),
                 "baseline_strategy": protocol.baseline_strategy,
                 "baseline_custom_trial_mode": protocol.baseline_custom_trial_mode,
                 "baseline_soa_values_ms": list(protocol.baseline_soa_values_ms),
                 "catch_trial_percentage": protocol.catch_trial_percentage,
+                "auditory_only_trial_percentage": getattr(protocol, "auditory_only_trial_percentage", 0.0),
+                "auditory_only_trials_exact": getattr(protocol, "auditory_only_trials_exact", None),
                 "baseline_trials_exact": getattr(protocol, "baseline_trials_exact", None),
                 "baseline_trial_percentage": protocol.baseline_trial_percentage,
                 "repetitions_per_condition": protocol.repetitions_per_condition,
@@ -8826,6 +8984,12 @@ def _study_settings_manifest(context: DashboardProjectContext, design: StimulusD
                 "mode": "audio_only",
                 "source": "Segment 2 trial-sequence WAVs copied and renamed into Segment 3 catch folders",
                 "scheduling": "not defined in Segment 3",
+            },
+            "auditory_only_generation": {
+                "enabled": bool(getattr(protocol, "include_auditory_only_trials", False)),
+                "mode": "auditory_only_response_trial",
+                "source": "Segment 2 trial-sequence WAVs copied into Segment 3 auditory-only response folders",
+                "scheduling": "response-required auditory trials, distinct from catch trials",
             },
             "trial_pool_generation": {
                 "segment": "4_trial_repetition_pool",
