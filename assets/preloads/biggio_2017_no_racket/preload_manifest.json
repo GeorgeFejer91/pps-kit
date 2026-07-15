@@ -1,0 +1,152 @@
+{
+  "schema": "pps-preload-profile-assets.v1",
+  "template_id": "biggio_2017_no_racket",
+  "title": "Biggio 2017 racket tool-use PPS - no racket session",
+  "visible_variant_label": "B",
+  "publication_status": "published",
+  "profile_type": "static_near_far_electrical_voice_response_tool_context",
+  "asset_mode": "bundled_local",
+  "retrieval_strategy": "bundled_or_download_from_github_pages",
+  "local_only": true,
+  "catalog_segments": [
+    {
+      "folder": "01_profile",
+      "label": "Profile",
+      "path": "assets/preloads/biggio_2017_no_racket/01_profile"
+    },
+    {
+      "folder": "02_looming_stimuli",
+      "label": "Looming Stimuli Builder",
+      "path": "assets/preloads/biggio_2017_no_racket/02_looming_stimuli"
+    },
+    {
+      "folder": "03_baseline_strategy",
+      "label": "Baseline Strategy",
+      "path": "assets/preloads/biggio_2017_no_racket/03_baseline_strategy"
+    },
+    {
+      "folder": "04_trial_designer",
+      "label": "Trial Designer",
+      "path": "assets/preloads/biggio_2017_no_racket/04_trial_designer"
+    },
+    {
+      "folder": "05_run_setup",
+      "label": "Run Setup",
+      "path": "assets/preloads/biggio_2017_no_racket/05_run_setup"
+    }
+  ],
+  "profile_parameters_manifest": "assets/preloads/biggio_2017_no_racket/01_profile/profile_parameters_manifest.json",
+  "recreation_status": {
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
+    "missing_parameter_count": 0,
+    "unsupported_structure_count": 0
+  },
+  "render_contract": {
+    "stage": "auditory_looming_prebake",
+    "engine": "python-sofa-reference",
+    "include_tactile": false,
+    "tactile_policy": "deferred_until_session_preparation"
+  },
+  "assets": [
+    {
+      "label": "Near hand pink-noise burst",
+      "path": "assets/preloads/biggio_2017_no_racket/02_looming_stimuli/looming_Near_hand_pink-noise_burst.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/biggio_2017_no_racket/02_looming_stimuli/looming_Near_hand_pink-noise_burst.wav",
+      "sha256": "ccd21f1a246b7690fe69e1eea7cef3b5beff18f541578a1005a1047c5a7fbe90",
+      "duration_s": 0.15,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Near hand pink-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 30.0,
+        "end_distance_cm": 30.0,
+        "start_rotation_deg": 90.0,
+        "end_rotation_deg": 90.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.3,
+          "y_m": 0.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.3,
+          "y_m": 0.0,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Far racket-tip pink-noise burst",
+      "path": "assets/preloads/biggio_2017_no_racket/02_looming_stimuli/looming_Far_racket-tip_pink-noise_burst.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/biggio_2017_no_racket/02_looming_stimuli/looming_Far_racket-tip_pink-noise_burst.wav",
+      "sha256": "150ec6b4828326431031bded13b4c420650ac1424a30a6374af8e53f64f728d3",
+      "duration_s": 0.15,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Far racket-tip pink-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 98.5,
+        "end_distance_cm": 98.5,
+        "start_rotation_deg": 90.0,
+        "end_rotation_deg": 90.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.985,
+          "y_m": 0.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.985,
+          "y_m": 0.0,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ],
+  "notes": [
+    "Prebaked WAVs are local auditory-only profile assets.",
+    "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",
+    "The browser dashboard only orchestrates local companion verification and use of these files."
+  ]
+}

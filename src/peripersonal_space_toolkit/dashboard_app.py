@@ -184,6 +184,7 @@ ROW_CONTRACT_FIELDS = (
     "response_scoring_policy",
     "response_capture_device",
     "response_input_modality",
+    "tool_condition",
     "multisensory_trial_family",
     "exteroceptive_modality_set",
     "visual_stimulus_type",

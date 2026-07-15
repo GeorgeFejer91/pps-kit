@@ -850,6 +850,7 @@ def _response_base(event: dict[str, Any]) -> dict[str, Any]:
             "input_modality",
             "Input_Modality",
         ),
+        "tool_condition": _field(event, "tool_condition", "Tool_Condition"),
         "multisensory_trial_family": _field(
             event,
             "multisensory_trial_family",
@@ -3198,6 +3199,8 @@ def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
         row["response_capture_device"] = row.get("Response_Capture_Device")
     if "response_input_modality" not in row and "Response_Input_Modality" in row:
         row["response_input_modality"] = row.get("Response_Input_Modality")
+    if "tool_condition" not in row and "Tool_Condition" in row:
+        row["tool_condition"] = row.get("Tool_Condition")
     if "multisensory_trial_family" not in row and "Multisensory_Trial_Family" in row:
         row["multisensory_trial_family"] = row.get("Multisensory_Trial_Family")
     if "exteroceptive_modality_set" not in row and "Exteroceptive_Modality_Set" in row:

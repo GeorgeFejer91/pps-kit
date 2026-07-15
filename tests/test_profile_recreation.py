@@ -39,7 +39,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     template_ids = {template.template_id for template in templates}
     status = json.loads((root / "assets" / "preloads" / "profile_recreation_status.json").read_text(encoding="utf-8"))
 
-    assert len(templates) == 27
+    assert len(templates) == 30
     assert status["schema"] == PROFILE_RECREATION_STATUS_SCHEMA
     assert status["profile_count"] == len(templates)
     assert {profile["template_id"] for profile in status["profiles"]} == template_ids
@@ -107,7 +107,7 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert study5["segment_0_to_4_profile_checks_passed"] is True
     assert study5["missing_parameter_count"] == 0
     assert study5["unsupported_structure_count"] == 0
-    assert len(status["categories"]["gui_recreatable"]) == 18
+    assert len(status["categories"]["gui_recreatable"]) == 21
 
     study5_lateral = profiles[STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID]
     assert study5_lateral["primary_category"] == "gui_recreatable"
@@ -204,6 +204,20 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert tajadura_crossed["missing_parameter_count"] == 0
     assert tajadura_crossed["unsupported_structure_count"] == 0
 
+    for template_id in (
+        "biggio_2017_no_racket",
+        "biggio_2017_common_racket",
+        "biggio_2017_personal_racket",
+    ):
+        biggio = profiles[template_id]
+        assert biggio["primary_category"] == "gui_recreatable"
+        assert biggio["publication_status"] == "published"
+        assert biggio["runner_readiness"] == "ready"
+        assert biggio["profile_checks_passed"] is True
+        assert biggio["segment_0_to_4_profile_checks_passed"] is True
+        assert biggio["missing_parameter_count"] == 0
+        assert biggio["unsupported_structure_count"] == 0
+
     report = (root / "docs" / "PUBLISHED_STUDY_RECREATION_STATUS.md").read_text(encoding="utf-8")
     assert "## GUI-recreatable" in report
     assert "## Missing publication parameters" in report
@@ -212,7 +226,7 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert "Ordinary trial randomization and block order" in report
 
     tex_report = (root / "docs" / "audit_report.tex").read_text(encoding="utf-8")
-    assert "Published-paper profiles passing checks & 16" in tex_report
+    assert "Published-paper profiles passing checks & 19" in tex_report
     assert "study5" in tex_report and "box" in tex_report and "breathing" in tex_report
     assert "No visible GUI progress indicator" in tex_report
     assert "Clinical populations, interventions, non-audiotactile stimuli" in tex_report
@@ -274,7 +288,7 @@ def test_protocol12_matrix_targets_ready_published_profiles_and_blocked_samples(
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID not in ready_published
     assert DEFAULT_STUDY_TEMPLATE_ID in ready_all
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID in ready_all
-    assert len(ready_published) == 16
+    assert len(ready_published) == 19
     assert set(ready_published) < set(ready_all)
     assert len(blocked_samples) == 1
 

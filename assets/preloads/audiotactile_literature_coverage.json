@@ -229,17 +229,17 @@
   "coverage_summary": {
     "literature_record_count": 75,
     "literature_record_category_counts": {
-      "covered_runnable_profile": 13,
+      "covered_runnable_profile": 14,
       "covered_blocked_missing_publication_parameters": 9,
       "covered_blocked_toolkit_structure": 0,
       "not_yet_templated_requires_toolkit_structure": 0,
-      "not_yet_templated_missing_publication_parameters": 49,
+      "not_yet_templated_missing_publication_parameters": 48,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
-    "current_template_count": 27,
-    "current_profile_check_pass_count": 18,
-    "published_profile_check_pass_count": 16,
+    "current_template_count": 30,
+    "current_profile_check_pass_count": 21,
+    "published_profile_check_pass_count": 19,
     "local_unpublished_profile_check_pass_count": 2,
     "current_templates_with_missing_publication_parameters": 9,
     "current_templates_with_toolkit_structural_gaps": 0,
@@ -790,6 +790,27 @@
       "current_recreation_category": "gui_recreatable",
       "primary_constraint_ids": [],
       "known_parameter_validation_report": "artifacts/validation_runs/current_goal_tajadura_2009_known_parameter_20260715/tajadura_2009_known_parameter_validation_report.json"
+    },
+    {
+      "template_id": "biggio_2017_no_racket",
+      "published": true,
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_biggio_2017_known_parameter_20260715/biggio_2017_known_parameter_validation_report.json"
+    },
+    {
+      "template_id": "biggio_2017_common_racket",
+      "published": true,
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_biggio_2017_known_parameter_20260715/biggio_2017_known_parameter_validation_report.json"
+    },
+    {
+      "template_id": "biggio_2017_personal_racket",
+      "published": true,
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_biggio_2017_known_parameter_20260715/biggio_2017_known_parameter_validation_report.json"
     }
   ],
   "literature_records": [
@@ -2163,15 +2184,25 @@
         "pubmed_query_variant_exhaustiveness_2026_06_13",
         "web_search_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "audiotactile_task_family": "near/far audio-tactile PPS task while tennis players or novices hold a racket",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+      "current_template_ids": [
+        "biggio_2017_no_racket",
+        "biggio_2017_common_racket",
+        "biggio_2017_personal_racket"
       ],
-      "missing_publication_parameters": [
-        "extract near/far auditory locations, tactile site/timing, racket/handle geometry, conditions, trial counts, ITI/jitter, and numeric response window before templating; verbal/voice-key response metadata is now runner-supported and sport expertise is non-blocking context"
+      "coverage_category": "covered_runnable_profile",
+      "audiotactile_task_family": "near/far audio-tactile PPS task while tennis players or novices hold a racket",
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_biggio_2017_known_parameter_20260715/biggio_2017_known_parameter_validation_report.json",
+      "manual_review_file": "For-AI/audiotactile-paper-metadata-audit/manual_reviews/biggio_2017_racket_tool_use.json",
+      "source_parameter_status": "manual_pdf_parameters_captured_with_nonblocking_caveats",
+      "nonblocking_caveats": [
+        "exact pink-noise source file, seed, and spectrum recipe not supplied",
+        "exact far-sound lead not reported; stored as a derived 2 ms speed-of-sound approximation",
+        "exact electrical tactile pulse duration/current/calibration not reported",
+        "ITI/jitter policy and numeric response deadline not reported",
+        "voice-key threshold and latency correction not reported"
       ]
     }
   ]

@@ -11,6 +11,7 @@ LEDGER_PATH = ROOT / "assets" / "preloads" / "audiotactile_expected_outcome_cove
 SCRIPT_PATH = ROOT / "validation_protocols" / "scripts" / "run_synthetic_expected_outcome_smoke.py"
 
 READY_PROFILE_IDS = {
+    "biggio_2017_racket_tool_use",
     "tajadura_jimenez_2009_visual_deprivation",
     "canzoneri_2012_dynamic_sounds",
     "galli_2015_wheelchair",
@@ -45,9 +46,9 @@ def test_synthetic_expected_outcome_smoke_generates_ready_profile_rows(tmp_path)
     assert report["schema"] == module.SCHEMA
     assert report["passed"] is True
     assert report["summary"] == {
-        "ready_profile_record_count": 13,
-        "synthetic_comparison_record_count": 13,
-        "synthetic_direction_match_count": 13,
+        "ready_profile_record_count": 14,
+        "synthetic_comparison_record_count": 14,
+        "synthetic_direction_match_count": 14,
         "synthetic_direction_mismatch_count": 0,
         "human_behavioral_comparison_count_from_ledger": 0,
         "all_synthetic_direction_checks_passed": True,

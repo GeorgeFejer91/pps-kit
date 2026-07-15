@@ -86,6 +86,7 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
 }
 
 RUNNABLE_STRUCTURED_IDS = {
+    "biggio_2017_racket_tool_use",
     "canzoneri_2012_dynamic_sounds",
     "galli_2015_wheelchair",
     "lerner_2021_3d_boundary",
@@ -143,18 +144,18 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "structured_expected_outcome_record_count": 71,
         "pending_expected_outcome_record_count": 0,
         "adjacent_or_out_of_scope_record_count": 4,
-        "runnable_profile_parameter_record_count": 13,
+        "runnable_profile_parameter_record_count": 14,
         "observed_behavioral_comparison_record_count": 0,
-        "mouse_click_simulated_participant_like_comparison_record_count": 13,
-        "synthetic_profile_contrast_comparison_record_count": 13,
+        "mouse_click_simulated_participant_like_comparison_record_count": 14,
+        "synthetic_profile_contrast_comparison_record_count": 14,
         "parameter_run_evidence_only_record_count": 0,
-        "not_runnable_no_observed_comparison_record_count": 58,
+        "not_runnable_no_observed_comparison_record_count": 57,
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 4,
-            "not_yet_templated_missing_publication_parameters": 49,
-            "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 13,
+            "not_yet_templated_missing_publication_parameters": 48,
+            "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 14,
             "template_present_blocked_missing_publication_parameters": 9,
         },
     }
@@ -194,15 +195,24 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
             "tajadura_2009_known_parameter_validation_report.json"
             if record_id == "tajadura_jimenez_2009_visual_deprivation"
             else (
-                "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/"
-                "ready_profile_mouse_click_expected_outcome_audit_report.json"
+                "artifacts/validation_runs/current_goal_biggio_2017_known_parameter_20260715/"
+                "biggio_2017_known_parameter_validation_report.json"
+                if record_id == "biggio_2017_racket_tool_use"
+                else (
+                    "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/"
+                    "ready_profile_mouse_click_expected_outcome_audit_report.json"
+                )
             )
         )
         expected_mouse_boundary = (
             "Paper-specific deterministic participant-like mouse clicks were injected through "
             "SessionRunnerController and evaluated from runner-produced analysis rows; not collected "
             "participant data, not physical loopback evidence, and not a scientific replication claim."
-            if record_id == "tajadura_jimenez_2009_visual_deprivation"
+            if record_id
+            in {
+                "tajadura_jimenez_2009_visual_deprivation",
+                "biggio_2017_racket_tool_use",
+            }
             else (
                 "Deterministic participant-like mouse clicks were injected through SessionRunnerController "
                 "after tactile onsets and evaluated from runner-produced analysis rows; not collected "

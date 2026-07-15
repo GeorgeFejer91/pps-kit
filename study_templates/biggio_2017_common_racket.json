@@ -1,0 +1,101 @@
+{
+  "template_id": "biggio_2017_common_racket",
+  "title": "Biggio 2017 racket tool-use PPS - common racket session",
+  "citation": "Biggio, M., Bisio, A., Avanzino, L., Ruggeri, P., & Bove, M. (2017). This racket is not mine: The influence of the tool-use on peripersonal space. Neuropsychologia, 103, 54-58.",
+  "source_url": "https://doi.org/10.1016/j.neuropsychologia.2017.07.018",
+  "doi": "10.1016/j.neuropsychologia.2017.07.018",
+  "verification_status": "partial",
+  "notes": "Common-racket session of the reported static near/far audio-tactile PPS task. It preserves the 90-trial session unit and keeps the racket context as row metadata rather than changing the generated WAV structure.",
+  "reference_parameters": {
+    "profile_check_complete": true,
+    "publication_status": "published",
+    "profile_type": "static_near_far_electrical_voice_response_tool_context",
+    "record_id": "biggio_2017_racket_tool_use",
+    "manual_review_file": "For-AI/audiotactile-paper-metadata-audit/manual_reviews/biggio_2017_racket_tool_use.json",
+    "reported_session_context": "common racket",
+    "reported_sound_type": "pink-noise burst",
+    "reported_sound_duration_ms": 150,
+    "reported_sound_level_db_spl": 70,
+    "reported_near_sound_to_tactile_soa_ms": 0,
+    "derived_far_sound_to_tactile_soa_ms": 2,
+    "reported_trial_formula": "Per session: 30 near audio-tactile target + 30 far audio-tactile target + 15 near sound-only catch + 15 far sound-only catch = 90 trials.",
+    "minimum_runnable_profile_scope": "Common-racket session only; no-racket and personal-racket sessions are companion templates.",
+    "nonblocking_caveats": [
+      "exact pink-noise source file, seed, and spectrum recipe not supplied",
+      "exact far-sound lead not reported; stored as a derived 2 ms approximation",
+      "exact electrical tactile pulse duration/current/calibration not reported",
+      "ITI/jitter policy and numeric response deadline not reported",
+      "voice-key threshold and latency correction not reported"
+    ],
+    "loudness_policy": {
+      "mode": "estimated_spl",
+      "calibration_mode": "estimate_allowed",
+      "calibration_status": "estimated_not_measured",
+      "start_spl_db": 70.0,
+      "end_spl_db": 70.0,
+      "instruction_offset_db": 0.0,
+      "distance_gain_policy": "disable_direct_path_gain_for_calibrated_loudness"
+    }
+  },
+  "design": {
+    "name": "Biggio 2017 racket tool-use PPS - common racket session",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Near hand pink-noise burst",
+        "noise_type": "pink",
+        "source_profile": "continuous_noise",
+        "azimuth_deg": 90.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0,
+        "motion_mode": "stationary",
+        "trajectory_snapshot": {"coordinate_mode": "cartesian", "path_direction": "stationary", "start": {"x_m": 0.30, "y_m": 0.0, "z_m": 0.0}, "end": {"x_m": 0.30, "y_m": 0.0, "z_m": 0.0}, "start_distance_cm": 30.0, "end_distance_cm": 30.0, "start_rotation_deg": 90.0, "end_rotation_deg": 90.0, "path_length_m": 0.0, "movement_duration_s": 0.15, "start_hold_s": 0.0, "end_hold_s": 0.0}
+      },
+      {
+        "label": "Far racket-tip pink-noise burst",
+        "noise_type": "pink",
+        "source_profile": "continuous_noise",
+        "azimuth_deg": 90.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0,
+        "motion_mode": "stationary",
+        "trajectory_snapshot": {"coordinate_mode": "cartesian", "path_direction": "stationary", "start": {"x_m": 0.985, "y_m": 0.0, "z_m": 0.0}, "end": {"x_m": 0.985, "y_m": 0.0, "z_m": 0.0}, "start_distance_cm": 98.5, "end_distance_cm": 98.5, "start_rotation_deg": 90.0, "end_rotation_deg": 90.0, "path_length_m": 0.0, "movement_duration_s": 0.15, "start_hold_s": 0.0, "end_hold_s": 0.0}
+      }
+    ],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "trajectory": {"start_radius_m": 0.30, "end_radius_m": 0.301, "path_direction": "custom", "coordinate_mode": "cartesian", "start_x_m": 0.30, "start_y_m": 0.0, "start_z_m": 0.0, "end_x_m": 0.301, "end_y_m": 0.0, "end_z_m": 0.0, "path_length_m": 0.001, "propagation_speed_mps": 0.006666667, "azimuth_start_deg": 90.0, "azimuth_end_deg": 90.0, "elevation_deg": 0.0, "padding_pre_s": 0.0, "padding_post_s": 0.0, "sample_rate": 44100, "use_inverse_square": false},
+    "protocol": {
+      "repetitions_per_condition": 30,
+      "trial_pool_repetition_defaults": {"default": 30, "audio_tactile": 30, "catch": 15},
+      "soa_values_ms": [0, 2],
+      "spatial_values_cm": [30.0, 98.5],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": ["stationary_near", "stationary_far"],
+      "tactile_sites": ["right wrist"],
+      "include_catch_trials": true,
+      "catch_trial_percentage": 33.3333,
+      "catch_trials_exact": 30,
+      "catch_crosses_sequence_variants": true,
+      "include_baseline_trials": false,
+      "baseline_soa_values_ms": [],
+      "respiratory_phases": ["Common racket session"],
+      "blocks": 1,
+      "block_specs": [{"label": "Common racket session", "stimulus_types": ["Audio-Tactile", "Catch"]}],
+      "distribute_trial_pool_across_blocks": true,
+      "trial_randomization_strategy": "no_immediate_repeats",
+      "block_order_randomization": "fixed",
+      "max_consecutive_same_trial_type": 2,
+      "participants": 1,
+      "random_seed": 201707019,
+      "trial_strips": [
+        {"strip_id": "biggio-2017-common-racket-near", "label": "Common racket near target", "soa_values_ms": [0], "spatial_values_cm": [30.0], "metadata": {"expected_response": "respond", "response_rule": "verbal_response_to_tactile_target_ignore_sound", "target_role": "tactile_target", "response_mode": "voice_key_mouse_click_proxy", "response_capture_device": "microphone", "voice_key_enabled": "true", "tool_condition": "common_racket", "auditory_trajectory_family": "static_near_far", "auditory_trajectory_direction": "stationary_near", "trajectory_start_distance_cm": 30.0, "trajectory_end_distance_cm": 30.0, "source_asset_equivalence": "procedural pink-noise proxy for unreported source", "renderer_equivalence_boundary": "binaural stationary proxy for physical near loudspeaker", "iti_policy": "toolkit_default_unreported_in_source", "iti_ms": "300", "tactile_stimulation_modality": "electrical", "electrical_stimulator_model": "Digitimer DS7AH HV", "electrical_electrode_site": "right wrist surface bipolar electrode"}, "elements": [{"element_id": "biggio-2017-common-near-source", "kind": "looming_stimulus", "label": "Near sound", "source_label": "Near hand pink-noise burst", "source_labels": ["Near hand pink-noise burst"], "randomized": true}]},
+        {"strip_id": "biggio-2017-common-racket-far", "label": "Common racket far target", "soa_values_ms": [2], "spatial_values_cm": [98.5], "metadata": {"expected_response": "respond", "response_rule": "verbal_response_to_tactile_target_ignore_sound", "target_role": "tactile_target", "response_mode": "voice_key_mouse_click_proxy", "response_capture_device": "microphone", "voice_key_enabled": "true", "tool_condition": "common_racket", "auditory_trajectory_family": "static_near_far", "auditory_trajectory_direction": "stationary_far", "trajectory_start_distance_cm": 98.5, "trajectory_end_distance_cm": 98.5, "source_asset_equivalence": "procedural pink-noise proxy for unreported source", "renderer_equivalence_boundary": "binaural stationary proxy for physical far loudspeaker", "iti_policy": "derived_far_sound_lead_plus_toolkit_default_unreported_iti", "iti_ms": "300", "far_sound_lead_ms": "2", "tactile_stimulation_modality": "electrical", "electrical_stimulator_model": "Digitimer DS7AH HV", "electrical_electrode_site": "right wrist surface bipolar electrode"}, "elements": [{"element_id": "biggio-2017-common-far-source", "kind": "looming_stimulus", "label": "Far sound", "source_label": "Far racket-tip pink-noise burst", "source_labels": ["Far racket-tip pink-noise burst"], "randomized": true}]}
+      ]
+    }
+  },
+  "provenance": [
+    {"field": "manual_review", "source": "For-AI/audiotactile-paper-metadata-audit/manual_reviews/biggio_2017_racket_tool_use.json"},
+    {"field": "trial_formula", "source": "Manual review records 30 near targets, 30 far targets, and 30 sound-only catches per session."}
+  ]
+}

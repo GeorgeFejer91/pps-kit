@@ -32,6 +32,9 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 | noel_2015_bodily_self_back_space | B | ready | All required current-GUI fields are present and materializable. |
 | pfeiffer_2018_lateral_perihead_left_to_right | - | ready | All required current-GUI fields are present and materializable. |
 | study5_dynaspace_lateral_45_pps | - | ready | All required current-GUI fields are present and materializable. |
+| biggio_2017_common_racket | A | ready | All required current-GUI fields are present and materializable. |
+| biggio_2017_no_racket | B | ready | All required current-GUI fields are present and materializable. |
+| biggio_2017_personal_racket | C | ready | All required current-GUI fields are present and materializable. |
 | tajadura_jimenez_2009_crossed_visual_deprivation | A | ready | All required current-GUI fields are present and materializable. |
 | tajadura_jimenez_2009_uncrossed_visual_deprivation | B | ready | All required current-GUI fields are present and materializable. |
 | canzoneri_2012_dynamic_sounds | - | ready | All required current-GUI fields are present and materializable. |

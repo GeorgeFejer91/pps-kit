@@ -1491,6 +1491,465 @@
       ]
     },
     {
+      "template_id": "biggio_2017_common_racket",
+      "title": "Biggio 2017 racket tool-use PPS - common racket session",
+      "visible_variant_label": "A",
+      "variant_display": "Biggio 2017 racket tool-use PPS - common racket session - Variant A",
+      "publication_status": "published",
+      "profile_type": "static_near_far_electrical_voice_response_tool_context",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/biggio_2017_common_racket/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/biggio_2017_common_racket/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/biggio_2017_common_racket/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/biggio_2017_common_racket/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/biggio_2017_common_racket/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/biggio_2017_common_racket/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/biggio_2017_common_racket/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Near hand pink-noise burst",
+          "path": "assets/preloads/biggio_2017_common_racket/02_looming_stimuli/looming_Near_hand_pink-noise_burst.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/biggio_2017_common_racket/02_looming_stimuli/looming_Near_hand_pink-noise_burst.wav",
+          "sha256": "ccd21f1a246b7690fe69e1eea7cef3b5beff18f541578a1005a1047c5a7fbe90",
+          "duration_s": 0.15,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Near hand pink-noise burst",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 30.0,
+            "end_distance_cm": 30.0,
+            "start_rotation_deg": 90.0,
+            "end_rotation_deg": 90.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.3,
+              "y_m": 0.0,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.3,
+              "y_m": 0.0,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        },
+        {
+          "label": "Far racket-tip pink-noise burst",
+          "path": "assets/preloads/biggio_2017_common_racket/02_looming_stimuli/looming_Far_racket-tip_pink-noise_burst.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/biggio_2017_common_racket/02_looming_stimuli/looming_Far_racket-tip_pink-noise_burst.wav",
+          "sha256": "150ec6b4828326431031bded13b4c420650ac1424a30a6374af8e53f64f728d3",
+          "duration_s": 0.15,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Far racket-tip pink-noise burst",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 98.5,
+            "end_distance_cm": 98.5,
+            "start_rotation_deg": 90.0,
+            "end_rotation_deg": 90.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.985,
+              "y_m": 0.0,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.985,
+              "y_m": 0.0,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        }
+      ]
+    },
+    {
+      "template_id": "biggio_2017_no_racket",
+      "title": "Biggio 2017 racket tool-use PPS - no racket session",
+      "visible_variant_label": "B",
+      "variant_display": "Biggio 2017 racket tool-use PPS - no racket session - Variant B",
+      "publication_status": "published",
+      "profile_type": "static_near_far_electrical_voice_response_tool_context",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/biggio_2017_no_racket/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/biggio_2017_no_racket/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/biggio_2017_no_racket/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/biggio_2017_no_racket/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/biggio_2017_no_racket/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/biggio_2017_no_racket/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/biggio_2017_no_racket/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Near hand pink-noise burst",
+          "path": "assets/preloads/biggio_2017_no_racket/02_looming_stimuli/looming_Near_hand_pink-noise_burst.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/biggio_2017_no_racket/02_looming_stimuli/looming_Near_hand_pink-noise_burst.wav",
+          "sha256": "ccd21f1a246b7690fe69e1eea7cef3b5beff18f541578a1005a1047c5a7fbe90",
+          "duration_s": 0.15,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Near hand pink-noise burst",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 30.0,
+            "end_distance_cm": 30.0,
+            "start_rotation_deg": 90.0,
+            "end_rotation_deg": 90.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.3,
+              "y_m": 0.0,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.3,
+              "y_m": 0.0,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        },
+        {
+          "label": "Far racket-tip pink-noise burst",
+          "path": "assets/preloads/biggio_2017_no_racket/02_looming_stimuli/looming_Far_racket-tip_pink-noise_burst.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/biggio_2017_no_racket/02_looming_stimuli/looming_Far_racket-tip_pink-noise_burst.wav",
+          "sha256": "150ec6b4828326431031bded13b4c420650ac1424a30a6374af8e53f64f728d3",
+          "duration_s": 0.15,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Far racket-tip pink-noise burst",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 98.5,
+            "end_distance_cm": 98.5,
+            "start_rotation_deg": 90.0,
+            "end_rotation_deg": 90.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.985,
+              "y_m": 0.0,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.985,
+              "y_m": 0.0,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        }
+      ]
+    },
+    {
+      "template_id": "biggio_2017_personal_racket",
+      "title": "Biggio 2017 racket tool-use PPS - personal racket session",
+      "visible_variant_label": "C",
+      "variant_display": "Biggio 2017 racket tool-use PPS - personal racket session - Variant C",
+      "publication_status": "published",
+      "profile_type": "static_near_far_electrical_voice_response_tool_context",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/biggio_2017_personal_racket/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/biggio_2017_personal_racket/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/biggio_2017_personal_racket/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/biggio_2017_personal_racket/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/biggio_2017_personal_racket/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/biggio_2017_personal_racket/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/biggio_2017_personal_racket/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Near hand pink-noise burst",
+          "path": "assets/preloads/biggio_2017_personal_racket/02_looming_stimuli/looming_Near_hand_pink-noise_burst.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/biggio_2017_personal_racket/02_looming_stimuli/looming_Near_hand_pink-noise_burst.wav",
+          "sha256": "ccd21f1a246b7690fe69e1eea7cef3b5beff18f541578a1005a1047c5a7fbe90",
+          "duration_s": 0.15,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Near hand pink-noise burst",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 30.0,
+            "end_distance_cm": 30.0,
+            "start_rotation_deg": 90.0,
+            "end_rotation_deg": 90.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.3,
+              "y_m": 0.0,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.3,
+              "y_m": 0.0,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        },
+        {
+          "label": "Far racket-tip pink-noise burst",
+          "path": "assets/preloads/biggio_2017_personal_racket/02_looming_stimuli/looming_Far_racket-tip_pink-noise_burst.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/biggio_2017_personal_racket/02_looming_stimuli/looming_Far_racket-tip_pink-noise_burst.wav",
+          "sha256": "150ec6b4828326431031bded13b4c420650ac1424a30a6374af8e53f64f728d3",
+          "duration_s": 0.15,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Far racket-tip pink-noise burst",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 98.5,
+            "end_distance_cm": 98.5,
+            "start_rotation_deg": 90.0,
+            "end_rotation_deg": 90.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.985,
+              "y_m": 0.0,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.985,
+              "y_m": 0.0,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        }
+      ]
+    },
+    {
       "template_id": "canzoneri_2013_amputation_prosthesis",
       "title": "Canzoneri 2013 amputation/prosthesis PPS",
       "visible_variant_label": "",

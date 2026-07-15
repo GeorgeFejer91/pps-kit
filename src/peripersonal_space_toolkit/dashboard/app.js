@@ -1064,7 +1064,7 @@ function staticTrialFileBakePayload(design, status) {
       const noiseType = staticVariantNoiseType(variant, sourceInventory);
       const variantIndex = variantCounter;
       variantCounter += 1;
-      for (const soaMs of soaValues) {
+      for (const soaMs of staticStripSoaValues(strip, soaValues)) {
         files.push(staticTrialFileRow({
           templateId: design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID,
           rowIndex,
@@ -1146,6 +1146,13 @@ function staticTrialFileBakePayload(design, status) {
     files,
     manifest_sha256: `static-${design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID}-${files.length}`,
   };
+}
+
+function staticStripSoaValues(strip, fallbackSoas) {
+  const stripSoas = (strip?.soa_values_ms || [])
+    .filter((value) => Number.isFinite(Number(value)))
+    .map((value) => Number(value));
+  return stripSoas.length ? stripSoas : fallbackSoas;
 }
 
 function staticBaselineSoaValues(protocol, soaValues) {

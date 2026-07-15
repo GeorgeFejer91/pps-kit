@@ -34,19 +34,19 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 13,
+        "covered_runnable_profile": 14,
         "covered_blocked_missing_publication_parameters": 9,
         "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 0,
-        "not_yet_templated_missing_publication_parameters": 49,
+        "not_yet_templated_missing_publication_parameters": 48,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
-    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 27
+    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 30
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
-    ) == 18
-    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 16
+    ) == 21
+    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 19
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
     assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 0
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
@@ -294,6 +294,16 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "current_recreation_category": "gui_recreatable",
         "primary_constraint_ids": [],
     }
+    assert by_template["biggio_2017_no_racket"] == {
+        "template_id": "biggio_2017_no_racket",
+        "published": True,
+        "current_recreation_category": "gui_recreatable",
+        "primary_constraint_ids": [],
+        "known_parameter_validation_report": (
+            "artifacts/validation_runs/current_goal_biggio_2017_known_parameter_20260715/"
+            "biggio_2017_known_parameter_validation_report.json"
+        ),
+    }
     assert by_template["lerner_2021_3d_audio_tactile_boundary"] == {
         "template_id": "lerner_2021_3d_audio_tactile_boundary",
         "published": True,
@@ -332,7 +342,7 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for entry in coverage["current_template_coverage"]
         if entry["published"] and entry["current_recreation_category"] == "gui_recreatable"
     ]
-    assert len(published_ready) == 16
+    assert len(published_ready) == 19
 
 
 def test_literature_coverage_constraints_focus_on_task_execution():
@@ -760,12 +770,19 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["finisguerra_2015_moving_sounds_motor"]["blocking_constraint_ids"] == [
         "missing_core_soa_iti_baseline_repetition_parameters"
     ]
-    assert records["biggio_2017_racket_tool_use"]["coverage_category"] == (
-        "not_yet_templated_missing_publication_parameters"
-    )
-    assert records["biggio_2017_racket_tool_use"]["blocking_constraint_ids"] == [
-        "missing_core_soa_iti_baseline_repetition_parameters",
+    assert records["biggio_2017_racket_tool_use"]["coverage_category"] == "covered_runnable_profile"
+    assert records["biggio_2017_racket_tool_use"]["current_template_ids"] == [
+        "biggio_2017_no_racket",
+        "biggio_2017_common_racket",
+        "biggio_2017_personal_racket",
     ]
+    assert records["biggio_2017_racket_tool_use"]["can_recreate_audiotactile_components_now"] is True
+    assert records["biggio_2017_racket_tool_use"]["blocking_constraint_ids"] == []
+    assert records["biggio_2017_racket_tool_use"]["missing_publication_parameters"] == []
+    assert records["biggio_2017_racket_tool_use"]["known_parameter_validation_report"] == (
+        "artifacts/validation_runs/current_goal_biggio_2017_known_parameter_20260715/"
+        "biggio_2017_known_parameter_validation_report.json"
+    )
     assert records["bassolino_2010_mouse_use"]["doi"] == "10.1016/j.neuropsychologia.2009.11.009"
     assert records["bassolino_2010_mouse_use"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["bassolino_2010_mouse_use"]["blocking_constraint_ids"] == []
