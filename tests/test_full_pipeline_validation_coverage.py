@@ -54,13 +54,13 @@ def test_full_pipeline_validation_summary_is_conservative():
         "adjacent_not_applicable": 4,
         "full_emulated_source_to_runner_pipeline_validated": 12,
         "profile_present_but_source_parameters_missing": 8,
-        "source_parameters_missing_before_profile_creation": 35,
-        "toolkit_structure_or_response_contract_missing": 16,
+        "source_parameters_missing_before_profile_creation": 37,
+        "toolkit_structure_or_response_contract_missing": 14,
     }
     assert summary["primary_gap_counts"] == {
         "profile_present_but_source_parameters_missing": 8,
-        "source_parameters_missing_before_profile_creation": 35,
-        "toolkit_structure_or_response_contract_missing": 16,
+        "source_parameters_missing_before_profile_creation": 37,
+        "toolkit_structure_or_response_contract_missing": 14,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
         "minimum_source_parameters_captured": 12,
@@ -73,8 +73,8 @@ def test_full_pipeline_validation_summary_is_conservative():
         "not_applicable_adjacent_record": 4,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
-        "blocked_by_missing_profile_parameters": 43,
-        "blocked_by_toolkit_structure_or_response_contract": 16,
+        "blocked_by_missing_profile_parameters": 45,
+        "blocked_by_toolkit_structure_or_response_contract": 14,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 12,
     }
@@ -131,11 +131,11 @@ def test_full_pipeline_blocks_at_the_first_unproven_layer():
     assert newborn["blocking_constraint_ids"] == ["missing_core_soa_iti_baseline_repetition_parameters"]
 
     kitagawa = records["kitagawa_2005_sound_complexity"]
-    assert kitagawa["pipeline_status"] == "toolkit_structure_or_response_contract_missing"
+    assert kitagawa["pipeline_status"] == "source_parameters_missing_before_profile_creation"
     assert kitagawa["gates"]["toolkit_gui_implementation"]["status"] == (
-        "blocked_by_toolkit_structure_or_response_contract"
+        "blocked_by_missing_profile_parameters"
     )
-    assert kitagawa["blocking_constraint_ids"] == ["tactile_discrimination_or_localization_response"]
+    assert kitagawa["blocking_constraint_ids"] == []
 
     spiousas = records["spiousas_2025_auditory_only"]
     assert spiousas["pipeline_status"] == "adjacent_not_applicable"

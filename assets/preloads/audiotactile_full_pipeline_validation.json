@@ -249,11 +249,9 @@
     },
     {
       "audiotactile_task_family": "static near/far audio-tactile sound-complexity task",
-      "blocking_constraint_ids": [
-        "tactile_discrimination_or_localization_response"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Kitagawa et al. (2005)",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.1007/s00221-005-2393-8",
       "expected_effect_direction": "near_rear_complex_sounds_increase_audio_tactile_interference",
@@ -286,9 +284,7 @@
           "template_ids": []
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "tactile_discrimination_or_localization_response"
-          ],
+          "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
             "full exact timing, response mapping, and stimulus asset details need extraction"
@@ -308,13 +304,11 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "tactile_discrimination_or_localization_response"
-          ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "blocker_ids": [],
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -327,7 +321,7 @@
       "missing_publication_parameters": [
         "full exact timing, response mapping, and stimulus asset details need extraction"
       ],
-      "next_required_action": "Implement or validate toolkit support for: tactile_discrimination_or_localization_response; also extract/source missing paper parameters: full exact timing, response mapping, and stimulus asset details need extraction",
+      "next_required_action": "Extract or source the missing paper parameters: full exact timing, response mapping, and stimulus asset details need extraction",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -340,7 +334,7 @@
         "pdf_status": "open_access_unavailable",
         "supplement_status": "not_checked"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "kitagawa_2005_sound_complexity",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -548,7 +542,6 @@
     {
       "audiotactile_task_family": "auditory, tactile, and audiotactile lateralization with crossed/uncrossed posture",
       "blocking_constraint_ids": [
-        "tactile_discrimination_or_localization_response",
         "body_part_anchored_coordinate_frames"
       ],
       "citation_short": "Tajadura-Jimenez et al. (2009)",
@@ -586,7 +579,6 @@
         },
         "source_parameter_extraction": {
           "blockers": [
-            "tactile_discrimination_or_localization_response",
             "body_part_anchored_coordinate_frames"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
@@ -609,7 +601,6 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "tactile_discrimination_or_localization_response",
             "body_part_anchored_coordinate_frames"
           ],
           "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
@@ -628,7 +619,7 @@
       "missing_publication_parameters": [
         "extract lateralization response mapping, posture/body-coordinate rules, and stimulus timing"
       ],
-      "next_required_action": "Implement or validate toolkit support for: tactile_discrimination_or_localization_response, body_part_anchored_coordinate_frames; also extract/source missing paper parameters: extract lateralization response mapping, posture/body-coordinate rules, and stimulus timing",
+      "next_required_action": "Implement or validate toolkit support for: body_part_anchored_coordinate_frames; also extract/source missing paper parameters: extract lateralization response mapping, posture/body-coordinate rules, and stimulus timing",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -1468,11 +1459,9 @@
     },
     {
       "audiotactile_task_family": "auditory/tactile/audiotactile information processing with tactile response mapping",
-      "blocking_constraint_ids": [
-        "tactile_discrimination_or_localization_response"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Teramoto et al. (2013)",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.1037/a0028416",
       "expected_effect_direction": "visual_deprivation_reduces_spatial_multisensory_binding_and_alters_reference_frames",
@@ -1505,9 +1494,7 @@
           "template_ids": []
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "tactile_discrimination_or_localization_response"
-          ],
+          "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
             "full response mapping, stimulus timing, and apparatus details need extraction"
@@ -1527,13 +1514,11 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "tactile_discrimination_or_localization_response"
-          ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "blocker_ids": [],
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
           "profile_readiness": [],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
@@ -1546,7 +1531,7 @@
       "missing_publication_parameters": [
         "full response mapping, stimulus timing, and apparatus details need extraction"
       ],
-      "next_required_action": "Implement or validate toolkit support for: tactile_discrimination_or_localization_response; also extract/source missing paper parameters: full response mapping, stimulus timing, and apparatus details need extraction",
+      "next_required_action": "Extract or source the missing paper parameters: full response mapping, stimulus timing, and apparatus details need extraction",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -1559,7 +1544,7 @@
         "pdf_status": "paywalled",
         "supplement_status": "not_found"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "source_parameters_missing_before_profile_creation",
       "record_id": "teramoto_2013_visual_deprivation",
       "runnable_status": "not_yet_templated",
       "source_basis": [
@@ -7331,8 +7316,7 @@
     {
       "audiotactile_task_family": "audiotactile interaction task manipulating cheek, hand, and knee tactile sites with spatially related sounds",
       "blocking_constraint_ids": [
-        "body_part_anchored_coordinate_frames",
-        "tactile_discrimination_or_localization_response"
+        "body_part_anchored_coordinate_frames"
       ],
       "citation_short": "Teramoto et al. (2013 beyond head)",
       "coverage_category": "not_yet_templated_requires_toolkit_structure",
@@ -7369,8 +7353,7 @@
         },
         "source_parameter_extraction": {
           "blockers": [
-            "body_part_anchored_coordinate_frames",
-            "tactile_discrimination_or_localization_response"
+            "body_part_anchored_coordinate_frames"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
@@ -7392,8 +7375,7 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "body_part_anchored_coordinate_frames",
-            "tactile_discrimination_or_localization_response"
+            "body_part_anchored_coordinate_frames"
           ],
           "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
@@ -7411,7 +7393,7 @@
       "missing_publication_parameters": [
         "extract exact body-site mapping, auditory locations, tactile response/scoring rules, timing, and trial counts before templating"
       ],
-      "next_required_action": "Implement or validate toolkit support for: body_part_anchored_coordinate_frames, tactile_discrimination_or_localization_response; also extract/source missing paper parameters: extract exact body-site mapping, auditory locations, tactile response/scoring rules, timing, and trial counts before templating",
+      "next_required_action": "Implement or validate toolkit support for: body_part_anchored_coordinate_frames; also extract/source missing paper parameters: extract exact body-site mapping, auditory locations, tactile response/scoring rules, timing, and trial counts before templating",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -7678,8 +7660,8 @@
         "source_parameters_missing_or_unresolved": 59
       },
       "toolkit_gui_implementation": {
-        "blocked_by_missing_profile_parameters": 43,
-        "blocked_by_toolkit_structure_or_response_contract": 16,
+        "blocked_by_missing_profile_parameters": 45,
+        "blocked_by_toolkit_structure_or_response_contract": 14,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 12
       },
@@ -7697,13 +7679,13 @@
       "adjacent_not_applicable": 4,
       "full_emulated_source_to_runner_pipeline_validated": 12,
       "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 35,
-      "toolkit_structure_or_response_contract_missing": 16
+      "source_parameters_missing_before_profile_creation": 37,
+      "toolkit_structure_or_response_contract_missing": 14
     },
     "primary_gap_counts": {
       "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 35,
-      "toolkit_structure_or_response_contract_missing": 16
+      "source_parameters_missing_before_profile_creation": 37,
+      "toolkit_structure_or_response_contract_missing": 14
     }
   }
 }

@@ -155,6 +155,13 @@
       "relevance": "Capability smoke proving that Segment 5/6 rows can declare fixed ITI, foreperiod, hazard-control policy, and expectancy-role metadata, preserve those fields in prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated responses. This is not exact author-side randomization reconstruction, physical loopback timing, LabRecorder, collected participant evidence, or physiological endpoint validation."
     },
     {
+      "id": "response_choice_contract_capability_smoke_2026_07_15",
+      "kind": "validation_protocol",
+      "date_run": "2026-07-15",
+      "local_summary_file": "artifacts/validation_runs/current_goal_response_choice_contract_20260715/response_choice_contract_capability_smoke_report.json",
+      "relevance": "Capability smoke proving that Segment 5/6 rows can declare tactile discrimination/localization response-mode, choice-set, correct-response, and mouse-click scoring-policy metadata, preserve those fields in prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated participant-like choices with a software wired-loopback sidecar. This is not physical button-box, localization-device, collected participant, physical timing-loopback, or scientific PPS-effect validation."
+    },
+    {
       "id": "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15",
       "kind": "pubmed_live_spot_check",
       "date_run": "2026-07-15",
@@ -170,8 +177,8 @@
       "covered_runnable_profile": 12,
       "covered_blocked_missing_publication_parameters": 8,
       "covered_blocked_toolkit_structure": 0,
-      "not_yet_templated_requires_toolkit_structure": 16,
-      "not_yet_templated_missing_publication_parameters": 35,
+      "not_yet_templated_requires_toolkit_structure": 14,
+      "not_yet_templated_missing_publication_parameters": 37,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
@@ -335,12 +342,15 @@
     {
       "id": "tactile_discrimination_or_localization_response",
       "dimension": "response_capture_or_response_mapping",
-      "description": "Tactile discrimination or localization responses rather than simple speeded detection.",
-      "toolkit_status": "not_first_class",
+      "description": "Tactile discrimination or localization responses rather than simple speeded detection, represented as row-level response-choice metadata.",
+      "toolkit_status": "supported_by_response_choice_contract_capability_smoke",
       "example_records": [
         "kitagawa_2005_sound_complexity",
-        "teramoto_2013_visual_deprivation"
-      ]
+        "tajadura_jimenez_2009_visual_deprivation",
+        "teramoto_2013_visual_deprivation",
+        "teramoto_2013_beyond_head_audiotactile"
+      ],
+      "validation_report": "artifacts/validation_runs/current_goal_response_choice_contract_20260715/response_choice_contract_capability_smoke_report.json"
     },
     {
       "id": "cross_modal_extinction_response_mapping",
@@ -688,7 +698,7 @@
   "literature_records": [
     {
       "record_id": "ladavas_2001_auditory_tactile_extinction",
-      "citation_short": "L\u00c3\u00a0davas et al. (2001)",
+      "citation_short": "LÃ davas et al. (2001)",
       "doi": "10.1093/neucas/7.2.97",
       "source_basis": [
         "openalex_query_variant_exhaustiveness_2026_06_13",
@@ -709,7 +719,7 @@
     },
     {
       "record_id": "farne_ladavas_2002_auditory_pps_humans",
-      "citation_short": "Farn\u00c3\u00a8 & L\u00c3\u00a0davas (2002)",
+      "citation_short": "FarnÃ¨ & LÃ davas (2002)",
       "doi": "10.1162/089892902320474481",
       "source_basis": [
         "openalex_query_variant_exhaustiveness_2026_06_13",
@@ -736,12 +746,10 @@
         "holmes_2020_systematic_review"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "static near/far audio-tactile sound-complexity task",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "tactile_discrimination_or_localization_response"
-      ],
+      "blocking_constraint_ids": [],
       "missing_publication_parameters": [
         "full exact timing, response mapping, and stimulus asset details need extraction"
       ]
@@ -795,7 +803,6 @@
       "audiotactile_task_family": "auditory, tactile, and audiotactile lateralization with crossed/uncrossed posture",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "tactile_discrimination_or_localization_response",
         "body_part_anchored_coordinate_frames"
       ],
       "missing_publication_parameters": [
@@ -956,12 +963,10 @@
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "auditory/tactile/audiotactile information processing with tactile response mapping",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "tactile_discrimination_or_localization_response"
-      ],
+      "blocking_constraint_ids": [],
       "missing_publication_parameters": [
         "full response mapping, stimulus timing, and apparatus details need extraction"
       ]
@@ -2036,8 +2041,7 @@
       "audiotactile_task_family": "audiotactile interaction task manipulating cheek, hand, and knee tactile sites with spatially related sounds",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "body_part_anchored_coordinate_frames",
-        "tactile_discrimination_or_localization_response"
+        "body_part_anchored_coordinate_frames"
       ],
       "missing_publication_parameters": [
         "extract exact body-site mapping, auditory locations, tactile response/scoring rules, timing, and trial counts before templating"

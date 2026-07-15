@@ -37,8 +37,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_runnable_profile": 12,
         "covered_blocked_missing_publication_parameters": 8,
         "covered_blocked_toolkit_structure": 0,
-        "not_yet_templated_requires_toolkit_structure": 16,
-        "not_yet_templated_missing_publication_parameters": 35,
+        "not_yet_templated_requires_toolkit_structure": 14,
+        "not_yet_templated_missing_publication_parameters": 37,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
@@ -156,6 +156,16 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         == (
             "artifacts/validation_runs/current_goal_iti_hazard_contract_20260715/"
             "iti_hazard_contract_capability_smoke_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "response_choice_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_response_choice_contract_20260715/"
+            "response_choice_contract_capability_smoke_report.json"
         )
         for source in coverage["evidence_sources"]
     )
@@ -293,6 +303,16 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "artifacts/validation_runs/current_goal_iti_hazard_contract_20260715/"
         "iti_hazard_contract_capability_smoke_report.json"
     )
+    response_choice_constraint = next(
+        item
+        for item in coverage["constraint_taxonomy"]
+        if item["id"] == "tactile_discrimination_or_localization_response"
+    )
+    assert response_choice_constraint["toolkit_status"] == "supported_by_response_choice_contract_capability_smoke"
+    assert response_choice_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_response_choice_contract_20260715/"
+        "response_choice_contract_capability_smoke_report.json"
+    )
     multi_speaker_constraint = next(
         item for item in coverage["constraint_taxonomy"] if item["id"] == "multi_speaker_array_switching"
     )
@@ -360,7 +380,18 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["teraoka_2024_front_rear"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert records["holmes_2020_four_experiments"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["holmes_2020_four_experiments"]["blocking_constraint_ids"] == []
+    assert records["kitagawa_2005_sound_complexity"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["kitagawa_2005_sound_complexity"]["blocking_constraint_ids"] == []
     assert records["tajadura_jimenez_2009_visual_deprivation"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
+    assert records["tajadura_jimenez_2009_visual_deprivation"]["blocking_constraint_ids"] == [
+        "body_part_anchored_coordinate_frames"
+    ]
+    assert records["teramoto_2013_visual_deprivation"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["teramoto_2013_visual_deprivation"]["blocking_constraint_ids"] == []
     assert records["mindfulness_pps_2024"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["newborn_boundaries_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["newborn_boundaries_2019"]["blocking_constraint_ids"] == [
@@ -472,7 +503,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     ]
     assert records["teramoto_2013_beyond_head_audiotactile"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert "body_part_anchored_coordinate_frames" in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]
-    assert "tactile_discrimination_or_localization_response" in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]
+    assert "tactile_discrimination_or_localization_response" not in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]
     assert records["finisguerra_2015_moving_sounds_motor"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert "voice_key_response_capture" in records["finisguerra_2015_moving_sounds_motor"]["blocking_constraint_ids"]
     assert records["biggio_2017_racket_tool_use"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
@@ -506,6 +537,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         assert "tactile_waveform_frequency_profile" not in record["blocking_constraint_ids"], record["record_id"]
         assert "external_event_trigger_sync_contract" not in record["blocking_constraint_ids"], record["record_id"]
         assert "fixed_iti_or_hazard_control_policy" not in record["blocking_constraint_ids"], record["record_id"]
+        assert "tactile_discrimination_or_localization_response" not in record["blocking_constraint_ids"], record["record_id"]
         assert not (set(record["blocking_constraint_ids"]) & non_blocking_tokens), record["record_id"]
         for constraint_id in record["blocking_constraint_ids"]:
             assert constraint_dimensions[constraint_id] in task_execution_dimensions, record["record_id"]

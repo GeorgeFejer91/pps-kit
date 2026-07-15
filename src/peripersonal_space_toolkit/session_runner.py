@@ -84,7 +84,7 @@ SEGMENT_BLOCK_PREVIEW_SCHEMA = "pps-block-csv-preview.v1"
 LAST_EXPERIMENT_SCHEMA = "pps-last-experiment.v1"
 PREPARED_SESSION_QUEUE_SCHEMA = "pps-prepared-session-queue.v1"
 BLOCK_WAV_CACHE_SCHEMA = "pps-session-block-cache.v1"
-BLOCK_WAV_CACHE_VERSION = "2026-07-15.iti-hazard-contract.v1"
+BLOCK_WAV_CACHE_VERSION = "2026-07-15.response-choice-contract.v1"
 RESPONSE_MARKER_GAIN = 0.05
 EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S = 1.0
 LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_launched"}
@@ -491,6 +491,12 @@ PARTICIPANT_TRIAL_FIELDNAMES = [
     "expected_response",
     "response_rule",
     "target_role",
+    "response_mode",
+    "response_choice_set",
+    "correct_response",
+    "response_scoring_policy",
+    "observed_response_choice",
+    "response_choice_correct",
     "tactile_present",
     "tactile_channel",
     "tactile_waveform_shape",
@@ -644,6 +650,7 @@ class ParticipantTrialCsvWriter:
             tactile_present=tactile_present,
             catch_trial=catch_trial,
         )
+        choice_metadata = _trial_response_choice_metadata(base)
         response_required = bool(response_metadata["response_required"])
         trial_start_unix = _as_float(trial_start.get("unix_time", base.get("unix_time")), default=0.0)
         stimulus_start_unix = _as_float(
@@ -667,9 +674,26 @@ class ParticipantTrialCsvWriter:
         rt_ms = ""
         if valid_response and tactile_present and response_required and tactile_unix > 0.0 and click_unix > 0.0:
             rt_ms = f"{(click_unix - tactile_unix) * 1000.0:.3f}"
+        observed_response_choice = _response_choice_from_click(click, choice_metadata) if click else ""
+        response_choice_correct_value = _response_choice_correctness(
+            observed_response_choice,
+            choice_metadata.get("correct_response", ""),
+        )
+        response_choice_correct = (
+            "" if response_choice_correct_value is None else str(bool(response_choice_correct_value)).lower()
+        )
+        choice_required = _trial_requires_choice_scoring(choice_metadata)
         if tactile_present and response_required:
-            outcome = "Hit" if valid_response else "Miss"
-            correctness_rule = f"response within {TACTILE_RESPONSE_RULE_LABEL}"
+            if choice_required:
+                outcome = "Hit" if valid_response and response_choice_correct_value is True else "Miss"
+                correctness_rule = (
+                    "response choice matches correct_response via "
+                    f"{choice_metadata.get('response_scoring_policy') or 'declared response-choice contract'} "
+                    f"within {TACTILE_RESPONSE_RULE_LABEL}"
+                )
+            else:
+                outcome = "Hit" if valid_response else "Miss"
+                correctness_rule = f"response within {TACTILE_RESPONSE_RULE_LABEL}"
         elif tactile_present:
             outcome = "Miss" if response_given else "Hit"
             correctness_rule = "withhold response during no-go/strong tactile trial"
@@ -725,6 +749,12 @@ class ParticipantTrialCsvWriter:
             "expected_response": response_metadata["expected_response"],
             "response_rule": response_metadata["response_rule"],
             "target_role": response_metadata["target_role"],
+            "response_mode": choice_metadata["response_mode"],
+            "response_choice_set": choice_metadata["response_choice_set"],
+            "correct_response": choice_metadata["correct_response"],
+            "response_scoring_policy": choice_metadata["response_scoring_policy"],
+            "observed_response_choice": observed_response_choice,
+            "response_choice_correct": response_choice_correct,
             "tactile_present": str(tactile_present).lower(),
             "tactile_channel": _row_value(base, "tactile_channel", "Tactile_Channel", default=""),
             "tactile_waveform_shape": _row_value(base, "tactile_waveform_shape", "Tactile_Waveform_Shape", default=""),
@@ -2350,6 +2380,10 @@ def _cache_manifest_trial_payload(trial_rows: list[dict[str, Any]]) -> list[dict
                 "external_trigger_code": row.get("External_Trigger_Code", ""),
                 "external_trigger_tolerance_ms": row.get("External_Trigger_Tolerance_ms", ""),
                 "external_trigger_channel": row.get("External_Trigger_Channel", ""),
+                "response_mode": row.get("Response_Mode", ""),
+                "response_choice_set": row.get("Response_Choice_Set", ""),
+                "correct_response": row.get("Correct_Response", ""),
+                "response_scoring_policy": row.get("Response_Scoring_Policy", ""),
                 "iti_policy": row.get("ITI_Policy", ""),
                 "iti_ms": row.get("ITI_ms", ""),
                 "foreperiod_ms": row.get("Foreperiod_ms", ""),
@@ -5405,8 +5439,6 @@ def _trial_response_metadata(
         "Response_Expected",
         "required_response",
         "Required_Response",
-        "correct_response",
-        "Correct_Response",
         default="",
     )
     explicit_rule = _row_value(
@@ -5448,6 +5480,170 @@ def _trial_response_metadata(
     }
 
 
+def _trial_response_choice_metadata(row: dict[str, Any]) -> dict[str, str]:
+    response_mode = str(
+        _row_value(
+            row,
+            "response_mode",
+            "Response_Mode",
+            "choice_mode",
+            "Choice_Mode",
+            "task_response_mode",
+            "Task_Response_Mode",
+            default="",
+        )
+        or ""
+    ).strip()
+    response_choice_set = str(
+        _row_value(
+            row,
+            "response_choice_set",
+            "Response_Choice_Set",
+            "choice_set",
+            "Choice_Set",
+            "response_choices",
+            "Response_Choices",
+            "response_options",
+            "Response_Options",
+            default="",
+        )
+        or ""
+    ).strip()
+    correct_response = str(
+        _row_value(
+            row,
+            "correct_response",
+            "Correct_Response",
+            "correct_choice",
+            "Correct_Choice",
+            "target_choice",
+            "Target_Choice",
+            "expected_choice",
+            "Expected_Choice",
+            default="",
+        )
+        or ""
+    ).strip()
+    response_scoring_policy = str(
+        _row_value(
+            row,
+            "response_scoring_policy",
+            "Response_Scoring_Policy",
+            "choice_scoring_policy",
+            "Choice_Scoring_Policy",
+            "response_mapping_policy",
+            "Response_Mapping_Policy",
+            default="",
+        )
+        or ""
+    ).strip()
+    if not response_mode and response_choice_set and correct_response:
+        response_mode = "choice"
+    return {
+        "response_mode": response_mode,
+        "response_choice_set": response_choice_set,
+        "correct_response": correct_response,
+        "response_scoring_policy": response_scoring_policy,
+    }
+
+
+def _trial_requires_choice_scoring(choice_metadata: dict[str, Any]) -> bool:
+    correct_response = str(choice_metadata.get("correct_response") or "").strip()
+    response_choice_set = str(choice_metadata.get("response_choice_set") or "").strip()
+    if not correct_response or not response_choice_set:
+        return False
+    mode = _response_choice_token(choice_metadata.get("response_mode"))
+    if not mode:
+        return True
+    return bool(
+        {
+            "choice",
+            "discrimination",
+            "localization",
+            "localisation",
+            "tactile_discrimination",
+            "tactile_localization",
+            "tactile_localisation",
+            "spatial_choice",
+            "forced_choice",
+            "two_alternative_forced_choice",
+            "2afc",
+        }.intersection({mode, *mode.split("_")})
+    )
+
+
+def _response_choice_from_click(click: dict[str, Any], choice_metadata: dict[str, Any]) -> str:
+    explicit = _row_value(
+        click,
+        "response_choice",
+        "Response_Choice",
+        "choice",
+        "Choice",
+        "button_label",
+        "Button_Label",
+        default="",
+    )
+    if explicit not in (None, ""):
+        return str(explicit).strip()
+    choices = _split_response_choice_set(choice_metadata.get("response_choice_set", ""))
+    if not choices:
+        return ""
+    if len(choices) == 1:
+        return choices[0]
+    policy = _response_choice_token(choice_metadata.get("response_scoring_policy"))
+    mode = _response_choice_token(choice_metadata.get("response_mode"))
+    if "mouse_y_split" in policy or ("vertical" in policy and "mouse" in policy):
+        axis_value = _as_float(click.get("y"), default=math.nan)
+        low_side = "up"
+        high_side = "down"
+    elif "mouse_x_split" in policy or "mouse" in policy or "localization" in mode or "localisation" in mode:
+        axis_value = _as_float(click.get("x"), default=math.nan)
+        low_side = "left"
+        high_side = "right"
+    else:
+        axis_value = _as_float(click.get("x"), default=math.nan)
+        low_side = "left"
+        high_side = "right"
+    if not math.isfinite(axis_value):
+        return ""
+    threshold = 0.5 if abs(axis_value) <= 1.0 else 500.0
+    side = low_side if axis_value < threshold else high_side
+    labelled = _choice_by_side(choices, side)
+    if labelled:
+        return labelled
+    return choices[0] if axis_value < threshold else choices[1]
+
+
+def _split_response_choice_set(value: Any) -> list[str]:
+    text = str(value or "").strip()
+    if not text:
+        return []
+    return [part.strip() for part in re.split(r"\s*(?:\||/|,|;)\s*", text) if part.strip()]
+
+
+def _choice_by_side(choices: list[str], side: str) -> str:
+    side_token = _response_choice_token(side)
+    for choice in choices:
+        token = _response_choice_token(choice)
+        if token == side_token or side_token in token.split("_"):
+            return choice
+    return ""
+
+
+def _response_choice_correctness(observed: Any, expected: Any) -> bool | None:
+    expected_token = _response_choice_token(expected)
+    if not expected_token:
+        return None
+    observed_token = _response_choice_token(observed)
+    if not observed_token:
+        return False
+    return observed_token == expected_token
+
+
+def _response_choice_token(value: Any) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", str(value or "").strip().lower()).strip("_")
+
+
 def _trial_requires_response(
     row: dict[str, Any],
     *,
@@ -5466,8 +5662,6 @@ def _trial_requires_response(
         "Response_Expected",
         "required_response",
         "Required_Response",
-        "correct_response",
-        "Correct_Response",
         default="",
     )
     decision = _response_expectation_decision(expected)
@@ -6980,8 +7174,6 @@ def _segment_session_trial_row(
         "Response_Expected",
         "required_response",
         "Required_Response",
-        "correct_response",
-        "Correct_Response",
         default="",
     )
     response_rule = _row_value(
@@ -7004,6 +7196,50 @@ def _segment_session_trial_row(
         "Stimulus_Role",
         "tactile_role",
         "Tactile_Role",
+        default="",
+    )
+    response_mode = _row_value(
+        source,
+        "response_mode",
+        "Response_Mode",
+        "choice_mode",
+        "Choice_Mode",
+        "task_response_mode",
+        "Task_Response_Mode",
+        default="",
+    )
+    response_choice_set = _row_value(
+        source,
+        "response_choice_set",
+        "Response_Choice_Set",
+        "choice_set",
+        "Choice_Set",
+        "response_choices",
+        "Response_Choices",
+        "response_options",
+        "Response_Options",
+        default="",
+    )
+    correct_response = _row_value(
+        source,
+        "correct_response",
+        "Correct_Response",
+        "correct_choice",
+        "Correct_Choice",
+        "target_choice",
+        "Target_Choice",
+        "expected_choice",
+        "Expected_Choice",
+        default="",
+    )
+    response_scoring_policy = _row_value(
+        source,
+        "response_scoring_policy",
+        "Response_Scoring_Policy",
+        "choice_scoring_policy",
+        "Choice_Scoring_Policy",
+        "response_mapping_policy",
+        "Response_Mapping_Policy",
         default="",
     )
     primary_analysis_included = _row_value(
@@ -7034,6 +7270,10 @@ def _segment_session_trial_row(
         "Expected_Response": expected_response,
         "Response_Rule": response_rule,
         "Target_Role": target_role,
+        "Response_Mode": response_mode,
+        "Response_Choice_Set": response_choice_set,
+        "Correct_Response": correct_response,
+        "Response_Scoring_Policy": response_scoring_policy,
         "Primary_Analysis_Included": primary_analysis_included,
         "Row": row_label,
         "Row_Label": row_label,
@@ -7178,6 +7418,10 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "Expected_Response",
         "Response_Rule",
         "Target_Role",
+        "Response_Mode",
+        "Response_Choice_Set",
+        "Correct_Response",
+        "Response_Scoring_Policy",
         "Primary_Analysis_Included",
         "Row",
         "Row_Label",

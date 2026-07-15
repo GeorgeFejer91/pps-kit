@@ -725,7 +725,14 @@ def _pair_tactile_responses(events: list[dict[str, Any]], *, min_rt_s: float, ma
         row["tactile_unix_time"] = onset
         row["response_required"] = response_required
         row["expected_response"] = row.get("expected_response") or ("respond" if response_required else "withhold")
-        row["hit"] = (click is not None) if response_required else (click is None)
+        observed_response_choice = _response_choice_from_click(click, row) if click is not None else ""
+        response_choice_correct = _response_choice_correctness(observed_response_choice, row.get("correct_response", ""))
+        row["observed_response_choice"] = observed_response_choice
+        row["response_choice_correct"] = "" if response_choice_correct is None else bool(response_choice_correct)
+        if response_required and _trial_requires_choice_scoring(row):
+            row["hit"] = click is not None and response_choice_correct is True
+        else:
+            row["hit"] = (click is not None) if response_required else (click is None)
         if click is not None:
             click_time = _as_float(click.get("unix_time"), 0.0)
             row["click_unix_time"] = click_time
@@ -772,8 +779,6 @@ def _response_base(event: dict[str, Any]) -> dict[str, Any]:
             "Response_Expected",
             "required_response",
             "Required_Response",
-            "correct_response",
-            "Correct_Response",
         ),
         "response_rule": _field(
             event,
@@ -794,6 +799,38 @@ def _response_base(event: dict[str, Any]) -> dict[str, Any]:
             "Stimulus_Role",
             "tactile_role",
             "Tactile_Role",
+        ),
+        "response_mode": _field(event, "response_mode", "Response_Mode", "choice_mode", "Choice_Mode"),
+        "response_choice_set": _field(
+            event,
+            "response_choice_set",
+            "Response_Choice_Set",
+            "choice_set",
+            "Choice_Set",
+            "response_choices",
+            "Response_Choices",
+            "response_options",
+            "Response_Options",
+        ),
+        "correct_response": _field(
+            event,
+            "correct_response",
+            "Correct_Response",
+            "correct_choice",
+            "Correct_Choice",
+            "target_choice",
+            "Target_Choice",
+            "expected_choice",
+            "Expected_Choice",
+        ),
+        "response_scoring_policy": _field(
+            event,
+            "response_scoring_policy",
+            "Response_Scoring_Policy",
+            "choice_scoring_policy",
+            "Choice_Scoring_Policy",
+            "response_mapping_policy",
+            "Response_Mapping_Policy",
         ),
         "tactile_channel": _field(event, "tactile_channel", "Tactile_Channel"),
         "tactile_waveform_shape": _field(event, "tactile_waveform_shape", "Tactile_Waveform_Shape"),
@@ -2526,6 +2563,96 @@ def _field(row: dict[str, Any], *names: str) -> Any:
     return ""
 
 
+def _trial_requires_choice_scoring(row: dict[str, Any]) -> bool:
+    correct_response = str(_field(row, "correct_response", "Correct_Response") or "").strip()
+    response_choice_set = str(_field(row, "response_choice_set", "Response_Choice_Set") or "").strip()
+    if not correct_response or not response_choice_set:
+        return False
+    mode = _response_choice_token(_field(row, "response_mode", "Response_Mode"))
+    if not mode:
+        return True
+    return bool(
+        {
+            "choice",
+            "discrimination",
+            "localization",
+            "localisation",
+            "tactile_discrimination",
+            "tactile_localization",
+            "tactile_localisation",
+            "spatial_choice",
+            "forced_choice",
+            "two_alternative_forced_choice",
+            "2afc",
+        }.intersection({mode, *mode.split("_")})
+    )
+
+
+def _response_choice_from_click(click: dict[str, Any] | None, row: dict[str, Any]) -> str:
+    if click is None:
+        return ""
+    explicit = _field(click, "response_choice", "Response_Choice", "choice", "Choice", "button_label", "Button_Label")
+    if explicit not in (None, ""):
+        return str(explicit).strip()
+    choices = _split_response_choice_set(_field(row, "response_choice_set", "Response_Choice_Set"))
+    if not choices:
+        return ""
+    if len(choices) == 1:
+        return choices[0]
+    policy = _response_choice_token(_field(row, "response_scoring_policy", "Response_Scoring_Policy"))
+    mode = _response_choice_token(_field(row, "response_mode", "Response_Mode"))
+    if "mouse_y_split" in policy or ("vertical" in policy and "mouse" in policy):
+        axis_value = _as_float(click.get("y"), math.nan)
+        low_side = "up"
+        high_side = "down"
+    elif "mouse_x_split" in policy or "mouse" in policy or "localization" in mode or "localisation" in mode:
+        axis_value = _as_float(click.get("x"), math.nan)
+        low_side = "left"
+        high_side = "right"
+    else:
+        axis_value = _as_float(click.get("x"), math.nan)
+        low_side = "left"
+        high_side = "right"
+    if not math.isfinite(axis_value):
+        return ""
+    threshold = 0.5 if abs(axis_value) <= 1.0 else 500.0
+    side = low_side if axis_value < threshold else high_side
+    labelled = _choice_by_side(choices, side)
+    if labelled:
+        return labelled
+    return choices[0] if axis_value < threshold else choices[1]
+
+
+def _split_response_choice_set(value: Any) -> list[str]:
+    text = str(value or "").strip()
+    if not text:
+        return []
+    return [part.strip() for part in re.split(r"\s*(?:\||/|,|;)\s*", text) if part.strip()]
+
+
+def _choice_by_side(choices: list[str], side: str) -> str:
+    side_token = _response_choice_token(side)
+    for choice in choices:
+        token = _response_choice_token(choice)
+        if token == side_token or side_token in token.split("_"):
+            return choice
+    return ""
+
+
+def _response_choice_correctness(observed: Any, expected: Any) -> bool | None:
+    expected_token = _response_choice_token(expected)
+    if not expected_token:
+        return None
+    observed_token = _response_choice_token(observed)
+    if not observed_token:
+        return False
+    return observed_token == expected_token
+
+
+def _response_choice_token(value: Any) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", str(value or "").strip().lower()).strip("_")
+
+
 def _trial_requires_response(row: dict[str, Any]) -> bool:
     expected = _field(
         row,
@@ -2535,8 +2662,6 @@ def _trial_requires_response(row: dict[str, Any]) -> bool:
         "Response_Expected",
         "required_response",
         "Required_Response",
-        "correct_response",
-        "Correct_Response",
     )
     decision = _response_expectation_decision(expected)
     if decision is not None:
@@ -2654,6 +2779,7 @@ def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
         "catch_trial",
         "baseline_trial",
         "response_required",
+        "response_choice_correct",
         "tactile_waveform_generated",
         "external_trigger_required",
     }
@@ -2686,6 +2812,18 @@ def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
         row["expectancy_control_role"] = row.get("Expectancy_Control_Role")
     if "soa_ms" not in row and "SOA_ms" in row:
         row["soa_ms"] = row.get("SOA_ms")
+    if "response_mode" not in row and "Response_Mode" in row:
+        row["response_mode"] = row.get("Response_Mode")
+    if "response_choice_set" not in row and "Response_Choice_Set" in row:
+        row["response_choice_set"] = row.get("Response_Choice_Set")
+    if "correct_response" not in row and "Correct_Response" in row:
+        row["correct_response"] = row.get("Correct_Response")
+    if "response_scoring_policy" not in row and "Response_Scoring_Policy" in row:
+        row["response_scoring_policy"] = row.get("Response_Scoring_Policy")
+    if "observed_response_choice" not in row and "Observed_Response_Choice" in row:
+        row["observed_response_choice"] = row.get("Observed_Response_Choice")
+    if "response_choice_correct" not in row and "Response_Choice_Correct" in row:
+        row["response_choice_correct"] = row.get("Response_Choice_Correct")
     if "rt_ms" not in row and "RT_ms" in row:
         row["rt_ms"] = row.get("RT_ms")
     if "participant_id" not in row and "Participant_ID" in row:

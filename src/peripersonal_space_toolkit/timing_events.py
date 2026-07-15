@@ -126,6 +126,16 @@ class TriggerDictionary:
                     "family": payload.get("family", payload.get("Family", "")),
                     "row_label": payload.get("row_label", payload.get("Row_Label", "")),
                     "soa_ms": payload.get("soa_ms", payload.get("SOA_ms", "")),
+                    "response_mode": payload.get("response_mode", payload.get("Response_Mode", "")),
+                    "response_choice_set": payload.get(
+                        "response_choice_set",
+                        payload.get("Response_Choice_Set", ""),
+                    ),
+                    "correct_response": payload.get("correct_response", payload.get("Correct_Response", "")),
+                    "response_scoring_policy": payload.get(
+                        "response_scoring_policy",
+                        payload.get("Response_Scoring_Policy", ""),
+                    ),
                     "external_trigger_required": payload.get(
                         "external_trigger_required",
                         payload.get("External_Trigger_Required", ""),
@@ -197,6 +207,16 @@ class TriggerDictionary:
                 "block_index": payload.get("block_index", payload.get("block_number", "")),
                 "trial_index": payload.get("trial_index", payload.get("trial_number", "")),
                 "trial_uid": payload.get("trial_uid", payload.get("Trial_UID", "")),
+                "response_mode": payload.get("response_mode", payload.get("Response_Mode", "")),
+                "response_choice_set": payload.get(
+                    "response_choice_set",
+                    payload.get("Response_Choice_Set", ""),
+                ),
+                "correct_response": payload.get("correct_response", payload.get("Correct_Response", "")),
+                "response_scoring_policy": payload.get(
+                    "response_scoring_policy",
+                    payload.get("Response_Scoring_Policy", ""),
+                ),
                 "external_trigger_required": payload.get(
                     "external_trigger_required",
                     payload.get("External_Trigger_Required", ""),

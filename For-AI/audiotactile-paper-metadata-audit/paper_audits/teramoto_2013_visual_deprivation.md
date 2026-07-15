@@ -3,7 +3,7 @@
 - Record ID: `teramoto_2013_visual_deprivation`
 - DOI: `10.1037/a0028416`
 - DOI URL: https://doi.org/10.1037/a0028416
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: auditory/tactile/audiotactile information processing with tactile response mapping
 - PDF status: `paywalled`
 - Supplement status: `not_found`
