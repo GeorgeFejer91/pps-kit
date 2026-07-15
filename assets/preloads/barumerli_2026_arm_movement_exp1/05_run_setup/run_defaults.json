@@ -5,5 +5,39 @@
   "participants": 31,
   "random_seed": 20260401,
   "trial_randomization_strategy": "no_immediate_repeats",
-  "block_order_randomization": "counterbalanced_rotation"
+  "block_order_randomization": "counterbalanced_rotation",
+  "block_specs": [
+    {
+      "label": "Trunk motor block",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Trunk static block",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Hand motor block",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Hand static block",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    }
+  ]
 }

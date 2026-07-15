@@ -124,7 +124,8 @@ def run_audit(
             "model_role": (
                 "contrast metadata readiness audit plus deterministic DynaSpace "
                 "looming-vs-fixed, Serino peri-trunk near-vs-far, and Matsuda "
-                "four-direction approaching-vs-receding RT comparisons"
+                "four-direction approaching-vs-receding, and Lamia movement-state "
+                "RT comparisons"
             ),
             "assumption_boundary": EVIDENCE_BOUNDARY,
         },
@@ -214,6 +215,20 @@ def _audit_record(
             "required_next_step": (
                 "Replace deterministic synthetic RTs with collected participant data before making a scientific "
                 "four-direction PPS replication claim."
+            ),
+        }
+    if not missing and record_id == "lamia_2026_arm_movement":
+        comparison = _compare_lamia_arm_movement(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "arm-movement PPS replication claim."
             ),
         }
     if not missing:
@@ -478,6 +493,98 @@ def _approach_recede_direction(row: dict[str, Any]) -> str:
         for key in ("sequence_labels", "sequence_variant_key", "row_label", "respiratory_phase")
     ).lower()
     return "receding" if "reced" in text else "approaching"
+
+
+def _compare_lamia_arm_movement(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    rows = [
+        row
+        for profile in profile_rows
+        for row in profile["rows"]
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    movement_states: set[str] = set()
+    tactile_sites: set[str] = set()
+    for row in rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        movement_state, tactile_site = _lamia_block_factors(row)
+        if movement_state:
+            movement_states.add(movement_state)
+        if tactile_site:
+            tactile_sites.add(tactile_site)
+        motion = _approach_recede_direction(row)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        if motion == "receding":
+            proximity = 1.0 - proximity
+        distance_bin = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        if motion == "approaching" and movement_state == "static":
+            rt_ms = 535.0 - (38.0 * proximity)
+        elif motion == "approaching" and movement_state == "motor":
+            rt_ms = 512.0 - (4.0 * proximity)
+        else:
+            rt_ms = 515.0
+        out = dict(row)
+        out["synthetic_condition"] = f"{movement_state or 'unknown'}_{motion}_{distance_bin}"
+        out["synthetic_motion_direction"] = motion
+        out["synthetic_movement_state"] = movement_state
+        out["synthetic_tactile_site"] = tactile_site
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "lamia_2026_arm_movement_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    static_delta = means.get("static_approaching_far", math.nan) - means.get("static_approaching_near", math.nan)
+    motor_delta = means.get("motor_approaching_far", math.nan) - means.get("motor_approaching_near", math.nan)
+    complete_factors = {"motor", "static"}.issubset(movement_states) and {"hand", "trunk"}.issubset(tactile_sites)
+    observed_direction = (
+        "movement_blunts_looming_distance_facilitation"
+        if complete_factors
+        and math.isfinite(static_delta)
+        and static_delta >= 20.0
+        and math.isfinite(motor_delta)
+        and abs(motor_delta) < 8.0
+        else "movement_does_not_blunt_looming_distance_facilitation"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "static_approaching_far_minus_near_ms": static_delta if math.isfinite(static_delta) else None,
+        "motor_approaching_far_minus_near_ms": motor_delta if math.isfinite(motor_delta) else None,
+        "movement_states_observed": sorted(movement_states),
+        "tactile_sites_observed": sorted(tactile_sites),
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "static looming/approaching far_mean_rt_ms - near_mean_rt_ms >= 20, "
+            "motor looming/approaching near/far difference < 8 ms, hand and trunk sites present, "
+            "and observed direction equals expected direction"
+        ),
+        "pass": observed_direction == expected_direction,
+    }
+
+
+def _lamia_block_factors(row: dict[str, Any]) -> tuple[str, str]:
+    text = " ".join(str(row.get(key) or "") for key in ("block_label", "condition", "row_label")).lower()
+    movement_state = "static" if "static" in text or "still" in text else "motor" if "motor" in text else ""
+    tactile_site = "hand" if "hand" in text or "finger" in text else "trunk" if "trunk" in text or "chest" in text else ""
+    return movement_state, tactile_site
 
 
 def _body_relative_direction(row: dict[str, Any]) -> str:

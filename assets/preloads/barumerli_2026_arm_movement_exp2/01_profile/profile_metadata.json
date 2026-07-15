@@ -6,7 +6,7 @@
   "doi": "10.1038/s41598-026-36796-5",
   "source_url": "https://www.nature.com/articles/s41598-026-36796-5",
   "verification_status": "verified",
-  "notes": "Experiment 2 extends auditory duration to 4000 ms and includes all five tactile delays in unisensory baseline blocks. The original two-speaker apparatus is treated as analog provenance; this profile recreates the reported near-far motion as a binaural spatialized trajectory.",
+  "notes": "Experiment 2 extends auditory duration to 4000 ms and includes all five tactile delays in unisensory baseline blocks. The original two-speaker apparatus is treated as analog provenance; this profile recreates the reported near-far motion as a binaural spatialized trajectory. Motor/static and hand/trunk body-part factors are encoded as block labels for reconstruction and expected-outcome contrast audits.",
   "reference_parameters": {},
   "provenance": [
     {

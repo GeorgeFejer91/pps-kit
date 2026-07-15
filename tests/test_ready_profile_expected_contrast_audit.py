@@ -38,6 +38,7 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     rows_path = tmp_path / "roussel_analysis_ready_trials.csv"
     serino_rows_path = tmp_path / "serino_analysis_ready_trials.csv"
     matsuda_rows_path = tmp_path / "matsuda_analysis_ready_trials.csv"
+    lamia_rows_path = tmp_path / "lamia_analysis_ready_trials.csv"
     _write_csv(
         rows_path,
         [
@@ -108,6 +109,22 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                     }
                 )
     _write_csv(matsuda_rows_path, matsuda_rows)
+    lamia_rows: list[dict[str, str]] = []
+    for block_label in ("Trunk motor block", "Trunk static block", "Hand motor block", "Hand static block"):
+        for sequence_label in ("Pink moving sound", "Pink moving sound - receding"):
+            for soa_ms in ("300", "2700"):
+                lamia_rows.append(
+                    {
+                        "block_label": block_label,
+                        "row_label": "Arm-movement sound-motion trial",
+                        "respiratory_phase": "Arm-movement sound-motion trial",
+                        "sequence_labels": sequence_label,
+                        "sequence_variant_key": sequence_label.lower().replace(" - ", "_").replace(" ", "_"),
+                        "family": "audio_tactile",
+                        "soa_ms": soa_ms,
+                    }
+                )
+    _write_csv(lamia_rows_path, lamia_rows)
     smoke_path = tmp_path / "runner_smoke.json"
     smoke_path.write_text(
         json.dumps(
@@ -128,6 +145,10 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                     {
                         "template_id": "matsuda_2021_four_directions",
                         "outputs": {"analysis_ready_trials": str(matsuda_rows_path)},
+                    },
+                    {
+                        "template_id": "barumerli_2026_arm_movement_exp1",
+                        "outputs": {"analysis_ready_trials": str(lamia_rows_path)},
                     },
                 ]
             }
@@ -175,6 +196,15 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                             )
                         },
                     },
+                    {
+                        "record_id": "lamia_2026_arm_movement",
+                        "citation_short": "Lamia 2026",
+                        "observed_comparison_gap": audit.READY_GAP,
+                        "current_template_ids": ["barumerli_2026_arm_movement_exp1"],
+                        "expected_outcome": {
+                            "expected_effect_direction": "movement_blunts_looming_distance_facilitation"
+                        },
+                    },
                 ]
             }
         ),
@@ -190,9 +220,9 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert report["schema"] == audit.SCHEMA
     assert report["passed"]
     assert report["summary"] == {
-        "ready_profile_record_count": 4,
-        "synthetic_comparison_record_count": 3,
-        "synthetic_comparison_passed_count": 3,
+        "ready_profile_record_count": 5,
+        "synthetic_comparison_record_count": 4,
+        "synthetic_comparison_passed_count": 4,
         "synthetic_comparison_failed_count": 0,
         "contrast_metadata_blocked_record_count": 1,
         "contrast_metadata_present_model_missing_record_count": 0,
@@ -223,6 +253,15 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert matsuda["synthetic_comparison"]["body_directions_observed"] == ["front", "left", "rear", "right"]
     assert matsuda["synthetic_comparison"]["observed_effect_direction"] == (
         "approaching_sounds_show_pps_facilitation_across_four_directions"
+    )
+
+    lamia = by_id["lamia_2026_arm_movement"]
+    assert lamia["status"] == "synthetic_behavioral_comparison_passed"
+    assert lamia["missing_contrasts"] == []
+    assert lamia["synthetic_comparison"]["movement_states_observed"] == ["motor", "static"]
+    assert lamia["synthetic_comparison"]["tactile_sites_observed"] == ["hand", "trunk"]
+    assert lamia["synthetic_comparison"]["observed_effect_direction"] == (
+        "movement_blunts_looming_distance_facilitation"
     )
 
 
