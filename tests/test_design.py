@@ -993,6 +993,33 @@ def test_block_specs_partition_trial_pool_by_stimulus_type():
     assert len(rows) == protocol_summary(design)["total_trials"]
 
 
+def test_repeat_trial_pool_per_block_repeats_eligible_rows_in_each_block():
+    design = default_design()
+    design.noises = design.noises[:1]
+    design.protocol.repetitions_per_condition = 1
+    design.protocol.soa_values_ms = [100, 300]
+    design.protocol.spatial_values_cm = [80.0, 40.0]
+    design.protocol.respiratory_phases = ["Any"]
+    design.protocol.include_baseline_trials = False
+    design.protocol.catch_trial_percentage = 0.0
+    design.protocol.block_specs = [
+        BlockSpec("Congruent", ["Audio-Tactile"]),
+        BlockSpec("Incongruent", ["Audio-Tactile"]),
+    ]
+    design.protocol.repeat_trial_pool_per_block = True
+
+    rows = block_trial_rows(design)
+    soas_by_block: dict[str, set[int]] = {}
+    for row in rows:
+        soas_by_block.setdefault(str(row["block_label"]), set()).add(int(row["soa_ms"]))
+
+    assert soas_by_block == {
+        "Congruent": {100, 300},
+        "Incongruent": {100, 300},
+    }
+    assert protocol_summary(design)["total_trials"] == 4
+
+
 def test_participant_block_order_is_randomized_but_block_contents_are_fixed():
     design = default_design()
     design.noises = design.noises[:1]

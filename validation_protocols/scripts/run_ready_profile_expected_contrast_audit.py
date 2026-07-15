@@ -126,7 +126,8 @@ def run_audit(
                 "contrast metadata readiness audit plus deterministic DynaSpace "
                 "looming-vs-fixed, Noel front/back synchrony, Serino peri-trunk "
                 "near-vs-far, Matsuda four-direction approaching-vs-receding, "
-                "and Lamia movement-state RT comparisons"
+                "Lamia movement-state, and Pfeiffer vestibular-congruence RT "
+                "comparisons"
             ),
             "assumption_boundary": EVIDENCE_BOUNDARY,
         },
@@ -244,6 +245,21 @@ def _audit_record(
             "required_next_step": (
                 "Replace deterministic synthetic RTs with collected participant data before making a scientific "
                 "arm-movement PPS replication claim."
+            ),
+        }
+    if not missing and record_id == "pfeiffer_2018_vestibular":
+        comparison = _compare_pfeiffer_vestibular(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "vestibular modulation of peri-head PPS replication claim. Passive whole-body rotation remains "
+                "external apparatus context, not a generated WAV component."
             ),
         }
     if not missing:
@@ -750,6 +766,109 @@ def _lamia_block_factors(row: dict[str, Any]) -> tuple[str, str]:
     movement_state = "static" if "static" in text or "still" in text else "motor" if "motor" in text else ""
     tactile_site = "hand" if "hand" in text or "finger" in text else "trunk" if "trunk" in text or "chest" in text else ""
     return movement_state, tactile_site
+
+
+def _compare_pfeiffer_vestibular(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    rows = [
+        row
+        for profile in profile_rows
+        for row in profile["rows"]
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    conditions: set[str] = set()
+    for row in rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        condition = _pfeiffer_vestibular_condition(row)
+        if not condition:
+            continue
+        conditions.add(condition)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        distance_bin = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        rt_ms = 525.0 - (12.0 * proximity)
+        if condition in {"congruent_rotation", "incongruent_rotation"}:
+            rt_ms -= 8.0
+        if condition == "congruent_rotation":
+            rt_ms -= 26.0 * (1.0 - proximity)
+        elif condition == "incongruent_rotation":
+            rt_ms -= 4.0 * (1.0 - proximity)
+        out = dict(row)
+        out["synthetic_condition"] = f"{condition}_{distance_bin}"
+        out["synthetic_pfeiffer_condition"] = condition
+        out["synthetic_distance_bin"] = distance_bin
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "pfeiffer_2018_vestibular_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    congruent_far = means.get("congruent_rotation_far", math.nan)
+    incongruent_far = means.get("incongruent_rotation_far", math.nan)
+    no_rotation_far = means.get("no_rotation_far", math.nan)
+    far_controls_complete = math.isfinite(incongruent_far) and math.isfinite(no_rotation_far)
+    control_far_mean = (incongruent_far + no_rotation_far) / 2.0 if far_controls_complete else math.nan
+    congruent_far_advantage = control_far_mean - congruent_far if math.isfinite(control_far_mean) else math.nan
+    complete_conditions = {"congruent_rotation", "incongruent_rotation", "no_rotation"}.issubset(conditions)
+    observed_direction = (
+        "congruent_audio_vestibular_motion_expands_pps"
+        if complete_conditions
+        and far_controls_complete
+        and math.isfinite(congruent_far_advantage)
+        and congruent_far_advantage > 0.0
+        else "congruent_audio_vestibular_motion_expansion_not_recovered"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "conditions_observed": sorted(conditions),
+        "far_control_conditions_observed": {
+            "incongruent_rotation_far": math.isfinite(incongruent_far),
+            "no_rotation_far": math.isfinite(no_rotation_far),
+        },
+        "congruent_far_control_minus_congruent_ms": (
+            congruent_far_advantage if math.isfinite(congruent_far_advantage) else None
+        ),
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "congruent, incongruent, and no-rotation conditions present; far-space control mean RT minus "
+            "congruent rotation mean RT >= 15 ms; and observed direction equals expected direction"
+        ),
+        "pass": (
+            observed_direction == expected_direction
+            and complete_conditions
+            and far_controls_complete
+            and math.isfinite(congruent_far_advantage)
+            and congruent_far_advantage >= 15.0
+        ),
+    }
+
+
+def _pfeiffer_vestibular_condition(row: dict[str, Any]) -> str:
+    tokens = _word_tokens(_row_factor_text(row))
+    if "no" in tokens and "rotation" in tokens:
+        return "no_rotation"
+    if "incongruent" in tokens:
+        return "incongruent_rotation"
+    if "congruent" in tokens:
+        return "congruent_rotation"
+    return ""
 
 
 def _body_relative_direction(row: dict[str, Any]) -> str:

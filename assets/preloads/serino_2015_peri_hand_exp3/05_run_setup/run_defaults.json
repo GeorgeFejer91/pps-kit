@@ -5,5 +5,6 @@
   "participants": 16,
   "random_seed": 20151223,
   "trial_randomization_strategy": "no_immediate_repeats",
-  "block_order_randomization": "fixed"
+  "block_order_randomization": "fixed",
+  "repeat_trial_pool_per_block": false
 }

@@ -6548,6 +6548,10 @@ def _bake_block_csv_preview(
 
     block_count = max(1, int(recipe.get("block_count") or getattr(design.protocol, "blocks", 1) or 1))
     seed = int(recipe.get("seed") or getattr(design.protocol, "random_seed", 20250604) or 20250604)
+    recipe_repeat = recipe.get("repeat_trial_pool_per_block")
+    if isinstance(recipe_repeat, str):
+        recipe_repeat = recipe_repeat.strip().lower() in {"1", "true", "yes", "on"}
+    repeat_trial_pool_per_block = bool(recipe_repeat or getattr(design.protocol, "repeat_trial_pool_per_block", False))
     soa_values: list[int] = []
     for row in pool_rows:
         try:
@@ -6565,7 +6569,10 @@ def _bake_block_csv_preview(
         progress(0, block_count, "Reading Segment 4 trial pool")
 
     row_order = _block_csv_row_order(pool_rows)
-    blocks = _assign_trial_pool_rows_to_blocks(pool_rows, block_count, seed=seed)
+    if repeat_trial_pool_per_block:
+        blocks = [list(pool_rows) for _ in range(block_count)]
+    else:
+        blocks = _assign_trial_pool_rows_to_blocks(pool_rows, block_count, seed=seed)
     explicit_block_specs = list(getattr(design.protocol, "block_specs", []) or [])
     block_spec_labels = [str(block.label or "").strip() for block in explicit_block_specs]
     fieldnames = [
@@ -6629,6 +6636,7 @@ def _bake_block_csv_preview(
         if progress:
             progress(block_index, block_count, f"Wrote {block_label}")
 
+    scheduled_trial_count = sum(int(block["trial_count"]) for block in block_summaries)
     manifest_path = _block_csv_preview_manifest_path(render_dir)
     manifest_payload = {
         "schema": BLOCK_CSV_PREVIEW_MANIFEST_SCHEMA,
@@ -6646,11 +6654,17 @@ def _bake_block_csv_preview(
         "randomization_seed": seed,
         "randomization_strategy": BLOCK_RANDOMIZATION_STRATEGY,
         "max_consecutive_same_feature": BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE,
-        "total_trials": len(pool_rows),
+        "source_segment4_total_trials": len(pool_rows),
+        "total_trials": scheduled_trial_count,
         "estimated_total_duration_ms": total_duration_ms,
         "estimated_total_duration_s": round(total_duration_ms / 1000.0, 3),
+        "repeat_trial_pool_per_block": repeat_trial_pool_per_block,
         "balancing_strategy": "row_order_preserving_minimum_divergence_by_family_soa_source_lineage_with_gellermann_constraints",
-        "row_sequence_strategy": "cycle_preserved_segment_row_order_within_each_block",
+        "row_sequence_strategy": (
+            "full_segment4_trial_pool_repeated_within_each_block"
+            if repeat_trial_pool_per_block
+            else "cycle_preserved_segment_row_order_within_each_block"
+        ),
         "row_order": row_order,
         "soa_color_gradient": {
             "minimum_soa_ms": soa_min,
@@ -6672,7 +6686,8 @@ def _bake_block_csv_preview(
         "manifest_path": str(manifest_path),
         "block_count": block_count,
         "csv_count": len(block_summaries),
-        "total_count": len(pool_rows),
+        "source_segment4_total_count": len(pool_rows),
+        "total_count": scheduled_trial_count,
         "estimated_total_duration_ms": total_duration_ms,
         "blocks": [
             {

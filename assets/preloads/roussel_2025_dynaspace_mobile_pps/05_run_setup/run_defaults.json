@@ -6,6 +6,7 @@
   "random_seed": 20251001,
   "trial_randomization_strategy": "balanced_shuffle",
   "block_order_randomization": "fixed",
+  "repeat_trial_pool_per_block": false,
   "block_specs": [
     {
       "label": "DynaSpace recorded 72-trial block",

@@ -40,6 +40,7 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     serino_rows_path = tmp_path / "serino_analysis_ready_trials.csv"
     matsuda_rows_path = tmp_path / "matsuda_analysis_ready_trials.csv"
     lamia_rows_path = tmp_path / "lamia_analysis_ready_trials.csv"
+    pfeiffer_rows_path = tmp_path / "pfeiffer_analysis_ready_trials.csv"
     _write_csv(
         rows_path,
         [
@@ -144,6 +145,23 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                     }
                 )
     _write_csv(lamia_rows_path, lamia_rows)
+    pfeiffer_rows: list[dict[str, str]] = []
+    for block_label in (
+        "Congruent vestibular rotation block",
+        "Incongruent vestibular rotation block",
+        "No rotation baseline block",
+    ):
+        for soa_ms in ("300", "2700"):
+            pfeiffer_rows.append(
+                {
+                    "block_label": block_label,
+                    "row_label": "Lateral motion PPS trial",
+                    "respiratory_phase": "Lateral motion PPS trial",
+                    "family": "audio_tactile",
+                    "soa_ms": soa_ms,
+                }
+            )
+    _write_csv(pfeiffer_rows_path, pfeiffer_rows)
     smoke_path = tmp_path / "runner_smoke.json"
     smoke_path.write_text(
         json.dumps(
@@ -172,6 +190,10 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                     {
                         "template_id": "barumerli_2026_arm_movement_exp1",
                         "outputs": {"analysis_ready_trials": str(lamia_rows_path)},
+                    },
+                    {
+                        "template_id": "pfeiffer_2018_lateral_perihead_left_to_right",
+                        "outputs": {"analysis_ready_trials": str(pfeiffer_rows_path)},
                     },
                 ]
             }
@@ -231,6 +253,15 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                             "expected_effect_direction": "movement_blunts_looming_distance_facilitation"
                         },
                     },
+                    {
+                        "record_id": "pfeiffer_2018_vestibular",
+                        "citation_short": "Pfeiffer 2018",
+                        "observed_comparison_gap": audit.READY_GAP,
+                        "current_template_ids": ["pfeiffer_2018_lateral_perihead_left_to_right"],
+                        "expected_outcome": {
+                            "expected_effect_direction": "congruent_audio_vestibular_motion_expands_pps"
+                        },
+                    },
                 ]
             }
         ),
@@ -246,9 +277,9 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert report["schema"] == audit.SCHEMA
     assert report["passed"]
     assert report["summary"] == {
-        "ready_profile_record_count": 5,
-        "synthetic_comparison_record_count": 5,
-        "synthetic_comparison_passed_count": 5,
+        "ready_profile_record_count": 6,
+        "synthetic_comparison_record_count": 6,
+        "synthetic_comparison_passed_count": 6,
         "synthetic_comparison_failed_count": 0,
         "contrast_metadata_blocked_record_count": 0,
         "contrast_metadata_present_model_missing_record_count": 0,
@@ -292,6 +323,23 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert lamia["synthetic_comparison"]["tactile_sites_observed"] == ["hand", "trunk"]
     assert lamia["synthetic_comparison"]["observed_effect_direction"] == (
         "movement_blunts_looming_distance_facilitation"
+    )
+
+    pfeiffer = by_id["pfeiffer_2018_vestibular"]
+    assert pfeiffer["status"] == "synthetic_behavioral_comparison_passed"
+    assert pfeiffer["missing_contrasts"] == []
+    assert pfeiffer["synthetic_comparison"]["conditions_observed"] == [
+        "congruent_rotation",
+        "incongruent_rotation",
+        "no_rotation",
+    ]
+    assert pfeiffer["synthetic_comparison"]["far_control_conditions_observed"] == {
+        "incongruent_rotation_far": True,
+        "no_rotation_far": True,
+    }
+    assert pfeiffer["synthetic_comparison"]["congruent_far_control_minus_congruent_ms"] >= 15.0
+    assert pfeiffer["synthetic_comparison"]["observed_effect_direction"] == (
+        "congruent_audio_vestibular_motion_expands_pps"
     )
 
 

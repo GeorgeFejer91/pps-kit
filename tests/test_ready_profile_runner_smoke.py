@@ -30,8 +30,8 @@ def test_ready_profile_runner_smoke_runs_prepared_profile_package(tmp_path: Path
     assert report["passed"]
     assert report["summary"]["profile_count"] == 1
     assert report["summary"]["passed_profile_count"] == 1
-    assert report["summary"]["total_blocks_played"] == 1
-    assert report["summary"]["total_response_markers"] == 1
+    assert report["summary"]["total_blocks_played"] == 3
+    assert report["summary"]["total_response_markers"] == 3
     assert "software-only runner-contract smoke" in report["evidence_boundary"]
     assert (tmp_path / "ready_profile_runner_smoke_report.json").exists()
     assert (tmp_path / "ready_profile_runner_smoke_report.md").exists()
@@ -41,9 +41,10 @@ def test_ready_profile_runner_smoke_runs_prepared_profile_package(tmp_path: Path
     assert profile["passed"]
     assert all(profile["criteria"].values())
     assert profile["analysis_ready_trial_count"] > 0
-    assert profile["analysis_ready_hit_count"] == 1
-    assert profile["event_counts"]["response_marker_start"] == 1
-    assert profile["event_counts"]["mouse_click"] == 1
+    assert profile["block_count"] == 3
+    assert profile["analysis_ready_hit_count"] == 3
+    assert profile["event_counts"]["response_marker_start"] == 3
+    assert profile["event_counts"]["mouse_click"] == 3
     assert profile["recording_wav_count"] == profile["block_count"]
     assert all(item["readable"] for item in profile["block_wavs"])
     assert all(item["readable"] for item in profile["recording_wavs"])

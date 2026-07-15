@@ -215,6 +215,7 @@ class ProtocolSpec:
     respiratory_phases: list[str] = field(default_factory=lambda: ["Inhale", "Exhale"])
     blocks: int = 6
     block_specs: list[BlockSpec] = field(default_factory=list)
+    repeat_trial_pool_per_block: bool = False
     trial_strips: list[TrialStripSpec] = field(default_factory=list)
     trial_randomization_strategy: str = "no_immediate_repeats"
     block_order_randomization: str = "counterbalanced_rotation"
@@ -1640,23 +1641,30 @@ def block_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
     for row in protocol_trial_rows(design):
         rows_by_type.setdefault(str(row["trial_type"]), []).append(row)
 
-    for trial_type, rows in rows_by_type.items():
-        if not rows:
-            continue
-        eligible_blocks = [block for block in blocks if trial_type in block.stimulus_types]
-        if not eligible_blocks:
-            continue
-        shuffled = list(rows)
-        random.Random(protocol.random_seed + sum(ord(ch) for ch in trial_type)).shuffle(shuffled)
-        for idx, row in enumerate(shuffled):
-            min_count = min(len(block_rows[block.label]) for block in eligible_blocks)
-            candidates = [
-                block
-                for block in eligible_blocks
-                if len(block_rows[block.label]) == min_count
-            ]
-            block = candidates[idx % len(candidates)]
-            block_rows[block.label].append(dict(row))
+    if protocol.repeat_trial_pool_per_block:
+        for block in blocks:
+            for trial_type, rows in rows_by_type.items():
+                if trial_type not in block.stimulus_types:
+                    continue
+                block_rows[block.label].extend(dict(row) for row in rows)
+    else:
+        for trial_type, rows in rows_by_type.items():
+            if not rows:
+                continue
+            eligible_blocks = [block for block in blocks if trial_type in block.stimulus_types]
+            if not eligible_blocks:
+                continue
+            shuffled = list(rows)
+            random.Random(protocol.random_seed + sum(ord(ch) for ch in trial_type)).shuffle(shuffled)
+            for idx, row in enumerate(shuffled):
+                min_count = min(len(block_rows[block.label]) for block in eligible_blocks)
+                candidates = [
+                    block
+                    for block in eligible_blocks
+                    if len(block_rows[block.label]) == min_count
+                ]
+                block = candidates[idx % len(candidates)]
+                block_rows[block.label].append(dict(row))
 
     scheduled: list[dict[str, Any]] = []
     for block_index, block in enumerate(blocks, start=1):

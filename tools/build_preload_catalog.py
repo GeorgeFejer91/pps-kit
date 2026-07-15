@@ -625,6 +625,7 @@ def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Pa
         "random_seed": protocol.random_seed,
         "trial_randomization_strategy": protocol.trial_randomization_strategy,
         "block_order_randomization": protocol.block_order_randomization,
+        "repeat_trial_pool_per_block": protocol.repeat_trial_pool_per_block,
     }
     if protocol.block_specs:
         run_setup_defaults["block_specs"] = [asdict(block) for block in protocol.block_specs]
