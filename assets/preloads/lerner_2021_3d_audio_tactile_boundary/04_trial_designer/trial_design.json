@@ -1,7 +1,7 @@
 {
   "schema": "pps-preload-trial-designer-segment.v1",
   "template_id": "lerner_2021_3d_audio_tactile_boundary",
-  "repetitions_per_condition": 8,
+  "repetitions_per_condition": 1,
   "soa_values_ms": [
     0,
     1100,
@@ -45,18 +45,18 @@
             "Dynamic pink 3D sound - direction 10",
             "Dynamic pink 3D sound - direction 11",
             "Dynamic pink 3D sound - direction 12",
-            "Flat white 3D sound",
-            "Flat white 3D sound - direction 02",
-            "Flat white 3D sound - direction 03",
-            "Flat white 3D sound - direction 04",
-            "Flat white 3D sound - direction 05",
-            "Flat white 3D sound - direction 06",
-            "Flat white 3D sound - direction 07",
-            "Flat white 3D sound - direction 08",
-            "Flat white 3D sound - direction 09",
-            "Flat white 3D sound - direction 10",
-            "Flat white 3D sound - direction 11",
-            "Flat white 3D sound - direction 12"
+            "Flat pink 3D sound",
+            "Flat pink 3D sound - direction 02",
+            "Flat pink 3D sound - direction 03",
+            "Flat pink 3D sound - direction 04",
+            "Flat pink 3D sound - direction 05",
+            "Flat pink 3D sound - direction 06",
+            "Flat pink 3D sound - direction 07",
+            "Flat pink 3D sound - direction 08",
+            "Flat pink 3D sound - direction 09",
+            "Flat pink 3D sound - direction 10",
+            "Flat pink 3D sound - direction 11",
+            "Flat pink 3D sound - direction 12"
           ],
           "jitter_values_ms": [],
           "randomized": true
@@ -65,5 +65,5 @@
     }
   ],
   "prestimulus_files": [],
-  "preview_trial_count": 4608
+  "preview_trial_count": 144
 }

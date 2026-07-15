@@ -14,6 +14,7 @@ READY_PROFILE_IDS = {
     "canzoneri_2012_dynamic_sounds",
     "galli_2015_wheelchair",
     "lamia_2026_arm_movement",
+    "lerner_2021_3d_boundary",
     "matsuda_2021_four_directions",
     "noel_2015_bodily_self",
     "pfeiffer_2018_vestibular",
@@ -43,9 +44,9 @@ def test_synthetic_expected_outcome_smoke_generates_ready_profile_rows(tmp_path)
     assert report["schema"] == module.SCHEMA
     assert report["passed"] is True
     assert report["summary"] == {
-        "ready_profile_record_count": 11,
-        "synthetic_comparison_record_count": 11,
-        "synthetic_direction_match_count": 11,
+        "ready_profile_record_count": 12,
+        "synthetic_comparison_record_count": 12,
+        "synthetic_direction_match_count": 12,
         "synthetic_direction_mismatch_count": 0,
         "human_behavioral_comparison_count_from_ledger": 0,
         "all_synthetic_direction_checks_passed": True,

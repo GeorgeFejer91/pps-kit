@@ -1036,16 +1036,18 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
     "lerner_2021_3d_boundary": {
         "outcome_family": "vr_3d_audio_tactile_pps_boundary_mapping",
         "primary_expected_effect": (
-            "The VR audio-tactile setup is expected to infer an individual 3D PPS "
-            "boundary by measuring how tactile processing varies with virtual "
-            "sound-source location around the body."
+            "The VR audio-tactile setup is expected to infer individualized 3D "
+            "PPS boundary polyhedra from tactile RT thresholds across twelve "
+            "virtual sound directions, without a systematic dynamic-versus-flat "
+            "sound advantage in the reported pilot sample."
         ),
-        "expected_effect_direction": "audio_tactile_vr_task_maps_individual_3d_pps_boundary",
-        "observable_metric": "individual 3D PPS boundary/localization from audio-tactile interaction across virtual directions",
-        "condition_contrast": "virtual audio-tactile source locations spanning the 3D peribody volume",
+        "expected_effect_direction": "individual_3d_pps_maps_without_systematic_dynamic_flat_advantage",
+        "observable_metric": "sigmoid-derived RT threshold/boundary distance by direction and flat/dynamic source condition",
+        "condition_contrast": "dynamic looming versus flat stationary pink-noise sources across twelve virtual directions and six arm-length-scaled tactile timepoints",
         "source_basis": [
             "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#lerner_2021_3d_boundary",
-            "Consensus MCP 2026-07-15 query: Noel 2018 neural adaptation peripersonal space audio tactile",
+            "Frontiers article live review 2026-07-15: DOI 10.3389/frvir.2021.644214, Materials and Methods/Results/Table 2",
+            "Consensus MCP 2026-07-15 query: Lerner Tahar Bar Koren Flash 2021 VR setup assess peripersonal space audio tactile 3D boundaries",
         ],
     },
     "amiel_2025_front_rear": {
@@ -1197,7 +1199,7 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
         },
         "current_observed_evidence": {
             "profile_materialization": (
-                "artifacts/validation_runs/current_goal_ready_profiles_protocol12_20260715_after_galli_wheelchair_unlock/"
+                "artifacts/validation_runs/current_goal_ready_profiles_protocol12_20260715_after_lerner_unlock/"
                 "profile_recreation_interface_matrix_report.json"
             ),
             "static_dashboard_parity": (
@@ -1209,15 +1211,15 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
                 "one_block_trial_runner_report.json"
             ),
             "ready_profile_runner_smoke": (
-                "artifacts/validation_runs/current_goal_ready_profiles_runner_smoke_20260715_after_galli_wheelchair_unlock/"
+                "artifacts/validation_runs/current_goal_ready_profiles_runner_smoke_20260715_after_lerner_unlock/"
                 "ready_profile_runner_smoke_report.json"
             ),
             "ready_profile_response_marker_loopback": (
-                "artifacts/validation_runs/current_goal_ready_profiles_response_marker_loopback_20260715_after_galli_wheelchair_unlock/"
+                "artifacts/validation_runs/current_goal_ready_profiles_response_marker_loopback_20260715_after_lerner_unlock/"
                 "ready_profile_response_marker_loopback_report.json"
             ),
             "ready_profile_expected_contrast_audit": (
-                "artifacts/validation_runs/current_goal_ready_profiles_expected_contrast_audit_20260715_after_galli_wheelchair_unlock/"
+                "artifacts/validation_runs/current_goal_ready_profiles_expected_contrast_audit_20260715_after_lerner_unlock/"
                 "ready_profile_expected_contrast_audit_report.json"
             ),
             "click_path_mock": (
@@ -1229,7 +1231,7 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
                 "response_marker_loopback_report.json"
             ),
             "synthetic_expected_outcome_smoke": (
-                "artifacts/validation_runs/current_goal_synthetic_expected_outcome_smoke_20260715/"
+                "artifacts/validation_runs/current_goal_synthetic_expected_outcome_smoke_20260715_after_lerner_unlock/"
                 "synthetic_expected_outcome_smoke_report.json"
             ),
         },

@@ -1361,7 +1361,7 @@ def test_dashboard_startup_overwrites_stale_study5_canonical_ingredient(tmp_path
 def test_dashboard_blocks_runner_launch_for_incomplete_published_profile(tmp_path: Path):
     client = _client(tmp_path)
 
-    blocked_template_id = "lerner_2021_3d_audio_tactile_boundary"
+    blocked_template_id = "taffou_2014_cynophobic_rear_looming"
     loaded = client.post(f"/api/templates/{blocked_template_id}/load").json()
     assert loaded["selected_template"] == blocked_template_id
     assert loaded["templates"]
@@ -1995,19 +1995,36 @@ def test_lerner_preload_loads_twelve_3d_boundary_directions(tmp_path: Path):
     assert len(design["noises"]) == 2
     assert len(design["custom_looming_files"]) == 22
     assert design["protocol"]["auditory_motion_directions"] == ["source_trajectory"]
+    assert design["protocol"]["repetitions_per_condition"] == 1
+    assert design["protocol"]["include_baseline_trials"] is False
+    assert design["protocol"]["include_catch_trials"] is False
+    assert design["protocol"]["distribute_trial_pool_across_blocks"] is True
     assert len(viewer_sources) == 24
-    assert {item["tone_type"] for item in viewer_sources} == {"pink", "white"}
-    unique_geometries = {
+    assert {item["tone_type"] for item in viewer_sources} == {"pink"}
+    dynamic_sources = [item for item in viewer_sources if item["label"].startswith("Dynamic")]
+    flat_sources = [item for item in viewer_sources if item["label"].startswith("Flat")]
+    assert len(dynamic_sources) == 12
+    assert len(flat_sources) == 12
+    assert {item["trajectory_snapshot"]["path_direction"] for item in dynamic_sources} == {"custom"}
+    assert {item["trajectory_snapshot"]["path_direction"] for item in flat_sources} == {"stationary"}
+    unique_starts = {
+        tuple(item["trajectory_snapshot"]["start"][axis] for axis in ("x_m", "y_m", "z_m"))
+        for item in viewer_sources
+    }
+    dynamic_geometries = {
         (
             tuple(item["trajectory_snapshot"]["start"][axis] for axis in ("x_m", "y_m", "z_m")),
             tuple(item["trajectory_snapshot"]["end"][axis] for axis in ("x_m", "y_m", "z_m")),
         )
-        for item in viewer_sources
+        for item in dynamic_sources
     }
-    assert len(unique_geometries) == 12
-    assert {item["trajectory_snapshot"]["movement_duration_s"] for item in viewer_sources} == {5.5}
+    assert len(unique_starts) == 12
+    assert len(dynamic_geometries) == 12
+    assert {item["trajectory_snapshot"]["movement_duration_s"] for item in dynamic_sources} == {5.5}
+    assert {item["trajectory_snapshot"]["movement_duration_s"] for item in flat_sources} == {0.0}
     assert {item["trajectory_snapshot"]["start_distance_cm"] for item in viewer_sources} == {120.0}
-    assert {item["trajectory_snapshot"]["end_distance_cm"] for item in viewer_sources} == {1.0}
+    assert {item["trajectory_snapshot"]["end_distance_cm"] for item in dynamic_sources} == {1.0}
+    assert {item["trajectory_snapshot"]["end_distance_cm"] for item in flat_sources} == {120.0}
     for item in viewer_sources:
         _assert_dashboard_path_exists(root, item["local_path"])
 

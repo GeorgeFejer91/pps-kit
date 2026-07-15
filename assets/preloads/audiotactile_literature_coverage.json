@@ -123,20 +123,20 @@
   "coverage_summary": {
     "literature_record_count": 74,
     "literature_record_category_counts": {
-      "covered_runnable_profile": 11,
+      "covered_runnable_profile": 12,
       "covered_blocked_missing_publication_parameters": 7,
-      "covered_blocked_toolkit_structure": 2,
+      "covered_blocked_toolkit_structure": 1,
       "not_yet_templated_requires_toolkit_structure": 29,
       "not_yet_templated_missing_publication_parameters": 21,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
     "current_template_count": 24,
-    "current_profile_check_pass_count": 15,
-    "published_profile_check_pass_count": 13,
+    "current_profile_check_pass_count": 16,
+    "published_profile_check_pass_count": 14,
     "local_unpublished_profile_check_pass_count": 2,
-    "current_templates_with_missing_publication_parameters": 9,
-    "current_templates_with_toolkit_structural_gaps": 2,
+    "current_templates_with_missing_publication_parameters": 8,
+    "current_templates_with_toolkit_structural_gaps": 1,
     "holmes_2020_reported_articles": 23,
     "holmes_2020_reported_experiments": 46,
     "pubmed_screened_records": 48,
@@ -369,7 +369,7 @@
       "id": "unity_3d_tune_in_engine_behavior",
       "dimension": "auditory_stimulus_type_asset_provenance_rendering_or_gain_law",
       "description": "Unity/3D Tune-In runtime behavior is part of the auditory stimulus definition.",
-      "toolkit_status": "blocked_current_profile",
+      "toolkit_status": "recreation_caveat_when_paper_reports_reducible_trajectory_and_timing",
       "example_records": [
         "lerner_2021_3d_audio_tactile_boundary"
       ]
@@ -378,7 +378,7 @@
       "id": "body_scaled_distance_units",
       "dimension": "spatial_trajectory_coordinate_frame_or_apparatus_geometry",
       "description": "Distances are expressed in subject-scaled units such as arm length rather than absolute cm/m.",
-      "toolkit_status": "blocked_current_profile",
+      "toolkit_status": "recreation_caveat_when_reference_body_measure_is_declared",
       "example_records": [
         "lerner_2021_3d_audio_tactile_boundary"
       ]
@@ -574,11 +574,9 @@
     {
       "template_id": "lerner_2021_3d_audio_tactile_boundary",
       "published": true,
-      "current_recreation_category": "toolkit_structural_gap",
-      "primary_constraint_ids": [
-        "body_scaled_distance_units",
-        "unity_3d_tune_in_engine_behavior"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "GUI-recreatable with twelve published 3D source directions, dynamic moving pink-noise and flat stationary pink-noise source families, six arm-length-scaled tactile timepoints represented using a declared 70 cm reference arm length, and 144 preview trial rows; exact Unity/3D Tune-In rendering and per-subject body/head scaling remain recreation caveats."
     },
     {
       "template_id": "noel_2015_walking_full_body_action",
@@ -1901,15 +1899,15 @@
       "current_template_ids": [
         "lerner_2021_3d_audio_tactile_boundary"
       ],
-      "coverage_category": "covered_blocked_toolkit_structure",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "VR 3D audio-tactile PPS boundary estimation",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "body_scaled_distance_units",
-        "unity_3d_tune_in_engine_behavior"
-      ],
-      "missing_publication_parameters": [
-        "exact Unity/3D Tune-In stimulus engine behavior"
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "recreation_caveats": [
+        "The original Unity/3D Tune-In scene and per-subject head-circumference/ITD customization are represented with the toolkit's Python SOFA reference renderer and fixed listener model.",
+        "The original body-scaled tactile timepoints are represented with a declared 70 cm reference arm length, preserving the reported 0.7-1.7 arm-length sequence as 49-119 cm values.",
+        "The paper text reports four blocks and 144 total trials but also says 24 trials per block; the runnable profile preserves the 144-trial condition matrix and four-block workflow."
       ]
     },
     {

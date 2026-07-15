@@ -154,9 +154,9 @@ def render_audit_report(status: dict[str, Any], materialization: dict[str, Any])
             "A toolkit-structural-gap finding means the study contains an audiotactile PPS "
             "task-execution element that cannot yet be represented as a faithful Segment "
             "0--4 dashboard/backend profile. Examples in this ledger include "
-            "body-scaled distance modes, separate rear-hemifield trajectory families, "
-            "speaker-array switching, Gaussian amplitude fields, and Unity/3D Tune-In "
-            "audio-engine behavior."
+            "separate rear-hemifield trajectory families, unreduced speaker-array "
+            "switching, unreduced Gaussian amplitude fields, and renderer behavior "
+            "that cannot be reduced to a reported trajectory/timing profile."
         ),
         "",
         r"\section*{Machine-Readable Sources}",

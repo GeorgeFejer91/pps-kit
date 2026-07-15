@@ -7497,7 +7497,14 @@ def _ensure_preload_source_assets(design: StimulusDesign) -> StimulusDesign:
             continue
         consumed.add(key)
         noise.prebaked_path = str(asset.get("path") or noise.prebaked_path or "")
-        if not noise.trajectory_snapshot and isinstance(asset.get("trajectory_snapshot"), dict):
+        noise.noise_type = str(asset.get("noise_type") or asset.get("tone_type") or noise.noise_type or "pink")
+        noise.motion_mode = str(asset.get("motion_mode") or noise.motion_mode or "looming")
+        source_profile = str(asset.get("source_profile") or "").strip()
+        if source_profile:
+            noise.source_profile = source_profile
+        if isinstance(asset.get("source_profile_parameters"), dict):
+            noise.source_profile_parameters = dict(asset.get("source_profile_parameters") or {})
+        if isinstance(asset.get("trajectory_snapshot"), dict):
             noise.trajectory_snapshot = dict(asset.get("trajectory_snapshot") or {})
     for audio in design.custom_looming_files:
         key = _source_key(audio.label)
@@ -7508,7 +7515,8 @@ def _ensure_preload_source_assets(design: StimulusDesign) -> StimulusDesign:
         audio.path = str(asset.get("path") or audio.path or "")
         if not audio.tone_type:
             audio.tone_type = str(asset.get("noise_type") or asset.get("tone_type") or CUSTOM_AUDIO_NOISE_TYPE)
-        if not audio.trajectory_snapshot and isinstance(asset.get("trajectory_snapshot"), dict):
+        audio.motion_mode = str(asset.get("motion_mode") or audio.motion_mode or "looming")
+        if isinstance(asset.get("trajectory_snapshot"), dict):
             audio.trajectory_snapshot = dict(asset.get("trajectory_snapshot") or {})
     for key, asset in assets.items():
         if key in consumed:

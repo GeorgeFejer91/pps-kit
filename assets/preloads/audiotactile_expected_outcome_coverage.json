@@ -11,19 +11,19 @@
     "structured_expected_outcome_record_count": 70,
     "pending_expected_outcome_record_count": 0,
     "adjacent_or_out_of_scope_record_count": 4,
-    "runnable_profile_parameter_record_count": 11,
+    "runnable_profile_parameter_record_count": 12,
     "observed_behavioral_comparison_record_count": 0,
-    "parameter_run_evidence_only_record_count": 11,
-    "not_runnable_no_observed_comparison_record_count": 59,
+    "parameter_run_evidence_only_record_count": 12,
+    "not_runnable_no_observed_comparison_record_count": 58,
     "adjacent_not_applicable_record_count": 4,
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
       "not_yet_templated_missing_publication_parameters": 21,
       "not_yet_templated_requires_toolkit_structure": 29,
-      "ready_profile_needs_behavioral_or_synthetic_outcome_comparison": 11,
+      "ready_profile_needs_behavioral_or_synthetic_outcome_comparison": 12,
       "template_present_blocked_missing_publication_parameters": 7,
-      "template_present_blocked_toolkit_structure": 2
+      "template_present_blocked_toolkit_structure": 1
     }
   },
   "expected_outcome_extraction_sources": {
@@ -31,15 +31,15 @@
     "manual_review_index": "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv"
   },
   "current_observed_evidence": {
-    "profile_materialization": "artifacts/validation_runs/current_goal_ready_profiles_protocol12_20260715_after_galli_wheelchair_unlock/profile_recreation_interface_matrix_report.json",
+    "profile_materialization": "artifacts/validation_runs/current_goal_ready_profiles_protocol12_20260715_after_lerner_unlock/profile_recreation_interface_matrix_report.json",
     "static_dashboard_parity": "artifacts/validation_runs/current_goal_ready_profiles_static_dashboard_parity_20260715_after_galli_wheelchair_unlock/static_dashboard_preview_parity_audit_report.json",
     "runner_mock": "artifacts/validation_runs/current_goal_one_block_runner_20260714_duration500ms/one_block_trial_runner_report.json",
-    "ready_profile_runner_smoke": "artifacts/validation_runs/current_goal_ready_profiles_runner_smoke_20260715_after_galli_wheelchair_unlock/ready_profile_runner_smoke_report.json",
-    "ready_profile_response_marker_loopback": "artifacts/validation_runs/current_goal_ready_profiles_response_marker_loopback_20260715_after_galli_wheelchair_unlock/ready_profile_response_marker_loopback_report.json",
-    "ready_profile_expected_contrast_audit": "artifacts/validation_runs/current_goal_ready_profiles_expected_contrast_audit_20260715_after_galli_wheelchair_unlock/ready_profile_expected_contrast_audit_report.json",
+    "ready_profile_runner_smoke": "artifacts/validation_runs/current_goal_ready_profiles_runner_smoke_20260715_after_lerner_unlock/ready_profile_runner_smoke_report.json",
+    "ready_profile_response_marker_loopback": "artifacts/validation_runs/current_goal_ready_profiles_response_marker_loopback_20260715_after_lerner_unlock/ready_profile_response_marker_loopback_report.json",
+    "ready_profile_expected_contrast_audit": "artifacts/validation_runs/current_goal_ready_profiles_expected_contrast_audit_20260715_after_lerner_unlock/ready_profile_expected_contrast_audit_report.json",
     "click_path_mock": "artifacts/validation_runs/current_goal_session_click_path_20260714/session_runner_click_path_report.json",
     "synthetic_response_marker_loopback": "artifacts/validation_runs/current_goal_mock_response_marker_loopback_20260714/comparison/response_marker_loopback_report.json",
-    "synthetic_expected_outcome_smoke": "artifacts/validation_runs/current_goal_synthetic_expected_outcome_smoke_20260715/synthetic_expected_outcome_smoke_report.json"
+    "synthetic_expected_outcome_smoke": "artifacts/validation_runs/current_goal_synthetic_expected_outcome_smoke_20260715_after_lerner_unlock/synthetic_expected_outcome_smoke_report.json"
   },
   "records": [
     {
@@ -2272,21 +2272,22 @@
       "record_id": "lerner_2021_3d_boundary",
       "citation_short": "Lerner et al. (2021)",
       "doi": "10.3389/frvir.2021.644214",
-      "coverage_category": "covered_blocked_toolkit_structure",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "lerner_2021_3d_audio_tactile_boundary"
       ],
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "vr_3d_audio_tactile_pps_boundary_mapping",
-        "primary_expected_effect": "The VR audio-tactile setup is expected to infer an individual 3D PPS boundary by measuring how tactile processing varies with virtual sound-source location around the body.",
-        "expected_effect_direction": "audio_tactile_vr_task_maps_individual_3d_pps_boundary",
-        "observable_metric": "individual 3D PPS boundary/localization from audio-tactile interaction across virtual directions",
-        "condition_contrast": "virtual audio-tactile source locations spanning the 3D peribody volume",
+        "primary_expected_effect": "The VR audio-tactile setup is expected to infer individualized 3D PPS boundary polyhedra from tactile RT thresholds across twelve virtual sound directions, without a systematic dynamic-versus-flat sound advantage in the reported pilot sample.",
+        "expected_effect_direction": "individual_3d_pps_maps_without_systematic_dynamic_flat_advantage",
+        "observable_metric": "sigmoid-derived RT threshold/boundary distance by direction and flat/dynamic source condition",
+        "condition_contrast": "dynamic looming versus flat stationary pink-noise sources across twelve virtual directions and six arm-length-scaled tactile timepoints",
         "source_basis": [
           "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv#lerner_2021_3d_boundary",
-          "Consensus MCP 2026-07-15 query: Noel 2018 neural adaptation peripersonal space audio tactile"
+          "Frontiers article live review 2026-07-15: DOI 10.3389/frvir.2021.644214, Materials and Methods/Results/Table 2",
+          "Consensus MCP 2026-07-15 query: Lerner Tahar Bar Koren Flash 2021 VR setup assess peripersonal space audio tactile 3D boundaries"
         ]
       },
       "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
@@ -2298,10 +2299,10 @@
         "paper_audit_visualization_status": "source_mined",
         "paper_audit_visualization_candidate_count": "5"
       },
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_needs_behavioral_or_synthetic_outcome_comparison",
+      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
+      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
     },
     {
       "record_id": "lamia_2026_arm_movement",

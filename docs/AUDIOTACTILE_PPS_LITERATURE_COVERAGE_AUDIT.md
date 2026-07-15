@@ -15,7 +15,7 @@ The Holmes consensus-corpus screening trail is `assets/preloads/audiotactile_hol
 The PubMed screening audit trail is `assets/preloads/audiotactile_pubmed_screening.json`, with the supplemental PubMed query-variant trail in `assets/preloads/audiotactile_pubmed_query_variant_screening.json`.
 The OpenAlex broad-screen trail is `assets/preloads/audiotactile_openalex_broad_screening.json`, with per-hit screening decisions in `assets/preloads/audiotactile_openalex_candidate_screening.json`. The additional query-variant exhaustiveness screen is `assets/preloads/audiotactile_openalex_query_variant_screening.json`. The live web sanity trail is `assets/preloads/audiotactile_web_sanity_screening.json`.
 
-Current ledger size: 74 literature records. Across the separate preload gate, 12 profile variants currently pass runnable checks. In the broader literature ledger, 8 literature records have covered runnable profiles, 5 covered records still need toolkit structure, 29 not-yet-templated records expose toolkit-structure gaps, 21 not-yet-templated records are structurally close but lack extracted/published PPS-task parameters, and 4 records are adjacent/out of scope. The previous generic candidate bucket is now cleared: tracked records are classified by whether the PPS task is runnable, missing exact task details, blocked by an unsupported task structure, or not actually an audiotactile PPS target.
+Current ledger size: 74 literature records. Across the separate preload gate, 16 profile variants currently pass runnable checks. In the broader literature ledger, 12 literature records have covered runnable profiles, 1 covered record still needs toolkit structure, 29 not-yet-templated records expose toolkit-structure gaps, 21 not-yet-templated records are structurally close but lack extracted/published PPS-task parameters, and 4 records are adjacent/out of scope. The previous generic candidate bucket is now cleared: tracked records are classified by whether the PPS task is runnable, missing exact task details, blocked by an unsupported task structure, or not actually an audiotactile PPS target.
 
 ## Evidence Base
 
@@ -74,9 +74,9 @@ The current profile gate covers 24 templates:
 
 | Outcome | Count | Meaning |
 |---|---:|---|
-| GUI-recreatable | 13 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Eleven are published profiles, including paired Noel front/back variants; two are unpublished local examples. |
-| Missing publication parameters | 10 | The task looks structurally expressible, but published or encoded details are insufficient. |
-| Toolkit structural gap | 4 | The task uses a trial, audio, tactile, response, timing, coordinate, or apparatus feature that the toolkit schema does not yet model. |
+| GUI-recreatable | 16 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Fourteen are published profiles, including paired Noel front/back variants; two are unpublished local examples. |
+| Missing publication parameters | 8 | The task looks structurally expressible, but published or encoded details are insufficient. |
+| Toolkit structural gap | 1 | The task uses a trial, audio, tactile, response, timing, coordinate, or apparatus feature that the toolkit schema does not yet model. |
 
 Runnable published-paper profiles today:
 
@@ -89,6 +89,9 @@ Runnable published-paper profiles today:
 - `pfeiffer_2018_lateral_perihead_left_to_right`
 - `canzoneri_2012_dynamic_sounds`
 - `tonelli_2019_echolocation`
+- `galli_2015_wheelchair_full_body`
+- `lerner_2021_3d_audio_tactile_boundary`
+- `serino_2015_front_back_trunk_exp2`
 - `serino_2015_peri_hand_exp3`
 - `serino_2015_peri_trunk_exp1`
 
@@ -165,7 +168,7 @@ This table is generated from `assets/preloads/audiotactile_literature_coverage.j
 | Interoception vs. Exteroception (2025) | audio-tactile self-relevance task placing the auditory source inside versus outside PPS with tactile responses and EEG/HEP endpoint | Not templated; toolkit structure gap | Toolkit/task constraints: `static_near_far_trial_family`, `external_event_trigger_sync_contract`, `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: extract auditory inside/outside-PPS locations, tactile timing, response window, and EEG/HEP trigger timing requirements |
 | Multisensory integration in PPS indexes consciousness states (2026) | audio-tactile PPS task in sleep/disorders-of-consciousness setting | Not templated; toolkit structure gap | Toolkit/task constraints: `static_near_far_trial_family`, `missing_core_soa_iti_baseline_repetition_parameters` Missing/extract: extract near/far audiotactile stimulus distances, tactile settings, timing, trial counts, response/trigger settings, and apparatus details independently of sleep or clinical endpoint |
 | Matsuda et al. (2021) | front, rear, left, and right approaching/receding audio-tactile PPS task | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate. |
-| Lerner et al. (2021) | VR 3D audio-tactile PPS boundary estimation | Template exists; toolkit structure gap | Toolkit/task constraints: `body_scaled_distance_units`, `unity_3d_tune_in_engine_behavior` Missing/extract: exact Unity/3D Tune-In stimulus engine behavior |
+| Lerner et al. (2021) | VR 3D audio-tactile PPS boundary estimation | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate with twelve 3D source directions, dynamic moving pink-noise and flat stationary pink-noise source families, six arm-length-scaled tactile timepoints represented through a declared 70 cm reference arm length, and 144 preview trial rows; exact Unity/3D Tune-In rendering and per-subject body/head scaling remain provenance caveats. |
 | Lamia, Shabani, & Candidi (2026) | looming/receding audio-tactile task with arm-movement context | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate. |
 | Using Android smartphones to collect RTs to multisensory stimuli (2025) | smartphone DynaSpace looming versus fixed audio-tactile PPS validation task | GUI-recreatable now | Current DynaSpace profile passes the Segment 0-4 audiotactile recreation gate; original Android WAVs are provenance only and the public preload uses generated proxy WAVs. |
 | Spiousas et al. (2025) | auditory reachability judgments without tactile stimulus/response | Adjacent/out of scope | Excluded or adjacent to this audit target. |
@@ -200,8 +203,8 @@ These are the main standardization constraints to flag when deciding whether the
 | Analog two-speaker apparatus provenance | Near/far speaker setups are original apparatus descriptions. They are not blockers by themselves when reported trajectory/timing/source parameters can be recreated with the binaural renderer; exact original gain/envelope files remain missing provenance when required for author-stimulus equivalence. | Canzoneri 2012; Serino 2015 peri-trunk/peri-hand |
 | Multi-speaker array switching | A physical array may switch speakers or schedule discrete positions rather than render one virtual source. Serial arrays can be represented when reported distances/timings map to a single virtual trajectory; true unreduced source switching still needs first-class support. | Serino 2015 Exp. 4-6 |
 | Gaussian speaker-array amplitude field | The auditory source is an amplitude field across speakers. When the paper reports a single reducible trajectory with enough timing/distance anchors, this is apparatus provenance rather than a current blocker. | No current blocked profile examples |
-| HRTF or binaural engine mismatch | Exact HRTF database or renderer behavior can define the stimulus. | Taffou 2014 LISTEN HRTF; Pfeiffer reference simulator; Lerner Unity/3D Tune-In |
-| Body-scaled distances | Distances depend on the participant's body dimensions rather than absolute cm/m. | Lerner 2021 |
+| HRTF or binaural engine mismatch | Exact HRTF database or renderer behavior can define the stimulus. | Taffou 2014 LISTEN HRTF; Pfeiffer reference simulator; Lerner Unity/3D Tune-In as a provenance caveat |
+| Body-scaled distances | Distances depend on the participant's body dimensions rather than absolute cm/m. A declared reference body measure can make a profile runnable while leaving live participant scaling as a caveat. | Lerner 2021 reference-arm recreation |
 | Body-part anchored coordinate frames | Space may be hand-, trunk-, head-, rear-, or hemifield-relative. | Hobeika 2018; Teramoto 2013; Teraoka 2024 |
 | Ecological/licensed audio | The original PPS-task sounds may be proprietary, ecological, emotional, animal, music, or voice stimuli. Contextual music/social material is not a blocker unless it is actually part of the audiotactile PPS stimulus. | Ferri 2015; Taffou 2014 |
 | Voice-key response capture | Original response timing can be vocal rather than button/mouse. | Serino/Canzoneri training profile |
@@ -225,11 +228,10 @@ These are structurally close enough that the next step is mainly paper/supplemen
 
 ## Current Profiles That Need Toolkit Expansion
 
-These already expose real standardized-toolkit gaps:
+This still exposes a real standardized-toolkit gap:
 
 | Profile | Main unsupported task structure |
 |---|---|
-| `lerner_2021_3d_audio_tactile_boundary` | Body-scaled distance mode and Unity/3D Tune-In stimulus behavior. |
 | `taffou_2014_cynophobic_rear_looming` | Separate rear-left/rear-right trajectory families plus exact ecological audio/HRTF provenance. |
 
 ## Known Literature Not Yet Templated
@@ -283,8 +285,8 @@ To generalize across the literature, the next toolkit schema work should priorit
 2. Richer baseline/catch families beyond the current direction-coupled tactile-only baseline implementation.
 3. Audiovisual/trisensory trial-family metadata, so audio-tactile components embedded in audiovisual PPS tasks can be flagged honestly rather than silently approximated.
 4. Response modes beyond mouse/button detection, especially voice-key and tactile discrimination/localization.
-5. Audio renderer/source modes for multi-speaker arrays, Gaussian amplitude fields, HRTF provenance, and Unity/3D Tune-In equivalence notes; two-speaker analog setups should instead be extracted as reported trajectories and recreated binaurally when parameters are sufficient.
-6. Body-relative and body-scaled coordinate systems.
+5. Audio renderer/source modes for multi-speaker arrays, Gaussian amplitude fields, HRTF provenance, and Unity/3D Tune-In equivalence notes; two-speaker analog setups and reducible 3D source trajectories should instead be extracted as reported trajectories and recreated binaurally when parameters are sufficient.
+6. Body-relative coordinate systems and live participant body-scaled distance controls; a profile with a declared reference body measure can still be runnable when the paper's parameter grid is otherwise complete.
 7. Tactile modality/calibration metadata.
 8. Tactile waveform/frequency profiles for haptic actuators.
 9. Exact ITI/jitter, baseline-timing, repetition-count, and hazard-control policies when those timing policies define the PPS task.
