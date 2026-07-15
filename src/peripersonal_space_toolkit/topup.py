@@ -194,12 +194,16 @@ class TopUpLedger:
     def _add_tactile(self, event: SessionEvent, row: dict[str, Any]) -> None:
         if not _is_tactile_trial(row):
             return
+        if not _tactile_trial_requires_response(row):
+            return
         trial_uid = str(_field(row, "trial_uid", "Trial_UID") or "")
         if trial_uid and any(entry.trial_uid == trial_uid and str(entry.tactile_event_id) == str(event.event_id) for entry in self.entries):
             return
         is_topup = _truthy(_field(row, "is_topup", "Is_Topup"))
         topup_role = str(_field(row, "topup_role", "Topup_Role") or "").strip().lower()
-        primary_included = not (is_topup and topup_role == "filler")
+        source_primary = _field(row, "primary_analysis_included", "Primary_Analysis_Included")
+        primary_included = _truthy(source_primary) if source_primary not in (None, "") else True
+        primary_included = primary_included and not (is_topup and topup_role == "filler")
         entry = TopUpLedgerEntry(
             ledger_id=self._next_id,
             status=PENDING,
@@ -338,6 +342,113 @@ def _is_tactile_trial(row: dict[str, Any]) -> bool:
     if tactile_sample not in (None, ""):
         return True
     return False
+
+
+def _tactile_trial_requires_response(row: dict[str, Any]) -> bool:
+    expected = _field(
+        row,
+        "expected_response",
+        "Expected_Response",
+        "response_expected",
+        "Response_Expected",
+        "required_response",
+        "Required_Response",
+        "correct_response",
+        "Correct_Response",
+    )
+    decision = _response_expectation_decision(expected)
+    if decision is not None:
+        return decision
+    for value in (
+        _field(
+            row,
+            "target_role",
+            "Target_Role",
+            "go_nogo_role",
+            "Go_NoGo_Role",
+            "stimulus_role",
+            "Stimulus_Role",
+            "tactile_role",
+            "Tactile_Role",
+        ),
+        _field(
+            row,
+            "response_rule",
+            "Response_Rule",
+            "response_mapping",
+            "Response_Mapping",
+            "task_response_rule",
+            "Task_Response_Rule",
+        ),
+        _field(row, "trial_type", "Trial_Type"),
+        _field(row, "family", "Family"),
+    ):
+        decision = _response_expectation_decision(value)
+        if decision is not None:
+            return decision
+    return True
+
+
+def _response_expectation_decision(value: Any) -> bool | None:
+    text = str(value or "").strip().lower()
+    if not text:
+        return None
+    token = "".join(ch if ch.isalnum() else "_" for ch in text).strip("_")
+    if not token:
+        return None
+    if token in {
+        "0",
+        "false",
+        "no",
+        "none",
+        "withhold",
+        "withhold_response",
+        "no_response",
+        "noresponse",
+        "no_go",
+        "nogo",
+        "no_target",
+        "not_target",
+        "non_target",
+        "nontarget",
+        "strong",
+        "strong_nontarget",
+        "strong_non_target",
+        "distractor",
+    }:
+        return False
+    if token in {
+        "1",
+        "true",
+        "yes",
+        "respond",
+        "response",
+        "click",
+        "button_press",
+        "go",
+        "target",
+        "weak",
+        "weak_target",
+        "weak_go",
+    }:
+        return True
+    parts = set(token.split("_"))
+    has_no_marker = (
+        "no_response" in token
+        or "no_target" in token
+        or "non_target" in token
+        or "nontarget" in token
+        or parts.intersection({"withhold", "nogo", "not", "none", "strong", "distractor", "nontarget"})
+    )
+    strong_response_marker = "respond" in parts or "click" in parts or "go" in parts or "weak" in parts
+    has_response_marker = strong_response_marker or ("target" in parts and not has_no_marker)
+    if has_no_marker and strong_response_marker:
+        return None
+    if has_no_marker:
+        return False
+    if has_response_marker:
+        return True
+    return None
 
 
 def _truthy(value: Any) -> bool:

@@ -5,5 +5,27 @@
   "participants": 19,
   "random_seed": 20150722,
   "trial_randomization_strategy": "no_immediate_repeats",
-  "block_order_randomization": "counterbalanced_rotation"
+  "block_order_randomization": "counterbalanced_rotation",
+  "repeat_trial_pool_per_block": false,
+  "distribute_trial_pool_across_blocks": false,
+  "baseline_crosses_sequence_variants": true,
+  "catch_crosses_sequence_variants": true,
+  "block_specs": [
+    {
+      "label": "Front synchronous stroking block",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Front asynchronous stroking block",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    }
+  ]
 }

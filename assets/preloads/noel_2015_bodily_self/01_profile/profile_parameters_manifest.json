@@ -9,8 +9,8 @@
   "publication_status": "published",
   "profile_type": "",
   "paper_group_key": "doi:10.1016/j.cognition.2015.07.012",
-  "visible_variant_label": "",
-  "variant_display": "PPS as the space of the bodily self",
+  "visible_variant_label": "A",
+  "variant_display": "PPS as the space of the bodily self - Variant A",
   "recreation_status": {
     "primary_category": "gui_recreatable",
     "category_label": "GUI-recreatable",
@@ -54,7 +54,7 @@
         "segment": "3",
         "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
         "passed": true,
-        "field_count": 4,
+        "field_count": 5,
         "blocking_reasons": []
       },
       {
@@ -95,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 2,
+      "value": 3,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -180,6 +180,14 @@
       "status": "reported",
       "value": "tactile_only",
       "note": "Baseline strategy is encoded."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "baseline_count",
+      "status": "reported",
+      "value": 0.0,
+      "note": "Baseline count/percentage settings are encoded."
     },
     {
       "segment": "3",
@@ -272,6 +280,10 @@
     {
       "field": "SOAs and distances",
       "source": "Methods lines report six sound distances D6-D1 with tactile timing corresponding to the spatial dimension."
+    },
+    {
+      "field": "stroking-condition blocks",
+      "source": "Manual review records synchronous and asynchronous visuo-tactile stroking as separate counterbalanced blocks for the front-space chest-vibration experiment."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."

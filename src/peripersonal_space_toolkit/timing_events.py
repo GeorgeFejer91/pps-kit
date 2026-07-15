@@ -37,6 +37,7 @@ LSL_MARKER_CHANNELS = [
     "session_group_id",
     "part_session_id",
     "part_number",
+    "part_label",
     "block_index",
     "trial_uid",
     "sample_index",
@@ -117,6 +118,7 @@ class TriggerDictionary:
                     "session_group_id": payload.get("session_group_id", ""),
                     "part_session_id": payload.get("part_session_id", ""),
                     "part_number": payload.get("part_number", ""),
+                    "part_label": payload.get("part_label", ""),
                     "block_index": payload.get("block_index", payload.get("block_number", "")),
                     "trial_index": payload.get("trial_index", payload.get("trial_number", "")),
                     "trial_uid": payload.get("trial_uid", payload.get("Trial_UID", "")),
@@ -124,6 +126,273 @@ class TriggerDictionary:
                     "family": payload.get("family", payload.get("Family", "")),
                     "row_label": payload.get("row_label", payload.get("Row_Label", "")),
                     "soa_ms": payload.get("soa_ms", payload.get("SOA_ms", "")),
+                    "expected_response": payload.get("expected_response", payload.get("Expected_Response", "")),
+                    "response_rule": payload.get("response_rule", payload.get("Response_Rule", "")),
+                    "target_role": payload.get("target_role", payload.get("Target_Role", "")),
+                    "response_mode": payload.get("response_mode", payload.get("Response_Mode", "")),
+                    "response_choice_set": payload.get(
+                        "response_choice_set",
+                        payload.get("Response_Choice_Set", ""),
+                    ),
+                    "correct_response": payload.get("correct_response", payload.get("Correct_Response", "")),
+                    "response_scoring_policy": payload.get(
+                        "response_scoring_policy",
+                        payload.get("Response_Scoring_Policy", ""),
+                    ),
+                    "response_capture_device": payload.get(
+                        "response_capture_device",
+                        payload.get("Response_Capture_Device", ""),
+                    ),
+                    "response_input_modality": payload.get(
+                        "response_input_modality",
+                        payload.get("Response_Input_Modality", ""),
+                    ),
+                    "multisensory_trial_family": payload.get(
+                        "multisensory_trial_family",
+                        payload.get("Multisensory_Trial_Family", ""),
+                    ),
+                    "exteroceptive_modality_set": payload.get(
+                        "exteroceptive_modality_set",
+                        payload.get("Exteroceptive_Modality_Set", ""),
+                    ),
+                    "visual_stimulus_type": payload.get(
+                        "visual_stimulus_type",
+                        payload.get("Visual_Stimulus_Type", ""),
+                    ),
+                    "visual_motion_profile": payload.get(
+                        "visual_motion_profile",
+                        payload.get("Visual_Motion_Profile", ""),
+                    ),
+                    "visual_start_distance_cm": payload.get(
+                        "visual_start_distance_cm",
+                        payload.get("Visual_Start_Distance_cm", ""),
+                    ),
+                    "visual_end_distance_cm": payload.get(
+                        "visual_end_distance_cm",
+                        payload.get("Visual_End_Distance_cm", ""),
+                    ),
+                    "visual_speed_cm_s": payload.get(
+                        "visual_speed_cm_s",
+                        payload.get("Visual_Speed_cm_s", ""),
+                    ),
+                    "visual_duration_ms": payload.get(
+                        "visual_duration_ms",
+                        payload.get("Visual_Duration_ms", ""),
+                    ),
+                    "visual_renderer_engine": payload.get(
+                        "visual_renderer_engine",
+                        payload.get("Visual_Renderer_Engine", ""),
+                    ),
+                    "visual_display_device": payload.get(
+                        "visual_display_device",
+                        payload.get("Visual_Display_Device", ""),
+                    ),
+                    "mixed_reality_context": payload.get(
+                        "mixed_reality_context",
+                        payload.get("Mixed_Reality_Context", ""),
+                    ),
+                    "body_rendering_mode": payload.get(
+                        "body_rendering_mode",
+                        payload.get("Body_Rendering_Mode", ""),
+                    ),
+                    "audiovisual_synchrony_policy": payload.get(
+                        "audiovisual_synchrony_policy",
+                        payload.get("Audiovisual_Synchrony_Policy", ""),
+                    ),
+                    "mixed_reality_equivalence_boundary": payload.get(
+                        "mixed_reality_equivalence_boundary",
+                        payload.get("Mixed_Reality_Equivalence_Boundary", ""),
+                    ),
+                    "audio_output_mode": payload.get("audio_output_mode", payload.get("Audio_Output_Mode", "")),
+                    "speaker_array_id": payload.get("speaker_array_id", payload.get("Speaker_Array_ID", "")),
+                    "speaker_array_layout": payload.get(
+                        "speaker_array_layout",
+                        payload.get("Speaker_Array_Layout", ""),
+                    ),
+                    "speaker_switch_sequence": payload.get(
+                        "speaker_switch_sequence",
+                        payload.get("Speaker_Switch_Sequence", ""),
+                    ),
+                    "speaker_switch_times_ms": payload.get(
+                        "speaker_switch_times_ms",
+                        payload.get("Speaker_Switch_Times_ms", ""),
+                    ),
+                    "speaker_switch_channels": payload.get(
+                        "speaker_switch_channels",
+                        payload.get("Speaker_Switch_Channels", ""),
+                    ),
+                    "speaker_switch_gains": payload.get(
+                        "speaker_switch_gains",
+                        payload.get("Speaker_Switch_Gains", ""),
+                    ),
+                    "speaker_source_channel": payload.get(
+                        "speaker_source_channel",
+                        payload.get("Speaker_Source_Channel", ""),
+                    ),
+                    "speaker_switch_generated": payload.get(
+                        "speaker_switch_generated",
+                        payload.get("Speaker_Switch_Generated", ""),
+                    ),
+                    "voice_key_enabled": payload.get(
+                        "voice_key_enabled",
+                        payload.get("Voice_Key_Enabled", ""),
+                    ),
+                    "voice_key_response_label": payload.get(
+                        "voice_key_response_label",
+                        payload.get("Voice_Key_Response_Label", ""),
+                    ),
+                    "voice_key_threshold": payload.get(
+                        "voice_key_threshold",
+                        payload.get("Voice_Key_Threshold", ""),
+                    ),
+                    "voice_key_latency_correction_ms": payload.get(
+                        "voice_key_latency_correction_ms",
+                        payload.get("Voice_Key_Latency_Correction_ms", ""),
+                    ),
+                    "tactile_stimulation_modality": payload.get(
+                        "tactile_stimulation_modality",
+                        payload.get("Tactile_Stimulation_Modality", ""),
+                    ),
+                    "tactile_calibration_method": payload.get(
+                        "tactile_calibration_method",
+                        payload.get("Tactile_Calibration_Method", ""),
+                    ),
+                    "tactile_threshold_reference": payload.get(
+                        "tactile_threshold_reference",
+                        payload.get("Tactile_Threshold_Reference", ""),
+                    ),
+                    "tactile_intensity": payload.get(
+                        "tactile_intensity",
+                        payload.get("Tactile_Intensity", ""),
+                    ),
+                    "tactile_intensity_unit": payload.get(
+                        "tactile_intensity_unit",
+                        payload.get("Tactile_Intensity_Unit", ""),
+                    ),
+                    "tactile_pulse_duration_ms": payload.get(
+                        "tactile_pulse_duration_ms",
+                        payload.get("Tactile_Pulse_Duration_ms", ""),
+                    ),
+                    "electrical_stimulator_model": payload.get(
+                        "electrical_stimulator_model",
+                        payload.get("Electrical_Stimulator_Model", ""),
+                    ),
+                    "electrical_electrode_site": payload.get(
+                        "electrical_electrode_site",
+                        payload.get("Electrical_Electrode_Site", ""),
+                    ),
+                    "spatial_coordinate_frame": payload.get(
+                        "spatial_coordinate_frame",
+                        payload.get("Spatial_Coordinate_Frame", ""),
+                    ),
+                    "body_anchor": payload.get("body_anchor", payload.get("Body_Anchor", "")),
+                    "body_part": payload.get("body_part", payload.get("Body_Part", "")),
+                    "body_side": payload.get("body_side", payload.get("Body_Side", "")),
+                    "spatial_hemifield": payload.get(
+                        "spatial_hemifield",
+                        payload.get("Spatial_Hemifield", ""),
+                    ),
+                    "body_relative_axis": payload.get(
+                        "body_relative_axis",
+                        payload.get("Body_Relative_Axis", ""),
+                    ),
+                    "auditory_trajectory_family": payload.get(
+                        "auditory_trajectory_family",
+                        payload.get("Auditory_Trajectory_Family", ""),
+                    ),
+                    "auditory_trajectory_direction": payload.get(
+                        "auditory_trajectory_direction",
+                        payload.get("Auditory_Trajectory_Direction", ""),
+                    ),
+                    "trajectory_coordinate_frame": payload.get(
+                        "trajectory_coordinate_frame",
+                        payload.get("Trajectory_Coordinate_Frame", ""),
+                    ),
+                    "trajectory_start_hemifield": payload.get(
+                        "trajectory_start_hemifield",
+                        payload.get("Trajectory_Start_Hemifield", ""),
+                    ),
+                    "trajectory_end_hemifield": payload.get(
+                        "trajectory_end_hemifield",
+                        payload.get("Trajectory_End_Hemifield", ""),
+                    ),
+                    "trajectory_start_distance_cm": payload.get(
+                        "trajectory_start_distance_cm",
+                        payload.get("Trajectory_Start_Distance_cm", ""),
+                    ),
+                    "trajectory_end_distance_cm": payload.get(
+                        "trajectory_end_distance_cm",
+                        payload.get("Trajectory_End_Distance_cm", ""),
+                    ),
+                    "trajectory_start_azimuth_deg": payload.get(
+                        "trajectory_start_azimuth_deg",
+                        payload.get("Trajectory_Start_Azimuth_deg", ""),
+                    ),
+                    "trajectory_end_azimuth_deg": payload.get(
+                        "trajectory_end_azimuth_deg",
+                        payload.get("Trajectory_End_Azimuth_deg", ""),
+                    ),
+                    "spatial_renderer_engine": payload.get(
+                        "spatial_renderer_engine",
+                        payload.get("Spatial_Renderer_Engine", ""),
+                    ),
+                    "spatial_renderer_version": payload.get(
+                        "spatial_renderer_version",
+                        payload.get("Spatial_Renderer_Version", ""),
+                    ),
+                    "hrtf_database": payload.get("hrtf_database", payload.get("HRTF_Database", "")),
+                    "hrtf_subject_id": payload.get("hrtf_subject_id", payload.get("HRTF_Subject_ID", "")),
+                    "hrtf_filter_id": payload.get("hrtf_filter_id", payload.get("HRTF_Filter_ID", "")),
+                    "hrtf_near_field_compensation": payload.get(
+                        "hrtf_near_field_compensation",
+                        payload.get("HRTF_Near_Field_Compensation", ""),
+                    ),
+                    "source_asset_equivalence": payload.get(
+                        "source_asset_equivalence",
+                        payload.get("Source_Asset_Equivalence", ""),
+                    ),
+                    "renderer_equivalence_boundary": payload.get(
+                        "renderer_equivalence_boundary",
+                        payload.get("Renderer_Equivalence_Boundary", ""),
+                    ),
+                    "external_trigger_required": payload.get(
+                        "external_trigger_required",
+                        payload.get("External_Trigger_Required", ""),
+                    ),
+                    "external_trigger_modality": payload.get(
+                        "external_trigger_modality",
+                        payload.get("External_Trigger_Modality", ""),
+                    ),
+                    "external_trigger_role": payload.get(
+                        "external_trigger_role",
+                        payload.get("External_Trigger_Role", ""),
+                    ),
+                    "external_trigger_code": payload.get(
+                        "external_trigger_code",
+                        payload.get("External_Trigger_Code", ""),
+                    ),
+                    "external_trigger_tolerance_ms": payload.get(
+                        "external_trigger_tolerance_ms",
+                        payload.get("External_Trigger_Tolerance_ms", ""),
+                    ),
+                    "external_trigger_channel": payload.get(
+                        "external_trigger_channel",
+                        payload.get("External_Trigger_Channel", ""),
+                    ),
+                    "iti_policy": payload.get("iti_policy", payload.get("ITI_Policy", "")),
+                    "iti_ms": payload.get(
+                        "iti_ms",
+                        payload.get("ITI_ms", payload.get("Intertrial_Interval_ms", "")),
+                    ),
+                    "foreperiod_ms": payload.get("foreperiod_ms", payload.get("Foreperiod_ms", "")),
+                    "hazard_control_policy": payload.get(
+                        "hazard_control_policy",
+                        payload.get("Hazard_Control_Policy", ""),
+                    ),
+                    "expectancy_control_role": payload.get(
+                        "expectancy_control_role",
+                        payload.get("Expectancy_Control_Role", ""),
+                    ),
                     "sample_index": getattr(event, "sample_index", ""),
                 }
 
@@ -153,9 +422,277 @@ class TriggerDictionary:
                 "session_group_id": payload.get("session_group_id", ""),
                 "part_session_id": payload.get("part_session_id", ""),
                 "part_number": payload.get("part_number", ""),
+                "part_label": payload.get("part_label", ""),
                 "block_index": payload.get("block_index", payload.get("block_number", "")),
                 "trial_index": payload.get("trial_index", payload.get("trial_number", "")),
                 "trial_uid": payload.get("trial_uid", payload.get("Trial_UID", "")),
+                "expected_response": payload.get("expected_response", payload.get("Expected_Response", "")),
+                "response_rule": payload.get("response_rule", payload.get("Response_Rule", "")),
+                "target_role": payload.get("target_role", payload.get("Target_Role", "")),
+                "response_mode": payload.get("response_mode", payload.get("Response_Mode", "")),
+                "response_choice_set": payload.get(
+                    "response_choice_set",
+                    payload.get("Response_Choice_Set", ""),
+                ),
+                "correct_response": payload.get("correct_response", payload.get("Correct_Response", "")),
+                "response_scoring_policy": payload.get(
+                    "response_scoring_policy",
+                    payload.get("Response_Scoring_Policy", ""),
+                ),
+                "response_capture_device": payload.get(
+                    "response_capture_device",
+                    payload.get("Response_Capture_Device", ""),
+                ),
+                "response_input_modality": payload.get(
+                    "response_input_modality",
+                    payload.get("Response_Input_Modality", ""),
+                ),
+                "multisensory_trial_family": payload.get(
+                    "multisensory_trial_family",
+                    payload.get("Multisensory_Trial_Family", ""),
+                ),
+                "exteroceptive_modality_set": payload.get(
+                    "exteroceptive_modality_set",
+                    payload.get("Exteroceptive_Modality_Set", ""),
+                ),
+                "visual_stimulus_type": payload.get(
+                    "visual_stimulus_type",
+                    payload.get("Visual_Stimulus_Type", ""),
+                ),
+                "visual_motion_profile": payload.get(
+                    "visual_motion_profile",
+                    payload.get("Visual_Motion_Profile", ""),
+                ),
+                "visual_start_distance_cm": payload.get(
+                    "visual_start_distance_cm",
+                    payload.get("Visual_Start_Distance_cm", ""),
+                ),
+                "visual_end_distance_cm": payload.get(
+                    "visual_end_distance_cm",
+                    payload.get("Visual_End_Distance_cm", ""),
+                ),
+                "visual_speed_cm_s": payload.get(
+                    "visual_speed_cm_s",
+                    payload.get("Visual_Speed_cm_s", ""),
+                ),
+                "visual_duration_ms": payload.get(
+                    "visual_duration_ms",
+                    payload.get("Visual_Duration_ms", ""),
+                ),
+                "visual_renderer_engine": payload.get(
+                    "visual_renderer_engine",
+                    payload.get("Visual_Renderer_Engine", ""),
+                ),
+                "visual_display_device": payload.get(
+                    "visual_display_device",
+                    payload.get("Visual_Display_Device", ""),
+                ),
+                "mixed_reality_context": payload.get(
+                    "mixed_reality_context",
+                    payload.get("Mixed_Reality_Context", ""),
+                ),
+                "body_rendering_mode": payload.get(
+                    "body_rendering_mode",
+                    payload.get("Body_Rendering_Mode", ""),
+                ),
+                "audiovisual_synchrony_policy": payload.get(
+                    "audiovisual_synchrony_policy",
+                    payload.get("Audiovisual_Synchrony_Policy", ""),
+                ),
+                "mixed_reality_equivalence_boundary": payload.get(
+                    "mixed_reality_equivalence_boundary",
+                    payload.get("Mixed_Reality_Equivalence_Boundary", ""),
+                ),
+                "audio_output_mode": payload.get("audio_output_mode", payload.get("Audio_Output_Mode", "")),
+                "speaker_array_id": payload.get("speaker_array_id", payload.get("Speaker_Array_ID", "")),
+                "speaker_array_layout": payload.get(
+                    "speaker_array_layout",
+                    payload.get("Speaker_Array_Layout", ""),
+                ),
+                "speaker_switch_sequence": payload.get(
+                    "speaker_switch_sequence",
+                    payload.get("Speaker_Switch_Sequence", ""),
+                ),
+                "speaker_switch_times_ms": payload.get(
+                    "speaker_switch_times_ms",
+                    payload.get("Speaker_Switch_Times_ms", ""),
+                ),
+                "speaker_switch_channels": payload.get(
+                    "speaker_switch_channels",
+                    payload.get("Speaker_Switch_Channels", ""),
+                ),
+                "speaker_switch_gains": payload.get(
+                    "speaker_switch_gains",
+                    payload.get("Speaker_Switch_Gains", ""),
+                ),
+                "speaker_source_channel": payload.get(
+                    "speaker_source_channel",
+                    payload.get("Speaker_Source_Channel", ""),
+                ),
+                "speaker_switch_generated": payload.get(
+                    "speaker_switch_generated",
+                    payload.get("Speaker_Switch_Generated", ""),
+                ),
+                "voice_key_enabled": payload.get(
+                    "voice_key_enabled",
+                    payload.get("Voice_Key_Enabled", ""),
+                ),
+                "voice_key_response_label": payload.get(
+                    "voice_key_response_label",
+                    payload.get("Voice_Key_Response_Label", ""),
+                ),
+                "voice_key_threshold": payload.get(
+                    "voice_key_threshold",
+                    payload.get("Voice_Key_Threshold", ""),
+                ),
+                "voice_key_latency_correction_ms": payload.get(
+                    "voice_key_latency_correction_ms",
+                    payload.get("Voice_Key_Latency_Correction_ms", ""),
+                ),
+                "tactile_stimulation_modality": payload.get(
+                    "tactile_stimulation_modality",
+                    payload.get("Tactile_Stimulation_Modality", ""),
+                ),
+                "tactile_calibration_method": payload.get(
+                    "tactile_calibration_method",
+                    payload.get("Tactile_Calibration_Method", ""),
+                ),
+                "tactile_threshold_reference": payload.get(
+                    "tactile_threshold_reference",
+                    payload.get("Tactile_Threshold_Reference", ""),
+                ),
+                "tactile_intensity": payload.get(
+                    "tactile_intensity",
+                    payload.get("Tactile_Intensity", ""),
+                ),
+                "tactile_intensity_unit": payload.get(
+                    "tactile_intensity_unit",
+                    payload.get("Tactile_Intensity_Unit", ""),
+                ),
+                "tactile_pulse_duration_ms": payload.get(
+                    "tactile_pulse_duration_ms",
+                    payload.get("Tactile_Pulse_Duration_ms", ""),
+                ),
+                "electrical_stimulator_model": payload.get(
+                    "electrical_stimulator_model",
+                    payload.get("Electrical_Stimulator_Model", ""),
+                ),
+                "electrical_electrode_site": payload.get(
+                    "electrical_electrode_site",
+                    payload.get("Electrical_Electrode_Site", ""),
+                ),
+                "spatial_coordinate_frame": payload.get(
+                    "spatial_coordinate_frame",
+                    payload.get("Spatial_Coordinate_Frame", ""),
+                ),
+                "body_anchor": payload.get("body_anchor", payload.get("Body_Anchor", "")),
+                "body_part": payload.get("body_part", payload.get("Body_Part", "")),
+                "body_side": payload.get("body_side", payload.get("Body_Side", "")),
+                "spatial_hemifield": payload.get(
+                    "spatial_hemifield",
+                    payload.get("Spatial_Hemifield", ""),
+                ),
+                "body_relative_axis": payload.get(
+                    "body_relative_axis",
+                    payload.get("Body_Relative_Axis", ""),
+                ),
+                "auditory_trajectory_family": payload.get(
+                    "auditory_trajectory_family",
+                    payload.get("Auditory_Trajectory_Family", ""),
+                ),
+                "auditory_trajectory_direction": payload.get(
+                    "auditory_trajectory_direction",
+                    payload.get("Auditory_Trajectory_Direction", ""),
+                ),
+                "trajectory_coordinate_frame": payload.get(
+                    "trajectory_coordinate_frame",
+                    payload.get("Trajectory_Coordinate_Frame", ""),
+                ),
+                "trajectory_start_hemifield": payload.get(
+                    "trajectory_start_hemifield",
+                    payload.get("Trajectory_Start_Hemifield", ""),
+                ),
+                "trajectory_end_hemifield": payload.get(
+                    "trajectory_end_hemifield",
+                    payload.get("Trajectory_End_Hemifield", ""),
+                ),
+                "trajectory_start_distance_cm": payload.get(
+                    "trajectory_start_distance_cm",
+                    payload.get("Trajectory_Start_Distance_cm", ""),
+                ),
+                "trajectory_end_distance_cm": payload.get(
+                    "trajectory_end_distance_cm",
+                    payload.get("Trajectory_End_Distance_cm", ""),
+                ),
+                "trajectory_start_azimuth_deg": payload.get(
+                    "trajectory_start_azimuth_deg",
+                    payload.get("Trajectory_Start_Azimuth_deg", ""),
+                ),
+                "trajectory_end_azimuth_deg": payload.get(
+                    "trajectory_end_azimuth_deg",
+                    payload.get("Trajectory_End_Azimuth_deg", ""),
+                ),
+                "spatial_renderer_engine": payload.get(
+                    "spatial_renderer_engine",
+                    payload.get("Spatial_Renderer_Engine", ""),
+                ),
+                "spatial_renderer_version": payload.get(
+                    "spatial_renderer_version",
+                    payload.get("Spatial_Renderer_Version", ""),
+                ),
+                "hrtf_database": payload.get("hrtf_database", payload.get("HRTF_Database", "")),
+                "hrtf_subject_id": payload.get("hrtf_subject_id", payload.get("HRTF_Subject_ID", "")),
+                "hrtf_filter_id": payload.get("hrtf_filter_id", payload.get("HRTF_Filter_ID", "")),
+                "hrtf_near_field_compensation": payload.get(
+                    "hrtf_near_field_compensation",
+                    payload.get("HRTF_Near_Field_Compensation", ""),
+                ),
+                "source_asset_equivalence": payload.get(
+                    "source_asset_equivalence",
+                    payload.get("Source_Asset_Equivalence", ""),
+                ),
+                "renderer_equivalence_boundary": payload.get(
+                    "renderer_equivalence_boundary",
+                    payload.get("Renderer_Equivalence_Boundary", ""),
+                ),
+                "external_trigger_required": payload.get(
+                    "external_trigger_required",
+                    payload.get("External_Trigger_Required", ""),
+                ),
+                "external_trigger_modality": payload.get(
+                    "external_trigger_modality",
+                    payload.get("External_Trigger_Modality", ""),
+                ),
+                "external_trigger_role": payload.get(
+                    "external_trigger_role",
+                    payload.get("External_Trigger_Role", ""),
+                ),
+                "external_trigger_code": payload.get(
+                    "external_trigger_code",
+                    payload.get("External_Trigger_Code", ""),
+                ),
+                "external_trigger_tolerance_ms": payload.get(
+                    "external_trigger_tolerance_ms",
+                    payload.get("External_Trigger_Tolerance_ms", ""),
+                ),
+                "external_trigger_channel": payload.get(
+                    "external_trigger_channel",
+                    payload.get("External_Trigger_Channel", ""),
+                ),
+                "iti_policy": payload.get("iti_policy", payload.get("ITI_Policy", "")),
+                "iti_ms": payload.get(
+                    "iti_ms",
+                    payload.get("ITI_ms", payload.get("Intertrial_Interval_ms", "")),
+                ),
+                "foreperiod_ms": payload.get("foreperiod_ms", payload.get("Foreperiod_ms", "")),
+                "hazard_control_policy": payload.get(
+                    "hazard_control_policy",
+                    payload.get("Hazard_Control_Policy", ""),
+                ),
+                "expectancy_control_role": payload.get(
+                    "expectancy_control_role",
+                    payload.get("Expectancy_Control_Role", ""),
+                ),
                 "sample_index": payload.get("sample_index", ""),
                 "dynamic": True,
             }
@@ -170,6 +707,7 @@ class TriggerDictionary:
         session_group_id: str = "",
         part_session_id: str = "",
         part_number: str | int = "",
+        part_label: str = "",
     ) -> Path:
         path = Path(path)
         payload = {
@@ -180,6 +718,7 @@ class TriggerDictionary:
             "session_group_id": session_group_id,
             "part_session_id": part_session_id,
             "part_number": part_number,
+            "part_label": part_label,
             "reserved_codes": dict(sorted(RESERVED_TRIGGER_CODES.items(), key=lambda item: item[1])),
             "triggers": [
                 {
@@ -281,6 +820,7 @@ class LSLMarkerOutlet:
             str(marker.get("session_group_id", "")),
             str(marker.get("part_session_id", "")),
             str(marker.get("part_number", "")),
+            str(marker.get("part_label", "")),
             str(marker.get("block_index", "")),
             str(marker.get("trial_uid", "")),
             str(marker.get("sample_index", "")),
@@ -423,6 +963,7 @@ class TimingEventHub:
             "session_group_id",
             "part_session_id",
             "part_number",
+            "part_label",
             "lsl_timestamp",
             "timestamp_quality",
             "sample_index",
@@ -456,6 +997,7 @@ class TimingEventHub:
             session_group_id=str(self.default_payload.get("session_group_id") or ""),
             part_session_id=str(self.default_payload.get("part_session_id") or ""),
             part_number=self.default_payload.get("part_number", ""),
+            part_label=str(self.default_payload.get("part_label") or ""),
         )
 
     def push_deferred_event_marker(self, event: SessionEvent) -> None:
@@ -612,6 +1154,7 @@ class TimingEventHub:
             "session_group_id": payload.get("session_group_id", ""),
             "part_session_id": payload.get("part_session_id", ""),
             "part_number": payload.get("part_number", ""),
+            "part_label": payload.get("part_label", ""),
             "block_index": block_index,
             "trial_uid": payload.get("trial_uid", payload.get("Trial_UID", "")),
             "sample_index": payload.get("sample_index", payload.get("planned_sample_index", "")),
@@ -700,7 +1243,7 @@ def _marker_modality(trial_type: str, family: str) -> str:
         return "audiotactile"
     if "baseline" in text or ("tactile" in text and "audio" not in text):
         return "tactile"
-    if "audio" in text or "catch" in text:
+    if "audio" in text or "auditory" in text or "catch" in text:
         return "audio"
     return ""
 
@@ -865,6 +1408,7 @@ def _rich_marker_samples_chunk(stream_id: int, markers: list[dict[str, Any]]) ->
             str(marker.get("session_group_id", "")),
             str(marker.get("part_session_id", "")),
             str(marker.get("part_number", "")),
+            str(marker.get("part_label", "")),
             str(marker.get("block_index", "")),
             str(marker.get("trial_uid", "")),
             str(marker.get("sample_index", "")),

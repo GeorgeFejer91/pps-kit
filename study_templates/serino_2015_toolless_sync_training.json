@@ -5,7 +5,7 @@
   "source_url": "https://www.frontiersin.org/journals/behavioral-neuroscience/articles/10.3389/fnbeh.2015.00004/full",
   "doi": "10.3389/fnbeh.2015.00004",
   "verification_status": "partial",
-  "notes": "Training-induced PPS plasticity profile. The preload captures the measurement task: 3000 ms pink-noise IN/OUT sounds, right-hand tactile detection, T1-T5 SOAs, and auditory-only catch trials. The synchronous versus asynchronous training protocol is stored as metadata until ordered training phases become a first-class GUI concept.",
+  "notes": "Training-induced PPS plasticity profile. The preload captures the measurement assessment block: 3000 ms pink-noise IN/OUT sounds, right-hand tactile detection, T1-T5 SOAs, and auditory-only catch trials. The synchronous versus asynchronous training protocol is retained as context metadata because the PPS Toolkit profile recreates the runnable audiotactile measurement task rather than the intervention schedule.",
   "reference_parameters": {
     "profile_type": "audio_tactile_training_plasticity",
     "sound_duration_ms": 3000,
@@ -14,11 +14,21 @@
     "measurement_task": "right-hand speeded tactile detection with task-irrelevant IN/OUT pink noise",
     "training_factor": "synchronous versus asynchronous far-audio/hand-tactile pairing",
     "response_rule": "vocal response to tactile target, ignore sound",
+    "profile_check_complete": true,
+    "target_trial_repetitions_reported_or_inherited": 8,
+    "target_trial_count": 80,
+    "catch_trials_derived_from_77_percent_target_rate": 24,
+    "reported_assessment_block_count": 1,
+    "training_context": "Participants completed synchronous and asynchronous training days. The paper reports 23 five-second training trains, 22 interstimulus intervals of 4000-6000 ms, and five attention beeps per training session.",
+    "remaining_caveats": [
+      "the Frontiers paper reports 77% tactile-target trials but does not print a separate exact catch count; 24 catches is the parsimonious integer count paired with the inherited 80-target Canzoneri-family T1-T5 x IN/OUT x 8 structure",
+      "exact original pink-noise asset and two-speaker gain files are not available",
+      "participant-level DS7A current calibration and voice-key threshold/latency are represented as provenance and emulated by mouse-click response proxies",
+      "synchronous/asynchronous training intervention scheduling is retained as context and not run as part of the single assessment-block profile"
+    ],
     "implementation_gaps": [
       "ordered pre-training/training/post-training phase model",
-      "training train structure and timing",
-      "electrocutaneous tactile calibration",
-      "voice-key response capture"
+      "training train structure and timing"
     ]
   },
   "design": {
@@ -63,12 +73,23 @@
       "pair_spatial_values_with_soas": true,
       "auditory_motion_directions": ["looming", "receding"],
       "tactile_sites": ["right hand"],
-      "catch_trial_percentage": 23.0,
-      "catch_trials_exact": null,
+      "include_catch_trials": true,
+      "catch_trial_percentage": 23.08,
+      "catch_trials_exact": 24,
+      "catch_crosses_sequence_variants": true,
       "include_baseline_trials": false,
+      "baseline_strategy": "none",
+      "baseline_trial_percentage": 0.0,
+      "baseline_trials_exact": 0,
       "baseline_soa_values_ms": [],
       "respiratory_phases": ["synchronous training group", "asynchronous training group"],
-      "blocks": 2,
+      "blocks": 1,
+      "distribute_trial_pool_across_blocks": true,
+      "trial_pool_repetition_defaults": {
+        "default": 8,
+        "audio_tactile": 8,
+        "catch": 12
+      },
       "trial_randomization_strategy": "no_immediate_repeats",
       "block_order_randomization": "counterbalanced_rotation",
       "max_consecutive_same_trial_type": 2,
@@ -76,9 +97,21 @@
         {
           "strip_id": "serino-toolless-measurement-row",
           "label": "Training measurement PPS trial",
-          "audio_tactile_percentage": 100.0,
-          "catch_percentage": 0.0,
-          "baseline_percentage": 0.0,
+          "metadata": {
+            "expected_response": "respond",
+            "response_rule": "verbal_response_to_tactile_target_ignore_sound",
+            "target_role": "tactile_target",
+            "response_mode": "voice_key_mouse_click_proxy",
+            "response_capture_device": "microphone",
+            "voice_key_enabled": "true",
+            "tactile_stimulation_modality": "electrical",
+            "electrical_stimulator_model": "Digitimer DS7A",
+            "electrical_electrode_site": "right hand Neuroline/Ambu electrode pair",
+            "source_asset_equivalence": "procedural pink-noise proxy for unshared original sound file",
+            "renderer_equivalence_boundary": "binaural virtual trajectory proxy for hidden near/far loudspeakers",
+            "iti_policy": "toolkit_default_unreported_in_source",
+            "iti_ms": "300"
+          },
           "elements": [
             {
               "element_id": "serino-toolless-moving-sound",
@@ -99,6 +132,14 @@
     {
       "field": "measurement task",
       "source": "Frontiers Methods report 3000 ms pink-noise IN/OUT sounds, right-hand tactile target detection, 77% target trials, and T1-T5 at 300, 800, 1500, 2200, and 2700 ms."
+    },
+    {
+      "field": "response and tactile apparatus",
+      "source": "Frontiers Methods report a DS7A Digitimer constant-current electrical stimulator, Neuroline/Ambu electrodes on the right hand, vocal responses, and voice-activated relay recording."
+    },
+    {
+      "field": "assessment structure",
+      "source": "Frontiers Design reports PPS was measured before and after training; each interleaved assessment session consisted of one audio-tactile interaction task block."
     },
     {
       "field": "training manipulation",

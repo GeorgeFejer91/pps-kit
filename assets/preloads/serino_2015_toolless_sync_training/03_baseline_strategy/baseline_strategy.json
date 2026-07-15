@@ -1,10 +1,14 @@
 {
   "schema": "pps-preload-baseline-segment.v1",
   "template_id": "serino_2015_toolless_sync_training",
-  "baseline_strategy": "tactile_only",
+  "baseline_strategy": "none",
   "include_baseline_trials": false,
+  "baseline_trials_exact": 0,
   "baseline_trial_percentage": 0.0,
   "baseline_soa_values_ms": [],
-  "catch_trial_percentage": 23.0,
-  "catch_trials_exact": null
+  "baseline_crosses_sequence_variants": true,
+  "catch_trial_percentage": 23.08,
+  "catch_trials_exact": 24,
+  "catch_crosses_sequence_variants": true,
+  "distribute_trial_pool_across_blocks": true
 }

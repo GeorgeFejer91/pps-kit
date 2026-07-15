@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260630-source-mode-widgets">
+  <link rel="stylesheet" href="styles.css?v=20260703-runner-gui-compat">
 </head>
 <body>
   <div class="app-shell">
@@ -24,13 +24,13 @@
         <span id="edit-mode-status" class="status-label optional">view mode</span>
       </div>
       <nav class="rail-nav-group active" aria-label="Toolkit workflow sections" data-rail-page="toolkit">
-        <a href="#study" data-step-link="study"><span>0 Preload</span><strong class="decision-state not-ready" data-step-state="study" aria-label="Preload not ready" title="Preload not ready">X</strong></a>
-        <a href="#stimulus" data-step-link="stimulus"><span>1 Stimuli</span><strong class="decision-state not-ready" data-step-state="stimulus" aria-label="Stimuli not ready" title="Stimuli not ready">X</strong></a>
-        <a href="#trials" data-step-link="trials"><span>2 Sequence</span><strong class="decision-state not-ready" data-step-state="trials" aria-label="Sequence not ready" title="Sequence not ready">X</strong></a>
-        <a href="#baseline" data-step-link="baseline"><span>3 Tactile</span><strong class="decision-state not-ready" data-step-state="baseline" aria-label="Tactile not ready" title="Tactile not ready">X</strong></a>
-        <a href="#block" data-step-link="block"><span>4 Pool</span><strong class="decision-state not-ready" data-step-state="block" aria-label="Trial pool not ready" title="Trial pool not ready">X</strong></a>
-        <a href="#schedule" data-step-link="schedule"><span>5 Blocks</span><strong class="decision-state not-ready" data-step-state="schedule" aria-label="Block CSV preview not ready" title="Block CSV preview not ready">X</strong></a>
-        <a href="#run" data-step-link="run"><span>6 Prepare Experiment</span><strong class="decision-state not-ready" data-step-state="run" aria-label="Prepare experiment not ready" title="Prepare experiment not ready">X</strong></a>
+        <a href="#study" data-step-link="study"><span>0 Preload</span><strong class="decision-state not-ready" data-step-state="study" aria-label="Preload not ready" title="Preload not ready">✕</strong></a>
+        <a href="#stimulus" data-step-link="stimulus"><span>1 Stimuli</span><strong class="decision-state not-ready" data-step-state="stimulus" aria-label="Stimuli not ready" title="Stimuli not ready">✕</strong></a>
+        <a href="#trials" data-step-link="trials"><span>2 Sequence</span><strong class="decision-state not-ready" data-step-state="trials" aria-label="Sequence not ready" title="Sequence not ready">✕</strong></a>
+        <a href="#baseline" data-step-link="baseline"><span>3 Tactile</span><strong class="decision-state not-ready" data-step-state="baseline" aria-label="Tactile not ready" title="Tactile not ready">✕</strong></a>
+        <a href="#block" data-step-link="block"><span>4 Pool</span><strong class="decision-state not-ready" data-step-state="block" aria-label="Trial pool not ready" title="Trial pool not ready">✕</strong></a>
+        <a href="#schedule" data-step-link="schedule"><span>5 Blocks</span><strong class="decision-state not-ready" data-step-state="schedule" aria-label="Block CSV preview not ready" title="Block CSV preview not ready">✕</strong></a>
+        <a href="#run" data-step-link="run"><span>6 Prepare Experiment</span><strong class="decision-state not-ready" data-step-state="run" aria-label="Prepare experiment not ready" title="Prepare experiment not ready">✕</strong></a>
       </nav>
       <nav class="rail-nav-group" aria-label="Documentation sections" data-rail-page="documentation" hidden>
         <div class="rail-nav-kicker">Documentation</div>
@@ -208,7 +208,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260630-source-mode-widgets"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260703-runner-gui-compat"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -218,11 +218,25 @@
                 <span id="source-counts" class="status-label">0 sources</span>
               </div>
               <div class="source-action-grid">
-                <div class="source-action source-picker-card">
-                  <label for="generated-noise-select">Generate Looming Noise</label>
-                  <select id="generated-noise-select">
+                <div class="source-action source-picker-card noise-picker-card">
+                  <span class="noise-picker-label">Generate Looming Noise</span>
+                  <!-- Hidden state mirror: preserves the #generated-noise-select hook that app.js
+                       populates (renderGeneratedNoiseSelect) and resets after a bake. The visible
+                       quick-pick buttons below drive staging via stageGeneratedNoise(). -->
+                  <select id="generated-noise-select" class="state-only" tabindex="-1" aria-hidden="true">
                     <option value="">Choose noise type to bake...</option>
                   </select>
+                  <div class="noise-type-buttons" role="group" aria-label="Generate looming noise type">
+                    <div class="noise-type-row noise-type-row-primary">
+                      <button type="button" class="noise-type-button noise-type-primary" data-noise-type="white" data-noise-hint="White noise - flat spectrum. Rated the most pleasant and least arousing of the five colours in Ferri et al. (2015), who used it as the neutral looming sound.">White</button>
+                      <button type="button" class="noise-type-button noise-type-primary" data-noise-type="pink" data-noise-hint="Pink noise - power falls ~3 dB/octave (1/f). Rated more arousing and less pleasant than white in Ferri et al. (2015).">Pink</button>
+                    </div>
+                    <div class="noise-type-row noise-type-row-secondary">
+                      <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="blue" data-noise-hint="Blue noise - power rises ~3 dB/octave (f); high-frequency emphasis. One of the five colours validated in Ferri et al. (2015) Experiment 1.">Blue</button>
+                      <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="violet" data-noise-hint="Violet noise - power rises ~6 dB/octave (f^2), the derivative of white noise. Validated in Ferri et al. (2015); its valence differed from white.">Violet</button>
+                      <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="brown" data-noise-hint="Brown noise - power falls ~6 dB/octave (1/f^2); low rumble. Ferri et al. (2015) used it as the negative-valence sound, which expanded peripersonal space.">Brown</button>
+                    </div>
+                  </div>
                 </div>
                 <button id="import-audio-spatialize" type="button" class="source-action">
                   <strong>Custom Looming Tone</strong>
@@ -234,36 +248,38 @@
                 </button>
               </div>
               <div class="bake-panel">
-                <div class="field-row">
-                  <label for="bake-label">Bake label</label>
-                  <input id="bake-label" type="text" autocomplete="off">
-                </div>
-                <div id="generated-source-mode-control" class="source-mode-row" aria-label="Generated source mode">
-                  <span>Source mode</span>
-                  <div class="source-mode-choice-grid" role="radiogroup" aria-label="Generated source mode">
-                    <label class="source-mode-widget">
-                      <input type="radio" name="generated-source-mode" value="dynaspace_gaussian_burst_train" checked>
-                      <span class="source-mode-widget-body">
-                        <img src="looming_burst_train_waveform.svg" alt="" aria-hidden="true" width="960" height="360">
-                        <span class="source-mode-widget-copy">
-                          <strong>Burst train</strong>
-                          <span>Hobeika et al. (2020)</span>
-                        </span>
-                      </span>
-                    </label>
-                    <label class="source-mode-widget">
-                      <input type="radio" name="generated-source-mode" value="continuous_noise">
-                      <span class="source-mode-widget-body">
-                        <img src="looming_smooth_linear_approach_waveform.svg" alt="" aria-hidden="true" width="960" height="360">
-                        <span class="source-mode-widget-copy">
-                          <strong>Smooth linear</strong>
-                          <span>Approach envelope</span>
-                        </span>
-                      </span>
-                    </label>
+                <div class="bake-configure">
+                  <div class="field-row">
+                    <label for="bake-label">Bake label</label>
+                    <input id="bake-label" type="text" autocomplete="off">
                   </div>
+                  <div id="generated-source-mode-control" class="source-mode-row" aria-label="Generated source mode">
+                    <span>Source mode</span>
+                    <div class="source-mode-choice-grid" role="radiogroup" aria-label="Generated source mode">
+                      <label class="source-mode-widget">
+                        <input type="radio" name="generated-source-mode" value="dynaspace_gaussian_burst_train" checked>
+                        <span class="source-mode-widget-body">
+                          <img src="looming_burst_train_waveform.svg" alt="" aria-hidden="true" width="960" height="360">
+                          <span class="source-mode-widget-copy">
+                            <strong>Burst train</strong>
+                            <span>Hobeika et al. (2020)</span>
+                          </span>
+                        </span>
+                      </label>
+                      <label class="source-mode-widget">
+                        <input type="radio" name="generated-source-mode" value="continuous_noise">
+                        <span class="source-mode-widget-body">
+                          <img src="looming_smooth_linear_approach_waveform.svg" alt="" aria-hidden="true" width="960" height="360">
+                          <span class="source-mode-widget-copy">
+                            <strong>Smooth linear</strong>
+                            <span>Approach envelope</span>
+                          </span>
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                  <input id="bake-gain" type="hidden" value="1">
                 </div>
-                <input id="bake-gain" type="hidden" value="1">
                 <div class="loudness-panel" aria-label="Loudness policy">
                   <div class="loudness-panel-heading">
                     <span>Loudness Contract</span>
@@ -283,8 +299,10 @@
                   </div>
                   <div id="loudness-derived" class="loudness-derived"></div>
                 </div>
-                <button id="bake-stimulus" type="button" class="primary">Bake Ingredient</button>
-                <span id="bake-status" class="status-label required">No source staged</span>
+                <div class="bake-action-row">
+                  <button id="bake-stimulus" type="button" class="primary">Bake Ingredient</button>
+                  <span id="bake-status" class="status-label required">No source staged</span>
+                </div>
               </div>
             </div>
 
@@ -1147,7 +1165,7 @@
       </form>
     </div>
   </div>
-  <script src="hardware_pixel_art.js?v=20260630-source-mode-widgets"></script>
-  <script src="app.js?v=20260630-source-mode-widgets"></script>
+  <script src="hardware_pixel_art.js?v=20260703-runner-gui-compat"></script>
+  <script src="app.js?v=20260703-runner-gui-compat"></script>
 </body>
 </html>

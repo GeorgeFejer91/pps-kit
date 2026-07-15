@@ -21,9 +21,26 @@
     {
       "strip_id": "serino-toolless-measurement-row",
       "label": "Training measurement PPS trial",
-      "audio_tactile_percentage": 100.0,
-      "catch_percentage": 0.0,
-      "baseline_percentage": 0.0,
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "respond",
+        "response_rule": "verbal_response_to_tactile_target_ignore_sound",
+        "target_role": "tactile_target",
+        "response_mode": "voice_key_mouse_click_proxy",
+        "response_capture_device": "microphone",
+        "voice_key_enabled": "true",
+        "tactile_stimulation_modality": "electrical",
+        "electrical_stimulator_model": "Digitimer DS7A",
+        "electrical_electrode_site": "right hand Neuroline/Ambu electrode pair",
+        "source_asset_equivalence": "procedural pink-noise proxy for unshared original sound file",
+        "renderer_equivalence_boundary": "binaural virtual trajectory proxy for hidden near/far loudspeakers",
+        "iti_policy": "toolkit_default_unreported_in_source",
+        "iti_ms": "300"
+      },
       "elements": [
         {
           "element_id": "serino-toolless-moving-sound",
@@ -41,5 +58,5 @@
     }
   ],
   "prestimulus_files": [],
-  "preview_trial_count": 80
+  "preview_trial_count": 104
 }

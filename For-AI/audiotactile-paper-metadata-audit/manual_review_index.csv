@@ -1,6 +1,7 @@
 record_id,citation_short,manual_review_status,confidence_score,confidence_label,profile_recreation_assessment,critical_missing_or_caveat_count,source_check_count,review_date
 biggio_2017_racket_tool_use,Biggio et al. (2017),manual_review_completed_main_pdf_no_supplement_found,0.84,high_confidence_extraction,possible_with_caveats_static_near_far_racket_condition,6,5,2026-06-16
 canzoneri_2012_dynamic_sounds,Canzoneri et al. (2012),manual_review_completed_main_pdf,0.92,high_confidence_extraction,possible_with_caveats,4,5,2026-06-16
+canzoneri_2013_amputation_prosthesis,Canzoneri et al. (2013b),manual_review_completed_open_access_pdf_no_supplement_found,0.86,high_confidence_extraction_with_source_count_caveat,possible_with_caveats_dynamic_upper_arm_prosthesis_context,5,3,2026-07-15
 cell_reports_medicine_2026_consciousness,Multisensory integration in PPS indexes consciousness states (2026),manual_review_completed_main_pdf_and_cell_press_source_pdf,0.91,high_confidence_extraction,possible_with_caveats_task_free_eeg_pps_two_variants,8,5,2026-06-16
 depersonalisation_2024,"Ferroni et al. (2024/2025), depersonalisation PPS",manual_review_completed_main_pdf_supplement_blocked,0.78,partial_extraction,possible_with_caveats,7,5,2026-06-16
 farne_ladavas_2002_auditory_pps_humans,Farne & Ladavas (2002),manual_review_completed_main_pdf,0.82,high_confidence_extraction,possible_with_caveats,6,5,2026-06-16
@@ -10,6 +11,7 @@ disorders_consciousness_2019,"Noel et al. (2019), DoC PPS encoding",manual_revie
 lamia_2026_arm_movement,"Lamia, Shabani, & Candidi (2026)",manual_review_completed_main_pdf_and_supplement,0.91,high_confidence_extraction,possible_with_caveats_two_experiment_arm_movement_profiles,7,8,2026-06-16
 mindfulness_pps_2024,Mindfulness and PPS boundaries (2024),manual_review_completed_main_pdf,0.86,high_confidence_extraction,possible_with_caveats,4,4,2026-06-16
 noel_2015_bodily_self,Noel et al. (2015a),manual_review_completed_main_pdf_and_supplement,0.88,high_confidence_extraction,possible_with_caveats_front_back_fbi_trunk_profiles,7,8,2026-06-16
+noel_2015_walking,Noel et al. (2015b),manual_review_completed_public_pdf_no_supplement_found,0.90,high_confidence_extraction,possible_with_apparatus_caveats_full_body_walking_audio_tactile_profile,4,2,2026-07-15
 matsuda_2021_four_directions,Matsuda et al. (2021),manual_review_completed_main_pdf_and_publisher_html_no_supplement_found,0.93,high_confidence_extraction,possible_with_caveats_four_direction_dynamic_trunk_pps_profile,5,6,2026-06-16
 ronga_2021_newborn_erp,"Ronga et al. (2021), newborn ERP",manual_review_completed_main_pdf_and_pnas_supplements,0.90,high_confidence_extraction,possible_with_caveats_static_near_far_passive_erp_profile,5,6,2026-06-16
 serino_2007_blind_cane_users,Serino et al. (2007),manual_review_completed_main_pdf_supplement_limited,0.88,high_confidence_extraction,possible_with_caveats_static_near_far_tool_condition,7,5,2026-06-16
@@ -17,6 +19,7 @@ serino_2015_peri_trunk_exp1,"Serino et al. (2015), Exp. 1",manual_review_complet
 serino_2015_front_back_trunk_exp2,"Serino et al. (2015), Exp. 2",manual_review_completed_main_pdf_and_supplement,0.84,high_confidence_extraction,possible_with_caveats_16_speaker_front_back_trunk_profile,7,7,2026-06-16
 serino_2015_peri_hand_exp3,"Serino et al. (2015), Exp. 3",manual_review_completed_main_pdf_and_supplement,0.87,high_confidence_extraction,possible_with_caveats_lateralized_peri_hand_profile,6,7,2026-06-16
 serino_2015_exps_4_to_6,"Serino et al. (2015), Exp. 4-6",manual_review_completed_main_pdf_and_supplement,0.86,high_confidence_extraction,possible_with_caveats_split_into_exp4_exp5_exp6_profiles,8,7,2026-06-16
+serino_2015_toolless_sync_training,Serino/Canzoneri 2015 toolless sync training,manual_review_completed_publisher_html,0.82,high_confidence_extraction_with_count_derivation_caveat,possible_with_caveats_single_assessment_block,4,2,2026-07-15
 tonelli_2019_echolocation,Tonelli et al. (2019),manual_review_completed_main_pdf_and_supplement,0.90,high_confidence_extraction,possible_with_caveats_lateral_head_looming_echolocation_profile,6,6,2026-06-16
 taffou_2021_auditory_roughness,Taffou et al. (2021),manual_review_completed_main_pdf_and_supplement,0.91,high_confidence_extraction,possible_with_caveats_rear_left_binaural_roughness_looming_profile,6,6,2026-06-16
 tajadura_jimenez_2009_visual_deprivation,Collignon et al. (2009) [legacy ID Tajadura-Jimenez],manual_review_completed_main_pdf_and_supporting_figure_no_methods_supplement,0.89,high_confidence_extraction,possible_with_caveats_static_left_right_lateralization_not_looming,6,6,2026-06-16

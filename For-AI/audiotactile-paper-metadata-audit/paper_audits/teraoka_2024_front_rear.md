@@ -3,7 +3,7 @@
 - Record ID: `teraoka_2024_front_rear`
 - DOI: `10.1007/s00221-024-06782-2`
 - DOI URL: https://doi.org/10.1007/s00221-024-06782-2
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: front/rear approaching auditory probe with vibrotactile detection and baseline
 - PDF status: `paywalled`
 - Supplement status: `downloaded`

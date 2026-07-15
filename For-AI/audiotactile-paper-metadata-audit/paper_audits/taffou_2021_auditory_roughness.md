@@ -3,28 +3,32 @@
 - Record ID: `taffou_2021_auditory_roughness`
 - DOI: `10.1038/s41598-020-79767-0`
 - DOI URL: https://doi.org/10.1038/s41598-020-79767-0
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: rear-hemifield looming rough/non-rough sound with speeded tactile detection
 - PDF status: `downloaded`
 - Supplement status: `downloaded`
 - Supplement acquisition attempts: `13` (`downloaded`)
 - Supplement extracted text files: `1`
 - Extraction status: `parsed_with_warnings`
-- Metadata confidence: `0.56` (`partial_extraction`)
-- Confidence basis: Publication PDF is parsed and the automated Segment 1-4 miner found candidate values for 22/25 fields; values still require critical PDF/supplement review.
+- Metadata confidence: `0.68` (`publisher_html_methods_review`)
+- Confidence basis: Publication PDF extraction remains candidate-level, but the publisher HTML methods/results were manually reviewed on 2026-07-15 for the rear-left trajectory, timing, counts, and expected roughness outcome; exact source/rendering provenance remains unresolved.
 - Automated evidence mining: `source_mined`; 22/25 fields with candidate values
 - PPS visualization mining: `source_mined`; 7/9 visualization-form candidates
 
 ## Known Prior Gaps
 
-- extract exact rough/non-rough sound synthesis, binaural rendering filters, rear trajectory implementation, and tactile/response timing before templating
+- exact rough/non-rough harmonic source WAVs or fully specified harmonic amplitudes, modulation depth, and phase/envelope settings
+- Max/MSP Spat LISTEN HRTF subject/filter, near-field compensation, and renderer settings for the rear-left trajectory
+- exact SPL/gain transfer for the reported 76.5/77.3 dBA source levels
+
+Publisher HTML review on 2026-07-15 confirmed the rear-left task family, 3000 ms looming sound, tactile timing/count families, and expected roughness effect. The remaining blocker is not rear-hemifield schema support; it is missing source and rendering provenance.
 
 ## Review Attempts
 
 - `main PDF OpenDataLoader extraction`: `available_for_run` - Run parser after placing the publication PDF in artifacts/paper_metadata_audit/publication_pdfs.
-- `targeted methods/table search`: `pending_review` - Search methods, procedure, apparatus, stimuli, trial design, and tables for Segment 1-4 parameters.
+- `targeted methods/table search`: `completed_publisher_html` - Publisher HTML methods review confirmed the rear-left trajectory family, timing, trial-count structure, and tactile task parameters while leaving exact source/rendering provenance unresolved.
 - `supplement search`: `available_for_review` - Downloaded or locally provided supplement files are available for methods/table review.
-- `fallback extractor/source check`: `pending_review` - Use pdfplumber/pypdf, rendered pages, publisher HTML, or supplement files before marking a field missing.
+- `fallback extractor/source check`: `completed_publisher_html` - Publisher HTML and supplement-route checks did not expose the generated source WAVs, full harmonic synthesis settings, LISTEN HRTF subject/filter, near-field compensation settings, or SPL transfer needed for an honest runnable profile.
 
 ## Six Semantic Review Passes
 

@@ -1,9 +1,13 @@
 {
   "schema": "pps-preload-run-setup-segment.v1",
   "template_id": "serino_2015_toolless_sync_training",
-  "blocks": 2,
+  "blocks": 1,
   "participants": 16,
   "random_seed": 20150202,
   "trial_randomization_strategy": "no_immediate_repeats",
-  "block_order_randomization": "counterbalanced_rotation"
+  "block_order_randomization": "counterbalanced_rotation",
+  "repeat_trial_pool_per_block": false,
+  "distribute_trial_pool_across_blocks": true,
+  "baseline_crosses_sequence_variants": true,
+  "catch_crosses_sequence_variants": true
 }

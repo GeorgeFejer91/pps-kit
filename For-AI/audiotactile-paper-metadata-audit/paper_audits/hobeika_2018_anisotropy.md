@@ -3,7 +3,7 @@
 - Record ID: `hobeika_2018_anisotropy`
 - DOI: `10.1007/s00221-017-5158-2`
 - DOI URL: https://doi.org/10.1007/s00221-017-5158-2
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: lateral PPS audio-tactile task linked to handedness
 - PDF status: `paywalled`
 - Supplement status: `needs_user_download`

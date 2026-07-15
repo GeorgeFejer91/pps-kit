@@ -3,7 +3,7 @@
 - Record ID: `teramoto_2013_beyond_head_audiotactile`
 - DOI: `10.1007/s00221-013-3574-5`
 - DOI URL: https://doi.org/10.1007/s00221-013-3574-5
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: audiotactile interaction task manipulating cheek, hand, and knee tactile sites with spatially related sounds
 - PDF status: `paywalled`
 - Supplement status: `needs_user_download`

@@ -1,0 +1,345 @@
+{
+  "template_id": "serino_2007_blind_cane_users",
+  "title": "Serino 2007 blind cane-user static near/far PPS",
+  "citation": "Serino, A., Bassolino, M., Farne, A., & Ladavas, E. (2007). Extended multisensory space in blind cane users. Psychological Science, 18(7), 642-648.",
+  "source_url": "https://doi.org/10.1111/j.1467-9280.2007.01952.x",
+  "doi": "10.1111/j.1467-9280.2007.01952.x",
+  "verification_status": "partial",
+  "notes": "Manual PDF audit extracted the static near/far audio-tactile task: 150 ms white-noise bursts, near hand versus far cane/handle-tip source positions, weak electrical tactile targets, strong electrical tactile nontargets, auditory-only catch trials, and vocal response to weak tactile targets. Exact source noise, electrical pulse details, ITI, and numeric response window were not reported, so this profile is a known-parameter runnable contract rather than a full physical reproduction.",
+  "reference_parameters": {
+    "publication_status": "published",
+    "profile_type": "static_near_far_electrical_gonogo_tool_context",
+    "manual_review_file": "For-AI/audiotactile-paper-metadata-audit/manual_reviews/serino_2007_blind_cane_users.json",
+    "reported_sound_type": "white noise",
+    "reported_sound_duration_ms": 150,
+    "reported_sound_level_db_spl": 70,
+    "reported_near_sound_to_tactile_soa_ms": 0,
+    "reported_far_sound_to_tactile_soa_ms": 5,
+    "reported_near_sound_position": "close to the stimulated right hand",
+    "reported_far_sound_position": "on the floor approximately 125 cm from the hand at the cane or handle tip",
+    "reported_tactile_stimulators": "two DS7A Digitimer constant-current stimulators",
+    "reported_tactile_site": "upper side of the right index finger",
+    "reported_tactile_intensities": {
+      "weak_target": "about 90% perception",
+      "strong_nontarget": "about 100% perception"
+    },
+    "reported_response_rule": "verbal response only to weak tactile targets; withhold response for strong tactile nontargets and auditory-only catches",
+    "reported_trial_formula": "30 weak-target near + 30 weak-target far + 30 strong-nontarget near + 30 strong-nontarget far + 30 auditory-only catch trials = 150 trials per described task.",
+    "profile_scope": "The audiotactile task parameters are encoded. Cane versus handle and training-session context remain non-blocking experimental context until ordered intervention phases are needed.",
+    "loudness_policy": {
+      "mode": "estimated_spl",
+      "calibration_mode": "estimate_allowed",
+      "calibration_status": "estimated_not_measured",
+      "start_spl_db": 70.0,
+      "end_spl_db": 70.0,
+      "instruction_offset_db": 0.0,
+      "distance_gain_policy": "disable_direct_path_gain_for_calibrated_loudness"
+    },
+    "implementation_gaps": [
+      "exact white-noise source asset, seed, and spectral recipe",
+      "exact electrical tactile pulse duration, waveform, current, and electrode impedance calibration",
+      "exact ITI or jitter distribution and numeric response window",
+      "exact voice-key response capture threshold and latency correction"
+    ]
+  },
+  "design": {
+    "name": "Serino 2007 blind cane-user static near/far PPS",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Near hand white-noise burst",
+        "noise_type": "white",
+        "source_profile": "continuous_noise",
+        "azimuth_deg": 90.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0,
+        "motion_mode": "stationary",
+        "trajectory_snapshot": {
+          "coordinate_mode": "cartesian",
+          "path_direction": "stationary",
+          "start": {"x_m": 0.3, "y_m": 0.0, "z_m": 0.0},
+          "end": {"x_m": 0.301, "y_m": 0.0, "z_m": 0.0},
+          "start_distance_cm": 30.0,
+          "end_distance_cm": 30.1,
+          "start_rotation_deg": 90.0,
+          "end_rotation_deg": 90.0,
+          "path_length_m": 0.001,
+          "movement_duration_s": 0.15,
+          "start_hold_s": 0.0,
+          "end_hold_s": 0.0
+        }
+      },
+      {
+        "label": "Far cane-tip white-noise burst",
+        "noise_type": "white",
+        "source_profile": "continuous_noise",
+        "azimuth_deg": 90.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0,
+        "motion_mode": "stationary",
+        "trajectory_snapshot": {
+          "coordinate_mode": "cartesian",
+          "path_direction": "stationary",
+          "start": {"x_m": 1.25, "y_m": 0.0, "z_m": 0.0},
+          "end": {"x_m": 1.251, "y_m": 0.0, "z_m": 0.0},
+          "start_distance_cm": 125.0,
+          "end_distance_cm": 125.1,
+          "start_rotation_deg": 90.0,
+          "end_rotation_deg": 90.0,
+          "path_length_m": 0.001,
+          "movement_duration_s": 0.15,
+          "start_hold_s": 0.0,
+          "end_hold_s": 0.0
+        }
+      }
+    ],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "trajectory": {
+      "start_radius_m": 0.3,
+      "end_radius_m": 0.301,
+      "path_direction": "custom",
+      "coordinate_mode": "cartesian",
+      "start_x_m": 0.3,
+      "start_y_m": 0.0,
+      "start_z_m": 0.0,
+      "end_x_m": 0.301,
+      "end_y_m": 0.0,
+      "end_z_m": 0.0,
+      "path_length_m": 0.001,
+      "propagation_speed_mps": 0.006666667,
+      "azimuth_start_deg": 90.0,
+      "azimuth_end_deg": 90.0,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": false
+    },
+    "protocol": {
+      "repetitions_per_condition": 30,
+      "trial_pool_repetition_defaults": {
+        "default": 30,
+        "audio_tactile": 30,
+        "catch": 1
+      },
+      "soa_values_ms": [0, 5],
+      "spatial_values_cm": [30.0, 125.0],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": ["stationary"],
+      "tactile_sites": ["right index finger"],
+      "include_catch_trials": true,
+      "catch_trial_percentage": 20.0,
+      "catch_trials_exact": 30,
+      "catch_crosses_sequence_variants": true,
+      "include_baseline_trials": false,
+      "baseline_soa_values_ms": [],
+      "respiratory_phases": ["Any"],
+      "blocks": 1,
+      "distribute_trial_pool_across_blocks": true,
+      "trial_randomization_strategy": "no_immediate_repeats",
+      "block_order_randomization": "fixed",
+      "max_consecutive_same_trial_type": 2,
+      "trial_strips": [
+        {
+          "strip_id": "serino-2007-weak-target-near",
+          "label": "Weak target near hand",
+          "soa_values_ms": [0],
+          "spatial_values_cm": [30.0],
+          "metadata": {
+            "expected_response": "respond",
+            "response_rule": "verbal_response_to_weak_tactile_target_only",
+            "target_role": "weak_target",
+            "response_mode": "voice_key_mouse_click_proxy",
+            "response_capture_device": "microphone",
+            "voice_key_enabled": "true",
+            "voice_key_response_label": "weak tactile target detected",
+            "body_anchor": "right hand",
+            "body_part": "right index finger",
+            "body_side": "right",
+            "spatial_coordinate_frame": "hand_relative",
+            "auditory_trajectory_family": "static_near_far",
+            "auditory_trajectory_direction": "stationary_near",
+            "trajectory_start_distance_cm": 30.0,
+            "trajectory_end_distance_cm": 30.0,
+            "source_asset_equivalence": "procedural white-noise proxy for unreported source",
+            "renderer_equivalence_boundary": "binaural stationary proxy for physical loudspeaker at hand",
+            "primary_analysis_included": "true",
+            "iti_policy": "toolkit_default_unreported_in_source",
+            "iti_ms": "300",
+            "tactile_stimulation_modality": "electrical",
+            "tactile_calibration_method": "perceptual threshold",
+            "tactile_threshold_reference": "about 90% perception",
+            "tactile_intensity": "weak target",
+            "tactile_intensity_unit": "perceptual threshold",
+            "electrical_stimulator_model": "Digitimer DS7A",
+            "electrical_electrode_site": "upper side of right index finger"
+          },
+          "elements": [
+            {
+              "element_id": "serino-2007-near-source-weak",
+              "kind": "looming_stimulus",
+              "label": "Near hand sound",
+              "source_label": "Near hand white-noise burst",
+              "source_labels": ["Near hand white-noise burst"],
+              "randomized": true
+            }
+          ]
+        },
+        {
+          "strip_id": "serino-2007-weak-target-far",
+          "label": "Weak target far cane tip",
+          "soa_values_ms": [5],
+          "spatial_values_cm": [125.0],
+          "metadata": {
+            "expected_response": "respond",
+            "response_rule": "verbal_response_to_weak_tactile_target_only",
+            "target_role": "weak_target",
+            "response_mode": "voice_key_mouse_click_proxy",
+            "response_capture_device": "microphone",
+            "voice_key_enabled": "true",
+            "voice_key_response_label": "weak tactile target detected",
+            "body_anchor": "right hand",
+            "body_part": "right index finger",
+            "body_side": "right",
+            "spatial_coordinate_frame": "hand_relative",
+            "auditory_trajectory_family": "static_near_far",
+            "auditory_trajectory_direction": "stationary_far",
+            "trajectory_start_distance_cm": 125.0,
+            "trajectory_end_distance_cm": 125.0,
+            "source_asset_equivalence": "procedural white-noise proxy for unreported source",
+            "renderer_equivalence_boundary": "binaural stationary proxy for physical floor loudspeaker at cane or handle tip",
+            "primary_analysis_included": "true",
+            "iti_policy": "toolkit_default_unreported_in_source",
+            "iti_ms": "300",
+            "tactile_stimulation_modality": "electrical",
+            "tactile_calibration_method": "perceptual threshold",
+            "tactile_threshold_reference": "about 90% perception",
+            "tactile_intensity": "weak target",
+            "tactile_intensity_unit": "perceptual threshold",
+            "electrical_stimulator_model": "Digitimer DS7A",
+            "electrical_electrode_site": "upper side of right index finger"
+          },
+          "elements": [
+            {
+              "element_id": "serino-2007-far-source-weak",
+              "kind": "looming_stimulus",
+              "label": "Far cane-tip sound",
+              "source_label": "Far cane-tip white-noise burst",
+              "source_labels": ["Far cane-tip white-noise burst"],
+              "randomized": true
+            }
+          ]
+        },
+        {
+          "strip_id": "serino-2007-strong-nontarget-near",
+          "label": "Strong nontarget near hand",
+          "soa_values_ms": [0],
+          "spatial_values_cm": [30.0],
+          "metadata": {
+            "expected_response": "withhold",
+            "response_rule": "withhold_response_to_strong_tactile_nontarget",
+            "target_role": "strong_nontarget",
+            "response_mode": "voice_key_mouse_click_proxy",
+            "response_capture_device": "microphone",
+            "voice_key_enabled": "true",
+            "body_anchor": "right hand",
+            "body_part": "right index finger",
+            "body_side": "right",
+            "spatial_coordinate_frame": "hand_relative",
+            "auditory_trajectory_family": "static_near_far",
+            "auditory_trajectory_direction": "stationary_near",
+            "trajectory_start_distance_cm": 30.0,
+            "trajectory_end_distance_cm": 30.0,
+            "source_asset_equivalence": "procedural white-noise proxy for unreported source",
+            "renderer_equivalence_boundary": "binaural stationary proxy for physical loudspeaker at hand",
+            "primary_analysis_included": "true",
+            "iti_policy": "toolkit_default_unreported_in_source",
+            "iti_ms": "300",
+            "tactile_stimulation_modality": "electrical",
+            "tactile_calibration_method": "perceptual threshold",
+            "tactile_threshold_reference": "about 100% perception",
+            "tactile_intensity": "strong nontarget",
+            "tactile_intensity_unit": "perceptual threshold",
+            "electrical_stimulator_model": "Digitimer DS7A",
+            "electrical_electrode_site": "upper side of right index finger"
+          },
+          "elements": [
+            {
+              "element_id": "serino-2007-near-source-strong",
+              "kind": "looming_stimulus",
+              "label": "Near hand sound",
+              "source_label": "Near hand white-noise burst",
+              "source_labels": ["Near hand white-noise burst"],
+              "randomized": true
+            }
+          ]
+        },
+        {
+          "strip_id": "serino-2007-strong-nontarget-far",
+          "label": "Strong nontarget far cane tip",
+          "soa_values_ms": [5],
+          "spatial_values_cm": [125.0],
+          "metadata": {
+            "expected_response": "withhold",
+            "response_rule": "withhold_response_to_strong_tactile_nontarget",
+            "target_role": "strong_nontarget",
+            "response_mode": "voice_key_mouse_click_proxy",
+            "response_capture_device": "microphone",
+            "voice_key_enabled": "true",
+            "body_anchor": "right hand",
+            "body_part": "right index finger",
+            "body_side": "right",
+            "spatial_coordinate_frame": "hand_relative",
+            "auditory_trajectory_family": "static_near_far",
+            "auditory_trajectory_direction": "stationary_far",
+            "trajectory_start_distance_cm": 125.0,
+            "trajectory_end_distance_cm": 125.0,
+            "source_asset_equivalence": "procedural white-noise proxy for unreported source",
+            "renderer_equivalence_boundary": "binaural stationary proxy for physical floor loudspeaker at cane or handle tip",
+            "primary_analysis_included": "true",
+            "iti_policy": "toolkit_default_unreported_in_source",
+            "iti_ms": "300",
+            "tactile_stimulation_modality": "electrical",
+            "tactile_calibration_method": "perceptual threshold",
+            "tactile_threshold_reference": "about 100% perception",
+            "tactile_intensity": "strong nontarget",
+            "tactile_intensity_unit": "perceptual threshold",
+            "electrical_stimulator_model": "Digitimer DS7A",
+            "electrical_electrode_site": "upper side of right index finger"
+          },
+          "elements": [
+            {
+              "element_id": "serino-2007-far-source-strong",
+              "kind": "looming_stimulus",
+              "label": "Far cane-tip sound",
+              "source_label": "Far cane-tip white-noise burst",
+              "source_labels": ["Far cane-tip white-noise burst"],
+              "randomized": true
+            }
+          ]
+        }
+      ],
+      "participants": 26,
+      "random_seed": 20070701
+    }
+  },
+  "provenance": [
+    {
+      "field": "source review",
+      "source": "For-AI/audiotactile-paper-metadata-audit/manual_reviews/serino_2007_blind_cane_users.json records a high-confidence manual PDF review of the main paper text and rendered pages."
+    },
+    {
+      "field": "auditory parameters",
+      "source": "Manual review records 150 ms white-noise bursts, 70 dB ear-level equalization, near hand sound simultaneous with touch, and far floor/cane-tip sound 5 ms before touch."
+    },
+    {
+      "field": "tactile and response parameters",
+      "source": "Manual review records Digitimer DS7A electrical stimulation of the upper right index finger, weak targets at about 90% perception, strong nontargets at about 100% perception, and verbal response only to weak tactile targets."
+    },
+    {
+      "field": "trial counts",
+      "source": "Manual review records 30 weak-target near, 30 weak-target far, 30 strong-nontarget near, 30 strong-nontarget far, and 30 sound-only catch trials per described task."
+    }
+  ]
+}

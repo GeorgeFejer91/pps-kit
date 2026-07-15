@@ -1,0 +1,273 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "canzoneri_2013_amputation_prosthesis",
+  "citation_short": "Canzoneri et al. (2013b)",
+  "review_date": "2026-07-15",
+  "manual_review_status": "manual_review_completed_open_access_pdf_no_supplement_found",
+  "confidence_score": 0.86,
+  "confidence_label": "high_confidence_extraction_with_source_count_caveat",
+  "confidence_basis": "The open-access Scientific Reports HTML and PDF were reviewed for Experiment 2/3 audio-tactile methods, apparatus, tactile timing, trial counts, catch rows, condition structure, and expected result pattern. Core runnable audio-tactile parameters are reported, but one Methods sentence is internally inconsistent: 8 target stimuli per T1-T5 x IN/OUT cell implies 80 target rows, while the same sentence states 76 tactile-target trials.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats_dynamic_upper_arm_prosthesis_context",
+    "reason": "The profile can recreate the reported dynamic IN/OUT pink-noise PPS task with T1-T5 timings, upper-arm tactile target context, 76 auditory-only catches, two blocks, and prosthesis/limb context retained as non-runnable analysis metadata. Exact original gain files/noise seed, voice-key calibration, participant-level electrical current values, and the source count inconsistency remain caveats."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf_url",
+      "source": "https://www.nature.com/articles/srep02844.pdf",
+      "status": "reviewed",
+      "scope": "PDF pages 1-7, Experiment 2 and Experiment 3 results plus Methods lines for audio-tactile task, apparatus, timing, catch rows, and trial count."
+    },
+    {
+      "source_type": "publisher_html",
+      "source": "https://www.nature.com/articles/srep02844",
+      "status": "reviewed",
+      "scope": "Official Nature Scientific Reports HTML checked against the PDF for abstract, results, and methods values."
+    },
+    {
+      "source_type": "pmc_route",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3789144/",
+      "status": "blocked_by_recaptcha",
+      "scope": "PMC route exists in template history but was not relied on because the browser route returned a reCAPTCHA page."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "Stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Confirmed 3000 ms pink-noise sounds, IN approaching and OUT receding directions, near and far loudspeakers separated by about 100 cm, and exponentially rising/falling intensity."
+    },
+    {
+      "strategy": "Timing and SOA pass",
+      "status": "completed",
+      "result": "Confirmed fixed 1000 ms silence before and after the sound and T1-T5 tactile delays of 300, 800, 1500, 2200, and 2700 ms from sound onset."
+    },
+    {
+      "strategy": "Sequence and intermixing pass",
+      "status": "completed",
+      "result": "Confirmed random combination/intermingling of target and catch rows and two task blocks."
+    },
+    {
+      "strategy": "Baseline, catch, and count pass",
+      "status": "completed_with_source_count_caveat",
+      "result": "Confirmed 76 auditory-only catch trials and no tactile-only baseline in Experiment 2/3. The source says 8 targets per delay/direction but also says 76 tactile-target trials; the runnable profile preserves the coherent 80-row factorial target structure."
+    },
+    {
+      "strategy": "Tactile and response apparatus pass",
+      "status": "completed_with_caveats",
+      "result": "Confirmed DS7A constant-current electrical stimulation on the dorsal upper arm, Neuroline electrodes, speeded vocal TAH response, and voice-activated relay. Participant-level current calibration and voice-key threshold/latency are not reported."
+    },
+    {
+      "strategy": "Expected-outcome pass",
+      "status": "completed",
+      "result": "Confirmed healthy/control PPS shows faster RTs for nearer perceived distances; amputated limb without prosthesis is slower/shifted toward stump; wearing the prosthesis speeds responses and restores/prosthesis-extends PPS coding."
+    }
+  ],
+  "field_status_counts": {
+    "not_applicable": 2,
+    "not_reported_after_review": 1,
+    "reported": 15,
+    "reported_absent": 2,
+    "reported_with_caveat": 4,
+    "source_inconsistency_caveat": 1
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Pink-noise dynamic auditory stimulus.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods, Experiment 2 and 3 - audio-tactile interaction task",
+        "evidence_note": "The sound type and 3000 ms duration are explicitly reported."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Near loudspeaker close to upper arm and far loudspeaker about 100 cm away; IN moves far-to-near, OUT near-to-far by intensity manipulation.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "Physical loudspeaker layout and motion impression are reported."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "3000 ms sound with 1000 ms pre-sound and 1000 ms post-sound silence.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The fixed trial silence windows are reported."
+      },
+      "gain_envelope": {
+        "status": "reported_with_caveat",
+        "value": "IN exponentially rising intensity and OUT exponentially falling intensity; exact gain file/curve parameters not supplied.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "Envelope direction is reported, not the original file."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "IN approaching and OUT receding dynamic pink-noise conditions.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The task used looming and receding sounds with T1-T5 tactile delays."
+      },
+      "source_provenance": {
+        "status": "reported_with_caveat",
+        "value": "Pink-noise source is reported; exact original waveform, seed, and gain files are not supplied.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The validator uses generated pink noise while preserving this as source-equivalence caveat."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Two-loudspeaker near/far apparatus with the far loudspeaker about 100 cm from the near loudspeaker.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The toolkit recreates the trajectory in generated audio while preserving apparatus provenance."
+      },
+      "stimulus_speed": {
+        "status": "not_applicable",
+        "value": "No metric speed is reported; apparent motion is defined by 3000 ms duration, gain direction, and T1-T5 delays.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The profile uses timing/delay parameters rather than a speed claim."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two trajectory directions: IN and OUT.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "Both directions are represented in the runnable profile."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Audio-tactile target rows and auditory-only catch rows; no tactile-only baseline reported.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The remaining trials are described as auditory-only catches."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "Random combination of target timing/direction rows randomly intermingled with catches.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "Randomization is reported but treated as reproducible runner behavior."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "Trials equally divided into two blocks of about 8 minutes each.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The profile preserves a two-block run package."
+      },
+      "iti_jitter_policy": {
+        "status": "not_reported_after_review",
+        "value": "Exact ITI or jitter policy is not reported.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "Routine randomization/ITI behavior is not a blocker for the saved minimal profile."
+      },
+      "response_window": {
+        "status": "reported_with_caveat",
+        "value": "Speeded vocal response to tactile target; voice-key threshold and latency correction are not reported.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The runner validation emulates vocal responses with mouse-click responses after tactile onset."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Respond to tactile targets and withhold responses on auditory-only catches.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The validator enforces response rows for targets and withholds catch responses."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported_with_caveat",
+        "value": "Electrical tactile stimulation on the dorsal surface of the upper arm via DS7A and Neuroline electrodes; above-threshold but no participant current table.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The runner stores modality/apparatus context and uses mouse-click response proxy evidence."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "T1 300 ms, T2 800 ms, T3 1500 ms, T4 2200 ms, T5 2700 ms from sound onset.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The five tactile timings are explicit."
+      },
+      "baseline_strategy": {
+        "status": "reported_absent",
+        "value": "No tactile-only baseline rows are reported for this Experiment 2/3 task.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "Only target and auditory-only catch rows are described."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Auditory-only catch rows with no tactile target and no response expected.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "Catch trial type is explicit."
+      },
+      "baseline_timing": {
+        "status": "not_applicable",
+        "value": "No tactile-only baseline timing is reported because this task reports target and auditory-only catch rows only.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The profile sets baseline rows to zero."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Eight target stimuli for each T1-T5 temporal delay for IN and OUT sounds.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "This implies 80 target rows."
+      },
+      "catch_count": {
+        "status": "reported",
+        "value": "Seventy-six auditory-only catch trials.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "Catch count is explicit."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "Two blocks.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The profile prepares two runnable block WAVs."
+      },
+      "total_trial_count": {
+        "status": "source_inconsistency_caveat",
+        "value": "Runnable contract uses 156 rows: 80 target rows from 8 x 5 x 2 plus 76 catches. The PDF's literal 76-target total conflicts with the factorial statement.",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "The source inconsistency is preserved in the template and validator report."
+      },
+      "baseline_count": {
+        "status": "reported_absent",
+        "value": "0",
+        "source_file": "https://www.nature.com/articles/srep02844.pdf",
+        "page_or_section": "PDF p.7, Methods",
+        "evidence_note": "No tactile-only baseline rows are reported for Experiments 2/3."
+      }
+    }
+  },
+  "expected_outcome": {
+    "healthy_limb_or_controls": "RTs speed up as perceived sound distance approaches the body, with a boundary around D2-D3.",
+    "amputated_limb_without_prosthesis": "PPS coding shifts toward the stump and RTs are slower than healthy-limb conditions.",
+    "amputated_limb_with_prosthesis": "Wearing the prosthesis speeds responses and restores/extends PPS coding toward the prosthetic hand.",
+    "experiment_3": "Healthy arm/hand tactile-location manipulation supports the interpretation that sound position is coded relative to the stimulated limb boundary."
+  },
+  "critical_caveats": [
+    "The paper has an internal trial-count inconsistency: 8 x 5 x 2 target rows implies 80 targets, but the same sentence says 76 tactile-target trials.",
+    "The exact original pink-noise waveform/seed and gain curve file are not supplied.",
+    "Participant-level electrical stimulation current/electrode calibration is not reported.",
+    "Voice-key threshold and latency correction are not reported.",
+    "The toolkit validation is software runner evidence only, not collected amputee/prosthesis behavior or physical apparatus equivalence."
+  ],
+  "next_manual_action": "Use the runnable profile for software validation with the source count caveat retained; seek author clarification or raw scripts only if exact 76-target cell distribution is required."
+}

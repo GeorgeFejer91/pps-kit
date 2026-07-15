@@ -28,39 +28,40 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 | matsuda_2021_four_directions | - | ready | All required current-GUI fields are present and materializable. |
 | barumerli_2026_arm_movement_exp1 | A | ready | All required current-GUI fields are present and materializable. |
 | barumerli_2026_arm_movement_exp2 | B | ready | All required current-GUI fields are present and materializable. |
-| noel_2015_bodily_self | - | ready | All required current-GUI fields are present and materializable. |
+| noel_2015_walking_full_body_action | - | ready | All required current-GUI fields are present and materializable. |
+| noel_2015_bodily_self | A | ready | All required current-GUI fields are present and materializable. |
+| noel_2015_bodily_self_back_space | B | ready | All required current-GUI fields are present and materializable. |
 | pfeiffer_2018_lateral_perihead_left_to_right | - | ready | All required current-GUI fields are present and materializable. |
 | study5_dynaspace_lateral_45_pps | - | ready | All required current-GUI fields are present and materializable. |
+| biggio_2017_common_racket | A | ready | All required current-GUI fields are present and materializable. |
+| biggio_2017_no_racket | B | ready | All required current-GUI fields are present and materializable. |
+| biggio_2017_personal_racket | C | ready | All required current-GUI fields are present and materializable. |
+| canzoneri_2013_amputation_prosthesis | - | ready | All required current-GUI fields are present and materializable. |
+| tajadura_jimenez_2009_crossed_visual_deprivation | A | ready | All required current-GUI fields are present and materializable. |
+| tajadura_jimenez_2009_uncrossed_visual_deprivation | B | ready | All required current-GUI fields are present and materializable. |
+| canzoneri_2012_dynamic_sounds | - | ready | All required current-GUI fields are present and materializable. |
+| tonelli_2019_echolocation | - | ready | All required current-GUI fields are present and materializable. |
+| galli_2015_wheelchair_full_body | - | ready | All required current-GUI fields are present and materializable. |
+| lerner_2021_3d_audio_tactile_boundary | - | ready | All required current-GUI fields are present and materializable. |
+| serino_2015_front_back_trunk_exp2 | A | ready | All required current-GUI fields are present and materializable. |
+| serino_2015_peri_hand_exp3 | B | ready | All required current-GUI fields are present and materializable. |
 | serino_2015_peri_trunk_exp1 | C | ready | All required current-GUI fields are present and materializable. |
+| serino_2015_toolless_sync_training | - | ready | All required current-GUI fields are present and materializable. |
 
 ## Missing publication parameters
 
 | Profile | Variant | Status | Main reasons |
 |---|---|---|---|
-| canzoneri_2013_amputation_prosthesis | - | blocked_missing_parameters | exact trial count and tactile calibration table from full paper |
 | canzoneri_2013_tool_use_reshaping | - | blocked_missing_parameters | exact trial count and ITI table from full paper |
-| canzoneri_2012_dynamic_sounds | - | blocked_unsupported_toolkit_structure | exact original SoundForge exponential gain/envelope files; voice-key response capture; electrical tactile threshold calibration |
-| tonelli_2019_echolocation | - | blocked_unsupported_toolkit_structure | apparatus-specific seven-speaker switching/timing details |
 | ferri_2015_artificial_looming_valence | A | blocked_missing_parameters | exact auditory files; paper-specific gain envelope |
 | ferri_2015_ecological_looming_valence | B | blocked_missing_parameters | licensed ecological sounds; exact amplitude envelopes |
-| lerner_2021_3d_audio_tactile_boundary | - | blocked_unsupported_toolkit_structure | exact Unity/3D Tune-In stimulus engine behavior |
-| noel_2015_walking_full_body_action | - | blocked_missing_parameters | exact sound distances and trial counts |
-| serino_2015_front_back_trunk_exp2 | A | blocked_unsupported_toolkit_structure | 13-distance internal schedule |
-| serino_2015_toolless_sync_training | - | blocked_missing_parameters | electrocutaneous tactile calibration; voice-key response capture |
-| taffou_2014_cynophobic_rear_looming | - | blocked_unsupported_toolkit_structure | exact dog/sheep audio; LISTEN HRTF rather than bundled FABIAN |
+| serino_2007_blind_cane_users | - | blocked_missing_parameters | exact white-noise source asset, seed, and spectral recipe; exact electrical tactile pulse duration, waveform, current, and electrode impedance calibration; exact ITI or jitter distribution and numeric response window |
+| taffou_2014_cynophobic_rear_looming | - | blocked_missing_parameters | exact dog/sheep source audio and Audacity amplitude/dynamic matching settings; LISTEN HRTF subject/filter identifier and renderer settings |
 | teneggi_2013_social_face_pps | - | blocked_missing_parameters | exact distance/timing table from supplement |
 
 ## Toolkit structural gap
 
-| Profile | Variant | Status | Main reasons |
-|---|---|---|---|
-| canzoneri_2012_dynamic_sounds | - | blocked_unsupported_toolkit_structure | direction-coupled tactile-only T0/T6 baseline trials |
-| tonelli_2019_echolocation | - | blocked_unsupported_toolkit_structure | apparatus-specific seven-speaker switching/timing details |
-| galli_2015_wheelchair_full_body | - | blocked_unsupported_toolkit_structure | speaker-array Gaussian amplitude control |
-| lerner_2021_3d_audio_tactile_boundary | - | blocked_unsupported_toolkit_structure | body-scaled distance mode; exact Unity/3D Tune-In stimulus engine behavior |
-| serino_2015_front_back_trunk_exp2 | A | blocked_unsupported_toolkit_structure | physical 16-speaker array |
-| serino_2015_peri_hand_exp3 | B | blocked_unsupported_toolkit_structure | lateralized hand coordinate |
-| taffou_2014_cynophobic_rear_looming | - | blocked_unsupported_toolkit_structure | left/right rear hemifield as separate trajectories |
+No profiles currently fall in this category.
 
 ## Machine-Readable Source
 

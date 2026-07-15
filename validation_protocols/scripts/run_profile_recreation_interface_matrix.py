@@ -335,13 +335,16 @@ def _validate_blocked_profile(template_id: str, profile: dict[str, Any], criteri
 
 def _materialize_ready_profile(template_id: str, *, output_dir: Path) -> dict[str, Any]:
     batch_root = output_dir / "materialized_profiles" / template_id
+    session_root = batch_root / "sessions"
+    state_root = batch_root / "dashboard_state"
     controller = DashboardController(
         design_path=batch_root / "active_design.json",
         render_dir=batch_root / "legacy_render",
-        session_root=batch_root / "sessions",
+        session_root=session_root,
         import_dir=batch_root / "imports",
         preview_dir=batch_root / "previews",
         project_registry_root=output_dir / "dashboard_projects" / "0_study_project_registry",
+        state_root=state_root,
     )
     try:
         state = controller.load_template(template_id)
@@ -383,10 +386,18 @@ def _materialize_ready_profile(template_id: str, *, output_dir: Path) -> dict[st
             "segment6_csv_path": run_setup.get("csv_path", ""),
             "session_manifest_path": session_payload.get("manifest_path", ""),
             "session_dir": session_payload.get("session_dir", ""),
+            "expected_session_root": str(session_root),
+            "controller_state_root": str(state_root),
             "participant_id": session_payload.get("participant_id", ""),
         }
     except Exception as exc:  # noqa: BLE001 - validation report should retain per-profile failure details.
-        return {"template_id": template_id, "status": "failed", "reason": str(exc)}
+        return {
+            "template_id": template_id,
+            "status": "failed",
+            "reason": str(exc),
+            "expected_session_root": str(session_root),
+            "controller_state_root": str(state_root),
+        }
 
 
 def _profile_state_summary(state: dict[str, Any]) -> dict[str, Any]:
@@ -407,6 +418,7 @@ def _audit_materialization(template_id: str, materialized: dict[str, Any], crite
     segment6_csv = Path(str(materialized.get("segment6_csv_path") or ""))
     session_manifest = Path(str(materialized.get("session_manifest_path") or ""))
     session_dir = Path(str(materialized.get("session_dir") or ""))
+    expected_session_root = Path(str(materialized.get("expected_session_root") or ""))
     prepared = materialized.get("status") == "prepared"
     counts_ok = all(int(materialized.get(key) or 0) > 0 for key in ("segment2_variant_count", "segment3_total_count", "segment4_total_count", "segment5_block_count"))
     paths_ok = (
@@ -417,6 +429,11 @@ def _audit_materialization(template_id: str, materialized: dict[str, Any], crite
         and _path_is_dir(session_dir)
     )
     outside_preloads = "assets\\preloads" not in str(project_dir).lower() and "assets/preloads" not in str(project_dir).lower()
+    session_paths_profile_local = (
+        _path_is_dir(expected_session_root)
+        and _path_is_within(session_dir, expected_session_root)
+        and _path_is_within(session_manifest, expected_session_root)
+    )
     criteria.append(
         Criterion(
             "segment_materialization",
@@ -424,6 +441,21 @@ def _audit_materialization(template_id: str, materialized: dict[str, Any], crite
             prepared and counts_ok and paths_ok and outside_preloads,
             "Ready profile must materialize through Segments 1-6 under writable validation output paths.",
             evidence=materialized,
+        )
+    )
+    criteria.append(
+        Criterion(
+            "segment_materialization",
+            f"{template_id}:participant_package_profile_local",
+            prepared and session_paths_profile_local,
+            "Prepared participant session package must stay under this template's validation session root.",
+            evidence={
+                "expected_session_root": str(expected_session_root),
+                "session_dir": str(session_dir),
+                "session_manifest_path": str(session_manifest),
+                "session_dir_profile_local": _path_is_within(session_dir, expected_session_root),
+                "session_manifest_profile_local": _path_is_within(session_manifest, expected_session_root),
+            },
         )
     )
     criteria.append(
@@ -492,6 +524,15 @@ def _path_is_file(path: str | Path) -> bool:
 def _path_is_dir(path: str | Path) -> bool:
     try:
         return os.path.isdir(_filesystem_path(path))
+    except OSError:
+        return False
+
+
+def _path_is_within(path: str | Path, root: str | Path) -> bool:
+    try:
+        resolved_path = Path(path).resolve()
+        resolved_root = Path(root).resolve()
+        return resolved_path == resolved_root or resolved_root in resolved_path.parents
     except OSError:
         return False
 

@@ -3,7 +3,7 @@
 - Record ID: `kitagawa_2005_sound_complexity`
 - DOI: `10.1007/s00221-005-2393-8`
 - DOI URL: https://doi.org/10.1007/s00221-005-2393-8
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: static near/far audio-tactile sound-complexity task
 - PDF status: `open_access_unavailable`
 - Supplement status: `not_checked`

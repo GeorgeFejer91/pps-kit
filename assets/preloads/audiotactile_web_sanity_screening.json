@@ -30,7 +30,7 @@
       "linked_literature_record_ids": [
         "looming_duration_2025"
       ],
-      "reason": "Full PDF exposes the PPS-task parameters that were previously marked for extraction: 2 s and 3 s looming pink-noise tasks, seven tactile delays per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, start distances, and 50 cm/s movement speed. Remaining issue is toolkit support for tactile waveform/frequency and exact HRTF/rendering provenance."
+      "reason": "Full PDF exposes the PPS-task parameters that were previously marked for extraction: 2 s and 3 s looming pink-noise tasks, seven tactile delays per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, start distances, and 50 cm/s movement speed. Row-level tactile waveform/frequency synthesis is now runner-supported; the remaining issue is exact HRTF/right-lateral rendering provenance."
     },
     {
       "source_url": "https://nin.nl/publications/multisensory-integration-in-peripersonal-space-indexes-consciousness-states-in-sleep-and-disorders-of-consciousness/",
@@ -73,7 +73,7 @@
       "linked_literature_record_ids": [
         "tonelli_2019_echolocation"
       ],
-      "reason": "Live search result is the existing Tonelli 2019 echolocation template/ledger record; its blocker remains the seven-speaker switching/timing structure."
+      "reason": "Live search result is the existing Tonelli 2019 echolocation template/ledger record; it is now runnable as a virtual seven-distance lateral moving-source recreation, with exact speaker switching/gain, original noise asset, response timeout, and unfixed ITI retained as caveats."
     },
     {
       "source_url": "https://pubmed.ncbi.nlm.nih.gov/29461657/",

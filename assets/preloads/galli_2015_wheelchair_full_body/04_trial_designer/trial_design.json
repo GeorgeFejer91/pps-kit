@@ -23,9 +23,12 @@
     {
       "strip_id": "galli-wheelchair-moving-sound-row",
       "label": "Wheelchair PPS moving-sound trial",
-      "audio_tactile_percentage": 100.0,
-      "catch_percentage": 0.0,
-      "baseline_percentage": 0.0,
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {},
       "elements": [
         {
           "element_id": "galli-wheelchair-moving-sound",
@@ -43,5 +46,5 @@
     }
   ],
   "prestimulus_files": [],
-  "preview_trial_count": 144
+  "preview_trial_count": 216
 }

@@ -36,6 +36,12 @@ records only the researcher decision. The local backend validates the two
 supported modes, normalizes burst-train parameters, clears stale burst
 parameters for smooth-linear bakes, and then owns WAV generation.
 
+Noise type is selected through visible quick-pick buttons rather than a dropdown:
+White and Pink are the primary publication-backed choices, while Blue, Violet,
+and Brown are smaller spectral variants with hover caveats. The legacy
+`generated-noise-select` remains hidden as a JavaScript state mirror so existing
+render/reset hooks keep working.
+
 Existing generated source cards display a compact `Burst train` or
 `Smooth linear` chip and keep the saved `source_profile`,
 `source_profile_parameters`, and `motion_mode` fields in hidden form state.
@@ -47,8 +53,26 @@ outside this generated-noise toggle.
 
 Hosted/static mode cannot write WAVs or CSVs, but finished bundled profiles must still show the same downstream decisions that the local companion would materialize. `staticStateForTemplate()` therefore derives read-only virtual Segment 3 trial files, Segment 4 repetition-pool rows, and already-randomized Segment 5 block previews from the committed profile parameters. Canonical Study 5 should show 44 virtual Segment 3 WAVs, 204 planned Segment 4 pool rows, and 6 accepted static block previews of 34 trials each. The lateral DynaSpace Study 5 profile should show 52 virtual Segment 3 WAVs, 204 planned Segment 4 pool rows, and the same six 34-trial block previews. Static previews must use the same seeded, row-order-preserving Gellermann-style block scheduler concept as the local companion and expose `Download Randomization` for the browser-generated CSV/manifest. The local companion still performs actual file/CSV materialization when launching or preparing a run.
 
+The local companion must also serve the committed public static asset roots at
+`/assets` and `/study_templates`. Connected read-only profile inspection uses
+the same `staticStateForTemplate()` overlay as hosted/static mode, so these
+routes must stay mounted alongside `/dashboard`, `/viewer`, and `/api/*`.
+
+## Auditory-Only Response Trials
+
+`Auditory-Only` is a first-class response-required trial family, separate from
+no-response `Catch` rows. The browser static preview, backend Segment 3 bake,
+Segment 4/5 pool counts, and Segment 6 manifests must count `auditory_only`
+separately from `catch`. Its WAVs are stereo audio-only files with no tactile
+channel, but the runner anchors response scoring to the response-window onset
+and expects a mouse/response input when the row declares `expected_response =
+respond`. Legacy `audio_only` labels still map to catch unless the profile uses
+the explicit `auditory_only` / `Auditory-Only` family.
+
 ## Static Preview Parity Audit
 
 Hosted/static no-companion mode must keep every profile visible in the static selector aligned with committed offline/local profile truth. Ready launchable profiles must match local dashboard preview counts and read-only Segment 3-6 summaries; blocked profiles must remain inspectable only as metadata/source/trajectory/blocker previews and must not appear launchable. Editing, baking, file import, saving, output-folder export, local-folder opening, and runner launch remain disabled until the hosted page connects to the local companion.
+
+Static profile hydration must consume every committed preload asset, not only the first source card stored in the template JSON. Direction-expanded inventories such as front/back, left/right, looming/receding, or spherical boundary profiles should append unconsumed assets as read-only preserved custom sources, expand Segment 2 `looming_stimulus` source labels to the concrete asset labels, and use the source trajectory as the direction factor when multiple asset direction labels are present. Static defaults should mirror backend profile-load defaults: catch trials are inferred from explicit counts/percentages, tactile-only and stationary-burst baselines span the full SOA list, and launchability remains controlled by the profile recreation ledger rather than static preview synthesis.
 
 `validation_protocols/scripts/run_static_dashboard_preview_parity_audit.py` is the static-preview parity harness. It can force the dashboard into no-companion static mode with `forceStaticPreview=1`, read the query-gated sanitized browser snapshot exposed by `auditStaticPreview=1`, and compare all static-selectable profiles against preload/profile ledgers plus local Protocol 12 materialization for ready profiles. The audit surface must stay validation-only and must not expose local paths, participant data, generated outputs, or secrets.

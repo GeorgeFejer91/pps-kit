@@ -139,7 +139,12 @@ def source_pointer_only_issues(records: Iterable[dict[str, Any]]) -> list[str]:
         record_id = str(record.get("record_id", "<unknown>"))
         for field_name in ("pdf_file",):
             value = str(record.get(field_name) or "")
-            if value and not value.startswith(RAW_ARTIFACT_PREFIX):
+            public_review_url = (
+                field_name == "pdf_file"
+                and record.get("pdf_status") == "public_pdf_reviewed"
+                and value.startswith("https://")
+            )
+            if value and not value.startswith(RAW_ARTIFACT_PREFIX) and not public_review_url:
                 issues.append(f"{record_id}.{field_name}={value}")
         for source_file in _iter_source_files(record):
             if source_file and not source_file.startswith(RAW_ARTIFACT_PREFIX):

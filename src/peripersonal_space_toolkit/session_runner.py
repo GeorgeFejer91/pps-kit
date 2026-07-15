@@ -84,7 +84,7 @@ SEGMENT_BLOCK_PREVIEW_SCHEMA = "pps-block-csv-preview.v1"
 LAST_EXPERIMENT_SCHEMA = "pps-last-experiment.v1"
 PREPARED_SESSION_QUEUE_SCHEMA = "pps-prepared-session-queue.v1"
 BLOCK_WAV_CACHE_SCHEMA = "pps-session-block-cache.v1"
-BLOCK_WAV_CACHE_VERSION = "2026-06-29.source-file-content.v1"
+BLOCK_WAV_CACHE_VERSION = "2026-07-15.audiovisual-trisensory-contract.v1"
 RESPONSE_MARKER_GAIN = 0.05
 EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S = 1.0
 LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_launched"}
@@ -92,11 +92,13 @@ PARTICIPANT_TRIAL_CSV_SUFFIX = "_trials.csv"
 EXTERNAL_LABRECORDER_SCOPE_PART = "part"
 EXTERNAL_LABRECORDER_SCOPE_SESSION_GROUP = "session_group_same_window"
 PART1_TOPUP_REPEAT_BLOCK_INDEXES = (1, 2)
+PART_LABEL_MAX_CHARS = 80
 DATA_MIN_FIELDNAMES = [
     "participant_id",
     "session_id",
     "part_session_id",
     "part_number",
+    "part_label",
     "block_number",
     "block_label",
     "trial_number",
@@ -215,6 +217,45 @@ def _package_part_identity(package: "RunPackage") -> dict[str, Any]:
         "part_session_id": _package_part_session_id(package) if _package_is_split_part(package) else "",
         "part_number": getattr(package, "part_number", None) if _package_is_split_part(package) else "",
     }
+
+
+def _normalize_part_label(value: Any) -> str:
+    text = re.sub(r"[\x00-\x1f\x7f]+", " ", str(value or ""))
+    text = re.sub(r"\s+", " ", text).strip()
+    if len(text) > PART_LABEL_MAX_CHARS:
+        text = text[:PART_LABEL_MAX_CHARS].rstrip()
+    return text
+
+
+def _part_label_number_text(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    match = re.search(r"(\d+)", text)
+    if not match:
+        return ""
+    number = int(match.group(1))
+    return str(number) if number in {1, 2} else ""
+
+
+def _normalize_part_label_map(value: Any) -> dict[str, str]:
+    if not isinstance(value, dict):
+        return {}
+    labels: dict[str, str] = {}
+    for key, label in value.items():
+        part = _part_label_number_text(key)
+        if not part:
+            continue
+        labels[part] = _normalize_part_label(label)
+    return labels
+
+
+def _part_label_for_package(package: "RunPackage", labels: dict[str, str] | None, fallback: Any = "") -> str:
+    normalized = _normalize_part_label_map(labels or {})
+    part = _package_part_number_value(package)
+    if part and normalized.get(part):
+        return normalized[part]
+    return _normalize_part_label(fallback)
 
 
 def _package_split_part_count(package: "RunPackage") -> int:
@@ -427,6 +468,7 @@ PARTICIPANT_TRIAL_FIELDNAMES = [
     "session_group_id",
     "part_session_id",
     "part_number",
+    "part_label",
     "condition",
     "block_number",
     "block_label",
@@ -437,9 +479,99 @@ PARTICIPANT_TRIAL_FIELDNAMES = [
     "respiratory_phase",
     "row_label",
     "stimulus_modality",
+    "multisensory_trial_family",
+    "exteroceptive_modality_set",
+    "visual_stimulus_type",
+    "visual_motion_profile",
+    "visual_start_distance_cm",
+    "visual_end_distance_cm",
+    "visual_speed_cm_s",
+    "visual_duration_ms",
+    "visual_renderer_engine",
+    "visual_display_device",
+    "mixed_reality_context",
+    "body_rendering_mode",
+    "audiovisual_synchrony_policy",
+    "mixed_reality_equivalence_boundary",
     "noise_type",
+    "sequence_labels",
+    "sequence_variant_key",
+    "audio_output_mode",
+    "speaker_array_id",
+    "speaker_array_layout",
+    "speaker_switch_sequence",
+    "speaker_switch_times_ms",
+    "speaker_switch_channels",
+    "speaker_switch_gains",
+    "speaker_source_channel",
+    "speaker_switch_generated",
+    "spatial_coordinate_frame",
+    "body_anchor",
+    "body_part",
+    "body_side",
+    "spatial_hemifield",
+    "body_relative_axis",
+    "auditory_trajectory_family",
+    "auditory_trajectory_direction",
+    "trajectory_coordinate_frame",
+    "trajectory_start_hemifield",
+    "trajectory_end_hemifield",
+    "trajectory_start_distance_cm",
+    "trajectory_end_distance_cm",
+    "trajectory_start_azimuth_deg",
+    "trajectory_end_azimuth_deg",
+    "spatial_renderer_engine",
+    "spatial_renderer_version",
+    "hrtf_database",
+    "hrtf_subject_id",
+    "hrtf_filter_id",
+    "hrtf_near_field_compensation",
+    "source_asset_equivalence",
+    "renderer_equivalence_boundary",
+    "iti_policy",
+    "iti_ms",
+    "foreperiod_ms",
+    "hazard_control_policy",
+    "expectancy_control_role",
     "soa_ms",
+    "expected_response",
+    "response_rule",
+    "target_role",
+    "response_mode",
+    "response_choice_set",
+    "correct_response",
+    "response_scoring_policy",
+    "response_capture_device",
+    "response_input_modality",
+    "tool_condition",
+    "locomotion_condition",
+    "voice_key_enabled",
+    "voice_key_response_label",
+    "voice_key_threshold",
+    "voice_key_latency_correction_ms",
+    "observed_response_choice",
+    "response_choice_correct",
     "tactile_present",
+    "tactile_channel",
+    "tactile_stimulation_modality",
+    "tactile_calibration_method",
+    "tactile_threshold_reference",
+    "tactile_intensity",
+    "tactile_intensity_unit",
+    "tactile_pulse_duration_ms",
+    "electrical_stimulator_model",
+    "electrical_electrode_site",
+    "tactile_waveform_shape",
+    "tactile_frequency_hz",
+    "tactile_duration_ms",
+    "tactile_amplitude",
+    "tactile_waveform_generated",
+    "external_trigger_required",
+    "external_trigger_modality",
+    "external_trigger_role",
+    "external_trigger_code",
+    "external_trigger_tolerance_ms",
+    "external_trigger_channel",
     "catch_trial",
     "audio_present",
     "stimulus_start_unix_time",
@@ -467,12 +599,14 @@ class ParticipantTrialCsvWriter:
         *,
         package: RunPackage,
         participant_metadata: dict[str, Any] | None = None,
+        part_label: str = "",
         min_rt_s: float = TACTILE_RESPONSE_MIN_RT_S,
         max_rt_s: float = TACTILE_RESPONSE_MAX_RT_S,
     ):
         self.path = Path(path)
         self.package = package
         self.participant_metadata = dict(participant_metadata or {})
+        self.part_label = _normalize_part_label(part_label)
         self.min_rt_s = max(0.0, float(min_rt_s))
         self.max_rt_s = max(self.min_rt_s, float(max_rt_s))
         self._trial_states: dict[tuple[str, str], dict[str, Any]] = {}
@@ -571,6 +705,15 @@ class ParticipantTrialCsvWriter:
         tactile_present = _trial_has_tactile(trial_type, family, bool(tactile_onset))
         catch_trial = _trial_is_catch(trial_type, family)
         audio_present = _trial_has_audio(trial_type, family, bool(looming_onset))
+        response_metadata = _trial_response_metadata(
+            base,
+            trial_type=trial_type,
+            family=family,
+            tactile_present=tactile_present,
+            catch_trial=catch_trial,
+        )
+        choice_metadata = _trial_response_choice_metadata(base)
+        response_required = bool(response_metadata["response_required"])
         trial_start_unix = _as_float(trial_start.get("unix_time", base.get("unix_time")), default=0.0)
         stimulus_start_unix = _as_float(
             looming_onset.get("unix_time", tactile_onset.get("unix_time", response_onset.get("unix_time", trial_start_unix))),
@@ -587,14 +730,41 @@ class ParticipantTrialCsvWriter:
             trial_end_unix=trial_end_unix,
             tactile_present=tactile_present,
             catch_trial=catch_trial,
+            response_required=response_required,
         )
         click_unix = _as_float(click.get("unix_time"), default=0.0) if click else 0.0
         rt_ms = ""
-        if valid_response and tactile_present and tactile_unix > 0.0 and click_unix > 0.0:
-            rt_ms = f"{(click_unix - tactile_unix) * 1000.0:.3f}"
-        if tactile_present:
-            outcome = "Hit" if valid_response else "Miss"
-            correctness_rule = f"response within {TACTILE_RESPONSE_RULE_LABEL}"
+        if valid_response and response_required and click_unix > 0.0:
+            response_anchor_unix = tactile_unix if tactile_present and tactile_unix > 0.0 else response_window_unix
+            if response_anchor_unix > 0.0:
+                rt_ms = f"{(click_unix - response_anchor_unix) * 1000.0:.3f}"
+        observed_response_choice = _response_choice_from_click(click, choice_metadata) if click else ""
+        response_choice_correct_value = _response_choice_correctness(
+            observed_response_choice,
+            choice_metadata.get("correct_response", ""),
+        )
+        response_choice_correct = (
+            "" if response_choice_correct_value is None else str(bool(response_choice_correct_value)).lower()
+        )
+        choice_required = _trial_requires_choice_scoring(choice_metadata)
+        if response_required:
+            if choice_required:
+                outcome = "Hit" if valid_response and response_choice_correct_value is True else "Miss"
+                correctness_rule = (
+                    "response choice matches correct_response via "
+                    f"{choice_metadata.get('response_scoring_policy') or 'declared response-choice contract'} "
+                    f"within {TACTILE_RESPONSE_RULE_LABEL}"
+                )
+            else:
+                outcome = "Hit" if valid_response else "Miss"
+                correctness_rule = (
+                    f"response within {TACTILE_RESPONSE_RULE_LABEL}"
+                    if tactile_present
+                    else f"response within {self.min_rt_s * 1000.0:.0f}-{self.max_rt_s * 1000.0:.0f} ms from auditory response window"
+                )
+        elif tactile_present:
+            outcome = "Miss" if response_given else "Hit"
+            correctness_rule = "withhold response during no-go/strong tactile trial"
         elif catch_trial:
             outcome = "Miss" if response_given else "Hit"
             correctness_rule = "withhold response during catch/audio-only trial"
@@ -614,6 +784,7 @@ class ParticipantTrialCsvWriter:
             "session_group_id": str(getattr(self.package, "session_group_id", "") or ""),
             "part_session_id": _package_part_session_id(self.package) if _package_is_split_part(self.package) else "",
             "part_number": _row_value(base, "part_number", "Part_Number", default=""),
+            "part_label": _row_value(base, "part_label", "Part_Label", default=self.part_label),
             "condition": _row_value(base, "condition", "Condition", default=""),
             "block_number": _row_value(base, "block_number", "block_index", "Block_Number", default=""),
             "block_label": _row_value(base, "block_label", "Block_Label", default=""),
@@ -624,9 +795,508 @@ class ParticipantTrialCsvWriter:
             "respiratory_phase": _row_value(base, "respiratory_phase", "Respiratory_Phase", "row_label", "Row_Label", "Row", default=""),
             "row_label": _row_value(base, "row_label", "Row_Label", "Row", default=""),
             "stimulus_modality": modality,
+            "multisensory_trial_family": _row_value(
+                base,
+                "multisensory_trial_family",
+                "Multisensory_Trial_Family",
+                "trial_modality_family",
+                "Trial_Modality_Family",
+                default="",
+            ),
+            "exteroceptive_modality_set": _row_value(
+                base,
+                "exteroceptive_modality_set",
+                "Exteroceptive_Modality_Set",
+                "external_stimulus_modality_set",
+                "External_Stimulus_Modality_Set",
+                default="",
+            ),
+            "visual_stimulus_type": _row_value(base, "visual_stimulus_type", "Visual_Stimulus_Type", default=""),
+            "visual_motion_profile": _row_value(base, "visual_motion_profile", "Visual_Motion_Profile", default=""),
+            "visual_start_distance_cm": _row_value(
+                base,
+                "visual_start_distance_cm",
+                "Visual_Start_Distance_cm",
+                default="",
+            ),
+            "visual_end_distance_cm": _row_value(
+                base,
+                "visual_end_distance_cm",
+                "Visual_End_Distance_cm",
+                default="",
+            ),
+            "visual_speed_cm_s": _row_value(base, "visual_speed_cm_s", "Visual_Speed_cm_s", default=""),
+            "visual_duration_ms": _row_value(base, "visual_duration_ms", "Visual_Duration_ms", default=""),
+            "visual_renderer_engine": _row_value(
+                base,
+                "visual_renderer_engine",
+                "Visual_Renderer_Engine",
+                default="",
+            ),
+            "visual_display_device": _row_value(
+                base,
+                "visual_display_device",
+                "Visual_Display_Device",
+                default="",
+            ),
+            "mixed_reality_context": _row_value(
+                base,
+                "mixed_reality_context",
+                "Mixed_Reality_Context",
+                default="",
+            ),
+            "body_rendering_mode": _row_value(base, "body_rendering_mode", "Body_Rendering_Mode", default=""),
+            "audiovisual_synchrony_policy": _row_value(
+                base,
+                "audiovisual_synchrony_policy",
+                "Audiovisual_Synchrony_Policy",
+                default="",
+            ),
+            "mixed_reality_equivalence_boundary": _row_value(
+                base,
+                "mixed_reality_equivalence_boundary",
+                "Mixed_Reality_Equivalence_Boundary",
+                default="",
+            ),
             "noise_type": _row_value(base, "noise_type", "Noise_Type", "noise_label", "Noise_Label", default=""),
+            "sequence_labels": _row_value(base, "sequence_labels", "Sequence_Labels", default=""),
+            "sequence_variant_key": _row_value(base, "sequence_variant_key", "Sequence_Variant_Key", default=""),
+            "audio_output_mode": _row_value(
+                base,
+                "audio_output_mode",
+                "Audio_Output_Mode",
+                "speaker_array_mode",
+                "Speaker_Array_Mode",
+                default="",
+            ),
+            "speaker_array_id": _row_value(base, "speaker_array_id", "Speaker_Array_ID", default=""),
+            "speaker_array_layout": _row_value(base, "speaker_array_layout", "Speaker_Array_Layout", default=""),
+            "speaker_switch_sequence": _row_value(
+                base,
+                "speaker_switch_sequence",
+                "Speaker_Switch_Sequence",
+                default="",
+            ),
+            "speaker_switch_times_ms": _row_value(
+                base,
+                "speaker_switch_times_ms",
+                "Speaker_Switch_Times_ms",
+                "speaker_switch_boundaries_ms",
+                "Speaker_Switch_Boundaries_ms",
+                default="",
+            ),
+            "speaker_switch_channels": _row_value(
+                base,
+                "speaker_switch_channels",
+                "Speaker_Switch_Channels",
+                "speaker_output_channels",
+                "Speaker_Output_Channels",
+                default="",
+            ),
+            "speaker_switch_gains": _row_value(base, "speaker_switch_gains", "Speaker_Switch_Gains", default=""),
+            "speaker_source_channel": _row_value(
+                base,
+                "speaker_source_channel",
+                "Speaker_Source_Channel",
+                default="",
+            ),
+            "speaker_switch_generated": _row_value(
+                base,
+                "speaker_switch_generated",
+                "Speaker_Switch_Generated",
+                default="",
+            ),
+            "spatial_coordinate_frame": _row_value(
+                base,
+                "spatial_coordinate_frame",
+                "Spatial_Coordinate_Frame",
+                "coordinate_frame",
+                "Coordinate_Frame",
+                "reference_frame",
+                "Reference_Frame",
+                default="",
+            ),
+            "body_anchor": _row_value(
+                base,
+                "body_anchor",
+                "Body_Anchor",
+                "anchored_body_part",
+                "Anchored_Body_Part",
+                "body_reference_anchor",
+                "Body_Reference_Anchor",
+                default="",
+            ),
+            "body_part": _row_value(
+                base,
+                "body_part",
+                "Body_Part",
+                "tactile_body_part",
+                "Tactile_Body_Part",
+                "tactile_site",
+                "Tactile_Site",
+                default="",
+            ),
+            "body_side": _row_value(
+                base,
+                "body_side",
+                "Body_Side",
+                "reference_side",
+                "Reference_Side",
+                "tactile_side",
+                "Tactile_Side",
+                default="",
+            ),
+            "spatial_hemifield": _row_value(
+                base,
+                "spatial_hemifield",
+                "Spatial_Hemifield",
+                "hemifield",
+                "Hemifield",
+                "field",
+                "Field",
+                default="",
+            ),
+            "body_relative_axis": _row_value(
+                base,
+                "body_relative_axis",
+                "Body_Relative_Axis",
+                "trajectory_axis",
+                "Trajectory_Axis",
+                "spatial_axis",
+                "Spatial_Axis",
+                default="",
+            ),
+            "auditory_trajectory_family": _row_value(
+                base,
+                "auditory_trajectory_family",
+                "Auditory_Trajectory_Family",
+                "trajectory_family",
+                "Trajectory_Family",
+                default="",
+            ),
+            "auditory_trajectory_direction": _row_value(
+                base,
+                "auditory_trajectory_direction",
+                "Auditory_Trajectory_Direction",
+                "trajectory_direction",
+                "Trajectory_Direction",
+                default="",
+            ),
+            "trajectory_coordinate_frame": _row_value(
+                base,
+                "trajectory_coordinate_frame",
+                "Trajectory_Coordinate_Frame",
+                default="",
+            ),
+            "trajectory_start_hemifield": _row_value(
+                base,
+                "trajectory_start_hemifield",
+                "Trajectory_Start_Hemifield",
+                default="",
+            ),
+            "trajectory_end_hemifield": _row_value(
+                base,
+                "trajectory_end_hemifield",
+                "Trajectory_End_Hemifield",
+                default="",
+            ),
+            "trajectory_start_distance_cm": _row_value(
+                base,
+                "trajectory_start_distance_cm",
+                "Trajectory_Start_Distance_cm",
+                default="",
+            ),
+            "trajectory_end_distance_cm": _row_value(
+                base,
+                "trajectory_end_distance_cm",
+                "Trajectory_End_Distance_cm",
+                default="",
+            ),
+            "trajectory_start_azimuth_deg": _row_value(
+                base,
+                "trajectory_start_azimuth_deg",
+                "Trajectory_Start_Azimuth_deg",
+                default="",
+            ),
+            "trajectory_end_azimuth_deg": _row_value(
+                base,
+                "trajectory_end_azimuth_deg",
+                "Trajectory_End_Azimuth_deg",
+                default="",
+            ),
+            "spatial_renderer_engine": _row_value(
+                base,
+                "spatial_renderer_engine",
+                "Spatial_Renderer_Engine",
+                "renderer_engine",
+                "Renderer_Engine",
+                default="",
+            ),
+            "spatial_renderer_version": _row_value(
+                base,
+                "spatial_renderer_version",
+                "Spatial_Renderer_Version",
+                "renderer_version",
+                "Renderer_Version",
+                default="",
+            ),
+            "hrtf_database": _row_value(base, "hrtf_database", "HRTF_Database", default=""),
+            "hrtf_subject_id": _row_value(base, "hrtf_subject_id", "HRTF_Subject_ID", default=""),
+            "hrtf_filter_id": _row_value(base, "hrtf_filter_id", "HRTF_Filter_ID", default=""),
+            "hrtf_near_field_compensation": _row_value(
+                base,
+                "hrtf_near_field_compensation",
+                "HRTF_Near_Field_Compensation",
+                default="",
+            ),
+            "source_asset_equivalence": _row_value(
+                base,
+                "source_asset_equivalence",
+                "Source_Asset_Equivalence",
+                default="",
+            ),
+            "renderer_equivalence_boundary": _row_value(
+                base,
+                "renderer_equivalence_boundary",
+                "Renderer_Equivalence_Boundary",
+                default="",
+            ),
+            "iti_policy": _row_value(base, "iti_policy", "ITI_Policy", default=""),
+            "iti_ms": _row_value(base, "iti_ms", "ITI_ms", "Intertrial_Interval_ms", default=""),
+            "foreperiod_ms": _row_value(base, "foreperiod_ms", "Foreperiod_ms", default=""),
+            "hazard_control_policy": _row_value(
+                base,
+                "hazard_control_policy",
+                "Hazard_Control_Policy",
+                default="",
+            ),
+            "expectancy_control_role": _row_value(
+                base,
+                "expectancy_control_role",
+                "Expectancy_Control_Role",
+                default="",
+            ),
             "soa_ms": _row_value(base, "soa_ms", "SOA_ms", default=""),
+            "expected_response": response_metadata["expected_response"],
+            "response_rule": response_metadata["response_rule"],
+            "target_role": response_metadata["target_role"],
+            "response_mode": choice_metadata["response_mode"],
+            "response_choice_set": choice_metadata["response_choice_set"],
+            "correct_response": choice_metadata["correct_response"],
+            "response_scoring_policy": choice_metadata["response_scoring_policy"],
+            "response_capture_device": _row_value(
+                base,
+                "response_capture_device",
+                "Response_Capture_Device",
+                "response_device",
+                "Response_Device",
+                "response_capture",
+                "Response_Capture",
+                default="",
+            ),
+            "response_input_modality": _row_value(
+                base,
+                "response_input_modality",
+                "Response_Input_Modality",
+                "response_modality",
+                "Response_Modality",
+                "input_modality",
+                "Input_Modality",
+                default="",
+            ),
+            "tool_condition": _row_value(base, "tool_condition", "Tool_Condition", default=""),
+            "locomotion_condition": _row_value(
+                base,
+                "locomotion_condition",
+                "Locomotion_Condition",
+                default="",
+            ),
+            "voice_key_enabled": _row_value(
+                base,
+                "voice_key_enabled",
+                "Voice_Key_Enabled",
+                "voice_key_required",
+                "Voice_Key_Required",
+                "vocal_response_required",
+                "Vocal_Response_Required",
+                default="",
+            ),
+            "voice_key_response_label": _row_value(
+                base,
+                "voice_key_response_label",
+                "Voice_Key_Response_Label",
+                "vocal_response_label",
+                "Vocal_Response_Label",
+                "spoken_response_label",
+                "Spoken_Response_Label",
+                default="",
+            ),
+            "voice_key_threshold": _row_value(
+                base,
+                "voice_key_threshold",
+                "Voice_Key_Threshold",
+                "voice_key_threshold_db",
+                "Voice_Key_Threshold_dB",
+                "microphone_threshold",
+                "Microphone_Threshold",
+                default="",
+            ),
+            "voice_key_latency_correction_ms": _row_value(
+                base,
+                "voice_key_latency_correction_ms",
+                "Voice_Key_Latency_Correction_ms",
+                "voice_key_latency_ms",
+                "Voice_Key_Latency_ms",
+                "vocal_onset_correction_ms",
+                "Vocal_Onset_Correction_ms",
+                default="",
+            ),
+            "observed_response_choice": observed_response_choice,
+            "response_choice_correct": response_choice_correct,
             "tactile_present": str(tactile_present).lower(),
+            "tactile_channel": _row_value(base, "tactile_channel", "Tactile_Channel", default=""),
+            "tactile_stimulation_modality": _row_value(
+                base,
+                "tactile_stimulation_modality",
+                "Tactile_Stimulation_Modality",
+                "tactile_modality",
+                "Tactile_Modality",
+                "stimulation_modality",
+                "Stimulation_Modality",
+                default="",
+            ),
+            "tactile_calibration_method": _row_value(
+                base,
+                "tactile_calibration_method",
+                "Tactile_Calibration_Method",
+                "calibration_method",
+                "Calibration_Method",
+                "electrical_calibration_method",
+                "Electrical_Calibration_Method",
+                default="",
+            ),
+            "tactile_threshold_reference": _row_value(
+                base,
+                "tactile_threshold_reference",
+                "Tactile_Threshold_Reference",
+                "tactile_threshold",
+                "Tactile_Threshold",
+                "threshold_reference",
+                "Threshold_Reference",
+                "electrical_threshold_reference",
+                "Electrical_Threshold_Reference",
+                default="",
+            ),
+            "tactile_intensity": _row_value(
+                base,
+                "tactile_intensity",
+                "Tactile_Intensity",
+                "electrical_current",
+                "Electrical_Current",
+                "tactile_current",
+                "Tactile_Current",
+                default="",
+            ),
+            "tactile_intensity_unit": _row_value(
+                base,
+                "tactile_intensity_unit",
+                "Tactile_Intensity_Unit",
+                "electrical_current_unit",
+                "Electrical_Current_Unit",
+                "tactile_current_unit",
+                "Tactile_Current_Unit",
+                default="",
+            ),
+            "tactile_pulse_duration_ms": _row_value(
+                base,
+                "tactile_pulse_duration_ms",
+                "Tactile_Pulse_Duration_ms",
+                "electrical_pulse_duration_ms",
+                "Electrical_Pulse_Duration_ms",
+                "pulse_duration_ms",
+                "Pulse_Duration_ms",
+                default="",
+            ),
+            "electrical_stimulator_model": _row_value(
+                base,
+                "electrical_stimulator_model",
+                "Electrical_Stimulator_Model",
+                "stimulator_model",
+                "Stimulator_Model",
+                "tactile_stimulator_model",
+                "Tactile_Stimulator_Model",
+                default="",
+            ),
+            "electrical_electrode_site": _row_value(
+                base,
+                "electrical_electrode_site",
+                "Electrical_Electrode_Site",
+                "electrode_site",
+                "Electrode_Site",
+                "tactile_electrode_site",
+                "Tactile_Electrode_Site",
+                default="",
+            ),
+            "tactile_waveform_shape": _row_value(base, "tactile_waveform_shape", "Tactile_Waveform_Shape", default=""),
+            "tactile_frequency_hz": _row_value(
+                base,
+                "tactile_frequency_hz",
+                "Tactile_Frequency_Hz",
+                "tactile_waveform_frequency_hz",
+                "Tactile_Waveform_Frequency_Hz",
+                default="",
+            ),
+            "tactile_duration_ms": _row_value(
+                base,
+                "tactile_duration_ms",
+                "Tactile_Duration_ms",
+                "tactile_waveform_duration_ms",
+                "Tactile_Waveform_Duration_ms",
+                default="",
+            ),
+            "tactile_amplitude": _row_value(base, "tactile_amplitude", "Tactile_Amplitude", default=""),
+            "tactile_waveform_generated": _row_value(
+                base,
+                "tactile_waveform_generated",
+                "Tactile_Waveform_Generated",
+                default="",
+            ),
+            "external_trigger_required": _row_value(
+                base,
+                "external_trigger_required",
+                "External_Trigger_Required",
+                default="",
+            ),
+            "external_trigger_modality": _row_value(
+                base,
+                "external_trigger_modality",
+                "External_Trigger_Modality",
+                default="",
+            ),
+            "external_trigger_role": _row_value(
+                base,
+                "external_trigger_role",
+                "External_Trigger_Role",
+                default="",
+            ),
+            "external_trigger_code": _row_value(
+                base,
+                "external_trigger_code",
+                "External_Trigger_Code",
+                default="",
+            ),
+            "external_trigger_tolerance_ms": _row_value(
+                base,
+                "external_trigger_tolerance_ms",
+                "External_Trigger_Tolerance_ms",
+                default="",
+            ),
+            "external_trigger_channel": _row_value(
+                base,
+                "external_trigger_channel",
+                "External_Trigger_Channel",
+                default="",
+            ),
             "catch_trial": str(catch_trial).lower(),
             "audio_present": str(audio_present).lower(),
             "stimulus_start_unix_time": "" if stimulus_start_unix <= 0.0 else f"{stimulus_start_unix:.9f}",
@@ -654,6 +1324,7 @@ class ParticipantTrialCsvWriter:
         trial_end_unix: float,
         tactile_present: bool,
         catch_trial: bool,
+        response_required: bool,
     ) -> tuple[dict[str, Any], bool, bool]:
         start = response_window_unix if response_window_unix > 0.0 else trial_start_unix
         end = trial_end_unix if trial_end_unix > start else start + self.max_rt_s
@@ -673,9 +1344,19 @@ class ParticipantTrialCsvWriter:
         if not candidates:
             return {}, False, False
         if tactile_present:
+            if not response_required:
+                return candidates[0], False, True
             tactile_start = tactile_unix if tactile_unix > 0.0 else start
             valid_start = tactile_start + self.min_rt_s
             valid_end = tactile_start + self.max_rt_s
+            for click in candidates:
+                click_time = _as_float(click.get("unix_time"), default=0.0)
+                if valid_start <= click_time <= valid_end:
+                    return click, True, True
+            return candidates[0], False, True
+        if response_required:
+            valid_start = start + self.min_rt_s
+            valid_end = start + self.max_rt_s
             for click in candidates:
                 click_time = _as_float(click.get("unix_time"), default=0.0)
                 if valid_start <= click_time <= valid_end:
@@ -727,6 +1408,7 @@ def _data_min_row_from_rich(row: dict[str, Any], *, trial_number_global: int) ->
         "session_id": _row_value(row, "session_id", "Session_ID", default=""),
         "part_session_id": _row_value(row, "part_session_id", "Part_Session_ID", default=""),
         "part_number": _row_value(row, "part_number", "Part_Number", default=""),
+        "part_label": _row_value(row, "part_label", "Part_Label", default=""),
         "block_number": _row_value(row, "block_number", "block_index", "Block_Number", default=""),
         "block_label": _row_value(row, "block_label", "Block_Label", default=""),
         "trial_number": _row_value(row, "trial_number", "trial_index", "Trial_Number", default=""),
@@ -979,6 +1661,8 @@ def mirror_data_max_outputs(package: "RunPackage", *, analysis_outputs: dict[str
             "session_group_id": package.session_group_id,
             "part_session_id": package.part_session_id,
             "part_number": package.part_number,
+            "part_label": str(metadata.get("part_label") or ""),
+            "part_labels_by_part_number": _json_ready(metadata.get("part_labels_by_part_number") or {}),
             "participant": participant_metadata,
         }
         _write_json_file(demographics_dir / "participant_metadata.private.json", payload)
@@ -2173,6 +2857,88 @@ def _cache_manifest_trial_payload(trial_rows: list[dict[str, Any]]) -> list[dict
                 "tactile_latency_compensation_status": row.get("Tactile_Latency_Compensation_Status", ""),
                 "tactile_latency_compensation_applied": row.get("Tactile_Latency_Compensation_Applied", ""),
                 "tactile_latency_compensation_note": row.get("Tactile_Latency_Compensation_Note", ""),
+                "multisensory_trial_family": row.get("Multisensory_Trial_Family", ""),
+                "exteroceptive_modality_set": row.get("Exteroceptive_Modality_Set", ""),
+                "visual_stimulus_type": row.get("Visual_Stimulus_Type", ""),
+                "visual_motion_profile": row.get("Visual_Motion_Profile", ""),
+                "visual_start_distance_cm": row.get("Visual_Start_Distance_cm", ""),
+                "visual_end_distance_cm": row.get("Visual_End_Distance_cm", ""),
+                "visual_speed_cm_s": row.get("Visual_Speed_cm_s", ""),
+                "visual_duration_ms": row.get("Visual_Duration_ms", ""),
+                "visual_renderer_engine": row.get("Visual_Renderer_Engine", ""),
+                "visual_display_device": row.get("Visual_Display_Device", ""),
+                "mixed_reality_context": row.get("Mixed_Reality_Context", ""),
+                "body_rendering_mode": row.get("Body_Rendering_Mode", ""),
+                "audiovisual_synchrony_policy": row.get("Audiovisual_Synchrony_Policy", ""),
+                "mixed_reality_equivalence_boundary": row.get("Mixed_Reality_Equivalence_Boundary", ""),
+                "tactile_waveform_shape": row.get("Tactile_Waveform_Shape", ""),
+                "tactile_frequency_hz": row.get("Tactile_Frequency_Hz", ""),
+                "tactile_duration_ms": row.get("Tactile_Duration_ms", ""),
+                "tactile_amplitude": row.get("Tactile_Amplitude", ""),
+                "tactile_waveform_generated": row.get("Tactile_Waveform_Generated", ""),
+                "tactile_stimulation_modality": row.get("Tactile_Stimulation_Modality", ""),
+                "tactile_calibration_method": row.get("Tactile_Calibration_Method", ""),
+                "tactile_threshold_reference": row.get("Tactile_Threshold_Reference", ""),
+                "tactile_intensity": row.get("Tactile_Intensity", ""),
+                "tactile_intensity_unit": row.get("Tactile_Intensity_Unit", ""),
+                "tactile_pulse_duration_ms": row.get("Tactile_Pulse_Duration_ms", ""),
+                "electrical_stimulator_model": row.get("Electrical_Stimulator_Model", ""),
+                "electrical_electrode_site": row.get("Electrical_Electrode_Site", ""),
+                "external_trigger_required": row.get("External_Trigger_Required", ""),
+                "external_trigger_modality": row.get("External_Trigger_Modality", ""),
+                "external_trigger_role": row.get("External_Trigger_Role", ""),
+                "external_trigger_code": row.get("External_Trigger_Code", ""),
+                "external_trigger_tolerance_ms": row.get("External_Trigger_Tolerance_ms", ""),
+                "external_trigger_channel": row.get("External_Trigger_Channel", ""),
+                "response_mode": row.get("Response_Mode", ""),
+                "response_choice_set": row.get("Response_Choice_Set", ""),
+                "correct_response": row.get("Correct_Response", ""),
+                "response_scoring_policy": row.get("Response_Scoring_Policy", ""),
+                "response_capture_device": row.get("Response_Capture_Device", ""),
+                "response_input_modality": row.get("Response_Input_Modality", ""),
+                "tool_condition": row.get("Tool_Condition", ""),
+                "locomotion_condition": row.get("Locomotion_Condition", ""),
+                "voice_key_enabled": row.get("Voice_Key_Enabled", ""),
+                "voice_key_response_label": row.get("Voice_Key_Response_Label", ""),
+                "voice_key_threshold": row.get("Voice_Key_Threshold", ""),
+                "voice_key_latency_correction_ms": row.get("Voice_Key_Latency_Correction_ms", ""),
+                "audio_output_mode": row.get("Audio_Output_Mode", ""),
+                "speaker_array_id": row.get("Speaker_Array_ID", ""),
+                "speaker_array_layout": row.get("Speaker_Array_Layout", ""),
+                "speaker_switch_sequence": row.get("Speaker_Switch_Sequence", ""),
+                "speaker_switch_times_ms": row.get("Speaker_Switch_Times_ms", ""),
+                "speaker_switch_channels": row.get("Speaker_Switch_Channels", ""),
+                "speaker_switch_gains": row.get("Speaker_Switch_Gains", ""),
+                "speaker_source_channel": row.get("Speaker_Source_Channel", ""),
+                "speaker_switch_generated": row.get("Speaker_Switch_Generated", ""),
+                "spatial_coordinate_frame": row.get("Spatial_Coordinate_Frame", ""),
+                "body_anchor": row.get("Body_Anchor", ""),
+                "body_part": row.get("Body_Part", ""),
+                "body_side": row.get("Body_Side", ""),
+                "spatial_hemifield": row.get("Spatial_Hemifield", ""),
+                "body_relative_axis": row.get("Body_Relative_Axis", ""),
+                "auditory_trajectory_family": row.get("Auditory_Trajectory_Family", ""),
+                "auditory_trajectory_direction": row.get("Auditory_Trajectory_Direction", ""),
+                "trajectory_coordinate_frame": row.get("Trajectory_Coordinate_Frame", ""),
+                "trajectory_start_hemifield": row.get("Trajectory_Start_Hemifield", ""),
+                "trajectory_end_hemifield": row.get("Trajectory_End_Hemifield", ""),
+                "trajectory_start_distance_cm": row.get("Trajectory_Start_Distance_cm", ""),
+                "trajectory_end_distance_cm": row.get("Trajectory_End_Distance_cm", ""),
+                "trajectory_start_azimuth_deg": row.get("Trajectory_Start_Azimuth_deg", ""),
+                "trajectory_end_azimuth_deg": row.get("Trajectory_End_Azimuth_deg", ""),
+                "spatial_renderer_engine": row.get("Spatial_Renderer_Engine", ""),
+                "spatial_renderer_version": row.get("Spatial_Renderer_Version", ""),
+                "hrtf_database": row.get("HRTF_Database", ""),
+                "hrtf_subject_id": row.get("HRTF_Subject_ID", ""),
+                "hrtf_filter_id": row.get("HRTF_Filter_ID", ""),
+                "hrtf_near_field_compensation": row.get("HRTF_Near_Field_Compensation", ""),
+                "source_asset_equivalence": row.get("Source_Asset_Equivalence", ""),
+                "renderer_equivalence_boundary": row.get("Renderer_Equivalence_Boundary", ""),
+                "iti_policy": row.get("ITI_Policy", ""),
+                "iti_ms": row.get("ITI_ms", ""),
+                "foreperiod_ms": row.get("Foreperiod_ms", ""),
+                "hazard_control_policy": row.get("Hazard_Control_Policy", ""),
+                "expectancy_control_role": row.get("Expectancy_Control_Role", ""),
             }
         )
     return trials
@@ -2289,6 +3055,12 @@ def _segment_trial_rows_from_cache(
         looming_onset_s = _segment_looming_onset_s(row)
         tactile_onset_s = _segment_tactile_onset_s(row, looming_onset_s)
         family = _segment_family(row)
+        spec = _tactile_waveform_spec(row, family)
+        tactile_waveform = _tactile_waveform_metadata(row, spec, generated=bool(spec))
+        speaker_switching = _speaker_switching_row_metadata(
+            row,
+            generated=_truthy(cached.get("speaker_switch_generated")),
+        )
         tactile_compensation = {
             "requested_compensation_ms": _as_float(cached.get("tactile_latency_compensation_requested_ms"), default=0.0),
             "applied_compensation_ms": _as_float(cached.get("tactile_latency_compensation_applied_ms"), default=0.0),
@@ -2324,6 +3096,8 @@ def _segment_trial_rows_from_cache(
                 tactile_onset_s=tactile_onset_s,
                 tactile_drive_onset_s=float(tactile_compensation.get("drive_onset_s") or tactile_onset_s),
                 tactile_compensation=tactile_compensation,
+                tactile_waveform=tactile_waveform,
+                speaker_switching=speaker_switching,
             )
         )
         wav_infos.append(_wav_info(trial_path, sha256=trial_hash, label=trial_path.stem))
@@ -2942,9 +3716,12 @@ def _write_session_group_manifest(
     part_entries = []
     for package in sorted(packages, key=lambda item: int(item.part_number or 0)):
         completed, message = _session_package_has_completed_data(package)
+        status = _load_json_if_exists(_part_completion_status_path(package))
+        part_label = str(status.get("part_label") or "").strip() if isinstance(status, dict) else ""
         part_entries.append(
             {
                 "part_number": package.part_number,
+                "part_label": part_label,
                 "part_session_id": package.part_session_id,
                 "part_folder_name": package.part_folder_name,
                 "session_manifest_path": str(package.manifest_path),
@@ -3028,6 +3805,13 @@ class SessionRunnerController:
         self._analytics_dir = _package_analytics_dir(package)
         self._topup_dir = self._runner_log_dir / "topup"
         self._runner_metadata_input = dict(runner_metadata or {})
+        part_labels = _normalize_part_label_map(self._runner_metadata_input.get("part_labels"))
+        self._runner_metadata_input["part_labels"] = part_labels
+        self._runner_metadata_input["part_label"] = _part_label_for_package(
+            package,
+            part_labels,
+            self._runner_metadata_input.get("part_label", ""),
+        )
         self._tactile_response_ledger = TopUpLedger(
             self._topup_dir,
             participant_id=package.participant_id,
@@ -3040,7 +3824,10 @@ class SessionRunnerController:
         self._runner_metadata_input["adaptive_tactile_threshold"] = self._adaptive_tactile_threshold.policy_payload()
         self._part_identity = {
             key: value
-            for key, value in _package_part_identity(package).items()
+            for key, value in {
+                **_package_part_identity(package),
+                "part_label": self._runner_metadata_input.get("part_label", ""),
+            }.items()
             if value not in (None, "")
         }
         self._session_metadata_path = _session_metadata_path(package)
@@ -3055,6 +3842,7 @@ class SessionRunnerController:
             self._participant_trials_csv_path,
             package=package,
             participant_metadata=dict(self._session_metadata.get("participant") or {}),
+            part_label=str(self._session_metadata.get("part_label") or ""),
         )
         self._lsl_session_metadata = _redact_session_metadata_for_lsl(self._session_metadata)
         self._topup_approval_callback = topup_approval_callback
@@ -3599,6 +4387,7 @@ class SessionRunnerController:
             "session_group_id": self.package.session_group_id,
             "part_session_id": self.package.part_session_id,
             "part_number": self.package.part_number,
+            "part_label": str(self._session_metadata.get("part_label") or ""),
             "participant_id": self.package.participant_id,
             "lsl_stream_session_id": self._lsl_stream_session_id,
             "external_labrecorder_scope": self.capture_options.external_labrecorder_scope,
@@ -4631,11 +5420,23 @@ class SessionRunnerController:
             looming_onset_s = _segment_looming_onset_s(source_row)
             tactile_onset_s = _segment_tactile_onset_s(source_row, looming_onset_s)
             family = _segment_family(source_row)
+            data, tactile_waveform = _apply_tactile_waveform_profile(
+                data,
+                source_row,
+                sample_rate=sample_rate,
+                family=family,
+                tactile_onset_s=tactile_onset_s,
+            )
             data, tactile_compensation = _apply_tactile_drive_compensation(
                 data,
                 sample_rate=sample_rate,
                 family=family,
                 tactile_onset_s=tactile_onset_s,
+            )
+            data, speaker_switching = _apply_speaker_switching_profile(
+                data,
+                source_row,
+                sample_rate=sample_rate,
             )
             target_channels = max(target_channels, int(data.shape[1]))
             clips.append(data)
@@ -4677,6 +5478,8 @@ class SessionRunnerController:
                 tactile_onset_s=tactile_onset_s,
                 tactile_drive_onset_s=float(tactile_compensation.get("drive_onset_s") or tactile_onset_s),
                 tactile_compensation=tactile_compensation,
+                tactile_waveform=tactile_waveform,
+                speaker_switching=speaker_switching,
             )
             row["Session_Group_ID"] = self.package.session_group_id
             row["Part_Session_ID"] = _package_part_session_id(self.package) if _package_is_split_part(self.package) else ""
@@ -4860,6 +5663,7 @@ class SessionRunnerController:
                     "session_group_id": self.package.session_group_id,
                     "part_session_id": self.package.part_session_id,
                     "part_number": self.package.part_number,
+                    "part_label": str(self._session_metadata.get("part_label") or ""),
                     "lsl_stream_session_id": self._lsl_stream_session_id,
                     "session_manifest": str(self.package.manifest_path),
                     "session_metadata": str(self._session_metadata_path),
@@ -4918,6 +5722,8 @@ class SessionRunnerController:
             "session_id": self.package.session_id,
             "participant_id": self.package.participant_id,
             "part_number": self.package.part_number,
+            "part_label": str(self._session_metadata.get("part_label") or ""),
+            "part_labels_by_part_number": _json_ready(self._session_metadata.get("part_labels_by_part_number") or {}),
             "part_folder_name": self.package.part_folder_name,
             "completed": bool(completed),
             "interrupted": bool(interrupted),
@@ -5171,11 +5977,432 @@ def _trial_is_catch(trial_type: str, family: str) -> bool:
     return "catch" in text or "audio_only" in text or "audio-only" in text
 
 
+def _trial_is_auditory_only(trial_type: str, family: str) -> bool:
+    text = f"{trial_type} {family}".strip().lower().replace("-", "_").replace(" ", "_")
+    return "auditory_only" in text or "auditoryonly" in text
+
+
+def _trial_response_metadata(
+    row: dict[str, Any],
+    *,
+    trial_type: str,
+    family: str,
+    tactile_present: bool,
+    catch_trial: bool,
+) -> dict[str, Any]:
+    response_required = _trial_requires_response(
+        row,
+        trial_type=trial_type,
+        family=family,
+        tactile_present=tactile_present,
+        catch_trial=catch_trial,
+    )
+    explicit_expected = _row_value(
+        row,
+        "expected_response",
+        "Expected_Response",
+        "response_expected",
+        "Response_Expected",
+        "required_response",
+        "Required_Response",
+        default="",
+    )
+    explicit_rule = _row_value(
+        row,
+        "response_rule",
+        "Response_Rule",
+        "response_mapping",
+        "Response_Mapping",
+        "task_response_rule",
+        "Task_Response_Rule",
+        default="",
+    )
+    explicit_role = _row_value(
+        row,
+        "target_role",
+        "Target_Role",
+        "go_nogo_role",
+        "Go_NoGo_Role",
+        "stimulus_role",
+        "Stimulus_Role",
+        "tactile_role",
+        "Tactile_Role",
+        default="",
+    )
+    expected_response = _normal_expected_response(explicit_expected)
+    if not expected_response:
+        expected_response = "respond" if response_required else "withhold"
+    response_rule = str(explicit_rule or "").strip()
+    if not response_rule:
+        if response_required:
+            response_rule = "respond_to_tactile_target" if tactile_present else "respond_to_auditory_target"
+        else:
+            response_rule = "withhold_response"
+    target_role = str(explicit_role or "").strip()
+    if not target_role:
+        target_role = "target" if response_required else "no_target"
+    return {
+        "response_required": bool(response_required),
+        "expected_response": expected_response,
+        "response_rule": response_rule,
+        "target_role": target_role,
+    }
+
+
+def _trial_response_choice_metadata(row: dict[str, Any]) -> dict[str, str]:
+    response_mode = str(
+        _row_value(
+            row,
+            "response_mode",
+            "Response_Mode",
+            "choice_mode",
+            "Choice_Mode",
+            "task_response_mode",
+            "Task_Response_Mode",
+            default="",
+        )
+        or ""
+    ).strip()
+    response_choice_set = str(
+        _row_value(
+            row,
+            "response_choice_set",
+            "Response_Choice_Set",
+            "choice_set",
+            "Choice_Set",
+            "response_choices",
+            "Response_Choices",
+            "response_options",
+            "Response_Options",
+            default="",
+        )
+        or ""
+    ).strip()
+    correct_response = str(
+        _row_value(
+            row,
+            "correct_response",
+            "Correct_Response",
+            "correct_choice",
+            "Correct_Choice",
+            "target_choice",
+            "Target_Choice",
+            "expected_choice",
+            "Expected_Choice",
+            default="",
+        )
+        or ""
+    ).strip()
+    response_scoring_policy = str(
+        _row_value(
+            row,
+            "response_scoring_policy",
+            "Response_Scoring_Policy",
+            "choice_scoring_policy",
+            "Choice_Scoring_Policy",
+            "response_mapping_policy",
+            "Response_Mapping_Policy",
+            default="",
+        )
+        or ""
+    ).strip()
+    if not response_mode and response_choice_set and correct_response:
+        response_mode = "choice"
+    return {
+        "response_mode": response_mode,
+        "response_choice_set": response_choice_set,
+        "correct_response": correct_response,
+        "response_scoring_policy": response_scoring_policy,
+    }
+
+
+def _trial_requires_choice_scoring(choice_metadata: dict[str, Any]) -> bool:
+    correct_response = str(choice_metadata.get("correct_response") or "").strip()
+    response_choice_set = str(choice_metadata.get("response_choice_set") or "").strip()
+    if not correct_response or not response_choice_set:
+        return False
+    mode = _response_choice_token(choice_metadata.get("response_mode"))
+    if not mode:
+        return True
+    return bool(
+        {
+            "choice",
+            "discrimination",
+            "localization",
+            "localisation",
+            "tactile_discrimination",
+            "tactile_localization",
+            "tactile_localisation",
+            "spatial_choice",
+            "extinction",
+            "cross_modal_extinction",
+            "cross_modal_extinction_report",
+            "tactile_extinction",
+            "tactile_report",
+            "percept_report",
+            "forced_choice",
+            "two_alternative_forced_choice",
+            "2afc",
+        }.intersection({mode, *mode.split("_")})
+    )
+
+
+def _response_choice_from_click(click: dict[str, Any], choice_metadata: dict[str, Any]) -> str:
+    explicit = _row_value(
+        click,
+        "response_choice",
+        "Response_Choice",
+        "choice",
+        "Choice",
+        "button_label",
+        "Button_Label",
+        default="",
+    )
+    if explicit not in (None, ""):
+        return str(explicit).strip()
+    choices = _split_response_choice_set(choice_metadata.get("response_choice_set", ""))
+    if not choices:
+        return ""
+    if len(choices) == 1:
+        return choices[0]
+    policy = _response_choice_token(choice_metadata.get("response_scoring_policy"))
+    mode = _response_choice_token(choice_metadata.get("response_mode"))
+    if "mouse_quadrant" in policy or ("quadrant" in policy and "mouse" in policy):
+        return _choice_by_mouse_quadrant(click, choices)
+    if "mouse_y_split" in policy or ("vertical" in policy and "mouse" in policy):
+        axis_value = _as_float(click.get("y"), default=math.nan)
+        low_side = "up"
+        high_side = "down"
+    elif "mouse_x_split" in policy or "mouse" in policy or "localization" in mode or "localisation" in mode:
+        axis_value = _as_float(click.get("x"), default=math.nan)
+        low_side = "left"
+        high_side = "right"
+    else:
+        axis_value = _as_float(click.get("x"), default=math.nan)
+        low_side = "left"
+        high_side = "right"
+    if not math.isfinite(axis_value):
+        return ""
+    threshold = 0.5 if abs(axis_value) <= 1.0 else 500.0
+    side = low_side if axis_value < threshold else high_side
+    labelled = _choice_by_side(choices, side)
+    if labelled:
+        return labelled
+    return choices[0] if axis_value < threshold else choices[1]
+
+
+def _choice_by_mouse_quadrant(click: dict[str, Any], choices: list[str]) -> str:
+    x = _as_float(click.get("x"), default=math.nan)
+    y = _as_float(click.get("y"), default=math.nan)
+    if not math.isfinite(x) or not math.isfinite(y):
+        return ""
+    x_threshold = 0.5 if abs(x) <= 1.0 else 500.0
+    y_threshold = 0.5 if abs(y) <= 1.0 else 500.0
+    if x < x_threshold and y < y_threshold:
+        label = "left"
+    elif x >= x_threshold and y < y_threshold:
+        label = "right"
+    elif x < x_threshold and y >= y_threshold:
+        label = "bilateral"
+    else:
+        label = "none"
+    labelled = _choice_by_report_label(choices, label)
+    if labelled:
+        return labelled
+    index = {"left": 0, "right": 1, "bilateral": 2, "none": 3}[label]
+    return choices[index] if index < len(choices) else choices[-1]
+
+
+def _split_response_choice_set(value: Any) -> list[str]:
+    text = str(value or "").strip()
+    if not text:
+        return []
+    return [part.strip() for part in re.split(r"\s*(?:\||/|,|;)\s*", text) if part.strip()]
+
+
+def _choice_by_side(choices: list[str], side: str) -> str:
+    side_token = _response_choice_token(side)
+    for choice in choices:
+        token = _response_choice_token(choice)
+        if token == side_token or side_token in token.split("_"):
+            return choice
+    return ""
+
+
+def _choice_by_report_label(choices: list[str], label: str) -> str:
+    aliases = {
+        "left": {"left", "left_side", "contralesional_left", "ipsilesional_left"},
+        "right": {"right", "right_side", "contralesional_right", "ipsilesional_right"},
+        "bilateral": {"bilateral", "both", "both_sides", "left_and_right", "right_and_left", "double"},
+        "none": {"none", "no_touch", "absent", "nothing", "no_report", "not_detected", "undetected"},
+    }
+    wanted = aliases.get(label, {_response_choice_token(label)})
+    for choice in choices:
+        token = _response_choice_token(choice)
+        parts = set(token.split("_"))
+        if token in wanted or wanted.intersection(parts):
+            return choice
+    return ""
+
+
+def _response_choice_correctness(observed: Any, expected: Any) -> bool | None:
+    expected_token = _response_choice_token(expected)
+    if not expected_token:
+        return None
+    observed_token = _response_choice_token(observed)
+    if not observed_token:
+        return False
+    return observed_token == expected_token
+
+
+def _response_choice_token(value: Any) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", str(value or "").strip().lower()).strip("_")
+
+
+def _trial_requires_response(
+    row: dict[str, Any],
+    *,
+    trial_type: str,
+    family: str,
+    tactile_present: bool,
+    catch_trial: bool,
+) -> bool:
+    if catch_trial:
+        return False
+    expected = _row_value(
+        row,
+        "expected_response",
+        "Expected_Response",
+        "response_expected",
+        "Response_Expected",
+        "required_response",
+        "Required_Response",
+        default="",
+    )
+    decision = _response_expectation_decision(expected)
+    if decision is not None:
+        return decision
+    for value in (
+        _row_value(
+            row,
+            "target_role",
+            "Target_Role",
+            "go_nogo_role",
+            "Go_NoGo_Role",
+            "stimulus_role",
+            "Stimulus_Role",
+            "tactile_role",
+            "Tactile_Role",
+            default="",
+        ),
+        _row_value(
+            row,
+            "response_rule",
+            "Response_Rule",
+            "response_mapping",
+            "Response_Mapping",
+            "task_response_rule",
+            "Task_Response_Rule",
+            default="",
+        ),
+        trial_type,
+        family,
+    ):
+        decision = _response_expectation_decision(value)
+        if decision is not None:
+            return decision
+    if not tactile_present:
+        return _trial_is_auditory_only(trial_type, family)
+    return True
+
+
+def _normal_expected_response(value: Any) -> str:
+    decision = _response_expectation_decision(value)
+    if decision is None:
+        return ""
+    return "respond" if decision else "withhold"
+
+
+def _response_expectation_decision(value: Any) -> bool | None:
+    text = str(value or "").strip().lower()
+    if not text:
+        return None
+    token = re.sub(r"[^a-z0-9]+", "_", text).strip("_")
+    if not token:
+        return None
+    no_response_exact = {
+        "0",
+        "false",
+        "no",
+        "none",
+        "withhold",
+        "withhold_response",
+        "no_response",
+        "noresponse",
+        "no_go",
+        "nogo",
+        "no_target",
+        "not_target",
+        "non_target",
+        "nontarget",
+        "strong",
+        "strong_nontarget",
+        "strong_non_target",
+        "distractor",
+    }
+    response_exact = {
+        "1",
+        "true",
+        "yes",
+        "respond",
+        "response",
+        "click",
+        "button_press",
+        "go",
+        "target",
+        "weak",
+        "weak_target",
+        "weak_go",
+    }
+    if token in no_response_exact:
+        return False
+    if token in response_exact:
+        return True
+    parts = set(token.split("_"))
+    no_go_markers = {
+        "withhold",
+        "nogo",
+        "not",
+        "none",
+        "strong",
+        "distractor",
+        "nontarget",
+    }
+    has_no_marker = (
+        "no_response" in token
+        or "no_target" in token
+        or "non_target" in token
+        or "nontarget" in token
+        or parts.intersection(no_go_markers)
+    )
+    strong_response_marker = "respond" in parts or "click" in parts or "go" in parts or "weak" in parts
+    has_response_marker = strong_response_marker or ("target" in parts and not has_no_marker)
+    if has_no_marker and strong_response_marker:
+        return None
+    if has_no_marker:
+        return False
+    if has_response_marker:
+        return True
+    return None
+
+
 def _trial_has_tactile(trial_type: str, family: str, tactile_event_seen: bool) -> bool:
     if tactile_event_seen:
         return True
     text = f"{trial_type} {family}".strip().lower()
     if _trial_is_catch(trial_type, family):
+        return False
+    if _trial_is_auditory_only(trial_type, family):
         return False
     return "tactile" in text or "baseline" in text
 
@@ -5184,9 +6411,9 @@ def _trial_has_audio(trial_type: str, family: str, looming_event_seen: bool) -> 
     if looming_event_seen:
         return True
     text = f"{trial_type} {family}".strip().lower()
-    if "baseline" in text and "audio" not in text:
+    if "baseline" in text and "audio" not in text and "auditory" not in text:
         return False
-    return "audio" in text or "catch" in text
+    return "audio" in text or "auditory" in text or "catch" in text
 
 
 def _trial_stimulus_modality(trial_type: str, family: str, tactile_event_seen: bool) -> str:
@@ -5327,6 +6554,8 @@ def _build_runner_session_metadata(
     lsl_status: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     raw = dict(runner_metadata or {})
+    part_labels = _normalize_part_label_map(raw.get("part_labels"))
+    part_label = _part_label_for_package(package, part_labels, raw.get("part_label", ""))
     participant_code = str(raw.get("participant_code") or package.participant_id or "").strip()
     participant_name = str(raw.get("participant_name") or "").strip()
     include_name = _truthy(raw.get("include_name_in_lsl", False))
@@ -5349,6 +6578,8 @@ def _build_runner_session_metadata(
         "session_group_id": package.session_group_id,
         "part_session_id": _package_part_session_id(package),
         "part_number": package.part_number,
+        "part_label": part_label,
+        "part_labels_by_part_number": part_labels,
         "part_folder_name": package.part_folder_name,
         "part_split_schema": package.part_split_schema,
         "sibling_part_manifest_paths": [str(path) for path in package.sibling_part_manifest_paths],
@@ -5636,6 +6867,7 @@ def _timeline_trial_type_label(payload: dict[str, Any]) -> str:
         "catch": "Catch",
         "catch_trial": "Catch",
         "audio_only": "Catch",
+        "auditory_only": "Auditory-only",
     }
     return labels.get(key, trial_type or family or "Trial")
 
@@ -6087,18 +7319,21 @@ def _segment_trial_type(family: str) -> str:
         "audio_tactile": "Audio-Tactile",
         "baseline": "Baseline",
         "catch": "Catch",
+        "auditory_only": "Auditory-Only",
     }.get(str(family or "").strip().lower(), "Trial")
 
 
 def _segment_family(row: dict[str, Any]) -> str:
     family = str(row.get("family") or row.get("Family") or "").strip().lower().replace("-", "_").replace(" ", "_")
-    if family in {"audio_tactile", "baseline", "catch"}:
+    if family in {"audio_tactile", "baseline", "catch", "auditory_only"}:
         return family
     trial_type = str(row.get("Trial_Type") or "").strip().lower()
     if "baseline" in trial_type:
         return "baseline"
     if "catch" in trial_type:
         return "catch"
+    if "auditory" in trial_type:
+        return "auditory_only"
     return "audio_tactile"
 
 
@@ -6138,10 +7373,377 @@ def _segment_tactile_onset_s(row: dict[str, Any], looming_onset_s: float) -> flo
     if explicit != "":
         return max(0.0, _as_float(explicit, default=looming_onset_s))
     family = _segment_family(row)
-    if family == "catch":
+    if family in {"catch", "auditory_only"}:
         return 0.0
     soa_ms = _as_float(_row_value(row, "soa_ms", "SOA_ms", default=0), default=0.0)
     return round(max(0.0, looming_onset_s + soa_ms / 1000.0), 6)
+
+
+def _normal_tactile_waveform_shape(value: Any) -> str:
+    token = re.sub(r"[^a-z0-9]+", "_", str(value or "").strip().lower()).strip("_")
+    if not token:
+        return ""
+    aliases = {
+        "saw": "sawtooth",
+        "saw_tooth": "sawtooth",
+        "sawtooth": "sawtooth",
+        "ramp": "sawtooth",
+        "sine": "sine",
+        "sin": "sine",
+        "sinusoid": "sine",
+        "sinusoidal": "sine",
+        "square": "square",
+        "pulse": "square",
+        "pulse_train": "biphasic_square_pulse_train",
+        "square_pulse_train": "biphasic_square_pulse_train",
+        "biphasic_pulse": "biphasic_square_pulse_train",
+        "biphasic_square_pulse": "biphasic_square_pulse_train",
+        "biphasic_square_pulse_train": "biphasic_square_pulse_train",
+    }
+    return aliases.get(token, token)
+
+
+def _tactile_waveform_spec(row: dict[str, Any], family: str) -> dict[str, Any] | None:
+    if family not in {"audio_tactile", "baseline"}:
+        return None
+    shape = _normal_tactile_waveform_shape(
+        _row_value(row, "tactile_waveform_shape", "Tactile_Waveform_Shape", default="")
+    )
+    frequency_hz = _as_float(
+        _row_value(
+            row,
+            "tactile_frequency_hz",
+            "Tactile_Frequency_Hz",
+            "tactile_waveform_frequency_hz",
+            "Tactile_Waveform_Frequency_Hz",
+            default="",
+        ),
+        default=0.0,
+    )
+    duration_ms = _as_float(
+        _row_value(
+            row,
+            "tactile_duration_ms",
+            "Tactile_Duration_ms",
+            "tactile_waveform_duration_ms",
+            "Tactile_Waveform_Duration_ms",
+            default="",
+        ),
+        default=0.0,
+    )
+    if not shape and frequency_hz <= 0.0:
+        return None
+    if shape not in {"sawtooth", "sine", "square", "biphasic_square_pulse_train"}:
+        raise ValueError(f"Unsupported tactile waveform shape: {shape or '<blank>'}")
+    if frequency_hz <= 0.0:
+        raise ValueError("Tactile waveform frequency must be greater than zero.")
+    if duration_ms <= 0.0:
+        raise ValueError("Tactile waveform duration must be greater than zero.")
+    pulse_duration_ms = _as_float(
+        _row_value(
+            row,
+            "tactile_pulse_duration_ms",
+            "Tactile_Pulse_Duration_ms",
+            "tactile_waveform_pulse_duration_ms",
+            "Tactile_Waveform_Pulse_Duration_ms",
+            default="",
+        ),
+        default=0.0,
+    )
+    if shape == "biphasic_square_pulse_train" and pulse_duration_ms <= 0.0:
+        raise ValueError("Biphasic square pulse trains require tactile_pulse_duration_ms.")
+    channel = _as_int(_row_value(row, "tactile_channel", "Tactile_Channel", default=3), default=3)
+    amplitude = _as_float(
+        _row_value(row, "tactile_amplitude", "Tactile_Amplitude", "tactile_waveform_amplitude", default=0.2),
+        default=0.2,
+    )
+    return {
+        "shape": shape,
+        "frequency_hz": float(frequency_hz),
+        "duration_ms": float(duration_ms),
+        "pulse_duration_ms": float(pulse_duration_ms) if pulse_duration_ms > 0.0 else "",
+        "channel_1based": max(1, int(channel)),
+        "amplitude": max(0.0, min(1.0, float(amplitude))),
+    }
+
+
+def _tactile_waveform_metadata(
+    row: dict[str, Any],
+    spec: dict[str, Any] | None,
+    *,
+    generated: bool,
+) -> dict[str, Any]:
+    if spec is not None:
+        return {
+            "shape": spec.get("shape", ""),
+            "frequency_hz": spec.get("frequency_hz", ""),
+            "duration_ms": spec.get("duration_ms", ""),
+            "pulse_duration_ms": spec.get("pulse_duration_ms", ""),
+            "channel_1based": spec.get("channel_1based", ""),
+            "amplitude": spec.get("amplitude", ""),
+            "generated": bool(generated),
+        }
+    return {
+        "shape": _row_value(row, "tactile_waveform_shape", "Tactile_Waveform_Shape", default=""),
+        "frequency_hz": _row_value(
+            row,
+            "tactile_frequency_hz",
+            "Tactile_Frequency_Hz",
+            "tactile_waveform_frequency_hz",
+            "Tactile_Waveform_Frequency_Hz",
+            default="",
+        ),
+        "duration_ms": _row_value(
+            row,
+            "tactile_duration_ms",
+            "Tactile_Duration_ms",
+            "tactile_waveform_duration_ms",
+            "Tactile_Waveform_Duration_ms",
+            default="",
+        ),
+        "pulse_duration_ms": _row_value(
+            row,
+            "tactile_pulse_duration_ms",
+            "Tactile_Pulse_Duration_ms",
+            "tactile_waveform_pulse_duration_ms",
+            "Tactile_Waveform_Pulse_Duration_ms",
+            default="",
+        ),
+        "channel_1based": _row_value(row, "tactile_channel", "Tactile_Channel", default=""),
+        "amplitude": _row_value(row, "tactile_amplitude", "Tactile_Amplitude", default=""),
+        "generated": False,
+    }
+
+
+def _apply_tactile_waveform_profile(
+    data: Any,
+    row: dict[str, Any],
+    *,
+    sample_rate: int,
+    family: str,
+    tactile_onset_s: float,
+) -> tuple[Any, dict[str, Any]]:
+    import numpy as np
+
+    spec = _tactile_waveform_spec(row, family)
+    if spec is None:
+        return data, _tactile_waveform_metadata(row, spec, generated=False)
+    if sample_rate <= 0:
+        raise ValueError("Cannot synthesize tactile waveform without a positive sample rate.")
+    source = np.asarray(data, dtype=np.float32)
+    if getattr(source, "ndim", 0) != 2:
+        raise ValueError("Tactile waveform synthesis expects a 2-D audio array.")
+    channel_index = int(spec["channel_1based"]) - 1
+    if source.shape[1] <= channel_index:
+        pad = np.zeros((source.shape[0], channel_index + 1 - source.shape[1]), dtype=source.dtype)
+        source = np.concatenate([source, pad], axis=1)
+    start = max(0, int(round(float(tactile_onset_s) * sample_rate)))
+    frames = max(1, int(round(float(spec["duration_ms"]) / 1000.0 * sample_rate)))
+    if spec["shape"] == "biphasic_square_pulse_train":
+        period_frames = max(1, int(round(sample_rate / float(spec["frequency_hz"]))))
+        pulse_frames = max(2, int(round(float(spec["pulse_duration_ms"]) / 1000.0 * sample_rate)))
+        pulse_count = max(1, int(math.floor(float(spec["duration_ms"]) / 1000.0 * float(spec["frequency_hz"]) + 1e-9)) + 1)
+        frames = max(frames, (pulse_count - 1) * period_frames + pulse_frames)
+    stop = start + frames
+    if stop > source.shape[0]:
+        pad = np.zeros((stop - source.shape[0], source.shape[1]), dtype=source.dtype)
+        source = np.concatenate([source, pad], axis=0)
+    t = np.arange(frames, dtype=np.float32) / float(sample_rate)
+    phase = (t * float(spec["frequency_hz"])) % 1.0
+    if spec["shape"] == "biphasic_square_pulse_train":
+        waveform = np.zeros(frames, dtype=np.float32)
+        period_frames = max(1, int(round(sample_rate / float(spec["frequency_hz"]))))
+        pulse_frames = max(2, int(round(float(spec["pulse_duration_ms"]) / 1000.0 * sample_rate)))
+        pulse_count = max(1, int(math.floor(float(spec["duration_ms"]) / 1000.0 * float(spec["frequency_hz"]) + 1e-9)) + 1)
+        split = max(1, pulse_frames // 2)
+        for pulse_index in range(pulse_count):
+            pulse_start = pulse_index * period_frames
+            pulse_stop = min(frames, pulse_start + pulse_frames)
+            if pulse_stop <= pulse_start:
+                continue
+            phase_split = min(pulse_stop, pulse_start + split)
+            waveform[pulse_start:phase_split] = 1.0
+            waveform[phase_split:pulse_stop] = -1.0
+    elif spec["shape"] == "sawtooth":
+        waveform = (2.0 * phase) - 1.0
+    elif spec["shape"] == "square":
+        waveform = np.where(phase < 0.5, 1.0, -1.0)
+    else:
+        waveform = np.sin(2.0 * math.pi * float(spec["frequency_hz"]) * t)
+    adjusted = np.array(source, copy=True)
+    adjusted[start:stop, channel_index] = waveform.astype(np.float32) * float(spec["amplitude"])
+    return adjusted, _tactile_waveform_metadata(row, spec, generated=True)
+
+
+def _speaker_switching_spec(row: dict[str, Any], *, duration_s: float) -> dict[str, Any] | None:
+    channels_text = str(
+        _row_value(
+            row,
+            "speaker_switch_channels",
+            "Speaker_Switch_Channels",
+            "speaker_output_channels",
+            "Speaker_Output_Channels",
+            default="",
+        )
+        or ""
+    ).strip()
+    times_text = str(
+        _row_value(
+            row,
+            "speaker_switch_times_ms",
+            "Speaker_Switch_Times_ms",
+            "speaker_switch_boundaries_ms",
+            "Speaker_Switch_Boundaries_ms",
+            default="",
+        )
+        or ""
+    ).strip()
+    if not channels_text and not times_text:
+        return None
+    channels = [_as_int(part, default=0) for part in _split_contract_list(channels_text)]
+    channels = [channel for channel in channels if channel > 0]
+    times_ms = [_as_float(part, default=math.nan) for part in _split_contract_list(times_text)]
+    times_ms = [float(value) for value in times_ms if math.isfinite(value) and value >= 0.0]
+    if not channels:
+        raise ValueError("Speaker switching requires one or more 1-based output channels.")
+    if not times_ms:
+        raise ValueError("Speaker switching requires millisecond boundary times.")
+    if len(times_ms) == len(channels):
+        times_ms.append(max(times_ms[-1], float(duration_s) * 1000.0))
+    if len(times_ms) != len(channels) + 1:
+        raise ValueError("Speaker switching times must contain either N starts or N+1 boundaries for N channels.")
+    if any(later < earlier for earlier, later in zip(times_ms, times_ms[1:])):
+        raise ValueError("Speaker switching times must be non-decreasing.")
+    gains_text = str(_row_value(row, "speaker_switch_gains", "Speaker_Switch_Gains", default="") or "").strip()
+    gains = [_as_float(part, default=math.nan) for part in _split_contract_list(gains_text)]
+    gains = [float(value) for value in gains if math.isfinite(value)]
+    if not gains:
+        gains = [1.0 for _ in channels]
+    if len(gains) != len(channels):
+        raise ValueError("Speaker switching gains must be blank or contain one value per channel segment.")
+    source_channel = str(_row_value(row, "speaker_source_channel", "Speaker_Source_Channel", default="1") or "1").strip()
+    mode = str(
+        _row_value(
+            row,
+            "audio_output_mode",
+            "Audio_Output_Mode",
+            "speaker_array_mode",
+            "Speaker_Array_Mode",
+            default="switched_speaker_array",
+        )
+        or "switched_speaker_array"
+    ).strip()
+    return {
+        "mode": mode,
+        "array_id": str(_row_value(row, "speaker_array_id", "Speaker_Array_ID", default="") or "").strip(),
+        "layout": str(_row_value(row, "speaker_array_layout", "Speaker_Array_Layout", default="") or "").strip(),
+        "sequence": str(_row_value(row, "speaker_switch_sequence", "Speaker_Switch_Sequence", default="") or "").strip(),
+        "times_ms": _format_contract_number_list(times_ms),
+        "channels": "|".join(str(channel) for channel in channels),
+        "gains": _format_contract_number_list(gains),
+        "source_channel": source_channel,
+        "generated": True,
+        "_channels": channels,
+        "_times_ms": times_ms,
+        "_gains": gains,
+    }
+
+
+def _speaker_switching_row_metadata(row: dict[str, Any], *, generated: bool = False) -> dict[str, Any]:
+    fields = {
+        "mode": _row_value(
+            row,
+            "audio_output_mode",
+            "Audio_Output_Mode",
+            "speaker_array_mode",
+            "Speaker_Array_Mode",
+            default="",
+        ),
+        "array_id": _row_value(row, "speaker_array_id", "Speaker_Array_ID", default=""),
+        "layout": _row_value(row, "speaker_array_layout", "Speaker_Array_Layout", default=""),
+        "sequence": _row_value(row, "speaker_switch_sequence", "Speaker_Switch_Sequence", default=""),
+        "times_ms": _row_value(
+            row,
+            "speaker_switch_times_ms",
+            "Speaker_Switch_Times_ms",
+            "speaker_switch_boundaries_ms",
+            "Speaker_Switch_Boundaries_ms",
+            default="",
+        ),
+        "channels": _row_value(
+            row,
+            "speaker_switch_channels",
+            "Speaker_Switch_Channels",
+            "speaker_output_channels",
+            "Speaker_Output_Channels",
+            default="",
+        ),
+        "gains": _row_value(row, "speaker_switch_gains", "Speaker_Switch_Gains", default=""),
+        "source_channel": _row_value(row, "speaker_source_channel", "Speaker_Source_Channel", default=""),
+    }
+    if not any(value not in (None, "") for value in fields.values()) and not generated:
+        return {}
+    fields["generated"] = bool(generated)
+    return fields
+
+
+def _apply_speaker_switching_profile(
+    data: Any,
+    row: dict[str, Any],
+    *,
+    sample_rate: int,
+) -> tuple[Any, dict[str, Any]]:
+    import numpy as np
+
+    source = np.asarray(data, dtype=np.float32)
+    if getattr(source, "ndim", 0) != 2:
+        raise ValueError("Speaker switching expects a 2-D audio array.")
+    duration_s = float(source.shape[0] / sample_rate) if sample_rate > 0 else 0.0
+    spec = _speaker_switching_spec(row, duration_s=duration_s)
+    if spec is None:
+        return data, {}
+    if sample_rate <= 0:
+        raise ValueError("Cannot apply speaker switching without a positive sample rate.")
+    channels = [int(value) for value in spec["_channels"]]
+    times_ms = [float(value) for value in spec["_times_ms"]]
+    gains = [float(value) for value in spec["_gains"]]
+    tactile_channel = _as_int(_row_value(row, "tactile_channel", "Tactile_Channel", default=0), default=0)
+    target_channels = max(source.shape[1], max(channels), tactile_channel)
+    routed = np.zeros((source.shape[0], target_channels), dtype=np.float32)
+    if tactile_channel > 0 and tactile_channel <= source.shape[1]:
+        routed[:, tactile_channel - 1] = source[:, tactile_channel - 1]
+    signal = _speaker_switch_source_signal(source, spec)
+    for index, channel in enumerate(channels):
+        start = max(0, min(source.shape[0], int(round((times_ms[index] / 1000.0) * sample_rate))))
+        stop = max(0, min(source.shape[0], int(round((times_ms[index + 1] / 1000.0) * sample_rate))))
+        if stop <= start:
+            continue
+        routed[start:stop, channel - 1] += signal[start:stop] * float(gains[index])
+    public_spec = {key: value for key, value in spec.items() if not key.startswith("_")}
+    return routed, public_spec
+
+
+def _speaker_switch_source_signal(source: Any, spec: dict[str, Any]) -> Any:
+    source_channel = str(spec.get("source_channel") or "1").strip().lower()
+    if source_channel in {"mix", "mixdown", "mean", "mono", "mono_mixdown"}:
+        count = max(1, min(2, int(source.shape[1])))
+        return source[:, :count].mean(axis=1)
+    channel = _as_int(source_channel, default=1)
+    channel_index = max(0, int(channel) - 1)
+    if channel_index >= source.shape[1]:
+        raise ValueError(f"Speaker source channel {channel} is not present in the trial WAV.")
+    return source[:, channel_index]
+
+
+def _split_contract_list(value: Any) -> list[str]:
+    text = str(value or "").strip()
+    if not text:
+        return []
+    return [part.strip() for part in re.split(r"[|;,]+", text) if part.strip()]
+
+
+def _format_contract_number_list(values: list[float]) -> str:
+    return "|".join(f"{float(value):.6g}" for value in values)
 
 
 def _tactile_drive_onset_for_trial(family: str, tactile_onset_s: float) -> tuple[float, float]:
@@ -6301,12 +7903,36 @@ def _materialize_segment_block_wav(
         looming_onset_s = _segment_looming_onset_s(row)
         tactile_onset_s = _segment_tactile_onset_s(row, looming_onset_s)
         family = _segment_family(row)
+        data, tactile_waveform = _apply_tactile_waveform_profile(
+            data,
+            row,
+            sample_rate=sample_rate,
+            family=family,
+            tactile_onset_s=tactile_onset_s,
+        )
         data, tactile_compensation = _apply_tactile_drive_compensation(
             data,
             sample_rate=sample_rate,
             family=family,
             tactile_onset_s=tactile_onset_s,
         )
+        data, speaker_switching = _apply_speaker_switching_profile(
+            data,
+            row,
+            sample_rate=sample_rate,
+        )
+        iti_ms = max(
+            0.0,
+            _as_float(
+                _row_value(row, "iti_ms", "ITI_ms", "Intertrial_Interval_ms", default=""),
+                default=0.0,
+            ),
+        )
+        if iti_ms > 0.0:
+            iti_frames = int(round((iti_ms / 1000.0) * sample_rate))
+            if iti_frames > 0:
+                silence = np.zeros((iti_frames, data.shape[1]), dtype=data.dtype)
+                data = np.concatenate([data, silence], axis=0)
         target_channels = max(target_channels, int(data.shape[1]))
         clips.append(data)
         wav_infos.append(_wav_info(trial_path, sha256=actual_hash, label=trial_path.stem))
@@ -6341,6 +7967,8 @@ def _materialize_segment_block_wav(
                 tactile_onset_s=tactile_onset_s,
                 tactile_drive_onset_s=float(tactile_compensation.get("drive_onset_s") or tactile_onset_s),
                 tactile_compensation=tactile_compensation,
+                tactile_waveform=tactile_waveform,
+                speaker_switching=speaker_switching,
             )
         )
         frame_cursor = trial_end_sample
@@ -6386,15 +8014,508 @@ def _segment_session_trial_row(
     tactile_onset_s: float,
     tactile_drive_onset_s: float,
     tactile_compensation: dict[str, Any] | None = None,
+    tactile_waveform: dict[str, Any] | None = None,
+    speaker_switching: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     trial_start_s = trial_start_sample / float(sample_rate)
     trial_end_s = trial_end_sample / float(sample_rate)
-    response_window_onset_s = looming_onset_s if family in {"audio_tactile", "catch"} else tactile_onset_s
-    tactile_compensation = dict(tactile_compensation or {})
+    has_audio = family in {"audio_tactile", "catch", "auditory_only"}
     has_tactile = family in {"audio_tactile", "baseline"}
+    response_window_onset_s = looming_onset_s if has_audio else tactile_onset_s
+    tactile_compensation = dict(tactile_compensation or {})
+    tactile_waveform = dict(tactile_waveform or {})
+    speaker_switching = dict(speaker_switching or {})
     drive_onset_s = max(0.0, float(tactile_drive_onset_s))
     soa_ms = _row_value(source, "soa_ms", "SOA_ms", default="")
     row_label = str(_row_value(source, "row_label", "Row_Label", "Row", default="")).strip()
+    expected_response = _row_value(
+        source,
+        "expected_response",
+        "Expected_Response",
+        "response_expected",
+        "Response_Expected",
+        "required_response",
+        "Required_Response",
+        default="",
+    )
+    response_rule = _row_value(
+        source,
+        "response_rule",
+        "Response_Rule",
+        "response_mapping",
+        "Response_Mapping",
+        "task_response_rule",
+        "Task_Response_Rule",
+        default="",
+    )
+    target_role = _row_value(
+        source,
+        "target_role",
+        "Target_Role",
+        "go_nogo_role",
+        "Go_NoGo_Role",
+        "stimulus_role",
+        "Stimulus_Role",
+        "tactile_role",
+        "Tactile_Role",
+        default="",
+    )
+    response_mode = _row_value(
+        source,
+        "response_mode",
+        "Response_Mode",
+        "choice_mode",
+        "Choice_Mode",
+        "task_response_mode",
+        "Task_Response_Mode",
+        default="",
+    )
+    response_choice_set = _row_value(
+        source,
+        "response_choice_set",
+        "Response_Choice_Set",
+        "choice_set",
+        "Choice_Set",
+        "response_choices",
+        "Response_Choices",
+        "response_options",
+        "Response_Options",
+        default="",
+    )
+    correct_response = _row_value(
+        source,
+        "correct_response",
+        "Correct_Response",
+        "correct_choice",
+        "Correct_Choice",
+        "target_choice",
+        "Target_Choice",
+        "expected_choice",
+        "Expected_Choice",
+        default="",
+    )
+    response_scoring_policy = _row_value(
+        source,
+        "response_scoring_policy",
+        "Response_Scoring_Policy",
+        "choice_scoring_policy",
+        "Choice_Scoring_Policy",
+        "response_mapping_policy",
+        "Response_Mapping_Policy",
+        default="",
+    )
+    audio_output_mode = _row_value(
+        source,
+        "audio_output_mode",
+        "Audio_Output_Mode",
+        "speaker_array_mode",
+        "Speaker_Array_Mode",
+        default=speaker_switching.get("mode", ""),
+    )
+    speaker_array_id = _row_value(
+        source,
+        "speaker_array_id",
+        "Speaker_Array_ID",
+        default=speaker_switching.get("array_id", ""),
+    )
+    speaker_array_layout = _row_value(
+        source,
+        "speaker_array_layout",
+        "Speaker_Array_Layout",
+        default=speaker_switching.get("layout", ""),
+    )
+    speaker_switch_sequence = _row_value(
+        source,
+        "speaker_switch_sequence",
+        "Speaker_Switch_Sequence",
+        default=speaker_switching.get("sequence", ""),
+    )
+    speaker_switch_times_ms = _row_value(
+        source,
+        "speaker_switch_times_ms",
+        "Speaker_Switch_Times_ms",
+        "speaker_switch_boundaries_ms",
+        "Speaker_Switch_Boundaries_ms",
+        default=speaker_switching.get("times_ms", ""),
+    )
+    speaker_switch_channels = _row_value(
+        source,
+        "speaker_switch_channels",
+        "Speaker_Switch_Channels",
+        "speaker_output_channels",
+        "Speaker_Output_Channels",
+        default=speaker_switching.get("channels", ""),
+    )
+    speaker_switch_gains = _row_value(
+        source,
+        "speaker_switch_gains",
+        "Speaker_Switch_Gains",
+        default=speaker_switching.get("gains", ""),
+    )
+    speaker_source_channel = _row_value(
+        source,
+        "speaker_source_channel",
+        "Speaker_Source_Channel",
+        default=speaker_switching.get("source_channel", ""),
+    )
+    response_capture_device = _row_value(
+        source,
+        "response_capture_device",
+        "Response_Capture_Device",
+        "response_device",
+        "Response_Device",
+        "response_capture",
+        "Response_Capture",
+        default="",
+    )
+    response_input_modality = _row_value(
+        source,
+        "response_input_modality",
+        "Response_Input_Modality",
+        "response_modality",
+        "Response_Modality",
+        "input_modality",
+        "Input_Modality",
+        default="",
+    )
+    tool_condition = _row_value(source, "tool_condition", "Tool_Condition", default="")
+    locomotion_condition = _row_value(
+        source,
+        "locomotion_condition",
+        "Locomotion_Condition",
+        default="",
+    )
+    multisensory_trial_family = _row_value(
+        source,
+        "multisensory_trial_family",
+        "Multisensory_Trial_Family",
+        "trial_modality_family",
+        "Trial_Modality_Family",
+        default="",
+    )
+    exteroceptive_modality_set = _row_value(
+        source,
+        "exteroceptive_modality_set",
+        "Exteroceptive_Modality_Set",
+        "external_stimulus_modality_set",
+        "External_Stimulus_Modality_Set",
+        default="",
+    )
+    visual_stimulus_type = _row_value(source, "visual_stimulus_type", "Visual_Stimulus_Type", default="")
+    visual_motion_profile = _row_value(source, "visual_motion_profile", "Visual_Motion_Profile", default="")
+    visual_start_distance_cm = _row_value(
+        source,
+        "visual_start_distance_cm",
+        "Visual_Start_Distance_cm",
+        default="",
+    )
+    visual_end_distance_cm = _row_value(
+        source,
+        "visual_end_distance_cm",
+        "Visual_End_Distance_cm",
+        default="",
+    )
+    visual_speed_cm_s = _row_value(source, "visual_speed_cm_s", "Visual_Speed_cm_s", default="")
+    visual_duration_ms = _row_value(source, "visual_duration_ms", "Visual_Duration_ms", default="")
+    visual_renderer_engine = _row_value(source, "visual_renderer_engine", "Visual_Renderer_Engine", default="")
+    visual_display_device = _row_value(source, "visual_display_device", "Visual_Display_Device", default="")
+    mixed_reality_context = _row_value(source, "mixed_reality_context", "Mixed_Reality_Context", default="")
+    body_rendering_mode = _row_value(source, "body_rendering_mode", "Body_Rendering_Mode", default="")
+    audiovisual_synchrony_policy = _row_value(
+        source,
+        "audiovisual_synchrony_policy",
+        "Audiovisual_Synchrony_Policy",
+        default="",
+    )
+    mixed_reality_equivalence_boundary = _row_value(
+        source,
+        "mixed_reality_equivalence_boundary",
+        "Mixed_Reality_Equivalence_Boundary",
+        default="",
+    )
+    voice_key_enabled = _row_value(
+        source,
+        "voice_key_enabled",
+        "Voice_Key_Enabled",
+        "voice_key_required",
+        "Voice_Key_Required",
+        "vocal_response_required",
+        "Vocal_Response_Required",
+        default="",
+    )
+    voice_key_response_label = _row_value(
+        source,
+        "voice_key_response_label",
+        "Voice_Key_Response_Label",
+        "vocal_response_label",
+        "Vocal_Response_Label",
+        "spoken_response_label",
+        "Spoken_Response_Label",
+        default="",
+    )
+    voice_key_threshold = _row_value(
+        source,
+        "voice_key_threshold",
+        "Voice_Key_Threshold",
+        "voice_key_threshold_db",
+        "Voice_Key_Threshold_dB",
+        "microphone_threshold",
+        "Microphone_Threshold",
+        default="",
+    )
+    voice_key_latency_correction_ms = _row_value(
+        source,
+        "voice_key_latency_correction_ms",
+        "Voice_Key_Latency_Correction_ms",
+        "voice_key_latency_ms",
+        "Voice_Key_Latency_ms",
+        "vocal_onset_correction_ms",
+        "Vocal_Onset_Correction_ms",
+        default="",
+    )
+    tactile_stimulation_modality = _row_value(
+        source,
+        "tactile_stimulation_modality",
+        "Tactile_Stimulation_Modality",
+        "tactile_modality",
+        "Tactile_Modality",
+        "stimulation_modality",
+        "Stimulation_Modality",
+        default="",
+    )
+    tactile_calibration_method = _row_value(
+        source,
+        "tactile_calibration_method",
+        "Tactile_Calibration_Method",
+        "calibration_method",
+        "Calibration_Method",
+        "electrical_calibration_method",
+        "Electrical_Calibration_Method",
+        default="",
+    )
+    tactile_threshold_reference = _row_value(
+        source,
+        "tactile_threshold_reference",
+        "Tactile_Threshold_Reference",
+        "tactile_threshold",
+        "Tactile_Threshold",
+        "threshold_reference",
+        "Threshold_Reference",
+        "electrical_threshold_reference",
+        "Electrical_Threshold_Reference",
+        default="",
+    )
+    tactile_intensity = _row_value(
+        source,
+        "tactile_intensity",
+        "Tactile_Intensity",
+        "electrical_current",
+        "Electrical_Current",
+        "tactile_current",
+        "Tactile_Current",
+        default="",
+    )
+    tactile_intensity_unit = _row_value(
+        source,
+        "tactile_intensity_unit",
+        "Tactile_Intensity_Unit",
+        "electrical_current_unit",
+        "Electrical_Current_Unit",
+        "tactile_current_unit",
+        "Tactile_Current_Unit",
+        default="",
+    )
+    tactile_pulse_duration_ms = _row_value(
+        source,
+        "tactile_pulse_duration_ms",
+        "Tactile_Pulse_Duration_ms",
+        "electrical_pulse_duration_ms",
+        "Electrical_Pulse_Duration_ms",
+        "pulse_duration_ms",
+        "Pulse_Duration_ms",
+        default="",
+    )
+    electrical_stimulator_model = _row_value(
+        source,
+        "electrical_stimulator_model",
+        "Electrical_Stimulator_Model",
+        "stimulator_model",
+        "Stimulator_Model",
+        "tactile_stimulator_model",
+        "Tactile_Stimulator_Model",
+        default="",
+    )
+    electrical_electrode_site = _row_value(
+        source,
+        "electrical_electrode_site",
+        "Electrical_Electrode_Site",
+        "electrode_site",
+        "Electrode_Site",
+        "tactile_electrode_site",
+        "Tactile_Electrode_Site",
+        default="",
+    )
+    spatial_coordinate_frame = _row_value(
+        source,
+        "spatial_coordinate_frame",
+        "Spatial_Coordinate_Frame",
+        "coordinate_frame",
+        "Coordinate_Frame",
+        "reference_frame",
+        "Reference_Frame",
+        default="",
+    )
+    body_anchor = _row_value(
+        source,
+        "body_anchor",
+        "Body_Anchor",
+        "anchored_body_part",
+        "Anchored_Body_Part",
+        "body_reference_anchor",
+        "Body_Reference_Anchor",
+        default="",
+    )
+    body_part = _row_value(
+        source,
+        "body_part",
+        "Body_Part",
+        "tactile_body_part",
+        "Tactile_Body_Part",
+        "tactile_site",
+        "Tactile_Site",
+        default="",
+    )
+    body_side = _row_value(
+        source,
+        "body_side",
+        "Body_Side",
+        "reference_side",
+        "Reference_Side",
+        "tactile_side",
+        "Tactile_Side",
+        default="",
+    )
+    spatial_hemifield = _row_value(
+        source,
+        "spatial_hemifield",
+        "Spatial_Hemifield",
+        "hemifield",
+        "Hemifield",
+        "field",
+        "Field",
+        default="",
+    )
+    body_relative_axis = _row_value(
+        source,
+        "body_relative_axis",
+        "Body_Relative_Axis",
+        "trajectory_axis",
+        "Trajectory_Axis",
+        "spatial_axis",
+        "Spatial_Axis",
+        default="",
+    )
+    auditory_trajectory_family = _row_value(
+        source,
+        "auditory_trajectory_family",
+        "Auditory_Trajectory_Family",
+        "trajectory_family",
+        "Trajectory_Family",
+        default="",
+    )
+    auditory_trajectory_direction = _row_value(
+        source,
+        "auditory_trajectory_direction",
+        "Auditory_Trajectory_Direction",
+        "trajectory_direction",
+        "Trajectory_Direction",
+        default="",
+    )
+    trajectory_coordinate_frame = _row_value(
+        source,
+        "trajectory_coordinate_frame",
+        "Trajectory_Coordinate_Frame",
+        default=spatial_coordinate_frame,
+    )
+    trajectory_start_hemifield = _row_value(
+        source,
+        "trajectory_start_hemifield",
+        "Trajectory_Start_Hemifield",
+        default="",
+    )
+    trajectory_end_hemifield = _row_value(
+        source,
+        "trajectory_end_hemifield",
+        "Trajectory_End_Hemifield",
+        default="",
+    )
+    trajectory_start_distance_cm = _row_value(
+        source,
+        "trajectory_start_distance_cm",
+        "Trajectory_Start_Distance_cm",
+        default="",
+    )
+    trajectory_end_distance_cm = _row_value(
+        source,
+        "trajectory_end_distance_cm",
+        "Trajectory_End_Distance_cm",
+        default="",
+    )
+    trajectory_start_azimuth_deg = _row_value(
+        source,
+        "trajectory_start_azimuth_deg",
+        "Trajectory_Start_Azimuth_deg",
+        default="",
+    )
+    trajectory_end_azimuth_deg = _row_value(
+        source,
+        "trajectory_end_azimuth_deg",
+        "Trajectory_End_Azimuth_deg",
+        default="",
+    )
+    spatial_renderer_engine = _row_value(
+        source,
+        "spatial_renderer_engine",
+        "Spatial_Renderer_Engine",
+        "renderer_engine",
+        "Renderer_Engine",
+        default="",
+    )
+    spatial_renderer_version = _row_value(
+        source,
+        "spatial_renderer_version",
+        "Spatial_Renderer_Version",
+        "renderer_version",
+        "Renderer_Version",
+        default="",
+    )
+    hrtf_database = _row_value(source, "hrtf_database", "HRTF_Database", default="")
+    hrtf_subject_id = _row_value(source, "hrtf_subject_id", "HRTF_Subject_ID", default="")
+    hrtf_filter_id = _row_value(source, "hrtf_filter_id", "HRTF_Filter_ID", default="")
+    hrtf_near_field_compensation = _row_value(
+        source,
+        "hrtf_near_field_compensation",
+        "HRTF_Near_Field_Compensation",
+        default="",
+    )
+    source_asset_equivalence = _row_value(
+        source,
+        "source_asset_equivalence",
+        "Source_Asset_Equivalence",
+        default="",
+    )
+    renderer_equivalence_boundary = _row_value(
+        source,
+        "renderer_equivalence_boundary",
+        "Renderer_Equivalence_Boundary",
+        default="",
+    )
+    primary_analysis_included = _row_value(
+        source,
+        "primary_analysis_included",
+        "Primary_Analysis_Included",
+        default="true",
+    )
     trial_uid = f"{participant_id}_{phase}_B{output_block_index:02d}_T{trial_index:03d}_{_row_value(source, 'trial_pool_index', default=trial_index)}"
     return {
         "Participant_ID": participant_id,
@@ -6414,6 +8535,59 @@ def _segment_session_trial_row(
         "Trial_Type": _segment_trial_type(family),
         "Family": family,
         "SOA_ms": soa_ms,
+        "Expected_Response": expected_response,
+        "Response_Rule": response_rule,
+        "Target_Role": target_role,
+        "Response_Mode": response_mode,
+        "Response_Choice_Set": response_choice_set,
+        "Correct_Response": correct_response,
+        "Response_Scoring_Policy": response_scoring_policy,
+        "Response_Capture_Device": response_capture_device,
+        "Response_Input_Modality": response_input_modality,
+        "Tool_Condition": tool_condition,
+        "Locomotion_Condition": locomotion_condition,
+        "Multisensory_Trial_Family": multisensory_trial_family,
+        "Exteroceptive_Modality_Set": exteroceptive_modality_set,
+        "Visual_Stimulus_Type": visual_stimulus_type,
+        "Visual_Motion_Profile": visual_motion_profile,
+        "Visual_Start_Distance_cm": visual_start_distance_cm,
+        "Visual_End_Distance_cm": visual_end_distance_cm,
+        "Visual_Speed_cm_s": visual_speed_cm_s,
+        "Visual_Duration_ms": visual_duration_ms,
+        "Visual_Renderer_Engine": visual_renderer_engine,
+        "Visual_Display_Device": visual_display_device,
+        "Mixed_Reality_Context": mixed_reality_context,
+        "Body_Rendering_Mode": body_rendering_mode,
+        "Audiovisual_Synchrony_Policy": audiovisual_synchrony_policy,
+        "Mixed_Reality_Equivalence_Boundary": mixed_reality_equivalence_boundary,
+        "Voice_Key_Enabled": voice_key_enabled,
+        "Voice_Key_Response_Label": voice_key_response_label,
+        "Voice_Key_Threshold": voice_key_threshold,
+        "Voice_Key_Latency_Correction_ms": voice_key_latency_correction_ms,
+        "Spatial_Coordinate_Frame": spatial_coordinate_frame,
+        "Body_Anchor": body_anchor,
+        "Body_Part": body_part,
+        "Body_Side": body_side,
+        "Spatial_Hemifield": spatial_hemifield,
+        "Body_Relative_Axis": body_relative_axis,
+        "Auditory_Trajectory_Family": auditory_trajectory_family,
+        "Auditory_Trajectory_Direction": auditory_trajectory_direction,
+        "Trajectory_Coordinate_Frame": trajectory_coordinate_frame,
+        "Trajectory_Start_Hemifield": trajectory_start_hemifield,
+        "Trajectory_End_Hemifield": trajectory_end_hemifield,
+        "Trajectory_Start_Distance_cm": trajectory_start_distance_cm,
+        "Trajectory_End_Distance_cm": trajectory_end_distance_cm,
+        "Trajectory_Start_Azimuth_deg": trajectory_start_azimuth_deg,
+        "Trajectory_End_Azimuth_deg": trajectory_end_azimuth_deg,
+        "Spatial_Renderer_Engine": spatial_renderer_engine,
+        "Spatial_Renderer_Version": spatial_renderer_version,
+        "HRTF_Database": hrtf_database,
+        "HRTF_Subject_ID": hrtf_subject_id,
+        "HRTF_Filter_ID": hrtf_filter_id,
+        "HRTF_Near_Field_Compensation": hrtf_near_field_compensation,
+        "Source_Asset_Equivalence": source_asset_equivalence,
+        "Renderer_Equivalence_Boundary": renderer_equivalence_boundary,
+        "Primary_Analysis_Included": primary_analysis_included,
         "Row": row_label,
         "Row_Label": row_label,
         "Respiratory_Phase": row_label,
@@ -6421,6 +8595,32 @@ def _segment_session_trial_row(
         "Baseline_Mode": _row_value(source, "baseline_mode", "Baseline_Mode", default=""),
         "Sequence_Labels": _row_value(source, "sequence_labels", "Sequence_Labels", default=""),
         "Sequence_Variant_Key": _row_value(source, "sequence_variant_key", "Sequence_Variant_Key", default=""),
+        "Audio_Output_Mode": audio_output_mode,
+        "Speaker_Array_ID": speaker_array_id,
+        "Speaker_Array_Layout": speaker_array_layout,
+        "Speaker_Switch_Sequence": speaker_switch_sequence,
+        "Speaker_Switch_Times_ms": speaker_switch_times_ms,
+        "Speaker_Switch_Channels": speaker_switch_channels,
+        "Speaker_Switch_Gains": speaker_switch_gains,
+        "Speaker_Source_Channel": speaker_source_channel,
+        "Speaker_Switch_Generated": str(bool(speaker_switching.get("generated"))).lower()
+        if speaker_switching
+        else _row_value(source, "speaker_switch_generated", "Speaker_Switch_Generated", default=""),
+        "ITI_Policy": _row_value(source, "iti_policy", "ITI_Policy", default=""),
+        "ITI_ms": _row_value(source, "iti_ms", "ITI_ms", "Intertrial_Interval_ms", default=""),
+        "Foreperiod_ms": _row_value(source, "foreperiod_ms", "Foreperiod_ms", default=""),
+        "Hazard_Control_Policy": _row_value(
+            source,
+            "hazard_control_policy",
+            "Hazard_Control_Policy",
+            default="",
+        ),
+        "Expectancy_Control_Role": _row_value(
+            source,
+            "expectancy_control_role",
+            "Expectancy_Control_Role",
+            default="",
+        ),
         "Source_File_Name": _row_value(source, "source_file_name", "Source_File_Name", default=trial_file_path.name),
         "Trial_File_Path": str(trial_file_path),
         "Source_SHA256": trial_file_sha256,
@@ -6428,13 +8628,79 @@ def _segment_session_trial_row(
         "Trial_Duration_S": f"{duration_s:.9f}",
         "Sample_Rate_Hz": sample_rate,
         "Channels": source_channels,
-        "Tactile_Channel": _row_value(source, "tactile_channel", "Tactile_Channel", default=""),
+        "Tactile_Channel": _row_value(
+            source,
+            "tactile_channel",
+            "Tactile_Channel",
+            default=tactile_waveform.get("channel_1based", ""),
+        ),
+        "Tactile_Stimulation_Modality": tactile_stimulation_modality,
+        "Tactile_Calibration_Method": tactile_calibration_method,
+        "Tactile_Threshold_Reference": tactile_threshold_reference,
+        "Tactile_Intensity": tactile_intensity,
+        "Tactile_Intensity_Unit": tactile_intensity_unit,
+        "Tactile_Pulse_Duration_ms": tactile_pulse_duration_ms,
+        "Electrical_Stimulator_Model": electrical_stimulator_model,
+        "Electrical_Electrode_Site": electrical_electrode_site,
+        "Tactile_Waveform_Shape": str(tactile_waveform.get("shape") or ""),
+        "Tactile_Frequency_Hz": (
+            f"{float(tactile_waveform.get('frequency_hz')):.6g}"
+            if tactile_waveform.get("frequency_hz") not in (None, "")
+            else ""
+        ),
+        "Tactile_Duration_ms": (
+            f"{float(tactile_waveform.get('duration_ms')):.6g}"
+            if tactile_waveform.get("duration_ms") not in (None, "")
+            else ""
+        ),
+        "Tactile_Amplitude": (
+            f"{float(tactile_waveform.get('amplitude')):.6g}"
+            if tactile_waveform.get("amplitude") not in (None, "")
+            else ""
+        ),
+        "Tactile_Waveform_Generated": str(bool(tactile_waveform.get("generated"))).lower() if has_tactile else "",
+        "External_Trigger_Required": _row_value(
+            source,
+            "external_trigger_required",
+            "External_Trigger_Required",
+            default="",
+        ),
+        "External_Trigger_Modality": _row_value(
+            source,
+            "external_trigger_modality",
+            "External_Trigger_Modality",
+            default="",
+        ),
+        "External_Trigger_Role": _row_value(
+            source,
+            "external_trigger_role",
+            "External_Trigger_Role",
+            default="",
+        ),
+        "External_Trigger_Code": _row_value(
+            source,
+            "external_trigger_code",
+            "External_Trigger_Code",
+            default="",
+        ),
+        "External_Trigger_Tolerance_ms": _row_value(
+            source,
+            "external_trigger_tolerance_ms",
+            "External_Trigger_Tolerance_ms",
+            default="",
+        ),
+        "External_Trigger_Channel": _row_value(
+            source,
+            "external_trigger_channel",
+            "External_Trigger_Channel",
+            default="",
+        ),
         "Trial_Start_S": f"{trial_start_s:.9f}",
         "Trial_Start_Sample": trial_start_sample,
-        "Looming_Onset_S": f"{looming_onset_s:.9f}" if family in {"audio_tactile", "catch"} else "",
-        "Looming_Onset_Sample": int(round((trial_start_s + looming_onset_s) * sample_rate)) if family in {"audio_tactile", "catch"} else "",
-        "Tactile_Onset_S": f"{tactile_onset_s:.9f}" if family in {"audio_tactile", "baseline"} else "",
-        "Tactile_Onset_Sample": int(round((trial_start_s + tactile_onset_s) * sample_rate)) if family in {"audio_tactile", "baseline"} else "",
+        "Looming_Onset_S": f"{looming_onset_s:.9f}" if has_audio else "",
+        "Looming_Onset_Sample": int(round((trial_start_s + looming_onset_s) * sample_rate)) if has_audio else "",
+        "Tactile_Onset_S": f"{tactile_onset_s:.9f}" if has_tactile else "",
+        "Tactile_Onset_Sample": int(round((trial_start_s + tactile_onset_s) * sample_rate)) if has_tactile else "",
         "Tactile_Drive_Onset_S": f"{drive_onset_s:.9f}" if has_tactile else "",
         "Tactile_Drive_Onset_Sample": int(round((trial_start_s + drive_onset_s) * sample_rate)) if has_tactile else "",
         "Tactile_Latency_Compensation_Requested_ms": (
@@ -6481,6 +8747,59 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "Trial_Type",
         "Family",
         "SOA_ms",
+        "Expected_Response",
+        "Response_Rule",
+        "Target_Role",
+        "Response_Mode",
+        "Response_Choice_Set",
+        "Correct_Response",
+        "Response_Scoring_Policy",
+        "Response_Capture_Device",
+        "Response_Input_Modality",
+        "Tool_Condition",
+        "Locomotion_Condition",
+        "Multisensory_Trial_Family",
+        "Exteroceptive_Modality_Set",
+        "Visual_Stimulus_Type",
+        "Visual_Motion_Profile",
+        "Visual_Start_Distance_cm",
+        "Visual_End_Distance_cm",
+        "Visual_Speed_cm_s",
+        "Visual_Duration_ms",
+        "Visual_Renderer_Engine",
+        "Visual_Display_Device",
+        "Mixed_Reality_Context",
+        "Body_Rendering_Mode",
+        "Audiovisual_Synchrony_Policy",
+        "Mixed_Reality_Equivalence_Boundary",
+        "Voice_Key_Enabled",
+        "Voice_Key_Response_Label",
+        "Voice_Key_Threshold",
+        "Voice_Key_Latency_Correction_ms",
+        "Spatial_Coordinate_Frame",
+        "Body_Anchor",
+        "Body_Part",
+        "Body_Side",
+        "Spatial_Hemifield",
+        "Body_Relative_Axis",
+        "Auditory_Trajectory_Family",
+        "Auditory_Trajectory_Direction",
+        "Trajectory_Coordinate_Frame",
+        "Trajectory_Start_Hemifield",
+        "Trajectory_End_Hemifield",
+        "Trajectory_Start_Distance_cm",
+        "Trajectory_End_Distance_cm",
+        "Trajectory_Start_Azimuth_deg",
+        "Trajectory_End_Azimuth_deg",
+        "Spatial_Renderer_Engine",
+        "Spatial_Renderer_Version",
+        "HRTF_Database",
+        "HRTF_Subject_ID",
+        "HRTF_Filter_ID",
+        "HRTF_Near_Field_Compensation",
+        "Source_Asset_Equivalence",
+        "Renderer_Equivalence_Boundary",
+        "Primary_Analysis_Included",
         "Row",
         "Row_Label",
         "Respiratory_Phase",
@@ -6488,6 +8807,20 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "Baseline_Mode",
         "Sequence_Labels",
         "Sequence_Variant_Key",
+        "Audio_Output_Mode",
+        "Speaker_Array_ID",
+        "Speaker_Array_Layout",
+        "Speaker_Switch_Sequence",
+        "Speaker_Switch_Times_ms",
+        "Speaker_Switch_Channels",
+        "Speaker_Switch_Gains",
+        "Speaker_Source_Channel",
+        "Speaker_Switch_Generated",
+        "ITI_Policy",
+        "ITI_ms",
+        "Foreperiod_ms",
+        "Hazard_Control_Policy",
+        "Expectancy_Control_Role",
         "Source_File_Name",
         "Trial_File_Path",
         "Source_SHA256",
@@ -6496,6 +8829,25 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "Sample_Rate_Hz",
         "Channels",
         "Tactile_Channel",
+        "Tactile_Stimulation_Modality",
+        "Tactile_Calibration_Method",
+        "Tactile_Threshold_Reference",
+        "Tactile_Intensity",
+        "Tactile_Intensity_Unit",
+        "Tactile_Pulse_Duration_ms",
+        "Electrical_Stimulator_Model",
+        "Electrical_Electrode_Site",
+        "Tactile_Waveform_Shape",
+        "Tactile_Frequency_Hz",
+        "Tactile_Duration_ms",
+        "Tactile_Amplitude",
+        "Tactile_Waveform_Generated",
+        "External_Trigger_Required",
+        "External_Trigger_Modality",
+        "External_Trigger_Role",
+        "External_Trigger_Code",
+        "External_Trigger_Tolerance_ms",
+        "External_Trigger_Channel",
         "Trial_Start_S",
         "Trial_Start_Sample",
         "Looming_Onset_S",
@@ -6624,6 +8976,8 @@ def _attach_trial_file_paths(rows: list[dict[str, Any]], lookup: dict[tuple[str,
             family = "baseline"
         elif trial_type == "Catch":
             family = "catch"
+        elif trial_type == "Auditory-Only":
+            family = "auditory_only"
         else:
             continue
         try:
@@ -6637,6 +8991,8 @@ def _attach_trial_file_paths(rows: list[dict[str, Any]], lookup: dict[tuple[str,
             continue
         path = lookup.get(key)
         if not path and family == "catch":
+            path = lookup.get((family, key[1], key[2], 0))
+        if not path and family == "auditory_only":
             path = lookup.get((family, key[1], key[2], 0))
         if path:
             row["trial_file_path"] = path

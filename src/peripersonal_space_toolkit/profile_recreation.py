@@ -518,6 +518,20 @@ def _record_core_fields(
         protocol.baseline_strategy or "none/default",
         "Baseline strategy is encoded." if protocol.baseline_strategy else "No paper-specific baseline strategy is encoded.",
     )
+    baseline_value: Any = (
+        protocol.baseline_trials_exact
+        if protocol.baseline_trials_exact is not None
+        else protocol.baseline_trial_percentage
+    )
+    record(
+        "3",
+        "baseline_count",
+        STATUS_REPORTED if protocol.include_baseline_trials or baseline_value else STATUS_DEFAULTED,
+        baseline_value,
+        "Baseline count/percentage settings are encoded."
+        if protocol.include_baseline_trials or baseline_value
+        else "No baseline trials are configured.",
+    )
     catch_value: Any = protocol.catch_trials_exact if protocol.catch_trials_exact is not None else protocol.catch_trial_percentage
     record(
         "3",

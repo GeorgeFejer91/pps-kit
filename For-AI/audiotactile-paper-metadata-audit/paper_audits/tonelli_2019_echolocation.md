@@ -3,7 +3,7 @@
 - Record ID: `tonelli_2019_echolocation`
 - DOI: `10.1007/s00221-019-05469-3`
 - DOI URL: https://doi.org/10.1007/s00221-019-05469-3
-- Coverage category: `covered_blocked_toolkit_structure`
+- Coverage category: `covered_runnable_profile`
 - Task family: seven-speaker audio-tactile PPS task
 - PDF status: `downloaded`
 - Supplement status: `downloaded`
@@ -11,13 +11,13 @@
 - Supplement extracted text files: `1`
 - Extraction status: `parsed_with_warnings`
 - Metadata confidence: `0.56` (`partial_extraction`)
-- Confidence basis: Publication PDF is parsed and the automated Segment 1-4 miner found candidate values for 22/25 fields; values still require critical PDF/supplement review.
+- Confidence basis: Manual review supplies enough Segment 1-4 parameters for a runnable virtual seven-distance lateral moving-source recreation; retained unresolved items are provenance caveats, not current runnable blockers.
 - Automated evidence mining: `source_mined`; 22/25 fields with candidate values
 - PPS visualization mining: `source_mined`; 6/9 visualization-form candidates
 
 ## Known Prior Gaps
 
-- apparatus-specific seven-speaker switching/timing details
+- No remaining publication-parameter gap recorded in the current coverage ledger.
 
 ## Review Attempts
 

@@ -1,0 +1,80 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "tajadura_jimenez_2009_uncrossed_visual_deprivation",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Left speaker pink-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 39.0512,
+        "end_distance_cm": 39.0512,
+        "start_rotation_deg": 320.1944,
+        "end_rotation_deg": 320.1944,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": -0.25,
+          "y_m": 0.3,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": -0.25,
+          "y_m": 0.3,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Left speaker pink-noise burst"
+      ],
+      "tone_types": [
+        "pink"
+      ],
+      "asset_paths": [
+        "assets/preloads/tajadura_jimenez_2009_uncrossed_visual_deprivation/02_looming_stimuli/looming_Left_speaker_pink-noise_burst.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Right speaker pink-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 39.0512,
+        "end_distance_cm": 39.0512,
+        "start_rotation_deg": 39.8056,
+        "end_rotation_deg": 39.8056,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.25,
+          "y_m": 0.3,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.25,
+          "y_m": 0.3,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Right speaker pink-noise burst"
+      ],
+      "tone_types": [
+        "pink"
+      ],
+      "asset_paths": [
+        "assets/preloads/tajadura_jimenez_2009_uncrossed_visual_deprivation/02_looming_stimuli/looming_Right_speaker_pink-noise_burst.wav"
+      ]
+    }
+  ]
+}

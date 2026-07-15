@@ -5,19 +5,19 @@
     {
       "trajectory_snapshot": {
         "schema": "pps-stimulus-trajectory.v1",
-        "label": "Walking PPS looming sound",
+        "label": "Noel 2015 white-noise motion",
         "source_kind": "generated_noise",
-        "noise_type": "pink",
+        "noise_type": "white",
         "start_distance_cm": 200.0,
-        "end_distance_cm": 10.0,
+        "end_distance_cm": 1.0,
         "start_rotation_deg": 0.0,
         "end_rotation_deg": 0.0,
-        "movement_duration_s": 3.0,
+        "movement_duration_s": 2.6667,
         "start_hold_s": 0.0,
         "end_hold_s": 0.0,
-        "path_length_m": 1.9,
+        "path_length_m": 2.0,
         "coordinate_mode": "cartesian",
-        "path_direction": "approach",
+        "path_direction": "approach_or_recede_condition_metadata",
         "start": {
           "x_m": 0.0,
           "y_m": 2.0,
@@ -25,18 +25,18 @@
         },
         "end": {
           "x_m": 0.0,
-          "y_m": 0.1,
+          "y_m": 0.01,
           "z_m": 0.0
         }
       },
       "source_labels": [
-        "Walking PPS looming sound"
+        "Noel 2015 white-noise motion"
       ],
       "tone_types": [
-        "pink"
+        "white"
       ],
       "asset_paths": [
-        "assets/preloads/noel_2015_walking_full_body_action/02_looming_stimuli/looming_Walking_PPS_looming_sound.wav"
+        "assets/preloads/noel_2015_walking_full_body_action/02_looming_stimuli/looming_Noel_2015_white-noise_motion.wav"
       ]
     }
   ]

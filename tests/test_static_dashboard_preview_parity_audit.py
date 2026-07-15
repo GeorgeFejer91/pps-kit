@@ -38,7 +38,7 @@ def test_static_dashboard_preview_parity_audit_targets_all_previewable_profiles(
     all_ids = module._target_template_ids(inventory, status, profile_set="all")
     ready_ids = module._target_template_ids(inventory, status, profile_set="ready-all")
 
-    assert len(all_ids) == 23
+    assert len(all_ids) == 30
     assert ready_ids == [
         "study5_box_breathing_pps",
         "roussel_2025_dynaspace_mobile_pps",
@@ -46,8 +46,20 @@ def test_static_dashboard_preview_parity_audit_targets_all_previewable_profiles(
         "barumerli_2026_arm_movement_exp1",
         "barumerli_2026_arm_movement_exp2",
         "noel_2015_bodily_self",
+        "noel_2015_bodily_self_back_space",
         "pfeiffer_2018_lateral_perihead_left_to_right",
         "study5_dynaspace_lateral_45_pps",
+        "biggio_2017_common_racket",
+        "biggio_2017_no_racket",
+        "biggio_2017_personal_racket",
+        "tajadura_jimenez_2009_crossed_visual_deprivation",
+        "tajadura_jimenez_2009_uncrossed_visual_deprivation",
+        "canzoneri_2012_dynamic_sounds",
+        "tonelli_2019_echolocation",
+        "galli_2015_wheelchair_full_body",
+        "lerner_2021_3d_audio_tactile_boundary",
+        "serino_2015_front_back_trunk_exp2",
+        "serino_2015_peri_hand_exp3",
         "serino_2015_peri_trunk_exp1",
     ]
     assert module.dashboard_audit_url("https://georgefejer91.github.io/pps-kit/") == (

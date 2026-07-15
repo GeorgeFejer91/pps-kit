@@ -3,7 +3,7 @@
 - Record ID: `serino_2015_exps_4_to_6`
 - DOI: `10.1038/srep18603`
 - DOI URL: https://doi.org/10.1038/srep18603
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: additional body-part/front-back PPS variants from the same six-experiment paper
 - PDF status: `downloaded`
 - Supplement status: `downloaded`
@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- experiment-specific distance, tactile-site, and apparatus mappings need extraction
+- experiment-specific distance, tactile-site, speaker layout/channel schedule, gain/SPL transfer, and apparatus mappings need extraction; row-level multi-speaker switching is now runner-supported
 
 ## Review Attempts
 

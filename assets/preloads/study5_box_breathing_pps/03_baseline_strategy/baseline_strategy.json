@@ -3,8 +3,12 @@
   "template_id": "study5_box_breathing_pps",
   "baseline_strategy": "stationary_burst",
   "include_baseline_trials": true,
+  "baseline_trials_exact": null,
   "baseline_trial_percentage": 0.0,
   "baseline_soa_values_ms": [],
+  "baseline_crosses_sequence_variants": true,
   "catch_trial_percentage": 0.0,
-  "catch_trials_exact": null
+  "catch_trials_exact": null,
+  "catch_crosses_sequence_variants": true,
+  "distribute_trial_pool_across_blocks": false
 }

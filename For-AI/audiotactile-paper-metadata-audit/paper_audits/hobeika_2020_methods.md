@@ -3,7 +3,7 @@
 - Record ID: `hobeika_2020_methods`
 - DOI: `10.1016/j.jneumeth.2019.108534`
 - DOI URL: https://doi.org/10.1016/j.jneumeth.2019.108534
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: expectancy-controlled dynamic PPS task with sound-propagation corrections
 - PDF status: `paywalled`
 - Supplement status: `not_found`

@@ -3,7 +3,7 @@
 - Record ID: `serino_2011_rtms`
 - DOI: `10.1162/jocn_a_00006`
 - DOI URL: https://doi.org/10.1162/jocn_a_00006
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: static near/far audio-tactile PPS task with rTMS context
 - PDF status: `paywalled`
 - Supplement status: `paywalled`

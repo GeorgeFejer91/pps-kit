@@ -5,7 +5,16 @@
   --line: #d9dfd6;
   --line-strong: #bcc7bd;
   --text: #202621;
-  --muted: #68746c;
+  --muted: #5e695f;
+  /* Neutral scale — single source for hover/disabled greys */
+  --neutral-100: #f3f6f2;
+  --neutral-200: #eef0eb;
+  --neutral-300: #d7ded5;
+  --neutral-400: #9ba59d;
+  --neutral-500: #819389;
+  --neutral-600: #5e695f;
+  /* Standard interaction transition */
+  --transition-ui: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
   --primary: #246b55;
   --primary-hover: #1d5846;
   --warning: #8a5a16;
@@ -13,8 +22,8 @@
   --danger: #8c2f2f;
   --danger-bg: #fff0f0;
   --ok-bg: #e9f4ef;
-  --family-audio: #246b55;
-  --family-audio-bg: #e8f4ef;
+  --family-audio: #1c7a86;
+  --family-audio-bg: #e4f1f2;
   --family-baseline: #4b5fa8;
   --family-baseline-bg: #eef1ff;
   --family-catch: #a4631b;
@@ -62,18 +71,19 @@ button {
   color: var(--text);
   padding: 6px 11px;
   cursor: pointer;
+  transition: var(--transition-ui);
 }
 
 button:hover {
-  border-color: #819389;
-  background: #f3f6f2;
+  border-color: var(--neutral-500);
+  background: var(--neutral-100);
 }
 
 button:disabled {
   cursor: default;
-  color: #9ba59d;
-  background: #eef0eb;
-  border-color: #d7ded5;
+  color: var(--neutral-600);
+  background: var(--neutral-200);
+  border-color: var(--neutral-300);
 }
 
 button.primary {
@@ -181,6 +191,7 @@ code {
   text-decoration: none;
   padding: 8px 9px;
   border-radius: 6px;
+  transition: var(--transition-ui);
 }
 
 .rail nav a:hover,
@@ -289,6 +300,7 @@ code {
   padding: 6px 11px;
   text-decoration: none;
   font-weight: 600;
+  transition: var(--transition-ui);
 }
 
 .button-link:hover {
@@ -1678,6 +1690,10 @@ body.resizing-panel * {
   padding: 3px 7px;
   font-size: 11px;
   font-weight: 700;
+  max-width: 40ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .step-badge.complete {
@@ -1796,17 +1812,43 @@ select {
   background: var(--surface);
   color: var(--text);
   padding: 6px 8px;
+  transition: var(--transition-ui);
 }
 
+/* Text fields: a soft ring on any focus (mouse or keyboard). Text inputs
+   always match :focus-visible, so routing them through the heavy button ring
+   made every click into a field flash a keyboard-style outline. */
 input:focus,
-select:focus {
-  outline: 2px solid rgba(36, 107, 85, 0.2);
+select:focus,
+textarea:focus {
+  outline: 2px solid rgba(36, 107, 85, 0.35);
+  outline-offset: 1px;
   border-color: var(--primary);
+}
+
+/* App-wide keyboard focus ring for buttons, links, custom widgets, and resize
+   separators. Card/segmented wrappers use :has(:focus-visible) so plain mouse
+   clicks on their labels don't leave a persistent ring. */
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible,
+[role="separator"]:focus-visible,
+.baseline-option-card:has(input:focus-visible),
+.segmented-control label:has(input:focus-visible) {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* The wrapper carries the ring; silence the inner control's own ring so
+   keyboard users don't see a double outline. */
+.baseline-option-card input:focus-visible,
+.segmented-control label input:focus-visible {
+  outline: none;
 }
 
 .split-fields {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -2247,31 +2289,186 @@ select:focus {
   padding: 4px 7px;
 }
 
+/* Generate Looming Noise quick-pick buttons (replaces the noise-type dropdown).
+   White/Pink are the publication-backed common types (larger primary buttons);
+   Blue/Violet/Brown are spectral variants (smaller, with a hover tooltip). */
+.noise-picker-label {
+  color: #37433b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.noise-type-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.noise-type-row {
+  display: grid;
+  gap: 6px;
+}
+
+.noise-type-row-primary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.noise-type-row-secondary {
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+}
+
+.noise-type-button {
+  position: relative;
+  width: 100%;
+}
+
+.noise-type-primary {
+  min-height: 46px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.noise-type-secondary {
+  min-height: 30px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Colored by noise type: readable tints with dark text for contrast.
+   White gets an off-white fill + mid-grey border so its boundary clears the
+   3:1 component-contrast floor while still reading as "white". */
+.noise-type-button[data-noise-type="white"]  { background: #fbfcfa; color: #26302a; border-color: var(--neutral-500); }
+.noise-type-button[data-noise-type="pink"]   { background: #f6c9dd; color: #7a2e50; border-color: #e3a9c4; }
+.noise-type-button[data-noise-type="blue"]   { background: #c8def7; color: #234b73; border-color: #a8c8ee; }
+.noise-type-button[data-noise-type="violet"] { background: #ddccf1; color: #452a66; border-color: #c6b0e6; }
+.noise-type-button[data-noise-type="brown"]  { background: #e3cdb6; color: #5c3c22; border-color: #cdb094; }
+
+.noise-type-button:not(:disabled):hover { filter: brightness(0.96); }
+.noise-type-button:not(:disabled):active { filter: brightness(0.92); }
+
+/* Disabled (View mode / read-only profiles): must out-specify the tint rules
+   above so the buttons actually look inert. */
+.noise-type-button:disabled,
+.noise-type-button[data-noise-type]:disabled {
+  background: var(--neutral-200);
+  color: var(--neutral-600);
+  border-color: var(--neutral-300);
+  filter: none;
+}
+
+/* Staged highlight: a neutral dark ring that reads on any noise colour. */
+.noise-type-button.active {
+  border-color: var(--text);
+  box-shadow: inset 0 0 0 2px var(--text);
+}
+
+/* Hover/focus tooltip for every noise-type button (Ferri 2015 valence + spectrum).
+   Opens BELOW the buttons (the picker sits near the top of the viewport after
+   rail navigation, so upward tooltips clipped offscreen), with a 400ms hover
+   delay so sweeping the pointer across the row doesn't flash paragraphs.
+   Keyboard focus shows it immediately. */
+.noise-type-button[data-noise-hint]::after {
+  content: attr(data-noise-hint);
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 9px);
+  transform: translateX(-50%);
+  z-index: 40;
+  width: max-content;
+  max-width: 260px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: var(--text);
+  color: #f4f5f1;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: left;
+  white-space: normal;
+  box-shadow: 0 10px 26px rgba(28, 38, 31, 0.22);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 120ms ease, visibility 0s linear 520ms;
+}
+
+.noise-type-button[data-noise-hint]::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 4px);
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-bottom-color: var(--text);
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 120ms ease, visibility 0s linear 520ms;
+}
+
+.noise-type-button[data-noise-hint]:hover::after,
+.noise-type-button[data-noise-hint]:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 400ms, 400ms;
+}
+
+.noise-type-button[data-noise-hint]:focus-visible::after,
+.noise-type-button[data-noise-hint]:focus-visible::before {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s, 0s;
+}
+
 .bake-panel {
   display: grid;
-  grid-template-columns: minmax(170px, 0.55fr) minmax(360px, 1.45fr) auto auto;
-  gap: 8px;
-  align-items: end;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
   margin-top: 10px;
   padding-top: 10px;
   border-top: 1px solid var(--line);
+}
+
+.bake-configure {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bake-action-row {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+#bake-stimulus {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 180px;
 }
 
 .bake-panel .field-row {
   margin-bottom: 0;
 }
 
-.bake-panel .status-label {
-  align-self: center;
-  justify-self: end;
+.bake-action-row .status-label {
+  flex: 0 1 auto;
 }
 
 .source-mode-row {
   display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: minmax(88px, 120px) minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: 1fr;
+  gap: 8px;
   align-items: stretch;
+  min-width: 0;
 }
 
 .source-mode-row > span {
@@ -2406,8 +2603,8 @@ select:focus {
 
 .loudness-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(72px, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 10px;
   align-items: end;
 }
 
@@ -2734,7 +2931,7 @@ select:focus {
 .filmstrip-element.noise-white { border-left: 5px solid #d8dde2; }
 .filmstrip-element.noise-brown { border-left: 5px solid #8b623f; }
 .filmstrip-element.noise-violet { border-left: 5px solid #8364b9; }
-.filmstrip-element.noise-custom_audio { border-left: 5px solid #246b55; }
+.filmstrip-element.noise-custom_audio { border-left: 5px solid var(--family-audio); }
 .filmstrip-element.jitter { border-left: 5px solid #b7a452; }
 
 .filmstrip-element-heading {
@@ -3145,7 +3342,7 @@ select:focus {
 }
 
 .count-chip.audio {
-  border-color: rgba(36, 107, 85, 0.42);
+  border-color: rgba(28, 122, 134, 0.42);
   background: var(--family-audio-bg);
   box-shadow: inset 3px 0 0 var(--family-audio);
 }
@@ -3202,13 +3399,16 @@ select:focus {
   font-weight: 900;
 }
 
+/* Read-only composition meter (role=meter): a flat bar, not a draggable
+   slider. The live control is the .percent-mixer range inputs above. */
 .pool-slider-track {
   position: relative;
   height: 13px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
   background: #edf0eb;
-  overflow: visible;
+  overflow: hidden;
+  cursor: default;
 }
 
 .pool-slider-fill {
@@ -3218,19 +3418,6 @@ select:focus {
   border-radius: 999px;
   background: var(--line-strong);
   transition: width 220ms ease;
-}
-
-.pool-slider-thumb {
-  position: absolute;
-  top: 50%;
-  left: calc(var(--slider-value, 0) * 1%);
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  background: var(--line-strong);
-  box-shadow: 0 0 0 3px var(--surface-2);
-  transform: translate(-50%, -50%);
-  transition: left 220ms ease;
 }
 
 .pool-slider-meta {
@@ -3294,19 +3481,16 @@ select:focus {
 }
 
 .pool-slider.audio .pool-slider-fill,
-.pool-slider.audio .pool-slider-thumb,
 .pool-slider.audio .pool-subslider-track span {
   background: var(--family-audio);
 }
 
 .pool-slider.baseline .pool-slider-fill,
-.pool-slider.baseline .pool-slider-thumb,
 .pool-slider.baseline .pool-subslider-track span {
   background: var(--family-baseline);
 }
 
 .pool-slider.catch .pool-slider-fill,
-.pool-slider.catch .pool-slider-thumb,
 .pool-slider.catch .pool-subslider-track span {
   background: var(--family-catch);
 }
@@ -4229,7 +4413,13 @@ body.modal-open {
   }
 
   .source-action-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Below ~1180px the noise quick-pick gets its own full row so the five
+     buttons never crush into a third of the panel. */
+  .noise-picker-card {
+    grid-column: 1 / -1;
   }
 
   .baseline-option-grid {
@@ -4245,11 +4435,7 @@ body.modal-open {
   }
 
   .bake-panel {
-    grid-template-columns: minmax(180px, 1fr) 110px auto;
-  }
-
-  .bake-panel .status-label {
-    justify-self: start;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .source-card-fields {
@@ -4395,7 +4581,7 @@ body.modal-open {
   }
 
   .bake-panel {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .loudness-grid {

@@ -3,7 +3,7 @@
 - Record ID: `serino_2007_blind_cane_users`
 - DOI: `10.1111/j.1467-9280.2007.01952.x`
 - DOI URL: https://doi.org/10.1111/j.1467-9280.2007.01952.x
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `covered_blocked_missing_publication_parameters`
 - Task family: static near/far weak-target Go/NoGo tactile detection
 - PDF status: `paywalled`
 - Supplement status: `paywalled`
@@ -17,7 +17,13 @@
 
 ## Known Prior Gaps
 
-- full calibration and response-capture implementation details need extraction
+- extract exact electrical tactile pulse/current/duration/threshold values plus timing/ITI parameters; weak/strong/no-target response logic, row-level voice-key metadata, and electrical tactile metadata are now runner-supported
+
+## Current Profile Status
+
+- `study_templates/serino_2007_blind_cane_users.json` now captures the reported known row contract: 150 ms near/far white-noise rows, near 0 ms and far 5 ms SOAs, 30 weak-target near, 30 weak-target far, 30 strong-nontarget near, 30 strong-nontarget far, and 30 auditory-only catch rows.
+- The profile remains non-launchable as an exact published-study recreation because the paper/source route still does not publish the exact white-noise source/seed/spectrum, electrical pulse waveform/current/electrode calibration, exact ITI/jitter and numeric response window, or voice-key threshold/latency correction.
+- The known-parameter software validation report is `artifacts/validation_runs/current_goal_serino_2007_known_parameter_20260715/serino_2007_known_parameter_validation_report.json`; it proves the captured row contract can be loaded, materialized into WAV/session artifacts, and run with mouse-click simulated participant-like responses, but it is not an exact original-author stimulus or human PPS-effect replication.
 
 ## Review Attempts
 

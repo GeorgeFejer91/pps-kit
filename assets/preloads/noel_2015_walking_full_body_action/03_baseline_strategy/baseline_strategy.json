@@ -3,11 +3,15 @@
   "template_id": "noel_2015_walking_full_body_action",
   "baseline_strategy": "tactile_only",
   "include_baseline_trials": true,
-  "baseline_trial_percentage": 0.0,
+  "baseline_trials_exact": null,
+  "baseline_trial_percentage": 25.0,
   "baseline_soa_values_ms": [
-    300,
-    2700
+    440,
+    2220
   ],
-  "catch_trial_percentage": 10.0,
-  "catch_trials_exact": null
+  "baseline_crosses_sequence_variants": true,
+  "catch_trial_percentage": 12.5,
+  "catch_trials_exact": null,
+  "catch_crosses_sequence_variants": true,
+  "distribute_trial_pool_across_blocks": true
 }

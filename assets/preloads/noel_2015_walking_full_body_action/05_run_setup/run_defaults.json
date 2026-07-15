@@ -1,9 +1,79 @@
 {
   "schema": "pps-preload-run-setup-segment.v1",
   "template_id": "noel_2015_walking_full_body_action",
-  "blocks": 2,
+  "blocks": 8,
   "participants": 18,
-  "random_seed": 20150401,
+  "random_seed": 201408030,
   "trial_randomization_strategy": "no_immediate_repeats",
-  "block_order_randomization": "counterbalanced_rotation"
+  "block_order_randomization": "counterbalanced_rotation",
+  "repeat_trial_pool_per_block": false,
+  "distribute_trial_pool_across_blocks": true,
+  "baseline_crosses_sequence_variants": true,
+  "catch_crosses_sequence_variants": true,
+  "block_specs": [
+    {
+      "label": "Noel 2015 run block 01",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Noel 2015 run block 02",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Noel 2015 run block 03",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Noel 2015 run block 04",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Noel 2015 run block 05",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Noel 2015 run block 06",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Noel 2015 run block 07",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Noel 2015 run block 08",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    }
+  ]
 }

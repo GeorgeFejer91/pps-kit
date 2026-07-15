@@ -3,21 +3,35 @@
 - Record ID: `tajadura_jimenez_2009_visual_deprivation`
 - DOI: `10.1016/j.neuropsychologia.2009.07.025`
 - DOI URL: https://doi.org/10.1016/j.neuropsychologia.2009.07.025
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `covered_runnable_profile`
 - Task family: auditory, tactile, and audiotactile lateralization with crossed/uncrossed posture
-- PDF status: `paywalled`
+- PDF status: `manual_reviewed_local_pdf`
 - Supplement status: `not_found`
 - Supplement acquisition attempts: `1` (`checked_no_supplement_candidates`)
 - Supplement extracted text files: `0`
-- Extraction status: `pending_pdf`
-- Metadata confidence: `0.0` (`source_unavailable`)
-- Confidence basis: Automated open-access acquisition did not produce a locally inspectable publication PDF.
+- Extraction status: `manual_review_completed`
+- Metadata confidence: `0.89` (`high_confidence_extraction`)
+- Confidence basis: Later manual review inspected the local publication PDF, rendered methods pages, Figure 1, fallback snippets, PubMed/Crossref routes, and Elsevier supplement routes. The local record ID remains legacy-mismatched; cite the paper as Collignon et al. (2009) for this DOI.
 - Automated evidence mining: `no_extracted_source`; 0/25 fields with candidate values
 - PPS visualization mining: `no_extracted_source`; 0/9 visualization-form candidates
 
+## Current Profile Recreation Update
+
+The GUI/profile recreation layer now represents this record with two runnable
+posture-specific profiles: `tajadura_jimenez_2009_uncrossed_visual_deprivation`
+and `tajadura_jimenez_2009_crossed_visual_deprivation`. They preserve the
+paper-level minimum task parameters for the software runner: static external
+left/right 100 ms pink-noise bursts, tactile-only baselines, auditory-only
+response trials, congruent audio-tactile trials, crossed/uncrossed anatomical
+hand mapping, 50 repetitions per side x modality, and 300 trials per posture.
+The paper-specific validation report is
+`artifacts/validation_runs/current_goal_tajadura_2009_known_parameter_20260715/tajadura_2009_known_parameter_validation_report.json`.
+Exact noise seed/asset, ISI distribution, online timeout, and human
+visual-deprivation effects remain caveats rather than runnable blockers.
+
 ## Known Prior Gaps
 
-- extract lateralization response mapping, posture/body-coordinate rules, and stimulus timing
+- no remaining software-runner blocker after the two posture-specific profiles; unresolved values are limited to exact noise seed/asset, ISI distribution, online timeout, and non-software human effect interpretation
 
 ## Review Attempts
 

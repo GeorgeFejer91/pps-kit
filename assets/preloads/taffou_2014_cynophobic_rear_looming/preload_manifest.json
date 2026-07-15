@@ -37,9 +37,9 @@
   ],
   "profile_parameters_manifest": "assets/preloads/taffou_2014_cynophobic_rear_looming/01_profile/profile_parameters_manifest.json",
   "recreation_status": {
-    "primary_category": "toolkit_structural_gap",
-    "category_label": "Toolkit structural gap",
-    "runner_readiness": "blocked_unsupported_toolkit_structure",
+    "primary_category": "missing_publication_parameters",
+    "category_label": "Missing publication parameters",
+    "runner_readiness": "blocked_missing_parameters",
     "profile_checks_passed": false,
     "gui_recreatable": false,
     "segment_0_to_4_profile_checks_passed": false,
@@ -48,7 +48,7 @@
     "segment_6_launchable": false,
     "profile_completion_status": "unfinished_preload",
     "missing_parameter_count": 2,
-    "unsupported_structure_count": 1
+    "unsupported_structure_count": 0
   },
   "render_contract": {
     "stage": "auditory_looming_prebake",
@@ -61,8 +61,8 @@
       "label": "Dog growl threatening placeholder",
       "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Dog_growl_threatening_placeholder.wav",
       "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Dog_growl_threatening_placeholder.wav",
-      "sha256": "1e27a6bc097016b23b2d9778ee5b4c3cf2b961d9212308d0dbae01be9d49f0e9",
-      "duration_s": 6.666667,
+      "sha256": "c47675fd94acfd4e82518ec942907b47f8d4d29531baa6bf14a8a4f603c49239",
+      "duration_s": 3.0,
       "sample_rate": 44100,
       "channels": 2,
       "source_kind": "generated_noise",
@@ -81,7 +81,7 @@
         "end_distance_cm": 19.9999,
         "start_rotation_deg": 225.0,
         "end_rotation_deg": 225.0,
-        "movement_duration_s": 6.6667,
+        "movement_duration_s": 3.0,
         "start_hold_s": 0.0,
         "end_hold_s": 0.0,
         "path_length_m": 5.0,
@@ -98,24 +98,14 @@
           "z_m": 0.0
         }
       },
-      "source_profile": "dynaspace_gaussian_burst_train",
-      "source_profile_parameters": {
-        "burst_count_mode": "duration_derived",
-        "burst_duration_s": 0.03,
-        "rise_fall_s": 0.01,
-        "target_period_s": 0.095,
-        "onset_s": 0.3,
-        "active_window_source": "trajectory_movement_duration",
-        "spacing_policy": "symmetric_fit",
-        "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-      }
+      "source_profile": "continuous_noise"
     },
     {
       "label": "Dog growl threatening placeholder - rear right looming",
       "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Dog_growl_threatening_placeholder_-_rear_right_looming.wav",
       "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Dog_growl_threatening_placeholder_-_rear_right_looming.wav",
-      "sha256": "4d50d873889ed6f799995b5eb181dd41aa03c648d30a544c54ff520f01eb768d",
-      "duration_s": 6.666667,
+      "sha256": "c103929c432d0679cdf40440007605e5a7cecd729132ab2af3cca66f1d6d8011",
+      "duration_s": 3.0,
       "sample_rate": 44100,
       "channels": 2,
       "source_kind": "generated_noise",
@@ -134,7 +124,7 @@
         "end_distance_cm": 19.9999,
         "start_rotation_deg": 135.0,
         "end_rotation_deg": 135.0,
-        "movement_duration_s": 6.6667,
+        "movement_duration_s": 3.0,
         "start_hold_s": 0.0,
         "end_hold_s": 0.0,
         "path_length_m": 5.0,
@@ -151,24 +141,14 @@
           "z_m": 0.0
         }
       },
-      "source_profile": "dynaspace_gaussian_burst_train",
-      "source_profile_parameters": {
-        "burst_count_mode": "duration_derived",
-        "burst_duration_s": 0.03,
-        "rise_fall_s": 0.01,
-        "target_period_s": 0.095,
-        "onset_s": 0.3,
-        "active_window_source": "trajectory_movement_duration",
-        "spacing_policy": "symmetric_fit",
-        "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-      }
+      "source_profile": "continuous_noise"
     },
     {
       "label": "Sheep bleat non-threatening placeholder",
       "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Sheep_bleat_non-threatening_placeholder.wav",
       "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Sheep_bleat_non-threatening_placeholder.wav",
-      "sha256": "5450d9c3b60bb94a3b987f8acbf450da9a78d68926b8a2f089e7b339d274ac6f",
-      "duration_s": 6.666667,
+      "sha256": "48433d3b604146a33cdf18ca3e237886c4ef45443aa1771db92cad6c873051c5",
+      "duration_s": 3.0,
       "sample_rate": 44100,
       "channels": 2,
       "source_kind": "generated_noise",
@@ -187,7 +167,7 @@
         "end_distance_cm": 19.9999,
         "start_rotation_deg": 225.0,
         "end_rotation_deg": 225.0,
-        "movement_duration_s": 6.6667,
+        "movement_duration_s": 3.0,
         "start_hold_s": 0.0,
         "end_hold_s": 0.0,
         "path_length_m": 5.0,
@@ -204,24 +184,14 @@
           "z_m": 0.0
         }
       },
-      "source_profile": "dynaspace_gaussian_burst_train",
-      "source_profile_parameters": {
-        "burst_count_mode": "duration_derived",
-        "burst_duration_s": 0.03,
-        "rise_fall_s": 0.01,
-        "target_period_s": 0.095,
-        "onset_s": 0.3,
-        "active_window_source": "trajectory_movement_duration",
-        "spacing_policy": "symmetric_fit",
-        "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-      }
+      "source_profile": "continuous_noise"
     },
     {
       "label": "Sheep bleat non-threatening placeholder - rear right looming",
       "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Sheep_bleat_non-threatening_placeholder_-_rear_right_looming.wav",
       "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Sheep_bleat_non-threatening_placeholder_-_rear_right_looming.wav",
-      "sha256": "06d36c18fd089080b4d0b0af562439feca5db8e07c154f4cc4179c053bf46c81",
-      "duration_s": 6.666667,
+      "sha256": "0313c4f23380433a3bb5869d3d82a495cfdef5d73fb65070490d0193207c8bc3",
+      "duration_s": 3.0,
       "sample_rate": 44100,
       "channels": 2,
       "source_kind": "generated_noise",
@@ -240,7 +210,7 @@
         "end_distance_cm": 19.9999,
         "start_rotation_deg": 135.0,
         "end_rotation_deg": 135.0,
-        "movement_duration_s": 6.6667,
+        "movement_duration_s": 3.0,
         "start_hold_s": 0.0,
         "end_hold_s": 0.0,
         "path_length_m": 5.0,
@@ -257,17 +227,7 @@
           "z_m": 0.0
         }
       },
-      "source_profile": "dynaspace_gaussian_burst_train",
-      "source_profile_parameters": {
-        "burst_count_mode": "duration_derived",
-        "burst_duration_s": 0.03,
-        "rise_fall_s": 0.01,
-        "target_period_s": 0.095,
-        "onset_s": 0.3,
-        "active_window_source": "trajectory_movement_duration",
-        "spacing_policy": "symmetric_fit",
-        "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-      }
+      "source_profile": "continuous_noise"
     }
   ],
   "notes": [

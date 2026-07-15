@@ -6,7 +6,7 @@
   "doi": "10.1016/j.cognition.2015.07.012",
   "source_url": "https://noel-lab.org/wp-content/uploads/2024/05/noet-et-al-cognition-2015.pdf",
   "verification_status": "verified",
-  "notes": "Audio-tactile PPS task intermingled with full-body-illusion stroking. The template captures the PPS trial schedule; FBI stroking and front/back experimental context must be configured in the lab protocol.",
+  "notes": "Audio-tactile PPS task intermingled with full-body-illusion stroking. This ready profile captures the front-space main PPS trial schedule with chest vibration and source-backed synchronous/asynchronous stroking block labels. The separate back-space experiment still needs its own back-space/back-tactile variant before the full front/back expected-outcome contrast can be compared.",
   "reference_parameters": {},
   "provenance": [
     {
@@ -16,6 +16,10 @@
     {
       "field": "SOAs and distances",
       "source": "Methods lines report six sound distances D6-D1 with tactile timing corresponding to the spatial dimension."
+    },
+    {
+      "field": "stroking-condition blocks",
+      "source": "Manual review records synchronous and asynchronous visuo-tactile stroking as separate counterbalanced blocks for the front-space chest-vibration experiment."
     }
   ]
 }

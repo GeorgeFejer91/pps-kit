@@ -6,7 +6,7 @@
 - The active tactile calibration protocol keeps the 2-down/1-up staircase as the detection-threshold estimator, then runs a final confirmation phase before saving a participant preset.
 - The saved staircase estimate is `detection_threshold_output_34_percent`; the confirmed task preset is `recommended_output_34_percent`, with `final_output_34_percent` retained as the legacy-compatible alias.
 - Confirmation accepts only after 10 consecutive tactile hits and 5 clean confirmation catch trials using the shared 100-1300 ms tactile response window.
-- Confirmation misses reset the hit streak, raise the level by +0.01% Output 3/4, and continue until the 0.5% cap. A miss at the cap fails with `failed_confirmation_at_max`.
+- Confirmation misses reset the hit streak, raise the level by +0.01% Output 3/4, and expand the working software ceiling as needed up to the 1.0% hard guard. A miss at the hard guard fails with `failed_confirmation_at_hard_guard`.
 - Confirmation catch false alarms show the red warning `Only press when you feel the tactile pulse.`, reset only the clean-catch streak, do not change intensity, and fail on the third cumulative false alarm.
 - Successful calibration no longer auto-returns to the Experiment Control tab. The monitor displays the saved-value summary and enables `Continue`, which returns to the PPS runner UI.
 

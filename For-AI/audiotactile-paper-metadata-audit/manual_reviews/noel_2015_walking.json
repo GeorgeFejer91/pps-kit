@@ -1,0 +1,269 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "noel_2015_walking",
+  "citation_short": "Noel et al. (2015b)",
+  "review_date": "2026-07-15",
+  "manual_review_status": "manual_review_completed_public_pdf_no_supplement_found",
+  "confidence_score": 0.9,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "The public Noel Lab PDF was reviewed for apparatus, sound motion, timing/distance mappings, tactile/response apparatus, trial formula, and reported result pattern. Core audio-tactile parameters needed by the toolkit are explicit; remaining caveats are physical treadmill/optic-flow context, loudspeaker-array interpolation, exact generated noise waveform/seed, motor latency calibration, and controller latency correction.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_apparatus_caveats_full_body_walking_audio_tactile_profile",
+    "reason": "The publication reports white-noise motion, 2 m path, 0.75 m/s speed, five tactile delays, corresponding distances, standing/walking and looming/receding factors, baselines, catches, repetitions, and total trial count. The toolkit can reproduce the runnable audio-tactile schedule and preserve locomotion/optic-flow context as metadata, but it does not physically control treadmill walking, optic flow, or the original two-array speaker apparatus."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf_url",
+      "source": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+      "status": "reviewed",
+      "scope": "Methods and results sections covering Experiment 1 and Experiment 2, including apparatus, stimuli, procedure, trial formula, and result interpretation."
+    },
+    {
+      "source_type": "doi_route",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2014.08.030",
+      "status": "checked",
+      "scope": "Citation and DOI identity check for the Neuropsychologia article."
+    },
+    {
+      "source_type": "supplement_route",
+      "source": "publisher and DOI-linked supplement routes for 10.1016/j.neuropsychologia.2014.08.030",
+      "status": "checked_no_methods_supplement_needed_for_profile",
+      "scope": "No supplement was needed for the runnable PPS-task profile after the public PDF supplied task parameters."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "Stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Confirmed white-noise source, 50 dB loudness, two eight-speaker linear arrays, 2 m path, 75 cm/s motion speed, and standing/walking locomotion context."
+    },
+    {
+      "strategy": "Timing and SOA pass",
+      "status": "completed",
+      "result": "Confirmed tactile delays T1-T5 = 440, 880, 1330, 1770, and 2220 ms, with looming mapped D5-D1 and receding mapped D1-D5."
+    },
+    {
+      "strategy": "Sequence and intermixing pass",
+      "status": "completed",
+      "result": "Confirmed Locomotion, Sound Direction, and Sound Distance factors, with sound direction and distance randomized within locomotion conditions."
+    },
+    {
+      "strategy": "Baseline, catch, and counts pass",
+      "status": "completed",
+      "result": "Confirmed 2 Locomotion x 2 Sound Direction x (5 Distances + 2 Baselines + 1 Catch) x 16 = 512 trials per subject."
+    },
+    {
+      "strategy": "Tactile and response apparatus pass",
+      "status": "completed",
+      "result": "Confirmed 100 ms chest vibration using Precision MicroDrives model 312-101 motors and right-thumb button responses through a wireless Xbox 360 controller."
+    },
+    {
+      "strategy": "Expected-outcome pass",
+      "status": "completed",
+      "result": "Confirmed reported standing near-body facilitation around D1-D2 and walking expansion through D5/166 cm, with receding sounds not showing the same spatial modulation and optic flow alone not explaining the effect."
+    }
+  ],
+  "field_status_counts": {
+    "reported": 21,
+    "reported_with_caveat": 3,
+    "reported_with_toolkit_distribution": 1
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "White-noise auditory source at 50 dB.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Apparatus and stimuli",
+        "evidence_note": "The auditory stimulus class and loudness are stated in the apparatus/stimulus description."
+      },
+      "source_provenance": {
+        "status": "reported_with_caveat",
+        "value": "Original waveform/seed is not supplied; sound was rendered through a physical loudspeaker array.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Apparatus and stimuli",
+        "evidence_note": "The profile uses procedural white noise as the minimum reproducible source."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two sound directions: looming and receding.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "Sound Direction is a task factor."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Sound moved between the participant and a point 2 m away along the forward path.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Apparatus and stimuli",
+        "evidence_note": "The sound source either approached from 2 m or receded to 2 m."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "Motion duration is derived from the 2 m path and 0.75 m/s speed: approximately 2.67 s.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Apparatus and stimuli",
+        "evidence_note": "Duration follows directly from reported path length and velocity."
+      },
+      "stimulus_speed": {
+        "status": "reported",
+        "value": "75 cm/s.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Apparatus and stimuli",
+        "evidence_note": "The speed is explicitly reported."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Looming and receding sound direction crossed with standing and walking locomotion.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "Locomotion and Sound Direction are explicit factors."
+      },
+      "gain_envelope": {
+        "status": "reported_with_caveat",
+        "value": "50 dB loudness reported; exact speaker interpolation/gain envelope not supplied.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Apparatus and stimuli",
+        "evidence_note": "Toolkit stores loudness policy as estimated metadata."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Two uniform linear arrays of eight JBL Control 1 Pro loudspeakers each, driven by an M-Audio FastTrack Ultra 8R interface.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Apparatus and stimuli",
+        "evidence_note": "Physical renderer details are reported; the toolkit uses its reference renderer proxy."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Audio-tactile trials, tactile-only baselines at T1/T5, and sound-only catch trials.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "The 5 distance, 2 baseline, and 1 catch row families are in the trial formula."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "Sound Direction and Sound Distance were randomized trial by trial; Locomotion was blocked/counterbalanced.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "Randomization details are sufficient but not required for the minimal profile contract."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "Standing and walking locomotion conditions were blocked and counterbalanced.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "Toolkit preserves locomotion as row metadata and distributes the exact pool across run blocks."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "Inter-trial interval was randomized between 1 and 1.5 s.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "Encoded as an ITI policy string because the runner currently uses its own block timing controls."
+      },
+      "response_window": {
+        "status": "reported_with_caveat",
+        "value": "Participants responded as fast as possible to vibration; no numeric timeout is reported in the extracted method text.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "The validator uses mouse-click injection on expected response rows."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Respond to chest vibration and withhold on sound-only catch trials.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "Target and no-go rules are explicit."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "100 ms chest vibration from Precision MicroDrives shaftless vibration motors, model 312-101, 3 V, 60 mA, 9000 rpm, 150 Hz, 5 g.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Apparatus and stimuli",
+        "evidence_note": "Modality, site, duration, and motor specification are reported."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "T1-T5 = 440, 880, 1330, 1770, and 2220 ms. Receding maps T1-T5 to D1-D5; looming maps T1-T5 to D5-D1.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "The timing and direction-specific mapping are explicit."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Tactile-only baseline trials at the first and last tactile delays.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "Baseline is represented as tactile-only rows at 440 and 2220 ms."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "Baseline timings T1 and T5: 440 and 2220 ms.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "Baseline timings are part of the trial formula."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Sound-only catch trial with no vibration and no response.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "Catch/no-go row is explicit."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Each condition row was repeated 16 times.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "The trial formula gives x16 repetitions."
+      },
+      "baseline_count": {
+        "status": "reported",
+        "value": "128 tactile-only baseline rows per subject: 2 locomotion x 2 sound direction x 2 baseline timings x 16.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "Derived directly from the explicit formula."
+      },
+      "catch_count": {
+        "status": "reported",
+        "value": "64 sound-only catch rows per subject: 2 locomotion x 2 sound direction x 1 catch x 16.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "Derived directly from the explicit formula."
+      },
+      "block_count": {
+        "status": "reported_with_toolkit_distribution",
+        "value": "The paper reports blocked locomotion/counterbalancing, not a numeric toolkit block count; the runnable profile distributes the exact 512-row pool across eight run blocks.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "Block count is a toolkit packaging choice, not a stimulus-parameter claim."
+      },
+      "total_trial_count": {
+        "status": "reported",
+        "value": "512 trials per subject.",
+        "source_file": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+        "page_or_section": "Methods, Procedure",
+        "evidence_note": "The paper states the formula and total."
+      }
+    }
+  },
+  "expected_outcome": {
+    "standing": "Reaction-time facilitation is expected close to the body, around D1-D2.",
+    "walking": "Walking expands facilitation through D5, around 166 cm.",
+    "receding": "Receding sounds do not show the same space-dependent facilitation pattern.",
+    "optic_flow": "Experiment 2 indicates optic flow alone does not account for the walking expansion."
+  },
+  "critical_caveats": [
+    "The toolkit can validate the runnable audio-tactile schedule and output artifacts, not human walking behavior or the scientific RT effect.",
+    "Treadmill walking and optic flow are condition metadata in this profile.",
+    "The physical dual-speaker-array interpolation is represented by the toolkit's reference renderer and row-level trajectory metadata.",
+    "The original white-noise waveform/seed and motor/controller latency corrections are not supplied."
+  ],
+  "next_manual_action": "Use this review as the source contract for noel_2015_walking_full_body_action validation. Do not claim physical treadmill, optic-flow, or loudspeaker-array replication beyond the documented metadata boundary."
+}

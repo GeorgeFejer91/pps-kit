@@ -3,11 +3,15 @@
   "template_id": "canzoneri_2012_dynamic_sounds",
   "baseline_strategy": "tactile_only",
   "include_baseline_trials": true,
+  "baseline_trials_exact": null,
   "baseline_trial_percentage": 0.0,
   "baseline_soa_values_ms": [
     -700,
     3600
   ],
+  "baseline_crosses_sequence_variants": true,
   "catch_trial_percentage": 40.43,
-  "catch_trials_exact": 76
+  "catch_trials_exact": 76,
+  "catch_crosses_sequence_variants": true,
+  "distribute_trial_pool_across_blocks": true
 }

@@ -54,7 +54,7 @@
         "segment": "3",
         "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
         "passed": true,
-        "field_count": 4,
+        "field_count": 5,
         "blocking_reasons": []
       },
       {
@@ -179,6 +179,14 @@
       "status": "reported",
       "value": "tactile_only",
       "note": "Baseline strategy is encoded."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "baseline_count",
+      "status": "reported",
+      "value": 0.0,
+      "note": "Baseline count/percentage settings are encoded."
     },
     {
       "segment": "3",

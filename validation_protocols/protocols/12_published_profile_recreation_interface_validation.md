@@ -135,6 +135,9 @@ python .\validation_protocols\scripts\run_profile_recreation_interface_matrix.py
 - [ ] Segment 6 can prepare a participant session package.
 - [ ] `session_manifest.json` resolves under writable local validation/session
   paths.
+- [ ] In multi-profile matrix runs, each prepared participant session package
+  and session manifest stay under that profile's own validation session root,
+  not a previous profile's remembered output folder.
 - [ ] Session metadata carries profile/template identity and recreation
   provenance.
 - [ ] The standalone runner profile selector exposes the profile only when it

@@ -4,7 +4,7 @@
   "title": "Canzoneri 2013 amputation/prosthesis PPS",
   "citation": "Canzoneri, E., Marzolla, M., Amoresano, A., Verni, G., & Serino, A. (2013). Amputation and prosthesis implantation shape body and peripersonal space representations. Scientific Reports, 3, 2844.",
   "doi": "10.1038/srep02844",
-  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3789144/",
+  "source_url": "https://www.nature.com/articles/srep02844",
   "verification_status": "partial",
   "publication_status": "published",
   "profile_type": "audio_tactile_clinical_upper_limb_pps",
@@ -12,22 +12,22 @@
   "visible_variant_label": "",
   "variant_display": "Canzoneri 2013 amputation/prosthesis PPS",
   "recreation_status": {
-    "primary_category": "missing_publication_parameters",
-    "category_label": "Missing publication parameters",
-    "runner_readiness": "blocked_missing_parameters",
-    "profile_checks_passed": false,
-    "gui_recreatable": false,
-    "segment_0_to_4_profile_checks_passed": false,
-    "segment_1_to_6_materializable": false,
-    "finished_profile": false,
-    "segment_6_launchable": false,
-    "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 1,
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
+    "missing_parameter_count": 0,
     "unsupported_structure_count": 0
   },
   "segment_0_to_4_profile_checks": {
     "gate": "segments_0_to_4",
-    "passed": false,
+    "passed": true,
     "segments": [
       {
         "segment": "0",
@@ -46,21 +46,15 @@
       {
         "segment": "2",
         "segment_label": "Segment 2 trial rows and sequences",
-        "passed": false,
-        "field_count": 4,
-        "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
-            "status": "missing_publication_parameter",
-            "reason": "exact trial count and tactile calibration table from full paper"
-          }
-        ]
+        "passed": true,
+        "field_count": 3,
+        "blocking_reasons": []
       },
       {
         "segment": "3",
         "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
         "passed": true,
-        "field_count": 4,
+        "field_count": 5,
         "blocking_reasons": []
       },
       {
@@ -92,7 +86,7 @@
       "value": {
         "citation": "Canzoneri, E., Marzolla, M., Amoresano, A., Verni, G., & Serino, A. (2013). Amputation and prosthesis implantation shape body and peripersonal space representations. Scientific Reports, 3, 2844.",
         "doi": "10.1038/srep02844",
-        "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3789144/"
+        "source_url": "https://www.nature.com/articles/srep02844"
       },
       "note": "Publication reference metadata is encoded."
     },
@@ -101,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 9,
+      "value": 21,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -174,7 +168,7 @@
       "parameter": "tactile_sites",
       "status": "reported",
       "value": [
-        "upper limb / hand"
+        "upper arm"
       ],
       "note": "Tactile site labels are encoded."
     },
@@ -183,24 +177,36 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "baseline_mode",
       "status": "reported",
-      "value": "tactile_only",
+      "value": "none",
       "note": "Baseline strategy is encoded."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "baseline_count",
+      "status": "defaulted",
+      "value": 0,
+      "note": "No baseline trials are configured."
     },
     {
       "segment": "3",
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "catch_mode",
       "status": "reported",
-      "value": 30.0,
+      "value": 76,
       "note": "Catch settings are encoded."
     },
     {
       "segment": "4",
       "segment_label": "Segment 4 repetition pool settings",
       "parameter": "trial_pool_repetitions",
-      "status": "inferred",
-      "value": 8,
-      "note": "Segment 4 can infer repetitions from repetitions_per_condition."
+      "status": "reported",
+      "value": {
+        "default": 8,
+        "audio_tactile": 8,
+        "catch": 38
+      },
+      "note": "Segment 4 repetition defaults are encoded."
     },
     {
       "segment": "5",
@@ -257,23 +263,9 @@
       "status": "defaulted",
       "value": "tested limb/body-part assignment",
       "note": "tested limb/body-part assignment"
-    },
-    {
-      "segment": "2",
-      "segment_label": "Segment 2 trial rows and sequences",
-      "parameter": "profile_gap",
-      "status": "missing_publication_parameter",
-      "value": "exact trial count and tactile calibration table from full paper",
-      "note": "exact trial count and tactile calibration table from full paper"
     }
   ],
-  "missing_publication_parameters": [
-    {
-      "segment": "2",
-      "parameter": "profile_gap",
-      "reason": "exact trial count and tactile calibration table from full paper"
-    }
-  ],
+  "missing_publication_parameters": [],
   "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
@@ -310,11 +302,15 @@
   "provenance": [
     {
       "field": "study scope",
-      "source": "Open Scientific Reports abstract and article report PPS testing in upper-limb amputees with an audio-tactile interaction task."
+      "source": "Scientific Reports article reports PPS testing in upper-limb amputees with healthy limb, amputated limb without prosthesis, and amputated limb with prosthesis conditions."
     },
     {
-      "field": "task scaffold",
-      "source": "Profile uses the Canzoneri-family dynamic sound scaffold pending full-method verification."
+      "field": "task parameters",
+      "source": "Scientific Reports Methods report 3000 ms pink-noise IN/OUT sounds, 1000 ms pre/post silence, T1-T5 at 300, 800, 1500, 2200, and 2700 ms from sound onset, 76 auditory-only catch trials, and two blocks."
+    },
+    {
+      "field": "trial count caveat",
+      "source": "The Methods sentence simultaneously reports 8 target stimuli per T1-T5 x IN/OUT cell and a 76-trial tactile-target total; the profile preserves the coherent factorial target structure and records the literal total as a caveat."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."

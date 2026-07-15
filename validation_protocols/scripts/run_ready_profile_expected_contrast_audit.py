@@ -1,0 +1,1819 @@
+"""Audit expected-outcome contrast support for ready published profiles.
+
+The expected-outcome ledger can only be compared with runner outputs when the
+runner rows retain the paper-level contrast variables used by the paper's
+claim. This audit consumes the ready-profile runner smoke report and the
+expected-outcome ledger, then reports which ready records have enough contrast
+metadata for an explicit synthetic behavioral comparison.
+
+For profile records whose runner rows currently retain the required labels, the
+audit writes deterministic synthetic RT tables and checks that the observed
+synthetic direction matches the paper-derived expected direction. Other ready
+records are reported as blocked when the current rows lack required factors
+such as synchrony, vestibular congruence, movement state, body-relative
+direction, or auditory motion direction.
+"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import math
+import re
+from pathlib import Path
+from typing import Any
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+LEDGER_PATH = REPO_ROOT / "assets" / "preloads" / "audiotactile_expected_outcome_coverage.json"
+DEFAULT_RUNNER_SMOKE_REPORT = (
+    REPO_ROOT
+    / "artifacts"
+    / "validation_runs"
+    / "current_goal_ready_profile_runner_smoke_20260715"
+    / "ready_profile_runner_smoke_report.json"
+)
+DEFAULT_OUTPUT_DIR = (
+    REPO_ROOT
+    / "artifacts"
+    / "validation_runs"
+    / "current_goal_ready_profile_expected_contrast_audit_20260715"
+)
+
+SCHEMA = "pps-ready-profile-expected-contrast-audit.v1"
+READY_GAP = "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison"
+MODEL_ID = "profile_contrast_readiness_synthetic_rt.v2"
+EVIDENCE_BOUNDARY = (
+    "This audit checks whether ready-profile runner rows retain the contrast "
+    "variables needed for expected-outcome comparison. Profile-specific "
+    "comparisons use deterministic synthetic RTs; they are not human "
+    "behavioral PPS evidence, collected participant data, or publication "
+    "replication."
+)
+
+REQUIRED_CONTRASTS = {
+    "canzoneri_2012_dynamic_sounds": {
+        "required": ["soa_or_distance_rank", "auditory_motion_direction", "audio_tactile_vs_baseline"],
+        "note": "The rows must retain IN/approaching versus OUT/receding labels, T1-T5 SOA ranks, and tactile-only T0/T6 baseline rows.",
+    },
+    "noel_2015_bodily_self": {
+        "required": ["stroking_synchrony", "front_back_space"],
+        "note": "The current front-space ready rows encode synchronous/asynchronous stroking but not the separate back-space/back-tactile experiment.",
+    },
+    "serino_2015_peri_trunk_exp1": {
+        "required": ["soa_or_distance_rank", "auditory_motion_direction"],
+        "note": "The rows retain SOA but do not name looming versus receding motion direction.",
+    },
+    "serino_2015_peri_hand_exp3": {
+        "required": ["soa_or_distance_rank", "auditory_motion_direction"],
+        "note": "The rows must retain the hand-centered near/far SOA rank and looming/receding labels.",
+    },
+    "serino_2015_front_back_trunk_exp2": {
+        "required": ["soa_or_distance_rank", "audio_tactile_vs_baseline", "front_back_trunk_paths"],
+        "note": "The rows must retain the front-to-back/back-to-front crossing paths plus tactile-only baseline rows.",
+    },
+    "pfeiffer_2018_vestibular": {
+        "required": ["vestibular_condition", "audio_vestibular_congruence"],
+        "note": "The rows retain lateral audio timing but not vestibular/no-rotation or congruent/incongruent context.",
+    },
+    "matsuda_2021_four_directions": {
+        "required": ["body_relative_direction", "auditory_motion_direction"],
+        "note": "The rows retain four generic block labels but not front/rear/left/right or approaching/receding labels.",
+    },
+    "lamia_2026_arm_movement": {
+        "required": ["movement_state", "tactile_site", "auditory_motion_direction"],
+        "note": "The rows retain the audio-tactile schedule but not motor/static state, tactile site, or looming/receding labels.",
+    },
+    "smartphone_rt_methods_2025": {
+        "required": ["looming_vs_fixed_source"],
+        "note": "The rows retain DynaSpace looming versus fixed source labels.",
+    },
+    "tonelli_2019_echolocation": {
+        "required": ["soa_or_distance_rank", "audio_tactile_vs_baseline", "seven_distance_lateral_profile"],
+        "note": "The rows must retain the seven lateral sound-distance timings plus tactile-only baseline rows; pre/post echolocation training context is modeled synthetically because it is not a WAV/run-time factor.",
+    },
+    "galli_2015_wheelchair": {
+        "required": ["soa_or_distance_rank", "audio_tactile_vs_baseline", "wheelchair_front_back_paths"],
+        "note": "The rows must retain wheelchair moving-source near/far timings, front/back path labels, and tactile-only baseline rows; wheelchair training context is modeled synthetically because it is not a WAV/run-time factor.",
+    },
+    "lerner_2021_3d_boundary": {
+        "required": ["soa_or_distance_rank", "dynamic_flat_source_profile", "twelve_direction_3d_profile"],
+        "note": "The rows must retain dynamic versus flat pink-noise source families across all twelve reported 3D source directions.",
+    },
+}
+
+
+def run_audit(
+    *,
+    ledger_path: Path = LEDGER_PATH,
+    runner_smoke_report: Path = DEFAULT_RUNNER_SMOKE_REPORT,
+    output_dir: Path = DEFAULT_OUTPUT_DIR,
+) -> dict[str, Any]:
+    ledger_path = Path(ledger_path).resolve()
+    runner_smoke_report = Path(runner_smoke_report).resolve()
+    output_dir = Path(output_dir).resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    ledger = _read_json(ledger_path)
+    smoke = _read_json(runner_smoke_report)
+    smoke_profiles = {
+        str(profile.get("template_id") or ""): profile
+        for profile in smoke.get("profiles", [])
+    }
+    records = [
+        record
+        for record in ledger.get("records", [])
+        if record.get("observed_comparison_gap") == READY_GAP
+    ]
+    rows = [
+        _audit_record(record, smoke_profiles=smoke_profiles, output_dir=output_dir)
+        for record in sorted(records, key=lambda item: str(item.get("record_id") or ""))
+    ]
+    summary = _summary(rows)
+    blocked_rows = [row for row in rows if row.get("status") == "contrast_metadata_missing"]
+    criteria = {
+        "ledger_exists": ledger_path.is_file(),
+        "runner_smoke_report_exists": runner_smoke_report.is_file(),
+        "ready_records_found": bool(records),
+        "attempted_synthetic_comparisons_passed": summary["synthetic_comparison_failed_count"] == 0,
+        "contrast_blockers_are_explicit": not blocked_rows or all(row.get("required_next_step") for row in blocked_rows),
+    }
+    report = {
+        "schema": SCHEMA,
+        "generated_on": "2026-07-15",
+        "passed": all(criteria.values()),
+        "criteria": criteria,
+        "summary": summary,
+        "model": {
+            "model_id": MODEL_ID,
+            "model_role": (
+                "contrast metadata readiness audit plus deterministic DynaSpace "
+                "looming-vs-fixed, Noel front/back synchrony, Serino peri-trunk "
+                "near-vs-far, Matsuda four-direction approaching-vs-receding, "
+                "Lamia movement-state, and Pfeiffer vestibular-congruence RT "
+                "comparisons, plus Serino peri-hand, Canzoneri near-vs-far, "
+                "Tonelli echolocation pre/post, Serino front/back trunk crossing, "
+                "Galli wheelchair-training, and Lerner 3D dynamic/flat boundary "
+                "RT comparisons"
+            ),
+            "assumption_boundary": EVIDENCE_BOUNDARY,
+        },
+        "evidence_boundary": EVIDENCE_BOUNDARY,
+        "source_expected_outcome_ledger": _repo_relative(ledger_path),
+        "source_runner_smoke_report": _repo_relative(runner_smoke_report),
+        "records": rows,
+        "report_json": str(output_dir / "ready_profile_expected_contrast_audit_report.json"),
+        "report_md": str(output_dir / "ready_profile_expected_contrast_audit_report.md"),
+    }
+    _write_json(Path(report["report_json"]), report)
+    _write_markdown(Path(report["report_md"]), report)
+    return report
+
+
+def _audit_record(
+    record: dict[str, Any],
+    *,
+    smoke_profiles: dict[str, dict[str, Any]],
+    output_dir: Path,
+) -> dict[str, Any]:
+    record_id = str(record.get("record_id") or "")
+    expected = dict(record.get("expected_outcome") or {})
+    template_ids = [str(value) for value in record.get("current_template_ids") or []]
+    profile_rows = [
+        _profile_rows(template_id, smoke_profiles.get(template_id, {}))
+        for template_id in template_ids
+    ]
+    availability = _contrast_availability(record_id, profile_rows)
+    base = {
+        "record_id": record_id,
+        "citation_short": str(record.get("citation_short") or ""),
+        "template_ids": template_ids,
+        "expected_effect_direction": str(expected.get("expected_effect_direction") or ""),
+        "required_contrasts": REQUIRED_CONTRASTS.get(record_id, {}).get("required", []),
+        "contrast_availability": availability,
+        "source_runner_outputs": [
+            {
+                "template_id": item["template_id"],
+                "analysis_ready_trials": item["analysis_ready_trials"],
+                "row_count": len(item["rows"]),
+            }
+            for item in profile_rows
+        ],
+    }
+    if record_id == "smartphone_rt_methods_2025" and availability.get("looming_vs_fixed_source"):
+        comparison = _compare_dynaspace_looming_fixed(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "replication claim."
+            ),
+        }
+    missing = [
+        contrast
+        for contrast in REQUIRED_CONTRASTS.get(record_id, {}).get("required", [])
+        if not availability.get(contrast)
+    ]
+    if not missing and record_id == "noel_2015_bodily_self":
+        comparison = _compare_noel_front_back_synchrony(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "front/back full-body-illusion PPS replication claim."
+            ),
+        }
+    if not missing and record_id == "serino_2015_peri_trunk_exp1":
+        comparison = _compare_serino_near_far(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "peri-trunk PPS replication claim."
+            ),
+        }
+    if not missing and record_id == "serino_2015_peri_hand_exp3":
+        comparison = _compare_serino_peri_hand_near_far(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "peri-hand PPS replication claim."
+            ),
+        }
+    if not missing and record_id == "serino_2015_front_back_trunk_exp2":
+        comparison = _compare_serino_front_back_trunk(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "front/back trunk PPS replication claim. The 16-speaker Gaussian amplitude field remains "
+                "represented as a virtual front/back crossing trajectory with explicit apparatus caveats."
+            ),
+        }
+    if not missing and record_id == "canzoneri_2012_dynamic_sounds":
+        comparison = _compare_canzoneri_near_far(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "Canzoneri dynamic-sound PPS replication claim."
+            ),
+        }
+    if not missing and record_id == "matsuda_2021_four_directions":
+        comparison = _compare_matsuda_four_direction(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "four-direction PPS replication claim."
+            ),
+        }
+    if not missing and record_id == "lamia_2026_arm_movement":
+        comparison = _compare_lamia_arm_movement(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "arm-movement PPS replication claim."
+            ),
+        }
+    if not missing and record_id == "pfeiffer_2018_vestibular":
+        comparison = _compare_pfeiffer_vestibular(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "vestibular modulation of peri-head PPS replication claim. Passive whole-body rotation remains "
+                "external apparatus context, not a generated WAV component."
+            ),
+        }
+    if not missing and record_id == "tonelli_2019_echolocation":
+        comparison = _compare_tonelli_echolocation(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected pre/post echolocation participant data before "
+                "making a scientific lateral head/neck PPS training-modulation claim. The seven-loudspeaker array "
+                "remains represented as a virtual lateral moving-source trajectory with explicit apparatus caveats."
+            ),
+        }
+    if not missing and record_id == "galli_2015_wheelchair":
+        comparison = _compare_galli_wheelchair(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected pre/post wheelchair-training participant data "
+                "before making a scientific wheelchair-mediated full-body PPS extension claim. The passive/active/"
+                "blindfolded training manipulation remains synthetic experiment context, not a generated WAV factor."
+            ),
+        }
+    if not missing and record_id == "lerner_2021_3d_boundary":
+        comparison = _compare_lerner_3d_boundary(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data and fitted 3D PPS boundary "
+                "surfaces before making a scientific VR 3D boundary replication claim. The current profile keeps "
+                "Unity/3D Tune-In and subject-specific scaling as explicit renderer caveats."
+            ),
+        }
+    if not missing:
+        return {
+            **base,
+            "status": "contrast_metadata_present_comparison_model_missing",
+            "missing_contrasts": [],
+            "synthetic_comparison": {},
+            "required_next_step": (
+                "Add an outcome-specific collected-data or synthetic-participant comparator for this expected "
+                "effect now that the runner rows expose the required contrast metadata."
+            ),
+        }
+    return {
+        **base,
+        "status": "contrast_metadata_missing",
+        "missing_contrasts": missing,
+        "synthetic_comparison": {},
+        "required_next_step": _required_next_step(record_id, missing),
+    }
+
+
+def _profile_rows(template_id: str, profile: dict[str, Any]) -> dict[str, Any]:
+    analysis_path = Path(str((profile.get("outputs") or {}).get("analysis_ready_trials") or ""))
+    rows = _read_csv(analysis_path) if analysis_path.is_file() else []
+    return {
+        "template_id": template_id,
+        "analysis_ready_trials": str(analysis_path),
+        "rows": rows,
+    }
+
+
+def _contrast_availability(record_id: str, profile_rows: list[dict[str, Any]]) -> dict[str, bool]:
+    rows = [row for profile in profile_rows for row in profile["rows"]]
+    text_values = " | ".join(
+        " ".join(
+            str(row.get(key) or "")
+            for key in (
+                "condition",
+                "block_label",
+                "respiratory_phase",
+                "row_label",
+                "sequence_labels",
+                "sequence_variant_key",
+            )
+        )
+        for row in rows
+    ).lower()
+    tokens = _word_tokens(text_values)
+    soa_values = {_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))}
+    families = {str(row.get("family") or "").strip().lower() for row in rows}
+    has_body_directions = {direction for direction in ("front", "rear", "left", "right") if direction in tokens}
+    has_movement_state = any(token in tokens for token in ("moving", "movement", "motor"))
+    has_static_state = any(token in tokens for token in ("static", "still", "rest"))
+    has_hand_site = any(token in tokens for token in ("hand", "finger"))
+    has_trunk_site = any(token in tokens for token in ("chest", "trunk", "sternum"))
+    has_recede_label = any(token.startswith("reced") for token in tokens)
+    has_motion_context = any(token in tokens for token in ("moving", "motion"))
+    has_approach_label = (
+        any(token in tokens for token in ("approach", "approaching", "looming"))
+        or (has_recede_label and has_motion_context)
+    )
+    availability = {
+        "soa_or_distance_rank": len(soa_values) >= 2,
+        "audio_tactile_vs_baseline": {"audio_tactile", "baseline"}.issubset(families),
+        "looming_vs_fixed_source": "looming" in text_values and "fixed" in text_values,
+        "auditory_motion_direction": has_approach_label and has_recede_label,
+        "body_relative_direction": {"front", "rear", "left", "right"}.issubset(has_body_directions),
+        "movement_state": has_movement_state and has_static_state,
+        "tactile_site": has_hand_site and has_trunk_site,
+        "stroking_synchrony": _has_stroking_synchrony_poles(tokens),
+        "front_back_space": "front" in tokens and ("back" in tokens or "rear" in tokens),
+        "vestibular_condition": _has_vestibular_condition_poles(tokens, text_values),
+        "audio_vestibular_congruence": _has_congruence_poles(tokens),
+        "seven_distance_lateral_profile": record_id == "tonelli_2019_echolocation" and len(
+            {value for value in soa_values if value >= 0}
+        ) >= 7,
+        "front_back_trunk_paths": record_id == "serino_2015_front_back_trunk_exp2"
+        and {"front_to_back", "back_to_front"}.issubset(_front_back_trunk_paths(rows)),
+        "wheelchair_front_back_paths": record_id == "galli_2015_wheelchair"
+        and {"front", "back"}.issubset(_wheelchair_paths(rows)),
+        "dynamic_flat_source_profile": record_id == "lerner_2021_3d_boundary"
+        and {"dynamic", "flat"}.issubset(_lerner_source_types(rows)),
+        "twelve_direction_3d_profile": record_id == "lerner_2021_3d_boundary"
+        and len(_lerner_directions(rows)) >= 12,
+    }
+    if record_id == "smartphone_rt_methods_2025":
+        availability["looming_vs_fixed_source"] = _has_dynaspace_looming_and_fixed(rows)
+    return availability
+
+
+def _word_tokens(text: str) -> set[str]:
+    return set(re.findall(r"[a-z0-9]+", text.lower()))
+
+
+def _has_stroking_synchrony_poles(tokens: set[str]) -> bool:
+    has_sync = bool({"synchronous", "sync"} & tokens)
+    has_async = bool({"asynchronous", "async"} & tokens)
+    return has_sync and has_async
+
+
+def _has_vestibular_condition_poles(tokens: set[str], text_values: str) -> bool:
+    has_rotation = bool({"vestibular", "rotation", "rotating", "rotated"} & tokens)
+    has_no_rotation = (
+        "no rotation" in text_values
+        or "no-rotation" in text_values
+        or "no_rotation" in text_values
+        or bool({"stationary", "static", "rest"} & tokens)
+    )
+    return has_rotation and has_no_rotation
+
+
+def _has_congruence_poles(tokens: set[str]) -> bool:
+    return "congruent" in tokens and "incongruent" in tokens
+
+
+def _compare_dynaspace_looming_fixed(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    rows = [row for profile in profile_rows for row in profile["rows"]]
+    synthetic_rows: list[dict[str, Any]] = []
+    for row in rows:
+        condition = _dynaspace_condition(row)
+        if not condition:
+            continue
+        rt_ms = 480.0 if condition == "looming" else 505.0
+        out = dict(row)
+        out["synthetic_condition"] = condition
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "smartphone_rt_methods_2025_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    delta = means.get("fixed", math.nan) - means.get("looming", math.nan)
+    observed_direction = "looming_faster_than_static" if math.isfinite(delta) and delta > 0.0 else "looming_not_faster_than_static"
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "fixed_minus_looming_ms": delta if math.isfinite(delta) else None,
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": "fixed_mean_rt_ms - looming_mean_rt_ms > 0 and observed direction equals expected direction",
+        "pass": observed_direction == expected_direction and math.isfinite(delta) and delta >= 20.0,
+    }
+
+
+def _compare_noel_front_back_synchrony(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    rows = [
+        row
+        for profile in profile_rows
+        for row in profile["rows"]
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    spaces: set[str] = set()
+    synchronies: set[str] = set()
+    for row in rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        space = _noel_space(row)
+        synchrony = _noel_synchrony(row)
+        if not space or not synchrony:
+            continue
+        spaces.add(space)
+        synchronies.add(synchrony)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        distance_bin = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        rt_ms = 520.0 - (25.0 * proximity)
+        if space == "front" and synchrony == "synchronous":
+            rt_ms -= 18.0
+        elif space == "back" and synchrony == "synchronous":
+            rt_ms += 20.0 * proximity
+        out = dict(row)
+        out["synthetic_condition"] = f"{space}_{synchrony}_{distance_bin}"
+        out["synthetic_space"] = space
+        out["synthetic_synchrony"] = synchrony
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "noel_2015_bodily_self_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    front_far_delta = means.get("front_asynchronous_far", math.nan) - means.get("front_synchronous_far", math.nan)
+    back_near_delta = means.get("back_synchronous_near", math.nan) - means.get("back_asynchronous_near", math.nan)
+    complete_factor_crossing = {"front", "back"}.issubset(spaces) and {"synchronous", "asynchronous"}.issubset(synchronies)
+    observed_direction = (
+        "synchronous_front_expansion_and_back_reduction"
+        if complete_factor_crossing
+        and math.isfinite(front_far_delta)
+        and math.isfinite(back_near_delta)
+        and front_far_delta > 0.0
+        and back_near_delta > 0.0
+        else "front_back_synchrony_contrast_not_recovered"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "spaces_observed": sorted(spaces),
+        "synchronies_observed": sorted(synchronies),
+        "front_async_minus_sync_far_ms": front_far_delta if math.isfinite(front_far_delta) else None,
+        "back_sync_minus_async_near_ms": back_near_delta if math.isfinite(back_near_delta) else None,
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "front asynchronous far_mean_rt_ms - synchronous far_mean_rt_ms >= 10, "
+            "back synchronous near_mean_rt_ms - asynchronous near_mean_rt_ms >= 10, "
+            "front/back and synchronous/asynchronous factors present, and observed direction equals expected direction"
+        ),
+        "pass": (
+            observed_direction == expected_direction
+            and complete_factor_crossing
+            and math.isfinite(front_far_delta)
+            and math.isfinite(back_near_delta)
+            and front_far_delta >= 10.0
+            and back_near_delta >= 10.0
+        ),
+    }
+
+
+def _noel_space(row: dict[str, Any]) -> str:
+    tokens = _word_tokens(_row_factor_text(row))
+    if "back" in tokens or "rear" in tokens:
+        return "back"
+    if "front" in tokens:
+        return "front"
+    return ""
+
+
+def _noel_synchrony(row: dict[str, Any]) -> str:
+    tokens = _word_tokens(_row_factor_text(row))
+    if "asynchronous" in tokens or "async" in tokens:
+        return "asynchronous"
+    if "synchronous" in tokens or "sync" in tokens:
+        return "synchronous"
+    return ""
+
+
+def _row_factor_text(row: dict[str, Any]) -> str:
+    return " ".join(
+        str(row.get(key) or "")
+        for key in (
+            "condition",
+            "block_label",
+            "respiratory_phase",
+            "row_label",
+            "sequence_labels",
+            "sequence_variant_key",
+        )
+    ).lower()
+
+
+def _front_back_trunk_paths(rows: list[dict[str, Any]]) -> set[str]:
+    return {
+        path
+        for row in rows
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+        for path in [_front_back_trunk_path(row)]
+        if path
+    }
+
+
+def _front_back_trunk_path(row: dict[str, Any]) -> str:
+    text = _row_factor_text(row).replace("_", " ")
+    if "back to front" in text:
+        return "back_to_front"
+    if "front to back" in text or "front back moving sound" in text:
+        return "front_to_back"
+    return ""
+
+
+def _wheelchair_paths(rows: list[dict[str, Any]]) -> set[str]:
+    return {
+        path
+        for row in rows
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+        for path in [_wheelchair_path(row)]
+        if path
+    }
+
+
+def _wheelchair_path(row: dict[str, Any]) -> str:
+    text = _row_factor_text(row).replace("_", " ")
+    if "wheelchair" not in text:
+        return ""
+    return "back" if "back" in text else "front"
+
+
+def _lerner_source_types(rows: list[dict[str, Any]]) -> set[str]:
+    return {
+        source_type
+        for row in rows
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+        for source_type in [_lerner_source_type(row)]
+        if source_type
+    }
+
+
+def _lerner_source_type(row: dict[str, Any]) -> str:
+    text = _row_factor_text(row).replace("_", " ")
+    if "dynamic pink" in text or "dynamic" in text:
+        return "dynamic"
+    if "flat pink" in text or "flat" in text:
+        return "flat"
+    return ""
+
+
+def _lerner_directions(rows: list[dict[str, Any]]) -> set[int]:
+    return {
+        direction
+        for row in rows
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+        for direction in [_lerner_direction(row)]
+        if direction is not None
+    }
+
+
+def _lerner_direction(row: dict[str, Any]) -> int | None:
+    text = _row_factor_text(row).replace("_", " ")
+    match = re.search(r"\bdirection\s*(\d{1,2})\b", text)
+    if match:
+        return int(match.group(1))
+    return 1 if _lerner_source_type(row) else None
+
+
+def _compare_serino_near_far(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    rows = [
+        row
+        for profile in profile_rows
+        for row in profile["rows"]
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    for row in rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        motion = _serino_motion_direction(row)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        if motion == "receding":
+            proximity = 1.0 - proximity
+        condition = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        rt_ms = 525.0 - (45.0 * proximity)
+        out = dict(row)
+        out["synthetic_condition"] = condition
+        out["synthetic_motion_direction"] = motion
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "serino_2015_peri_trunk_exp1_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    delta = means.get("far", math.nan) - means.get("near", math.nan)
+    observed_direction = (
+        "near_or_approaching_trunk_sounds_speed_tactile_rt"
+        if math.isfinite(delta) and delta > 0.0
+        else "near_or_approaching_trunk_sounds_do_not_speed_tactile_rt"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "far_minus_near_ms": delta if math.isfinite(delta) else None,
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": "far_mean_rt_ms - near_mean_rt_ms > 0 and observed direction equals expected direction",
+        "pass": observed_direction == expected_direction and math.isfinite(delta) and delta >= 20.0,
+    }
+
+
+def _serino_motion_direction(row: dict[str, Any]) -> str:
+    text = " ".join(
+        str(row.get(key) or "")
+        for key in ("sequence_labels", "sequence_variant_key", "row_label", "respiratory_phase")
+    ).lower()
+    return "receding" if "reced" in text else "looming"
+
+
+def _compare_serino_peri_hand_near_far(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    rows = [
+        row
+        for profile in profile_rows
+        for row in profile["rows"]
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    motions: set[str] = set()
+    for row in rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        motion = _serino_motion_direction(row)
+        motions.add(motion)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        if motion == "receding":
+            proximity = 1.0 - proximity
+        condition = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        rt_ms = 522.0 - (40.0 * proximity)
+        if motion == "looming":
+            rt_ms -= 8.0 * proximity
+        out = dict(row)
+        out["synthetic_condition"] = f"{motion}_{condition}"
+        out["synthetic_motion_direction"] = motion
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "serino_2015_peri_hand_exp3_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    looming_delta = means.get("looming_far", math.nan) - means.get("looming_near", math.nan)
+    receding_delta = means.get("receding_far", math.nan) - means.get("receding_near", math.nan)
+    complete_motions = {"looming", "receding"}.issubset(motions)
+    observed_direction = (
+        "near_hand_sounds_speed_hand_tactile_rt"
+        if complete_motions
+        and math.isfinite(looming_delta)
+        and looming_delta > 0.0
+        and (not math.isfinite(receding_delta) or receding_delta > 0.0)
+        else "near_hand_sounds_do_not_speed_hand_tactile_rt"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "motions_observed": sorted(motions),
+        "looming_far_minus_near_ms": looming_delta if math.isfinite(looming_delta) else None,
+        "receding_far_minus_near_ms": receding_delta if math.isfinite(receding_delta) else None,
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "looming far_mean_rt_ms - near_mean_rt_ms >= 20, looming/receding factors present, "
+            "and observed direction equals expected direction"
+        ),
+        "pass": (
+            observed_direction == expected_direction
+            and complete_motions
+            and math.isfinite(looming_delta)
+            and looming_delta >= 20.0
+        ),
+    }
+
+
+def _compare_serino_front_back_trunk(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    all_rows = [row for profile in profile_rows for row in profile["rows"]]
+    audio_rows = [
+        row
+        for row in all_rows
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    baseline_rows = [
+        row
+        for row in all_rows
+        if str(row.get("family") or "").strip().lower() == "baseline"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in audio_rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    soa_center = (soa_min + soa_max) / 2.0 if math.isfinite(soa_min) and math.isfinite(soa_max) else math.nan
+    max_offset = max(abs(value - soa_center) for value in soas) if soas and math.isfinite(soa_center) else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    paths: set[str] = set()
+    for row in audio_rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(max_offset) or max_offset <= 0.0:
+            continue
+        path = _front_back_trunk_path(row)
+        if path:
+            paths.add(path)
+        proximity = 1.0 - (abs(soa_ms - soa_center) / max_offset)
+        proximity = max(0.0, min(1.0, proximity))
+        distance_bin = "near_crossing" if proximity >= 0.8 else "far_endpoint" if proximity <= 0.2 else "middle"
+        rt_ms = 528.0 - (46.0 * proximity)
+        out = dict(row)
+        out["synthetic_condition"] = f"{path or 'unknown'}_{distance_bin}"
+        out["synthetic_front_back_path"] = path
+        out["synthetic_distance_bin"] = distance_bin
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    for row in baseline_rows:
+        out = dict(row)
+        out["synthetic_condition"] = "baseline"
+        out["synthetic_front_back_path"] = _front_back_trunk_path(row)
+        out["synthetic_distance_bin"] = "baseline"
+        out["synthetic_proximity_rank"] = ""
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = "532.000"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "serino_2015_front_back_trunk_exp2_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    distance_means = _mean_rt_by_field(synthetic_rows, "synthetic_distance_bin")
+    delta = distance_means.get("far_endpoint", math.nan) - distance_means.get("near_crossing", math.nan)
+    complete_paths = {"front_to_back", "back_to_front"}.issubset(paths)
+    baseline_present = bool(baseline_rows)
+    observed_direction = (
+        "near_trunk_front_back_sounds_speed_corresponding_tactile_rt"
+        if complete_paths and baseline_present and math.isfinite(delta) and delta > 0.0
+        else "near_trunk_front_back_sound_facilitation_not_recovered"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "distance_bin_mean_rt_ms": distance_means,
+        "paths_observed": sorted(paths),
+        "baseline_family_present": baseline_present,
+        "far_endpoint_minus_near_crossing_ms": delta if math.isfinite(delta) else None,
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "front-to-back and back-to-front path labels present; tactile-only baseline rows present; "
+            "far endpoint mean RT minus near body-crossing mean RT >= 20 ms; and observed direction equals "
+            "expected direction"
+        ),
+        "pass": (
+            observed_direction == expected_direction
+            and complete_paths
+            and baseline_present
+            and math.isfinite(delta)
+            and delta >= 20.0
+        ),
+    }
+
+
+def _compare_canzoneri_near_far(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    all_rows = [row for profile in profile_rows for row in profile["rows"]]
+    rows = [
+        row
+        for row in all_rows
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    families = {str(row.get("family") or "").strip().lower() for row in all_rows}
+    soas = sorted({_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    motions: set[str] = set()
+    for row in rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        motion = _approach_recede_direction(row)
+        motions.add(motion)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        if motion == "receding":
+            proximity = 1.0 - proximity
+        distance_bin = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        if motion == "approaching":
+            rt_ms = 532.0 - (46.0 * proximity)
+        else:
+            rt_ms = 515.0 - (6.0 * proximity)
+        out = dict(row)
+        out["synthetic_condition"] = f"{motion}_{distance_bin}"
+        out["synthetic_motion_direction"] = motion
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "canzoneri_2012_dynamic_sounds_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    approaching_delta = means.get("approaching_far", math.nan) - means.get("approaching_near", math.nan)
+    receding_delta = means.get("receding_far", math.nan) - means.get("receding_near", math.nan)
+    complete_motions = {"approaching", "receding"}.issubset(motions)
+    baseline_present = "baseline" in families
+    observed_direction = (
+        "approaching_near_body_sounds_speed_tactile_rt"
+        if complete_motions
+        and baseline_present
+        and math.isfinite(approaching_delta)
+        and approaching_delta > 0.0
+        else "approaching_near_body_sounds_do_not_speed_tactile_rt"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "motions_observed": sorted(motions),
+        "baseline_family_present": baseline_present,
+        "approaching_far_minus_near_ms": approaching_delta if math.isfinite(approaching_delta) else None,
+        "receding_far_minus_near_ms": receding_delta if math.isfinite(receding_delta) else None,
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "approaching far_mean_rt_ms - near_mean_rt_ms >= 20, approaching/receding factors present, "
+            "tactile-only baseline family present, and observed direction equals expected direction"
+        ),
+        "pass": (
+            observed_direction == expected_direction
+            and complete_motions
+            and baseline_present
+            and math.isfinite(approaching_delta)
+            and approaching_delta >= 20.0
+        ),
+    }
+
+
+def _compare_matsuda_four_direction(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    rows = [
+        row
+        for profile in profile_rows
+        for row in profile["rows"]
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    body_directions: set[str] = set()
+    for row in rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        body_direction = _body_relative_direction(row)
+        if body_direction:
+            body_directions.add(body_direction)
+        motion = _approach_recede_direction(row)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        if motion == "receding":
+            proximity = 1.0 - proximity
+        distance_bin = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        if motion == "approaching":
+            rt_ms = 530.0 - (42.0 * proximity)
+        else:
+            rt_ms = 515.0
+        out = dict(row)
+        out["synthetic_condition"] = f"{motion}_{distance_bin}"
+        out["synthetic_motion_direction"] = motion
+        out["synthetic_body_direction"] = body_direction
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "matsuda_2021_four_directions_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    approaching_delta = means.get("approaching_far", math.nan) - means.get("approaching_near", math.nan)
+    receding_delta = means.get("receding_far", math.nan) - means.get("receding_near", math.nan)
+    all_directions = {"front", "rear", "left", "right"}.issubset(body_directions)
+    observed_direction = (
+        "approaching_sounds_show_pps_facilitation_across_four_directions"
+        if math.isfinite(approaching_delta)
+        and approaching_delta > 0.0
+        and (not math.isfinite(receding_delta) or abs(receding_delta) < 5.0)
+        and all_directions
+        else "approaching_sounds_do_not_show_direction_general_pps_facilitation"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "approaching_far_minus_near_ms": approaching_delta if math.isfinite(approaching_delta) else None,
+        "receding_far_minus_near_ms": receding_delta if math.isfinite(receding_delta) else None,
+        "body_directions_observed": sorted(body_directions),
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "approaching far_mean_rt_ms - near_mean_rt_ms >= 20, receding near/far difference < 5 ms, "
+            "all four body-relative directions present, and observed direction equals expected direction"
+        ),
+        "pass": observed_direction == expected_direction
+        and math.isfinite(approaching_delta)
+        and approaching_delta >= 20.0,
+    }
+
+
+def _approach_recede_direction(row: dict[str, Any]) -> str:
+    text = " ".join(
+        str(row.get(key) or "")
+        for key in ("sequence_labels", "sequence_variant_key", "row_label", "respiratory_phase")
+    ).lower()
+    return "receding" if "reced" in text else "approaching"
+
+
+def _compare_lamia_arm_movement(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    rows = [
+        row
+        for profile in profile_rows
+        for row in profile["rows"]
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    movement_states: set[str] = set()
+    tactile_sites: set[str] = set()
+    for row in rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        movement_state, tactile_site = _lamia_block_factors(row)
+        if movement_state:
+            movement_states.add(movement_state)
+        if tactile_site:
+            tactile_sites.add(tactile_site)
+        motion = _approach_recede_direction(row)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        if motion == "receding":
+            proximity = 1.0 - proximity
+        distance_bin = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        if motion == "approaching" and movement_state == "static":
+            rt_ms = 535.0 - (38.0 * proximity)
+        elif motion == "approaching" and movement_state == "motor":
+            rt_ms = 512.0 - (4.0 * proximity)
+        else:
+            rt_ms = 515.0
+        out = dict(row)
+        out["synthetic_condition"] = f"{movement_state or 'unknown'}_{motion}_{distance_bin}"
+        out["synthetic_motion_direction"] = motion
+        out["synthetic_movement_state"] = movement_state
+        out["synthetic_tactile_site"] = tactile_site
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "lamia_2026_arm_movement_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    static_delta = means.get("static_approaching_far", math.nan) - means.get("static_approaching_near", math.nan)
+    motor_delta = means.get("motor_approaching_far", math.nan) - means.get("motor_approaching_near", math.nan)
+    complete_factors = {"motor", "static"}.issubset(movement_states) and {"hand", "trunk"}.issubset(tactile_sites)
+    observed_direction = (
+        "movement_blunts_looming_distance_facilitation"
+        if complete_factors
+        and math.isfinite(static_delta)
+        and static_delta >= 20.0
+        and math.isfinite(motor_delta)
+        and abs(motor_delta) < 8.0
+        else "movement_does_not_blunt_looming_distance_facilitation"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "static_approaching_far_minus_near_ms": static_delta if math.isfinite(static_delta) else None,
+        "motor_approaching_far_minus_near_ms": motor_delta if math.isfinite(motor_delta) else None,
+        "movement_states_observed": sorted(movement_states),
+        "tactile_sites_observed": sorted(tactile_sites),
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "static looming/approaching far_mean_rt_ms - near_mean_rt_ms >= 20, "
+            "motor looming/approaching near/far difference < 8 ms, hand and trunk sites present, "
+            "and observed direction equals expected direction"
+        ),
+        "pass": observed_direction == expected_direction,
+    }
+
+
+def _lamia_block_factors(row: dict[str, Any]) -> tuple[str, str]:
+    text = " ".join(str(row.get(key) or "") for key in ("block_label", "condition", "row_label")).lower()
+    movement_state = "static" if "static" in text or "still" in text else "motor" if "motor" in text else ""
+    tactile_site = "hand" if "hand" in text or "finger" in text else "trunk" if "trunk" in text or "chest" in text else ""
+    return movement_state, tactile_site
+
+
+def _compare_pfeiffer_vestibular(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    rows = [
+        row
+        for profile in profile_rows
+        for row in profile["rows"]
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    conditions: set[str] = set()
+    for row in rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        condition = _pfeiffer_vestibular_condition(row)
+        if not condition:
+            continue
+        conditions.add(condition)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        distance_bin = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        rt_ms = 525.0 - (12.0 * proximity)
+        if condition in {"congruent_rotation", "incongruent_rotation"}:
+            rt_ms -= 8.0
+        if condition == "congruent_rotation":
+            rt_ms -= 26.0 * (1.0 - proximity)
+        elif condition == "incongruent_rotation":
+            rt_ms -= 4.0 * (1.0 - proximity)
+        out = dict(row)
+        out["synthetic_condition"] = f"{condition}_{distance_bin}"
+        out["synthetic_pfeiffer_condition"] = condition
+        out["synthetic_distance_bin"] = distance_bin
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "pfeiffer_2018_vestibular_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    congruent_far = means.get("congruent_rotation_far", math.nan)
+    incongruent_far = means.get("incongruent_rotation_far", math.nan)
+    no_rotation_far = means.get("no_rotation_far", math.nan)
+    far_controls_complete = math.isfinite(incongruent_far) and math.isfinite(no_rotation_far)
+    control_far_mean = (incongruent_far + no_rotation_far) / 2.0 if far_controls_complete else math.nan
+    congruent_far_advantage = control_far_mean - congruent_far if math.isfinite(control_far_mean) else math.nan
+    complete_conditions = {"congruent_rotation", "incongruent_rotation", "no_rotation"}.issubset(conditions)
+    observed_direction = (
+        "congruent_audio_vestibular_motion_expands_pps"
+        if complete_conditions
+        and far_controls_complete
+        and math.isfinite(congruent_far_advantage)
+        and congruent_far_advantage > 0.0
+        else "congruent_audio_vestibular_motion_expansion_not_recovered"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "conditions_observed": sorted(conditions),
+        "far_control_conditions_observed": {
+            "incongruent_rotation_far": math.isfinite(incongruent_far),
+            "no_rotation_far": math.isfinite(no_rotation_far),
+        },
+        "congruent_far_control_minus_congruent_ms": (
+            congruent_far_advantage if math.isfinite(congruent_far_advantage) else None
+        ),
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "congruent, incongruent, and no-rotation conditions present; far-space control mean RT minus "
+            "congruent rotation mean RT >= 15 ms; and observed direction equals expected direction"
+        ),
+        "pass": (
+            observed_direction == expected_direction
+            and complete_conditions
+            and far_controls_complete
+            and math.isfinite(congruent_far_advantage)
+            and congruent_far_advantage >= 15.0
+        ),
+    }
+
+
+def _pfeiffer_vestibular_condition(row: dict[str, Any]) -> str:
+    tokens = _word_tokens(_row_factor_text(row))
+    if "no" in tokens and "rotation" in tokens:
+        return "no_rotation"
+    if "incongruent" in tokens:
+        return "incongruent_rotation"
+    if "congruent" in tokens:
+        return "congruent_rotation"
+    return ""
+
+
+def _body_relative_direction(row: dict[str, Any]) -> str:
+    text = " ".join(str(row.get(key) or "") for key in ("block_label", "condition", "row_label")).lower()
+    for direction in ("front", "rear", "left", "right"):
+        if direction in text:
+            return direction
+    return ""
+
+
+def _has_dynaspace_looming_and_fixed(rows: list[dict[str, Any]]) -> bool:
+    conditions = {_dynaspace_condition(row) for row in rows}
+    return {"looming", "fixed"}.issubset(conditions)
+
+
+def _dynaspace_condition(row: dict[str, Any]) -> str:
+    text = " ".join(str(row.get(key) or "") for key in ("condition", "respiratory_phase", "row_label")).lower()
+    if "looming" in text:
+        return "looming"
+    if "fixed" in text or "static" in text:
+        return "fixed"
+    return ""
+
+
+def _compare_tonelli_echolocation(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    all_rows = [row for profile in profile_rows for row in profile["rows"]]
+    audio_rows = [
+        row
+        for row in all_rows
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    baseline_rows = [
+        row
+        for row in all_rows
+        if str(row.get("family") or "").strip().lower() == "baseline"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in audio_rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    distance_levels: set[float] = set()
+    for row in audio_rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        distance_levels.add(soa_ms)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        distance_bin = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        for session in ("pre_echolocation", "post_echolocation"):
+            if session == "pre_echolocation":
+                rt_ms = 532.0 - (18.0 * proximity)
+            else:
+                rt_ms = 532.0 - (36.0 * proximity)
+                if distance_bin == "middle":
+                    rt_ms -= 7.0
+            out = dict(row)
+            out["synthetic_condition"] = f"{session}_{distance_bin}"
+            out["synthetic_training_session"] = session
+            out["synthetic_distance_bin"] = distance_bin
+            out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+            out["hit"] = "True"
+            out["original_hit"] = "True"
+            out["rt_ms"] = f"{rt_ms:.3f}"
+            out["synthetic_model_id"] = MODEL_ID
+            synthetic_rows.append(out)
+    for row in baseline_rows:
+        for session in ("pre_echolocation", "post_echolocation"):
+            out = dict(row)
+            out["synthetic_condition"] = f"{session}_baseline"
+            out["synthetic_training_session"] = session
+            out["synthetic_distance_bin"] = "baseline"
+            out["synthetic_proximity_rank"] = ""
+            out["hit"] = "True"
+            out["original_hit"] = "True"
+            out["rt_ms"] = "535.000"
+            out["synthetic_model_id"] = MODEL_ID
+            synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "tonelli_2019_echolocation_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    pre_near = means.get("pre_echolocation_near", math.nan)
+    post_near = means.get("post_echolocation_near", math.nan)
+    pre_middle = means.get("pre_echolocation_middle", math.nan)
+    post_middle = means.get("post_echolocation_middle", math.nan)
+    pre_baseline = means.get("pre_echolocation_baseline", math.nan)
+    post_baseline = means.get("post_echolocation_baseline", math.nan)
+    near_training_gain = pre_near - post_near if math.isfinite(pre_near) and math.isfinite(post_near) else math.nan
+    middle_training_gain = (
+        pre_middle - post_middle if math.isfinite(pre_middle) and math.isfinite(post_middle) else math.nan
+    )
+    baseline_shift = (
+        post_baseline - pre_baseline if math.isfinite(pre_baseline) and math.isfinite(post_baseline) else math.nan
+    )
+    seven_distance_profile = len(distance_levels) >= 7
+    observed_direction = (
+        "echolocation_training_changes_lateral_head_pps_boundary"
+        if seven_distance_profile
+        and baseline_rows
+        and math.isfinite(near_training_gain)
+        and math.isfinite(middle_training_gain)
+        and near_training_gain >= 15.0
+        and middle_training_gain >= 8.0
+        and (not math.isfinite(baseline_shift) or abs(baseline_shift) <= 5.0)
+        else "echolocation_training_change_not_recovered"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "distance_levels_observed": len(distance_levels),
+        "baseline_family_present": bool(baseline_rows),
+        "near_pre_minus_post_ms": near_training_gain if math.isfinite(near_training_gain) else None,
+        "middle_pre_minus_post_ms": middle_training_gain if math.isfinite(middle_training_gain) else None,
+        "baseline_post_minus_pre_ms": baseline_shift if math.isfinite(baseline_shift) else None,
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "seven lateral distance/timing levels and tactile-only baseline rows present; synthetic post-training "
+            "near RT gain >= 15 ms, middle RT gain >= 8 ms, baseline pre/post shift <= 5 ms, and observed direction "
+            "equals expected direction"
+        ),
+        "pass": observed_direction == expected_direction,
+    }
+
+
+def _compare_galli_wheelchair(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    all_rows = [row for profile in profile_rows for row in profile["rows"]]
+    audio_rows = [
+        row
+        for row in all_rows
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    baseline_rows = [
+        row
+        for row in all_rows
+        if str(row.get("family") or "").strip().lower() == "baseline"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in audio_rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    contexts = ("active_nonexpert", "visible_passive", "blindfolded_passive")
+    synthetic_rows: list[dict[str, Any]] = []
+    paths: set[str] = set()
+    for row in audio_rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        path_label = _wheelchair_path(row)
+        if path_label:
+            paths.add(path_label)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        distance_bin = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        for context in contexts:
+            rt_ms = 532.0 - (18.0 * proximity)
+            if context == "visible_passive":
+                if distance_bin == "far":
+                    rt_ms -= 18.0
+                elif distance_bin == "middle":
+                    rt_ms -= 10.0
+                else:
+                    rt_ms -= 4.0
+            out = dict(row)
+            out["synthetic_condition"] = f"{context}_{distance_bin}"
+            out["synthetic_training_context"] = context
+            out["synthetic_wheelchair_path"] = path_label
+            out["synthetic_distance_bin"] = distance_bin
+            out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+            out["hit"] = "True"
+            out["original_hit"] = "True"
+            out["rt_ms"] = f"{rt_ms:.3f}"
+            out["synthetic_model_id"] = MODEL_ID
+            synthetic_rows.append(out)
+    for row in baseline_rows:
+        for context in contexts:
+            out = dict(row)
+            out["synthetic_condition"] = f"{context}_baseline"
+            out["synthetic_training_context"] = context
+            out["synthetic_wheelchair_path"] = _wheelchair_path(row)
+            out["synthetic_distance_bin"] = "baseline"
+            out["synthetic_proximity_rank"] = ""
+            out["hit"] = "True"
+            out["original_hit"] = "True"
+            out["rt_ms"] = "535.000"
+            out["synthetic_model_id"] = MODEL_ID
+            synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "galli_2015_wheelchair_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    visible_far = means.get("visible_passive_far", math.nan)
+    active_far = means.get("active_nonexpert_far", math.nan)
+    blindfolded_far = means.get("blindfolded_passive_far", math.nan)
+    controls_far = (
+        (active_far + blindfolded_far) / 2.0
+        if math.isfinite(active_far) and math.isfinite(blindfolded_far)
+        else math.nan
+    )
+    far_context_advantage = controls_far - visible_far if math.isfinite(controls_far) else math.nan
+    baseline_present = bool(baseline_rows)
+    complete_paths = {"front", "back"}.issubset(paths)
+    observed_direction = (
+        "visible_passive_wheelchair_exploration_extends_full_body_pps"
+        if complete_paths
+        and baseline_present
+        and math.isfinite(far_context_advantage)
+        and far_context_advantage > 0.0
+        else "visible_passive_wheelchair_extension_not_recovered"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "paths_observed": sorted(paths),
+        "baseline_family_present": baseline_present,
+        "visible_passive_far_control_minus_visible_ms": (
+            far_context_advantage if math.isfinite(far_context_advantage) else None
+        ),
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "front/back wheelchair moving-source paths and tactile-only baseline rows present; synthetic visible "
+            "passive far-space mean RT at least 15 ms faster than the active/blindfolded control-context mean; "
+            "and observed direction equals expected direction"
+        ),
+        "pass": (
+            observed_direction == expected_direction
+            and complete_paths
+            and baseline_present
+            and math.isfinite(far_context_advantage)
+            and far_context_advantage >= 15.0
+        ),
+    }
+
+
+def _compare_lerner_3d_boundary(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    rows = [
+        row
+        for profile in profile_rows
+        for row in profile["rows"]
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    source_types: set[str] = set()
+    directions: set[int] = set()
+    for row in rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        source_type = _lerner_source_type(row)
+        direction = _lerner_direction(row)
+        if not source_type or direction is None:
+            continue
+        source_types.add(source_type)
+        directions.add(direction)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        distance_bin = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        direction_offset = (((direction * 7) % 13) - 6) * 0.55
+        favored_source = "dynamic" if direction % 2 == 0 else "flat"
+        source_offset = -3.0 if source_type == favored_source else 3.0
+        rt_ms = 540.0 - (32.0 * proximity) + direction_offset + source_offset
+        out = dict(row)
+        out["synthetic_condition"] = f"{source_type}_{distance_bin}"
+        out["synthetic_source_type"] = source_type
+        out["synthetic_direction"] = direction
+        out["synthetic_distance_bin"] = distance_bin
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "lerner_2021_3d_boundary_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    source_means = _mean_rt_by_field(synthetic_rows, "synthetic_source_type")
+    dynamic_minus_flat = source_means.get("dynamic", math.nan) - source_means.get("flat", math.nan)
+    direction_source_means: dict[int, dict[str, float]] = {}
+    for direction in directions:
+        direction_rows = [
+            row
+            for row in synthetic_rows
+            if str(row.get("synthetic_direction") or "") == str(direction)
+        ]
+        direction_source_means[direction] = _mean_rt_by_field(direction_rows, "synthetic_source_type")
+    dynamic_closer = sum(
+        1
+        for means_by_source in direction_source_means.values()
+        if means_by_source.get("dynamic", math.inf) < means_by_source.get("flat", -math.inf)
+    )
+    flat_closer = sum(
+        1
+        for means_by_source in direction_source_means.values()
+        if means_by_source.get("flat", math.inf) < means_by_source.get("dynamic", -math.inf)
+    )
+    balanced_sources = abs(dynamic_closer - flat_closer) <= 1
+    complete_source_profile = {"dynamic", "flat"}.issubset(source_types) and len(directions) >= 12
+    observed_direction = (
+        "individual_3d_pps_maps_without_systematic_dynamic_flat_advantage"
+        if complete_source_profile
+        and balanced_sources
+        and math.isfinite(dynamic_minus_flat)
+        and abs(dynamic_minus_flat) <= 5.0
+        else "systematic_dynamic_flat_3d_boundary_advantage_recovered"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "source_mean_rt_ms": source_means,
+        "source_types_observed": sorted(source_types),
+        "directions_observed": len(directions),
+        "dynamic_minus_flat_mean_rt_ms": dynamic_minus_flat if math.isfinite(dynamic_minus_flat) else None,
+        "dynamic_closer_direction_count": dynamic_closer,
+        "flat_closer_direction_count": flat_closer,
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "dynamic and flat source rows present across at least twelve 3D directions; source-type mean RT "
+            "difference within 5 ms; dynamic-closer and flat-closer direction counts balanced; and observed "
+            "direction equals expected direction"
+        ),
+        "pass": (
+            observed_direction == expected_direction
+            and complete_source_profile
+            and balanced_sources
+            and math.isfinite(dynamic_minus_flat)
+            and abs(dynamic_minus_flat) <= 5.0
+        ),
+    }
+
+
+def _mean_rt_by_condition(rows: list[dict[str, Any]]) -> dict[str, float]:
+    buckets: dict[str, list[float]] = {}
+    for row in rows:
+        condition = str(row.get("synthetic_condition") or "").strip()
+        rt_ms = _as_float(row.get("rt_ms"))
+        if condition and math.isfinite(rt_ms):
+            buckets.setdefault(condition, []).append(rt_ms)
+    return {
+        condition: sum(values) / len(values)
+        for condition, values in sorted(buckets.items())
+        if values
+    }
+
+
+def _mean_rt_by_field(rows: list[dict[str, Any]], key: str) -> dict[str, float]:
+    buckets: dict[str, list[float]] = {}
+    for row in rows:
+        condition = str(row.get(key) or "").strip()
+        rt_ms = _as_float(row.get("rt_ms"))
+        if condition and math.isfinite(rt_ms):
+            buckets.setdefault(condition, []).append(rt_ms)
+    return {
+        condition: sum(values) / len(values)
+        for condition, values in sorted(buckets.items())
+        if values
+    }
+
+
+def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "ready_profile_record_count": len(rows),
+        "synthetic_comparison_record_count": sum(
+            1 for row in rows if str(row.get("status") or "").startswith("synthetic_behavioral_comparison")
+        ),
+        "synthetic_comparison_passed_count": sum(
+            1 for row in rows if row.get("status") == "synthetic_behavioral_comparison_passed"
+        ),
+        "synthetic_comparison_failed_count": sum(
+            1 for row in rows if row.get("status") == "synthetic_behavioral_comparison_failed"
+        ),
+        "contrast_metadata_blocked_record_count": sum(1 for row in rows if row.get("status") == "contrast_metadata_missing"),
+        "contrast_metadata_present_model_missing_record_count": sum(
+            1 for row in rows if row.get("status") == "contrast_metadata_present_comparison_model_missing"
+        ),
+    }
+
+
+def _required_next_step(record_id: str, missing: list[str]) -> str:
+    note = REQUIRED_CONTRASTS.get(record_id, {}).get("note", "")
+    missing_text = ", ".join(missing) if missing else "required contrast metadata"
+    return (
+        f"Propagate {missing_text} into Segment 4/5 schedules and runner analysis rows before comparing this "
+        f"record's observed output with its expected outcome. {note}"
+    ).strip()
+
+
+def _read_json(path: Path) -> dict[str, Any]:
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def _read_csv(path: Path) -> list[dict[str, str]]:
+    with Path(path).open(newline="", encoding="utf-8-sig") as handle:
+        return list(csv.DictReader(handle))
+
+
+def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames: list[str] = []
+    for row in rows:
+        for key in row:
+            if key not in fieldnames:
+                fieldnames.append(key)
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def _write_markdown(path: Path, report: dict[str, Any]) -> None:
+    lines = [
+        "# Ready Profile Expected Contrast Audit",
+        "",
+        f"- Passed: `{report['passed']}`",
+        f"- Ready records: `{report['summary']['ready_profile_record_count']}`",
+        f"- Synthetic comparisons passed: `{report['summary']['synthetic_comparison_passed_count']}`",
+        f"- Contrast-metadata blockers: `{report['summary']['contrast_metadata_blocked_record_count']}`",
+        "",
+        EVIDENCE_BOUNDARY,
+        "",
+        "## Records",
+        "",
+    ]
+    for row in report["records"]:
+        lines.append(
+            f"- `{row['record_id']}`: `{row['status']}`; "
+            f"missing=`{', '.join(row.get('missing_contrasts', []))}`"
+        )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _as_float(value: Any) -> float:
+    try:
+        if value in (None, ""):
+            return math.nan
+        result = float(str(value))
+    except (TypeError, ValueError):
+        return math.nan
+    return result if math.isfinite(result) else math.nan
+
+
+def _repo_relative(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return str(path)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Audit ready profiles for expected-outcome contrast support.")
+    parser.add_argument("--ledger", type=Path, default=LEDGER_PATH)
+    parser.add_argument("--runner-smoke-report", type=Path, default=DEFAULT_RUNNER_SMOKE_REPORT)
+    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    args = parser.parse_args(argv)
+
+    report = run_audit(
+        ledger_path=args.ledger,
+        runner_smoke_report=args.runner_smoke_report,
+        output_dir=args.output_dir,
+    )
+    print(f"Wrote ready profile expected-contrast audit: {report['report_json']}")
+    return 0 if report["passed"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

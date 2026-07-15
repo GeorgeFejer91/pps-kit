@@ -3,7 +3,7 @@
 - Record ID: `ladavas_2001_auditory_tactile_extinction`
 - DOI: `10.1093/neucas/7.2.97`
 - DOI URL: https://doi.org/10.1093/neucas/7.2.97
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: near/far auditory-tactile extinction task around the head in a right-brain-damaged patient
 - PDF status: `paywalled`
 - Supplement status: `paywalled`
@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- extract exact near/far sound distances, sound types, tactile site and response scoring, trial counts, and clinical extinction-response procedure before any scaffolded profile
+- extract exact near/far sound distances, sound types, tactile site, trial counts, and clinical extinction-response procedure before any scaffolded profile; row-level cross-modal extinction/report response mapping is now runner-supported
 
 ## Review Attempts
 

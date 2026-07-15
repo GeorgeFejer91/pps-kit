@@ -35,10 +35,22 @@ manuscript for PPS Toolkit.
   scaffolds, unpublished local examples, missing-parameter blockers, and
   toolkit structural gaps.
 - `figure_source_plan.csv`: planned figure/source-artifact map for the final
-  submission, including the evidence boundary for each figure.
+  submission, including the generated PNG path and evidence boundary for each
+  figure.
+- `figures/generate_figures.py`: deterministic Pillow generator for
+  source-owned schematic manuscript figures.
+- `figures/figure*.png`: redistributable schematic figures generated from the
+  tracked script. They summarize toolkit workflow, evidence ledgers, stimulus
+  alternatives, evidence tiers, tactile safeguards, and exploratory analysis
+  surfaces without using private participant data or copyrighted source-paper
+  figures.
 - `procedural_gap_register.csv`: procedural gap register listing the screening,
   timing, tactile-delivery, spatial-perception, rights, and analysis-governance
   evidence that should be closed or caveated before final submission.
+- `pre_run_qualification_checklist.csv`: pre-run qualification checklist that
+  turns the procedural gaps into participant/session readiness records for
+  listening eligibility, spatial perception, route timing, tactile readiness,
+  task/response governance, and profile rights/provenance.
 - `output_schema_dictionary.csv`: source-level dictionary for the runner's
   public `1.Data_min` exports, richer `2.Data_max` reconstruction layer,
   event/marker/timing evidence, tactile calibration/top-up/adaptive-threshold
@@ -125,11 +137,17 @@ workflow explicitly asks for an archived submission snapshot.
   what each preload profile may safely claim, but it is not a rights clearance,
   apparatus reconstruction, perceptual validation, or proof of original-study
   effects.
-- `figure_source_plan.csv` is a publication-preparation scaffold, not generated
-  figure evidence. Final figures must be generated from redistributable toolkit
-  artifacts and should cite or archive the exact source files used.
+- `figure_source_plan.csv` records the planned figure set and the current
+  generated PNG path for each source-owned schematic. The schematic figures
+  support workflow and evidence-boundary explanation only; they are not
+  screenshots of validated runtime behavior, hardware timing evidence, tactile
+  mechanical evidence, or participant-effect evidence.
 - `procedural_gap_register.csv` is a reviewer-facing readiness scaffold, not a
   claim that those procedural validations have already been completed.
+- `pre_run_qualification_checklist.csv` is a reporting checklist for labs and
+  release examples. It does not certify that listening, spatial, timing,
+  tactile, rights, or analysis qualification artifacts have already been
+  supplied.
 - `output_schema_dictionary.csv` documents current output artifacts for
   publication planning. It is not a guarantee that every artifact is public:
   release status still depends on deidentification, rights, path/privacy review,

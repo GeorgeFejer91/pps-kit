@@ -5,11 +5,13 @@ from __future__ import annotations
 import argparse
 import csv
 from datetime import datetime
+import hashlib
 from html import escape
 import json
 import math
 import os
 import queue
+import re
 import subprocess
 import sys
 import threading
@@ -185,6 +187,7 @@ from .tactile_calibration import (
     CONFIRMATION_REQUIRED_CLEAN_CATCHES,
     CONFIRMATION_REQUIRED_CONSECUTIVE_HITS,
     PROTOCOL_NAME as TACTILE_CALIBRATION_PROTOCOL_NAME,
+    TACTILE_OUTPUT_34_HARD_GUARD_PERCENT,
     TACTILE_OUTPUT_34_MAX_PERCENT,
     TactileCalibrationRunner,
     VALID_RESPONSE_END_MS,
@@ -201,6 +204,9 @@ STUDY5_PROFILE_ID = "study5_box_breathing_pps"
 DATA_COLLECTED_MARK = "[collected]"
 PARTICIPANT_LEDGER_FILENAME = "participant_ledger.v1.json"
 PARTICIPANT_LEDGER_SCHEMA = "pps-focus-participant-ledger.v1"
+PART_LABEL_HISTORY_FILENAME = "part_label_history.v1.json"
+PART_LABEL_HISTORY_SCHEMA = "pps-focus-part-label-history.v1"
+PART_LABEL_MAX_CHARS = 80
 TIMELINE_LABEL_WIDTH = 58
 TIMELINE_RIGHT_MARGIN = 12
 TIMELINE_ROW_NAMES = ("Resp", "Type", "Noise", "SOA", "Tactile", "Clicks")
@@ -512,7 +518,7 @@ def _coerce_volume_percent(value: Any, *, default: float = 100.0, maximum: float
 
 
 def _coerce_tactile_output_percent(value: Any, *, default: float = TACTILE_OUTPUT_34_MAX_PERCENT) -> float:
-    return _coerce_volume_percent(value, default=default, maximum=TACTILE_OUTPUT_34_MAX_PERCENT)
+    return _coerce_volume_percent(value, default=default, maximum=TACTILE_OUTPUT_34_HARD_GUARD_PERCENT)
 
 
 def _volume_percent_to_slider_value(value: Any, *, maximum: float = 100.0) -> int:
@@ -541,8 +547,10 @@ def _output_channel_volume_payload(output_12_percent: Any, output_34_percent: An
         "output_1_2_percent": output_12,
         "output_3_4_percent": output_34,
         "output_1_2_linear_gain": _output_volume_gain(output_12),
-        "output_3_4_linear_gain": _output_volume_gain(output_34, maximum=TACTILE_OUTPUT_34_MAX_PERCENT),
-        "output_3_4_max_percent": TACTILE_OUTPUT_34_MAX_PERCENT,
+        "output_3_4_linear_gain": _output_volume_gain(output_34, maximum=TACTILE_OUTPUT_34_HARD_GUARD_PERCENT),
+        "output_3_4_max_percent": TACTILE_OUTPUT_34_HARD_GUARD_PERCENT,
+        "output_3_4_initial_software_ceiling_percent": TACTILE_OUTPUT_34_MAX_PERCENT,
+        "output_3_4_hard_guard_percent": TACTILE_OUTPUT_34_HARD_GUARD_PERCENT,
     }
 
 
@@ -2005,12 +2013,21 @@ def _create_focus_mode_dialog(q: dict[str, Any], owner: Any) -> Any:
         def eventFilter(self, watched: Any, event: Any) -> bool:  # noqa: N802 - Qt API
             try:
                 mouse_press = q["QEvent"].Type.MouseButtonPress
+                key_press = q["QEvent"].Type.KeyPress
+                key_release = q["QEvent"].Type.KeyRelease
             except AttributeError:
                 mouse_press = q["QEvent"].MouseButtonPress
-            if event.type() == mouse_press:
+                key_press = q["QEvent"].KeyPress
+                key_release = q["QEvent"].KeyRelease
+            event_type = event.type()
+            if event_type == mouse_press:
                 handler = getattr(owner, "_handle_response_mouse_press", None)
                 if callable(handler):
                     handler(watched, event)
+            elif event_type in (key_press, key_release):
+                handler = getattr(owner, "_handle_mouse_lock_chord_event", None)
+                if callable(handler):
+                    handler(event, event_type == key_press)
             return False
 
         def _restore_locked_geometry(self) -> None:
@@ -2312,7 +2329,7 @@ def _create_tactile_calibration_monitor_dialog(q: dict[str, Any], owner: Any, pa
                 label.setObjectName("metricValue")
                 label.setWordWrap(True)
             self.intensity_bar = q["QProgressBar"]()
-            self.intensity_bar.setRange(0, int(round(TACTILE_OUTPUT_34_MAX_PERCENT * OUTPUT_VOLUME_SLIDER_SCALE)))
+            self.intensity_bar.setRange(0, int(round(TACTILE_OUTPUT_34_HARD_GUARD_PERCENT * OUTPUT_VOLUME_SLIDER_SCALE)))
             self.intensity_bar.setTextVisible(True)
             self.intensity_bar.setValue(0)
             metrics_layout.addWidget(self.intensity_label, 0, 0)
@@ -6075,6 +6092,115 @@ def participant_ledger_entry(output_root: Path | str, participant_id: str) -> di
     return dict(entry) if isinstance(entry, dict) else {}
 
 
+def part_label_history_path(output_root: Path | str) -> Path:
+    return output_project_state_dir(output_root) / PART_LABEL_HISTORY_FILENAME
+
+
+def load_part_label_history(output_root: Path | str) -> dict[str, Any]:
+    path = part_label_history_path(output_root)
+    try:
+        with open(_focus_filesystem_path(path), "r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except Exception:
+        return {"schema": PART_LABEL_HISTORY_SCHEMA, "experiments": {}}
+    if not isinstance(data, dict):
+        return {"schema": PART_LABEL_HISTORY_SCHEMA, "experiments": {}}
+    experiments = data.get("experiments")
+    if not isinstance(experiments, dict):
+        experiments = {}
+    return {
+        **data,
+        "schema": PART_LABEL_HISTORY_SCHEMA,
+        "experiments": experiments,
+    }
+
+
+def save_part_label_history(output_root: Path | str, history: dict[str, Any]) -> Path:
+    path = part_label_history_path(output_root)
+    data = dict(history or {})
+    experiments = data.get("experiments")
+    if not isinstance(experiments, dict):
+        experiments = {}
+    data["schema"] = PART_LABEL_HISTORY_SCHEMA
+    data["experiments"] = experiments
+    data["updated_at"] = datetime.now().isoformat(timespec="seconds")
+    os.makedirs(_focus_filesystem_path(path.parent), exist_ok=True)
+    with open(_focus_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False) + "\n")
+    return path
+
+
+def _normalize_part_label(value: Any) -> str:
+    text = str(value or "")
+    text = re.sub(r"[\x00-\x1f\x7f]+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    if len(text) > PART_LABEL_MAX_CHARS:
+        text = text[:PART_LABEL_MAX_CHARS].rstrip()
+    return text
+
+
+def _part_label_number_text(value: Any) -> str:
+    text = str(value or "").strip().lower()
+    match = re.search(r"\d+", text)
+    if not match:
+        return ""
+    try:
+        number = int(match.group(0))
+    except ValueError:
+        return ""
+    return str(number) if number > 0 else ""
+
+
+def _normalize_part_label_map(value: Any) -> dict[str, str]:
+    if not isinstance(value, dict):
+        return {}
+    labels: dict[str, str] = {}
+    for key, label in value.items():
+        part = _part_label_number_text(key)
+        if not part:
+            continue
+        normalized = _normalize_part_label(label)
+        labels[part] = normalized
+    return labels
+
+
+def _part_label_run_setup_sha256(run_setup_manifest_path: Any) -> str:
+    if run_setup_manifest_path in (None, ""):
+        return ""
+    path = Path(run_setup_manifest_path)
+    if not _focus_path_is_file(path):
+        return ""
+    digest = hashlib.sha256()
+    try:
+        with open(_focus_filesystem_path(path), "rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(chunk)
+    except Exception:
+        return ""
+    return digest.hexdigest()
+
+
+def _part_label_experiment_key(run_setup_manifest_path: Any, run_setup_sha256: str = "") -> str:
+    digest = str(run_setup_sha256 or _part_label_run_setup_sha256(run_setup_manifest_path) or "").strip()
+    if digest:
+        return f"sha256:{digest}"
+    if run_setup_manifest_path not in (None, ""):
+        try:
+            return f"path:{Path(run_setup_manifest_path).expanduser().resolve()}"
+        except Exception:
+            return f"path:{run_setup_manifest_path}"
+    return "unknown"
+
+
+def _append_unique_part_label(labels: list[str], value: Any) -> None:
+    label = _normalize_part_label(value)
+    if not label:
+        return
+    label_key = label.casefold()
+    labels[:] = [item for item in labels if _normalize_part_label(item).casefold() != label_key]
+    labels.insert(0, label)
+
+
 def _read_latest_output_diary_context(path: Any) -> dict[str, Any]:
     if path in (None, ""):
         return {}
@@ -8690,6 +8816,10 @@ class FocusModeWindow:
         self._experiment_window_locked_window_state: Any | None = None
         self._experiment_window_previous_minimum_size: Any | None = None
         self._experiment_window_previous_maximum_size: Any | None = None
+        self._mouse_area_lock_active = False
+        self._mouse_lock_chord_down: set[int] = set()
+        self._mouse_lock_chord_fired = False
+        self._mouse_lock_reassert_timer: Any | None = None
         self.all_block_plan_items: list[dict[str, Any]] = []
         self.block_plan_items: list[dict[str, Any]] = []
         self.instruction_plan_items: list[dict[str, Any]] = []
@@ -8825,6 +8955,9 @@ class FocusModeWindow:
         self.target_button = _create_response_target_button(q, profile)
         self.target_button.setEnabled(False)
         self.target_button.clicked.connect(self._click)
+        self.target_button.setToolTip(
+            "Hold Ctrl+A+S+D to lock or unlock the mouse cursor inside this response target."
+        )
         response_layout.addWidget(self.target_button, 0, q["Qt"].AlignmentFlag.AlignHCenter)
         response_layout.addStretch(1)
         self.instruction_button = q["QPushButton"]("Continue")
@@ -8895,9 +9028,12 @@ class FocusModeWindow:
             label="Output 3/4",
             value=self.output_34_volume_percent,
             object_name="output34VolumeSlider",
-            tooltip="Linear gain for tactile output 3 and its output 4 mirror. Capped at 0.5% for participant comfort.",
+            tooltip=(
+                "Linear gain for tactile output 3 and its output 4 mirror. "
+                "The software ceiling starts conservatively and can expand up to the hard guard during calibration or missed-trial adaptation."
+            ),
             on_change=lambda value: self._set_output_volume("output_3_4", value),
-            maximum_percent=TACTILE_OUTPUT_34_MAX_PERCENT,
+            maximum_percent=TACTILE_OUTPUT_34_HARD_GUARD_PERCENT,
         )
         output_levels_layout.addWidget(output_12_row)
         output_levels_layout.addWidget(output_34_row)
@@ -8913,7 +9049,7 @@ class FocusModeWindow:
         self.test_tactile_button = q["QPushButton"]("Test Tactile")
         self.test_tactile_button.setObjectName("testTactileOutputButton")
         self.test_tactile_button.setMinimumHeight(output_test_button_min_height)
-        self.test_tactile_button.setToolTip("Play four standardized tactile pulses one second apart through output 3, mirrored to output 4, using the capped current Output 3/4 level.")
+        self.test_tactile_button.setToolTip("Play four standardized tactile pulses one second apart through output 3, mirrored to output 4, using the current Output 3/4 level.")
         self.test_tactile_button.clicked.connect(lambda _checked=False: self._run_output_test("tactile"))
         self.tactile_calibration_button = q["QPushButton"]("Tactile Threshold")
         self.tactile_calibration_button.setObjectName("tactileCalibrationButton")
@@ -9046,6 +9182,8 @@ class FocusModeWindow:
         self.participant_decrement_button.clicked.connect(lambda _checked=False: self._step_participant_selection(-1))
         self.participant_name_input = q["QLineEdit"]("")
         self.participant_name_input.setPlaceholderText("Participant name")
+        self.part1_label_combo = self._create_part_label_combo("part01LabelCombo", "Part 01 label")
+        self.part2_label_combo = self._create_part_label_combo("part02LabelCombo", "Part 02 label")
         self.include_name_lsl_checkbox = q["QCheckBox"]("Include name in LSL/session markers (opt-in)")
         self.include_name_lsl_checkbox.setObjectName("nameSharingCheckbox")
         self.include_name_lsl_checkbox.setToolTip("Opt in only when the participant's real name may be stored in local session metadata and LSL markers.")
@@ -9078,7 +9216,7 @@ class FocusModeWindow:
         setup_fields.setHorizontalSpacing(8)
         setup_fields.setVerticalSpacing(6)
 
-        def _add_setup_field(row: int, label: str, widget: Any) -> None:
+        def _add_setup_field(row: int, label: str, widget: Any) -> Any:
             key = q["QLabel"](label)
             key.setObjectName("metricLabel")
             key.setMinimumHeight(max(16, profile.input_min_height - 8))
@@ -9086,12 +9224,15 @@ class FocusModeWindow:
                 widget.setMinimumHeight(profile.input_min_height)
             setup_fields.addWidget(key, row, 0)
             setup_fields.addWidget(widget, row, 1)
+            return key
 
         _add_setup_field(0, "Participant", self.participant_selector_widget)
         _add_setup_field(1, "Name", self.participant_name_input)
-        _add_setup_field(2, "Age", self.age_input)
-        _add_setup_field(3, "Handedness", self.handedness_combo)
-        _add_setup_field(4, "Gender", self.gender_combo)
+        self.part1_label_field_label = _add_setup_field(2, "Part 01 label", self.part1_label_combo)
+        self.part2_label_field_label = _add_setup_field(3, "Part 02 label", self.part2_label_combo)
+        _add_setup_field(4, "Age", self.age_input)
+        _add_setup_field(5, "Handedness", self.handedness_combo)
+        _add_setup_field(6, "Gender", self.gender_combo)
         setup_fields.setColumnStretch(1, 1)
         data_logging_layout.addLayout(setup_fields)
         self.participant_status_summary_label = q["QLabel"]("")
@@ -9118,6 +9259,8 @@ class FocusModeWindow:
                 self.participant_increment_button,
                 self.participant_decrement_button,
                 self.participant_name_input,
+                self.part1_label_combo,
+                self.part2_label_combo,
                 self.include_name_lsl_checkbox,
                 self.age_input,
                 self.handedness_combo,
@@ -9488,6 +9631,12 @@ class FocusModeWindow:
             "adaptive_staircase",
             "staircase_criteria",
             "confirmation_criteria",
+            "max_output_34_percent",
+            "initial_software_ceiling_output_34_percent",
+            "final_software_ceiling_output_34_percent",
+            "hard_output_34_guard_percent",
+            "dynamic_ceiling_expansions",
+            "dynamic_ceiling_expansion_count",
             "report_path",
             "trials_csv_path",
             "latest_path",
@@ -9505,7 +9654,25 @@ class FocusModeWindow:
                 except (TypeError, ValueError):
                     payload[percent_key] = payload.get(percent_key, "")
         if payload:
-            payload["max_output_34_percent"] = TACTILE_OUTPUT_34_MAX_PERCENT
+            final_ceiling = payload.get("final_software_ceiling_output_34_percent", payload.get("max_output_34_percent", ""))
+            try:
+                final_ceiling = _coerce_tactile_output_percent(float(final_ceiling))
+            except (TypeError, ValueError):
+                try:
+                    recommended = float(payload.get("recommended_output_34_percent", 0.0) or 0.0)
+                except (TypeError, ValueError):
+                    recommended = 0.0
+                final_ceiling = max(TACTILE_OUTPUT_34_MAX_PERCENT, recommended)
+                final_ceiling = _coerce_tactile_output_percent(final_ceiling)
+            payload["max_output_34_percent"] = final_ceiling
+            payload["final_software_ceiling_output_34_percent"] = final_ceiling
+            initial_ceiling = payload.get("initial_software_ceiling_output_34_percent", TACTILE_OUTPUT_34_MAX_PERCENT)
+            try:
+                initial_ceiling = _coerce_tactile_output_percent(float(initial_ceiling))
+            except (TypeError, ValueError):
+                initial_ceiling = TACTILE_OUTPUT_34_MAX_PERCENT
+            payload["initial_software_ceiling_output_34_percent"] = initial_ceiling
+            payload["hard_output_34_guard_percent"] = TACTILE_OUTPUT_34_HARD_GUARD_PERCENT
         return payload
 
     def _apply_latest_tactile_calibration(self, participant_id: str | None = None, *, show_message: bool = True) -> bool:
@@ -9527,7 +9694,9 @@ class FocusModeWindow:
             ):
                 if percent_key in self._latest_tactile_calibration:
                     self._latest_tactile_calibration[percent_key] = percent
-            self._latest_tactile_calibration["max_output_34_percent"] = TACTILE_OUTPUT_34_MAX_PERCENT
+            self._latest_tactile_calibration["max_output_34_percent"] = percent
+            self._latest_tactile_calibration["final_software_ceiling_output_34_percent"] = percent
+            self._latest_tactile_calibration["hard_output_34_guard_percent"] = TACTILE_OUTPUT_34_HARD_GUARD_PERCENT
         self._set_output_volume("output_3_4", percent)
         if show_message and hasattr(self, "event_label"):
             if percent != raw_percent:
@@ -9851,6 +10020,9 @@ class FocusModeWindow:
             "age": str(self.age_input.text() or ""),
             "handedness": str(self.handedness_combo.currentData() or ""),
             "gender": str(self.gender_combo.currentData() or ""),
+            "part_labels": self._part_labels_from_fields(),
+            "part_label_options": self._part_label_options() if self._part_label_controls_visible() else [],
+            "part_label_controls_visible": self._part_label_controls_visible(),
         }
 
     def _companion_run_plan_payload(self) -> list[dict[str, Any]]:
@@ -10044,6 +10216,13 @@ class FocusModeWindow:
         age = str(payload.get("age") or payload.get("age_years") or "").strip()
         handedness = str(payload.get("handedness") or "").strip()
         gender = str(payload.get("gender") or "").strip()
+        part_label_payload = payload.get("part_labels")
+        if not isinstance(part_label_payload, dict):
+            part_label_payload = {
+                "1": payload.get("part01_label", payload.get("part1_label", payload.get("part_01_label", ""))),
+                "2": payload.get("part02_label", payload.get("part2_label", payload.get("part_02_label", ""))),
+            }
+        part_labels = _normalize_part_label_map(part_label_payload)
         share_name = bool(
             payload.get("name_sharing_opt_in")
             if "name_sharing_opt_in" in payload
@@ -10052,6 +10231,9 @@ class FocusModeWindow:
         self.participant_name_input.setText(name)
         self.age_input.setText(age)
         self.include_name_lsl_checkbox.setChecked(share_name)
+        if self._part_label_controls_visible():
+            self._set_part_label_combo_text(getattr(self, "part1_label_combo", None), part_labels.get("1", ""))
+            self._set_part_label_combo_text(getattr(self, "part2_label_combo", None), part_labels.get("2", ""))
         if handedness and not self._companion_select_combo_data(self.handedness_combo, handedness):
             raise CompanionCommandError(reason="invalid_handedness")
         if gender and not self._companion_select_combo_data(self.gender_combo, gender):
@@ -11275,6 +11457,165 @@ class FocusModeWindow:
         self._refresh_topup_draft_widget()
         self.tactile_timeline_widget.update()
 
+    def _create_part_label_combo(self, object_name: str, placeholder: str) -> Any:
+        combo = self.q["QComboBox"]()
+        combo.setObjectName(object_name)
+        combo.setEditable(True)
+        combo.setInsertPolicy(self.q["QComboBox"].InsertPolicy.NoInsert)
+        combo.setToolTip("Optional experiment label for this split part, such as Pre, Post, Control, or Treatment.")
+        line_edit = combo.lineEdit()
+        if line_edit is not None:
+            line_edit.setPlaceholderText(placeholder)
+            line_edit.setMaxLength(PART_LABEL_MAX_CHARS)
+        return combo
+
+    def _part_label_controls_visible(self) -> bool:
+        return bool(_package_is_split_part(self.package))
+
+    def _part_label_controls(self) -> list[tuple[str, Any]]:
+        return [
+            ("1", getattr(self, "part1_label_combo", None)),
+            ("2", getattr(self, "part2_label_combo", None)),
+        ]
+
+    def _part_label_row_widgets(self) -> list[Any]:
+        return [
+            getattr(self, "part1_label_field_label", None),
+            getattr(self, "part1_label_combo", None),
+            getattr(self, "part2_label_field_label", None),
+            getattr(self, "part2_label_combo", None),
+        ]
+
+    def _current_run_setup_sha256(self) -> str:
+        return _part_label_run_setup_sha256(getattr(self.package, "source_run_setup_manifest_path", None))
+
+    def _current_part_label_experiment_key(self) -> str:
+        return _part_label_experiment_key(
+            getattr(self.package, "source_run_setup_manifest_path", None),
+            self._current_run_setup_sha256(),
+        )
+
+    def _part_label_entry_matches_current_setup(self, entry: dict[str, Any]) -> bool:
+        current_hash = self._current_run_setup_sha256()
+        entry_hash = str(entry.get("run_setup_sha256") or "").strip()
+        if current_hash and entry_hash:
+            return current_hash == entry_hash
+        current_run_setup = str(getattr(self.package, "source_run_setup_manifest_path", "") or "")
+        entry_run_setup = str(entry.get("run_setup_manifest_path") or "")
+        if current_run_setup and entry_run_setup:
+            try:
+                return Path(current_run_setup).resolve() == Path(entry_run_setup).resolve()
+            except Exception:
+                return current_run_setup == entry_run_setup
+        return not current_run_setup and not entry_run_setup
+
+    def _part_label_history_record(self) -> dict[str, Any]:
+        history = load_part_label_history(self.output_root)
+        experiments = history.get("experiments") if isinstance(history.get("experiments"), dict) else {}
+        record = experiments.get(self._current_part_label_experiment_key())
+        return dict(record) if isinstance(record, dict) else {}
+
+    def _part_label_options(self) -> list[str]:
+        labels: list[str] = []
+        record = self._part_label_history_record()
+        for label in reversed(list(record.get("labels") or [])):
+            _append_unique_part_label(labels, label)
+        ledger = load_participant_ledger(self.output_root)
+        participants = ledger.get("participants") if isinstance(ledger.get("participants"), dict) else {}
+        entries = [entry for entry in participants.values() if isinstance(entry, dict) and self._part_label_entry_matches_current_setup(entry)]
+        entries.sort(key=lambda entry: str(entry.get("updated_at") or entry.get("submitted_at") or ""))
+        for entry in entries:
+            for label in _normalize_part_label_map(entry.get("part_labels")).values():
+                _append_unique_part_label(labels, label)
+        return labels
+
+    def _set_part_label_combo_text(self, combo: Any, value: Any) -> None:
+        if combo is None:
+            return
+        text = _normalize_part_label(value)
+        try:
+            combo.setEditText(text)
+        except Exception:
+            pass
+        line_edit = combo.lineEdit() if hasattr(combo, "lineEdit") else None
+        if line_edit is not None:
+            line_edit.setText(text)
+
+    def _refresh_part_label_options(self) -> None:
+        options = self._part_label_options()
+        for _part, combo in self._part_label_controls():
+            if combo is None:
+                continue
+            current = _normalize_part_label(combo.currentText())
+            combo.blockSignals(True)
+            try:
+                combo.clear()
+                for label in options:
+                    combo.addItem(label, label)
+                self._set_part_label_combo_text(combo, current)
+            finally:
+                combo.blockSignals(False)
+
+    def _part_labels_from_fields(self) -> dict[str, str]:
+        labels: dict[str, str] = {}
+        if not self._part_label_controls_visible():
+            return labels
+        for part, combo in self._part_label_controls():
+            if combo is None:
+                continue
+            labels[part] = _normalize_part_label(combo.currentText())
+        return labels
+
+    def _part_label_for_current_part(self, labels: dict[str, str] | None = None) -> str:
+        part = _part_key_text(getattr(self.package, "part_number", "")) or self._ensure_selected_part_key() or "1"
+        return _normalize_part_label_map(labels or self._part_labels_from_fields()).get(part, "")
+
+    def _refresh_part_label_controls(self) -> None:
+        visible = self._part_label_controls_visible()
+        for widget in self._part_label_row_widgets():
+            if widget is not None:
+                widget.setVisible(visible)
+        if visible:
+            self._refresh_part_label_options()
+
+    def _apply_part_label_defaults(self, entry: dict[str, Any] | None = None) -> None:
+        self._refresh_part_label_controls()
+        if not self._part_label_controls_visible():
+            return
+        labels = _normalize_part_label_map((entry or {}).get("part_labels") if isinstance(entry, dict) else {})
+        if not any(labels.values()):
+            labels = _normalize_part_label_map(self._part_label_history_record().get("last_pair"))
+        self._set_part_label_combo_text(getattr(self, "part1_label_combo", None), labels.get("1", ""))
+        self._set_part_label_combo_text(getattr(self, "part2_label_combo", None), labels.get("2", ""))
+
+    def _save_part_label_history(self, runner_metadata: dict[str, Any]) -> Path | None:
+        labels = _normalize_part_label_map(runner_metadata.get("part_labels"))
+        used = [label for label in labels.values() if label]
+        if not used:
+            return None
+        history = load_part_label_history(self.output_root)
+        experiments = history.get("experiments") if isinstance(history.get("experiments"), dict) else {}
+        key = self._current_part_label_experiment_key()
+        record = dict(experiments.get(key) or {}) if isinstance(experiments.get(key), dict) else {}
+        label_options: list[str] = []
+        for label in reversed(list(record.get("labels") or [])):
+            _append_unique_part_label(label_options, label)
+        for label in used:
+            _append_unique_part_label(label_options, label)
+        now = datetime.now().isoformat(timespec="seconds")
+        record.update(
+            {
+                "run_setup_manifest_path": str(getattr(self.package, "source_run_setup_manifest_path", "") or ""),
+                "run_setup_sha256": self._current_run_setup_sha256(),
+                "labels": label_options,
+                "last_pair": labels,
+                "updated_at": now,
+            }
+        )
+        experiments[key] = record
+        history["experiments"] = experiments
+        return save_part_label_history(self.output_root, history)
+
     def _step_participant_selection(self, delta: int) -> None:
         if not hasattr(self, "participant_code_combo"):
             return
@@ -11310,6 +11651,8 @@ class FocusModeWindow:
         entry = participant_ledger_entry(self.output_root, participant_id)
         if not entry:
             return {}
+        if self._part_label_entry_matches_current_setup(entry):
+            return entry
         current_run_setup = str(getattr(self.package, "source_run_setup_manifest_path", "") or "")
         entry_run_setup = str(entry.get("run_setup_manifest_path") or "")
         if current_run_setup and entry_run_setup:
@@ -11327,12 +11670,14 @@ class FocusModeWindow:
         participant = str(participant_id or self._selected_participant_code() or self.package.participant_id or "").strip()
         entry = self._participant_ledger_entry_for(participant)
         if not entry:
+            self._apply_part_label_defaults({})
             return False
         self.participant_name_input.setText(str(entry.get("participant_name") or ""))
         self.age_input.setText(str(entry.get("age_years") or ""))
         _set_combo_data(self.handedness_combo, str(entry.get("handedness") or ""))
         _set_combo_data(self.gender_combo, str(entry.get("gender") or ""))
         self.include_name_lsl_checkbox.setChecked(bool(entry.get("include_name_in_lsl", False)))
+        self._apply_part_label_defaults(entry)
         return True
 
     def _save_participant_ledger_entry(self, runner_metadata: dict[str, Any]) -> Path:
@@ -11349,12 +11694,14 @@ class FocusModeWindow:
             "handedness": str(runner_metadata.get("handedness") or ""),
             "gender": str(runner_metadata.get("gender") or ""),
             "include_name_in_lsl": bool(runner_metadata.get("include_name_in_lsl")),
+            "part_labels": _normalize_part_label_map(runner_metadata.get("part_labels")),
             "tactile_calibration": _json_ready(runner_metadata.get("tactile_calibration") or {}),
             "submitted_at": now,
             "updated_at": now,
             "session_id": str(getattr(self.package, "session_id", "") or ""),
             "session_manifest_path": str(getattr(self.package, "manifest_path", "") or ""),
             "run_setup_manifest_path": str(getattr(self.package, "source_run_setup_manifest_path", "") or ""),
+            "run_setup_sha256": self._current_run_setup_sha256(),
         }
         ledger["participants"] = participants
         return save_participant_ledger(self.output_root, ledger)
@@ -11592,6 +11939,10 @@ class FocusModeWindow:
         self._release_prepared_controller()
         if hasattr(self, "participant_name_input"):
             self.participant_name_input.clear()
+        if hasattr(self, "part1_label_combo"):
+            self._set_part_label_combo_text(self.part1_label_combo, "")
+        if hasattr(self, "part2_label_combo"):
+            self._set_part_label_combo_text(self.part2_label_combo, "")
         if hasattr(self, "age_input"):
             self.age_input.clear()
         if hasattr(self, "include_name_lsl_checkbox"):
@@ -11603,6 +11954,8 @@ class FocusModeWindow:
         if hasattr(self, "setup_submit_button"):
             self.setup_submit_button.setEnabled(True)
             self._set_setup_status_message("Submit setup to unlock start controls.")
+        if hasattr(self, "part1_label_combo"):
+            self._refresh_part_label_controls()
 
     def _refresh_loaded_package_display(self) -> None:
         profile = self.layout_profile
@@ -11737,7 +12090,7 @@ class FocusModeWindow:
         if engine is None:
             return
         audio_gain = _output_volume_gain(self.output_12_volume_percent)
-        tactile_gain = _output_volume_gain(self.output_34_volume_percent, maximum=TACTILE_OUTPUT_34_MAX_PERCENT)
+        tactile_gain = _output_volume_gain(self.output_34_volume_percent, maximum=TACTILE_OUTPUT_34_HARD_GUARD_PERCENT)
         setter = getattr(engine, "set_main_volume", None)
         if callable(setter):
             try:
@@ -11765,7 +12118,7 @@ class FocusModeWindow:
             if hasattr(self, "output_34_volume_slider"):
                 previous = self.output_34_volume_slider.blockSignals(True)
                 self.output_34_volume_slider.setValue(
-                    _volume_percent_to_slider_value(percent, maximum=TACTILE_OUTPUT_34_MAX_PERCENT)
+                    _volume_percent_to_slider_value(percent, maximum=TACTILE_OUTPUT_34_HARD_GUARD_PERCENT)
                 )
                 self.output_34_volume_slider.blockSignals(previous)
             if hasattr(self, "output_34_volume_percent_box"):
@@ -12308,6 +12661,7 @@ class FocusModeWindow:
         )
 
     def _runner_metadata(self) -> dict[str, Any]:
+        part_labels = self._part_labels_from_fields()
         return {
             "participant_code": self._selected_participant_code() or self.package.participant_id,
             "participant_name": self.participant_name_input.text().strip(),
@@ -12315,6 +12669,8 @@ class FocusModeWindow:
             "age_years": self.age_input.text().strip(),
             "handedness": self.handedness_combo.currentData() or "",
             "gender": self.gender_combo.currentData() or "",
+            "part_labels": part_labels,
+            "part_label": self._part_label_for_current_part(part_labels),
             "playback_output_levels": self._output_channel_volume_payload(),
             "tactile_calibration": self._current_tactile_calibration_metadata(),
         }
@@ -12460,6 +12816,7 @@ class FocusModeWindow:
         self.controller = None
 
     def _handle_dialog_finished(self, _code: int) -> None:
+        self._set_mouse_area_lock(False)
         cancel_event = getattr(self, "_tactile_calibration_cancel_event", None)
         if cancel_event is not None:
             cancel_event.set()
@@ -12557,10 +12914,18 @@ class FocusModeWindow:
         self._refresh_part_controls()
         ledger_path_text = ""
         ledger_error = ""
+        part_label_history_path_text = ""
+        part_label_history_error = ""
         try:
             ledger_path_text = str(self._save_participant_ledger_entry(runner_metadata))
         except Exception as exc:
             ledger_error = str(exc)
+        try:
+            history_path = self._save_part_label_history(runner_metadata)
+            part_label_history_path_text = "" if history_path is None else str(history_path)
+        except Exception as exc:
+            part_label_history_error = str(exc)
+        self._refresh_part_label_options()
         self._refresh_participant_step_buttons()
         self._refresh_participant_ledger_summary()
         self.start_button.setEnabled(True)
@@ -12586,6 +12951,11 @@ class FocusModeWindow:
                 "participant_ledger_path": ledger_path_text,
                 "participant_ledger_saved": bool(ledger_path_text) and not ledger_error,
                 "participant_ledger_error": ledger_error,
+                "part_labels": _normalize_part_label_map(runner_metadata.get("part_labels")),
+                "part_label": str(runner_metadata.get("part_label") or ""),
+                "part_label_history_path": part_label_history_path_text,
+                "part_label_history_saved": bool(part_label_history_path_text) and not part_label_history_error,
+                "part_label_history_error": part_label_history_error,
                 "participant_metadata_fields": sorted(key for key, value in runner_metadata.items() if str(value or "").strip()),
             },
             create=True,
@@ -12616,6 +12986,7 @@ class FocusModeWindow:
             "select_part_1": ["Alt+1"],
             "select_part_2": ["Alt+2"],
             "select_topup_preview": ["Ctrl+T"],
+            "mouse_area_lock": ["Ctrl+A+S+D (hold together)"],
         }
         if _env_flag("PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT"):
             shortcuts["validation_synthetic_click"] = ["Ctrl+Alt+Shift+F12"]
@@ -12664,6 +13035,151 @@ class FocusModeWindow:
     def _handle_topup_preview_shortcut(self) -> None:
         if self._topup_slots_enabled_for_plan():
             self._select_current_part_topup_slot()
+
+    def _mouse_lock_chord_keys(self) -> set[int]:
+        qt = self.q["Qt"]
+        keys = getattr(qt, "Key", qt)
+        return {int(keys.Key_A), int(keys.Key_S), int(keys.Key_D)}
+
+    def _handle_mouse_lock_chord_event(self, event: Any, pressed: bool) -> None:
+        # Software alternative to taping the mouse sensor: holding Ctrl+A+S+D
+        # toggles an OS-level cursor clip (ClipCursor) confining the pointer to
+        # the response target, so the participant's click-only mouse cannot be
+        # dislodged and the researcher can release it without touching the rig.
+        try:
+            if bool(event.isAutoRepeat()):
+                return
+            key = int(event.key())
+        except Exception:
+            return
+        chord = self._mouse_lock_chord_keys()
+        if key not in chord:
+            return
+        down = getattr(self, "_mouse_lock_chord_down", None)
+        if down is None:
+            down = set()
+            self._mouse_lock_chord_down = down
+        if pressed:
+            qt = self.q["Qt"]
+            modifiers = getattr(qt, "KeyboardModifier", qt)
+            try:
+                ctrl_held = bool(event.modifiers() & modifiers.ControlModifier)
+            except Exception:
+                ctrl_held = False
+            if not ctrl_held:
+                down.clear()
+                self._mouse_lock_chord_fired = False
+                return
+            down.add(key)
+            if down == chord and not getattr(self, "_mouse_lock_chord_fired", False):
+                self._mouse_lock_chord_fired = True
+                self._toggle_mouse_area_lock()
+        else:
+            down.discard(key)
+            if not down:
+                self._mouse_lock_chord_fired = False
+
+    def _toggle_mouse_area_lock(self) -> None:
+        self._set_mouse_area_lock(not bool(getattr(self, "_mouse_area_lock_active", False)))
+
+    def _set_mouse_area_lock(self, active: bool) -> None:
+        if bool(active) == bool(getattr(self, "_mouse_area_lock_active", False)):
+            return
+        if active:
+            if sys.platform != "win32":
+                self.event_label.setText("Mouse lock is unavailable on this platform (needs Windows ClipCursor).")
+                return
+            if not self._apply_mouse_area_clip():
+                self.event_label.setText("Mouse lock failed: response-target area could not be resolved.")
+                return
+            self._mouse_area_lock_active = True
+            x, y, _source = _widget_screen_center(self.target_button)
+            try:
+                self._move_os_cursor_to_global_center(x, y)
+            except Exception:
+                pass
+            timer = getattr(self, "_mouse_lock_reassert_timer", None)
+            if timer is None:
+                timer = self.q["QTimer"](self.dialog)
+                timer.setInterval(1000)
+                timer.timeout.connect(self._reassert_mouse_area_clip)
+                self._mouse_lock_reassert_timer = timer
+            timer.start()
+            self.event_label.setText("Mouse locked to the response target. Hold Ctrl+A+S+D to unlock.")
+            _append_output_diary_event(
+                "mouse_area_lock_enabled",
+                package=self.package,
+                capture_options=self.capture_options.as_dict(),
+                create=True,
+            )
+        else:
+            timer = getattr(self, "_mouse_lock_reassert_timer", None)
+            if timer is not None:
+                timer.stop()
+            self._release_mouse_area_clip()
+            self._mouse_area_lock_active = False
+            self.event_label.setText("Mouse lock released. Hold Ctrl+A+S+D to lock the cursor to the response target.")
+            _append_output_diary_event(
+                "mouse_area_lock_disabled",
+                package=self.package,
+                capture_options=self.capture_options.as_dict(),
+                create=True,
+            )
+
+    def _mouse_area_clip_rect(self) -> tuple[int, int, int, int] | None:
+        button = getattr(self, "target_button", None)
+        if button is None:
+            return None
+        try:
+            top_left = button.mapToGlobal(button.rect().topLeft())
+            bottom_right = button.mapToGlobal(button.rect().bottomRight())
+            left, top = int(top_left.x()), int(top_left.y())
+            right, bottom = int(bottom_right.x()), int(bottom_right.y())
+            ratio = 1.0
+            try:
+                screen = button.screen()
+                ratio = float(screen.devicePixelRatio()) if screen is not None else 1.0
+            except Exception:
+                ratio = 1.0
+            if ratio > 1.01:
+                left, top = int(round(left * ratio)), int(round(top * ratio))
+                right, bottom = int(round(right * ratio)), int(round(bottom * ratio))
+            if right > left and bottom > top:
+                # RECT right/bottom bounds are exclusive.
+                return left, top, right + 1, bottom + 1
+        except Exception:
+            pass
+        return None
+
+    def _apply_mouse_area_clip(self) -> bool:
+        rect_values = self._mouse_area_clip_rect()
+        if rect_values is None:
+            return False
+        try:
+            import ctypes
+            from ctypes import wintypes
+
+            rect = wintypes.RECT(*rect_values)
+            return bool(ctypes.windll.user32.ClipCursor(ctypes.byref(rect)))
+        except Exception:
+            return False
+
+    def _reassert_mouse_area_clip(self) -> None:
+        # Windows silently clears cursor clips on focus changes and system
+        # popups; while the lock is on, re-apply it every second so the clip
+        # also tracks any window move.
+        if getattr(self, "_mouse_area_lock_active", False):
+            self._apply_mouse_area_clip()
+
+    def _release_mouse_area_clip(self) -> None:
+        if sys.platform != "win32":
+            return
+        try:
+            import ctypes
+
+            ctypes.windll.user32.ClipCursor(None)
+        except Exception:
+            pass
 
     def _handle_validation_synthetic_click_shortcut(self) -> None:
         if not _env_flag("PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT"):
@@ -12893,7 +13409,9 @@ class FocusModeWindow:
                 if rect.get("width", 0) < 220:
                     failures.append(f"{name} is too narrow for operator controls: {rect}")
         required_shortcut_names = set(self.keyboard_shortcut_map())
-        installed_shortcut_names = {"start_or_continue"} | {
+        # start_or_continue is registered separately; mouse_area_lock is a held
+        # chord handled by the application event filter, not a QShortcut.
+        installed_shortcut_names = {"start_or_continue", "mouse_area_lock"} | {
             name for name, shortcuts in self.operator_action_shortcuts.items() if shortcuts
         }
         missing_shortcuts = sorted(required_shortcut_names - installed_shortcut_names)
@@ -13340,6 +13858,7 @@ class FocusModeWindow:
             capture_options=self.capture_options.as_dict(),
             create=True,
         )
+        self._set_mouse_area_lock(False)
         self._stop()
         self.dialog.accept()
 

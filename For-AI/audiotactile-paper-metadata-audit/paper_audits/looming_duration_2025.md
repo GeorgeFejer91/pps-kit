@@ -3,7 +3,7 @@
 - Record ID: `looming_duration_2025`
 - DOI: `10.61782/fa.2025.0866`
 - DOI URL: https://doi.org/10.61782/fa.2025.0866
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: looming-cue tactile-response PPS task varying auditory duration
 - PDF status: `downloaded`
 - Supplement status: `not_found`
@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; exact original MATLAB HRTF implementation and tactile-waveform profile are not current first-class toolkit inputs
+- live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation, HRTF/source assets, and source-equivalence validation remain unresolved
 
 ## Review Attempts
 

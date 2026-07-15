@@ -287,6 +287,8 @@ def test_session_analysis_writes_condition_lens_outputs_and_quality_gate(tmp_pat
                         "soa_ms": soa,
                         "respiratory_phase": state,
                         "noise_type": "pink" if repeat == 0 else "white",
+                        "sequence_labels": "Pink moving sound - receding" if repeat == 0 else "White moving sound - looming",
+                        "sequence_variant_key": "pink_receding" if repeat == 0 else "white_looming",
                         "timestamp_quality": "dac_time_sample_exact",
                     }
                     events.append({"event_id": event_id, "event_type": "trial_start", "unix_time": onset - 0.25, **context})
@@ -309,6 +311,8 @@ def test_session_analysis_writes_condition_lens_outputs_and_quality_gate(tmp_pat
     result = analyze_session_events(events)
     outputs = write_analysis_csvs(result, tmp_path, "S001")
 
+    assert result.response_rows[0]["sequence_labels"] == "Pink moving sound - receding"
+    assert result.response_rows[0]["sequence_variant_key"] == "pink_receding"
     assert outputs["condition_lens_curves"].exists()
     assert outputs["condition_lens_model_fits"].exists()
     assert outputs["condition_lens_model_fit_comparison"].exists()
@@ -334,6 +338,49 @@ def test_session_analysis_writes_condition_lens_outputs_and_quality_gate(tmp_pat
     assert predictions
     assert {row["label"] for row in condition_lens_button_rows(data)} == {"2 x 2", "Part 1 | Part 2", "Inhale | Exhale"}
     assert {row["model"] for row in model_button_rows(data)} == {"sigmoid", "logarithmic_decay", "linear"}
+    analysis_rows = list(csv.DictReader(outputs["analysis_ready_trials"].open(encoding="utf-8")))
+    assert analysis_rows[0]["sequence_labels"] == "Pink moving sound - receding"
+    assert analysis_rows[0]["sequence_variant_key"] == "pink_receding"
+
+
+def test_analysis_displays_part_labels_while_preserving_part_number_order():
+    rows: list[dict[str, object]] = []
+    for part_number, part_label in ((1, "Pre"), (2, "Post")):
+        for trial_type, rt_base in (("Baseline", 500.0), ("Audio-Tactile", 430.0)):
+            for soa in (100, 200, 400, 800):
+                for repeat in range(4):
+                    rows.append(
+                        {
+                            "trial_uid": f"P{part_number}-{trial_type[0]}-{soa}-{repeat}",
+                            "trial_type": trial_type,
+                            "hit": True,
+                            "soa_ms": soa,
+                            "rt_ms": rt_base - (soa / 100.0) + repeat,
+                            "part_number": part_number,
+                            "part_label": part_label,
+                            "respiratory_phase": "Inhale",
+                            "noise_type": "pink",
+                            "primary_analysis_included": True,
+                        }
+                    )
+
+    result = analyze_analysis_ready_trials(rows)
+
+    two_by_two = [
+        row
+        for row in result.condition_lens_curve_rows
+        if row.get("analysis_lens") == CONDITION_LENS_TWO_BY_TWO and int(float(row.get("soa_ms"))) == 100
+    ]
+    assert [row["part_label"] for row in two_by_two] == ["Pre (Part 1)", "Post (Part 2)"]
+    assert [int(row["part_number"]) for row in two_by_two] == [1, 2]
+    assert [row["display_scope"] for row in two_by_two] == ["Pre (Part 1) / Inhale", "Post (Part 2) / Inhale"]
+    separate = [
+        row
+        for row in result.curve_rows
+        if row.get("aggregation_mode") == PARTS_SEPARATE and int(float(row.get("soa_ms"))) == 100
+    ]
+    assert [int(row["part_number"]) for row in separate] == [1, 2]
+    assert [row["scope"] for row in separate] == ["Pre (Part 1) / Inhale / pink", "Post (Part 2) / Inhale / pink"]
 
 
 def test_basic_assumption_baseline_green_when_no_significant_proximity_trend():

@@ -3,7 +3,7 @@
 - Record ID: `farne_ladavas_2002_auditory_pps_humans`
 - DOI: `10.1162/089892902320474481`
 - DOI URL: https://doi.org/10.1162/089892902320474481
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: front/back near/far auditory-tactile extinction task around the head in right-brain-damaged patients
 - PDF status: `paywalled`
 - Supplement status: `paywalled`
@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- extract front/back and near/far auditory positions, pure-tone versus complex-sound settings, tactile site and response scoring, trial counts, and extinction-response procedure before templating
+- extract front/back and near/far auditory positions, pure-tone versus complex-sound settings, tactile site, trial counts, and extinction-response procedure; row-level cross-modal extinction/report response mapping is now runner-supported
 
 ## Review Attempts
 

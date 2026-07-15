@@ -1,37 +1,261 @@
 {
   "schema": "pps-preload-trial-designer-segment.v1",
   "template_id": "noel_2015_walking_full_body_action",
-  "repetitions_per_condition": 12,
+  "repetitions_per_condition": 16,
   "soa_values_ms": [
-    300,
-    800,
-    1500,
-    2200,
-    2700
+    440,
+    880,
+    1330,
+    1770,
+    2220
   ],
   "spatial_values_cm": [
     166,
     133,
     100,
-    65,
-    30
+    66,
+    33
   ],
   "custom_clip_assets": [],
   "trial_strips": [
     {
-      "strip_id": "noel-walking-looming-row",
-      "label": "Walking PPS looming trial",
-      "audio_tactile_percentage": 100.0,
-      "catch_percentage": 0.0,
-      "baseline_percentage": 0.0,
+      "strip_id": "noel-2015-standing-looming",
+      "label": "Standing looming",
+      "audio_tactile_percentage": 62.5,
+      "catch_percentage": 12.5,
+      "baseline_percentage": 25.0,
+      "soa_values_ms": [
+        440,
+        880,
+        1330,
+        1770,
+        2220
+      ],
+      "spatial_values_cm": [
+        166.0,
+        133.0,
+        100.0,
+        66.0,
+        33.0
+      ],
+      "metadata": {
+        "expected_response": "respond",
+        "response_rule": "button_press_to_chest_vibration_ignore_sound",
+        "target_role": "chest_vibrotactile_target",
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_capture_device": "wireless Xbox 360 controller",
+        "response_input_modality": "right_thumb_button_mouse_click_proxy",
+        "locomotion_condition": "standing_still",
+        "auditory_trajectory_family": "linear_speaker_array_motion",
+        "auditory_trajectory_direction": "looming",
+        "trajectory_coordinate_frame": "body_centered_sagittal",
+        "trajectory_start_hemifield": "front_far",
+        "trajectory_end_hemifield": "front_near",
+        "trajectory_start_distance_cm": 200.0,
+        "trajectory_end_distance_cm": 1.0,
+        "source_asset_equivalence": "procedural white-noise proxy for reported 50 dB white noise",
+        "renderer_equivalence_boundary": "reference binaural renderer proxy for two 8-speaker linear arrays",
+        "iti_policy": "paper_randomized_1000_to_1500_ms",
+        "iti_ms": "1000-1500",
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_calibration_method": "reported motor specification not recalibrated",
+        "tactile_intensity": "3 V, 60 mA, 9000 rpm, 5 g",
+        "tactile_waveform_shape": "sine",
+        "tactile_duration_ms": "100",
+        "tactile_pulse_duration_ms": "100",
+        "tactile_frequency_hz": "150"
+      },
       "elements": [
         {
-          "element_id": "noel-walking-looming-source",
+          "element_id": "noel-2015-standing-looming-source",
           "kind": "looming_stimulus",
-          "label": "Walking PPS looming sound",
-          "source_label": "Walking PPS looming sound",
+          "label": "Standing looming sound",
+          "source_label": "Noel 2015 white-noise motion",
           "source_labels": [
-            "Walking PPS looming sound"
+            "Noel 2015 white-noise motion"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    },
+    {
+      "strip_id": "noel-2015-standing-receding",
+      "label": "Standing receding",
+      "audio_tactile_percentage": 62.5,
+      "catch_percentage": 12.5,
+      "baseline_percentage": 25.0,
+      "soa_values_ms": [
+        440,
+        880,
+        1330,
+        1770,
+        2220
+      ],
+      "spatial_values_cm": [
+        33.0,
+        66.0,
+        100.0,
+        133.0,
+        166.0
+      ],
+      "metadata": {
+        "expected_response": "respond",
+        "response_rule": "button_press_to_chest_vibration_ignore_sound",
+        "target_role": "chest_vibrotactile_target",
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_capture_device": "wireless Xbox 360 controller",
+        "response_input_modality": "right_thumb_button_mouse_click_proxy",
+        "locomotion_condition": "standing_still",
+        "auditory_trajectory_family": "linear_speaker_array_motion",
+        "auditory_trajectory_direction": "receding",
+        "trajectory_coordinate_frame": "body_centered_sagittal",
+        "trajectory_start_hemifield": "front_near",
+        "trajectory_end_hemifield": "front_far",
+        "trajectory_start_distance_cm": 1.0,
+        "trajectory_end_distance_cm": 200.0,
+        "source_asset_equivalence": "procedural white-noise proxy for reported 50 dB white noise",
+        "renderer_equivalence_boundary": "row metadata preserves receding speaker-array direction; generated source uses reference white-noise trajectory",
+        "iti_policy": "paper_randomized_1000_to_1500_ms",
+        "iti_ms": "1000-1500",
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_calibration_method": "reported motor specification not recalibrated",
+        "tactile_intensity": "3 V, 60 mA, 9000 rpm, 5 g",
+        "tactile_waveform_shape": "sine",
+        "tactile_duration_ms": "100",
+        "tactile_pulse_duration_ms": "100",
+        "tactile_frequency_hz": "150"
+      },
+      "elements": [
+        {
+          "element_id": "noel-2015-standing-receding-source",
+          "kind": "looming_stimulus",
+          "label": "Standing receding sound",
+          "source_label": "Noel 2015 white-noise motion",
+          "source_labels": [
+            "Noel 2015 white-noise motion"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    },
+    {
+      "strip_id": "noel-2015-walking-looming",
+      "label": "Walking looming",
+      "audio_tactile_percentage": 62.5,
+      "catch_percentage": 12.5,
+      "baseline_percentage": 25.0,
+      "soa_values_ms": [
+        440,
+        880,
+        1330,
+        1770,
+        2220
+      ],
+      "spatial_values_cm": [
+        166.0,
+        133.0,
+        100.0,
+        66.0,
+        33.0
+      ],
+      "metadata": {
+        "expected_response": "respond",
+        "response_rule": "button_press_to_chest_vibration_ignore_sound",
+        "target_role": "chest_vibrotactile_target",
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_capture_device": "wireless Xbox 360 controller",
+        "response_input_modality": "right_thumb_button_mouse_click_proxy",
+        "locomotion_condition": "walking_treadmill_0.70_m_s",
+        "auditory_trajectory_family": "linear_speaker_array_motion",
+        "auditory_trajectory_direction": "looming",
+        "trajectory_coordinate_frame": "body_centered_sagittal",
+        "trajectory_start_hemifield": "front_far",
+        "trajectory_end_hemifield": "front_near",
+        "trajectory_start_distance_cm": 200.0,
+        "trajectory_end_distance_cm": 1.0,
+        "source_asset_equivalence": "procedural white-noise proxy for reported 50 dB white noise",
+        "renderer_equivalence_boundary": "reference binaural renderer proxy for two 8-speaker linear arrays",
+        "iti_policy": "paper_randomized_1000_to_1500_ms",
+        "iti_ms": "1000-1500",
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_calibration_method": "reported motor specification not recalibrated",
+        "tactile_intensity": "3 V, 60 mA, 9000 rpm, 5 g",
+        "tactile_waveform_shape": "sine",
+        "tactile_duration_ms": "100",
+        "tactile_pulse_duration_ms": "100",
+        "tactile_frequency_hz": "150"
+      },
+      "elements": [
+        {
+          "element_id": "noel-2015-walking-looming-source",
+          "kind": "looming_stimulus",
+          "label": "Walking looming sound",
+          "source_label": "Noel 2015 white-noise motion",
+          "source_labels": [
+            "Noel 2015 white-noise motion"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    },
+    {
+      "strip_id": "noel-2015-walking-receding",
+      "label": "Walking receding",
+      "audio_tactile_percentage": 62.5,
+      "catch_percentage": 12.5,
+      "baseline_percentage": 25.0,
+      "soa_values_ms": [
+        440,
+        880,
+        1330,
+        1770,
+        2220
+      ],
+      "spatial_values_cm": [
+        33.0,
+        66.0,
+        100.0,
+        133.0,
+        166.0
+      ],
+      "metadata": {
+        "expected_response": "respond",
+        "response_rule": "button_press_to_chest_vibration_ignore_sound",
+        "target_role": "chest_vibrotactile_target",
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_capture_device": "wireless Xbox 360 controller",
+        "response_input_modality": "right_thumb_button_mouse_click_proxy",
+        "locomotion_condition": "walking_treadmill_0.70_m_s",
+        "auditory_trajectory_family": "linear_speaker_array_motion",
+        "auditory_trajectory_direction": "receding",
+        "trajectory_coordinate_frame": "body_centered_sagittal",
+        "trajectory_start_hemifield": "front_near",
+        "trajectory_end_hemifield": "front_far",
+        "trajectory_start_distance_cm": 1.0,
+        "trajectory_end_distance_cm": 200.0,
+        "source_asset_equivalence": "procedural white-noise proxy for reported 50 dB white noise",
+        "renderer_equivalence_boundary": "row metadata preserves receding speaker-array direction; generated source uses reference white-noise trajectory",
+        "iti_policy": "paper_randomized_1000_to_1500_ms",
+        "iti_ms": "1000-1500",
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_calibration_method": "reported motor specification not recalibrated",
+        "tactile_intensity": "3 V, 60 mA, 9000 rpm, 5 g",
+        "tactile_waveform_shape": "sine",
+        "tactile_duration_ms": "100",
+        "tactile_pulse_duration_ms": "100",
+        "tactile_frequency_hz": "150"
+      },
+      "elements": [
+        {
+          "element_id": "noel-2015-walking-receding-source",
+          "kind": "looming_stimulus",
+          "label": "Walking receding sound",
+          "source_label": "Noel 2015 white-noise motion",
+          "source_labels": [
+            "Noel 2015 white-noise motion"
           ],
           "jitter_values_ms": [],
           "randomized": true
@@ -40,5 +264,5 @@
     }
   ],
   "prestimulus_files": [],
-  "preview_trial_count": 120
+  "preview_trial_count": 512
 }

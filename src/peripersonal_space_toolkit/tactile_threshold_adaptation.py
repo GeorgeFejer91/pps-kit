@@ -11,7 +11,11 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from .output_layout import _filesystem_path as _output_filesystem_path
-from .tactile_calibration.schema import CONFIRMATION_LEVEL_INCREMENT_PERCENT, TACTILE_OUTPUT_34_MAX_PERCENT
+from .tactile_calibration.schema import (
+    CONFIRMATION_LEVEL_INCREMENT_PERCENT,
+    TACTILE_OUTPUT_34_HARD_GUARD_PERCENT,
+    TACTILE_OUTPUT_34_MAX_PERCENT,
+)
 
 
 ADAPTIVE_TACTILE_THRESHOLD_SCHEMA = "pps-adaptive-tactile-threshold.v1"
@@ -34,6 +38,10 @@ class AdaptiveTactileThresholdAdjustment:
     triggering_trial_number: str
     triggering_is_topup: bool
     triggering_miss_reason: str
+    initial_software_ceiling_output_34_percent: float
+    final_software_ceiling_output_34_percent: float
+    hard_output_34_guard_percent: float
+    dynamic_ceiling_expansion_count: int
 
     def as_row(self) -> dict[str, Any]:
         return {
@@ -49,6 +57,10 @@ class AdaptiveTactileThresholdAdjustment:
             "triggering_trial_number": self.triggering_trial_number,
             "triggering_is_topup": self.triggering_is_topup,
             "triggering_miss_reason": self.triggering_miss_reason,
+            "initial_software_ceiling_output_34_percent": self.initial_software_ceiling_output_34_percent,
+            "final_software_ceiling_output_34_percent": self.final_software_ceiling_output_34_percent,
+            "hard_output_34_guard_percent": self.hard_output_34_guard_percent,
+            "dynamic_ceiling_expansion_count": self.dynamic_ceiling_expansion_count,
         }
 
 
@@ -63,14 +75,23 @@ class AdaptiveTactileThresholdController:
         misses_per_adjustment: int = DEFAULT_MISSES_PER_ADJUSTMENT,
         increment_output_34_percent: float = CONFIRMATION_LEVEL_INCREMENT_PERCENT,
         max_output_34_percent: float = TACTILE_OUTPUT_34_MAX_PERCENT,
+        hard_output_34_guard_percent: float = TACTILE_OUTPUT_34_HARD_GUARD_PERCENT,
         miss_scope: str = DEFAULT_MISS_SCOPE,
     ):
         self.enabled = bool(enabled)
-        self.initial_output_34_percent = _coerce_output_34_percent(initial_output_34_percent, maximum=max_output_34_percent)
+        self.hard_output_34_guard_percent = max(0.0, float(hard_output_34_guard_percent or 0.0))
+        self.initial_output_34_percent = _coerce_output_34_percent(
+            initial_output_34_percent,
+            maximum=self.hard_output_34_guard_percent,
+        )
         self.current_output_34_percent = self.initial_output_34_percent
         self.misses_per_adjustment = max(1, int(misses_per_adjustment or DEFAULT_MISSES_PER_ADJUSTMENT))
         self.increment_output_34_percent = max(0.0, float(increment_output_34_percent or 0.0))
-        self.max_output_34_percent = max(0.0, float(max_output_34_percent or 0.0))
+        self.initial_software_ceiling_output_34_percent = min(
+            self.hard_output_34_guard_percent,
+            max(float(max_output_34_percent or 0.0), self.initial_output_34_percent),
+        )
+        self.max_output_34_percent = self.initial_software_ceiling_output_34_percent
         self.miss_scope = str(miss_scope or DEFAULT_MISS_SCOPE)
         self.total_misses = 0
         self.misses_since_last_adjustment = 0
@@ -80,6 +101,8 @@ class AdaptiveTactileThresholdController:
         self.current_pending_count = 0
         self.adjustments: list[AdaptiveTactileThresholdAdjustment] = []
         self.suppressed_at_cap_count = 0
+        self.suppressed_at_hard_guard_count = 0
+        self.dynamic_ceiling_expansions: list[dict[str, Any]] = []
         self._observed_miss_keys: set[str] = set()
 
     def policy_payload(self) -> dict[str, Any]:
@@ -91,8 +114,34 @@ class AdaptiveTactileThresholdController:
             "misses_per_adjustment": self.misses_per_adjustment,
             "increment_output_34_percent": self.increment_output_34_percent,
             "max_output_34_percent": self.max_output_34_percent,
+            "initial_software_ceiling_output_34_percent": self.initial_software_ceiling_output_34_percent,
+            "final_software_ceiling_output_34_percent": self.max_output_34_percent,
+            "hard_output_34_guard_percent": self.hard_output_34_guard_percent,
             "initial_output_34_percent": self.initial_output_34_percent,
         }
+
+    def _expand_software_ceiling(self, *, triggering_miss_count: int, from_level: float) -> bool:
+        old_ceiling = float(self.max_output_34_percent)
+        if old_ceiling >= self.hard_output_34_guard_percent:
+            return False
+        requested = max(
+            old_ceiling + self.increment_output_34_percent,
+            float(from_level) + self.increment_output_34_percent,
+        )
+        new_ceiling = min(self.hard_output_34_guard_percent, round(requested, 3))
+        if new_ceiling <= old_ceiling:
+            return False
+        expansion = {
+            "index": len(self.dynamic_ceiling_expansions) + 1,
+            "triggering_miss_count": int(triggering_miss_count),
+            "old_software_ceiling_output_34_percent": old_ceiling,
+            "new_software_ceiling_output_34_percent": new_ceiling,
+            "trigger_level_output_34_percent": float(from_level),
+            "hard_output_34_guard_percent": self.hard_output_34_guard_percent,
+        }
+        self.max_output_34_percent = new_ceiling
+        self.dynamic_ceiling_expansions.append(expansion)
+        return True
 
     def observe_missed_entries(self, entries: Iterable[Any]) -> list[dict[str, Any]]:
         if not self.enabled:
@@ -108,12 +157,20 @@ class AdaptiveTactileThresholdController:
             if self.misses_since_last_adjustment < self.misses_per_adjustment:
                 continue
             self.misses_since_last_adjustment = 0
+            target_percent = self.current_output_34_percent + self.increment_output_34_percent
+            if target_percent > self.max_output_34_percent:
+                self._expand_software_ceiling(
+                    triggering_miss_count=self.total_misses,
+                    from_level=self.current_output_34_percent,
+                )
             next_percent = _coerce_output_34_percent(
-                self.current_output_34_percent + self.increment_output_34_percent,
+                target_percent,
                 maximum=self.max_output_34_percent,
             )
             if next_percent <= self.current_output_34_percent:
                 self.suppressed_at_cap_count += 1
+                if self.max_output_34_percent >= self.hard_output_34_guard_percent:
+                    self.suppressed_at_hard_guard_count += 1
                 continue
             adjustment = AdaptiveTactileThresholdAdjustment(
                 adjustment_index=len(self.adjustments) + 1,
@@ -127,6 +184,10 @@ class AdaptiveTactileThresholdController:
                 triggering_trial_number=str(getattr(entry, "trial_number", "")),
                 triggering_is_topup=bool(getattr(entry, "is_topup", False)),
                 triggering_miss_reason=str(getattr(entry, "miss_reason", "")),
+                initial_software_ceiling_output_34_percent=self.initial_software_ceiling_output_34_percent,
+                final_software_ceiling_output_34_percent=self.max_output_34_percent,
+                hard_output_34_guard_percent=self.hard_output_34_guard_percent,
+                dynamic_ceiling_expansion_count=len(self.dynamic_ceiling_expansions),
             )
             self.current_output_34_percent = next_percent
             self.adjustments.append(adjustment)
@@ -156,8 +217,14 @@ class AdaptiveTactileThresholdController:
                 "misses_since_last_adjustment": self.misses_since_last_adjustment,
                 "adjustment_count": len(self.adjustments),
                 "suppressed_at_cap_count": self.suppressed_at_cap_count,
+                "suppressed_at_hard_guard_count": self.suppressed_at_hard_guard_count,
                 "final_output_34_percent": self.current_output_34_percent,
-                "capped_at_max": self.current_output_34_percent >= self.max_output_34_percent,
+                "capped_at_max": self.current_output_34_percent >= self.hard_output_34_guard_percent,
+                "initial_software_ceiling_output_34_percent": self.initial_software_ceiling_output_34_percent,
+                "final_software_ceiling_output_34_percent": self.max_output_34_percent,
+                "hard_output_34_guard_percent": self.hard_output_34_guard_percent,
+                "dynamic_ceiling_expansions": list(self.dynamic_ceiling_expansions),
+                "dynamic_ceiling_expansion_count": len(self.dynamic_ceiling_expansions),
                 "adjustments": [item.as_row() for item in self.adjustments],
             }
         )
@@ -183,6 +250,10 @@ class AdaptiveTactileThresholdController:
             "triggering_trial_number",
             "triggering_is_topup",
             "triggering_miss_reason",
+            "initial_software_ceiling_output_34_percent",
+            "final_software_ceiling_output_34_percent",
+            "hard_output_34_guard_percent",
+            "dynamic_ceiling_expansion_count",
         ]
         with open(_output_filesystem_path(csv_path), "w", newline="", encoding="utf-8") as handle:
             writer = csv.DictWriter(handle, fieldnames=fieldnames)
@@ -198,16 +269,19 @@ def adaptive_threshold_initial_output_34_percent(runner_metadata: dict[str, Any]
     raw = dict(runner_metadata or {})
     playback = raw.get("playback_output_levels")
     if isinstance(playback, dict) and playback.get("output_3_4_percent") not in (None, ""):
-        return _coerce_output_34_percent(playback.get("output_3_4_percent"))
+        return _coerce_output_34_percent(playback.get("output_3_4_percent"), maximum=TACTILE_OUTPUT_34_HARD_GUARD_PERCENT)
     calibration = raw.get("tactile_calibration")
     if isinstance(calibration, dict):
         for key in ("recommended_output_34_percent", "final_output_34_percent", "detection_threshold_output_34_percent"):
             if calibration.get(key) not in (None, ""):
-                return _coerce_output_34_percent(calibration.get(key))
-    return _coerce_output_34_percent(TACTILE_OUTPUT_34_MAX_PERCENT)
+                return _coerce_output_34_percent(
+                    calibration.get(key),
+                    maximum=TACTILE_OUTPUT_34_HARD_GUARD_PERCENT,
+                )
+    return _coerce_output_34_percent(TACTILE_OUTPUT_34_MAX_PERCENT, maximum=TACTILE_OUTPUT_34_HARD_GUARD_PERCENT)
 
 
-def _coerce_output_34_percent(value: Any, *, maximum: float = TACTILE_OUTPUT_34_MAX_PERCENT) -> float:
+def _coerce_output_34_percent(value: Any, *, maximum: float = TACTILE_OUTPUT_34_HARD_GUARD_PERCENT) -> float:
     try:
         number = float(value)
     except (TypeError, ValueError):

@@ -3,7 +3,7 @@
 - Record ID: `disorders_consciousness_2019`
 - DOI: `10.1016/j.nicl.2019.101940`
 - DOI URL: https://doi.org/10.1016/j.nicl.2019.101940
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: audio-tactile PPS task with neuroclinical endpoint
 - PDF status: `downloaded`
 - Supplement status: `not_found`
@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- extract 5 cm/75 cm auditory-tactile timing, tactile apparatus, response/EEG triggers, and task execution separately from clinical endpoint
+- extract 5 cm/75 cm auditory-tactile timing, tactile apparatus, response/EEG trigger codes, baseline/ITI policy, and trial counts separately from clinical endpoint
 
 ## Review Attempts
 

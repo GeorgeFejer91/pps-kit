@@ -5,7 +5,7 @@
   "source_url": "https://doi.org/10.1111/ejn.13872",
   "doi": "10.1111/ejn.13872",
   "verification_status": "verified",
-  "notes": "Trajectory/noise profile from the local Pfeiffer_EJN2018 simulator reference. It encodes pink-noise lateral movement geometry, mirrored left-to-right/right-to-left source variants, and sample rate; FABIAN HRIR rendering remains the standardized under-the-hood app resource, not a Pfeiffer-specific user choice.",
+  "notes": "Trajectory/noise profile from the local Pfeiffer_EJN2018 simulator reference. It encodes pink-noise lateral movement geometry, mirrored left-to-right/right-to-left source variants, and sample rate; FABIAN HRIR rendering remains the standardized under-the-hood app resource, not a Pfeiffer-specific user choice. Experiment-level congruent rotation, incongruent rotation, and no-rotation labels are retained as runner block context for expected-outcome auditing; passive whole-body vestibular rotation is external apparatus context and is not synthesized into the WAV files.",
   "reference_parameters": {
     "reference_file": "Example-configs/Pfeiffer_EJN2018.zip/12022013_MovingSoundSourceSimulator.m",
     "model_dimensions": "2D horizontal spherical-head model",
@@ -26,7 +26,16 @@
     "directional_loss_left_db": "5/180 * doa_deg - 5",
     "directional_loss_right_db": "-5/180 * doa_deg",
     "final_output_peak_scale": 0.25,
-    "level_note": "The reference MATLAB script applies dB gain terms before final peak normalization; these values describe relative level shaping, not a calibrated SPL in the WAV file."
+    "level_note": "The reference MATLAB script applies dB gain terms before final peak normalization; these values describe relative level shaping, not a calibrated SPL in the WAV file.",
+    "vestibular_context": {
+      "source_basis": "Pfeiffer et al. (2018) expected-outcome source trail and Consensus MCP abstract sanity check on 2026-07-15.",
+      "conditions_encoded_as_block_labels": [
+        "congruent vestibular rotation",
+        "incongruent vestibular rotation",
+        "no rotation"
+      ],
+      "apparatus_boundary": "The toolkit profile recreates the audio-tactile timing and WAV schedule; passive whole-body rotation remains external apparatus context."
+    }
   },
   "design": {
     "name": "Pfeiffer EJN2018 lateral trajectory profile",
@@ -75,7 +84,19 @@
       "include_baseline_trials": true,
       "baseline_soa_values_ms": [],
       "respiratory_phases": ["Any"],
-      "blocks": 1,
+      "blocks": 3,
+      "block_specs": [
+        {
+          "label": "Congruent vestibular rotation block"
+        },
+        {
+          "label": "Incongruent vestibular rotation block"
+        },
+        {
+          "label": "No rotation baseline block"
+        }
+      ],
+      "repeat_trial_pool_per_block": true,
       "trial_randomization_strategy": "no_immediate_repeats",
       "block_order_randomization": "fixed",
       "max_consecutive_same_trial_type": 2,
@@ -126,6 +147,10 @@
     {
       "field": "reference level and gains",
       "source": "Reference variables `ref_dB = 100`, `att_factor = 40`, directional dB loss equations for each ear, and final `output_F = 0.25 * output_F ./ max(max(output_F))`; because of final peak normalization, the WAV is not absolutely SPL calibrated."
+    },
+    {
+      "field": "vestibular condition block labels",
+      "source": "Expected-outcome extraction and Consensus MCP abstract sanity check identify congruent audio-vestibular motion, incongruent audio-vestibular motion, and no-rotation comparison context. These labels are carried as block context only; the original passive whole-body rotation apparatus is not a generated audio/tactile waveform."
     }
   ]
 }

@@ -1,0 +1,92 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "biggio_2017_personal_racket",
+  "assets": [
+    {
+      "label": "Near hand pink-noise burst",
+      "path": "assets/preloads/biggio_2017_personal_racket/02_looming_stimuli/looming_Near_hand_pink-noise_burst.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/biggio_2017_personal_racket/02_looming_stimuli/looming_Near_hand_pink-noise_burst.wav",
+      "sha256": "ccd21f1a246b7690fe69e1eea7cef3b5beff18f541578a1005a1047c5a7fbe90",
+      "duration_s": 0.15,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Near hand pink-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 30.0,
+        "end_distance_cm": 30.0,
+        "start_rotation_deg": 90.0,
+        "end_rotation_deg": 90.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.3,
+          "y_m": 0.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.3,
+          "y_m": 0.0,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Far racket-tip pink-noise burst",
+      "path": "assets/preloads/biggio_2017_personal_racket/02_looming_stimuli/looming_Far_racket-tip_pink-noise_burst.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/biggio_2017_personal_racket/02_looming_stimuli/looming_Far_racket-tip_pink-noise_burst.wav",
+      "sha256": "150ec6b4828326431031bded13b4c420650ac1424a30a6374af8e53f64f728d3",
+      "duration_s": 0.15,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Far racket-tip pink-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 98.5,
+        "end_distance_cm": 98.5,
+        "start_rotation_deg": 90.0,
+        "end_rotation_deg": 90.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.985,
+          "y_m": 0.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.985,
+          "y_m": 0.0,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

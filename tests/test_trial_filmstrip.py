@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
@@ -163,6 +164,32 @@ def test_trial_strips_add_baseline_events_inside_the_same_block():
     assert {row["soa_ms"] for row in baselines} == {0}
     assert all(row["tactile_enabled"] is True for row in baselines)
     assert all("Baseline tactile" in row["sequence_labels"] for row in baselines)
+
+
+def test_trial_strips_can_use_exact_baseline_count():
+    design = _filmstrip_design(source_count=1)
+    design.protocol.trial_strips = [design.protocol.trial_strips[0]]
+    design.protocol.soa_values_ms = [0, 500, 1000, 1500, 2000, 2500, 3000]
+    design.protocol.spatial_values_cm = [119.0, 102.0, 85.0, 68.0, 51.0, 34.0, 17.0]
+    design.protocol.pair_spatial_values_with_soas = True
+    design.protocol.repetitions_per_condition = 12
+    design.protocol.catch_trials_exact = 28
+    design.protocol.include_baseline_trials = True
+    design.protocol.baseline_strategy = "tactile_only"
+    design.protocol.baseline_soa_values_ms = [-500, 3500]
+    design.protocol.baseline_trials_exact = 28
+    for strip in design.protocol.trial_strips:
+        strip.audio_tactile_percentage = None
+        strip.catch_percentage = None
+        strip.baseline_percentage = None
+
+    rows = block_trial_rows(design)
+    counts = Counter(row["trial_type"] for row in rows)
+
+    assert counts == {"Audio-Tactile": 84, "Baseline": 28, "Catch": 28}
+    assert len(rows) == 140
+    assert all(row["tactile_enabled"] is True for row in rows if row["trial_type"] == "Baseline")
+    assert all(row["tactile_enabled"] is False for row in rows if row["trial_type"] == "Catch")
 
 
 def test_trial_strips_row_mix_percentages_control_block_composition():

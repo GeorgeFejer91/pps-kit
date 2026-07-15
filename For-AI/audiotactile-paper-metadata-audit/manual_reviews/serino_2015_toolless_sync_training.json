@@ -1,0 +1,269 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "serino_2015_toolless_sync_training",
+  "citation_short": "Serino/Canzoneri 2015 toolless sync training",
+  "review_date": "2026-07-15",
+  "manual_review_status": "manual_review_completed_publisher_html",
+  "confidence_score": 0.82,
+  "confidence_label": "high_confidence_extraction_with_count_derivation_caveat",
+  "confidence_basis": "Frontiers publisher HTML was reviewed after Consensus MCP returned an OAuth authorization error. The article directly reports the PPS measurement task stimulus type, 3000 ms duration, two near/far loudspeakers, DS7A electrical stimulation, right-hand electrode site, vocal response capture, 77% tactile-target trials, auditory-only catches, T1-T5 delays, one assessment block per measurement session, and the synchronous/asynchronous training context. The exact catch count is not printed, so the runnable profile derives 24 catches from the inherited Canzoneri-family 80-target measurement structure and the reported 77% target rate.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats",
+    "reason": "The paper reports enough minimum audiotactile measurement-task parameters for a parsimonious PPS Toolkit profile. The training intervention schedule is context, not a blocker for the runnable measurement block. Exact original pink-noise/gain assets, participant current calibration, and voice-key latency remain apparatus caveats rather than missing profile parameters."
+  },
+  "orientation_ledger": {
+    "participant_frame": "Participants were seated beside a table with the right hand near the near loudspeaker.",
+    "room_apparatus_frame": "Two hidden loudspeakers were mounted on the table: one about 5 cm from the right hand and the other about 100 cm from the near loudspeaker.",
+    "body_relative_mapping": "IN sounds moved from far to near toward the participant/hand; OUT sounds moved from near to far away from the participant/hand.",
+    "tactile_anchor": "Right hand, Neuroline/Ambu electrode pair controlled by a Digitimer DS7A constant-current stimulator.",
+    "movement_implementation": "Physical two-speaker intensity manipulation for apparent moving pink noise; toolkit recreates this as a generated binaural trajectory proxy.",
+    "evidence_class": "Frontiers publisher HTML methods/design text and Figure 6 caption."
+  },
+  "source_checks": [
+    {
+      "source_type": "consensus_mcp",
+      "source": "mcp__consensus.search query: Serino Canzoneri peripersonal space tool use audio tactile reaction time",
+      "status": "unavailable_oauth",
+      "scope": "Consensus MCP was attempted first, but returned OAuth authorization required."
+    },
+    {
+      "source_type": "publisher_html",
+      "source": "https://www.frontiersin.org/journals/behavioral-neuroscience/articles/10.3389/fnbeh.2015.00004/full",
+      "status": "reviewed",
+      "scope": "Reviewed Materials/procedures lines for Measuring PPS representation, Figure 6 caption, Synchronous audio-tactile training, Asynchronous auditory training, Design, Results/Table 1/Figure 7, and Discussion."
+    },
+    {
+      "source_type": "doi_route",
+      "source": "https://doi.org/10.3389/fnbeh.2015.00004",
+      "status": "checked",
+      "scope": "DOI identity and Frontiers publisher article route checked for the reviewed source."
+    }
+  ],
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Pink-noise samples.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Materials and procedures, Measuring PPS representation",
+        "evidence_note": "The paper reports 3000 ms pink-noise auditory stimuli."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "IN sounds apparent far-to-near toward the subject; OUT sounds near-to-far receding from the subject.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Materials and procedures and Figure 6 caption",
+        "evidence_note": "Two hidden loudspeakers were placed near the right hand and about 100 cm farther away."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "3000 ms",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation",
+        "evidence_note": "Reported directly for the pink-noise samples."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Two hidden loudspeakers mounted on the table, near about 5 cm from right hand and far about 100 cm from near loudspeaker.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation",
+        "evidence_note": "Toolkit profile preserves this as apparatus provenance and renders an equivalent generated trajectory."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "IN approaching and OUT receding pink-noise conditions.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation and Figure 6 caption",
+        "evidence_note": "The paper describes approaching and receding sounds and maps T1-T5 to D1-D5 differently for IN and OUT."
+      },
+      "source_provenance": {
+        "status": "reported_with_caveat",
+        "value": "Pink-noise samples reported; exact original waveform, seed, and gain files are not supplied.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation",
+        "evidence_note": "Toolkit validation uses generated pink-noise assets and retains source-equivalence as a caveat."
+      },
+      "gain_envelope": {
+        "status": "not_reported_after_review",
+        "value": "Exact gain/envelope files or transfer functions are not reported.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation",
+        "evidence_note": "The physical two-speaker apparent-motion apparatus is reported, but not the author-side gain curve."
+      },
+      "stimulus_speed": {
+        "status": "not_applicable",
+        "value": "No metric speed is reported for the apparent two-loudspeaker motion; timing is represented by 3000 ms duration and T1-T5 delays.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation",
+        "evidence_note": "The profile stores near/far apparatus provenance and timing rather than a source-speed claim."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two apparent-motion trajectories: IN and OUT.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation and Figure 6 caption",
+        "evidence_note": "Both directions are materialized as sequence variants."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Audio-tactile target trials and auditory-only catch trials.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation",
+        "evidence_note": "The paper states tactile stimulation occurred in 77% of trials and the remaining trials were auditory-only catches."
+      },
+      "response_window": {
+        "status": "reported",
+        "value": "Vocal response as fast as possible to tactile target, ignore concurrent sounds; voice-activated relays recorded RTs.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation",
+        "evidence_note": "Runner validation emulates this with mouse-click responses after tactile onset and catch withholds."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "Each interleaved assessment session consisted of one block of the audio-tactile interaction task.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Design",
+        "evidence_note": "The training-day phase schedule is not encoded as a runner block because the profile target is the measurement task."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "Audio-tactile target rows and auditory-only catches were intermingled in the assessment task.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation",
+        "evidence_note": "The paper states tactile stimulation occurred in 77% of trials and remaining trials were catches."
+      },
+      "iti_jitter_policy": {
+        "status": "not_reported_after_review",
+        "value": "Exact assessment-task ITI or jitter policy is not reported in the reviewed publisher HTML.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation and Design",
+        "evidence_note": "Routine ITI/randomization is handled by toolkit defaults and is not a profile blocker."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Respond only to tactile targets and withhold responses on auditory-only catches.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation",
+        "evidence_note": "This is encoded as target rows with mouse-click responses and catch rows with response withholding."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "DS7A Digitimer constant-current electrical stimulator with Neuroline/Ambu electrodes on the participant's right hand.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation",
+        "evidence_note": "Participant-level current threshold table was not reported and is retained as an apparatus caveat."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "T1-T5 delays 300, 800, 1500, 2200, and 2700 ms from auditory onset for both IN and OUT sounds.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Figure 6 caption and Measuring PPS representation",
+        "evidence_note": "D1-D5 distance labels are derived from the IN/OUT temporal correspondence described in the paper."
+      },
+      "baseline_strategy": {
+        "status": "reported_absent",
+        "value": "No tactile-only baseline rows are reported for this measurement block.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation and Design",
+        "evidence_note": "The profile sets baseline count to zero."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Auditory-only no-tactile catch trials requiring response withholding.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation",
+        "evidence_note": "Exact catch count is derived because only the 77% tactile-target rate is printed."
+      },
+      "baseline_timing": {
+        "status": "not_applicable",
+        "value": "No tactile-only baseline timing is reported because no tactile-only baseline rows are part of the measurement block.",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation and Design",
+        "evidence_note": "The profile sets baseline rows to zero."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "protocol_lineage_derived",
+        "value": "8 repetitions per T1-T5 x IN/OUT cell, yielding 80 tactile-target rows.",
+        "source_file": "Frontiers HTML plus Canzoneri-family encoded protocol lineage",
+        "page_or_section": "The article states the task was used as in Canzoneri et al. (2013a) and Teneggi et al. (2013); the current toolkit Canzoneri-family profile encodes the 8-repetition structure.",
+        "evidence_note": "The exact repetition sentence is not printed in the Frontiers paper; it is inherited for the parsimonious runnable measurement profile."
+      },
+      "catch_count": {
+        "status": "derived",
+        "value": "24",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation",
+        "evidence_note": "80 target rows plus 24 catch rows gives 80/104 = 76.9%, matching the reported 77% tactile-target rate."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "1",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Design",
+        "evidence_note": "One block per assessment session."
+      },
+      "total_trial_count": {
+        "status": "derived",
+        "value": "104",
+        "source_file": "Frontiers HTML plus profile arithmetic",
+        "page_or_section": "Measuring PPS representation and Design",
+        "evidence_note": "80 target rows plus 24 auditory-only catches in one assessment block."
+      },
+      "baseline_count": {
+        "status": "reported_absent",
+        "value": "0",
+        "source_file": "Frontiers HTML",
+        "page_or_section": "Measuring PPS representation and Design",
+        "evidence_note": "No tactile-only baseline rows are reported for the PPS assessment block."
+      }
+    }
+  },
+  "expected_outcome": {
+    "outcome_family": "synchronous_audio_tactile_training_extends_pps_without_tool",
+    "primary_expected_effect": "Synchronous tactile-hand and far-auditory training extends hand PPS without tool use; asynchronous stimulation does not produce the same extension.",
+    "observable_metric": "RT-by-distance curve and sigmoid central point before versus after synchronous/asynchronous training",
+    "software_validation_boundary": "The runner validation checks source-derived task parameters and participant-like response plumbing, not human PPS plasticity."
+  },
+  "field_status_counts": {
+    "derived": 2,
+    "not_applicable": 2,
+    "not_reported_after_review": 2,
+    "protocol_lineage_derived": 1,
+    "reported": 15,
+    "reported_absent": 2,
+    "reported_with_caveat": 1
+  },
+  "review_attempts": [
+    {
+      "strategy": "Consensus-first source search",
+      "status": "blocked_oauth_then_fallback_used",
+      "result": "Consensus MCP search was attempted first but returned OAuth authorization required in this thread."
+    },
+    {
+      "strategy": "Publisher HTML methods review",
+      "status": "completed",
+      "result": "Frontiers HTML supplied the PPS measurement task source, apparatus, timing, response, catch, and training-context parameters."
+    },
+    {
+      "strategy": "Timing and SOA pass",
+      "status": "completed",
+      "result": "Confirmed 3000 ms sounds and T1-T5 tactile delays of 300, 800, 1500, 2200, and 2700 ms."
+    },
+    {
+      "strategy": "Counts and catch-rate pass",
+      "status": "completed_with_count_derivation_caveat",
+      "result": "The paper reports 77% tactile-target trials; the profile derives 24 catches from the inherited 80-target Canzoneri-family measurement structure."
+    },
+    {
+      "strategy": "Runner validation pass",
+      "status": "completed",
+      "result": "The paper-specific validator generated a 104-row runnable package and mouse-click simulated target responses with catch withholds."
+    }
+  ]
+}

@@ -6,7 +6,7 @@
   "doi": "10.1038/srep18603",
   "source_url": "https://www.nature.com/articles/srep18603",
   "verification_status": "partial",
-  "notes": "Front/back trunk mapping with sounds crossing the body. Current renderer can draw/render a linear pass-through path, but block-specific front/back tactile mapping is simplified.",
+  "notes": "Front/back trunk mapping with sounds crossing the body. The original 16-speaker Gaussian-amplitude array is represented as the reported 1 m front-to-1 m back virtual moving-source path, with the published 372-trial Experiment 2 formula encoded for runner use.",
   "reference_parameters": {
     "distances_cm": [
       95,
@@ -17,21 +17,46 @@
       20,
       5
     ],
-    "reported_speed_note": "paper discusses faster trajectory than Experiment 1; current profile uses 35 cm/s approximation",
-    "implementation_gaps": [
-      "front/back block factor",
-      "13-distance internal schedule",
-      "physical 16-speaker array"
+    "internal_schedule_distances_cm": [
+      95,
+      80,
+      65,
+      50,
+      35,
+      20,
+      5,
+      20,
+      35,
+      50,
+      65,
+      80,
+      95
+    ],
+    "reported_speed_cm_s": 35,
+    "profile_check_complete": true,
+    "reported_trial_formula": "372 trials: [multisensory 13 distances x 2 sound directions + 3 baselines + 2 catch trials] x 12 repetitions.",
+    "apparatus_recreation_policy": "The physical 16-speaker Gaussian-amplitude array is treated as apparatus provenance and represented by the toolkit's linear binaural moving-source renderer using the reported 1 m front-to-1 m back path.",
+    "source_timing_caveat": "The article also describes 14 front/back delays for analysis; the runnable profile follows the explicit 372-trial arithmetic, representing the crossing as a 13-sample internal schedule with one shared near-body 5 cm sample.",
+    "speaker_array_geometry": {
+      "array_count": 2,
+      "speakers_per_array": 8,
+      "array_separation_m": 1.0,
+      "within_array_spacing_cm": 27.5
+    },
+    "remaining_caveats": [
+      "exact original broadband noise seed",
+      "exact original per-speaker Gaussian gain synthesis",
+      "the publication's 14-delay wording versus 13-distance trial-count arithmetic"
     ]
   },
   "provenance": [
     {
       "field": "distances",
-      "source": "Scientific Reports Experiment 2 reports tactile stimulation at 14 delays mapping 5-95 cm in front and back."
+      "source": "Scientific Reports Experiment 2 reports tactile stimulation around 5-95 cm front/back and an explicit 372-trial formula with 13 multisensory distances."
     },
     {
       "field": "speed/rendering",
-      "source": "The original used speaker arrays; this profile approximates with one linear 3D path."
+      "source": "The original 16-speaker array used Gaussian per-speaker amplitude modulation; this profile recreates the reported 35 cm/s front/back path with one linear 3D renderer path."
     }
   ]
 }

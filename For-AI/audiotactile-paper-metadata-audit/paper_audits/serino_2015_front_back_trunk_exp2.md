@@ -3,7 +3,7 @@
 - Record ID: `serino_2015_front_back_trunk_exp2`
 - DOI: `10.1038/srep18603`
 - DOI URL: https://doi.org/10.1038/srep18603
-- Coverage category: `covered_blocked_toolkit_structure`
+- Coverage category: `covered_runnable_profile`
 - Task family: front/back trunk tactile PPS with physical speaker array
 - PDF status: `downloaded`
 - Supplement status: `downloaded`
@@ -17,7 +17,9 @@
 
 ## Known Prior Gaps
 
-- 13-distance internal schedule
+- Resolved in the current runnable profile by encoding the paper's explicit 372-trial formula: 13 multisensory distance samples x 2 directions, 3 baseline rows, and 2 catch rows, all repeated 12 times.
+- The original 16-speaker Gaussian-amplitude array remains apparatus provenance and is recreated as a linear binaural moving-source trajectory.
+- The paper's prose also describes 14 front/back delays; this remains a documented source caveat because it conflicts with the 13-distance trial-count arithmetic.
 
 ## Review Attempts
 

@@ -1040,3 +1040,162 @@ Methods manuscript draft. It is a working audit, not manuscript text.
 - A run-ready profile is still not an original-apparatus replication. Exact
   recreation requires original methods/assets or a validated and explicitly
   reported approximation.
+
+## Iteration 30: Consensus Spot-check and Manuscript Voice Pass
+
+### Main Critiques
+
+- The manuscript had become evidence-rich, but several sections still read like
+  internal planning notes. Phrases such as "the final paper should" and "the
+  manuscript needs to" weaken the BRM article voice even when the underlying
+  caveat is correct.
+- A targeted Consensus spot-check was needed before further polishing, because
+  the next revision should not merely make the prose smoother; it should verify
+  that the strongest boundaries still match the literature. The check focused
+  on three places where overclaiming would be easiest: BRM software-tool
+  validation style, PPS baseline/expectancy logic, and vibrotactile threshold
+  and adaptation evidence.
+
+### Resolution In This Revision
+
+- Ran targeted Consensus searches for behavioral-software/tool validation
+  models, audio-tactile PPS baseline and expectancy controls, and vibrotactile
+  threshold/adaptation evidence. The results reinforced the existing structure:
+  software papers should separate workflow, openness, timing evidence, and
+  reusable materials; PPS baseline choices change the estimand; and tactile
+  threshold/adaptation language should stay conservative unless run artifacts
+  are supplied.
+- Rewrote planning-language paragraphs in `main.tex` into present-tense
+  manuscript prose. The revised sections now describe HRTF provenance, tactile
+  calibration, archive layers, validation tiers, operator procedure, procedural
+  gaps, figure sourcing, limitations, and declarations as article content
+  rather than as instructions to a future writer.
+- Preserved the substantive caveats: profile recreation remains conditional,
+  participant-ear SPL requires measured calibration, timing evidence remains
+  tiered, and the two-miss tactile-output nudge remains a logged safeguard
+  rather than a validated psychophysical correction.
+
+### Residual Concerns
+
+- The manuscript still contains intentionally incomplete declaration fields and
+  release placeholders. Those are not prose-quality defects; they require human
+  author metadata, repository release data, DOI/archive links, funding,
+  competing-interest, and ethics language.
+- The next high-value paper pass should create final redistributable figures or
+  a figure-generation script from toolkit artifacts, because the prose now
+  repeatedly promises figure/source-material boundaries but the final figures
+  are not yet present.
+
+## Iteration 31: Source-owned Figure Integration Pass
+
+### Main Critiques
+
+- The paper had a figure/source-material plan, but the manuscript still asked
+  readers to imagine the workflow, design-decision map, evidence tiers, tactile
+  safeguards, and analysis surfaces from prose and tables alone. That made the
+  article less like a practical BRM software/methods paper.
+- The figure plan also needed to become reproducible without importing
+  copyrighted source-paper figures, private participant records, local SOFA
+  files, or generated lab outputs that cannot be shared.
+- Any figure pass could easily overstate validation if it made schematic
+  diagrams look like empirical timing or participant-effect evidence.
+
+### Resolution In This Revision
+
+- Added `figures/generate_figures.py`, a deterministic Pillow script that
+  creates six redistributable schematic PNG figures for the manuscript.
+- Generated and inserted figures for the Segment 0--6 workflow, the
+  design-decision evidence map, stimulus/trajectory/baseline alternatives, the
+  HRTF-to-output evidence chain, tactile calibration/miss safeguards, and the
+  exploratory post-run analysis surfaces.
+- Added short prose bridges and captions in `main.tex` that state each
+  figure's evidential boundary. The captions distinguish workflow/provenance
+  explanation from timing validation, tactile mechanical evidence, perceived
+  spatialization, adaptive-threshold efficacy, and confirmatory PPS inference.
+- Updated `figure_source_plan.csv`, the manuscript README, and
+  `submission_readiness_audit.md` so the source package records both the
+  generated figure files and the remaining need for release-state screenshots
+  or validation-output figures before final submission.
+
+### Residual Concerns
+
+- The current figures are schematics, not runtime screenshots or empirical
+  validation plots. They improve manuscript readability and claim discipline,
+  but they do not close the final release-hardware, participant-data, or
+  publication-supplement figure requirements.
+- The final submission should still consider replacing or supplementing one or
+  more schematics with release-state dashboard/runner screenshots, validation
+  evidence plots, and deidentified sample-analysis visuals once those artifacts
+  are frozen.
+
+## Iteration 32: Figure-plan Consistency Pass
+
+### Main Critiques
+
+- After the source-owned figure integration pass, the manuscript still contained
+  a `Figure and Source-material Plan` subsection written as if the figures were
+  only recommended future artifacts. That was internally inconsistent with the
+  six generated PNG figures now included in the draft.
+- The claim-boundary audit had the same slight lag: it protected against
+  copyrighted figures and private participant data, but it did not yet state
+  that the draft contains tracked schematic figures with explicit boundaries.
+
+### Resolution In This Revision
+
+- Rewrote the `Figure and Source-material Plan` subsection in `main.tex` to
+  describe the current schematic figure set, the tracked generator, and the
+  role of future release-state screenshots or validation-output figures.
+- Updated the figure-plan table so each row points to the current generated PNG
+  or the ledgers backing the schematic, rather than only to proposed future
+  source materials.
+- Updated `claim_boundary_audit.csv` so figure/material claims now distinguish
+  current schematic figures from stronger release-state visual evidence.
+
+### Residual Concerns
+
+- The edit closes an internal consistency gap only. It still does not provide
+  publication-hardware validation plots, deidentified empirical analysis
+  figures, author metadata, release DOI, or final declaration text.
+
+## Iteration 33: Pre-run Qualification Checklist Pass
+
+### Main Critiques
+
+- The manuscript named the major procedural gaps, but a BRM reader could still
+  ask what a laboratory should do before the first participant sits down. The
+  operator table described what the runner writes during a session; the gap
+  register described what remains missing. Neither one presented a crisp
+  pre-run qualification checklist.
+- Targeted Consensus searches reinforced that auditory and multisensory
+  methods papers separate playback/listening checks, hearing or headphone
+  screening, route-specific timing validation, tactile delivery, and analysis
+  governance. The draft needed to express that separation as a procedure, not
+  only as limitations.
+- The checklist had to avoid becoming a false validation certificate. It should
+  say what to record and what evidence tier is still required, not imply that
+  the current source package already supplies every hearing, SPL, localization,
+  loopback, tactile, rights, or preregistration artifact.
+
+### Resolution In This Revision
+
+- Added `pre_run_qualification_checklist.csv`, a source-level ledger covering
+  listening eligibility, spatial rendering/perception, route timing and
+  synchronization, tactile perceptual/mechanical readiness, task/response
+  governance, and profile provenance/rights.
+- Added a `Pre-run Qualification Checklist` subsection and table to `main.tex`
+  between timing evidence and operator procedure. This makes the manuscript's
+  practical workflow read as design archive -> pre-run qualification ->
+  session execution -> post-run review.
+- Updated the manuscript README and `submission_readiness_audit.md` so the new
+  checklist is maintained as a reporting scaffold with explicit boundaries.
+
+### Residual Concerns
+
+- The checklist is source-ready, but the final submission still needs the
+  underlying lab artifacts for any strong claim: screening results or policy,
+  measured or justified level setting, spatial-perception or localization
+  checks when claimed, hardware timing/loopback reports, tactile delivery
+  evidence, rights review, profile hashes, and preregistered confirmatory
+  analysis decisions.
+- The table may need layout tuning after LaTeX render because it is dense and
+  citation-heavy.

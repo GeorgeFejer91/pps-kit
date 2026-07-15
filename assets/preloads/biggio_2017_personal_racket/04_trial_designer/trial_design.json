@@ -1,0 +1,111 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "biggio_2017_personal_racket",
+  "repetitions_per_condition": 30,
+  "soa_values_ms": [
+    0,
+    2
+  ],
+  "spatial_values_cm": [
+    30.0,
+    98.5
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "biggio-2017-personal-racket-near",
+      "label": "Personal racket near target",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        0
+      ],
+      "spatial_values_cm": [
+        30.0
+      ],
+      "metadata": {
+        "expected_response": "respond",
+        "response_rule": "verbal_response_to_tactile_target_ignore_sound",
+        "target_role": "tactile_target",
+        "response_mode": "voice_key_mouse_click_proxy",
+        "response_capture_device": "microphone",
+        "voice_key_enabled": "true",
+        "tool_condition": "personal_racket",
+        "auditory_trajectory_family": "static_near_far",
+        "auditory_trajectory_direction": "stationary_near",
+        "trajectory_start_distance_cm": 30.0,
+        "trajectory_end_distance_cm": 30.0,
+        "source_asset_equivalence": "procedural pink-noise proxy for unreported source",
+        "renderer_equivalence_boundary": "binaural stationary proxy for physical near loudspeaker",
+        "iti_policy": "toolkit_default_unreported_in_source",
+        "iti_ms": "300",
+        "tactile_stimulation_modality": "electrical",
+        "electrical_stimulator_model": "Digitimer DS7AH HV",
+        "electrical_electrode_site": "right wrist surface bipolar electrode"
+      },
+      "elements": [
+        {
+          "element_id": "biggio-2017-personal-near-source",
+          "kind": "looming_stimulus",
+          "label": "Near sound",
+          "source_label": "Near hand pink-noise burst",
+          "source_labels": [
+            "Near hand pink-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    },
+    {
+      "strip_id": "biggio-2017-personal-racket-far",
+      "label": "Personal racket far target",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        2
+      ],
+      "spatial_values_cm": [
+        98.5
+      ],
+      "metadata": {
+        "expected_response": "respond",
+        "response_rule": "verbal_response_to_tactile_target_ignore_sound",
+        "target_role": "tactile_target",
+        "response_mode": "voice_key_mouse_click_proxy",
+        "response_capture_device": "microphone",
+        "voice_key_enabled": "true",
+        "tool_condition": "personal_racket",
+        "auditory_trajectory_family": "static_near_far",
+        "auditory_trajectory_direction": "stationary_far",
+        "trajectory_start_distance_cm": 98.5,
+        "trajectory_end_distance_cm": 98.5,
+        "source_asset_equivalence": "procedural pink-noise proxy for unreported source",
+        "renderer_equivalence_boundary": "binaural stationary proxy for physical far loudspeaker",
+        "iti_policy": "derived_far_sound_lead_plus_toolkit_default_unreported_iti",
+        "iti_ms": "300",
+        "far_sound_lead_ms": "2",
+        "tactile_stimulation_modality": "electrical",
+        "electrical_stimulator_model": "Digitimer DS7AH HV",
+        "electrical_electrode_site": "right wrist surface bipolar electrode"
+      },
+      "elements": [
+        {
+          "element_id": "biggio-2017-personal-far-source",
+          "kind": "looming_stimulus",
+          "label": "Far sound",
+          "source_label": "Far racket-tip pink-noise burst",
+          "source_labels": [
+            "Far racket-tip pink-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 150
+}

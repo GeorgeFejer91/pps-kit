@@ -58,7 +58,8 @@ analysis, and operator failure modes.
 Protocol 12 is the published-profile recreation interface matrix. It verifies
 that ready published preloads pass the Segment 0-4 profile gate, remain
 read-only in the interface, materialize through local Segments 0-6, and produce
-runner-handoff artifacts before a profile is treated as runnable evidence.
+profile-local runner-handoff artifacts before a profile is treated as runnable
+evidence.
 
 ## Scripts
 
@@ -97,6 +98,9 @@ python .\validation_protocols\scripts\run_protocol11_capture_options_matrix.py -
 python .\validation_protocols\scripts\validate_protocol11_emulated_runner_artifacts.py --session-dir local_data\sessions\P001_YYYYMMDD_HHMMSS --response-plan artifacts\validation_runs\protocol11_response_plan.json
 python .\validation_protocols\scripts\audit_protocol11_study5_readiness.py --artifact-dir artifacts\validation_runs\full_study5_realtime_current --require-full-study5 --require-realtime
 python .\validation_protocols\scripts\run_profile_recreation_interface_matrix.py --output-dir artifacts\validation_runs\profile_recreation_interface_matrix_current
+python .\validation_protocols\scripts\run_ready_profile_runner_smoke.py --profile-set ready-published --output-dir artifacts\validation_runs\ready_profile_runner_smoke_current
+python .\validation_protocols\scripts\run_ready_profile_response_marker_loopback.py --smoke-report artifacts\validation_runs\ready_profile_runner_smoke_current\ready_profile_runner_smoke_report.json --output-dir artifacts\validation_runs\ready_profile_response_marker_loopback_current
+python .\validation_protocols\scripts\run_ready_profile_expected_contrast_audit.py --runner-smoke-report artifacts\validation_runs\ready_profile_runner_smoke_current\ready_profile_runner_smoke_report.json --output-dir artifacts\validation_runs\ready_profile_expected_contrast_audit_current
 python .\validation_protocols\scripts\run_focus_mode_click_path_stress.py --output-dir artifacts\validation_runs\focus_mode_click_path_current --count 10 --offscreen
 python .\validation_protocols\scripts\run_visible_runner_os_click_stress.py --output-dir artifacts\validation_runs\visible_runner_os_click_stress_current --count 10 --interval-s 0.05 --armed
 python .\validation_protocols\scripts\run_one_block_actual_condition_validation.py --run-setup-manifest local_data\dashboard_projects\0_study_project_registry\profile_pfeiffer_2018_lateral_perihead_left_to_right\6_experiment_run_setup\experiment_run_setup_manifest.json --device 31 --audio-gain 0.005 --tactile-gain 0.05
@@ -118,6 +122,12 @@ above `0.10`. If a channel is too quiet, adjust the physical patch, input gain,
 or detection setup; do not raise the digital test tone into clipping. Equal
 interface knob positions are not evidence of equal recorded levels. Use the
 captured peak/SNR/correlation/clipping reports to balance the inputs.
+
+Ready-profile runner smoke compacts per-profile generated WAV/session trees by
+default after it records CSV/JSON/XDF evidence for downstream loopback and
+expected-contrast audits. Pass `--keep-materialized` only when the full
+generated session tree is the artifact under inspection and sufficient disk
+space is available.
 
 The full validation PC software checklist is tracked in
 `docs/WINDOWS_PC_SOFTWARE_REQUIREMENTS.md`. The current lab install should use:

@@ -3,7 +3,7 @@
 - Record ID: `interoception_exteroception_2025`
 - DOI: `10.1073/pnas.2516229122`
 - DOI URL: https://doi.org/10.1073/pnas.2516229122
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: audio-tactile self-relevance task placing the auditory source inside versus outside PPS with tactile responses and EEG/HEP endpoint
 - PDF status: `needs_user_download`
 - Supplement status: `paywalled`
@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- extract auditory inside/outside-PPS locations, tactile timing, response window, and EEG/HEP trigger timing requirements
+- extract auditory inside/outside-PPS locations, tactile timing, response window, baseline/ITI policy, trial counts, and EEG/HEP trigger timing requirements
 
 ## Review Attempts
 

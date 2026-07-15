@@ -99,14 +99,14 @@
       "holmes_experiments": [
         "1"
       ],
-      "decision": "consensus_current_blocked_profile",
+      "decision": "consensus_current_runnable_profile",
       "linked_literature_record_ids": [
         "canzoneri_2012_dynamic_sounds"
       ],
       "current_template_ids": [
         "canzoneri_2012_dynamic_sounds"
       ],
-      "reason": "Profile exists but direction-coupled tactile-only baselines, exact gain files, voice-key capture, and tactile calibration block exact recreation."
+      "reason": "Current profile passes the audiotactile task recreation gate with direction-coupled tactile-only baselines and reported trial counts; exact author SoundForge gain files, voice-key hardware, and electrical calibration remain provenance caveats."
     },
     {
       "source_label": "Canzoneri et al. (2013a)",
@@ -285,7 +285,7 @@
         "serino_2015_front_back_trunk_exp2",
         "serino_2015_peri_hand_exp3"
       ],
-      "reason": "Experiment 1 is now profile-check runnable via analog-apparatus trajectory reconstruction; Experiments 2-3 are templated but still blocked by multi-speaker/body-coordinate issues, and Experiments 4-6 still need extraction."
+      "reason": "Experiments 1 and 3 are now profile-check runnable via analog-apparatus trajectory reconstruction, with Experiment 3 using a caveated hand-anchored cartesian path; Experiment 2 remains templated but blocked by multi-speaker/internal-distance issues, and Experiments 4-6 still need extraction."
     },
     {
       "source_label": "Ardizzi & Ferri (2018)",
@@ -343,14 +343,14 @@
         "2",
         "3"
       ],
-      "decision": "consensus_current_blocked_profile",
+      "decision": "consensus_current_runnable_profile",
       "linked_literature_record_ids": [
         "tonelli_2019_echolocation"
       ],
       "current_template_ids": [
         "tonelli_2019_echolocation"
       ],
-      "reason": "Profile exists; seven-speaker switching/timing support is missing."
+      "reason": "Current Tonelli profile passes the audiotactile task gate using a virtual seven-distance lateral moving-source recreation; exact speaker switching/gain, original noise asset, response timeout, and unfixed ITI remain provenance caveats."
     },
     {
       "source_label": "van der Linden (2014)",

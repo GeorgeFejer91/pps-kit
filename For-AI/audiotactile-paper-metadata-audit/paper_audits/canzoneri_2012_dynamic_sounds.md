@@ -3,7 +3,7 @@
 - Record ID: `canzoneri_2012_dynamic_sounds`
 - DOI: `10.1371/journal.pone.0044306`
 - DOI URL: https://doi.org/10.1371/journal.pone.0044306
-- Coverage category: `covered_blocked_toolkit_structure`
+- Coverage category: `covered_runnable_profile`
 - Task family: canonical dynamic looming/receding sound with tactile detection
 - PDF status: `downloaded`
 - Supplement status: `needs_user_download`
@@ -17,9 +17,7 @@
 
 ## Known Prior Gaps
 
-- exact original SoundForge gain/envelope files
-- voice-key response capture
-- electrical tactile threshold calibration
+- No remaining publication-parameter gap recorded in the current coverage ledger.
 
 ## Review Attempts
 

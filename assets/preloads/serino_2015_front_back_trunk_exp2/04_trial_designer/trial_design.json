@@ -9,7 +9,13 @@
     1429,
     1857,
     2286,
-    2714
+    2714,
+    3429,
+    3857,
+    4286,
+    4714,
+    5143,
+    5571
   ],
   "spatial_values_cm": [
     95,
@@ -18,16 +24,25 @@
     50,
     35,
     20,
-    5
+    5,
+    20,
+    35,
+    50,
+    65,
+    80,
+    95
   ],
   "custom_clip_assets": [],
   "trial_strips": [
     {
       "strip_id": "serino-front-back-trunk-row",
       "label": "Front/back trunk moving-sound trial",
-      "audio_tactile_percentage": 100.0,
-      "catch_percentage": 0.0,
-      "baseline_percentage": 0.0,
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {},
       "elements": [
         {
           "element_id": "serino-front-back-moving-sound",
@@ -45,5 +60,5 @@
     }
   ],
   "prestimulus_files": [],
-  "preview_trial_count": 168
+  "preview_trial_count": 372
 }

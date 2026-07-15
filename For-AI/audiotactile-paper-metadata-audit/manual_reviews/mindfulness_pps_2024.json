@@ -65,9 +65,9 @@
     }
   ],
   "field_status_counts": {
-    "reported": 20,
     "derived": 4,
-    "not_reported_after_review": 1
+    "not_reported_after_review": 1,
+    "reported": 20
   },
   "segment_field_audit": {
     "segment_1_stimulus_reconstruction": {

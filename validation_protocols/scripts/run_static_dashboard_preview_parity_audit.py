@@ -306,7 +306,7 @@ def _compare_one_profile(
     if enabled:
         failures.append(prefix + f"mutating controls enabled without companion: {', '.join(enabled)}")
 
-    expected_labels = _expected_source_labels(template_data)
+    expected_labels = _expected_source_labels(template_data, inventory_profile)
     actual_labels = [str(item.get("label") or "") for item in snapshot.get("sources", [])]
     if actual_labels != expected_labels:
         failures.append(prefix + f"source labels mismatch: expected {expected_labels}, got {actual_labels}")
@@ -427,19 +427,38 @@ def _profile_blockers(profile: dict[str, Any]) -> list[str]:
     return blockers
 
 
-def _expected_source_labels(template_data: dict[str, Any]) -> list[str]:
+def _expected_source_labels(template_data: dict[str, Any], inventory_profile: dict[str, Any]) -> list[str]:
     design = template_data.get("design") or {}
     labels = []
+    consumed_asset_keys = set()
+    asset_labels_by_key = {
+        _source_key(str(asset.get("label") or "")): str(asset.get("label") or "")
+        for asset in inventory_profile.get("assets", [])
+        if str(asset.get("label") or "")
+    }
     for item in design.get("noises") or []:
         if item.get("label"):
-            labels.append(str(item["label"]))
+            label = str(item["label"])
+            labels.append(label)
+            if _source_key(label) in asset_labels_by_key:
+                consumed_asset_keys.add(_source_key(label))
     for item in design.get("custom_looming_files") or []:
         if item.get("label"):
-            labels.append(str(item["label"]))
+            label = str(item["label"])
+            labels.append(label)
+            if _source_key(label) in asset_labels_by_key:
+                consumed_asset_keys.add(_source_key(label))
+    for key, label in asset_labels_by_key.items():
+        if key not in consumed_asset_keys:
+            labels.append(label)
     for item in design.get("prestimulus_files") or []:
         if item.get("label"):
             labels.append(str(item["label"]))
-    return labels
+    return list(dict.fromkeys(labels))
+
+
+def _source_key(label: str) -> str:
+    return " ".join(str(label or "").strip().lower().split())
 
 
 def _free_port(host: str) -> int:

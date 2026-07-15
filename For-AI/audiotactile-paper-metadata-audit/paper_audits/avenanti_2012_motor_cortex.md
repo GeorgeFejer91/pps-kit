@@ -3,7 +3,7 @@
 - Record ID: `avenanti_2012_motor_cortex`
 - DOI: `10.1016/j.neuroimage.2012.06.063`
 - DOI URL: https://doi.org/10.1016/j.neuroimage.2012.06.063
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: audio-tactile PPS stimulation with motor-evoked-potential endpoint
 - PDF status: `open_access_unavailable`
 - Supplement status: `not_checked`
@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- not a standalone behavioral tactile RT profile in the current toolkit
+- extract audio-tactile task timing, tactile stimulation, motor-evoked-potential timing, trigger markers, baseline/ITI policy, and trial counts before templating; runner can now preserve declared external trigger metadata but hardware TTL validation remains outside software-runner scope
 
 ## Review Attempts
 

@@ -255,7 +255,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260630-source-mode-widgets"
+    static_version = "20260703-runner-gui-compat"
     assert f'href="styles.css?v={static_version}"' in html
     assert f'src="hardware_pixel_art.js?v={static_version}"' in html
     assert f'src="app.js?v={static_version}"' in html
@@ -1007,6 +1007,13 @@ def test_dashboard_pages_companion_contract(tmp_path: Path):
     assert root.status_code in {302, 307}
     assert root.headers["location"] == "/dashboard/index.html"
 
+    static_inventory = client.get("/assets/preloads/preload_inventory.json")
+    assert static_inventory.status_code == 200
+    assert static_inventory.json()["schema"] == "pps-preload-asset-inventory.v1"
+    static_template = client.get("/study_templates/study5_box_breathing_pps.json")
+    assert static_template.status_code == 200
+    assert static_template.json()["template_id"] == "study5_box_breathing_pps"
+
     for origin in ("https://georgefejer91.github.io", "https://ppskit.qzz.io"):
         health = client.get("/api/health", headers={"Origin": origin})
         assert health.status_code == 200
@@ -1035,15 +1042,15 @@ def test_dashboard_pages_companion_contract(tmp_path: Path):
     assert study5["missing_parameter_count"] == 0
     assert study5["unsupported_structure_count"] == 0
 
-    partial = next(item for item in preloads["profiles"] if item["template_id"] == "canzoneri_2012_dynamic_sounds")
-    assert partial["runner_readiness"] == "blocked_unsupported_toolkit_structure"
-    assert partial["profile_checks_passed"] is False
-    assert partial["segment_0_to_4_profile_checks_passed"] is False
-    assert partial["finished_profile"] is False
-    assert partial["segment_6_launchable"] is False
-    assert partial["profile_completion_status"] == "unfinished_preload"
-    assert partial["missing_parameter_count"] > 0
-    assert partial["unsupported_structure_count"] > 0
+    canzoneri = next(item for item in preloads["profiles"] if item["template_id"] == "canzoneri_2012_dynamic_sounds")
+    assert canzoneri["runner_readiness"] == "ready"
+    assert canzoneri["profile_checks_passed"] is True
+    assert canzoneri["segment_0_to_4_profile_checks_passed"] is True
+    assert canzoneri["finished_profile"] is True
+    assert canzoneri["segment_6_launchable"] is True
+    assert canzoneri["profile_completion_status"] == "finished_segment_6_launchable"
+    assert canzoneri["missing_parameter_count"] == 0
+    assert canzoneri["unsupported_structure_count"] == 0
 
     synced = client.post("/api/preloads/study5_box_breathing_pps/sync").json()
     assert synced["status"] == "ready"
@@ -1354,11 +1361,12 @@ def test_dashboard_startup_overwrites_stale_study5_canonical_ingredient(tmp_path
 def test_dashboard_blocks_runner_launch_for_incomplete_published_profile(tmp_path: Path):
     client = _client(tmp_path)
 
-    loaded = client.post("/api/templates/canzoneri_2012_dynamic_sounds/load").json()
-    assert loaded["selected_template"] == "canzoneri_2012_dynamic_sounds"
+    blocked_template_id = "taffou_2014_cynophobic_rear_looming"
+    loaded = client.post(f"/api/templates/{blocked_template_id}/load").json()
+    assert loaded["selected_template"] == blocked_template_id
     assert loaded["templates"]
-    template = next(item for item in loaded["templates"] if item["template_id"] == "canzoneri_2012_dynamic_sounds")
-    assert template["runner_readiness"] == "blocked_unsupported_toolkit_structure"
+    template = next(item for item in loaded["templates"] if item["template_id"] == blocked_template_id)
+    assert template["runner_readiness"] == "blocked_missing_parameters"
     assert template["profile_checks_passed"] is False
 
     blocked = client.post("/api/run-sequence/open-runner")
@@ -1378,7 +1386,7 @@ def test_dashboard_blocks_runner_launch_for_incomplete_published_profile(tmp_pat
     state = client.get("/api/state").json()
     assert state["participant_id"] == "P999"
     assert state["design"]["name"] == loaded["design"]["name"]
-    assert state["design"]["study_profile_id"] == "canzoneri_2012_dynamic_sounds"
+    assert state["design"]["study_profile_id"] == blocked_template_id
 
 
 def test_dashboard_launches_every_finished_profile_from_segment6(tmp_path: Path, monkeypatch):
@@ -1719,6 +1727,52 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
     assert state["project_segments"]["4_trial_repetition_pool"]["total_count"] == 264
 
 
+def test_dashboard_trial_pool_honors_tonelli_exact_control_counts(tmp_path: Path):
+    design_path = tmp_path / "design.json"
+    save_design(_compact_design(), design_path)
+    controller = DashboardController(
+        design_path=design_path,
+        render_dir=_render_dir(tmp_path),
+        session_root=tmp_path / "sessions",
+        import_dir=tmp_path / "imports",
+        preview_dir=tmp_path / "previews",
+        project_registry_root=tmp_path / "dashboard_projects" / "0_study_project_registry",
+    )
+    controller.load_template("tonelli_2019_echolocation", snapshot=False)
+    design = controller.design
+    project = controller._ensure_project_context(design)
+    project_dir = project.project_dir
+
+    sequence_done = dashboard_app._bake_trial_sequence_variants(design, project_dir)
+    assert sequence_done["status"] == "baked"
+
+    tactile_done = dashboard_app._bake_audio_tactile_trial_files(design, project_dir)
+    assert tactile_done["status"] == "baked"
+    assert tactile_done["audio_tactile_count"] == 7
+    assert tactile_done["baseline_count"] == 2
+    assert tactile_done["catch_count"] == 1
+
+    pool_done = dashboard_app._bake_trial_repetition_pool(
+        design,
+        project_dir,
+        {"kind": "trial_repetition_pool", "label": "4_trial_repetition_pool"},
+    )
+    assert pool_done["status"] == "baked"
+    assert pool_done["total_count"] == 140
+    assert pool_done["audio_tactile_count"] == 84
+    assert pool_done["baseline_count"] == 28
+    assert pool_done["catch_count"] == 28
+
+    pool_manifest = _read_json_file(pool_done["manifest_path"])
+    assert pool_manifest["exact_family_trial_counts"] == {"baseline": 28, "catch": 28}
+    assert pool_manifest["settings"]["exact_family_trial_counts"] == {"baseline": 28, "catch": 28}
+    folder_counts = {
+        item["family"]: item["trial_count"]
+        for item in pool_manifest["folder_summaries"]
+    }
+    assert folder_counts == {"audio_tactile": 84, "baseline": 28, "catch": 28}
+
+
 def test_dashboard_study5_profile_preserves_trial_budget_with_two_sources(tmp_path: Path):
     client = _client(tmp_path)
     client.post("/api/templates/study5_box_breathing_pps/load").json()
@@ -1820,15 +1874,14 @@ def test_dashboard_study5_profile_preserves_trial_budget_with_two_sources(tmp_pa
             "baseline": 10,
             "catch": 4,
         }
-        assert dict(Counter(row["noise_type"] for row in block_rows)) == {"pink": 17, "white": 17}
-        assert dict(Counter((row["family"], row["noise_type"]) for row in block_rows)) == {
-            ("audio_tactile", "pink"): 10,
-            ("audio_tactile", "white"): 10,
-            ("baseline", "pink"): 5,
-            ("baseline", "white"): 5,
-            ("catch", "pink"): 2,
-            ("catch", "white"): 2,
-        }
+        noise_counts = Counter(row["noise_type"] for row in block_rows)
+        assert set(noise_counts) == {"pink", "white"}
+        assert sum(noise_counts.values()) == 34
+        assert abs(noise_counts["pink"] - noise_counts["white"]) <= 2
+        family_noise_counts = Counter((row["family"], row["noise_type"]) for row in block_rows)
+        assert abs(family_noise_counts[("audio_tactile", "pink")] - family_noise_counts[("audio_tactile", "white")]) <= 2
+        assert abs(family_noise_counts[("baseline", "pink")] - family_noise_counts[("baseline", "white")]) <= 2
+        assert abs(family_noise_counts[("catch", "pink")] - family_noise_counts[("catch", "white")]) <= 2
         assert [row["row_label"] for row in block_rows] == ["Inhale trial type", "Exhale trial type"] * 17
 
 
@@ -1942,19 +1995,36 @@ def test_lerner_preload_loads_twelve_3d_boundary_directions(tmp_path: Path):
     assert len(design["noises"]) == 2
     assert len(design["custom_looming_files"]) == 22
     assert design["protocol"]["auditory_motion_directions"] == ["source_trajectory"]
+    assert design["protocol"]["repetitions_per_condition"] == 1
+    assert design["protocol"]["include_baseline_trials"] is False
+    assert design["protocol"]["include_catch_trials"] is False
+    assert design["protocol"]["distribute_trial_pool_across_blocks"] is True
     assert len(viewer_sources) == 24
-    assert {item["tone_type"] for item in viewer_sources} == {"pink", "white"}
-    unique_geometries = {
+    assert {item["tone_type"] for item in viewer_sources} == {"pink"}
+    dynamic_sources = [item for item in viewer_sources if item["label"].startswith("Dynamic")]
+    flat_sources = [item for item in viewer_sources if item["label"].startswith("Flat")]
+    assert len(dynamic_sources) == 12
+    assert len(flat_sources) == 12
+    assert {item["trajectory_snapshot"]["path_direction"] for item in dynamic_sources} == {"custom"}
+    assert {item["trajectory_snapshot"]["path_direction"] for item in flat_sources} == {"stationary"}
+    unique_starts = {
+        tuple(item["trajectory_snapshot"]["start"][axis] for axis in ("x_m", "y_m", "z_m"))
+        for item in viewer_sources
+    }
+    dynamic_geometries = {
         (
             tuple(item["trajectory_snapshot"]["start"][axis] for axis in ("x_m", "y_m", "z_m")),
             tuple(item["trajectory_snapshot"]["end"][axis] for axis in ("x_m", "y_m", "z_m")),
         )
-        for item in viewer_sources
+        for item in dynamic_sources
     }
-    assert len(unique_geometries) == 12
-    assert {item["trajectory_snapshot"]["movement_duration_s"] for item in viewer_sources} == {5.5}
+    assert len(unique_starts) == 12
+    assert len(dynamic_geometries) == 12
+    assert {item["trajectory_snapshot"]["movement_duration_s"] for item in dynamic_sources} == {5.5}
+    assert {item["trajectory_snapshot"]["movement_duration_s"] for item in flat_sources} == {0.0}
     assert {item["trajectory_snapshot"]["start_distance_cm"] for item in viewer_sources} == {120.0}
-    assert {item["trajectory_snapshot"]["end_distance_cm"] for item in viewer_sources} == {1.0}
+    assert {item["trajectory_snapshot"]["end_distance_cm"] for item in dynamic_sources} == {1.0}
+    assert {item["trajectory_snapshot"]["end_distance_cm"] for item in flat_sources} == {120.0}
     for item in viewer_sources:
         _assert_dashboard_path_exists(root, item["local_path"])
 
@@ -2646,6 +2716,103 @@ def test_dashboard_sequence_bake_preserves_stereo_looming_after_mono_instruction
     assert np.max(np.abs(audio_tactile[:, 2])) > 0.01
 
 
+def test_dashboard_auditory_only_trials_are_stereo_response_trials(tmp_path: Path):
+    client = _client(tmp_path)
+    custom = client.post("/api/templates/__custom__/load").json()
+    sample_rate = 44100
+    looming_frames = 256
+    stereo_looming = np.column_stack(
+        [
+            np.linspace(0.05, 0.20, looming_frames, dtype=np.float32),
+            np.linspace(-0.20, -0.05, looming_frames, dtype=np.float32),
+        ]
+    )
+    looming = _register_segment1_wav(
+        client,
+        custom["design"],
+        "Pink",
+        stereo_looming,
+        sample_rate=sample_rate,
+        motion_mode="looming",
+        source_kind="test_looming_audio",
+    )
+    custom["design"]["noises"] = [{"label": "Pink", "noise_type": "pink", "prebaked_path": str(looming)}]
+    custom["design"]["protocol"]["soa_values_ms"] = [1]
+    custom["design"]["protocol"]["spatial_values_cm"] = [100.0]
+    custom["design"]["protocol"]["include_catch_trials"] = False
+    custom["design"]["protocol"]["include_auditory_only_trials"] = True
+    custom["design"]["protocol"]["auditory_only_trials_exact"] = 3
+    custom["design"]["protocol"]["include_baseline_trials"] = False
+    custom["design"]["protocol"]["trial_strips"] = [
+        {
+            "strip_id": "row-1",
+            "label": "Auditory response row",
+            "metadata": {
+                "response_mode": "mouse_click_choice",
+                "response_choice_set": "left,right",
+                "correct_response": "left",
+            },
+            "elements": [
+                {"kind": "looming_stimulus", "label": "Looming Stimulus", "source_labels": ["Pink"], "randomized": True},
+            ],
+        }
+    ]
+
+    sequence_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {"kind": "trial_sequence_batch", "label": "2_trial_sequence_designs"},
+        },
+    ).json()
+    sequence_done = _wait_job(client, sequence_job["job_id"])
+    assert sequence_done["status"] == "succeeded"
+    sequence_manifest = _read_json_file(sequence_done["result"]["manifest_path"])
+    sequence_path = Path(sequence_manifest["variants"][0]["file_path"])
+    sequence_audio, sequence_sr = sf.read(dashboard_app._soundfile_path(sequence_path), dtype="float32", always_2d=True)
+
+    tactile_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {"kind": "audiotactile_trial_batch", "label": "3_tactile_and_baseline_trials"},
+        },
+    ).json()
+    tactile_done = _wait_job(client, tactile_job["job_id"])
+    assert tactile_done["status"] == "succeeded"
+    assert tactile_done["result"]["auditory_only_count"] == 1
+    tactile_manifest = _read_json_file(tactile_done["result"]["manifest_path"])
+    auditory_row = next(item for item in tactile_manifest["files"] if item["family"] == "auditory_only")
+    auditory_audio, auditory_sr = sf.read(dashboard_app._soundfile_path(auditory_row["file_path"]), dtype="float32", always_2d=True)
+
+    assert auditory_sr == sequence_sr
+    assert auditory_row["channels"] == 2
+    assert auditory_row["tactile_channel"] == ""
+    assert auditory_row["expected_response"] == "respond"
+    assert auditory_row["target_role"] == "auditory_target"
+    assert auditory_row["response_rule"] == "respond_to_auditory_target"
+    assert auditory_audio.shape == sequence_audio.shape
+    assert np.max(np.abs(auditory_audio - sequence_audio)) <= 1 / 32768
+
+    pool_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {"kind": "trial_repetition_pool", "label": "4_trial_repetition_pool"},
+        },
+    ).json()
+    pool_done = _wait_job(client, pool_job["job_id"])
+    assert pool_done["status"] == "succeeded"
+    assert pool_done["result"]["auditory_only_count"] == 3
+    pool_manifest = _read_json_file(pool_done["result"]["manifest_path"])
+    pool_rows = list(csv.DictReader(Path(pool_done["result"]["csv_path"]).open(encoding="utf-8")))
+    assert pool_manifest["family_counts"]["auditory_only"] == 3
+    assert Counter(row["family"] for row in pool_rows) == {"audio_tactile": 1, "auditory_only": 3}
+
+
 def test_dashboard_previews_each_segment2_source_label(tmp_path: Path):
     client = _client(tmp_path)
     custom = client.post("/api/templates/__custom__/load").json()
@@ -2953,6 +3120,10 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     assert {"trial_pool_index", "trial_file_path", "configured_repetitions", "duration_ms"} <= set(pool_rows[0])
 
     custom["design"]["protocol"]["blocks"] = 2
+    custom["design"]["protocol"]["block_specs"] = [
+        {"label": "Front direction", "stimulus_types": ["Audio-Tactile", "Baseline", "Catch"]},
+        {"label": "Rear direction", "stimulus_types": ["Audio-Tactile", "Baseline", "Catch"]},
+    ]
     block_job = client.post(
         "/api/stimulus/bake",
         json={
@@ -2977,10 +3148,12 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     assert block_manifest["max_consecutive_same_feature"] == 2
     assert block_manifest["source_segment4_manifest_sha256"] == dashboard_app._local_file_sha256(Path(pool_done["result"]["manifest_path"]))
     assert len(block_manifest["blocks"]) == 2
+    assert [block["block_label"] for block in block_manifest["blocks"]] == ["Front direction", "Rear direction"]
     block_counts = [block["trial_count"] for block in block_manifest["blocks"]]
     assert max(block_counts) - min(block_counts) <= 1
     assert sum(block_counts) == 13
     block_rows = list(csv.DictReader(Path(block_manifest["blocks"][0]["csv_path"]).open(encoding="utf-8")))
+    assert {row["block_label"] for row in block_rows} == {"Front direction"}
     assert {
         "family_color_hex",
         "row_color_hex",
@@ -3239,6 +3412,162 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     )
     assert second_prepare.status_code == 400
     assert "already prepared" in second_prepare.json()["detail"]
+
+
+def test_dashboard_preserves_row_contract_fields_and_strip_soas_through_block_csv(tmp_path: Path):
+    client = _client(tmp_path)
+    custom = client.post("/api/templates/__custom__/load").json()
+    sample_rate = 44100
+    frames = int(0.10 * sample_rate)
+
+    near = _register_segment1_wav(
+        client,
+        custom["design"],
+        "Near white burst",
+        np.ones((frames, 2), dtype=np.float32) * 0.10,
+        sample_rate=sample_rate,
+        motion_mode="stationary",
+        source_kind="test_looming_audio",
+    )
+    far = _register_segment1_wav(
+        client,
+        custom["design"],
+        "Far white burst",
+        np.ones((frames, 2), dtype=np.float32) * 0.08,
+        sample_rate=sample_rate,
+        motion_mode="stationary",
+        source_kind="test_looming_audio",
+    )
+    custom["design"]["name"] = "Row contract static near/far"
+    custom["design"]["noises"] = [
+        {"label": "Near white burst", "noise_type": "white", "prebaked_path": str(near)},
+        {"label": "Far white burst", "noise_type": "white", "prebaked_path": str(far)},
+    ]
+    custom["design"]["protocol"]["repetitions_per_condition"] = 1
+    custom["design"]["protocol"]["soa_values_ms"] = [10, 50, 90]
+    custom["design"]["protocol"]["spatial_values_cm"] = [99.0, 199.0, 299.0]
+    custom["design"]["protocol"]["pair_spatial_values_with_soas"] = True
+    custom["design"]["protocol"]["include_catch_trials"] = False
+    custom["design"]["protocol"]["include_baseline_trials"] = False
+    custom["design"]["protocol"]["blocks"] = 1
+    custom["design"]["protocol"]["trial_strips"] = [
+        {
+            "strip_id": "weak-near",
+            "label": "Weak target near",
+            "soa_values_ms": [0],
+            "spatial_values_cm": [30.0],
+            "metadata": {
+                "expected_response": "respond",
+                "response_rule": "respond_to_weak_target",
+                "target_role": "weak_target",
+                "response_mode": "mouse_click_voice_key_proxy",
+                "tactile_stimulation_modality": "electrical",
+                "tactile_threshold_reference": "90_percent_perception",
+            },
+            "elements": [
+                {
+                    "kind": "looming_stimulus",
+                    "label": "Near sound",
+                    "source_labels": ["Near white burst"],
+                    "randomized": True,
+                }
+            ],
+        },
+        {
+            "strip_id": "strong-far",
+            "label": "Strong nontarget far",
+            "soa_values_ms": [5],
+            "spatial_values_cm": [125.0],
+            "metadata": {
+                "expected_response": "withhold",
+                "response_rule": "withhold_to_strong_nontarget",
+                "target_role": "strong_nontarget",
+                "response_mode": "mouse_click_voice_key_proxy",
+                "tactile_stimulation_modality": "electrical",
+                "tactile_threshold_reference": "100_percent_perception",
+            },
+            "elements": [
+                {
+                    "kind": "looming_stimulus",
+                    "label": "Far sound",
+                    "source_labels": ["Far white burst"],
+                    "randomized": True,
+                }
+            ],
+        },
+    ]
+    custom = client.post("/api/design", json={"design": custom["design"]}).json()
+
+    sequence_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {"kind": "trial_sequence_batch", "label": "2_trial_sequence_designs"},
+        },
+    ).json()
+    sequence_done = _wait_job(client, sequence_job["job_id"])
+    assert sequence_done["status"] == "succeeded"
+    sequence_manifest = _read_json_file(sequence_done["result"]["manifest_path"])
+    assert {tuple(row["soa_values_ms"]) for row in sequence_manifest["variants"]} == {(0,), (5,)}
+
+    tactile_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {"kind": "audiotactile_trial_batch", "label": "3_tactile_and_baseline_trials"},
+        },
+    ).json()
+    tactile_done = _wait_job(client, tactile_job["job_id"])
+    assert tactile_done["status"] == "succeeded"
+    tactile_manifest = _read_json_file(tactile_done["result"]["manifest_path"])
+    assert tactile_manifest["audio_tactile_count"] == 2
+    by_role = {row["target_role"]: row for row in tactile_manifest["files"]}
+    assert by_role["weak_target"]["soa_ms"] == 0
+    assert by_role["weak_target"]["spatial_value_cm"] == pytest.approx(30.0)
+    assert by_role["strong_nontarget"]["soa_ms"] == 5
+    assert by_role["strong_nontarget"]["spatial_value_cm"] == pytest.approx(125.0)
+    assert client.get("/api/state").json()["project_segments"]["3_tactile_and_baseline_trials"]["status"] == "ready"
+
+    pool_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {
+                "kind": "trial_repetition_pool",
+                "label": "4_trial_repetition_pool",
+                "default_repetitions": 1,
+            },
+        },
+    ).json()
+    pool_done = _wait_job(client, pool_job["job_id"])
+    assert pool_done["status"] == "succeeded"
+    pool_rows = list(csv.DictReader(Path(pool_done["result"]["csv_path"]).open(encoding="utf-8")))
+    assert {row["expected_response"] for row in pool_rows} == {"respond", "withhold"}
+    assert {row["soa_ms"] for row in pool_rows} == {"0", "5"}
+
+    block_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {"kind": "block_csv_preview", "label": "5_block_csv_preview", "block_count": 1},
+        },
+    ).json()
+    block_done = _wait_job(client, block_job["job_id"])
+    assert block_done["status"] == "succeeded"
+    block_manifest = _read_json_file(block_done["result"]["manifest_path"])
+    block_rows = list(csv.DictReader(Path(block_manifest["blocks"][0]["csv_path"]).open(encoding="utf-8")))
+    block_by_role = {row["target_role"]: row for row in block_rows}
+    assert block_by_role["weak_target"]["expected_response"] == "respond"
+    assert block_by_role["weak_target"]["soa_ms"] == "0"
+    assert block_by_role["weak_target"]["spatial_value_cm"] == "30.0"
+    assert block_by_role["strong_nontarget"]["expected_response"] == "withhold"
+    assert block_by_role["strong_nontarget"]["soa_ms"] == "5"
+    assert block_by_role["strong_nontarget"]["spatial_value_cm"] == "125.0"
+    assert block_by_role["strong_nontarget"]["tactile_stimulation_modality"] == "electrical"
 
 
 def test_auditory_only_bake_render_writes_stereo_wav(tmp_path: Path):

@@ -13,6 +13,7 @@ pytest.importorskip("httpx")
 
 from fastapi.testclient import TestClient
 
+from peripersonal_space_toolkit import dashboard_app
 from peripersonal_space_toolkit.dashboard_app import DashboardController, create_app
 from peripersonal_space_toolkit.design import ProtocolSpec, default_design, design_to_dict, save_design
 
@@ -139,6 +140,7 @@ def test_dashboard_static_assets_keep_numbered_baseline_and_block_segments():
     assert "renderLiveTrialPreviewTables" in app_js
     assert "min_max" in app_js
     assert "baseline_trial_percentage" in app_js
+    assert "baseline_trials_exact" in app_js
 
 
 def test_dashboard_saves_baseline_strategy_and_updates_summary(tmp_path: Path):
@@ -154,7 +156,32 @@ def test_dashboard_saves_baseline_strategy_and_updates_summary(tmp_path: Path):
     summary = updated["protocol_summary"]
     assert protocol["include_baseline_trials"] is True
     assert protocol["baseline_strategy"] == "soa_zero"
+    assert protocol["baseline_trials_exact"] is None
     assert protocol["baseline_trial_percentage"] == pytest.approx(20.0)
     assert summary["baseline_trials"] == 1
     assert summary["baseline_actual_percent"] == pytest.approx(50.0)
     assert "estimated_participant_minutes" in summary
+
+
+def test_full_soa_baseline_anchors_respect_custom_timing_list():
+    design = _compact_design()
+    design.protocol.include_baseline_trials = True
+    design.protocol.soa_values_ms = [10, 50]
+    design.protocol.baseline_strategy = "tactile_only"
+    design.protocol.baseline_soa_values_ms = [50]
+
+    assert dashboard_app._baseline_anchor_specs(design) == [
+        {"anchor_label": "custom_50ms", "soa_ms": 50, "mode": "tactile_only"}
+    ]
+
+    design.protocol.baseline_soa_values_ms = []
+    assert dashboard_app._baseline_anchor_specs(design) == [
+        {"anchor_label": "full_soa_10ms", "soa_ms": 10, "mode": "tactile_only"},
+        {"anchor_label": "full_soa_50ms", "soa_ms": 50, "mode": "tactile_only"},
+    ]
+
+    design.protocol.baseline_strategy = "stationary_burst"
+    design.protocol.baseline_soa_values_ms = [50]
+    assert dashboard_app._baseline_anchor_specs(design) == [
+        {"anchor_label": "custom_stationary_burst_50ms", "soa_ms": 50, "mode": "stationary_burst"}
+    ]

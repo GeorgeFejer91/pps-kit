@@ -32,20 +32,23 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     status = json.loads(STATUS_PATH.read_text(encoding="utf-8"))
 
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
-    assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 74
+    assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 6,
-        "covered_blocked_missing_publication_parameters": 7,
-        "covered_blocked_toolkit_structure": 7,
-        "not_yet_templated_requires_toolkit_structure": 29,
-        "not_yet_templated_missing_publication_parameters": 21,
+        "covered_runnable_profile": 17,
+        "covered_blocked_missing_publication_parameters": 6,
+        "covered_blocked_toolkit_structure": 0,
+        "not_yet_templated_requires_toolkit_structure": 0,
+        "not_yet_templated_missing_publication_parameters": 48,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
-    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 22
-    assert coverage["coverage_summary"]["current_profile_check_pass_count"] == 8
-    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 7
-    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 7
+    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 30
+    assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
+        status["categories"]["gui_recreatable"]
+    ) == 24
+    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 22
+    assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
+    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 0
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
     assert coverage["coverage_summary"]["openalex_broad_candidate_like_hits"] == 103
     assert coverage["coverage_summary"]["openalex_broad_linked_candidate_like_hits"] == 47
@@ -100,17 +103,289 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         == "assets/preloads/audiotactile_web_sanity_screening.json"
         for source in coverage["evidence_sources"]
     )
+    assert any(
+        source.get("id") == "consensus_mcp_spot_check_2026_07_15"
+        and source.get("kind") == "consensus_mcp_spot_check"
+        and len(source.get("queries") or []) == 3
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "static_near_far_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_static_near_far_capability_20260715/"
+            "static_near_far_capability_smoke_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "gonogo_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_gonogo_capability_20260715/"
+            "gonogo_capability_smoke_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "tactile_waveform_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_tactile_waveform_capability_20260715/"
+            "tactile_waveform_capability_smoke_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "external_trigger_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_external_trigger_contract_20260715/"
+            "external_trigger_contract_capability_smoke_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "iti_hazard_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_iti_hazard_contract_20260715/"
+            "iti_hazard_contract_capability_smoke_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "response_choice_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_response_choice_contract_20260715/"
+            "response_choice_contract_capability_smoke_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "cross_modal_extinction_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_cross_modal_extinction_contract_20260715/"
+            "cross_modal_extinction_contract_capability_smoke_report.json"
+        )
+        and "clinical neglect/extinction behavior" in source.get("relevance", "")
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "body_frame_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_body_frame_contract_20260715/"
+            "body_frame_contract_capability_smoke_report.json"
+        )
+        and "body tracking" in source.get("relevance", "").replace("-", " ")
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "voice_key_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_voice_key_contract_20260715/"
+            "voice_key_contract_capability_smoke_report.json"
+        )
+        and "physical microphone" in source.get("relevance", "")
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "electrical_tactile_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_electrical_tactile_contract_20260715/"
+            "electrical_tactile_contract_capability_smoke_report.json"
+        )
+        and "physical electrical stimulation" in source.get("relevance", "")
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "multi_speaker_switch_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_multi_speaker_switch_contract_20260715/"
+            "multi_speaker_switch_contract_capability_smoke_report.json"
+        )
+        and "physical loudspeaker-array validation" in source.get("relevance", "")
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "auditory_trajectory_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_auditory_trajectory_contract_20260715/"
+            "auditory_trajectory_contract_capability_smoke_report.json"
+        )
+        and "physical speaker or HRTF spatialization validation" in source.get("relevance", "")
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "spatial_renderer_provenance_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_spatial_renderer_provenance_contract_20260715/"
+            "spatial_renderer_provenance_contract_capability_smoke_report.json"
+        )
+        and "not bit-matched MATLAB or HRTF rendering" in source.get("relevance", "")
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "audiovisual_trisensory_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_audiovisual_trisensory_contract_20260715/"
+            "audiovisual_trisensory_contract_capability_smoke_report.json"
+        )
+        and "not VR/HMD rendering" in source.get("relevance", "")
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15"
+        and source.get("kind") == "pubmed_live_spot_check"
+        and source.get("pmid") == "42128086"
+        and source.get("doi") == "10.1016/j.neuropsychologia.2026.109490"
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "canzoneri_2013_amputation_known_parameter_validation_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/"
+            "canzoneri_2013_amputation_known_parameter_validation_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "serino_2015_toolless_known_parameter_validation_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/"
+            "serino_2015_toolless_known_parameter_validation_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
 
     status_ids = {profile["template_id"] for profile in status["profiles"]}
     coverage_ids = {entry["template_id"] for entry in coverage["current_template_coverage"]}
     assert coverage_ids == status_ids
+
+    by_template = {entry["template_id"]: entry for entry in coverage["current_template_coverage"]}
+    assert by_template["study5_dynaspace_lateral_45_pps"] == {
+        "template_id": "study5_dynaspace_lateral_45_pps",
+        "published": False,
+        "current_recreation_category": "gui_recreatable",
+        "primary_constraint_ids": [],
+    }
+    assert by_template["serino_2015_peri_hand_exp3"] == {
+        "template_id": "serino_2015_peri_hand_exp3",
+        "published": True,
+        "current_recreation_category": "gui_recreatable",
+        "primary_constraint_ids": [],
+    }
+    serino_toolless = by_template["serino_2015_toolless_sync_training"]
+    assert serino_toolless["template_id"] == "serino_2015_toolless_sync_training"
+    assert serino_toolless["published"] is True
+    assert serino_toolless["current_recreation_category"] == "gui_recreatable"
+    assert serino_toolless["primary_constraint_ids"] == []
+    assert serino_toolless["known_parameter_validation_report"] == (
+        "artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/"
+        "serino_2015_toolless_known_parameter_validation_report.json"
+    )
+    assert "Frontiers publisher-source review on 2026-07-15" in serino_toolless["source_notes"]
+    assert by_template["tonelli_2019_echolocation"] == {
+        "template_id": "tonelli_2019_echolocation",
+        "published": True,
+        "current_recreation_category": "gui_recreatable",
+        "primary_constraint_ids": [],
+    }
+    assert by_template["biggio_2017_no_racket"] == {
+        "template_id": "biggio_2017_no_racket",
+        "published": True,
+        "current_recreation_category": "gui_recreatable",
+        "primary_constraint_ids": [],
+        "known_parameter_validation_report": (
+            "artifacts/validation_runs/current_goal_biggio_2017_known_parameter_20260715/"
+            "biggio_2017_known_parameter_validation_report.json"
+        ),
+    }
+    assert by_template["noel_2015_walking_full_body_action"] == {
+        "template_id": "noel_2015_walking_full_body_action",
+        "published": True,
+        "current_recreation_category": "gui_recreatable",
+        "primary_constraint_ids": [],
+        "known_parameter_validation_report": (
+            "artifacts/validation_runs/current_goal_noel_2015_known_parameter_20260715/"
+            "noel_2015_known_parameter_validation_report.json"
+        ),
+        "source_notes": (
+            "Public PDF review on 2026-07-15 recovered the core walking PPS parameters: "
+            "white-noise source, 2 m path, 75 cm/s speed, standing/walking x looming/receding, "
+            "T1-T5 delays 440/880/1330/1770/2220 ms, D1-D5 distances 33/66/100/133/166 cm, "
+            "T1/T5 tactile-only baselines, sound-only catches, and the 512-trial formula. "
+            "The paper-specific validator materializes Segments 0-6 and runs 512 trials with "
+            "mouse-click simulated chest-vibration responses while preserving treadmill/optic-flow "
+            "and physical loudspeaker-array limits as apparatus caveats."
+        ),
+    }
+    assert by_template["lerner_2021_3d_audio_tactile_boundary"] == {
+        "template_id": "lerner_2021_3d_audio_tactile_boundary",
+        "published": True,
+        "current_recreation_category": "gui_recreatable",
+        "primary_constraint_ids": [],
+        "source_notes": (
+            "GUI-recreatable with twelve published 3D source directions, dynamic moving "
+            "pink-noise and flat stationary pink-noise source families, six "
+            "arm-length-scaled tactile timepoints represented using a declared 70 cm "
+            "reference arm length, and 144 preview trial rows; exact Unity/3D Tune-In "
+            "rendering and per-subject body/head scaling remain recreation caveats."
+        ),
+    }
+    assert by_template["taffou_2014_cynophobic_rear_looming"] == {
+        "template_id": "taffou_2014_cynophobic_rear_looming",
+        "published": True,
+        "current_recreation_category": "missing_publication_parameters",
+        "primary_constraint_ids": [
+            "ecological_or_licensed_audio_assets",
+            "hrtf_database_or_binaural_engine_mismatch",
+        ],
+        "source_notes": (
+            "Profile now expands both reported rear hemispaces into four source assets: "
+            "dog/sheep x rear-left/rear-right. Publisher HTML methods review on 2026-07-15 "
+            "confirmed 3000 ms sounds, 520-to-20 cm rear trajectories at -135 and +135 "
+            "degrees, Tbefore/T1-T5/Tafter tactile timings, 224 tactile-target trials, "
+            "32 auditory-only catches, and eight 32-trial blocks. The profile remains "
+            "blocked because the exact dog/sheep source audio, Audacity matching settings, "
+            "LISTEN HRTF subject/filter choice, and renderer settings are not available "
+            "in the public toolkit."
+        ),
+    }
 
     published_ready = [
         entry
         for entry in coverage["current_template_coverage"]
         if entry["published"] and entry["current_recreation_category"] == "gui_recreatable"
     ]
-    assert len(published_ready) == 7
+    assert len(published_ready) == 22
 
 
 def test_literature_coverage_constraints_focus_on_task_execution():
@@ -131,9 +406,169 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert "body_scaled_distance_units" in constraint_ids
     assert "voice_key_response_capture" in constraint_ids
     assert "external_event_trigger_sync_contract" in constraint_ids
+    assert "fixed_iti_or_hazard_control_policy" in constraint_ids
     assert "tactile_waveform_frequency_profile" in constraint_ids
     assert "missing_core_soa_iti_baseline_repetition_parameters" in constraint_ids
     assert "exact_trial_timing_randomization_tables" not in constraint_ids
+    static_near_far_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "static_near_far_trial_family"
+    )
+    assert static_near_far_constraint["toolkit_status"] == "supported_by_static_near_far_capability_smoke"
+    assert static_near_far_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_static_near_far_capability_20260715/"
+        "static_near_far_capability_smoke_report.json"
+    )
+    gonogo_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "weak_strong_no_target_gonogo"
+    )
+    assert gonogo_constraint["toolkit_status"] == "supported_by_gonogo_capability_smoke"
+    assert gonogo_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_gonogo_capability_20260715/"
+        "gonogo_capability_smoke_report.json"
+    )
+    tactile_waveform_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "tactile_waveform_frequency_profile"
+    )
+    assert tactile_waveform_constraint["toolkit_status"] == "supported_by_tactile_waveform_capability_smoke"
+    assert tactile_waveform_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_tactile_waveform_capability_20260715/"
+        "tactile_waveform_capability_smoke_report.json"
+    )
+    external_trigger_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "external_event_trigger_sync_contract"
+    )
+    assert external_trigger_constraint["toolkit_status"] == "supported_by_external_trigger_contract_capability_smoke"
+    assert external_trigger_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_external_trigger_contract_20260715/"
+        "external_trigger_contract_capability_smoke_report.json"
+    )
+    audiovisual_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "audiovisual_or_trisensory_trial_family"
+    )
+    assert audiovisual_constraint["toolkit_status"] == (
+        "supported_by_audiovisual_trisensory_contract_capability_smoke"
+    )
+    assert audiovisual_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_audiovisual_trisensory_contract_20260715/"
+        "audiovisual_trisensory_contract_capability_smoke_report.json"
+    )
+    iti_hazard_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "fixed_iti_or_hazard_control_policy"
+    )
+    assert iti_hazard_constraint["toolkit_status"] == "supported_by_iti_hazard_contract_capability_smoke"
+    assert iti_hazard_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_iti_hazard_contract_20260715/"
+        "iti_hazard_contract_capability_smoke_report.json"
+    )
+    response_choice_constraint = next(
+        item
+        for item in coverage["constraint_taxonomy"]
+        if item["id"] == "tactile_discrimination_or_localization_response"
+    )
+    assert response_choice_constraint["toolkit_status"] == "supported_by_response_choice_contract_capability_smoke"
+    assert response_choice_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_response_choice_contract_20260715/"
+        "response_choice_contract_capability_smoke_report.json"
+    )
+    cross_modal_extinction_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "cross_modal_extinction_response_mapping"
+    )
+    assert cross_modal_extinction_constraint["toolkit_status"] == (
+        "supported_by_cross_modal_extinction_contract_capability_smoke"
+    )
+    assert cross_modal_extinction_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_cross_modal_extinction_contract_20260715/"
+        "cross_modal_extinction_contract_capability_smoke_report.json"
+    )
+    assert set(cross_modal_extinction_constraint["example_records"]) == {
+        "ladavas_2001_auditory_tactile_extinction",
+        "farne_ladavas_2002_auditory_pps_humans",
+    }
+    body_frame_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "body_part_anchored_coordinate_frames"
+    )
+    assert body_frame_constraint["toolkit_status"] == "supported_by_body_frame_contract_capability_smoke"
+    assert body_frame_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_body_frame_contract_20260715/"
+        "body_frame_contract_capability_smoke_report.json"
+    )
+    assert set(body_frame_constraint["example_records"]) == {
+        "ladavas_2001_auditory_tactile_extinction",
+        "farne_ladavas_2002_auditory_pps_humans",
+        "tajadura_jimenez_2009_visual_deprivation",
+        "serino_2015_exps_4_to_6",
+        "hobeika_2018_anisotropy",
+        "teraoka_2024_front_rear",
+        "amiel_2025_front_rear",
+        "teramoto_2013_beyond_head_audiotactile",
+    }
+    voice_key_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "voice_key_response_capture"
+    )
+    assert voice_key_constraint["toolkit_status"] == "supported_by_voice_key_contract_capability_smoke"
+    assert voice_key_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_voice_key_contract_20260715/"
+        "voice_key_contract_capability_smoke_report.json"
+    )
+    assert set(voice_key_constraint["example_records"]) == {
+        "serino_2007_blind_cane_users",
+        "finisguerra_2015_moving_sounds_motor",
+        "biggio_2017_racket_tool_use",
+        "serino_2015_toolless_sync_training",
+    }
+    electrical_tactile_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "electrical_tactile_calibration"
+    )
+    assert electrical_tactile_constraint["toolkit_status"] == (
+        "supported_by_electrical_tactile_contract_capability_smoke"
+    )
+    assert electrical_tactile_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_electrical_tactile_contract_20260715/"
+        "electrical_tactile_contract_capability_smoke_report.json"
+    )
+    assert set(electrical_tactile_constraint["example_records"]) == {
+        "serino_2007_blind_cane_users",
+        "ronga_2021_newborn_erp",
+        "serino_2015_toolless_sync_training",
+        "canzoneri_2013_amputation_prosthesis",
+    }
+    multi_speaker_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "multi_speaker_array_switching"
+    )
+    assert multi_speaker_constraint["toolkit_status"] == (
+        "supported_by_multi_speaker_switch_contract_capability_smoke"
+    )
+    assert multi_speaker_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_multi_speaker_switch_contract_20260715/"
+        "multi_speaker_switch_contract_capability_smoke_report.json"
+    )
+    assert multi_speaker_constraint["example_records"] == ["serino_2015_exps_4_to_6"]
+    auditory_trajectory_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "rear_hemifield_trajectory_families"
+    )
+    assert auditory_trajectory_constraint["toolkit_status"] == (
+        "supported_by_auditory_trajectory_contract_capability_smoke"
+    )
+    assert auditory_trajectory_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_auditory_trajectory_contract_20260715/"
+        "auditory_trajectory_contract_capability_smoke_report.json"
+    )
+    assert auditory_trajectory_constraint["example_records"] == ["amiel_2025_front_rear"]
+    hrtf_provenance_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "hrtf_database_or_binaural_engine_mismatch"
+    )
+    assert hrtf_provenance_constraint["toolkit_status"] == (
+        "supported_by_spatial_renderer_provenance_contract_capability_smoke"
+    )
+    assert hrtf_provenance_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_spatial_renderer_provenance_contract_20260715/"
+        "spatial_renderer_provenance_contract_capability_smoke_report.json"
+    )
+    assert set(hrtf_provenance_constraint["example_records"]) == {
+        "taffou_2014_cynophobic_rear_looming",
+        "pfeiffer_2018_lateral_perihead_left_to_right",
+        "looming_duration_2025",
+    }
     assert {
         "trial_design_families",
         "audio_source_and_renderer",
@@ -188,22 +623,63 @@ def test_literature_coverage_constraints_focus_on_task_execution():
 
     records = {record["record_id"]: record for record in coverage["literature_records"]}
     assert records["spiousas_2025_auditory_only"]["coverage_category"] == "adjacent_out_of_scope"
-    assert records["ladavas_2001_auditory_tactile_extinction"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert "cross_modal_extinction_response_mapping" in records["ladavas_2001_auditory_tactile_extinction"]["blocking_constraint_ids"]
-    assert records["farne_ladavas_2002_auditory_pps_humans"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert "cross_modal_extinction_response_mapping" in records["farne_ladavas_2002_auditory_pps_humans"]["blocking_constraint_ids"]
+    assert records["ladavas_2001_auditory_tactile_extinction"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["ladavas_2001_auditory_tactile_extinction"]["blocking_constraint_ids"] == []
+    assert "runner-supported" in records["ladavas_2001_auditory_tactile_extinction"][
+        "missing_publication_parameters"
+    ][0]
+    assert records["farne_ladavas_2002_auditory_pps_humans"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["farne_ladavas_2002_auditory_pps_humans"]["blocking_constraint_ids"] == []
+    assert "runner-supported" in records["farne_ladavas_2002_auditory_pps_humans"][
+        "missing_publication_parameters"
+    ][0]
     assert records["rossi_sebastiano_2022_visuotactile"]["coverage_category"] == "adjacent_out_of_scope"
-    assert records["teraoka_2024_front_rear"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert records["holmes_2020_four_experiments"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert records["tajadura_jimenez_2009_visual_deprivation"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
+    assert records["teraoka_2024_front_rear"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["teraoka_2024_front_rear"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+    ]
+    assert records["holmes_2020_four_experiments"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["holmes_2020_four_experiments"]["blocking_constraint_ids"] == []
+    assert records["kitagawa_2005_sound_complexity"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["kitagawa_2005_sound_complexity"]["blocking_constraint_ids"] == []
+    assert records["tajadura_jimenez_2009_visual_deprivation"]["coverage_category"] == "covered_runnable_profile"
+    assert records["tajadura_jimenez_2009_visual_deprivation"]["current_template_ids"] == [
+        "tajadura_jimenez_2009_uncrossed_visual_deprivation",
+        "tajadura_jimenez_2009_crossed_visual_deprivation",
+    ]
+    assert records["tajadura_jimenez_2009_visual_deprivation"]["can_recreate_audiotactile_components_now"] is True
+    assert records["tajadura_jimenez_2009_visual_deprivation"]["blocking_constraint_ids"] == []
+    assert records["tajadura_jimenez_2009_visual_deprivation"]["known_parameter_validation_report"] == (
+        "artifacts/validation_runs/current_goal_tajadura_2009_known_parameter_20260715/"
+        "tajadura_2009_known_parameter_validation_report.json"
+    )
+    assert records["teramoto_2013_visual_deprivation"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["teramoto_2013_visual_deprivation"]["blocking_constraint_ids"] == []
     assert records["mindfulness_pps_2024"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["newborn_boundaries_2019"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert records["ronga_2021_newborn_erp"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
+    assert records["newborn_boundaries_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["newborn_boundaries_2019"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+    ]
+    assert records["ronga_2021_newborn_erp"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["ronga_2021_newborn_erp"]["blocking_constraint_ids"] == []
     assert records["ferri_2015_jneurosci_itv"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["autism_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["social_coding_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["social_perception_2017"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["ferroni_2020_tool_observation"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["ferroni_2026_pps_plasticity"]["doi"] == "10.1016/j.neuropsychologia.2026.109490"
+    assert records["ferroni_2026_pps_plasticity"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["ferroni_2026_pps_plasticity"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+    ]
     assert records["ageing_2021"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["seeming_confines_2021"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["jazz_duet_2021"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
@@ -212,20 +688,73 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["depersonalisation_2024"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["lower_limb_pps_2017"]["coverage_category"] == "adjacent_out_of_scope"
     assert records["lower_limb_pps_2017"]["blocking_constraint_ids"] == []
-    assert records["cell_reports_medicine_2026_consciousness"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert "static_near_far_trial_family" in records["cell_reports_medicine_2026_consciousness"]["blocking_constraint_ids"]
-    assert records["serino_2018_mixed_reality_pps"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
+    assert records["cell_reports_medicine_2026_consciousness"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["cell_reports_medicine_2026_consciousness"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+    ]
+    assert records["serino_2015_exps_4_to_6"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["serino_2015_exps_4_to_6"]["blocking_constraint_ids"] == []
+    assert "runner-supported" in records["serino_2015_exps_4_to_6"][
+        "missing_publication_parameters"
+    ][0]
+    assert records["serino_2018_mixed_reality_pps"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
     assert "audiovisual_or_trisensory_trial_family" in records["serino_2018_mixed_reality_pps"]["blocking_constraint_ids"]
+    assert "audiovisual/MR provenance metadata are now runner-supported" in records[
+        "serino_2018_mixed_reality_pps"
+    ]["missing_publication_parameters"][0]
     assert records["amemiya_2017_pseudowalking_footsole"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["serino_2011_professional_fencers"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["interoception_exteroception_2025"]["doi"] == "10.1073/pnas.2516229122"
-    assert records["interoception_exteroception_2025"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert records["amiel_2025_front_rear"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
+    assert records["interoception_exteroception_2025"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["interoception_exteroception_2025"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+    ]
+    assert records["amiel_2025_front_rear"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["amiel_2025_front_rear"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters",
+    ]
+    assert "trajectory-family metadata is now runner-supported" in records["amiel_2025_front_rear"][
+        "missing_publication_parameters"
+    ][0]
     assert records["body_image_social_cognition_2024"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["taffou_2021_auditory_roughness"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert "rear_hemifield_trajectory_families" in records["taffou_2021_auditory_roughness"]["blocking_constraint_ids"]
-    assert records["looming_duration_2025"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert "tactile_waveform_frequency_profile" in records["looming_duration_2025"]["blocking_constraint_ids"]
+    assert records["taffou_2021_auditory_roughness"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["taffou_2021_auditory_roughness"]["blocking_constraint_ids"] == [
+        "hrtf_database_or_binaural_engine_mismatch",
+        "exact_audio_envelope_or_gain_files",
+    ]
+    assert records["taffou_2021_auditory_roughness"]["missing_publication_parameters"] == [
+        "exact rough/non-rough harmonic source WAVs or fully specified harmonic amplitudes, modulation depth, and phase/envelope settings",
+        "Max/MSP Spat LISTEN HRTF subject/filter, near-field compensation, and renderer settings for the rear-left trajectory",
+        "exact SPL/gain transfer for the reported 76.5/77.3 dBA source levels",
+    ]
+    assert records["looming_duration_2025"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["looming_duration_2025"]["blocking_constraint_ids"] == [
+        "hrtf_database_or_binaural_engine_mismatch"
+    ]
+    assert "renderer/HRTF provenance metadata are now runner-supported" in records["looming_duration_2025"][
+        "missing_publication_parameters"
+    ][0]
+    assert records["hobeika_2020_methods"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["hobeika_2020_methods"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+    ]
+    assert records["spadone_2021_connectivity"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["spadone_2021_connectivity"]["blocking_constraint_ids"] == []
+    assert records["spadone_2021_connectivity"]["missing_publication_parameters"] == [
+        "extract near/far, flat/dynamic, fMRI block timing, and paper-specific ITI/foreperiod/hazard values separately from scanner context before templating"
+    ]
+    assert records["hobeika_2018_anisotropy"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["hobeika_2018_anisotropy"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+    ]
     assert records["lamia_2026_arm_movement"]["can_recreate_audiotactile_components_now"] is True
     assert records["serino_2015_peri_trunk_exp1"]["coverage_category"] == "covered_runnable_profile"
     assert records["serino_2015_peri_trunk_exp1"]["can_recreate_audiotactile_components_now"] is True
@@ -236,27 +765,139 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     ]
     assert records["smartphone_rt_methods_2025"]["can_recreate_audiotactile_components_now"] is True
     assert records["smartphone_rt_methods_2025"]["blocking_constraint_ids"] == []
-    assert records["serino_2015_peri_hand_exp3"]["blocking_constraint_ids"] == [
-        "body_part_anchored_coordinate_frames"
+    assert records["serino_2015_peri_hand_exp3"]["coverage_category"] == "covered_runnable_profile"
+    assert records["serino_2015_peri_hand_exp3"]["can_recreate_audiotactile_components_now"] is True
+    assert records["serino_2015_peri_hand_exp3"]["blocking_constraint_ids"] == []
+    assert records["canzoneri_2012_dynamic_sounds"]["coverage_category"] == "covered_runnable_profile"
+    assert records["canzoneri_2012_dynamic_sounds"]["can_recreate_audiotactile_components_now"] is True
+    assert records["canzoneri_2012_dynamic_sounds"]["blocking_constraint_ids"] == []
+    assert records["canzoneri_2012_dynamic_sounds"]["missing_publication_parameters"] == []
+    assert records["tonelli_2019_echolocation"]["coverage_category"] == "covered_runnable_profile"
+    assert records["tonelli_2019_echolocation"]["can_recreate_audiotactile_components_now"] is True
+    assert records["tonelli_2019_echolocation"]["blocking_constraint_ids"] == []
+    assert records["tonelli_2019_echolocation"]["missing_publication_parameters"] == []
+    assert records["tonelli_2019_echolocation"]["recreation_caveats"]
+    assert records["serino_2015_front_back_trunk_exp2"]["coverage_category"] == "covered_runnable_profile"
+    assert records["serino_2015_front_back_trunk_exp2"]["can_recreate_audiotactile_components_now"] is True
+    assert records["serino_2015_front_back_trunk_exp2"]["blocking_constraint_ids"] == []
+    assert records["serino_2015_front_back_trunk_exp2"]["missing_publication_parameters"] == []
+    assert records["serino_2015_front_back_trunk_exp2"]["recreation_caveats"]
+    assert records["galli_2015_wheelchair"]["coverage_category"] == "covered_runnable_profile"
+    assert records["galli_2015_wheelchair"]["can_recreate_audiotactile_components_now"] is True
+    assert records["galli_2015_wheelchair"]["blocking_constraint_ids"] == []
+    assert records["galli_2015_wheelchair"]["missing_publication_parameters"] == []
+    assert records["lerner_2021_3d_boundary"]["coverage_category"] == "covered_runnable_profile"
+    assert records["lerner_2021_3d_boundary"]["can_recreate_audiotactile_components_now"] is True
+    assert records["lerner_2021_3d_boundary"]["blocking_constraint_ids"] == []
+    assert records["lerner_2021_3d_boundary"]["missing_publication_parameters"] == []
+    assert records["lerner_2021_3d_boundary"]["recreation_caveats"]
+    assert records["taffou_2014_cynophobic_rear_looming"]["coverage_category"] == (
+        "covered_blocked_missing_publication_parameters"
+    )
+    assert records["taffou_2014_cynophobic_rear_looming"]["blocking_constraint_ids"] == [
+        "ecological_or_licensed_audio_assets",
+        "hrtf_database_or_binaural_engine_mismatch",
     ]
-    assert records["teramoto_2013_beyond_head_audiotactile"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert "body_part_anchored_coordinate_frames" in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]
-    assert "tactile_discrimination_or_localization_response" in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]
-    assert records["finisguerra_2015_moving_sounds_motor"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert "voice_key_response_capture" in records["finisguerra_2015_moving_sounds_motor"]["blocking_constraint_ids"]
-    assert records["biggio_2017_racket_tool_use"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert "static_near_far_trial_family" in records["biggio_2017_racket_tool_use"]["blocking_constraint_ids"]
+    assert records["taffou_2014_cynophobic_rear_looming"]["missing_publication_parameters"] == [
+        "exact dog/sheep source audio and Audacity amplitude/dynamic matching settings",
+        "LISTEN HRTF subject/filter identifier and renderer settings",
+    ]
+    assert records["teramoto_2013_beyond_head_audiotactile"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"] == []
+    assert "tactile_discrimination_or_localization_response" not in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]
+    assert records["finisguerra_2015_moving_sounds_motor"]["coverage_category"] == (
+        "not_yet_templated_missing_publication_parameters"
+    )
+    assert records["finisguerra_2015_moving_sounds_motor"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+    ]
+    assert records["biggio_2017_racket_tool_use"]["coverage_category"] == "covered_runnable_profile"
+    assert records["biggio_2017_racket_tool_use"]["current_template_ids"] == [
+        "biggio_2017_no_racket",
+        "biggio_2017_common_racket",
+        "biggio_2017_personal_racket",
+    ]
+    assert records["biggio_2017_racket_tool_use"]["can_recreate_audiotactile_components_now"] is True
+    assert records["biggio_2017_racket_tool_use"]["blocking_constraint_ids"] == []
+    assert records["biggio_2017_racket_tool_use"]["missing_publication_parameters"] == []
+    assert records["biggio_2017_racket_tool_use"]["known_parameter_validation_report"] == (
+        "artifacts/validation_runs/current_goal_biggio_2017_known_parameter_20260715/"
+        "biggio_2017_known_parameter_validation_report.json"
+    )
     assert records["bassolino_2010_mouse_use"]["doi"] == "10.1016/j.neuropsychologia.2009.11.009"
+    assert records["bassolino_2010_mouse_use"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["bassolino_2010_mouse_use"]["blocking_constraint_ids"] == []
+    assert records["serino_2011_rtms"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["serino_2011_rtms"]["blocking_constraint_ids"] == []
+    assert records["cimmino_2013_surgical_arm_elongation"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["cimmino_2013_surgical_arm_elongation"]["blocking_constraint_ids"] == []
+    assert records["serino_2007_blind_cane_users"]["coverage_category"] == (
+        "covered_blocked_missing_publication_parameters"
+    )
+    assert records["serino_2007_blind_cane_users"]["current_template_ids"] == [
+        "serino_2007_blind_cane_users"
+    ]
+    assert records["serino_2007_blind_cane_users"]["blocking_constraint_ids"] == [
+        "exact_audio_envelope_or_gain_files",
+        "electrical_tactile_calibration",
+        "fixed_iti_or_hazard_control_policy",
+        "voice_key_response_capture",
+    ]
+    assert records["serino_2007_blind_cane_users"]["known_parameter_validation_report"] == (
+        "artifacts/validation_runs/current_goal_serino_2007_known_parameter_20260715/"
+        "serino_2007_known_parameter_validation_report.json"
+    )
+    assert records["serino_2015_toolless_sync_training"]["coverage_category"] == "covered_runnable_profile"
+    assert records["serino_2015_toolless_sync_training"]["can_recreate_audiotactile_components_now"] is True
+    assert records["serino_2015_toolless_sync_training"]["blocking_constraint_ids"] == []
+    assert records["serino_2015_toolless_sync_training"]["missing_publication_parameters"] == []
+    assert records["serino_2015_toolless_sync_training"]["known_parameter_validation_report"] == (
+        "artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/"
+        "serino_2015_toolless_known_parameter_validation_report.json"
+    )
+    assert records["canzoneri_2013_amputation_prosthesis"]["coverage_category"] == "covered_runnable_profile"
+    assert records["canzoneri_2013_amputation_prosthesis"]["can_recreate_audiotactile_components_now"] is True
+    assert records["canzoneri_2013_amputation_prosthesis"]["blocking_constraint_ids"] == []
+    assert records["canzoneri_2013_amputation_prosthesis"]["missing_publication_parameters"] == []
+    assert records["canzoneri_2013_amputation_prosthesis"]["known_parameter_validation_report"] == (
+        "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/"
+        "canzoneri_2013_amputation_known_parameter_validation_report.json"
+    )
+    assert {
+        record["record_id"]
+        for record in records.values()
+        if "voice_key_response_capture" in record["blocking_constraint_ids"]
+    } == {"serino_2007_blind_cane_users"}
+    assert {
+        record["record_id"]
+        for record in records.values()
+        if "electrical_tactile_calibration" in record["blocking_constraint_ids"]
+    } == {"serino_2007_blind_cane_users"}
+    assert {
+        record["record_id"]
+        for record in records.values()
+        if "fixed_iti_or_hazard_control_policy" in record["blocking_constraint_ids"]
+    } == {"serino_2007_blind_cane_users"}
     assert records["teneggi_2013_social_face"]["doi"] == "10.1016/j.cub.2013.01.043"
-    assert records["serino_2009_tms"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert "external_event_trigger_sync_contract" in records["serino_2009_tms"]["blocking_constraint_ids"]
-    assert records["avenanti_2012_motor_cortex"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert records["avenanti_2012_motor_cortex"]["blocking_constraint_ids"] == ["external_event_trigger_sync_contract"]
+    assert records["serino_2009_tms"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["serino_2009_tms"]["blocking_constraint_ids"] == []
+    assert records["avenanti_2012_motor_cortex"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["avenanti_2012_motor_cortex"]["blocking_constraint_ids"] == []
     assert records["barumerli_2026_semantic_looming_auditory_only"]["coverage_category"] == "adjacent_out_of_scope"
     assert records["barumerli_2026_semantic_looming_auditory_only"]["doi"] == "10.1038/s41598-026-48067-4"
 
     for record in coverage["literature_records"]:
         assert set(record["blocking_constraint_ids"]) <= constraint_ids, record["record_id"]
+        assert "static_near_far_trial_family" not in record["blocking_constraint_ids"], record["record_id"]
+        assert "weak_strong_no_target_gonogo" not in record["blocking_constraint_ids"], record["record_id"]
+        assert "tactile_waveform_frequency_profile" not in record["blocking_constraint_ids"], record["record_id"]
+        assert "external_event_trigger_sync_contract" not in record["blocking_constraint_ids"], record["record_id"]
+        assert "tactile_discrimination_or_localization_response" not in record["blocking_constraint_ids"], record["record_id"]
+        assert "body_part_anchored_coordinate_frames" not in record["blocking_constraint_ids"], record["record_id"]
+        assert "multi_speaker_array_switching" not in record["blocking_constraint_ids"], record["record_id"]
+        assert "rear_hemifield_trajectory_families" not in record["blocking_constraint_ids"], record["record_id"]
         assert not (set(record["blocking_constraint_ids"]) & non_blocking_tokens), record["record_id"]
         for constraint_id in record["blocking_constraint_ids"]:
             assert constraint_dimensions[constraint_id] in task_execution_dimensions, record["record_id"]

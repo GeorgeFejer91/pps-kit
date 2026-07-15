@@ -19,12 +19,12 @@ import argparse
 import json
 import math
 import shutil
-from dataclasses import replace
+from dataclasses import asdict, replace
 from pathlib import Path
 from typing import Any
 
 from peripersonal_space_toolkit import render_backend
-from peripersonal_space_toolkit.dashboard_app import _stimulus_trajectory_snapshot
+from peripersonal_space_toolkit.dashboard_app import _stimulus_trajectory_snapshot, _write_generated_profile_noise_wav
 from peripersonal_space_toolkit.design import (
     AudioFileSpec,
     NoiseDefinition,
@@ -242,6 +242,10 @@ def render_noise_source(template: StudyTemplate, design: Any, noise: NoiseDefini
     source_design.noises = [replace(noise, label=f"source_{index:03d}")]
     source_design.custom_looming_files = []
     source_design.prestimulus_files = []
+    if _uses_direct_static_profile_noise(noise):
+        target.parent.mkdir(parents=True, exist_ok=True)
+        _write_generated_profile_noise_wav(target, source_design, noise)
+        return
     design_path = build_dir / "stimulus_design.json"
     save_design(source_design, design_path)
     result = render_backend.render_design_with_3dti(
@@ -258,6 +262,13 @@ def render_noise_source(template: StudyTemplate, design: Any, noise: NoiseDefini
     qc_target = target.with_suffix(".render_qc.csv")
     if result.qc_path.exists():
         shutil.copy2(result.qc_path, qc_target)
+
+
+def _uses_direct_static_profile_noise(noise: NoiseDefinition) -> bool:
+    return (
+        str(getattr(noise, "motion_mode", "") or "").strip().lower() == "stationary"
+        and str(getattr(noise, "source_profile", "") or "").strip().lower() == "continuous_noise"
+    )
 
 
 def asset_metadata(
@@ -534,8 +545,33 @@ def refresh_radius_from_xyz(trajectory: Any) -> None:
     trajectory.end_radius_m = float(end_spherical["radius_m"])
 
 
-def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Path, source_assets: list[dict[str, Any]]) -> None:
+def _metadata_design_with_source_assets(design: Any, source_assets: list[dict[str, Any]]) -> Any:
     metadata_design = design_from_dict(design_to_dict(design))
+    existing_labels = {str(noise.label or "").strip() for noise in metadata_design.noises}
+    for asset in source_assets:
+        label = str(asset.get("label") or "").strip()
+        if not label or label in existing_labels:
+            continue
+        metadata_design.noises.append(
+            NoiseDefinition(
+                label=label,
+                noise_type=str(asset.get("noise_type") or asset.get("tone_type") or "pink"),
+                azimuth_deg=float(asset.get("azimuth_deg") or 0.0),
+                elevation_deg=float(asset.get("elevation_deg") or 0.0),
+                gain=1.0,
+                prebaked_path=str(asset.get("path") or ""),
+                motion_mode=str(asset.get("motion_mode") or "looming"),
+                trajectory_snapshot=dict(asset.get("trajectory_snapshot") or {}),
+                source_profile=str(asset.get("source_profile") or ""),
+                source_profile_parameters=dict(asset.get("source_profile_parameters") or {}),
+            )
+        )
+        existing_labels.add(label)
+    return metadata_design
+
+
+def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Path, source_assets: list[dict[str, Any]]) -> None:
+    metadata_design = _metadata_design_with_source_assets(design, source_assets)
     expand_trial_strip_source_labels(
         metadata_design,
         [str(asset.get("label") or "") for asset in source_assets],
@@ -597,10 +633,14 @@ def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Pa
             "template_id": template.template_id,
             "baseline_strategy": protocol.baseline_strategy,
             "include_baseline_trials": protocol.include_baseline_trials,
+            "baseline_trials_exact": protocol.baseline_trials_exact,
             "baseline_trial_percentage": protocol.baseline_trial_percentage,
             "baseline_soa_values_ms": protocol.baseline_soa_values_ms,
+            "baseline_crosses_sequence_variants": protocol.baseline_crosses_sequence_variants,
             "catch_trial_percentage": protocol.catch_trial_percentage,
             "catch_trials_exact": protocol.catch_trials_exact,
+            "catch_crosses_sequence_variants": protocol.catch_crosses_sequence_variants,
+            "distribute_trial_pool_across_blocks": protocol.distribute_trial_pool_across_blocks,
         },
     )
     write_json(
@@ -625,7 +665,13 @@ def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Pa
         "random_seed": protocol.random_seed,
         "trial_randomization_strategy": protocol.trial_randomization_strategy,
         "block_order_randomization": protocol.block_order_randomization,
+        "repeat_trial_pool_per_block": protocol.repeat_trial_pool_per_block,
+        "distribute_trial_pool_across_blocks": protocol.distribute_trial_pool_across_blocks,
+        "baseline_crosses_sequence_variants": protocol.baseline_crosses_sequence_variants,
+        "catch_crosses_sequence_variants": protocol.catch_crosses_sequence_variants,
     }
+    if protocol.block_specs:
+        run_setup_defaults["block_specs"] = [asdict(block) for block in protocol.block_specs]
     dashboard_run_setup = template.reference_parameters.get("dashboard_run_setup")
     if isinstance(dashboard_run_setup, dict):
         if "experiment_structure" in dashboard_run_setup:

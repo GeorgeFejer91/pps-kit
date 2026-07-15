@@ -45,6 +45,12 @@
       "baseline_soa_values_ms": [-700, 3700],
       "respiratory_phases": ["Any"],
       "blocks": 4,
+      "block_specs": [
+        {"label": "Front direction", "stimulus_types": ["Audio-Tactile", "Baseline", "Catch"]},
+        {"label": "Rear direction", "stimulus_types": ["Audio-Tactile", "Baseline", "Catch"]},
+        {"label": "Left direction", "stimulus_types": ["Audio-Tactile", "Baseline", "Catch"]},
+        {"label": "Right direction", "stimulus_types": ["Audio-Tactile", "Baseline", "Catch"]}
+      ],
       "trial_strips": [
         {
           "strip_id": "matsuda-sound-motion-row",

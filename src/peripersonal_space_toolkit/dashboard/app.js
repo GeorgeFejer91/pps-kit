@@ -215,9 +215,9 @@ const STIMULUS_TRAJECTORY_COLORS = {
   white: "#d8dde2",
   brown: "#8b623f",
   violet: "#8364b9",
-  custom_audio: "#246b55",
-  preserve: "#246b55",
-  spatialize: "#246b55",
+  custom_audio: "#1c7a86",
+  preserve: "#1c7a86",
+  spatialize: "#1c7a86",
   prestimulus: "#7b8288"
 };
 const SOURCE_COLOR_OPTIONS = [
@@ -226,10 +226,11 @@ const SOURCE_COLOR_OPTIONS = [
   { value: "white", label: "White" },
   { value: "brown", label: "Brown" },
   { value: "violet", label: "Violet" },
-  { value: "custom_audio", label: "Green / custom" }
+  { value: "custom_audio", label: "Teal / custom" }
 ];
+// Keep in sync with --family-* tokens in styles.css (:root).
 const TRIAL_FAMILY_COLORS = {
-  audio_tactile: "#246b55",
+  audio_tactile: "#1c7a86",
   baseline: "#4b5fa8",
   catch: "#a4631b"
 };
@@ -523,13 +524,23 @@ function renderEditModePanel() {
   viewButton.classList.toggle("active", !editModeActive);
   editButton.classList.toggle("active", editModeActive);
   viewButton.setAttribute("aria-pressed", String(!editModeActive));
-  editButton.setAttribute("aria-pressed", String(editModeActive));
   editButton.disabled = !canEnterEdit;
   editButton.title = staticModeActive
     ? STATIC_COMPANION_REQUIRED_MESSAGE
     : isProfileReadonlyMode()
       ? "Create a named custom copy before editing this loaded profile."
       : "Unlock editable custom-study decisions.";
+  if (isProfileReadonlyMode()) {
+    // Acts as a dialog launcher (opens the customize-naming modal), not a
+    // toggle; advertising aria-pressed here would be a lie to screen readers.
+    editButton.textContent = "Customize";
+    editButton.removeAttribute("aria-pressed");
+    editButton.setAttribute("aria-haspopup", "dialog");
+  } else {
+    editButton.textContent = "Edit";
+    editButton.setAttribute("aria-pressed", String(editModeActive));
+    editButton.removeAttribute("aria-haspopup");
+  }
   status.textContent = editModeActive ? "edit mode" : "view mode";
   status.className = `status-label ${editModeActive ? "ready" : "optional"}`;
 }
@@ -1002,7 +1013,9 @@ function staticTrialFileRow({
   const sequenceLabels = variant.map((choice) => choice.label).join(" | ");
   const variantKey = previewVariantKey(variant);
   const folderKey = slugify(`${rowFolderName}__${folderName}`);
-  const familySuffix = family === "audio_tactile" ? `soa${soaMs}ms_tac120ms_ch3` : (family === "baseline" ? `baseline_${baselineMode}_soa${soaMs}ms_tac120ms_ch3` : "catch_audio");
+  const familySuffix = family === "audio_tactile"
+    ? `soa${soaMs}ms_tac120ms_ch3`
+    : (family === "baseline" ? `baseline_${baselineMode}_soa${soaMs}ms_tac120ms_ch3` : `${family}_audio`);
   const sourceFileName = `${slugify(variantKey)}_${familySuffix}_total${durationMs}ms.wav`;
   const filePath = `static://${templateId}/${rowFolderName}/${folderName}/${sourceFileName}`;
   const fileKey = `${family}|${rowFolderName}|${variantIndex}|${soaMs}|${baselineMode}`;
@@ -1026,8 +1039,8 @@ function staticTrialFileRow({
     sequence_labels: sequenceLabels,
     source_labels: sequenceLabels,
     noise_type: noiseType,
-    channels: family === "catch" ? 2 : 3,
-    tactile_channel: family === "catch" ? "" : 3,
+    channels: ["catch", "auditory_only"].includes(family) ? 2 : 3,
+    tactile_channel: ["catch", "auditory_only"].includes(family) ? "" : 3,
   };
 }
 
@@ -1037,17 +1050,21 @@ function staticTrialFileBakePayload(design, status) {
   const soaValues = (protocol.soa_values_ms || []).filter((value) => Number.isFinite(Number(value))).map((value) => Number(value));
   const baselineSoas = staticBaselineSoaValues(protocol, soaValues);
   const includeCatch = Boolean(protocol.include_catch_trials);
+  const includeAuditoryOnly = Boolean(protocol.include_auditory_only_trials);
+  const baselineCrossesVariants = protocol.baseline_crosses_sequence_variants !== false;
+  const catchCrossesVariants = protocol.catch_crosses_sequence_variants !== false;
+  const auditoryOnlyCrossesVariants = protocol.auditory_only_crosses_sequence_variants !== false;
   const files = [];
   let variantCounter = 1;
   for (const [rowIndex, strip] of (protocol.trial_strips || []).entries()) {
     const variants = stripPreviewVariants(strip);
     const rowLabel = strip.label || `Trial type ${rowIndex + 1}`;
-    for (const variant of variants) {
+    for (const [variantListIndex, variant] of variants.entries()) {
       const durationMs = staticVariantDurationMs(variant, sourceInventory);
       const noiseType = staticVariantNoiseType(variant, sourceInventory);
       const variantIndex = variantCounter;
       variantCounter += 1;
-      for (const soaMs of soaValues) {
+      for (const soaMs of staticStripSoaValues(strip, soaValues)) {
         files.push(staticTrialFileRow({
           templateId: design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID,
           rowIndex,
@@ -1061,22 +1078,24 @@ function staticTrialFileBakePayload(design, status) {
           noiseType,
         }));
       }
-      for (const soaMs of baselineSoas) {
-        files.push(staticTrialFileRow({
-          templateId: design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID,
-          rowIndex,
-          rowLabel,
-          family: "baseline",
-          folderName: "baseline",
-          variant,
-          variantIndex,
-          durationMs,
-          soaMs,
-          baselineMode: protocol.baseline_custom_trial_mode || protocol.baseline_strategy || "tactile_only",
-          noiseType,
-        }));
+      if (baselineCrossesVariants || variantListIndex === 0) {
+        for (const soaMs of baselineSoas) {
+          files.push(staticTrialFileRow({
+            templateId: design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID,
+            rowIndex,
+            rowLabel,
+            family: "baseline",
+            folderName: "baseline",
+            variant,
+            variantIndex,
+            durationMs,
+            soaMs,
+            baselineMode: protocol.baseline_custom_trial_mode || protocol.baseline_strategy || "tactile_only",
+            noiseType,
+          }));
+        }
       }
-      if (includeCatch) {
+      if (includeCatch && (catchCrossesVariants || variantListIndex === 0)) {
         files.push(staticTrialFileRow({
           templateId: design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID,
           rowIndex,
@@ -1089,12 +1108,28 @@ function staticTrialFileBakePayload(design, status) {
           noiseType,
         }));
       }
+      if (includeAuditoryOnly && (auditoryOnlyCrossesVariants || variantListIndex === 0)) {
+        files.push(staticTrialFileRow({
+          templateId: design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID,
+          rowIndex,
+          rowLabel,
+          family: "auditory_only",
+          folderName: "auditory_only",
+          variant,
+          variantIndex,
+          durationMs,
+          soaMs: 0,
+          baselineMode: "auditory_only",
+          noiseType,
+        }));
+      }
     }
   }
   const counts = {
     audio_tactile: files.filter((file) => file.family === "audio_tactile").length,
     baseline: files.filter((file) => file.family === "baseline").length,
     catch: files.filter((file) => file.family === "catch").length,
+    auditory_only: files.filter((file) => file.family === "auditory_only").length,
   };
   return {
     root: "",
@@ -1105,11 +1140,19 @@ function staticTrialFileBakePayload(design, status) {
     audio_tactile_count: counts.audio_tactile,
     baseline_count: counts.baseline,
     catch_count: counts.catch,
+    auditory_only_count: counts.auditory_only,
     total_count: files.length,
     rows: [],
     files,
     manifest_sha256: `static-${design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID}-${files.length}`,
   };
+}
+
+function staticStripSoaValues(strip, fallbackSoas) {
+  const stripSoas = (strip?.soa_values_ms || [])
+    .filter((value) => Number.isFinite(Number(value)))
+    .map((value) => Number(value));
+  return stripSoas.length ? stripSoas : fallbackSoas;
 }
 
 function staticBaselineSoaValues(protocol, soaValues) {
@@ -1121,7 +1164,9 @@ function staticBaselineSoaValues(protocol, soaValues) {
   if (strategy === "min_anchor") return soaValues.length ? [soaValues[0]] : [];
   if (strategy === "max_anchor") return soaValues.length ? [soaValues[soaValues.length - 1]] : [];
   if (strategy === "min_max") return Array.from(new Set([soaValues[0], soaValues[soaValues.length - 1]].filter((value) => Number.isFinite(Number(value)))));
+  if (strategy === "tactile_only" || strategy === "stationary_burst") return custom.length ? custom : soaValues;
   if (strategy === "soa_zero") return [0];
+  if (strategy === "custom") return custom;
   return custom.length ? custom : soaValues;
 }
 
@@ -1131,22 +1176,88 @@ function staticTrialPoolSettings(protocol) {
   const familyRepetitions = {};
   for (const [key, value] of Object.entries(defaults)) {
     const family = trialPoolFamilyKey(key);
-    if (["audio_tactile", "baseline", "catch"].includes(family)) {
+    if (["audio_tactile", "baseline", "catch", "auditory_only"].includes(family)) {
       familyRepetitions[family] = normalizeRepetitionValue(value, defaultRepetitions);
     }
   }
-  return {
+  const exactFamilyCounts = trialPoolExactFamilyCounts(protocol);
+  const settings = {
     default_repetitions: defaultRepetitions,
     family_repetitions: familyRepetitions,
     folder_repetitions: {},
     file_repetition_overrides: {},
     fractional_seed: Number(protocol.random_seed || 20250604) || 20250604,
   };
+  if (Object.keys(exactFamilyCounts).length) settings.exact_family_trial_counts = exactFamilyCounts;
+  return settings;
 }
 
 function staticConfiguredRepetitions(file, settings) {
   const family = trialPoolFamilyKey(file.family);
   return normalizeRepetitionValue(settings.family_repetitions?.[family] ?? settings.default_repetitions ?? 1, 1);
+}
+
+function trialPoolExactFamilyCounts(source = {}) {
+  const raw = (
+    source?.exact_family_trial_counts
+    && typeof source.exact_family_trial_counts === "object"
+    && !Array.isArray(source.exact_family_trial_counts)
+  ) ? source.exact_family_trial_counts : source;
+  const exactCounts = {};
+  for (const [family, key] of [["baseline", "baseline_trials_exact"], ["catch", "catch_trials_exact"], ["auditory_only", "auditory_only_trials_exact"]]) {
+    const value = raw?.[family] ?? raw?.[key];
+    if (value === null || value === undefined || value === "") continue;
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) exactCounts[family] = Math.max(0, Math.trunc(parsed));
+  }
+  return exactCounts;
+}
+
+function trialPoolExactRecordSortKey(record, seed, family) {
+  const file = record?.file || {};
+  const fileKey = String(file.file_key || "");
+  const sequenceKey = String(file.sequence_variant_key || file.variant_key || "");
+  const sourceFileName = String(file.source_file_name || (file.file_path || "").split(/[\\/]/).pop() || "");
+  const orderKey = `${seed}|exact_family_count|${family}|${fileKey}|${sequenceKey}|${sourceFileName}`;
+  return [stableHashInt(orderKey), fileKey, sequenceKey, sourceFileName];
+}
+
+function applyTrialPoolExactFamilyCounts(records, settings = {}, warnings = []) {
+  const exactCounts = trialPoolExactFamilyCounts(settings);
+  if (!Object.keys(exactCounts).length) return {};
+  const seed = Number(settings.fractional_seed || state?.design?.protocol?.random_seed || 20250604) || 20250604;
+  for (const family of Object.keys(exactCounts).sort()) {
+    const targetCount = exactCounts[family];
+    const familyRecords = records.filter((record) => trialPoolFamilyKey(record?.file?.family) === family);
+    if (!familyRecords.length) {
+      if (targetCount) warnings.push(`Exact ${family} trial count ${targetCount} could not be applied because Segment 3 has no ${family} files.`);
+      continue;
+    }
+    const baseCount = Math.floor(targetCount / familyRecords.length);
+    const extraCount = targetCount % familyRecords.length;
+    const ordered = [...familyRecords].sort((left, right) => {
+      const leftKey = trialPoolExactRecordSortKey(left, seed, family);
+      const rightKey = trialPoolExactRecordSortKey(right, seed, family);
+      for (let index = 0; index < leftKey.length; index += 1) {
+        if (leftKey[index] === rightKey[index]) continue;
+        if (typeof leftKey[index] === "number" && typeof rightKey[index] === "number") {
+          return leftKey[index] - rightKey[index];
+        }
+        return String(leftKey[index]).localeCompare(String(rightKey[index]));
+      }
+      return 0;
+    });
+    for (const [index, record] of ordered.entries()) {
+      const occurrenceCount = baseCount + (index < extraCount ? 1 : 0);
+      record.configured = occurrenceCount;
+      record.baseRepetitions = occurrenceCount;
+      record.fractionalRemainder = 0;
+      record.fractionalExtra = false;
+      record.balancingStratum = `${family}|exact_count|target${targetCount}|files${familyRecords.length}`;
+      record.balancingParentStratum = record.balancingStratum;
+    }
+  }
+  return exactCounts;
 }
 
 function staticTrialPoolRows(files, settings) {
@@ -1185,6 +1296,7 @@ function staticTrialPoolRows(files, settings) {
     const rotated = ordered.slice(offset).concat(ordered.slice(0, offset));
     for (const record of rotated.slice(0, extraCount)) record.fractionalExtra = true;
   }
+  applyTrialPoolExactFamilyCounts(records, settings);
   const rows = [];
   let trialPoolIndex = 1;
   for (const record of records) {
@@ -1230,7 +1342,7 @@ function staticTrialPoolBakePayload(design, trialFileBake) {
   const protocol = design.protocol || {};
   const settings = staticTrialPoolSettings(protocol);
   const poolRows = staticTrialPoolRows(trialFileBake.files || [], settings);
-  const familyCounts = { audio_tactile: 0, baseline: 0, catch: 0 };
+  const familyCounts = { audio_tactile: 0, baseline: 0, catch: 0, auditory_only: 0 };
   for (const row of poolRows) {
     if (Object.prototype.hasOwnProperty.call(familyCounts, row.family)) familyCounts[row.family] += 1;
   }
@@ -1249,6 +1361,7 @@ function staticTrialPoolBakePayload(design, trialFileBake) {
     audio_tactile_count: familyCounts.audio_tactile,
     baseline_count: familyCounts.baseline,
     catch_count: familyCounts.catch,
+    auditory_only_count: familyCounts.auditory_only,
     estimated_total_duration_ms: totalDurationMs,
     family_counts: familyCounts,
     preview_rows: poolRows,
@@ -1485,7 +1598,7 @@ function staticBlockPreviewRow(row, blockIndex, blockTrialIndex, soaMin, soaMax)
     trial_pool_index: row.trial_pool_index,
     family,
     family_label: familyDisplayName(family),
-    family_color_hex: TRIAL_FAMILY_COLORS[family] || "#68746c",
+    family_color_hex: TRIAL_FAMILY_COLORS[family] || "#5e695f",
     row_label: row.row_label || "",
     row_color_hex: staticRowColor(row.row_label || row.folder_key || ""),
     folder_key: row.folder_key || "",
@@ -1585,6 +1698,7 @@ function normalizeStaticTemplateDesign(data, status) {
   design.custom_looming_files = Array.isArray(design.custom_looming_files) ? design.custom_looming_files : [];
   design.prestimulus_files = Array.isArray(design.prestimulus_files) ? design.prestimulus_files : [];
   design.trajectory = design.trajectory || {};
+  const rawProtocol = design.protocol || {};
   design.protocol = {
     repetitions_per_condition: 1,
     trial_pool_repetition_defaults: {},
@@ -1594,35 +1708,66 @@ function normalizeStaticTemplateDesign(data, status) {
     auditory_motion_directions: ["looming"],
     tactile_sites: ["hand"],
     include_catch_trials: false,
-    catch_trial_percentage: 0,
-    include_baseline_trials: false,
-    baseline_strategy: "none",
+    catch_trial_percentage: 10,
+    catch_trials_exact: null,
+    catch_crosses_sequence_variants: true,
+    include_auditory_only_trials: false,
+    auditory_only_trial_percentage: 0,
+    auditory_only_trials_exact: null,
+    auditory_only_crosses_sequence_variants: true,
+    include_baseline_trials: true,
+    baseline_strategy: "tactile_only",
+    baseline_trials_exact: null,
     baseline_trial_percentage: 0,
     baseline_soa_values_ms: [],
     baseline_custom_trial_mode: "tactile_only",
+    baseline_crosses_sequence_variants: true,
     respiratory_phases: ["Inhale", "Exhale"],
     blocks: 1,
     block_specs: [],
+    distribute_trial_pool_across_blocks: false,
     trial_strips: [],
     trial_randomization_strategy: "no_immediate_repeats",
     block_order_randomization: "counterbalanced_rotation",
     max_consecutive_same_trial_type: 2,
     participants: 1,
     random_seed: 20250604,
-    ...(design.protocol || {})
+    ...rawProtocol
   };
+  if (!Object.prototype.hasOwnProperty.call(rawProtocol, "include_catch_trials")) {
+    const catchExact = rawProtocol.catch_trials_exact;
+    design.protocol.include_catch_trials = Boolean(
+      Number(rawProtocol.catch_trial_percentage || 0) > 0
+      || (catchExact !== null && catchExact !== undefined && catchExact !== 0 && catchExact !== "")
+    );
+  }
+  if (!Object.prototype.hasOwnProperty.call(rawProtocol, "include_auditory_only_trials")) {
+    const auditoryExact = rawProtocol.auditory_only_trials_exact;
+    design.protocol.include_auditory_only_trials = Boolean(
+      Number(rawProtocol.auditory_only_trial_percentage || 0) > 0
+      || (auditoryExact !== null && auditoryExact !== undefined && auditoryExact !== 0 && auditoryExact !== "")
+    );
+  }
   hydrateStaticSourceAssets(design, status);
   return design;
 }
 
 function hydrateStaticSourceAssets(design, status) {
   const assetsByLabel = new Map();
+  const consumed = new Set();
+  const directionLabels = new Set();
   for (const asset of status.assets || []) {
-    assetsByLabel.set(normalizeSourceKey(asset.label), asset);
+    const key = normalizeSourceKey(asset.label);
+    if (!key) continue;
+    assetsByLabel.set(key, asset);
+    const directionLabel = String(asset.direction_label || "").trim();
+    if (directionLabel) directionLabels.add(directionLabel);
   }
   for (const noise of design.noises || []) {
-    const asset = assetsByLabel.get(normalizeSourceKey(noise.label));
+    const key = normalizeSourceKey(noise.label);
+    const asset = assetsByLabel.get(key);
     if (!asset) continue;
+    consumed.add(key);
     noise.prebaked_path = noise.prebaked_path || asset.path;
     noise.noise_type = noise.noise_type || asset.noise_type || asset.tone_type || "pink";
     noise.motion_mode = noise.motion_mode || asset.motion_mode || "looming";
@@ -1631,14 +1776,61 @@ function hydrateStaticSourceAssets(design, status) {
       : clone(asset.trajectory_snapshot || {});
   }
   for (const source of design.custom_looming_files || []) {
-    const asset = assetsByLabel.get(normalizeSourceKey(source.label));
+    const key = normalizeSourceKey(source.label);
+    const asset = assetsByLabel.get(key);
     if (!asset) continue;
+    consumed.add(key);
     source.path = source.path || asset.path;
     source.tone_type = source.tone_type || asset.tone_type || asset.noise_type || "custom_audio";
     source.motion_mode = source.motion_mode || asset.motion_mode || "looming";
     source.trajectory_snapshot = Object.keys(source.trajectory_snapshot || {}).length
       ? source.trajectory_snapshot
       : clone(asset.trajectory_snapshot || {});
+  }
+  for (const [key, asset] of assetsByLabel.entries()) {
+    if (consumed.has(key)) continue;
+    const label = String(asset.label || "").trim();
+    const path = String(asset.path || "").trim();
+    if (!label || !path) continue;
+    design.custom_looming_files.push({
+      label,
+      path,
+      target_duration_s: Number(asset.duration_s || design.trajectory?.total_duration_s || 4),
+      render_mode: "preserve",
+      tone_type: asset.noise_type || asset.tone_type || "custom_audio",
+      gain: 1.0,
+      motion_mode: asset.motion_mode || "looming",
+      trajectory_snapshot: clone(asset.trajectory_snapshot || {}),
+    });
+  }
+  expandStaticTrialStripSourceLabels(
+    design,
+    [...assetsByLabel.values()].map((asset) => String(asset.label || "").trim()).filter(Boolean)
+  );
+  if (directionLabels.size > 1) {
+    design.protocol.auditory_motion_directions = ["source_trajectory"];
+  }
+}
+
+function expandStaticTrialStripSourceLabels(design, availableSourceLabels) {
+  const available = (availableSourceLabels || []).map((label) => String(label || "").trim()).filter(Boolean);
+  if (!available.length) return;
+  for (const strip of design.protocol?.trial_strips || []) {
+    for (const element of strip.elements || []) {
+      if (element.kind !== "looming_stimulus") continue;
+      const labels = Array.isArray(element.source_labels) && element.source_labels.length
+        ? element.source_labels
+        : [element.source_label || element.label || ""];
+      const expanded = [];
+      for (const rawLabel of labels) {
+        const label = String(rawLabel || "").trim();
+        if (!label) continue;
+        const matches = available.filter((candidate) => candidate === label || candidate.startsWith(`${label} - `));
+        expanded.push(...(matches.length ? matches : [label]));
+      }
+      element.source_labels = [...new Set(expanded)];
+      element.source_label = element.source_labels[0] || "";
+    }
   }
 }
 
@@ -1691,6 +1883,7 @@ function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, b
         audio_tactile_count: trialFileBake.audio_tactile_count || 0,
         baseline_count: trialFileBake.baseline_count || 0,
         catch_count: trialFileBake.catch_count || 0,
+        auditory_only_count: trialFileBake.auditory_only_count || 0,
         total_count: trialFileBake.total_count || 0,
       }
     ),
@@ -1705,6 +1898,7 @@ function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, b
         audio_tactile_count: trialPoolBake.audio_tactile_count || 0,
         baseline_count: trialPoolBake.baseline_count || 0,
         catch_count: trialPoolBake.catch_count || 0,
+        auditory_only_count: trialPoolBake.auditory_only_count || 0,
       }
     ),
     "5_block_csv_preview": segment(
@@ -2009,6 +2203,7 @@ function dashboardAuditSnapshot() {
       audio_tactile_count: segment.audio_tactile_count || 0,
       baseline_count: segment.baseline_count || 0,
       catch_count: segment.catch_count || 0,
+      auditory_only_count: segment.auditory_only_count || 0,
       total_count: segment.total_count || segment.trial_count || 0,
       block_count: segment.block_count || 0,
       csv_count: segment.csv_count || 0
@@ -2051,7 +2246,12 @@ function dashboardAuditSnapshot() {
       baseline_strategy: protocol.baseline_strategy || "",
       baseline_soa_values_ms: clone(protocol.baseline_soa_values_ms || []),
       baseline_custom_trial_mode: protocol.baseline_custom_trial_mode || "",
+      baseline_crosses_sequence_variants: protocol.baseline_crosses_sequence_variants !== false,
       include_catch_trials: Boolean(protocol.include_catch_trials),
+      catch_crosses_sequence_variants: protocol.catch_crosses_sequence_variants !== false,
+      include_auditory_only_trials: Boolean(protocol.include_auditory_only_trials),
+      auditory_only_crosses_sequence_variants: protocol.auditory_only_crosses_sequence_variants !== false,
+      distribute_trial_pool_across_blocks: Boolean(protocol.distribute_trial_pool_across_blocks),
       trial_pool_repetition_defaults: clone(protocol.trial_pool_repetition_defaults || {}),
       trial_strips: (protocol.trial_strips || []).map(auditTrialStripSnapshot)
     },
@@ -2060,6 +2260,7 @@ function dashboardAuditSnapshot() {
       audio_tactile_count: state?.trial_file_bake?.audio_tactile_count || 0,
       baseline_count: state?.trial_file_bake?.baseline_count || 0,
       catch_count: state?.trial_file_bake?.catch_count || 0,
+      auditory_only_count: state?.trial_file_bake?.auditory_only_count || 0,
       total_count: state?.trial_file_bake?.total_count || 0
     },
     trial_pool_bake: {
@@ -2069,6 +2270,7 @@ function dashboardAuditSnapshot() {
       audio_tactile_count: state?.trial_pool_bake?.audio_tactile_count || 0,
       baseline_count: state?.trial_pool_bake?.baseline_count || 0,
       catch_count: state?.trial_pool_bake?.catch_count || 0,
+      auditory_only_count: state?.trial_pool_bake?.auditory_only_count || 0,
       estimated_total_duration_ms: state?.trial_pool_bake?.estimated_total_duration_ms || 0,
       family_counts: clone(state?.trial_pool_bake?.family_counts || {}),
       preview_rows: auditPoolRows(state?.trial_pool_bake?.preview_rows || [])
@@ -2686,10 +2888,30 @@ function renderGeneratedNoiseSelect() {
   select.value = PROCEDURAL_NOISE_TYPES.some((item) => item.value === current) ? current : "";
 }
 
+function syncNoiseTypeButtons() {
+  const activeType = pendingBakeRecipe && pendingBakeRecipe.kind === "generated_noise"
+    ? pendingBakeRecipe.noise_type
+    : "";
+  const select = $("generated-noise-select");
+  if (select) {
+    select.value = PROCEDURAL_NOISE_TYPES.some((item) => item.value === activeType) ? activeType : "";
+  }
+  for (const button of document.querySelectorAll(".noise-type-button")) {
+    button.classList.toggle("active", Boolean(activeType) && button.dataset.noiseType === activeType);
+  }
+}
+
 function renderBakePanel() {
   const status = $("bake-status");
   const button = $("bake-stimulus");
   if (!status || !button) return;
+  syncNoiseTypeButtons();
+  const controlsLocked = staticModeActive || isProfileReadonlyMode() || customViewModeLocked();
+  const select = $("generated-noise-select");
+  if (select) select.disabled = controlsLocked;
+  for (const noiseButton of document.querySelectorAll(".noise-type-button")) {
+    noiseButton.disabled = controlsLocked;
+  }
   if (!pendingBakeRecipe) {
     status.textContent = "No source staged";
     status.className = "status-label required";
@@ -2714,7 +2936,7 @@ function renderBakePanel() {
   const kind = pendingBakeRecipe.kind === "imported_audio" ? audioRoleTitle(pendingBakeRecipe.render_mode) : `${noiseTypeLabel(pendingBakeRecipe.noise_type)} noise`;
   status.textContent = `Staged: ${kind}`;
   status.className = "status-label ready";
-  button.disabled = false;
+  button.disabled = controlsLocked;
 }
 
 function renderNoiseTable() {
@@ -3212,7 +3434,7 @@ function renderBlockPreviewCard(block, index = 0) {
   const distribution = ["audio_tactile", "baseline", "catch"].map((family) => {
     const count = Number(familyCounts[family] || 0);
     return `
-      <div class="block-distribution-segment" style="--segment-color:${escapeAttr(TRIAL_FAMILY_COLORS[family] || "#68746c")}">
+      <div class="block-distribution-segment" style="--segment-color:${escapeAttr(TRIAL_FAMILY_COLORS[family] || "#5e695f")}">
         ${escapeHtml(familyDisplayName(family))}: ${count}
       </div>
     `;
@@ -3262,13 +3484,13 @@ function blockFeatureChips(counts = {}, prefix, rows, valueKey, colorKey, limit)
   const colorByValue = new Map();
   for (const row of rows || []) {
     const value = String(row[valueKey] || "");
-    if (value && !colorByValue.has(value)) colorByValue.set(value, row[colorKey] || "#68746c");
+    if (value && !colorByValue.has(value)) colorByValue.set(value, row[colorKey] || "#5e695f");
   }
   return Object.entries(counts)
     .filter(([value]) => value)
     .slice(0, limit)
     .map(([value, count]) => `
-      <span class="feature-chip" style="--chip-color:${escapeAttr(colorByValue.get(value) || "#68746c")}">
+      <span class="feature-chip" style="--chip-color:${escapeAttr(colorByValue.get(value) || "#5e695f")}">
         ${escapeHtml(prefix)} ${escapeHtml(value)}: ${escapeHtml(count)}
       </span>
     `);
@@ -3419,6 +3641,7 @@ function trialPoolFamilyKey(value) {
   if (["audio", "target", "target_audio_tactile", "audio_tactile_trials"].includes(key)) return "audio_tactile";
   if (["baseline_trials", "tactile_baseline", "tactile_only"].includes(key)) return "baseline";
   if (["catch_trials", "audio_only"].includes(key)) return "catch";
+  if (["auditory", "auditory_only", "auditory_only_trials", "audio_response", "audio_only_response"].includes(key)) return "auditory_only";
   return key;
 }
 
@@ -3480,13 +3703,13 @@ function syncTrialPoolDraftFromState() {
   const familyRepetitions = {};
   for (const [key, value] of Object.entries(protocolDefaults)) {
     const family = trialPoolFamilyKey(key);
-    if (["audio_tactile", "baseline", "catch"].includes(family)) {
+    if (["audio_tactile", "baseline", "catch", "auditory_only"].includes(family)) {
       familyRepetitions[family] = normalizeRepetitionValue(value, defaultRepetitions);
     }
   }
   for (const [key, value] of Object.entries(settings.family_repetitions || {})) {
     const family = trialPoolFamilyKey(key);
-    if (["audio_tactile", "baseline", "catch"].includes(family)) {
+    if (["audio_tactile", "baseline", "catch", "auditory_only"].includes(family)) {
       familyRepetitions[family] = normalizeRepetitionValue(value, defaultRepetitions);
     }
   }
@@ -3611,6 +3834,14 @@ function trialPoolCompositionEstimate() {
       record.fractionalExtra = true;
     }
   }
+  applyTrialPoolExactFamilyCounts(
+    records,
+    {
+      exact_family_trial_counts: trialPoolExactFamilyCounts(state?.design?.protocol || {}),
+      fractional_seed: seed,
+    },
+    warnings
+  );
   const occurrenceByFileKey = new Map();
   for (const record of records) {
     const key = record.file.file_key || `source-${record.index}`;
@@ -3763,7 +3994,6 @@ function compositionSliderRow(kind, label, family, composition) {
         aria-valuemax="100"
         aria-valuenow="${escapeAttr(percent.toFixed(1))}">
         <span class="pool-slider-fill"></span>
-        <span class="pool-slider-thumb"></span>
       </div>
       <div class="pool-slider-meta">
         <span>${escapeHtml(count)} trial${count === 1 ? "" : "s"}</span>
@@ -3927,10 +4157,16 @@ function baselineAnchorSpecsFromInputs() {
       .map((soa, index) => ({ label: index === 0 ? "minimum" : "maximum", soa_ms: soa, mode: "audio_tactile" }));
   }
   if (strategy === "tactile_only") {
-    return soaValues.map((soa) => ({ label: "full SOA tactile-only", soa_ms: soa, mode: "tactile_only" }));
+    const customSoas = parseIntegerList($("baseline-soa-values").value);
+    const values = customSoas.length ? customSoas : soaValues;
+    const label = customSoas.length ? "custom tactile-only" : "full SOA tactile-only";
+    return values.map((soa) => ({ label, soa_ms: soa, mode: "tactile_only" }));
   }
   if (strategy === "stationary_burst") {
-    return soaValues.map((soa) => ({ label: "full SOA stationary burst", soa_ms: soa, mode: "stationary_burst" }));
+    const customSoas = parseIntegerList($("baseline-soa-values").value);
+    const values = customSoas.length ? customSoas : soaValues;
+    const label = customSoas.length ? "custom stationary burst" : "full SOA stationary burst";
+    return values.map((soa) => ({ label, soa_ms: soa, mode: "stationary_burst" }));
   }
   if (strategy === "custom") {
     const mode = $("baseline-custom-audio-tactile")?.checked ? "audio_tactile" : "tactile_only";
@@ -5361,16 +5597,23 @@ function renderWorkflow() {
     if (stateLabel) {
       const label = step.label || humanize(stepId);
       const missing = Array.isArray(step.missing) && step.missing.length
-        ? `: ${step.missing.join(" ")}`
+        ? `: ${step.missing.join(", ")}`
         : "";
       const status = complete ? "ready" : "not ready";
-      stateLabel.textContent = complete ? "\u2713" : "X";
+      stateLabel.textContent = complete ? "\u2713" : "\u2715";
       stateLabel.className = `decision-state ${complete ? "ready" : "not-ready"}`;
       stateLabel.title = `${label} ${status}${missing}`;
       stateLabel.setAttribute("aria-label", `${label} ${status}`);
     }
+    const missingSummary = !complete && Array.isArray(step.missing) && step.missing.length
+      ? step.missing.join(", ")
+      : "";
     for (const badge of badges) {
-      badge.textContent = profileReadonly ? "read-only" : locked ? "locked" : complete ? "ready" : "required";
+      const baseText = profileReadonly ? "read-only" : locked ? "locked" : complete ? "ready" : "required";
+      badge.textContent = baseText === "required" && missingSummary
+        ? `required - ${missingSummary}`
+        : baseText;
+      badge.title = missingSummary ? `Needs: ${missingSummary}` : "";
       badge.className = `step-badge ${profileReadonly ? "readonly" : locked ? "locked" : complete ? "complete" : current ? "current" : ""}`;
     }
   }
@@ -5561,7 +5804,7 @@ function collectPayload() {
     ? design.protocol.spatial_values_cm
     : [trajectoryControls.end_distance_cm];
   const baselineStrategy = currentBaselineStrategy();
-  const baselineTimings = baselineStrategy === "custom"
+  const baselineTimings = baselineStrategyIsActive(baselineStrategy)
     ? parseIntegerList($("baseline-soa-values").value)
     : [];
   design.protocol = {
@@ -5571,12 +5814,20 @@ function collectPayload() {
     spatial_values_cm: legacySpatial,
     pair_spatial_values_with_soas: false,
     include_catch_trials: $("include-catch-trials")?.checked || false,
+    catch_crosses_sequence_variants: design.protocol?.catch_crosses_sequence_variants !== false,
     catch_trial_percentage: numberValue("catch-percent", 0),
+    include_auditory_only_trials: Boolean(design.protocol?.include_auditory_only_trials),
+    auditory_only_crosses_sequence_variants: design.protocol?.auditory_only_crosses_sequence_variants !== false,
+    auditory_only_trial_percentage: Number(design.protocol?.auditory_only_trial_percentage || 0),
+    auditory_only_trials_exact: design.protocol?.auditory_only_trials_exact ?? null,
     include_baseline_trials: baselineStrategyIsActive(baselineStrategy),
     baseline_strategy: baselineStrategy,
+    baseline_trials_exact: baselineStrategyIsActive(baselineStrategy) ? (design.protocol?.baseline_trials_exact ?? null) : null,
     baseline_trial_percentage: baselineStrategyIsActive(baselineStrategy) ? numberValue("baseline-percent", 0) : 0,
     baseline_soa_values_ms: baselineTimings,
     baseline_custom_trial_mode: $("baseline-custom-audio-tactile")?.checked ? "audio_tactile" : "tactile_only",
+    baseline_crosses_sequence_variants: design.protocol?.baseline_crosses_sequence_variants !== false,
+    distribute_trial_pool_across_blocks: Boolean(design.protocol?.distribute_trial_pool_across_blocks),
     blocks: Math.max(1, Math.round(numberValue("block-count", numberValue("blocks", 1)))),
     participants: Math.max(1, Math.round(numberValue("participants", 1))),
     trial_strips: trialStrips
@@ -5922,7 +6173,8 @@ async function startBakeTrialFiles() {
 }
 
 function trialPoolBakeRecipe() {
-  return {
+  const exactFamilyCounts = trialPoolExactFamilyCounts(state?.design?.protocol || {});
+  const recipe = {
     kind: "trial_repetition_pool",
     label: "4_trial_repetition_pool",
     default_repetitions: normalizeRepetitionValue(trialPoolRepetitionDraft.defaultRepetitions || 0, 0),
@@ -5931,6 +6183,8 @@ function trialPoolBakeRecipe() {
     file_repetition_overrides: { ...trialPoolRepetitionDraft.fileRepetitionOverrides },
     fractional_seed: Number(trialPoolRepetitionDraft.fractionalSeed || state?.design?.protocol?.random_seed || 20250604) || 20250604,
   };
+  if (Object.keys(exactFamilyCounts).length) recipe.exact_family_trial_counts = exactFamilyCounts;
+  return recipe;
 }
 
 async function startBakeTrialPool() {
@@ -7141,8 +7395,19 @@ function wireEvents() {
   $("generated-noise-select").addEventListener("change", () => {
     const selectedNoise = $("generated-noise-select").value;
     if (!selectedNoise) return;
+    if (!ensureEditableProject()) {
+      renderBakePanel();
+      return;
+    }
     stageGeneratedNoise(selectedNoise);
   });
+  for (const button of document.querySelectorAll(".noise-type-button")) {
+    button.addEventListener("click", () => {
+      const type = button.dataset.noiseType;
+      if (!ensureEditableProject()) return;
+      if (type) stageGeneratedNoise(type);
+    });
+  }
   $("bake-label").addEventListener("input", () => {
     if (pendingBakeRecipe) pendingBakeRecipe.label = $("bake-label").value.trim();
   });

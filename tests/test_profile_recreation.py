@@ -39,7 +39,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     template_ids = {template.template_id for template in templates}
     status = json.loads((root / "assets" / "preloads" / "profile_recreation_status.json").read_text(encoding="utf-8"))
 
-    assert len(templates) == 23
+    assert len(templates) == 30
     assert status["schema"] == PROFILE_RECREATION_STATUS_SCHEMA
     assert status["profile_count"] == len(templates)
     assert {profile["template_id"] for profile in status["profiles"]} == template_ids
@@ -48,9 +48,8 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     assert categorized == template_ids
     assert status["categories"]["gui_recreatable"]
     assert status["categories"]["missing_publication_parameters"]
-    assert status["categories"]["toolkit_structural_gap"]
-    assert len(status["categories"]["missing_publication_parameters"]) == 12
-    assert len(status["categories"]["toolkit_structural_gap"]) == 7
+    assert len(status["categories"]["missing_publication_parameters"]) == 6
+    assert len(status["categories"]["toolkit_structural_gap"]) == 0
 
     allowed_statuses = {
         STATUS_REPORTED,
@@ -108,7 +107,7 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert study5["segment_0_to_4_profile_checks_passed"] is True
     assert study5["missing_parameter_count"] == 0
     assert study5["unsupported_structure_count"] == 0
-    assert len(status["categories"]["gui_recreatable"]) == 9
+    assert len(status["categories"]["gui_recreatable"]) == 24
 
     study5_lateral = profiles[STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID]
     assert study5_lateral["primary_category"] == "gui_recreatable"
@@ -140,27 +139,100 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert dynaspace["unsupported_structure_count"] == 0
 
     canzoneri = profiles["canzoneri_2012_dynamic_sounds"]
-    assert canzoneri["template_id"] in status["categories"]["missing_publication_parameters"]
-    assert canzoneri["template_id"] in status["categories"]["toolkit_structural_gap"]
-    assert canzoneri["missing_parameter_count"] > 0
-    assert canzoneri["unsupported_structure_count"] > 0
-    assert canzoneri["runner_readiness"] == "blocked_unsupported_toolkit_structure"
-    assert canzoneri["profile_checks_passed"] is False
-    assert canzoneri["segment_0_to_4_profile_checks_passed"] is False
-    assert {
-        item["reason"] for item in canzoneri["unsupported_toolkit_structures"]
-    } == {"direction-coupled tactile-only T0/T6 baseline trials"}
+    assert canzoneri["primary_category"] == "gui_recreatable"
+    assert canzoneri["runner_readiness"] == "ready"
+    assert canzoneri["profile_checks_passed"] is True
+    assert canzoneri["segment_0_to_4_profile_checks_passed"] is True
+    assert canzoneri["missing_parameter_count"] == 0
+    assert canzoneri["unsupported_structure_count"] == 0
+
+    canzoneri_amputation = profiles["canzoneri_2013_amputation_prosthesis"]
+    assert canzoneri_amputation["primary_category"] == "gui_recreatable"
+    assert canzoneri_amputation["runner_readiness"] == "ready"
+    assert canzoneri_amputation["profile_checks_passed"] is True
+    assert canzoneri_amputation["segment_0_to_4_profile_checks_passed"] is True
+    assert canzoneri_amputation["missing_parameter_count"] == 0
+    assert canzoneri_amputation["unsupported_structure_count"] == 0
+
+    tonelli = profiles["tonelli_2019_echolocation"]
+    assert tonelli["primary_category"] == "gui_recreatable"
+    assert tonelli["runner_readiness"] == "ready"
+    assert tonelli["profile_checks_passed"] is True
+    assert tonelli["segment_0_to_4_profile_checks_passed"] is True
+    assert tonelli["missing_parameter_count"] == 0
+    assert tonelli["unsupported_structure_count"] == 0
+
+    serino_2007 = profiles["serino_2007_blind_cane_users"]
+    assert serino_2007["primary_category"] == "missing_publication_parameters"
+    assert serino_2007["runner_readiness"] == "blocked_missing_parameters"
+    assert serino_2007["profile_checks_passed"] is False
+    assert serino_2007["segment_0_to_4_profile_checks_passed"] is False
+    assert serino_2007["missing_parameter_count"] == 4
+    assert serino_2007["unsupported_structure_count"] == 0
+
+    serino_front_back = profiles["serino_2015_front_back_trunk_exp2"]
+    assert serino_front_back["primary_category"] == "gui_recreatable"
+    assert serino_front_back["runner_readiness"] == "ready"
+    assert serino_front_back["profile_checks_passed"] is True
+    assert serino_front_back["segment_0_to_4_profile_checks_passed"] is True
+    assert serino_front_back["missing_parameter_count"] == 0
+    assert serino_front_back["unsupported_structure_count"] == 0
+
+    serino_toolless = profiles["serino_2015_toolless_sync_training"]
+    assert serino_toolless["primary_category"] == "gui_recreatable"
+    assert serino_toolless["runner_readiness"] == "ready"
+    assert serino_toolless["profile_checks_passed"] is True
+    assert serino_toolless["segment_0_to_4_profile_checks_passed"] is True
+    assert serino_toolless["missing_parameter_count"] == 0
+    assert serino_toolless["unsupported_structure_count"] == 0
 
     galli = profiles["galli_2015_wheelchair_full_body"]
-    assert galli["template_id"] in status["categories"]["toolkit_structural_gap"]
-    assert {
-        item["reason"] for item in galli["unsupported_toolkit_structures"]
-    } == {"speaker-array Gaussian amplitude control"}
+    assert galli["primary_category"] == "gui_recreatable"
+    assert galli["runner_readiness"] == "ready"
+    assert galli["profile_checks_passed"] is True
+    assert galli["segment_0_to_4_profile_checks_passed"] is True
+    assert galli["missing_parameter_count"] == 0
+    assert galli["unsupported_structure_count"] == 0
 
     serino_hand = profiles["serino_2015_peri_hand_exp3"]
-    assert {
-        item["reason"] for item in serino_hand["unsupported_toolkit_structures"]
-    } == {"lateralized hand coordinate"}
+    assert serino_hand["primary_category"] == "gui_recreatable"
+    assert serino_hand["runner_readiness"] == "ready"
+    assert serino_hand["profile_checks_passed"] is True
+    assert serino_hand["segment_0_to_4_profile_checks_passed"] is True
+    assert serino_hand["missing_parameter_count"] == 0
+    assert serino_hand["unsupported_structure_count"] == 0
+
+    tajadura_uncrossed = profiles["tajadura_jimenez_2009_uncrossed_visual_deprivation"]
+    assert tajadura_uncrossed["primary_category"] == "gui_recreatable"
+    assert tajadura_uncrossed["publication_status"] == "published"
+    assert tajadura_uncrossed["runner_readiness"] == "ready"
+    assert tajadura_uncrossed["profile_checks_passed"] is True
+    assert tajadura_uncrossed["segment_0_to_4_profile_checks_passed"] is True
+    assert tajadura_uncrossed["missing_parameter_count"] == 0
+    assert tajadura_uncrossed["unsupported_structure_count"] == 0
+
+    tajadura_crossed = profiles["tajadura_jimenez_2009_crossed_visual_deprivation"]
+    assert tajadura_crossed["primary_category"] == "gui_recreatable"
+    assert tajadura_crossed["publication_status"] == "published"
+    assert tajadura_crossed["runner_readiness"] == "ready"
+    assert tajadura_crossed["profile_checks_passed"] is True
+    assert tajadura_crossed["segment_0_to_4_profile_checks_passed"] is True
+    assert tajadura_crossed["missing_parameter_count"] == 0
+    assert tajadura_crossed["unsupported_structure_count"] == 0
+
+    for template_id in (
+        "biggio_2017_no_racket",
+        "biggio_2017_common_racket",
+        "biggio_2017_personal_racket",
+    ):
+        biggio = profiles[template_id]
+        assert biggio["primary_category"] == "gui_recreatable"
+        assert biggio["publication_status"] == "published"
+        assert biggio["runner_readiness"] == "ready"
+        assert biggio["profile_checks_passed"] is True
+        assert biggio["segment_0_to_4_profile_checks_passed"] is True
+        assert biggio["missing_parameter_count"] == 0
+        assert biggio["unsupported_structure_count"] == 0
 
     report = (root / "docs" / "PUBLISHED_STUDY_RECREATION_STATUS.md").read_text(encoding="utf-8")
     assert "## GUI-recreatable" in report
@@ -170,7 +242,7 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert "Ordinary trial randomization and block order" in report
 
     tex_report = (root / "docs" / "audit_report.tex").read_text(encoding="utf-8")
-    assert "Published-paper profiles passing checks & 7" in tex_report
+    assert "Published-paper profiles passing checks & 22" in tex_report
     assert "study5" in tex_report and "box" in tex_report and "breathing" in tex_report
     assert "No visible GUI progress indicator" in tex_report
     assert "Clinical populations, interventions, non-audiotactile stimuli" in tex_report
@@ -232,13 +304,13 @@ def test_protocol12_matrix_targets_ready_published_profiles_and_blocked_samples(
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID not in ready_published
     assert DEFAULT_STUDY_TEMPLATE_ID in ready_all
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID in ready_all
-    assert len(ready_published) == 7
+    assert len(ready_published) == 22
     assert set(ready_published) < set(ready_all)
-    assert len(blocked_samples) == 2
+    assert len(blocked_samples) == 1
 
     profiles = {profile["template_id"]: profile for profile in status["profiles"]}
     assert any(profiles[item]["missing_parameter_count"] > 0 for item in blocked_samples)
-    assert any(profiles[item]["unsupported_structure_count"] > 0 for item in blocked_samples)
+    assert all(profiles[item]["unsupported_structure_count"] == 0 for item in blocked_samples)
 
 
 def test_protocol12_matrix_metadata_only_report_accepts_ready_and_blocked(tmp_path: Path):
@@ -247,7 +319,7 @@ def test_protocol12_matrix_metadata_only_report_accepts_ready_and_blocked(tmp_pa
     report = matrix.run_matrix(
         output_dir=tmp_path,
         templates=["pfeiffer_2018_lateral_perihead_left_to_right"],
-        blocked_templates=["canzoneri_2012_dynamic_sounds"],
+        blocked_templates=["taffou_2014_cynophobic_rear_looming"],
         metadata_only=True,
     )
 
@@ -260,3 +332,34 @@ def test_protocol12_matrix_metadata_only_report_accepts_ready_and_blocked(tmp_pa
     assert report["blocked_results"][0]["blocked"]
     assert (tmp_path / "profile_recreation_interface_matrix_report.json").exists()
     assert (tmp_path / "profile_recreation_interface_matrix_report.md").exists()
+
+
+def test_protocol12_matrix_materializes_session_packages_under_each_profile_root(tmp_path: Path):
+    matrix = _load_validation_script("run_profile_recreation_interface_matrix.py")
+
+    report = matrix.run_matrix(
+        output_dir=tmp_path,
+        templates=["roussel_2025_dynaspace_mobile_pps", "matsuda_2021_four_directions"],
+        skip_blocked_samples=True,
+    )
+
+    assert report["schema"] == matrix.SCHEMA
+    assert report["passed"]
+    local_criteria = [
+        criterion
+        for criterion in report["criteria"]
+        if criterion["name"].endswith(":participant_package_profile_local")
+    ]
+    assert len(local_criteria) == 2
+    assert all(criterion["passed"] for criterion in local_criteria)
+
+    for result in report["profile_results"]:
+        materialization = result["materialization"]
+        expected_root = Path(materialization["expected_session_root"]).resolve()
+        session_dir = Path(materialization["session_dir"]).resolve()
+        session_manifest = Path(materialization["session_manifest_path"]).resolve()
+
+        assert result["template_id"] in str(expected_root)
+        assert session_dir == expected_root or expected_root in session_dir.parents
+        assert session_manifest == expected_root or expected_root in session_manifest.parents
+        assert session_manifest.exists()

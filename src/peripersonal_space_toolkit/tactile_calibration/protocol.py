@@ -35,6 +35,7 @@ from .schema import (
     STAIRCASE_STOP_REVERSALS,
     STAIRCASE_TARGET_DETECTION_RATE,
     STAIRCASE_UP_AFTER_MISSES,
+    TACTILE_OUTPUT_34_HARD_GUARD_PERCENT,
     TACTILE_OUTPUT_34_MAX_PERCENT,
     VALID_RESPONSE_END_MS,
     VALID_RESPONSE_START_MS,
@@ -87,8 +88,15 @@ class TactileCalibrationRunner:
         self.source_pulse_path = Path(source_pulse_path) if source_pulse_path else None
         self.current_output_34_percent = max(
             0.0,
-            min(float(TACTILE_OUTPUT_34_MAX_PERCENT), float(current_output_34_percent or 0.0)),
+            min(float(TACTILE_OUTPUT_34_HARD_GUARD_PERCENT), float(current_output_34_percent or 0.0)),
         )
+        self.hard_output_34_guard_percent = float(TACTILE_OUTPUT_34_HARD_GUARD_PERCENT)
+        self.initial_software_ceiling_output_34_percent = min(
+            self.hard_output_34_guard_percent,
+            max(float(TACTILE_OUTPUT_34_MAX_PERCENT), self.current_output_34_percent),
+        )
+        self.current_software_ceiling_output_34_percent = self.initial_software_ceiling_output_34_percent
+        self.dynamic_ceiling_expansions: list[dict[str, Any]] = []
         self.playback_output_levels_before = dict(playback_output_levels_before or {})
         self.package_context = dict(package_context or {})
         self.progress_callback = progress_callback
@@ -109,12 +117,53 @@ class TactileCalibrationRunner:
             raise RuntimeError("calibration cancelled")
 
     def _set_audio_engine_tactile_level(self, level_percent: float) -> None:
-        gain = max(0.0, min(float(TACTILE_OUTPUT_34_MAX_PERCENT), float(level_percent or 0.0))) / 100.0
+        gain = max(0.0, min(self.hard_output_34_guard_percent, float(level_percent or 0.0))) / 100.0
         setter = getattr(self.audio_engine, "set_tactile_volume", None)
         if callable(setter):
             setter(gain)
         else:
             setattr(self.audio_engine, "tactile_volume", gain)
+
+    def _base_levels(self) -> list[float]:
+        levels = [float(level) for level in SEARCH_LEVELS_PERCENT if 0.0 < float(level) <= self.hard_output_34_guard_percent]
+        levels.append(float(self.current_software_ceiling_output_34_percent))
+        return sorted(set(round(level, 6) for level in levels))
+
+    def _expand_software_ceiling(self, *, phase: str, trial_index: int, from_level: float) -> bool:
+        old_ceiling = float(self.current_software_ceiling_output_34_percent)
+        if old_ceiling >= self.hard_output_34_guard_percent:
+            return False
+        requested = max(
+            old_ceiling + float(CONFIRMATION_LEVEL_INCREMENT_PERCENT),
+            float(from_level) + float(CONFIRMATION_LEVEL_INCREMENT_PERCENT),
+        )
+        new_ceiling = min(self.hard_output_34_guard_percent, round(requested, 6))
+        if new_ceiling <= old_ceiling:
+            return False
+        expansion = {
+            "index": len(self.dynamic_ceiling_expansions) + 1,
+            "phase": str(phase or ""),
+            "trial_index": int(trial_index),
+            "old_software_ceiling_output_34_percent": old_ceiling,
+            "new_software_ceiling_output_34_percent": new_ceiling,
+            "trigger_level_output_34_percent": float(from_level),
+            "hard_output_34_guard_percent": self.hard_output_34_guard_percent,
+        }
+        self.current_software_ceiling_output_34_percent = new_ceiling
+        self.dynamic_ceiling_expansions.append(expansion)
+        self._progress(
+            f"Expanded tactile software ceiling to Output 3/4 {new_ceiling:g}%",
+            ui_event="dynamic_ceiling_expanded",
+            **expansion,
+        )
+        return True
+
+    def _ensure_level_available(self, levels: list[float], level: float) -> int:
+        level = round(float(level), 6)
+        if all(abs(existing - level) > 1e-9 for existing in levels):
+            levels.append(level)
+            levels.sort()
+        return levels.index(level)
 
     def _request_recenter(
         self,
@@ -297,7 +346,11 @@ class TactileCalibrationRunner:
         return max(0.0, float(inter_trial_interval_ms) - prior_tail_ms)
 
     def _starting_level_index(self, levels: list[float]) -> int:
-        start_level = min(max(levels), max(FAMILIARIZATION_MIN_LEVEL_PERCENT, self.current_output_34_percent))
+        start_level = min(
+            self.hard_output_34_guard_percent,
+            max(FAMILIARIZATION_MIN_LEVEL_PERCENT, self.current_output_34_percent),
+        )
+        self._ensure_level_available(levels, start_level)
         for index, level in enumerate(levels):
             if level >= start_level:
                 return index
@@ -342,10 +395,13 @@ class TactileCalibrationRunner:
         return int(trial_index) + int(needed) <= int(MAX_CALIBRATION_EVENTS)
 
     def _increase_confirmation_level(self, level_percent: float) -> float:
-        return min(
-            float(TACTILE_OUTPUT_34_MAX_PERCENT),
+        target = min(
+            self.hard_output_34_guard_percent,
             round(float(level_percent) + float(CONFIRMATION_LEVEL_INCREMENT_PERCENT), 6),
         )
+        if target > self.current_software_ceiling_output_34_percent:
+            self._expand_software_ceiling(phase="confirmation", trial_index=len(self.trials), from_level=level_percent)
+        return target
 
     def _confirmation_summary(
         self,
@@ -386,7 +442,9 @@ class TactileCalibrationRunner:
         starting_level: float,
         cumulative_false_alarms: int,
     ) -> dict[str, Any]:
-        current_level = max(0.0, min(float(TACTILE_OUTPUT_34_MAX_PERCENT), float(starting_level)))
+        current_level = max(0.0, min(self.hard_output_34_guard_percent, float(starting_level)))
+        if current_level > self.current_software_ceiling_output_34_percent:
+            self.current_software_ceiling_output_34_percent = current_level
         consecutive_hits = 0
         clean_catches = 0
         signal_trials = 0
@@ -460,14 +518,20 @@ class TactileCalibrationRunner:
                 else:
                     misses += 1
                     consecutive_hits = 0
-                    if current_level >= float(TACTILE_OUTPUT_34_MAX_PERCENT):
-                        status = "failed_confirmation_at_max"
+                    if current_level >= self.hard_output_34_guard_percent:
+                        status = "failed_confirmation_at_hard_guard"
                         message = (
-                            f"Participant missed a confirmation pulse at the capped maximum "
-                            f"{TACTILE_OUTPUT_34_MAX_PERCENT:g}% Output 3/4."
+                            f"Participant missed a confirmation pulse at the hard safety guard "
+                            f"{self.hard_output_34_guard_percent:g}% Output 3/4."
                         )
                         stop_after_trial = True
                     else:
+                        if current_level >= self.current_software_ceiling_output_34_percent:
+                            self._expand_software_ceiling(
+                                phase="confirmation",
+                                trial_index=trial_index,
+                                from_level=current_level,
+                            )
                         current_level = self._increase_confirmation_level(current_level)
             trial["confirmation_consecutive_hits"] = consecutive_hits
             trial["confirmation_clean_catches"] = clean_catches
@@ -507,7 +571,7 @@ class TactileCalibrationRunner:
         }
 
     def run(self) -> dict[str, Any]:
-        levels = [float(level) for level in SEARCH_LEVELS_PERCENT]
+        levels = self._base_levels()
         trial_index = 0
         accepted_level: float | None = None
         threshold_estimate: float | None = None
@@ -533,7 +597,11 @@ class TactileCalibrationRunner:
         staircase_false_alarms = 0
         with tempfile.TemporaryDirectory(prefix="pps_tactile_calibration_") as temp_text:
             temp_dir = Path(temp_text)
-            familiarization_level = min(max(levels), max(FAMILIARIZATION_MIN_LEVEL_PERCENT, self.current_output_34_percent))
+            familiarization_level = min(
+                self.hard_output_34_guard_percent,
+                max(FAMILIARIZATION_MIN_LEVEL_PERCENT, self.current_output_34_percent),
+            )
+            self._ensure_level_available(levels, familiarization_level)
             for _ in range(FAMILIARIZATION_TRIAL_COUNT):
                 if not self._has_event_capacity(trial_index):
                     status = "inconclusive_max_events"
@@ -622,6 +690,18 @@ class TactileCalibrationRunner:
 
                     if step_direction:
                         next_index = current_index - 1 if step_direction == "down" else current_index + 1
+                        if step_direction == "up" and next_index >= len(levels):
+                            if self._expand_software_ceiling(
+                                phase="staircase",
+                                trial_index=trial_index,
+                                from_level=level,
+                            ):
+                                next_index = self._ensure_level_available(
+                                    levels,
+                                    self.current_software_ceiling_output_34_percent,
+                                )
+                            else:
+                                next_index = len(levels) - 1
                         next_index = max(0, min(len(levels) - 1, next_index))
                         if next_index != current_index:
                             step_index += 1
@@ -632,7 +712,19 @@ class TactileCalibrationRunner:
                             last_step_direction = step_direction
                             current_index = next_index
                         else:
-                            step_direction = f"{step_direction}_limit"
+                            step_direction = "up_hard_guard" if step_direction == "up" else f"{step_direction}_limit"
+                            if (
+                                step_direction == "up_hard_guard"
+                                and hits == 0
+                                and float(level) >= self.hard_output_34_guard_percent
+                            ):
+                                status = "failed_no_detection_at_hard_guard"
+                                message = (
+                                    f"Participant did not report feeling the tactile pulse during the staircase, "
+                                    f"including at the hard safety guard {self.hard_output_34_guard_percent:g}% Output 3/4."
+                                )
+                                trial["staircase_direction"] = step_direction
+                                break
                     trial["staircase_direction"] = step_direction
                     trial["consecutive_hits"] = consecutive_hits
                     trial["consecutive_misses"] = consecutive_misses
@@ -664,10 +756,10 @@ class TactileCalibrationRunner:
                             f"from {len(reversal_levels)} staircase reversals."
                         )
                     elif hits == 0:
-                        status = "failed_no_detection_at_max"
+                        status = "failed_no_detection_at_hard_guard"
                         message = (
                             f"Participant did not report feeling the tactile pulse during the staircase, "
-                            f"including at the capped maximum {TACTILE_OUTPUT_34_MAX_PERCENT:g}% Output 3/4."
+                            f"including at the hard safety guard {self.hard_output_34_guard_percent:g}% Output 3/4."
                         )
                 if status != "invalid_false_alarm" and threshold_estimate is not None:
                     staircase_false_alarms = false_alarms
@@ -714,10 +806,15 @@ class TactileCalibrationRunner:
                 f"confirmation requiring {CONFIRMATION_REQUIRED_CONSECUTIVE_HITS} consecutive hits and "
                 f"{CONFIRMATION_REQUIRED_CLEAN_CATCHES} clean catch trials."
             ),
-            "search_levels_percent": levels,
+            "search_levels_percent": [float(level) for level in SEARCH_LEVELS_PERCENT],
             "staircase_levels_percent": levels,
             "starting_level_percent": starting_level,
-            "max_output_34_percent": TACTILE_OUTPUT_34_MAX_PERCENT,
+            "max_output_34_percent": self.current_software_ceiling_output_34_percent,
+            "initial_software_ceiling_output_34_percent": self.initial_software_ceiling_output_34_percent,
+            "final_software_ceiling_output_34_percent": self.current_software_ceiling_output_34_percent,
+            "hard_output_34_guard_percent": self.hard_output_34_guard_percent,
+            "dynamic_ceiling_expansions": list(self.dynamic_ceiling_expansions),
+            "dynamic_ceiling_expansion_count": len(self.dynamic_ceiling_expansions),
             "output_level_control": "candidate_output_34_percent_sets_audio_engine_tactile_gain",
             "threshold_censoring": threshold_censoring,
             "max_calibration_events": MAX_CALIBRATION_EVENTS,

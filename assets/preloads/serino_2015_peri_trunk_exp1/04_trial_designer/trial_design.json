@@ -26,6 +26,9 @@
       "audio_tactile_percentage": 100.0,
       "catch_percentage": 0.0,
       "baseline_percentage": 0.0,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {},
       "elements": [
         {
           "element_id": "serino-peri-trunk-moving-sound",
@@ -43,5 +46,5 @@
     }
   ],
   "prestimulus_files": [],
-  "preview_trial_count": 96
+  "preview_trial_count": 192
 }

@@ -3,7 +3,7 @@
 - Record ID: `ronga_2021_newborn_erp`
 - DOI: `10.1073/pnas.2024548118`
 - DOI URL: https://doi.org/10.1073/pnas.2024548118
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: near/far auditory plus electrical tactile stimulation with ERP endpoint
 - PDF status: `downloaded`
 - Supplement status: `paywalled`
@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- extract near/far auditory apparatus, electrical tactile parameters, timing offset, and ERP trigger needs
+- extract exact near/far auditory apparatus, electrical tactile pulse/calibration values, timing offset, and ERP trigger codes; electrical tactile metadata is now runner-supported
 
 ## Review Attempts
 

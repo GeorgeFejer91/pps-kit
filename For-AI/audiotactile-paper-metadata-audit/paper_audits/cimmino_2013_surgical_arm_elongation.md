@@ -3,7 +3,7 @@
 - Record ID: `cimmino_2013_surgical_arm_elongation`
 - DOI: `10.3233/RNN-120286`
 - DOI URL: https://doi.org/10.3233/RNN-120286
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: static near/far audio-tactile PPS task
 - PDF status: `open_access_unavailable`
 - Supplement status: `not_checked`

@@ -5,7 +5,7 @@
   "source_url": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2015.00639/full",
   "doi": "10.3389/fpsyg.2015.00639",
   "verification_status": "partial",
-  "notes": "Wheelchair-training PPS task. The profile captures trunk tactile timing and front/back looming structure; active/passive training condition is not yet a GUI factor.",
+  "notes": "Wheelchair-training PPS task. The profile captures the reported front/back trunk PPS timing and trial formula; the original 16-speaker Gaussian-amplitude arrays are represented as two virtual moving-source trajectories while active/passive/blindfolded wheelchair training remains experiment context.",
   "reference_parameters": {
     "sound_velocity_mps": 0.75,
     "sound_path_m": 2.0,
@@ -22,10 +22,20 @@
       "catch": 24,
       "baseline": 48
     },
-    "implementation_gaps": [
-      "wheelchair training condition",
-      "front/back block factors",
-      "speaker-array Gaussian amplitude control"
+    "profile_check_complete": true,
+    "reported_trial_formula": "216 PPS-assessment trials: 12 front/back spatial locations x 12 repetitions = 144 audio-tactile trials, plus 24 auditory catch trials and 48 tactile-only baseline trials.",
+    "apparatus_recreation_policy": "The two physical 8-speaker Gaussian-amplitude arrays are treated as apparatus provenance and represented by the toolkit's front and back binaural moving-source trajectories using the reported 2 m path and 75 cm/s speed.",
+    "speaker_array_geometry": {
+      "array_count": 2,
+      "speakers_per_array": 8,
+      "array_separation_m": 1.0,
+      "within_array_spacing_cm": 27.5
+    },
+    "remaining_caveats": [
+      "exact original broadband sound source",
+      "exact original per-speaker Gaussian gain synthesis",
+      "exact original loudspeaker SPL/intensity field",
+      "wheelchair training condition is represented as experiment context rather than a generated WAV factor"
     ]
   },
   "design": {
@@ -87,12 +97,12 @@
         "back looming"
       ],
       "tactile_sites": [
-        "sternum/chest",
-        "back"
+        "front/back trunk site (sternum/back mapped by trajectory side)"
       ],
       "catch_trial_percentage": 10.0,
       "catch_trials_exact": 24,
       "include_baseline_trials": true,
+      "baseline_trials_exact": 48,
       "baseline_soa_values_ms": [
         380,
         2280
@@ -108,9 +118,6 @@
         {
           "strip_id": "galli-wheelchair-moving-sound-row",
           "label": "Wheelchair PPS moving-sound trial",
-          "audio_tactile_percentage": 100.0,
-          "catch_percentage": 0.0,
-          "baseline_percentage": 0.0,
           "elements": [
             {
               "element_id": "galli-wheelchair-moving-sound",

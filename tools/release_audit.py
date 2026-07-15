@@ -59,6 +59,11 @@ ALLOWED_STANDARD_HRTF = (
     / "FABIAN_HRIR_measured_HATO_0.sofa"
 )
 ALLOWED_STANDARD_HRTF_MANIFEST = ALLOWED_STANDARD_HRTF.with_suffix(".manifest.json")
+ALLOWED_RELEASE_ARCHIVES = {
+    Path("publication")
+    / "behavior-research-methods"
+    / "springer-nature-latex-template-dec-2024.zip": "812e76dcaa9c28dc1bff1fb6065d51729b67d4ea140552a05088317414a3ecae",
+}
 ALLOWED_WAV_PREFIXES = {
     Path("assets") / "breathing",
     Path("assets") / "click",
@@ -181,8 +186,13 @@ def check_public_file_inventory() -> list[str]:
     for path in iter_public_files(REPO_ROOT):
         rel = path.relative_to(REPO_ROOT)
         suffix = path.suffix.lower()
-        if suffix in FORBIDDEN_SUFFIXES and rel != ALLOWED_STANDARD_HRTF:
+        if suffix in FORBIDDEN_SUFFIXES and rel != ALLOWED_STANDARD_HRTF and rel not in ALLOWED_RELEASE_ARCHIVES:
             problems.append(f"forbidden release artifact: {rel}")
+        if rel in ALLOWED_RELEASE_ARCHIVES:
+            expected_hash = ALLOWED_RELEASE_ARCHIVES[rel]
+            actual_hash = sha256_file(path).lower()
+            if actual_hash != expected_hash:
+                problems.append(f"allowed archive hash mismatch for {rel}: expected {expected_hash}, actual {actual_hash}")
         if suffix == ".wav" and not any(_is_under(rel, prefix) for prefix in ALLOWED_WAV_PREFIXES):
             problems.append(f"unapproved public WAV file: {rel}")
     return problems

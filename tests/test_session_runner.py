@@ -396,6 +396,35 @@ def test_prepare_segment_run_package_uses_segment5_and_segment6_csvs(tmp_path: P
     assert manifest["source_run_setup_sha256"] == _sha256(run_manifest)
 
 
+def test_prepare_segment_run_package_applies_row_iti_padding(tmp_path: Path):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    block_csv = run_manifest.parent.parent / "5_block_csv_preview" / "block_01_final.csv"
+    with block_csv.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    fieldnames = list(rows[0].keys()) + ["ITI_ms"]
+    rows[0]["ITI_ms"] = "300"
+    rows[1]["ITI_ms"] = ""
+    with block_csv.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    package = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+
+    block_audio, sample_rate = sf.read(package.blocks[0].wav_path, always_2d=True)
+    iti_frames = int(round(0.300 * sample_rate))
+    assert block_audio.shape == (441 + iti_frames + 220, 3)
+    assert np.max(np.abs(block_audio[441 : 441 + iti_frames, :])) == pytest.approx(0.0)
+    with package.blocks[0].manifest_path.open(newline="", encoding="utf-8") as handle:
+        prepared_rows = list(csv.DictReader(handle))
+    assert prepared_rows[1]["Trial_Start_Sample"] == str(441 + iti_frames)
+
+
 def test_prepare_segment_run_package_creates_split_part_packages(tmp_path: Path):
     run_manifest = _two_part_segment_run_setup_fixture(tmp_path)
     session_root = tmp_path / "sessions"
@@ -528,6 +557,160 @@ def test_prepare_segment_run_package_advances_woojer_tactile_drive_in_block_wav(
     policy = manifest["timing"]["tactile_latency_compensation"]
     assert policy["compensation_ms"] == pytest.approx(23.0)
     assert policy["example_compensated_drive_onset_ms"] == pytest.approx(77.0)
+
+
+def test_prepare_segment_run_package_generates_declared_tactile_waveform(tmp_path: Path):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    block_csv = run_manifest.parent.parent / "5_block_csv_preview" / "block_01_final.csv"
+    sample_rate = 44100
+    nominal_onset_s = 0.100
+    tactile_duration_s = 0.200
+    target = tmp_path / "looming_duration_2025_style.wav"
+    target_audio = np.zeros((int(round(0.500 * sample_rate)), 2), dtype=np.float32)
+    target_audio[:, 0] = 0.03
+    target_audio[:, 1] = 0.02
+    sf.write(target, target_audio, sample_rate)
+
+    with block_csv.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+        fieldnames = list(reader.fieldnames or [])
+    for field in (
+        "tactile_waveform_shape",
+        "tactile_frequency_hz",
+        "tactile_duration_ms",
+        "tactile_amplitude",
+    ):
+        if field not in fieldnames:
+            fieldnames.append(field)
+    rows[0].update(
+        {
+            "source_file_name": target.name,
+            "trial_file_path": str(target),
+            "source_sha256": _sha256(target),
+            "duration_ms": "500",
+            "duration_s": "0.5",
+            "looming_segment_onset_s": "0.000",
+            "tactile_onset_s": f"{nominal_onset_s:.3f}",
+            "channels": "2",
+            "tactile_channel": "3",
+            "tactile_waveform_shape": "sawtooth",
+            "tactile_frequency_hz": "80",
+            "tactile_duration_ms": "200",
+            "tactile_amplitude": "0.4",
+        }
+    )
+    with block_csv.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    package = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+        use_block_cache=False,
+    )
+
+    block_audio, rate = sf.read(package.blocks[0].wav_path, always_2d=True)
+    assert rate == sample_rate
+    assert block_audio.shape[1] == 3
+    drive_start = int(round((nominal_onset_s - 0.023) * sample_rate))
+    duration_frames = int(round(tactile_duration_s * sample_rate))
+    tactile = block_audio[drive_start : drive_start + duration_frames, 2]
+    assert tactile.min() == pytest.approx(-0.4, abs=0.02)
+    assert tactile.max() == pytest.approx(0.4, abs=0.02)
+    reset_count = int(np.count_nonzero(np.diff(tactile) < -0.5))
+    assert reset_count in {15, 16}
+
+    with package.blocks[0].manifest_path.open(newline="", encoding="utf-8") as handle:
+        prepared_rows = list(csv.DictReader(handle))
+    prepared = prepared_rows[0]
+    assert prepared["Tactile_Waveform_Shape"] == "sawtooth"
+    assert float(prepared["Tactile_Frequency_Hz"]) == pytest.approx(80.0)
+    assert float(prepared["Tactile_Duration_ms"]) == pytest.approx(200.0)
+    assert float(prepared["Tactile_Amplitude"]) == pytest.approx(0.4)
+    assert prepared["Tactile_Waveform_Generated"] == "true"
+    assert prepared["Tactile_Channel"] == "3"
+
+
+def test_prepare_segment_run_package_generates_biphasic_square_pulse_train(tmp_path: Path):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    block_csv = run_manifest.parent.parent / "5_block_csv_preview" / "block_01_final.csv"
+    sample_rate = 44100
+    nominal_onset_s = 0.100
+    target = tmp_path / "looming_duration_2025_style.wav"
+    target_audio = np.zeros((int(round(0.500 * sample_rate)), 2), dtype=np.float32)
+    target_audio[:, 0] = 0.03
+    target_audio[:, 1] = 0.02
+    sf.write(target, target_audio, sample_rate)
+
+    with block_csv.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+        fieldnames = list(reader.fieldnames or [])
+    for field in (
+        "tactile_waveform_shape",
+        "tactile_frequency_hz",
+        "tactile_duration_ms",
+        "tactile_pulse_duration_ms",
+        "tactile_amplitude",
+    ):
+        if field not in fieldnames:
+            fieldnames.append(field)
+    rows[0].update(
+        {
+            "source_file_name": target.name,
+            "trial_file_path": str(target),
+            "source_sha256": _sha256(target),
+            "duration_ms": "500",
+            "duration_s": "0.5",
+            "looming_segment_onset_s": "0.000",
+            "tactile_onset_s": f"{nominal_onset_s:.3f}",
+            "channels": "2",
+            "tactile_channel": "3",
+            "tactile_waveform_shape": "biphasic_square_pulse_train",
+            "tactile_frequency_hz": "40",
+            "tactile_duration_ms": "100",
+            "tactile_pulse_duration_ms": "1",
+            "tactile_amplitude": "0.4",
+        }
+    )
+    with block_csv.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    package = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+        use_block_cache=False,
+    )
+
+    block_audio, rate = sf.read(package.blocks[0].wav_path, always_2d=True)
+    assert rate == sample_rate
+    assert block_audio.shape[1] == 3
+    drive_start = int(round((nominal_onset_s - 0.023) * sample_rate))
+    tactile = block_audio[drive_start : drive_start + int(round(0.105 * sample_rate)), 2]
+    active = np.flatnonzero(np.abs(tactile) > 0.1)
+    groups = np.split(active, np.flatnonzero(np.diff(active) > 1) + 1)
+    assert len(groups) == 5
+    assert all(len(group) == pytest.approx(int(round(0.001 * sample_rate)), abs=2) for group in groups)
+    first_pulse = tactile[groups[0]]
+    assert first_pulse.max() == pytest.approx(0.4, abs=0.02)
+    assert first_pulse.min() == pytest.approx(-0.4, abs=0.02)
+
+    with package.blocks[0].manifest_path.open(newline="", encoding="utf-8") as handle:
+        prepared_rows = list(csv.DictReader(handle))
+    prepared = prepared_rows[0]
+    assert prepared["Tactile_Waveform_Shape"] == "biphasic_square_pulse_train"
+    assert float(prepared["Tactile_Frequency_Hz"]) == pytest.approx(40.0)
+    assert float(prepared["Tactile_Duration_ms"]) == pytest.approx(100.0)
+    assert float(prepared["Tactile_Pulse_Duration_ms"]) == pytest.approx(1.0)
+    assert prepared["Tactile_Waveform_Generated"] == "true"
 
 
 def test_prepare_segment_run_package_reports_progress_and_reuses_block_cache(tmp_path: Path):
@@ -1088,6 +1271,8 @@ def test_participant_trial_csv_writer_classifies_hit_miss_for_tactile_and_catch(
             "respiratory_phase": "Inhale",
             "soa_ms": "300",
             "noise_type": "pink",
+            "sequence_labels": "Inhale | Pink moving sound - receding",
+            "sequence_variant_key": "inhale_pink_moving_sound_receding",
         }
         writer.observe_event({"event_id": event_id, "event_type": "trial_start", "unix_time": start_unix, **base})
         event_id += 1
@@ -1158,6 +1343,60 @@ def test_participant_trial_csv_writer_classifies_hit_miss_for_tactile_and_catch(
     assert rows[1]["catch_trial"] == "true"
     assert rows[2]["response_given"] == "true"
     assert rows[3]["stimulus_modality"] == "tactile"
+    assert rows[0]["sequence_labels"] == "Inhale | Pink moving sound - receding"
+    assert rows[0]["sequence_variant_key"] == "inhale_pink_moving_sound_receding"
+
+
+def test_participant_trial_csv_writer_scores_auditory_only_response_trial(tmp_path: Path):
+    package = SimpleNamespace(participant_id="P001", session_id="P001_20260102_030405", session_dir=tmp_path / "P001_20260102_030405")
+    writer = ParticipantTrialCsvWriter(
+        package.session_dir / f"{package.session_id}_trials.csv",
+        package=package,
+    )
+    base = {
+        "participant_id": "P001",
+        "session_id": package.session_id,
+        "block_number": 1,
+        "block_label": "Block 01",
+        "trial_number": 1,
+        "trial_uid": "T001",
+        "trial_type": "Auditory-Only",
+        "family": "auditory_only",
+        "row_label": "Left auditory target",
+        "soa_ms": "0",
+        "noise_type": "pink",
+        "expected_response": "respond",
+        "response_rule": "respond_to_auditory_target",
+        "target_role": "auditory_target",
+    }
+
+    writer.observe_event({"event_id": 1, "event_type": "trial_start", "unix_time": 100.0, **base})
+    writer.observe_event({"event_id": 2, "event_type": "looming_onset", "unix_time": 101.0, **base})
+    writer.observe_event({"event_id": 3, "event_type": "response_window_onset", "unix_time": 101.0, **base})
+    writer.observe_event(
+        {
+            "event_id": 4,
+            "event_type": "mouse_click",
+            "unix_time": 101.25,
+            "block_number": 1,
+            "in_target": True,
+            "during_playback": True,
+        }
+    )
+    writer.observe_event({"event_id": 5, "event_type": "trial_end", "unix_time": 106.0, **base})
+
+    rows = list(csv.DictReader(writer.path.open(encoding="utf-8")))
+    assert len(rows) == 1
+    row = rows[0]
+    assert row["trial_type"] == "Auditory-Only"
+    assert row["family"] == "auditory_only"
+    assert row["stimulus_modality"] == "audio"
+    assert row["tactile_present"] == "false"
+    assert row["catch_trial"] == "false"
+    assert row["audio_present"] == "true"
+    assert row["expected_response"] == "respond"
+    assert row["outcome"] == "Hit"
+    assert row["rt_ms"] == "250.000"
 
 
 def test_participant_trial_csv_rewrite_uses_tactile_window_after_trial_end(tmp_path: Path):
@@ -1180,6 +1419,8 @@ def test_participant_trial_csv_rewrite_uses_tactile_window_after_trial_end(tmp_p
         "respiratory_phase": "Inhale",
         "soa_ms": "300",
         "noise_type": "pink",
+        "sequence_labels": "Inhale | Pink moving sound - receding",
+        "sequence_variant_key": "inhale_pink_moving_sound_receding",
     }
     events = [
         {"event_id": 1, "event_type": "trial_start", "unix_time": 100.0, **base},
@@ -1197,6 +1438,8 @@ def test_participant_trial_csv_rewrite_uses_tactile_window_after_trial_end(tmp_p
     assert rows[0]["rt_ms"] == "1000.000"
     assert rows[0]["response_event_id"] == "6"
     assert rows[0]["correctness_rule"] == "response within 100-1300 ms after tactile onset"
+    assert rows[0]["sequence_labels"] == "Inhale | Pink moving sound - receding"
+    assert rows[0]["sequence_variant_key"] == "inhale_pink_moving_sound_receding"
 
 
 def test_data_min_export_keeps_original_and_real_topup_trials_only(tmp_path: Path):
@@ -1207,6 +1450,7 @@ def test_data_min_export_keeps_original_and_real_topup_trials_only(tmp_path: Pat
             "session_id": "P001_20260102_030405",
             "part_session_id": "P001_20260102_030405_part01",
             "part_number": "1",
+            "part_label": "Pre",
             "condition": "near",
             "block_number": "1",
             "block_label": "Block 01",
@@ -1229,6 +1473,7 @@ def test_data_min_export_keeps_original_and_real_topup_trials_only(tmp_path: Pat
             "session_id": "P001_20260102_030405",
             "part_session_id": "P001_20260102_030405_part01",
             "part_number": "1",
+            "part_label": "Pre",
             "condition": "near",
             "block_number": "2",
             "block_label": "Top-up",
@@ -1252,6 +1497,7 @@ def test_data_min_export_keeps_original_and_real_topup_trials_only(tmp_path: Pat
             "session_id": "P001_20260102_030405",
             "part_session_id": "P001_20260102_030405_part01",
             "part_number": "1",
+            "part_label": "Pre",
             "condition": "near",
             "block_number": "2",
             "block_label": "Top-up",
@@ -1281,6 +1527,7 @@ def test_data_min_export_keeps_original_and_real_topup_trials_only(tmp_path: Pat
     assert list(data_min_rows[0].keys()) == session_runner_module.DATA_MIN_FIELDNAMES
     assert len(data_min_rows) == 2
     assert [row["trial_uid"] for row in data_min_rows] == ["P001-B01-T001", "P001-B02-T001"]
+    assert [row["part_label"] for row in data_min_rows] == ["Pre", "Pre"]
     assert [row["trial_number_global"] for row in data_min_rows] == ["1", "2"]
     assert [row["hit_miss"] for row in data_min_rows] == ["Miss", "Hit"]
     assert [row["reaction_time_ms"] for row in data_min_rows] == ["", "420.000"]
@@ -1620,7 +1867,8 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     assert initial_status["next_part_number"] == 1
     assert "Part 1 ready" in initial_status["part_inventory"]
 
-    controller1 = SessionRunnerController(part1, audio_engine=_MockAudioEngine())
+    part_labels = {"1": "Pre", "2": "Post"}
+    controller1 = SessionRunnerController(part1, audio_engine=_MockAudioEngine(), runner_metadata={"part_labels": part_labels})
     result1 = controller1.run()
 
     assert result1.completed
@@ -1636,6 +1884,8 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     assert completion_status["session_group_id"] == part1.session_group_id
     assert completion_status["part_session_id"] == part1.part_session_id
     assert completion_status["part_number"] == 1
+    assert completion_status["part_label"] == "Pre"
+    assert completion_status["part_labels_by_part_number"] == part_labels
 
     with result1.events_csv.open(newline="", encoding="utf-8") as handle:
         event_rows = list(csv.DictReader(handle))
@@ -1646,6 +1896,7 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     assert part_start["session_group_id"] == part1.session_group_id
     assert part_start["part_session_id"] == part1.part_session_id
     assert part_start["part_number"] == 1
+    assert part_start["part_label"] == "Pre"
 
     with result1.lsl_markers_csv.open(newline="", encoding="utf-8") as handle:
         marker_rows = list(csv.DictReader(handle))
@@ -1653,18 +1904,25 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     assert marker_rows[0]["session_group_id"] == part1.session_group_id
     assert marker_rows[0]["part_session_id"] == part1.part_session_id
     assert marker_rows[0]["part_number"] == "1"
+    assert marker_rows[0]["part_label"] == "Pre"
+    marker_payload = json.loads(marker_rows[0]["payload_json"])
+    assert marker_payload["part_label"] == "Pre"
 
     trigger_dictionary = json.loads(result1.trigger_dictionary_path.read_text(encoding="utf-8"))
     assert trigger_dictionary["session_group_id"] == part1.session_group_id
     assert trigger_dictionary["part_session_id"] == part1.part_session_id
     assert trigger_dictionary["part_number"] == 1
+    assert trigger_dictionary["part_label"] == "Pre"
     session_metadata = json.loads(result1.session_metadata_path.read_text(encoding="utf-8"))
     assert session_metadata["session_group_id"] == part1.session_group_id
     assert session_metadata["part_session_id"] == part1.part_session_id
     assert session_metadata["part_number"] == 1
+    assert session_metadata["part_label"] == "Pre"
+    assert session_metadata["part_labels_by_part_number"] == part_labels
     participant_rows = list(csv.DictReader(result1.analysis_outputs["participant_trials"].open(encoding="utf-8")))
     assert participant_rows[0]["session_group_id"] == part1.session_group_id
     assert participant_rows[0]["part_session_id"] == part1.part_session_id
+    assert participant_rows[0]["part_label"] == "Pre"
     assert not output_data_min_participant_csv(session_root, "P001").exists()
     data_max_part1 = output_data_max_participant_dir(session_root, "P001") / "sessions" / part1.session_group_id / "part_01"
     assert data_max_part1.joinpath(f"{part1.session_id}_trials.csv").exists()
@@ -1691,7 +1949,7 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     )
     assert claim_prepared_session(run_manifest, "P001", state_root=state_root, session_root=session_root) == part2.manifest_path.resolve()
 
-    controller2 = SessionRunnerController(part2, audio_engine=_MockAudioEngine())
+    controller2 = SessionRunnerController(part2, audio_engine=_MockAudioEngine(), runner_metadata={"part_labels": part_labels})
     result2 = controller2.run()
     assert result2.completed
     assert result2.analysis_outputs["analysis_catalog"].exists()
@@ -1710,6 +1968,9 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     assert part_numbers[:first_part2_index] == ["1"] * first_part2_index
     assert part_numbers[first_part2_index:] == ["2"] * (len(part_numbers) - first_part2_index)
     assert {row["part_session_id"] for row in data_min_rows} == {part1.part_session_id, part2.part_session_id}
+    assert {row["part_label"] for row in data_min_rows} == {"Pre", "Post"}
+    assert all(row["part_label"] == "Pre" for row in data_min_rows[:first_part2_index])
+    assert all(row["part_label"] == "Post" for row in data_min_rows[first_part2_index:])
     assert [row["trial_number_global"] for row in data_min_rows] == [str(index) for index in range(1, len(data_min_rows) + 1)]
     assert output_data_min_master_csv(session_root).exists()
     data_max_part2 = output_data_max_participant_dir(session_root, "P001") / "sessions" / part2.session_group_id / "part_02"

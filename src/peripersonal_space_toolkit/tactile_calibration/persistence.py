@@ -79,6 +79,12 @@ def _latest_payload(report: dict[str, Any], *, report_path: Path, trials_path: P
         "detection_threshold_output_34_percent": threshold_percent,
         "recommended_output_34_percent": recommended_percent,
         "confirmation_level_output_34_percent": report.get("confirmation_level_output_34_percent", threshold_percent),
+        "max_output_34_percent": report.get("max_output_34_percent", ""),
+        "initial_software_ceiling_output_34_percent": report.get("initial_software_ceiling_output_34_percent", ""),
+        "final_software_ceiling_output_34_percent": report.get("final_software_ceiling_output_34_percent", report.get("max_output_34_percent", "")),
+        "hard_output_34_guard_percent": report.get("hard_output_34_guard_percent", ""),
+        "dynamic_ceiling_expansions": list(report.get("dynamic_ceiling_expansions") or []),
+        "dynamic_ceiling_expansion_count": report.get("dynamic_ceiling_expansion_count", ""),
         "staircase_target_detection_rate": staircase_summary.get(
             "target_detection_rate",
             dict(report.get("adaptive_staircase") or {}).get("target_detection_rate", ""),
