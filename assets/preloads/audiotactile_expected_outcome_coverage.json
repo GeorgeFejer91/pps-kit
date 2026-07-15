@@ -19,8 +19,8 @@
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
-      "not_yet_templated_missing_publication_parameters": 21,
-      "not_yet_templated_requires_toolkit_structure": 29,
+      "not_yet_templated_missing_publication_parameters": 22,
+      "not_yet_templated_requires_toolkit_structure": 28,
       "ready_profile_needs_behavioral_or_synthetic_outcome_comparison": 12,
       "template_present_blocked_missing_publication_parameters": 8
     }
@@ -1757,7 +1757,7 @@
       "record_id": "taffou_2021_auditory_roughness",
       "citation_short": "Taffou et al. (2021)",
       "doi": "10.1038/s41598-020-79767-0",
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "runnable_status": "not_yet_templated",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -1777,7 +1777,7 @@
         "paper_audit_pdf_status": "downloaded",
         "paper_audit_supplement_status": "downloaded",
         "paper_audit_extraction_status": "parsed_with_warnings",
-        "paper_audit_metadata_confidence_label": "partial_extraction",
+        "paper_audit_metadata_confidence_label": "publisher_html_methods_review",
         "paper_audit_visualization_status": "source_mined",
         "paper_audit_visualization_candidate_count": "7",
         "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
@@ -1785,7 +1785,7 @@
         "manual_review_profile_recreation_assessment": "possible_with_caveats_rear_left_binaural_roughness_looming_profile"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_requires_toolkit_structure",
+      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Create a profile template or add the missing toolkit structure before attempting observed-vs-expected evaluation."
     },

@@ -48,8 +48,8 @@ def test_paper_audit_package_summarizes_core_pipeline_without_source_artifacts()
     assert summary["record_count"] == 74
     assert summary["category_counts"]["covered_runnable_profile"] == 12
     assert len(summary["runnable_profile_records"]) == 12
-    assert len(summary["missing_parameter_records"]) == 29
-    assert len(summary["toolkit_structure_gap_records"]) == 29
+    assert len(summary["missing_parameter_records"]) == 30
+    assert len(summary["toolkit_structure_gap_records"]) == 28
     assert len(summary["adjacent_out_of_scope_records"]) == 4
     assert blockers
     assert summary["blocker_counts"] == blockers
@@ -187,6 +187,7 @@ def test_paper_metadata_schema_and_status_values_are_valid():
                     "source_acquired_unreviewed",
                     "partial_extraction",
                     "high_confidence_extraction",
+                    "publisher_html_methods_review",
                 }
                 assert record["automated_evidence_mining"]["status"] in {"source_mined", "no_extracted_source"}
                 assert record["pps_visualization_audit"]["status"] in {

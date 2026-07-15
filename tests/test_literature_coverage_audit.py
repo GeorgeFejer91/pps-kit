@@ -37,8 +37,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_runnable_profile": 12,
         "covered_blocked_missing_publication_parameters": 8,
         "covered_blocked_toolkit_structure": 0,
-        "not_yet_templated_requires_toolkit_structure": 29,
-        "not_yet_templated_missing_publication_parameters": 21,
+        "not_yet_templated_requires_toolkit_structure": 28,
+        "not_yet_templated_missing_publication_parameters": 22,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
@@ -288,8 +288,16 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["interoception_exteroception_2025"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert records["amiel_2025_front_rear"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert records["body_image_social_cognition_2024"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["taffou_2021_auditory_roughness"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert "rear_hemifield_trajectory_families" in records["taffou_2021_auditory_roughness"]["blocking_constraint_ids"]
+    assert records["taffou_2021_auditory_roughness"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["taffou_2021_auditory_roughness"]["blocking_constraint_ids"] == [
+        "hrtf_database_or_binaural_engine_mismatch",
+        "exact_audio_envelope_or_gain_files",
+    ]
+    assert records["taffou_2021_auditory_roughness"]["missing_publication_parameters"] == [
+        "exact rough/non-rough harmonic source WAVs or fully specified harmonic amplitudes, modulation depth, and phase/envelope settings",
+        "Max/MSP Spat LISTEN HRTF subject/filter, near-field compensation, and renderer settings for the rear-left trajectory",
+        "exact SPL/gain transfer for the reported 76.5/77.3 dBA source levels",
+    ]
     assert records["looming_duration_2025"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
     assert "tactile_waveform_frequency_profile" in records["looming_duration_2025"]["blocking_constraint_ids"]
     assert records["lamia_2026_arm_movement"]["can_recreate_audiotactile_components_now"] is True

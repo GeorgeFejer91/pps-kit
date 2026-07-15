@@ -29,8 +29,9 @@
   },
   "metadata_confidence_label_counts": {
     "not_applicable": 4,
-    "partial_extraction": 28,
+    "partial_extraction": 27,
     "pending_source": 13,
+    "publisher_html_methods_review": 1,
     "source_unavailable": 29
   },
   "automated_evidence_status_counts": {

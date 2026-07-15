@@ -149,8 +149,8 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 4,
-            "not_yet_templated_missing_publication_parameters": 21,
-            "not_yet_templated_requires_toolkit_structure": 29,
+            "not_yet_templated_missing_publication_parameters": 22,
+            "not_yet_templated_requires_toolkit_structure": 28,
             "ready_profile_needs_behavioral_or_synthetic_outcome_comparison": 12,
             "template_present_blocked_missing_publication_parameters": 8,
         },

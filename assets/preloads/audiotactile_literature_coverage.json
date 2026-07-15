@@ -126,8 +126,8 @@
       "covered_runnable_profile": 12,
       "covered_blocked_missing_publication_parameters": 8,
       "covered_blocked_toolkit_structure": 0,
-      "not_yet_templated_requires_toolkit_structure": 29,
-      "not_yet_templated_missing_publication_parameters": 21,
+      "not_yet_templated_requires_toolkit_structure": 28,
+      "not_yet_templated_missing_publication_parameters": 22,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
@@ -397,10 +397,10 @@
     {
       "id": "rear_hemifield_trajectory_families",
       "dimension": "spatial_trajectory_coordinate_frame_or_apparatus_geometry",
-      "description": "Rear-left and rear-right trajectories are distinct task families rather than one mirrored direction parameter; current preload assets can expand them when the paper reports enough coordinates and timings.",
-      "toolkit_status": "modeled_for_current_profile_assets_but_still_audit_constraint_for_untemplated_records",
+      "description": "Rear-left and rear-right trajectories are distinct task families rather than one mirrored direction parameter. Current preload assets can expand them when the paper reports enough coordinates and timings; otherwise rear/front body-relative mapping remains a structural blocker.",
+      "toolkit_status": "partially_modeled_reported_coordinates_supported",
       "example_records": [
-        "taffou_2021_auditory_roughness"
+        "amiel_2025_front_rear"
       ]
     },
     {
@@ -1608,19 +1608,21 @@
       "doi": "10.1038/s41598-020-79767-0",
       "source_basis": [
         "openalex_audiotactile_pps_2026_06_13",
-        "pubmed_query_variant_exhaustiveness_2026_06_13"
+        "pubmed_query_variant_exhaustiveness_2026_06_13",
+        "publisher_html_methods_review_2026_07_15"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "rear-hemifield looming rough/non-rough sound with speeded tactile detection",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "rear_hemifield_trajectory_families",
         "hrtf_database_or_binaural_engine_mismatch",
         "exact_audio_envelope_or_gain_files"
       ],
       "missing_publication_parameters": [
-        "extract exact rough/non-rough sound synthesis, binaural rendering filters, rear trajectory implementation, and tactile/response timing before templating"
+        "exact rough/non-rough harmonic source WAVs or fully specified harmonic amplitudes, modulation depth, and phase/envelope settings",
+        "Max/MSP Spat LISTEN HRTF subject/filter, near-field compensation, and renderer settings for the rear-left trajectory",
+        "exact SPL/gain transfer for the reported 76.5/77.3 dBA source levels"
       ]
     },
     {
