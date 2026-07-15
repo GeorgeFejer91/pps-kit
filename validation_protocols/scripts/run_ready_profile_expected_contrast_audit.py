@@ -123,7 +123,8 @@ def run_audit(
             "model_id": MODEL_ID,
             "model_role": (
                 "contrast metadata readiness audit plus deterministic DynaSpace "
-                "looming-vs-fixed and Serino peri-trunk near-vs-far RT comparisons"
+                "looming-vs-fixed, Serino peri-trunk near-vs-far, and Matsuda "
+                "four-direction approaching-vs-receding RT comparisons"
             ),
             "assumption_boundary": EVIDENCE_BOUNDARY,
         },
@@ -199,6 +200,20 @@ def _audit_record(
             "required_next_step": (
                 "Replace deterministic synthetic RTs with collected participant data before making a scientific "
                 "peri-trunk PPS replication claim."
+            ),
+        }
+    if not missing and record_id == "matsuda_2021_four_directions":
+        comparison = _compare_matsuda_four_direction(record, profile_rows, output_dir=output_dir)
+        return {
+            **base,
+            "status": "synthetic_behavioral_comparison_passed"
+            if comparison.get("pass")
+            else "synthetic_behavioral_comparison_failed",
+            "missing_contrasts": [],
+            "synthetic_comparison": comparison,
+            "required_next_step": (
+                "Replace deterministic synthetic RTs with collected participant data before making a scientific "
+                "four-direction PPS replication claim."
             ),
         }
     if not missing:
@@ -372,6 +387,100 @@ def _serino_motion_direction(row: dict[str, Any]) -> str:
         for key in ("sequence_labels", "sequence_variant_key", "row_label", "respiratory_phase")
     ).lower()
     return "receding" if "reced" in text else "looming"
+
+
+def _compare_matsuda_four_direction(
+    record: dict[str, Any],
+    profile_rows: list[dict[str, Any]],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    rows = [
+        row
+        for profile in profile_rows
+        for row in profile["rows"]
+        if str(row.get("family") or "").strip().lower() == "audio_tactile"
+    ]
+    soas = sorted({_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))})
+    soa_min = min(soas) if soas else math.nan
+    soa_max = max(soas) if soas else math.nan
+    synthetic_rows: list[dict[str, Any]] = []
+    body_directions: set[str] = set()
+    for row in rows:
+        soa_ms = _as_float(row.get("soa_ms"))
+        if not math.isfinite(soa_ms) or not math.isfinite(soa_min) or not math.isfinite(soa_max) or soa_max <= soa_min:
+            continue
+        body_direction = _body_relative_direction(row)
+        if body_direction:
+            body_directions.add(body_direction)
+        motion = _approach_recede_direction(row)
+        proximity = (soa_ms - soa_min) / (soa_max - soa_min)
+        if motion == "receding":
+            proximity = 1.0 - proximity
+        distance_bin = "near" if proximity >= 0.8 else "far" if proximity <= 0.2 else "middle"
+        if motion == "approaching":
+            rt_ms = 530.0 - (42.0 * proximity)
+        else:
+            rt_ms = 515.0
+        out = dict(row)
+        out["synthetic_condition"] = f"{motion}_{distance_bin}"
+        out["synthetic_motion_direction"] = motion
+        out["synthetic_body_direction"] = body_direction
+        out["synthetic_proximity_rank"] = f"{proximity:.6f}"
+        out["hit"] = "True"
+        out["original_hit"] = "True"
+        out["rt_ms"] = f"{rt_ms:.3f}"
+        out["synthetic_model_id"] = MODEL_ID
+        synthetic_rows.append(out)
+    path = output_dir / "synthetic_behavior" / "matsuda_2021_four_directions_synthetic_analysis_ready_trials.csv"
+    _write_rows(path, synthetic_rows)
+    means = _mean_rt_by_condition(synthetic_rows)
+    approaching_delta = means.get("approaching_far", math.nan) - means.get("approaching_near", math.nan)
+    receding_delta = means.get("receding_far", math.nan) - means.get("receding_near", math.nan)
+    all_directions = {"front", "rear", "left", "right"}.issubset(body_directions)
+    observed_direction = (
+        "approaching_sounds_show_pps_facilitation_across_four_directions"
+        if math.isfinite(approaching_delta)
+        and approaching_delta > 0.0
+        and (not math.isfinite(receding_delta) or abs(receding_delta) < 5.0)
+        and all_directions
+        else "approaching_sounds_do_not_show_direction_general_pps_facilitation"
+    )
+    expected_direction = str((record.get("expected_outcome") or {}).get("expected_effect_direction") or "")
+    return {
+        "model_id": MODEL_ID,
+        "synthetic_rows_csv": str(path),
+        "synthetic_row_count": len(synthetic_rows),
+        "condition_mean_rt_ms": means,
+        "approaching_far_minus_near_ms": approaching_delta if math.isfinite(approaching_delta) else None,
+        "receding_far_minus_near_ms": receding_delta if math.isfinite(receding_delta) else None,
+        "body_directions_observed": sorted(body_directions),
+        "observed_effect_direction": observed_direction,
+        "expected_effect_direction": expected_direction,
+        "criterion": (
+            "approaching far_mean_rt_ms - near_mean_rt_ms >= 20, receding near/far difference < 5 ms, "
+            "all four body-relative directions present, and observed direction equals expected direction"
+        ),
+        "pass": observed_direction == expected_direction
+        and math.isfinite(approaching_delta)
+        and approaching_delta >= 20.0,
+    }
+
+
+def _approach_recede_direction(row: dict[str, Any]) -> str:
+    text = " ".join(
+        str(row.get(key) or "")
+        for key in ("sequence_labels", "sequence_variant_key", "row_label", "respiratory_phase")
+    ).lower()
+    return "receding" if "reced" in text else "approaching"
+
+
+def _body_relative_direction(row: dict[str, Any]) -> str:
+    text = " ".join(str(row.get(key) or "") for key in ("block_label", "condition", "row_label")).lower()
+    for direction in ("front", "rear", "left", "right"):
+        if direction in text:
+            return direction
+    return ""
 
 
 def _has_dynaspace_looming_and_fixed(rows: list[dict[str, Any]]) -> bool:

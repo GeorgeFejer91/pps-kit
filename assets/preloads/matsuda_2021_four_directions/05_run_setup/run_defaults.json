@@ -5,5 +5,39 @@
   "participants": 20,
   "random_seed": 20210501,
   "trial_randomization_strategy": "no_immediate_repeats",
-  "block_order_randomization": "counterbalanced_rotation"
+  "block_order_randomization": "counterbalanced_rotation",
+  "block_specs": [
+    {
+      "label": "Front direction",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Rear direction",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Left direction",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Right direction",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    }
+  ]
 }

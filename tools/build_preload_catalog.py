@@ -19,7 +19,7 @@ import argparse
 import json
 import math
 import shutil
-from dataclasses import replace
+from dataclasses import asdict, replace
 from pathlib import Path
 from typing import Any
 
@@ -626,6 +626,8 @@ def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Pa
         "trial_randomization_strategy": protocol.trial_randomization_strategy,
         "block_order_randomization": protocol.block_order_randomization,
     }
+    if protocol.block_specs:
+        run_setup_defaults["block_specs"] = [asdict(block) for block in protocol.block_specs]
     dashboard_run_setup = template.reference_parameters.get("dashboard_run_setup")
     if isinstance(dashboard_run_setup, dict):
         if "experiment_structure" in dashboard_run_setup:

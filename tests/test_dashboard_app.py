@@ -2960,6 +2960,10 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     assert {"trial_pool_index", "trial_file_path", "configured_repetitions", "duration_ms"} <= set(pool_rows[0])
 
     custom["design"]["protocol"]["blocks"] = 2
+    custom["design"]["protocol"]["block_specs"] = [
+        {"label": "Front direction", "stimulus_types": ["Audio-Tactile", "Baseline", "Catch"]},
+        {"label": "Rear direction", "stimulus_types": ["Audio-Tactile", "Baseline", "Catch"]},
+    ]
     block_job = client.post(
         "/api/stimulus/bake",
         json={
@@ -2984,10 +2988,12 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     assert block_manifest["max_consecutive_same_feature"] == 2
     assert block_manifest["source_segment4_manifest_sha256"] == dashboard_app._local_file_sha256(Path(pool_done["result"]["manifest_path"]))
     assert len(block_manifest["blocks"]) == 2
+    assert [block["block_label"] for block in block_manifest["blocks"]] == ["Front direction", "Rear direction"]
     block_counts = [block["trial_count"] for block in block_manifest["blocks"]]
     assert max(block_counts) - min(block_counts) <= 1
     assert sum(block_counts) == 13
     block_rows = list(csv.DictReader(Path(block_manifest["blocks"][0]["csv_path"]).open(encoding="utf-8")))
+    assert {row["block_label"] for row in block_rows} == {"Front direction"}
     assert {
         "family_color_hex",
         "row_color_hex",

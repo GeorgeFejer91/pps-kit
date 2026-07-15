@@ -5,5 +5,14 @@
   "participants": 20,
   "random_seed": 20251001,
   "trial_randomization_strategy": "balanced_shuffle",
-  "block_order_randomization": "fixed"
+  "block_order_randomization": "fixed",
+  "block_specs": [
+    {
+      "label": "DynaSpace recorded 72-trial block",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Catch"
+      ]
+    }
+  ]
 }

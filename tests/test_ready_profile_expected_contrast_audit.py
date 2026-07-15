@@ -37,6 +37,7 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     audit = _load_script()
     rows_path = tmp_path / "roussel_analysis_ready_trials.csv"
     serino_rows_path = tmp_path / "serino_analysis_ready_trials.csv"
+    matsuda_rows_path = tmp_path / "matsuda_analysis_ready_trials.csv"
     _write_csv(
         rows_path,
         [
@@ -91,6 +92,22 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
             },
         ],
     )
+    matsuda_rows: list[dict[str, str]] = []
+    for block_label in ("Front direction", "Rear direction", "Left direction", "Right direction"):
+        for sequence_label in ("Pink moving sound", "Pink moving sound - receding"):
+            for soa_ms in ("300", "2700"):
+                matsuda_rows.append(
+                    {
+                        "block_label": block_label,
+                        "row_label": "Sound-motion PPS trial",
+                        "respiratory_phase": "Sound-motion PPS trial",
+                        "sequence_labels": sequence_label,
+                        "sequence_variant_key": sequence_label.lower().replace(" - ", "_").replace(" ", "_"),
+                        "family": "audio_tactile",
+                        "soa_ms": soa_ms,
+                    }
+                )
+    _write_csv(matsuda_rows_path, matsuda_rows)
     smoke_path = tmp_path / "runner_smoke.json"
     smoke_path.write_text(
         json.dumps(
@@ -107,6 +124,10 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                     {
                         "template_id": "serino_2015_peri_trunk_exp1",
                         "outputs": {"analysis_ready_trials": str(serino_rows_path)},
+                    },
+                    {
+                        "template_id": "matsuda_2021_four_directions",
+                        "outputs": {"analysis_ready_trials": str(matsuda_rows_path)},
                     },
                 ]
             }
@@ -143,6 +164,17 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
                             "expected_effect_direction": "near_or_approaching_trunk_sounds_speed_tactile_rt"
                         },
                     },
+                    {
+                        "record_id": "matsuda_2021_four_directions",
+                        "citation_short": "Matsuda 2021",
+                        "observed_comparison_gap": audit.READY_GAP,
+                        "current_template_ids": ["matsuda_2021_four_directions"],
+                        "expected_outcome": {
+                            "expected_effect_direction": (
+                                "approaching_sounds_show_pps_facilitation_across_four_directions"
+                            )
+                        },
+                    },
                 ]
             }
         ),
@@ -158,9 +190,9 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert report["schema"] == audit.SCHEMA
     assert report["passed"]
     assert report["summary"] == {
-        "ready_profile_record_count": 3,
-        "synthetic_comparison_record_count": 2,
-        "synthetic_comparison_passed_count": 2,
+        "ready_profile_record_count": 4,
+        "synthetic_comparison_record_count": 3,
+        "synthetic_comparison_passed_count": 3,
         "synthetic_comparison_failed_count": 0,
         "contrast_metadata_blocked_record_count": 1,
         "contrast_metadata_present_model_missing_record_count": 0,
@@ -182,4 +214,13 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert serino["synthetic_comparison"]["far_minus_near_ms"] == 45.0
     assert serino["synthetic_comparison"]["observed_effect_direction"] == (
         "near_or_approaching_trunk_sounds_speed_tactile_rt"
+    )
+
+    matsuda = by_id["matsuda_2021_four_directions"]
+    assert matsuda["status"] == "synthetic_behavioral_comparison_passed"
+    assert matsuda["missing_contrasts"] == []
+    assert matsuda["synthetic_comparison"]["approaching_far_minus_near_ms"] == 42.0
+    assert matsuda["synthetic_comparison"]["body_directions_observed"] == ["front", "left", "rear", "right"]
+    assert matsuda["synthetic_comparison"]["observed_effect_direction"] == (
+        "approaching_sounds_show_pps_facilitation_across_four_directions"
     )

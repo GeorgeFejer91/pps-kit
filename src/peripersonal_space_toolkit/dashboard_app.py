@@ -6566,6 +6566,8 @@ def _bake_block_csv_preview(
 
     row_order = _block_csv_row_order(pool_rows)
     blocks = _assign_trial_pool_rows_to_blocks(pool_rows, block_count, seed=seed)
+    explicit_block_specs = list(getattr(design.protocol, "block_specs", []) or [])
+    block_spec_labels = [str(block.label or "").strip() for block in explicit_block_specs]
     fieldnames = [
         "block_index",
         "block_label",
@@ -6601,7 +6603,10 @@ def _bake_block_csv_preview(
     block_summaries: list[dict[str, Any]] = []
     total_duration_ms = 0
     for block_index, source_rows in enumerate(blocks, start=1):
-        block_label = f"Block {block_index:02d}"
+        if block_index <= len(block_spec_labels) and block_spec_labels[block_index - 1]:
+            block_label = block_spec_labels[block_index - 1]
+        else:
+            block_label = f"Block {block_index:02d}"
         csv_path = root / f"block_{block_index:02d}.csv"
         rows = [
             _block_csv_row(
