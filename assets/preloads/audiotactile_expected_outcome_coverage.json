@@ -13,7 +13,8 @@
     "adjacent_or_out_of_scope_record_count": 4,
     "runnable_profile_parameter_record_count": 12,
     "observed_behavioral_comparison_record_count": 0,
-    "parameter_run_evidence_only_record_count": 12,
+    "synthetic_profile_contrast_comparison_record_count": 12,
+    "parameter_run_evidence_only_record_count": 0,
     "not_runnable_no_observed_comparison_record_count": 58,
     "adjacent_not_applicable_record_count": 4,
     "pending_expected_outcome_blocker_counts": {},
@@ -21,7 +22,7 @@
       "not_applicable_adjacent_out_of_scope": 4,
       "not_yet_templated_missing_publication_parameters": 22,
       "not_yet_templated_requires_toolkit_structure": 28,
-      "ready_profile_needs_behavioral_or_synthetic_outcome_comparison": 12,
+      "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison": 12,
       "template_present_blocked_missing_publication_parameters": 8
     }
   },
@@ -30,12 +31,12 @@
     "manual_review_index": "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv"
   },
   "current_observed_evidence": {
-    "profile_materialization": "artifacts/validation_runs/current_goal_ready_profiles_protocol12_20260715_after_lerner_unlock/profile_recreation_interface_matrix_report.json",
+    "profile_materialization": "artifacts/validation_runs/current_goal_ready_profile_protocol12_20260715/profile_recreation_interface_matrix_report.json",
     "static_dashboard_parity": "artifacts/validation_runs/current_goal_ready_profiles_static_dashboard_parity_20260715_after_galli_wheelchair_unlock/static_dashboard_preview_parity_audit_report.json",
     "runner_mock": "artifacts/validation_runs/current_goal_one_block_runner_20260714_duration500ms/one_block_trial_runner_report.json",
-    "ready_profile_runner_smoke": "artifacts/validation_runs/current_goal_ready_profiles_runner_smoke_20260715_after_lerner_unlock/ready_profile_runner_smoke_report.json",
-    "ready_profile_response_marker_loopback": "artifacts/validation_runs/current_goal_ready_profiles_response_marker_loopback_20260715_after_lerner_unlock/ready_profile_response_marker_loopback_report.json",
-    "ready_profile_expected_contrast_audit": "artifacts/validation_runs/current_goal_ready_profiles_expected_contrast_audit_20260715_after_lerner_unlock/ready_profile_expected_contrast_audit_report.json",
+    "ready_profile_runner_smoke": "artifacts/validation_runs/current_goal_ready_profile_runner_smoke_20260715/ready_profile_runner_smoke_report.json",
+    "ready_profile_response_marker_loopback": "artifacts/validation_runs/current_goal_ready_profile_response_marker_loopback_20260715/ready_profile_response_marker_loopback_report.json",
+    "ready_profile_expected_contrast_audit": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
     "click_path_mock": "artifacts/validation_runs/current_goal_session_click_path_20260714/session_runner_click_path_report.json",
     "synthetic_response_marker_loopback": "artifacts/validation_runs/current_goal_mock_response_marker_loopback_20260714/comparison/response_marker_loopback_report.json",
     "synthetic_expected_outcome_smoke": "artifacts/validation_runs/current_goal_synthetic_expected_outcome_smoke_20260715_after_lerner_unlock/synthetic_expected_outcome_smoke_report.json"
@@ -413,10 +414,15 @@
         "manual_review_confidence_label": "high_confidence_extraction",
         "manual_review_profile_recreation_assessment": "possible_with_caveats"
       },
-      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_needs_behavioral_or_synthetic_outcome_comparison",
-      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
-      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+      "observed_vs_expected_status": "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison",
+      "observed_evidence_boundary": "The ready-profile contrast audit provides an explicit deterministic synthetic comparison between runner analysis rows and the paper's structured expected effect. This proves comparison wiring and retained contrast metadata only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
+      "required_next_evidence": "Run a participant-like mouse-click simulation through the experiment runner, or collect participant data, before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic synthetic software evidence only.",
+      "observed_profile_contrast_evidence": {
+        "status": "deterministic_synthetic_profile_contrast_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+      }
     },
     {
       "record_id": "canzoneri_2013_tool_use_reshaping",
@@ -757,10 +763,15 @@
         "paper_audit_visualization_status": "source_mined",
         "paper_audit_visualization_candidate_count": "7"
       },
-      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_needs_behavioral_or_synthetic_outcome_comparison",
-      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
-      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+      "observed_vs_expected_status": "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison",
+      "observed_evidence_boundary": "The ready-profile contrast audit provides an explicit deterministic synthetic comparison between runner analysis rows and the paper's structured expected effect. This proves comparison wiring and retained contrast metadata only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
+      "required_next_evidence": "Run a participant-like mouse-click simulation through the experiment runner, or collect participant data, before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic synthetic software evidence only.",
+      "observed_profile_contrast_evidence": {
+        "status": "deterministic_synthetic_profile_contrast_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+      }
     },
     {
       "record_id": "maister_2015_shared_sensory",
@@ -829,10 +840,15 @@
         "manual_review_confidence_label": "high_confidence_extraction",
         "manual_review_profile_recreation_assessment": "possible_with_caveats_front_back_fbi_trunk_profiles"
       },
-      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_needs_behavioral_or_synthetic_outcome_comparison",
-      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
-      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+      "observed_vs_expected_status": "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison",
+      "observed_evidence_boundary": "The ready-profile contrast audit provides an explicit deterministic synthetic comparison between runner analysis rows and the paper's structured expected effect. This proves comparison wiring and retained contrast metadata only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
+      "required_next_evidence": "Run a participant-like mouse-click simulation through the experiment runner, or collect participant data, before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic synthetic software evidence only.",
+      "observed_profile_contrast_evidence": {
+        "status": "deterministic_synthetic_profile_contrast_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+      }
     },
     {
       "record_id": "noel_2015_walking",
@@ -902,10 +918,15 @@
         "manual_review_confidence_label": "high_confidence_extraction",
         "manual_review_profile_recreation_assessment": "possible_with_caveats"
       },
-      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_needs_behavioral_or_synthetic_outcome_comparison",
-      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
-      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+      "observed_vs_expected_status": "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison",
+      "observed_evidence_boundary": "The ready-profile contrast audit provides an explicit deterministic synthetic comparison between runner analysis rows and the paper's structured expected effect. This proves comparison wiring and retained contrast metadata only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
+      "required_next_evidence": "Run a participant-like mouse-click simulation through the experiment runner, or collect participant data, before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic synthetic software evidence only.",
+      "observed_profile_contrast_evidence": {
+        "status": "deterministic_synthetic_profile_contrast_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+      }
     },
     {
       "record_id": "serino_2015_front_back_trunk_exp2",
@@ -940,10 +961,15 @@
         "manual_review_confidence_label": "high_confidence_extraction",
         "manual_review_profile_recreation_assessment": "possible_with_caveats_16_speaker_front_back_trunk_profile"
       },
-      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_needs_behavioral_or_synthetic_outcome_comparison",
-      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
-      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+      "observed_vs_expected_status": "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison",
+      "observed_evidence_boundary": "The ready-profile contrast audit provides an explicit deterministic synthetic comparison between runner analysis rows and the paper's structured expected effect. This proves comparison wiring and retained contrast metadata only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
+      "required_next_evidence": "Run a participant-like mouse-click simulation through the experiment runner, or collect participant data, before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic synthetic software evidence only.",
+      "observed_profile_contrast_evidence": {
+        "status": "deterministic_synthetic_profile_contrast_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+      }
     },
     {
       "record_id": "serino_2015_peri_hand_exp3",
@@ -978,10 +1004,15 @@
         "manual_review_confidence_label": "high_confidence_extraction",
         "manual_review_profile_recreation_assessment": "possible_with_caveats_lateralized_peri_hand_profile"
       },
-      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_needs_behavioral_or_synthetic_outcome_comparison",
-      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
-      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+      "observed_vs_expected_status": "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison",
+      "observed_evidence_boundary": "The ready-profile contrast audit provides an explicit deterministic synthetic comparison between runner analysis rows and the paper's structured expected effect. This proves comparison wiring and retained contrast metadata only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
+      "required_next_evidence": "Run a participant-like mouse-click simulation through the experiment runner, or collect participant data, before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic synthetic software evidence only.",
+      "observed_profile_contrast_evidence": {
+        "status": "deterministic_synthetic_profile_contrast_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+      }
     },
     {
       "record_id": "serino_2015_exps_4_to_6",
@@ -1183,10 +1214,15 @@
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
-      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_needs_behavioral_or_synthetic_outcome_comparison",
-      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
-      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+      "observed_vs_expected_status": "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison",
+      "observed_evidence_boundary": "The ready-profile contrast audit provides an explicit deterministic synthetic comparison between runner analysis rows and the paper's structured expected effect. This proves comparison wiring and retained contrast metadata only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
+      "required_next_evidence": "Run a participant-like mouse-click simulation through the experiment runner, or collect participant data, before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic synthetic software evidence only.",
+      "observed_profile_contrast_evidence": {
+        "status": "deterministic_synthetic_profile_contrast_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+      }
     },
     {
       "record_id": "ieeg_trunk_2018",
@@ -1257,10 +1293,15 @@
         "manual_review_confidence_label": "high_confidence_extraction",
         "manual_review_profile_recreation_assessment": "possible_with_caveats_lateral_head_looming_echolocation_profile"
       },
-      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_needs_behavioral_or_synthetic_outcome_comparison",
-      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
-      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+      "observed_vs_expected_status": "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison",
+      "observed_evidence_boundary": "The ready-profile contrast audit provides an explicit deterministic synthetic comparison between runner analysis rows and the paper's structured expected effect. This proves comparison wiring and retained contrast metadata only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
+      "required_next_evidence": "Run a participant-like mouse-click simulation through the experiment runner, or collect participant data, before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic synthetic software evidence only.",
+      "observed_profile_contrast_evidence": {
+        "status": "deterministic_synthetic_profile_contrast_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+      }
     },
     {
       "record_id": "pregnancy_2019",
@@ -2262,10 +2303,15 @@
         "manual_review_confidence_label": "high_confidence_extraction",
         "manual_review_profile_recreation_assessment": "possible_with_caveats_four_direction_dynamic_trunk_pps_profile"
       },
-      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_needs_behavioral_or_synthetic_outcome_comparison",
-      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
-      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+      "observed_vs_expected_status": "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison",
+      "observed_evidence_boundary": "The ready-profile contrast audit provides an explicit deterministic synthetic comparison between runner analysis rows and the paper's structured expected effect. This proves comparison wiring and retained contrast metadata only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
+      "required_next_evidence": "Run a participant-like mouse-click simulation through the experiment runner, or collect participant data, before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic synthetic software evidence only.",
+      "observed_profile_contrast_evidence": {
+        "status": "deterministic_synthetic_profile_contrast_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+      }
     },
     {
       "record_id": "lerner_2021_3d_boundary",
@@ -2298,10 +2344,15 @@
         "paper_audit_visualization_status": "source_mined",
         "paper_audit_visualization_candidate_count": "5"
       },
-      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_needs_behavioral_or_synthetic_outcome_comparison",
-      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
-      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+      "observed_vs_expected_status": "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison",
+      "observed_evidence_boundary": "The ready-profile contrast audit provides an explicit deterministic synthetic comparison between runner analysis rows and the paper's structured expected effect. This proves comparison wiring and retained contrast metadata only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
+      "required_next_evidence": "Run a participant-like mouse-click simulation through the experiment runner, or collect participant data, before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic synthetic software evidence only.",
+      "observed_profile_contrast_evidence": {
+        "status": "deterministic_synthetic_profile_contrast_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+      }
     },
     {
       "record_id": "lamia_2026_arm_movement",
@@ -2337,10 +2388,15 @@
         "manual_review_confidence_label": "high_confidence_extraction",
         "manual_review_profile_recreation_assessment": "possible_with_caveats_two_experiment_arm_movement_profiles"
       },
-      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_needs_behavioral_or_synthetic_outcome_comparison",
-      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
-      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+      "observed_vs_expected_status": "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison",
+      "observed_evidence_boundary": "The ready-profile contrast audit provides an explicit deterministic synthetic comparison between runner analysis rows and the paper's structured expected effect. This proves comparison wiring and retained contrast metadata only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
+      "required_next_evidence": "Run a participant-like mouse-click simulation through the experiment runner, or collect participant data, before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic synthetic software evidence only.",
+      "observed_profile_contrast_evidence": {
+        "status": "deterministic_synthetic_profile_contrast_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+      }
     },
     {
       "record_id": "smartphone_rt_methods_2025",
@@ -2372,10 +2428,15 @@
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
-      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_needs_behavioral_or_synthetic_outcome_comparison",
-      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant or synthetic behavioral data have been compared with the paper's expected PPS effect.",
-      "required_next_evidence": "Run a profile-specific observed dataset: either collected participant data or an explicit synthetic participant model, then compare the analysis output with the structured expected effect."
+      "observed_vs_expected_status": "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison",
+      "observed_evidence_boundary": "The ready-profile contrast audit provides an explicit deterministic synthetic comparison between runner analysis rows and the paper's structured expected effect. This proves comparison wiring and retained contrast metadata only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
+      "required_next_evidence": "Run a participant-like mouse-click simulation through the experiment runner, or collect participant data, before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic synthetic software evidence only.",
+      "observed_profile_contrast_evidence": {
+        "status": "deterministic_synthetic_profile_contrast_comparison_available",
+        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+      }
     },
     {
       "record_id": "spiousas_2025_auditory_only",

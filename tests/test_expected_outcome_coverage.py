@@ -143,7 +143,8 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "adjacent_or_out_of_scope_record_count": 4,
         "runnable_profile_parameter_record_count": 12,
         "observed_behavioral_comparison_record_count": 0,
-        "parameter_run_evidence_only_record_count": 12,
+        "synthetic_profile_contrast_comparison_record_count": 12,
+        "parameter_run_evidence_only_record_count": 0,
         "not_runnable_no_observed_comparison_record_count": 58,
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {},
@@ -151,7 +152,7 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
             "not_applicable_adjacent_out_of_scope": 4,
             "not_yet_templated_missing_publication_parameters": 22,
             "not_yet_templated_requires_toolkit_structure": 28,
-            "ready_profile_needs_behavioral_or_synthetic_outcome_comparison": 12,
+            "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison": 12,
             "template_present_blocked_missing_publication_parameters": 8,
         },
     }
@@ -168,10 +169,26 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
     for record_id in RUNNABLE_STRUCTURED_IDS:
         record = records[record_id]
         assert record["runnable_status"] == "runnable_profile_parameters_ready"
-        assert record["observed_vs_expected_status"] == "parameter_run_evidence_only_behavioral_effect_unobserved"
-        assert record["observed_comparison_gap"] == (
-            "ready_profile_needs_behavioral_or_synthetic_outcome_comparison"
+        assert record["observed_vs_expected_status"] == (
+            "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved"
         )
+        assert record["observed_comparison_gap"] == (
+            "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison"
+        )
+        assert record["observed_profile_contrast_evidence"] == {
+            "status": "deterministic_synthetic_profile_contrast_comparison_available",
+            "source_report": (
+                "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/"
+                "ready_profile_expected_contrast_audit_report.json"
+            ),
+            "model_boundary": (
+                "Deterministic synthetic RT comparisons over runner rows; not collected participant data, "
+                "not mouse-click-simulated participant-like runner behavior, and not a scientific "
+                "replication claim."
+            ),
+        }
+        assert "deterministic synthetic comparison" in record["observed_evidence_boundary"]
+        assert record["required_next_evidence"].startswith("Run a participant-like mouse-click simulation")
 
     nonrunnable_structured = structured_ids - RUNNABLE_STRUCTURED_IDS
     assert nonrunnable_structured

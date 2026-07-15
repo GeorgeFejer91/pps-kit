@@ -28,6 +28,10 @@ MANUAL_REVIEW_INDEX_PATH = (
 )
 
 SCHEMA = "pps-audiotactile-expected-outcome-coverage.v1"
+READY_PROFILE_SYNTHETIC_COMPARISON_REPORT = (
+    "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/"
+    "ready_profile_expected_contrast_audit_report.json"
+)
 
 
 EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
@@ -1185,6 +1189,9 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
             "adjacent_or_out_of_scope_record_count": expected_counts["adjacent_out_of_scope"],
             "runnable_profile_parameter_record_count": len(runnable_records),
             "observed_behavioral_comparison_record_count": observed_counts["observed_behavioral_comparison_available"],
+            "synthetic_profile_contrast_comparison_record_count": observed_counts[
+                "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved"
+            ],
             "parameter_run_evidence_only_record_count": observed_counts[
                 "parameter_run_evidence_only_behavioral_effect_unobserved"
             ],
@@ -1199,7 +1206,7 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
         },
         "current_observed_evidence": {
             "profile_materialization": (
-                "artifacts/validation_runs/current_goal_ready_profiles_protocol12_20260715_after_lerner_unlock/"
+                "artifacts/validation_runs/current_goal_ready_profile_protocol12_20260715/"
                 "profile_recreation_interface_matrix_report.json"
             ),
             "static_dashboard_parity": (
@@ -1211,17 +1218,14 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
                 "one_block_trial_runner_report.json"
             ),
             "ready_profile_runner_smoke": (
-                "artifacts/validation_runs/current_goal_ready_profiles_runner_smoke_20260715_after_lerner_unlock/"
+                "artifacts/validation_runs/current_goal_ready_profile_runner_smoke_20260715/"
                 "ready_profile_runner_smoke_report.json"
             ),
             "ready_profile_response_marker_loopback": (
-                "artifacts/validation_runs/current_goal_ready_profiles_response_marker_loopback_20260715_after_lerner_unlock/"
+                "artifacts/validation_runs/current_goal_ready_profile_response_marker_loopback_20260715/"
                 "ready_profile_response_marker_loopback_report.json"
             ),
-            "ready_profile_expected_contrast_audit": (
-                "artifacts/validation_runs/current_goal_ready_profiles_expected_contrast_audit_20260715_after_lerner_unlock/"
-                "ready_profile_expected_contrast_audit_report.json"
-            ),
+            "ready_profile_expected_contrast_audit": READY_PROFILE_SYNTHETIC_COMPARISON_REPORT,
             "click_path_mock": (
                 "artifacts/validation_runs/current_goal_session_click_path_20260714/"
                 "session_runner_click_path_report.json"
@@ -1264,7 +1268,7 @@ def build_record(
     observed_gap = _observed_comparison_gap(expected_status, runnable_status, coverage_category)
     extraction_blocker = _expected_outcome_extraction_blocker(expected_status, paper_audit, manual_review)
 
-    return {
+    result = {
         "record_id": record_id,
         "citation_short": str(record.get("citation_short") or ""),
         "doi": str(record.get("doi") or ""),
@@ -1280,6 +1284,10 @@ def build_record(
         "observed_evidence_boundary": _observed_boundary(observed_status),
         "required_next_evidence": _required_next_evidence(expected_status, runnable_status),
     }
+    observed_profile_contrast_evidence = _observed_profile_contrast_evidence(observed_status)
+    if observed_profile_contrast_evidence:
+        result["observed_profile_contrast_evidence"] = observed_profile_contrast_evidence
+    return result
 
 
 def _load_csv_index(path: Path, key: str) -> dict[str, dict[str, str]]:
@@ -1367,6 +1375,8 @@ def _observed_status(expected_status: str, runnable_status: str) -> str:
         return "adjacent_not_applicable"
     if runnable_status != "runnable_profile_parameters_ready":
         return "not_runnable_no_observed_comparison"
+    if expected_status == "structured_expected_outcome_extracted":
+        return "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved"
     return "parameter_run_evidence_only_behavioral_effect_unobserved"
 
 
@@ -1376,7 +1386,7 @@ def _observed_comparison_gap(expected_status: str, runnable_status: str, coverag
     if expected_status != "structured_expected_outcome_extracted":
         return "expected_outcome_extraction_pending"
     if runnable_status == "runnable_profile_parameters_ready":
-        return "ready_profile_needs_behavioral_or_synthetic_outcome_comparison"
+        return "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison"
     if coverage_category == "covered_blocked_missing_publication_parameters":
         return "template_present_blocked_missing_publication_parameters"
     if coverage_category == "covered_blocked_toolkit_structure":
@@ -1389,15 +1399,36 @@ def _observed_comparison_gap(expected_status: str, runnable_status: str, coverag
 
 
 def _observed_boundary(observed_status: str) -> str:
+    if observed_status == "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved":
+        return (
+            "The ready-profile contrast audit provides an explicit deterministic synthetic "
+            "comparison between runner analysis rows and the paper's structured expected "
+            "effect. This proves comparison wiring and retained contrast metadata only; it "
+            "does not prove human behavioral PPS effects or exact original apparatus equivalence."
+        )
     if observed_status == "parameter_run_evidence_only_behavioral_effect_unobserved":
         return (
             "Current evidence can show that the profile can load/materialize/run as software, "
-            "but no profile-specific participant or synthetic behavioral data have been "
-            "compared with the paper's expected PPS effect."
+            "but no profile-specific participant data or mouse-click-simulated participant-like "
+            "runner data have been compared with the paper's expected PPS effect."
         )
     if observed_status == "not_runnable_no_observed_comparison":
         return "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists."
     return "The record is adjacent or out of scope for audiotactile PPS outcome comparison."
+
+
+def _observed_profile_contrast_evidence(observed_status: str) -> dict[str, str]:
+    if observed_status != "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved":
+        return {}
+    return {
+        "status": "deterministic_synthetic_profile_contrast_comparison_available",
+        "source_report": READY_PROFILE_SYNTHETIC_COMPARISON_REPORT,
+        "model_boundary": (
+            "Deterministic synthetic RT comparisons over runner rows; not collected participant data, "
+            "not mouse-click-simulated participant-like runner behavior, and not a scientific "
+            "replication claim."
+        ),
+    }
 
 
 def _required_next_evidence(expected_status: str, runnable_status: str) -> str:
@@ -1416,8 +1447,9 @@ def _required_next_evidence(expected_status: str, runnable_status: str) -> str:
     if runnable_status != "runnable_profile_parameters_ready":
         return "Resolve profile blockers before attempting observed-vs-expected evaluation."
     return (
-        "Run a profile-specific observed dataset: either collected participant data or an explicit "
-        "synthetic participant model, then compare the analysis output with the structured expected effect."
+        "Run a participant-like mouse-click simulation through the experiment runner, or collect "
+        "participant data, before making a scientific PPS-effect replication claim; the current "
+        "ready-profile comparison is deterministic synthetic software evidence only."
     )
 
 
