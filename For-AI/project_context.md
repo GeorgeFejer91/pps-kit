@@ -4,6 +4,8 @@
 
 The toolkit should make audio-tactile PPS experiments reusable, reproducible, and publishable. The near-term aim is a ready-to-use Windows app for Study 5 and closely related audio-tactile PPS designs. The broader aim is a single program that can recreate published audio-tactile PPS paradigms by configuring stimuli, trial structure, runner behavior, and analysis settings.
 
+Latest source-to-runner validation status, 2026-07-15: `noel_2015_walking_full_body_action` is now a verified runnable published profile, not a missing-parameter scaffold. The public PDF review captured the standing/walking x looming/receding white-noise profile, 2 m path at 75 cm/s, T1-T5 tactile timings, derived distance-at-tactile mapping, tactile-only baselines, sound-only catches, 512-row trial formula, and expected walking-expanded PPS outcome. The paper-specific validator produced eight runnable block WAVs, software loopback sidecars, and mouse-click simulated participant-like rows matching the extracted contract. Current machine ledgers report 30 templates, 22 ready profiles, 20 published ready profile variants, 8 current missing-parameter profiles, 15 covered runnable literature records, and 15 full emulated source-to-runner validations; older same-day count paragraphs below are historical checkpoints when they cite 21/19/14.
+
 ## Audience
 
 Primary users are cognitive neuroscience and psychology researchers who need to run, replicate, or adapt audio-tactile PPS experiments without editing Python scripts. Secondary users are developers and AI agents maintaining the toolkit.

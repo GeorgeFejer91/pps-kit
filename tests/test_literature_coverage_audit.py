@@ -34,8 +34,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 14,
-        "covered_blocked_missing_publication_parameters": 9,
+        "covered_runnable_profile": 15,
+        "covered_blocked_missing_publication_parameters": 8,
         "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 0,
         "not_yet_templated_missing_publication_parameters": 48,
@@ -45,8 +45,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 30
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
-    ) == 21
-    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 19
+    ) == 22
+    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 20
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
     assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 0
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
@@ -304,6 +304,25 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
             "biggio_2017_known_parameter_validation_report.json"
         ),
     }
+    assert by_template["noel_2015_walking_full_body_action"] == {
+        "template_id": "noel_2015_walking_full_body_action",
+        "published": True,
+        "current_recreation_category": "gui_recreatable",
+        "primary_constraint_ids": [],
+        "known_parameter_validation_report": (
+            "artifacts/validation_runs/current_goal_noel_2015_known_parameter_20260715/"
+            "noel_2015_known_parameter_validation_report.json"
+        ),
+        "source_notes": (
+            "Public PDF review on 2026-07-15 recovered the core walking PPS parameters: "
+            "white-noise source, 2 m path, 75 cm/s speed, standing/walking x looming/receding, "
+            "T1-T5 delays 440/880/1330/1770/2220 ms, D1-D5 distances 33/66/100/133/166 cm, "
+            "T1/T5 tactile-only baselines, sound-only catches, and the 512-trial formula. "
+            "The paper-specific validator materializes Segments 0-6 and runs 512 trials with "
+            "mouse-click simulated chest-vibration responses while preserving treadmill/optic-flow "
+            "and physical loudspeaker-array limits as apparatus caveats."
+        ),
+    }
     assert by_template["lerner_2021_3d_audio_tactile_boundary"] == {
         "template_id": "lerner_2021_3d_audio_tactile_boundary",
         "published": True,
@@ -342,7 +361,7 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for entry in coverage["current_template_coverage"]
         if entry["published"] and entry["current_recreation_category"] == "gui_recreatable"
     ]
-    assert len(published_ready) == 19
+    assert len(published_ready) == 20
 
 
 def test_literature_coverage_constraints_focus_on_task_execution():

@@ -544,6 +544,7 @@ PARTICIPANT_TRIAL_FIELDNAMES = [
     "response_capture_device",
     "response_input_modality",
     "tool_condition",
+    "locomotion_condition",
     "voice_key_enabled",
     "voice_key_response_label",
     "voice_key_threshold",
@@ -1104,6 +1105,12 @@ class ParticipantTrialCsvWriter:
                 default="",
             ),
             "tool_condition": _row_value(base, "tool_condition", "Tool_Condition", default=""),
+            "locomotion_condition": _row_value(
+                base,
+                "locomotion_condition",
+                "Locomotion_Condition",
+                default="",
+            ),
             "voice_key_enabled": _row_value(
                 base,
                 "voice_key_enabled",
@@ -2890,6 +2897,7 @@ def _cache_manifest_trial_payload(trial_rows: list[dict[str, Any]]) -> list[dict
                 "response_capture_device": row.get("Response_Capture_Device", ""),
                 "response_input_modality": row.get("Response_Input_Modality", ""),
                 "tool_condition": row.get("Tool_Condition", ""),
+                "locomotion_condition": row.get("Locomotion_Condition", ""),
                 "voice_key_enabled": row.get("Voice_Key_Enabled", ""),
                 "voice_key_response_label": row.get("Voice_Key_Response_Label", ""),
                 "voice_key_threshold": row.get("Voice_Key_Threshold", ""),
@@ -8171,6 +8179,12 @@ def _segment_session_trial_row(
         default="",
     )
     tool_condition = _row_value(source, "tool_condition", "Tool_Condition", default="")
+    locomotion_condition = _row_value(
+        source,
+        "locomotion_condition",
+        "Locomotion_Condition",
+        default="",
+    )
     multisensory_trial_family = _row_value(
         source,
         "multisensory_trial_family",
@@ -8531,6 +8545,7 @@ def _segment_session_trial_row(
         "Response_Capture_Device": response_capture_device,
         "Response_Input_Modality": response_input_modality,
         "Tool_Condition": tool_condition,
+        "Locomotion_Condition": locomotion_condition,
         "Multisensory_Trial_Family": multisensory_trial_family,
         "Exteroceptive_Modality_Set": exteroceptive_modality_set,
         "Visual_Stimulus_Type": visual_stimulus_type,
@@ -8742,6 +8757,7 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "Response_Capture_Device",
         "Response_Input_Modality",
         "Tool_Condition",
+        "Locomotion_Condition",
         "Multisensory_Trial_Family",
         "Exteroceptive_Modality_Set",
         "Visual_Stimulus_Type",

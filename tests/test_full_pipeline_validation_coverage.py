@@ -47,34 +47,34 @@ def test_full_pipeline_validation_summary_is_conservative():
     assert summary["literature_record_count"] == 75
     assert summary["in_scope_record_count"] == 71
     assert summary["adjacent_not_applicable_record_count"] == 4
-    assert summary["full_emulated_pipeline_validated_record_count"] == 14
+    assert summary["full_emulated_pipeline_validated_record_count"] == 15
     assert summary["human_behavioral_observed_record_count"] == 0
     assert summary["physical_loopback_observed_record_count"] == 0
     assert summary["pipeline_status_counts"] == {
         "adjacent_not_applicable": 4,
-        "full_emulated_source_to_runner_pipeline_validated": 14,
-        "profile_present_but_source_parameters_missing": 9,
+        "full_emulated_source_to_runner_pipeline_validated": 15,
+        "profile_present_but_source_parameters_missing": 8,
         "source_parameters_missing_before_profile_creation": 48,
     }
     assert summary["primary_gap_counts"] == {
-        "profile_present_but_source_parameters_missing": 9,
+        "profile_present_but_source_parameters_missing": 8,
         "source_parameters_missing_before_profile_creation": 48,
         "toolkit_structure_or_response_contract_missing": 0,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
-        "minimum_source_parameters_captured": 14,
+        "minimum_source_parameters_captured": 15,
         "not_applicable_adjacent_record": 4,
-        "source_parameters_missing_or_unresolved": 57,
+        "source_parameters_missing_or_unresolved": 56,
     }
     assert summary["gate_status_counts"]["observed_emulated_expected_match"] == {
-        "emulated_observed_direction_matches_expected": 14,
-        "no_observed_emulated_comparison": 57,
+        "emulated_observed_direction_matches_expected": 15,
+        "no_observed_emulated_comparison": 56,
         "not_applicable_adjacent_record": 4,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
-        "blocked_by_missing_profile_parameters": 57,
+        "blocked_by_missing_profile_parameters": 56,
         "not_applicable_adjacent_record": 4,
-        "segment_0_to_6_gui_toolkit_path_ready": 14,
+        "segment_0_to_6_gui_toolkit_path_ready": 15,
     }
     assert "not collected participant evidence" in pipeline["scope"]["evidence_boundary"]
 
@@ -86,7 +86,7 @@ def test_full_pipeline_validated_records_pass_every_required_gate():
         record for record in records.values() if record["full_emulated_pipeline_validated"]
     ]
 
-    assert len(full_records) == pipeline["summary"]["full_emulated_pipeline_validated_record_count"] == 14
+    assert len(full_records) == pipeline["summary"]["full_emulated_pipeline_validated_record_count"] == 15
     for record in full_records:
         assert record["pipeline_status"] == "full_emulated_source_to_runner_pipeline_validated"
         assert all(gate["passed"] for gate in record["gates"].values()), record["record_id"]
@@ -105,6 +105,8 @@ def test_full_pipeline_validated_records_pass_every_required_gate():
                 if record["record_id"] == "tajadura_jimenez_2009_visual_deprivation"
                 else "biggio_2017_known_parameter_validation_report.json"
                 if record["record_id"] == "biggio_2017_racket_tool_use"
+                else "noel_2015_known_parameter_validation_report.json"
+                if record["record_id"] == "noel_2015_walking"
                 else "ready_profile_mouse_click_expected_outcome_audit_report.json"
             )
         )
@@ -130,6 +132,12 @@ def test_full_pipeline_validated_records_pass_every_required_gate():
     ]
     assert biggio["known_parameter_validation_report"].endswith(
         "biggio_2017_known_parameter_validation_report.json"
+    )
+    noel = records["noel_2015_walking"]
+    assert noel["full_emulated_pipeline_validated"]
+    assert noel["current_template_ids"] == ["noel_2015_walking_full_body_action"]
+    assert noel["known_parameter_validation_report"].endswith(
+        "noel_2015_known_parameter_validation_report.json"
     )
 
 

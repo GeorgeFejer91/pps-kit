@@ -3,72 +3,40 @@
 - Record ID: `noel_2015_walking`
 - DOI: `10.1016/j.neuropsychologia.2014.08.030`
 - DOI URL: https://doi.org/10.1016/j.neuropsychologia.2014.08.030
-- Coverage category: `covered_blocked_missing_publication_parameters`
-- Task family: walking/full-body PPS audio-tactile task
-- PDF status: `needs_user_download`
-- Supplement status: `not_found`
-- Supplement acquisition attempts: `2` (`checked_no_supplement_candidates`)
-- Supplement extracted text files: `0`
-- Extraction status: `pending_pdf`
-- Metadata confidence: `0.0` (`pending_source`)
-- Confidence basis: Main publication PDF is not yet locally available for Segment 1-4 inspection.
-- Automated evidence mining: `no_extracted_source`; 0/25 fields with candidate values
-- PPS visualization mining: `no_extracted_source`; 0/9 visualization-form candidates
+- Public PDF reviewed: https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf
+- Manual review: `For-AI/audiotactile-paper-metadata-audit/manual_reviews/noel_2015_walking.json`
+- Coverage category: `covered_runnable_profile`
+- Current template: `noel_2015_walking_full_body_action`
+- Validation report: `artifacts/validation_runs/current_goal_noel_2015_known_parameter_20260715/noel_2015_known_parameter_validation_report.json`
 
-## Known Prior Gaps
+## Extracted Minimum PPS Parameters
 
-- exact sound distances and trial counts
+- Auditory stimulus: 50 dB white noise, approaching or receding over a 2 m path at 75 cm/s.
+- Apparatus provenance: two 8-speaker JBL Control 1 Pro arrays, 50 cm lateral from the participant, driven by M-Audio FastTrack Ultra 8R.
+- Locomotion factor: standing still versus treadmill walking at 0.70 m/s.
+- Tactile stimulus: 100 ms chest vibration, documented as 150 Hz Precision MicroDrives shaftless model 312-101 metadata in the runnable profile.
+- Response mode: right-thumb controller in the paper; mouse-click simulated participant-like responses in software validation.
+- Tactile timings: T1-T5 = 440, 880, 1330, 1770, and 2220 ms.
+- Distance-at-tactile mapping: D1-D5 = 33, 66, 100, 133, and 166 cm, derived from the reported speed/delay relation and interpreted as a unit typo in the PDF distance label.
+- Direction mapping: looming maps T1-T5 to D5/D4/D3/D2/D1; receding maps T1-T5 to D1/D2/D3/D4/D5.
+- Trial families: audio-tactile target trials, tactile-only T1/T5 baselines, and sound-only catch trials.
+- Trial formula: 2 locomotion conditions x 2 sound directions x (5 distances + 2 baselines + 1 catch) x 16 repetitions = 512 trials.
+- Expected outcome: standing facilitation is strongest near the body, while walking expands the facilitation range through the farthest sampled distance; receding does not show the same spatial modulation.
 
-## Review Attempts
+## Toolkit Validation
 
-- `main PDF OpenDataLoader extraction`: `pending` - Run parser after placing the publication PDF in artifacts/paper_metadata_audit/publication_pdfs.
-- `targeted methods/table search`: `pending_pdf` - Search methods, procedure, apparatus, stimuli, trial design, and tables for Segment 1-4 parameters.
-- `supplement search`: `checked_not_found` - Automated source routes found no supplement candidates; use publisher/source checks again before final missing-value decisions.
-- `fallback extractor/source check`: `pending_pdf` - Use pdfplumber/pypdf, rendered pages, publisher HTML, or supplement files before marking a field missing.
+The paper-specific validator loads the profile through the HTML-dashboard backend controller, materializes Segments 2-6, prepares runnable block WAV/session packages, runs the experiment runner, writes software loopback sidecars, injects mouse-click simulated responses after tactile onset for tactile rows, withholds catch responses, and compares observed rows/events against the extracted PDF contract.
 
-## Six Semantic Review Passes
+Retained validation result:
 
-| Strategy | Status | Hits | Matched terms | Pages |
-|---|---|---:|---|---|
-| `stimulus_reconstruction` | `source_unavailable` | 0 |  |  |
-| `timing_soa` | `source_unavailable` | 0 |  |  |
-| `trial_structure_intermixing` | `source_unavailable` | 0 |  |  |
-| `baseline_catch_counts` | `source_unavailable` | 0 |  |  |
-| `tactile_response_apparatus` | `source_unavailable` | 0 |  |  |
-| `pps_visualization_reporting` | `source_unavailable` | 0 |  |  |
+- 512 participant-like trial rows.
+- 320 audio-tactile rows, 128 tactile-only baseline rows, and 64 sound-only catch rows.
+- 448 response-required rows with simulated mouse clicks and 64 withhold rows.
+- 256 standing and 256 walking rows.
+- 256 looming and 256 receding rows.
+- Eight runnable block WAVs and eight software loopback sidecars.
+- Locomotion, sound direction, timing, distance, tactile waveform, and response-rule metadata preserved through runner/analysis rows.
 
-## PPS Visualization Candidates
+## Remaining Caveats
 
-- `no_extracted_source`: No extracted source text is available; inspect the publication PDF, figures, captions, and supplements manually before closing visualization review.
-
-## Segment Field Status
-
-| Segment | Field | Status | Value | Source pointer |
-|---|---|---|---|---|
-| `segment_1_stimulus_reconstruction` | `stimulus_type` | `source_unavailable` |  |  |
-| `segment_1_stimulus_reconstruction` | `source_provenance` | `source_unavailable` |  |  |
-| `segment_1_stimulus_reconstruction` | `trajectory_count` | `source_unavailable` |  |  |
-| `segment_1_stimulus_reconstruction` | `trajectory_path` | `source_unavailable` |  |  |
-| `segment_1_stimulus_reconstruction` | `stimulus_duration` | `source_unavailable` |  |  |
-| `segment_1_stimulus_reconstruction` | `stimulus_speed` | `source_unavailable` |  |  |
-| `segment_1_stimulus_reconstruction` | `auditory_conditions` | `source_unavailable` |  |  |
-| `segment_1_stimulus_reconstruction` | `gain_envelope` | `source_unavailable` |  |  |
-| `segment_1_stimulus_reconstruction` | `renderer_or_apparatus` | `source_unavailable` |  |  |
-| `segment_2_sequence_and_intermixing` | `trial_rows_families` | `source_unavailable` |  |  |
-| `segment_2_sequence_and_intermixing` | `condition_intermixing` | `source_unavailable` |  |  |
-| `segment_2_sequence_and_intermixing` | `blocked_or_random_order` | `source_unavailable` |  |  |
-| `segment_2_sequence_and_intermixing` | `iti_jitter_policy` | `source_unavailable` |  |  |
-| `segment_2_sequence_and_intermixing` | `response_window` | `source_unavailable` |  |  |
-| `segment_2_sequence_and_intermixing` | `task_sequence_rules` | `source_unavailable` |  |  |
-| `segment_3_tactile_soa_baseline` | `tactile_stimulus` | `source_unavailable` |  |  |
-| `segment_3_tactile_soa_baseline` | `soa_table` | `source_unavailable` |  |  |
-| `segment_3_tactile_soa_baseline` | `baseline_strategy` | `source_unavailable` |  |  |
-| `segment_3_tactile_soa_baseline` | `baseline_timing` | `source_unavailable` |  |  |
-| `segment_3_tactile_soa_baseline` | `catch_trial_type` | `source_unavailable` |  |  |
-| `segment_4_counts` | `repetitions_per_tactile_soa_condition` | `source_unavailable` |  |  |
-| `segment_4_counts` | `baseline_count` | `source_unavailable` |  |  |
-| `segment_4_counts` | `catch_count` | `source_unavailable` |  |  |
-| `segment_4_counts` | `block_count` | `source_unavailable` |  |  |
-| `segment_4_counts` | `total_trial_count` | `source_unavailable` |  |  |
-
-Do not paste long source text here; use short page/section pointers and concise paraphrases.
+The toolkit recreation is a software PPS-task validation, not a physical apparatus replication. Exact treadmill behavior, optic-flow display, physical SPL field, room acoustics, and the original two-array loudspeaker interpolation remain apparatus/provenance caveats outside the software-runner contract.

@@ -426,7 +426,7 @@ def _paper_audit_summary(paper_record: dict[str, Any], manual_review: dict[str, 
         "metadata_confidence_label": paper_record.get("metadata_confidence_label", ""),
         "metadata_confidence_score": paper_record.get("metadata_confidence_score", 0),
         "automated_evidence_status": (paper_record.get("automated_evidence_mining") or {}).get("status", ""),
-        "manual_review_status": manual_review.get("review_status", ""),
+        "manual_review_status": manual_review.get("manual_review_status", "") or manual_review.get("review_status", ""),
         "manual_review_confidence_label": manual_review.get("confidence_label", ""),
         "manual_review_profile_recreation_assessment": manual_review.get("profile_recreation_assessment", ""),
     }

@@ -4,56 +4,50 @@
   "title": "Noel 2015 walking full-body action PPS",
   "citation": "Noel, J. P., Grivaz, P., Marmaroli, P., Lissek, H., Blanke, O., & Serino, A. (2015). Full body action remapping of peripersonal space: the case of walking. Neuropsychologia, 70, 375-384.",
   "doi": "10.1016/j.neuropsychologia.2014.08.030",
-  "source_url": "https://pubmed.ncbi.nlm.nih.gov/25193502/",
-  "verification_status": "partial",
+  "source_url": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+  "verification_status": "verified",
   "publication_status": "published",
-  "profile_type": "",
+  "profile_type": "full_body_action_walking_white_noise_vibrotactile_button_response",
   "paper_group_key": "doi:10.1016/j.neuropsychologia.2014.08.030",
   "visible_variant_label": "",
   "variant_display": "Noel 2015 walking full-body action PPS",
   "recreation_status": {
-    "primary_category": "missing_publication_parameters",
-    "category_label": "Missing publication parameters",
-    "runner_readiness": "blocked_missing_parameters",
-    "profile_checks_passed": false,
-    "gui_recreatable": false,
-    "segment_0_to_4_profile_checks_passed": false,
-    "segment_1_to_6_materializable": false,
-    "finished_profile": false,
-    "segment_6_launchable": false,
-    "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 1,
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
+    "missing_parameter_count": 0,
     "unsupported_structure_count": 0
   },
   "segment_0_to_4_profile_checks": {
     "gate": "segments_0_to_4",
-    "passed": false,
+    "passed": true,
     "segments": [
       {
         "segment": "0",
         "segment_label": "Segment 0 profile manifest and provenance",
         "passed": true,
-        "field_count": 4,
+        "field_count": 3,
         "blocking_reasons": []
       },
       {
         "segment": "1",
         "segment_label": "Segment 1 source/stimulus assets",
-        "passed": false,
-        "field_count": 4,
-        "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
-            "status": "missing_publication_parameter",
-            "reason": "exact sound distances and trial counts"
-          }
-        ]
+        "passed": true,
+        "field_count": 3,
+        "blocking_reasons": []
       },
       {
         "segment": "2",
         "segment_label": "Segment 2 trial rows and sequences",
         "passed": true,
-        "field_count": 4,
+        "field_count": 3,
         "blocking_reasons": []
       },
       {
@@ -92,7 +86,7 @@
       "value": {
         "citation": "Noel, J. P., Grivaz, P., Marmaroli, P., Lissek, H., Blanke, O., & Serino, A. (2015). Full body action remapping of peripersonal space: the case of walking. Neuropsychologia, 70, 375-384.",
         "doi": "10.1016/j.neuropsychologia.2014.08.030",
-        "source_url": "https://pubmed.ncbi.nlm.nih.gov/25193502/"
+        "source_url": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf"
       },
       "note": "Publication reference metadata is encoded."
     },
@@ -101,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 5,
+      "value": 32,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -126,7 +120,7 @@
       "parameter": "stimulus_duration",
       "status": "reported",
       "value": [
-        3.0
+        2.666667
       ],
       "note": "Duration comes from generated WAV metadata."
     },
@@ -135,7 +129,7 @@
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "trial_sequence_rows",
       "status": "reported",
-      "value": 1,
+      "value": 4,
       "note": "Current Segment 2 row/box representation is encoded."
     },
     {
@@ -160,11 +154,11 @@
       "parameter": "soa_values_ms",
       "status": "reported",
       "value": [
-        300,
-        800,
-        1500,
-        2200,
-        2700
+        440,
+        880,
+        1330,
+        1770,
+        2220
       ],
       "note": "SOA values are encoded."
     },
@@ -191,7 +185,7 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "baseline_count",
       "status": "reported",
-      "value": 0.0,
+      "value": 25.0,
       "note": "Baseline count/percentage settings are encoded."
     },
     {
@@ -199,23 +193,28 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "catch_mode",
       "status": "reported",
-      "value": 10.0,
+      "value": 12.5,
       "note": "Catch settings are encoded."
     },
     {
       "segment": "4",
       "segment_label": "Segment 4 repetition pool settings",
       "parameter": "trial_pool_repetitions",
-      "status": "inferred",
-      "value": 12,
-      "note": "Segment 4 can infer repetitions from repetitions_per_condition."
+      "status": "reported",
+      "value": {
+        "default": 16,
+        "audio_tactile": 16,
+        "baseline": 16,
+        "catch": 16
+      },
+      "note": "Segment 4 repetition defaults are encoded."
     },
     {
       "segment": "5",
       "segment_label": "Segment 5 block CSV settings",
       "parameter": "block_count",
       "status": "reported",
-      "value": 2,
+      "value": 8,
       "note": "Block count is encoded."
     },
     {
@@ -223,7 +222,7 @@
       "segment_label": "Segment 5 block CSV settings",
       "parameter": "row_order_constraints",
       "status": "reported",
-      "value": 1,
+      "value": 4,
       "note": "Row order can be preserved through Segment 5."
     },
     {
@@ -241,39 +240,9 @@
       "status": "defaulted",
       "value": "1 part",
       "note": "Current dashboard default; phase/intervention context is non-blocking unless it changes the audiotactile PPS task execution."
-    },
-    {
-      "segment": "0",
-      "segment_label": "Segment 0 profile manifest and provenance",
-      "parameter": "profile_gap",
-      "status": "defaulted",
-      "value": "treadmill state",
-      "note": "treadmill state"
-    },
-    {
-      "segment": "2",
-      "segment_label": "Segment 2 trial rows and sequences",
-      "parameter": "profile_gap",
-      "status": "defaulted",
-      "value": "optic flow condition",
-      "note": "optic flow condition"
-    },
-    {
-      "segment": "1",
-      "segment_label": "Segment 1 source/stimulus assets",
-      "parameter": "profile_gap",
-      "status": "missing_publication_parameter",
-      "value": "exact sound distances and trial counts",
-      "note": "exact sound distances and trial counts"
     }
   ],
-  "missing_publication_parameters": [
-    {
-      "segment": "1",
-      "parameter": "profile_gap",
-      "reason": "exact sound distances and trial counts"
-    }
-  ],
+  "missing_publication_parameters": [],
   "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
@@ -290,11 +259,11 @@
     },
     "04_trial_designer": {
       "trial_design": "assets/preloads/noel_2015_walking_full_body_action/04_trial_designer/trial_design.json",
-      "trial_row_count": 1
+      "trial_row_count": 4
     },
     "05_run_setup": {
       "run_defaults": "assets/preloads/noel_2015_walking_full_body_action/05_run_setup/run_defaults.json",
-      "block_count": 2,
+      "block_count": 8,
       "participant_count": 18
     },
     "local_segment_0_to_4_profile_gate": {
@@ -309,12 +278,28 @@
   },
   "provenance": [
     {
-      "field": "boundary values",
-      "source": "PubMed abstract reports standing facilitation around 65-100 cm and walking expansion around 1.66 m."
+      "field": "source_pdf",
+      "source": "Noel et al. public PDF: https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf"
     },
     {
-      "field": "implementation gap",
-      "source": "Current GUI does not encode treadmill or optic-flow condition; those remain protocol-level notes."
+      "field": "sound_and_apparatus",
+      "source": "Methods report white noise at 50 dB, two arrays of eight loudspeakers, 2 m approach/recede path, and 75 cm/s sound velocity."
+    },
+    {
+      "field": "tactile_response",
+      "source": "Methods report 100 ms chest vibration from Precision MicroDrives model 312-101 motors and right-thumb wireless Xbox 360 controller responses."
+    },
+    {
+      "field": "timing_distance_mapping",
+      "source": "Methods report tactile delays T1-T5 = 0.44, 0.88, 1.33, 1.77, and 2.22 s, with receding T1-T5 mapped D1-D5 and looming T1-T5 mapped D5-D1."
+    },
+    {
+      "field": "trial_formula",
+      "source": "Methods report 2 Locomotion x 2 Sound Direction x (5 Distances + 2 Baselines + 1 Catch) x 16 = 512 trials."
+    },
+    {
+      "field": "expected_outcome",
+      "source": "Results report standing near-body facilitation around D1-D2 and walking facilitation through D5/166 cm, with receding sounds not showing the same spatial modulation."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."

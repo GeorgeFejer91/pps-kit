@@ -224,13 +224,19 @@
       "date_run": "2026-07-15",
       "local_summary_file": "artifacts/validation_runs/current_goal_audiovisual_trisensory_contract_20260715/audiovisual_trisensory_contract_capability_smoke_report.json",
       "relevance": "Capability smoke proving that Segment 5/6 rows can declare audiovisual/trisensory and mixed-reality provenance metadata, including multisensory trial family, exteroceptive modality set, visual object/motion/distance/speed/duration, visual renderer/display context, body rendering mode, audiovisual synchrony policy, and explicit mixed-reality equivalence boundary through prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated participant-like responses with generated audio/tactile WAVs and a software wired-loopback sidecar. This is not VR/HMD rendering, physical mixed-reality synchronization, visual stimulus presentation, collected participant behavior, physical timing-loopback, or scientific PPS-effect validation."
+    },
+    {
+      "id": "noel_2015_known_parameter_validation_2026_07_15",
+      "kind": "validation_protocol",
+      "local_summary_file": "artifacts/validation_runs/current_goal_noel_2015_known_parameter_20260715/noel_2015_known_parameter_validation_report.json",
+      "relevance": "Paper-specific source-to-runner validation for Noel et al. 2015 walking PPS: public PDF parameters, Segments 0-6 GUI materialization, generated block WAVs, software wired-loopback sidecars, and mouse-click simulated responses to chest vibration. This is software evidence, not collected human behavior."
     }
   ],
   "coverage_summary": {
     "literature_record_count": 75,
     "literature_record_category_counts": {
-      "covered_runnable_profile": 14,
-      "covered_blocked_missing_publication_parameters": 9,
+      "covered_runnable_profile": 15,
+      "covered_blocked_missing_publication_parameters": 8,
       "covered_blocked_toolkit_structure": 0,
       "not_yet_templated_requires_toolkit_structure": 0,
       "not_yet_templated_missing_publication_parameters": 48,
@@ -238,10 +244,10 @@
       "adjacent_out_of_scope": 4
     },
     "current_template_count": 30,
-    "current_profile_check_pass_count": 21,
-    "published_profile_check_pass_count": 19,
+    "current_profile_check_pass_count": 22,
+    "published_profile_check_pass_count": 20,
     "local_unpublished_profile_check_pass_count": 2,
-    "current_templates_with_missing_publication_parameters": 9,
+    "current_templates_with_missing_publication_parameters": 8,
     "current_templates_with_toolkit_structural_gaps": 0,
     "holmes_2020_reported_articles": 23,
     "holmes_2020_reported_experiments": 46,
@@ -718,10 +724,10 @@
     {
       "template_id": "noel_2015_walking_full_body_action",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_noel_2015_known_parameter_20260715/noel_2015_known_parameter_validation_report.json",
+      "source_notes": "Public PDF review on 2026-07-15 recovered the core walking PPS parameters: white-noise source, 2 m path, 75 cm/s speed, standing/walking x looming/receding, T1-T5 delays 440/880/1330/1770/2220 ms, D1-D5 distances 33/66/100/133/166 cm, T1/T5 tactile-only baselines, sound-only catches, and the 512-trial formula. The paper-specific validator materializes Segments 0-6 and runs 512 trials with mouse-click simulated chest-vibration responses while preserving treadmill/optic-flow and physical loudspeaker-array limits as apparatus caveats."
     },
     {
       "template_id": "serino_2015_front_back_trunk_exp2",
@@ -816,7 +822,7 @@
   "literature_records": [
     {
       "record_id": "ladavas_2001_auditory_tactile_extinction",
-      "citation_short": "L\u00c3\u00a0davas et al. (2001)",
+      "citation_short": "LÃ davas et al. (2001)",
       "doi": "10.1093/neucas/7.2.97",
       "source_basis": [
         "openalex_query_variant_exhaustiveness_2026_06_13",
@@ -834,7 +840,7 @@
     },
     {
       "record_id": "farne_ladavas_2002_auditory_pps_humans",
-      "citation_short": "Farn\u00c3\u00a8 & L\u00c3\u00a0davas (2002)",
+      "citation_short": "FarnÃ¨ & LÃ davas (2002)",
       "doi": "10.1162/089892902320474481",
       "source_basis": [
         "openalex_query_variant_exhaustiveness_2026_06_13",
@@ -1264,20 +1270,20 @@
       "doi": "10.1016/j.neuropsychologia.2014.08.030",
       "source_basis": [
         "holmes_2020_systematic_review",
-        "pubmed_audio_tactile_pps_2026_06_13"
+        "pubmed_audio_tactile_pps_2026_06_13",
+        "public_pdf_manual_review_2026_07_15",
+        "paper_specific_runner_validation_2026_07_15"
       ],
       "current_template_ids": [
         "noel_2015_walking_full_body_action"
       ],
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "walking/full-body PPS audio-tactile task",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-      ],
-      "missing_publication_parameters": [
-        "exact sound distances and trial counts"
-      ]
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_noel_2015_known_parameter_20260715/noel_2015_known_parameter_validation_report.json",
+      "source_notes": "Noel 2015 walking is now runnable at the audio-tactile software-contract level. The toolkit preserves the extracted timing/distance/count profile and locomotion condition metadata; physical treadmill walking, optic flow, and exact two-array loudspeaker interpolation remain outside the runner contract."
     },
     {
       "record_id": "serino_2015_peri_trunk_exp1",

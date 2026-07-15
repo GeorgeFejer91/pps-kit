@@ -185,6 +185,7 @@ ROW_CONTRACT_FIELDS = (
     "response_capture_device",
     "response_input_modality",
     "tool_condition",
+    "locomotion_condition",
     "multisensory_trial_family",
     "exteroceptive_modality_set",
     "visual_stimulus_type",
