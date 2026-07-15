@@ -32,6 +32,10 @@ READY_PROFILE_SYNTHETIC_COMPARISON_REPORT = (
     "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/"
     "ready_profile_expected_contrast_audit_report.json"
 )
+READY_PROFILE_MOUSE_CLICK_COMPARISON_REPORT = (
+    "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/"
+    "ready_profile_mouse_click_expected_outcome_audit_report.json"
+)
 
 
 EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
@@ -1175,11 +1179,11 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
             ),
             "evidence_boundary": (
                 "Protocol 12, static preview parity, one-block and ready-profile fake-audio runner "
-                "stress, synthetic loopback, and ready-profile contrast audits prove software "
+                "stress, synthetic loopback, ready-profile contrast audits, and mouse-click "
+                "participant-like expected-outcome audits prove software "
                 "scheduling, WAV generation, event/marker, artifact, and comparison-readiness "
                 "contracts. They do not prove human behavioral PPS effects. Observed scientific "
-                "outcomes require either collected participant data or an explicit synthetic-participant "
-                "model whose assumptions are documented separately."
+                "outcomes require collected participant data."
             ),
         },
         "summary": {
@@ -1189,9 +1193,17 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
             "adjacent_or_out_of_scope_record_count": expected_counts["adjacent_out_of_scope"],
             "runnable_profile_parameter_record_count": len(runnable_records),
             "observed_behavioral_comparison_record_count": observed_counts["observed_behavioral_comparison_available"],
-            "synthetic_profile_contrast_comparison_record_count": observed_counts[
-                "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved"
+            "mouse_click_simulated_participant_like_comparison_record_count": observed_counts[
+                "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved"
             ],
+            "synthetic_profile_contrast_comparison_record_count": len(
+                [
+                    record
+                    for record in records
+                    if record.get("runnable_status") == "runnable_profile_parameters_ready"
+                    and record.get("expected_outcome_status") == "structured_expected_outcome_extracted"
+                ]
+            ),
             "parameter_run_evidence_only_record_count": observed_counts[
                 "parameter_run_evidence_only_behavioral_effect_unobserved"
             ],
@@ -1226,6 +1238,7 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
                 "ready_profile_response_marker_loopback_report.json"
             ),
             "ready_profile_expected_contrast_audit": READY_PROFILE_SYNTHETIC_COMPARISON_REPORT,
+            "ready_profile_mouse_click_expected_outcome_audit": READY_PROFILE_MOUSE_CLICK_COMPARISON_REPORT,
             "click_path_mock": (
                 "artifacts/validation_runs/current_goal_session_click_path_20260714/"
                 "session_runner_click_path_report.json"
@@ -1282,11 +1295,14 @@ def build_record(
         "observed_vs_expected_status": observed_status,
         "observed_comparison_gap": observed_gap,
         "observed_evidence_boundary": _observed_boundary(observed_status),
-        "required_next_evidence": _required_next_evidence(expected_status, runnable_status),
+        "required_next_evidence": _required_next_evidence(expected_status, runnable_status, observed_status),
     }
     observed_profile_contrast_evidence = _observed_profile_contrast_evidence(observed_status)
     if observed_profile_contrast_evidence:
         result["observed_profile_contrast_evidence"] = observed_profile_contrast_evidence
+    observed_mouse_click_evidence = _observed_mouse_click_evidence(observed_status)
+    if observed_mouse_click_evidence:
+        result["observed_mouse_click_participant_like_evidence"] = observed_mouse_click_evidence
     return result
 
 
@@ -1376,7 +1392,7 @@ def _observed_status(expected_status: str, runnable_status: str) -> str:
     if runnable_status != "runnable_profile_parameters_ready":
         return "not_runnable_no_observed_comparison"
     if expected_status == "structured_expected_outcome_extracted":
-        return "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved"
+        return "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved"
     return "parameter_run_evidence_only_behavioral_effect_unobserved"
 
 
@@ -1386,7 +1402,7 @@ def _observed_comparison_gap(expected_status: str, runnable_status: str, coverag
     if expected_status != "structured_expected_outcome_extracted":
         return "expected_outcome_extraction_pending"
     if runnable_status == "runnable_profile_parameters_ready":
-        return "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison"
+        return "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison"
     if coverage_category == "covered_blocked_missing_publication_parameters":
         return "template_present_blocked_missing_publication_parameters"
     if coverage_category == "covered_blocked_toolkit_structure":
@@ -1399,6 +1415,14 @@ def _observed_comparison_gap(expected_status: str, runnable_status: str, coverag
 
 
 def _observed_boundary(observed_status: str) -> str:
+    if observed_status == "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved":
+        return (
+            "The ready-profile mouse-click expected-outcome audit runs deterministic participant-like "
+            "mouse clicks through SessionRunnerController after tactile onsets and compares the "
+            "runner-produced analysis RTs with the paper's structured expected effect. This proves "
+            "runner-level software comparison behavior only; it does not prove human behavioral PPS "
+            "effects or exact original apparatus equivalence."
+        )
     if observed_status == "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved":
         return (
             "The ready-profile contrast audit provides an explicit deterministic synthetic "
@@ -1418,7 +1442,10 @@ def _observed_boundary(observed_status: str) -> str:
 
 
 def _observed_profile_contrast_evidence(observed_status: str) -> dict[str, str]:
-    if observed_status != "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved":
+    if observed_status not in {
+        "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved",
+        "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
+    }:
         return {}
     return {
         "status": "deterministic_synthetic_profile_contrast_comparison_available",
@@ -1431,7 +1458,21 @@ def _observed_profile_contrast_evidence(observed_status: str) -> dict[str, str]:
     }
 
 
-def _required_next_evidence(expected_status: str, runnable_status: str) -> str:
+def _observed_mouse_click_evidence(observed_status: str) -> dict[str, str]:
+    if observed_status != "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved":
+        return {}
+    return {
+        "status": "mouse_click_simulated_participant_like_comparison_available",
+        "source_report": READY_PROFILE_MOUSE_CLICK_COMPARISON_REPORT,
+        "model_boundary": (
+            "Deterministic participant-like mouse clicks were injected through SessionRunnerController "
+            "after tactile onsets and evaluated from runner-produced analysis rows; not collected "
+            "participant data, not physical loopback evidence, and not a scientific replication claim."
+        ),
+    }
+
+
+def _required_next_evidence(expected_status: str, runnable_status: str, observed_status: str) -> str:
     if expected_status == "adjacent_out_of_scope":
         return "No outcome comparison required unless the record is reclassified as in scope."
     if expected_status == "pending_expected_outcome_extraction":
@@ -1446,6 +1487,12 @@ def _required_next_evidence(expected_status: str, runnable_status: str) -> str:
         )
     if runnable_status != "runnable_profile_parameters_ready":
         return "Resolve profile blockers before attempting observed-vs-expected evaluation."
+    if observed_status == "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved":
+        return (
+            "Collect participant data before making a scientific PPS-effect replication claim; the current "
+            "ready-profile comparison is deterministic mouse-click simulated participant-like software "
+            "evidence only."
+        )
     return (
         "Run a participant-like mouse-click simulation through the experiment runner, or collect "
         "participant data, before making a scientific PPS-effect replication claim; the current "

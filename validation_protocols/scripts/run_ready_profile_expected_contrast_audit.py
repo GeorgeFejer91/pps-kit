@@ -42,7 +42,7 @@ DEFAULT_OUTPUT_DIR = (
 )
 
 SCHEMA = "pps-ready-profile-expected-contrast-audit.v1"
-READY_GAP = "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison"
+READY_GAP = "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison"
 MODEL_ID = "profile_contrast_readiness_synthetic_rt.v2"
 EVIDENCE_BOUNDARY = (
     "This audit checks whether ready-profile runner rows retain the contrast "

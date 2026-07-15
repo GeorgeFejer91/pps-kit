@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import inspect
 import json
 import shutil
 import sys
@@ -112,7 +113,7 @@ class FastProfileSmokeAudioEngine:
                 if event.event_type == "tactile_onset" and self._clicks_this_block < self.max_clicks_per_block:
                     self._clicks_this_block += 1
                     if self._on_tactile is not None:
-                        self._on_tactile()
+                        self._invoke_tactile_callback(payload)
         if progress_callback is not None:
             progress_callback(float(info.duration))
         return not self._stopped
@@ -136,6 +137,32 @@ class FastProfileSmokeAudioEngine:
             **dict(metadata or {}),
         }
         self._audio_event_callback(payload)
+
+    def _invoke_tactile_callback(self, payload: dict[str, Any]) -> None:
+        if self._on_tactile is None:
+            return
+        try:
+            signature = inspect.signature(self._on_tactile)
+        except (TypeError, ValueError):
+            self._on_tactile(payload)
+            return
+        positional = [
+            parameter
+            for parameter in signature.parameters.values()
+            if parameter.kind
+            in {
+                inspect.Parameter.POSITIONAL_ONLY,
+                inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            }
+        ]
+        accepts_args = any(
+            parameter.kind == inspect.Parameter.VAR_POSITIONAL
+            for parameter in signature.parameters.values()
+        )
+        if positional or accepts_args:
+            self._on_tactile(payload)
+        else:
+            self._on_tactile()
 
     def start_recording(self, output_path=None) -> bool:
         if output_path:

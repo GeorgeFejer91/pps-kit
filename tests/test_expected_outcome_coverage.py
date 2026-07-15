@@ -143,6 +143,7 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "adjacent_or_out_of_scope_record_count": 4,
         "runnable_profile_parameter_record_count": 12,
         "observed_behavioral_comparison_record_count": 0,
+        "mouse_click_simulated_participant_like_comparison_record_count": 12,
         "synthetic_profile_contrast_comparison_record_count": 12,
         "parameter_run_evidence_only_record_count": 0,
         "not_runnable_no_observed_comparison_record_count": 58,
@@ -152,7 +153,7 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
             "not_applicable_adjacent_out_of_scope": 4,
             "not_yet_templated_missing_publication_parameters": 22,
             "not_yet_templated_requires_toolkit_structure": 28,
-            "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison": 12,
+            "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 12,
             "template_present_blocked_missing_publication_parameters": 8,
         },
     }
@@ -170,10 +171,10 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         record = records[record_id]
         assert record["runnable_status"] == "runnable_profile_parameters_ready"
         assert record["observed_vs_expected_status"] == (
-            "synthetic_profile_contrast_comparison_available_behavioral_effect_unobserved"
+            "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved"
         )
         assert record["observed_comparison_gap"] == (
-            "ready_profile_synthetic_contrast_available_needs_mouse_click_simulated_participant_like_comparison"
+            "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison"
         )
         assert record["observed_profile_contrast_evidence"] == {
             "status": "deterministic_synthetic_profile_contrast_comparison_available",
@@ -187,8 +188,21 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
                 "replication claim."
             ),
         }
-        assert "deterministic synthetic comparison" in record["observed_evidence_boundary"]
-        assert record["required_next_evidence"].startswith("Run a participant-like mouse-click simulation")
+        assert record["observed_mouse_click_participant_like_evidence"] == {
+            "status": "mouse_click_simulated_participant_like_comparison_available",
+            "source_report": (
+                "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/"
+                "ready_profile_mouse_click_expected_outcome_audit_report.json"
+            ),
+            "model_boundary": (
+                "Deterministic participant-like mouse clicks were injected through SessionRunnerController "
+                "after tactile onsets and evaluated from runner-produced analysis rows; not collected "
+                "participant data, not physical loopback evidence, and not a scientific replication claim."
+            ),
+        }
+        assert "mouse clicks through SessionRunnerController" in record["observed_evidence_boundary"]
+        assert "Deterministic synthetic RT comparisons" in record["observed_profile_contrast_evidence"]["model_boundary"]
+        assert record["required_next_evidence"].startswith("Collect participant data")
 
     nonrunnable_structured = structured_ids - RUNNABLE_STRUCTURED_IDS
     assert nonrunnable_structured
@@ -358,6 +372,7 @@ def test_expected_outcome_current_observed_evidence_is_software_only():
         "ready_profile_runner_smoke",
         "ready_profile_response_marker_loopback",
         "ready_profile_expected_contrast_audit",
+        "ready_profile_mouse_click_expected_outcome_audit",
         "click_path_mock",
         "synthetic_response_marker_loopback",
         "synthetic_expected_outcome_smoke",
@@ -370,6 +385,9 @@ def test_expected_outcome_current_observed_evidence_is_software_only():
     )
     assert evidence["ready_profile_expected_contrast_audit"].endswith(
         "ready_profile_expected_contrast_audit_report.json"
+    )
+    assert evidence["ready_profile_mouse_click_expected_outcome_audit"].endswith(
+        "ready_profile_mouse_click_expected_outcome_audit_report.json"
     )
     assert evidence["synthetic_response_marker_loopback"].endswith("response_marker_loopback_report.json")
     assert evidence["synthetic_expected_outcome_smoke"].endswith("synthetic_expected_outcome_smoke_report.json")
