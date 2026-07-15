@@ -795,6 +795,24 @@ def _response_base(event: dict[str, Any]) -> dict[str, Any]:
             "tactile_role",
             "Tactile_Role",
         ),
+        "tactile_channel": _field(event, "tactile_channel", "Tactile_Channel"),
+        "tactile_waveform_shape": _field(event, "tactile_waveform_shape", "Tactile_Waveform_Shape"),
+        "tactile_frequency_hz": _field(
+            event,
+            "tactile_frequency_hz",
+            "Tactile_Frequency_Hz",
+            "tactile_waveform_frequency_hz",
+            "Tactile_Waveform_Frequency_Hz",
+        ),
+        "tactile_duration_ms": _field(
+            event,
+            "tactile_duration_ms",
+            "Tactile_Duration_ms",
+            "tactile_waveform_duration_ms",
+            "Tactile_Waveform_Duration_ms",
+        ),
+        "tactile_amplitude": _field(event, "tactile_amplitude", "Tactile_Amplitude"),
+        "tactile_waveform_generated": _field(event, "tactile_waveform_generated", "Tactile_Waveform_Generated"),
         "noise_type": _field(event, "noise_type", "Noise_Type"),
         "sequence_labels": _field(event, "sequence_labels", "Sequence_Labels"),
         "sequence_variant_key": _field(event, "sequence_variant_key", "Sequence_Variant_Key"),
@@ -2621,6 +2639,7 @@ def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
         "catch_trial",
         "baseline_trial",
         "response_required",
+        "tactile_waveform_generated",
     }
     for field in boolean_fields:
         if field in row and row[field] not in (None, ""):

@@ -132,6 +132,13 @@
       "date_run": "2026-07-15",
       "local_summary_file": "artifacts/validation_runs/current_goal_gonogo_capability_20260715/gonogo_capability_smoke_report.json",
       "relevance": "Capability smoke proving that the runner/package contract can execute row-level respond-vs-withhold tactile expectations for weak targets, strong no-go/non-target rows, sound-only catches, software wired-loopback sidecars, mouse-click simulated responses, participant-trial outcomes, analysis-ready rows, and top-up exclusion of no-go controls. This is not paper-specific parameter extraction, physical hardware-loopback evidence, or collected participant evidence."
+    },
+    {
+      "id": "tactile_waveform_capability_smoke_2026_07_15",
+      "kind": "validation_protocol",
+      "date_run": "2026-07-15",
+      "local_summary_file": "artifacts/validation_runs/current_goal_tactile_waveform_capability_20260715/tactile_waveform_capability_smoke_report.json",
+      "relevance": "Capability smoke proving that Segment 5/6 rows can declare an 80 Hz, 200 ms sawtooth tactile waveform, synthesize it into channel 3 of generated block WAVs, preserve tactile waveform metadata in participant and analysis rows, and run mouse-click simulated responses across the 2 s/3 s looming-duration delay matrix. This is not exact MATLAB HRTF/source rendering, physical tactile calibration, hardware loopback, or collected participant evidence."
     }
   ],
   "coverage_summary": {
@@ -463,11 +470,12 @@
     {
       "id": "tactile_waveform_frequency_profile",
       "dimension": "tactile_site_channel_modality_duration_or_calibration",
-      "description": "The tactile stimulus is defined by a waveform/frequency profile, such as an 80 Hz sawtooth vibration, rather than only by site, channel, and duration.",
-      "toolkit_status": "not_first_class",
+      "description": "The tactile stimulus is defined by a waveform/frequency profile, such as an 80 Hz sawtooth vibration, rather than only by site, channel, and duration. The runner now supports this as row-level tactile waveform metadata; paper-specific renderer, calibration, and source-equivalence constraints can still block individual studies.",
+      "toolkit_status": "supported_by_tactile_waveform_capability_smoke",
       "example_records": [
         "looming_duration_2025"
-      ]
+      ],
+      "validation_report": "artifacts/validation_runs/current_goal_tactile_waveform_capability_20260715/tactile_waveform_capability_smoke_report.json"
     },
     {
       "id": "external_event_trigger_sync_contract",
@@ -1786,11 +1794,10 @@
       "audiotactile_task_family": "looming-cue tactile-response PPS task varying auditory duration",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "tactile_waveform_frequency_profile",
         "hrtf_database_or_binaural_engine_mismatch"
       ],
       "missing_publication_parameters": [
-        "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; exact original MATLAB HRTF implementation and tactile-waveform profile are not current first-class toolkit inputs"
+        "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis is runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation is not yet validated as a first-class toolkit/source-equivalence input"
       ]
     },
     {

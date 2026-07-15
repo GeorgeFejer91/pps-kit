@@ -530,6 +530,82 @@ def test_prepare_segment_run_package_advances_woojer_tactile_drive_in_block_wav(
     assert policy["example_compensated_drive_onset_ms"] == pytest.approx(77.0)
 
 
+def test_prepare_segment_run_package_generates_declared_tactile_waveform(tmp_path: Path):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    block_csv = run_manifest.parent.parent / "5_block_csv_preview" / "block_01_final.csv"
+    sample_rate = 44100
+    nominal_onset_s = 0.100
+    tactile_duration_s = 0.200
+    target = tmp_path / "looming_duration_2025_style.wav"
+    target_audio = np.zeros((int(round(0.500 * sample_rate)), 2), dtype=np.float32)
+    target_audio[:, 0] = 0.03
+    target_audio[:, 1] = 0.02
+    sf.write(target, target_audio, sample_rate)
+
+    with block_csv.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+        fieldnames = list(reader.fieldnames or [])
+    for field in (
+        "tactile_waveform_shape",
+        "tactile_frequency_hz",
+        "tactile_duration_ms",
+        "tactile_amplitude",
+    ):
+        if field not in fieldnames:
+            fieldnames.append(field)
+    rows[0].update(
+        {
+            "source_file_name": target.name,
+            "trial_file_path": str(target),
+            "source_sha256": _sha256(target),
+            "duration_ms": "500",
+            "duration_s": "0.5",
+            "looming_segment_onset_s": "0.000",
+            "tactile_onset_s": f"{nominal_onset_s:.3f}",
+            "channels": "2",
+            "tactile_channel": "3",
+            "tactile_waveform_shape": "sawtooth",
+            "tactile_frequency_hz": "80",
+            "tactile_duration_ms": "200",
+            "tactile_amplitude": "0.4",
+        }
+    )
+    with block_csv.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    package = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+        use_block_cache=False,
+    )
+
+    block_audio, rate = sf.read(package.blocks[0].wav_path, always_2d=True)
+    assert rate == sample_rate
+    assert block_audio.shape[1] == 3
+    drive_start = int(round((nominal_onset_s - 0.023) * sample_rate))
+    duration_frames = int(round(tactile_duration_s * sample_rate))
+    tactile = block_audio[drive_start : drive_start + duration_frames, 2]
+    assert tactile.min() == pytest.approx(-0.4, abs=0.02)
+    assert tactile.max() == pytest.approx(0.4, abs=0.02)
+    reset_count = int(np.count_nonzero(np.diff(tactile) < -0.5))
+    assert reset_count in {15, 16}
+
+    with package.blocks[0].manifest_path.open(newline="", encoding="utf-8") as handle:
+        prepared_rows = list(csv.DictReader(handle))
+    prepared = prepared_rows[0]
+    assert prepared["Tactile_Waveform_Shape"] == "sawtooth"
+    assert float(prepared["Tactile_Frequency_Hz"]) == pytest.approx(80.0)
+    assert float(prepared["Tactile_Duration_ms"]) == pytest.approx(200.0)
+    assert float(prepared["Tactile_Amplitude"]) == pytest.approx(0.4)
+    assert prepared["Tactile_Waveform_Generated"] == "true"
+    assert prepared["Tactile_Channel"] == "3"
+
+
 def test_prepare_segment_run_package_reports_progress_and_reuses_block_cache(tmp_path: Path):
     run_manifest = _segment_run_setup_fixture(tmp_path)
     cache_root = tmp_path / "block_cache"

@@ -84,7 +84,7 @@ SEGMENT_BLOCK_PREVIEW_SCHEMA = "pps-block-csv-preview.v1"
 LAST_EXPERIMENT_SCHEMA = "pps-last-experiment.v1"
 PREPARED_SESSION_QUEUE_SCHEMA = "pps-prepared-session-queue.v1"
 BLOCK_WAV_CACHE_SCHEMA = "pps-session-block-cache.v1"
-BLOCK_WAV_CACHE_VERSION = "2026-06-29.source-file-content.v1"
+BLOCK_WAV_CACHE_VERSION = "2026-07-15.tactile-waveform.v1"
 RESPONSE_MARKER_GAIN = 0.05
 EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S = 1.0
 LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_launched"}
@@ -487,6 +487,12 @@ PARTICIPANT_TRIAL_FIELDNAMES = [
     "response_rule",
     "target_role",
     "tactile_present",
+    "tactile_channel",
+    "tactile_waveform_shape",
+    "tactile_frequency_hz",
+    "tactile_duration_ms",
+    "tactile_amplitude",
+    "tactile_waveform_generated",
     "catch_trial",
     "audio_present",
     "stimulus_start_unix_time",
@@ -694,6 +700,31 @@ class ParticipantTrialCsvWriter:
             "response_rule": response_metadata["response_rule"],
             "target_role": response_metadata["target_role"],
             "tactile_present": str(tactile_present).lower(),
+            "tactile_channel": _row_value(base, "tactile_channel", "Tactile_Channel", default=""),
+            "tactile_waveform_shape": _row_value(base, "tactile_waveform_shape", "Tactile_Waveform_Shape", default=""),
+            "tactile_frequency_hz": _row_value(
+                base,
+                "tactile_frequency_hz",
+                "Tactile_Frequency_Hz",
+                "tactile_waveform_frequency_hz",
+                "Tactile_Waveform_Frequency_Hz",
+                default="",
+            ),
+            "tactile_duration_ms": _row_value(
+                base,
+                "tactile_duration_ms",
+                "Tactile_Duration_ms",
+                "tactile_waveform_duration_ms",
+                "Tactile_Waveform_Duration_ms",
+                default="",
+            ),
+            "tactile_amplitude": _row_value(base, "tactile_amplitude", "Tactile_Amplitude", default=""),
+            "tactile_waveform_generated": _row_value(
+                base,
+                "tactile_waveform_generated",
+                "Tactile_Waveform_Generated",
+                default="",
+            ),
             "catch_trial": str(catch_trial).lower(),
             "audio_present": str(audio_present).lower(),
             "stimulus_start_unix_time": "" if stimulus_start_unix <= 0.0 else f"{stimulus_start_unix:.9f}",
@@ -2246,6 +2277,11 @@ def _cache_manifest_trial_payload(trial_rows: list[dict[str, Any]]) -> list[dict
                 "tactile_latency_compensation_status": row.get("Tactile_Latency_Compensation_Status", ""),
                 "tactile_latency_compensation_applied": row.get("Tactile_Latency_Compensation_Applied", ""),
                 "tactile_latency_compensation_note": row.get("Tactile_Latency_Compensation_Note", ""),
+                "tactile_waveform_shape": row.get("Tactile_Waveform_Shape", ""),
+                "tactile_frequency_hz": row.get("Tactile_Frequency_Hz", ""),
+                "tactile_duration_ms": row.get("Tactile_Duration_ms", ""),
+                "tactile_amplitude": row.get("Tactile_Amplitude", ""),
+                "tactile_waveform_generated": row.get("Tactile_Waveform_Generated", ""),
             }
         )
     return trials
@@ -2362,6 +2398,8 @@ def _segment_trial_rows_from_cache(
         looming_onset_s = _segment_looming_onset_s(row)
         tactile_onset_s = _segment_tactile_onset_s(row, looming_onset_s)
         family = _segment_family(row)
+        spec = _tactile_waveform_spec(row, family)
+        tactile_waveform = _tactile_waveform_metadata(row, spec, generated=bool(spec))
         tactile_compensation = {
             "requested_compensation_ms": _as_float(cached.get("tactile_latency_compensation_requested_ms"), default=0.0),
             "applied_compensation_ms": _as_float(cached.get("tactile_latency_compensation_applied_ms"), default=0.0),
@@ -2397,6 +2435,7 @@ def _segment_trial_rows_from_cache(
                 tactile_onset_s=tactile_onset_s,
                 tactile_drive_onset_s=float(tactile_compensation.get("drive_onset_s") or tactile_onset_s),
                 tactile_compensation=tactile_compensation,
+                tactile_waveform=tactile_waveform,
             )
         )
         wav_infos.append(_wav_info(trial_path, sha256=trial_hash, label=trial_path.stem))
@@ -4719,6 +4758,13 @@ class SessionRunnerController:
             looming_onset_s = _segment_looming_onset_s(source_row)
             tactile_onset_s = _segment_tactile_onset_s(source_row, looming_onset_s)
             family = _segment_family(source_row)
+            data, tactile_waveform = _apply_tactile_waveform_profile(
+                data,
+                source_row,
+                sample_rate=sample_rate,
+                family=family,
+                tactile_onset_s=tactile_onset_s,
+            )
             data, tactile_compensation = _apply_tactile_drive_compensation(
                 data,
                 sample_rate=sample_rate,
@@ -4765,6 +4811,7 @@ class SessionRunnerController:
                 tactile_onset_s=tactile_onset_s,
                 tactile_drive_onset_s=float(tactile_compensation.get("drive_onset_s") or tactile_onset_s),
                 tactile_compensation=tactile_compensation,
+                tactile_waveform=tactile_waveform,
             )
             row["Session_Group_ID"] = self.package.session_group_id
             row["Part_Session_ID"] = _package_part_session_id(self.package) if _package_is_split_part(self.package) else ""
@@ -6442,6 +6489,155 @@ def _segment_tactile_onset_s(row: dict[str, Any], looming_onset_s: float) -> flo
     return round(max(0.0, looming_onset_s + soa_ms / 1000.0), 6)
 
 
+def _normal_tactile_waveform_shape(value: Any) -> str:
+    token = re.sub(r"[^a-z0-9]+", "_", str(value or "").strip().lower()).strip("_")
+    if not token:
+        return ""
+    aliases = {
+        "saw": "sawtooth",
+        "saw_tooth": "sawtooth",
+        "sawtooth": "sawtooth",
+        "ramp": "sawtooth",
+        "sine": "sine",
+        "sin": "sine",
+        "sinusoid": "sine",
+        "sinusoidal": "sine",
+        "square": "square",
+        "pulse": "square",
+    }
+    return aliases.get(token, token)
+
+
+def _tactile_waveform_spec(row: dict[str, Any], family: str) -> dict[str, Any] | None:
+    if family not in {"audio_tactile", "baseline"}:
+        return None
+    shape = _normal_tactile_waveform_shape(
+        _row_value(row, "tactile_waveform_shape", "Tactile_Waveform_Shape", default="")
+    )
+    frequency_hz = _as_float(
+        _row_value(
+            row,
+            "tactile_frequency_hz",
+            "Tactile_Frequency_Hz",
+            "tactile_waveform_frequency_hz",
+            "Tactile_Waveform_Frequency_Hz",
+            default="",
+        ),
+        default=0.0,
+    )
+    duration_ms = _as_float(
+        _row_value(
+            row,
+            "tactile_duration_ms",
+            "Tactile_Duration_ms",
+            "tactile_waveform_duration_ms",
+            "Tactile_Waveform_Duration_ms",
+            default="",
+        ),
+        default=0.0,
+    )
+    if not shape and frequency_hz <= 0.0 and duration_ms <= 0.0:
+        return None
+    if shape not in {"sawtooth", "sine", "square"}:
+        raise ValueError(f"Unsupported tactile waveform shape: {shape or '<blank>'}")
+    if frequency_hz <= 0.0:
+        raise ValueError("Tactile waveform frequency must be greater than zero.")
+    if duration_ms <= 0.0:
+        raise ValueError("Tactile waveform duration must be greater than zero.")
+    channel = _as_int(_row_value(row, "tactile_channel", "Tactile_Channel", default=3), default=3)
+    amplitude = _as_float(
+        _row_value(row, "tactile_amplitude", "Tactile_Amplitude", "tactile_waveform_amplitude", default=0.2),
+        default=0.2,
+    )
+    return {
+        "shape": shape,
+        "frequency_hz": float(frequency_hz),
+        "duration_ms": float(duration_ms),
+        "channel_1based": max(1, int(channel)),
+        "amplitude": max(0.0, min(1.0, float(amplitude))),
+    }
+
+
+def _tactile_waveform_metadata(
+    row: dict[str, Any],
+    spec: dict[str, Any] | None,
+    *,
+    generated: bool,
+) -> dict[str, Any]:
+    if spec is not None:
+        return {
+            "shape": spec.get("shape", ""),
+            "frequency_hz": spec.get("frequency_hz", ""),
+            "duration_ms": spec.get("duration_ms", ""),
+            "channel_1based": spec.get("channel_1based", ""),
+            "amplitude": spec.get("amplitude", ""),
+            "generated": bool(generated),
+        }
+    return {
+        "shape": _row_value(row, "tactile_waveform_shape", "Tactile_Waveform_Shape", default=""),
+        "frequency_hz": _row_value(
+            row,
+            "tactile_frequency_hz",
+            "Tactile_Frequency_Hz",
+            "tactile_waveform_frequency_hz",
+            "Tactile_Waveform_Frequency_Hz",
+            default="",
+        ),
+        "duration_ms": _row_value(
+            row,
+            "tactile_duration_ms",
+            "Tactile_Duration_ms",
+            "tactile_waveform_duration_ms",
+            "Tactile_Waveform_Duration_ms",
+            default="",
+        ),
+        "channel_1based": _row_value(row, "tactile_channel", "Tactile_Channel", default=""),
+        "amplitude": _row_value(row, "tactile_amplitude", "Tactile_Amplitude", default=""),
+        "generated": False,
+    }
+
+
+def _apply_tactile_waveform_profile(
+    data: Any,
+    row: dict[str, Any],
+    *,
+    sample_rate: int,
+    family: str,
+    tactile_onset_s: float,
+) -> tuple[Any, dict[str, Any]]:
+    import numpy as np
+
+    spec = _tactile_waveform_spec(row, family)
+    if spec is None:
+        return data, _tactile_waveform_metadata(row, spec, generated=False)
+    if sample_rate <= 0:
+        raise ValueError("Cannot synthesize tactile waveform without a positive sample rate.")
+    source = np.asarray(data, dtype=np.float32)
+    if getattr(source, "ndim", 0) != 2:
+        raise ValueError("Tactile waveform synthesis expects a 2-D audio array.")
+    channel_index = int(spec["channel_1based"]) - 1
+    if source.shape[1] <= channel_index:
+        pad = np.zeros((source.shape[0], channel_index + 1 - source.shape[1]), dtype=source.dtype)
+        source = np.concatenate([source, pad], axis=1)
+    start = max(0, int(round(float(tactile_onset_s) * sample_rate)))
+    frames = max(1, int(round(float(spec["duration_ms"]) / 1000.0 * sample_rate)))
+    stop = start + frames
+    if stop > source.shape[0]:
+        pad = np.zeros((stop - source.shape[0], source.shape[1]), dtype=source.dtype)
+        source = np.concatenate([source, pad], axis=0)
+    t = np.arange(frames, dtype=np.float32) / float(sample_rate)
+    phase = (t * float(spec["frequency_hz"])) % 1.0
+    if spec["shape"] == "sawtooth":
+        waveform = (2.0 * phase) - 1.0
+    elif spec["shape"] == "square":
+        waveform = np.where(phase < 0.5, 1.0, -1.0)
+    else:
+        waveform = np.sin(2.0 * math.pi * float(spec["frequency_hz"]) * t)
+    adjusted = np.array(source, copy=True)
+    adjusted[start:stop, channel_index] = waveform.astype(np.float32) * float(spec["amplitude"])
+    return adjusted, _tactile_waveform_metadata(row, spec, generated=True)
+
+
 def _tactile_drive_onset_for_trial(family: str, tactile_onset_s: float) -> tuple[float, float]:
     policy = woojer_tactile_latency_policy()
     requested_ms = float(policy.get("compensation_ms") or 0.0)
@@ -6599,6 +6795,13 @@ def _materialize_segment_block_wav(
         looming_onset_s = _segment_looming_onset_s(row)
         tactile_onset_s = _segment_tactile_onset_s(row, looming_onset_s)
         family = _segment_family(row)
+        data, tactile_waveform = _apply_tactile_waveform_profile(
+            data,
+            row,
+            sample_rate=sample_rate,
+            family=family,
+            tactile_onset_s=tactile_onset_s,
+        )
         data, tactile_compensation = _apply_tactile_drive_compensation(
             data,
             sample_rate=sample_rate,
@@ -6639,6 +6842,7 @@ def _materialize_segment_block_wav(
                 tactile_onset_s=tactile_onset_s,
                 tactile_drive_onset_s=float(tactile_compensation.get("drive_onset_s") or tactile_onset_s),
                 tactile_compensation=tactile_compensation,
+                tactile_waveform=tactile_waveform,
             )
         )
         frame_cursor = trial_end_sample
@@ -6684,11 +6888,13 @@ def _segment_session_trial_row(
     tactile_onset_s: float,
     tactile_drive_onset_s: float,
     tactile_compensation: dict[str, Any] | None = None,
+    tactile_waveform: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     trial_start_s = trial_start_sample / float(sample_rate)
     trial_end_s = trial_end_sample / float(sample_rate)
     response_window_onset_s = looming_onset_s if family in {"audio_tactile", "catch"} else tactile_onset_s
     tactile_compensation = dict(tactile_compensation or {})
+    tactile_waveform = dict(tactile_waveform or {})
     has_tactile = family in {"audio_tactile", "baseline"}
     drive_onset_s = max(0.0, float(tactile_drive_onset_s))
     soa_ms = _row_value(source, "soa_ms", "SOA_ms", default="")
@@ -6770,7 +6976,29 @@ def _segment_session_trial_row(
         "Trial_Duration_S": f"{duration_s:.9f}",
         "Sample_Rate_Hz": sample_rate,
         "Channels": source_channels,
-        "Tactile_Channel": _row_value(source, "tactile_channel", "Tactile_Channel", default=""),
+        "Tactile_Channel": _row_value(
+            source,
+            "tactile_channel",
+            "Tactile_Channel",
+            default=tactile_waveform.get("channel_1based", ""),
+        ),
+        "Tactile_Waveform_Shape": str(tactile_waveform.get("shape") or ""),
+        "Tactile_Frequency_Hz": (
+            f"{float(tactile_waveform.get('frequency_hz')):.6g}"
+            if tactile_waveform.get("frequency_hz") not in (None, "")
+            else ""
+        ),
+        "Tactile_Duration_ms": (
+            f"{float(tactile_waveform.get('duration_ms')):.6g}"
+            if tactile_waveform.get("duration_ms") not in (None, "")
+            else ""
+        ),
+        "Tactile_Amplitude": (
+            f"{float(tactile_waveform.get('amplitude')):.6g}"
+            if tactile_waveform.get("amplitude") not in (None, "")
+            else ""
+        ),
+        "Tactile_Waveform_Generated": str(bool(tactile_waveform.get("generated"))).lower() if has_tactile else "",
         "Trial_Start_S": f"{trial_start_s:.9f}",
         "Trial_Start_Sample": trial_start_sample,
         "Looming_Onset_S": f"{looming_onset_s:.9f}" if family in {"audio_tactile", "catch"} else "",
@@ -6842,6 +7070,11 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "Sample_Rate_Hz",
         "Channels",
         "Tactile_Channel",
+        "Tactile_Waveform_Shape",
+        "Tactile_Frequency_Hz",
+        "Tactile_Duration_ms",
+        "Tactile_Amplitude",
+        "Tactile_Waveform_Generated",
         "Trial_Start_S",
         "Trial_Start_Sample",
         "Looming_Onset_S",

@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; exact original MATLAB HRTF implementation and tactile-waveform profile are not current first-class toolkit inputs
+- live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis is runner-supported and validated, but exact original MATLAB HRTF/right-lateral rendering implementation is not yet validated as a first-class toolkit/source-equivalence input
 
 ## Review Attempts
 

@@ -6134,7 +6134,6 @@
     {
       "audiotactile_task_family": "looming-cue tactile-response PPS task varying auditory duration",
       "blocking_constraint_ids": [
-        "tactile_waveform_frequency_profile",
         "hrtf_database_or_binaural_engine_mismatch"
       ],
       "citation_short": "Impact of looming sound duration on PPS measurement (2025)",
@@ -6173,12 +6172,11 @@
         },
         "source_parameter_extraction": {
           "blockers": [
-            "tactile_waveform_frequency_profile",
             "hrtf_database_or_binaural_engine_mismatch"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; exact original MATLAB HRTF implementation and tactile-waveform profile are not current first-class toolkit inputs"
+            "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis is runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation is not yet validated as a first-class toolkit/source-equivalence input"
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -6196,7 +6194,6 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "tactile_waveform_frequency_profile",
             "hrtf_database_or_binaural_engine_mismatch"
           ],
           "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
@@ -6213,9 +6210,9 @@
         }
       },
       "missing_publication_parameters": [
-        "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; exact original MATLAB HRTF implementation and tactile-waveform profile are not current first-class toolkit inputs"
+        "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis is runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation is not yet validated as a first-class toolkit/source-equivalence input"
       ],
-      "next_required_action": "Implement or validate toolkit support for: tactile_waveform_frequency_profile, hrtf_database_or_binaural_engine_mismatch; also extract/source missing paper parameters: live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; exact original MATLAB HRTF implementation and tactile-waveform profile are not current first-class toolkit inputs",
+      "next_required_action": "Implement or validate toolkit support for: hrtf_database_or_binaural_engine_mismatch; also extract/source missing paper parameters: live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis is runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation is not yet validated as a first-class toolkit/source-equivalence input",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",

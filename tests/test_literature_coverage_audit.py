@@ -129,6 +129,16 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         )
         for source in coverage["evidence_sources"]
     )
+    assert any(
+        source.get("id") == "tactile_waveform_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_tactile_waveform_capability_20260715/"
+            "tactile_waveform_capability_smoke_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
 
     status_ids = {profile["template_id"] for profile in status["profiles"]}
     coverage_ids = {entry["template_id"] for entry in coverage["current_template_coverage"]}
@@ -230,6 +240,14 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert gonogo_constraint["validation_report"] == (
         "artifacts/validation_runs/current_goal_gonogo_capability_20260715/"
         "gonogo_capability_smoke_report.json"
+    )
+    tactile_waveform_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "tactile_waveform_frequency_profile"
+    )
+    assert tactile_waveform_constraint["toolkit_status"] == "supported_by_tactile_waveform_capability_smoke"
+    assert tactile_waveform_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_tactile_waveform_capability_20260715/"
+        "tactile_waveform_capability_smoke_report.json"
     )
     multi_speaker_constraint = next(
         item for item in coverage["constraint_taxonomy"] if item["id"] == "multi_speaker_array_switching"
@@ -341,7 +359,9 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "exact SPL/gain transfer for the reported 76.5/77.3 dBA source levels",
     ]
     assert records["looming_duration_2025"]["coverage_category"] == "not_yet_templated_requires_toolkit_structure"
-    assert "tactile_waveform_frequency_profile" in records["looming_duration_2025"]["blocking_constraint_ids"]
+    assert records["looming_duration_2025"]["blocking_constraint_ids"] == [
+        "hrtf_database_or_binaural_engine_mismatch"
+    ]
     assert records["lamia_2026_arm_movement"]["can_recreate_audiotactile_components_now"] is True
     assert records["serino_2015_peri_trunk_exp1"]["coverage_category"] == "covered_runnable_profile"
     assert records["serino_2015_peri_trunk_exp1"]["can_recreate_audiotactile_components_now"] is True
@@ -422,6 +442,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         assert set(record["blocking_constraint_ids"]) <= constraint_ids, record["record_id"]
         assert "static_near_far_trial_family" not in record["blocking_constraint_ids"], record["record_id"]
         assert "weak_strong_no_target_gonogo" not in record["blocking_constraint_ids"], record["record_id"]
+        assert "tactile_waveform_frequency_profile" not in record["blocking_constraint_ids"], record["record_id"]
         assert not (set(record["blocking_constraint_ids"]) & non_blocking_tokens), record["record_id"]
         for constraint_id in record["blocking_constraint_ids"]:
             assert constraint_dimensions[constraint_id] in task_execution_dimensions, record["record_id"]
