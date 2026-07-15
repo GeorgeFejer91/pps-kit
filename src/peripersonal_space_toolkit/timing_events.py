@@ -150,6 +150,20 @@ class TriggerDictionary:
                         "external_trigger_channel",
                         payload.get("External_Trigger_Channel", ""),
                     ),
+                    "iti_policy": payload.get("iti_policy", payload.get("ITI_Policy", "")),
+                    "iti_ms": payload.get(
+                        "iti_ms",
+                        payload.get("ITI_ms", payload.get("Intertrial_Interval_ms", "")),
+                    ),
+                    "foreperiod_ms": payload.get("foreperiod_ms", payload.get("Foreperiod_ms", "")),
+                    "hazard_control_policy": payload.get(
+                        "hazard_control_policy",
+                        payload.get("Hazard_Control_Policy", ""),
+                    ),
+                    "expectancy_control_role": payload.get(
+                        "expectancy_control_role",
+                        payload.get("Expectancy_Control_Role", ""),
+                    ),
                     "sample_index": getattr(event, "sample_index", ""),
                 }
 
@@ -206,6 +220,20 @@ class TriggerDictionary:
                 "external_trigger_channel": payload.get(
                     "external_trigger_channel",
                     payload.get("External_Trigger_Channel", ""),
+                ),
+                "iti_policy": payload.get("iti_policy", payload.get("ITI_Policy", "")),
+                "iti_ms": payload.get(
+                    "iti_ms",
+                    payload.get("ITI_ms", payload.get("Intertrial_Interval_ms", "")),
+                ),
+                "foreperiod_ms": payload.get("foreperiod_ms", payload.get("Foreperiod_ms", "")),
+                "hazard_control_policy": payload.get(
+                    "hazard_control_policy",
+                    payload.get("Hazard_Control_Policy", ""),
+                ),
+                "expectancy_control_role": payload.get(
+                    "expectancy_control_role",
+                    payload.get("Expectancy_Control_Role", ""),
                 ),
                 "sample_index": payload.get("sample_index", ""),
                 "dynamic": True,

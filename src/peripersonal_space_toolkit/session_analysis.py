@@ -826,6 +826,11 @@ def _response_base(event: dict[str, Any]) -> dict[str, Any]:
         "noise_type": _field(event, "noise_type", "Noise_Type"),
         "sequence_labels": _field(event, "sequence_labels", "Sequence_Labels"),
         "sequence_variant_key": _field(event, "sequence_variant_key", "Sequence_Variant_Key"),
+        "iti_policy": _field(event, "iti_policy", "ITI_Policy"),
+        "iti_ms": _field(event, "iti_ms", "ITI_ms", "Intertrial_Interval_ms"),
+        "foreperiod_ms": _field(event, "foreperiod_ms", "Foreperiod_ms"),
+        "hazard_control_policy": _field(event, "hazard_control_policy", "Hazard_Control_Policy"),
+        "expectancy_control_role": _field(event, "expectancy_control_role", "Expectancy_Control_Role"),
         "respiratory_phase": _field(event, "respiratory_phase", "Respiratory_Phase"),
         "stimulus_modality": _field(event, "stimulus_modality"),
         "is_topup": _truthy(_field(event, "is_topup", "Is_Topup")),
@@ -2669,6 +2674,16 @@ def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
         row["sequence_labels"] = row.get("Sequence_Labels")
     if "sequence_variant_key" not in row and "Sequence_Variant_Key" in row:
         row["sequence_variant_key"] = row.get("Sequence_Variant_Key")
+    if "iti_policy" not in row and "ITI_Policy" in row:
+        row["iti_policy"] = row.get("ITI_Policy")
+    if "iti_ms" not in row and "ITI_ms" in row:
+        row["iti_ms"] = row.get("ITI_ms")
+    if "foreperiod_ms" not in row and "Foreperiod_ms" in row:
+        row["foreperiod_ms"] = row.get("Foreperiod_ms")
+    if "hazard_control_policy" not in row and "Hazard_Control_Policy" in row:
+        row["hazard_control_policy"] = row.get("Hazard_Control_Policy")
+    if "expectancy_control_role" not in row and "Expectancy_Control_Role" in row:
+        row["expectancy_control_role"] = row.get("Expectancy_Control_Role")
     if "soa_ms" not in row and "SOA_ms" in row:
         row["soa_ms"] = row.get("SOA_ms")
     if "rt_ms" not in row and "RT_ms" in row:

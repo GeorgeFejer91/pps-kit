@@ -3,7 +3,7 @@
 - Record ID: `spadone_2021_connectivity`
 - DOI: `10.1038/s41598-021-00048-5`
 - DOI URL: https://doi.org/10.1038/s41598-021-00048-5
-- Coverage category: `not_yet_templated_requires_toolkit_structure`
+- Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: fMRI audio-tactile task with looming/flat and near/far conditions
 - PDF status: `downloaded`
 - Supplement status: `needs_user_download`
@@ -17,7 +17,7 @@
 
 ## Known Prior Gaps
 
-- extract near/far, flat/dynamic, and fMRI block timing separately from scanner context; remaining toolkit blocker is fixed ITI/hazard timing policy
+- extract near/far, flat/dynamic, fMRI block timing, and paper-specific ITI/foreperiod/hazard values separately from scanner context before templating
 
 ## Review Attempts
 

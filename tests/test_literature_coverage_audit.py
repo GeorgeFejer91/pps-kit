@@ -37,8 +37,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_runnable_profile": 12,
         "covered_blocked_missing_publication_parameters": 8,
         "covered_blocked_toolkit_structure": 0,
-        "not_yet_templated_requires_toolkit_structure": 18,
-        "not_yet_templated_missing_publication_parameters": 33,
+        "not_yet_templated_requires_toolkit_structure": 16,
+        "not_yet_templated_missing_publication_parameters": 35,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
@@ -150,6 +150,16 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for source in coverage["evidence_sources"]
     )
     assert any(
+        source.get("id") == "iti_hazard_contract_capability_smoke_2026_07_15"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_iti_hazard_contract_20260715/"
+            "iti_hazard_contract_capability_smoke_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
         source.get("id") == "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15"
         and source.get("kind") == "pubmed_live_spot_check"
         and source.get("pmid") == "42128086"
@@ -239,6 +249,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert "body_scaled_distance_units" in constraint_ids
     assert "voice_key_response_capture" in constraint_ids
     assert "external_event_trigger_sync_contract" in constraint_ids
+    assert "fixed_iti_or_hazard_control_policy" in constraint_ids
     assert "tactile_waveform_frequency_profile" in constraint_ids
     assert "missing_core_soa_iti_baseline_repetition_parameters" in constraint_ids
     assert "exact_trial_timing_randomization_tables" not in constraint_ids
@@ -273,6 +284,14 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert external_trigger_constraint["validation_report"] == (
         "artifacts/validation_runs/current_goal_external_trigger_contract_20260715/"
         "external_trigger_contract_capability_smoke_report.json"
+    )
+    iti_hazard_constraint = next(
+        item for item in coverage["constraint_taxonomy"] if item["id"] == "fixed_iti_or_hazard_control_policy"
+    )
+    assert iti_hazard_constraint["toolkit_status"] == "supported_by_iti_hazard_contract_capability_smoke"
+    assert iti_hazard_constraint["validation_report"] == (
+        "artifacts/validation_runs/current_goal_iti_hazard_contract_20260715/"
+        "iti_hazard_contract_capability_smoke_report.json"
     )
     multi_speaker_constraint = next(
         item for item in coverage["constraint_taxonomy"] if item["id"] == "multi_speaker_array_switching"
@@ -395,6 +414,15 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["looming_duration_2025"]["blocking_constraint_ids"] == [
         "hrtf_database_or_binaural_engine_mismatch"
     ]
+    assert records["hobeika_2020_methods"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["hobeika_2020_methods"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+    ]
+    assert records["spadone_2021_connectivity"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["spadone_2021_connectivity"]["blocking_constraint_ids"] == []
+    assert records["spadone_2021_connectivity"]["missing_publication_parameters"] == [
+        "extract near/far, flat/dynamic, fMRI block timing, and paper-specific ITI/foreperiod/hazard values separately from scanner context before templating"
+    ]
     assert records["lamia_2026_arm_movement"]["can_recreate_audiotactile_components_now"] is True
     assert records["serino_2015_peri_trunk_exp1"]["coverage_category"] == "covered_runnable_profile"
     assert records["serino_2015_peri_trunk_exp1"]["can_recreate_audiotactile_components_now"] is True
@@ -477,6 +505,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         assert "weak_strong_no_target_gonogo" not in record["blocking_constraint_ids"], record["record_id"]
         assert "tactile_waveform_frequency_profile" not in record["blocking_constraint_ids"], record["record_id"]
         assert "external_event_trigger_sync_contract" not in record["blocking_constraint_ids"], record["record_id"]
+        assert "fixed_iti_or_hazard_control_policy" not in record["blocking_constraint_ids"], record["record_id"]
         assert not (set(record["blocking_constraint_ids"]) & non_blocking_tokens), record["record_id"]
         for constraint_id in record["blocking_constraint_ids"]:
             assert constraint_dimensions[constraint_id] in task_execution_dimensions, record["record_id"]

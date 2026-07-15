@@ -84,7 +84,7 @@ SEGMENT_BLOCK_PREVIEW_SCHEMA = "pps-block-csv-preview.v1"
 LAST_EXPERIMENT_SCHEMA = "pps-last-experiment.v1"
 PREPARED_SESSION_QUEUE_SCHEMA = "pps-prepared-session-queue.v1"
 BLOCK_WAV_CACHE_SCHEMA = "pps-session-block-cache.v1"
-BLOCK_WAV_CACHE_VERSION = "2026-07-15.external-trigger-contract.v1"
+BLOCK_WAV_CACHE_VERSION = "2026-07-15.iti-hazard-contract.v1"
 RESPONSE_MARKER_GAIN = 0.05
 EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S = 1.0
 LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_launched"}
@@ -482,6 +482,11 @@ PARTICIPANT_TRIAL_FIELDNAMES = [
     "noise_type",
     "sequence_labels",
     "sequence_variant_key",
+    "iti_policy",
+    "iti_ms",
+    "foreperiod_ms",
+    "hazard_control_policy",
+    "expectancy_control_role",
     "soa_ms",
     "expected_response",
     "response_rule",
@@ -701,6 +706,21 @@ class ParticipantTrialCsvWriter:
             "noise_type": _row_value(base, "noise_type", "Noise_Type", "noise_label", "Noise_Label", default=""),
             "sequence_labels": _row_value(base, "sequence_labels", "Sequence_Labels", default=""),
             "sequence_variant_key": _row_value(base, "sequence_variant_key", "Sequence_Variant_Key", default=""),
+            "iti_policy": _row_value(base, "iti_policy", "ITI_Policy", default=""),
+            "iti_ms": _row_value(base, "iti_ms", "ITI_ms", "Intertrial_Interval_ms", default=""),
+            "foreperiod_ms": _row_value(base, "foreperiod_ms", "Foreperiod_ms", default=""),
+            "hazard_control_policy": _row_value(
+                base,
+                "hazard_control_policy",
+                "Hazard_Control_Policy",
+                default="",
+            ),
+            "expectancy_control_role": _row_value(
+                base,
+                "expectancy_control_role",
+                "Expectancy_Control_Role",
+                default="",
+            ),
             "soa_ms": _row_value(base, "soa_ms", "SOA_ms", default=""),
             "expected_response": response_metadata["expected_response"],
             "response_rule": response_metadata["response_rule"],
@@ -2330,6 +2350,11 @@ def _cache_manifest_trial_payload(trial_rows: list[dict[str, Any]]) -> list[dict
                 "external_trigger_code": row.get("External_Trigger_Code", ""),
                 "external_trigger_tolerance_ms": row.get("External_Trigger_Tolerance_ms", ""),
                 "external_trigger_channel": row.get("External_Trigger_Channel", ""),
+                "iti_policy": row.get("ITI_Policy", ""),
+                "iti_ms": row.get("ITI_ms", ""),
+                "foreperiod_ms": row.get("Foreperiod_ms", ""),
+                "hazard_control_policy": row.get("Hazard_Control_Policy", ""),
+                "expectancy_control_role": row.get("Expectancy_Control_Role", ""),
             }
         )
     return trials
@@ -7017,6 +7042,21 @@ def _segment_session_trial_row(
         "Baseline_Mode": _row_value(source, "baseline_mode", "Baseline_Mode", default=""),
         "Sequence_Labels": _row_value(source, "sequence_labels", "Sequence_Labels", default=""),
         "Sequence_Variant_Key": _row_value(source, "sequence_variant_key", "Sequence_Variant_Key", default=""),
+        "ITI_Policy": _row_value(source, "iti_policy", "ITI_Policy", default=""),
+        "ITI_ms": _row_value(source, "iti_ms", "ITI_ms", "Intertrial_Interval_ms", default=""),
+        "Foreperiod_ms": _row_value(source, "foreperiod_ms", "Foreperiod_ms", default=""),
+        "Hazard_Control_Policy": _row_value(
+            source,
+            "hazard_control_policy",
+            "Hazard_Control_Policy",
+            default="",
+        ),
+        "Expectancy_Control_Role": _row_value(
+            source,
+            "expectancy_control_role",
+            "Expectancy_Control_Role",
+            default="",
+        ),
         "Source_File_Name": _row_value(source, "source_file_name", "Source_File_Name", default=trial_file_path.name),
         "Trial_File_Path": str(trial_file_path),
         "Source_SHA256": trial_file_sha256,
@@ -7146,6 +7186,11 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "Baseline_Mode",
         "Sequence_Labels",
         "Sequence_Variant_Key",
+        "ITI_Policy",
+        "ITI_ms",
+        "Foreperiod_ms",
+        "Hazard_Control_Policy",
+        "Expectancy_Control_Role",
         "Source_File_Name",
         "Trial_File_Path",
         "Source_SHA256",

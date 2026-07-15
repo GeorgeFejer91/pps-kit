@@ -116,7 +116,7 @@
         "peripersonal space auditory tactile dynamic sounds tool use social audio tactile task"
       ],
       "date_run": "2026-07-15",
-      "relevance": "Spot-check against Consensus MCP after the profile library reached 23 preloads. The returned methodological families matched the tracked audit scope: dynamic looming, direction/body-frame, social/tool-use, VR/3D boundary, emotional/roughness, mobile/smartphone, EEG/ERP/static near-far, and adjacent auditory-only or visual/audiovisual records. This spot-check did not replace the 74-record source audit or resolve missing PDFs/supplements.",
+      "relevance": "Spot-check against Consensus MCP after the profile library reached 23 preloads. The returned methodological families matched the tracked audit scope: dynamic looming, direction/body-frame, social/tool-use, VR/3D boundary, emotional/roughness, mobile/smartphone, EEG/ERP/static near-far, and adjacent auditory-only or visual/audiovisual records. This spot-check did not replace the 75-record source audit or resolve missing PDFs/supplements.",
       "note": "Current July 15, 2026 Consensus MCP spot-check returned the same broad audiotactile PPS families already represented by the tracked audit, including Tonelli 2019, newer front/rear records, and Lamia 2026. Tonelli is now runnable as a virtual lateral moving-source recreation with explicit apparatus caveats."
     },
     {
@@ -148,6 +148,13 @@
       "relevance": "Capability smoke proving that Segment 5/6 rows can declare an external event-trigger synchronization contract, preserve it in prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated responses. This is not EEG, TMS, fMRI, iEEG, sleep-recorder, hardware TTL, LabRecorder, or physiological endpoint validation."
     },
     {
+      "id": "iti_hazard_contract_capability_smoke_2026_07_15",
+      "kind": "validation_protocol",
+      "date_run": "2026-07-15",
+      "local_summary_file": "artifacts/validation_runs/current_goal_iti_hazard_contract_20260715/iti_hazard_contract_capability_smoke_report.json",
+      "relevance": "Capability smoke proving that Segment 5/6 rows can declare fixed ITI, foreperiod, hazard-control policy, and expectancy-role metadata, preserve those fields in prepared block CSVs, marker payloads, trigger dictionaries, local marker XDF mirrors, participant rows, and analysis rows, and run mouse-click simulated responses. This is not exact author-side randomization reconstruction, physical loopback timing, LabRecorder, collected participant evidence, or physiological endpoint validation."
+    },
+    {
       "id": "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15",
       "kind": "pubmed_live_spot_check",
       "date_run": "2026-07-15",
@@ -163,8 +170,8 @@
       "covered_runnable_profile": 12,
       "covered_blocked_missing_publication_parameters": 8,
       "covered_blocked_toolkit_structure": 0,
-      "not_yet_templated_requires_toolkit_structure": 18,
-      "not_yet_templated_missing_publication_parameters": 33,
+      "not_yet_templated_requires_toolkit_structure": 16,
+      "not_yet_templated_missing_publication_parameters": 35,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
@@ -375,12 +382,13 @@
     {
       "id": "fixed_iti_or_hazard_control_policy",
       "dimension": "timing_iti_soa_baseline_repetition",
-      "description": "Profiles requiring explicit expectancy or hazard-rate control across fixed, flat, dynamic, near, far, and baseline trials.",
-      "toolkit_status": "partially_modeled",
+      "description": "Profiles requiring explicit expectancy or hazard-rate control across fixed, flat, dynamic, near, far, and baseline trials. The runner now supports parsimonious row-level ITI, foreperiod, hazard-control policy, and expectancy-role metadata through prepared block CSVs, marker payloads, trigger dictionaries, participant rows, and analysis rows.",
+      "toolkit_status": "supported_by_iti_hazard_contract_capability_smoke",
       "example_records": [
         "hobeika_2020_methods",
         "spadone_2021_connectivity"
-      ]
+      ],
+      "validation_report": "artifacts/validation_runs/current_goal_iti_hazard_contract_20260715/iti_hazard_contract_capability_smoke_report.json"
     },
     {
       "id": "multi_speaker_array_switching",
@@ -680,7 +688,7 @@
   "literature_records": [
     {
       "record_id": "ladavas_2001_auditory_tactile_extinction",
-      "citation_short": "LÃ davas et al. (2001)",
+      "citation_short": "L\u00c3\u00a0davas et al. (2001)",
       "doi": "10.1093/neucas/7.2.97",
       "source_basis": [
         "openalex_query_variant_exhaustiveness_2026_06_13",
@@ -701,7 +709,7 @@
     },
     {
       "record_id": "farne_ladavas_2002_auditory_pps_humans",
-      "citation_short": "FarnÃ¨ & LÃ davas (2002)",
+      "citation_short": "Farn\u00c3\u00a8 & L\u00c3\u00a0davas (2002)",
       "doi": "10.1162/089892902320474481",
       "source_basis": [
         "openalex_query_variant_exhaustiveness_2026_06_13",
@@ -1520,11 +1528,10 @@
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "expectancy-controlled dynamic PPS task with sound-propagation corrections",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "fixed_iti_or_hazard_control_policy",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
@@ -1575,14 +1582,12 @@
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_requires_toolkit_structure",
+      "coverage_category": "not_yet_templated_missing_publication_parameters",
       "audiotactile_task_family": "fMRI audio-tactile task with looming/flat and near/far conditions",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "fixed_iti_or_hazard_control_policy"
-      ],
+      "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "extract near/far, flat/dynamic, and fMRI block timing separately from scanner context; remaining toolkit blocker is fixed ITI/hazard timing policy"
+        "extract near/far, flat/dynamic, fMRI block timing, and paper-specific ITI/foreperiod/hazard values separately from scanner context before templating"
       ]
     },
     {
