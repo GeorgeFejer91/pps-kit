@@ -224,3 +224,59 @@ def test_ready_profile_expected_contrast_audit_reports_supported_and_missing_con
     assert matsuda["synthetic_comparison"]["observed_effect_direction"] == (
         "approaching_sounds_show_pps_facilitation_across_four_directions"
     )
+
+
+def test_contrast_availability_requires_both_factor_poles_for_lamia():
+    audit = _load_script()
+
+    incomplete = audit._contrast_availability(
+        "lamia_2026_arm_movement",
+        [
+            {
+                "template_id": "barumerli_2026_arm_movement_exp1",
+                "analysis_ready_trials": "",
+                "rows": [
+                    {
+                        "family": "audio_tactile",
+                        "block_label": "Arm movement block",
+                        "row_label": "Arm-movement sound-motion trial",
+                        "sequence_labels": "Pink moving sound - receding",
+                        "soa_ms": "300",
+                    }
+                ],
+            }
+        ],
+    )
+
+    assert incomplete["auditory_motion_direction"]
+    assert not incomplete["movement_state"]
+    assert not incomplete["tactile_site"]
+
+    complete = audit._contrast_availability(
+        "lamia_2026_arm_movement",
+        [
+            {
+                "template_id": "barumerli_2026_arm_movement_exp1",
+                "analysis_ready_trials": "",
+                "rows": [
+                    {
+                        "family": "audio_tactile",
+                        "block_label": "Motor hand block",
+                        "row_label": "Finger tactile site",
+                        "sequence_labels": "Pink moving sound - receding",
+                        "soa_ms": "300",
+                    },
+                    {
+                        "family": "audio_tactile",
+                        "block_label": "Static trunk block",
+                        "row_label": "Chest tactile site",
+                        "sequence_labels": "Pink moving sound",
+                        "soa_ms": "2700",
+                    },
+                ],
+            }
+        ],
+    )
+
+    assert complete["movement_state"]
+    assert complete["tactile_site"]

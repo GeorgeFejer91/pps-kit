@@ -264,6 +264,11 @@ def _contrast_availability(record_id: str, profile_rows: list[dict[str, Any]]) -
     ).lower()
     soa_values = {_as_float(row.get("soa_ms")) for row in rows if math.isfinite(_as_float(row.get("soa_ms")))}
     families = {str(row.get("family") or "").strip().lower() for row in rows}
+    has_body_directions = {direction for direction in ("front", "rear", "left", "right") if direction in text_values}
+    has_movement_state = any(token in text_values for token in ("moving", "movement", "motor"))
+    has_static_state = any(token in text_values for token in ("static", "still", "rest"))
+    has_hand_site = any(token in text_values for token in ("hand", "finger"))
+    has_trunk_site = any(token in text_values for token in ("chest", "trunk", "sternum"))
     availability = {
         "soa_or_distance_rank": len(soa_values) >= 2,
         "audio_tactile_vs_baseline": {"audio_tactile", "baseline"}.issubset(families),
@@ -271,9 +276,9 @@ def _contrast_availability(record_id: str, profile_rows: list[dict[str, Any]]) -
         "auditory_motion_direction": any(token in text_values for token in ("reced", "approach", "looming")) and (
             "reced" in text_values
         ),
-        "body_relative_direction": any(token in text_values for token in ("front", "rear", "left", "right")),
-        "movement_state": any(token in text_values for token in ("moving", "movement", "static", "motor")),
-        "tactile_site": any(token in text_values for token in ("hand", "finger", "chest", "trunk")),
+        "body_relative_direction": {"front", "rear", "left", "right"}.issubset(has_body_directions),
+        "movement_state": has_movement_state and has_static_state,
+        "tactile_site": has_hand_site and has_trunk_site,
         "stroking_synchrony": any(token in text_values for token in ("synchronous", "asynchronous", "sync")),
         "front_back_space": "front" in text_values and ("back" in text_values or "rear" in text_values),
         "vestibular_condition": "vestibular" in text_values or "rotation" in text_values,
