@@ -65,14 +65,14 @@ const DEFAULT_LOUDNESS_POLICY = {
     windows_volume_policy: "not_part_of_asio_calibration"
   }
 };
-const STATIC_REPO_ROOT = new URL("../../../../", document.currentScript?.src || window.location.href).href;
+const STATIC_REPO_ROOT = new URL(import.meta.url.includes("/compiled/assets/") ? "../../../../../" : "../../../", import.meta.url).href;
 const STATIC_PRELOAD_INVENTORY_PATH = "assets/preloads/preload_inventory.json";
 const STATIC_TEMPLATE_DIR = "study_templates/";
 const STATIC_AUDIT_SNAPSHOT_SCHEMA = "pps-static-dashboard-preview-audit-snapshot.v1";
 const STATIC_AUDIT_QUERY_PARAM = "auditStaticPreview";
 const STATIC_FORCE_QUERY_PARAM = "forceStaticPreview";
 const STATIC_COMPANION_REQUIRED_MESSAGE =
-  "Start the local companion backend to create, bake, save, prepare, or open local experiment files.";
+  "This action needs the installed PPS Designer. Hosted mode can compose and export profiles, but cannot render audio, write workspace folders, or launch the Runner.";
 const PROFILE_RECREATION_NOTICE =
   "Be aware: this is not the exact stimulus set used in the original study. This preload recreates the study's reported parameters within this interface, using the toolkit's local rendering and bundled profile assets.";
 const WORKFLOW_STEPS = ["study", "stimulus", "trials", "baseline", "block", "schedule", "run"];
@@ -153,11 +153,11 @@ const SEGMENT_INFO = {
   },
   run: {
     kicker: "Segment 6",
-    title: "Prepare Experiment",
-    purpose: "Set final experiment-level run parameters.",
-    inputs: "Participant count, 1-part/2-part structure, preloaded instruction audio clips, and block-order sequence.",
-    backend: "Writes the 6_experiment_run_setup participant block-order CSV/manifest, run instruction profile, and native runner session.",
-    next: "Hands off to Focus Mode for timing-sensitive participant runs."
+    title: "Profile Validation and Save",
+    purpose: "Validate and save a reusable design without fixing the eventual study size.",
+    inputs: "Part membership, instruction policy, a non-scientific preview row count, and the versioned block-order policy.",
+    backend: "Stores the profile contract and deterministic order policy. The Runner materializes an immutable participant session later.",
+    next: "Exports a portable .pps-profile or registers the profile for Runner discovery."
   }
 };
 const DOWNSTREAM_STEPS = {
@@ -337,6 +337,8 @@ let runSequencePreviewTimer = null;
 let activePage = "toolkit";
 let editModeActive = false;
 let staticModeActive = false;
+let autosaveTimer = 0;
+let autosaveRevision = 0;
 let staticModeReason = "";
 let staticPreloadInventory = null;
 let staticTemplatesCache = null;
@@ -474,7 +476,7 @@ function isCustomMode() {
 }
 
 function isProfileReadonlyMode() {
-  return Boolean(state && !isCustomMode());
+  return Boolean(state && (!isCustomMode() || state.custom_workflow?.is_finalized));
 }
 
 function customViewModeLocked() {
@@ -485,12 +487,6 @@ function setEditMode(active) {
   if (active) {
     if (!state) {
       showToast("Wait for the dashboard state to load before editing.");
-      editModeActive = false;
-      renderEditModePanel();
-      return false;
-    }
-    if (staticModeActive) {
-      showToast(STATIC_COMPANION_REQUIRED_MESSAGE);
       editModeActive = false;
       renderEditModePanel();
       return false;
@@ -520,14 +516,12 @@ function renderEditModePanel() {
   const editButton = $("edit-mode-button");
   const status = $("edit-mode-status");
   if (!viewButton || !editButton || !status) return;
-  const canEnterEdit = Boolean(state && !staticModeActive);
+  const canEnterEdit = Boolean(state);
   viewButton.classList.toggle("active", !editModeActive);
   editButton.classList.toggle("active", editModeActive);
   viewButton.setAttribute("aria-pressed", String(!editModeActive));
   editButton.disabled = !canEnterEdit;
-  editButton.title = staticModeActive
-    ? STATIC_COMPANION_REQUIRED_MESSAGE
-    : isProfileReadonlyMode()
+  editButton.title = isProfileReadonlyMode()
       ? "Create a named custom copy before editing this loaded profile."
       : "Unlock editable custom-study decisions.";
   if (isProfileReadonlyMode()) {
@@ -551,6 +545,7 @@ function renderEditModePanel() {
 // fields are locked (read-only profile or a not-yet-reached custom step), the
 // preview can still be viewed but the trajectory cannot be changed.
 function trajectoryEditingEnabled() {
+  if (staticModeActive) return false;
   const input = $("start-distance");
   return Boolean(input && !input.disabled);
 }
@@ -2408,6 +2403,23 @@ function renderAll() {
   renderSegmentRegistryOutputs();
   renderWorkflow();
   renderDataAcquisitionBridge();
+  renderCapabilityLocks();
+}
+
+function renderCapabilityLocks() {
+  if (!staticModeActive) return;
+  const unavailable = [
+    "start-distance", "end-distance", "start-rotation", "end-rotation",
+    "movement-duration", "start-hold", "end-hold", "generated-noise-select",
+    "bake-stimulus", "import-audio-spatialize", "regenerate-run-sequence",
+    "export-output-folder", "prepare-experiment",
+  ];
+  for (const id of unavailable) {
+    const control = $(id);
+    if (!control) continue;
+    control.disabled = true;
+    control.title = STATIC_COMPANION_REQUIRED_MESSAGE;
+  }
 }
 
 function normalizePageRoute(value) {
@@ -2511,6 +2523,9 @@ function replaceRouteForPage(page, sectionId = "") {
 function setActivePage(page, options = {}) {
   const nextPage = PAGE_TABS.includes(page) ? page : "toolkit";
   activePage = nextPage;
+  if (nextPage === "documentation" && !window.HARDWARE_PIXEL_ART) {
+    import("./hardware_pixel_art.js").then(renderHardwarePixelArt).catch(console.error);
+  }
   document.body.dataset.activePage = nextPage;
   document.body.classList.toggle("info-page-active", nextPage !== "toolkit");
   for (const button of document.querySelectorAll("[data-page-tab]")) {
@@ -2575,6 +2590,26 @@ function initializePageTabs() {
   scrollToHashTarget();
 }
 
+function initializeLazySurfaces() {
+  const frame = $("trajectory-frame");
+  if (!frame?.dataset.lazySrc) return;
+  const load = () => {
+    if (!frame.dataset.lazySrc) return;
+    frame.src = frame.dataset.lazySrc;
+    delete frame.dataset.lazySrc;
+  };
+  if (!("IntersectionObserver" in window)) {
+    load();
+    return;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    observer.disconnect();
+    load();
+  }, { rootMargin: "320px" });
+  observer.observe(frame);
+}
+
 function renderHeader() {
   $("design-title").textContent = state.design.name || "Untitled PPS design";
   const applyButton = $("apply-design");
@@ -2603,10 +2638,8 @@ function renderProfileMode() {
       : editModeActive ? "custom edit mode" : "custom view mode";
   status.className = `status-label ${readonly || customViewModeLocked() ? "required" : "ready"}`;
   button.textContent = readonly ? "Edit As New Study" : "Editing Custom Study";
-  button.disabled = !readonly || staticModeActive;
-  button.title = staticModeActive
-    ? STATIC_COMPANION_REQUIRED_MESSAGE
-    : readonly
+  button.disabled = !readonly;
+  button.title = readonly
     ? "Create a named custom copy before changing this loaded profile."
     : "This project is already editable.";
 }
@@ -2906,7 +2939,7 @@ function renderBakePanel() {
   const button = $("bake-stimulus");
   if (!status || !button) return;
   syncNoiseTypeButtons();
-  const controlsLocked = staticModeActive || isProfileReadonlyMode() || customViewModeLocked();
+  const controlsLocked = isProfileReadonlyMode() || customViewModeLocked();
   const select = $("generated-noise-select");
   if (select) select.disabled = controlsLocked;
   for (const noiseButton of document.querySelectorAll(".noise-type-button")) {
@@ -5399,7 +5432,9 @@ function renderRun() {
   const setup = state.run_sequence_setup || {};
   const segment6 = projectSegment("6_experiment_run_setup");
   const prepared = Boolean(setup.prepared || segment6.status === "ready");
-  const localProfileActionsAvailable = prepared && !staticModeActive;
+  const profileValid = Boolean(setup.ready || getWorkflowStep("run")?.complete);
+  const profileFinalizeAvailable = profileValid;
+  const localProfileActionsAvailable = profileValid && !staticModeActive;
   if ($("participants") && document.activeElement !== $("participants")) {
     $("participants").value = state.design.protocol?.participants ?? setup.participant_count ?? 1;
   }
@@ -5410,7 +5445,7 @@ function renderRun() {
   if ($("participants")) $("participants").disabled = prepared;
   const pill = $("run-sequence-status");
   if (pill) {
-    pill.textContent = prepared ? "prepared" : setup.ready ? "preview" : "required";
+    pill.textContent = prepared ? "legacy session prepared" : profileValid ? "profile valid" : "required";
     pill.className = `status-label ${prepared || setup.ready ? "ready" : "required"}`;
   }
   const regenerateButton = $("regenerate-run-sequence");
@@ -5425,10 +5460,10 @@ function renderRun() {
   }
   const saveProfileButton = $("save-study-profile");
   if (saveProfileButton) {
-    saveProfileButton.disabled = !localProfileActionsAvailable;
-    saveProfileButton.title = localProfileActionsAvailable
-      ? "Save this prepared experiment as a reusable local study profile."
-      : (prepared ? STATIC_COMPANION_REQUIRED_MESSAGE : "Prepare Segment 6 before saving a reusable profile.");
+    saveProfileButton.disabled = !profileFinalizeAvailable;
+    saveProfileButton.title = profileFinalizeAvailable
+      ? (staticModeActive ? "Lock this browser-local profile for portable export." : "Register and lock this validated profile in the researcher workspace.")
+      : "Complete profile validation before finalizing.";
   }
   const exportButton = $("export-output-folder");
   if (exportButton) {
@@ -5832,6 +5867,9 @@ function collectPayload() {
     participants: Math.max(1, Math.round(numberValue("participants", 1))),
     trial_strips: trialStrips
   };
+  if (design.protocol.participant_order_policy?.algorithm === "seeded_factoradic_cycle.v1") {
+    design.protocol.participant_order_policy.preview_count = design.protocol.participants;
+  }
   return {
     participant_id: state.participant_id || (state.custom_workflow?.is_custom ? "" : "P001"),
     design,
@@ -5906,22 +5944,55 @@ function collectAudioFiles() {
 
 async function applyDesign() {
   if (!ensureEditableProject()) return;
-  state = await api("/api/design", {
-    method: "POST",
-    body: JSON.stringify(collectPayload())
-  });
+  if (staticModeActive) {
+    state.design = collectPayload().design;
+    await window.PPSDesigner?.drafts?.save(state);
+  } else {
+    state = await api("/api/design", {
+      method: "POST",
+      body: JSON.stringify(collectPayload())
+    });
+  }
   renderAll();
   updateViewer();
   const staleSegments = Object.values(state.project_segments || {}).filter((segment) => segment.status === "stale");
-  showToast(staleSegments.length ? "Design saved; downstream segments need rebake" : "Design saved");
+  showToast(staticModeActive ? "Browser draft saved locally" : staleSegments.length ? "Design saved; downstream segments need rebake" : "Design saved");
+}
+
+function scheduleCustomAutosave() {
+  if (!state || !isCustomMode() || isProfileReadonlyMode() || !editModeActive) return;
+  window.clearTimeout(autosaveTimer);
+  const revision = ++autosaveRevision;
+  autosaveTimer = window.setTimeout(() => autosaveCustomDraft(revision).catch(reportError), 700);
+}
+
+async function autosaveCustomDraft(revision) {
+  if (revision !== autosaveRevision || !state || !isCustomMode() || isProfileReadonlyMode() || !editModeActive) return;
+  const payload = collectPayload();
+  if (staticModeActive) {
+    state.design = payload.design;
+    await window.PPSDesigner?.drafts?.save(state);
+  } else {
+    const updated = await api("/api/design", { method: "POST", body: JSON.stringify(payload) });
+    if (revision !== autosaveRevision) return;
+    state = updated;
+    renderWorkflow();
+    renderHeader();
+    document.dispatchEvent(new CustomEvent("pps-designer-saved"));
+  }
 }
 
 async function continueWorkflowStep(stepId) {
   if (!ensureEditableProject()) return;
-  state = await api("/api/design", {
-    method: "POST",
-    body: JSON.stringify(collectPayload())
-  });
+  if (staticModeActive) {
+    state.design = collectPayload().design;
+    await window.PPSDesigner?.drafts?.save(state);
+  } else {
+    state = await api("/api/design", {
+      method: "POST",
+      body: JSON.stringify(collectPayload())
+    });
+  }
   renderAll();
   updateViewer();
   const step = getWorkflowStep(stepId);
@@ -6032,15 +6103,15 @@ function closeSegmentInfoModal() {
 }
 
 function defaultCustomStudyName() {
-  return `${state?.design?.name || state?.design?.study_profile_title || "PPS design"} custom`;
+  const sourceId = state?.design?.study_profile_id
+    || state?.project?.project_id
+    || state?.design?.study_profile_reference_parameters?.customized_from_profile_id
+    || "source";
+  return `${state?.design?.name || state?.design?.study_profile_title || "PPS design"} custom [${sourceId}]`;
 }
 
 function openCustomizeModal() {
   if (!state || !isProfileReadonlyMode()) return;
-  if (staticModeActive) {
-    showToast("Start the local companion backend before creating a local editable study.");
-    return;
-  }
   const modal = $("customize-modal");
   const input = $("customize-study-name");
   const source = $("customize-source-label");
@@ -6100,14 +6171,42 @@ async function customizeAsNewProject(name) {
     openCustomizeModal();
     return;
   }
-  state = await api("/api/project/customize", {
-    method: "POST",
-    body: JSON.stringify({ name: cleanName })
-  });
+  if (staticModeActive) {
+    const sourceId = state.design?.study_profile_id || state.selected_template || state.project?.project_id || "source";
+    const derivedName = cleanName.toLowerCase().includes(sourceId.toLowerCase()) ? cleanName : `${cleanName} [${sourceId}]`;
+    state = clone(state);
+    state.design.name = derivedName;
+    state.design.study_profile_id = "";
+    state.design.study_profile_title = "";
+    state.design.study_profile_reference_parameters = {
+      ...(state.design.study_profile_reference_parameters || {}),
+      dashboard_mode: "custom",
+      customized_from_profile_id: sourceId,
+      capability_provenance: "hosted_compose",
+      profile_status: "draft"
+    };
+    state.design.protocol.participant_order_policy = state.design.protocol.participant_order_policy?.algorithm
+      ? state.design.protocol.participant_order_policy
+      : {
+          schema: "pps-participant-order-policy.v1",
+          algorithm: "seeded_factoradic_cycle.v1",
+          seed: Number(state.design.protocol.random_seed || 20250604),
+          preview_count: Math.max(1, Math.min(100, Number(state.design.protocol.participants || 12))),
+        };
+    state.selected_template = CUSTOM_TEMPLATE_ID;
+    state.custom_workflow = { ...(state.custom_workflow || {}), is_custom: true, is_finalized: false };
+    state.project = { ...(state.project || {}), project_kind: "browser_draft", project_label: derivedName };
+    await window.PPSDesigner?.drafts?.save(state);
+  } else {
+    state = await api("/api/project/customize", {
+      method: "POST",
+      body: JSON.stringify({ name: cleanName })
+    });
+  }
   editModeActive = true;
   renderAll();
   updateViewer();
-  showToast("Custom project created");
+  showToast(staticModeActive ? "Browser draft created; nothing was uploaded" : "Custom project created");
   scrollToStep(state.custom_workflow?.current_step || "study");
 }
 
@@ -6417,12 +6516,22 @@ async function ensureLocalBackendState() {
 }
 
 async function savePreparedStudyProfile() {
-  if (!(await ensureLocalBackendState())) return;
-  const prepared = Boolean(state.run_sequence_setup?.prepared || projectSegment("6_experiment_run_setup").status === "ready");
-  if (!prepared) {
-    showToast("Prepare Segment 6 before saving a study profile.");
+  if (staticModeActive) {
+    if (!getWorkflowStep("run")?.complete) {
+      showToast("Complete every required segment before finalizing this profile.");
+      return;
+    }
+    state.design = collectPayload().design;
+    state.design.study_profile_reference_parameters.profile_status = "finalized";
+    state.design.study_profile_reference_parameters.finalized_at = new Date().toISOString();
+    state.custom_workflow.is_finalized = true;
+    editModeActive = false;
+    await window.PPSDesigner?.drafts?.save(state);
+    renderAll();
+    showToast("Profile finalized and locked. Use Customize to create another editable copy.");
     return;
   }
+  if (!(await ensureLocalBackendState())) return;
   openSaveProfileModal();
 }
 
@@ -7107,6 +7216,44 @@ async function importAudioFromPicker() {
   const file = input.files && input.files[0];
   input.value = "";
   if (!file) return;
+  if (staticModeActive) {
+    if (pendingAudioImportMode === "spatialize") {
+      showToast("Hosted mode can use fixed local audio, but cannot spatialize or generate looming audio.");
+      return;
+    }
+    const stored = await window.PPSDesigner?.drafts?.storeAudio(file);
+    if (!stored) throw new Error("Browser audio storage is unavailable. Export the profile now or use the desktop app.");
+    const audio = {
+      label: file.name.replace(/\.[^.]+$/, ""),
+      path: `browser-asset:${stored.id}`,
+      browser_preview_url: stored.url,
+      browser_asset_id: stored.id,
+      target_duration_s: 4,
+      gain: 1,
+      render_mode: "preserve",
+      motion_mode: "stationary",
+      tone_type: "custom_audio",
+      trajectory_snapshot: {}
+    };
+    if (pendingInstructionSlot) {
+      const profile = state.design.study_profile_reference_parameters?.dashboard_run_setup || {};
+      profile.instruction_profile = profile.instruction_profile || { slots: [] };
+      profile.instruction_profile.slots = (profile.instruction_profile.slots || []).filter((item) => item.slot !== pendingInstructionSlot);
+      profile.instruction_profile.slots.push({ slot: pendingInstructionSlot, label: audio.label, path: audio.path, browser_asset_id: stored.id });
+      state.design.study_profile_reference_parameters.dashboard_run_setup = profile;
+      pendingInstructionSlot = "";
+    } else if (pendingAudioImportMode === "prestimulus") {
+      state.design.prestimulus_files = state.design.prestimulus_files || [];
+      state.design.prestimulus_files.push({ ...audio, placement: "before", target_source_label: "", phase: "", gap_s: 0 });
+    } else {
+      state.design.custom_looming_files = state.design.custom_looming_files || [];
+      state.design.custom_looming_files.push(audio);
+    }
+    await window.PPSDesigner?.drafts?.save(state);
+    renderAll();
+    showToast("Local audio added to this browser only; it was not uploaded");
+    return;
+  }
   const contentBase64 = await fileToBase64(file);
   if (pendingInstructionSlot) {
     const current = collectRunInstructionProfile().slots.find((slot) => slot.slot === pendingInstructionSlot) || {};
@@ -7268,6 +7415,12 @@ function renderHardwarePixelArt() {
 }
 
 function wireEvents() {
+  document.addEventListener("pointerdown", (event) => {
+    const control = event.target.closest?.("#toolkit-page input:disabled, #toolkit-page select:disabled, #toolkit-page textarea:disabled, #toolkit-page button:disabled");
+    if (!control || !isProfileReadonlyMode() || control.matches("[data-preview-view-control]")) return;
+    event.preventDefault();
+    openCustomizeModal();
+  }, true);
   $("refresh-state").addEventListener("click", () => loadState({ resetEditMode: true }).catch(reportError));
   $("apply-design").addEventListener("click", () => applyDesign().catch(reportError));
   $("view-mode-button")?.addEventListener("click", () => setEditMode(false));
@@ -7603,6 +7756,9 @@ function wireEvents() {
     updateViewer();
   });
   document.addEventListener("click", (event) => {
+    const autosaveMutation = event.target.closest?.(
+      "[data-remove-noise], [data-remove-audio], [data-remove-strip], [data-remove-strip-element], [data-add-strip-element], [data-add-strip-row], [data-add-box-label], [data-remove-box-label], [data-strip-move]"
+    );
     const previewButton = event.target.closest?.("[data-preview-strip]");
     if (previewButton) {
       previewFilmstripRow(previewButton).catch(reportError);
@@ -7641,6 +7797,7 @@ function wireEvents() {
     if (event.target.matches("[data-strip-move]")) {
       moveFilmstripRow(event.target, event.target.dataset.stripMove);
     }
+    if (autosaveMutation) window.setTimeout(scheduleCustomAutosave, 0);
   });
   document.addEventListener("input", (event) => {
     const card = event.target.closest?.(".source-card");
@@ -7653,6 +7810,7 @@ function wireEvents() {
       state.design.protocol.trial_strips = collectTrialStrips();
       updateFilmstripCounts();
     }
+    if (event.target.closest?.("#toolkit-page")) scheduleCustomAutosave();
   });
   document.addEventListener("change", (event) => {
     const sourceLabelCard = event.target.closest?.(".source-card");
@@ -7693,12 +7851,14 @@ function wireEvents() {
     }
     if (event.target.matches('[data-element-field="is_jitter"]')) {
       setFilmstripElementMode(event.target);
+      scheduleCustomAutosave();
       return;
     }
     if (event.target.closest?.(".filmstrip-row")) {
       state.design.protocol.trial_strips = collectTrialStrips();
       updateFilmstripCounts();
     }
+    if (event.target.closest?.("#toolkit-page")) scheduleCustomAutosave();
   });
 }
 
@@ -7711,8 +7871,23 @@ loadApiBase();
 loadCompanionToken();
 loadResizableLayoutSettings();
 enforceExternalLinkTargets();
-renderHardwarePixelArt();
 exposeDashboardAuditHook();
 wireEvents();
 initializePageTabs();
+initializeLazySurfaces();
+window.PPSDesignerApp = Object.freeze({
+  getState: () => clone(state),
+  isHosted: () => staticModeActive,
+  restoreHostedDraft: (snapshot) => {
+    if (!snapshot?.design) return false;
+    state = clone(snapshot);
+    staticModeActive = true;
+    editModeActive = !state.custom_workflow?.is_finalized;
+    renderAll();
+    updateViewer();
+    return true;
+  },
+  markSaved: () => document.dispatchEvent(new CustomEvent("pps-designer-saved")),
+});
+
 loadState({ resetEditMode: true }).catch(reportError);

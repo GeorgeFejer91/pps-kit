@@ -4,11 +4,15 @@
 
 The HTML dashboard has a left-rail `View / Edit` mode switch. `View` is the safe default on page load, profile load, existing custom-study load, and refresh. In View mode, researchers can inspect, navigate, preview audio, open folders, launch already prepared profile-run actions, and save a prepared experiment as a reusable study profile, but mutation controls are locked.
 
-Entering `Edit` on a bundled/read-only profile opens the existing custom-study naming modal first. After the custom copy is created, Edit mode unlocks source, trajectory, trial-sequence, baseline, repetition, block, and run-setup decisions for that custom working copy. Static hosted mode without a local companion cannot enter Edit mode.
+Entering `Edit` on a bundled/read-only or finalized profile opens the custom-profile naming modal first. The derived display name retains the immutable source profile ID. After the custom draft is created, Edit mode unlocks applicable decisions. Draft inputs autosave. Backend signature comparison invalidates downstream Segment artifacts from the earliest changed scientific segment. `Done — Lock Profile` changes the profile to copy-to-edit-only; only finalized profiles enter the Runner catalogue.
+
+Hosted composition can clone immutable profiles and edit browser-local decisions. It persists the draft and fixed local audio in IndexedDB, never uploads selected files, and can export `.pps-profile`. Hosted mode keeps trajectory mutation, looming generation/spatialization, workspace writes, and Runner actions disabled. Stored trajectories remain inspectable in 2D/3D.
+
+The applet retains the long Segment 0-6 scroll surface. Fixed chrome shows capability and saved/unsaved state, a persistent light/dark theme, contextual Help, sticky stage headings/actions, and per-stage collapse controls. Desktop applet mode hides public Documentation and Downloads tabs; those remain on the public website.
 
 ## Trajectory Preview
 
-The Segment 1 trajectory preview is an embedded Three.js viewer. The right-side preview controls (`2D`, `3D`, view presets, zoom, fit radius, reset) are view-only camera controls and must stay usable in read-only, locked, and hosted/static modes. The left trajectory/source controls remain mutation controls and are gated by View/Edit mode.
+The Segment 1 trajectory preview is an embedded Three.js viewer that is lazy-loaded as it approaches the viewport. The right-side preview controls (`2D`, `3D`, view presets, zoom, fit radius, reset) are view-only camera controls and must stay usable in read-only, locked, and hosted/static modes. The left trajectory/source controls remain mutation controls and are gated by View/Edit mode.
 
 The dashboard must not depend solely on catching the iframe `load` event before it sends preview payloads. If the viewer iframe loads before listeners are attached, `updateViewer()` should detect the viewer API when it becomes available, mark it ready, and push the current payload so online/static previews do not remain stuck on the viewer's initial placeholder 2D scene.
 

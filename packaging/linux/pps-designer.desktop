@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=PPS Experiment Designer
+Comment=Compose portable peripersonal-space experiment profiles
+Exec=pps-designer
+Icon=pps-toolkit
+Terminal=false
+Categories=Science;Education;

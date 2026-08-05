@@ -597,6 +597,8 @@ def _custom_profile_entries(registry_root: Path, *, session_root: Path, state_ro
         project_metadata = project_metadata if isinstance(project_metadata, dict) else {}
         if str(reference.get("dashboard_mode") or "").strip().lower() != "custom":
             continue
+        if str(reference.get("profile_status") or "legacy").strip().lower() == "draft":
+            continue
         project_manifest = _read_json(child / "0_profile" / "project_manifest.json")
         display_name = str(
             project_manifest.get("project_label")
@@ -606,11 +608,20 @@ def _custom_profile_entries(registry_root: Path, *, session_root: Path, state_ro
         )
         run_setup_path = child / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
         participant_ids = _participants_from_run_setup(run_setup_path) if _path_exists(run_setup_path) else []
+        if not participant_ids:
+            protocol = design.get("protocol") if isinstance(design.get("protocol"), dict) else {}
+            preview_count = max(1, min(100, int(protocol.get("participants") or 1)))
+            participant_ids = [f"P{index:03d}" for index in range(1, preview_count + 1)]
         statuses = _participant_statuses(run_setup_path, participant_ids, session_root=session_root, state_root=state_root)
-        ready = _run_setup_ready(run_setup_path)
+        legacy_run_ready = _run_setup_ready(run_setup_path)
+        segment_paths = _segment_manifest_paths(child)
+        profile_ready = all(segment in segment_paths for segment in (
+            "0_profile", "1_core_audio_ingredients", "2_trial_sequence_designs",
+            "3_tactile_and_baseline_trials", "4_trial_repetition_pool", "5_block_csv_preview",
+        ))
         missing = []
-        if not ready:
-            missing.append("Segment 6 run setup is missing or stale.")
+        if not profile_ready:
+            missing.append("The saved profile is missing one or more accepted Segment 0-5 artifacts.")
         entries.append(
             {
                 "profile_id": child.name,
@@ -619,9 +630,11 @@ def _custom_profile_entries(registry_root: Path, *, session_root: Path, state_ro
                 "dashboard_project_id": child.name,
                 "project_dir": str(child),
                 "asset_roots": [str(child)],
-                "segment_manifests": _segment_manifest_paths(child),
+                "segment_manifests": segment_paths,
                 "run_setup_manifest_path": str(run_setup_path) if _path_exists(run_setup_path) else "",
-                "segment_6_ready": ready,
+                "profile_ready": profile_ready,
+                "segment_6_ready": profile_ready or legacy_run_ready,
+                "runner_materialization_required": profile_ready and not legacy_run_ready,
                 "participant_count": len(participant_ids),
                 "participant_ids": participant_ids,
                 "participants": [_participant_entry(participant, statuses.get(participant, {})) for participant in participant_ids],

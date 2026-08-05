@@ -75,7 +75,7 @@ Zenodo-hosted payload:
 
 ```powershell
 .\windows\Build_Experiment_Runner_Exe.ps1
-.\windows\Build_Dashboard_Launcher_Exe.ps1
+.\windows\Build_PPS_Designer.ps1
 .\windows\Build_PPS_Downloader.ps1
 .\windows\Build_PPS_Distribution.ps1 -Version 0.1.0 -ZenodoPayloadUrl "https://zenodo.org/records/<record>/files/PPS-Toolkit-v0.1.0-offline-lab-windows-x64.zip?download=1" -ZenodoDoi "10.5281/zenodo.<record>"
 ```
@@ -86,8 +86,12 @@ verified by `pps_download_manifest.v1.json` before extraction or launch. The
 installed dashboard opens through `dist\PPSDashboardLauncher\PPSDashboardLauncher.exe`
 so end users do not need Python for the local GUI.
 
-The same HTML interface can also be published as a static GitHub Pages site.
-In that mode, start the trusted local companion backend first:
+The same compiled HTML interface is published as a static GitHub Pages site.
+Hosted mode can clone immutable templates, compose profiles from cleared hosted
+assets and browser-local fixed audio, retain drafts in IndexedDB, inspect stored
+trajectories, and export `.pps-profile` without uploading selected files. Start
+the optional trusted local companion only when hosted-connected functionality
+is needed:
 
 ```bat
 windows\Start_Website_Companion.bat
@@ -97,11 +101,20 @@ Then open the public dashboard at
 [https://ppskit.qzz.io/](https://ppskit.qzz.io/) or
 [https://georgefejer91.github.io/pps-kit/](https://georgefejer91.github.io/pps-kit/).
 The hosted page connects back to
-`http://127.0.0.1:8766` for local render/session/focus operations; the website
-itself cannot silently install packages or run experiments without the local
-companion. It also does not upload selected stimulus files, generated WAVs, or
-experiment outputs online; audio import and all experiment operations stay on
-the research PC. See [docs/GITHUB_PAGES_DASHBOARD.md](docs/GITHUB_PAGES_DASHBOARD.md).
+`http://127.0.0.1:8766` for authorized local operations. Hosted compose cannot
+generate/spatialize looming audio, write workspace folders, or launch the
+Runner. See [docs/GITHUB_PAGES_DASHBOARD.md](docs/GITHUB_PAGES_DASHBOARD.md).
+
+Launch the native system-WebView applet after installing the designer extra:
+
+```text
+pip install -e ".[designer]"
+pps-designer
+```
+
+`pps-designer` uses WebView2 on Windows and WebKitGTK on Linux. Bare
+`pps-dashboard` is the temporary compatibility alias; use
+`pps-dashboard --no-browser` to run only the local service.
 
 Open the Qt stimulus designer for comparison:
 
@@ -154,6 +167,7 @@ copied into each participant session under `instructions\`.
 ```powershell
 pps-generate --dry-run
 pps-generate --participants 50
+pps-designer
 pps-dashboard
 pps-design
 pps-audio-stress --device-query Komplete

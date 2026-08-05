@@ -7,6 +7,7 @@ import base64
 import binascii
 import csv
 import hashlib
+import hmac
 import itertools
 import json
 import math
@@ -16,6 +17,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import urllib.request
@@ -45,6 +47,7 @@ from .design import (
     default_design,
     design_from_dict,
     design_to_dict,
+    effective_block_specs,
     expand_trial_strip_source_labels,
     gold_standard_looming_source_parameters,
     has_trial_strips,
@@ -80,6 +83,7 @@ from .loudness import (
     normalize_loudness_policy,
 )
 from .output_layout import output_profile_snapshot_dir
+from .participant_orders import default_order_policy, order_preview, participant_order
 from .profile_memory import (
     append_output_diary_event,
     active_output_folder,
@@ -93,6 +97,7 @@ from .profile_memory import (
     refresh_project_dependency_hashes,
     update_runner_settings as update_profile_runner_settings,
 )
+from .profile_bundle import read_profile_bundle, write_profile_bundle
 
 
 from .templates import (
@@ -786,6 +791,36 @@ class DashboardController:
     def custom_projects_payload(self) -> list[dict[str, Any]]:
         return _custom_project_records(self.project_registry_root)
 
+    def import_profile_bundle(self, bundle_path: Path) -> dict[str, Any]:
+        loaded = read_profile_bundle(bundle_path)
+        source = _normalize_dashboard_design(loaded["design"])
+        display_name = str(loaded["profile"].get("display_name") or source.name or "Imported PPS profile")
+        design = _custom_project_design_from_source(source, project_name=display_name)
+        params = dict(design.study_profile_reference_parameters or {})
+        params["bundle_import"] = {
+            "schema": loaded["manifest"]["schema"],
+            "profile_id": loaded["manifest"].get("profile_id", ""),
+            "parent": loaded["manifest"].get("parent", {}),
+            "capability_provenance": loaded["manifest"].get("capability_provenance", ""),
+        }
+        design.study_profile_reference_parameters = params
+        with self._lock:
+            self.design = design
+            project = self._ensure_project_context(self.design, force_new_custom=True)
+            bundle_target = project.profile_dir / f"{project.project_id}.pps-profile"
+            shutil.copy2(bundle_path, bundle_target)
+            _write_project_context_files(project, self.design)
+            _write_segment_validation_report(project, self.design)
+            save_design(self.design, self.design_path)
+            self.current_run_package = None
+        result = self.snapshot()
+        result["profile_bundle_import"] = {
+            "bundle_path": str(bundle_target),
+            "project_id": project.project_id,
+            "verified": True,
+        }
+        return result
+
     def sync_preload_assets(self, template_id: str) -> dict[str, Any]:
         return ensure_preload_assets(
             template_id,
@@ -838,7 +873,7 @@ class DashboardController:
         design.study_profile_id = ""
         design.study_profile_title = ""
         design.study_profile_notes = ""
-        design.study_profile_reference_parameters = {"dashboard_mode": "custom"}
+        design.study_profile_reference_parameters = {"dashboard_mode": "custom", "profile_status": "draft"}
         design.noises = []
         design.custom_looming_files = []
         design.prestimulus_files = []
@@ -854,6 +889,7 @@ class DashboardController:
         design.protocol.baseline_custom_trial_mode = "tactile_only"
         design.protocol.blocks = 1
         design.protocol.participants = 1
+        design.protocol.participant_order_policy = default_order_policy(seed=design.protocol.random_seed)
         design = _normalize_dashboard_design(design)
         with self._lock:
             self.design = design
@@ -1068,11 +1104,12 @@ class DashboardController:
         with self._lock:
             source_project = self._ensure_project_context(self.design)
             source_design = _copy_design(self.design)
-            run_setup_manifest_path = _run_setup_manifest_path(source_project.project_dir)
-            manifest = _load_json(run_setup_manifest_path)
-            errors = _validate_run_setup_manifest(manifest, project_dir=source_project.project_dir, design=source_design)
-            if errors:
-                raise ValueError(f"Prepare Segment 6 before saving a study profile: {errors[0]}")
+            _require_custom_workflow_ready(
+                source_design,
+                self.participant_id,
+                source_project.project_dir,
+                require_participant=True,
+            )
             source_metadata = _project_metadata(source_design)
             source_profile_id = str(
                 source_metadata.get("project_id")
@@ -1110,6 +1147,8 @@ class DashboardController:
             saved_design.study_profile_title = ""
             params = dict(saved_design.study_profile_reference_parameters or {})
             params["dashboard_mode"] = "custom"
+            params["profile_status"] = "finalized"
+            params["finalized_at"] = datetime.now().isoformat(timespec="seconds")
             params["source_profile_id"] = source_profile_id
             params["source_template_id"] = source_template_id
             params[PROJECT_METADATA_KEY] = {
@@ -1247,9 +1286,12 @@ class DashboardController:
             _apply_run_setup_payload(self.design, payload.get("run_setup"))
             self.design = _normalize_dashboard_design(self.design)
             if _should_refresh_placeholder_custom_project(self.design, self.project_registry_root):
-                self._ensure_project_context(self.design, force_new_custom=True)
+                project = self._ensure_project_context(self.design, force_new_custom=True)
             else:
-                self._ensure_project_context(self.design)
+                project = self._ensure_project_context(self.design)
+            changed_segment = _earliest_changed_design_segment(previous_design, self.design)
+            if changed_segment is not None:
+                _clear_downstream_segment_outputs(project, from_segment=changed_segment)
             self.current_run_package = None
             save_design(self.design, self.design_path)
             record_experiment_activity(
@@ -1646,6 +1688,7 @@ class DashboardController:
     def regenerate_run_sequence(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
         if payload:
             self.update_design(payload)
+        deterministic_policy = False
         with self._lock:
             project = self._ensure_project_context(self.design)
             manifest = _load_json(_run_setup_manifest_path(project.project_dir))
@@ -1653,15 +1696,18 @@ class DashboardController:
             if manifest and not errors:
                 raise ValueError("Segment 6 experiment setup is prepared. Change requests should start from a new prepared setup rather than silently regenerating it.")
             settings = _run_setup_settings(self.design)
-            settings["seed"] = int(time.time() * 1000) + random.randint(1, 999999)
-            _set_run_setup_settings(self.design, settings)
-            self.current_run_package = None
-            save_design(self.design, self.design_path)
-            self._append_dashboard_diary_event(
-                "dashboard_run_sequence_regenerated",
-                project=project,
-                payload={"seed": settings["seed"]},
-            )
+            if self.design.protocol.participant_order_policy.get("algorithm") == "seeded_factoradic_cycle.v1":
+                deterministic_policy = True
+            else:
+                settings["seed"] = int(time.time() * 1000) + random.randint(1, 999999)
+                _set_run_setup_settings(self.design, settings)
+                self.current_run_package = None
+                save_design(self.design, self.design_path)
+                self._append_dashboard_diary_event(
+                    "dashboard_run_sequence_regenerated",
+                    project=project,
+                    payload={"seed": settings["seed"]},
+                )
         return self.snapshot()
 
     def prepare_experiment_run_setup(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -2259,7 +2305,7 @@ def create_app(
     try:
         from fastapi import Body, FastAPI, HTTPException, Request
         from fastapi.middleware.cors import CORSMiddleware
-        from fastapi.responses import JSONResponse
+        from fastapi.responses import JSONResponse, Response
         from fastapi.responses import RedirectResponse
         from fastapi.staticfiles import StaticFiles
     except ImportError as exc:
@@ -2293,7 +2339,22 @@ def create_app(
 
     @app.get("/")
     def index() -> Any:
-        return RedirectResponse(url="/dashboard/index.html")
+        return RedirectResponse(url="/dashboard/compiled/index.html")
+
+    @app.get("/api/bootstrap")
+    def api_bootstrap(token: str = "") -> Any:
+        if not security.enabled or not token or not hmac.compare_digest(token, security.token):
+            raise HTTPException(status_code=403, detail="Invalid desktop bootstrap token.")
+        response = RedirectResponse(url="/dashboard/compiled/index.html?desktop=1", status_code=302)
+        response.set_cookie(
+            "pps_designer_session",
+            token,
+            httponly=True,
+            samesite="strict",
+            secure=False,
+            path="/",
+        )
+        return response
 
     app.mount("/dashboard", StaticFiles(directory=str(dashboard_dir)), name="dashboard")
     app.mount("/viewer", StaticFiles(directory=str(viewer_dir)), name="viewer")
@@ -2312,7 +2373,7 @@ def create_app(
                 path=request.url.path,
                 method=request.method.upper(),
                 origin=request.headers.get("origin", ""),
-                supplied_token=request.headers.get(TOKEN_HEADER, ""),
+                supplied_token=request.headers.get(TOKEN_HEADER, "") or request.cookies.get("pps_designer_session", ""),
             )
             if not accepted:
                 return JSONResponse(
@@ -2328,6 +2389,19 @@ def create_app(
     @app.get("/api/state")
     def api_state() -> dict[str, Any]:
         return controller.snapshot()
+
+    @app.get("/api/capabilities")
+    def api_capabilities() -> dict[str, Any]:
+        return {
+            "schema": "pps-designer-capabilities.v1",
+            "mode": "desktop_full",
+            "can_write_workspace": True,
+            "can_render_looming": True,
+            "can_import_local_audio": True,
+            "can_preview_hosted_assets": True,
+            "can_save_profile": True,
+            "can_launch_runner": True,
+        }
 
     @app.get("/api/health")
     def api_health() -> dict[str, Any]:
@@ -2352,6 +2426,54 @@ def create_app(
     @app.get("/api/profile-catalog")
     def api_profile_catalog() -> dict[str, Any]:
         return controller.profile_catalog_payload()
+
+    @app.post("/api/profiles/export-bundle")
+    def api_export_profile_bundle(payload: dict[str, Any] = Body(default_factory=dict)) -> Any:
+        try:
+            design = design_from_dict(payload.get("design") or design_to_dict(controller.design))
+            display_name = str(payload.get("display_name") or design.name or "PPS profile")
+            profile_id = str(payload.get("profile_id") or f"custom_{_project_slug(display_name, 'profile')}")
+            asset_payload = payload.get("assets") if isinstance(payload.get("assets"), dict) else {}
+            assets = {str(key): Path(str(value)) for key, value in asset_payload.items()}
+            if not assets:
+                for index, item in enumerate([*design.custom_looming_files, *design.prestimulus_files], start=1):
+                    source = Path(str(item.path or ""))
+                    if source.is_file():
+                        assets[f"audio_{index:03d}_{_project_slug(item.label, 'asset')}"] = source
+            with tempfile.TemporaryDirectory(prefix="pps-profile-export-") as temporary_text:
+                bundle = write_profile_bundle(
+                    design,
+                    Path(temporary_text) / f"{profile_id}.pps-profile",
+                    profile_id=profile_id,
+                    display_name=display_name,
+                    assets=assets,
+                    parent=payload.get("parent") if isinstance(payload.get("parent"), dict) else {},
+                    capability_provenance="desktop_full",
+                )
+                content = bundle.read_bytes()
+            return Response(
+                content=content,
+                media_type="application/vnd.pps-profile+zip",
+                headers={"Content-Disposition": f'attachment; filename="{_safe_filename(profile_id)}.pps-profile"'},
+            )
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/api/profiles/import-bundle")
+    def api_import_profile_bundle(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
+        try:
+            encoded = str(payload.get("content_base64") or "")
+            if not encoded:
+                raise ValueError("Profile bundle content is missing.")
+            content = base64.b64decode(encoded, validate=True)
+            if len(content) > 512 * 1024 * 1024:
+                raise ValueError("Profile bundle exceeds the 512 MB import limit.")
+            with tempfile.TemporaryDirectory(prefix="pps-profile-import-") as temporary_text:
+                bundle = Path(temporary_text) / "import.pps-profile"
+                bundle.write_bytes(content)
+                return controller.import_profile_bundle(bundle)
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     @app.post("/api/preloads/{template_id}/sync")
     def api_sync_preload(template_id: str) -> dict[str, Any]:
@@ -2704,6 +2826,16 @@ def _trial_preview_rows(design: StimulusDesign, render_dir: Path | None = None) 
 
 
 def _participant_orders(design: StimulusDesign) -> list[dict[str, Any]]:
+    policy = dict(design.protocol.participant_order_policy or {})
+    if policy:
+        labels = [block.label for block in effective_block_specs(design.protocol)]
+        return [
+            {
+                **row,
+                "block_order": " -> ".join(str(value) for value in row["block_order"]),
+            }
+            for row in order_preview(labels, policy=policy)
+        ]
     orders = participant_block_orders(design)
     return [{"participant": participant, "block_order": " -> ".join(blocks)} for participant, blocks in list(orders.items())[:80]]
 
@@ -4129,21 +4261,35 @@ def _run_setup_preview_rows(
     participant_count: int,
     structure: str,
     seed: int,
+    order_policy: dict[str, Any] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     phases = _run_setup_phase_labels(structure)
-    needed = participant_count * len(phases)
-    orders = _block_order_permutations(blocks, needed, seed)
+    policy = dict(order_policy or {})
+    labels = [str(block.get("block_label") or f"Block {index:02d}") for index, block in enumerate(blocks, start=1)]
+    block_lookup = {label: block for label, block in zip(labels, blocks)}
+    memberships = policy.get("part_membership") if isinstance(policy.get("part_membership"), dict) else {}
+    legacy_orders = [] if policy else _block_order_permutations(blocks, participant_count * len(phases), seed)
     summary_rows: list[dict[str, Any]] = []
     csv_rows: list[dict[str, Any]] = []
     order_index = 0
     for participant_index in range(1, participant_count + 1):
         participant_id = f"P{participant_index:03d}"
         participant_phase_orders: list[tuple[str, list[dict[str, Any]]]] = []
+        generated = (
+            participant_order(labels, participant_index=participant_index, policy=policy)
+            if policy
+            else None
+        )
         for phase in phases:
-            order = list(orders[order_index % len(orders)]) if orders else []
-            if phase == "post" and participant_phase_orders and order == participant_phase_orders[-1][1] and len(orders) > 1:
+            if generated is not None:
+                allowed = memberships.get(phase) or memberships.get(str(len(participant_phase_orders) + 1)) or labels
+                allowed_set = {str(value) for value in allowed}
+                order = [block_lookup[label] for label in generated.block_order if label in allowed_set]
+            else:
+                order = list(legacy_orders[order_index % len(legacy_orders)]) if legacy_orders else []
+            if generated is None and phase == "post" and participant_phase_orders and order == participant_phase_orders[-1][1] and len(legacy_orders) > 1:
                 order_index += 1
-                order = list(orders[order_index % len(orders)])
+                order = list(legacy_orders[order_index % len(legacy_orders)])
             participant_phase_orders.append((phase, order))
             order_index += 1
         for phase_index, (phase, order) in enumerate(participant_phase_orders, start=1):
@@ -4157,6 +4303,9 @@ def _run_setup_preview_rows(
                     "phase_index": phase_index,
                     "block_count": len(order),
                     "block_order": " -> ".join(block_names),
+                    "cycle_index": 0 if generated is None else generated.cycle_index,
+                    "permutation_index": participant_index - 1 if generated is None else generated.permutation_index,
+                    "order_algorithm": "legacy" if generated is None else generated.algorithm,
                 }
             )
             for block_position, block in enumerate(order, start=1):
@@ -4176,6 +4325,9 @@ def _run_setup_preview_rows(
                         "trial_count": int(block.get("trial_count") or 0),
                         "duration_ms": int(block.get("duration_ms") or 0),
                         "sequence_seed": seed,
+                        "order_algorithm": "legacy" if generated is None else generated.algorithm,
+                        "cycle_index": 0 if generated is None else generated.cycle_index,
+                        "permutation_index": participant_index - 1 if generated is None else generated.permutation_index,
                     }
                 )
     return summary_rows, csv_rows
@@ -4213,6 +4365,7 @@ def _run_setup_preview(project_dir: Path, design: StimulusDesign) -> dict[str, A
         participant_count=participants,
         structure=structure,
         seed=seed,
+        order_policy=design.protocol.participant_order_policy,
     )
     manifest = _load_json(_run_setup_manifest_path(project_dir))
     manifest_errors = _validate_run_setup_manifest(manifest, project_dir=project_dir, design=design)
@@ -4926,6 +5079,9 @@ def _write_run_setup_outputs(project_dir: Path, design: StimulusDesign) -> dict[
         "trial_count",
         "duration_ms",
         "sequence_seed",
+        "order_algorithm",
+        "cycle_index",
+        "permutation_index",
     ]
     with open(_filesystem_path(csv_path), "w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
@@ -4946,6 +5102,7 @@ def _write_run_setup_outputs(project_dir: Path, design: StimulusDesign) -> dict[
         "blocks_per_part": preview["blocks_per_part"],
         "total_block_runs": preview["total_block_runs"],
         "seed": preview["seed"],
+        "participant_order_policy": dict(design.protocol.participant_order_policy or {}),
         "instruction_profile": preview["instruction_profile"],
         "instruction_profile_signature": preview["instruction_profile_signature"],
         "instruction_profile_warnings": preview["instruction_profile_warnings"],
@@ -7202,7 +7359,7 @@ def _custom_workflow_status(
         ("baseline", "Baseline and Tactile Trial Design", _custom_baseline_missing(project_dir, design)),
         ("block", "Trial Composition", _custom_block_missing(project_dir, design)),
         ("schedule", "Block CSV Preview", _custom_schedule_missing(project_dir, design)),
-        ("run", "Run Preparation", _custom_run_missing(project_dir, design)),
+        ("run", "Profile Validation and Save", _custom_run_missing(project_dir, design)),
     ]
     is_custom = _is_custom_design(design)
     if not is_custom:
@@ -7231,6 +7388,7 @@ def _custom_workflow_status(
     prepare_missing = _missing_for_steps(steps, {"study", "stimulus", "trials", "baseline", "block", "schedule", "run"})
     return {
         "is_custom": True,
+        "is_finalized": str(design.study_profile_reference_parameters.get("profile_status") or "draft") == "finalized",
         "current_step": current_step,
         "ready_to_render": not render_missing,
         "ready_to_prepare": not prepare_missing,
@@ -7266,7 +7424,9 @@ def _is_custom_design(design: StimulusDesign) -> bool:
 
 
 def _is_readonly_profile_design(design: StimulusDesign) -> bool:
-    return bool(str(design.study_profile_id or "").strip()) and not _is_custom_design(design)
+    if _is_custom_design(design):
+        return str(design.study_profile_reference_parameters.get("profile_status") or "draft") == "finalized"
+    return bool(str(design.study_profile_id or "").strip())
 
 
 def _payload_mutates_design(payload: dict[str, Any] | None) -> bool:
@@ -7392,17 +7552,12 @@ def _custom_baseline_missing(project_dir: Path | None, design: StimulusDesign) -
 
 
 def _custom_run_missing(project_dir: Path | None, design: StimulusDesign) -> list[str]:
-    missing: list[str] = []
-    if design.protocol.participants < 1:
-        missing.append("Set planned participants to at least 1.")
-    if project_dir is None:
-        missing.append("Prepare Segment 6 experiment.")
-        return missing
-    manifest = _load_json(_run_setup_manifest_path(project_dir))
-    errors = _validate_run_setup_manifest(manifest, project_dir=project_dir, design=design)
-    if errors:
-        missing.append("Prepare Segment 6 experiment.")
-    return missing
+    policy = dict(design.protocol.participant_order_policy or {})
+    algorithm = str(policy.get("algorithm") or design.protocol.block_order_randomization or "")
+    supported = {"seeded_factoradic_cycle.v1", "fixed", "counterbalanced_rotation", "seeded_random_permutation"}
+    if algorithm not in supported:
+        return ["Choose a supported participant order policy."]
+    return []
 
 
 def _template_to_dict(template: StudyTemplate, *, asset_status: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -7885,7 +8040,9 @@ def _custom_project_design_from_source(source: StimulusDesign, *, project_name: 
     source_template_id = str(source.study_profile_id or source_metadata.get("source_template_id") or "").strip()
     source_project_id = str(source_metadata.get("project_id") or "").strip()
     default_name = f"{source.name or source.study_profile_title or 'PPS profile'} custom"
-    design.name = project_name.strip() or default_name
+    source_identity = source_template_id or source_project_id or "custom_source"
+    requested_name = project_name.strip() or default_name
+    design.name = requested_name if source_identity.lower() in requested_name.lower() else f"{requested_name} [{source_identity}]"
     design.study_profile_id = ""
     design.study_profile_title = ""
     params = dict(design.study_profile_reference_parameters or {})
@@ -7893,9 +8050,14 @@ def _custom_project_design_from_source(source: StimulusDesign, *, project_name: 
     params["customized_from_profile_id"] = source_template_id
     params["customized_from_profile_title"] = str(source.study_profile_title or source.name or "").strip()
     params["customized_from_project_id"] = source_project_id
+    params["project_id_name"] = requested_name
+    params["profile_status"] = "draft"
+    params.pop("finalized_at", None)
     params.pop(PROJECT_METADATA_KEY, None)
     params.pop(RUN_SETUP_METADATA_KEY, None)
     design.study_profile_reference_parameters = params
+    if not design.protocol.participant_order_policy:
+        design.protocol.participant_order_policy = default_order_policy(seed=design.protocol.random_seed)
     return design
 
 
@@ -8340,7 +8502,10 @@ def _ensure_dashboard_project_context(
             return existing
 
     if _is_custom_design(design):
-        project_id = _custom_project_id(design.name, registry_root)
+        project_id = _custom_project_id(
+            str(design.study_profile_reference_parameters.get("project_id_name") or design.name),
+            registry_root,
+        )
         source_template_id = str(design.study_profile_reference_parameters.get("customized_from_profile_id") or "").strip()
         source_profile_id = str(design.study_profile_reference_parameters.get("source_profile_id") or source_template_id).strip()
         context = _project_context_from_parts(
@@ -9085,6 +9250,52 @@ def _stable_json_hash(value: Any) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def _design_segment_signatures(design: StimulusDesign) -> dict[int, str]:
+    protocol = design.protocol
+    params = dict(design.study_profile_reference_parameters or {})
+    return {
+        1: _stable_json_hash({
+            "trajectory": asdict(design.trajectory),
+            "noises": [asdict(item) for item in design.noises],
+            "custom_looming_files": [asdict(item) for item in design.custom_looming_files],
+            "prestimulus_files": [asdict(item) for item in design.prestimulus_files],
+            "loudness_policy": params.get(LOUDNESS_POLICY_KEY, {}),
+        }),
+        2: _stable_json_hash([asdict(item) for item in protocol.trial_strips]),
+        3: _stable_json_hash({
+            "soa_values_ms": protocol.soa_values_ms,
+            "include_catch_trials": protocol.include_catch_trials,
+            "catch_trial_percentage": protocol.catch_trial_percentage,
+            "include_baseline_trials": protocol.include_baseline_trials,
+            "baseline_strategy": protocol.baseline_strategy,
+            "baseline_soa_values_ms": protocol.baseline_soa_values_ms,
+            "baseline_custom_trial_mode": protocol.baseline_custom_trial_mode,
+        }),
+        4: _stable_json_hash({
+            "repetitions_per_condition": protocol.repetitions_per_condition,
+            "trial_pool_repetition_defaults": protocol.trial_pool_repetition_defaults,
+        }),
+        5: _stable_json_hash({
+            "blocks": protocol.blocks,
+            "block_specs": [asdict(item) for item in protocol.block_specs],
+            "repeat_trial_pool_per_block": protocol.repeat_trial_pool_per_block,
+            "distribute_trial_pool_across_blocks": protocol.distribute_trial_pool_across_blocks,
+            "trial_randomization_strategy": protocol.trial_randomization_strategy,
+        }),
+        6: _stable_json_hash({
+            "preview_count": protocol.participants,
+            "participant_order_policy": protocol.participant_order_policy,
+            "run_setup": params.get(RUN_SETUP_METADATA_KEY, {}),
+        }),
+    }
+
+
+def _earliest_changed_design_segment(previous: StimulusDesign, current: StimulusDesign) -> int | None:
+    before = _design_segment_signatures(previous)
+    after = _design_segment_signatures(current)
+    return next((segment for segment in range(1, 7) if before[segment] != after[segment]), None)
+
+
 def _segment2_design_signature(design: StimulusDesign) -> str:
     return _stable_json_hash(
         {
@@ -9174,7 +9385,12 @@ def _running_dashboard_url(host: str, port: int) -> str | None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = build_arg_parser().parse_args(argv)
+    arguments = list(sys.argv[1:] if argv is None else argv)
+    if not arguments:
+        from .designer_shell import main as designer_main
+
+        return designer_main([])
+    args = build_arg_parser().parse_args(arguments)
     url = f"http://{args.host}:{args.port}/"
     running_url = _running_dashboard_url(args.host, args.port)
     if running_url is not None:
