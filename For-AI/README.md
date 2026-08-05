@@ -9,6 +9,7 @@ Read this file before modifying the repository. Then read:
 - [segment_registry_contract.md](segment_registry_contract.md) for the locked Segments 0-3 project/folder/manifest contract.
 - [download_package_inventory.md](download_package_inventory.md) for the installer/offline-package inventory and release packaging boundary.
 - [module_map.md](module_map.md) for the current source ownership map and refactor direction.
+- [product_applet_architecture.md](product_applet_architecture.md) for the agreed central-hub, independently runnable applet, shared-workspace, and immutable-template/profile lifecycle direction.
 - [loudness_calibration.md](loudness_calibration.md) for the Study 5 headphone/interface loudness calibration findings and policy direction.
 - [looming_stimulus_generation_standard.md](looming_stimulus_generation_standard.md) for the current DynaSpace-derived golden standard for generated looming stimuli.
 - [dashboard_gui_behavior.md](dashboard_gui_behavior.md) for current HTML dashboard edit/view-mode and downward-decision-propagation behavior.
@@ -19,6 +20,8 @@ Read this file before modifying the repository. Then read:
 ## Project Summary
 
 The repository is a public, reusable Python toolkit for audio-tactile peripersonal-space (PPS) experiments. It began as a cleaned and compartmentalized Study 5 replication tool and is evolving into a general Windows-ready PPS experiment designer/runner.
+
+The release-direction architecture is one central PPS Toolkit hub with independently runnable applets over a shared core and researcher workspace. Built-in study templates are immutable package resources; editing one creates a provenance-linked custom profile, and running either a template or custom profile produces an immutable prepared-experiment snapshot for the runner. See `product_applet_architecture.md`.
 
 The toolkit currently centers on:
 

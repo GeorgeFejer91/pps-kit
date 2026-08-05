@@ -2,6 +2,48 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-08-05
+
+- Adopt a central PPS Toolkit hub with independently runnable applets for
+  experiment/stimulus design, native Windows acquisition, Android control and
+  experimental phone-local execution, analysis/review, and calibration. Keep
+  validation/development tools identifiable as support infrastructure rather
+  than routine participant-runtime features. The hub is a launcher/status
+  surface and must not become the timing, file, or manifest authority.
+- Establish a shared PPS core and researcher workspace as the common source of
+  truth. Applets should exchange versioned profiles, manifests, assets,
+  prepared packages, schemas, hashes, and provenance through documented APIs;
+  they should not import another applet's private GUI/backend functions. The
+  current Segment manifest chain is the starting point, and dashboard, CLI,
+  hub, and runner profile-launch paths should converge on one public
+  preparation API.
+- Make independent workflows explicit release requirements: stimulus design
+  and export without Focus Mode; direct execution of a finished built-in
+  profile with automatic preparation; custom-protocol design followed by
+  preparation and runner handoff; direct runner opening of a prepared package;
+  and standalone decoding/analysis of compatible outputs.
+- Treat package-supplied existing-study templates as immutable, versioned,
+  read-only resources. `Customize` or any attempted mutation must first create
+  a researcher-owned custom profile and retain the source template id, version,
+  schema, content hash, and asset provenance. Use **custom profile** for the
+  editable copy rather than **custom template**.
+- Treat custom profiles as editable drafts and prepared experiments as
+  immutable runnable snapshots. A prepared snapshot pins assets/hashes,
+  accepted blocks, randomization/order, scientific runtime settings, schema,
+  and provenance. Later profile edits require a new prepared revision so an
+  existing experiment cannot silently change between participants.
+- Preserve separate storage roles for read-only installation resources,
+  writable researcher workspace content, and participant acquisition outputs.
+  Application upgrades may add template versions but must not overwrite
+  derived custom profiles or participant data.
+- Mature these components one by one toward a public scientific-software
+  release and possible JOSS paper, alongside rather than replacing the current
+  Behavior Research Methods manuscript direction. Initial modularization does
+  not require separate repositories/installers; prioritize public schemas,
+  explicit APIs, independent launch paths, examples, tests, and evidence
+  boundaries. The consolidated contract is
+  `For-AI/product_applet_architecture.md`.
+
 ## 2026-07-15
 
 - Completed the Serino/Canzoneri (2015) toolless synchronous-training source-to-runner validation. Consensus MCP discovery was available but the search call required OAuth in this thread, so the source review used the Frontiers publisher HTML for DOI `10.3389/fnbeh.2015.00004`. The runnable `serino_2015_toolless_sync_training` profile preserves the paper's one-block PPS assessment task: 3000 ms IN/OUT pink-noise sounds from hidden near/far loudspeakers, right-hand DS7A electrical tactile targets, vocal-response intent, T1-T5 delays at 300/800/1500/2200/2700 ms, and auditory-only catches. The source prints a 77% tactile-target rate rather than exact catch count, so the profile uses the inherited Canzoneri-family 80 target rows plus 24 catches (`80/104 = 76.9%`) and retains the full synchronous/asynchronous training protocol as contextual provenance. `validation_protocols/scripts/run_serino_2015_toolless_known_parameter_profile_validation.py` loads the profile through `DashboardController`, bakes Segments 2-6, prepares one runnable block WAV package, runs `SessionRunnerController` with a software wired-loopback sidecar, injects mouse-click simulated tactile responses for target rows, withholds catch responses, and writes `artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/serino_2015_toolless_known_parameter_validation_report.json`. The retained report passed with 104 participant-like rows, 80 audio-tactile target rows, 24 catches, one block, 80 clicks/response markers, all expected rows scored as hits, and source caveats for exact noise/gain files, participant-level DS7A current calibration, physical voice-key threshold/latency, and full training-intervention execution.
