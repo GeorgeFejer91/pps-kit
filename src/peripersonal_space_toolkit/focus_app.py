@@ -6618,12 +6618,24 @@ def _materialize_profile_run_setup(
     )
     if entry.get("kind") == "custom":
         run_setup_manifest_path = Path(str(entry.get("run_setup_manifest_path") or ""))
-        if not run_setup_manifest_path.is_file() or not bool(entry.get("segment_6_ready")):
-            reasons = entry.get("missing_or_stale_asset_reasons") or ["Segment 6 is not ready."]
+        if not bool(entry.get("profile_ready", entry.get("segment_6_ready"))):
+            reasons = entry.get("missing_or_stale_asset_reasons") or ["The profile is not ready for Runner materialization."]
             raise ValueError(f"Local study profile '{profile_id}' cannot be launched: {str(reasons[0])}")
         design_path = Path(str(entry.get("project_dir") or "")) / "0_profile" / "active_design.json"
         if not design_path.is_file():
             raise FileNotFoundError(f"Stored profile design is missing: {design_path}")
+        if not run_setup_manifest_path.is_file() or bool(entry.get("runner_materialization_required")):
+            controller = dashboard_app.DashboardController(
+                design_path=design_path,
+                render_dir=DEFAULT_RENDER_DIR,
+                session_root=active_output_folder(state_root=DEFAULT_DASHBOARD_STATE_ROOT, fallback=DEFAULT_SESSION_ROOT),
+                project_registry_root=DEFAULT_PROJECT_REGISTRY_ROOT,
+            )
+            result = controller.prepare_experiment_run_setup()
+            run_setup_manifest_path = Path(str(result.get("run_sequence_prepare_result", {}).get("manifest_path") or ""))
+            if not run_setup_manifest_path.is_file():
+                raise RuntimeError(f"Runner could not materialize an order manifest for '{profile_id}'.")
+            return controller, dashboard_app._copy_design(controller.design), run_setup_manifest_path
         design = dashboard_app._normalize_dashboard_design(dashboard_app.load_design(design_path))
         return SimpleNamespace(design_path=design_path), design, run_setup_manifest_path
 

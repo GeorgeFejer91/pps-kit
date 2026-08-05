@@ -165,3 +165,31 @@ Research Methods manuscript direction. Modularity does not require separate
 repositories or installers initially: the first priority is stable public
 schemas, explicit APIs, independent launch paths, examples, tests, and clear
 evidence boundaries.
+
+## Implemented Designer Boundary (2026-08-05)
+
+The first applet implementation is now `pps-designer`. It starts the existing
+FastAPI service on loopback and hosts the compiled Vite frontend in a native
+`pywebview` window: WebView2 on Windows and GTK/WebKitGTK on Linux. Bare
+`pps-dashboard` is a one-release compatibility alias; explicit
+`pps-dashboard --no-browser` remains the companion/testing service.
+
+GitHub Pages and the native shell consume `dashboard/compiled/`, generated
+from the adjacent HTML/CSS/ES-module source. Hosted composition stores drafts
+and selected fixed audio in IndexedDB and exports `.pps-profile` without
+uploading files. It cannot render looming audio, change trajectories, write
+workspace folders, or launch the Runner.
+
+`.pps-profile` is a ZIP-compatible `pps-profile-bundle.v1` with canonical
+profile JSON, stored trajectory provenance, content-addressed audio, and a
+SHA-256 inventory. The Python importer rejects unsafe paths, missing or
+uninventoried files, hash/size mismatches, duplicate logical IDs, unsupported
+schemas, and binary substitutions disguised as audio.
+
+Custom profiles have a draft/finalized lifecycle. Editing an immutable
+template or finalized profile creates a named copy whose display name retains
+the source profile ID. Draft decisions autosave and scientific changes
+invalidate downstream Segment artifacts. `Done — Lock Profile` finalizes the
+profile and makes it copy-to-edit-only. The Runner catalogue excludes drafts
+and can materialize the legacy Segment 6 session/order artifact on demand from
+a finalized Segment 0-5 profile.

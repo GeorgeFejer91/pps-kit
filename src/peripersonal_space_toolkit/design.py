@@ -234,6 +234,7 @@ class ProtocolSpec:
     max_consecutive_same_trial_type: int = 2
     participants: int = 50
     random_seed: int = 20250604
+    participant_order_policy: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -2111,29 +2112,23 @@ def block_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
 
 
 def participant_block_orders(design: StimulusDesign) -> dict[str, list[str]]:
+    from .participant_orders import participant_order
+
     protocol = design.protocol
     labels = [block.label for block in effective_block_specs(protocol)]
     if not labels:
         return {}
 
-    base_order = list(labels)
-    if protocol.block_order_randomization != "fixed":
-        random.Random(protocol.random_seed).shuffle(base_order)
-
     orders: dict[str, list[str]] = {}
-    block_count = len(base_order)
     for participant_index in range(1, protocol.participants + 1):
-        if protocol.block_order_randomization == "fixed":
-            order = list(labels)
-        elif protocol.block_order_randomization == "seeded_random_permutation":
-            order = list(labels)
-            random.Random(protocol.random_seed + participant_index * 7919).shuffle(order)
-        else:
-            shift = (participant_index - 1) % block_count
-            order = base_order[shift:] + base_order[:shift]
-            if ((participant_index - 1) // block_count) % 2 == 1:
-                order = list(reversed(order))
-        orders[f"P{participant_index:03d}"] = order
+        generated = participant_order(
+            labels,
+            participant_index=participant_index,
+            policy=protocol.participant_order_policy,
+            legacy_algorithm=protocol.block_order_randomization,
+            legacy_seed=protocol.random_seed,
+        )
+        orders[f"P{participant_index:03d}"] = list(generated.block_order)
     return orders
 
 

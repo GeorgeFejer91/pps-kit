@@ -4,6 +4,7 @@ __pycache__/
 .codex-remote-attachments/
 .venv/
 .venv-*/
+node_modules/
 build/
 dist/
 tmp/

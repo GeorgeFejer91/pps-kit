@@ -5,6 +5,10 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
 ## Current Ownership
 
 - Dashboard backend and Segment 0-6 materialization: `src/peripersonal_space_toolkit/dashboard_app.py`.
+- Cross-platform native Designer shell: `designer_shell.py`; loopback bootstrap-cookie exchange, system WebView selection, single-instance lock, geometry persistence, external-browser handoff, and controlled profile-bundle save.
+- Versioned participant order and portable profile interchange: `participant_orders.py` owns `seeded_factoradic_cycle.v1`; `profile_bundle.py` owns `.pps-profile` verification and installation.
+- Designer frontend source/build: `dashboard/{index.html,styles.css,app.js,designer_main.js}` plus its Vite configuration; `dashboard/compiled/` is the shared native/GitHub-Pages artifact.
+- Designer packaging: `windows/PPSDesigner.spec`, `windows/Build_PPS_Designer.ps1`, and `packaging/linux/` for the generic source launcher and DEB/RPM staging.
 - Dashboard backend helper seams: `src/peripersonal_space_toolkit/dashboard_backend/`.
 - Browser dashboard/static GitHub Pages surface: `src/peripersonal_space_toolkit/dashboard/`, root `index.html`, `.nojekyll`, `CNAME`.
 - Loudness policy, SPL estimate metadata, dB/RMS helpers, final-active-window calibration rules, and standalone loudness-manifest helpers: `src/peripersonal_space_toolkit/loudness.py`.

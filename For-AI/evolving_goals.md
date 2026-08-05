@@ -1900,3 +1900,20 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - Keep refining Trial Assembler layout so the app is usable at smaller desktop sizes.
 - Add GUI controls for important literature-derived parameters when they are implementable: auditory duration lock, envelope/gain law, tactile stimulus details, catch/baseline subtype, block-level factors, body-scaled distance mode, response rule, latency fields, and analysis config.
 - Do not expose the legacy Tk runner as an operator path. Future runner polish should target the PySide Focus Mode app shell and keep the callback-derived timing core GUI-independent.
+
+## 2026-08-05 — Cross-platform Experiment Designer
+
+- Implemented `pps-designer` as an independently launchable pywebview/FastAPI
+  applet for Windows WebView2 and Linux GTK/WebKitGTK, with one compiled Vite
+  frontend shared by the native package and GitHub Pages.
+- Implemented hosted browser-local composition, IndexedDB draft/audio storage,
+  immutable-template copy-on-edit, source-ID-bearing derived names, draft
+  autosave, downstream invalidation, finalization locking, themes, collapsible
+  sticky stages, and portable `.pps-profile` export.
+- Added SHA-256-verified profile bundles and
+  `seeded_factoradic_cycle.v1`. Segment 6 is the profile validation/finalization
+  boundary; its count is a preview count, while the Runner remains responsible
+  for session materialization.
+- Added Windows x64 and Linux DEB/RPM/source packaging definitions. The central
+  hub, broader Runner GUI redesign, and Android acquisition remain out of this
+  unit.

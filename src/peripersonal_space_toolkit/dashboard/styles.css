@@ -4720,3 +4720,163 @@ body.modal-open {
 .pub-doi-link:hover {
   text-decoration: underline;
 }
+
+/* PPS Designer applet chrome and theme layer. */
+.designer-status-chrome {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.segment-heading {
+  position: sticky;
+  top: 88px;
+  z-index: 9;
+  align-items: center;
+  padding: 8px 4px;
+  background: color-mix(in srgb, var(--background) 94%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.segment-collapse-button {
+  margin-left: auto;
+  min-height: 28px;
+  padding: 3px 9px;
+  font-size: 12px;
+}
+
+.decision-segment.collapsed > :not(.segment-heading) {
+  display: none !important;
+}
+
+.decision-segment.collapsed .segment-heading {
+  border-bottom: 1px solid var(--line);
+}
+
+.step-footer {
+  position: sticky;
+  bottom: 8px;
+  z-index: 7;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+body:not(.desktop-applet) .legacy-session-action {
+  display: none;
+}
+
+body.desktop-applet [data-page-tab="documentation"],
+body.desktop-applet [data-page-tab="downloads"],
+body.desktop-applet .companion-panel,
+body.desktop-applet .rail-note {
+  display: none !important;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #151a17;
+  --surface: #202723;
+  --surface-2: #252e29;
+  --line: #3d4b43;
+  --line-strong: #607066;
+  --text: #f1f5f2;
+  --muted: #bdc9c1;
+  --neutral-100: #2c3731;
+  --neutral-200: #303b35;
+  --neutral-300: #46554c;
+  --neutral-400: #8b9a91;
+  --neutral-500: #a8b5ad;
+  --neutral-600: #c2ccc6;
+  --primary: #54b58f;
+  --primary-hover: #6bc7a2;
+  --warning: #f0c57c;
+  --warning-bg: #463719;
+  --danger: #ffadad;
+  --danger-bg: #492629;
+  --ok-bg: #1f3b31;
+  --family-audio-bg: #193b3e;
+  --family-baseline-bg: #292f54;
+  --family-catch-bg: #49351f;
+}
+
+:root[data-theme="dark"] .rail {
+  background: #1b211e;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.36);
+}
+
+:root[data-theme="dark"] .segment-heading h2,
+:root[data-theme="dark"] .pub-reference-list {
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .field-row label,
+:root[data-theme="dark"] .layout-title,
+:root[data-theme="dark"] .panel-title,
+:root[data-theme="dark"] .panel-subtitle,
+:root[data-theme="dark"] .rail nav a,
+:root[data-theme="dark"] .rail-nav-group a,
+:root[data-theme="dark"] .button-link.secondary-link {
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .rail nav a:hover,
+:root[data-theme="dark"] .rail nav a.active,
+:root[data-theme="dark"] .rail-nav-group a:hover,
+:root[data-theme="dark"] .rail-nav-group a.active {
+  background: var(--neutral-200);
+}
+
+:root[data-theme="dark"] .panel.locked,
+:root[data-theme="dark"] .panel.profile-readonly {
+  opacity: 0.88;
+}
+
+:root[data-theme="dark"] button.primary,
+:root[data-theme="dark"] .site-tab.active,
+:root[data-theme="dark"] .site-tab[aria-selected="true"],
+:root[data-theme="dark"] .button-link.primary-link,
+:root[data-theme="dark"] .segmented-control button.active,
+:root[data-theme="dark"] .segmented-control label:has(input:checked),
+:root[data-theme="dark"] .step-badge.current,
+:root[data-theme="dark"] .filmstrip-preview-button.playing,
+:root[data-theme="dark"] .sequence-label-chip .sequence-label-preview.playing {
+  color: #10241d;
+}
+
+:root[data-theme="dark"] .segmented-control input:checked + span {
+  color: #10241d;
+}
+
+:root[data-theme="dark"] .rail nav a .decision-state.ready,
+:root[data-theme="dark"] .rail-nav-group a .decision-state.ready {
+  color: #8fe4c0;
+  border-color: #4c9b7b;
+}
+
+:root[data-theme="dark"] .segment-info-button {
+  border-color: var(--line-strong);
+  background: var(--surface-2);
+  color: var(--primary);
+}
+
+:root[data-theme="dark"] .data-acquisition-bridge {
+  border-color: var(--line);
+  background: var(--surface-2);
+}
+
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] table,
+:root[data-theme="dark"] th,
+:root[data-theme="dark"] td {
+  color: var(--text);
+  border-color: var(--line);
+  background-color: var(--surface);
+}

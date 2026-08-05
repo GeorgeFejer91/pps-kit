@@ -255,13 +255,13 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260703-runner-gui-compat"
+    static_version = "20260805-designer"
     assert f'href="styles.css?v={static_version}"' in html
-    assert f'src="hardware_pixel_art.js?v={static_version}"' in html
+    assert 'import("./hardware_pixel_art.js")' in app_js
     assert f'src="app.js?v={static_version}"' in html
-    assert f"index.html?page=toolkit&v={static_version}" in public_index
-    assert f"index.html?page=documentation&v={static_version}" in public_docs
-    assert f"index.html?page=downloads&v={static_version}" in public_download
+    assert f"compiled/index.html?page=toolkit&v={static_version}" in public_index
+    assert f"compiled/index.html?page=documentation&v={static_version}" in public_docs
+    assert f"compiled/index.html?page=downloads&v={static_version}" in public_download
     assert "seededGellermannBlockRows" in app_js
     assert "downloadBlockRandomization" in app_js
     assert 'control.id === "download-block-randomization"' in app_js
@@ -279,7 +279,7 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="toolkit-page"' in html
     assert 'id="download-block-randomization"' in html
     assert ".panel.profile-readonly #download-block-randomization" in styles_css
-    assert f'src="../viewer/index.html?v={static_version}"' in html
+    assert f'data-lazy-src="../viewer/index.html?v={static_version}"' in html
     assert "PAGE_ROUTE_SEGMENTS" in app_js
     assert 'documentation: "documentation"' in app_js
     assert 'downloads: "download"' in app_js
@@ -307,8 +307,8 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="preload-asset-status"' in html
     assert 'id="profile-recreation-notice"' in html
     assert "Study/profile" in html
-    assert "Save as New Study Profile" in html
-    assert "Prepare Output Folder for Data Collection" in html
+    assert "Done — Lock Profile" in html
+    assert "Export .pps-profile" in html
     assert "/api/profiles/save-prepared" in app_js
     assert "/api/run-sequence/export-bridge" in app_js
     assert 'id="edit-profile-rail"' in html
@@ -337,7 +337,7 @@ def test_dashboard_static_assets_are_packaged():
         "Baseline and Tactile Trial Design",
         "Trial Repetition Pool",
         "Generate and Review Blocks",
-        "Prepare Experiment",
+        "Profile Validation and Save",
     ]:
         assert title in html
     for slugged_title in [
@@ -498,20 +498,20 @@ def test_dashboard_static_assets_are_packaged():
     assert html.index('id="repetitions"') > html.index('id="block"')
     assert html.index('id="blocks"') > html.index('id="block"')
     assert html.index('id="protocol-summary"') > html.index('id="block"')
-    assert "Prepare Experiment" in html
-    assert "Experiment-Level Parameters" in html
+    assert "Profile Validation and Save" in html
+    assert "Portable Profile Parameters" in html
     assert "Run Setup" not in html
     assert html.index('id="run"') > html.index('id="schedule"')
     assert html.index('id="participants"') > html.index('id="run"')
-    assert "Planned participants" in html
+    assert "Order preview rows (not study size)" in html
     assert 'name="experiment-structure"' in html
     assert "1 part" in html
     assert "2 parts" in html
     assert "Block Permutation Preview" in html
     assert 'id="run-sequence-summary"' in html
     assert 'id="run-sequence-table"' in html
-    assert "Regenerate Sequence" in html
-    assert "Save Design and Start Experiment Runner" in html
+    assert "Refresh Order Preview" in html
+    assert "Done — Lock Profile" in html
     assert 'id="capture-lsl"' not in html
     assert 'id="capture-xdf"' not in html
     assert 'id="capture-analysis"' not in html
@@ -616,13 +616,13 @@ def test_dashboard_static_assets_are_packaged():
     assert "min_max" in app_js
     assert "isCompanionDashboardOrigin" in app_js
     assert "http://127.0.0.1:8766" in app_js
-    assert 'new URL("../../../../", document.currentScript?.src || window.location.href).href' in app_js
+    assert 'import.meta.url.includes("/compiled/assets/")' in app_js
     assert "STATIC_PRELOAD_INVENTORY_PATH" in app_js
     assert "study_templates/" in app_js
     assert "staticStateForTemplate" in app_js
     assert "DEFAULT_STUDY_TEMPLATE_ID = \"study5_box_breathing_pps\"" in app_js
     assert "Loaded committed preload assets from GitHub" in app_js
-    assert "Start the local companion backend to create, bake, save, prepare, or open local experiment files." in app_js
+    assert "Hosted mode can compose and export profiles" in app_js
     assert "Open Asset" in app_js
     assert "staticPreviewAssetForLabel" in app_js
     assert "Remove trial sequence row" in app_js
@@ -1005,7 +1005,7 @@ def test_dashboard_pages_companion_contract(tmp_path: Path):
 
     root = client.get("/", follow_redirects=False)
     assert root.status_code in {302, 307}
-    assert root.headers["location"] == "/dashboard/index.html"
+    assert root.headers["location"] == "/dashboard/compiled/index.html"
 
     static_inventory = client.get("/assets/preloads/preload_inventory.json")
     assert static_inventory.status_code == 200
@@ -3176,9 +3176,9 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     accepted = accepted_response.json()
     assert accepted["project_segments"]["5_block_csv_preview"]["accepted"] is True
     assert accepted["custom_workflow"]["ready_to_render"] is True
-    assert accepted["custom_workflow"]["ready_to_prepare"] is False
+    assert accepted["custom_workflow"]["ready_to_prepare"] is True
     assert accepted["custom_workflow"]["current_step"] == "run"
-    assert "Prepare Segment 6 experiment." in accepted["custom_workflow"]["missing"]
+    assert accepted["custom_workflow"]["missing"] == []
     accepted_manifest = json.loads(Path(block_done["result"]["manifest_path"]).read_text(encoding="utf-8"))
     assert all(block["csv_file_name"].endswith("_final.csv") for block in accepted_manifest["blocks"])
     assert all(Path(block["csv_path"]).name.endswith("_final.csv") for block in accepted_manifest["blocks"])

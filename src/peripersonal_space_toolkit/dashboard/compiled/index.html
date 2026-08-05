@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
-  <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260805-designer">
+  <link rel="icon" type="image/png" href="./assets/pps_toolkit_icon-PI4CIL5w.png">
+  <script type="module" crossorigin src="./assets/index-B7atsyVE.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-Ct9AMpON.css">
 </head>
 <body>
   <div class="app-shell">
@@ -214,7 +215,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260805-designer"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../../viewer/index.html?v=20260805-designer"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -265,7 +266,7 @@
                       <label class="source-mode-widget">
                         <input type="radio" name="generated-source-mode" value="dynaspace_gaussian_burst_train" checked>
                         <span class="source-mode-widget-body">
-                          <img src="looming_burst_train_waveform.svg" alt="" aria-hidden="true" width="960" height="360">
+                          <img src="./assets/looming_burst_train_waveform-ClrNKwma.svg" alt="" aria-hidden="true" width="960" height="360">
                           <span class="source-mode-widget-copy">
                             <strong>Burst train</strong>
                             <span>Hobeika et al. (2020)</span>
@@ -275,7 +276,7 @@
                       <label class="source-mode-widget">
                         <input type="radio" name="generated-source-mode" value="continuous_noise">
                         <span class="source-mode-widget-body">
-                          <img src="looming_smooth_linear_approach_waveform.svg" alt="" aria-hidden="true" width="960" height="360">
+                          <img src="./assets/looming_smooth_linear_approach_waveform-Oee7sVhW.svg" alt="" aria-hidden="true" width="960" height="360">
                           <span class="source-mode-widget-copy">
                             <strong>Smooth linear</strong>
                             <span>Approach envelope</span>
@@ -716,7 +717,7 @@
               <div class="arch-tier-label">Rendering</div>
               <div class="arch-tier-nodes arch-tier-nodes-2">
                 <article class="arch-node arch-node-resource">
-                  <div class="arch-node-icon arch-node-image-icon"><img src="sofa_logo.png" alt="" aria-hidden="true"></div>
+                  <div class="arch-node-icon arch-node-image-icon"><img src="./assets/sofa_logo-B7WShRtS.png" alt="" aria-hidden="true"></div>
                   <span class="arch-node-kicker">Reference Path</span>
                   <strong>SOFA/FABIAN HRIR</strong>
                   <p>Head-related transfer functions stored in SOFA format provide the binaural reference used to spatialize looming audio along the researcher-defined trajectory.</p>
@@ -725,7 +726,7 @@
                   </div>
                 </article>
                 <article class="arch-node arch-node-resource">
-                  <div class="arch-node-icon arch-node-image-icon arch-node-sonicom-icon"><img src="sonicom_wave.png" alt="" aria-hidden="true"></div>
+                  <div class="arch-node-icon arch-node-image-icon arch-node-sonicom-icon"><img src="./assets/sonicom_wave-Ccwgm6Ho.png" alt="" aria-hidden="true"></div>
                   <span class="arch-node-kicker">Native Path</span>
                   <strong>3DTI and BRT Renderer</strong>
                   <p>Open-source C++ spatial audio engine rendering moving binaural sources from the same trajectory decisions passed through the Python backend.</p>
@@ -771,7 +772,7 @@
                   <p>Native Windows application that opens the prepared session package and plays the three-channel ASIO stream to the lab hardware. Owns all timing-sensitive playback and response recording entirely outside the browser.</p>
                   <figure class="audiogram-figure" aria-label="Audiogram of an example looming stimulus trial">
                     <div class="audiogram-frame">
-                      <img src="audiogram_looming_trial.svg" alt="Waveform display of a three-channel looming trial WAV showing Channel 1 Left Audio and Channel 2 Right Audio with growing amplitude, and Channel 3 Tactile Drive with burst onset at the SOA" width="820" height="300">
+                      <img src="./assets/audiogram_looming_trial-B6hFVwaU.svg" alt="Waveform display of a three-channel looming trial WAV showing Channel 1 Left Audio and Channel 2 Right Audio with growing amplitude, and Channel 3 Tactile Drive with burst onset at the SOA" width="820" height="300">
                     </div>
                     <figcaption class="audiogram-figcaption">
                       <span class="audiogram-figcaption-label">Fig.</span>
@@ -865,7 +866,7 @@
               <div class="spatial-pipeline-arrow" aria-hidden="true"></div>
               <article class="spatial-pipeline-step">
                 <div class="spatial-step-icon spatial-step-image-icon" aria-hidden="true">
-                  <img src="sofa_logo.png" alt="">
+                  <img src="./assets/sofa_logo-B7WShRtS.png" alt="">
                 </div>
                 <strong>SOFA / FABIAN</strong>
                 <span>Ear filters for each direction</span>
@@ -873,7 +874,7 @@
               <div class="spatial-pipeline-arrow" aria-hidden="true"></div>
               <article class="spatial-pipeline-step">
                 <div class="spatial-step-icon spatial-step-sonicom-icon" aria-hidden="true">
-                  <img src="sonicom_wave.png" alt="">
+                  <img src="./assets/sonicom_wave-Ccwgm6Ho.png" alt="">
                 </div>
                 <strong>3DTI / BRT</strong>
                 <span>Renderer applies filters and motion</span>
@@ -934,8 +935,8 @@
           </ol>
 
           <div class="doc-link-row">
-            <a class="button-link" href="../../../docs/STIMULUS_DESIGNER.md">Open Stimulus Designer Docs</a>
-            <a class="button-link" href="../../../docs/REPLICATION.md">Open Replication Notes</a>
+            <a class="button-link" href="../../../../docs/STIMULUS_DESIGNER.md">Open Stimulus Designer Docs</a>
+            <a class="button-link" href="../../../../docs/REPLICATION.md">Open Replication Notes</a>
             <a class="button-link" href="https://github.com/3DTune-In/3dti_AudioToolkit" target="_blank" rel="noopener noreferrer">Open Original 3DTI GitHub</a>
           </div>
         </section>
@@ -948,7 +949,7 @@
             <h2 id="docs-hardware-title">Hardware Specifications and Latency Evidence</h2>
           </div>
           <p class="info-copy">The validated lab route runs on Windows and delivers auditory and tactile stimuli through a single synchronized multichannel ASIO output stream using the Native Instruments Komplete Audio 6 MK2 interface. Channels 1 and 2 route binaural left and right audio to participant headphones while channel 3 drives a Woojer Strap 4 connected as a wired analog load, removing the timing variability introduced by Bluetooth. The tactile signal is not a separate conversion path but a conventional audio waveform written to output 3 and routed into the Woojer's wired analog auxiliary input, whose transducer converts low-frequency signal energy into vibrotactile stimulation. Encoding the tactile cue as an audio channel keeps its onset timing under exactly the same software and hardware control as the auditory channels, making the stimulus onset asynchrony between sound and touch a direct function of the SOA schedule.</p>
-          <p class="info-copy">Latency was measured using a direct electrical loopback in which the three output channels were patched back into the Komplete Audio 6 MK2's own analog inputs via TRS cables, and a calibration pulse train was played while the return signal was simultaneously recorded. Comparing transmitted and received pulse timing gives the round-trip delay per channel. The physical-minus-digital latency is 33.462 &plusmn; 0.013 ms across 20 recovered pulses, representing the time between when the software schedules a sample and when that signal appears at the physical output. All 20 response marker pulses were recovered. The critical finding for audio-tactile research is the inter-channel skew: the left and right audio channels are synchronized to within 0.023 ms of each other, and the tactile drive channel deviates from the audio channels by only 0.011 ms. These sub-millisecond differences are possible because the Komplete Audio 6 MK2, operated through its ASIO driver as a single multichannel device, clocks all three outputs from the same sample clock and renders them within the same output buffer; this result cannot be replicated by routing stimuli through separate Windows stereo endpoints. The full loopback protocol is documented in <a href="../../../docs/EXPERIMENT_LATENCY_VALIDATION.md">the latency validation report</a>.</p>
+          <p class="info-copy">Latency was measured using a direct electrical loopback in which the three output channels were patched back into the Komplete Audio 6 MK2's own analog inputs via TRS cables, and a calibration pulse train was played while the return signal was simultaneously recorded. Comparing transmitted and received pulse timing gives the round-trip delay per channel. The physical-minus-digital latency is 33.462 &plusmn; 0.013 ms across 20 recovered pulses, representing the time between when the software schedules a sample and when that signal appears at the physical output. All 20 response marker pulses were recovered. The critical finding for audio-tactile research is the inter-channel skew: the left and right audio channels are synchronized to within 0.023 ms of each other, and the tactile drive channel deviates from the audio channels by only 0.011 ms. These sub-millisecond differences are possible because the Komplete Audio 6 MK2, operated through its ASIO driver as a single multichannel device, clocks all three outputs from the same sample clock and renders them within the same output buffer; this result cannot be replicated by routing stimuli through separate Windows stereo endpoints. The full loopback protocol is documented in <a href="../../../../docs/EXPERIMENT_LATENCY_VALIDATION.md">the latency validation report</a>.</p>
         </section>
 
         <hr class="doc-segment-rule" aria-hidden="true">
@@ -969,8 +970,8 @@
             <div><strong>6 Prepare</strong><span>Create participant block orders and hand off to the native runner.</span></div>
           </div>
           <div class="doc-link-row">
-            <a class="button-link" href="../../../docs/GITHUB_PAGES_DASHBOARD.md">Open Dashboard Guide</a>
-            <a class="button-link" href="../../../docs/PUBLISHED_STUDY_RECREATION_STATUS.md">Open Profile Status</a>
+            <a class="button-link" href="../../../../docs/GITHUB_PAGES_DASHBOARD.md">Open Dashboard Guide</a>
+            <a class="button-link" href="../../../../docs/PUBLISHED_STUDY_RECREATION_STATUS.md">Open Profile Status</a>
           </div>
         </section>
 
@@ -983,8 +984,8 @@
           </div>
           <p class="info-copy">The Experiment Runner is a native Windows application, PPSExperimentRunner.exe, launched from the Segment 6 setup package and entirely separate from the browser dashboard. It is responsible for all timing-sensitive work during data collection, opening the prepared session package, playing the three-channel ASIO stream to the lab hardware, and recording participant responses and event markers. All playback timing is handled natively to avoid the latency variability inherent in browser JavaScript execution. Session output folders contain event CSVs, XDF and marker mirrors for Lab Streaming Layer integrations, trigger dictionaries, timing quality-control reports, and analysis-ready trial rows.</p>
           <div class="doc-link-row">
-            <a class="button-link" href="../../../docs/WINDOWS_APP.md">Open Windows App Guide</a>
-            <a class="button-link" href="../../../docs/AUDIO_ROUTING_STRESS_TEST.md">Open Audio Stress Notes</a>
+            <a class="button-link" href="../../../../docs/WINDOWS_APP.md">Open Windows App Guide</a>
+            <a class="button-link" href="../../../../docs/AUDIO_ROUTING_STRESS_TEST.md">Open Audio Stress Notes</a>
           </div>
         </section>
 
@@ -1028,9 +1029,9 @@
             </article>
           </div>
           <div class="doc-link-row">
-            <a class="button-link" href="../../../LICENSE">Open MIT License</a>
-            <a class="button-link" href="../../../docs/PRIVACY_RELEASE.md">Open Privacy Guide</a>
-            <a class="button-link" href="../../../docs/PPS_DOWNLOADS.md">Open Download Notes</a>
+            <a class="button-link" href="../../../../LICENSE">Open MIT License</a>
+            <a class="button-link" href="../../../../docs/PRIVACY_RELEASE.md">Open Privacy Guide</a>
+            <a class="button-link" href="../../../../docs/PPS_DOWNLOADS.md">Open Download Notes</a>
           </div>
         </section>
       </section>
@@ -1172,7 +1173,5 @@
       </form>
     </div>
   </div>
-  <script type="module" src="app.js?v=20260805-designer"></script>
-  <script type="module" src="designer_main.js?v=20260805-designer"></script>
 </body>
 </html>
