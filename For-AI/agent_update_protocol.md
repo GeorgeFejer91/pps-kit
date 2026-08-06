@@ -79,6 +79,11 @@ The verification should render the actual relevant UI state, save screenshots or
 an equivalent visual artifact under an ignored validation folder, and explicitly
 check for nonblank output, clipping, overlap, text visibility, panel placement,
 and adaptive behavior across the target screen sizes when screen size matters.
+For the HTML Experiment Designer, follow `interface_design_principles.md` and run
+`python validation_protocols/scripts/run_designer_visual_layout_audit.py`. Inspect
+the screenshots/contact sheet, correct defects, rebuild, and rerun; collecting one
+set of screenshots without a documented inspection-and-correction pass is not
+visual approval.
 
 ## Android Emulator Validation Rule
 

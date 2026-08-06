@@ -10,11 +10,17 @@ Hosted composition can clone immutable profiles and edit browser-local decisions
 
 The applet retains the long Segment 0-6 scroll surface. Fixed chrome shows capability and saved/unsaved state, a persistent light/dark theme, contextual Help, sticky stage headings/actions, and per-stage collapse controls. Desktop applet mode hides public Documentation and Downloads tabs; those remain on the public website.
 
+All layout and styling changes follow `interface_design_principles.md`: a 4 px base/8 px primary rhythm, shared panel and control geometry, explicit alignment meridians, hierarchy-driven salience, WCAG-aware target/focus/reflow behavior, and iterative screenshot inspection after every visual change.
+
+Read-only profile inspection remains fully legible. Do not dim entire read-only panels: use badges, disabled mutation controls, and pointer-event gating to communicate capability while retaining normal content/surface contrast in both themes. Themeable application cards and controls use semantic surface/color variables; white backgrounds are reserved for content that inherently needs a white canvas, such as a waveform image.
+
 ## Segment 0 Profile Chooser
 
 Segment 0 is a parsimonious profile catalogue, not an acquisition or folder-configuration surface. It exposes one grouped `Profile` selector containing immutable built-in study templates and researcher-owned custom designs, one `Start New Custom Design` button, and one contextual profile card with kind/status, citation, DOI, stable profile ID, source provenance, and exceptional asset warnings. Custom profiles must not be duplicated in a second selector. The direct `Refresh`, `Apply Design`, `Apply Profile / Create Project Folder`, `Open Folder`, and data-acquisition-folder controls are not part of Segment 0.
 
 Selecting a profile loads it for inspection without an additional Apply step. Starting a clean-slate design first requires a name and creates a draft in the fixed researcher workspace; desktop and hosted drafts then autosave. Attempted mutation of a built-in or finalized profile still opens the provenance-preserving copy-and-name dialog. The Segment 0 About modal calls the installed or hosted study-template source the `Template Directory`; the phrase is a link that opens the physical directory locally and the repository directory online. Its fourth information heading is `Output`.
+
+The profile selector and `Start New Custom Design` share an exact control height and vertical center on desktop layouts. Segment heading, panel content, chooser row, information card, and metadata share project grid meridians. The profile card uses a tokenized vertical flow, and its identity/provenance fields form a compact aligned metadata grid rather than unrelated floating text blocks.
 
 ## Trajectory Preview
 

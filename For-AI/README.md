@@ -13,6 +13,7 @@ Read this file before modifying the repository. Then read:
 - [loudness_calibration.md](loudness_calibration.md) for the Study 5 headphone/interface loudness calibration findings and policy direction.
 - [looming_stimulus_generation_standard.md](looming_stimulus_generation_standard.md) for the current DynaSpace-derived golden standard for generated looming stimuli.
 - [dashboard_gui_behavior.md](dashboard_gui_behavior.md) for current HTML dashboard edit/view-mode and downward-decision-propagation behavior.
+- [interface_design_principles.md](interface_design_principles.md) for the evidence-based PPS grid, spacing, hierarchy, accessibility, and mandatory iterative visual-validation contract.
 - [audiotactile-paper-metadata-audit/README.md](audiotactile-paper-metadata-audit/README.md) for the standalone paper/PDF/supplement metadata extraction audit that is independent from GUI profile recreation.
 - [agent_update_protocol.md](agent_update_protocol.md) for how to keep this folder current.
 - [skills/html-dashboard-orchestrator/SKILL.md](skills/html-dashboard-orchestrator/SKILL.md) before making HTML dashboard or hosted-GitHub-Pages GUI changes.

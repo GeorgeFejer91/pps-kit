@@ -255,7 +255,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260806-segment0"
+    static_version = "20260806-interface-grid"
     assert f'href="styles.css?v={static_version}"' in html
     assert 'import("./hardware_pixel_art.js")' in app_js
     assert f'src="app.js?v={static_version}"' in html

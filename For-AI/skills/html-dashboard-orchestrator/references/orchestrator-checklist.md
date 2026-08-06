@@ -37,6 +37,9 @@ Use this checklist before finalizing an HTML dashboard change.
 - Are labels short and unambiguous?
 - Are dimensions stable across desktop and narrow viewports?
 - Are panel splitters/edge handles preserved rather than replaced by left-rail size sliders?
+- Do same-row controls share height and vertical center?
+- Do segment headings, panel content, action rows, cards, and footers follow common meridians and the 4/8 px spacing tokens?
+- Is visual salience proportional to task importance, with no accidental competing primary action?
 
 ## Validation
 
@@ -44,4 +47,5 @@ Use this checklist before finalizing an HTML dashboard change.
 - Run relevant render/session tests when backend behavior changes.
 - Browser-smoke the local dashboard.
 - Verify the GitHub Pages/static version after push when dashboard files changed.
+- Run the Designer visual-layout audit for visual changes, inspect every generated viewport/segment image and the contact sheet, fix defects, then rerun until the report and inspection pass.
 - State any test that could not be run.

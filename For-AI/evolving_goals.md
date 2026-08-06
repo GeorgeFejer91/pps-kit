@@ -2,6 +2,10 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-08-06 — interface design system and visual QA
+
+- Adopt a repository-wide PPS interface-design contract based on task ownership, common grid meridians, a 4 px base/8 px primary spacing rhythm, consistent control geometry, proximity grouping, hierarchy-driven salience, responsive reflow, WCAG-aware contrast/focus/targets, and restrained progressive disclosure. Symmetry is a balance tool rather than a universal rule; deliberate hierarchy may be asymmetric, while accidental misalignment is a defect. Every visual change now requires deterministic desktop/hosted build output, visible rail-click navigation, multi-viewport light/dark screenshots for every Segment 0-6 stage, DOM geometry checks, explicit image inspection, correction, and a repeated audit until both hard criteria and qualitative review pass. Read-only scientific content retains full opacity; state is communicated with badges and locked controls rather than degraded legibility.
+
 ## 2026-08-06
 
 - Reduce Segment 0 to one grouped profile selector, one `Start New Custom Design` action, and one read-only profile information card. Built-in templates remain permanent package resources; custom drafts and finalized profiles share the same selector under a separate group. Remove duplicate custom-project selection, explicit Apply/Save/Refresh/folder buttons, and the data-acquisition bridge from this design stage. A clean-slate profile must be named before its dedicated researcher-workspace folder is created; subsequent draft decisions autosave. The About modal links `Template Directory` to the physical local template directory or the hosted GitHub directory, labels its final section `Output`, and does not discuss acquisition responsibilities.

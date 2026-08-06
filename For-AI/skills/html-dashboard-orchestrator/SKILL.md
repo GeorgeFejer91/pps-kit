@@ -37,6 +37,7 @@ In this repo:
    - Preserve unrelated dirty worktree changes. Stage selectively when needed.
 
 3. Keep the UI lab-oriented.
+   - Follow `For-AI/interface_design_principles.md` for every layout or styling change. Use the shared 4 px base/8 px primary spacing rhythm, control-height and panel tokens, common alignment meridians, proximity-based grouping, hierarchy-driven salience, and WCAG-aware focus/target/reflow rules. Symmetry may support balance, but do not force symmetry when an asymmetric layout better communicates task priority. Accidental off-grid spacing and same-row height/center mismatches are defects.
    - Build dense, quiet researcher controls rather than marketing/AI-dashboard surfaces.
    - Prefer explicit control groups, segmented buttons, tables, status chips, splitters, and direct manipulation.
    - Do not add visible instructional prose when the control itself can be clear.
@@ -80,6 +81,7 @@ In this repo:
    - Smoke-test the dashboard in a browser with the local backend running.
    - For viewer or canvas changes, verify the page is nonblank and interaction updates fields.
    - For static/hosted changes, push or otherwise update the GitHub Pages-facing files and verify the hosted URL with cache-busting query params.
+   - For any visual change, run `python validation_protocols/scripts/run_designer_visual_layout_audit.py`, inspect its multi-viewport light/dark screenshots and contact sheet, correct hard or qualitative defects, rebuild, and rerun. Geometry checks and pixel diffs do not replace direct image inspection; one unreviewed screenshot pass is insufficient.
 
 7. Update project memory.
    - Update `For-AI/project_context.md` for durable architecture/boundary changes.
