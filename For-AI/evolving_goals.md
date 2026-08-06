@@ -1954,3 +1954,29 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   selection, actual participant count/IDs, session materialization, capture
   settings, and Runner launch are no longer normal Designer controls; legacy
   `6_experiment_run_setup` files/routes remain readable for compatibility.
+
+## 2026-08-06 — Bounded selector consistency
+
+- Native WebKitGTK and Windows select popups may expand to the longest option,
+  so all visible single-choice Designer selectors now use one shared accessible
+  combobox presentation. The native select remains authoritative for form/API
+  state, while the visible listbox is anchored to and exactly as wide as its
+  trigger, wraps long labels, uses a bounded vertical menu, and supports
+  pointer and keyboard selection.
+- Visual QA now opens the Segment 0 profile menu at every target viewport and
+  fails when its width or leading edge differs from the selector by more than
+  one CSS pixel or when it crosses the viewport edge.
+- Segment 0's profile card is intentionally reduced to profile ID, citation,
+  DOI, and optional source provenance. Repeated profile title, template/status
+  chips, asset-count chip, and the recreation warning are removed; the warning
+  now appears only in Segment 0 About. The desktop applet also omits the entire
+  hosted top navigation/status bar, while the hosted website retains it for
+  page navigation.
+- The sidebar spells out `Peripersonal Space Design Toolkit`. Theme selection
+  lives beside the sidebar subtitle as a compact horizontal white/black and
+  black/white two-square toggle; the former text `Dark`/`Light` top-bar button
+  is removed.
+- Native DOI/external-link clicks are explicitly delegated from the shared
+  frontend to the pywebview shell. The shell validates HTTP(S)/mailto schemes
+  and uses the operating system browser handoff (`xdg-open`, the Windows shell,
+  or macOS `open`) instead of asking WebKitGTK/WebView2 to navigate externally.

@@ -31,6 +31,8 @@ def test_designer_layout_uses_shared_grid_and_control_tokens() -> None:
         "--panel-padding: 16px",
         "height: var(--control-height)",
         "padding: var(--space-2) calc(var(--panel-padding) + 1px)",
+        ".bounded-select-menu",
+        ".bounded-select-button",
     ]:
         assert contract in css
     assert "Mandatory Visual Validation Loop" in memory
@@ -38,6 +40,8 @@ def test_designer_layout_uses_shared_grid_and_control_tokens() -> None:
     assert 'step_link.click()' in audit_source
     assert 'page.locator(".decision-segment").nth(segment_index)' in audit_source
     assert 'html{scroll-behavior:auto!important}' in audit_source
+    assert 'select_menu_width_delta_px' in audit_source
+    assert 'f"{case.name}_segment0_dropdown.png"' in audit_source
 
 
 def test_visual_layout_audit_rejects_geometry_regressions() -> None:
@@ -54,6 +58,10 @@ def test_visual_layout_audit_rejects_geometry_regressions() -> None:
             "select_button_height_delta_px": 2.0,
             "select_button_center_delta_px": 2.0,
             "select_button_overlap_px": 0.0,
+            "select_menu_width_delta_px": 2.0,
+            "select_menu_left_delta_px": 2.0,
+            "select_menu_viewport_overflow_px": 2.0,
+            "topbar_visible": 1.0,
         },
         "primary_label_fits": True,
         "undersized_targets": [],
@@ -65,3 +73,7 @@ def test_visual_layout_audit_rejects_geometry_regressions() -> None:
     assert any("leading meridian" in failure for failure in failures)
     assert any("different heights" in failure for failure in failures)
     assert any("vertical centers" in failure for failure in failures)
+    assert any("same width" in failure for failure in failures)
+    assert any("anchored" in failure for failure in failures)
+    assert any("extends beyond" in failure for failure in failures)
+    assert any("redundant hosted top bar" in failure for failure in failures)

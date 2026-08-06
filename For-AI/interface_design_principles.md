@@ -25,6 +25,7 @@ The PPS implementation uses a 4 px base unit and an 8 px primary rhythm. This is
 | Hierarchy and salience | Visual strength follows task importance. | At most one primary action in a local decision row. Titles, status, metadata, warnings, and secondary actions have descending emphasis. | Primary action is immediately identifiable; metadata and warnings do not compete with it unless blocking. |
 | Balance | Balance visual weight without forcing false symmetry. | Use stable column ratios and equal padding. Allow asymmetric action columns or previews when priority or content length requires it. | No accidental lopsided padding, orphaned controls, or unexplained empty columns. |
 | Consistency | Same meaning uses the same component, label pattern, size, color, and placement. | Shared tokens define control height, panel padding, radius, spacing, focus, and status styles across all applets. | No local component override without a documented semantic reason. |
+| Selection controls | A menu should preserve the spatial context of the field that opened it. | Visible single-choice selectors use the shared bounded combobox: its listbox is anchored to and exactly as wide as its trigger, with a viewport-bounded height. Native selects remain the form-state source underneath. | Opened listbox width and leading edge differ from the trigger by no more than 1 CSS px and never create viewport overflow. |
 | Typography and scanability | Reading order and text hierarchy should be obvious. | Left-align researcher forms and long text; keep labels close to controls; constrain prose widths; use stable title/label/metadata levels. | No clipped labels, ambiguous association, excessive line length, or centered body copy. |
 | Color and contrast | Do not use color alone; preserve readable contrast in all themes. | Status combines text and color; focus is visible; light/dark themes use the same semantic hierarchy. | WCAG-AA automated checks where machine-testable, plus manual light/dark review. |
 | Targets and control geometry | Controls must be large enough and separated enough to operate reliably. | Visible interactive targets are at least 24 x 24 CSS px; ordinary PPS form controls share the standard height; compact exceptions remain at least 28 px. | Browser geometry audit reports no undersized visible target or overlap. |
@@ -38,11 +39,13 @@ The PPS implementation uses a 4 px base unit and an 8 px primary rhythm. This is
 ## Segment 0 Layout Contract
 
 - The profile selector and `Start New Custom Design` are one action row. Their rendered heights and vertical centers match.
+- The opened profile list is anchored to the selector and has exactly the same width. Long study names wrap inside that width; the menu must never expand to the longest option or the viewport width.
 - The action row, information card, and panel heading share the same inner left/right meridians.
 - The action column has a stable width at desktop sizes and collapses to a full-width row at narrow sizes.
-- The profile card is a single vertical flow using tokenized gaps. Status, title, citation, DOI, identity/provenance, and exceptional notice appear in that order.
+- The profile card is a compact vertical flow using tokenized gaps: stable profile ID first, then citation, DOI, and optional source provenance. Do not repeat the selected profile title, template/read-only status, asset count, or recreation caveat in the main card; the selector and workflow state already communicate that context, while the caveat belongs in Segment 0 About.
 - Profile identity/provenance uses a compact aligned metadata grid. Empty provenance is removed rather than leaving a blank column.
 - The primary action is the only filled/high-salience control in Segment 0.
+- The independently launched desktop applet does not show the hosted site's top page-navigation/status bar. Its sidebar already owns the full `Peripersonal Space Design Toolkit` identity, mode, compact two-square light/dark toggle, and workflow navigation; Segment 0 begins at the top of the desktop workspace. Hosted pages retain their page navigation but use the same sidebar theme toggle rather than a text `Dark`/`Light` button.
 
 ## Mandatory Visual Validation Loop
 

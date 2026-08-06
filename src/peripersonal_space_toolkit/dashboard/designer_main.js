@@ -180,8 +180,10 @@ function applyTheme(theme) {
   localStorage.setItem("ppsDesigner.theme", theme);
   const toggle = document.getElementById("designer-theme-toggle");
   if (toggle) {
-    toggle.textContent = theme === "dark" ? "Light" : "Dark";
     toggle.setAttribute("aria-pressed", String(theme === "dark"));
+    const nextThemeLabel = theme === "dark" ? "Use light theme" : "Use dark theme";
+    toggle.setAttribute("aria-label", nextThemeLabel);
+    toggle.title = nextThemeLabel;
   }
 }
 

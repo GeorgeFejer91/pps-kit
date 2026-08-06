@@ -47,6 +47,27 @@ def test_segments_expose_one_clear_decision_model_each():
     assert ".profile-validation-checklist" in styles
     assert ".decision-summary-strip" in styles
     assert ".sequence-event-add-symbol.with-label" in styles
+    assert 'const BOUNDED_SELECT_SELECTOR = "select:not([multiple])' in app_js
+    assert 'boundedSelectMenu.style.width = `${rect.width}px`' in app_js
+    assert ".bounded-select-button" in styles
+    assert ".bounded-select-option" in styles
+    assert html.index('id="profile-inspection-id"') < html.index('id="profile-citation"')
+    assert 'id="design-title"' not in html
+    assert 'id="profile-kind-status"' not in html
+    assert 'id="preload-asset-status"' not in html
+    assert 'id="profile-recreation-notice"' not in html
+    assert 'id="segment-info-note-card"' in html
+    assert "body.desktop-applet .topbar" in styles
+    assert "display: none" in styles[styles.index("body.desktop-applet .topbar"):]
+    assert "Peripersonal Space Design Toolkit" in html
+    assert html.count('id="designer-theme-toggle"') == 1
+    assert html.index('id="designer-theme-toggle"') < html.index("</aside>")
+    assert html.count('class="theme-square ') == 2
+    assert ".rail-theme-toggle" in styles
+    assert '.rail-theme-toggle[aria-pressed="true"] .theme-square-dark' in styles
+    assert "function handoffExternalLinkToNative(event)" in app_js
+    assert 'window.pywebview?.api?.open_external' in app_js
+    assert 'document.addEventListener("click", handoffExternalLinkToNative, true)' in app_js
 
 
 def test_for_ai_contract_uses_profile_finalization_boundary():

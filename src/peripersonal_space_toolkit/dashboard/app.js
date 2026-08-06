@@ -112,7 +112,8 @@ const SEGMENT_INFO = {
     backendBeforeLink: "The application loads the selected profile from its ",
     backendLinkLabel: "Template Directory",
     backendAfterLink: ". New custom drafts are stored automatically in the researcher workspace. No folder selection is required.",
-    output: "A new template starts a dedicated folder for storing assets used to run the experiment."
+    output: "A new template starts a dedicated folder for storing assets used to run the experiment.",
+    note: PROFILE_RECREATION_NOTICE
   },
   stimulus: {
     kicker: "Segment 1",
@@ -308,6 +309,12 @@ const TRIAL_PREVIEW_LIMIT = 240;
 
 const $ = (id) => document.getElementById(id);
 const cssEscape = (value) => (window.CSS && window.CSS.escape ? window.CSS.escape(String(value)) : String(value).replace(/["\\]/g, "\\$&"));
+const BOUNDED_SELECT_SELECTOR = "select:not([multiple]):not(.state-only):not([aria-hidden=\"true\"])";
+const boundedSelectButtons = new WeakMap();
+let boundedSelectMenu = null;
+let activeBoundedSelect = null;
+let activeBoundedOptionIndex = -1;
+let boundedSelectSequence = 0;
 let apiBase = "";
 let companionToken = "";
 let templateLoadInFlight = false;
@@ -333,6 +340,225 @@ let trialPoolRepetitionDraft = {
 };
 let trialPoolDraftSourceHash = "";
 let trialPoolDraftInitialized = false;
+
+function boundedSelectLabel(select) {
+  const option = select.selectedOptions?.[0] || select.options?.[select.selectedIndex];
+  return String(option?.textContent || "Choose an option").trim();
+}
+
+function boundedSelectFieldLabel(select) {
+  const explicitLabel = select.id ? document.querySelector(`label[for="${cssEscape(select.id)}"]`) : null;
+  return String(explicitLabel?.textContent || select.closest(".field-row")?.querySelector("label")?.textContent || "Choose an option").trim();
+}
+
+function closeBoundedSelect({ restoreFocus = false } = {}) {
+  if (!boundedSelectMenu || !activeBoundedSelect) return;
+  const button = boundedSelectButtons.get(activeBoundedSelect);
+  boundedSelectMenu.hidden = true;
+  boundedSelectMenu.replaceChildren();
+  button?.setAttribute("aria-expanded", "false");
+  activeBoundedSelect = null;
+  activeBoundedOptionIndex = -1;
+  if (restoreFocus) button?.focus();
+}
+
+function selectBoundedOption(optionIndex) {
+  if (!activeBoundedSelect) return;
+  const option = activeBoundedSelect.options[optionIndex];
+  if (!option || option.disabled || option.hidden) return;
+  const select = activeBoundedSelect;
+  select.value = option.value;
+  closeBoundedSelect({ restoreFocus: true });
+  syncBoundedSelect(select);
+  select.dispatchEvent(new Event("input", { bubbles: true }));
+  select.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+function focusBoundedOption(direction) {
+  if (!boundedSelectMenu || !activeBoundedSelect) return;
+  const enabled = [...boundedSelectMenu.querySelectorAll("[data-bounded-option-index]")];
+  if (!enabled.length) return;
+  const current = enabled.findIndex((item) => Number(item.dataset.boundedOptionIndex) === activeBoundedOptionIndex);
+  let next = current;
+  if (direction === "first") next = 0;
+  else if (direction === "last") next = enabled.length - 1;
+  else if (direction === "next") next = current < 0 ? 0 : (current + 1) % enabled.length;
+  else if (direction === "previous") next = current < 0 ? enabled.length - 1 : (current - 1 + enabled.length) % enabled.length;
+  const item = enabled[next];
+  activeBoundedOptionIndex = Number(item.dataset.boundedOptionIndex);
+  item.focus({ preventScroll: true });
+  item.scrollIntoView({ block: "nearest" });
+}
+
+function positionBoundedSelectMenu(button) {
+  const rect = button.getBoundingClientRect();
+  const viewportInset = 8;
+  const menuGap = 4;
+  const availableBelow = Math.max(0, window.innerHeight - rect.bottom - viewportInset - menuGap);
+  const availableAbove = Math.max(0, rect.top - viewportInset - menuGap);
+  const openAbove = availableBelow < 200 && availableAbove > availableBelow;
+  const available = openAbove ? availableAbove : availableBelow;
+  const menuHeight = Math.max(96, Math.min(320, available));
+  boundedSelectMenu.style.left = `${rect.left}px`;
+  boundedSelectMenu.style.width = `${rect.width}px`;
+  boundedSelectMenu.style.maxHeight = `${menuHeight}px`;
+  if (openAbove) {
+    boundedSelectMenu.style.top = "auto";
+    boundedSelectMenu.style.bottom = `${window.innerHeight - rect.top + menuGap}px`;
+  } else {
+    boundedSelectMenu.style.top = `${rect.bottom + menuGap}px`;
+    boundedSelectMenu.style.bottom = "auto";
+  }
+}
+
+function openBoundedSelect(select) {
+  const button = boundedSelectButtons.get(select);
+  if (!button) return;
+  if (select.disabled) {
+    if (isProfileReadonlyMode()) openCustomizeModal();
+    return;
+  }
+  if (activeBoundedSelect === select && !boundedSelectMenu.hidden) {
+    closeBoundedSelect({ restoreFocus: true });
+    return;
+  }
+  closeBoundedSelect();
+  activeBoundedSelect = select;
+  activeBoundedOptionIndex = select.selectedIndex;
+  boundedSelectMenu.replaceChildren();
+  let lastGroup = null;
+  [...select.options].forEach((option, optionIndex) => {
+    const group = option.parentElement?.tagName === "OPTGROUP" ? option.parentElement : null;
+    if (group && group !== lastGroup) {
+      const heading = document.createElement("div");
+      heading.className = "bounded-select-group";
+      heading.textContent = group.label;
+      boundedSelectMenu.appendChild(heading);
+    }
+    lastGroup = group;
+    if (option.hidden) return;
+    const item = document.createElement("div");
+    item.className = "bounded-select-option";
+    item.dataset.boundedOptionIndex = String(optionIndex);
+    item.setAttribute("role", "option");
+    item.setAttribute("aria-selected", String(option.selected));
+    item.tabIndex = option.disabled ? -1 : 0;
+    item.textContent = option.textContent;
+    if (option.disabled) {
+      item.classList.add("disabled");
+      item.setAttribute("aria-disabled", "true");
+    } else {
+      item.addEventListener("click", () => selectBoundedOption(optionIndex));
+    }
+    boundedSelectMenu.appendChild(item);
+  });
+  positionBoundedSelectMenu(button);
+  boundedSelectMenu.hidden = false;
+  button.setAttribute("aria-expanded", "true");
+  window.requestAnimationFrame(() => {
+    const selected = boundedSelectMenu.querySelector(`[data-bounded-option-index="${select.selectedIndex}"]`);
+    (selected || boundedSelectMenu.querySelector("[data-bounded-option-index]:not(.disabled)"))?.focus({ preventScroll: true });
+  });
+}
+
+function syncBoundedSelect(select) {
+  const button = boundedSelectButtons.get(select);
+  if (!button) return;
+  const label = boundedSelectLabel(select);
+  button.querySelector(".bounded-select-value").textContent = label;
+  button.title = label;
+  button.setAttribute("aria-disabled", String(select.disabled));
+  button.classList.toggle("disabled", select.disabled);
+  if (activeBoundedSelect === select && select.disabled) closeBoundedSelect();
+}
+
+function upgradeBoundedSelect(select) {
+  if (!select.matches(BOUNDED_SELECT_SELECTOR) || boundedSelectButtons.has(select)) return;
+  const shell = document.createElement("div");
+  shell.className = "bounded-select-shell";
+  select.before(shell);
+  shell.appendChild(select);
+  select.classList.add("bounded-select-native");
+  select.tabIndex = -1;
+  select.setAttribute("aria-hidden", "true");
+
+  const button = document.createElement("button");
+  const controlId = select.id || `bounded-select-${++boundedSelectSequence}`;
+  button.type = "button";
+  button.id = `${controlId}-combobox`;
+  button.className = "bounded-select-button";
+  button.dataset.boundedSelectFor = controlId;
+  button.setAttribute("role", "combobox");
+  button.setAttribute("aria-haspopup", "listbox");
+  button.setAttribute("aria-controls", "bounded-select-menu");
+  button.setAttribute("aria-expanded", "false");
+  button.setAttribute("aria-label", boundedSelectFieldLabel(select));
+  button.innerHTML = '<span class="bounded-select-value"></span><span class="bounded-select-arrow" aria-hidden="true"></span>';
+  shell.appendChild(button);
+  boundedSelectButtons.set(select, button);
+  button.addEventListener("click", () => openBoundedSelect(select));
+  button.addEventListener("keydown", (event) => {
+    if (!["Enter", " ", "ArrowDown", "ArrowUp"].includes(event.key)) return;
+    event.preventDefault();
+    openBoundedSelect(select);
+    if (event.key === "ArrowUp") window.requestAnimationFrame(() => focusBoundedOption("previous"));
+  });
+  syncBoundedSelect(select);
+}
+
+function upgradeBoundedSelects(root = document) {
+  if (root instanceof HTMLSelectElement) upgradeBoundedSelect(root);
+  for (const select of root.querySelectorAll?.(BOUNDED_SELECT_SELECTOR) || []) upgradeBoundedSelect(select);
+  for (const select of document.querySelectorAll(".bounded-select-native")) syncBoundedSelect(select);
+}
+
+function initializeBoundedSelects() {
+  boundedSelectMenu = document.createElement("div");
+  boundedSelectMenu.id = "bounded-select-menu";
+  boundedSelectMenu.className = "bounded-select-menu";
+  boundedSelectMenu.setAttribute("role", "listbox");
+  boundedSelectMenu.hidden = true;
+  document.body.appendChild(boundedSelectMenu);
+  boundedSelectMenu.addEventListener("keydown", (event) => {
+    const action = { ArrowDown: "next", ArrowUp: "previous", Home: "first", End: "last" }[event.key];
+    if (action) {
+      event.preventDefault();
+      focusBoundedOption(action);
+    } else if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      selectBoundedOption(activeBoundedOptionIndex);
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      closeBoundedSelect({ restoreFocus: true });
+    } else if (event.key === "Tab") {
+      closeBoundedSelect();
+    }
+  });
+  document.addEventListener("pointerdown", (event) => {
+    const button = activeBoundedSelect ? boundedSelectButtons.get(activeBoundedSelect) : null;
+    if (!activeBoundedSelect || boundedSelectMenu.contains(event.target) || button?.contains(event.target)) return;
+    closeBoundedSelect();
+  });
+  document.addEventListener("change", (event) => {
+    if (event.target instanceof HTMLSelectElement) syncBoundedSelect(event.target);
+  });
+  document.addEventListener("scroll", (event) => {
+    if (activeBoundedSelect && !boundedSelectMenu.contains(event.target)) closeBoundedSelect();
+  }, true);
+  window.addEventListener("resize", () => closeBoundedSelect());
+  new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === "attributes" && mutation.target instanceof HTMLSelectElement) {
+        syncBoundedSelect(mutation.target);
+      }
+      for (const node of mutation.addedNodes) {
+        if (node instanceof Element) upgradeBoundedSelects(node);
+      }
+      if (mutation.target instanceof HTMLSelectElement) syncBoundedSelect(mutation.target);
+    }
+  }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["disabled"] });
+  upgradeBoundedSelects();
+}
 let runSequencePreviewTimer = null;
 let activePage = "toolkit";
 let editModeActive = false;
@@ -2399,7 +2625,6 @@ function renderAll() {
   document.body.classList.toggle("dashboard-edit-mode", editModeActive);
   document.body.classList.toggle("dashboard-view-mode", !editModeActive);
   renderEditModePanel();
-  renderHeader();
   renderPageTabs();
   renderStudy();
   renderStimulus();
@@ -2411,6 +2636,7 @@ function renderAll() {
   renderSegmentRegistryOutputs();
   renderWorkflow();
   renderCapabilityLocks();
+  upgradeBoundedSelects();
 }
 
 function renderCapabilityLocks() {
@@ -2617,10 +2843,6 @@ function initializeLazySurfaces() {
   observer.observe(frame);
 }
 
-function renderHeader() {
-  $("design-title").textContent = state.design.name || "Untitled PPS design";
-}
-
 function renderStudy() {
   const select = $("template-select");
   select.innerHTML = "";
@@ -2653,7 +2875,6 @@ function renderStudy() {
     select.value = customProfileSelectValue(activeProjectId);
   }
   renderProfileSummary();
-  renderPreloadAssetStatus();
 }
 
 function profileCatalogEntries() {
@@ -2708,7 +2929,6 @@ function renderProfileSummary() {
   const selectedId = choice.kind === "bundled" ? choice.id : "";
   const current = state.templates.find((item) => item.template_id === selectedId);
   const custom = isCustomMode();
-  const finalized = Boolean(state.custom_workflow?.is_finalized);
   const params = state.design?.study_profile_reference_parameters || {};
   const profileId = custom
     ? String(state.project?.project_id || choice.id || "browser_draft")
@@ -2720,13 +2940,6 @@ function renderProfileSummary() {
     || state.project?.source_profile_id
     || ""
   ) : "";
-  const kindBadge = $("profile-kind-status");
-  if (kindBadge) {
-    kindBadge.textContent = custom
-      ? `custom profile · ${finalized ? "finalized" : "draft"}`
-      : "built-in template · read-only";
-    kindBadge.className = `status-label ${custom && !finalized ? "ready" : "optional"}`;
-  }
   const citation = $("profile-citation");
   if (citation) citation.textContent = custom ? "" : String(current?.citation || current?.citation_label || "");
   const href = current?.doi ? doiUrl(current.doi) : "";
@@ -2741,35 +2954,6 @@ function renderProfileSummary() {
   const sourceField = $("profile-inspection-source");
   if (sourceDetail) sourceDetail.hidden = !sourceId;
   if (sourceField) sourceField.textContent = sourceId || "—";
-  const notice = $("profile-recreation-notice");
-  if (notice) {
-    const showNotice = Boolean(selectedId);
-    notice.hidden = !showNotice;
-    notice.textContent = showNotice ? PROFILE_RECREATION_NOTICE : "";
-  }
-}
-
-function renderPreloadAssetStatus() {
-  const badge = $("preload-asset-status");
-  if (!badge) return;
-  const choice = selectedProfileChoice();
-  const selectedId = choice.kind === "bundled" ? choice.id : "";
-  if (!selectedId) {
-    badge.hidden = true;
-    return;
-  }
-  const current = state.templates.find((item) => item.template_id === selectedId);
-  const status = current?.preload_asset_status || state.preload_inventory || {};
-  const value = status.status || "not_indexed";
-  const ready = Boolean(status.ready);
-  badge.hidden = false;
-  badge.textContent = ready
-    ? `${status.ready_asset_count || status.asset_count || 0} ${staticModeActive ? "online" : "local"} assets`
-    : value === "recipe_only"
-      ? "recipe only"
-      : value.replace(/_/g, " ");
-  badge.className = `status-label ${ready ? "ready" : value === "recipe_only" ? "" : "required"}`;
-  badge.title = status.message || "";
 }
 
 function renderDataAcquisitionBridge() {
@@ -6061,7 +6245,6 @@ async function autosaveCustomDraft(revision) {
     if (revision !== autosaveRevision) return;
     state = updated;
     renderWorkflow();
-    renderHeader();
     document.dispatchEvent(new CustomEvent("pps-designer-saved"));
   }
 }
@@ -6180,6 +6363,10 @@ function openSegmentInfoModal(stepId, trigger = null) {
     backend.textContent = info.backend || "";
   }
   $("segment-info-next").textContent = info.output || "";
+  const noteCard = $("segment-info-note-card");
+  const note = $("segment-info-note");
+  noteCard.hidden = !info.note;
+  note.textContent = info.note || "";
   $("segment-info-modal").hidden = false;
   document.body.classList.add("modal-open");
   window.setTimeout(() => $("segment-info-modal-close")?.focus(), 0);
@@ -7709,6 +7896,29 @@ function enforceExternalLinkTargets(root = document) {
   }
 }
 
+function handoffExternalLinkToNative(event) {
+  const link = event.target.closest?.("a[href]");
+  const nativeOpener = window.pywebview?.api?.open_external;
+  if (!link || typeof nativeOpener !== "function") return;
+  let url;
+  try {
+    url = new URL(link.getAttribute("href"), window.location.href);
+  } catch (_err) {
+    return;
+  }
+  if (!/^(https?|mailto):$/i.test(url.protocol) || url.origin === window.location.origin) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  Promise.resolve(nativeOpener(url.href))
+    .then((opened) => {
+      if (opened === false) showToast("The system browser could not open this link.");
+    })
+    .catch((error) => {
+      console.error(error);
+      showToast("The system browser could not open this link.");
+    });
+}
+
 function renderHardwarePixelArt() {
   const store = window.HARDWARE_PIXEL_ART || {};
   for (const canvas of document.querySelectorAll("canvas[data-hardware-pixel]")) {
@@ -7735,6 +7945,7 @@ function renderHardwarePixelArt() {
 }
 
 function wireEvents() {
+  document.addEventListener("click", handoffExternalLinkToNative, true);
   document.addEventListener("pointerdown", (event) => {
     const control = event.target.closest?.("#toolkit-page input:disabled, #toolkit-page select:disabled, #toolkit-page textarea:disabled, #toolkit-page button:disabled");
     if (!control || !isProfileReadonlyMode() || control.matches("[data-preview-view-control]")) return;
@@ -8179,6 +8390,7 @@ loadCompanionToken();
 loadResizableLayoutSettings();
 enforceExternalLinkTargets();
 exposeDashboardAuditHook();
+initializeBoundedSelects();
 wireEvents();
 initializePageTabs();
 initializeLazySurfaces();

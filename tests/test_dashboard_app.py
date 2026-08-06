@@ -255,7 +255,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260806-segment-usability"
+    static_version = "20260806-segment0-compact"
     assert f'href="styles.css?v={static_version}"' in html
     assert 'import("./hardware_pixel_art.js")' in app_js
     assert f'src="app.js?v={static_version}"' in html
@@ -272,6 +272,8 @@ def test_dashboard_static_assets_are_packaged():
     assert 'data-page-tab="documentation"' in html
     assert 'data-page-tab="downloads"' in html
     assert 'class="site-tab-brand"' not in html
+    assert "Peripersonal Space Design Toolkit" in html
+    assert html.count('id="designer-theme-toggle"') == 1
     assert "Researcher Workspace" not in html
     assert 'id="documentation-page"' in html
     assert html.count('class="doc-segment-rule"') == 8
@@ -304,8 +306,11 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="zoom-in-camera"' in html
     assert 'id="zoom-out-camera"' in html
     assert 'id="fit-radius-camera"' in html
-    assert 'id="preload-asset-status"' in html
-    assert 'id="profile-recreation-notice"' in html
+    assert 'id="preload-asset-status"' not in html
+    assert 'id="profile-kind-status"' not in html
+    assert 'id="profile-recreation-notice"' not in html
+    assert 'id="segment-info-note"' in html
+    assert "note: PROFILE_RECREATION_NOTICE" in app_js
     assert '<label for="template-select">Profile</label>' in html
     assert 'id="start-new-custom-design"' in html
     assert "Start New Custom Design" in html
@@ -642,7 +647,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "BASELINE_STRATEGY_NOTES" in app_js
     assert "baselineCountEstimate" in app_js
     assert "updateBaselineDecision" in app_js
-    assert "renderPreloadAssetStatus" in app_js
+    assert "renderPreloadAssetStatus" not in app_js
     assert "/api/local/open-folder" in app_js
     assert "data-open-folder" in app_js
     assert "Open Folder" in app_js

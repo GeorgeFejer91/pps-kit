@@ -97,6 +97,16 @@ def assess_geometry(case: ViewportCase, geometry: dict[str, Any]) -> list[str]:
         failures.append("Segment 0 selector and primary action have different vertical centers")
     if not case.stacked_segment_zero and metrics["select_button_overlap_px"] > 0:
         failures.append("Segment 0 selector and primary action overlap")
+    if metrics.get("select_menu_width_delta_px", 0) > 1:
+        failures.append("Segment 0 dropdown is not the same width as its selector")
+    if metrics.get("select_menu_left_delta_px", 0) > 1:
+        failures.append("Segment 0 dropdown is not anchored to its selector")
+    if metrics.get("select_menu_viewport_overflow_px", 0) > 1:
+        failures.append("Segment 0 dropdown extends beyond the viewport")
+    if case.desktop and metrics.get("topbar_visible", 0) > 0:
+        failures.append("desktop applet still shows the redundant hosted top bar")
+    if not case.desktop and metrics.get("topbar_visible", 0) < 1:
+        failures.append("hosted layout is missing its page-navigation top bar")
     if not geometry["primary_label_fits"]:
         failures.append("Start New Custom Design label is clipped")
     if geometry["undersized_targets"]:
@@ -213,6 +223,7 @@ def _geometry_script() -> str:
           select_button_height_delta_px: Math.abs(select.height - button.height),
           select_button_center_delta_px: Math.abs((select.y + select.height / 2) - (button.y + button.height / 2)),
           select_button_overlap_px: horizontalOverlap,
+          topbar_visible: visible(document.querySelector('.topbar')),
         },
         primary_label_fits: button.width + 1 >= document.querySelector('#start-new-custom-design').scrollWidth,
         undersized_targets: undersizedTargets,
@@ -264,7 +275,7 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                 )
                 page.goto(_page_url(base_url, case), wait_until="domcontentloaded", timeout=30_000)
                 page.wait_for_selector("#template-select option", state="attached", timeout=20_000)
-                page.wait_for_function("document.querySelector('#profile-kind-status')?.textContent !== 'loading'")
+                page.wait_for_function("document.querySelector('#profile-inspection-id')?.textContent !== '—'")
                 page.add_style_tag(
                     content=(
                         "html{scroll-behavior:auto!important}"
@@ -274,6 +285,27 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                 page.wait_for_timeout(500)
 
                 geometry = page.evaluate(_geometry_script())
+                page.locator("#template-select-combobox").click()
+                page.wait_for_selector("#bounded-select-menu:not([hidden])")
+                menu_geometry = page.evaluate(
+                    """
+                    () => {
+                      const trigger = document.querySelector('#template-select-combobox').getBoundingClientRect();
+                      const menu = document.querySelector('#bounded-select-menu').getBoundingClientRect();
+                      return {
+                        select_menu_width_delta_px: Math.abs(trigger.width - menu.width),
+                        select_menu_left_delta_px: Math.abs(trigger.left - menu.left),
+                        select_menu_viewport_overflow_px: Math.max(0, menu.right - window.innerWidth, -menu.left),
+                      };
+                    }
+                    """
+                )
+                geometry["metrics"].update(menu_geometry)
+                dropdown_path = output_dir / f"{case.name}_segment0_dropdown.png"
+                page.screenshot(path=str(dropdown_path), animations="disabled")
+                screenshots.append(dropdown_path)
+                page.keyboard.press("Escape")
+                page.wait_for_selector("#bounded-select-menu", state="hidden")
                 geometry["metrics"] = {key: _round(value) for key, value in geometry["metrics"].items()}
                 failures = assess_geometry(case, geometry)
                 failures.extend(f"browser error: {message}" for message in page_errors)

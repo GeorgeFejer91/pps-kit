@@ -86,6 +86,125 @@ button {
   transition: var(--transition-ui);
 }
 
+/* WebKitGTK and some Windows system pickers size native select popups from the
+   longest option, which can make a menu span most of the window. Visible
+   single-choice selects therefore share one anchored listbox. The native
+   select remains in the same grid cell for form state and automated tooling. */
+.bounded-select-shell {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-width: 0;
+}
+
+.bounded-select-native,
+.bounded-select-button {
+  grid-area: 1 / 1;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--control-height);
+  margin: 0;
+}
+
+.bounded-select-native {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.bounded-select-button {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  overflow: hidden;
+  border-color: var(--line-strong);
+  background: var(--surface);
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.bounded-select-button:hover,
+.bounded-select-button[aria-expanded="true"] {
+  border-color: var(--primary);
+}
+
+.bounded-select-button.disabled {
+  cursor: default;
+  opacity: 0.62;
+}
+
+.bounded-select-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bounded-select-arrow {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  margin: 0 3px 3px 0;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.bounded-select-menu {
+  position: fixed;
+  z-index: 4000;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow: 0 12px 28px rgba(20, 35, 31, 0.18);
+  color: var(--text);
+  padding: var(--space-1);
+  overscroll-behavior: contain;
+}
+
+.bounded-select-menu[hidden] {
+  display: none;
+}
+
+.bounded-select-group {
+  padding: var(--space-2) var(--space-2) var(--space-1);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.bounded-select-option {
+  min-height: var(--control-height);
+  border-radius: 4px;
+  padding: var(--space-2);
+  cursor: pointer;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.bounded-select-option:hover,
+.bounded-select-option:focus-visible {
+  outline: none;
+  background: var(--surface-2);
+}
+
+.bounded-select-option[aria-selected="true"] {
+  background: var(--ok-bg);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.bounded-select-option.disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
 button:hover {
   border-color: var(--neutral-500);
   background: var(--neutral-100);
@@ -158,19 +277,90 @@ code {
 }
 
 .brand {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-2);
   padding: 4px 4px 12px;
   border-bottom: 1px solid var(--line);
 }
 
+.brand-copy {
+  display: contents;
+}
+
 .brand-name {
+  grid-column: 1 / -1;
   font-size: 16px;
   font-weight: 700;
+  line-height: 1.25;
 }
 
 .brand-subtitle {
+  grid-column: 1;
   margin-top: 3px;
   color: var(--muted);
   font-size: 12px;
+}
+
+.rail-theme-toggle {
+  grid-column: 2;
+  grid-row: 2;
+  width: 56px;
+  min-width: 56px;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-color: var(--line-strong);
+  background: var(--surface);
+  padding: 4px;
+}
+
+.theme-square {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  border: 1px solid #171c19;
+  border-radius: 2px;
+  transition: var(--transition-ui), transform 0.15s ease;
+}
+
+.theme-square::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: 1px;
+}
+
+.theme-square-light {
+  background: #ffffff;
+}
+
+.theme-square-light::after {
+  background: #171c19;
+}
+
+.theme-square-dark {
+  background: #171c19;
+}
+
+.theme-square-dark::after {
+  background: #ffffff;
+}
+
+.rail-theme-toggle[aria-pressed="false"] .theme-square-light,
+.rail-theme-toggle[aria-pressed="true"] .theme-square-dark {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 70%, transparent);
+  transform: translateY(-1px);
+}
+
+.rail-theme-toggle[aria-pressed="false"] .theme-square-dark,
+.rail-theme-toggle[aria-pressed="true"] .theme-square-light {
+  opacity: 0.58;
 }
 
 .rail nav,
@@ -420,11 +610,6 @@ code {
   font-size: 12px;
 }
 
-.design-title {
-  font-weight: 700;
-  margin-top: 2px;
-}
-
 .top-actions,
 .action-row,
 .table-toolbar,
@@ -476,17 +661,6 @@ code {
   padding: var(--space-4);
 }
 
-.profile-inspection-status {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-  margin: 0;
-}
-
-.profile-inspection-card .design-title {
-  margin: 0;
-}
-
 .profile-citation {
   margin: 0;
   color: var(--text);
@@ -534,8 +708,7 @@ code {
   overflow-wrap: anywhere;
 }
 
-.profile-inspection-card .summary-text,
-.profile-inspection-card .profile-notice {
+.profile-inspection-card .summary-text {
   margin: 0;
 }
 
@@ -1834,6 +2007,7 @@ body.custom-mode .step-footer {
 .panel.profile-readonly #download-block-randomization,
 .panel.profile-readonly #save-study-profile,
 .panel.profile-readonly #export-profile-bundle,
+.panel.profile-readonly .bounded-select-button,
 .panel.profile-readonly [data-preview-source-label] {
   pointer-events: auto;
 }
@@ -3535,17 +3709,6 @@ a:focus-visible,
   color: var(--primary-hover);
 }
 
-.profile-notice {
-  color: var(--warning);
-  background: var(--warning-bg);
-  border: 1px solid #ead6a8;
-  border-radius: 6px;
-  padding: var(--space-2) var(--space-3);
-  line-height: 1.4;
-  margin: 0 0 var(--space-3);
-  font-weight: 600;
-}
-
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -4651,6 +4814,26 @@ body.modal-open {
   line-height: 1.45;
 }
 
+.segment-info-note {
+  margin-top: var(--space-3);
+  border: 1px solid #ead6a8;
+  border-radius: 6px;
+  background: var(--warning-bg);
+  padding: var(--space-3);
+  color: var(--warning);
+}
+
+.segment-info-note h3 {
+  margin: 0 0 var(--space-1);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.segment-info-note p {
+  margin: 0;
+  line-height: 1.45;
+}
+
 @media (max-width: 1180px) {
   .app-shell {
     display: block;
@@ -5103,6 +5286,14 @@ body.desktop-applet [data-page-tab="downloads"],
 body.desktop-applet .companion-panel,
 body.desktop-applet .rail-note {
   display: none !important;
+}
+
+body.desktop-applet .topbar {
+  display: none;
+}
+
+body.desktop-applet .segment-heading {
+  top: var(--layout-gutter);
 }
 
 :root[data-theme="dark"] {
