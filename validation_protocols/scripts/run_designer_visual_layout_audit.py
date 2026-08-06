@@ -329,6 +329,38 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                 failures = assess_geometry(case, geometry)
                 failures.extend(f"browser error: {message}" for message in page_errors)
 
+                theme_path = output_dir / f"{case.name}_theme_toggle.png"
+                page.locator("#designer-theme-toggle").screenshot(path=str(theme_path), animations="disabled")
+                screenshots.append(theme_path)
+                theme_interaction: dict[str, Any] = {}
+                if case_index == 0:
+                    light_theme_state = page.locator("#designer-theme-toggle").evaluate(
+                        """toggle => ({
+                          theme: document.documentElement.dataset.theme,
+                          pressed: toggle.getAttribute('aria-pressed'),
+                          indicatorTransform: getComputedStyle(toggle.querySelector('.theme-toggle-indicator')).transform,
+                        })"""
+                    )
+                    page.locator("#designer-theme-toggle").click()
+                    page.wait_for_function("document.documentElement.dataset.theme === 'dark'")
+                    dark_theme_state = page.locator("#designer-theme-toggle").evaluate(
+                        """toggle => ({
+                          theme: document.documentElement.dataset.theme,
+                          pressed: toggle.getAttribute('aria-pressed'),
+                          indicatorTransform: getComputedStyle(toggle.querySelector('.theme-toggle-indicator')).transform,
+                        })"""
+                    )
+                    dark_theme_path = output_dir / "desktop_1440_dark_theme_toggle.png"
+                    page.locator("#designer-theme-toggle").screenshot(path=str(dark_theme_path), animations="disabled")
+                    screenshots.append(dark_theme_path)
+                    page.locator("#designer-theme-toggle").click()
+                    page.wait_for_function("document.documentElement.dataset.theme === 'light'")
+                    theme_interaction = {"light": light_theme_state, "dark": dark_theme_state}
+                    if light_theme_state["pressed"] != "false" or dark_theme_state["pressed"] != "true":
+                        failures.append("theme toggle accessible state does not follow light/dark selection")
+                    if light_theme_state["indicatorTransform"] == dark_theme_state["indicatorTransform"]:
+                        failures.append("theme toggle indicator does not move between sun and moon")
+
                 segment_path = output_dir / f"{case.name}_segment0.png"
                 page.locator("#study").screenshot(path=str(segment_path), animations="disabled")
                 screenshots.append(segment_path)
@@ -422,6 +454,7 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                     "desktop": case.desktop,
                     "geometry": geometry,
                     "screenshots": [str(segment_path), str(viewport_path)],
+                    "theme_interaction": theme_interaction,
                     "mode_interaction": mode_interaction,
                     "failures": failures,
                     "passed": not failures,

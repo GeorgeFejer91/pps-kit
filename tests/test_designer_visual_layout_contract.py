@@ -46,6 +46,9 @@ def test_designer_layout_uses_shared_grid_and_control_tokens() -> None:
     assert 'desktop_1440_light_profile_lock_open.png' in audit_source
     assert 'desktop_1440_light_profile_copy_prompt.png' in audit_source
     assert 'profile lock shackle has no distinct open visual state' in audit_source
+    assert 'f"{case.name}_theme_toggle.png"' in audit_source
+    assert 'desktop_1440_dark_theme_toggle.png' in audit_source
+    assert 'theme toggle indicator does not move between sun and moon' in audit_source
 
 
 def test_visual_layout_audit_rejects_geometry_regressions() -> None:

@@ -62,9 +62,13 @@ def test_segments_expose_one_clear_decision_model_each():
     assert "Peripersonal Space Design Toolkit" in html
     assert html.count('id="designer-theme-toggle"') == 1
     assert html.index('id="designer-theme-toggle"') < html.index("</aside>")
-    assert html.count('class="theme-square ') == 2
+    assert html.count('class="theme-toggle-icon ') == 2
+    assert 'class="theme-toggle-indicator"' in html
+    assert 'theme-toggle-sun' in html
+    assert 'theme-toggle-moon' in html
     assert ".rail-theme-toggle" in styles
-    assert '.rail-theme-toggle[aria-pressed="true"] .theme-square-dark' in styles
+    assert '.rail-theme-toggle[aria-pressed="true"] .theme-toggle-indicator' in styles
+    assert 'transform: translateX(30px)' in styles
     assert 'id="profile-lock-visual"' in html
     assert 'class="profile-lock-shackle"' in html
     assert 'id="edit-mode-button" class="profile-mode-toggle"' in html

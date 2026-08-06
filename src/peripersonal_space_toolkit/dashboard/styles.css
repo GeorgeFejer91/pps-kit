@@ -306,61 +306,67 @@ code {
 .rail-theme-toggle {
   grid-column: 2;
   grid-row: 2;
-  width: 56px;
-  min-width: 56px;
+  width: 64px;
+  min-width: 64px;
   min-height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  border-color: var(--line-strong);
-  background: var(--surface);
-  padding: 4px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  padding: 0;
 }
 
-.theme-square {
+.theme-toggle-track {
   position: relative;
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
-  border: 1px solid #171c19;
-  border-radius: 2px;
-  transition: var(--transition-ui), transform 0.15s ease;
+  width: 64px;
+  height: 30px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  align-items: center;
+  justify-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
 }
 
-.theme-square::after {
-  content: "";
+.theme-toggle-indicator {
   position: absolute;
-  inset: 5px;
-  border-radius: 1px;
+  top: 2px;
+  left: 2px;
+  width: 29px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--text);
+  box-shadow: 0 1px 2px rgba(28, 38, 31, 0.2);
+  transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.theme-square-light {
-  background: #ffffff;
+.theme-toggle-icon {
+  position: relative;
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 150ms ease;
 }
 
-.theme-square-light::after {
-  background: #171c19;
+.rail-theme-toggle[aria-pressed="false"] .theme-toggle-sun,
+.rail-theme-toggle[aria-pressed="true"] .theme-toggle-moon {
+  stroke: var(--surface);
 }
 
-.theme-square-dark {
-  background: #171c19;
+.rail-theme-toggle[aria-pressed="true"] .theme-toggle-indicator {
+  transform: translateX(30px);
 }
 
-.theme-square-dark::after {
-  background: #ffffff;
-}
-
-.rail-theme-toggle[aria-pressed="false"] .theme-square-light,
-.rail-theme-toggle[aria-pressed="true"] .theme-square-dark {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 70%, transparent);
-  transform: translateY(-1px);
-}
-
-.rail-theme-toggle[aria-pressed="false"] .theme-square-dark,
-.rail-theme-toggle[aria-pressed="true"] .theme-square-light {
-  opacity: 0.58;
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle-indicator,
+  .theme-toggle-icon {
+    transition: none;
+  }
 }
 
 .rail nav,
