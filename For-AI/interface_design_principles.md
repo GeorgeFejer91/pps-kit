@@ -46,6 +46,7 @@ The PPS implementation uses a 4 px base unit and an 8 px primary rhythm. This is
 - Profile identity/provenance uses a compact aligned metadata grid. Empty provenance is removed rather than leaving a blank column.
 - The primary action is the only filled/high-salience control in Segment 0.
 - The independently launched desktop applet does not show the hosted site's top page-navigation/status bar. Its sidebar already owns the full `Peripersonal Space Design Toolkit` identity, mode, compact two-square light/dark toggle, and workflow navigation; Segment 0 begins at the top of the desktop workspace. Hosted pages retain their page navigation but use the same sidebar theme toggle rather than a text `Dark`/`Light` button.
+- Profile editing state uses one lock illustration above a single switch placed between `View` and `Edit`. The closed/open shackle and switch position must agree; avoid redundant `Mode` headings or repeated textual status chips. The animation respects reduced-motion preferences, and the switch retains explicit accessible state and naming.
 
 ## Mandatory Visual Validation Loop
 

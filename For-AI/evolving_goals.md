@@ -5,6 +5,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 ## 2026-08-06 — interface design system and visual QA
 
 - Adopt a repository-wide PPS interface-design contract based on task ownership, common grid meridians, a 4 px base/8 px primary spacing rhythm, consistent control geometry, proximity grouping, hierarchy-driven salience, responsive reflow, WCAG-aware contrast/focus/targets, and restrained progressive disclosure. Symmetry is a balance tool rather than a universal rule; deliberate hierarchy may be asymmetric, while accidental misalignment is a defect. Every visual change now requires deterministic desktop/hosted build output, visible rail-click navigation, multi-viewport light/dark screenshots for every Segment 0-6 stage, DOM geometry checks, explicit image inspection, correction, and a repeated audit until both hard criteria and qualitative review pass. Read-only scientific content retains full opacity; state is communicated with badges and locked controls rather than degraded legibility.
+- Replace the redundant left-rail `Mode` heading, two-button selector, and textual mode chip with one animated SVG lock above a switch positioned between `View` and `Edit`. Immutable templates and finalized profiles keep the lock closed until the naming dialog has created a provenance-linked custom copy. Named drafts may toggle View/Edit directly. Segment 6 finalization explicitly returns the switch to View and closes the lock; further edits require another named copy.
 
 ## 2026-08-06
 

@@ -744,31 +744,29 @@ function resetEditMode() {
 }
 
 function renderEditModePanel() {
-  const viewButton = $("view-mode-button");
   const editButton = $("edit-mode-button");
-  const status = $("edit-mode-status");
-  if (!viewButton || !editButton || !status) return;
+  const panel = $("profile-mode-panel");
+  if (!editButton || !panel) return;
+  if (editModeActive && isProfileReadonlyMode()) editModeActive = false;
   const canEnterEdit = Boolean(state);
-  viewButton.classList.toggle("active", !editModeActive);
-  editButton.classList.toggle("active", editModeActive);
-  viewButton.setAttribute("aria-pressed", String(!editModeActive));
+  panel.dataset.lockState = editModeActive ? "open" : "closed";
+  editButton.setAttribute("aria-checked", String(editModeActive));
   editButton.disabled = !canEnterEdit;
-  editButton.title = isProfileReadonlyMode()
-      ? "Create a named custom copy before editing this loaded profile."
-      : "Unlock editable custom-study decisions.";
+  editButton.title = editModeActive
+    ? "Return to locked View mode."
+    : isProfileReadonlyMode()
+      ? "Create a named custom copy and unlock Edit mode."
+      : "Unlock this custom draft for editing.";
+  editButton.setAttribute("aria-label", editModeActive
+    ? "Editing unlocked. Switch to View mode."
+    : isProfileReadonlyMode()
+      ? "Editing locked. Create a named custom copy and switch to Edit mode."
+      : "Editing locked. Switch this custom draft to Edit mode.");
   if (isProfileReadonlyMode()) {
-    // Acts as a dialog launcher (opens the customize-naming modal), not a
-    // toggle; advertising aria-pressed here would be a lie to screen readers.
-    editButton.textContent = "Customize";
-    editButton.removeAttribute("aria-pressed");
     editButton.setAttribute("aria-haspopup", "dialog");
   } else {
-    editButton.textContent = "Edit";
-    editButton.setAttribute("aria-pressed", String(editModeActive));
     editButton.removeAttribute("aria-haspopup");
   }
-  status.textContent = editModeActive ? "edit mode" : "view mode";
-  status.className = `status-label ${editModeActive ? "ready" : "optional"}`;
 }
 
 // Editing the trajectory (typing distances/rotations OR dragging the preview
@@ -7035,7 +7033,7 @@ async function savePreparedStudyProfile() {
     editModeActive = false;
     await window.PPSDesigner?.drafts?.save(state);
     renderAll();
-    showToast("Profile finalized and locked. Use Customize to create another editable copy.");
+    showToast("Profile finalized and locked. Use Edit to create another named custom copy.");
     return;
   }
   if (!(await ensureLocalBackendState())) return;
@@ -7091,10 +7089,11 @@ async function submitSaveProfileModal() {
       method: "POST",
       body: JSON.stringify({ name: cleanName })
     });
+    editModeActive = false;
     closeSaveProfileModal();
     renderAll();
     updateViewer();
-    showToast("Study profile saved");
+    showToast("Profile finalized and locked");
   } catch (error) {
     showSaveProfileError(error.message || String(error));
   } finally {
@@ -7952,8 +7951,7 @@ function wireEvents() {
     event.preventDefault();
     openCustomizeModal();
   }, true);
-  $("view-mode-button")?.addEventListener("click", () => setEditMode(false));
-  $("edit-mode-button")?.addEventListener("click", () => setEditMode(true));
+  $("edit-mode-button")?.addEventListener("click", () => setEditMode(!editModeActive));
   $("connect-backend").addEventListener("click", () => {
     saveApiBase($("backend-url").value);
     saveCompanionToken($("companion-token")?.value || "");

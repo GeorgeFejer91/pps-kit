@@ -42,6 +42,10 @@ def test_designer_layout_uses_shared_grid_and_control_tokens() -> None:
     assert 'html{scroll-behavior:auto!important}' in audit_source
     assert 'select_menu_width_delta_px' in audit_source
     assert 'f"{case.name}_segment0_dropdown.png"' in audit_source
+    assert 'desktop_1440_light_profile_lock_closed.png' in audit_source
+    assert 'desktop_1440_light_profile_lock_open.png' in audit_source
+    assert 'desktop_1440_light_profile_copy_prompt.png' in audit_source
+    assert 'profile lock shackle has no distinct open visual state' in audit_source
 
 
 def test_visual_layout_audit_rejects_geometry_regressions() -> None:
@@ -62,6 +66,11 @@ def test_visual_layout_audit_rejects_geometry_regressions() -> None:
             "select_menu_left_delta_px": 2.0,
             "select_menu_viewport_overflow_px": 2.0,
             "topbar_visible": 1.0,
+            "mode_icon_center_delta_px": 2.0,
+            "mode_switch_center_delta_px": 2.0,
+            "mode_view_switch_gap_px": -1.0,
+            "mode_switch_edit_gap_px": -1.0,
+            "mode_label_center_delta_px": 2.0,
         },
         "primary_label_fits": True,
         "undersized_targets": [],
@@ -77,3 +86,6 @@ def test_visual_layout_audit_rejects_geometry_regressions() -> None:
     assert any("anchored" in failure for failure in failures)
     assert any("extends beyond" in failure for failure in failures)
     assert any("redundant hosted top bar" in failure for failure in failures)
+    assert any("sidebar meridian" in failure for failure in failures)
+    assert any("overlap" in failure for failure in failures)
+    assert any("horizontal centerline" in failure for failure in failures)

@@ -65,6 +65,17 @@ def test_segments_expose_one_clear_decision_model_each():
     assert html.count('class="theme-square ') == 2
     assert ".rail-theme-toggle" in styles
     assert '.rail-theme-toggle[aria-pressed="true"] .theme-square-dark' in styles
+    assert 'id="profile-lock-visual"' in html
+    assert 'class="profile-lock-shackle"' in html
+    assert 'id="edit-mode-button" class="profile-mode-toggle"' in html
+    assert 'role="switch" aria-checked="false"' in html
+    assert 'id="view-mode-button"' not in html
+    assert 'id="edit-mode-status"' not in html
+    assert '<div class="layout-title">Mode</div>' not in html
+    assert '.profile-mode-panel[data-lock-state="open"] .profile-lock-shackle' in styles
+    assert '@media (prefers-reduced-motion: reduce)' in styles
+    assert 'setEditMode(!editModeActive)' in app_js
+    assert 'showToast("Profile finalized and locked")' in app_js
     assert "function handoffExternalLinkToNative(event)" in app_js
     assert 'window.pywebview?.api?.open_external' in app_js
     assert 'document.addEventListener("click", handoffExternalLinkToNative, true)' in app_js

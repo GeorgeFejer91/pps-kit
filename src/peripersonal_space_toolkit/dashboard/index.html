@@ -6,7 +6,7 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260806-segment0-compact">
+  <link rel="stylesheet" href="styles.css?v=20260806-profile-lock-toggle">
 </head>
 <body>
   <div class="app-shell">
@@ -21,13 +21,24 @@
           <span class="theme-square theme-square-dark" aria-hidden="true"></span>
         </button>
       </div>
-      <div class="profile-mode-panel" aria-label="Dashboard mode">
-        <div class="layout-title">Mode</div>
-        <div class="segmented-control rail-mode-switch" role="group" aria-label="View or edit mode">
-          <button id="view-mode-button" type="button" data-dashboard-mode="view" class="active" aria-pressed="true">View</button>
-          <button id="edit-mode-button" type="button" data-dashboard-mode="edit" aria-pressed="false">Edit</button>
+      <div id="profile-mode-panel" class="profile-mode-panel" data-lock-state="closed" aria-label="Profile editing state">
+        <div id="profile-lock-visual" class="profile-lock-visual" aria-hidden="true">
+          <svg class="profile-lock-icon" viewBox="0 0 48 52" focusable="false">
+            <path class="profile-lock-shackle" d="M15 25v-7a9 9 0 0 1 18 0v7"></path>
+            <rect class="profile-lock-body" x="9" y="23" width="30" height="24" rx="5"></rect>
+            <circle class="profile-lock-keyhole" cx="24" cy="34" r="2.5"></circle>
+            <path class="profile-lock-key-stem" d="M24 36.5v4"></path>
+          </svg>
         </div>
-        <span id="edit-mode-status" class="status-label optional">view mode</span>
+        <div class="profile-mode-switch-row">
+          <span id="profile-view-label" class="profile-mode-option profile-mode-option-view">View</span>
+          <button id="edit-mode-button" class="profile-mode-toggle" type="button" role="switch" aria-checked="false" aria-label="Editing locked. Switch to Edit mode.">
+            <span class="profile-mode-toggle-track" aria-hidden="true">
+              <span class="profile-mode-toggle-thumb"></span>
+            </span>
+          </button>
+          <span id="profile-edit-label" class="profile-mode-option profile-mode-option-edit">Edit</span>
+        </div>
       </div>
       <nav class="rail-nav-group active" aria-label="Toolkit workflow sections" data-rail-page="toolkit">
         <a href="#study" data-step-link="study"><span>0 Preload</span><strong class="decision-state not-ready" data-step-state="study" aria-label="Preload not ready" title="Preload not ready">✕</strong></a>
@@ -193,7 +204,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260806-segment0-compact"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260806-profile-lock-toggle"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -1190,7 +1201,7 @@
       </form>
     </div>
   </div>
-  <script type="module" src="app.js?v=20260806-segment0-compact"></script>
-  <script type="module" src="designer_main.js?v=20260806-segment0-compact"></script>
+  <script type="module" src="app.js?v=20260806-profile-lock-toggle"></script>
+  <script type="module" src="designer_main.js?v=20260806-profile-lock-toggle"></script>
 </body>
 </html>

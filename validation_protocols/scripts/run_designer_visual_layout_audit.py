@@ -107,6 +107,12 @@ def assess_geometry(case: ViewportCase, geometry: dict[str, Any]) -> list[str]:
         failures.append("desktop applet still shows the redundant hosted top bar")
     if not case.desktop and metrics.get("topbar_visible", 0) < 1:
         failures.append("hosted layout is missing its page-navigation top bar")
+    if metrics.get("mode_icon_center_delta_px", 0) > 1 or metrics.get("mode_switch_center_delta_px", 0) > 1:
+        failures.append("profile lock and View/Edit switch are not centered on the sidebar meridian")
+    if metrics.get("mode_view_switch_gap_px", 0) < 0 or metrics.get("mode_switch_edit_gap_px", 0) < 0:
+        failures.append("View/Edit labels overlap the profile-mode switch")
+    if metrics.get("mode_label_center_delta_px", 0) > 1:
+        failures.append("View/Edit labels do not share the switch's horizontal centerline")
     if not geometry["primary_label_fits"]:
         failures.append("Start New Custom Design label is clipped")
     if geometry["undersized_targets"]:
@@ -194,6 +200,11 @@ def _geometry_script() -> str:
       const card = rect('.profile-inspection-card');
       const select = rect('#template-select');
       const button = rect('#start-new-custom-design');
+      const modePanel = rect('#profile-mode-panel');
+      const modeIcon = rect('#profile-lock-visual');
+      const modeSwitch = rect('#edit-mode-button');
+      const modeViewLabel = rect('#profile-view-label');
+      const modeEditLabel = rect('#profile-edit-label');
       const headingKicker = rect('[aria-labelledby="study-segment-title"] > .segment-heading .segment-kicker');
       const panelTitle = rect('#study .panel-title');
       const innerLeft = panel.x + parseFloat(panelStyle.borderLeftWidth) + parseFloat(panelStyle.paddingLeft);
@@ -212,7 +223,7 @@ def _geometry_script() -> str:
       const undersizedTargets = interactive.filter((item) => item.width < 24 || item.height < 24);
       const horizontalOverlap = Math.max(0, Math.min(select.right, button.right) - Math.max(select.x, button.x));
       return {
-        rects: { panel, picker, card, select, button, headingKicker, panelTitle },
+        rects: { panel, picker, card, select, button, headingKicker, panelTitle, modePanel, modeIcon, modeSwitch, modeViewLabel, modeEditLabel },
         metrics: {
           horizontal_overflow_px: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
           picker_card_left_delta_px: Math.abs(picker.x - card.x),
@@ -224,6 +235,14 @@ def _geometry_script() -> str:
           select_button_center_delta_px: Math.abs((select.y + select.height / 2) - (button.y + button.height / 2)),
           select_button_overlap_px: horizontalOverlap,
           topbar_visible: visible(document.querySelector('.topbar')),
+          mode_icon_center_delta_px: Math.abs((modePanel.x + modePanel.width / 2) - (modeIcon.x + modeIcon.width / 2)),
+          mode_switch_center_delta_px: Math.abs((modePanel.x + modePanel.width / 2) - (modeSwitch.x + modeSwitch.width / 2)),
+          mode_view_switch_gap_px: modeSwitch.x - modeViewLabel.right,
+          mode_switch_edit_gap_px: modeEditLabel.x - modeSwitch.right,
+          mode_label_center_delta_px: Math.max(
+            Math.abs((modeViewLabel.y + modeViewLabel.height / 2) - (modeSwitch.y + modeSwitch.height / 2)),
+            Math.abs((modeEditLabel.y + modeEditLabel.height / 2) - (modeSwitch.y + modeSwitch.height / 2)),
+          ),
         },
         primary_label_fits: button.width + 1 >= document.querySelector('#start-new-custom-design').scrollWidth,
         undersized_targets: undersizedTargets,
@@ -319,6 +338,10 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                 screenshots.append(viewport_path)
 
                 if case_index == 0:
+                    locked_mode_path = output_dir / "desktop_1440_light_profile_lock_closed.png"
+                    page.locator("#profile-mode-panel").screenshot(path=str(locked_mode_path), animations="disabled")
+                    screenshots.append(locked_mode_path)
+
                     guide_path = output_dir / f"{case.name}_segment0_guides.png"
                     _make_guide_overlay(segment_path, guide_path, geometry)
                     screenshots.append(guide_path)
@@ -347,6 +370,51 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                     page.screenshot(path=str(path), animations="disabled")
                     screenshots.append(path)
 
+                mode_interaction: dict[str, Any] = {}
+                if case_index == 0:
+                    closed_state = page.locator("#profile-mode-panel").evaluate(
+                        """panel => ({
+                          lockState: panel.dataset.lockState,
+                          checked: panel.querySelector('#edit-mode-button').getAttribute('aria-checked'),
+                          shackleTransform: getComputedStyle(panel.querySelector('.profile-lock-shackle')).transform,
+                        })"""
+                    )
+                    page.locator("#edit-mode-button").click()
+                    page.wait_for_selector("#customize-modal:not([hidden])")
+                    prompt_lock_state = page.locator("#profile-mode-panel").get_attribute("data-lock-state")
+                    prompt_path = output_dir / "desktop_1440_light_profile_copy_prompt.png"
+                    page.locator("#customize-modal .modal-card").screenshot(path=str(prompt_path), animations="disabled")
+                    screenshots.append(prompt_path)
+                    page.locator("#customize-study-name").fill("Visual audit custom profile")
+                    page.locator("#customize-submit").click()
+                    page.wait_for_selector("#customize-modal", state="hidden")
+                    page.wait_for_function("document.querySelector('#profile-mode-panel')?.dataset.lockState === 'open'")
+                    open_state = page.locator("#profile-mode-panel").evaluate(
+                        """panel => ({
+                          lockState: panel.dataset.lockState,
+                          checked: panel.querySelector('#edit-mode-button').getAttribute('aria-checked'),
+                          shackleTransform: getComputedStyle(panel.querySelector('.profile-lock-shackle')).transform,
+                        })"""
+                    )
+                    open_mode_path = output_dir / "desktop_1440_light_profile_lock_open.png"
+                    page.locator("#profile-mode-panel").screenshot(path=str(open_mode_path), animations="disabled")
+                    screenshots.append(open_mode_path)
+                    page.locator("#edit-mode-button").click()
+                    page.wait_for_function("document.querySelector('#profile-mode-panel')?.dataset.lockState === 'closed'")
+                    mode_interaction = {
+                        "closed": closed_state,
+                        "prompt_lock_state": prompt_lock_state,
+                        "open": open_state,
+                    }
+                    if closed_state["lockState"] != "closed" or closed_state["checked"] != "false":
+                        failures.append("profile mode does not initialize as locked View")
+                    if prompt_lock_state != "closed":
+                        failures.append("profile lock opens before the custom-copy naming dialog is completed")
+                    if open_state["lockState"] != "open" or open_state["checked"] != "true":
+                        failures.append("named custom copy does not unlock Edit mode")
+                    if open_state["shackleTransform"] == closed_state["shackleTransform"]:
+                        failures.append("profile lock shackle has no distinct open visual state")
+
                 case_record = {
                     "name": case.name,
                     "viewport": {"width": case.width, "height": case.height},
@@ -354,6 +422,7 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                     "desktop": case.desktop,
                     "geometry": geometry,
                     "screenshots": [str(segment_path), str(viewport_path)],
+                    "mode_interaction": mode_interaction,
                     "failures": failures,
                     "passed": not failures,
                 }

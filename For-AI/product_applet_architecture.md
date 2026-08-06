@@ -107,9 +107,9 @@ They may be inspected, rendered, prepared, and run directly.
 ### Clone on edit
 
 Attempting to change a built-in template must create a custom profile before
-the change is applied. The preferred UI flow is read-only `View` followed by
-`Customize`, with a clear clone-on-edit explanation. The original template
-must remain untouched.
+the change is applied. The preferred UI flow is a closed-lock `View` state and
+an `Edit` switch that first opens a naming/copy dialog; the lock opens only
+after the custom draft exists. The original template must remain untouched.
 
 A derived custom profile must retain at least:
 
