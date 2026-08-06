@@ -43,7 +43,10 @@ CASES = (
     ViewportCase("desktop_1440_light", 1440, 900, "light", True),
     ViewportCase("laptop_1280_light", 1280, 800, "light", True),
     ViewportCase("wide_1920_dark", 1920, 1080, "dark", False),
+    ViewportCase("boundary_601_light", 601, 900, "light", False),
     ViewportCase("narrow_720_light", 720, 900, "light", False),
+    ViewportCase("phone_390_dark", 390, 844, "dark", False),
+    ViewportCase("phone_360_light", 360, 800, "light", False),
 )
 
 
@@ -107,6 +110,12 @@ def assess_geometry(case: ViewportCase, geometry: dict[str, Any]) -> list[str]:
         failures.append("desktop applet still shows the redundant hosted top bar")
     if not case.desktop and metrics.get("topbar_visible", 0) < 1:
         failures.append("hosted layout is missing its page-navigation top bar")
+    if case.width <= 600 and metrics.get("mobile_topbar_above_rail", 0) < 1:
+        failures.append("mobile page navigation is not above the sidebar")
+    if metrics.get("site_tab_labels_fit", 0) < 1:
+        failures.append("page-navigation tab labels are clipped")
+    if metrics.get("site_tab_overlap_px", 0) > 0:
+        failures.append("page-navigation tabs overlap")
     if metrics.get("mode_icon_center_delta_px", 0) > 1 or metrics.get("mode_switch_center_delta_px", 0) > 1:
         failures.append("profile lock and View/Edit switch are not centered on the sidebar meridian")
     if metrics.get("mode_view_switch_gap_px", 0) < 0 or metrics.get("mode_switch_edit_gap_px", 0) < 0:
@@ -196,6 +205,8 @@ def _geometry_script() -> str:
       const panelElement = document.querySelector('#study');
       const panelStyle = getComputedStyle(panelElement);
       const panel = rect('#study');
+      const topbar = rect('.topbar');
+      const rail = rect('.rail');
       const picker = rect('.segment-zero-picker');
       const card = rect('.profile-inspection-card');
       const select = rect('#template-select');
@@ -222,8 +233,18 @@ def _geometry_script() -> str:
         });
       const undersizedTargets = interactive.filter((item) => item.width < 24 || item.height < 24);
       const horizontalOverlap = Math.max(0, Math.min(select.right, button.right) - Math.max(select.x, button.x));
+      const siteTabs = [...document.querySelectorAll('.site-tab')];
+      const siteTabRects = siteTabs.map((element) => element.getBoundingClientRect());
+      const siteTabOverlapPx = siteTabRects.reduce((maximum, current, index) => {
+        const overlaps = siteTabRects.slice(index + 1).map((other) => {
+          const width = Math.max(0, Math.min(current.right, other.right) - Math.max(current.left, other.left));
+          const height = Math.max(0, Math.min(current.bottom, other.bottom) - Math.max(current.top, other.top));
+          return width * height;
+        });
+        return Math.max(maximum, ...overlaps, 0);
+      }, 0);
       return {
-        rects: { panel, picker, card, select, button, headingKicker, panelTitle, modePanel, modeIcon, modeSwitch, modeViewLabel, modeEditLabel },
+        rects: { panel, picker, card, select, button, headingKicker, panelTitle, modePanel, modeIcon, modeSwitch, modeViewLabel, modeEditLabel, topbar, rail },
         metrics: {
           horizontal_overflow_px: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
           picker_card_left_delta_px: Math.abs(picker.x - card.x),
@@ -235,6 +256,9 @@ def _geometry_script() -> str:
           select_button_center_delta_px: Math.abs((select.y + select.height / 2) - (button.y + button.height / 2)),
           select_button_overlap_px: horizontalOverlap,
           topbar_visible: visible(document.querySelector('.topbar')),
+          mobile_topbar_above_rail: topbar.bottom <= rail.y + 1,
+          site_tab_labels_fit: siteTabs.every((element) => element.clientWidth + 1 >= element.scrollWidth),
+          site_tab_overlap_px: siteTabOverlapPx,
           mode_icon_center_delta_px: Math.abs((modePanel.x + modePanel.width / 2) - (modeIcon.x + modeIcon.width / 2)),
           mode_switch_center_delta_px: Math.abs((modePanel.x + modePanel.width / 2) - (modeSwitch.x + modeSwitch.width / 2)),
           mode_view_switch_gap_px: modeSwitch.x - modeViewLabel.right,
@@ -304,8 +328,12 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                 page.wait_for_timeout(500)
 
                 geometry = page.evaluate(_geometry_script())
-                page.locator("#template-select-combobox").click()
-                page.wait_for_selector("#bounded-select-menu:not([hidden])")
+                profile_trigger = page.locator("#template-select-combobox")
+                profile_trigger.scroll_into_view_if_needed()
+                profile_trigger.click()
+                page.wait_for_function(
+                    "document.querySelector('#bounded-select-menu')?.hidden === false"
+                )
                 menu_geometry = page.evaluate(
                     """
                     () => {
@@ -369,6 +397,33 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                 page.screenshot(path=str(viewport_path), animations="disabled")
                 screenshots.append(viewport_path)
 
+                page_tab_interaction: dict[str, Any] = {}
+                if case.width <= 520:
+                    for page_name in ("documentation", "downloads", "toolkit"):
+                        tab = page.locator(f'[data-page-tab="{page_name}"]')
+                        tab.click()
+                        page.wait_for_function(
+                            "page => document.body.dataset.activePage === page",
+                            arg=page_name,
+                        )
+                        selected = tab.get_attribute("aria-selected")
+                        panel_visible = page.locator(
+                            f'[data-page-panel="{page_name}"]'
+                        ).is_visible()
+                        page_tab_interaction[page_name] = {
+                            "selected": selected,
+                            "panel_visible": panel_visible,
+                        }
+                        tab_path = output_dir / f"{case.name}_tab_{page_name}.png"
+                        page.locator(".topbar").screenshot(
+                            path=str(tab_path), animations="disabled"
+                        )
+                        screenshots.append(tab_path)
+                        if selected != "true" or not panel_visible:
+                            failures.append(
+                                f"mobile {page_name} tab does not activate its page"
+                            )
+
                 if case_index == 0:
                     locked_mode_path = output_dir / "desktop_1440_light_profile_lock_closed.png"
                     page.locator("#profile-mode-panel").screenshot(path=str(locked_mode_path), animations="disabled")
@@ -393,6 +448,41 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                     # relying only on a test-only DOM scroll command.
                     step_link.click()
                     segment = page.locator(".decision-segment").nth(segment_index)
+                    page.evaluate(
+                        """
+                        () => new Promise(resolve => {
+                          let previous = window.scrollY;
+                          let stableFrames = 0;
+                          const started = performance.now();
+                          const check = () => {
+                            const current = window.scrollY;
+                            stableFrames = Math.abs(current - previous) < 0.5 ? stableFrames + 1 : 0;
+                            previous = current;
+                            if (stableFrames >= 5 || performance.now() - started > 4000) {
+                              resolve(true);
+                              return;
+                            }
+                            requestAnimationFrame(check);
+                          };
+                          requestAnimationFrame(check);
+                        })
+                        """
+                    )
+                    sticky_overlap = segment.locator(":scope > .segment-heading").evaluate(
+                        """
+                        headingElement => {
+                          const topbar = document.querySelector('.topbar').getBoundingClientRect();
+                          const heading = headingElement.getBoundingClientRect();
+                          const width = Math.max(0, Math.min(topbar.right, heading.right) - Math.max(topbar.left, heading.left));
+                          const height = Math.max(0, Math.min(topbar.bottom, heading.bottom) - Math.max(topbar.top, heading.top));
+                          return width * height;
+                        }
+                        """
+                    )
+                    if sticky_overlap > 1:
+                        failures.append(
+                            f"page navigation overlaps a sticky segment heading after opening Segment {segment_index}"
+                        )
                     # Normalize only the evidence framing. Hash navigation can
                     # stop at the document boundary or beneath a prior sticky
                     # heading, which obscures the stage in a viewport capture.
@@ -455,6 +545,7 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                     "geometry": geometry,
                     "screenshots": [str(segment_path), str(viewport_path)],
                     "theme_interaction": theme_interaction,
+                    "page_tab_interaction": page_tab_interaction,
                     "mode_interaction": mode_interaction,
                     "failures": failures,
                     "passed": not failures,

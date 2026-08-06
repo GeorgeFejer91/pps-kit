@@ -1975,10 +1975,25 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   hosted top navigation/status bar, while the hosted website retains it for
   page navigation.
 - The sidebar spells out `Peripersonal Space Design Toolkit`. Theme selection
-  lives beside the sidebar subtitle as a compact horizontal white/black and
-  black/white two-square toggle; the former text `Dark`/`Light` top-bar button
-  is removed.
+  lives beside the sidebar subtitle as a compact horizontal sun/moon pill with
+  one sliding selected-state indicator; the former text `Dark`/`Light` top-bar
+  button is removed.
 - Native DOI/external-link clicks are explicitly delegated from the shared
   frontend to the pywebview shell. The shell validates HTTP(S)/mailto schemes
   and uses the operating system browser handoff (`xdg-open`, the Windows shell,
   or macOS `open`) instead of asking WebKitGTK/WebView2 to navigate externally.
+
+## 2026-08-06 — Mobile hosted navigation
+
+- The hosted `Experiment Designer`/`Documentation`/`Downloads` header now
+  precedes the sidebar in source and visual order. At phone widths it is the
+  first in-flow application surface, so users can choose the public page before
+  traversing workflow navigation or Local Companion settings.
+- At `760px` or narrower, page tabs own a full-width row and status controls
+  wrap below. The header is non-sticky so it cannot cover the sticky scientific
+  stage headings, while short visible `Experiment` and `Docs` labels preserve
+  complete accessible names.
+- Visual QA now covers the `601px` side-rail breakpoint plus `390x844` dark and `360x800`
+  light phone layouts. It rejects a header below the in-flow phone sidebar,
+  clipped or overlapping page-tab labels, header/sticky-heading overlap after
+  rail navigation, and page tabs that fail to activate their matching panel.

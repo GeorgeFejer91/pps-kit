@@ -59,6 +59,9 @@ def test_segments_expose_one_clear_decision_model_each():
     assert 'id="segment-info-note-card"' in html
     assert "body.desktop-applet .topbar" in styles
     assert "display: none" in styles[styles.index("body.desktop-applet .topbar"):]
+    assert html.index('class="topbar site-tabs"') < html.index('<aside class="rail">')
+    assert html.count('class="topbar site-tabs"') == 1
+    assert html.count("data-page-tab=") == 3
     assert "Peripersonal Space Design Toolkit" in html
     assert html.count('id="designer-theme-toggle"') == 1
     assert html.index('id="designer-theme-toggle"') < html.index("</aside>")

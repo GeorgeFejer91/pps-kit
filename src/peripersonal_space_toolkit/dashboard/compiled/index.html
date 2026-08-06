@@ -6,11 +6,24 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="./assets/pps_toolkit_icon-PI4CIL5w.png">
-  <script type="module" crossorigin src="./assets/index-C2aN5o_4.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-2T4RkfsK.css">
+  <script type="module" crossorigin src="./assets/index-yYs_e-8R.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CRZpcRrO.css">
 </head>
 <body>
   <div class="app-shell">
+    <header class="topbar site-tabs" aria-label="Primary dashboard pages">
+      <nav class="site-tab-list" aria-label="Dashboard tabs">
+        <button class="site-tab active" type="button" data-page-tab="toolkit" aria-selected="true" aria-label="Experiment Designer"><span class="tab-label-full">Experiment Designer</span><span class="tab-label-short" aria-hidden="true">Experiment</span></button>
+        <button class="site-tab" type="button" data-page-tab="documentation" aria-selected="false" aria-label="Documentation"><span class="tab-label-full">Documentation</span><span class="tab-label-short" aria-hidden="true">Docs</span></button>
+        <button class="site-tab" type="button" data-page-tab="downloads" aria-selected="false">Downloads</button>
+      </nav>
+      <div class="designer-status-chrome" aria-label="Designer status">
+        <span id="designer-capability-badge" class="status-label optional">detecting mode</span>
+        <span id="designer-save-state" class="status-label optional">saved</span>
+        <button id="designer-help" type="button">Help</button>
+      </div>
+    </header>
+
     <aside class="rail">
       <div class="brand">
         <div class="brand-copy">
@@ -93,19 +106,6 @@
     </aside>
 
     <main class="workspace">
-      <header class="topbar site-tabs" aria-label="Primary dashboard pages">
-        <nav class="site-tab-list" aria-label="Dashboard tabs">
-          <button class="site-tab active" type="button" data-page-tab="toolkit" aria-selected="true">Experiment Designer</button>
-          <button class="site-tab" type="button" data-page-tab="documentation" aria-selected="false" aria-label="Documentation"><span class="tab-label-full">Documentation</span><span class="tab-label-short" aria-hidden="true">Docs</span></button>
-          <button class="site-tab" type="button" data-page-tab="downloads" aria-selected="false">Downloads</button>
-        </nav>
-        <div class="designer-status-chrome" aria-label="Designer status">
-          <span id="designer-capability-badge" class="status-label optional">detecting mode</span>
-          <span id="designer-save-state" class="status-label optional">saved</span>
-          <button id="designer-help" type="button">Help</button>
-        </div>
-      </header>
-
       <div id="toolkit-page" class="page-view toolkit-page active" data-page-panel="toolkit">
       <section class="decision-segment" aria-labelledby="study-segment-title">
         <div class="segment-heading">
@@ -213,7 +213,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../../viewer/index.html?v=20260806-theme-toggle"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../../viewer/index.html?v=20260806-mobile-nav-top"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">

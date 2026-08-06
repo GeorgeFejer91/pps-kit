@@ -694,7 +694,8 @@ code {
 
 .workspace {
   min-width: 0;
-  padding: var(--layout-gutter);
+  display: flow-root;
+  padding: 0 var(--layout-gutter) var(--layout-gutter);
   margin-left: calc(var(--rail-width) + (2 * var(--layout-gutter)));
 }
 
@@ -702,6 +703,7 @@ code {
   position: sticky;
   top: var(--layout-gutter);
   z-index: 12;
+  margin: var(--layout-gutter) var(--layout-gutter) 0 calc(var(--rail-width) + (3 * var(--layout-gutter)));
   min-height: 56px;
   display: flex;
   align-items: center;
@@ -4996,6 +4998,10 @@ body.modal-open {
     margin-left: calc(var(--rail-width) + var(--space-4));
   }
 
+  .topbar {
+    margin-left: calc(var(--rail-width) + var(--space-4) + var(--layout-gutter));
+  }
+
   .grid,
   .table-grid,
   .stimulus-grid,
@@ -5107,6 +5113,10 @@ body.modal-open {
     --rail-width: 184px;
   }
 
+  html {
+    scroll-padding-top: 120px;
+  }
+
   .rail {
     inset: var(--space-2) auto var(--space-2) var(--space-2);
     padding: var(--space-3) var(--space-2);
@@ -5121,7 +5131,15 @@ body.modal-open {
 
   .workspace {
     margin-left: calc(var(--rail-width) + var(--space-4));
-    padding: var(--space-2);
+    padding: 0 var(--space-2) var(--space-2);
+  }
+
+  .topbar {
+    position: static;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-right: var(--space-2);
+    margin-left: calc(var(--rail-width) + var(--space-4) + var(--space-2));
   }
 
   .segment-info-grid {
@@ -5138,9 +5156,21 @@ body.modal-open {
   }
 
   .site-tab-list {
+    flex: 1 0 100%;
     width: 100%;
     justify-content: flex-start;
     gap: 6px;
+  }
+
+  .designer-status-chrome {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+
+  .decision-segment,
+  #documentation-page .info-segment {
+    scroll-margin-top: 120px;
   }
 
   .site-tab {
@@ -5160,6 +5190,14 @@ body.modal-open {
   }
 
   .site-tab[data-page-tab="documentation"] .tab-label-short {
+    display: inline;
+  }
+
+  .site-tab[data-page-tab="toolkit"] .tab-label-full {
+    display: none;
+  }
+
+  .site-tab[data-page-tab="toolkit"] .tab-label-short {
     display: inline;
   }
 
@@ -5335,7 +5373,12 @@ body.modal-open {
 
 }
 
-@media (max-width: 520px) {
+@media (max-width: 600px) {
+  .topbar {
+    top: var(--space-2);
+    margin: var(--space-2) var(--space-2) 0;
+  }
+
   .rail {
     position: static;
     width: auto;
@@ -5345,7 +5388,9 @@ body.modal-open {
 
   .workspace {
     margin-left: 0;
+    padding: var(--space-2);
   }
+
 }
 
 /* Publication reference list */
@@ -5425,6 +5470,12 @@ body.modal-open {
   backdrop-filter: blur(8px);
 }
 
+@media (max-width: 760px) {
+  .segment-heading {
+    top: var(--space-2);
+  }
+}
+
 body:not(.desktop-applet) .legacy-session-action {
   display: none;
 }
@@ -5438,6 +5489,10 @@ body.desktop-applet .rail-note {
 
 body.desktop-applet .topbar {
   display: none;
+}
+
+body.desktop-applet .workspace {
+  padding-top: var(--layout-gutter);
 }
 
 body.desktop-applet .segment-heading {

@@ -49,6 +49,15 @@ def test_designer_layout_uses_shared_grid_and_control_tokens() -> None:
     assert 'f"{case.name}_theme_toggle.png"' in audit_source
     assert 'desktop_1440_dark_theme_toggle.png' in audit_source
     assert 'theme toggle indicator does not move between sun and moon' in audit_source
+    assert 'ViewportCase("phone_390_dark", 390, 844, "dark", False)' in audit_source
+    assert 'ViewportCase("phone_360_light", 360, 800, "light", False)' in audit_source
+    assert 'ViewportCase("boundary_601_light", 601, 900, "light", False)' in audit_source
+    assert "mobile page navigation is not above the sidebar" in audit_source
+    assert "page-navigation tab labels are clipped" in audit_source
+    assert "page-navigation tabs overlap" in audit_source
+    assert 'for page_name in ("documentation", "downloads", "toolkit")' in audit_source
+    assert "tab does not activate its page" in audit_source
+    assert "page navigation overlaps a sticky segment heading" in audit_source
 
 
 def test_visual_layout_audit_rejects_geometry_regressions() -> None:
@@ -69,6 +78,9 @@ def test_visual_layout_audit_rejects_geometry_regressions() -> None:
             "select_menu_left_delta_px": 2.0,
             "select_menu_viewport_overflow_px": 2.0,
             "topbar_visible": 1.0,
+            "mobile_topbar_above_rail": 0.0,
+            "site_tab_labels_fit": 0.0,
+            "site_tab_overlap_px": 2.0,
             "mode_icon_center_delta_px": 2.0,
             "mode_switch_center_delta_px": 2.0,
             "mode_view_switch_gap_px": -1.0,
@@ -80,6 +92,10 @@ def test_visual_layout_audit_rejects_geometry_regressions() -> None:
     }
 
     failures = audit.assess_geometry(case, geometry)
+    phone_failures = audit.assess_geometry(
+        audit.ViewportCase("phone", 390, 844, "dark", False),
+        geometry,
+    )
 
     assert any("horizontal overflow" in failure for failure in failures)
     assert any("leading meridian" in failure for failure in failures)
@@ -92,3 +108,6 @@ def test_visual_layout_audit_rejects_geometry_regressions() -> None:
     assert any("sidebar meridian" in failure for failure in failures)
     assert any("overlap" in failure for failure in failures)
     assert any("horizontal centerline" in failure for failure in failures)
+    assert any("mobile page navigation is not above the sidebar" in failure for failure in phone_failures)
+    assert any("tab labels are clipped" in failure for failure in failures)
+    assert any("tabs overlap" in failure for failure in failures)
