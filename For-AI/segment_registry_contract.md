@@ -10,7 +10,7 @@ The HTML dashboard segments are not only visual UI sections. They correspond to 
 
 The local packaged HTML dashboard and the hosted/GitHub Pages HTML dashboard must expose the same visible Segment numbering used by the writable registry folders. Segment 0 maps to `0_profile`, Segment 1 maps to `1_core_audio_ingredients`, Segment 2 maps to `2_trial_sequence_designs`, Segment 3 maps to `3_tactile_and_baseline_trials`, Segment 4 maps to `4_trial_repetition_pool`, Segment 5 maps to `5_block_csv_preview`, and Segment 6 maps to `6_experiment_run_setup`.
 
-Each locked Segment 0-6 must have a short explicit action button where it creates artifacts and a clear registry state. Registry state belongs in backend manifests, compact status chips, previews, and Open Folder affordances; do not add generic registry feedback panels with `Status`/`Variants`/`WAVs`/`Folder`/`Message` summary rows to any visible segment. Segment 1's action is `Bake Ingredient`; Segment 2's action is `Bake Trial Sequences`; Segment 3's action is `Bake Baseline/Tactile Trials`; Segment 4's action is `Bake Trial Pool CSV`; Segment 5 uses bottom decision buttons `Regenerate Blocks` and `Accept Blocks`; Segment 6 uses `Regenerate Sequence` and `Save Design and Start Experiment Runner`. Segment 0's action applies the profile/custom project and creates or activates the project folder. Segment actions should not secretly bake downstream layers.
+Segments 1-6 have short explicit action buttons where they create artifacts and a clear registry state. Registry state belongs in backend manifests, compact status chips, previews, and stage-appropriate Open Folder affordances; do not add generic registry feedback panels with `Status`/`Variants`/`WAVs`/`Folder`/`Message` summary rows to any visible segment. Segment 1's action is `Bake Ingredient`; Segment 2's action is `Bake Trial Sequences`; Segment 3's action is `Bake Baseline/Tactile Trials`; Segment 4's action is `Bake Trial Pool CSV`; Segment 5 uses bottom decision buttons `Regenerate Blocks` and `Accept Blocks`; Segment 6 owns validation/finalization. Segment 0 is deliberately simpler: profile selection activates an existing context automatically, while `Start New Custom Design` requires a name and creates the clean-slate project context without a separate Apply button. Segment actions should not secretly bake downstream layers.
 
 Visible segment surfaces should not create their own scroll controls. The browser page/workspace is the central scroll surface; segment panels, tables, and row builders should grow or wrap content instead of using nested vertical or horizontal scrollbars.
 
@@ -26,15 +26,14 @@ Segment 0 defines which study/project context the researcher is working in.
 
 ### User Decisions
 
-- Select an existing study profile/preload.
-- Or choose `Custom design (define manually)`.
-- Provide or confirm the project/design name.
+- Select an immutable built-in template or an existing custom design from one grouped profile selector.
+- Or use `Start New Custom Design` and provide a required name before the clean-slate draft is created.
 
 ### Folder And Registry Operations
 
 - Every study profile should map to its own project folder.
 - Choosing an existing profile should activate that profile folder.
-- Choosing custom should create a new project folder with the project name and timestamp baked into the folder name, so custom work is unique and traceable.
+- Starting a new custom design should create a dedicated project folder with the project name and timestamp baked into the folder name, so custom work is unique and traceable. The folder location is fixed by the researcher workspace and is not a Segment 0 user decision.
 - Shared reusable assets may live next to the study/project folders. The tactile cue library belongs in shared assets rather than being duplicated into every study profile.
 - Segment 0 must write a `study_manifest.json` in `0_profile/`. This file records the active study/default GUI settings and a lookup-style `gui_settings_inventory`, including baseline strategy, whether baseline file generation is enabled, the baseline file mode, the main SOA list, effective baseline SOAs, and the distinction between Segment 3 baseline-file generation and Segment 4 block-scheduling percentages.
 - The dashboard state should report Segment 0 folder/manifest status through `project_segments["0_profile"]`.

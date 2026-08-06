@@ -6,7 +6,7 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260805-designer">
+  <link rel="stylesheet" href="styles.css?v=20260806-segment0">
 </head>
 <body>
   <div class="app-shell">
@@ -92,50 +92,34 @@
           <section id="study" class="panel" data-step-panel="study" data-resizable-panel data-panel-id="study">
             <div class="panel-heading">
               <div class="panel-title">Study Profile <span class="step-badge" data-step-badge="study"></span></div>
-              <span id="preload-asset-status" class="status-label">inventory</span>
             </div>
-            <div class="segment-zero-status-card" aria-label="Active study controls">
-              <div class="active-design-block">
-                <div class="product-label">Active design</div>
-                <div id="design-title" class="design-title">Loading...</div>
+            <div class="segment-zero-picker" aria-label="Choose a study profile">
+              <div class="field-row segment-zero-profile-field">
+                <label for="template-select">Profile</label>
+                <select id="template-select"></select>
               </div>
-              <div class="segment-zero-status-actions">
-                <span id="workflow-pill" class="status-label">checking</span>
-                <span id="profile-mode-status" class="status-label">checking</span>
-                <button id="refresh-state" type="button">Refresh</button>
-                <button id="edit-profile-rail" type="button">Edit As New Study</button>
-                <button id="apply-design" type="button" class="primary">Apply Design</button>
+              <button id="start-new-custom-design" type="button" class="primary">Start New Custom Design</button>
+            </div>
+            <section class="profile-inspection-card" aria-label="Selected profile information">
+              <div class="profile-inspection-status">
+                <span id="profile-kind-status" class="status-label">loading</span>
+                <span id="preload-asset-status" class="status-label">inventory</span>
               </div>
-            </div>
-            <div class="field-row">
-              <label for="template-select">Study/profile</label>
-              <select id="template-select"></select>
-            </div>
-            <div id="profile-summary" class="summary-text"></div>
-            <div id="profile-recreation-notice" class="profile-notice" hidden></div>
-            <div class="field-row">
-              <label for="design-name">Design name</label>
-              <input id="design-name" type="text" autocomplete="off">
-            </div>
-            <div class="field-row">
-              <label for="existing-custom-project">Existing custom study</label>
-              <select id="existing-custom-project"></select>
-            </div>
-            <div class="step-footer">
-              <button id="load-custom-project" type="button">Open Custom Study</button>
-              <button id="apply-profile-project" type="button" class="primary">Apply Profile / Create Project Folder</button>
-              <button id="open-profile-folder" type="button" disabled>Open Folder</button>
-            </div>
-            <div class="data-acquisition-bridge" aria-label="Data acquisition folder bridge">
-              <div>
-                <div class="product-label">Data acquisition folder</div>
-                <span id="data-acquisition-status" class="status-label required">not linked</span>
-              </div>
-              <div class="data-acquisition-actions">
-                <button id="export-data-acquisition-folder" type="button" class="primary">Export Settings to Data Acquisition Folder</button>
-                <button id="open-data-acquisition-folder" type="button" disabled>Open Folder</button>
-              </div>
-            </div>
+              <div id="design-title" class="design-title">Loading...</div>
+              <p id="profile-citation" class="profile-citation"></p>
+              <div id="profile-summary" class="summary-text"></div>
+              <dl class="profile-inspection-details">
+                <div>
+                  <dt>Profile ID</dt>
+                  <dd id="profile-inspection-id">—</dd>
+                </div>
+                <div id="profile-source-detail" hidden>
+                  <dt>Source</dt>
+                  <dd id="profile-inspection-source">—</dd>
+                </div>
+              </dl>
+              <div id="profile-recreation-notice" class="profile-notice" hidden></div>
+            </section>
           </section>
         </div>
       </section>
@@ -214,7 +198,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260805-designer"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260806-segment0"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -1121,7 +1105,7 @@
           <p id="segment-info-backend"></p>
         </section>
         <section>
-          <h3>Used Next</h3>
+          <h3>Output</h3>
           <p id="segment-info-next"></p>
         </section>
       </div>
@@ -1132,7 +1116,7 @@
       <form id="customize-form">
         <div class="modal-heading">
           <div>
-            <div class="segment-kicker">New Custom Study</div>
+            <div id="customize-modal-kicker" class="segment-kicker">New Custom Study</div>
             <h2 id="customize-modal-title">Name This Study</h2>
           </div>
           <button id="customize-modal-close" class="icon-action" type="button" aria-label="Close">X</button>
@@ -1172,7 +1156,7 @@
       </form>
     </div>
   </div>
-  <script type="module" src="app.js?v=20260805-designer"></script>
-  <script type="module" src="designer_main.js?v=20260805-designer"></script>
+  <script type="module" src="app.js?v=20260806-segment0"></script>
+  <script type="module" src="designer_main.js?v=20260806-segment0"></script>
 </body>
 </html>

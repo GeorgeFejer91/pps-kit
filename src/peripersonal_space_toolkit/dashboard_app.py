@@ -651,6 +651,11 @@ class DashboardController:
         return {
             "design": design_to_dict(design),
             "design_path": str(self.design_path),
+            "template_directory": {
+                "kind": "local",
+                "path": str(self.template_dir.resolve()),
+                "url": "",
+            },
             "project": project.to_dict(),
             "custom_projects": self.custom_projects_payload(),
             "profile_catalog": profile_catalog,
@@ -868,29 +873,7 @@ class DashboardController:
         return self.snapshot() if snapshot else {"selected_template": template_id}
 
     def load_custom_design(self) -> dict[str, Any]:
-        design = default_design()
-        design.name = "Custom PPS design"
-        design.study_profile_id = ""
-        design.study_profile_title = ""
-        design.study_profile_notes = ""
-        design.study_profile_reference_parameters = {"dashboard_mode": "custom", "profile_status": "draft"}
-        design.noises = []
-        design.custom_looming_files = []
-        design.prestimulus_files = []
-        design.protocol.soa_values_ms = []
-        design.protocol.spatial_values_cm = []
-        design.protocol.trial_strips = []
-        design.protocol.include_catch_trials = False
-        design.protocol.catch_trial_percentage = 0.0
-        design.protocol.include_baseline_trials = False
-        design.protocol.baseline_strategy = ""
-        design.protocol.baseline_trials_exact = None
-        design.protocol.baseline_trial_percentage = 0.0
-        design.protocol.baseline_custom_trial_mode = "tactile_only"
-        design.protocol.blocks = 1
-        design.protocol.participants = 1
-        design.protocol.participant_order_policy = default_order_policy(seed=design.protocol.random_seed)
-        design = _normalize_dashboard_design(design)
+        design = _blank_custom_design("Custom PPS design")
         with self._lock:
             self.design = design
             project = self._ensure_project_context(self.design)
@@ -902,6 +885,36 @@ class DashboardController:
                 project=project,
                 payload={"project_dir": str(project.project_dir)},
             )
+        return self.snapshot()
+
+    def create_blank_custom_project(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        payload = payload or {}
+        project_name = str(payload.get("name") or "").strip()
+        if not project_name:
+            raise ValueError("Enter a study name before creating a custom design.")
+        design = _blank_custom_design(project_name)
+        with self._lock:
+            self.design = design
+            project = self._ensure_project_context(self.design, force_new_custom=True)
+            _clear_downstream_segment_outputs(project, from_segment=1)
+            _write_project_context_files(project, self.design)
+            _write_segment_validation_report(project, self.design)
+            self.participant_id = ""
+            self.current_run_package = None
+            save_design(self.design, self.design_path)
+            self._append_dashboard_diary_event(
+                "dashboard_blank_custom_project_created",
+                project=project,
+                payload={"project_name": project_name, "project_id": project.project_id},
+            )
+        update_profile_runner_settings(
+            state_root=self.state_root,
+            output_folder=self.session_root,
+            profile_id=project.project_id,
+            profile_kind="custom",
+            dashboard_project_id=project.project_id,
+            participant_id="",
+        )
         return self.snapshot()
 
     def customize_as_new_project(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -2213,6 +2226,7 @@ class DashboardController:
             self.session_root.resolve(),
             self.design_path.resolve().parent,
             self.project_registry_root.resolve(),
+            self.template_dir.resolve(),
             (REPO_ROOT / "assets" / "preloads").resolve(),
         ]
         if not any(target == root or root in target.parents for root in allowed_roots):
@@ -2490,6 +2504,13 @@ def create_app(
     def api_customize_project(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.customize_as_new_project(payload)
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/api/project/new-custom")
+    def api_new_custom_project(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
+        try:
+            return controller.create_blank_custom_project(payload)
         except Exception as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -8032,6 +8053,36 @@ def _normalize_study5_event_sequence_labels(design: StimulusDesign) -> StimulusD
             "within-block trial type rows",
         )
     return updated
+
+
+def _blank_custom_design(project_name: str) -> StimulusDesign:
+    design = default_design()
+    design.name = str(project_name or "Custom PPS design").strip() or "Custom PPS design"
+    design.study_profile_id = ""
+    design.study_profile_title = ""
+    design.study_profile_notes = ""
+    design.study_profile_reference_parameters = {
+        "dashboard_mode": "custom",
+        "profile_status": "draft",
+        "created_from": "blank_design",
+    }
+    design.noises = []
+    design.custom_looming_files = []
+    design.prestimulus_files = []
+    design.protocol.soa_values_ms = []
+    design.protocol.spatial_values_cm = []
+    design.protocol.trial_strips = []
+    design.protocol.include_catch_trials = False
+    design.protocol.catch_trial_percentage = 0.0
+    design.protocol.include_baseline_trials = False
+    design.protocol.baseline_strategy = ""
+    design.protocol.baseline_trials_exact = None
+    design.protocol.baseline_trial_percentage = 0.0
+    design.protocol.baseline_custom_trial_mode = "tactile_only"
+    design.protocol.blocks = 1
+    design.protocol.participants = 1
+    design.protocol.participant_order_policy = default_order_policy(seed=design.protocol.random_seed)
+    return _normalize_dashboard_design(design)
 
 
 def _custom_project_design_from_source(source: StimulusDesign, *, project_name: str = "") -> StimulusDesign:

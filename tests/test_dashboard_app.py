@@ -255,7 +255,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260805-designer"
+    static_version = "20260806-segment0"
     assert f'href="styles.css?v={static_version}"' in html
     assert 'import("./hardware_pixel_art.js")' in app_js
     assert f'src="app.js?v={static_version}"' in html
@@ -266,7 +266,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "downloadBlockRandomization" in app_js
     assert 'control.id === "download-block-randomization"' in app_js
     assert "index % blockCount" not in app_js
-    assert "Bundled study protocols" in app_js
+    assert "Built-in Study Templates" in app_js
     assert "PPS Toolkit Study 5 white/pink protocol" in app_js
     assert 'data-page-tab="toolkit"' in html
     assert 'data-page-tab="documentation"' in html
@@ -306,16 +306,18 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="fit-radius-camera"' in html
     assert 'id="preload-asset-status"' in html
     assert 'id="profile-recreation-notice"' in html
-    assert "Study/profile" in html
+    assert '<label for="template-select">Profile</label>' in html
+    assert 'id="start-new-custom-design"' in html
+    assert "Start New Custom Design" in html
     assert "Done — Lock Profile" in html
     assert "Export .pps-profile" in html
     assert "/api/profiles/save-prepared" in app_js
     assert "/api/run-sequence/export-bridge" in app_js
-    assert 'id="edit-profile-rail"' in html
-    assert "Edit As New Study" in html
+    assert 'id="edit-profile-rail"' not in html
+    assert "Edit As New Study" not in html
     assert 'id="customize-modal"' in html
-    assert 'id="existing-custom-project"' in html
-    assert 'id="load-custom-project"' in html
+    assert 'id="existing-custom-project"' not in html
+    assert 'id="load-custom-project"' not in html
     assert "Name This Study" in html
     assert 'id="segment-info-modal"' in html
     assert 'id="segment-info-modal-title"' in html
@@ -329,7 +331,10 @@ def test_dashboard_static_assets_are_packaged():
     assert "Purpose" in html
     assert "Your Inputs" in html
     assert "Backend Work" in html
-    assert "Used Next" in html
+    assert "Output" in html
+    assert "Used Next" not in html
+    assert "Template Directory" in app_js
+    assert "HOSTED_TEMPLATE_DIRECTORY_URL" in app_js
     for title in [
         "Choose or Create Study",
         "Build Looming Stimuli",
@@ -349,6 +354,7 @@ def test_dashboard_static_assets_are_packaged():
     ]:
         assert slugged_title not in html
     assert "/api/project/customize" in app_js
+    assert "/api/project/new-custom" in app_js
     assert "/api/projects/${encodeURIComponent(projectId)}/load" in app_js
     assert "profile-readonly-mode" in app_js
     assert "collectProfileRunPayload" in app_js
@@ -373,11 +379,12 @@ def test_dashboard_static_assets_are_packaged():
     assert "Bake Ingredient" in html
     assert 'id="bake-trial-sequences"' in html
     assert "Bake Trial Sequences" in html
-    assert 'id="open-profile-folder"' in html
-    assert 'id="export-data-acquisition-folder"' in html
-    assert 'id="open-data-acquisition-folder"' in html
-    assert "/api/data-acquisition/export" in app_js
-    assert "renderDataAcquisitionBridge" in app_js
+    assert 'id="open-profile-folder"' not in html
+    assert 'id="export-data-acquisition-folder"' not in html
+    assert 'id="open-data-acquisition-folder"' not in html
+    assert 'id="refresh-state"' not in html
+    assert 'id="apply-design"' not in html
+    assert 'id="apply-profile-project"' not in html
     assert 'id="open-ingredient-folder"' in html
     assert 'id="open-trial-sequence-folder"' in html
     assert 'id="segment0-output-summary"' not in html
@@ -879,6 +886,9 @@ def test_dashboard_rejects_profile_mutation_and_blank_custom_names(tmp_path: Pat
     blank = client.post("/api/project/customize", json={"name": "   "})
     assert blank.status_code == 400
     assert "Enter a study name" in blank.json()["detail"]
+    blank_new = client.post("/api/project/new-custom", json={"name": "   "})
+    assert blank_new.status_code == 400
+    assert "Enter a study name" in blank_new.json()["detail"]
 
     mutated_design = dict(state["design"])
     mutated_design["name"] = "Direct API Profile Mutation"

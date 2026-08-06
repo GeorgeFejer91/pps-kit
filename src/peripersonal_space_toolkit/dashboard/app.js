@@ -68,6 +68,7 @@ const DEFAULT_LOUDNESS_POLICY = {
 const STATIC_REPO_ROOT = new URL(import.meta.url.includes("/compiled/assets/") ? "../../../../../" : "../../../", import.meta.url).href;
 const STATIC_PRELOAD_INVENTORY_PATH = "assets/preloads/preload_inventory.json";
 const STATIC_TEMPLATE_DIR = "study_templates/";
+const HOSTED_TEMPLATE_DIRECTORY_URL = "https://github.com/GeorgeFejer91/pps-kit/tree/main/study_templates";
 const STATIC_AUDIT_SNAPSHOT_SCHEMA = "pps-static-dashboard-preview-audit-snapshot.v1";
 const STATIC_AUDIT_QUERY_PARAM = "auditStaticPreview";
 const STATIC_FORCE_QUERY_PARAM = "forceStaticPreview";
@@ -106,10 +107,12 @@ const SEGMENT_INFO = {
   study: {
     kicker: "Segment 0",
     title: "Choose or Create Study",
-    purpose: "Select a published profile or start a custom study.",
-    inputs: "Study/profile preload and design name.",
-    backend: "Creates or activates the 0_profile study project folder and writes profile/study manifests.",
-    next: "Provides the active project context for every later segment."
+    purpose: "Choose an existing study profile or create a new custom experiment design.",
+    inputs: "Select a built-in template or custom profile, or name a new clean-slate design.",
+    backendBeforeLink: "The application loads the selected profile from its ",
+    backendLinkLabel: "Template Directory",
+    backendAfterLink: ". New custom drafts are stored automatically in the researcher workspace. No folder selection is required.",
+    output: "A new template starts a dedicated folder for storing assets used to run the experiment."
   },
   stimulus: {
     kicker: "Segment 1",
@@ -117,7 +120,7 @@ const SEGMENT_INFO = {
     purpose: "Define the auditory ingredients available to the experiment.",
     inputs: "Trajectory values, generated noise type, custom tones, custom clips, bake label, and loudness policy.",
     backend: "Copies, imports, or bakes 1_core_audio_ingredients audio ingredients and records source metadata.",
-    next: "Supplies stimulus ingredients for Trial Sequence Design."
+    output: "Supplies stimulus ingredients for Trial Sequence Design."
   },
   trials: {
     kicker: "Segment 2",
@@ -125,7 +128,7 @@ const SEGMENT_INFO = {
     purpose: "Arrange ingredients into within-trial audio sequences.",
     inputs: "Row/box order, fixed clips, looming sources, alternatives, jitter values.",
     backend: "Bakes 2_trial_sequence_designs row-level sequence WAVs and a manifest mapping each file to its components and timing.",
-    next: "Feeds exact trial sequences into baseline/tactile trial generation."
+    output: "Feeds exact trial sequences into baseline/tactile trial generation."
   },
   baseline: {
     kicker: "Segment 3",
@@ -133,7 +136,7 @@ const SEGMENT_INFO = {
     purpose: "Add tactile timing and baseline/catch trial variants.",
     inputs: "SOAs, baseline strategy, custom baseline SOAs, catch trial choice.",
     backend: "Creates 3_tactile_and_baseline_trials three-channel target and baseline WAVs, optional catch WAVs, and row-preserving manifests.",
-    next: "Supplies final trial files for repetition-pool construction."
+    output: "Supplies final trial files for repetition-pool construction."
   },
   block: {
     kicker: "Segment 4",
@@ -141,7 +144,7 @@ const SEGMENT_INFO = {
     purpose: "Decide how many times each trial family/file should appear.",
     inputs: "Global, folder, or file-level repetition counts.",
     backend: "Writes the 4_trial_repetition_pool CSV and manifest without duplicating WAV files.",
-    next: "Provides the trial rows that will be arranged into blocks."
+    output: "Provides the trial rows that will be arranged into blocks."
   },
   schedule: {
     kicker: "Segment 5",
@@ -149,7 +152,7 @@ const SEGMENT_INFO = {
     purpose: "Generate block CSVs and accept the final block set.",
     inputs: "Block count, regenerate/accept decision.",
     backend: "Creates 5_block_csv_preview block CSV previews, then finalizes accepted block CSVs.",
-    next: "Unlocks experiment preparation and provides block order inputs."
+    output: "Unlocks experiment preparation and provides block order inputs."
   },
   run: {
     kicker: "Segment 6",
@@ -157,7 +160,7 @@ const SEGMENT_INFO = {
     purpose: "Validate and save a reusable design without fixing the eventual study size.",
     inputs: "Part membership, instruction policy, a non-scientific preview row count, and the versioned block-order policy.",
     backend: "Stores the profile contract and deterministic order policy. The Runner materializes an immutable participant session later.",
-    next: "Exports a portable .pps-profile or registers the profile for Runner discovery."
+    output: "Exports a portable .pps-profile or registers the profile for Runner discovery."
   }
 };
 const DOWNSTREAM_STEPS = {
@@ -172,11 +175,7 @@ const LOCAL_BACKEND_DEFAULT = "http://127.0.0.1:8766";
 const COMPANION_TOKEN_STORAGE_KEY = "ppsDashboard.companionToken";
 const STATIC_AUDIT_CONTROL_IDS = [
   "edit-mode-button",
-  "edit-profile-rail",
-  "apply-design",
-  "load-custom-project",
-  "apply-profile-project",
-  "export-data-acquisition-folder",
+  "start-new-custom-design",
   "import-audio-spatialize",
   "import-audio-preserve",
   "bake-stimulus",
@@ -322,6 +321,7 @@ let activeSourcePreviewButton = null;
 let activeSourcePreviewClearTimer = null;
 let sourcePreviewAudioContext = null;
 let customizeModalReturnFocus = null;
+let customizeModalMode = "copy";
 let saveProfileModalReturnFocus = null;
 let segmentInfoModalReturnFocus = null;
 let trialPoolRepetitionDraft = {
@@ -920,8 +920,14 @@ async function staticStateForTemplate(templateId) {
     static_mode_reason: staticModeReason,
     design,
     design_path: "",
+    template_directory: {
+      kind: "hosted",
+      path: "",
+      url: HOSTED_TEMPLATE_DIRECTORY_URL,
+    },
     project,
     custom_projects: [],
+    profile_catalog: { entries: [] },
     participant_id: "P001",
     templates,
     selected_template: cleanId,
@@ -2392,7 +2398,6 @@ function renderAll() {
   renderEditModePanel();
   renderHeader();
   renderPageTabs();
-  renderProfileMode();
   renderStudy();
   renderStimulus();
   renderTrials();
@@ -2402,7 +2407,6 @@ function renderAll() {
   renderPreviewTables();
   renderSegmentRegistryOutputs();
   renderWorkflow();
-  renderDataAcquisitionBridge();
   renderCapabilityLocks();
 }
 
@@ -2612,49 +2616,14 @@ function initializeLazySurfaces() {
 
 function renderHeader() {
   $("design-title").textContent = state.design.name || "Untitled PPS design";
-  const applyButton = $("apply-design");
-  if (applyButton) {
-    const readonly = isProfileReadonlyMode();
-    const viewLocked = customViewModeLocked();
-    applyButton.textContent = readonly ? "Profile Read-Only" : "Save Custom Design";
-    applyButton.title = readonly
-      ? "Create a custom project before editing this loaded profile."
-      : viewLocked
-        ? "Switch to Edit mode before saving custom design changes."
-      : "Save the current custom project decisions.";
-    applyButton.disabled = readonly || viewLocked;
-  }
-}
-
-function renderProfileMode() {
-  const status = $("profile-mode-status");
-  const button = $("edit-profile-rail");
-  if (!status || !button) return;
-  const readonly = isProfileReadonlyMode();
-  status.textContent = staticModeActive && readonly
-    ? "static profile"
-    : readonly
-      ? "profile run mode"
-      : editModeActive ? "custom edit mode" : "custom view mode";
-  status.className = `status-label ${readonly || customViewModeLocked() ? "required" : "ready"}`;
-  button.textContent = readonly ? "Edit As New Study" : "Editing Custom Study";
-  button.disabled = !readonly;
-  button.title = readonly
-    ? "Create a named custom copy before changing this loaded profile."
-    : "This project is already editable.";
 }
 
 function renderStudy() {
   const select = $("template-select");
   select.innerHTML = "";
-  const activeProjectId = state.project?.project_kind === "custom" ? state.project.project_id : "";
-  const customOption = document.createElement("option");
-  customOption.value = CUSTOM_TEMPLATE_ID;
-  customOption.textContent = "Custom design (define manually)";
-  customOption.selected = !state.selected_template && !activeProjectId;
-  select.appendChild(customOption);
+  const activeProjectId = isCustomMode() ? String(state.project?.project_id || "") : "";
   const bundledGroup = document.createElement("optgroup");
-  bundledGroup.label = "Bundled study protocols";
+  bundledGroup.label = "Built-in Study Templates";
   for (const template of state.templates) {
     const option = document.createElement("option");
     option.value = template.template_id;
@@ -2663,31 +2632,25 @@ function renderStudy() {
     bundledGroup.appendChild(option);
   }
   select.appendChild(bundledGroup);
-  const customEntries = profileCatalogEntries().filter((entry) => entry.kind === "custom");
+  const customEntries = customProfileEntries();
   if (customEntries.length) {
     const customGroup = document.createElement("optgroup");
-    customGroup.label = "Stored local profiles";
+    customGroup.label = "My Custom Designs";
     for (const entry of customEntries) {
       const option = document.createElement("option");
       option.value = customProfileSelectValue(entry.profile_id);
-      const created = entry.created_at ? ` (${entry.created_at})` : "";
-      option.textContent = `${entry.display_name || entry.profile_id}${created}`;
+      const status = entry.is_finalized ? "Finalized" : "Draft";
+      option.textContent = `${entry.display_name || entry.profile_id} — ${status}`;
       option.selected = entry.profile_id === activeProjectId;
       customGroup.appendChild(option);
     }
     select.appendChild(customGroup);
   }
-  $("design-name").value = state.design.name || "";
-  const readonly = isProfileReadonlyMode();
-  const applyProject = $("apply-profile-project");
-  if (applyProject) {
-    applyProject.hidden = readonly;
-    applyProject.textContent = isCustomMode() ? "Create / Update Custom Project Folder" : "Apply Profile / Create Project Folder";
+  if (activeProjectId && [...select.options].some((option) => option.value === customProfileSelectValue(activeProjectId))) {
+    select.value = customProfileSelectValue(activeProjectId);
   }
-  renderExistingCustomProjects();
   renderProfileSummary();
   renderPreloadAssetStatus();
-  renderDataAcquisitionBridge();
 }
 
 function profileCatalogEntries() {
@@ -2698,6 +2661,37 @@ function customProfileSelectValue(profileId) {
   return `custom-profile:${profileId}`;
 }
 
+function customProfileEntries() {
+  const entries = new Map();
+  for (const project of state.custom_projects || []) {
+    entries.set(project.project_id, {
+      profile_id: project.project_id,
+      display_name: project.project_label || project.project_id,
+      created_at: project.created_at || "",
+      is_finalized: false,
+    });
+  }
+  for (const entry of profileCatalogEntries().filter((item) => item.kind === "custom")) {
+    entries.set(entry.profile_id, {
+      ...(entries.get(entry.profile_id) || {}),
+      ...entry,
+      is_finalized: Boolean(entry.profile_ready || entry.profile_status === "finalized"),
+    });
+  }
+  if (isCustomMode()) {
+    const profileId = String(state.project?.project_id || "browser_draft");
+    entries.set(profileId, {
+      ...(entries.get(profileId) || {}),
+      profile_id: profileId,
+      display_name: state.design?.name || state.project?.project_label || profileId,
+      is_finalized: Boolean(state.custom_workflow?.is_finalized),
+    });
+  }
+  return [...entries.values()].sort((left, right) =>
+    String(left.display_name || left.profile_id).localeCompare(String(right.display_name || right.profile_id))
+  );
+}
+
 function selectedProfileChoice(value = $("template-select")?.value || "") {
   const raw = String(value || "");
   if (raw.startsWith("custom-profile:")) {
@@ -2706,48 +2700,47 @@ function selectedProfileChoice(value = $("template-select")?.value || "") {
   return { kind: raw === CUSTOM_TEMPLATE_ID ? "manual" : "bundled", id: raw };
 }
 
-function renderExistingCustomProjects() {
-  const select = $("existing-custom-project");
-  const button = $("load-custom-project");
-  if (!select || !button) return;
-  const projects = state.custom_projects || [];
-  const activeProjectId = state.project?.project_kind === "custom" ? state.project.project_id : "";
-  select.innerHTML = "";
-  const placeholder = document.createElement("option");
-  placeholder.value = "";
-  placeholder.textContent = projects.length ? "Choose a saved custom study" : "No saved custom studies";
-  select.appendChild(placeholder);
-  for (const project of projects) {
-    const option = document.createElement("option");
-    option.value = project.project_id;
-    option.textContent = project.created_at
-      ? `${project.project_label} (${project.created_at})`
-      : project.project_label;
-    option.selected = project.project_id === activeProjectId;
-    select.appendChild(option);
-  }
-  if (activeProjectId && [...select.options].some((option) => option.value === activeProjectId)) {
-    select.value = activeProjectId;
-  }
-  button.disabled = !select.value;
-  button.title = projects.length
-    ? "Open a custom study already saved in the local dashboard project registry."
-    : "No custom studies have been saved in the local dashboard project registry yet.";
-}
-
 function renderProfileSummary() {
   const choice = selectedProfileChoice();
   const selectedId = choice.kind === "bundled" ? choice.id : "";
   const current = state.templates.find((item) => item.template_id === selectedId);
+  const custom = isCustomMode();
+  const finalized = Boolean(state.custom_workflow?.is_finalized);
+  const params = state.design?.study_profile_reference_parameters || {};
+  const profileId = custom
+    ? String(state.project?.project_id || choice.id || "browser_draft")
+    : String(state.design?.study_profile_id || selectedId || "");
+  const sourceId = custom ? String(
+    params.customized_from_profile_id
+    || params.customized_from_project_id
+    || state.project?.source_template_id
+    || state.project?.source_profile_id
+    || ""
+  ) : "";
+  const kindBadge = $("profile-kind-status");
+  if (kindBadge) {
+    kindBadge.textContent = custom
+      ? `custom profile · ${finalized ? "finalized" : "draft"}`
+      : "built-in template · read-only";
+    kindBadge.className = `status-label ${custom && !finalized ? "ready" : "optional"}`;
+  }
+  const citation = $("profile-citation");
+  if (citation) citation.textContent = custom ? "" : String(current?.citation || current?.citation_label || "");
   const href = current?.doi ? doiUrl(current.doi) : "";
   const summary = $("profile-summary");
   summary.hidden = !href;
   summary.innerHTML = href
-    ? `<a href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(href)}</a>`
+    ? `DOI: <a href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(current.doi)}</a>`
     : "";
+  const idField = $("profile-inspection-id");
+  if (idField) idField.textContent = profileId || "—";
+  const sourceDetail = $("profile-source-detail");
+  const sourceField = $("profile-inspection-source");
+  if (sourceDetail) sourceDetail.hidden = !sourceId;
+  if (sourceField) sourceField.textContent = sourceId || "—";
   const notice = $("profile-recreation-notice");
   if (notice) {
-    const showNotice = Boolean(href && selectedId);
+    const showNotice = Boolean(selectedId);
     notice.hidden = !showNotice;
     notice.textContent = showNotice ? PROFILE_RECREATION_NOTICE : "";
   }
@@ -5604,10 +5597,12 @@ function renderWorkflow() {
   const activeIndex = WORKFLOW_STEPS.indexOf(activeStep);
   const unlockedIndex = customMode && activeIndex >= 0 ? activeIndex : WORKFLOW_STEPS.length - 1;
 
-  pill.textContent = customMode
-    ? workflow.ready_to_prepare ? "custom ready" : `${stepLabel(activeStep)} required`
-    : "profile loaded";
-  pill.className = `status-label ${customMode && !workflow.ready_to_prepare ? "required" : "ready"}`;
+  if (pill) {
+    pill.textContent = customMode
+      ? workflow.ready_to_prepare ? "custom ready" : `${stepLabel(activeStep)} required`
+      : "profile loaded";
+    pill.className = `status-label ${customMode && !workflow.ready_to_prepare ? "required" : "ready"}`;
+  }
 
   const stepMap = new Map((workflow.steps || []).map((step) => [step.id, step]));
   for (const stepId of WORKFLOW_STEPS) {
@@ -5825,7 +5820,7 @@ function renderJob(job) {
 function collectPayload() {
   const design = clone(state.design);
   const trajectoryControls = currentTrajectoryControls();
-  design.name = $("design-name").value.trim() || "Untitled PPS design";
+  design.name = String(state.design?.name || "Untitled PPS design").trim() || "Untitled PPS design";
   design.noises = collectNoises();
   const audio = collectAudioFiles();
   design.custom_looming_files = audio.looming;
@@ -6084,11 +6079,42 @@ function openSegmentInfoModal(stepId, trigger = null) {
   $("segment-info-modal-title").textContent = info.title;
   $("segment-info-purpose").textContent = info.purpose;
   $("segment-info-inputs").textContent = info.inputs;
-  $("segment-info-backend").textContent = info.backend;
-  $("segment-info-next").textContent = info.next;
+  const backend = $("segment-info-backend");
+  backend.replaceChildren();
+  if (info.backendLinkLabel) {
+    backend.append(document.createTextNode(info.backendBeforeLink || ""));
+    const link = document.createElement("a");
+    link.textContent = info.backendLinkLabel;
+    configureTemplateDirectoryLink(link);
+    backend.append(link, document.createTextNode(info.backendAfterLink || ""));
+  } else {
+    backend.textContent = info.backend || "";
+  }
+  $("segment-info-next").textContent = info.output || "";
   $("segment-info-modal").hidden = false;
   document.body.classList.add("modal-open");
   window.setTimeout(() => $("segment-info-modal-close")?.focus(), 0);
+}
+
+function configureTemplateDirectoryLink(link) {
+  const directory = state?.template_directory || {};
+  const localPath = !staticModeActive ? String(directory.path || "") : "";
+  if (localPath) {
+    link.href = "#";
+    link.title = localPath;
+    link.removeAttribute("target");
+    link.removeAttribute("rel");
+    link.onclick = (event) => {
+      event.preventDefault();
+      openLocalFolder(localPath).catch(reportError);
+    };
+    return;
+  }
+  link.href = String(directory.url || HOSTED_TEMPLATE_DIRECTORY_URL);
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.title = "Open the template directory on GitHub";
+  link.onclick = null;
 }
 
 function closeSegmentInfoModal() {
@@ -6112,13 +6138,18 @@ function defaultCustomStudyName() {
 
 function openCustomizeModal() {
   if (!state || !isProfileReadonlyMode()) return;
+  customizeModalMode = "copy";
   const modal = $("customize-modal");
   const input = $("customize-study-name");
   const source = $("customize-source-label");
   const error = $("customize-error");
+  $("customize-modal-kicker").textContent = "Custom Profile Copy";
+  $("customize-modal-title").textContent = "Name This Custom Copy";
+  $("customize-submit").textContent = "Create Custom Copy";
   customizeModalReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   input.value = defaultCustomStudyName();
   source.textContent = state?.design?.study_profile_title || state?.design?.name || "";
+  source.hidden = false;
   error.hidden = true;
   error.textContent = "";
   modal.hidden = false;
@@ -6127,6 +6158,30 @@ function openCustomizeModal() {
     input.focus();
     input.select();
   }, 0);
+}
+
+function openNewCustomDesignModal() {
+  if (!state) {
+    showToast("Wait for the profile catalogue to load.");
+    return;
+  }
+  customizeModalMode = "blank";
+  const modal = $("customize-modal");
+  const input = $("customize-study-name");
+  const source = $("customize-source-label");
+  const error = $("customize-error");
+  customizeModalReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  $("customize-modal-kicker").textContent = "New Custom Design";
+  $("customize-modal-title").textContent = "Start With a Clean Slate";
+  $("customize-submit").textContent = "Create Design";
+  input.value = "";
+  source.textContent = "";
+  source.hidden = true;
+  error.hidden = true;
+  error.textContent = "";
+  modal.hidden = false;
+  document.body.classList.add("modal-open");
+  window.setTimeout(() => input.focus(), 0);
 }
 
 function closeCustomizeModal() {
@@ -6156,13 +6211,178 @@ async function submitCustomizeModal() {
   }
   $("customize-submit").disabled = true;
   try {
-    await customizeAsNewProject(name);
+    if (customizeModalMode === "blank") {
+      await createBlankCustomProject(name);
+    } else {
+      await customizeAsNewProject(name);
+    }
     closeCustomizeModal();
   } catch (error) {
     showCustomizeError(error.message || String(error));
   } finally {
     $("customize-submit").disabled = false;
   }
+}
+
+function hostedBlankDesign(name) {
+  const seed = 20250604;
+  const design = clone(state?.design || {});
+  design.name = name;
+  design.study_profile_id = "";
+  design.study_profile_title = "";
+  design.study_profile_notes = "";
+  design.study_profile_reference_parameters = {
+    dashboard_mode: "custom",
+    profile_status: "draft",
+    created_from: "blank_design",
+    capability_provenance: "hosted_compose",
+  };
+  design.noises = [];
+  design.custom_looming_files = [];
+  design.prestimulus_files = [];
+  design.trajectory = {
+    start_radius_m: 1.1,
+    end_radius_m: 0.1,
+    path_direction: "approach",
+    coordinate_mode: "polar",
+    start_x_m: null,
+    start_y_m: null,
+    start_z_m: null,
+    end_x_m: null,
+    end_y_m: null,
+    end_z_m: null,
+    path_length_m: 1,
+    propagation_speed_mps: 1 / 3,
+    azimuth_start_deg: 0,
+    azimuth_end_deg: 0,
+    elevation_deg: 0,
+    padding_pre_s: 0.5,
+    padding_post_s: 0.5,
+    sample_rate: 44100,
+    use_inverse_square: true,
+  };
+  design.protocol = {
+    ...(design.protocol || {}),
+    repetitions_per_condition: 1,
+    trial_pool_repetition_defaults: {},
+    soa_values_ms: [],
+    spatial_values_cm: [],
+    pair_spatial_values_with_soas: false,
+    auditory_motion_directions: ["looming"],
+    tactile_sites: ["hand"],
+    include_catch_trials: false,
+    catch_trial_percentage: 0,
+    catch_trials_exact: null,
+    include_auditory_only_trials: false,
+    auditory_only_trial_percentage: 0,
+    auditory_only_trials_exact: null,
+    include_baseline_trials: false,
+    baseline_strategy: "",
+    baseline_trials_exact: null,
+    baseline_trial_percentage: 0,
+    baseline_soa_values_ms: [],
+    baseline_custom_trial_mode: "tactile_only",
+    blocks: 1,
+    block_specs: [],
+    distribute_trial_pool_across_blocks: false,
+    trial_strips: [],
+    participants: 1,
+    random_seed: seed,
+    participant_order_policy: {
+      schema: "pps-participant-order-policy.v1",
+      algorithm: "seeded_factoradic_cycle.v1",
+      seed,
+      preview_count: 12,
+    },
+  };
+  return design;
+}
+
+function browserDraftId(name) {
+  const slug = String(name || "profile").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 40) || "profile";
+  return `browser_${slug}_${Date.now().toString(36)}`;
+}
+
+async function createBlankCustomProject(name) {
+  const cleanName = String(name || "").trim();
+  if (!cleanName) {
+    openNewCustomDesignModal();
+    return;
+  }
+  if (staticModeActive) {
+    const profileId = browserDraftId(cleanName);
+    state = clone(state);
+    state.design = hostedBlankDesign(cleanName);
+    state.selected_template = CUSTOM_TEMPLATE_ID;
+    state.project = {
+      project_id: profileId,
+      project_kind: "browser_draft",
+      project_label: cleanName,
+      source_template_id: "",
+      source_profile_id: "",
+      created_at: new Date().toISOString(),
+      project_dir: "",
+      profile_dir: "",
+      segment_folders: {},
+    };
+    const labels = {
+      study: "Study Profile",
+      stimulus: "Stimulus Design",
+      trials: "Trial Sequence Design",
+      baseline: "Baseline and Tactile Trial Design",
+      block: "Trial Composition",
+      schedule: "Block CSV Preview",
+      run: "Profile Validation and Save",
+    };
+    state.custom_workflow = {
+      is_custom: true,
+      is_finalized: false,
+      current_step: "stimulus",
+      ready_to_render: false,
+      ready_to_prepare: false,
+      missing: ["Define and bake at least one stimulus ingredient."],
+      steps: WORKFLOW_STEPS.map((id) => ({
+        id,
+        label: labels[id],
+        complete: id === "study",
+        missing: id === "study" ? [] : [id === "stimulus" ? "Define and bake at least one stimulus ingredient." : "Complete the preceding segment."],
+      })),
+    };
+    state.trajectory_controls = {
+      start_distance_cm: 110,
+      end_distance_cm: 10,
+      start_rotation_deg: 0,
+      end_rotation_deg: 0,
+      movement_duration_s: 3,
+      start_hold_s: 0.5,
+      end_hold_s: 0.5,
+    };
+    state.viewer_payload = staticViewerPayload(state.design);
+    state.project_segments = Object.fromEntries(Object.entries(STEP_SEGMENT_FOLDERS).map(([id, folderName]) => [folderName, {
+      folder_name: folderName,
+      folder_path: "",
+      status: id === "study" ? "ready" : "missing",
+      manifest_exists: id === "study",
+      last_validation_message: id === "study" ? "Browser draft created." : "Complete the preceding segment.",
+    }]));
+    state.trial_sequence_bake = {};
+    state.trial_file_bake = {};
+    state.trial_pool_bake = {};
+    state.block_csv_preview = {};
+    state.run_sequence_setup = {};
+    state.preload_inventory = {};
+    await window.PPSDesigner?.drafts?.save(state);
+  } else {
+    state = await api("/api/project/new-custom", {
+      method: "POST",
+      body: JSON.stringify({ name: cleanName }),
+    });
+  }
+  editModeActive = true;
+  renderAll();
+  updateViewer();
+  showToast(staticModeActive ? "Clean browser draft created; nothing was uploaded" : "Clean custom design created");
+  scrollToStep("stimulus");
 }
 
 async function customizeAsNewProject(name) {
@@ -6174,6 +6394,7 @@ async function customizeAsNewProject(name) {
   if (staticModeActive) {
     const sourceId = state.design?.study_profile_id || state.selected_template || state.project?.project_id || "source";
     const derivedName = cleanName.toLowerCase().includes(sourceId.toLowerCase()) ? cleanName : `${cleanName} [${sourceId}]`;
+    const profileId = browserDraftId(derivedName);
     state = clone(state);
     state.design.name = derivedName;
     state.design.study_profile_id = "";
@@ -6195,7 +6416,17 @@ async function customizeAsNewProject(name) {
         };
     state.selected_template = CUSTOM_TEMPLATE_ID;
     state.custom_workflow = { ...(state.custom_workflow || {}), is_custom: true, is_finalized: false };
-    state.project = { ...(state.project || {}), project_kind: "browser_draft", project_label: derivedName };
+    state.project = {
+      ...(state.project || {}),
+      project_id: profileId,
+      project_kind: "browser_draft",
+      project_label: derivedName,
+      source_template_id: sourceId,
+      source_profile_id: sourceId,
+      created_at: new Date().toISOString(),
+      project_dir: "",
+      profile_dir: "",
+    };
     await window.PPSDesigner?.drafts?.save(state);
   } else {
     state = await api("/api/project/customize", {
@@ -7421,8 +7652,6 @@ function wireEvents() {
     event.preventDefault();
     openCustomizeModal();
   }, true);
-  $("refresh-state").addEventListener("click", () => loadState({ resetEditMode: true }).catch(reportError));
-  $("apply-design").addEventListener("click", () => applyDesign().catch(reportError));
   $("view-mode-button")?.addEventListener("click", () => setEditMode(false));
   $("edit-mode-button")?.addEventListener("click", () => setEditMode(true));
   $("connect-backend").addEventListener("click", () => {
@@ -7464,7 +7693,7 @@ function wireEvents() {
   $("segment-info-modal")?.addEventListener("click", (event) => {
     if (event.target === $("segment-info-modal")) closeSegmentInfoModal();
   });
-  $("edit-profile-rail")?.addEventListener("click", openCustomizeModal);
+  $("start-new-custom-design")?.addEventListener("click", openNewCustomDesignModal);
   $("customize-form")?.addEventListener("submit", (event) => {
     event.preventDefault();
     submitCustomizeModal().catch(reportError);
@@ -7503,13 +7732,6 @@ function wireEvents() {
     renderProfileSummary();
     loadTemplate().catch(reportError);
   });
-  $("existing-custom-project")?.addEventListener("change", () => {
-    const button = $("load-custom-project");
-    if (button) button.disabled = !$("existing-custom-project").value;
-  });
-  $("load-custom-project")?.addEventListener("click", () => loadCustomProject().catch(reportError));
-  $("apply-profile-project")?.addEventListener("click", () => continueWorkflowStep("study").catch(reportError));
-  $("export-data-acquisition-folder")?.addEventListener("click", () => exportDataAcquisitionFolder().catch(reportError));
   $("bake-stimulus").addEventListener("click", () => startBakeStimulus().catch(reportError));
   $("bake-trial-sequences")?.addEventListener("click", () => startBakeTrialSequences().catch(reportError));
   $("bake-trial-files")?.addEventListener("click", () => startBakeTrialFiles().catch(reportError));
@@ -7517,14 +7739,6 @@ function wireEvents() {
   $("regenerate-block-csvs")?.addEventListener("click", () => startBakeBlockCsvs().catch(reportError));
   $("accept-block-csvs")?.addEventListener("click", () => acceptBlockCsvs().catch(reportError));
   $("download-block-randomization")?.addEventListener("click", () => downloadBlockRandomization().catch(reportError));
-  $("open-profile-folder")?.addEventListener("click", () => {
-    const path = $("open-profile-folder")?.dataset.folderPath || projectSegment("0_profile").folder_path || "";
-    openLocalFolder(path).catch(reportError);
-  });
-  $("open-data-acquisition-folder")?.addEventListener("click", () => {
-    const path = $("open-data-acquisition-folder")?.dataset.folderPath || state?.data_acquisition?.root || "";
-    openLocalFolder(path).catch(reportError);
-  });
   $("open-ingredient-folder")?.addEventListener("click", () => {
     const path = $("open-ingredient-folder")?.dataset.folderPath || projectSegment("1_core_audio_ingredients").folder_path || "";
     openLocalFolder(path).catch(reportError);
