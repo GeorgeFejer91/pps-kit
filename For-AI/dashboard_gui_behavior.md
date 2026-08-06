@@ -22,7 +22,7 @@ Selecting a profile loads it for inspection without an additional Apply step. St
 
 The profile selector and `Start New Custom Design` share an exact control height and vertical center on desktop layouts. Segment heading, panel content, chooser row, information card, and metadata share project grid meridians. The profile card uses a tokenized vertical flow, and its identity/provenance fields form a compact aligned metadata grid rather than unrelated floating text blocks.
 
-DOI and other external HTTP(S)/mailto links remain ordinary new-tab links in hosted mode. In the native desktop applet, the shared frontend intercepts the click and calls the pywebview shell explicitly; Linux uses `xdg-open`, Windows uses the shell URL handler, and macOS uses `open`, with Python's browser module as fallback. The embedded webview must not attempt to navigate to the external page itself.
+DOI and other external HTTP(S)/mailto links remain ordinary new-tab links in hosted mode. In the native desktop applet, the shared frontend intercepts the click and calls the pywebview shell explicitly; Linux prefers `gio open` so registered desktop and Flatpak browsers resolve reliably, with `xdg-open` as a compatibility fallback. Windows uses the shell URL handler and macOS uses `open`, with Python's browser module as the final fallback. The embedded webview must not attempt to navigate to the external page itself.
 
 ## Trajectory Preview
 

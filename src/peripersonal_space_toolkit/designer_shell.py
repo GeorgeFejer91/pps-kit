@@ -126,16 +126,21 @@ class ShellApi:
             except OSError:
                 pass
         elif sys.platform.startswith("linux"):
-            try:
-                subprocess.Popen(
-                    ["xdg-open", url],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    start_new_session=True,
-                )
-                return True
-            except OSError:
-                pass
+            # Prefer GIO because it resolves the registered desktop application
+            # directly, including Flatpak browsers. On some XFCE systems
+            # xdg-open delegates to an unset "Web Browser" helper even when the
+            # HTTPS MIME association is valid.
+            for command in (["gio", "open", url], ["xdg-open", url]):
+                try:
+                    subprocess.Popen(
+                        command,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        start_new_session=True,
+                    )
+                    return True
+                except OSError:
+                    continue
         elif sys.platform == "darwin":
             try:
                 subprocess.Popen(
