@@ -1925,3 +1925,32 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - Added Windows x64 and Linux DEB/RPM/source packaging definitions. The central
   hub, broader Runner GUI redesign, and Android acquisition remain out of this
   unit.
+
+## 2026-08-06 — Segment usability and profile boundary
+
+- Standardized the Designer's action hierarchy: artifact creation is primary
+  until its segment validates, then Continue becomes primary. Researcher-facing
+  labels distinguish initial creation from rebuilding while stable DOM/API IDs
+  retain backward compatibility.
+- Segment 1 now presents trajectory, source choice, and ingredient creation as
+  an explicit three-step decision flow. The trajectory preview owns the only
+  visible 2D/3D toggle, and playback-calibration reference/peak ceiling fields
+  are disclosed as advanced assumptions rather than primary stimulus choices.
+- Segment 2 keeps the empty clean-slate start but adds a compact grammar legend,
+  named plus actions, and a live expression plus Cartesian variant count for
+  each trial family. It still owns no repetition, SOA, or block decisions.
+- Segment 3 uses mutually exclusive radio-card baseline strategies, including a
+  dedicated minimum+maximum option. Catch and auditory-only trial families are
+  separate protocol decisions, and a timing strip makes the channel-3 tactile
+  cue and selected SOAs inspectable.
+- Segment 4 uses researcher language (`trial groups`) with advanced file-level
+  overrides and an explicit explanation of deterministic half-step balancing.
+  Segment 5 labels the first action `Generate Blocks`, labels later runs
+  `Regenerate Blocks`, and displays the randomization strategy and seed.
+- Segment 6 is definitively `Profile Validation and Save`. It shows a Segments
+  0-5 checklist, treats its numeric count as example-order preview count, labels
+  table rows as examples, and uses `Done — Lock Profile` as the sole primary
+  pre-final action. Portable export is revealed after finalization. Output-folder
+  selection, actual participant count/IDs, session materialization, capture
+  settings, and Runner launch are no longer normal Designer controls; legacy
+  `6_experiment_run_setup` files/routes remain readable for compatibility.

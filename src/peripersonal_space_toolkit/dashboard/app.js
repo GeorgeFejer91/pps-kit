@@ -118,7 +118,7 @@ const SEGMENT_INFO = {
     kicker: "Segment 1",
     title: "Build Looming Stimuli",
     purpose: "Define the auditory ingredients available to the experiment.",
-    inputs: "Trajectory values, generated noise type, custom tones, custom clips, bake label, and loudness policy.",
+    inputs: "Trajectory values, one generated or imported source, an ingredient name, and the loudness policy. Calibration assumptions are available as advanced settings.",
     backend: "Copies, imports, or bakes 1_core_audio_ingredients audio ingredients and records source metadata.",
     output: "Supplies stimulus ingredients for Trial Sequence Design."
   },
@@ -126,16 +126,16 @@ const SEGMENT_INFO = {
     kicker: "Segment 2",
     title: "Trial Sequence Design",
     purpose: "Arrange ingredients into within-trial audio sequences.",
-    inputs: "Row/box order, fixed clips, looming sources, alternatives, jitter values.",
+    inputs: "Trial-family rows, left-to-right box order, fixed clips, alternatives within a box, and jitter values.",
     backend: "Bakes 2_trial_sequence_designs row-level sequence WAVs and a manifest mapping each file to its components and timing.",
     output: "Feeds exact trial sequences into baseline/tactile trial generation."
   },
   baseline: {
     kicker: "Segment 3",
     title: "Baseline and Tactile Trial Design",
-    purpose: "Add tactile timing and baseline/catch trial variants.",
-    inputs: "SOAs, baseline strategy, custom baseline SOAs, catch trial choice.",
-    backend: "Creates 3_tactile_and_baseline_trials three-channel target and baseline WAVs, optional catch WAVs, and row-preserving manifests.",
+    purpose: "Add tactile timing and define the baseline, catch, and auditory-only trial families.",
+    inputs: "SOAs, one explicit baseline strategy, optional custom baseline SOAs, and separate catch/auditory-only choices.",
+    backend: "Creates 3_tactile_and_baseline_trials target and baseline WAVs with tactile on channel 3, optional audio-only families, and row-preserving manifests.",
     output: "Supplies final trial files for repetition-pool construction."
   },
   block: {
@@ -150,15 +150,15 @@ const SEGMENT_INFO = {
     kicker: "Segment 5",
     title: "Generate and Review Blocks",
     purpose: "Generate block CSVs and accept the final block set.",
-    inputs: "Block count, regenerate/accept decision.",
+    inputs: "Block count, generated seed, reproducibility review, and regenerate/accept decision.",
     backend: "Creates 5_block_csv_preview block CSV previews, then finalizes accepted block CSVs.",
-    output: "Unlocks experiment preparation and provides block order inputs."
+    output: "Unlocks profile validation and provides the accepted block definitions."
   },
   run: {
     kicker: "Segment 6",
     title: "Profile Validation and Save",
     purpose: "Validate and save a reusable design without fixing the eventual study size.",
-    inputs: "Part membership, instruction policy, a non-scientific preview row count, and the versioned block-order policy.",
+    inputs: "Part membership, instruction policy, example-order preview count, and the versioned block-order policy.",
     backend: "Stores the profile contract and deterministic order policy. The Runner materializes an immutable participant session later.",
     output: "Exports a portable .pps-profile or registers the profile for Runner discovery."
   }
@@ -187,8 +187,7 @@ const STATIC_AUDIT_CONTROL_IDS = [
   "accept-block-csvs",
   "regenerate-run-sequence",
   "save-study-profile",
-  "export-output-folder",
-  "prepare-experiment"
+  "export-profile-bundle"
 ];
 const PANEL_RESIZE_SNAP_PX = 8;
 const PANEL_HEIGHT_MIN = 150;
@@ -231,7 +230,8 @@ const SOURCE_COLOR_OPTIONS = [
 const TRIAL_FAMILY_COLORS = {
   audio_tactile: "#1c7a86",
   baseline: "#4b5fa8",
-  catch: "#a4631b"
+  catch: "#a4631b",
+  auditory_only: "#86622d"
 };
 const RUN_INSTRUCTION_SLOTS = [
   { slot: "before_experiment", label: "Before experiment" },
@@ -479,6 +479,12 @@ function isProfileReadonlyMode() {
   return Boolean(state && (!isCustomMode() || state.custom_workflow?.is_finalized));
 }
 
+function isProfileFinalized() {
+  if (!state) return false;
+  if (state.custom_workflow?.is_custom) return Boolean(state.custom_workflow.is_finalized);
+  return true;
+}
+
 function customViewModeLocked() {
   return Boolean(isCustomMode() && !editModeActive);
 }
@@ -584,10 +590,8 @@ function profileReadonlyControlAllowed(control) {
     && (
       control.id.startsWith("open-")
       || control.id === "download-block-randomization"
-      || control.id === "prepare-experiment"
-      || control.id === "export-data-acquisition-folder"
       || control.id === "save-study-profile"
-      || control.id === "export-output-folder"
+      || control.id === "export-profile-bundle"
     )
   );
 }
@@ -597,10 +601,9 @@ function viewModeControlAllowed(control) {
   if (control.matches?.("[data-preview-source-label]")) return true;
   if (control.id?.startsWith("open-")) return true;
   if (control.id === "download-block-randomization") return true;
-  const prepared = Boolean(state?.run_sequence_setup?.prepared || projectSegment("6_experiment_run_setup").status === "ready");
   return Boolean(
-    prepared
-    && ["prepare-experiment", "save-study-profile", "export-output-folder"].includes(control.id || "")
+    isProfileFinalized()
+    && control.id === "export-profile-bundle"
   );
 }
 
@@ -3373,7 +3376,10 @@ function renderSegmentRegistryOutputs() {
   const downloadButton = $("download-block-randomization");
   const segment4Ready = segment4.status === "ready";
   const blockAccepted = Boolean(segment5.accepted || state.block_csv_preview?.accepted);
-  if (blockButton) blockButton.disabled = !segment4Ready || blockAccepted;
+  if (blockButton) {
+    blockButton.disabled = !segment4Ready || blockAccepted;
+    blockButton.textContent = (state.block_csv_preview?.blocks || []).length ? "Regenerate Blocks" : "Generate Blocks";
+  }
   if (acceptButton) {
     acceptButton.disabled = !(segment5.status === "ready");
     acceptButton.textContent = blockAccepted ? "Edit Blocks" : "Accept Blocks";
@@ -3385,6 +3391,25 @@ function renderSegmentRegistryOutputs() {
       ? `${segment5.block_count || 0} CSVs${blockAccepted ? " accepted" : ""}`
       : (segment4Ready ? "ready to bake" : "waiting for Segment 4");
     blockStatus.className = `status-label ${segment5.status === "ready" || segment4Ready ? "ready" : "required"}`;
+  }
+  updateStageActionHierarchy();
+}
+
+function updateStageActionHierarchy() {
+  const stages = [
+    { step: "stimulus", artifact: "bake-stimulus", ready: projectSegment("1_core_audio_ingredients").status === "ready", create: "Add Ingredient", rebuild: "Add Another Ingredient" },
+    { step: "trials", artifact: "bake-trial-sequences", ready: projectSegment("2_trial_sequence_designs").status === "ready", create: "Create Trial Sequences", rebuild: "Rebuild Trial Sequences" },
+    { step: "baseline", artifact: "bake-trial-files", ready: projectSegment("3_tactile_and_baseline_trials").status === "ready", create: "Create Trial Files", rebuild: "Rebuild Trial Files" },
+    { step: "block", artifact: "bake-trial-pool", ready: projectSegment("4_trial_repetition_pool").status === "ready", create: "Create Trial Pool", rebuild: "Rebuild Trial Pool" },
+  ];
+  for (const stage of stages) {
+    const artifact = $(stage.artifact);
+    const continueButton = document.querySelector(`[data-continue-step="${stage.step}"]`);
+    if (artifact) {
+      artifact.textContent = stage.ready ? stage.rebuild : stage.create;
+      artifact.classList.toggle("primary", !stage.ready);
+    }
+    if (continueButton) continueButton.classList.toggle("primary", stage.ready);
   }
 }
 
@@ -3426,6 +3451,7 @@ function renderBlockCsvPreview() {
   if (blockInput && document.activeElement !== blockInput) blockInput.value = protocolBlocks;
   const segment5 = projectSegment("5_block_csv_preview");
   const preview = state.block_csv_preview || {};
+  renderBlockPolicySummary(preview);
   const blockAccepted = Boolean(segment5.accepted || preview.accepted);
   if (blockInput) blockInput.disabled = blockAccepted;
   if ($("download-block-randomization")) $("download-block-randomization").disabled = !(preview.blocks || []).length;
@@ -3453,11 +3479,22 @@ function renderBlockCsvPreview() {
   list.innerHTML = blocks.map((block, index) => renderBlockPreviewCard(block, index)).join("");
 }
 
+function renderBlockPolicySummary(preview = {}) {
+  const container = $("block-order-policy-summary");
+  if (!container) return;
+  const strategy = preview.randomization_strategy || "seeded row-preserving randomization";
+  const seed = preview.randomization_seed ?? state.design?.protocol?.random_seed;
+  container.innerHTML = `
+    <span><strong>Method</strong> ${escapeHtml(humanize(strategy))}</span>
+    <span><strong>Seed</strong> ${seed === undefined || seed === null || seed === "" ? "assigned when blocks are generated" : escapeHtml(seed)}</span>
+  `;
+}
+
 function renderBlockPreviewCard(block, index = 0) {
   const rows = block.preview_rows || [];
   const familyCounts = block.family_counts || {};
   const total = Number(block.trial_count || rows.length || 0);
-  const distribution = ["audio_tactile", "baseline", "catch"].map((family) => {
+  const distribution = ["audio_tactile", "baseline", "catch", "auditory_only"].map((family) => {
     const count = Number(familyCounts[family] || 0);
     return `
       <div class="block-distribution-segment" style="--segment-color:${escapeAttr(TRIAL_FAMILY_COLORS[family] || "#5e695f")}">
@@ -3873,10 +3910,10 @@ function trialPoolCompositionEstimate() {
     const key = record.file.file_key || `source-${record.index}`;
     occurrenceByFileKey.set(key, record.baseRepetitions + (record.fractionalExtra ? 1 : 0));
   }
-  const familyCounts = { audio_tactile: 0, baseline: 0, catch: 0 };
-  const familyDurationMs = { audio_tactile: 0, baseline: 0, catch: 0 };
-  const subgroupCounts = { audio_tactile: {}, baseline: {}, catch: {} };
-  const subgroupDurationMs = { audio_tactile: {}, baseline: {}, catch: {} };
+  const familyCounts = { audio_tactile: 0, baseline: 0, catch: 0, auditory_only: 0 };
+  const familyDurationMs = { audio_tactile: 0, baseline: 0, catch: 0, auditory_only: 0 };
+  const subgroupCounts = { audio_tactile: {}, baseline: {}, catch: {}, auditory_only: {} };
+  const subgroupDurationMs = { audio_tactile: {}, baseline: {}, catch: {}, auditory_only: {} };
   const folderSummaries = [];
   let totalTrials = 0;
   let totalDurationMs = 0;
@@ -3934,6 +3971,7 @@ function renderProtocolSummary() {
     ["Audio-tactile", composition.familyCounts.audio_tactile, "audio"],
     ["Baseline", composition.familyCounts.baseline, "baseline"],
     ["Catch", composition.familyCounts.catch, "catch"],
+    ["Auditory-only", composition.familyCounts.auditory_only, "auditory"],
   ];
   for (const [label, value, family] of rows) {
     const item = document.createElement("div");
@@ -4058,9 +4096,10 @@ function renderTrialPoolDurationCalculus(composition) {
     ${durationCalculusFamilyRow("audio", "Audio-tactile", "audio_tactile", composition)}
     ${durationCalculusFamilyRow("baseline", "Baseline", "baseline", composition)}
     ${durationCalculusFamilyRow("catch", "Catch", "catch", composition)}
+    ${durationCalculusFamilyRow("auditory", "Auditory-only", "auditory_only", composition)}
     <div class="duration-calculus-total">
       <span>Total</span>
-      <code>${escapeHtml(formatDurationMs(composition.familyDurationMs.audio_tactile || 0))} + ${escapeHtml(formatDurationMs(composition.familyDurationMs.baseline || 0))} + ${escapeHtml(formatDurationMs(composition.familyDurationMs.catch || 0))}</code>
+      <code>${escapeHtml(formatDurationMs(composition.familyDurationMs.audio_tactile || 0))} + ${escapeHtml(formatDurationMs(composition.familyDurationMs.baseline || 0))} + ${escapeHtml(formatDurationMs(composition.familyDurationMs.catch || 0))} + ${escapeHtml(formatDurationMs(composition.familyDurationMs.auditory_only || 0))}</code>
       <strong>${escapeHtml(total)}</strong>
     </div>
     <div class="duration-calculus-total muted-total">
@@ -4076,6 +4115,7 @@ function familyDisplayName(family) {
     audio_tactile: "Audio-tactile",
     baseline: "Baseline",
     catch: "Catch",
+    auditory_only: "Auditory-only",
   }[family] || humanize(family || "trial");
 }
 
@@ -4123,7 +4163,7 @@ function renderTrialPoolFolderCards(composition = trialPoolCompositionEstimate()
           <span>${formatDurationMs(folderSummary.durationMs || 0)}</span>
         </div>
         <details class="trial-pool-file-details">
-          <summary>Files</summary>
+          <summary>Advanced file-level overrides</summary>
           <table class="data-table compact">
             <thead><tr><th>WAV</th><th>Duration</th><th>SOA</th><th>Reps</th></tr></thead>
             <tbody>${fileRows}</tbody>
@@ -4149,6 +4189,7 @@ function renderCompositionTree(composition, context = {}) {
     ${compositionSliderRow("audio", "Audio-tactile", "audio_tactile", composition)}
     ${compositionSliderRow("baseline", "Baseline", "baseline", composition)}
     ${compositionSliderRow("catch", "Catch", "catch", composition)}
+    ${compositionSliderRow("auditory", "Auditory-only", "auditory_only", composition)}
     <div class="balance-note ${balanceClass}">${escapeHtml(balanceMessage)}</div>
   `;
   renderTrialPoolDurationCalculus(composition);
@@ -4210,10 +4251,12 @@ function renderBaselineTactileSummary() {
   const soaValues = currentSoaValues();
   const anchors = baselineAnchorSpecsFromInputs();
   const includeCatch = $("include-catch-trials")?.checked || false;
+  const includeAuditoryOnly = $("include-auditory-only-trials")?.checked || false;
   const audioFiles = sequence.variantCount * soaValues.length;
   const baselineFiles = sequence.variantCount * anchors.length;
   const catchFiles = includeCatch ? sequence.variantCount : 0;
-  const folderCount = sequence.rowCount * (audioFiles ? 1 : 0) + sequence.rowCount * (baselineFiles ? 1 : 0) + sequence.rowCount * (catchFiles ? 1 : 0);
+  const auditoryOnlyFiles = includeAuditoryOnly ? sequence.variantCount : 0;
+  const folderCount = sequence.rowCount * (audioFiles ? 1 : 0) + sequence.rowCount * (baselineFiles ? 1 : 0) + sequence.rowCount * (catchFiles ? 1 : 0) + sequence.rowCount * (auditoryOnlyFiles ? 1 : 0);
 
   const rows = [
     ["Row variants", sequence.variantCount, "total"],
@@ -4222,6 +4265,7 @@ function renderBaselineTactileSummary() {
     ["Baseline anchors", anchors.length, "baseline"],
     ["Baseline files", baselineFiles, "baseline"],
     ["Catch files", catchFiles, "catch"],
+    ["Auditory-only files", auditoryOnlyFiles, "auditory"],
     ["Output folders", folderCount, "total"],
   ];
   strip.innerHTML = rows.map(([label, value, family]) => `
@@ -4242,6 +4286,9 @@ function renderBaselineTactileSummary() {
   const catchExpression = includeCatch
     ? `${sequence.variantCount} row variant${sequence.variantCount === 1 ? "" : "s"} copied from Segment 2 audio`
     : "Catch file generation disabled";
+  const auditoryOnlyExpression = includeAuditoryOnly
+    ? `${sequence.variantCount} response-required audio-only variant${sequence.variantCount === 1 ? "" : "s"}`
+    : "Auditory-only file generation disabled";
   tree.innerHTML = `
     <div class="tree-root">
       <strong>Segment 3 trial files</strong>
@@ -4250,6 +4297,7 @@ function renderBaselineTactileSummary() {
     ${compositionTreeRow("audio", "Audio-tactile files", audioExpression, audioFiles)}
     ${compositionTreeRow("baseline", "Baseline files", baselineExpression, baselineFiles)}
     ${compositionTreeRow("catch", "Catch files", catchExpression, catchFiles)}
+    ${compositionTreeRow("auditory", "Auditory-only files", auditoryOnlyExpression, auditoryOnlyFiles)}
   `;
 
   const bake = state.trial_file_bake || {};
@@ -4315,6 +4363,9 @@ function renderBaseline() {
     : (protocol.include_baseline_trials === false ? "none" : (protocol.baseline_strategy || "tactile_only"));
   $("catch-percent").value = protocol.catch_trial_percentage ?? 0;
   if ($("include-catch-trials")) $("include-catch-trials").checked = Boolean(protocol.include_catch_trials);
+  if ($("include-auditory-only-trials")) {
+    $("include-auditory-only-trials").checked = Boolean(protocol.include_auditory_only_trials);
+  }
   $("baseline-percent").value = !savedStrategy || savedStrategy === "none" ? 0 : (protocol.baseline_trial_percentage ?? 0);
   $("baseline-soa-values").value = formatList(protocol.baseline_soa_values_ms || []);
   $("baseline-custom-audio-tactile").checked = protocol.baseline_custom_trial_mode === "audio_tactile";
@@ -4357,28 +4408,12 @@ function syncBaselineStrategyControls() {
 }
 
 function baselineOptionCheckedForStrategy(value, strategy) {
-  if (!strategy) return false;
-  if (strategy === "min_max") return value === "min_anchor" || value === "max_anchor";
-  return value === strategy;
+  return Boolean(strategy) && value === strategy;
 }
 
-function strategyFromBaselineCheckboxes(changedInput = null) {
-  const checked = new Set(baselineOptionInputs().filter((input) => input.checked).map((input) => input.value));
-  const changed = changedInput?.value || "";
-  if (changed === "none" && changedInput.checked) return "none";
-  if (changed === "custom" && changedInput.checked) return "custom";
-  if (changed === "tactile_only" && changedInput.checked) return "tactile_only";
-  if (changed === "stationary_burst" && changedInput.checked) return "stationary_burst";
-  checked.delete("none");
-  checked.delete("custom");
-  checked.delete("tactile_only");
-  checked.delete("stationary_burst");
-  const wantsMin = checked.has("min_anchor");
-  const wantsMax = checked.has("max_anchor");
-  if (wantsMin && wantsMax) return "min_max";
-  if (wantsMin) return "min_anchor";
-  if (wantsMax) return "max_anchor";
-  return "";
+function strategyFromBaselineOptions(changedInput = null) {
+  if (changedInput?.checked) return changedInput.value || "";
+  return baselineOptionInputs().find((input) => input.checked)?.value || "";
 }
 
 function derivedBaselineTimingsMs(strategy = currentBaselineStrategy()) {
@@ -4622,6 +4657,18 @@ function updateBaselineDecision() {
     status.className = `status-label ${valid ? "ready" : "required"}`;
   }
   if (strategy === "none") $("baseline-percent").value = 0;
+  const timingSummary = $("tactile-timing-summary");
+  if (timingSummary) {
+    const timingText = soaValues.length
+      ? `${soaValues.length} tactile timing${soaValues.length === 1 ? "" : "s"}: ${soaValues.join(", ")} ms`
+      : "Enter at least one tactile timing.";
+    const familyNotes = [
+      $("include-catch-trials")?.checked ? "catch included" : "no catch trials",
+      $("include-auditory-only-trials")?.checked ? "auditory-only included" : "no auditory-only trials",
+    ];
+    timingSummary.innerHTML = `<span><strong>Tactile channel 3</strong> ${escapeHtml(timingText)}</span><span>${escapeHtml(familyNotes.join(" · "))}</span>`;
+    timingSummary.classList.toggle("required", !soaValues.length);
+  }
   enforceGlobalPercentBounds("baseline-percent");
   updatePercentMixerDisplay();
   renderBaselineTactileSummary();
@@ -4681,6 +4728,10 @@ function renderTrialStripRow(strip, index, options = {}) {
         <label>Condition label</label>
         <input data-strip-field="label" value="${escapeAttr(strip.label || `Trial type ${index + 1}`)}">
       </div>
+      <div class="filmstrip-row-summary" aria-live="polite">
+        <span class="filmstrip-row-expression">${escapeHtml(trialStripExpression(strip))}</span>
+        <span class="status-label optional filmstrip-row-variant-count">${stripPreviewVariants(strip).length} ${stripPreviewVariants(strip).length === 1 ? "variant" : "variants"}</span>
+      </div>
       <div class="filmstrip-sequence"></div>
     </div>
     <div class="filmstrip-row-mix state-only" aria-label="Trial type row composition">
@@ -4731,7 +4782,7 @@ function renderAddEventControl(rowIndex, insertAfter, strip = {}, isEmpty = fals
   const wrapper = document.createElement("div");
   wrapper.className = `sequence-event-add ${isEmpty ? "empty-row-add" : ""}`;
   wrapper.innerHTML = `
-    <button type="button" class="sequence-event-add-symbol" data-add-strip-element="fixed_audio" data-insert-after="${insertAfter}" title="Add sequence box" aria-label="Add sequence box">+</button>
+    <button type="button" class="sequence-event-add-symbol with-label" data-add-strip-element="fixed_audio" data-insert-after="${insertAfter}" title="Add sequence box" aria-label="Add sequence box"><span aria-hidden="true">+</span> ${isEmpty ? "Add first box" : "Add box"}</button>
   `;
   return wrapper;
 }
@@ -4740,7 +4791,7 @@ function renderAddRowControl(insertAfter = -1, isEmpty = false) {
   const wrapper = document.createElement("div");
   wrapper.className = `trial-row-add ${isEmpty ? "trial-row-empty" : "between-row-add"}`;
   wrapper.innerHTML = `
-    <button type="button" class="sequence-event-add-symbol" data-add-strip-row data-insert-row-after="${insertAfter}" title="Add trial sequence row" aria-label="Add trial sequence row">+</button>
+    <button type="button" class="sequence-event-add-symbol with-label" data-add-strip-row data-insert-row-after="${insertAfter}" title="Add trial family" aria-label="Add trial family"><span aria-hidden="true">+</span> ${isEmpty ? "Add first trial family" : "Add trial family"}</button>
   `;
   return wrapper;
 }
@@ -4755,6 +4806,19 @@ function audioBoxLabels(element = {}) {
   const fallback = String(element.label || "").trim();
   if (!labels.length && fallback && !genericAudioBoxLabel(fallback)) labels.push(fallback);
   return Array.from(new Set(labels));
+}
+
+function trialStripExpression(strip = {}) {
+  const expressions = (strip.elements || []).map((element) => {
+    if (element.kind === "jitter") {
+      const values = (element.jitter_values_ms || []).filter((value) => Number.isFinite(Number(value)));
+      return values.length ? `Jitter (${values.join(" | ")} ms)` : "Jitter (add a duration)";
+    }
+    const labels = audioBoxLabels(element);
+    if (!labels.length) return "Empty audio box";
+    return labels.length === 1 ? labels[0] : `(${labels.join(" | ")})`;
+  });
+  return expressions.length ? expressions.join(" → ") : "Add an audio or jitter box to define this trial family.";
 }
 
 function genericAudioBoxLabel(label = "") {
@@ -4999,10 +5063,17 @@ function collectTrialStrips() {
 }
 
 function updateFilmstripCounts() {
-  for (const row of $("filmstrip-list").querySelectorAll(".filmstrip-row")) {
+  const strips = collectTrialStrips();
+  for (const [index, row] of [...$("filmstrip-list").querySelectorAll(".filmstrip-row")].entries()) {
     const rowCounts = rowCompositionCounts(row);
     const mixValid = Math.abs(rowCounts.mix.total - 100) <= 0.5 && rowCounts.mix.audioTactile > 0;
     row.classList.toggle("mix-warning", !mixValid);
+    const strip = strips[index] || {};
+    const variants = stripPreviewVariants(strip).length;
+    const expression = row.querySelector(".filmstrip-row-expression");
+    const count = row.querySelector(".filmstrip-row-variant-count");
+    if (expression) expression.textContent = trialStripExpression(strip);
+    if (count) count.textContent = `${variants} ${variants === 1 ? "variant" : "variants"}`;
   }
   renderProtocolSummary();
   renderLiveTrialPreviewTables();
@@ -5423,68 +5494,79 @@ function syncFilmstripSourceOptions() {
 
 function renderRun() {
   const setup = state.run_sequence_setup || {};
-  const segment6 = projectSegment("6_experiment_run_setup");
-  const prepared = Boolean(setup.prepared || segment6.status === "ready");
   const profileValid = Boolean(setup.ready || getWorkflowStep("run")?.complete);
-  const profileFinalizeAvailable = profileValid;
-  const localProfileActionsAvailable = profileValid && !staticModeActive;
+  const finalized = isProfileFinalized();
   if ($("participants") && document.activeElement !== $("participants")) {
     $("participants").value = state.design.protocol?.participants ?? setup.participant_count ?? 1;
   }
   for (const input of document.querySelectorAll('input[name="experiment-structure"]')) {
     if (document.activeElement !== input) input.checked = input.value === (setup.experiment_structure || "single");
-    input.disabled = prepared;
+    input.disabled = finalized;
   }
-  if ($("participants")) $("participants").disabled = prepared;
+  if ($("participants")) $("participants").disabled = finalized;
   const pill = $("run-sequence-status");
   if (pill) {
-    pill.textContent = prepared ? "legacy session prepared" : profileValid ? "profile valid" : "required";
-    pill.className = `status-label ${prepared || setup.ready ? "ready" : "required"}`;
+    pill.textContent = finalized ? "profile locked" : profileValid ? "ready to lock" : "review required";
+    pill.className = `status-label ${finalized || profileValid ? "ready" : "required"}`;
   }
   const regenerateButton = $("regenerate-run-sequence");
-  if (regenerateButton) regenerateButton.disabled = prepared || !setup.ready;
+  if (regenerateButton) regenerateButton.disabled = finalized || !setup.ready;
   const prepareButton = $("prepare-experiment");
   if (prepareButton) {
-    prepareButton.disabled = staticModeActive || (!setup.ready && !isProfileReadonlyMode());
-    prepareButton.textContent = prepared ? "Open Experiment Runner" : "Save Design and Start Experiment Runner";
-    prepareButton.title = staticModeActive
-      ? STATIC_COMPANION_REQUIRED_MESSAGE
-      : "";
+    prepareButton.disabled = true;
+    prepareButton.hidden = true;
   }
   const saveProfileButton = $("save-study-profile");
   if (saveProfileButton) {
-    saveProfileButton.disabled = !profileFinalizeAvailable;
-    saveProfileButton.title = profileFinalizeAvailable
+    saveProfileButton.hidden = finalized;
+    saveProfileButton.disabled = !profileValid;
+    saveProfileButton.title = profileValid
       ? (staticModeActive ? "Lock this browser-local profile for portable export." : "Register and lock this validated profile in the researcher workspace.")
       : "Complete profile validation before finalizing.";
   }
-  const exportButton = $("export-output-folder");
-  if (exportButton) {
-    exportButton.disabled = !localProfileActionsAvailable;
-    exportButton.title = localProfileActionsAvailable
-      ? "Copy the active profile snapshot into the runner output folder for data collection."
-      : (prepared ? STATIC_COMPANION_REQUIRED_MESSAGE : "Prepare Segment 6 before preparing the output folder.");
-  }
-  const outputSummary = $("output-folder-summary");
-  if (outputSummary) {
-    const folder = state.runner_settings?.active_output_folder || "";
-    outputSummary.textContent = folder ? folderDisplayName(folder) : "runner default";
-    outputSummary.title = folder || "Output folder is selected in PPSExperimentRunner.exe.";
-    outputSummary.className = `status-label ${folder ? "ready" : "optional"}`;
+  const bundleButton = $("export-profile-bundle");
+  if (bundleButton) {
+    bundleButton.hidden = !finalized;
+    bundleButton.disabled = !finalized;
+    bundleButton.title = finalized ? "Export this locked profile as a portable bundle." : "Lock the validated profile before exporting it.";
   }
   const summary = $("run-sequence-summary");
   if (summary) {
-    const participantCount = Number(setup.participant_count || state.design.protocol?.participants || 0);
+    const exampleCount = Number(setup.participant_count || state.design.protocol?.participants || 0);
     const partCount = Number(setup.parts_per_participant || (currentExperimentStructure() === "pre_post" ? 2 : 1));
-    const blockRuns = Number(setup.total_block_runs || 0);
     summary.textContent = setup.ready
-      ? `${participantCount} participants / ${partCount} ${partCount === 1 ? "part" : "parts"} / ${blockRuns} block runs`
+      ? `${exampleCount} example order${exampleCount === 1 ? "" : "s"} · ${partCount} ${partCount === 1 ? "part" : "parts"} · deterministic preview`
       : (setup.message || "waiting for accepted blocks");
     summary.className = `status-label ${setup.ready ? "ready" : "required"}`;
   }
+  renderProfileValidationChecklist(profileValid, finalized);
   renderRunInstructions(setup.instruction_profile || state.design?.study_profile_reference_parameters?.dashboard_run_setup?.instruction_profile || {});
   renderRunSequenceTable(setup.rows || []);
   renderProtocolSummary();
+}
+
+function renderProfileValidationChecklist(profileValid = false, finalized = false) {
+  const container = $("profile-validation-checklist");
+  const summary = $("profile-validation-summary");
+  if (!container) return;
+  const workflow = state.custom_workflow || {};
+  const stepMap = new Map((workflow.steps || []).map((step) => [step.id, step]));
+  const items = WORKFLOW_STEPS.slice(0, -1).map((stepId) => {
+    const step = workflow.is_custom ? (stepMap.get(stepId) || profileStepStatus(stepId)) : profileStepStatus(stepId);
+    return { id: stepId, label: step.label || stepLabel(stepId), complete: Boolean(step.complete) };
+  });
+  const completeCount = items.filter((item) => item.complete).length;
+  container.innerHTML = items.map((item) => `
+    <div class="profile-validation-item ${item.complete ? "complete" : "required"}">
+      <span aria-hidden="true">${item.complete ? "✓" : "!"}</span>
+      <span>${escapeHtml(item.label)}</span>
+      <strong>${item.complete ? "validated" : "review required"}</strong>
+    </div>
+  `).join("");
+  if (summary) {
+    summary.textContent = finalized ? "locked" : profileValid ? "all checks passed" : `${completeCount} of ${items.length} passed`;
+    summary.className = `status-label ${finalized || profileValid ? "ready" : "required"}`;
+  }
 }
 
 function folderDisplayName(path) {
@@ -5524,8 +5606,7 @@ function normalizedRunInstructionSlots(profile = {}) {
 function renderRunInstructions(profile = {}) {
   const container = $("run-instruction-slots");
   if (!container) return;
-  const setup = state.run_sequence_setup || {};
-  const prepared = Boolean(setup.prepared || projectSegment("6_experiment_run_setup").status === "ready");
+  const prepared = isProfileFinalized();
   const slots = normalizedRunInstructionSlots(profile);
   const enabledCount = slots.filter((slot) => slot.enabled && slot.path).length;
   const summary = $("run-instructions-summary");
@@ -5639,9 +5720,11 @@ function renderWorkflow() {
       ? step.missing.join(", ")
       : "";
     for (const badge of badges) {
-      const baseText = profileReadonly ? "read-only" : locked ? "locked" : complete ? "ready" : "required";
-      badge.textContent = baseText === "required" && missingSummary
-        ? `required - ${missingSummary}`
+      const baseText = profileReadonly
+        ? (state.custom_workflow?.is_finalized ? "finalized · locked" : "inherited · read-only")
+        : locked ? "review later" : complete ? "reviewed" : "review required";
+      badge.textContent = baseText === "review required" && missingSummary
+        ? `review required · ${missingSummary}`
         : baseText;
       badge.title = missingSummary ? `Needs: ${missingSummary}` : "";
       badge.className = `step-badge ${profileReadonly ? "readonly" : locked ? "locked" : complete ? "complete" : current ? "current" : ""}`;
@@ -5707,7 +5790,13 @@ function renderPreviewTables() {
 }
 
 function renderRunSequenceTable(rows) {
-  fillTable("run-sequence-table", rows, ["participant", "part", "block_count", "block_order"]);
+  const exampleIndex = new Map();
+  const examples = rows.map((row) => {
+    const key = String(row.participant || row.participant_index || `row-${exampleIndex.size + 1}`);
+    if (!exampleIndex.has(key)) exampleIndex.set(key, exampleIndex.size + 1);
+    return { ...row, participant: `Example ${exampleIndex.get(key)}` };
+  });
+  fillTable("run-sequence-table", examples, ["participant", "part", "block_count", "block_order"]);
 }
 
 function renderTrialPreviewTable(trialRows, totalRows = trialRows.length) {
@@ -5846,7 +5935,7 @@ function collectPayload() {
     include_catch_trials: $("include-catch-trials")?.checked || false,
     catch_crosses_sequence_variants: design.protocol?.catch_crosses_sequence_variants !== false,
     catch_trial_percentage: numberValue("catch-percent", 0),
-    include_auditory_only_trials: Boolean(design.protocol?.include_auditory_only_trials),
+    include_auditory_only_trials: Boolean($("include-auditory-only-trials")?.checked),
     auditory_only_crosses_sequence_variants: design.protocol?.auditory_only_crosses_sequence_variants !== false,
     auditory_only_trial_percentage: Number(design.protocol?.auditory_only_trial_percentage || 0),
     auditory_only_trials_exact: design.protocol?.auditory_only_trials_exact ?? null,
@@ -7853,7 +7942,7 @@ function wireEvents() {
   });
   for (const input of baselineOptionInputs()) {
     input.addEventListener("change", () => {
-      const nextStrategy = strategyFromBaselineCheckboxes(input);
+      const nextStrategy = strategyFromBaselineOptions(input);
       setBaselineStrategy(nextStrategy);
       if (!baselineStrategyIsActive(nextStrategy)) applyBaselineDefaultToTrialRows();
       updateFilmstripCounts();
@@ -7870,6 +7959,10 @@ function wireEvents() {
     updateFilmstripCounts();
   });
   $("include-catch-trials")?.addEventListener("change", () => {
+    updateBaselineDecision();
+    updateFilmstripCounts();
+  });
+  $("include-auditory-only-trials")?.addEventListener("change", () => {
     updateBaselineDecision();
     updateFilmstripCounts();
   });

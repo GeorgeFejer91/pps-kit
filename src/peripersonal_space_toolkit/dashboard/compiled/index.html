@@ -6,8 +6,8 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="./assets/pps_toolkit_icon-PI4CIL5w.png">
-  <script type="module" crossorigin src="./assets/index-C1mEaTLT.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-DiqTcVRj.css">
+  <script type="module" crossorigin src="./assets/index-dhTarNRF.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-B0B9GSUp.css">
 </head>
 <body>
   <div class="app-shell">
@@ -134,12 +134,8 @@
         <section class="stimulus-grid">
           <section id="stimulus" class="panel stimulus-trajectory-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus">
             <div class="panel-heading">
-              <div class="panel-title">Trajectory And Source <span class="step-badge" data-step-badge="stimulus"></span></div>
+              <div class="panel-title"><span class="decision-sequence-label">1 · Define trajectory</span> Trajectory And Source <span class="step-badge" data-step-badge="stimulus"></span></div>
               <input id="preview-mode" type="hidden" value="2d">
-              <div class="segmented-control" aria-label="Stimulus preview mode">
-                <button id="stimulus-mode-2d" type="button" class="mode-toggle active" data-preview-mode="2d">2D</button>
-                <button id="stimulus-mode-3d" type="button" class="mode-toggle" data-preview-mode="3d">3D</button>
-              </div>
             </div>
             <div class="split-fields">
               <div class="field-row">
@@ -199,13 +195,13 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../../viewer/index.html?v=20260806-interface-grid"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../../viewer/index.html?v=20260806-segment-usability"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
             <div class="source-module" aria-label="Stimulus source selection">
               <div class="source-module-heading">
-                <span>Stimulus Type Selection</span>
+                <span><span class="decision-sequence-label">2 · Choose a source</span> Stimulus Type Selection</span>
                 <span id="source-counts" class="status-label">0 sources</span>
               </div>
               <div class="source-action-grid">
@@ -239,9 +235,10 @@
                 </button>
               </div>
               <div class="bake-panel">
+                <div class="decision-sequence-label">3 · Name and add the ingredient</div>
                 <div class="bake-configure">
                   <div class="field-row">
-                    <label for="bake-label">Bake label</label>
+                    <label for="bake-label">Ingredient name</label>
                     <input id="bake-label" type="text" autocomplete="off">
                   </div>
                   <div id="generated-source-mode-control" class="source-mode-row" aria-label="Generated source mode">
@@ -283,11 +280,17 @@
                     <input id="loudness-end-spl" type="number" min="30" max="95" step="1" value="75">
                     <label for="instruction-offset-db">Instruction offset</label>
                     <input id="instruction-offset-db" type="number" min="-30" max="0" step="1" value="-6">
-                    <label for="estimated-full-scale-spl">0 dBFS estimate</label>
-                    <input id="estimated-full-scale-spl" type="number" min="80" max="130" step="0.1" value="109.2">
-                    <label for="audio-peak-ceiling-dbfs">Peak ceiling</label>
-                    <input id="audio-peak-ceiling-dbfs" type="number" min="-12" max="0" step="0.1" value="-1">
                   </div>
+                  <details class="advanced-settings loudness-advanced-settings">
+                    <summary>Calibration reference and safety ceiling</summary>
+                    <p class="decision-note">These values describe the playback calibration assumption. Use a measured calibration profile when one is available.</p>
+                    <div class="loudness-grid">
+                      <label for="estimated-full-scale-spl">Estimated 0 dBFS SPL</label>
+                      <input id="estimated-full-scale-spl" type="number" min="80" max="130" step="0.1" value="109.2">
+                      <label for="audio-peak-ceiling-dbfs">Digital peak ceiling</label>
+                      <input id="audio-peak-ceiling-dbfs" type="number" min="-12" max="0" step="0.1" value="-1">
+                    </div>
+                  </details>
                   <div id="loudness-derived" class="loudness-derived"></div>
                 </div>
                 <div class="bake-action-row">
@@ -334,6 +337,11 @@
             <span id="snippet-counts" class="status-label">0 clips</span>
             <input id="audio-file-input" type="file" accept=".wav,audio/wav,audio/x-wav,audio/mpeg,audio/mp3" hidden>
             <div class="source-card-list" id="snippet-list"></div>
+          </div>
+          <div class="sequence-grammar" aria-label="Trial sequence notation">
+            <span><strong>Left → right</strong> plays in sequence</span>
+            <span><strong>Within one box</strong> lists alternatives</span>
+            <span><strong>Jitter box</strong> inserts one listed silence duration</span>
           </div>
           <div class="filmstrip-editor" aria-label="Single-trial sequence builder">
             <div id="filmstrip-list" class="filmstrip-list"></div>
@@ -384,39 +392,52 @@
               </div>
             </div>
 
-            <label class="inline-toggle catch-trial-toggle" for="include-catch-trials">
-              <input id="include-catch-trials" type="checkbox">
-              <span>Include Catch Trials (audio only)</span>
-            </label>
+            <div class="trial-family-toggles" aria-label="Additional trial families">
+              <label class="inline-toggle catch-trial-toggle" for="include-catch-trials">
+                <input id="include-catch-trials" type="checkbox">
+                <span><strong>Catch trials</strong><small>Audio only; no response required.</small></span>
+              </label>
+              <label class="inline-toggle auditory-only-trial-toggle" for="include-auditory-only-trials">
+                <input id="include-auditory-only-trials" type="checkbox">
+                <span><strong>Auditory-only trials</strong><small>Audio only; response remains part of the protocol.</small></span>
+              </label>
+            </div>
+
+            <div id="tactile-timing-summary" class="decision-summary-strip" aria-live="polite"></div>
 
             <fieldset id="baseline-options" class="baseline-option-grid" aria-label="Baseline strategy">
               <label class="baseline-option-card" data-baseline-option="none">
-                <input type="checkbox" name="baseline-option" value="none">
+                <input type="radio" name="baseline-option" value="none">
                 <span class="baseline-option-title">No baseline</span>
                 <span class="baseline-option-copy">Create only audio-tactile trial files.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="min_anchor">
-                <input type="checkbox" name="baseline-option" value="min_anchor">
+                <input type="radio" name="baseline-option" value="min_anchor">
                 <span class="baseline-option-title">Minimum SOA anchor</span>
                 <span class="baseline-option-copy">Keep the trial audio and add tactile at the first entered SOA.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="max_anchor">
-                <input type="checkbox" name="baseline-option" value="max_anchor">
+                <input type="radio" name="baseline-option" value="max_anchor">
                 <span class="baseline-option-title">Maximum SOA anchor</span>
                 <span class="baseline-option-copy">Keep the trial audio and add tactile at the last entered SOA.</span>
               </label>
+              <label class="baseline-option-card" data-baseline-option="min_max">
+                <input type="radio" name="baseline-option" value="min_max">
+                <span class="baseline-option-title">Minimum + maximum anchors</span>
+                <span class="baseline-option-copy">Keep the trial audio and add tactile at both the first and last entered SOAs.</span>
+              </label>
               <label class="baseline-option-card" data-baseline-option="tactile_only">
-                <input type="checkbox" name="baseline-option" value="tactile_only">
+                <input type="radio" name="baseline-option" value="tactile_only">
                 <span class="baseline-option-title">Full SOA tactile-only</span>
                 <span class="baseline-option-copy">Preserve fixed clips and jitter, silence looming segments, and add tactile at every SOA.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="stationary_burst">
-                <input type="checkbox" name="baseline-option" value="stationary_burst">
+                <input type="radio" name="baseline-option" value="stationary_burst">
                 <span class="baseline-option-title">Full SOA stationary bursts</span>
                 <span class="baseline-option-copy">Preserve fixed clips and jitter, replace looming segments with stationary bursts, and add tactile at every SOA.</span>
               </label>
               <label class="baseline-option-card baseline-custom" data-baseline-option="custom">
-                <input type="checkbox" name="baseline-option" value="custom">
+                <input type="radio" name="baseline-option" value="custom">
                 <span class="baseline-option-title">Custom timings</span>
                 <span class="baseline-option-copy">Enter custom SOAs and choose whether custom baselines are tactile-only or audio-tactile.</span>
               </label>
@@ -470,11 +491,13 @@
 
             <div class="split-fields trial-decision-fields trial-pool-global-controls">
               <div class="field-row">
-                <label for="repetitions">Set all folders to</label>
+                <label for="repetitions">Set all trial groups to</label>
                 <input id="repetitions" type="number" min="0" max="100" step="0.5">
               </div>
-              <button id="apply-trial-pool-repetitions" type="button">Apply To Folders</button>
+              <button id="apply-trial-pool-repetitions" type="button">Apply To Trial Groups</button>
             </div>
+
+            <p class="decision-note half-step-note">Half-step repetitions add balanced extra trials deterministically across families, rows, SOAs, and source lineage.</p>
 
             <input id="blocks" type="hidden" value="1">
             <input id="baseline-percent" type="hidden" value="0">
@@ -484,7 +507,7 @@
             <div id="trial-pool-folder-list" class="trial-pool-folder-list"></div>
 
             <div class="action-row segment-bake-actions">
-              <button id="bake-trial-pool" type="button" class="primary">Bake Trial Pool CSV</button>
+              <button id="bake-trial-pool" type="button" class="primary">Create Trial Pool</button>
               <span id="trial-pool-bake-status" class="status-label">waiting</span>
               <button id="open-trial-pool-folder" type="button" disabled>Open Folder</button>
             </div>
@@ -527,6 +550,11 @@
             </div>
           </div>
 
+          <div id="block-order-policy-summary" class="decision-summary-strip block-policy-summary" aria-live="polite">
+            <span><strong>Method</strong> row-preserving seeded randomization</span>
+            <span><strong>Seed</strong> assigned when blocks are generated</span>
+          </div>
+
           <div class="block-build-progress" aria-label="Block CSV creation progress">
             <div class="block-build-progress-header">
               <strong>Block CSV bake</strong>
@@ -546,7 +574,7 @@
           </div>
 
           <div class="step-footer block-csv-decision-actions">
-            <button id="regenerate-block-csvs" type="button">Regenerate Blocks</button>
+            <button id="regenerate-block-csvs" type="button">Generate Blocks</button>
             <button id="accept-block-csvs" type="button" class="primary">Accept Blocks</button>
           </div>
         </section>
@@ -561,12 +589,19 @@
         <section class="run-grid">
           <section id="run" class="panel" data-step-panel="run" data-resizable-panel data-panel-id="run">
             <div class="panel-heading">
-              <div class="panel-title">Portable Profile Parameters <span class="step-badge" data-step-badge="run"></span></div>
+              <div class="panel-title">Profile Completion <span class="step-badge" data-step-badge="run"></span></div>
               <span id="run-sequence-status" class="status-label">checking</span>
             </div>
+            <section class="profile-validation-panel" aria-label="Profile validation checklist">
+              <div class="run-preview-toolbar">
+                <div class="panel-subtitle">Validation Checklist</div>
+                <span id="profile-validation-summary" class="status-label">checking</span>
+              </div>
+              <div id="profile-validation-checklist" class="profile-validation-checklist"></div>
+            </section>
             <div class="run-decision-grid" aria-label="Experiment-level parameters">
               <div class="field-row">
-                <label for="participants">Order preview rows (not study size)</label>
+                <label for="participants">Example orders to preview</label>
                 <input id="participants" type="number" min="1" max="100" step="1">
               </div>
               <div class="field-row">
@@ -598,7 +633,7 @@
               <table class="data-table" id="run-sequence-table">
                 <thead>
                   <tr>
-                    <th>Participant</th>
+                    <th>Example</th>
                     <th>Part</th>
                     <th>Blocks</th>
                     <th>Block order</th>
@@ -607,16 +642,12 @@
                 <tbody></tbody>
               </table>
             </div>
-            <div class="run-output-summary" aria-label="Acquisition output folder">
-              <span>Output folder</span>
-              <span id="output-folder-summary" class="status-label">runner default</span>
-            </div>
             <div class="step-footer run-sequence-actions">
               <button id="regenerate-run-sequence" type="button">Refresh Order Preview</button>
-              <button id="save-study-profile" type="button">Done — Lock Profile</button>
+              <button id="save-study-profile" type="button" class="primary">Done — Lock Profile</button>
               <button id="export-profile-bundle" type="button">Export .pps-profile</button>
-              <button id="export-output-folder" type="button" class="legacy-session-action">Legacy: Prepare Session</button>
-              <button id="prepare-experiment" type="button" class="primary legacy-session-action">Save and Open Runner</button>
+              <button id="export-output-folder" type="button" class="state-only" hidden aria-hidden="true" tabindex="-1">Legacy: Prepare Session</button>
+              <button id="prepare-experiment" type="button" class="state-only" hidden aria-hidden="true" tabindex="-1">Legacy: Save and Open Runner</button>
             </div>
           </section>
         </section>
