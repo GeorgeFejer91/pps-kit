@@ -6,7 +6,7 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260807-publication-network">
+  <link rel="stylesheet" href="styles.css?v=20260807-publication-network-sequential-edit">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -159,6 +159,7 @@
         <div class="segment-heading">
           <span class="segment-kicker">Segment 1</span>
           <h2 id="stimulus-segment-title">Build Looming Stimuli</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="stimulus" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="stimulus" aria-label="About Segment 1: Build Looming Stimuli">About</button>
         </div>
         <section class="stimulus-grid">
@@ -225,7 +226,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260807-publication-network"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260807-publication-network-sequential-edit"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -346,7 +347,7 @@
             </div>
             <div class="step-footer">
               <button id="open-ingredient-folder" type="button" disabled>Open Folder</button>
-              <button type="button" class="primary" data-continue-step="stimulus">Continue To Trial Sequence</button>
+              <button type="button" class="primary" data-continue-step="stimulus">Save &amp; Continue to Trial Sequence</button>
             </div>
           </section>
         </section>
@@ -356,6 +357,7 @@
         <div class="segment-heading">
           <span class="segment-kicker">Segment 2</span>
           <h2 id="trials-segment-title">Trial Sequence Design</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="trials" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="trials" aria-label="About Segment 2: Trial Sequence Design">About</button>
         </div>
         <section id="trials" class="panel" data-step-panel="trials" data-resizable-panel data-panel-id="trials">
@@ -382,7 +384,7 @@
             <button id="open-trial-sequence-folder" type="button" disabled>Open Folder</button>
           </div>
           <div class="step-footer">
-            <button type="button" class="primary" data-continue-step="trials">Continue To Baseline And Tactile</button>
+            <button type="button" class="primary" data-continue-step="trials">Save &amp; Continue to Baseline and Tactile</button>
           </div>
         </section>
       </section>
@@ -391,6 +393,7 @@
         <div class="segment-heading">
           <span class="segment-kicker">Segment 3</span>
           <h2 id="baseline-segment-title">Baseline and Tactile Trial Design</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="baseline" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="baseline" aria-label="About Segment 3: Baseline and Tactile Trial Design">About</button>
         </div>
         <section id="baseline" class="baseline-tactile-workbench" data-step-panel="baseline">
@@ -497,7 +500,7 @@
             </div>
 
             <div class="step-footer">
-              <button type="button" class="primary" data-continue-step="baseline">Continue To Trial Repetition Pool</button>
+              <button type="button" class="primary" data-continue-step="baseline">Save &amp; Continue to Trial Repetition Pool</button>
             </div>
           </section>
 
@@ -516,6 +519,7 @@
         <div class="segment-heading">
           <span class="segment-kicker">Segment 4</span>
           <h2 id="block-segment-title">Trial Repetition Pool</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="block" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="block" aria-label="About Segment 4: Trial Repetition Pool">About</button>
         </div>
         <section id="block" class="block-workbench" data-step-panel="block">
@@ -550,7 +554,7 @@
             </div>
 
             <div class="step-footer">
-              <button type="button" class="primary" data-continue-step="block">Continue To Block CSV Preview</button>
+              <button type="button" class="primary" data-continue-step="block">Save &amp; Continue to Block CSV Preview</button>
             </div>
           </section>
 
@@ -568,6 +572,7 @@
         <div class="segment-heading">
           <span class="segment-kicker">Segment 5</span>
           <h2 id="schedule-segment-title">Generate and Review Blocks</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="schedule" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="schedule" aria-label="About Segment 5: Generate and Review Blocks">About</button>
         </div>
         <section id="schedule" class="panel block-csv-preview-panel" data-step-panel="schedule" data-resizable-panel data-panel-id="block-csv-preview">
@@ -612,7 +617,7 @@
 
           <div class="step-footer block-csv-decision-actions">
             <button id="regenerate-block-csvs" type="button">Generate Blocks</button>
-            <button id="accept-block-csvs" type="button" class="primary">Accept Blocks</button>
+            <button id="accept-block-csvs" type="button" class="primary">Accept Blocks &amp; Continue</button>
           </div>
         </section>
       </section>
@@ -1380,7 +1385,7 @@
       </form>
     </div>
   </div>
-  <script type="module" src="app.js?v=20260807-publication-network"></script>
-  <script type="module" src="designer_main.js?v=20260807-publication-network"></script>
+  <script type="module" src="app.js?v=20260807-publication-network-sequential-edit"></script>
+  <script type="module" src="designer_main.js?v=20260807-publication-network-sequential-edit"></script>
 </body>
 </html>

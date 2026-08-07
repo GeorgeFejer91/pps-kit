@@ -36,15 +36,8 @@ AUDIT_QUERY = {
     "forceStaticPreview": "1",
     "auditStaticPreview": "1",
 }
-MUTATING_CONTROL_IDS = {
-    "edit-mode-button",
-    "edit-profile-rail",
-    "apply-design",
-    "load-custom-project",
-    "apply-profile-project",
+COMPANION_REQUIRED_CONTROL_IDS = {
     "export-data-acquisition-folder",
-    "import-audio-spatialize",
-    "import-audio-preserve",
     "bake-stimulus",
     "bake-trial-sequences",
     "bake-trial-files",
@@ -53,7 +46,6 @@ MUTATING_CONTROL_IDS = {
     "regenerate-block-csvs",
     "accept-block-csvs",
     "regenerate-run-sequence",
-    "save-study-profile",
     "export-output-folder",
     "prepare-experiment",
 }
@@ -136,6 +128,7 @@ def run_audit(
     local_authority: dict[str, dict[str, Any]] = {}
     if not skip_materialization:
         for template_id in ready_ids:
+            print(f"[static-parity] materialize {template_id}", flush=True)
             local_authority[template_id] = profile_matrix._materialize_ready_profile(template_id, output_dir=output_dir)
 
     try:
@@ -143,6 +136,7 @@ def run_audit(
         failures: list[str] = []
         for url in urls:
             direct_url = dashboard_audit_url(url)
+            print(f"[static-parity] inspect {direct_url}", flush=True)
             snapshots = _collect_browser_snapshots(
                 direct_url,
                 selected_ids,
@@ -225,6 +219,7 @@ def _collect_browser_snapshots(
         )
         snapshots: dict[str, dict[str, Any]] = {}
         for template_id in template_ids:
+            print(f"[static-parity] snapshot {template_id}", flush=True)
             page.select_option("#template-select", template_id)
             page.wait_for_function(
                 "(templateId) => window.PPSDashboardAudit && window.PPSDashboardAudit.snapshot().selected_template === templateId",
@@ -300,11 +295,14 @@ def _compare_one_profile(
         failures.append(prefix + f"selected template mismatch: {snapshot.get('selected_template')}")
     if not snapshot.get("static_mode"):
         failures.append(prefix + "snapshot is not in static mode")
-    if snapshot.get("controls", {}).get("edit-mode-button", {}).get("disabled") is not True:
-        failures.append(prefix + "Edit mode button must be disabled without companion")
-    enabled = sorted(set(snapshot.get("disabled_summary", {}).get("mutating_enabled", [])) & MUTATING_CONTROL_IDS)
+    if snapshot.get("controls", {}).get("edit-mode-button", {}).get("disabled") is not False:
+        failures.append(prefix + "Edit mode button must remain available for browser-local copy-on-edit")
+    enabled = sorted(
+        set(snapshot.get("disabled_summary", {}).get("mutating_enabled", []))
+        & COMPANION_REQUIRED_CONTROL_IDS
+    )
     if enabled:
-        failures.append(prefix + f"mutating controls enabled without companion: {', '.join(enabled)}")
+        failures.append(prefix + f"companion-required controls enabled without companion: {', '.join(enabled)}")
 
     expected_labels = _expected_source_labels(template_data, inventory_profile)
     actual_labels = [str(item.get("label") or "") for item in snapshot.get("sources", [])]

@@ -132,7 +132,7 @@ def test_dashboard_static_assets_keep_numbered_baseline_and_block_segments():
     assert "count-strip" in html
     assert "Default baseline %" not in html
     assert "Default catch %" not in html
-    assert "Continue To Baseline And Tactile" in html
+    assert "Save &amp; Continue to Baseline and Tactile" in html
     assert "BASELINE_STRATEGY_NOTES" in app_js
     assert "renderBaseline" in app_js
     assert "baselineCountEstimate" in app_js

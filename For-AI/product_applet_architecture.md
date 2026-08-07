@@ -188,8 +188,13 @@ schemas, and binary substitutions disguised as audio.
 
 Custom profiles have a draft/finalized lifecycle. Editing an immutable
 template or finalized profile creates a named copy whose display name retains
-the source profile ID. Draft decisions autosave and scientific changes
-invalidate downstream Segment artifacts. `Done — Lock Profile` finalizes the
-profile and makes it copy-to-edit-only. The Runner catalogue excludes drafts
+the source profile ID. Draft decisions persist through sequential `Save &
+Continue` confirmations, while scientific changes invalidate downstream
+Segment artifacts. Artifact validity and the persisted edit cursor are
+separate so a bake cannot silently unlock the next decision segment. Segment 5
+acceptance and cursor advancement commit together. `Done — Lock Profile`
+requires the current workflow revision, every Segment 0-5 confirmation, and no
+reopened review debt; finalization metadata is server-owned. It finalizes the
+profile and makes both design and generated artifacts copy-to-edit-only. The Runner catalogue excludes drafts
 and can materialize the legacy Segment 6 session/order artifact on demand from
 a finalized Segment 0-5 profile.

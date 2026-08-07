@@ -255,7 +255,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260807-publication-network"
+    static_version = "20260807-publication-network-sequential-edit"
     assert f'href="styles.css?v={static_version}"' in html
     assert 'import("./hardware_pixel_art.js")' in app_js
     assert f'src="app.js?v={static_version}"' in html
@@ -811,6 +811,8 @@ def test_dashboard_creates_profile_and_custom_project_folders(tmp_path: Path):
     assert fork_steps["trials"]["complete"] is False
     assert "Bake Segment 2 trial sequences." in fork_steps["trials"]["missing"]
     assert forked["custom_workflow"]["current_step"] == "trials"
+    assert forked["custom_workflow"]["edit_step"] == "stimulus"
+    assert forked["custom_workflow"]["confirmed_steps"] == ["study"]
     assert forked["project_segments"]["1_core_audio_ingredients"]["status"] == "ready"
     for noise in forked["design"]["noises"]:
         assert str(fork_dir / "1_core_audio_ingredients") in noise["prebaked_path"]
@@ -824,6 +826,7 @@ def test_dashboard_creates_profile_and_custom_project_folders(tmp_path: Path):
     assert reopened["project"]["project_id"] == fork_project["project_id"]
     assert reopened["project"]["project_kind"] == "custom"
     assert reopened["custom_workflow"]["is_custom"] is True
+    assert reopened["custom_workflow"]["edit_step"] == "stimulus"
     assert reopened["project_segments"]["1_core_audio_ingredients"]["status"] == "ready"
 
     custom = client.post("/api/templates/__custom__/load").json()
@@ -3292,7 +3295,41 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     assert {row["phase_label"] for row in run_rows} == {"Condition 1", "Condition 2"}
     assert all(row["block_csv_file"].endswith("_final.csv") for row in run_rows)
 
-    saved_response = client.post("/api/profiles/save-prepared", json={"name": "My Lab Pilot"})
+    review_state = client.get("/api/state").json()
+    for step_id in ("stimulus", "trials", "baseline", "block"):
+        reviewed = client.post(
+            "/api/design",
+            json={
+                "workflow_action": {
+                    "type": "save_and_continue",
+                    "step_id": step_id,
+                    "expected_revision": review_state["custom_workflow"]["review_revision"],
+                }
+            },
+        )
+        assert reviewed.status_code == 200, reviewed.text
+        review_state = reviewed.json()
+    reviewed = client.post(
+        "/api/block-csv/accept",
+        json={
+            "workflow_action": {
+                "type": "accept_and_continue",
+                "step_id": "schedule",
+                "expected_revision": review_state["custom_workflow"]["review_revision"],
+            }
+        },
+    )
+    assert reviewed.status_code == 200, reviewed.text
+    review_state = reviewed.json()
+    assert review_state["workflow_action_result"]["advanced"] is True
+    assert review_state["custom_workflow"]["edit_step"] == "run"
+    saved_response = client.post(
+        "/api/profiles/save-prepared",
+        json={
+            "name": "My Lab Pilot",
+            "expected_revision": review_state["custom_workflow"]["review_revision"],
+        },
+    )
     assert saved_response.status_code == 200, saved_response.text
     saved = saved_response.json()
     assert saved["custom_workflow"]["is_finalized"] is True

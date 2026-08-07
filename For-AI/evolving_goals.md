@@ -15,7 +15,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 ## 2026-08-06
 
-- Reduce Segment 0 to one grouped profile selector, one `Start New Custom Design` action, and one read-only profile information card. Built-in templates remain permanent package resources; custom drafts and finalized profiles share the same selector under a separate group. Remove duplicate custom-project selection, explicit Apply/Save/Refresh/folder buttons, and the data-acquisition bridge from this design stage. A clean-slate profile must be named before its dedicated researcher-workspace folder is created; subsequent draft decisions autosave. The About modal links `Template Directory` to the physical local template directory or the hosted GitHub directory, labels its final section `Output`, and does not discuss acquisition responsibilities.
+- Reduce Segment 0 to one grouped profile selector, one `Start New Custom Design` action, and one read-only profile information card. Built-in templates remain permanent package resources; custom drafts and finalized profiles share the same selector under a separate group. Remove duplicate custom-project selection, explicit Apply/Save/Refresh/folder buttons, and the data-acquisition bridge from this design stage. A clean-slate profile must be named before its dedicated researcher-workspace folder is created; subsequent draft decisions persist at explicit `Save & Continue` boundaries (the earlier autosave direction was superseded on 2026-08-07). The About modal links `Template Directory` to the physical local template directory or the hosted GitHub directory, labels its final section `Output`, and does not discuss acquisition responsibilities.
 
 ## 2026-08-05
 
@@ -1922,8 +1922,8 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   applet for Windows WebView2 and Linux GTK/WebKitGTK, with one compiled Vite
   frontend shared by the native package and GitHub Pages.
 - Implemented hosted browser-local composition, IndexedDB draft/audio storage,
-  immutable-template copy-on-edit, source-ID-bearing derived names, draft
-  autosave, downstream invalidation, finalization locking, themes, collapsible
+  immutable-template copy-on-edit, source-ID-bearing derived names, the original
+  draft-autosave path (superseded by explicit saves on 2026-08-07), downstream invalidation, finalization locking, themes, collapsible
   sticky stages, and portable `.pps-profile` export.
 - Added SHA-256-verified profile bundles and
   `seeded_factoradic_cycle.v1`. Segment 6 is the profile validation/finalization
@@ -2032,3 +2032,41 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   and abstracts without recorded reusable provenance stay unavailable in the
   public asset. Centrality values describe this corpus and are not study-quality
   ratings.
+
+## 2026-08-07 — Compact segment disclosure controls
+
+- Segment headings use circular double-chevron disclosure controls instead of
+  repeating `Collapse` and `Expand` text. The arrow rotates with the collapsed
+  state, while dynamic accessible names, titles, `aria-controls`, and
+  `aria-expanded` preserve an explicit nonvisual description of the action.
+- Disclosure controls are 32 px on wider layouts and retain a 44 px touch target
+  on phones. Reduced-motion preferences disable the rotation transition.
+
+## 2026-08-07 — Sequential explicit-save editing
+
+- View mode remains the full, unmuted Segment 0-6 overview. Edit mode now has
+  one persisted active decision segment: earlier confirmed segments are
+  read-only, downstream segments remain visible with subtle muting, and only
+  the active segment's mutation controls are enabled.
+- Removed draft autosave. Segments 1-4 use `Save & Continue`, Segment 5 uses
+  `Accept Blocks & Continue`, and these explicit actions are the only ones that
+  advance `designer_progress.edit_step`. Artifact readiness remains a separate
+  backend fact, so completing a bake cannot silently unlock the next segment.
+- Earlier confirmed segments expose `Reopen segment`. Reopening moves the edit
+  cursor back, truncates later confirmations, and marks previously confirmed
+  downstream decisions for review while preserving their inspectable values.
+  Workflow revisions reject stale or out-of-order confirmation requests.
+- Unsaved input is identified explicitly, guarded on View/profile navigation
+  and browser close, and discarded only after confirmation. Segment 6 preview
+  is candidate-only; the final profile-lock action performs the explicit save.
+- The compiled native/hosted frontend remains shared. Visual validation now
+  mouse-clicks Segment 1 `Save & Continue`, verifies exactly one-step advance
+  plus the upstream reopen affordance, and verifies that switching back to View
+  restores seven visible overview segments with no workflow muting.
+- Workflow hardening keeps profile status and finalization timestamps
+  server-owned, requires the current revision plus complete Segment 0-5 review
+  before profile lock, rejects generated-artifact mutation after finalization,
+  and commits Segment 5 acceptance plus cursor advancement as one retry-safe
+  action. The hosted browser-local path mirrors the full Segment 1-6 review
+  traversal while leaving actual baking, workspace writes, and Runner launch to
+  the installed companion.

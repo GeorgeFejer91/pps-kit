@@ -78,6 +78,8 @@ const STATIC_COMPANION_REQUIRED_MESSAGE =
 const PROFILE_RECREATION_NOTICE =
   "Be aware: this is not the exact stimulus set used in the original study. This preload recreates the study's reported parameters within this interface, using the toolkit's local rendering and bundled profile assets.";
 const WORKFLOW_STEPS = ["study", "stimulus", "trials", "baseline", "block", "schedule", "run"];
+const DESIGNER_PROGRESS_KEY = "designer_progress";
+const DESIGNER_PROGRESS_SCHEMA = "pps-designer-progress.v1";
 const STEP_TARGETS = {
   study: "study-segment",
   stimulus: "stimulus-segment",
@@ -189,7 +191,10 @@ const STATIC_AUDIT_CONTROL_IDS = [
   "accept-block-csvs",
   "regenerate-run-sequence",
   "save-study-profile",
-  "export-profile-bundle"
+  "export-profile-bundle",
+  "export-data-acquisition-folder",
+  "export-output-folder",
+  "prepare-experiment"
 ];
 const PANEL_RESIZE_SNAP_PX = 8;
 const PANEL_HEIGHT_MIN = 150;
@@ -537,7 +542,12 @@ function syncBoundedSelect(select) {
   button.querySelector(".bounded-select-value").textContent = label;
   button.title = label;
   const fieldLabel = boundedSelectFieldLabel(select);
-  if (select.disabled && isProfileReadonlyMode()) {
+  // The custom proxy must mirror the native select's interaction lock. The
+  // one exception is an inherited read-only profile, where the proxy remains
+  // actionable so it can open the "create a custom copy" dialog.
+  const opensCustomize = select.disabled && isProfileReadonlyMode();
+  button.disabled = select.disabled && !opensCustomize;
+  if (opensCustomize) {
     button.setAttribute("role", "button");
     button.setAttribute("aria-haspopup", "dialog");
     button.setAttribute("aria-controls", "customize-modal");
@@ -651,8 +661,8 @@ let runSequencePreviewTimer = null;
 let activePage = "toolkit";
 let editModeActive = false;
 let staticModeActive = false;
-let autosaveTimer = 0;
-let autosaveRevision = 0;
+let designerDirty = false;
+let workflowSaveInFlight = false;
 let staticModeReason = "";
 let staticPreloadInventory = null;
 let staticTemplatesCache = null;
@@ -803,7 +813,148 @@ function customViewModeLocked() {
   return Boolean(isCustomMode() && !editModeActive);
 }
 
-function setEditMode(active) {
+function normalizedDesignerProgress() {
+  const workflow = state?.custom_workflow || {};
+  const stored = state?.design?.study_profile_reference_parameters?.[DESIGNER_PROGRESS_KEY] || {};
+  const fallbackStep = WORKFLOW_STEPS.includes(workflow.current_step) ? workflow.current_step : "stimulus";
+  const editStep = WORKFLOW_STEPS.includes(workflow.edit_step)
+    ? workflow.edit_step
+    : WORKFLOW_STEPS.includes(stored.edit_step)
+      ? stored.edit_step
+      : fallbackStep;
+  const confirmed = new Set(workflow.confirmed_steps || stored.confirmed_steps || WORKFLOW_STEPS.slice(0, WORKFLOW_STEPS.indexOf(editStep)));
+  confirmed.add("study");
+  confirmed.delete(editStep);
+  const needsReview = new Set(workflow.needs_review_steps || stored.needs_review_steps || []);
+  needsReview.delete(editStep);
+  for (const stepId of confirmed) needsReview.delete(stepId);
+  return {
+    schema: DESIGNER_PROGRESS_SCHEMA,
+    edit_step: editStep,
+    confirmed_steps: WORKFLOW_STEPS.filter((stepId) => confirmed.has(stepId)),
+    needs_review_steps: WORKFLOW_STEPS.filter((stepId) => needsReview.has(stepId)),
+    revision: Math.max(0, Number(workflow.review_revision ?? stored.revision ?? 0)),
+  };
+}
+
+function setHostedDesignerProgress(progress) {
+  if (!state?.design) return;
+  state.design.study_profile_reference_parameters = state.design.study_profile_reference_parameters || {};
+  state.design.study_profile_reference_parameters[DESIGNER_PROGRESS_KEY] = clone(progress);
+  state.custom_workflow = state.custom_workflow || {};
+  state.custom_workflow.edit_step = progress.edit_step;
+  state.custom_workflow.confirmed_steps = [...progress.confirmed_steps];
+  state.custom_workflow.needs_review_steps = [...progress.needs_review_steps];
+  state.custom_workflow.review_revision = progress.revision;
+  const confirmed = new Set(progress.confirmed_steps);
+  const needsReview = new Set(progress.needs_review_steps);
+  state.custom_workflow.steps = (state.custom_workflow.steps || []).map((step) => ({
+    ...step,
+    decision_state: step.id === progress.edit_step
+      ? "editing"
+      : confirmed.has(step.id)
+        ? "confirmed"
+        : needsReview.has(step.id)
+          ? "needs_review"
+          : "locked",
+  }));
+}
+
+function refreshHostedWorkflowSteps() {
+  if (!staticModeActive || !state?.custom_workflow?.is_custom) return;
+  const design = state.design || {};
+  const protocol = design.protocol || {};
+  const sources = [
+    ...(design.noises || []),
+    ...(design.custom_looming_files || []),
+    ...(design.prestimulus_files || []),
+  ];
+  const strips = protocol.trial_strips || [];
+  const steps = WORKFLOW_STEPS.map((stepId) => {
+    const artifact = profileStepStatus(stepId);
+    let complete = artifact.complete;
+    let missing = [...(artifact.missing || [])];
+    if (stepId === "study") {
+      complete = Boolean(String(design.name || "").trim());
+      missing = complete ? [] : ["Name this study before continuing."];
+    } else if (stepId === "stimulus" && !sources.length) {
+      complete = false;
+      missing = ["Add at least one stimulus or instruction source."];
+    } else if (stepId === "trials" && (!strips.length || strips.some((strip) => stripPreviewVariants(strip).length < 1))) {
+      complete = false;
+      missing = ["Add at least one complete trial family."];
+    } else if (stepId === "baseline" && !(protocol.soa_values_ms || []).length) {
+      complete = false;
+      missing = ["Add at least one SOA value."];
+    }
+    return {
+      id: stepId,
+      label: SEGMENT_INFO[stepId]?.title || humanize(stepId),
+      complete,
+      missing: complete ? [] : missing,
+    };
+  });
+  const firstIncomplete = steps.find((step) => !step.complete);
+  state.custom_workflow.steps = steps;
+  state.custom_workflow.current_step = firstIncomplete?.id || "run";
+  state.custom_workflow.ready_to_render = steps.slice(0, -1).every((step) => step.complete);
+  state.custom_workflow.ready_to_prepare = steps.every((step) => step.complete);
+  state.custom_workflow.missing = steps.flatMap((step) => step.missing || []);
+}
+
+function initializeHostedDesignerProgress(editStep = "stimulus") {
+  refreshHostedWorkflowSteps();
+  setHostedDesignerProgress({
+    schema: DESIGNER_PROGRESS_SCHEMA,
+    edit_step: editStep,
+    confirmed_steps: ["study"],
+    needs_review_steps: [],
+    revision: 0,
+  });
+}
+
+function markDesignerDirty() {
+  if (!state || !isCustomMode() || isProfileReadonlyMode() || !editModeActive || designerDirty) return;
+  designerDirty = true;
+  document.dispatchEvent(new CustomEvent("pps-designer-dirty"));
+}
+
+function markDesignerSaved() {
+  designerDirty = false;
+  document.dispatchEvent(new CustomEvent("pps-designer-saved"));
+}
+
+function confirmDiscardUnsaved(actionLabel = "continue") {
+  if (!designerDirty) return true;
+  return window.confirm(`Discard unsaved changes and ${actionLabel}?`);
+}
+
+async function restorePersistedDraftForView() {
+  if (staticModeActive) {
+    const stored = await window.PPSDesigner?.drafts?.load?.().catch(() => null);
+    if (!stored?.design || stored?.project?.project_id !== state?.project?.project_id) {
+      throw new Error("The last saved browser draft could not be restored. Stay in Edit mode and export the draft before leaving.");
+    }
+    state = clone(stored);
+    editModeActive = false;
+    markDesignerSaved();
+    renderAll();
+    updateViewer();
+    return;
+  }
+  editModeActive = false;
+  markDesignerSaved();
+  await loadState({ resetEditMode: true });
+}
+
+async function reconnectBackendFromControls({ includeToken = true } = {}) {
+  if (!confirmDiscardUnsaved("reconnect to the companion")) return;
+  saveApiBase($("backend-url").value);
+  if (includeToken) saveCompanionToken($("companion-token")?.value || "");
+  await loadState({ resetEditMode: true });
+}
+
+async function setEditMode(active) {
   if (active) {
     if (!state) {
       showToast("Wait for the dashboard state to load before editing.");
@@ -820,6 +971,14 @@ function setEditMode(active) {
     }
     editModeActive = true;
   } else {
+    if (!confirmDiscardUnsaved("return to View mode")) {
+      renderEditModePanel();
+      return editModeActive;
+    }
+    if (designerDirty) {
+      await restorePersistedDraftForView();
+      return false;
+    }
     editModeActive = false;
   }
   renderAll();
@@ -829,6 +988,7 @@ function setEditMode(active) {
 
 function resetEditMode() {
   editModeActive = false;
+  designerDirty = false;
 }
 
 function renderEditModePanel() {
@@ -3745,7 +3905,14 @@ function renderSegmentRegistryOutputs() {
   }
   if (acceptButton) {
     acceptButton.disabled = !(segment5.status === "ready");
-    acceptButton.textContent = blockAccepted ? "Edit Blocks" : "Accept Blocks";
+    const reviewingSchedule = Boolean(
+      isCustomMode()
+      && editModeActive
+      && normalizedDesignerProgress().edit_step === "schedule"
+    );
+    acceptButton.textContent = reviewingSchedule || !blockAccepted
+      ? "Accept Blocks & Continue"
+      : "Edit Blocks";
   }
   if (downloadButton) downloadButton.disabled = !(state.block_csv_preview?.blocks || []).length;
   const blockStatus = $("block-csv-bake-status");
@@ -5675,6 +5842,7 @@ async function playSourcePreviewAudio(url, button, audioContext, contextReady, d
 function setTrialStrips(strips) {
   state.design.protocol = state.design.protocol || {};
   state.design.protocol.trial_strips = strips;
+  markDesignerDirty();
   renderTrialStrips();
 }
 
@@ -6043,18 +6211,24 @@ function renderWorkflow() {
   const customMode = Boolean(workflow.is_custom);
   const profileReadonly = isProfileReadonlyMode();
   const viewLocked = customViewModeLocked();
+  const sequentialEdit = Boolean(customMode && editModeActive && !profileReadonly);
+  const progress = normalizedDesignerProgress();
+  const activeStep = sequentialEdit ? progress.edit_step : (workflow.current_step || "run");
+  const activeIndex = WORKFLOW_STEPS.indexOf(activeStep);
+  const confirmedSteps = new Set(progress.confirmed_steps);
+  const needsReviewSteps = new Set(progress.needs_review_steps);
   document.body.classList.toggle("custom-mode", customMode);
   document.body.classList.toggle("profile-readonly-mode", profileReadonly);
+  document.body.classList.toggle("sequential-edit-mode", sequentialEdit);
   const pill = $("workflow-pill");
-  const activeStep = workflow.current_step || "run";
-  const activeIndex = WORKFLOW_STEPS.indexOf(activeStep);
-  const unlockedIndex = customMode && activeIndex >= 0 ? activeIndex : WORKFLOW_STEPS.length - 1;
 
   if (pill) {
-    pill.textContent = customMode
-      ? workflow.ready_to_prepare ? "custom ready" : `${stepLabel(activeStep)} required`
+    pill.textContent = sequentialEdit
+      ? `${stepLabel(activeStep)} editing`
+      : customMode
+        ? workflow.ready_to_prepare ? "custom ready" : `${stepLabel(workflow.current_step || "run")} required`
       : "profile loaded";
-    pill.className = `status-label ${customMode && !workflow.ready_to_prepare ? "required" : "ready"}`;
+    pill.className = `status-label ${sequentialEdit || (customMode && !workflow.ready_to_prepare) ? "required" : "ready"}`;
   }
 
   const stepMap = new Map((workflow.steps || []).map((step) => [step.id, step]));
@@ -6063,19 +6237,59 @@ function renderWorkflow() {
     const step = customMode
       ? (stepMap.get(stepId) || { id: stepId, complete: false, missing: [] })
       : profileStepStatus(stepId);
-    const locked = Boolean(customMode && index > unlockedIndex);
-    const current = Boolean(customMode && stepId === activeStep);
+    const current = Boolean(sequentialEdit && stepId === activeStep);
+    const confirmed = Boolean(sequentialEdit && confirmedSteps.has(stepId));
+    const needsReview = Boolean(sequentialEdit && needsReviewSteps.has(stepId));
+    const downstream = Boolean(sequentialEdit && index > activeIndex);
+    const locked = Boolean(sequentialEdit && !current);
     const complete = Boolean(step.complete);
     const link = document.querySelector(`[data-step-link="${stepId}"]`);
     const stateLabel = document.querySelector(`[data-step-state="${stepId}"]`);
     const badges = document.querySelectorAll(`[data-step-badge="${stepId}"]`);
+    const segment = $(STEP_TARGETS[stepId]);
+    const reopenButton = document.querySelector(`[data-reopen-step="${stepId}"]`);
+    const continueButton = document.querySelector(`[data-continue-step="${stepId}"]`);
 
     if (link) {
       link.classList.toggle("locked", locked);
+      link.classList.toggle("downstream", downstream);
       link.classList.toggle("current", current);
       link.classList.toggle("complete", complete);
       link.classList.toggle("not-ready", !complete);
-      link.setAttribute("aria-disabled", String(locked));
+      if (current) link.setAttribute("aria-current", "step");
+      else link.removeAttribute("aria-current");
+      link.removeAttribute("aria-disabled");
+      link.title = downstream
+        ? `Read-only until ${stepLabel(activeStep)} is saved.`
+        : confirmed
+          ? "Saved and read-only. Use Reopen segment to change it."
+          : "";
+    }
+    if (segment) {
+      segment.classList.toggle("workflow-current", current);
+      segment.classList.toggle("workflow-confirmed", confirmed);
+      segment.classList.toggle("workflow-downstream", downstream);
+      segment.classList.toggle("workflow-needs-review", needsReview);
+      segment.dataset.workflowState = current
+        ? "editing"
+        : confirmed
+          ? "confirmed"
+          : needsReview
+            ? "needs-review"
+            : sequentialEdit
+              ? "locked"
+              : "overview";
+    }
+    if (reopenButton) {
+      reopenButton.hidden = !(confirmed && index > 0 && index < activeIndex);
+      reopenButton.disabled = !sequentialEdit || workflowSaveInFlight;
+    }
+    if (continueButton) continueButton.hidden = !(sequentialEdit && current);
+    if (stepId === "schedule" && $("accept-block-csvs")) {
+      $("accept-block-csvs").hidden = !(sequentialEdit && current);
+    }
+    if (stepId === "run" && $("save-study-profile")) {
+      $("save-study-profile").hidden = isProfileFinalized() || !(sequentialEdit && current);
     }
     if (stateLabel) {
       const label = step.label || humanize(stepId);
@@ -6099,39 +6313,62 @@ function renderWorkflow() {
         badge.className = "step-badge";
         continue;
       }
-      const baseText = locked ? "review later" : complete ? "reviewed" : "review required";
-      badge.textContent = baseText === "review required" && missingSummary
-        ? `review required · ${missingSummary}`
+      const baseText = sequentialEdit
+        ? current
+          ? "editing"
+          : confirmed
+            ? "saved"
+            : needsReview
+              ? "needs review"
+              : "locked"
+        : complete
+          ? "validated"
+          : "review required";
+      badge.textContent = (baseText === "editing" || baseText === "review required") && missingSummary
+        ? `${baseText} · ${missingSummary}`
         : baseText;
       badge.title = missingSummary ? `Needs: ${missingSummary}` : "";
-      badge.className = `step-badge ${locked ? "locked" : complete ? "complete" : current ? "current" : ""}`;
+      badge.className = `step-badge ${current ? "current" : confirmed ? "complete" : needsReview ? "needs-review" : locked ? "locked" : complete ? "complete" : ""}`;
     }
   }
 
   for (const panel of document.querySelectorAll("[data-step-panel]")) {
     const stepId = panel.dataset.stepPanel;
-    const locked = Boolean(customMode && WORKFLOW_STEPS.indexOf(stepId) > unlockedIndex);
+    const stepIndex = WORKFLOW_STEPS.indexOf(stepId);
+    const editLocked = Boolean(sequentialEdit && stepId !== activeStep);
+    const downstream = Boolean(editLocked && stepIndex > activeIndex);
+    const confirmed = Boolean(editLocked && confirmedSteps.has(stepId));
     const readonly = Boolean(profileReadonly && stepId !== "study");
     const viewReadonly = Boolean(viewLocked && stepId !== "study");
-    panel.classList.toggle("locked", locked);
+    panel.classList.toggle("locked", downstream);
+    panel.classList.toggle("workflow-confirmed", confirmed);
     panel.classList.toggle("profile-readonly", readonly);
     panel.classList.toggle("view-readonly", viewReadonly);
-    if (readonly || viewReadonly) {
+    if (editLocked) {
+      panel.title = downstream
+        ? `Read-only until ${stepLabel(activeStep)} is saved.`
+        : "This segment is saved. Use Reopen segment before changing it.";
+    } else if (readonly || viewReadonly) {
       panel.title = readonly
         ? "Create a custom study before editing this loaded profile."
         : "Switch to Edit mode before changing this custom study.";
     } else if (
       panel.title === "Create a custom study before editing this loaded profile."
       || panel.title === "Switch to Edit mode before changing this custom study."
+      || panel.title === "This segment is saved. Use Reopen segment before changing it."
+      || panel.title.startsWith("Read-only until ")
     ) {
       panel.title = "";
     }
-    for (const control of panel.querySelectorAll("input, select, button")) {
+    for (const control of panel.querySelectorAll("input, select, textarea, button")) {
       // Preview view-controls (2D/3D, zoom, Fit Radius, Reset Camera) only change
       // the camera/view, never the trajectory data, so they stay usable even when
       // the step is read-only or locked. People can always look at the preview;
       // editing the trajectory itself remains gated to edit mode.
       const previewViewControl = Boolean(control.matches?.("[data-preview-view-control]"));
+      // One hidden picker is shared by Segment 1 source import and Segment 6
+      // instruction import even though its DOM home is inside Segment 2.
+      const sharedFilePicker = control.id === "audio-file-input";
       const readonlyLocked = readonly && !previewViewControl && !profileReadonlyControlAllowed(control);
       const viewModeLocked = viewReadonly && !previewViewControl && !viewModeControlAllowed(control);
       if (readonlyLocked) {
@@ -6152,13 +6389,23 @@ function renderWorkflow() {
         control.title = "";
         delete control.dataset.viewReadonlyTitle;
       }
-      setWorkflowDisabled(control, previewViewControl ? false : (locked || readonlyLocked || viewModeLocked));
+      setWorkflowDisabled(
+        control,
+        previewViewControl ? false : ((editLocked && !sharedFilePicker) || readonlyLocked || viewModeLocked)
+      );
     }
   }
 
-  setWorkflowDisabled($("design-name"), profileReadonly || viewLocked);
-  setWorkflowDisabled($("apply-profile-project"), profileReadonly || viewLocked);
-  setWorkflowDisabled($("apply-design"), profileReadonly || viewLocked);
+  for (const footer of document.querySelectorAll(".step-footer")) {
+    footer.hidden = ![...footer.children].some((child) => (
+      !child.hidden
+      && (!sequentialEdit || child.matches("[data-continue-step]"))
+    ));
+  }
+
+  setWorkflowDisabled($("design-name"), profileReadonly || viewLocked || sequentialEdit);
+  setWorkflowDisabled($("apply-profile-project"), profileReadonly || viewLocked || sequentialEdit);
+  setWorkflowDisabled($("apply-design"), profileReadonly || viewLocked || sequentialEdit);
   updateActiveNav();
 }
 
@@ -6416,63 +6663,147 @@ async function applyDesign() {
       body: JSON.stringify(collectPayload())
     });
   }
+  markDesignerSaved();
   renderAll();
   updateViewer();
   const staleSegments = Object.values(state.project_segments || {}).filter((segment) => segment.status === "stale");
   showToast(staticModeActive ? "Browser draft saved locally" : staleSegments.length ? "Design saved; downstream segments need rebake" : "Design saved");
 }
 
-function scheduleCustomAutosave() {
-  if (!state || !isCustomMode() || isProfileReadonlyMode() || !editModeActive) return;
-  window.clearTimeout(autosaveTimer);
-  const revision = ++autosaveRevision;
-  autosaveTimer = window.setTimeout(() => autosaveCustomDraft(revision).catch(reportError), 700);
-}
-
-async function autosaveCustomDraft(revision) {
-  if (revision !== autosaveRevision || !state || !isCustomMode() || isProfileReadonlyMode() || !editModeActive) return;
-  const payload = collectPayload();
-  if (staticModeActive) {
-    state.design = payload.design;
-    await window.PPSDesigner?.drafts?.save(state);
-  } else {
-    const updated = await api("/api/design", { method: "POST", body: JSON.stringify(payload) });
-    if (revision !== autosaveRevision) return;
-    state = updated;
-    renderWorkflow();
-    document.dispatchEvent(new CustomEvent("pps-designer-saved"));
+function revealWorkflowStep(stepId) {
+  const segment = $(STEP_TARGETS[stepId] || stepId);
+  if (segment?.classList.contains("collapsed")) {
+    segment.querySelector(":scope > .segment-heading .segment-collapse-button")?.click();
   }
+  scrollToStep(stepId);
 }
 
 async function continueWorkflowStep(stepId) {
   if (!ensureEditableProject()) return;
-  if (staticModeActive) {
-    state.design = collectPayload().design;
-    await window.PPSDesigner?.drafts?.save(state);
-  } else {
-    state = await api("/api/design", {
-      method: "POST",
-      body: JSON.stringify(collectPayload())
-    });
-  }
-  renderAll();
-  updateViewer();
-  const step = getWorkflowStep(stepId);
-  if (!step || step.complete) {
-    const next = NEXT_STEP[stepId];
-    if (next) {
-      scrollToStep(next);
-    }
-    showToast("Step saved");
+  if (workflowSaveInFlight) return;
+  const progress = normalizedDesignerProgress();
+  if (stepId !== progress.edit_step) {
+    showToast(`Save ${stepLabel(progress.edit_step)} first.`);
+    revealWorkflowStep(progress.edit_step);
     return;
   }
-  showToast(step.missing.join(" "));
-  scrollToStep(stepId);
+  if (designerDirty && !confirmDownstreamInvalidation(`Saving ${stepLabel(stepId)}`, stepId)) return;
+  workflowSaveInFlight = true;
+  const button = document.querySelector(`[data-continue-step="${stepId}"]`);
+  if (button) button.disabled = true;
+  let actionResult = null;
+  const payload = collectPayload();
+  payload.workflow_action = {
+    type: "save_and_continue",
+    step_id: stepId,
+    expected_revision: progress.revision,
+  };
+  try {
+    if (staticModeActive) {
+      state.design = payload.design;
+      refreshHostedWorkflowSteps();
+      const step = getWorkflowStep(stepId) || profileStepStatus(stepId);
+      if (step?.complete) {
+        const next = NEXT_STEP[stepId] || "run";
+        setHostedDesignerProgress({
+          ...progress,
+          edit_step: next,
+          confirmed_steps: WORKFLOW_STEPS.filter((id) => new Set([...progress.confirmed_steps, stepId]).has(id)),
+          needs_review_steps: progress.needs_review_steps.filter((id) => id !== stepId),
+          revision: progress.revision + 1,
+        });
+        actionResult = { advanced: true, unlocked_step: next, missing: [] };
+      } else {
+        actionResult = { advanced: false, missing: [...(step?.missing || ["Complete this segment before continuing."])] };
+      }
+      await window.PPSDesigner?.drafts?.save(state);
+    } else {
+      state = await api("/api/design", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+      actionResult = state.workflow_action_result || null;
+    }
+    markDesignerSaved();
+    renderAll();
+    updateViewer();
+    if (actionResult?.advanced) {
+      const next = actionResult.unlocked_step || NEXT_STEP[stepId];
+      showToast(`${stepLabel(stepId)} saved. ${stepLabel(next)} is ready to edit.`);
+      if (next) revealWorkflowStep(next);
+      return;
+    }
+    const missing = actionResult?.missing || getWorkflowStep(stepId)?.missing || [];
+    showToast(missing.join(" ") || `${stepLabel(stepId)} saved; complete its required output to continue.`);
+    revealWorkflowStep(stepId);
+  } finally {
+    workflowSaveInFlight = false;
+    if (button) button.disabled = false;
+    renderWorkflow();
+  }
+}
+
+async function reopenWorkflowStep(stepId) {
+  if (!ensureEditableProject() || workflowSaveInFlight) return;
+  const progress = normalizedDesignerProgress();
+  if (!progress.confirmed_steps.includes(stepId)) return;
+  if (!confirmDiscardUnsaved(`reopen ${stepLabel(stepId)}`)) return;
+  const later = progress.confirmed_steps.filter(
+    (id) => WORKFLOW_STEPS.indexOf(id) > WORKFLOW_STEPS.indexOf(stepId)
+  );
+  const consequence = later.length
+    ? ` Later saved segments (${later.map(stepLabel).join(", ")}) will need review.`
+    : "";
+  if (!window.confirm(`Reopen ${stepLabel(stepId)} for editing?${consequence}`)) return;
+  workflowSaveInFlight = true;
+  try {
+    if (staticModeActive) {
+      const stored = await window.PPSDesigner?.drafts?.load?.().catch(() => null);
+      if (stored?.design && stored?.project?.project_id === state?.project?.project_id) state = clone(stored);
+      const refreshed = normalizedDesignerProgress();
+      const targetIndex = WORKFLOW_STEPS.indexOf(stepId);
+      setHostedDesignerProgress({
+        ...refreshed,
+        edit_step: stepId,
+        confirmed_steps: refreshed.confirmed_steps.filter((id) => WORKFLOW_STEPS.indexOf(id) < targetIndex),
+        needs_review_steps: WORKFLOW_STEPS.filter((id) => (
+          refreshed.needs_review_steps.includes(id)
+          || (refreshed.confirmed_steps.includes(id) && WORKFLOW_STEPS.indexOf(id) > targetIndex)
+        )),
+        revision: refreshed.revision + 1,
+      });
+      await window.PPSDesigner?.drafts?.save(state);
+    } else {
+      state = await api("/api/design", {
+        method: "POST",
+        body: JSON.stringify({
+          workflow_action: {
+            type: "reopen",
+            step_id: stepId,
+            expected_revision: progress.revision,
+          },
+        }),
+      });
+    }
+    markDesignerSaved();
+    renderAll();
+    updateViewer();
+    revealWorkflowStep(stepId);
+    showToast(`${stepLabel(stepId)} reopened. Later segments are read-only until reviewed again.`);
+  } finally {
+    workflowSaveInFlight = false;
+    renderWorkflow();
+  }
 }
 
 async function loadTemplate() {
   if (templateLoadInFlight) return;
   const select = $("template-select");
+  if (!confirmDiscardUnsaved("load another profile")) {
+    renderStudy();
+    return;
+  }
+  if (designerDirty) markDesignerSaved();
   const choice = selectedProfileChoice(select.value);
   const id = choice.id;
   if (!id) return;
@@ -6857,6 +7188,7 @@ async function createBlankCustomProject(name) {
         missing: id === "study" ? [] : [id === "stimulus" ? "Define and bake at least one stimulus ingredient." : "Complete the preceding segment."],
       })),
     };
+    initializeHostedDesignerProgress("stimulus");
     state.trajectory_controls = {
       start_distance_cm: 110,
       end_distance_cm: 10,
@@ -6888,6 +7220,7 @@ async function createBlankCustomProject(name) {
     });
   }
   editModeActive = true;
+  markDesignerSaved();
   renderAll();
   updateViewer();
   showToast(staticModeActive ? "Clean browser draft created; nothing was uploaded" : "Clean custom design created");
@@ -6925,6 +7258,7 @@ async function customizeAsNewProject(name) {
         };
     state.selected_template = CUSTOM_TEMPLATE_ID;
     state.custom_workflow = { ...(state.custom_workflow || {}), is_custom: true, is_finalized: false };
+    initializeHostedDesignerProgress("stimulus");
     state.project = {
       ...(state.project || {}),
       project_id: profileId,
@@ -6944,10 +7278,11 @@ async function customizeAsNewProject(name) {
     });
   }
   editModeActive = true;
+  markDesignerSaved();
   renderAll();
   updateViewer();
   showToast(staticModeActive ? "Browser draft created; nothing was uploaded" : "Custom project created");
-  scrollToStep(state.custom_workflow?.current_step || "study");
+  scrollToStep(state.custom_workflow?.edit_step || "stimulus");
 }
 
 async function startBakeStimulus() {
@@ -6964,6 +7299,7 @@ async function startBakeStimulus() {
     method: "POST",
     body: JSON.stringify(payload)
   });
+  markDesignerSaved();
   showToast("Ingredient bake started");
   pollJob(job.job_id);
   await loadState();
@@ -6988,6 +7324,7 @@ async function startBakeTrialSequences() {
     method: "POST",
     body: JSON.stringify(payload)
   });
+  markDesignerSaved();
   showToast("Trial sequence bake started");
   pollJob(job.job_id);
   await loadState();
@@ -7006,6 +7343,7 @@ async function startBakeTrialFiles() {
     method: "POST",
     body: JSON.stringify(payload)
   });
+  markDesignerSaved();
   showToast("Baseline/tactile trial bake started");
   pollJob(job.job_id);
   await loadState();
@@ -7043,6 +7381,7 @@ async function startBakeTrialPool() {
     method: "POST",
     body: JSON.stringify(payload)
   });
+  markDesignerSaved();
   showToast("Trial pool CSV bake started");
   pollJob(job.job_id);
   await loadState();
@@ -7056,8 +7395,12 @@ async function startBakeBlockCsvs() {
     return;
   }
   if (projectSegment("5_block_csv_preview").accepted || state.block_csv_preview?.accepted) {
-    showToast("Click Edit Blocks before regenerating accepted block CSVs");
-    return;
+    if (!window.confirm("Reopen the accepted Segment 5 blocks and generate a new set?")) return;
+    if (staticModeActive) {
+      showToast("Block generation needs the installed PPS Designer. Export this browser draft to continue locally.");
+      return;
+    }
+    state = await api("/api/block-csv/edit", { method: "POST" });
   }
   const blockCount = Math.max(1, Math.round(numberValue("block-count", numberValue("blocks", 1))));
   if ($("blocks")) $("blocks").value = blockCount;
@@ -7076,6 +7419,7 @@ async function startBakeBlockCsvs() {
       method: "POST",
       body: JSON.stringify(payload)
     });
+    markDesignerSaved();
     setBlockProgress(job.progress_current || 0, job.progress_total || blockCount, job.progress_label || "queued");
     showToast("Block regeneration started");
     pollJob(job.job_id);
@@ -7097,20 +7441,53 @@ async function acceptBlockCsvs() {
   }
   const acceptButton = $("accept-block-csvs");
   if (acceptButton) acceptButton.disabled = true;
-  const accepted = Boolean(segment5.accepted || state.block_csv_preview?.accepted);
-  if (accepted && !confirmDownstreamInvalidation("Editing accepted Segment 5 blocks", "schedule")) {
+  const progress = normalizedDesignerProgress();
+  if (progress.edit_step !== "schedule") {
+    showToast(`Save ${stepLabel(progress.edit_step)} first.`);
     if (acceptButton) acceptButton.disabled = false;
     return;
   }
-  state = await api(accepted ? "/api/block-csv/edit" : "/api/block-csv/accept", { method: "POST" });
-  renderAll();
-  if (accepted) {
-    showToast("Blocks reopened for editing");
-    scrollToStep("schedule");
+  if (staticModeActive) {
+    state.design = collectPayload().design;
+    state.block_csv_preview = { ...(state.block_csv_preview || {}), accepted: true };
+    const segment = state.project_segments?.[STEP_SEGMENT_FOLDERS.schedule];
+    if (segment) segment.accepted = true;
+    refreshHostedWorkflowSteps();
+    const schedule = getWorkflowStep("schedule");
+    if (!schedule?.complete) {
+      showToast((schedule?.missing || ["Complete Segment 5 before continuing."]).join(" "));
+      if (acceptButton) acceptButton.disabled = false;
+      renderAll();
+      return;
+    }
+    setHostedDesignerProgress({
+      ...progress,
+      edit_step: "run",
+      confirmed_steps: WORKFLOW_STEPS.filter((id) => new Set([...progress.confirmed_steps, "schedule"]).has(id)),
+      needs_review_steps: progress.needs_review_steps.filter((id) => id !== "schedule"),
+      revision: progress.revision + 1,
+    });
+    await window.PPSDesigner?.drafts?.save(state);
+    state.workflow_action_result = { type: "accept_and_continue", advanced: true, unlocked_step: "run" };
   } else {
-    showToast("Blocks accepted; CSVs marked final");
-    scrollToStep("run");
+    const payload = collectPayload();
+    payload.workflow_action = {
+      type: "accept_and_continue",
+      step_id: "schedule",
+      expected_revision: progress.revision,
+    };
+    state = await api("/api/block-csv/accept", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
   }
+  markDesignerSaved();
+  renderAll();
+  const advanced = state.workflow_action_result?.advanced === true;
+  showToast(advanced
+    ? "Blocks accepted and saved. Profile validation is ready."
+    : (state.workflow_action_result?.missing || ["Blocks were accepted, but Segment 5 still needs review."]).join(" "));
+  revealWorkflowStep(advanced ? "run" : "schedule");
 }
 
 function csvEscape(value) {
@@ -7227,6 +7604,16 @@ function scheduleRunSequencePreview() {
 
 async function previewRunSequence() {
   if (!ensureEditableProject()) return;
+  if (staticModeActive) {
+    state.design = collectPayload().design;
+    refreshHostedWorkflowSteps();
+    state.run_sequence_setup = staticRunSetupPreview(state.design, {
+      finished_profile: Boolean(getWorkflowStep("run")?.complete),
+      message: "Browser-local order preview",
+    });
+    renderAll();
+    return;
+  }
   state = await api("/api/run-sequence/preview", {
     method: "POST",
     body: JSON.stringify(collectPayload())
@@ -7236,12 +7623,8 @@ async function previewRunSequence() {
 
 async function regenerateRunSequence() {
   if (!ensureEditableProject()) return;
-  state = await api("/api/run-sequence/regenerate", {
-    method: "POST",
-    body: JSON.stringify(collectPayload())
-  });
-  renderAll();
-  showToast("Block sequence regenerated");
+  await previewRunSequence();
+  showToast("Order preview refreshed. Save by locking the profile when review is complete.");
 }
 
 async function ensureLocalBackendState() {
@@ -7257,16 +7640,28 @@ async function ensureLocalBackendState() {
 
 async function savePreparedStudyProfile() {
   if (staticModeActive) {
+    state.design = collectPayload().design;
+    refreshHostedWorkflowSteps();
+    const progress = normalizedDesignerProgress();
+    const required = WORKFLOW_STEPS.slice(0, -1);
+    if (
+      progress.edit_step !== "run"
+      || required.some((stepId) => !progress.confirmed_steps.includes(stepId))
+      || progress.needs_review_steps.length
+    ) {
+      showToast("Save each segment in order and resolve reopened reviews before locking this profile.");
+      return;
+    }
     if (!getWorkflowStep("run")?.complete) {
       showToast("Complete every required segment before finalizing this profile.");
       return;
     }
-    state.design = collectPayload().design;
     state.design.study_profile_reference_parameters.profile_status = "finalized";
     state.design.study_profile_reference_parameters.finalized_at = new Date().toISOString();
     state.custom_workflow.is_finalized = true;
     editModeActive = false;
     await window.PPSDesigner?.drafts?.save(state);
+    markDesignerSaved();
     renderAll();
     showToast("Profile finalized and locked. Use Edit to create another named custom copy.");
     return;
@@ -7320,11 +7715,19 @@ async function submitSaveProfileModal() {
   }
   $("save-profile-submit").disabled = true;
   try {
+    state = await api("/api/design", {
+      method: "POST",
+      body: JSON.stringify(collectPayload()),
+    });
     state = await api("/api/profiles/save-prepared", {
       method: "POST",
-      body: JSON.stringify({ name: cleanName })
+      body: JSON.stringify({
+        name: cleanName,
+        expected_revision: normalizedDesignerProgress().revision,
+      })
     });
     editModeActive = false;
+    markDesignerSaved();
     closeSaveProfileModal();
     renderAll();
     updateViewer();
@@ -7591,6 +7994,7 @@ function applyTrajectoryControlUpdate(controls) {
     $(id).value = formatTrajectoryValue(key, controls[key]);
   }
   state.trajectory_controls = { ...(state.trajectory_controls || {}), ...currentTrajectoryControls() };
+  markDesignerDirty();
   updateViewer();
 }
 
@@ -8000,6 +8404,7 @@ async function importAudioFromPicker() {
       state.design.custom_looming_files.push(audio);
     }
     await window.PPSDesigner?.drafts?.save(state);
+    markDesignerSaved();
     renderAll();
     showToast("Local audio added to this browser only; it was not uploaded");
     return;
@@ -8018,6 +8423,7 @@ async function importAudioFromPicker() {
     });
     state = importedState;
     pendingInstructionSlot = "";
+    markDesignerSaved();
     renderAll();
     showToast("Instruction audio clip imported locally");
     return;
@@ -8195,12 +8601,8 @@ function wireEvents() {
     event.preventDefault();
     openCustomizeModal();
   }, true);
-  $("edit-mode-button")?.addEventListener("click", () => setEditMode(!editModeActive));
-  $("connect-backend").addEventListener("click", () => {
-    saveApiBase($("backend-url").value);
-    saveCompanionToken($("companion-token")?.value || "");
-    loadState({ resetEditMode: true }).catch(reportError);
-  });
+  $("edit-mode-button")?.addEventListener("click", () => setEditMode(!editModeActive).catch(reportError));
+  $("connect-backend").addEventListener("click", () => reconnectBackendFromControls().catch(reportError));
   $("companion-token")?.addEventListener("change", () => saveCompanionToken($("companion-token").value));
   const pageTabs = [...document.querySelectorAll("[data-page-tab]")];
   for (const button of pageTabs) {
@@ -8294,8 +8696,7 @@ function wireEvents() {
   });
   $("backend-url").addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
-      saveApiBase($("backend-url").value);
-      loadState({ resetEditMode: true }).catch(reportError);
+      reconnectBackendFromControls({ includeToken: false }).catch(reportError);
     }
   });
   $("template-select").addEventListener("change", () => {
@@ -8307,7 +8708,11 @@ function wireEvents() {
   $("bake-trial-files")?.addEventListener("click", () => startBakeTrialFiles().catch(reportError));
   $("bake-trial-pool")?.addEventListener("click", () => startBakeTrialPool().catch(reportError));
   $("regenerate-block-csvs")?.addEventListener("click", () => startBakeBlockCsvs().catch(reportError));
-  $("accept-block-csvs")?.addEventListener("click", () => acceptBlockCsvs().catch(reportError));
+  $("accept-block-csvs")?.addEventListener("click", () => acceptBlockCsvs().catch((error) => {
+    const button = $("accept-block-csvs");
+    if (button) button.disabled = false;
+    reportError(error);
+  }));
   $("download-block-randomization")?.addEventListener("click", () => downloadBlockRandomization().catch(reportError));
   $("open-ingredient-folder")?.addEventListener("click", () => {
     const path = $("open-ingredient-folder")?.dataset.folderPath || projectSegment("1_core_audio_ingredients").folder_path || "";
@@ -8387,6 +8792,7 @@ function wireEvents() {
     for (const group of trialPoolFolderGroups()) {
       trialPoolRepetitionDraft.folderRepetitions[group.folderKey] = next;
     }
+    markDesignerDirty();
     updateFilmstripCounts();
   });
   $("blocks").addEventListener("input", updateFilmstripCounts);
@@ -8513,25 +8919,26 @@ function wireEvents() {
   for (const button of document.querySelectorAll("[data-continue-step]")) {
     button.addEventListener("click", () => continueWorkflowStep(button.dataset.continueStep).catch(reportError));
   }
+  for (const button of document.querySelectorAll("[data-reopen-step]")) {
+    button.addEventListener("click", () => reopenWorkflowStep(button.dataset.reopenStep).catch(reportError));
+  }
   for (const link of document.querySelectorAll("[data-step-link]")) {
     link.addEventListener("click", (event) => {
       const stepId = link.dataset.stepLink;
+      event.preventDefault();
+      const fromMobileSections = mobileSectionsDisclosureOpen();
+      const moveFocus = fromMobileSections && event.detail === 0;
+      setActivePage("toolkit", {
+        updateHash: true,
+        preserveMobileDisclosures: fromMobileSections
+      });
+      const target = $(STEP_TARGETS[stepId] || stepId);
+      if (moveFocus) focusSectionNavigationTarget(target);
+      closeMobileRailDisclosures();
+      scrollToStep(stepId);
       if (link.classList.contains("locked")) {
-        event.preventDefault();
-        showToast("Complete the current custom step first.");
-        scrollToStep(state.custom_workflow?.current_step || "study");
-      } else {
-        event.preventDefault();
-        const fromMobileSections = mobileSectionsDisclosureOpen();
-        const moveFocus = fromMobileSections && event.detail === 0;
-        setActivePage("toolkit", {
-          updateHash: true,
-          preserveMobileDisclosures: fromMobileSections
-        });
-        const target = $(STEP_TARGETS[stepId] || stepId);
-        if (moveFocus) focusSectionNavigationTarget(target);
-        closeMobileRailDisclosures();
-        scrollToStep(stepId);
+        const active = normalizedDesignerProgress().edit_step;
+        showToast(`${stepLabel(stepId)} is read-only while ${stepLabel(active)} is being edited.`);
       }
     });
   }
@@ -8565,7 +8972,7 @@ function wireEvents() {
         : `Show all ${mobileTableToggle.dataset.rowCount || ""} rows`;
       return;
     }
-    const autosaveMutation = event.target.closest?.(
+    const structuralMutation = event.target.closest?.(
       "[data-remove-noise], [data-remove-audio], [data-remove-strip], [data-remove-strip-element], [data-add-strip-element], [data-add-strip-row], [data-add-box-label], [data-remove-box-label], [data-strip-move]"
     );
     const previewButton = event.target.closest?.("[data-preview-strip]");
@@ -8606,7 +9013,7 @@ function wireEvents() {
     if (event.target.matches("[data-strip-move]")) {
       moveFilmstripRow(event.target, event.target.dataset.stripMove);
     }
-    if (autosaveMutation) window.setTimeout(scheduleCustomAutosave, 0);
+    if (structuralMutation) markDesignerDirty();
   });
   document.addEventListener("input", (event) => {
     const card = event.target.closest?.(".source-card");
@@ -8619,7 +9026,7 @@ function wireEvents() {
       state.design.protocol.trial_strips = collectTrialStrips();
       updateFilmstripCounts();
     }
-    if (event.target.closest?.("#toolkit-page")) scheduleCustomAutosave();
+    if (event.target.closest?.("#toolkit-page") && !event.target.matches?.("[data-preview-view-control]")) markDesignerDirty();
   });
   document.addEventListener("change", (event) => {
     const sourceLabelCard = event.target.closest?.(".source-card");
@@ -8660,14 +9067,19 @@ function wireEvents() {
     }
     if (event.target.matches('[data-element-field="is_jitter"]')) {
       setFilmstripElementMode(event.target);
-      scheduleCustomAutosave();
+      markDesignerDirty();
       return;
     }
     if (event.target.closest?.(".filmstrip-row")) {
       state.design.protocol.trial_strips = collectTrialStrips();
       updateFilmstripCounts();
     }
-    if (event.target.closest?.("#toolkit-page")) scheduleCustomAutosave();
+    if (event.target.closest?.("#toolkit-page") && !event.target.matches?.("[data-preview-view-control]")) markDesignerDirty();
+  });
+  window.addEventListener("beforeunload", (event) => {
+    if (!designerDirty) return;
+    event.preventDefault();
+    event.returnValue = "";
   });
 }
 
@@ -8693,12 +9105,14 @@ window.PPSDesignerApp = Object.freeze({
     if (!snapshot?.design) return false;
     state = clone(snapshot);
     staticModeActive = true;
-    editModeActive = !state.custom_workflow?.is_finalized;
+    editModeActive = false;
+    markDesignerSaved();
     renderAll();
     updateViewer();
     return true;
   },
-  markSaved: () => document.dispatchEvent(new CustomEvent("pps-designer-saved")),
+  isDirty: () => designerDirty,
+  markSaved: markDesignerSaved,
 });
 
 loadState({ resetEditMode: true }).catch(reportError);
