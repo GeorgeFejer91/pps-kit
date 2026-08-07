@@ -1058,6 +1058,18 @@ def run_audit(
                             )""",
                             arg=next_step,
                         )
+                    page.locator('[data-step-link="schedule"]').click()
+                    page.wait_for_function(
+                        """() => {
+                          const segment = document.querySelector('#schedule-segment');
+                          const accept = document.querySelector('#accept-block-csvs');
+                          return segment
+                            && !segment.classList.contains('collapsed')
+                            && accept
+                            && !accept.hidden
+                            && accept.getClientRects().length > 0;
+                        }"""
+                    )
                     page.locator("#accept-block-csvs").click()
                     page.wait_for_function(
                         """() => {

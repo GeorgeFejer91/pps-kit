@@ -9,7 +9,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
 - Versioned participant order and portable profile interchange: `participant_orders.py` owns `seeded_factoradic_cycle.v1`; `profile_bundle.py` owns `.pps-profile` verification and installation.
 - Designer frontend source/build: `dashboard/{index.html,styles.css,app.js,designer_main.js}` plus its Vite configuration; `dashboard/compiled/` is the shared native/GitHub-Pages artifact.
 - Documentation publication-network UI/data: `dashboard/publication_network.js`
-  renders `dashboard/publication_network.v1.json`; canonical public-safe inputs
+  renders the verified-audiotactile-first projection of
+  `dashboard/publication_network.v1.json`; canonical public-safe inputs
   live under `data/publication_network/` and
   `tools/build_publication_network_asset.mjs` owns deterministic generation and
   exact-DOI joins to tracked toolkit parameter audits.

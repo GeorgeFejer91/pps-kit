@@ -31,6 +31,10 @@ and outputs to temporary paths for deterministic validation.
 - Citation edges run from the citing publication to the cited publication.
 - The 101 audiotactile nodes marked verified come from the original manual
   audit. Other nodes are not silently inferred to be audiotactile.
+- Verified audiotactile nodes carry deterministic subset-specific citation-map
+  and publication-year coordinates. These fit the 101-node induced subgraph
+  (78 connected nodes plus 23 nodes with no within-subset link) without changing
+  the underlying papers, citation direction, or complete-corpus metrics.
 - The 164 visuotactile lexical matches are provisional candidates with
   `verified: false`; none is presented as verified without a dedicated manual
   audit.

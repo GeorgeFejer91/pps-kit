@@ -28,6 +28,34 @@ Phone dialogs are bounded by the viewport, scroll internally, trap keyboard focu
 
 Responsive verification covers at least 320 px and 390 px portrait widths, a short phone landscape viewport, both sides of the 760/761 px mobile-layout boundary, and 600/601 px continuity probes. It checks every Segment 0-6 surface in light and dark themes, page-tab and rail-disclosure interaction, 44 px targets including radio/checkbox labels, absence of overflow/overlap, labeled mobile table records and progressive row reveal, static phone footers/headings, hidden resize handles, modal focus containment, and post-interaction browser errors.
 
+## Audiotactile PPS Citation Map
+
+The Documentation citation explorer is audiotactile-first. Its primary surface
+contains exactly the 101 manually verified audiotactile papers and the 635
+citations between them; it must not initialize with the complete 1,712-paper
+discovery corpus or provisional modality candidates. The broader corpus remains
+available in the generated public data asset and in progressively disclosed
+paper-level metrics, not as a competing default graph.
+
+The ordinary control surface contains search, one `Citation map` / `By year`
+view switch, and `Reset view`. Circle size and default list order use citations
+received from other verified audiotactile papers. The citation-map and timeline
+positions are deterministic layouts fitted specifically to the audiotactile
+subset. On spacious maps, several high-connectivity landmark papers remain
+labelled; below 520 px only the selected or hovered paper is labelled. Search
+and the persistent ranked list provide the complete keyboard-accessible path.
+Selecting either a circle or list row centers the paper, replaces the list with
+a compact detail panel, and highlights incoming versus outgoing citations with
+distinct colors and arrowheads. Abstracts, parameter-audit fields, and
+full-corpus centralities stay collapsed until requested and must retain their
+evidence and non-quality-rating caveats.
+
+At 760 px and narrower the study list precedes the map. The three primary
+controls reflow without duplication, all controls keep 44 px targets, details
+replace the list without deleting the map, the section has enough scroll margin
+to clear the hosted sticky top bar, and neither theme may introduce horizontal
+overflow.
+
 ## Segment 0 Profile Chooser
 
 Segment 0 is a parsimonious profile catalogue, not an acquisition or folder-configuration surface. It exposes one grouped `Profile` selector containing immutable built-in study templates and researcher-owned custom designs, one `Start New Custom Design` button, and one compact contextual profile card. The card begins with the stable profile ID and then shows citation, DOI, and optional source provenance. It does not repeat the selected profile title, template/read-only status, asset count, or recreation caveat. Custom profiles must not be duplicated in a second selector. The direct `Refresh`, `Apply Design`, `Apply Profile / Create Project Folder`, `Open Folder`, and data-acquisition-folder controls are not part of Segment 0.

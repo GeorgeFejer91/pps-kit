@@ -2033,6 +2033,27 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   public asset. Centrality values describe this corpus and are not study-quality
   ratings.
 
+## 2026-08-07 — Audiotactile-first citation-map simplification
+
+- Supersede the complete-corpus default with a focused map of the 101 manually
+  verified audiotactile PPS papers and their 635 internal citations. The broader
+  1,712-paper discovery corpus remains in the public asset and paper-level
+  advanced metrics, but it is no longer mixed into ordinary map navigation.
+- Reduce the primary interaction surface to search, `Citation map` / `By year`,
+  and reset. Keep a ranked study list visible beside the map on wider screens
+  and before the map on phones. Selecting a list row or circle centers the node,
+  opens a compact detail panel, and distinguishes incoming from outgoing
+  citations; long abstracts, audit fields, and full-corpus centralities remain
+  progressively disclosed.
+- The generator now emits deterministic audiotactile-only structure and
+  timeline coordinates. The connected 78-paper subgraph is expanded around its
+  own centroid while the 23 papers without an internal audiotactile link remain
+  in an outer ring. Spacious maps retain persistent landmark labels; maps below
+  520 px label only the selected or hovered paper so central labels cannot
+  collide. True fit-to-visible behavior, 24 px canvas hit areas, 44 px phone
+  controls, and a mobile list-first layout are release behavior rather than
+  optional presentation polish.
+
 ## 2026-08-07 — Compact segment disclosure controls
 
 - Segment headings use circular double-chevron disclosure controls instead of
@@ -2063,6 +2084,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   mouse-clicks Segment 1 `Save & Continue`, verifies exactly one-step advance
   plus the upstream reopen affordance, and verifies that switching back to View
   restores seven visible overview segments with no workflow muting.
+- Sequential footer filtering treats Segment 5 `Accept Blocks & Continue` and
+  Segment 6 `Save Study Profile` as forward actions alongside ordinary
+  `data-continue-step` buttons. The visual audit explicitly reveals Schedule
+  from the workflow rail before accepting it, so a hidden action or hidden
+  parent footer fails the same mouse path researchers use.
 - Workflow hardening keeps profile status and finalization timestamps
   server-owned, requires the current revision plus complete Segment 0-5 review
   before profile lock, rejects generated-artifact mutation after finalization,

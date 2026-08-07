@@ -54,6 +54,16 @@ def _compact_css(css: str) -> str:
     return re.sub(r"\s*([:;,{}()])\s*", r"\1", css)
 
 
+def _select_values(html: str, element_id: str) -> list[str]:
+    select = re.search(
+        rf'<select\b[^>]*\bid="{re.escape(element_id)}"[^>]*>(.*?)</select>',
+        html,
+        re.DOTALL,
+    )
+    assert select, f"missing select #{element_id}"
+    return re.findall(r'<option\b[^>]*\bvalue="([^"]+)"', select.group(1))
+
+
 def _load_network() -> dict:
     return json.loads(NETWORK_ASSET.read_text(encoding="utf-8"))
 
@@ -71,18 +81,30 @@ def test_publication_network_section_is_semantic_in_source_and_compiled() -> Non
         assert rail_links[0][1]["href"] == "#docs-publication-network"
         assert rail_links[0][1]["data-page-section-page"] == "documentation"
 
-        for control_id in (
-            "publication-filter-audiotactile",
-            "publication-filter-visuotactile",
-            "publication-filter-other",
-            "publication-filter-context",
-            "publication-filter-provisional",
-        ):
-            tag, attrs = markup.by_id(control_id)
-            assert tag == "input"
-            assert attrs["type"] == "checkbox"
-        assert "checked" in markup.by_id("publication-filter-audiotactile")[1]
-        assert "checked" in markup.by_id("publication-filter-provisional")[1]
+        section_markup = re.search(
+            r'<section\b[^>]*\bid="docs-publication-network".*?</section>',
+            html,
+            re.DOTALL,
+        )
+        assert section_markup
+        title = re.search(
+            r'<h2\b[^>]*\bid="docs-publication-network-title"[^>]*>(.*?)</h2>',
+            section_markup.group(0),
+            re.DOTALL,
+        )
+        assert title
+        title_text = re.sub(r"<[^>]+>", " ", title.group(1)).lower()
+        assert "audiotactile" in title_text
+        assert "citation map" in title_text
+        intro = re.search(
+            r'<p\b[^>]*\bclass="[^"]*publication-network-intro[^"]*"[^>]*>(.*?)</p>',
+            section_markup.group(0),
+            re.DOTALL,
+        )
+        assert intro
+        intro_text = re.sub(r"<[^>]+>", " ", intro.group(1)).lower()
+        assert "audiotactile" in intro_text
+        assert "manually verified" in intro_text
 
         structure = markup.by_id("publication-layout-structure")[1]
         timeline = markup.by_id("publication-layout-year")[1]
@@ -93,12 +115,7 @@ def test_publication_network_section_is_semantic_in_source_and_compiled() -> Non
         assert "checked" in structure and "checked" not in timeline
 
         assert markup.by_id("publication-network-search")[0] == "input"
-        assert markup.by_id("publication-network-size-metric")[0] == "select"
-        assert markup.by_id("publication-network-edge-mode")[0] == "select"
-        assert {
-            attrs["data-network-preset"]
-            for _tag, attrs in markup.with_attr("data-network-preset")
-        } == {"all", "audiotactile", "visuotactile"}
+        assert markup.by_id("publication-network-reset")[0] == "button"
 
         canvas_tag, canvas = markup.by_id("publication-network-canvas")
         assert canvas_tag == "canvas"
@@ -116,7 +133,36 @@ def test_publication_network_section_is_semantic_in_source_and_compiled() -> Non
         assert detail["tabindex"] == "-1"
         assert "hidden" in detail
         assert markup.by_id("publication-network-detail-close")[0] == "button"
+
+        study_lists = markup.with_attr("aria-label", "Audiotactile study list")
+        assert len(study_lists) == 1
+        assert study_lists[0][0] == "aside"
+        assert re.search(
+            r'<aside\b[^>]*\baria-label="Audiotactile study list"[^>]*>'
+            r'.*?<h[2-4]\b[^>]*>[^<]*studies[^<]*</h[2-4]>',
+            html,
+            re.DOTALL | re.IGNORECASE,
+        )
+        assert _select_values(html, "publication-network-results-sort") == [
+            "audiotactileReceived",
+            "year-desc",
+            "year-asc",
+            "title",
+        ]
         assert markup.by_id("publication-network-results")[0] == "ol"
+        assert markup.by_id("publication-network-results-more")[0] == "button"
+
+        for removed_id in (
+            "publication-filter-audiotactile",
+            "publication-filter-visuotactile",
+            "publication-filter-other",
+            "publication-filter-context",
+            "publication-filter-provisional",
+            "publication-network-size-metric",
+            "publication-network-edge-mode",
+        ):
+            assert f'id="{removed_id}"' not in html
+        assert "data-network-preset" not in html
 
 
 def test_publication_network_source_and_compiled_contracts_stay_in_sync() -> None:
@@ -129,19 +175,22 @@ def test_publication_network_source_and_compiled_contracts_stay_in_sync() -> Non
 
     assert source_html.count('class="doc-segment-rule"') == 9
     assert compiled_html.count('class="doc-segment-rule"') == 9
-    for value in (
-        "withinCorpusReceived",
-        "pageRank",
-        "betweennessApprox",
-        "externalMax",
-        "uniform",
-        "neighborhood",
-        "context",
-        "all",
-        "none",
-    ):
+    for value in ("audiotactileReceived", "year-desc", "year-asc", "title"):
         assert f'value="{value}"' in source_html
         assert f'value="{value}"' in compiled_html
+
+    for removed_contract in (
+        "publication-filter-audiotactile",
+        "publication-filter-visuotactile",
+        "publication-filter-other",
+        "publication-filter-context",
+        "publication-filter-provisional",
+        "publication-network-size-metric",
+        "publication-network-edge-mode",
+        "data-network-preset",
+    ):
+        assert removed_contract not in source_html
+        assert removed_contract not in compiled_html
 
 
 def test_publication_network_module_is_lazy_interactive_and_keyboard_accessible() -> None:
@@ -165,8 +214,7 @@ def test_publication_network_module_is_lazy_interactive_and_keyboard_accessible(
     for contract in (
         "publication-network-search",
         "publication-network-layout",
-        "publication-network-size-metric",
-        "publication-network-edge-mode",
+        "publication-network-reset",
         "publication-network-results",
         "publication-network-detail",
         "publication-network-fullscreen",
@@ -181,6 +229,40 @@ def test_publication_network_module_is_lazy_interactive_and_keyboard_accessible(
     ):
         assert contract in network_js
         assert contract in compiled_js
+
+    for source_contract in (
+        "verifiedAudiotactile",
+        "audiotactileEdges",
+        "audiotactileReceived",
+    ):
+        assert source_contract in network_js
+    assert "modality?.audiotactile?.verified" in network_js
+    assert re.search(r"state\.visible\s*=\s*verifiedAudiotactile\.filter", network_js)
+    assert re.search(r"landmark", network_js, re.IGNORECASE)
+    assert "geometry.width < 520 ? 0" in network_js
+
+    fit_start = network_js.index("function fitView()")
+    fit_end = network_js.index("\n  function zoom(", fit_start)
+    fit_source = network_js[fit_start:fit_end]
+    assert "state.visible" in fit_source
+    assert "positionFor" in fit_source
+    assert "state.view.scale" in fit_source
+    assert "state.view.x" in fit_source
+    assert "state.view.y" in fit_source
+    assert "state.view = { scale: 1, x: 0, y: 0 };" not in fit_source
+
+    for removed_contract in (
+        "publication-filter-audiotactile",
+        "publication-filter-visuotactile",
+        "publication-filter-other",
+        "publication-filter-context",
+        "publication-filter-provisional",
+        "publication-network-size-metric",
+        "publication-network-edge-mode",
+        "data-network-preset",
+    ):
+        assert removed_contract not in network_js
+        assert removed_contract not in compiled_js
 
     assert "innerHTML = node." not in network_js
     assert "insertAdjacentHTML" not in network_js
@@ -206,8 +288,7 @@ def test_publication_network_styles_cover_mobile_theme_and_reduced_motion() -> N
             ".publication-network-tooltip",
         ):
             assert selector in css
-        for color_variable in ("--network-at", "--network-vt", "--network-provisional"):
-            assert color_variable in css
+        assert "--network-at" in css
         assert "@media(prefers-reduced-motion:reduce)" in compact
         mobile = compact[compact.index("@media(max-width:760px)") :]
         assert ".publication-network-toolbar" in mobile
@@ -299,7 +380,25 @@ def test_publication_network_evidence_metrics_coordinates_and_abstract_policy() 
     data = _load_network()
     nodes = data["nodes"]
 
-    assert sum(node["modality"]["audiotactile"]["verified"] for node in nodes) == 101
+    verified_audiotactile = {
+        index
+        for index, node in enumerate(nodes)
+        if node["modality"]["audiotactile"]["verified"]
+    }
+    assert len(verified_audiotactile) == data["counts"]["audiotactileConfirmed"] == 101
+    audiotactile_edges = [
+        edge
+        for edge in data["edges"]
+        if edge[0] in verified_audiotactile and edge[1] in verified_audiotactile
+    ]
+    assert len(audiotactile_edges) == 635
+    assert data["layoutBounds"]["audiotactileStructure"] == {
+        "connectedNodeCount": 78,
+        "isolatedNodeCount": 23,
+    }
+    assert data["layoutBounds"]["audiotactileTimeline"]["minYear"] == 2000
+    assert data["layoutBounds"]["audiotactileTimeline"]["maxYear"] == 2026
+    assert "verified audiotactile induced citation subgraph" in data["methodology"]["layouts"]["audiotactileStructure"]
     assert sum(node["modality"]["visuotactile"]["verified"] for node in nodes) == 0
     assert sum(
         node["modality"]["visuotactile"]["status"] == "provisional_keyword_candidate"
@@ -325,6 +424,17 @@ def test_publication_network_evidence_metrics_coordinates_and_abstract_policy() 
                 math.isfinite(coordinates[axis]) and 0.0 <= coordinates[axis] <= 1.0
                 for axis in ("x", "y")
             )
+        if node["modality"]["audiotactile"]["verified"]:
+            for layout_name in ("audiotactileStructure", "audiotactileTimeline"):
+                coordinates = node["layouts"][layout_name]
+                assert set(coordinates) == {"x", "y"}
+                assert all(
+                    math.isfinite(coordinates[axis]) and 0.0 <= coordinates[axis] <= 1.0
+                    for axis in ("x", "y")
+                )
+        else:
+            assert "audiotactileStructure" not in node["layouts"]
+            assert "audiotactileTimeline" not in node["layouts"]
         for metric in ("withinCorpusReceived", "withinCorpusReferences", "externalMax"):
             value = node["citations"][metric]
             assert isinstance(value, (int, float)) and math.isfinite(value) and value >= 0

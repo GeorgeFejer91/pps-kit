@@ -36,26 +36,33 @@ experiment software runs locally on the research PC.
   companion or moves literature metadata, PDFs, or participant data between the
   browser and the research PC.
 
-## Publication And Citation Network
+## Audiotactile PPS Citation Map
 
-The `Publication & Citation Network` documentation segment renders the tracked
-`pps-publication-citation-network.v1` snapshot. Its two layouts answer different
-questions: `Citation structure` uses precomputed network coordinates to expose
-connected clusters, while `Publication year` places papers on a chronological
-axis. The selected size metric controls node size, not the scientific
-meaning of the layout. Within-corpus citations are the default; PageRank,
-approximate betweenness, external citation count, and uniform sizing are
-available for comparison.
+The Documentation page projects the tracked
+`pps-publication-citation-network.v1` snapshot into an audiotactile-first study
+browser. Its default and only primary graph contains the 101 papers whose
+audiotactile modality was manually verified. `Citation map` uses deterministic
+coordinates fitted to the induced 101-paper network; `By year` fits the same
+papers to their 2000-2026 publication range. The broader 1,712-paper PPS corpus
+remains in the generated public asset but is not mixed into the default visual
+surface.
 
-The graph can be filtered to audiotactile, visuotactile, other PPS, or
-foundational/context records. Verified modality labels and provisional keyword
-candidates are separate states; provisional records are included in the complete
-corpus view with explicit dashed/candidate styling and can be excluded independently.
-They must never be presented as manually confirmed studies. Selecting a node opens a
-detail drawer with bibliographic metadata, citation neighbors, metric
-definitions, abstract availability/provenance, and any DOI-linked PPS Toolkit
-parameter audit. Missing or unaudited fields are displayed explicitly rather
-than inferred.
+The primary controls are search, the two-view switch, and reset. A persistent
+study list is sorted by citations received from other verified audiotactile
+papers. Circle size uses that same within-audiotactile count. On spacious maps,
+several landmark papers are labelled directly; below 520 px, persistent labels
+are removed until a paper is selected or hovered. Selecting a node or list row
+centers it, replaces the list with a compact detail panel, and highlights
+incoming and outgoing citations with separate line colors and arrowheads.
+Abstracts, evidence notes,
+toolkit parameter audits, and full-corpus PageRank/betweenness remain available
+through progressive disclosure. Missing or unaudited fields are displayed
+explicitly rather than inferred.
+
+Verified modality labels and provisional keyword candidates remain separate in
+the data. No non-verified paper may be presented as an audiotactile study, and
+the 164 visuotactile lexical candidates remain explicitly provisional rather
+than becoming part of this map.
 
 The public snapshot is a broad, dated PPS discovery corpus, not a systematic
 review, exhaustive bibliography, study-quality ranking, or effect-size

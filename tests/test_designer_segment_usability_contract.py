@@ -120,7 +120,7 @@ def test_edit_mode_uses_explicit_sequential_save_boundaries():
     assert 'panel.querySelectorAll("input, select, textarea, button")' in app_js
     assert 'const sharedFilePicker = control.id === "audio-file-input"' in app_js
     assert "button.disabled = select.disabled && !opensCustomize" in app_js
-    assert '!sequentialEdit || child.matches("[data-continue-step]")' in app_js
+    assert 'child.matches("[data-continue-step], #accept-block-csvs, #save-study-profile")' in app_js
     assert app_js.count("workflowSaveInFlight = false;\n    renderWorkflow();") == 1
     assert "workflowSaveInFlight = false;\n    if (button) button.disabled = false;\n    renderWorkflow();" in app_js
 
@@ -158,6 +158,8 @@ def test_compiled_dashboard_contains_the_sequential_edit_contract():
     assert ".workflow-downstream" in compiled_css
     assert ".segment-reopen-button" in compiled_css
     assert ".panel.locked textarea" in compiled_css
+    assert ":not(#accept-block-csvs):not(#save-study-profile)" in compiled_css
+    assert "[data-continue-step], #accept-block-csvs, #save-study-profile" in compiled_js
 
 
 def test_for_ai_contract_uses_profile_finalization_boundary():

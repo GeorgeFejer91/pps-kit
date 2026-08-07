@@ -6399,7 +6399,7 @@ function renderWorkflow() {
   for (const footer of document.querySelectorAll(".step-footer")) {
     footer.hidden = ![...footer.children].some((child) => (
       !child.hidden
-      && (!sequentialEdit || child.matches("[data-continue-step]"))
+      && (!sequentialEdit || child.matches("[data-continue-step], #accept-block-csvs, #save-study-profile"))
     ));
   }
 

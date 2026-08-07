@@ -37,7 +37,7 @@ const SOURCE_SCHEMA = "pps-publication-citation-source.v1";
 const ASSET_SCHEMA = "pps-publication-citation-network.v1";
 const SNAPSHOT_ID = "pps-citation-network-20260807";
 const SNAPSHOT_DATE = "2026-08-07";
-const GENERATOR_VERSION = "1.0.0";
+const GENERATOR_VERSION = "1.1.0";
 
 function usage() {
   return `Build the PPS publication/citation network asset.
@@ -353,7 +353,7 @@ function createTimelineLayout(nodes) {
   return { positions, themes, minYear, maxYear };
 }
 
-function createStructuralLayout(nodes, edges) {
+function createStructuralLayout(nodes, edges, { connectedTargetRadius = null } = {}) {
   const indexById = new Map(nodes.map((node, index) => [node.id, index]));
   const degrees = new Uint32Array(nodes.length);
   const indexedEdges = [];
@@ -487,6 +487,24 @@ function createStructuralLayout(nodes, edges) {
     });
   }
 
+  if (Number.isFinite(connectedTargetRadius) && connectedTargetRadius > 0 && active.length) {
+    const activePositions = active.map((index) => positions.get(nodes[index].id));
+    const centroidX = activePositions.reduce((total, position) => total + position.x, 0) / activePositions.length;
+    const centroidY = activePositions.reduce((total, position) => total + position.y, 0) / activePositions.length;
+    const maximumRadius = activePositions.reduce((maximum, position) => Math.max(
+      maximum,
+      Math.hypot(position.x - centroidX, position.y - centroidY),
+    ), 0);
+    const scale = maximumRadius > 0 ? connectedTargetRadius / maximumRadius : 1;
+    for (const index of active) {
+      const position = positions.get(nodes[index].id);
+      positions.set(nodes[index].id, {
+        x: roundCoordinate(0.5 + (position.x - centroidX) * scale),
+        y: roundCoordinate(0.5 + (position.y - centroidY) * scale),
+      });
+    }
+  }
+
   const sortedIsolated = [...isolated].sort((left, right) => {
     const leftNode = nodes[left];
     const rightNode = nodes[right];
@@ -607,6 +625,16 @@ function buildAsset(snapshot) {
     || left.provenance.localeCompare(right.provenance));
   const timeline = createTimelineLayout(nodes);
   const structure = createStructuralLayout(nodes, edges);
+  const audiotactileNodes = nodes.filter((node) => node.modality.audiotactile.verified);
+  const audiotactileNodeIds = new Set(audiotactileNodes.map((node) => node.id));
+  const audiotactileEdges = edges.filter((edge) =>
+    audiotactileNodeIds.has(edge.source) && audiotactileNodeIds.has(edge.target));
+  const audiotactileTimeline = createTimelineLayout(audiotactileNodes);
+  const audiotactileStructure = createStructuralLayout(
+    audiotactileNodes,
+    audiotactileEdges,
+    { connectedTargetRadius: 0.32 },
+  );
   const audits = loadToolkitAudits();
   const nodeIndex = new Map(nodes.map((node, index) => [node.id, index]));
 
@@ -615,6 +643,10 @@ function buildAsset(snapshot) {
     layouts: {
       timeline: timeline.positions.get(node.id),
       structure: structure.positions.get(node.id),
+      ...(node.modality.audiotactile.verified ? {
+        audiotactileStructure: audiotactileStructure.positions.get(node.id),
+        audiotactileTimeline: audiotactileTimeline.positions.get(node.id),
+      } : {}),
     },
     toolkit: toolkitForNode(node, audits),
   }));
@@ -661,6 +693,8 @@ function buildAsset(snapshot) {
       layouts: {
         timeline: "Publication year on x and corpus theme lane on y; unknown years occupy the far-left lane.",
         structure: `${structure.algorithm}; ${structure.iterations} fixed iterations. Positions aid navigation and are not Cartesian scientific measurements.`,
+        audiotactileTimeline: `Verified audiotactile publications fitted to their ${audiotactileTimeline.minYear}-${audiotactileTimeline.maxYear} year range and corpus-theme lanes.`,
+        audiotactileStructure: `${audiotactileStructure.algorithm} and connected-subgraph radius 0.32 on the verified audiotactile induced citation subgraph; ${audiotactileStructure.iterations} fixed iterations. Positions aid navigation and are not Cartesian scientific measurements.`,
       },
       modality: {
         audiotactile: snapshot.sourceMethodology.audiotactilePolicy,
@@ -679,6 +713,15 @@ function buildAsset(snapshot) {
       structure: {
         connectedNodeCount: structure.connectedNodeCount,
         isolatedNodeCount: structure.isolatedNodeCount,
+      },
+      audiotactileTimeline: {
+        minYear: audiotactileTimeline.minYear,
+        maxYear: audiotactileTimeline.maxYear,
+        themes: audiotactileTimeline.themes,
+      },
+      audiotactileStructure: {
+        connectedNodeCount: audiotactileStructure.connectedNodeCount,
+        isolatedNodeCount: audiotactileStructure.isolatedNodeCount,
       },
     },
     facets: {
@@ -727,6 +770,19 @@ function validateAsset(asset) {
   assert(asset.nodes.every((node) => [node.layouts.timeline, node.layouts.structure].every((position) =>
     Number.isFinite(position.x) && Number.isFinite(position.y)
     && position.x >= 0 && position.x <= 1 && position.y >= 0 && position.y <= 1)), "All layout coordinates must be finite and normalized");
+  const verifiedAudiotactile = asset.nodes.filter((node) => node.modality.audiotactile.verified);
+  const otherNodes = asset.nodes.filter((node) => !node.modality.audiotactile.verified);
+  assert(verifiedAudiotactile.every((node) => [
+    node.layouts.audiotactileTimeline,
+    node.layouts.audiotactileStructure,
+  ].every((position) => Number.isFinite(position.x) && Number.isFinite(position.y)
+    && position.x >= 0 && position.x <= 1 && position.y >= 0 && position.y <= 1)), "Verified audiotactile nodes require normalized subset-specific coordinates");
+  assert(otherNodes.every((node) => node.layouts.audiotactileTimeline === undefined
+    && node.layouts.audiotactileStructure === undefined), "Subset-specific coordinates must not be assigned outside the verified audiotactile set");
+  assert(asset.layoutBounds.audiotactileTimeline.minYear === 2000
+    && asset.layoutBounds.audiotactileTimeline.maxYear === 2026, "Audiotactile timeline bounds are stale");
+  assert(asset.layoutBounds.audiotactileStructure.connectedNodeCount === 78
+    && asset.layoutBounds.audiotactileStructure.isolatedNodeCount === 23, "Audiotactile structural bounds are stale");
 }
 
 function report(asset, output, snapshotOutput, wrote) {
