@@ -2013,3 +2013,22 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   animated sidebar lock is the single visible editability indicator; disabled
   mutation controls continue to enforce the boundary. Editable drafts retain
   per-step review badges because those communicate workflow progress.
+
+## 2026-08-07 — Interactive PPS publication and citation network
+
+- The Documentation page now gives the PPS literature map its own segment. It
+  supports complementary citation-structure and publication-year layouts,
+  modality/preset filters, search, edge-density choices, and centrality-based
+  node sizing. Selecting a node opens an accessible detail drawer rather than
+  immediately navigating away from the toolkit.
+- The canonical graph snapshot is public-safe and reproducible: source records
+  live under `data/publication_network/`, a deterministic Node generator emits
+  `pps-publication-citation-network.v1`, and the same generated asset is packaged
+  into the local Designer and compiled GitHub Pages dashboard.
+- Modality verification, parameter extraction, and abstract reuse are explicit
+  evidence boundaries. Audiotactile manual confirmations remain distinct from
+  provisional keyword candidates; no visuotactile candidate is called verified
+  without review; toolkit parameters join only through normalized exact DOI;
+  and abstracts without recorded reusable provenance stay unavailable in the
+  public asset. Centrality values describe this corpus and are not study-quality
+  ratings.

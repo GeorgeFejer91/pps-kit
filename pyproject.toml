@@ -68,6 +68,7 @@ peripersonal_space_toolkit = [
   "dashboard/*.html",
   "dashboard/*.css",
   "dashboard/*.js",
+  "dashboard/*.json",
   "dashboard/*.png",
   "dashboard/*.svg",
   "dashboard/compiled/*.html",

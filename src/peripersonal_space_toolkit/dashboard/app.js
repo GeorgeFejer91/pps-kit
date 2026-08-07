@@ -1,6 +1,7 @@
 let state = null;
 let viewerReady = false;
 let viewerInitialFitDone = false;
+let publicationNetworkInitPromise = null;
 const activePolls = new Set();
 let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
@@ -2982,6 +2983,41 @@ function initializeLazySurfaces() {
     load();
   }, { rootMargin: "320px" });
   observer.observe(frame);
+}
+
+function initializePublicationNetworkSurface() {
+  const root = document.querySelector("[data-publication-network-root]");
+  if (!root) return;
+  root.dataset.publicationNetworkState = "idle";
+  const load = () => {
+    if (publicationNetworkInitPromise) return publicationNetworkInitPromise;
+    root.dataset.publicationNetworkState = "loading";
+    publicationNetworkInitPromise = import("./publication_network.js")
+      .then(({ initializePublicationNetwork }) => initializePublicationNetwork(root))
+      .catch((error) => {
+        root.dataset.publicationNetworkState = "error";
+        const loading = $("publication-network-loading");
+        if (loading) {
+          loading.hidden = false;
+          loading.classList.add("error");
+          const message = loading.querySelector("span:last-child");
+          if (message) message.textContent = "The publication network could not be loaded.";
+        }
+        console.error(error);
+        throw error;
+      });
+    return publicationNetworkInitPromise;
+  };
+  if (!("IntersectionObserver" in window)) {
+    load();
+    return;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    observer.disconnect();
+    load();
+  }, { rootMargin: "480px" });
+  observer.observe(root);
 }
 
 function renderStudy() {
@@ -8649,6 +8685,7 @@ initializeBoundedSelects();
 wireEvents();
 initializePageTabs();
 initializeLazySurfaces();
+initializePublicationNetworkSurface();
 window.PPSDesignerApp = Object.freeze({
   getState: () => clone(state),
   isHosted: () => staticModeActive,

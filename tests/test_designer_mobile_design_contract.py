@@ -355,8 +355,11 @@ def test_modals_contain_focus_and_scroll_within_the_phone_viewport() -> None:
 
     for html in (source_html, compiled_html):
         dialogs = _Markup(html).with_role("dialog")
-        assert len(dialogs) == 3
-        assert all(attrs["aria-modal"] == "true" for _tag, attrs in dialogs)
+        modal_dialogs = [(tag, attrs) for tag, attrs in dialogs if attrs.get("aria-modal") == "true"]
+        nonmodal_dialogs = [(tag, attrs) for tag, attrs in dialogs if attrs.get("aria-modal") == "false"]
+        assert len(modal_dialogs) == 3
+        assert len(nonmodal_dialogs) == 1
+        assert nonmodal_dialogs[0][1]["id"] == "publication-network-detail"
         assert all(attrs["tabindex"] == "-1" for _tag, attrs in dialogs)
 
     assert _rule_has(styles, r"\.modal-card", r"max-height:\s*calc\(100dvh - 40px\)")
@@ -406,7 +409,7 @@ def test_collapse_and_noise_choice_states_are_exposed_to_assistive_technology() 
         assert contract in compiled_js
 
 
-def test_compiled_dashboard_and_public_wrappers_share_one_mobile_cache_token() -> None:
+def test_compiled_dashboard_and_public_wrappers_share_one_cache_token() -> None:
     source_html, _styles, _app_js, _designer_main = _read_sources()
     compiled_html, _compiled_css, _compiled_js = _read_compiled()
     versions = set(
@@ -414,7 +417,7 @@ def test_compiled_dashboard_and_public_wrappers_share_one_mobile_cache_token() -
     )
     assert len(versions) == 1
     version = versions.pop()
-    assert "mobile" in version
+    assert version == "20260807-publication-network"
 
     wrappers = {
         "toolkit": (ROOT / "index.html").read_text(encoding="utf-8"),

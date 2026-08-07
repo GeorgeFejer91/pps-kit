@@ -31,6 +31,77 @@ experiment software runs locally on the research PC.
   Pages or any online service.
 - Browser JavaScript does not own experiment timing. Timing-sensitive participant
   runs stay native/Python-backed.
+- The Documentation page includes a read-only, lazy-loaded PPS publication and
+  citation network. It is a static GitHub Pages asset and never calls the local
+  companion or moves literature metadata, PDFs, or participant data between the
+  browser and the research PC.
+
+## Publication And Citation Network
+
+The `Publication & Citation Network` documentation segment renders the tracked
+`pps-publication-citation-network.v1` snapshot. Its two layouts answer different
+questions: `Citation structure` uses precomputed network coordinates to expose
+connected clusters, while `Publication year` places papers on a chronological
+axis. The selected size metric controls node size, not the scientific
+meaning of the layout. Within-corpus citations are the default; PageRank,
+approximate betweenness, external citation count, and uniform sizing are
+available for comparison.
+
+The graph can be filtered to audiotactile, visuotactile, other PPS, or
+foundational/context records. Verified modality labels and provisional keyword
+candidates are separate states; provisional records are included in the complete
+corpus view with explicit dashed/candidate styling and can be excluded independently.
+They must never be presented as manually confirmed studies. Selecting a node opens a
+detail drawer with bibliographic metadata, citation neighbors, metric
+definitions, abstract availability/provenance, and any DOI-linked PPS Toolkit
+parameter audit. Missing or unaudited fields are displayed explicitly rather
+than inferred.
+
+The public snapshot is a broad, dated PPS discovery corpus, not a systematic
+review, exhaustive bibliography, study-quality ranking, or effect-size
+analysis. Centrality values describe this snapshot only. Citation direction is
+`citing -> cited`. Abstract text is included only where the generator records a
+redistributable OpenAlex source; otherwise the public asset carries an
+availability/copyright caveat and links researchers to the publication source.
+Raw provider payloads, PDFs, supplements, extracted full text, and fuzzy
+parameter matches do not belong in the public dashboard asset.
+
+The 2026-08-07 snapshot contains 1,712 publication nodes and 10,109 citation
+edges. It has 101 manually verified audiotactile nodes, no manually verified
+visuotactile nodes, and 164 explicitly provisional visuotactile lexical
+candidates. Exact DOI matching attaches 73 toolkit literature-audit records to
+69 publication nodes; repeated task records for one paper remain separate.
+Forty-two abstracts are included with OpenAlex CC0 metadata provenance and an
+underlying-publication copyright caveat; all other abstract states remain
+link-only or unavailable.
+
+The canonical public-safe source snapshot lives in `data/publication_network/`.
+Rebuild the generated dashboard asset after changing that snapshot, modality
+reviews, or DOI-linked parameter audits:
+
+```bash
+node tools/build_publication_network_asset.mjs
+```
+
+For a deliberate initial refresh from a locally held network bundle, pass the
+bundle explicitly; the bundle itself is not committed:
+
+```bash
+node tools/build_publication_network_asset.mjs --source-bundle /path/to/pps-citation-network-YYYYMMDD
+```
+
+Then run the publication-network tests and rebuild Vite so the packaged/local
+and GitHub Pages dashboards receive the same source and generated data:
+
+```bash
+python -m pytest tests/test_publication_network.py
+npm --prefix src/peripersonal_space_toolkit/dashboard run build
+```
+
+The default data rebuild must be deterministic. Review the generated JSON diff,
+run the dashboard visual-layout audit, inspect its desktop/mobile light/dark
+screenshots, and publish the source dashboard, compiled dashboard, public
+wrappers, data snapshot, tests, and project-memory changes together.
 
 ## Publish
 
