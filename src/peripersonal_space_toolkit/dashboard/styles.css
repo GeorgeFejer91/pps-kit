@@ -33,10 +33,14 @@
   --family-auditory-bg: #f7f0df;
   --network-runnable: #a9570d;
   --network-supported: #e6c39e;
+  --network-unassessed: #f7f8f5;
+  --network-conflict: #fff1e8;
+  --network-conflict-stroke: #9d3f2f;
   --network-node-stroke: #75502d;
   --network-selection: #246b55;
-  --network-edge: rgba(82, 98, 115, 0.15);
-  --network-edge-selected: rgba(169, 87, 13, 0.72);
+  --network-edge: rgba(82, 98, 115, 0.18);
+  --network-edge-incoming: rgba(35, 107, 148, 0.9);
+  --network-edge-outgoing: rgba(169, 87, 13, 0.9);
   --font: "Aptos", "Noto Sans", "Helvetica Neue", sans-serif;
   /* Spatial system: 4 px base unit, 8 px primary rhythm. */
   --space-1: 4px;
@@ -1057,7 +1061,7 @@ code {
 
 .publication-network-toolbar {
   display: grid;
-  grid-template-columns: minmax(240px, 1.35fr) minmax(220px, 1fr) minmax(180px, 0.8fr) minmax(180px, 0.8fr);
+  grid-template-columns: minmax(260px, 1.35fr) minmax(240px, 1fr) minmax(200px, 0.8fr);
   align-items: end;
   gap: var(--space-4);
   padding: var(--space-4);
@@ -1220,6 +1224,54 @@ code {
 
 .legend-node-supported {
   background: var(--network-supported);
+}
+
+.legend-node-unassessed {
+  border-style: dashed;
+  background: var(--network-unassessed);
+}
+
+.legend-node-conflict {
+  border: 2px dashed var(--network-conflict-stroke);
+  background: var(--network-conflict);
+}
+
+.publication-network-size-key {
+  min-height: 18px;
+}
+
+.publication-network-size-key i {
+  display: inline-block;
+  flex: 0 0 auto;
+  border: 1.5px solid var(--network-node-stroke);
+  border-radius: 50%;
+  background: var(--network-supported);
+}
+
+.publication-network-size-key i:first-child {
+  width: 8px;
+  height: 8px;
+  margin-right: -5px;
+}
+
+.publication-network-size-key i:nth-child(2) {
+  width: 15px;
+  height: 15px;
+}
+
+.publication-network-legend-line {
+  display: inline-block;
+  width: 24px;
+  height: 0;
+  border-top: 2px solid;
+}
+
+.legend-line-incoming {
+  border-color: var(--network-edge-incoming);
+}
+
+.legend-line-outgoing {
+  border-color: var(--network-edge-outgoing);
 }
 
 .publication-network-workspace {
@@ -1443,6 +1495,17 @@ code {
 .publication-network-badge-incomplete {
   border-color: var(--network-node-stroke);
   color: var(--text);
+}
+
+.publication-network-badge-unassessed {
+  border-style: dashed;
+  color: var(--text);
+}
+
+.publication-network-badge-conflict {
+  border-style: dashed;
+  border-color: var(--network-conflict-stroke);
+  color: var(--network-conflict-stroke);
 }
 
 .publication-network-detail-links {
@@ -7201,10 +7264,14 @@ body.desktop-applet .segment-heading {
   --family-auditory-bg: #3b3424;
   --network-runnable: #e69345;
   --network-supported: #74583d;
+  --network-unassessed: #202a26;
+  --network-conflict: #3d2420;
+  --network-conflict-stroke: #ff9b84;
   --network-node-stroke: #d6af86;
   --network-selection: #6bc7a2;
-  --network-edge: rgba(183, 201, 191, 0.2);
-  --network-edge-selected: rgba(236, 158, 83, 0.82);
+  --network-edge: rgba(183, 201, 191, 0.22);
+  --network-edge-incoming: rgba(111, 193, 232, 0.92);
+  --network-edge-outgoing: rgba(241, 167, 92, 0.92);
 }
 
 :root[data-theme="dark"] .rail {

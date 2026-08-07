@@ -1,7 +1,5 @@
-const DATA_URL = new URL("./publication_network.v2.json", import.meta.url);
+const DATA_URL = new URL("./publication_network.v3.json", import.meta.url);
 const RESULT_PAGE_SIZE = 40;
-const NODE_RADIUS_MIN = 0.0095;
-const NODE_RADIUS_MAX = 0.018;
 
 function element(tag, options = {}, children = []) {
   const node = document.createElement(tag);
@@ -30,6 +28,8 @@ function titleCase(value) {
 }
 
 function metricValue(node, metric) {
+  if (metric === "networkReceived") return Number(node.network?.inDegree || 0);
+  if (metric === "networkPageRank") return Number(node.network?.pageRank || 0);
   if (metric === "pageRank") return Number(node.centrality?.pageRank || 0);
   if (metric === "betweennessApprox") return Number(node.centrality?.betweennessApprox || 0);
   if (metric === "externalMax") return Number(node.citations?.externalMax || 0);
@@ -37,13 +37,28 @@ function metricValue(node, metric) {
   return Number(node.citations?.withinCorpusReceived || 0);
 }
 
-function inScopeRecords(node) {
-  return (node.toolkit?.records || []).filter((record) =>
-    record.coverageCategory && record.coverageCategory !== "adjacent_out_of_scope");
+function toolkitStatus(node) {
+  return node.toolkit?.status || "not_assessed";
+}
+
+function toolkitStatusLabel(node) {
+  const status = toolkitStatus(node);
+  if (status === "runnable") return "Runnable Toolkit profile";
+  if (status === "supported_incomplete") return "Supported paradigm; parameters incomplete";
+  if (status === "adjacent_scope_conflict") return "Adjacent / scope conflict";
+  return "Not yet assessed for Toolkit";
+}
+
+function reviewPriority(node) {
+  const status = toolkitStatus(node);
+  if (status === "not_assessed") return 4;
+  if (status === "adjacent_scope_conflict") return 3;
+  if (status === "supported_incomplete") return 2;
+  return 1;
 }
 
 function isRunnable(node) {
-  return inScopeRecords(node).some((record) => record.recreatable);
+  return toolkitStatus(node) === "runnable";
 }
 
 function nodeSearchText(node) {
@@ -53,7 +68,9 @@ function nodeSearchText(node) {
     node.doi,
     node.year,
     node.venue,
-    ...inScopeRecords(node).map((record) => record.taskFamily),
+    toolkitStatusLabel(node),
+    node.corpus?.documentRole,
+    ...(node.toolkit?.records || []).map((record) => record.taskFamily),
   ].join(" ").toLocaleLowerCase();
 }
 
@@ -86,7 +103,6 @@ export async function initializePublicationNetwork(root) {
   const controls = {
     search: root.querySelector("#publication-network-search"),
     layout: [...root.querySelectorAll('input[name="publication-network-layout"]')],
-    sizeMetric: root.querySelector("#publication-network-size-metric"),
     edgeMode: root.querySelector("#publication-network-edge-mode"),
     resultsSort: root.querySelector("#publication-network-results-sort"),
   };
@@ -114,7 +130,7 @@ export async function initializePublicationNetwork(root) {
   const response = await fetch(DATA_URL);
   if (!response.ok) throw new Error(`Publication-network data request failed (${response.status}).`);
   const data = await response.json();
-  if (data.schema !== "pps-publication-citation-network.v2") {
+  if (data.schema !== "pps-publication-citation-network.v3") {
     throw new Error(`Unsupported publication-network schema: ${data.schema || "missing"}`);
   }
 
@@ -128,7 +144,7 @@ export async function initializePublicationNetwork(root) {
   }
   const searchText = nodes.map(nodeSearchText);
   const state = {
-    layout: "prominence",
+    layout: "topology",
     visible: [],
     visibleSet: new Set(),
     selected: null,
@@ -137,13 +153,12 @@ export async function initializePublicationNetwork(root) {
     lastFocus: canvas,
     lastFocusNode: null,
     redrawPending: false,
-    metricMaximum: 1,
     projected: new Map(),
     overlapCount: 0,
   };
 
   function positionFor(index) {
-    return nodes[index].layouts[state.layout] || nodes[index].layouts.prominence;
+    return nodes[index].layouts[state.layout] || nodes[index].layouts.topology;
   }
 
   function canvasGeometry() {
@@ -170,12 +185,7 @@ export async function initializePublicationNetwork(root) {
   }
 
   function radiusFor(index, geometry) {
-    if (controls.sizeMetric.value === "uniform") return geometry.plotSide * 0.0125;
-    const value = metricValue(nodes[index], controls.sizeMetric.value);
-    const normalized = state.metricMaximum > 0
-      ? Math.log1p(value) / Math.log1p(state.metricMaximum)
-      : 0;
-    return geometry.plotSide * (NODE_RADIUS_MIN + (NODE_RADIUS_MAX - NODE_RADIUS_MIN) * Math.sqrt(normalized));
+    return geometry.plotSide * Number(nodes[index].network?.radius || 0.009);
   }
 
   function overlapCount(projected, geometry) {
@@ -186,7 +196,7 @@ export async function initializePublicationNetwork(root) {
       for (let right = left + 1; right < state.visible.length; right += 1) {
         const rightIndex = state.visible[right];
         const rightPoint = projected.get(rightIndex);
-        const minimum = radiusFor(leftIndex, geometry) + radiusFor(rightIndex, geometry) + 2;
+        const minimum = radiusFor(leftIndex, geometry) + radiusFor(rightIndex, geometry) + 0.75;
         if (Math.hypot(leftPoint.x - rightPoint.x, leftPoint.y - rightPoint.y) + 0.25 < minimum) count += 1;
       }
     }
@@ -227,19 +237,69 @@ export async function initializePublicationNetwork(root) {
 
   function drawTimelineLabels(projected, geometry) {
     if (state.layout !== "timeline") return;
+    const years = [...new Set(state.visible.map((index) => nodes[index].year).filter(Number.isFinite))].sort((a, b) => a - b);
+    if (!years.length) return;
+    const guideYears = years.length <= 5
+      ? years
+      : [0, 0.25, 0.5, 0.75, 1].map((fraction) => years[Math.round((years.length - 1) * fraction)]);
     context2d.save();
     context2d.fillStyle = cssValue("--muted", "#65716a");
     context2d.font = `${geometry.plotSide < 420 ? 8 : 10}px system-ui, sans-serif`;
     context2d.textAlign = "center";
-    for (const index of state.visible) {
-      const point = projected.get(index);
-      const radius = radiusFor(index, geometry);
-      context2d.fillText(String(nodes[index].year || "n.d."), point.x, point.y + radius + (geometry.plotSide < 420 ? 9 : 12));
+    context2d.strokeStyle = cssValue("--network-edge", "rgba(82, 98, 115, 0.15)");
+    context2d.lineWidth = 0.75;
+    for (const year of new Set(guideYears)) {
+      const matches = state.visible.filter((index) => nodes[index].year === year);
+      const x = matches.reduce((sum, index) => sum + projected.get(index).x, 0) / matches.length;
+      context2d.beginPath();
+      context2d.moveTo(x, geometry.originY);
+      context2d.lineTo(x, geometry.originY + geometry.plotSide);
+      context2d.stroke();
+      context2d.fillText(String(year), x, Math.max(12, geometry.originY - 10));
     }
-    context2d.textAlign = "left";
-    context2d.font = "600 10px system-ui, sans-serif";
-    context2d.fillText("Oldest → newest", geometry.originX, Math.max(14, geometry.originY - 12));
     context2d.restore();
+  }
+
+  function selectedEdgeRelation(source, target) {
+    if (state.selected === target) return "incoming";
+    if (state.selected === source) return "outgoing";
+    return "";
+  }
+
+  function drawCitationEdge(source, target, projected, geometry) {
+    const from = projected.get(source);
+    const to = projected.get(target);
+    const relation = selectedEdgeRelation(source, target);
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const length = Math.max(1, Math.hypot(dx, dy));
+    const ux = dx / length;
+    const uy = dy / length;
+    const startInset = relation ? radiusFor(source, geometry) + 1 : 0;
+    const endInset = relation ? radiusFor(target, geometry) + 3.5 : 0;
+    const startX = from.x + ux * startInset;
+    const startY = from.y + uy * startInset;
+    const endX = to.x - ux * endInset;
+    const endY = to.y - uy * endInset;
+    context2d.strokeStyle = relation === "incoming"
+      ? cssValue("--network-edge-incoming", "rgba(35, 107, 148, 0.9)")
+      : relation === "outgoing"
+        ? cssValue("--network-edge-outgoing", "rgba(169, 87, 13, 0.9)")
+        : cssValue("--network-edge", "rgba(82, 98, 115, 0.18)");
+    context2d.fillStyle = context2d.strokeStyle;
+    context2d.lineWidth = relation ? 1.7 : 0.65;
+    context2d.beginPath();
+    context2d.moveTo(startX, startY);
+    context2d.lineTo(endX, endY);
+    context2d.stroke();
+    if (!relation) return;
+    const arrowSize = 4.5;
+    context2d.beginPath();
+    context2d.moveTo(endX, endY);
+    context2d.lineTo(endX - ux * arrowSize - uy * arrowSize * 0.58, endY - uy * arrowSize + ux * arrowSize * 0.58);
+    context2d.lineTo(endX - ux * arrowSize + uy * arrowSize * 0.58, endY - uy * arrowSize - ux * arrowSize * 0.58);
+    context2d.closePath();
+    context2d.fill();
   }
 
   function draw() {
@@ -250,32 +310,26 @@ export async function initializePublicationNetwork(root) {
     state.overlapCount = overlapCount(projected, geometry);
     root.dataset.publicationNetworkOverlaps = String(state.overlapCount);
     context2d.clearRect(0, 0, width, height);
+    drawTimelineLabels(projected, geometry);
 
     if (controls.edgeMode.value !== "none") {
       context2d.save();
-      for (const [source, target] of edges) {
-        if (!shouldDrawEdge(source, target)) continue;
-        const from = projected.get(source);
-        const to = projected.get(target);
-        const selectedEdge = state.selected === source || state.selected === target;
-        context2d.strokeStyle = selectedEdge
-          ? cssValue("--network-edge-selected", "rgba(169, 87, 13, 0.72)")
-          : cssValue("--network-edge", "rgba(82, 98, 115, 0.15)");
-        context2d.lineWidth = selectedEdge ? 1.45 : 0.65;
-        context2d.beginPath();
-        context2d.moveTo(from.x, from.y);
-        context2d.lineTo(to.x, to.y);
-        context2d.stroke();
+      const drawableEdges = edges
+        .filter(([source, target]) => shouldDrawEdge(source, target))
+        .sort(([leftSource, leftTarget], [rightSource, rightTarget]) =>
+          Number(Boolean(selectedEdgeRelation(leftSource, leftTarget))) - Number(Boolean(selectedEdgeRelation(rightSource, rightTarget))));
+      for (const [source, target] of drawableEdges) {
+        drawCitationEdge(source, target, projected, geometry);
       }
       context2d.restore();
     }
 
     const ordered = [...state.visible].sort((left, right) =>
-      metricValue(nodes[left], controls.sizeMetric.value) - metricValue(nodes[right], controls.sizeMetric.value));
+      radiusFor(left, geometry) - radiusFor(right, geometry));
     for (const index of ordered) {
       const point = projected.get(index);
       const radius = radiusFor(index, geometry);
-      const runnable = isRunnable(nodes[index]);
+      const nodeStatus = toolkitStatus(nodes[index]);
       context2d.save();
       if (state.selected === index) {
         context2d.beginPath();
@@ -286,18 +340,24 @@ export async function initializePublicationNetwork(root) {
       }
       context2d.beginPath();
       context2d.arc(point.x, point.y, radius, 0, Math.PI * 2);
-      context2d.fillStyle = runnable
+      context2d.fillStyle = nodeStatus === "runnable"
         ? cssValue("--network-runnable", "#a9570d")
-        : cssValue("--network-supported", "#e6c39e");
+        : nodeStatus === "supported_incomplete"
+          ? cssValue("--network-supported", "#e6c39e")
+          : nodeStatus === "adjacent_scope_conflict"
+            ? cssValue("--network-conflict", "#fff1e8")
+            : cssValue("--network-unassessed", "#f7f8f5");
       context2d.fill();
       context2d.strokeStyle = state.hovered === index
         ? cssValue("--text", "#1f2a25")
-        : cssValue("--network-node-stroke", "rgba(82, 58, 34, 0.72)");
-      context2d.lineWidth = state.hovered === index ? 2.2 : (runnable ? 1.1 : 1.6);
+        : nodeStatus === "adjacent_scope_conflict"
+          ? cssValue("--network-conflict-stroke", "#9d3f2f")
+          : cssValue("--network-node-stroke", "rgba(82, 58, 34, 0.72)");
+      context2d.lineWidth = state.hovered === index ? 2.2 : (nodeStatus === "runnable" ? 1.1 : 1.6);
+      context2d.setLineDash(nodeStatus === "not_assessed" ? [3, 2] : nodeStatus === "adjacent_scope_conflict" ? [5, 2] : []);
       context2d.stroke();
       context2d.restore();
     }
-    drawTimelineLabels(projected, geometry);
   }
 
   function hitTest(clientX, clientY) {
@@ -329,7 +389,7 @@ export async function initializePublicationNetwork(root) {
       element("strong", { text: node.title }),
       element("span", { text: `${node.year || "Year unavailable"} · ${node.authors?.join(", ") || "Authors unavailable"}` }),
       element("span", {
-        text: `${node.citations.withinCorpusReceived} PPS-corpus citations · ${isRunnable(node) ? "Runnable profile" : "Supported paradigm; parameters incomplete"}`,
+        text: `${node.network?.inDegree || 0} citation${node.network?.inDegree === 1 ? "" : "s"} received in this map · ${toolkitStatusLabel(node)}`,
       }),
     );
     const stageRect = stage.getBoundingClientRect();
@@ -339,7 +399,7 @@ export async function initializePublicationNetwork(root) {
   }
 
   function currentLayout() {
-    return controls.layout.find((input) => input.checked)?.value || "prominence";
+    return controls.layout.find((input) => input.checked)?.value || "topology";
   }
 
   function sortResults(indices) {
@@ -348,6 +408,9 @@ export async function initializePublicationNetwork(root) {
       if (metric === "year-desc") return (nodes[right].year || 0) - (nodes[left].year || 0) || nodes[left].title.localeCompare(nodes[right].title);
       if (metric === "year-asc") return (nodes[left].year || 9999) - (nodes[right].year || 9999) || nodes[left].title.localeCompare(nodes[right].title);
       if (metric === "title") return nodes[left].title.localeCompare(nodes[right].title);
+      if (metric === "review-priority") return reviewPriority(nodes[right]) - reviewPriority(nodes[left])
+        || metricValue(nodes[right], "networkReceived") - metricValue(nodes[left], "networkReceived")
+        || nodes[left].title.localeCompare(nodes[right].title);
       return metricValue(nodes[right], metric) - metricValue(nodes[left], metric) || nodes[left].title.localeCompare(nodes[right].title);
     });
   }
@@ -367,7 +430,7 @@ export async function initializePublicationNetwork(root) {
       }, [
         element("strong", { text: node.title }),
         element("span", {
-          text: `${node.year || "n.d."} · ${node.authors?.join(", ") || "Authors unavailable"} · ${node.citations.withinCorpusReceived} PPS-corpus citations · ${isRunnable(node) ? "runnable" : "parameters incomplete"}`,
+          text: `${node.year || "n.d."} · ${node.authors?.join(", ") || "Authors unavailable"} · ${node.network?.inDegree || 0} citation${node.network?.inDegree === 1 ? "" : "s"} received here · ${toolkitStatusLabel(node)}`,
         }),
       ]);
       button.addEventListener("click", () => selectNode(index, button));
@@ -386,10 +449,13 @@ export async function initializePublicationNetwork(root) {
       if (shouldDrawEdge(source, target)) shownEdges += 1;
     }
     const prefix = state.visible.length === nodes.length
-      ? `${nodes.length.toLocaleString()} experiment papers`
-      : `${state.visible.length.toLocaleString()} of ${nodes.length.toLocaleString()} experiment papers`;
-    const layoutLabel = state.layout === "timeline" ? "publication-year grid" : "citation prominence";
-    status.textContent = `${prefix} · ${data.counts.toolkitRecordJoins.toLocaleString()} supported task records · ${data.counts.toolkitRunnableNodes.toLocaleString()} runnable · ${shownEdges.toLocaleString()} / ${availableEdges.toLocaleString()} links shown · ${layoutLabel}`;
+      ? `${nodes.length.toLocaleString()} audio–tactile study publications`
+      : `${state.visible.length.toLocaleString()} of ${nodes.length.toLocaleString()} audio–tactile study publications`;
+    const layoutLabel = state.layout === "timeline" ? "publication-year arrangement" : "citation topology";
+    const selectedText = state.selected === null
+      ? ""
+      : ` · selected: ${nodes[state.selected].title} (${incoming[state.selected].length} incoming, ${outgoing[state.selected].length} outgoing)`;
+    status.textContent = `${prefix} · ${data.counts.toolkitRunnableNodes} runnable · ${data.counts.toolkitSupportedIncompleteNodes} incomplete · ${data.counts.toolkitNotAssessedNodes} to assess · ${data.counts.toolkitAdjacentConflictNodes} scope conflict · ${shownEdges.toLocaleString()} / ${availableEdges.toLocaleString()} links shown · ${layoutLabel}${selectedText}`;
   }
 
   function updateVisible() {
@@ -397,7 +463,6 @@ export async function initializePublicationNetwork(root) {
     state.layout = currentLayout();
     state.visible = nodes.map((_, index) => index).filter((index) => !query || searchText[index].includes(query));
     state.visibleSet = new Set(state.visible);
-    state.metricMaximum = Math.max(Number.EPSILON, ...nodes.map((node) => metricValue(node, controls.sizeMetric.value)));
     if (state.selected !== null && !state.visibleSet.has(state.selected)) closeDetail({ restoreFocus: false });
     state.resultLimit = RESULT_PAGE_SIZE;
     updateStatus();
@@ -407,12 +472,12 @@ export async function initializePublicationNetwork(root) {
 
   function makeMetricGrid(node) {
     const descriptions = [
-      ["PPS-corpus citations", node.citations.withinCorpusReceived, "Incoming links from the broad 1,712-publication source snapshot"],
-      ["PPS-corpus references", node.citations.withinCorpusReferences, "Outgoing links in the broad source snapshot"],
+      ["Citations in this map", node.network?.inDegree || 0, "Incoming links from the 97 displayed publications"],
+      ["References in this map", node.network?.outDegree || 0, "Outgoing links to the 97 displayed publications"],
+      ["Network PageRank", compactNumber(node.network?.pageRank, 6), "PageRank recalculated only for this displayed network"],
       ["External citations", node.citations.externalMax, "Largest provider count at snapshot time"],
-      ["PageRank", compactNumber(node.centrality.pageRank, 6), "Directed broad-corpus PageRank"],
-      ["Betweenness", compactNumber(node.centrality.betweennessApprox, 6), "Approximate broad-corpus betweenness"],
-      ["Influence", compactNumber(node.centrality.influence, 4), "Navigation score; not a quality rating"],
+      ["Broad PPS citations", node.citations.withinCorpusReceived, "Incoming links from the broad 1,712-publication source snapshot"],
+      ["Broad PPS references", node.citations.withinCorpusReferences, "Outgoing links in the broad source snapshot"],
     ];
     return element("dl", { className: "publication-network-detail-metrics" }, descriptions.map(([label, value, title]) =>
       element("div", {}, [
@@ -425,7 +490,7 @@ export async function initializePublicationNetwork(root) {
     if (!indices.length) return element("p", { className: "publication-network-detail-muted", text: emptyText });
     const sorted = [...indices]
       .filter((index) => state.visibleSet.has(index))
-      .sort((left, right) => nodes[right].citations.withinCorpusReceived - nodes[left].citations.withinCorpusReceived)
+      .sort((left, right) => (nodes[right].network?.inDegree || 0) - (nodes[left].network?.inDegree || 0))
       .slice(0, 24);
     if (!sorted.length) {
       return element("p", {
@@ -445,10 +510,11 @@ export async function initializePublicationNetwork(root) {
 
   function toolkitRecord(record) {
     const header = record.citationShort || record.recordId || "Toolkit literature record";
+    const adjacent = record.coverageCategory === "adjacent_out_of_scope";
     const details = element("details", { className: "publication-network-parameter-segment" });
     details.append(element("summary", {}, [
       element("span", { text: header }),
-      element("small", { text: record.recreatable ? "Runnable profile" : "Parameters incomplete" }),
+      element("small", { text: adjacent ? "Adjacent / out of scope" : record.recreatable ? "Runnable profile" : "Parameters incomplete" }),
     ]));
     const content = element("div", { className: "publication-network-detail-section" });
     if (record.taskFamily) content.append(element("p", { text: record.taskFamily }));
@@ -482,18 +548,29 @@ export async function initializePublicationNetwork(root) {
 
   function renderDetail(index) {
     const node = nodes[index];
-    const records = inScopeRecords(node);
-    const runnable = isRunnable(node);
+    const records = node.toolkit?.records || [];
+    const nodeStatus = toolkitStatus(node);
+    const role = titleCase(node.corpus?.documentRole || "unclassified publication");
+    const provenance = node.scope?.provenance || "legacy_confirmed";
     detailTitle.textContent = node.title;
     detailKicker.textContent = `${node.year || "Year unavailable"} · ${node.venue || "Venue unavailable"}`;
     const badges = [
-      makeBadge("Audio–tactile experiment", "publication-network-badge-at"),
+      makeBadge("Audio–tactile publication", "publication-network-badge-at"),
       makeBadge(
-        runnable ? "Runnable Toolkit profile" : "Supported paradigm · parameters incomplete",
-        runnable ? "publication-network-badge-runnable" : "publication-network-badge-incomplete",
+        toolkitStatusLabel(node),
+        nodeStatus === "runnable"
+          ? "publication-network-badge-runnable"
+          : nodeStatus === "supported_incomplete"
+            ? "publication-network-badge-incomplete"
+            : nodeStatus === "adjacent_scope_conflict"
+              ? "publication-network-badge-conflict"
+              : "publication-network-badge-unassessed",
       ),
+      makeBadge(role),
+      makeBadge(provenance === "later_exact_doi_audit" ? "Later exact-DOI audit addition" : "Legacy manually confirmed set"),
     ];
-    if (node.metadata.retracted) badges.push(makeBadge("Retracted"));
+    if (records.some((record) => record.manualReview)) badges.push(makeBadge("Manual parameter review"));
+    if (node.metadata?.retracted) badges.push(makeBadge("Retracted"));
 
     const links = [
       safeExternalLink("Open DOI", node.links.doi),
@@ -508,28 +585,43 @@ export async function initializePublicationNetwork(root) {
     ]);
 
     const abstractChildren = [];
-    if (node.abstract.status === "available" && node.abstract.text) {
+    if (node.abstract?.status === "available" && node.abstract.text) {
       abstractChildren.push(element("p", { text: node.abstract.text }));
-      abstractChildren.push(element("small", { text: `${node.abstract.source} · ${node.abstract.license}. ${node.abstract.caveat}` }));
+      abstractChildren.push(element("small", { text: [node.abstract.source, node.abstract.license, node.abstract.caveat].filter(Boolean).join(" · ") }));
     } else {
-      abstractChildren.push(element("p", { className: "publication-network-detail-muted", text: node.abstract.caveat || "Abstract unavailable in this public snapshot." }));
+      abstractChildren.push(element("p", { className: "publication-network-detail-muted", text: node.abstract?.caveat || "Abstract unavailable in this public snapshot." }));
     }
 
-    const classification = makeSection("Why this paper is included", [
-      element("p", { text: `An exact DOI match connects this experimental paper to ${records.length} in-scope PPS Toolkit literature-audit record${records.length === 1 ? "" : "s"}.` }),
-      element("p", { text: runnable
-        ? "At least one audited task has enough reported parameters for a runnable Toolkit profile."
-        : "The task structure is supported, but one or more publication parameters required for a runnable profile remain unavailable." }),
+    const inclusionBasis = provenance === "later_exact_doi_audit"
+      ? "This publication was added through a later exact-DOI literature-audit match identifying an in-scope audio–tactile PPS task."
+      : "This publication belongs to the manually verified legacy audio–tactile PPS citation set.";
+    const statusExplanation = nodeStatus === "runnable"
+      ? `An exact DOI match links ${records.length} Toolkit literature-audit record${records.length === 1 ? "" : "s"}; at least one task has enough reported parameters for a runnable profile.`
+      : nodeStatus === "supported_incomplete"
+        ? `An exact DOI match links ${records.length} in-scope Toolkit literature-audit record${records.length === 1 ? "" : "s"}. The paradigm is supported, but publication parameters needed for a runnable profile remain unavailable.`
+        : nodeStatus === "adjacent_scope_conflict"
+          ? "The citation audit classifies this publication as audio–tactile, while the Toolkit literature audit currently marks its matched task as adjacent or out of scope. It needs an explicit scope decision."
+          : "No exact-DOI Toolkit literature-audit record is linked yet. The publication remains visible so its paradigm can be assessed instead of being silently excluded.";
+    const classification = makeSection("Toolkit inclusion status", [
+      element("p", { text: inclusionBasis }),
+      element("p", { text: statusExplanation }),
     ]);
+
+    const parameterChildren = records.length
+      ? records.map(toolkitRecord)
+      : [element("p", {
+        className: "publication-network-detail-muted",
+        text: "Not yet assessed: no exact-DOI Toolkit parameter record is attached to this publication.",
+      })];
 
     detailBody.replaceChildren(
       overview,
       makeSection("Abstract", abstractChildren),
       classification,
-      makeSection("Citation metrics", [makeMetricGrid(node), element("small", { text: "Centrality values come from the dated broad PPS source corpus and are navigation aids, not study-quality scores." })]),
+      makeSection("Citation metrics", [makeMetricGrid(node), element("small", { text: "Displayed-network metrics determine this map's size and topology. Broader source counts are provided for context. Neither is a study-quality score." })]),
       makeSection(`Cited by included papers (${incoming[index].length})`, [citationList(incoming[index], "No incoming citation links from other included papers are present.")]),
       makeSection(`References to included papers (${outgoing[index].length})`, [citationList(outgoing[index], "No outgoing citation links to other included papers are present.")]),
-      makeSection("PPS Toolkit parameters", records.map(toolkitRecord)),
+      makeSection("PPS Toolkit parameters", parameterChildren),
     );
   }
 
@@ -569,7 +661,6 @@ export async function initializePublicationNetwork(root) {
 
   controls.search.addEventListener("input", updateVisible);
   for (const input of controls.layout) input.addEventListener("change", updateVisible);
-  controls.sizeMetric.addEventListener("change", updateVisible);
   controls.edgeMode.addEventListener("change", () => {
     updateStatus();
     requestDraw();
@@ -657,6 +748,12 @@ export async function initializePublicationNetwork(root) {
           y: point.y,
           radius: radiusFor(index, geometry),
           runnable: isRunnable(nodes[index]),
+          status: toolkitStatus(nodes[index]),
+          inDegree: nodes[index].network?.inDegree || 0,
+          outDegree: nodes[index].network?.outDegree || 0,
+          pageRank: nodes[index].network?.pageRank || 0,
+          prominence: nodes[index].network?.prominence || 0,
+          isolated: Boolean(nodes[index].network?.isolated),
         };
       }),
     };

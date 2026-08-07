@@ -2014,23 +2014,21 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   mutation controls continue to enforce the boundary. Editable drafts retain
   per-step review badges because those communicate workflow progress.
 
-## 2026-08-07 — Focused experimental audio-tactile publication network
+## 2026-08-07 — Verified/audited audio-tactile publication network v3
 
-- The Documentation page now gives the PPS literature map its own segment. It
-  now focuses only on experimental audio-tactile PPS papers whose paradigms are
-  covered by the Toolkit literature audit. Reviews and
-  `adjacent_out_of_scope` records are excluded. The current view contains 64
-  publication nodes, 68 in-scope task records, and 456 induced citation edges.
-- The structural view uses a square-bounded, collision-separated layout for the
-  focused graph; publication-year arrangement remains an optional complementary
-  view. Selecting a node opens an accessible detail drawer rather than navigating
-  away from the Toolkit.
-- The canonical broad source remains `citation_snapshot.v1.json` with 1,712
-  publications and 10,109 edges. A deterministic Node generator emits the
-  focused `pps-publication-citation-network.v2` browser asset, which is packaged
-  identically into the local Designer and compiled GitHub Pages dashboard.
-- Runnable status is an explicit evidence boundary: 15 publication nodes contain
-  17 runnable records, while 49 publications have structurally supported
-  paradigms with incomplete source parameters. Toolkit parameters join only by
-  normalized exact DOI; abstracts without reusable provenance remain unavailable;
-  and corpus-local centrality is never presented as study quality.
+- The Documentation map now projects 97 non-review audio-tactile publications
+  and 571 directed citation links: 93 original manually confirmed records plus
+  4 later exact-DOI audit additions. Readiness is encoded, not used as an
+  inclusion gate; the four Toolkit states are 15 runnable, 49 incomplete, 32
+  not assessed, and 1 adjacent/scope conflict.
+- The default square topology is a deterministic continuous force layout with
+  citation attraction, prominence-aware centring, radius-aware collision
+  separation, and 22 stable perimeter isolates. Node area represents normalized
+  displayed-network citations received. A collision-free year-anchored layout
+  remains the complementary chronological view.
+- All links stay faintly visible; selecting a paper distinguishes incoming from
+  outgoing neighbours and opens accessible metadata, provenance, abstract, and
+  exact-DOI Toolkit-parameter details. The broad 1,712-node/10,109-edge v1
+  source remains a dated discovery corpus, while the generated v3 asset is the
+  identical packaged/local and GitHub Pages view. Neither is exhaustive,
+  systematic-review evidence, a quality ranking, or an effect-size synthesis.

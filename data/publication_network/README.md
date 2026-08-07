@@ -7,16 +7,19 @@ dated `pps-citation-network-20260807` research snapshot.
 
 The corpus is a maximum-coverage, multi-index PPS-explicit snapshot with
 citation context. It is not a claim that every PPS publication is present. The
-generator projects this broad input into `publication_network.v2.json`, a
-focused `pps-publication-citation-network.v2` browser asset containing only
-experimental audio-tactile PPS papers covered by the Toolkit literature audit.
+generator projects this broad input into `publication_network.v3.json`, a
+focused `pps-publication-citation-network.v3` browser asset containing 97
+non-review audio-tactile publications and 571 induced citation links. Inclusion
+comes from either the original manually confirmed audio-tactile audit (93
+publications after review removal) or a later exact-DOI Toolkit literature audit
+(4 additions). Toolkit readiness is an encoding, not an inclusion gate.
 
-The focused projection includes a publication when at least one exact-DOI audit
-record is not `adjacent_out_of_scope` and the publication is not classified as
-a review. The current projection contains 64 publications, 68 in-scope task
-records, and 456 induced citation edges. Fifteen publication nodes contain 17
-runnable records; the remaining 49 publications have supported paradigms but
-incomplete source parameters.
+The four Toolkit assessment states are 15 runnable, 49 supported but parameter-
+incomplete, 32 not yet assessed, and 1 adjacent/scope-conflict publication.
+The default map uses a deterministic, continuous, radius-aware force layout:
+citation neighbours attract, nodes remain collision-free, and 22 isolates sit
+on a stable square perimeter. Node area encodes normalized displayed-network
+citations received. The alternative layout anchors horizontal position to year.
 
 ## Rebuild
 
@@ -39,14 +42,13 @@ and outputs to temporary paths for deterministic validation.
 ## Public-data boundaries
 
 - Citation edges run from the citing publication to the cited publication.
-- The broad v1 source retains all 1,712 publications, including its original
-  101 manually confirmed audiotactile labels and provisional modality screens.
-  The browser does not expose that broad discovery corpus; it uses the narrower
-  DOI-linked Toolkit-audit rule above.
-- Reviews and every `adjacent_out_of_scope` record are excluded from the focused
-  browser asset. A supported paradigm means the Toolkit can represent the task
-  structure, not that every original asset, apparatus setting, or reported
-  parameter is available.
+- The broad v1 source retains all 1,712 publications, including 101 manually
+  confirmed audiotactile labels and provisional modality screens. The browser
+  excludes reviews and shows only the 97-publication verified/audited projection.
+- One included exact-DOI record is retained as `adjacent_scope_conflict` so the
+  audit disagreement stays visible. A supported paradigm means the Toolkit can
+  represent the task structure, not that every original asset, apparatus
+  setting, or reported parameter is available.
 - Abstract text is included only when it can be reconstructed from an
   OpenAlex-attributed metadata record under OpenAlex's CC0 terms. Copyright in
   the underlying publication remains with its rights holder. Other abstracts
@@ -55,7 +57,8 @@ and outputs to temporary paths for deterministic validation.
 - PPS Toolkit literature and parameter audits are joined by normalized DOI
   only. All in-scope task records sharing a DOI are kept, and no fuzzy title or
   author matching is used.
-- Citation counts and centrality values are corpus-local navigation metrics,
-  not study-quality ratings or effect estimates.
+- Displayed links are faint by default; selecting a node distinguishes incoming
+  from outgoing citations. Citation counts, node area, and centrality remain
+  corpus-local navigation encodings, not study-quality ratings or effect estimates.
 - Raw provider responses, PDFs, supplements, and extracted full text are not
   part of this tracked asset.

@@ -39,31 +39,31 @@ experiment software runs locally on the research PC.
 ## Audiotactile PPS Citation Map
 
 The `Publication & Citation Network` documentation segment renders the tracked
-`pps-publication-citation-network.v2` asset. It is deliberately focused on 64
-experimental audio-tactile PPS publications whose paradigms are covered by the
-Toolkit literature audit. Inclusion requires at least one exact-DOI audit record
-outside `adjacent_out_of_scope`, and review publications are excluded. Repeated
-experimental records from one paper remain separate in the detail view.
+`pps-publication-citation-network.v3` asset. It contains 97 non-review
+audio-tactile publications: 93 retained from the original manual confirmation
+audit and 4 added by later exact-DOI Toolkit literature audits. Its 571 directed
+citation links run from the citing publication to the cited publication.
 
-The citation-structure layout is regenerated for the focused induced graph and
-kept within a square, collision-separated viewing area. The optional publication-
-year layout answers a different chronological question. Node size and centrality
-remain corpus-local navigation aids, not study-quality ratings. Selecting a node
-opens a detail drawer with bibliographic metadata, citation neighbors, abstract
-availability/provenance, and the DOI-linked PPS Toolkit parameter records.
+The default topology is a real deterministic force layout, not a ranked grid:
+citation neighbours attract, radius-aware collision separation keeps every node
+distinct, and 22 isolates occupy a stable square perimeter. Circle area encodes
+normalized citations received within the displayed network. All links remain
+faint for context; selecting a paper emphasizes and distinguishes incoming from
+outgoing citations. The optional year layout anchors horizontal position to
+publication year while retaining collision separation.
 
-The focused asset contains 64 publication nodes, 68 in-scope task records, and
-456 directed citation edges. Fifteen publication nodes contain 17 runnable
-records; 49 publications have a Toolkit-supported paradigm but still lack source
-parameters needed for an honest runnable recreation. The interface labels these
-states explicitly as `Runnable profile` and
-`Supported paradigm · parameters incomplete`.
+The legend exposes four Toolkit assessment states: 15 runnable, 49 supported
+but parameter-incomplete, 32 not yet assessed, and 1 adjacent/scope-conflict
+publication. Selecting a node opens bibliographic metadata, abstract
+availability/provenance, directional citation neighbours, and every exact-DOI
+Toolkit audit record and extracted parameter available for that publication.
 
 The canonical v1 source remains the broader dated snapshot of 1,712 publications
 and 10,109 citation edges. It is retained for reproducible provenance and future
 audit work but is not the browser view. Neither the source nor the focused
 projection is a systematic review, exhaustive bibliography, study-quality
-ranking, or effect-size analysis. Citation direction is `citing -> cited`.
+ranking, or effect-size analysis. The inclusion audits, citation graph, and
+metadata providers have dated and incomplete coverage.
 Abstract text is included only where the generator records redistributable
 OpenAlex provenance; otherwise the asset exposes a copyright caveat and source
 link. Raw provider payloads, PDFs, supplements, extracted full text, and fuzzy
