@@ -82,6 +82,10 @@ def test_segments_expose_one_clear_decision_model_each():
     assert '.profile-mode-panel[data-lock-state="open"] .profile-lock-shackle' in styles
     assert '@media (prefers-reduced-motion: reduce)' in styles
     assert 'setEditMode(!editModeActive)' in app_js
+    assert "badge.hidden = profileReadonly" in app_js
+    assert '"inherited · read-only"' not in app_js
+    assert '"finalized · locked"' not in app_js
+    assert ".step-badge[hidden]" in styles
     assert 'showToast("Profile finalized and locked")' in app_js
     assert "function handoffExternalLinkToNative(event)" in app_js
     assert 'window.pywebview?.api?.open_external' in app_js

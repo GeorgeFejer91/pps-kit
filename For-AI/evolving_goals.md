@@ -2005,3 +2005,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   undersized controls (including selectable labels), expanded-by-default rail
   content, sticky content overlays, table compression/overflow, focus escaping
   mobile dialogs, and page tabs that fail to activate their matching panel.
+
+## 2026-08-07 — Read-only indicator simplification
+
+- Built-in and finalized profiles no longer repeat their global capability state
+  with `inherited · read-only` or `finalized · locked` pills on every panel. The
+  animated sidebar lock is the single visible editability indicator; disabled
+  mutation controls continue to enforce the boundary. Editable drafts retain
+  per-step review badges because those communicate workflow progress.

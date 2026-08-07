@@ -6056,14 +6056,19 @@ function renderWorkflow() {
       ? step.missing.join(", ")
       : "";
     for (const badge of badges) {
-      const baseText = profileReadonly
-        ? (state.custom_workflow?.is_finalized ? "finalized · locked" : "inherited · read-only")
-        : locked ? "review later" : complete ? "reviewed" : "review required";
+      badge.hidden = profileReadonly;
+      if (profileReadonly) {
+        badge.textContent = "";
+        badge.removeAttribute("title");
+        badge.className = "step-badge";
+        continue;
+      }
+      const baseText = locked ? "review later" : complete ? "reviewed" : "review required";
       badge.textContent = baseText === "review required" && missingSummary
         ? `review required · ${missingSummary}`
         : baseText;
       badge.title = missingSummary ? `Needs: ${missingSummary}` : "";
-      badge.className = `step-badge ${profileReadonly ? "readonly" : locked ? "locked" : complete ? "complete" : current ? "current" : ""}`;
+      badge.className = `step-badge ${locked ? "locked" : complete ? "complete" : current ? "current" : ""}`;
     }
   }
 

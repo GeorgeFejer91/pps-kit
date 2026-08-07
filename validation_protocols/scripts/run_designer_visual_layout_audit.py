@@ -569,6 +569,23 @@ def run_audit(
                 page.wait_for_selector("#bounded-select-menu", state="hidden")
                 geometry["metrics"] = {key: _round(value) for key, value in geometry["metrics"].items()}
                 failures = assess_geometry(case, geometry)
+                initial_readonly_mode = page.locator("body").evaluate(
+                    "body => body.classList.contains('profile-readonly-mode')"
+                )
+                readonly_badge_state = page.locator("[data-step-badge]").evaluate_all(
+                    """badges => ({
+                      total: badges.length,
+                      hidden: badges.filter(badge => badge.hidden).length,
+                      visible: badges.filter(badge => badge.getClientRects().length > 0).length,
+                      nonempty: badges.filter(badge => badge.textContent.trim()).length,
+                    })"""
+                )
+                if not initial_readonly_mode:
+                    failures.append("default immutable profile does not initialize in read-only mode")
+                if readonly_badge_state != {"total": 7, "hidden": 7, "visible": 0, "nonempty": 0}:
+                    failures.append(
+                        "read-only workflow repeats the sidebar lock state in visible step badges"
+                    )
 
                 theme_path = output_dir / f"{case.name}_theme_toggle.png"
                 page.locator("#designer-theme-toggle").screenshot(path=str(theme_path), animations="disabled")
@@ -920,15 +937,28 @@ def run_audit(
                           shackleTransform: getComputedStyle(panel.querySelector('.profile-lock-shackle')).transform,
                         })"""
                     )
+                    editable_badge_state = page.locator("[data-step-badge]").evaluate_all(
+                        """badges => ({
+                          total: badges.length,
+                          hidden: badges.filter(badge => badge.hidden).length,
+                          visible: badges.filter(badge => badge.getClientRects().length > 0).length,
+                          nonempty: badges.filter(badge => badge.textContent.trim()).length,
+                        })"""
+                    )
                     open_mode_path = output_dir / "desktop_1440_light_profile_lock_open.png"
                     page.locator("#profile-mode-panel").screenshot(path=str(open_mode_path), animations="disabled")
                     screenshots.append(open_mode_path)
+                    editable_badges_path = output_dir / "desktop_1440_light_editable_step_badges.png"
+                    page.locator("#study").screenshot(path=str(editable_badges_path), animations="disabled")
+                    screenshots.append(editable_badges_path)
                     page.locator("#edit-mode-button").click()
                     page.wait_for_function("document.querySelector('#profile-mode-panel')?.dataset.lockState === 'closed'")
                     mode_interaction = {
                         "closed": closed_state,
                         "prompt_lock_state": prompt_lock_state,
                         "open": open_state,
+                        "readonly_badge_state": readonly_badge_state,
+                        "editable_badge_state": editable_badge_state,
                     }
                     if closed_state["lockState"] != "closed" or closed_state["checked"] != "false":
                         failures.append("profile mode does not initialize as locked View")
@@ -938,6 +968,8 @@ def run_audit(
                         failures.append("named custom copy does not unlock Edit mode")
                     if open_state["shackleTransform"] == closed_state["shackleTransform"]:
                         failures.append("profile lock shackle has no distinct open visual state")
+                    if editable_badge_state != {"total": 7, "hidden": 0, "visible": 7, "nonempty": 7}:
+                        failures.append("editable custom workflow loses its step-review badges")
 
                 # Read browser errors only after every tab, disclosure, modal,
                 # and workflow interaction so late failures cannot be omitted.

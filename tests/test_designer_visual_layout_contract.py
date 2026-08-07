@@ -46,7 +46,11 @@ def test_designer_layout_uses_shared_grid_and_control_tokens() -> None:
     assert 'desktop_1440_light_profile_lock_closed.png' in audit_source
     assert 'desktop_1440_light_profile_lock_open.png' in audit_source
     assert 'desktop_1440_light_profile_copy_prompt.png' in audit_source
+    assert 'desktop_1440_light_editable_step_badges.png' in audit_source
     assert 'profile lock shackle has no distinct open visual state' in audit_source
+    assert 'default immutable profile does not initialize in read-only mode' in audit_source
+    assert 'read-only workflow repeats the sidebar lock state in visible step badges' in audit_source
+    assert 'editable custom workflow loses its step-review badges' in audit_source
     assert 'f"{case.name}_theme_toggle.png"' in audit_source
     assert 'desktop_1440_dark_theme_toggle.png' in audit_source
     assert 'theme toggle indicator does not move between sun and moon' in audit_source

@@ -12,7 +12,7 @@ The applet retains the long Segment 0-6 scroll surface, per-stage headings/actio
 
 All layout and styling changes follow `interface_design_principles.md`: a 4 px base/8 px primary rhythm, shared panel and control geometry, explicit alignment meridians, hierarchy-driven salience, WCAG-aware target/focus/reflow behavior, and iterative screenshot inspection after every visual change.
 
-Read-only profile inspection remains fully legible. Do not dim entire read-only panels: use badges, disabled mutation controls, and pointer-event gating to communicate capability while retaining normal content/surface contrast in both themes. Themeable application cards and controls use semantic surface/color variables; white backgrounds are reserved for content that inherently needs a white canvas, such as a waveform image.
+Read-only profile inspection remains fully legible. Do not dim entire read-only panels or repeat the global lock state with per-panel `inherited · read-only` or `finalized · locked` pills: the animated sidebar lock, disabled mutation controls, and pointer-event gating communicate capability while retaining normal content/surface contrast in both themes. Editable drafts retain per-step review badges because those describe workflow progress rather than profile editability. Themeable application cards and controls use semantic surface/color variables; white backgrounds are reserved for content that inherently needs a white canvas, such as a waveform image.
 
 ## Mobile Phone Layout And Interaction
 

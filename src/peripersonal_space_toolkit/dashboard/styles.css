@@ -2136,6 +2136,10 @@ body.resizing-panel * {
   text-overflow: ellipsis;
 }
 
+.step-badge[hidden] {
+  display: none;
+}
+
 .step-badge.complete {
   color: var(--primary);
   background: var(--ok-bg);
@@ -2151,12 +2155,6 @@ body.resizing-panel * {
 .step-badge.locked {
   color: #9ba59d;
   background: #eef0eb;
-}
-
-.step-badge.readonly {
-  color: #5e695f;
-  background: #eef3f0;
-  border-color: #cfd8d1;
 }
 
 .step-footer {
@@ -2178,7 +2176,7 @@ body.custom-mode .step-footer {
 
 .panel.profile-readonly {
   /* Read-only is a capability state, not unavailable content. Keep inspection
-     fully legible and communicate the state through badges and disabled edits. */
+     fully legible; the sidebar lock and disabled edits communicate the state. */
   opacity: 1;
 }
 
