@@ -15,7 +15,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 ## 2026-08-06
 
-- Reduce Segment 0 to one grouped profile selector, one `Start New Custom Design` action, and one read-only profile information card. Built-in templates remain permanent package resources; custom drafts and finalized profiles share the same selector under a separate group. Remove duplicate custom-project selection, explicit Apply/Save/Refresh/folder buttons, and the data-acquisition bridge from this design stage. A clean-slate profile must be named before its dedicated researcher-workspace folder is created; subsequent draft decisions autosave. The About modal links `Template Directory` to the physical local template directory or the hosted GitHub directory, labels its final section `Output`, and does not discuss acquisition responsibilities.
+- Reduce Segment 0 to one grouped profile selector, one `Start New Custom Design` action, and one read-only profile information card. Built-in templates remain permanent package resources; custom drafts and finalized profiles share the same selector under a separate group. Remove duplicate custom-project selection, explicit Apply/Save/Refresh/folder buttons, and the data-acquisition bridge from this design stage. A clean-slate profile must be named before its dedicated researcher-workspace folder is created; subsequent draft decisions persist at explicit `Save & Continue` boundaries (the earlier autosave direction was superseded on 2026-08-07). The About modal links `Template Directory` to the physical local template directory or the hosted GitHub directory, labels its final section `Output`, and does not discuss acquisition responsibilities.
 
 ## 2026-08-05
 
@@ -1922,8 +1922,8 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   applet for Windows WebView2 and Linux GTK/WebKitGTK, with one compiled Vite
   frontend shared by the native package and GitHub Pages.
 - Implemented hosted browser-local composition, IndexedDB draft/audio storage,
-  immutable-template copy-on-edit, source-ID-bearing derived names, draft
-  autosave, downstream invalidation, finalization locking, themes, collapsible
+  immutable-template copy-on-edit, source-ID-bearing derived names, the original
+  draft-autosave path (superseded by explicit saves on 2026-08-07), downstream invalidation, finalization locking, themes, collapsible
   sticky stages, and portable `.pps-profile` export.
 - Added SHA-256-verified profile bundles and
   `seeded_factoradic_cycle.v1`. Segment 6 is the profile validation/finalization

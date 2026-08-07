@@ -92,6 +92,76 @@ def test_segments_expose_one_clear_decision_model_each():
     assert 'document.addEventListener("click", handoffExternalLinkToNative, true)' in app_js
 
 
+def test_edit_mode_uses_explicit_sequential_save_boundaries():
+    html, app_js, styles = _dashboard_sources()
+
+    for step_id, label in (
+        ("stimulus", "Save &amp; Continue to Trial Sequence"),
+        ("trials", "Save &amp; Continue to Baseline and Tactile"),
+        ("baseline", "Save &amp; Continue to Trial Repetition Pool"),
+        ("block", "Save &amp; Continue to Block CSV Preview"),
+    ):
+        assert f'data-continue-step="{step_id}">{label}</button>' in html
+    assert "Accept Blocks &amp; Continue" in html
+    assert html.count('class="segment-reopen-button"') == 5
+
+    assert "scheduleCustomAutosave" not in app_js
+    assert "autosaveCustomDraft" not in app_js
+    assert 'new CustomEvent("pps-designer-dirty")' in app_js
+    assert 'type: "save_and_continue"' in app_js
+    assert 'type: "reopen"' in app_js
+    assert "workflow.edit_step" in app_js
+    assert 'segment.dataset.workflowState = current' in app_js
+    assert 'continueButton.hidden = !(sequentialEdit && current)' in app_js
+    assert '$("accept-block-csvs").hidden = !(sequentialEdit && current)' in app_js
+    assert 'link.removeAttribute("aria-disabled")' in app_js
+    assert 'link.setAttribute("aria-current", "step")' in app_js
+    assert 'window.addEventListener("beforeunload"' in app_js
+    assert 'panel.querySelectorAll("input, select, textarea, button")' in app_js
+    assert 'const sharedFilePicker = control.id === "audio-file-input"' in app_js
+    assert "button.disabled = select.disabled && !opensCustomize" in app_js
+    assert 'child.matches("[data-continue-step], #accept-block-csvs, #save-study-profile")' in app_js
+    assert app_js.count("workflowSaveInFlight = false;\n    renderWorkflow();") == 1
+    assert "workflowSaveInFlight = false;\n    if (button) button.disabled = false;\n    renderWorkflow();" in app_js
+
+    assert ".decision-segment.workflow-current > .segment-heading" in styles
+    assert ".decision-segment.workflow-downstream > .segment-heading h2" in styles
+    assert ".segment-reopen-button" in styles
+    assert ".step-badge.needs-review" in styles
+    assert "body.sequential-edit-mode .step-footer > :not([data-continue-step])" in styles
+    assert ".panel.locked textarea" in styles
+    assert ".panel.profile-readonly textarea" in styles
+
+
+def test_compiled_dashboard_contains_the_sequential_edit_contract():
+    dashboard = files("peripersonal_space_toolkit.dashboard")
+    compiled_html = dashboard.joinpath("compiled/index.html").read_text(encoding="utf-8")
+    compiled_assets = dashboard.joinpath("compiled/assets")
+    compiled_js = "\n".join(
+        item.read_text(encoding="utf-8")
+        for item in compiled_assets.iterdir()
+        if item.name.startswith("index-") and item.name.endswith(".js")
+    )
+    compiled_css = "\n".join(
+        item.read_text(encoding="utf-8")
+        for item in compiled_assets.iterdir()
+        if item.name.startswith("index-") and item.name.endswith(".css")
+    )
+
+    assert 'data-reopen-step="stimulus"' in compiled_html
+    assert "Save &amp; Continue to Trial Sequence" in compiled_html
+    assert "Accept Blocks &amp; Continue" in compiled_html
+    assert "accept_and_continue" in compiled_js
+    assert "designer_progress" in compiled_js
+    assert "pps-designer-dirty" in compiled_js
+    assert "scheduleCustomAutosave" not in compiled_js
+    assert ".workflow-downstream" in compiled_css
+    assert ".segment-reopen-button" in compiled_css
+    assert ".panel.locked textarea" in compiled_css
+    assert ":not(#accept-block-csvs):not(#save-study-profile)" in compiled_css
+    assert "[data-continue-step], #accept-block-csvs, #save-study-profile" in compiled_js
+
+
 def test_for_ai_contract_uses_profile_finalization_boundary():
     contract = files("peripersonal_space_toolkit.dashboard").joinpath("index.html")
     repo_root = contract.parent.parent.parent.parent

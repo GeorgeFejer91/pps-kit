@@ -6,8 +6,8 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="./assets/pps_toolkit_icon-PI4CIL5w.png">
-  <script type="module" crossorigin src="./assets/index-CFRdVmR7.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-DeiY1qA3.css">
+  <script type="module" crossorigin src="./assets/index-GoV5H_pJ.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CdIhzmZk.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -80,7 +80,7 @@
       <nav id="documentation-section-nav" class="rail-nav-group" aria-label="Documentation sections" data-rail-page="documentation" hidden>
         <div class="rail-nav-kicker">Documentation</div>
         <a href="#docs-pps" data-page-section-link="docs-pps" data-page-section-page="documentation"><span>Peripersonal Space</span></a>
-        <a href="#docs-publication-network" data-page-section-link="docs-publication-network" data-page-section-page="documentation"><span>Citation Network</span></a>
+        <a href="#docs-publication-network" data-page-section-link="docs-publication-network" data-page-section-page="documentation"><span>Audiotactile Map</span></a>
         <a href="#docs-overview" data-page-section-link="docs-overview" data-page-section-page="documentation"><span>Toolkit</span></a>
         <a href="#docs-architecture" data-page-section-link="docs-architecture" data-page-section-page="documentation"><span>Architecture</span></a>
         <a href="#docs-spatialization" data-page-section-link="docs-spatialization" data-page-section-page="documentation"><span>Stimulus Generation</span></a>
@@ -160,6 +160,7 @@
         <div class="segment-heading">
           <span class="segment-kicker">Segment 1</span>
           <h2 id="stimulus-segment-title">Build Looming Stimuli</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="stimulus" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="stimulus" aria-label="About Segment 1: Build Looming Stimuli">About</button>
         </div>
         <section class="stimulus-grid">
@@ -347,7 +348,7 @@
             </div>
             <div class="step-footer">
               <button id="open-ingredient-folder" type="button" disabled>Open Folder</button>
-              <button type="button" class="primary" data-continue-step="stimulus">Continue To Trial Sequence</button>
+              <button type="button" class="primary" data-continue-step="stimulus">Save &amp; Continue to Trial Sequence</button>
             </div>
           </section>
         </section>
@@ -357,6 +358,7 @@
         <div class="segment-heading">
           <span class="segment-kicker">Segment 2</span>
           <h2 id="trials-segment-title">Trial Sequence Design</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="trials" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="trials" aria-label="About Segment 2: Trial Sequence Design">About</button>
         </div>
         <section id="trials" class="panel" data-step-panel="trials" data-resizable-panel data-panel-id="trials">
@@ -383,7 +385,7 @@
             <button id="open-trial-sequence-folder" type="button" disabled>Open Folder</button>
           </div>
           <div class="step-footer">
-            <button type="button" class="primary" data-continue-step="trials">Continue To Baseline And Tactile</button>
+            <button type="button" class="primary" data-continue-step="trials">Save &amp; Continue to Baseline and Tactile</button>
           </div>
         </section>
       </section>
@@ -392,6 +394,7 @@
         <div class="segment-heading">
           <span class="segment-kicker">Segment 3</span>
           <h2 id="baseline-segment-title">Baseline and Tactile Trial Design</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="baseline" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="baseline" aria-label="About Segment 3: Baseline and Tactile Trial Design">About</button>
         </div>
         <section id="baseline" class="baseline-tactile-workbench" data-step-panel="baseline">
@@ -498,7 +501,7 @@
             </div>
 
             <div class="step-footer">
-              <button type="button" class="primary" data-continue-step="baseline">Continue To Trial Repetition Pool</button>
+              <button type="button" class="primary" data-continue-step="baseline">Save &amp; Continue to Trial Repetition Pool</button>
             </div>
           </section>
 
@@ -517,6 +520,7 @@
         <div class="segment-heading">
           <span class="segment-kicker">Segment 4</span>
           <h2 id="block-segment-title">Trial Repetition Pool</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="block" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="block" aria-label="About Segment 4: Trial Repetition Pool">About</button>
         </div>
         <section id="block" class="block-workbench" data-step-panel="block">
@@ -551,7 +555,7 @@
             </div>
 
             <div class="step-footer">
-              <button type="button" class="primary" data-continue-step="block">Continue To Block CSV Preview</button>
+              <button type="button" class="primary" data-continue-step="block">Save &amp; Continue to Block CSV Preview</button>
             </div>
           </section>
 
@@ -569,6 +573,7 @@
         <div class="segment-heading">
           <span class="segment-kicker">Segment 5</span>
           <h2 id="schedule-segment-title">Generate and Review Blocks</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="schedule" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="schedule" aria-label="About Segment 5: Generate and Review Blocks">About</button>
         </div>
         <section id="schedule" class="panel block-csv-preview-panel" data-step-panel="schedule" data-resizable-panel data-panel-id="block-csv-preview">
@@ -613,7 +618,7 @@
 
           <div class="step-footer block-csv-decision-actions">
             <button id="regenerate-block-csvs" type="button">Generate Blocks</button>
-            <button id="accept-block-csvs" type="button" class="primary">Accept Blocks</button>
+            <button id="accept-block-csvs" type="button" class="primary">Accept Blocks &amp; Continue</button>
           </div>
         </section>
       </section>

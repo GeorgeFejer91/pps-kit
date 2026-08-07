@@ -36,7 +36,7 @@ experiment software runs locally on the research PC.
   companion or moves literature metadata, PDFs, or participant data between the
   browser and the research PC.
 
-## Publication And Citation Network
+## Audiotactile PPS Citation Map
 
 The `Publication & Citation Network` documentation segment renders the tracked
 `pps-publication-citation-network.v2` asset. It is deliberately focused on 64

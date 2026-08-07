@@ -102,6 +102,13 @@ def build_parser() -> argparse.ArgumentParser:
         default=COMPILED_PAGE,
         help="Page path relative to the local or --base-url server.",
     )
+    parser.add_argument(
+        "--case",
+        dest="case_names",
+        action="append",
+        choices=[case.name for case in CASES],
+        help="Audit only the named viewport case. Repeat to select several cases.",
+    )
     parser.add_argument("--review-note", default="", help="Record who inspected the generated images and what was checked.")
     return parser
 
@@ -483,6 +490,7 @@ def run_audit(
     *,
     page_url: str = "",
     page_path: str = COMPILED_PAGE,
+    cases: tuple[ViewportCase, ...] = CASES,
 ) -> dict[str, Any]:
     try:
         from playwright.sync_api import sync_playwright
@@ -504,7 +512,8 @@ def run_audit(
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
         try:
-            for case_index, case in enumerate(CASES):
+            for case_index, case in enumerate(cases):
+                print(f"[visual-audit] {case.name}", flush=True)
                 context = browser.new_context(
                     viewport={"width": case.width, "height": case.height},
                     color_scheme=case.theme,
@@ -591,7 +600,7 @@ def run_audit(
                 page.locator("#designer-theme-toggle").screenshot(path=str(theme_path), animations="disabled")
                 screenshots.append(theme_path)
                 theme_interaction: dict[str, Any] = {}
-                if case_index == 0:
+                if case.name == "desktop_1440_light":
                     light_theme_state = page.locator("#designer-theme-toggle").evaluate(
                         """toggle => ({
                           theme: document.documentElement.dataset.theme,
@@ -745,7 +754,7 @@ def run_audit(
                     page_tab_interaction["keyboard"] = keyboard_states
 
                 modal_interaction: dict[str, Any] = {}
-                if case_index == 0:
+                if case.name == "desktop_1440_light":
                     locked_mode_path = output_dir / "desktop_1440_light_profile_lock_closed.png"
                     page.locator("#profile-mode-panel").screenshot(path=str(locked_mode_path), animations="disabled")
                     screenshots.append(locked_mode_path)
@@ -912,7 +921,7 @@ def run_audit(
                     screenshots.append(path)
 
                 mode_interaction: dict[str, Any] = {}
-                if case_index == 0:
+                if case.name == "desktop_1440_light":
                     closed_state = page.locator("#profile-mode-panel").evaluate(
                         """panel => ({
                           lockState: panel.dataset.lockState,
@@ -951,14 +960,170 @@ def run_audit(
                     editable_badges_path = output_dir / "desktop_1440_light_editable_step_badges.png"
                     page.locator("#study").screenshot(path=str(editable_badges_path), animations="disabled")
                     screenshots.append(editable_badges_path)
+                    sequential_before = page.evaluate(
+                        """() => {
+                          const segments = [...document.querySelectorAll('.decision-segment')];
+                          const snapshot = window.PPSDesignerApp.getState();
+                          return {
+                            edit_step: snapshot.custom_workflow?.edit_step,
+                            editing: segments.filter(segment => segment.dataset.workflowState === 'editing').map(segment => segment.id),
+                            confirmed: segments.filter(segment => segment.dataset.workflowState === 'confirmed').map(segment => segment.id),
+                            downstream: segments.filter(segment => segment.classList.contains('workflow-downstream')).map(segment => segment.id),
+                            continue_enabled: (() => {
+                              const button = document.querySelector('[data-continue-step="stimulus"]');
+                              return Boolean(button && !button.hidden && !button.disabled && button.getClientRects().length);
+                            })(),
+                            visible_forward_ctas: [...document.querySelectorAll('[data-continue-step], #accept-block-csvs, #save-study-profile')]
+                              .filter(button => !button.hidden && button.getClientRects().length > 0).length,
+                            visible_step_footers: [...document.querySelectorAll('.step-footer')]
+                              .filter(footer => !footer.hidden && footer.getClientRects().length > 0).length,
+                            visible_step_footer_controls: [...document.querySelectorAll('.step-footer > *')]
+                              .filter(control => !control.hidden && getComputedStyle(control).display !== 'none' && control.getClientRects().length > 0).length,
+                            downstream_textarea_disabled: document.querySelector('#baseline-soa-values')?.disabled === true,
+                            downstream_textarea_pointer_events: getComputedStyle(document.querySelector('#baseline-soa-values')).pointerEvents,
+                            non_active_enabled_controls: [...document.querySelectorAll('[data-step-panel]')]
+                              .filter(panel => panel.dataset.stepPanel !== snapshot.custom_workflow?.edit_step)
+                              .flatMap(panel => [...panel.querySelectorAll('input, select, textarea, button:not([data-preview-view-control])')])
+                              .filter(control => control.id !== 'audio-file-input')
+                              .filter(control => !control.disabled)
+                              .map(control => control.id || control.name || control.tagName),
+                          };
+                        }"""
+                    )
+                    edit_segment_path = output_dir / "desktop_1440_light_sequential_edit_segment_1.png"
+                    page.locator("#stimulus-segment").screenshot(path=str(edit_segment_path), animations="disabled")
+                    screenshots.append(edit_segment_path)
+                    downstream_segment_path = output_dir / "desktop_1440_light_sequential_downstream_segment_2.png"
+                    page.locator("#trials-segment").screenshot(path=str(downstream_segment_path), animations="disabled")
+                    screenshots.append(downstream_segment_path)
+                    page.locator('[data-continue-step="stimulus"]').click()
+                    page.wait_for_function(
+                        """() => (
+                          window.PPSDesignerApp.getState().custom_workflow?.edit_step === 'trials'
+                          && document.querySelector('#trials-segment')?.dataset.workflowState === 'editing'
+                        )"""
+                    )
+                    sequential_after = page.evaluate(
+                        """() => {
+                          const segments = [...document.querySelectorAll('.decision-segment')];
+                          const snapshot = window.PPSDesignerApp.getState();
+                          return {
+                            edit_step: snapshot.custom_workflow?.edit_step,
+                            editing: segments.filter(segment => segment.dataset.workflowState === 'editing').map(segment => segment.id),
+                            confirmed: segments.filter(segment => segment.dataset.workflowState === 'confirmed').map(segment => segment.id),
+                            downstream: segments.filter(segment => segment.classList.contains('workflow-downstream')).map(segment => segment.id),
+                            stimulus_reopen_visible: document.querySelector('[data-reopen-step="stimulus"]')?.getClientRects().length > 0,
+                            stimulus_reopen_enabled: !document.querySelector('[data-reopen-step="stimulus"]')?.disabled,
+                          };
+                        }"""
+                    )
+                    saved_segment_path = output_dir / "desktop_1440_light_sequential_saved_segment_1.png"
+                    page.locator("#stimulus-segment").screenshot(path=str(saved_segment_path), animations="disabled")
+                    screenshots.append(saved_segment_path)
+                    next_segment_path = output_dir / "desktop_1440_light_sequential_active_segment_2.png"
+                    page.locator("#trials-segment").screenshot(path=str(next_segment_path), animations="disabled")
+                    screenshots.append(next_segment_path)
+                    page.once("dialog", lambda dialog: dialog.accept())
+                    page.locator('[data-reopen-step="stimulus"]').click()
+                    page.wait_for_function(
+                        """() => (
+                          window.PPSDesignerApp.getState().custom_workflow?.edit_step === 'stimulus'
+                          && document.querySelector('#stimulus-segment')?.dataset.workflowState === 'editing'
+                        )"""
+                    )
+                    reopened_state = page.evaluate(
+                        """() => {
+                          const segments = [...document.querySelectorAll('.decision-segment')];
+                          const snapshot = window.PPSDesignerApp.getState();
+                          return {
+                            edit_step: snapshot.custom_workflow?.edit_step,
+                            editing: segments.filter(segment => segment.dataset.workflowState === 'editing').map(segment => segment.id),
+                            confirmed: segments.filter(segment => segment.dataset.workflowState === 'confirmed').map(segment => segment.id),
+                            downstream: segments.filter(segment => segment.classList.contains('workflow-downstream')).map(segment => segment.id),
+                          };
+                        }"""
+                    )
+                    for step_id, next_step in (
+                        ("stimulus", "trials"),
+                        ("trials", "baseline"),
+                        ("baseline", "block"),
+                        ("block", "schedule"),
+                    ):
+                        page.locator(f'[data-continue-step="{step_id}"]').click()
+                        page.wait_for_function(
+                            """expected => (
+                              window.PPSDesignerApp.getState().custom_workflow?.edit_step === expected
+                              && document.querySelector(`[data-step-panel="${expected}"]`)
+                                ?.closest('.decision-segment')?.dataset.workflowState === 'editing'
+                            )""",
+                            arg=next_step,
+                        )
+                    page.locator('[data-step-link="schedule"]').click()
+                    page.wait_for_function(
+                        """() => {
+                          const segment = document.querySelector('#schedule-segment');
+                          const accept = document.querySelector('#accept-block-csvs');
+                          return segment
+                            && !segment.classList.contains('collapsed')
+                            && accept
+                            && !accept.hidden
+                            && accept.getClientRects().length > 0;
+                        }"""
+                    )
+                    page.locator("#accept-block-csvs").click()
+                    page.wait_for_function(
+                        """() => {
+                          const finalButton = document.querySelector('#save-study-profile');
+                          return window.PPSDesignerApp.getState().custom_workflow?.edit_step === 'run'
+                            && document.querySelector('#run-segment')?.dataset.workflowState === 'editing'
+                            && finalButton
+                            && !finalButton.hidden
+                            && !finalButton.disabled
+                            && finalButton.getClientRects().length > 0;
+                        }"""
+                    )
+                    hosted_full_sequence = page.evaluate(
+                        """() => {
+                          const snapshot = window.PPSDesignerApp.getState();
+                          const progress = snapshot.custom_workflow || {};
+                          const finalButton = document.querySelector('#save-study-profile');
+                          return {
+                            edit_step: progress.edit_step,
+                            confirmed_steps: progress.confirmed_steps,
+                            needs_review_steps: progress.needs_review_steps,
+                            final_action_visible: Boolean(finalButton && !finalButton.hidden && finalButton.getClientRects().length),
+                            final_action_enabled: Boolean(finalButton && !finalButton.disabled),
+                          };
+                        }"""
+                    )
                     page.locator("#edit-mode-button").click()
                     page.wait_for_function("document.querySelector('#profile-mode-panel')?.dataset.lockState === 'closed'")
+                    overview_state = page.evaluate(
+                        """() => {
+                          const segments = [...document.querySelectorAll('.decision-segment')];
+                          return {
+                            visible: segments.filter(segment => segment.getClientRects().length > 0).length,
+                            workflow_current: segments.filter(segment => segment.classList.contains('workflow-current')).length,
+                            workflow_downstream: segments.filter(segment => segment.classList.contains('workflow-downstream')).length,
+                            overview: segments.filter(segment => segment.dataset.workflowState === 'overview').length,
+                            muted_panels: [...document.querySelectorAll('[data-step-panel]')].filter(panel => {
+                              const style = getComputedStyle(panel);
+                              return Number(style.opacity) < 0.99 || style.filter !== 'none';
+                            }).length,
+                          };
+                        }"""
+                    )
                     mode_interaction = {
                         "closed": closed_state,
                         "prompt_lock_state": prompt_lock_state,
                         "open": open_state,
                         "readonly_badge_state": readonly_badge_state,
                         "editable_badge_state": editable_badge_state,
+                        "sequential_before": sequential_before,
+                        "sequential_after": sequential_after,
+                        "reopened_state": reopened_state,
+                        "hosted_full_sequence": hosted_full_sequence,
+                        "overview_state": overview_state,
                     }
                     if closed_state["lockState"] != "closed" or closed_state["checked"] != "false":
                         failures.append("profile mode does not initialize as locked View")
@@ -970,6 +1135,52 @@ def run_audit(
                         failures.append("profile lock shackle has no distinct open visual state")
                     if editable_badge_state != {"total": 7, "hidden": 0, "visible": 7, "nonempty": 7}:
                         failures.append("editable custom workflow loses its step-review badges")
+                    if sequential_before != {
+                        "edit_step": "stimulus",
+                        "editing": ["stimulus-segment"],
+                        "confirmed": ["study-segment"],
+                        "downstream": ["trials-segment", "baseline-segment", "block-segment", "schedule-segment", "run-segment"],
+                        "continue_enabled": True,
+                        "visible_forward_ctas": 1,
+                        "visible_step_footers": 1,
+                        "visible_step_footer_controls": 1,
+                        "downstream_textarea_disabled": True,
+                        "downstream_textarea_pointer_events": "none",
+                        "non_active_enabled_controls": [],
+                    }:
+                        failures.append("Edit mode does not initialize with exactly Segment 1 editable and downstream segments muted")
+                    if sequential_after != {
+                        "edit_step": "trials",
+                        "editing": ["trials-segment"],
+                        "confirmed": ["study-segment", "stimulus-segment"],
+                        "downstream": ["baseline-segment", "block-segment", "schedule-segment", "run-segment"],
+                        "stimulus_reopen_visible": True,
+                        "stimulus_reopen_enabled": True,
+                    }:
+                        failures.append("Save & Continue does not lock Segment 1 and advance exactly once to Segment 2")
+                    if reopened_state != {
+                        "edit_step": "stimulus",
+                        "editing": ["stimulus-segment"],
+                        "confirmed": ["study-segment"],
+                        "downstream": ["trials-segment", "baseline-segment", "block-segment", "schedule-segment", "run-segment"],
+                    }:
+                        failures.append("Reopen segment is not clickable or does not restore the earlier sequential boundary")
+                    if hosted_full_sequence != {
+                        "edit_step": "run",
+                        "confirmed_steps": ["study", "stimulus", "trials", "baseline", "block", "schedule"],
+                        "needs_review_steps": [],
+                        "final_action_visible": True,
+                        "final_action_enabled": True,
+                    }:
+                        failures.append("Hosted sequential review cannot traverse Segment 1 through Segment 6")
+                    if overview_state != {
+                        "visible": 7,
+                        "workflow_current": 0,
+                        "workflow_downstream": 0,
+                        "overview": 7,
+                        "muted_panels": 0,
+                    }:
+                        failures.append("View mode does not restore the full unmuted seven-segment overview")
 
                 # Read browser errors only after every tab, disclosure, modal,
                 # and workflow interaction so late failures cannot be omitted.
@@ -996,6 +1207,12 @@ def run_audit(
                 report["cases"].append(case_record)
                 report["failures"].extend(f"{case.name}: {failure}" for failure in failures)
                 context.close()
+                # The compiled dashboard can include large lazy documentation
+                # assets. Recycle Chromium between viewports so those assets and
+                # GPU surfaces cannot accumulate across the full matrix.
+                if case_index + 1 < len(cases):
+                    browser.close()
+                    browser = playwright.chromium.launch(headless=True)
         finally:
             browser.close()
 
@@ -1029,6 +1246,10 @@ def run_audit(
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    selected_cases = tuple(
+        case for case in CASES
+        if not args.case_names or case.name in args.case_names
+    )
     if args.page_url:
         report = run_audit(
             "",
@@ -1036,6 +1257,7 @@ def main(argv: list[str] | None = None) -> int:
             args.review_note,
             page_url=args.page_url,
             page_path=args.page_path,
+            cases=selected_cases,
         )
     elif args.base_url:
         report = run_audit(
@@ -1043,6 +1265,7 @@ def main(argv: list[str] | None = None) -> int:
             args.output_dir,
             args.review_note,
             page_path=args.page_path,
+            cases=selected_cases,
         )
     else:
         with serve_repository() as base_url:
@@ -1051,6 +1274,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.output_dir,
                 args.review_note,
                 page_path=args.page_path,
+                cases=selected_cases,
             )
     print(json.dumps({"passed": report["passed"], "failures": report["failures"], "contact_sheet": report["contact_sheet"]}, indent=2))
     return 0 if report["passed"] else 1

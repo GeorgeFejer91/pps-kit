@@ -27,7 +27,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from importlib.resources import files
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Iterable
 
 from . import render_backend
 from .design import (
@@ -176,6 +176,10 @@ DATA_ACQUISITION_BRIDGE_SCHEMA = "pps-dashboard-runner-bridge.v1"
 DASHBOARD_DESIGN_EXPORT_DIRNAME = "dashboard_design_export"
 PROJECT_METADATA_KEY = "dashboard_project"
 RUN_SETUP_METADATA_KEY = "dashboard_run_setup"
+DESIGNER_PROGRESS_KEY = "designer_progress"
+DESIGNER_PROGRESS_SCHEMA = "pps-designer-progress.v1"
+DESIGNER_WORKFLOW_STEPS = ("study", "stimulus", "trials", "baseline", "block", "schedule", "run")
+DESIGNER_STEP_SEGMENTS = {"stimulus": 1, "trials": 2, "baseline": 3, "block": 4, "schedule": 5, "run": 6}
 CUSTOM_PROJECT_ID_SLUG_MAX_LENGTH = 21
 TRIAL_POOL_FAMILIES = ("audio_tactile", "baseline", "catch", "auditory_only")
 ROW_CONTRACT_FIELDS = (
@@ -606,6 +610,21 @@ class DashboardController:
         self.preload_inventory = load_preload_inventory(REPO_ROOT)
         self.design = self._load_initial_design()
         project = self._ensure_project_context(self.design, clear_stale_profile_outputs=True)
+        stored_progress = self.design.study_profile_reference_parameters.get(DESIGNER_PROGRESS_KEY)
+        if _is_custom_design(self.design) and (
+            not isinstance(stored_progress, dict)
+            or stored_progress.get("schema") != DESIGNER_PROGRESS_SCHEMA
+        ):
+            legacy_workflow = _custom_workflow_status(self.design, "", project.project_dir)
+            _set_designer_progress(
+                self.design,
+                edit_step=str(legacy_workflow.get("current_step") or "stimulus"),
+                confirmed_steps=legacy_workflow.get("confirmed_steps", ("study",)),
+                needs_review_steps=legacy_workflow.get("needs_review_steps", ()),
+                revision=int(legacy_workflow.get("review_revision") or 0),
+            )
+            _write_project_context_files(project, self.design)
+            save_design(self.design, self.design_path)
         if self.design.study_profile_id == DEFAULT_STUDY_TEMPLATE_ID:
             _materialize_study_profile_segment1_ingredients(project, self.design)
             _write_project_context_files(project, self.design)
@@ -614,6 +633,7 @@ class DashboardController:
         self.current_run_package: RunPackage | None = None
         self.jobs = JobManager()
         self._lock = threading.Lock()
+        self._workflow_lock = threading.RLock()
 
     def _load_initial_design(self) -> StimulusDesign:
         if self.design_path.exists():
@@ -980,6 +1000,15 @@ class DashboardController:
             "created_at": context.created_at,
             "placeholder_name": False,
         }
+        if DESIGNER_PROGRESS_KEY not in design.study_profile_reference_parameters:
+            legacy_workflow = _custom_workflow_status(design, "", context.project_dir)
+            _set_designer_progress(
+                design,
+                edit_step=str(legacy_workflow.get("edit_step") or legacy_workflow.get("current_step") or "stimulus"),
+                confirmed_steps=legacy_workflow.get("confirmed_steps", ("study",)),
+                needs_review_steps=legacy_workflow.get("needs_review_steps", ()),
+                revision=int(legacy_workflow.get("review_revision") or 0),
+            )
         with self._lock:
             self.design = design
             self.participant_id = ""
@@ -1113,10 +1142,20 @@ class DashboardController:
         profile_name = str(payload.get("name") or "").strip()
         if not profile_name:
             raise ValueError("Enter a profile name before saving.")
+        try:
+            expected_revision = int(payload["expected_revision"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError("Profile finalization requires the current workflow revision.") from exc
         created_at = datetime.now()
-        with self._lock:
+        with self._workflow_lock, self._lock:
             source_project = self._ensure_project_context(self.design)
             source_design = _copy_design(self.design)
+            if not _is_custom_design(source_design) or _is_readonly_profile_design(source_design):
+                raise ValueError("Only an unlocked custom draft can be finalized.")
+            progress = _designer_progress(source_design)
+            if expected_revision != progress["revision"]:
+                raise ValueError("This study changed in another view. Reload it before finalizing.")
+            _require_designer_review_complete(source_design)
             _require_custom_workflow_ready(
                 source_design,
                 self.participant_id,
@@ -1282,52 +1321,239 @@ class DashboardController:
         snapshot["output_folder_export_result"] = bridge
         return snapshot
 
-    def update_design(self, payload: dict[str, Any]) -> dict[str, Any]:
+    def _update_designer_progress(
+        self,
+        *,
+        edit_step: str,
+        confirmed_steps: Iterable[str],
+        needs_review_steps: Iterable[str],
+        revision: int,
+    ) -> dict[str, Any]:
         with self._lock:
-            previous_design = _copy_design(self.design)
-            if _is_readonly_profile_design(previous_design) and _payload_mutates_design(payload):
-                raise ValueError("Loaded study profiles are read-only. Use Edit As New Study before changing design settings.")
-            if "participant_id" in payload:
-                participant_id = str(payload.get("participant_id") or "").strip()
-                self.participant_id = participant_id or ("" if _is_custom_design(self.design) else "P001")
-            if "design" in payload:
-                self.design = _carry_forward_project_metadata(previous_design, design_from_dict(dict(payload["design"])))
-            elif any(key in payload for key in ("name", "trajectory", "protocol", "noises")):
-                self.design = _carry_forward_project_metadata(previous_design, design_from_dict(payload))
-            if "trajectory_controls" in payload:
-                self.design = _apply_trajectory_controls(self.design, dict(payload["trajectory_controls"]))
-            _apply_run_setup_payload(self.design, payload.get("run_setup"))
-            self.design = _normalize_dashboard_design(self.design)
-            if _should_refresh_placeholder_custom_project(self.design, self.project_registry_root):
-                project = self._ensure_project_context(self.design, force_new_custom=True)
-            else:
-                project = self._ensure_project_context(self.design)
-            changed_segment = _earliest_changed_design_segment(previous_design, self.design)
-            if changed_segment is not None:
-                _clear_downstream_segment_outputs(project, from_segment=changed_segment)
-            self.current_run_package = None
-            save_design(self.design, self.design_path)
-            record_experiment_activity(
-                "project_edited",
-                state_root=self.state_root,
-                template_id=self.design.study_profile_id,
-                project_dir=str(_project_context_from_design(self.design, self.project_registry_root).project_dir if _project_context_from_design(self.design, self.project_registry_root) else ""),
-                design_path=str(self.design_path),
-                participant_id=self.participant_id,
+            progress = _set_designer_progress(
+                self.design,
+                edit_step=edit_step,
+                confirmed_steps=confirmed_steps,
+                needs_review_steps=needs_review_steps,
+                revision=revision,
             )
+            project = self._ensure_project_context(self.design)
+            save_design(self.design, self.design_path)
             self._append_dashboard_diary_event(
-                "dashboard_design_saved",
-                project=_project_context_from_design(self.design, self.project_registry_root),
+                "dashboard_workflow_progress_saved",
+                project=project,
                 payload={
-                    "payload_keys": sorted(str(key) for key in payload.keys()),
-                    "design_name": self.design.name,
+                    "edit_step": progress["edit_step"],
+                    "confirmed_steps": progress["confirmed_steps"],
+                    "needs_review_steps": progress["needs_review_steps"],
+                    "revision": progress["revision"],
                 },
             )
         return self.snapshot()
 
+    def _apply_designer_workflow_action(
+        self,
+        payload: dict[str, Any],
+        action: dict[str, Any],
+    ) -> dict[str, Any]:
+        action_type = str(action.get("type") or "").strip().lower()
+        step_id = str(action.get("step_id") or "").strip().lower()
+        if step_id not in DESIGNER_WORKFLOW_STEPS or step_id == "study":
+            raise ValueError("Choose a valid editable workflow segment.")
+        try:
+            expected_revision = int(action["expected_revision"])
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Workflow revision must be an integer.") from exc
+        except KeyError as exc:
+            raise ValueError("Workflow revision is required. Reload before continuing.") from exc
+
+        with self._workflow_lock:
+            before = self.snapshot()
+            workflow = dict(before.get("custom_workflow") or {})
+            if not workflow.get("is_custom") or workflow.get("is_finalized"):
+                raise ValueError("Sequential editing is available only for unlocked custom studies.")
+            edit_step = str(workflow.get("edit_step") or workflow.get("current_step") or "stimulus")
+            revision = int(workflow.get("review_revision") or 0)
+            if expected_revision != revision:
+                raise ValueError("This study changed in another view. Reload it before continuing.")
+
+            confirmed = list(workflow.get("confirmed_steps") or ("study",))
+            needs_review = list(workflow.get("needs_review_steps") or ())
+            if action_type == "reopen":
+                if step_id == "run" or step_id not in confirmed:
+                    raise ValueError("Only a previously saved design segment can be reopened.")
+                target_index = DESIGNER_WORKFLOW_STEPS.index(step_id)
+                active_index = DESIGNER_WORKFLOW_STEPS.index(edit_step)
+                if target_index >= active_index:
+                    raise ValueError("Choose an earlier saved segment to reopen.")
+                later_confirmed = [
+                    item
+                    for item in confirmed
+                    if DESIGNER_WORKFLOW_STEPS.index(item) > target_index
+                ]
+                retained_confirmed = [
+                    item
+                    for item in confirmed
+                    if DESIGNER_WORKFLOW_STEPS.index(item) < target_index
+                ]
+                updated = self._update_designer_progress(
+                    edit_step=step_id,
+                    confirmed_steps=retained_confirmed,
+                    needs_review_steps=[*needs_review, *later_confirmed],
+                    revision=revision + 1,
+                )
+                updated["workflow_action_result"] = {
+                    "type": "reopen",
+                    "reopened_step": step_id,
+                    "advanced": False,
+                }
+                return updated
+
+            if action_type != "save_and_continue":
+                raise ValueError("Unsupported workflow action.")
+            if step_id == "run":
+                raise ValueError("Use Done — Lock Profile to finish Segment 6.")
+            if step_id != edit_step:
+                raise ValueError(f"Save {edit_step} before continuing to another segment.")
+
+            save_payload = {key: value for key, value in payload.items() if key != "workflow_action"}
+            candidate = _candidate_design_from_payload(self.design, save_payload)
+            changed_segments = _changed_design_segments(self.design, candidate)
+            active_segment = DESIGNER_STEP_SEGMENTS.get(step_id)
+            identity_changed = any(
+                getattr(candidate, field_name) != getattr(self.design, field_name)
+                for field_name in ("name", "study_profile_id", "study_profile_title")
+            )
+            if identity_changed or any(segment != active_segment for segment in changed_segments):
+                raise ValueError(
+                    f"Save & Continue for {step_id} may change only that segment. Reload and reopen any other segment first."
+                )
+            updated = self.update_design(save_payload) if save_payload else before
+            updated_workflow = dict(updated.get("custom_workflow") or {})
+            step = next(
+                (item for item in updated_workflow.get("steps", []) if item.get("id") == step_id),
+                None,
+            )
+            if not step or not step.get("complete"):
+                updated["workflow_action_result"] = {
+                    "type": "save_and_continue",
+                    "saved_step": step_id,
+                    "advanced": False,
+                    "missing": list(step.get("missing") or ()) if step else ["Workflow status is unavailable."],
+                }
+                return updated
+
+            current_progress = _designer_progress(self.design, artifact_step=step_id)
+            if current_progress["edit_step"] != step_id:
+                raise ValueError("This workflow segment is no longer active. Reload before continuing.")
+            next_index = DESIGNER_WORKFLOW_STEPS.index(step_id) + 1
+            next_step = DESIGNER_WORKFLOW_STEPS[min(next_index, len(DESIGNER_WORKFLOW_STEPS) - 1)]
+            updated_confirmed = [*current_progress["confirmed_steps"], step_id]
+            updated_needs_review = [
+                item for item in current_progress["needs_review_steps"] if item != step_id
+            ]
+            result = self._update_designer_progress(
+                edit_step=next_step,
+                confirmed_steps=updated_confirmed,
+                needs_review_steps=updated_needs_review,
+                revision=current_progress["revision"] + 1,
+            )
+            result["workflow_action_result"] = {
+                "type": "save_and_continue",
+                "saved_step": step_id,
+                "unlocked_step": next_step,
+                "advanced": True,
+                "missing": [],
+            }
+            return result
+
+    def update_design(self, payload: dict[str, Any]) -> dict[str, Any]:
+        workflow_action = payload.get("workflow_action") if isinstance(payload.get("workflow_action"), dict) else None
+        if workflow_action is not None:
+            return self._apply_designer_workflow_action(payload, workflow_action)
+        with self._workflow_lock:
+            with self._lock:
+                previous_design = _copy_design(self.design)
+                candidate = _candidate_design_from_payload(previous_design, payload)
+                previous_project_id = str(_project_metadata(previous_design).get("project_id") or "").strip()
+                candidate_project_id = str(_project_metadata(candidate).get("project_id") or "").strip()
+                stale_placeholder_context = bool(
+                    _project_metadata(candidate).get("placeholder_name")
+                    and not _project_metadata(previous_design).get("placeholder_name")
+                )
+                if (
+                    _is_custom_design(previous_design)
+                    and previous_project_id
+                    and candidate_project_id
+                    and candidate_project_id != previous_project_id
+                    and not stale_placeholder_context
+                ):
+                    raise ValueError("This design payload belongs to another project. Reload the active study before saving.")
+
+                finalized_custom = (
+                    _is_custom_design(previous_design)
+                    and str(previous_design.study_profile_reference_parameters.get("profile_status") or "draft") == "finalized"
+                )
+                mutates_readonly_design = (
+                    design_to_dict(candidate) != design_to_dict(_normalize_dashboard_design(_copy_design(previous_design)))
+                    if finalized_custom
+                    else _payload_mutates_design(payload)
+                )
+                if _is_readonly_profile_design(previous_design) and mutates_readonly_design:
+                    raise ValueError("Loaded study profiles are read-only. Use Edit As New Study before changing design settings.")
+
+                changed_segments = _changed_design_segments(previous_design, candidate)
+                progress = _designer_progress(previous_design)
+
+                if "participant_id" in payload:
+                    participant_id = str(payload.get("participant_id") or "").strip()
+                    self.participant_id = participant_id or ("" if _is_custom_design(previous_design) else "P001")
+                self.design = candidate
+                if _should_refresh_placeholder_custom_project(self.design, self.project_registry_root):
+                    project = self._ensure_project_context(self.design, force_new_custom=True)
+                else:
+                    project = self._ensure_project_context(self.design)
+                changed_segment = min(changed_segments) if changed_segments else None
+                if changed_segment is not None:
+                    _clear_downstream_segment_outputs(project, from_segment=changed_segment)
+                    if _is_custom_design(self.design) and not finalized_custom:
+                        _set_designer_progress(
+                            self.design,
+                            edit_step=progress["edit_step"],
+                            confirmed_steps=progress["confirmed_steps"],
+                            needs_review_steps=progress["needs_review_steps"],
+                            revision=progress["revision"] + 1,
+                        )
+                self.current_run_package = None
+                save_design(self.design, self.design_path)
+                record_experiment_activity(
+                    "project_edited",
+                    state_root=self.state_root,
+                    template_id=self.design.study_profile_id,
+                    project_dir=str(_project_context_from_design(self.design, self.project_registry_root).project_dir if _project_context_from_design(self.design, self.project_registry_root) else ""),
+                    design_path=str(self.design_path),
+                    participant_id=self.participant_id,
+                )
+                self._append_dashboard_diary_event(
+                    "dashboard_design_saved",
+                    project=_project_context_from_design(self.design, self.project_registry_root),
+                    payload={
+                        "payload_keys": sorted(str(key) for key in payload.keys()),
+                        "design_name": self.design.name,
+                    },
+                )
+        return self.snapshot()
+
+    def _require_artifact_mutation_allowed(self) -> None:
+        with self._lock:
+            design = _copy_design(self.design)
+        if _is_readonly_profile_design(design):
+            raise ValueError("Loaded study profiles are read-only. Use Edit As New Study before changing generated design artifacts.")
+
     def start_render_job(self, payload: dict[str, Any]) -> DashboardJob:
         if payload:
             self.update_design(payload)
+        self._require_artifact_mutation_allowed()
         with self._lock:
             project = self._ensure_project_context(self.design)
             design = _copy_design(self.design)
@@ -1361,6 +1587,7 @@ class DashboardController:
         design_payload = {key: value for key, value in payload.items() if key != "bake_recipe"}
         if design_payload:
             self.update_design(design_payload)
+        self._require_artifact_mutation_allowed()
         with self._lock:
             project = self._ensure_project_context(self.design)
             design = _copy_design(self.design)
@@ -1637,9 +1864,8 @@ class DashboardController:
         )
         return self.snapshot() if snapshot else {"session_manifest": str(package.manifest_path), "session_dir": str(package.session_dir)}
 
-    def accept_block_csv_preview(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
-        if payload:
-            self.update_design(payload)
+    def _accept_block_csv_preview_now(self) -> dict[str, Any]:
+        self._require_artifact_mutation_allowed()
         with self._lock:
             project = self._ensure_project_context(self.design)
             design = _copy_design(self.design)
@@ -1665,7 +1891,57 @@ class DashboardController:
         )
         return self.snapshot()
 
+    def accept_block_csv_preview(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        payload = payload or {}
+        action = payload.get("workflow_action") if isinstance(payload.get("workflow_action"), dict) else None
+        if not action or str(action.get("type") or "").strip().lower() != "accept_and_continue":
+            if payload:
+                self.update_design(payload)
+            return self._accept_block_csv_preview_now()
+
+        try:
+            expected_revision = int(action["expected_revision"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError("Workflow revision is required. Reload before accepting blocks.") from exc
+        with self._workflow_lock:
+            workflow = dict(self.snapshot().get("custom_workflow") or {})
+            if not workflow.get("is_custom") or workflow.get("is_finalized"):
+                raise ValueError("Only an unlocked custom study can accept editable blocks.")
+            if str(workflow.get("edit_step") or "") != "schedule":
+                raise ValueError("Save the active segment before accepting Segment 5 blocks.")
+            if int(workflow.get("review_revision") or 0) != expected_revision:
+                raise ValueError("This study changed in another view. Reload it before accepting blocks.")
+            save_payload = {key: value for key, value in payload.items() if key != "workflow_action"}
+            candidate = _candidate_design_from_payload(self.design, save_payload)
+            if any(segment != 5 for segment in _changed_design_segments(self.design, candidate)):
+                raise ValueError("Accept Blocks & Continue may change only Segment 5.")
+            if save_payload:
+                self.update_design(save_payload)
+            accepted = self._accept_block_csv_preview_now()
+            step = next(
+                (item for item in accepted.get("custom_workflow", {}).get("steps", []) if item.get("id") == "schedule"),
+                None,
+            )
+            if not step or not step.get("complete"):
+                raise ValueError("Segment 5 blocks were not valid after acceptance.")
+            progress = _designer_progress(self.design, artifact_step="schedule")
+            result = self._update_designer_progress(
+                edit_step="run",
+                confirmed_steps=[*progress["confirmed_steps"], "schedule"],
+                needs_review_steps=[item for item in progress["needs_review_steps"] if item != "schedule"],
+                revision=progress["revision"] + 1,
+            )
+            result["workflow_action_result"] = {
+                "type": "accept_and_continue",
+                "saved_step": "schedule",
+                "unlocked_step": "run",
+                "advanced": True,
+                "missing": [],
+            }
+            return result
+
     def edit_block_csv_preview(self) -> dict[str, Any]:
+        self._require_artifact_mutation_allowed()
         with self._lock:
             project = self._ensure_project_context(self.design)
             design = _copy_design(self.design)
@@ -1694,9 +1970,48 @@ class DashboardController:
         return self.snapshot()
 
     def preview_run_sequence(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
-        if payload:
-            self.update_design(payload)
-        return self.snapshot()
+        if not payload:
+            return self.snapshot()
+        with self._lock:
+            saved_design = _copy_design(self.design)
+            project = self._ensure_project_context(self.design)
+            participant_id = str(payload.get("participant_id") or self.participant_id or "").strip()
+        if "design" in payload:
+            candidate = _carry_forward_project_metadata(
+                saved_design,
+                design_from_dict(dict(payload["design"])),
+            )
+        elif any(key in payload for key in ("name", "trajectory", "protocol", "noises")):
+            candidate = _carry_forward_project_metadata(saved_design, design_from_dict(payload))
+        else:
+            candidate = saved_design
+        if "trajectory_controls" in payload:
+            candidate = _apply_trajectory_controls(candidate, dict(payload["trajectory_controls"]))
+        _apply_run_setup_payload(candidate, payload.get("run_setup"))
+        candidate = _normalize_dashboard_design(candidate)
+
+        # Segment 6 previews are intentionally candidate-only. They update the
+        # visible order/checklist without persisting until the final lock action.
+        snapshot = self.snapshot()
+        artifact_root = self._lookup_root_for_design(candidate, project)
+        snapshot.update({
+            "design": design_to_dict(candidate),
+            "participant_id": participant_id,
+            "custom_workflow": _custom_workflow_status(candidate, participant_id, project.project_dir),
+            "trajectory_controls": _trajectory_controls(candidate),
+            "viewer_payload": trajectory_viewer_payload(candidate),
+            "protocol_summary": protocol_summary(candidate),
+            "trial_preview": _trial_preview_rows(candidate, artifact_root),
+            "participant_orders": _participant_orders(candidate),
+            "validation": validate_design(candidate),
+            "project_segments": _project_segments_status(project, candidate),
+            "run_sequence_setup": _run_setup_preview(project.project_dir, candidate),
+            "preflight": _preflight_to_dict(
+                preflight_run_package(candidate, participant_id, render_dir=artifact_root, require_audio=False)
+            ),
+            "preview_only": True,
+        })
+        return snapshot
 
     def regenerate_run_sequence(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
         if payload:
@@ -1708,6 +2023,9 @@ class DashboardController:
             errors = _validate_run_setup_manifest(manifest, project_dir=project.project_dir, design=self.design)
             if manifest and not errors:
                 raise ValueError("Segment 6 experiment setup is prepared. Change requests should start from a new prepared setup rather than silently regenerating it.")
+        self._require_artifact_mutation_allowed()
+        with self._lock:
+            project = self._ensure_project_context(self.design)
             settings = _run_setup_settings(self.design)
             if self.design.protocol.participant_order_policy.get("algorithm") == "seeded_factoradic_cycle.v1":
                 deterministic_policy = True
@@ -1737,6 +2055,9 @@ class DashboardController:
                 raise ValueError(
                     "Segment 6 experiment setup is already prepared. Start from a new setup or change upstream segments before preparing again."
                 )
+        self._require_artifact_mutation_allowed()
+        with self._lock:
+            project = self._ensure_project_context(self.design)
             result = _write_run_setup_outputs(project.project_dir, self.design)
             _write_segment_validation_report(project, self.design)
             self.current_run_package = None
@@ -7359,6 +7680,86 @@ def _custom_schedule_missing(project_dir: Path | None, design: StimulusDesign) -
     return []
 
 
+def _designer_progress(
+    design: StimulusDesign,
+    *,
+    artifact_step: str = "stimulus",
+) -> dict[str, Any]:
+    """Return normalized, server-owned progress for sequential design review."""
+    raw = design.study_profile_reference_parameters.get(DESIGNER_PROGRESS_KEY)
+    stored = (
+        dict(raw)
+        if isinstance(raw, dict) and raw.get("schema") == DESIGNER_PROGRESS_SCHEMA
+        else {}
+    )
+    fallback_step = artifact_step if artifact_step in DESIGNER_WORKFLOW_STEPS else "stimulus"
+    edit_step = str(stored.get("edit_step") or fallback_step)
+    if edit_step not in DESIGNER_WORKFLOW_STEPS:
+        edit_step = fallback_step
+
+    if stored:
+        confirmed = {
+            str(step_id)
+            for step_id in stored.get("confirmed_steps", [])
+            if str(step_id) in DESIGNER_WORKFLOW_STEPS
+        }
+    else:
+        edit_index = DESIGNER_WORKFLOW_STEPS.index(edit_step)
+        confirmed = set(DESIGNER_WORKFLOW_STEPS[:edit_index])
+    confirmed.add("study")
+    confirmed.discard(edit_step)
+
+    needs_review = {
+        str(step_id)
+        for step_id in stored.get("needs_review_steps", [])
+        if str(step_id) in DESIGNER_WORKFLOW_STEPS
+    }
+    needs_review.difference_update(confirmed)
+    needs_review.discard(edit_step)
+    try:
+        revision = max(0, int(stored.get("revision") or 0))
+    except (TypeError, ValueError):
+        revision = 0
+    return {
+        "schema": DESIGNER_PROGRESS_SCHEMA,
+        "edit_step": edit_step,
+        "confirmed_steps": [step_id for step_id in DESIGNER_WORKFLOW_STEPS if step_id in confirmed],
+        "needs_review_steps": [step_id for step_id in DESIGNER_WORKFLOW_STEPS if step_id in needs_review],
+        "revision": revision,
+    }
+
+
+def _set_designer_progress(
+    design: StimulusDesign,
+    *,
+    edit_step: str,
+    confirmed_steps: Iterable[str],
+    needs_review_steps: Iterable[str] = (),
+    revision: int = 0,
+) -> dict[str, Any]:
+    if edit_step not in DESIGNER_WORKFLOW_STEPS:
+        raise ValueError(f"Unknown designer workflow step: {edit_step}")
+    confirmed = {str(step_id) for step_id in confirmed_steps if str(step_id) in DESIGNER_WORKFLOW_STEPS}
+    confirmed.add("study")
+    confirmed.discard(edit_step)
+    needs_review = {
+        str(step_id)
+        for step_id in needs_review_steps
+        if str(step_id) in DESIGNER_WORKFLOW_STEPS
+    }
+    needs_review.difference_update(confirmed)
+    needs_review.discard(edit_step)
+    progress = {
+        "schema": DESIGNER_PROGRESS_SCHEMA,
+        "edit_step": edit_step,
+        "confirmed_steps": [step_id for step_id in DESIGNER_WORKFLOW_STEPS if step_id in confirmed],
+        "needs_review_steps": [step_id for step_id in DESIGNER_WORKFLOW_STEPS if step_id in needs_review],
+        "revision": max(0, int(revision)),
+    }
+    design.study_profile_reference_parameters[DESIGNER_PROGRESS_KEY] = progress
+    return progress
+
+
 def _raise_if_current_block_csvs_accepted(project_dir: Path, design: StimulusDesign | None = None) -> None:
     manifest = _load_json(_block_csv_preview_manifest_path(project_dir))
     if not bool(manifest.get("accepted")):
@@ -7405,12 +7806,29 @@ def _custom_workflow_status(
         for step_id, label, missing in step_checks
     ]
     current_step = next((step["id"] for step in steps if not step["complete"]), "run")
+    progress = _designer_progress(design, artifact_step=current_step)
+    confirmed_steps = set(progress["confirmed_steps"])
+    needs_review_steps = set(progress["needs_review_steps"])
+    for step in steps:
+        step_id = step["id"]
+        if step_id == progress["edit_step"]:
+            step["decision_state"] = "editing"
+        elif step_id in confirmed_steps:
+            step["decision_state"] = "confirmed"
+        elif step_id in needs_review_steps:
+            step["decision_state"] = "needs_review"
+        else:
+            step["decision_state"] = "locked"
     render_missing = _missing_for_steps(steps, {"study", "stimulus", "trials", "baseline", "block", "schedule"})
     prepare_missing = _missing_for_steps(steps, {"study", "stimulus", "trials", "baseline", "block", "schedule", "run"})
     return {
         "is_custom": True,
         "is_finalized": str(design.study_profile_reference_parameters.get("profile_status") or "draft") == "finalized",
         "current_step": current_step,
+        "edit_step": progress["edit_step"],
+        "confirmed_steps": progress["confirmed_steps"],
+        "needs_review_steps": progress["needs_review_steps"],
+        "review_revision": progress["revision"],
         "ready_to_render": not render_missing,
         "ready_to_prepare": not prepare_missing,
         "missing": prepare_missing,
@@ -7440,6 +7858,21 @@ def _require_custom_workflow_ready(
     raise RuntimeError(f"Custom design is incomplete: {'; '.join(missing)}")
 
 
+def _require_designer_review_complete(design: StimulusDesign) -> None:
+    progress = _designer_progress(design)
+    required_confirmed = set(DESIGNER_WORKFLOW_STEPS[:-1])
+    confirmed = set(progress["confirmed_steps"])
+    if (
+        progress["edit_step"] == "run"
+        and required_confirmed.issubset(confirmed)
+        and not progress["needs_review_steps"]
+    ):
+        return
+    raise RuntimeError(
+        "Sequential review is incomplete. Save each segment in order and resolve every reopened review before locking the profile."
+    )
+
+
 def _is_custom_design(design: StimulusDesign) -> bool:
     return str(design.study_profile_reference_parameters.get("dashboard_mode", "")).lower() == "custom"
 
@@ -7458,6 +7891,35 @@ def _payload_mutates_design(payload: dict[str, Any] | None) -> bool:
         return bool(incoming_profile_id)
     mutating_keys = {"design", "trajectory_controls", "run_setup", "name", "trajectory", "protocol", "noises"}
     return any(key in payload for key in mutating_keys)
+
+
+def _candidate_design_from_payload(design: StimulusDesign, payload: dict[str, Any] | None) -> StimulusDesign:
+    candidate = _copy_design(design)
+    payload = payload or {}
+    if "design" in payload and isinstance(payload.get("design"), dict):
+        candidate = _carry_forward_project_metadata(design, design_from_dict(dict(payload["design"])))
+    elif any(key in payload for key in ("name", "trajectory", "protocol", "noises")):
+        candidate = _carry_forward_project_metadata(design, design_from_dict(payload))
+    if "trajectory_controls" in payload:
+        candidate = _apply_trajectory_controls(candidate, dict(payload["trajectory_controls"]))
+    if "run_setup" in payload:
+        _apply_run_setup_payload(candidate, payload.get("run_setup"))
+    return _normalize_dashboard_design(candidate)
+
+
+def _payload_changes_design(design: StimulusDesign, payload: dict[str, Any] | None) -> bool:
+    """Return whether a payload would actually change a finalized custom design.
+
+    Finalized profiles must reject edits, while still allowing idempotent endpoint
+    calls to reach their more specific guards (for example, "already prepared").
+    """
+    if not payload or not any(
+        key in payload for key in ("design", "trajectory_controls", "run_setup", "name", "trajectory", "protocol", "noises")
+    ):
+        return False
+    current = _normalize_dashboard_design(_copy_design(design))
+    candidate = _candidate_design_from_payload(current, payload)
+    return design_to_dict(candidate) != design_to_dict(current)
 
 
 def _missing_for_steps(steps: list[dict[str, Any]], step_ids: set[str]) -> list[str]:
@@ -8082,6 +8544,7 @@ def _blank_custom_design(project_name: str) -> StimulusDesign:
     design.protocol.blocks = 1
     design.protocol.participants = 1
     design.protocol.participant_order_policy = default_order_policy(seed=design.protocol.random_seed)
+    _set_designer_progress(design, edit_step="stimulus", confirmed_steps=("study",))
     return _normalize_dashboard_design(design)
 
 
@@ -8107,6 +8570,7 @@ def _custom_project_design_from_source(source: StimulusDesign, *, project_name: 
     params.pop(PROJECT_METADATA_KEY, None)
     params.pop(RUN_SETUP_METADATA_KEY, None)
     design.study_profile_reference_parameters = params
+    _set_designer_progress(design, edit_step="stimulus", confirmed_steps=("study",))
     if not design.protocol.participant_order_policy:
         design.protocol.participant_order_policy = default_order_policy(seed=design.protocol.random_seed)
     return design
@@ -8379,7 +8843,17 @@ def _carry_forward_project_metadata(previous: StimulusDesign, incoming: Stimulus
     previous_metadata = _project_metadata(previous)
     incoming_mode = str(incoming.study_profile_reference_parameters.get("dashboard_mode", "")).strip().lower()
     previous_mode = str(previous.study_profile_reference_parameters.get("dashboard_mode", "")).strip().lower()
-    same_custom_context = incoming_mode == previous_mode == "custom"
+    incoming_project_id = str(incoming_metadata.get("project_id") or "").strip()
+    previous_project_id = str(previous_metadata.get("project_id") or "").strip()
+    stale_placeholder_context = bool(
+        incoming_metadata.get("placeholder_name")
+        and not previous_metadata.get("placeholder_name")
+    )
+    same_custom_context = (
+        incoming_mode == previous_mode == "custom"
+        and bool(previous_project_id)
+        and (not incoming_project_id or incoming_project_id == previous_project_id or stale_placeholder_context)
+    )
     same_profile_context = incoming.study_profile_id and incoming.study_profile_id == previous.study_profile_id
     same_project_context = bool(same_custom_context or same_profile_context)
     if (
@@ -8388,6 +8862,20 @@ def _carry_forward_project_metadata(previous: StimulusDesign, incoming: Stimulus
         and RUN_SETUP_METADATA_KEY in previous.study_profile_reference_parameters
     ):
         incoming.study_profile_reference_parameters[RUN_SETUP_METADATA_KEY] = dict(previous.study_profile_reference_parameters[RUN_SETUP_METADATA_KEY])
+    if same_project_context and DESIGNER_PROGRESS_KEY in previous.study_profile_reference_parameters:
+        # Workflow progress is server-owned. A stale browser payload must not
+        # rewind or skip the explicit Save & Continue cursor.
+        incoming.study_profile_reference_parameters[DESIGNER_PROGRESS_KEY] = dict(
+            previous.study_profile_reference_parameters[DESIGNER_PROGRESS_KEY]
+        )
+    if same_project_context:
+        # Finalization state is server-owned. Ordinary design payloads cannot
+        # lock a draft or clear the timestamp on a finalized profile.
+        for key in ("profile_status", "finalized_at"):
+            if key in previous.study_profile_reference_parameters:
+                incoming.study_profile_reference_parameters[key] = previous.study_profile_reference_parameters[key]
+            else:
+                incoming.study_profile_reference_parameters.pop(key, None)
     if not previous_metadata:
         return incoming
     if incoming_metadata and not (
@@ -9345,6 +9833,12 @@ def _earliest_changed_design_segment(previous: StimulusDesign, current: Stimulus
     before = _design_segment_signatures(previous)
     after = _design_segment_signatures(current)
     return next((segment for segment in range(1, 7) if before[segment] != after[segment]), None)
+
+
+def _changed_design_segments(previous: StimulusDesign, current: StimulusDesign) -> list[int]:
+    before = _design_segment_signatures(previous)
+    after = _design_segment_signatures(current)
+    return [segment for segment in range(1, 7) if before[segment] != after[segment]]
 
 
 def _segment2_design_signature(design: StimulusDesign) -> str:

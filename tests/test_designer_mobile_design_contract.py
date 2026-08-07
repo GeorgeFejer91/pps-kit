@@ -393,6 +393,9 @@ def test_collapse_and_noise_choice_states_are_exposed_to_assistive_technology() 
 
     for contract in (
         'button.className = "segment-collapse-button"',
+        'class="segment-collapse-icon" aria-hidden="true"',
+        'class="segment-collapse-arrow-accent"',
+        'class="segment-collapse-arrow-main"',
         'button.setAttribute("aria-controls", segment.id)',
         'button.setAttribute("aria-expanded", "true")',
         'button.setAttribute("aria-expanded", String(!collapsed))',
@@ -405,8 +408,25 @@ def test_collapse_and_noise_choice_states_are_exposed_to_assistive_technology() 
         'document.querySelectorAll(".noise-type-button")',
     ):
         assert contract in app_js
-    for contract in ("segment-collapse-button", "aria-expanded", "Collapse", "Expand", "noise-type-button", "aria-pressed"):
+    for contract in (
+        "segment-collapse-button",
+        "segment-collapse-icon",
+        "segment-collapse-arrow-accent",
+        "segment-collapse-arrow-main",
+        "aria-expanded",
+        "Collapse",
+        "Expand",
+        "noise-type-button",
+        "aria-pressed",
+    ):
         assert contract in compiled_js
+    for contract in (
+        ".segment-collapse-button{",
+        ".segment-collapse-icon{",
+        ".decision-segment.collapsed .segment-collapse-icon{transform:rotate(180deg)}",
+        "@media (prefers-reduced-motion: reduce)",
+    ):
+        assert contract in _compiled_css
 
 
 def test_compiled_dashboard_and_public_wrappers_share_one_cache_token() -> None:
