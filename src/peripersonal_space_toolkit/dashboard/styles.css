@@ -2445,8 +2445,10 @@ a:focus-visible,
 }
 
 .baseline-option-card input {
+  grid-area: radio;
   width: 18px;
   height: 18px;
+  margin: 1px 0 0;
   accent-color: var(--primary);
   flex: 0 0 auto;
 }
@@ -2498,18 +2500,46 @@ a:focus-visible,
 
 .baseline-option-card {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 4px 9px;
+  grid-template-columns: 18px minmax(0, 1fr);
+  grid-template-areas:
+    "graphic graphic"
+    "radio title"
+    ". copy";
+  gap: 5px 9px;
   align-items: start;
-  min-height: 118px;
+  align-content: start;
+  min-height: 168px;
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: var(--surface-2);
+  background: var(--surface);
   padding: 9px;
   cursor: pointer;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
 }
 
-.baseline-option-card.active {
+.baseline-option-card:not(.disabled):hover,
+.baseline-option-card:focus-within {
+  border-color: #9fb9ac;
+  box-shadow: 0 0 0 2px rgba(36, 107, 85, 0.11);
+}
+
+.baseline-option-graphic {
+  grid-area: graphic;
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  aspect-ratio: 10 / 3;
+  justify-self: center;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface-2);
+  object-fit: contain;
+}
+
+.baseline-option-card.active,
+.baseline-option-card:has(input:checked) {
   border-color: var(--family-baseline);
   background: var(--family-baseline-bg);
   box-shadow: inset 3px 0 0 var(--family-baseline);
@@ -2527,13 +2557,17 @@ a:focus-visible,
 }
 
 .baseline-option-title {
+  grid-area: title;
   display: block;
+  min-width: 0;
   color: var(--text);
   font-weight: 800;
+  line-height: 1.25;
 }
 
 .baseline-option-copy {
-  grid-column: 2;
+  grid-area: copy;
+  min-width: 0;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.35;

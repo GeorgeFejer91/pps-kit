@@ -6,7 +6,7 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260807-mobile-design">
+  <link rel="stylesheet" href="styles.css?v=20260807-native-signal-svg">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -224,7 +224,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260807-mobile-design"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260807-native-signal-svg"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -437,36 +437,43 @@
             <fieldset id="baseline-options" class="baseline-option-grid" aria-label="Baseline strategy">
               <label class="baseline-option-card" data-baseline-option="none">
                 <input type="radio" name="baseline-option" value="none">
+                <img class="baseline-option-graphic" src="baseline_none.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">No baseline</span>
                 <span class="baseline-option-copy">Create only audio-tactile trial files.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="min_anchor">
                 <input type="radio" name="baseline-option" value="min_anchor">
+                <img class="baseline-option-graphic" src="baseline_min_anchor.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Minimum SOA anchor</span>
                 <span class="baseline-option-copy">Keep the trial audio and add tactile at the first entered SOA.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="max_anchor">
                 <input type="radio" name="baseline-option" value="max_anchor">
+                <img class="baseline-option-graphic" src="baseline_max_anchor.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Maximum SOA anchor</span>
                 <span class="baseline-option-copy">Keep the trial audio and add tactile at the last entered SOA.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="min_max">
                 <input type="radio" name="baseline-option" value="min_max">
+                <img class="baseline-option-graphic" src="baseline_min_max.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Minimum + maximum anchors</span>
                 <span class="baseline-option-copy">Keep the trial audio and add tactile at both the first and last entered SOAs.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="tactile_only">
                 <input type="radio" name="baseline-option" value="tactile_only">
+                <img class="baseline-option-graphic" src="baseline_tactile_only.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Full SOA tactile-only</span>
                 <span class="baseline-option-copy">Preserve fixed clips and jitter, silence looming segments, and add tactile at every SOA.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="stationary_burst">
                 <input type="radio" name="baseline-option" value="stationary_burst">
+                <img class="baseline-option-graphic" src="baseline_stationary_burst.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Full SOA stationary bursts</span>
                 <span class="baseline-option-copy">Preserve fixed clips and jitter, replace looming segments with stationary bursts, and add tactile at every SOA.</span>
               </label>
               <label class="baseline-option-card baseline-custom" data-baseline-option="custom">
                 <input type="radio" name="baseline-option" value="custom">
+                <img class="baseline-option-graphic" src="baseline_custom.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Custom timings</span>
                 <span class="baseline-option-copy">Enter custom SOAs and choose whether custom baselines are tactile-only or audio-tactile.</span>
               </label>
@@ -1221,7 +1228,7 @@
       </form>
     </div>
   </div>
-  <script type="module" src="app.js?v=20260807-mobile-design"></script>
-  <script type="module" src="designer_main.js?v=20260807-mobile-design"></script>
+  <script type="module" src="app.js?v=20260807-native-signal-svg"></script>
+  <script type="module" src="designer_main.js?v=20260807-native-signal-svg"></script>
 </body>
 </html>
