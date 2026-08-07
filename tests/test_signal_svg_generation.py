@@ -50,7 +50,7 @@ def test_pipeline_generates_complete_native_vector_asset_set() -> None:
     documents = generator.generate_svg_documents()
 
     assert tuple(documents) == generator.GENERATED_FILENAMES
-    assert len(documents) == 10
+    assert len(documents) == 12
 
     for filename, svg in documents.items():
         root = ET.fromstring(svg)
@@ -62,7 +62,14 @@ def test_pipeline_generates_complete_native_vector_asset_set() -> None:
         metadata = _metadata(root)
         assert metadata["schema"] == generator.PIPELINE_SCHEMA
         assert metadata["generator"] == generator.GENERATOR_PATH
+        assert metadata["theme_behavior"] == "light/dark palette follows the embedding element color-scheme"
         assert metadata["sample_reduction"] == "per-column minimum and maximum"
+
+        theme_style = root.find("svg:style[@data-layer='theme-palette']", NS)
+        assert theme_style is not None and theme_style.text
+        assert "@media (prefers-color-scheme:dark)" in theme_style.text
+        assert "--pps-svg-surface:#ffffff" in theme_style.text
+        assert "--pps-svg-surface:#202723" in theme_style.text
 
         element_names = {_local_name(node.tag) for node in root.iter()}
         assert not element_names.intersection(FORBIDDEN_ELEMENTS), filename
@@ -133,6 +140,55 @@ def test_audiogram_and_baseline_previews_have_semantic_vector_channels() -> None
             assert root.find(".//*[@data-channel='audio']") is not None
 
 
+def test_interface_previews_are_compact_transparent_widget_scenes() -> None:
+    generator = _load_generator()
+    documents = generator.generate_svg_documents()
+
+    for filename in (
+        "looming_burst_train_widget.svg",
+        "looming_smooth_linear_approach_widget.svg",
+    ):
+        root = ET.fromstring(documents[filename])
+        metadata = _metadata(root)
+        assert metadata["asset_role"] == "source_mode_control_preview"
+        assert metadata["composition"] == "compact_transparent_widget"
+        assert root.attrib["width"] == "320"
+        assert root.attrib["height"] == "96"
+        transparent = root.find("svg:rect[@data-layer='transparent-background']", NS)
+        assert transparent is not None
+        assert transparent.attrib["fill"] == "none"
+        assert root.find(".//svg:path[@data-channel='generated-source']", NS) is not None
+
+    for filename in generator.GENERATED_FILENAMES:
+        if not filename.startswith("baseline_"):
+            continue
+        root = ET.fromstring(documents[filename])
+        transparent = root.find("svg:rect[@data-layer='transparent-background']", NS)
+        assert transparent is not None
+        assert transparent.attrib["fill"] == "none"
+        assert root.find("svg:rect[@data-layer='frame']", NS) is None
+
+    baseline_none = ET.fromstring(documents["baseline_none.svg"])
+    none_mark = baseline_none.find(".//*[@data-layer='no-extra-baseline-mark']", NS)
+    assert none_mark is not None
+    assert none_mark.tag == f"{{{SVG_NS}}}text"
+    assert none_mark.text == "TRIAL ONLY"
+
+
+def test_dashboard_uses_compact_theme_bridged_signal_widgets() -> None:
+    html = (DASHBOARD_DIR / "index.html").read_text(encoding="utf-8")
+    css = (DASHBOARD_DIR / "styles.css").read_text(encoding="utf-8")
+
+    assert 'src="looming_burst_train_widget.svg"' in html
+    assert 'src="looming_smooth_linear_approach_widget.svg"' in html
+    assert 'class="native-signal-graphic"' in html
+    assert 'class="baseline-option-graphic native-signal-graphic"' in html
+    assert "color-scheme: inherit" in css
+    assert ".source-mode-widget-copy::before" in css
+    assert ".source-mode-widget:has(input:checked) .source-mode-widget-copy::before" in css
+    assert ".source-mode-widget:has(input:focus-visible) .source-mode-widget-body" in css
+
+
 def test_generation_is_reproducible_and_committed_copies_are_identical() -> None:
     generator = _load_generator()
     first = generator.generate_svg_documents()
@@ -158,7 +214,7 @@ def test_generator_check_mode_and_compiled_asset_parity() -> None:
     )
     assert result.returncode == 0, result.stderr
 
-    for filename in generator.GENERATED_FILENAMES:
+    for filename in generator.INTERFACE_FILENAMES:
         source = DASHBOARD_DIR / filename
         compiled = list(COMPILED_ASSET_DIR.glob(f"{source.stem}-*.svg"))
         assert len(compiled) == 1, filename

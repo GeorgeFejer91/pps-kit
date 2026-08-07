@@ -6,8 +6,8 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="./assets/pps_toolkit_icon-PI4CIL5w.png">
-  <script type="module" crossorigin src="./assets/index-Ie2DcF9k.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-BYP1qCy-.css">
+  <script type="module" crossorigin src="./assets/index-BNGX_rYl.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CawkoEw9.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -225,7 +225,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../../viewer/index.html?v=20260807-native-signal-svg"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../../viewer/index.html?v=20260807-native-signal-widgets"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -277,7 +277,7 @@
                       <label class="source-mode-widget">
                         <input type="radio" name="generated-source-mode" value="dynaspace_gaussian_burst_train" checked>
                         <span class="source-mode-widget-body">
-                          <img src="./assets/looming_burst_train_waveform-yVj8ISAb.svg" alt="" aria-hidden="true" width="960" height="360">
+                          <img class="native-signal-graphic" src="./assets/looming_burst_train_widget-Tt3kadLk.svg" alt="" aria-hidden="true" width="320" height="96">
                           <span class="source-mode-widget-copy">
                             <strong>Burst train</strong>
                             <span>Hobeika et al. (2020)</span>
@@ -287,7 +287,7 @@
                       <label class="source-mode-widget">
                         <input type="radio" name="generated-source-mode" value="continuous_noise">
                         <span class="source-mode-widget-body">
-                          <img src="./assets/looming_smooth_linear_approach_waveform-DVa-EFMz.svg" alt="" aria-hidden="true" width="960" height="360">
+                          <img class="native-signal-graphic" src="./assets/looming_smooth_linear_approach_widget-yH5gK-8h.svg" alt="" aria-hidden="true" width="320" height="96">
                           <span class="source-mode-widget-copy">
                             <strong>Smooth linear</strong>
                             <span>Approach envelope</span>
@@ -438,43 +438,43 @@
             <fieldset id="baseline-options" class="baseline-option-grid" aria-label="Baseline strategy">
               <label class="baseline-option-card" data-baseline-option="none">
                 <input type="radio" name="baseline-option" value="none">
-                <img class="baseline-option-graphic" src="./assets/baseline_none-BSkGxiAO.svg" alt="" aria-hidden="true" width="320" height="96">
+                <img class="baseline-option-graphic native-signal-graphic" src="./assets/baseline_none-CQPom8Oi.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">No baseline</span>
                 <span class="baseline-option-copy">Create only audio-tactile trial files.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="min_anchor">
                 <input type="radio" name="baseline-option" value="min_anchor">
-                <img class="baseline-option-graphic" src="./assets/baseline_min_anchor-BqTKqZKO.svg" alt="" aria-hidden="true" width="320" height="96">
+                <img class="baseline-option-graphic native-signal-graphic" src="./assets/baseline_min_anchor-DGiFFeeZ.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Minimum SOA anchor</span>
                 <span class="baseline-option-copy">Keep the trial audio and add tactile at the first entered SOA.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="max_anchor">
                 <input type="radio" name="baseline-option" value="max_anchor">
-                <img class="baseline-option-graphic" src="./assets/baseline_max_anchor-ClkNzkOK.svg" alt="" aria-hidden="true" width="320" height="96">
+                <img class="baseline-option-graphic native-signal-graphic" src="./assets/baseline_max_anchor-C3C5p751.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Maximum SOA anchor</span>
                 <span class="baseline-option-copy">Keep the trial audio and add tactile at the last entered SOA.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="min_max">
                 <input type="radio" name="baseline-option" value="min_max">
-                <img class="baseline-option-graphic" src="./assets/baseline_min_max-C_IGqT5t.svg" alt="" aria-hidden="true" width="320" height="96">
+                <img class="baseline-option-graphic native-signal-graphic" src="./assets/baseline_min_max-Bs4Khpfo.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Minimum + maximum anchors</span>
                 <span class="baseline-option-copy">Keep the trial audio and add tactile at both the first and last entered SOAs.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="tactile_only">
                 <input type="radio" name="baseline-option" value="tactile_only">
-                <img class="baseline-option-graphic" src="./assets/baseline_tactile_only-ClVUNuek.svg" alt="" aria-hidden="true" width="320" height="96">
+                <img class="baseline-option-graphic native-signal-graphic" src="./assets/baseline_tactile_only-BOurphon.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Full SOA tactile-only</span>
                 <span class="baseline-option-copy">Preserve fixed clips and jitter, silence looming segments, and add tactile at every SOA.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="stationary_burst">
                 <input type="radio" name="baseline-option" value="stationary_burst">
-                <img class="baseline-option-graphic" src="./assets/baseline_stationary_burst-DrF3KdEZ.svg" alt="" aria-hidden="true" width="320" height="96">
+                <img class="baseline-option-graphic native-signal-graphic" src="./assets/baseline_stationary_burst-DcJP1nYK.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Full SOA stationary bursts</span>
                 <span class="baseline-option-copy">Preserve fixed clips and jitter, replace looming segments with stationary bursts, and add tactile at every SOA.</span>
               </label>
               <label class="baseline-option-card baseline-custom" data-baseline-option="custom">
                 <input type="radio" name="baseline-option" value="custom">
-                <img class="baseline-option-graphic" src="./assets/baseline_custom-B5apwzJ8.svg" alt="" aria-hidden="true" width="320" height="96">
+                <img class="baseline-option-graphic native-signal-graphic" src="./assets/baseline_custom-DZwwqCqV.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Custom timings</span>
                 <span class="baseline-option-copy">Enter custom SOAs and choose whether custom baselines are tactile-only or audio-tactile.</span>
               </label>
@@ -824,7 +824,7 @@
                   <p>Native Windows application that opens the prepared session package and plays the three-channel ASIO stream to the lab hardware. Owns all timing-sensitive playback and response recording entirely outside the browser.</p>
                   <figure class="audiogram-figure" aria-label="Audiogram of an example looming stimulus trial">
                     <div class="audiogram-frame">
-                      <img src="./assets/audiogram_looming_trial-DmwRGtMv.svg" alt="Waveform display of a three-channel looming trial WAV showing Channel 1 Left Audio and Channel 2 Right Audio with growing amplitude, and Channel 3 Tactile Drive with burst onset at the SOA" width="820" height="300">
+                      <img class="native-signal-graphic" src="./assets/audiogram_looming_trial-BGrHues9.svg" alt="Waveform display of a three-channel looming trial WAV showing Channel 1 Left Audio and Channel 2 Right Audio with growing amplitude, and Channel 3 Tactile Drive with burst onset at the SOA" width="820" height="300">
                     </div>
                     <figcaption class="audiogram-figcaption">
                       <span class="audiogram-figcaption-label">Fig.</span>

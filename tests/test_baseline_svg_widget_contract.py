@@ -75,7 +75,12 @@ def test_baseline_strategy_radios_have_matching_decorative_svg_previews() -> Non
     for value, filename in BASELINE_GRAPHICS.items():
         children = parser.cards[value]
         radios = [attrs for tag, attrs in children if tag == "input" and attrs.get("type") == "radio"]
-        previews = [attrs for tag, attrs in children if tag == "img" and attrs.get("class") == "baseline-option-graphic"]
+        previews = [
+            attrs
+            for tag, attrs in children
+            if tag == "img"
+            and "baseline-option-graphic" in (attrs.get("class") or "").split()
+        ]
 
         assert len(radios) == 1
         assert radios[0]["name"] == "baseline-option"
@@ -84,7 +89,7 @@ def test_baseline_strategy_radios_have_matching_decorative_svg_previews() -> Non
 
         assert len(previews) == 1
         assert previews[0] == {
-            "class": "baseline-option-graphic",
+            "class": "baseline-option-graphic native-signal-graphic",
             "src": filename,
             "alt": "",
             "aria-hidden": "true",
@@ -100,10 +105,27 @@ def test_baseline_strategy_previews_use_compact_responsive_card_layout() -> None
 
     assert "grid-template-areas:" in card
     assert '"graphic graphic"' in card
+    assert card.index('"radio title"') < card.index('"graphic graphic"')
     assert "min-width: 0" in card
     assert "aspect-ratio: 10 / 3" in graphic
-    assert "max-width: 320px" in graphic
+    assert "max-width" not in graphic
+    assert "background: transparent" in graphic
+    assert "border: 0" in graphic
     assert "object-fit: contain" in graphic
+
+    radio = _css_rule(css, ".baseline-option-card input")
+    assert "min-height: 0" in radio
+    assert "height: 18px" in radio
+    assert "appearance: none" in radio
+    assert ":root .baseline-option-card.active input" in css
+
+    native_graphic = _css_rule(css, ".native-signal-graphic")
+    assert "color-scheme: inherit" in native_graphic
+
+    forced_colors = "\n".join(_at_rule_blocks(css, "@media (forced-colors: active)"))
+    assert ".baseline-option-card input" in forced_colors
+    assert "appearance: auto" in forced_colors
+    assert "forced-color-adjust: auto" in forced_colors
 
     mobile = "\n".join(_at_rule_blocks(css, "@media (max-width: 760px)"))
     assert mobile

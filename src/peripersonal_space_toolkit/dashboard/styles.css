@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --background: #f4f5f1;
   --surface: #ffffff;
   --surface-2: #f8f9f6;
@@ -46,6 +47,10 @@
   --orders-column-width: 420px;
   --panel-padding: 16px;
   --panel-gap: 16px;
+}
+
+.native-signal-graphic {
+  color-scheme: inherit;
 }
 
 * {
@@ -1606,8 +1611,9 @@ code {
   width: 100%;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #253a2e;
-  box-shadow: 0 2px 8px rgba(14, 22, 18, 0.18);
+  border: 1px solid var(--line-strong);
+  background: var(--surface-2);
+  box-shadow: 0 2px 8px rgba(14, 22, 18, 0.12);
   line-height: 0;
 }
 
@@ -1647,7 +1653,7 @@ code {
   border-left: none;
   border-right: none;
   border-bottom: none;
-  border-top: 1px solid #1e3028;
+  border-top: 1px solid var(--line);
   box-shadow: none;
 }
 
@@ -2445,12 +2451,24 @@ a:focus-visible,
 }
 
 .baseline-option-card input {
+  appearance: none;
   grid-area: radio;
   width: 18px;
   height: 18px;
+  min-height: 0;
   margin: 1px 0 0;
-  accent-color: var(--primary);
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 4px var(--surface);
   flex: 0 0 auto;
+}
+
+:root .baseline-option-card.active input,
+:root .baseline-option-card input:checked {
+  border-color: var(--primary);
+  background-color: var(--primary);
 }
 
 .baseline-option-grid {
@@ -2502,13 +2520,13 @@ a:focus-visible,
   display: grid;
   grid-template-columns: 18px minmax(0, 1fr);
   grid-template-areas:
-    "graphic graphic"
     "radio title"
+    "graphic graphic"
     ". copy";
-  gap: 5px 9px;
+  gap: 7px 9px;
   align-items: start;
   align-content: start;
-  min-height: 168px;
+  min-height: 0;
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -2520,29 +2538,28 @@ a:focus-visible,
 
 .baseline-option-card:not(.disabled):hover,
 .baseline-option-card:focus-within {
-  border-color: #9fb9ac;
-  box-shadow: 0 0 0 2px rgba(36, 107, 85, 0.11);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
 .baseline-option-graphic {
   grid-area: graphic;
   display: block;
   width: 100%;
-  max-width: 320px;
   height: auto;
   aspect-ratio: 10 / 3;
   justify-self: center;
-  border: 1px solid var(--line);
+  border: 0;
   border-radius: 5px;
-  background: var(--surface-2);
+  background: transparent;
   object-fit: contain;
 }
 
 .baseline-option-card.active,
 .baseline-option-card:has(input:checked) {
-  border-color: var(--family-baseline);
-  background: var(--family-baseline-bg);
-  box-shadow: inset 3px 0 0 var(--family-baseline);
+  border-color: var(--primary);
+  background: var(--ok-bg);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 62%, transparent);
 }
 
 .baseline-option-card.disabled {
@@ -2585,6 +2602,16 @@ a:focus-visible,
   grid-column: 2;
   min-height: 32px;
   padding: 4px 6px;
+}
+
+@media (min-width: 761px) {
+  .baseline-tactile-panel .baseline-option-card.baseline-custom {
+    grid-template-columns: 18px minmax(0, 1fr) minmax(220px, 1.2fr);
+    grid-template-areas:
+      "radio title graphic"
+      ". copy graphic";
+    align-items: center;
+  }
 }
 
 .baseline-custom-controls {
@@ -3041,7 +3068,7 @@ a:focus-visible,
 .source-mode-widget-body {
   display: grid;
   grid-template-rows: auto auto;
-  gap: 6px;
+  gap: 7px;
   height: 100%;
   min-width: 0;
   padding: 7px;
@@ -3054,21 +3081,37 @@ a:focus-visible,
 .source-mode-widget img {
   display: block;
   width: 100%;
-  height: clamp(90px, 10vw, 124px);
+  height: auto;
+  aspect-ratio: 10 / 3;
   min-width: 0;
-  border: 1px solid #d7dfd7;
+  border: 0;
   border-radius: 5px;
-  background: #f4f5f1;
+  background: transparent;
   object-fit: contain;
 }
 
 .source-mode-widget-copy {
-  display: flex;
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
   min-width: 0;
   gap: 8px;
   align-items: center;
-  justify-content: space-between;
   line-height: 1.2;
+}
+
+.source-mode-widget-copy::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 4px var(--surface);
+}
+
+.source-mode-widget:has(input:checked) .source-mode-widget-copy::before {
+  border-color: var(--primary);
+  background: var(--primary);
 }
 
 .source-mode-widget-copy strong {
@@ -3089,14 +3132,23 @@ a:focus-visible,
 
 .source-mode-widget:hover .source-mode-widget-body,
 .source-mode-widget:focus-within .source-mode-widget-body {
-  border-color: #9fb9ac;
-  box-shadow: 0 0 0 2px rgba(36, 107, 85, 0.11);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
 .source-mode-widget:has(input:checked) .source-mode-widget-body {
   border-color: var(--primary);
   background: var(--ok-bg);
-  box-shadow: inset 0 0 0 1px rgba(36, 107, 85, 0.48);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 62%, transparent);
+}
+
+.source-mode-widget:has(input:focus-visible) .source-mode-widget-body {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.source-mode-widget input:focus-visible {
+  outline: none;
 }
 
 @media (max-width: 760px) {
@@ -3109,7 +3161,7 @@ a:focus-visible,
   }
 
   .source-mode-widget img {
-    height: 112px;
+    height: auto;
   }
 }
 
@@ -6411,4 +6463,29 @@ body.desktop-applet .segment-heading {
 :root[data-theme="dark"] .view-preset-control button:focus-visible {
   background: var(--neutral-200);
   color: var(--text);
+}
+
+@media (forced-colors: active) {
+  .baseline-option-card input {
+    appearance: auto;
+    border: 0;
+    background: Canvas;
+    box-shadow: none;
+    forced-color-adjust: auto;
+  }
+
+  .source-mode-widget-copy::before {
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: inset 0 0 0 4px Canvas;
+  }
+
+  .source-mode-widget:has(input:checked) .source-mode-widget-copy::before {
+    border-color: Highlight;
+    background: Highlight;
+  }
+
+  .source-mode-widget:has(input:focus-visible) .source-mode-widget-body {
+    outline-color: Highlight;
+  }
 }

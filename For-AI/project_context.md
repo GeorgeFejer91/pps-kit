@@ -82,7 +82,10 @@ Primary users are cognitive neuroscience and psychology researchers who need to 
   three-channel audiogram, and all seven visible baseline strategy previews.
   `tools/generate_noise_mode_svgs.py` synthesizes deterministic toolkit sample
   arrays, reduces them to min/max vector paths, and constructs the full SVG
-  scene without screenshots, tracing, canvas, or embedded raster data.
+  scene without screenshots, tracing, canvas, or embedded raster data. It emits
+  both full reference diagrams and compact transparent control previews, and
+  embeds light/dark palettes that follow the dashboard's explicit theme through
+  the external image `color-scheme` bridge.
   `python tools/generate_noise_mode_svgs.py --check` enforces byte-identical
   package/dashboard copies; the full contract and asset inventory live in
   `docs/NATIVE_SIGNAL_SVG_PIPELINE.md`.

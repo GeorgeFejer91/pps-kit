@@ -18,12 +18,23 @@ open a screenshot, draw to a canvas, trace pixels, or embed a raster image.
    burst boundaries, and tactile onset without a bitmap.
 4. It builds the frame, grid, envelopes, markers, labels, legends, and metadata
    as native SVG elements through `xml.etree.ElementTree`.
+5. It embeds light and dark palette variables in every SVG. The dark palette is
+   selected by `prefers-color-scheme` inside the SVG; the dashboard passes its
+   explicit theme to each external image with the inherited `color-scheme`
+   property, so the artwork follows the app toggle rather than remaining a
+   fixed light document.
 
 The same run generates:
 
-- The burst-train and continuous source-mode widgets.
+- Full burst-train and continuous reference diagrams.
+- Compact, transparent burst-train and continuous source-mode control previews.
 - The three-channel architecture audiogram.
 - Seven baseline strategy pictograms with audio and tactile lanes.
+
+The interface previews deliberately omit duplicated editorial chrome. Their
+outer canvas is transparent, leaving the HTML control responsible for the
+border, surface, hover, focus, and selected state. This keeps the generated
+signal geometry reusable while making it read as part of the toolkit UI.
 
 Each SVG embeds deterministic JSON metadata containing its recipe, seed, sample
 rate, signal roles, reduction method, and relevant timing parameters. The
@@ -56,6 +67,7 @@ After changing dashboard references or SVG bytes, rebuild
 ## Contract
 
 `tests/test_signal_svg_generation.py` enforces reproducible bytes, package and
-dashboard parity, compiled-asset parity, semantic waveform/channel layers,
-canonical burst timing, and a vector-only policy. It rejects raster/external
-resource elements, links, data URIs, and base64 payloads.
+dashboard parity, compiled interface-asset parity, semantic waveform/channel
+layers, compact transparent compositions, app-theme bridging, canonical burst
+timing, and a vector-only policy. It rejects raster/external resource elements,
+links, data URIs, and base64 payloads.

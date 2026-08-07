@@ -56,6 +56,13 @@ PANEL_Y = 98
 PANEL_W = 792
 PANEL_H = 166
 
+SOURCE_WIDGET_WIDTH = 320
+SOURCE_WIDGET_HEIGHT = 96
+SOURCE_WIDGET_PANEL_X = 4
+SOURCE_WIDGET_PANEL_Y = 4
+SOURCE_WIDGET_PANEL_W = 312
+SOURCE_WIDGET_PANEL_H = 68
+
 BASELINE_WIDTH = 320
 BASELINE_HEIGHT = 96
 BASELINE_DURATION_S = 1.50
@@ -71,13 +78,65 @@ COLORS = {
     "panel": "#141f1a",
     "panel_soft": "#1b2821",
     "panel_line": "#2e4038",
+    "widget_plot": "#eef3ef",
+    "widget_lane": "#f8faf7",
+    "widget_grid": "#c9d5cd",
     "primary": "#246b55",
     "primary_hover": "#1d5846",
-    "cyan": "#69cfc3",
-    "accent": "#f2a74b",
-    "orange": "#c06030",
+    "cyan": "#2a8f84",
+    "accent": "#d8892f",
+    "orange": "#b75b2f",
     "baseline": "#4b5fa8",
     "white_noise": "#d8dde2",
+    "chip_surface": "#eef7f3",
+    "chip_line": "#b8d9cf",
+    "plot_border": "#9aaba0",
+    "plot_label": "#5f7469",
+    "plot_label_strong": "#355447",
+    "silenced": "#6d8176",
+    "soft_mark": "#8da399",
+    "stimulus_span": "#496d5d",
+    "tactile_text": "#8a4020",
+    "footer": "#526c60",
+}
+
+DARK_COLORS = {
+    "background": "#151a17",
+    "surface": "#202723",
+    "surface_2": "#252e29",
+    "text": "#f1f5f2",
+    "muted": "#bdc9c1",
+    "line": "#3d4b43",
+    "line_strong": "#607066",
+    "panel": "#111915",
+    "panel_soft": "#1b2821",
+    "panel_line": "#33483e",
+    "widget_plot": "#171e1a",
+    "widget_lane": "#202a24",
+    "widget_grid": "#3b4b42",
+    "primary": "#54b58f",
+    "primary_hover": "#6bc7a2",
+    "cyan": "#69cfc3",
+    "accent": "#f2b35c",
+    "orange": "#e58c59",
+    "baseline": "#899af0",
+    "white_noise": "#d8dde2",
+    "chip_surface": "#1f3b31",
+    "chip_line": "#3f725e",
+    "plot_border": "#52645a",
+    "plot_label": "#91a99d",
+    "plot_label_strong": "#c0d2c8",
+    "silenced": "#8ca095",
+    "soft_mark": "#8ca095",
+    "stimulus_span": "#8ab9a3",
+    "tactile_text": "#f0a071",
+    "footer": "#91a99d",
+}
+
+LIGHT_COLORS = COLORS
+COLORS = {
+    key: f"var(--pps-svg-{key.replace('_', '-')}, {value})"
+    for key, value in LIGHT_COLORS.items()
 }
 
 FONT_SANS = "Aptos, Noto Sans, Helvetica Neue, sans-serif"
@@ -128,6 +187,11 @@ SHOWCASE_SPECS = (
         ),
     ),
 )
+
+SHOWCASE_WIDGET_FILENAMES = {
+    "burst": "looming_burst_train_widget.svg",
+    "continuous": "looming_smooth_linear_approach_widget.svg",
+}
 
 BASELINE_SPECS = (
     BaselineSpec(
@@ -186,6 +250,13 @@ BASELINE_SPECS = (
 
 GENERATED_FILENAMES = tuple(
     [spec.filename for spec in SHOWCASE_SPECS]
+    + [SHOWCASE_WIDGET_FILENAMES[spec.mode] for spec in SHOWCASE_SPECS]
+    + ["audiogram_looming_trial.svg"]
+    + [spec.filename for spec in BASELINE_SPECS]
+)
+
+INTERFACE_FILENAMES = tuple(
+    [SHOWCASE_WIDGET_FILENAMES[spec.mode] for spec in SHOWCASE_SPECS]
     + ["audiogram_looming_trial.svg"]
     + [spec.filename for spec in BASELINE_SPECS]
 )
@@ -254,6 +325,23 @@ def _text(
     return _element(parent, "text", attributes, text=value)
 
 
+def _theme_stylesheet() -> str:
+    light = "".join(
+        f"--pps-svg-{key.replace('_', '-')}:{value};"
+        for key, value in LIGHT_COLORS.items()
+    )
+    dark = "".join(
+        f"--pps-svg-{key.replace('_', '-')}:{value};"
+        for key, value in DARK_COLORS.items()
+    )
+    return (
+        f":root{{{light}}}"
+        "@media (prefers-color-scheme:dark){"
+        f":root{{{dark}}}"
+        "}"
+    )
+
+
 def _document(
     *,
     width: int,
@@ -278,11 +366,18 @@ def _document(
     )
     _element(root, "title", {"id": f"{document_id}-title"}, text=title)
     _element(root, "desc", {"id": f"{document_id}-desc"}, text=description)
+    _element(
+        root,
+        "style",
+        {"data-layer": "theme-palette"},
+        text=_theme_stylesheet(),
+    )
     metadata_node = _element(root, "metadata", {"id": f"{document_id}-metadata"})
     metadata_node.text = json.dumps(
         {
             "schema": PIPELINE_SCHEMA,
             "generator": GENERATOR_PATH,
+            "theme_behavior": "light/dark palette follows the embedding element color-scheme",
             **metadata,
         },
         sort_keys=True,
@@ -603,8 +698,8 @@ def _render_showcase(
         {
             "width": 205,
             "height": 28,
-            "fill": "#eef7f3",
-            "stroke": "#b8d9cf",
+            "fill": COLORS["chip_surface"],
+            "stroke": COLORS["chip_line"],
         },
     )
     _element(chip, "circle", {"cx": 17, "cy": 14, "r": 5, "fill": COLORS["primary"]})
@@ -633,7 +728,7 @@ def _render_showcase(
             "width": PANEL_W,
             "height": PANEL_H,
             "fill": COLORS["panel"],
-            "stroke": "#253a2e",
+            "stroke": COLORS["plot_border"],
             "stroke-width": 1.2,
             "data-layer": "plot-background",
         },
@@ -780,7 +875,7 @@ def _render_showcase(
             },
         )
 
-    _text(root, spec.label, PANEL_X + 12, PANEL_Y + 18, fill="#8aaa9e", size=10, family=FONT_MONO, data_layer="plot-label")
+    _text(root, spec.label, PANEL_X + 12, PANEL_Y + 18, fill=COLORS["plot_label"], size=10, family=FONT_MONO, data_layer="plot-label")
     _text(root, "PEAK ENVELOPE - RECIPROCAL DISTANCE", PANEL_X + PANEL_W, PANEL_Y - 12, fill=COLORS["muted"], size=10, family=FONT_MONO, anchor="end")
     _text(root, "far / quiet", PANEL_X, PANEL_Y + PANEL_H + 30, fill=COLORS["muted"], size=12)
     _text(root, "near / loud", PANEL_X + PANEL_W, PANEL_Y + PANEL_H + 30, fill=COLORS["muted"], size=12, anchor="end")
@@ -828,6 +923,251 @@ def _render_showcase(
         },
     )
     _text(root, "approach gain", 274, 322, fill=COLORS["muted"], size=11)
+    return _serialize(root)
+
+
+def _render_showcase_widget(
+    spec: ShowcaseSpec,
+    signal: np.ndarray,
+    gain: np.ndarray,
+    signal_details: dict[str, Any],
+) -> str:
+    """Render the signal as a compact selectable-control preview."""
+
+    prefix = f"{spec.mode}-widget"
+    metadata = _showcase_metadata(spec, signal_details)
+    metadata.update(
+        {
+            "asset_role": "source_mode_control_preview",
+            "composition": "compact_transparent_widget",
+            "waveform_bins": 256,
+        }
+    )
+    root, defs = _document(
+        width=SOURCE_WIDGET_WIDTH,
+        height=SOURCE_WIDGET_HEIGHT,
+        title=f"{spec.title} source preview",
+        description=(
+            f"Compact native-vector interface preview of {spec.description.lower()}"
+        ),
+        document_id=prefix,
+        metadata=metadata,
+    )
+    _linear_gradient(defs, f"{prefix}-wave-fill", COLORS["primary"], COLORS["cyan"])
+    _linear_gradient(
+        defs,
+        f"{prefix}-gain-fill",
+        COLORS["baseline"],
+        COLORS["accent"],
+        start_opacity=0.05,
+        end_opacity=0.22,
+    )
+    _clip_rect(
+        defs,
+        f"{prefix}-clip",
+        SOURCE_WIDGET_PANEL_X,
+        SOURCE_WIDGET_PANEL_Y,
+        SOURCE_WIDGET_PANEL_W,
+        SOURCE_WIDGET_PANEL_H,
+    )
+
+    _element(
+        root,
+        "rect",
+        {
+            "width": SOURCE_WIDGET_WIDTH,
+            "height": SOURCE_WIDGET_HEIGHT,
+            "fill": "none",
+            "data-layer": "transparent-background",
+        },
+    )
+    _element(
+        root,
+        "rect",
+        {
+            "x": SOURCE_WIDGET_PANEL_X,
+            "y": SOURCE_WIDGET_PANEL_Y,
+            "width": SOURCE_WIDGET_PANEL_W,
+            "height": SOURCE_WIDGET_PANEL_H,
+            "rx": 5,
+            "fill": COLORS["widget_plot"],
+            "stroke": COLORS["plot_border"],
+            "data-layer": "plot-background",
+        },
+    )
+    plot = _element(
+        root,
+        "g",
+        {
+            "clip-path": f"url(#{prefix}-clip)",
+            "data-layer": "plot",
+        },
+    )
+    for index in range(9):
+        line_x = SOURCE_WIDGET_PANEL_X + SOURCE_WIDGET_PANEL_W * index / 8
+        _element(
+            plot,
+            "line",
+            {
+                "x1": line_x,
+                "y1": SOURCE_WIDGET_PANEL_Y,
+                "x2": line_x,
+                "y2": SOURCE_WIDGET_PANEL_Y + SOURCE_WIDGET_PANEL_H,
+                "stroke": COLORS["widget_grid"],
+                "stroke-width": 0.6,
+                "data-layer": "grid",
+            },
+        )
+    for index in range(3):
+        line_y = SOURCE_WIDGET_PANEL_Y + SOURCE_WIDGET_PANEL_H * index / 2
+        _element(
+            plot,
+            "line",
+            {
+                "x1": SOURCE_WIDGET_PANEL_X,
+                "y1": line_y,
+                "x2": SOURCE_WIDGET_PANEL_X + SOURCE_WIDGET_PANEL_W,
+                "y2": line_y,
+                "stroke": COLORS["widget_grid"],
+                "stroke-width": 0.8 if index == 1 else 0.5,
+                "data-layer": "grid",
+            },
+        )
+    _element(
+        plot,
+        "path",
+        {
+            "d": _envelope_fill_path(
+                gain,
+                x=SOURCE_WIDGET_PANEL_X,
+                y=SOURCE_WIDGET_PANEL_Y,
+                width=SOURCE_WIDGET_PANEL_W,
+                height=SOURCE_WIDGET_PANEL_H,
+                points=96,
+            ),
+            "fill": f"url(#{prefix}-gain-fill)",
+            "data-layer": "approach-envelope-fill",
+        },
+    )
+    _element(
+        plot,
+        "path",
+        {
+            "d": _waveform_path(
+                signal,
+                x=SOURCE_WIDGET_PANEL_X,
+                y=SOURCE_WIDGET_PANEL_Y,
+                width=SOURCE_WIDGET_PANEL_W,
+                height=SOURCE_WIDGET_PANEL_H,
+                bins=256,
+            ),
+            "fill": f"url(#{prefix}-wave-fill)",
+            "stroke": COLORS["cyan"],
+            "stroke-width": 0.35,
+            "opacity": 0.92,
+            "data-layer": "waveform",
+            "data-channel": "generated-source",
+            "data-sample-reduction": "min-max-bin",
+        },
+    )
+    if spec.mode == "burst":
+        for onset_s in signal_details["burst_onsets_s"]:
+            onset_index = min(len(gain) - 1, int(round(onset_s * SAMPLE_RATE)))
+            marker_gain = float(gain[onset_index])
+            marker_x = SOURCE_WIDGET_PANEL_X + SOURCE_WIDGET_PANEL_W * onset_s / SHOWCASE_DURATION_S
+            top_y = SOURCE_WIDGET_PANEL_Y + SOURCE_WIDGET_PANEL_H / 2 - SOURCE_WIDGET_PANEL_H * 0.44 * marker_gain
+            _element(
+                plot,
+                "circle",
+                {
+                    "cx": marker_x,
+                    "cy": top_y,
+                    "r": 0.85,
+                    "fill": COLORS["accent"],
+                    "data-layer": "burst-peak",
+                },
+            )
+    for upper in (True, False):
+        _element(
+            plot,
+            "path",
+            {
+                "d": _sampled_line_path(
+                    gain,
+                    x=SOURCE_WIDGET_PANEL_X,
+                    y=SOURCE_WIDGET_PANEL_Y,
+                    width=SOURCE_WIDGET_PANEL_W,
+                    height=SOURCE_WIDGET_PANEL_H,
+                    points=96,
+                    upper=upper,
+                ),
+                "fill": "none",
+                "stroke": COLORS["accent"] if upper else COLORS["orange"],
+                "stroke-width": 1.15 if upper else 0.85,
+                "stroke-linecap": "round",
+                "stroke-dasharray": "3 3" if spec.mode == "burst" else "none",
+                "opacity": 0.88,
+                "data-layer": "approach-envelope",
+            },
+        )
+
+    chip_label = "33 BURSTS / 95 MS" if spec.mode == "burst" else "CONTINUOUS / 1/R"
+    chip_width = 91 if spec.mode == "burst" else 88
+    chip_x = SOURCE_WIDGET_WIDTH - chip_width - 9
+    _element(
+        root,
+        "rect",
+        {
+            "x": chip_x,
+            "y": 9,
+            "width": chip_width,
+            "height": 15,
+            "rx": 3,
+            "fill": COLORS["chip_surface"],
+            "stroke": COLORS["chip_line"],
+            "data-layer": "parameter-chip",
+        },
+    )
+    _text(
+        root,
+        chip_label,
+        chip_x + chip_width / 2,
+        19,
+        fill=COLORS["primary_hover"],
+        size=7.2,
+        family=FONT_MONO,
+        weight=700,
+        anchor="middle",
+        data_layer="parameter-chip-label",
+    )
+    _text(root, "far / quiet", 6, 89, fill=COLORS["muted"], size=8.2, weight=700)
+    _text(root, "near / loud", 314, 89, fill=COLORS["muted"], size=8.2, weight=700, anchor="end")
+    _element(
+        root,
+        "line",
+        {
+            "x1": 61,
+            "y1": 86,
+            "x2": 253,
+            "y2": 86,
+            "stroke": COLORS["line_strong"],
+            "stroke-width": 1,
+            "data-layer": "direction-axis",
+        },
+    )
+    _element(
+        root,
+        "path",
+        {
+            "d": "M 248,82 L 254,86 L 248,90",
+            "fill": "none",
+            "stroke": COLORS["line_strong"],
+            "stroke-width": 1,
+            "stroke-linecap": "round",
+            "stroke-linejoin": "round",
+            "data-layer": "direction-arrow",
+        },
+    )
     return _serialize(root)
 
 
@@ -887,6 +1227,12 @@ def _tactile_track(positions: Sequence[float]) -> np.ndarray:
 
 
 def _render_baseline_preview(spec: BaselineSpec, mini_signals: dict[str, np.ndarray]) -> str:
+    plot_x = 56
+    plot_y = 6
+    plot_w = 260
+    plot_h = 84
+    audio_center_y = 30
+    tactile_center_y = 66
     root, defs = _document(
         width=BASELINE_WIDTH,
         height=BASELINE_HEIGHT,
@@ -909,65 +1255,61 @@ def _render_baseline_preview(spec: BaselineSpec, mini_signals: dict[str, np.ndar
         },
     )
     _linear_gradient(defs, "baseline-audio-fill", COLORS["primary"], COLORS["cyan"])
-    _clip_rect(defs, "baseline-preview-clip", 58, 12, 248, 66)
+    _clip_rect(defs, "baseline-preview-clip", plot_x, plot_y, plot_w, plot_h)
 
-    _element(root, "rect", {"width": BASELINE_WIDTH, "height": BASELINE_HEIGHT, "fill": COLORS["surface"], "data-layer": "background"})
     _element(
         root,
         "rect",
         {
-            "x": 0.5,
-            "y": 0.5,
-            "width": BASELINE_WIDTH - 1,
-            "height": BASELINE_HEIGHT - 1,
+            "width": BASELINE_WIDTH,
+            "height": BASELINE_HEIGHT,
             "fill": "none",
-            "stroke": COLORS["line"],
-            "data-layer": "frame",
+            "data-layer": "transparent-background",
         },
     )
     _element(
         root,
         "rect",
         {
-            "x": 58,
-            "y": 12,
-            "width": 248,
-            "height": 66,
-            "fill": COLORS["panel"],
-            "stroke": "#253a2e",
+            "x": plot_x,
+            "y": plot_y,
+            "width": plot_w,
+            "height": plot_h,
+            "rx": 5,
+            "fill": COLORS["widget_plot"],
+            "stroke": COLORS["plot_border"],
             "data-layer": "plot-background",
         },
     )
-    _text(root, "AUDIO", 50, 35, fill=COLORS["muted"], size=8.5, family=FONT_MONO, weight=700, anchor="end")
-    _text(root, "TACTILE", 50, 65, fill=COLORS["muted"], size=8.5, family=FONT_MONO, weight=700, anchor="end")
+    _text(root, "AUDIO", 49, 33, fill=COLORS["muted"], size=9.5, family=FONT_MONO, weight=700, anchor="end", data_layer="channel-label")
+    _text(root, "TACTILE", 49, 69, fill=COLORS["muted"], size=9.5, family=FONT_MONO, weight=700, anchor="end", data_layer="channel-label")
 
     plot = _element(root, "g", {"clip-path": "url(#baseline-preview-clip)", "data-layer": "plot"})
     for index in range(6):
-        grid_x = 58 + 248 * index / 5
+        grid_x = plot_x + plot_w * index / 5
         _element(
             plot,
             "line",
             {
                 "x1": grid_x,
-                "y1": 12,
+                "y1": plot_y,
                 "x2": grid_x,
-                "y2": 78,
-                "stroke": COLORS["panel_line"],
+                "y2": plot_y + plot_h,
+                "stroke": COLORS["widget_grid"],
                 "stroke-width": 0.7,
-                "opacity": 0.62,
                 "data-layer": "grid",
             },
         )
-    for center_y in (34, 64):
+    for center_y in (audio_center_y, tactile_center_y):
         _element(
             plot,
             "line",
             {
-                "x1": 58,
+                "x1": plot_x,
                 "y1": center_y,
-                "x2": 306,
+                "x2": plot_x + plot_w,
                 "y2": center_y,
-                "stroke": COLORS["panel_line"],
+                "stroke": COLORS["widget_grid"],
                 "stroke-width": 0.8,
                 "data-layer": "channel-center",
             },
@@ -981,7 +1323,7 @@ def _render_baseline_preview(spec: BaselineSpec, mini_signals: dict[str, np.ndar
             plot,
             "path",
             {
-                "d": _waveform_path(audio_signal, x=58, y=21, width=248, height=26, bins=190),
+                "d": _waveform_path(audio_signal, x=plot_x, y=16, width=plot_w, height=28, bins=190),
                 "fill": "url(#baseline-audio-fill)",
                 "stroke": COLORS["cyan"],
                 "stroke-width": 0.35,
@@ -996,11 +1338,11 @@ def _render_baseline_preview(spec: BaselineSpec, mini_signals: dict[str, np.ndar
             plot,
             "line",
             {
-                "x1": 58,
-                "y1": 34,
-                "x2": 306,
-                "y2": 34,
-                "stroke": "#7a9c8e",
+                "x1": plot_x,
+                "y1": audio_center_y,
+                "x2": plot_x + plot_w,
+                "y2": audio_center_y,
+                "stroke": COLORS["silenced"],
                 "stroke-width": 1.2,
                 "stroke-dasharray": "4 4",
                 "data-layer": "silenced-audio",
@@ -1012,7 +1354,7 @@ def _render_baseline_preview(spec: BaselineSpec, mini_signals: dict[str, np.ndar
         plot,
         "path",
         {
-            "d": _waveform_path(tactile, x=58, y=51, width=248, height=26, bins=190),
+            "d": _waveform_path(tactile, x=plot_x, y=52, width=plot_w, height=28, bins=190),
             "fill": COLORS["orange"],
             "stroke": COLORS["accent"],
             "stroke-width": 0.35,
@@ -1023,15 +1365,15 @@ def _render_baseline_preview(spec: BaselineSpec, mini_signals: dict[str, np.ndar
         },
     )
     for index, normalized_position in enumerate(spec.tactile_positions):
-        marker_x = 58 + 248 * normalized_position
+        marker_x = plot_x + plot_w * normalized_position
         _element(
             plot,
             "line",
             {
                 "x1": marker_x,
-                "y1": 16,
+                "y1": 10,
                 "x2": marker_x,
-                "y2": 75,
+                "y2": 86,
                 "stroke": COLORS["accent"],
                 "stroke-width": 0.9,
                 "stroke-dasharray": "3 3",
@@ -1046,9 +1388,9 @@ def _render_baseline_preview(spec: BaselineSpec, mini_signals: dict[str, np.ndar
                 plot,
                 spec.marker_labels[index],
                 label_x,
-                20,
+                17,
                 fill=COLORS["accent"],
-                size=7.5,
+                size=8.5,
                 family=FONT_MONO,
                 weight=700,
                 anchor=anchor,
@@ -1056,34 +1398,19 @@ def _render_baseline_preview(spec: BaselineSpec, mini_signals: dict[str, np.ndar
             )
 
     if spec.filename == "baseline_none.svg":
-        _element(
+        _text(
             plot,
-            "line",
-            {
-                "x1": 280,
-                "y1": 18,
-                "x2": 300,
-                "y2": 38,
-                "stroke": "#b8cfc6",
-                "stroke-width": 1.4,
-                "data-layer": "no-extra-baseline-mark",
-            },
-        )
-        _element(
-            plot,
-            "line",
-            {
-                "x1": 300,
-                "y1": 18,
-                "x2": 280,
-                "y2": 38,
-                "stroke": "#b8cfc6",
-                "stroke-width": 1.4,
-                "data-layer": "no-extra-baseline-mark",
-            },
+            "TRIAL ONLY",
+            plot_x + plot_w - 6,
+            17,
+            fill=COLORS["plot_label_strong"],
+            size=8.5,
+            family=FONT_MONO,
+            weight=700,
+            anchor="end",
+            data_layer="no-extra-baseline-mark",
         )
 
-    _text(root, spec.footer, BASELINE_WIDTH / 2, 90, fill=COLORS["muted"], size=8.5, family=FONT_MONO, weight=700, anchor="middle", data_layer="strategy-caption")
     return _serialize(root)
 
 
@@ -1185,7 +1512,7 @@ def _render_audiogram() -> str:
     for channel_id, _channel, _label, lane_y, _color in channels:
         _clip_rect(defs, f"{channel_id}-clip", timeline_x, lane_y, timeline_w, 72)
 
-    _element(root, "rect", {"width": width, "height": height, "fill": COLORS["panel"], "data-layer": "background"})
+    _element(root, "rect", {"width": width, "height": height, "fill": COLORS["widget_plot"], "data-layer": "background"})
     for tick_index in range(9):
         milliseconds = tick_index * 250
         tick_x = timeline_x + timeline_w * tick_index / 8
@@ -1197,7 +1524,7 @@ def _render_audiogram() -> str:
                 "y1": 30,
                 "x2": tick_x,
                 "y2": 34,
-                "stroke": COLORS["panel_line"],
+                "stroke": COLORS["widget_grid"],
                 "data-layer": "time-tick",
                 "data-time-ms": milliseconds,
             },
@@ -1205,8 +1532,8 @@ def _render_audiogram() -> str:
         label = "0" if milliseconds == 0 else f"{milliseconds} ms"
         anchor = "start" if tick_index == 0 else ("end" if tick_index == 8 else "middle")
         label_x = tick_x + (2 if tick_index == 0 else (-2 if tick_index == 8 else 0))
-        _text(root, label, label_x, 28, fill="#8aaa9e", size=9, family=FONT_MONO, anchor=anchor, data_layer="time-label")
-    _element(root, "line", {"x1": timeline_x, "y1": 30, "x2": timeline_x + timeline_w, "y2": 30, "stroke": COLORS["panel_line"], "stroke-width": 0.5, "data-layer": "time-axis"})
+        _text(root, label, label_x, 28, fill=COLORS["plot_label"], size=9, family=FONT_MONO, anchor=anchor, data_layer="time-label")
+    _element(root, "line", {"x1": timeline_x, "y1": 30, "x2": timeline_x + timeline_w, "y2": 30, "stroke": COLORS["widget_grid"], "stroke-width": 0.5, "data-layer": "time-axis"})
 
     for (channel_id, channel_label, description, lane_y, color), signal in zip(channels, signals, strict=True):
         _element(
@@ -1217,7 +1544,7 @@ def _render_audiogram() -> str:
                 "y": lane_y,
                 "width": timeline_w,
                 "height": 72,
-                "fill": COLORS["panel_soft"],
+                "fill": COLORS["widget_lane"],
                 "data-layer": "channel-background",
                 "data-channel": channel_id,
             },
@@ -1231,7 +1558,7 @@ def _render_audiogram() -> str:
                 "y1": center_y,
                 "x2": timeline_x + timeline_w,
                 "y2": center_y,
-                "stroke": COLORS["panel_line"],
+                "stroke": COLORS["widget_grid"],
                 "stroke-width": 0.75,
                 "data-layer": "channel-center",
                 "data-channel": channel_id,
@@ -1268,12 +1595,12 @@ def _render_audiogram() -> str:
                 "y": lane_y,
                 "width": timeline_x,
                 "height": 72,
-                "fill": COLORS["panel"],
+                "fill": COLORS["widget_plot"],
                 "data-layer": "channel-label-background",
             },
         )
-        _text(root, channel_label, 90, lane_y + 30, fill="#b8cfc6", size=11, family=FONT_MONO, weight=700, anchor="end", data_layer="channel-label")
-        _text(root, description, 90, lane_y + 44, fill="#7a9c8e", size=9, anchor="end", data_layer="channel-description")
+        _text(root, channel_label, 90, lane_y + 30, fill=COLORS["plot_label_strong"], size=11, family=FONT_MONO, weight=700, anchor="end", data_layer="channel-label")
+        _text(root, description, 90, lane_y + 44, fill=COLORS["plot_label"], size=9, anchor="end", data_layer="channel-description")
         _element(
             root,
             "line",
@@ -1282,7 +1609,7 @@ def _render_audiogram() -> str:
                 "y1": lane_y,
                 "x2": timeline_x,
                 "y2": lane_y + 72,
-                "stroke": COLORS["panel_line"],
+                "stroke": COLORS["widget_grid"],
                 "stroke-width": 0.75,
                 "data-layer": "channel-boundary",
             },
@@ -1310,12 +1637,12 @@ def _render_audiogram() -> str:
 
     active_start_x = timeline_x + timeline_w * 0.28 / duration_s
     active_end_x = timeline_x + timeline_w * 1.66 / duration_s
-    _element(root, "line", {"x1": active_start_x, "y1": 263, "x2": active_end_x, "y2": 263, "stroke": "#3a5c4e", "data-layer": "stimulus-span"})
+    _element(root, "line", {"x1": active_start_x, "y1": 263, "x2": active_end_x, "y2": 263, "stroke": COLORS["stimulus_span"], "data-layer": "stimulus-span"})
     for marker_x in (active_start_x, active_end_x):
-        _element(root, "line", {"x1": marker_x, "y1": 260, "x2": marker_x, "y2": 266, "stroke": "#3a5c4e", "data-layer": "stimulus-span-boundary"})
-    _text(root, "LOOMING STIMULUS", (active_start_x + active_end_x) / 2, 276, fill="#3a5c4e", size=8.5, anchor="middle", data_layer="stimulus-span-label")
-    _text(root, "TACTILE", soa_x + 27, 276, fill="#8a4020", size=8.5, anchor="middle", data_layer="tactile-label")
-    _text(root, "EXAMPLE LOOMING TRIAL - NATIVE MIN/MAX SVG - SHARED 44.1 KHZ SAMPLE CLOCK", timeline_x, 293, fill="#6a8a7e", size=8.5, data_layer="footer")
+        _element(root, "line", {"x1": marker_x, "y1": 260, "x2": marker_x, "y2": 266, "stroke": COLORS["stimulus_span"], "data-layer": "stimulus-span-boundary"})
+    _text(root, "LOOMING STIMULUS", (active_start_x + active_end_x) / 2, 276, fill=COLORS["stimulus_span"], size=8.5, anchor="middle", data_layer="stimulus-span-label")
+    _text(root, "TACTILE", soa_x + 27, 276, fill=COLORS["tactile_text"], size=8.5, anchor="middle", data_layer="tactile-label")
+    _text(root, "EXAMPLE LOOMING TRIAL - NATIVE MIN/MAX SVG - SHARED 44.1 KHZ SAMPLE CLOCK", timeline_x, 293, fill=COLORS["footer"], size=8.5, data_layer="footer")
     return _serialize(root)
 
 
@@ -1330,6 +1657,17 @@ def generate_svg_documents() -> dict[str, str]:
         )
         for spec in SHOWCASE_SPECS
     }
+    documents.update(
+        {
+            SHOWCASE_WIDGET_FILENAMES[spec.mode]: _render_showcase_widget(
+                spec,
+                signals[spec.mode],
+                signals[f"{spec.mode}_gain"],
+                signal_details,
+            )
+            for spec in SHOWCASE_SPECS
+        }
+    )
     documents["audiogram_looming_trial.svg"] = _render_audiogram()
     mini_signals = _mini_signals()
     documents.update(
