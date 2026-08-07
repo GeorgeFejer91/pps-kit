@@ -6,16 +6,17 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260806-mobile-nav-top">
+  <link rel="stylesheet" href="styles.css?v=20260807-mobile-design">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to page content</a>
   <div class="app-shell">
     <header class="topbar site-tabs" aria-label="Primary dashboard pages">
-      <nav class="site-tab-list" aria-label="Dashboard tabs">
-        <button class="site-tab active" type="button" data-page-tab="toolkit" aria-selected="true" aria-label="Experiment Designer"><span class="tab-label-full">Experiment Designer</span><span class="tab-label-short" aria-hidden="true">Experiment</span></button>
-        <button class="site-tab" type="button" data-page-tab="documentation" aria-selected="false" aria-label="Documentation"><span class="tab-label-full">Documentation</span><span class="tab-label-short" aria-hidden="true">Docs</span></button>
-        <button class="site-tab" type="button" data-page-tab="downloads" aria-selected="false">Downloads</button>
-      </nav>
+      <div class="site-tab-list" role="tablist" aria-label="Dashboard pages">
+        <button id="page-tab-toolkit" class="site-tab active" type="button" role="tab" data-page-tab="toolkit" aria-controls="toolkit-page" aria-selected="true" aria-label="Experiment Designer"><span class="tab-label-full">Experiment Designer</span><span class="tab-label-short" aria-hidden="true">Experiment</span></button>
+        <button id="page-tab-documentation" class="site-tab" type="button" role="tab" data-page-tab="documentation" aria-controls="documentation-page" aria-selected="false" aria-label="Documentation" tabindex="-1"><span class="tab-label-full">Documentation</span><span class="tab-label-short" aria-hidden="true">Docs</span></button>
+        <button id="page-tab-downloads" class="site-tab" type="button" role="tab" data-page-tab="downloads" aria-controls="downloads-page" aria-selected="false" tabindex="-1">Downloads</button>
+      </div>
       <div class="designer-status-chrome" aria-label="Designer status">
         <span id="designer-capability-badge" class="status-label optional">detecting mode</span>
         <span id="designer-save-state" class="status-label optional">saved</span>
@@ -61,16 +62,21 @@
           <span id="profile-edit-label" class="profile-mode-option profile-mode-option-edit">Edit</span>
         </div>
       </div>
-      <nav class="rail-nav-group active" aria-label="Toolkit workflow sections" data-rail-page="toolkit">
-        <a href="#study" data-step-link="study"><span>0 Preload</span><strong class="decision-state not-ready" data-step-state="study" aria-label="Preload not ready" title="Preload not ready">✕</strong></a>
-        <a href="#stimulus" data-step-link="stimulus"><span>1 Stimuli</span><strong class="decision-state not-ready" data-step-state="stimulus" aria-label="Stimuli not ready" title="Stimuli not ready">✕</strong></a>
-        <a href="#trials" data-step-link="trials"><span>2 Sequence</span><strong class="decision-state not-ready" data-step-state="trials" aria-label="Sequence not ready" title="Sequence not ready">✕</strong></a>
-        <a href="#baseline" data-step-link="baseline"><span>3 Tactile</span><strong class="decision-state not-ready" data-step-state="baseline" aria-label="Tactile not ready" title="Tactile not ready">✕</strong></a>
-        <a href="#block" data-step-link="block"><span>4 Pool</span><strong class="decision-state not-ready" data-step-state="block" aria-label="Trial pool not ready" title="Trial pool not ready">✕</strong></a>
-        <a href="#schedule" data-step-link="schedule"><span>5 Blocks</span><strong class="decision-state not-ready" data-step-state="schedule" aria-label="Block CSV preview not ready" title="Block CSV preview not ready">✕</strong></a>
-        <a href="#run" data-step-link="run"><span>6 Validate &amp; Save</span><strong class="decision-state not-ready" data-step-state="run" aria-label="Profile not ready" title="Profile not ready">✕</strong></a>
+      <button id="mobile-rail-nav-toggle" class="mobile-rail-toggle" type="button" aria-expanded="false" aria-controls="toolkit-workflow-nav documentation-section-nav download-section-nav">
+        <span>Sections</span>
+        <strong id="mobile-rail-nav-current">Experiment workflow</strong>
+        <span class="mobile-disclosure-chevron" aria-hidden="true"></span>
+      </button>
+      <nav id="toolkit-workflow-nav" class="rail-nav-group active" aria-label="Toolkit workflow sections" data-rail-page="toolkit">
+        <a href="#study-segment" data-step-link="study"><span>0 Preload</span><strong class="decision-state not-ready" data-step-state="study" aria-label="Preload not ready" title="Preload not ready">✕</strong></a>
+        <a href="#stimulus-segment" data-step-link="stimulus"><span>1 Stimuli</span><strong class="decision-state not-ready" data-step-state="stimulus" aria-label="Stimuli not ready" title="Stimuli not ready">✕</strong></a>
+        <a href="#trials-segment" data-step-link="trials"><span>2 Sequence</span><strong class="decision-state not-ready" data-step-state="trials" aria-label="Sequence not ready" title="Sequence not ready">✕</strong></a>
+        <a href="#baseline-segment" data-step-link="baseline"><span>3 Tactile</span><strong class="decision-state not-ready" data-step-state="baseline" aria-label="Tactile not ready" title="Tactile not ready">✕</strong></a>
+        <a href="#block-segment" data-step-link="block"><span>4 Pool</span><strong class="decision-state not-ready" data-step-state="block" aria-label="Trial pool not ready" title="Trial pool not ready">✕</strong></a>
+        <a href="#schedule-segment" data-step-link="schedule"><span>5 Blocks</span><strong class="decision-state not-ready" data-step-state="schedule" aria-label="Block CSV preview not ready" title="Block CSV preview not ready">✕</strong></a>
+        <a href="#run-segment" data-step-link="run"><span>6 Validate &amp; Save</span><strong class="decision-state not-ready" data-step-state="run" aria-label="Profile not ready" title="Profile not ready">✕</strong></a>
       </nav>
-      <nav class="rail-nav-group" aria-label="Documentation sections" data-rail-page="documentation" hidden>
+      <nav id="documentation-section-nav" class="rail-nav-group" aria-label="Documentation sections" data-rail-page="documentation" hidden>
         <div class="rail-nav-kicker">Documentation</div>
         <a href="#docs-pps" data-page-section-link="docs-pps" data-page-section-page="documentation"><span>Peripersonal Space</span></a>
         <a href="#docs-overview" data-page-section-link="docs-overview" data-page-section-page="documentation"><span>Toolkit</span></a>
@@ -82,14 +88,19 @@
         <a href="#docs-emulatable-studies" data-page-section-link="docs-emulatable-studies" data-page-section-page="documentation"><span>Emulatable Studies</span></a>
         <a href="#docs-data-boundary" data-page-section-link="docs-data-boundary" data-page-section-page="documentation"><span>Data Boundary</span></a>
       </nav>
-      <nav class="rail-nav-group" aria-label="Download sections" data-rail-page="downloads" hidden>
+      <nav id="download-section-nav" class="rail-nav-group" aria-label="Download sections" data-rail-page="downloads" hidden>
         <div class="rail-nav-kicker">Downloads</div>
         <a href="#downloads-installer" data-page-section-link="downloads-installer" data-page-section-page="downloads"><span>Installer</span></a>
         <a href="#downloads-package" data-page-section-link="downloads-package" data-page-section-page="downloads"><span>Offline Package</span></a>
         <a href="#downloads-source" data-page-section-link="downloads-source" data-page-section-page="downloads"><span>Source</span></a>
         <a href="#downloads-companion" data-page-section-link="downloads-companion" data-page-section-page="downloads"><span>Companion</span></a>
       </nav>
-      <div class="companion-panel" aria-label="Local companion backend">
+      <button id="mobile-companion-toggle" class="mobile-rail-toggle mobile-companion-toggle" type="button" aria-expanded="false" aria-controls="companion-panel">
+        <span>Connection</span>
+        <strong>Local Companion</strong>
+        <span class="mobile-disclosure-chevron" aria-hidden="true"></span>
+      </button>
+      <div id="companion-panel" class="companion-panel" aria-label="Local companion backend">
         <div class="layout-title">Local Companion</div>
         <span id="connection-status" class="status-label required">checking</span>
         <label for="backend-url">Backend URL</label>
@@ -104,9 +115,10 @@
       </div>
     </aside>
 
-    <main class="workspace">
-      <div id="toolkit-page" class="page-view toolkit-page active" data-page-panel="toolkit">
-      <section class="decision-segment" aria-labelledby="study-segment-title">
+    <main id="main-content" class="workspace" tabindex="-1">
+      <div id="toolkit-page" class="page-view toolkit-page active" data-page-panel="toolkit" role="tabpanel" aria-labelledby="page-tab-toolkit" tabindex="0">
+        <h1 class="visually-hidden">PPS Experiment Designer</h1>
+      <section id="study-segment" class="decision-segment" aria-labelledby="study-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 0</span>
           <h2 id="study-segment-title">Choose or Create Study</h2>
@@ -142,7 +154,7 @@
         </div>
       </section>
 
-      <section class="decision-segment" aria-labelledby="stimulus-segment-title">
+      <section id="stimulus-segment" class="decision-segment" aria-labelledby="stimulus-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 1</span>
           <h2 id="stimulus-segment-title">Build Looming Stimuli</h2>
@@ -212,7 +224,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260806-mobile-nav-top"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260807-mobile-design"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -339,7 +351,7 @@
         </section>
       </section>
 
-      <section class="decision-segment" aria-labelledby="trials-segment-title">
+      <section id="trials-segment" class="decision-segment" aria-labelledby="trials-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 2</span>
           <h2 id="trials-segment-title">Trial Sequence Design</h2>
@@ -374,7 +386,7 @@
         </section>
       </section>
 
-      <section class="decision-segment" aria-labelledby="baseline-segment-title">
+      <section id="baseline-segment" class="decision-segment" aria-labelledby="baseline-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 3</span>
           <h2 id="baseline-segment-title">Baseline and Tactile Trial Design</h2>
@@ -492,7 +504,7 @@
         </section>
       </section>
 
-      <section class="decision-segment" aria-labelledby="block-segment-title">
+      <section id="block-segment" class="decision-segment" aria-labelledby="block-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 4</span>
           <h2 id="block-segment-title">Trial Repetition Pool</h2>
@@ -544,7 +556,7 @@
         </section>
       </section>
 
-      <section class="decision-segment" aria-labelledby="schedule-segment-title">
+      <section id="schedule-segment" class="decision-segment" aria-labelledby="schedule-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 5</span>
           <h2 id="schedule-segment-title">Generate and Review Blocks</h2>
@@ -577,7 +589,7 @@
               <strong>Block CSV bake</strong>
               <span id="block-build-progress-label">waiting</span>
             </div>
-            <div id="block-build-progress-track" class="block-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div id="block-build-progress-track" class="block-progress-track" role="progressbar" aria-label="Block generation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
               <span id="block-build-progress-fill" class="block-progress-fill"></span>
             </div>
             <div class="block-build-progress-meta">
@@ -597,7 +609,7 @@
         </section>
       </section>
 
-      <section class="decision-segment" aria-labelledby="run-segment-title">
+      <section id="run-segment" class="decision-segment" aria-labelledby="run-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 6</span>
           <h2 id="run-segment-title">Profile Validation and Save</h2>
@@ -647,7 +659,7 @@
               <span id="run-sequence-summary" class="status-label">waiting</span>
             </div>
             <div class="scroll-table compact run-sequence-table-wrap">
-              <table class="data-table" id="run-sequence-table">
+              <table class="data-table mobile-card-table" id="run-sequence-table">
                 <thead>
                   <tr>
                     <th>Example</th>
@@ -671,7 +683,7 @@
       </section>
       </div>
 
-      <section id="documentation-page" class="page-view info-page" data-page-panel="documentation" hidden>
+      <section id="documentation-page" class="page-view info-page" data-page-panel="documentation" role="tabpanel" aria-labelledby="page-tab-documentation" tabindex="0" hidden>
         <div class="info-page-heading">
           <span class="segment-kicker">Documentation</span>
           <h1>PPS Toolkit Public Documentation</h1>
@@ -925,22 +937,22 @@
 
           <div class="spatial-explain-grid">
             <article class="info-card">
-              <h2>What Is An HRTF?</h2>
+              <h3>What Is An HRTF?</h3>
               <p>A head-related transfer function is a small acoustic fingerprint for one direction. It describes how the head, torso, and ears reshape a sound before it reaches the left and right eardrums. Applying different HRTFs over time makes a stationary source file behave like it is moving.</p>
             </article>
             <article class="info-card">
-              <h2>What Is SOFA?</h2>
+              <h3>What Is SOFA?</h3>
               <p>SOFA, the Spatially Oriented Format for Acoustics, is the standardized file container that stores spatial acoustic measurements such as HRTFs, HRIRs, and binaural room impulse responses with enough metadata for different tools to read them consistently.</p>
               <a class="button-link" href="https://www.sofaconventions.org/mediawiki/index.php/SOFA_%28Spatially_Oriented_Format_for_Acoustics%29" target="_blank" rel="noopener noreferrer">Open SOFA Conventions</a>
             </article>
             <article class="info-card">
-              <h2>What Is FABIAN?</h2>
+              <h3>What Is FABIAN?</h3>
               <p>FABIAN is TU Berlin's head-and-torso simulator dataset. PPS uses its HRIR/HRTF measurements as the reference listener model when creating binaural looming audio, and credits the source data to Brinkmann.</p>
               <a class="button-link" href="https://depositonce.tu-berlin.de/items/bff6568a-5735-4ebc-b3fa-ac10707b7beb" target="_blank" rel="noopener noreferrer">Open TU DepositOnce Record</a>
               <a class="button-link secondary-link" href="https://sofacoustics.org/data/database/tu-berlin/" target="_blank" rel="noopener noreferrer">Open TU Berlin SOFA Files</a>
             </article>
             <article class="info-card">
-              <h2>Where Do 3DTI And BRT Fit?</h2>
+              <h3>Where Do 3DTI And BRT Fit?</h3>
               <p>3DTI and its newer BRT line provide the binaural-rendering toolbox layer: software that takes source audio, listener/source geometry, and HRIR data, then computes the left and right headphone signals. In PPS, this renderer layer is local infrastructure, not browser logic or participant data storage.</p>
               <a class="button-link" href="https://github.com/GrupoDiana/BRTLibrary" target="_blank" rel="noopener noreferrer">Open BRT Library</a>
               <a class="button-link secondary-link" href="https://www.3d-tune-in.eu/toolkit-developers" target="_blank" rel="noopener noreferrer">Open 3DTI Toolkit Page</a>
@@ -1048,15 +1060,15 @@
           <p class="info-copy">PPS Toolkit is released under the MIT License. Permission is granted to use, copy, modify, merge, publish, distribute, sublicense, and sell copies of the software, provided the copyright notice and permission notice stay with the software. The software is provided as is, without warranty of any kind, including implied warranties of merchantability, fitness for a particular purpose, or noninfringement. The authors and copyright holders are not liable for claims, damages, or other liability arising from use of the toolkit.</p>
           <div class="info-card-grid">
             <article class="info-card">
-              <h2>License Scope</h2>
+              <h3>License Scope</h3>
               <p>The MIT License covers the toolkit code and included project materials. It does not grant rights to redistribute third-party assets, vendor software, or external datasets.</p>
             </article>
             <article class="info-card">
-              <h2>Local Data</h2>
+              <h3>Local Data</h3>
               <p>Generated designs, sessions, participant outputs, and validation artifacts stay local under ignored folders such as <code>local_data/</code> and <code>artifacts/</code>.</p>
             </article>
             <article class="info-card">
-              <h2>No Warranty</h2>
+              <h3>No Warranty</h3>
               <p>Researchers are responsible for validating timing, hardware routing, ethics approvals, and local data-handling procedures before using the toolkit for data collection.</p>
             </article>
           </div>
@@ -1068,7 +1080,7 @@
         </section>
       </section>
 
-      <section id="downloads-page" class="page-view info-page" data-page-panel="downloads" hidden>
+      <section id="downloads-page" class="page-view info-page" data-page-panel="downloads" role="tabpanel" aria-labelledby="page-tab-downloads" tabindex="0" hidden>
         <div class="info-page-heading">
           <span class="segment-kicker">Downloads</span>
           <h1>Install and Run Locally</h1>
@@ -1080,7 +1092,7 @@
           </div>
           <div class="download-page-grid single">
             <article class="info-card download-card primary-download">
-            <h2>Windows Downloader</h2>
+            <h3>Windows Downloader</h3>
             <p>Small GitHub-hosted bootstrapper published through GitHub Releases after a reviewed Windows package build.</p>
             <a id="download-software" class="button-link primary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer">Open Installer Releases</a>
           </article>
@@ -1093,7 +1105,7 @@
           </div>
           <div class="download-page-grid single">
             <article class="info-card download-card">
-            <h2>Offline Lab Package</h2>
+            <h3>Offline Lab Package</h3>
             <p>Heavyweight release payload hosted outside GitHub for labs that need the full packaged toolkit bundle.</p>
             <a id="download-full-package" class="button-link secondary-link" href="https://zenodo.org/search?q=%22peripersonal-space-toolkit%22" target="_blank" rel="noopener noreferrer">Open Full Package Search</a>
           </article>
@@ -1106,7 +1118,7 @@
           </div>
           <div class="download-page-grid single">
             <article class="info-card download-card">
-            <h2>Source Repository</h2>
+            <h3>Source Repository</h3>
             <p>Browse source, issues, release notes, and development documentation on GitHub.</p>
             <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit" target="_blank" rel="noopener noreferrer">Open GitHub Repository</a>
           </article>
@@ -1119,7 +1131,7 @@
           </div>
           <div class="download-page-grid single">
             <article class="info-card download-card">
-            <h2>Local Companion</h2>
+            <h3>Local Companion</h3>
             <p>After installing, start the trusted local companion before using hosted dashboard actions.</p>
             <code>windows\Start_Website_Companion.bat</code>
           </article>
@@ -1132,7 +1144,7 @@
 
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="segment-info-modal" class="modal-backdrop" hidden>
-    <div class="modal-card segment-info-card" role="dialog" aria-modal="true" aria-labelledby="segment-info-modal-title">
+    <div class="modal-card segment-info-card" role="dialog" aria-modal="true" aria-labelledby="segment-info-modal-title" tabindex="-1">
       <div class="modal-heading">
         <div>
           <div id="segment-info-kicker" class="segment-kicker">Segment</div>
@@ -1165,7 +1177,7 @@
     </div>
   </div>
   <div id="customize-modal" class="modal-backdrop" hidden>
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="customize-modal-title">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="customize-modal-title" tabindex="-1">
       <form id="customize-form">
         <div class="modal-heading">
           <div>
@@ -1188,7 +1200,7 @@
     </div>
   </div>
   <div id="save-profile-modal" class="modal-backdrop" hidden>
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="save-profile-modal-title">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="save-profile-modal-title" tabindex="-1">
       <form id="save-profile-form">
         <div class="modal-heading">
           <div>
@@ -1209,7 +1221,7 @@
       </form>
     </div>
   </div>
-  <script type="module" src="app.js?v=20260806-mobile-nav-top"></script>
-  <script type="module" src="designer_main.js?v=20260806-mobile-nav-top"></script>
+  <script type="module" src="app.js?v=20260807-mobile-design"></script>
+  <script type="module" src="designer_main.js?v=20260807-mobile-design"></script>
 </body>
 </html>

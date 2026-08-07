@@ -2,6 +2,11 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-08-07 — mobile dashboard design contract
+
+- Apply the interface-design principles to the complete phone workflow, not only the hosted top bar. At 600 px and narrower, page tabs are the sticky first surface; the compact View/Edit state follows; workflow sections and Local Companion are collapsed disclosures by default; ordinary controls have 44 px touch targets; segment headings/actions reflow consistently; action footers become static; and resize handles are disabled at 760 px and narrower. Dense trial/block tables reflow into labeled records without local horizontal scrolling, long block rows use explicit progressive reveal, and read-only views omit mutation-only affordances while retaining previews.
+- Treat mobile accessibility and visual parity as release behavior. Viewport-bounded modals scroll, trap focus, inert the application shell, and restore focus; dark documentation and modal surfaces use semantic theme variables. Responsive validation covers all Segment 0-6 stages at 320 px and 390 px portrait, short phone landscape, and both sides of the 600/601 px and 760/761 px breakpoints, including navigation/disclosure interactions, targets, overflow/overlap, table reflow, modal containment, and browser errors.
+
 ## 2026-08-06 — interface design system and visual QA
 
 - Adopt a repository-wide PPS interface-design contract based on task ownership, common grid meridians, a 4 px base/8 px primary spacing rhythm, consistent control geometry, proximity grouping, hierarchy-driven salience, responsive reflow, WCAG-aware contrast/focus/targets, and restrained progressive disclosure. Symmetry is a balance tool rather than a universal rule; deliberate hierarchy may be asymmetric, while accidental misalignment is a defect. Every visual change now requires deterministic desktop/hosted build output, visible rail-click navigation, multi-viewport light/dark screenshots for every Segment 0-6 stage, DOM geometry checks, explicit image inspection, correction, and a repeated audit until both hard criteria and qualitative review pass. Read-only scientific content retains full opacity; state is communicated with badges and locked controls rather than degraded legibility.
@@ -1989,11 +1994,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   precedes the sidebar in source and visual order. At phone widths it is the
   first in-flow application surface, so users can choose the public page before
   traversing workflow navigation or Local Companion settings.
-- At `760px` or narrower, page tabs own a full-width row and status controls
-  wrap below. The header is non-sticky so it cannot cover the sticky scientific
-  stage headings, while short visible `Experiment` and `Docs` labels preserve
-  complete accessible names.
-- Visual QA now covers the `601px` side-rail breakpoint plus `390x844` dark and `360x800`
-  light phone layouts. It rejects a header below the in-flow phone sidebar,
-  clipped or overlapping page-tab labels, header/sticky-heading overlap after
-  rail navigation, and page tabs that fail to activate their matching panel.
+- At `760px` or narrower, the complete phone layout is continuous: the sticky
+  page tabs own a full-width first row, status controls sit below, the sidebar
+  becomes compact collapsed disclosures, stage headings and footers return to
+  document flow, and dense tables become readable labeled records. Short
+  visible `Experiment` and `Docs` labels preserve complete accessible names.
+- Visual QA covers `320x800`, `360x800`, and `390x844` portraits, a `568x320`
+  landscape, the `760/761px` mobile boundary, and a `600/601px` continuity
+  probe. It rejects misplaced navigation, clipped or overlapping tabs,
+  undersized controls (including selectable labels), expanded-by-default rail
+  content, sticky content overlays, table compression/overflow, focus escaping
+  mobile dialogs, and page tabs that fail to activate their matching panel.

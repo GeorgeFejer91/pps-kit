@@ -78,13 +78,13 @@ const PROFILE_RECREATION_NOTICE =
   "Be aware: this is not the exact stimulus set used in the original study. This preload recreates the study's reported parameters within this interface, using the toolkit's local rendering and bundled profile assets.";
 const WORKFLOW_STEPS = ["study", "stimulus", "trials", "baseline", "block", "schedule", "run"];
 const STEP_TARGETS = {
-  study: "study",
-  stimulus: "stimulus",
-  trials: "trials",
-  baseline: "baseline",
-  block: "block",
-  schedule: "schedule",
-  run: "run"
+  study: "study-segment",
+  stimulus: "stimulus-segment",
+  trials: "trials-segment",
+  baseline: "baseline-segment",
+  block: "block-segment",
+  schedule: "schedule-segment",
+  run: "run-segment"
 };
 const NEXT_STEP = {
   study: "stimulus",
@@ -314,6 +314,8 @@ const boundedSelectButtons = new WeakMap();
 let boundedSelectMenu = null;
 let activeBoundedSelect = null;
 let activeBoundedOptionIndex = -1;
+let boundedSelectTypeahead = "";
+let boundedSelectTypeaheadTimer = 0;
 let boundedSelectSequence = 0;
 let apiBase = "";
 let companionToken = "";
@@ -348,7 +350,21 @@ function boundedSelectLabel(select) {
 
 function boundedSelectFieldLabel(select) {
   const explicitLabel = select.id ? document.querySelector(`label[for="${cssEscape(select.id)}"]`) : null;
-  return String(explicitLabel?.textContent || select.closest(".field-row")?.querySelector("label")?.textContent || "Choose an option").trim();
+  return String(
+    select.getAttribute("aria-label")
+    || explicitLabel?.textContent
+    || select.closest(".field-row, .trial-condition-field, .source-card-field")?.querySelector("label")?.textContent
+    || "Choose an option"
+  ).trim();
+}
+
+function isBoundedSelectOptionDisabled(option) {
+  return option.disabled || (option.parentElement?.tagName === "OPTGROUP" && option.parentElement.disabled);
+}
+
+function enabledBoundedSelectItems() {
+  if (!boundedSelectMenu) return [];
+  return [...boundedSelectMenu.querySelectorAll('[data-bounded-option-index]:not([aria-disabled="true"])')];
 }
 
 function closeBoundedSelect({ restoreFocus = false } = {}) {
@@ -359,13 +375,15 @@ function closeBoundedSelect({ restoreFocus = false } = {}) {
   button?.setAttribute("aria-expanded", "false");
   activeBoundedSelect = null;
   activeBoundedOptionIndex = -1;
+  boundedSelectTypeahead = "";
+  window.clearTimeout(boundedSelectTypeaheadTimer);
   if (restoreFocus) button?.focus();
 }
 
 function selectBoundedOption(optionIndex) {
   if (!activeBoundedSelect) return;
   const option = activeBoundedSelect.options[optionIndex];
-  if (!option || option.disabled || option.hidden) return;
+  if (!option || isBoundedSelectOptionDisabled(option) || option.hidden) return;
   const select = activeBoundedSelect;
   select.value = option.value;
   closeBoundedSelect({ restoreFocus: true });
@@ -376,7 +394,7 @@ function selectBoundedOption(optionIndex) {
 
 function focusBoundedOption(direction) {
   if (!boundedSelectMenu || !activeBoundedSelect) return;
-  const enabled = [...boundedSelectMenu.querySelectorAll("[data-bounded-option-index]")];
+  const enabled = enabledBoundedSelectItems();
   if (!enabled.length) return;
   const current = enabled.findIndex((item) => Number(item.dataset.boundedOptionIndex) === activeBoundedOptionIndex);
   let next = current;
@@ -386,8 +404,40 @@ function focusBoundedOption(direction) {
   else if (direction === "previous") next = current < 0 ? enabled.length - 1 : (current - 1 + enabled.length) % enabled.length;
   const item = enabled[next];
   activeBoundedOptionIndex = Number(item.dataset.boundedOptionIndex);
+  for (const option of enabled) option.tabIndex = -1;
+  item.tabIndex = 0;
   item.focus({ preventScroll: true });
   item.scrollIntoView({ block: "nearest" });
+}
+
+function focusBoundedOptionByText(query) {
+  const cleanQuery = String(query || "").trim().toLowerCase();
+  if (!cleanQuery || !boundedSelectMenu) return;
+  const items = enabledBoundedSelectItems();
+  const item = items.find((candidate) => candidate.textContent.trim().toLowerCase().startsWith(cleanQuery));
+  if (!item) return;
+  for (const option of items) option.tabIndex = -1;
+  item.tabIndex = 0;
+  activeBoundedOptionIndex = Number(item.dataset.boundedOptionIndex);
+  item.focus({ preventScroll: true });
+  item.scrollIntoView({ block: "nearest" });
+}
+
+function moveFocusFromBoundedSelect(reverse = false) {
+  const button = activeBoundedSelect ? boundedSelectButtons.get(activeBoundedSelect) : null;
+  closeBoundedSelect();
+  if (!button) return;
+  const focusable = [...document.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  )].filter((element) => (
+    !element.hidden
+    && element.tabIndex >= 0
+    && !element.closest('[inert], [aria-hidden="true"]')
+    && element.getClientRects().length > 0
+  ));
+  const current = focusable.indexOf(button);
+  const next = focusable[current + (reverse ? -1 : 1)];
+  (next || button).focus();
 }
 
 function positionBoundedSelectMenu(button) {
@@ -427,37 +477,55 @@ function openBoundedSelect(select) {
   activeBoundedOptionIndex = select.selectedIndex;
   boundedSelectMenu.replaceChildren();
   let lastGroup = null;
+  let groupContainer = boundedSelectMenu;
   [...select.options].forEach((option, optionIndex) => {
     const group = option.parentElement?.tagName === "OPTGROUP" ? option.parentElement : null;
     if (group && group !== lastGroup) {
+      groupContainer = document.createElement("div");
+      groupContainer.className = "bounded-select-group-options";
+      groupContainer.setAttribute("role", "group");
+      groupContainer.setAttribute("aria-label", group.label);
       const heading = document.createElement("div");
       heading.className = "bounded-select-group";
       heading.textContent = group.label;
-      boundedSelectMenu.appendChild(heading);
+      heading.setAttribute("aria-hidden", "true");
+      groupContainer.appendChild(heading);
+      boundedSelectMenu.appendChild(groupContainer);
+    } else if (!group) {
+      groupContainer = boundedSelectMenu;
     }
     lastGroup = group;
     if (option.hidden) return;
+    const optionDisabled = isBoundedSelectOptionDisabled(option);
     const item = document.createElement("div");
     item.className = "bounded-select-option";
     item.dataset.boundedOptionIndex = String(optionIndex);
     item.setAttribute("role", "option");
     item.setAttribute("aria-selected", String(option.selected));
-    item.tabIndex = option.disabled ? -1 : 0;
+    item.tabIndex = !optionDisabled && optionIndex === select.selectedIndex ? 0 : -1;
     item.textContent = option.textContent;
-    if (option.disabled) {
+    if (optionDisabled) {
       item.classList.add("disabled");
       item.setAttribute("aria-disabled", "true");
     } else {
       item.addEventListener("click", () => selectBoundedOption(optionIndex));
     }
-    boundedSelectMenu.appendChild(item);
+    groupContainer.appendChild(item);
   });
+  boundedSelectMenu.setAttribute("aria-label", `${boundedSelectFieldLabel(select)} options`);
   positionBoundedSelectMenu(button);
   boundedSelectMenu.hidden = false;
   button.setAttribute("aria-expanded", "true");
   window.requestAnimationFrame(() => {
     const selected = boundedSelectMenu.querySelector(`[data-bounded-option-index="${select.selectedIndex}"]`);
-    (selected || boundedSelectMenu.querySelector("[data-bounded-option-index]:not(.disabled)"))?.focus({ preventScroll: true });
+    const target = selected && selected.getAttribute("aria-disabled") !== "true"
+      ? selected
+      : enabledBoundedSelectItems()[0];
+    if (target) {
+      target.tabIndex = 0;
+      activeBoundedOptionIndex = Number(target.dataset.boundedOptionIndex);
+      target.focus({ preventScroll: true });
+    }
   });
 }
 
@@ -467,7 +535,20 @@ function syncBoundedSelect(select) {
   const label = boundedSelectLabel(select);
   button.querySelector(".bounded-select-value").textContent = label;
   button.title = label;
-  button.setAttribute("aria-disabled", String(select.disabled));
+  const fieldLabel = boundedSelectFieldLabel(select);
+  if (select.disabled && isProfileReadonlyMode()) {
+    button.setAttribute("role", "button");
+    button.setAttribute("aria-haspopup", "dialog");
+    button.setAttribute("aria-controls", "customize-modal");
+    button.removeAttribute("aria-disabled");
+    button.setAttribute("aria-label", `${fieldLabel === "Choose an option" ? label : fieldLabel}: ${label}. Create a custom copy to edit.`);
+  } else {
+    button.setAttribute("role", "combobox");
+    button.setAttribute("aria-haspopup", "listbox");
+    button.setAttribute("aria-controls", "bounded-select-menu");
+    button.setAttribute("aria-disabled", String(select.disabled));
+    button.setAttribute("aria-label", fieldLabel);
+  }
   button.classList.toggle("disabled", select.disabled);
   if (activeBoundedSelect === select && select.disabled) closeBoundedSelect();
 }
@@ -531,7 +612,13 @@ function initializeBoundedSelects() {
       event.preventDefault();
       closeBoundedSelect({ restoreFocus: true });
     } else if (event.key === "Tab") {
-      closeBoundedSelect();
+      event.preventDefault();
+      moveFocusFromBoundedSelect(event.shiftKey);
+    } else if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      boundedSelectTypeahead += event.key.toLowerCase();
+      window.clearTimeout(boundedSelectTypeaheadTimer);
+      boundedSelectTypeaheadTimer = window.setTimeout(() => { boundedSelectTypeahead = ""; }, 650);
+      focusBoundedOptionByText(boundedSelectTypeahead);
     }
   });
   document.addEventListener("pointerdown", (event) => {
@@ -808,7 +895,7 @@ function setWorkflowDisabled(control, disabled) {
 
 function profileReadonlyControlAllowed(control) {
   if (!control) return false;
-  if (control.matches?.("[data-preview-source-label]")) return true;
+  if (control.matches?.("[data-preview-source-label], .mobile-table-more")) return true;
   return Boolean(
     control.id
     && (
@@ -822,7 +909,7 @@ function profileReadonlyControlAllowed(control) {
 
 function viewModeControlAllowed(control) {
   if (!control) return false;
-  if (control.matches?.("[data-preview-source-label]")) return true;
+  if (control.matches?.("[data-preview-source-label], .mobile-table-more")) return true;
   if (control.id?.startsWith("open-")) return true;
   if (control.id === "download-block-randomization") return true;
   return Boolean(
@@ -2763,12 +2850,14 @@ function setActivePage(page, options = {}) {
     const active = button.dataset.pageTab === nextPage;
     button.classList.toggle("active", active);
     button.setAttribute("aria-selected", String(active));
+    button.tabIndex = active ? 0 : -1;
   }
   for (const panel of document.querySelectorAll("[data-page-panel]")) {
     panel.hidden = panel.dataset.pagePanel !== nextPage;
     panel.classList.toggle("active", panel.dataset.pagePanel === nextPage);
   }
   syncRailForPage(nextPage);
+  if (!options.preserveMobileDisclosures) closeMobileRailDisclosures();
   if (options.updateHash) {
     replaceRouteForPage(nextPage);
   }
@@ -2788,6 +2877,60 @@ function syncRailForPage(page) {
     group.hidden = !active;
     group.classList.toggle("active", active);
   }
+  syncMobileRailSummary();
+}
+
+function closeMobileRailDisclosures() {
+  const rail = document.querySelector(".rail");
+  if (!rail) return;
+  rail.classList.remove("mobile-sections-open", "mobile-companion-open");
+  $("mobile-rail-nav-toggle")?.setAttribute("aria-expanded", "false");
+  $("mobile-companion-toggle")?.setAttribute("aria-expanded", "false");
+}
+
+function mobileSectionsDisclosureOpen() {
+  return window.matchMedia("(max-width: 760px)").matches
+    && document.querySelector(".rail")?.classList.contains("mobile-sections-open");
+}
+
+function focusSectionNavigationTarget(target) {
+  if (!target) return;
+  const originalTabIndex = target.getAttribute("tabindex");
+  if (originalTabIndex === null) target.tabIndex = -1;
+  target.focus({ preventScroll: true });
+  if (originalTabIndex !== null) return;
+  if (document.activeElement !== target) {
+    target.removeAttribute("tabindex");
+    return;
+  }
+  target.addEventListener("blur", () => target.removeAttribute("tabindex"), { once: true });
+}
+
+function toggleMobileRailDisclosure(kind) {
+  const rail = document.querySelector(".rail");
+  if (!rail) return;
+  const sections = kind === "sections";
+  const className = sections ? "mobile-sections-open" : "mobile-companion-open";
+  const otherClass = sections ? "mobile-companion-open" : "mobile-sections-open";
+  const toggle = $(sections ? "mobile-rail-nav-toggle" : "mobile-companion-toggle");
+  const otherToggle = $(sections ? "mobile-companion-toggle" : "mobile-rail-nav-toggle");
+  const expanded = !rail.classList.contains(className);
+  rail.classList.toggle(className, expanded);
+  rail.classList.remove(otherClass);
+  toggle?.setAttribute("aria-expanded", String(expanded));
+  otherToggle?.setAttribute("aria-expanded", "false");
+}
+
+function syncMobileRailSummary() {
+  const current = $("mobile-rail-nav-current");
+  if (!current) return;
+  const selector = activePage === "toolkit"
+    ? '[data-step-link].active'
+    : `[data-page-section-page="${cssEscape(activePage)}"].active`;
+  const fallback = document.querySelector(`[data-rail-page="${cssEscape(activePage)}"] a`);
+  const link = document.querySelector(selector) || fallback;
+  current.textContent = link?.querySelector("span")?.textContent?.trim()
+    || (activePage === "toolkit" ? "Experiment workflow" : humanize(activePage));
 }
 
 function setActivePageSection(sectionId) {
@@ -3108,7 +3251,9 @@ function syncNoiseTypeButtons() {
     select.value = PROCEDURAL_NOISE_TYPES.some((item) => item.value === activeType) ? activeType : "";
   }
   for (const button of document.querySelectorAll(".noise-type-button")) {
-    button.classList.toggle("active", Boolean(activeType) && button.dataset.noiseType === activeType);
+    const active = Boolean(activeType) && button.dataset.noiseType === activeType;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
   }
 }
 
@@ -3167,7 +3312,7 @@ function renderNoiseTable() {
       <div class="source-card-heading">
         <strong>${escapeHtml(noiseTypeLabel(selectedNoise))} noise</strong>
         <div class="source-card-actions">
-          ${sourceFolderAction(localPath)}
+          ${sourceFolderAction(localPath, noise.label || `${noiseTypeLabel(selectedNoise)} noise`)}
           <button type="button" data-remove-noise>Remove</button>
         </div>
       </div>
@@ -3238,7 +3383,7 @@ function renderAudioTable() {
       <div class="source-card-heading">
         <strong>${escapeHtml(audioRoleTitle(role))}</strong>
         <div class="source-card-actions">
-          ${sourceFolderAction(audio.path)}
+          ${sourceFolderAction(audio.path, audio.label || audioRoleTitle(role))}
           <button type="button" data-remove-audio>Remove</button>
         </div>
       </div>
@@ -3453,12 +3598,12 @@ function readJsonField(field) {
   }
 }
 
-function sourceFolderAction(path) {
+function sourceFolderAction(path, label = "source") {
   if (!path) return "";
   if (staticModeActive) {
-    return `<a class="source-folder-link" href="${escapeAttr(staticResourceUrl(path))}" target="_blank" rel="noopener noreferrer">Open Asset</a>`;
+    return `<a class="source-folder-link" href="${escapeAttr(staticResourceUrl(path))}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeAttr(label)} asset">Open Asset</a>`;
   }
-  return `<button type="button" class="source-folder-link" data-open-folder="${escapeAttr(path)}">Open Folder</button>`;
+  return `<button type="button" class="source-folder-link" data-open-folder="${escapeAttr(path)}" aria-label="Open ${escapeAttr(label)} folder">Open Folder</button>`;
 }
 
 function renderedWavForLabel(label) {
@@ -3691,6 +3836,10 @@ function renderBlockPreviewCard(block, index = 0) {
   ].join("");
   const bodyRows = rows.map(renderBlockPreviewRow).join("");
   const csvName = block.csv_file_name || "";
+  const tableId = `block-preview-table-${index + 1}`;
+  const mobileTableToggle = rows.length > 6
+    ? `<button class="mobile-table-more" type="button" data-mobile-table-toggle="${tableId}" data-row-count="${rows.length}" aria-controls="${tableId}" aria-expanded="false">Show all ${rows.length} rows</button>`
+    : "";
   return `
     <details class="block-preview-card" ${index === 0 ? "open" : ""}>
       <summary>
@@ -3704,7 +3853,7 @@ function renderBlockPreviewCard(block, index = 0) {
       <div class="block-preview-body">
         <div class="block-preview-meta">${meta}</div>
         <div class="scroll-table compact">
-          <table class="data-table compact block-preview-table">
+          <table id="${tableId}" class="data-table compact block-preview-table mobile-card-table">
             <thead>
               <tr>
                 <th>#</th>
@@ -3719,6 +3868,7 @@ function renderBlockPreviewCard(block, index = 0) {
             </thead>
             <tbody>${bodyRows}</tbody>
           </table>
+          ${mobileTableToggle}
         </div>
       </div>
     </details>
@@ -3744,20 +3894,20 @@ function blockFeatureChips(counts = {}, prefix, rows, valueKey, colorKey, limit)
 function renderBlockPreviewRow(row) {
   return `
     <tr>
-      <td>${escapeHtml(row.block_trial_index || "")}</td>
-      ${coloredPreviewCell(row.family_label || familyDisplayName(row.family), row.family_color_hex)}
-      ${coloredPreviewCell(row.row_label || "", row.row_color_hex)}
-      ${coloredPreviewCell(row.soa_ms ? `${row.soa_ms} ms` : "", row.soa_color_hex)}
-      ${coloredPreviewCell(row.noise_type || "", row.noise_color_hex)}
-      <td>${escapeHtml(row.sequence_labels || row.sequence_variant_key || "")}</td>
-      <td>${escapeHtml(formatDurationMs(row.duration_ms || 0))}</td>
-      <td>${escapeHtml(row.source_file_name || "")}</td>
+      <td data-label="#">${escapeHtml(row.block_trial_index || "")}</td>
+      ${coloredPreviewCell(row.family_label || familyDisplayName(row.family), row.family_color_hex, "Family")}
+      ${coloredPreviewCell(row.row_label || "", row.row_color_hex, "Row")}
+      ${coloredPreviewCell(row.soa_ms ? `${row.soa_ms} ms` : "", row.soa_color_hex, "SOA")}
+      ${coloredPreviewCell(row.noise_type || "", row.noise_color_hex, "Noise")}
+      <td data-label="Sequence">${escapeHtml(row.sequence_labels || row.sequence_variant_key || "")}</td>
+      <td data-label="Duration">${escapeHtml(formatDurationMs(row.duration_ms || 0))}</td>
+      <td data-label="WAV">${escapeHtml(row.source_file_name || "")}</td>
     </tr>
   `;
 }
 
-function coloredPreviewCell(value, color) {
-  return `<td class="preview-color-cell" style="--cell-color:${escapeAttr(color || "transparent")}">${escapeHtml(value || "")}</td>`;
+function coloredPreviewCell(value, color, label) {
+  return `<td class="preview-color-cell" data-label="${escapeAttr(label)}" style="--cell-color:${escapeAttr(color || "transparent")}">${escapeHtml(value || "")}</td>`;
 }
 
 function stimulusTargetOptionsFromDesign(selected = "") {
@@ -4315,10 +4465,10 @@ function renderTrialPoolFolderCards(composition = trialPoolCompositionEstimate()
       const inherited = !Object.prototype.hasOwnProperty.call(trialPoolRepetitionDraft.fileRepetitionOverrides, file.file_key || "");
       return `
         <tr>
-          <td>${escapeHtml(file.source_file_name || "")}</td>
-          <td>${formatDurationMs(file.duration_ms || 0)}</td>
-          <td>${escapeHtml(file.soa_ms ?? "")}</td>
-          <td>
+          <td data-label="WAV">${escapeHtml(file.source_file_name || "")}</td>
+          <td data-label="Duration">${formatDurationMs(file.duration_ms || 0)}</td>
+          <td data-label="SOA">${escapeHtml(file.soa_ms ?? "")}</td>
+          <td data-label="Reps">
             <input data-trial-pool-file="${escapeAttr(file.file_key || "")}" type="number" min="0" max="1000" step="0.5" value="${escapeAttr(formatRepetitionValue(fileReps))}" aria-label="File repetitions">
             <span class="muted">${inherited ? "folder" : "custom"}</span>
           </td>
@@ -4346,7 +4496,7 @@ function renderTrialPoolFolderCards(composition = trialPoolCompositionEstimate()
         </div>
         <details class="trial-pool-file-details">
           <summary>Advanced file-level overrides</summary>
-          <table class="data-table compact">
+          <table class="data-table compact mobile-card-table">
             <thead><tr><th>WAV</th><th>Duration</th><th>SOA</th><th>Reps</th></tr></thead>
             <tbody>${fileRows}</tbody>
           </table>
@@ -4514,16 +4664,16 @@ function renderRowMixOverrides(composition = blockCompositionEstimate()) {
     const mix = counts.mix;
     return `
       <tr>
-        <td>${escapeHtml(label)}</td>
-        <td><input data-row-mix-index="${index}" data-row-mix-field="audio_tactile_percentage" type="number" min="0" max="100" step="1" value="${escapeAttr(mix.audioTactile)}"></td>
-        <td><input data-row-mix-index="${index}" data-row-mix-field="baseline_percentage" type="number" min="0" max="100" step="1" value="${escapeAttr(mix.baseline)}"></td>
-        <td><input data-row-mix-index="${index}" data-row-mix-field="catch_percentage" type="number" min="0" max="100" step="1" value="${escapeAttr(mix.catch)}"></td>
-        <td>${counts.totalPerBlock}</td>
+        <td data-label="Row">${escapeHtml(label)}</td>
+        <td data-label="Audio %"><input aria-label="${escapeAttr(label)} audio percentage" data-row-mix-index="${index}" data-row-mix-field="audio_tactile_percentage" type="number" min="0" max="100" step="1" value="${escapeAttr(mix.audioTactile)}"></td>
+        <td data-label="Baseline %"><input aria-label="${escapeAttr(label)} baseline percentage" data-row-mix-index="${index}" data-row-mix-field="baseline_percentage" type="number" min="0" max="100" step="1" value="${escapeAttr(mix.baseline)}"></td>
+        <td data-label="Catch %"><input aria-label="${escapeAttr(label)} catch percentage" data-row-mix-index="${index}" data-row-mix-field="catch_percentage" type="number" min="0" max="100" step="1" value="${escapeAttr(mix.catch)}"></td>
+        <td data-label="Trials / block">${counts.totalPerBlock}</td>
       </tr>
     `;
   }).join("");
   container.innerHTML = `
-    <table class="data-table compact">
+    <table class="data-table compact mobile-card-table">
       <thead>
         <tr>
           <th>Row</th>
@@ -5715,9 +5865,13 @@ function renderRun() {
   const summary = $("run-sequence-summary");
   if (summary) {
     const exampleCount = Number(setup.participant_count || state.design.protocol?.participants || 0);
+    const visibleCount = Number(setup.rows?.length || 0);
     const partCount = Number(setup.parts_per_participant || (currentExperimentStructure() === "pre_post" ? 2 : 1));
+    const orderSummary = visibleCount < exampleCount
+      ? `${visibleCount} of ${exampleCount} example orders shown`
+      : `${exampleCount} example order${exampleCount === 1 ? "" : "s"}`;
     summary.textContent = setup.ready
-      ? `${exampleCount} example order${exampleCount === 1 ? "" : "s"} · ${partCount} ${partCount === 1 ? "part" : "parts"} · deterministic preview`
+      ? `${orderSummary} · ${partCount} ${partCount === 1 ? "part" : "parts"} · deterministic preview`
       : (setup.message || "waiting for accepted blocks");
     summary.className = `status-label ${setup.ready ? "ready" : "required"}`;
   }
@@ -6063,6 +6217,7 @@ function fillTable(id, rows, keys) {
   const table = $(id);
   const body = table?.querySelector("tbody");
   if (!body) return;
+  const labels = [...table.querySelectorAll("thead th")].map((header) => header.textContent.trim());
   body.innerHTML = "";
   for (const row of rows) {
     const tr = body.insertRow();
@@ -6070,8 +6225,9 @@ function fillTable(id, rows, keys) {
     if (family.includes("baseline")) tr.classList.add("preview-baseline");
     else if (family.includes("catch")) tr.classList.add("preview-catch");
     else if (family.includes("audio")) tr.classList.add("preview-audio");
-    for (const key of keys) {
+    for (const [index, key] of keys.entries()) {
       const cell = tr.insertCell();
+      cell.dataset.label = labels[index] || humanize(key);
       cell.textContent = row[key] ?? "";
     }
   }
@@ -6339,6 +6495,44 @@ async function exportDataAcquisitionFolder() {
   showToast("Data acquisition folder linked");
 }
 
+function activeModalBackdrop() {
+  return [...document.querySelectorAll(".modal-backdrop")].find((modal) => !modal.hidden) || null;
+}
+
+function syncModalEnvironment() {
+  const open = Boolean(activeModalBackdrop());
+  const shell = document.querySelector(".app-shell");
+  const skipLink = document.querySelector(".skip-link");
+  if (shell) shell.inert = open;
+  if (skipLink) skipLink.inert = open;
+  document.body.classList.toggle("modal-open", open);
+}
+
+function trapModalFocus(event) {
+  if (event.key !== "Tab") return false;
+  const modal = activeModalBackdrop();
+  const dialog = modal?.querySelector('[role="dialog"]');
+  if (!dialog) return false;
+  const focusable = [...dialog.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  )].filter((element) => !element.hidden && element.getClientRects().length > 0);
+  if (!focusable.length) {
+    event.preventDefault();
+    dialog.focus();
+    return true;
+  }
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) {
+    event.preventDefault();
+    first.focus();
+  }
+  return true;
+}
+
 function openSegmentInfoModal(stepId, trigger = null) {
   const info = SEGMENT_INFO[stepId];
   if (!info) return;
@@ -6366,7 +6560,7 @@ function openSegmentInfoModal(stepId, trigger = null) {
   noteCard.hidden = !info.note;
   note.textContent = info.note || "";
   $("segment-info-modal").hidden = false;
-  document.body.classList.add("modal-open");
+  syncModalEnvironment();
   window.setTimeout(() => $("segment-info-modal-close")?.focus(), 0);
 }
 
@@ -6395,7 +6589,7 @@ function closeSegmentInfoModal() {
   const modal = $("segment-info-modal");
   if (!modal || modal.hidden) return;
   modal.hidden = true;
-  document.body.classList.remove("modal-open");
+  syncModalEnvironment();
   if (segmentInfoModalReturnFocus && document.contains(segmentInfoModalReturnFocus)) {
     segmentInfoModalReturnFocus.focus();
   }
@@ -6427,7 +6621,7 @@ function openCustomizeModal() {
   error.hidden = true;
   error.textContent = "";
   modal.hidden = false;
-  document.body.classList.add("modal-open");
+  syncModalEnvironment();
   window.setTimeout(() => {
     input.focus();
     input.select();
@@ -6454,7 +6648,7 @@ function openNewCustomDesignModal() {
   error.hidden = true;
   error.textContent = "";
   modal.hidden = false;
-  document.body.classList.add("modal-open");
+  syncModalEnvironment();
   window.setTimeout(() => input.focus(), 0);
 }
 
@@ -6462,7 +6656,7 @@ function closeCustomizeModal() {
   const modal = $("customize-modal");
   if (modal.hidden) return;
   modal.hidden = true;
-  document.body.classList.remove("modal-open");
+  syncModalEnvironment();
   if (customizeModalReturnFocus && document.contains(customizeModalReturnFocus)) {
     customizeModalReturnFocus.focus();
   }
@@ -7050,7 +7244,7 @@ function openSaveProfileModal() {
   error.hidden = true;
   error.textContent = "";
   modal.hidden = false;
-  document.body.classList.add("modal-open");
+  syncModalEnvironment();
   window.setTimeout(() => {
     input.focus();
     input.select();
@@ -7061,7 +7255,7 @@ function closeSaveProfileModal() {
   const modal = $("save-profile-modal");
   if (!modal || modal.hidden) return;
   modal.hidden = true;
-  document.body.classList.remove("modal-open");
+  syncModalEnvironment();
   if (saveProfileModalReturnFocus && document.contains(saveProfileModalReturnFocus)) {
     saveProfileModalReturnFocus.focus();
   }
@@ -7427,6 +7621,7 @@ function updateActiveNav() {
         link.dataset.pageSectionPage === activePage && link.dataset.pageSectionLink === activeSection
       );
     }
+    syncMobileRailSummary();
     return;
   }
   for (const link of document.querySelectorAll("[data-page-section-link]")) {
@@ -7444,6 +7639,7 @@ function updateActiveNav() {
   for (const link of document.querySelectorAll("[data-step-link]")) {
     link.classList.toggle("active", link.dataset.stepLink === active);
   }
+  syncMobileRailSummary();
 }
 
 function scheduleActiveNavUpdate() {
@@ -7461,7 +7657,14 @@ function loadResizableLayoutSettings() {
 }
 
 function initializeResizablePanels() {
+  const mobileLayout = window.matchMedia("(max-width: 760px)").matches;
   for (const panel of document.querySelectorAll("[data-resizable-panel]")) {
+    if (mobileLayout) {
+      panel.querySelector(":scope > .panel-resize-handle")?.remove();
+      panel.classList.remove("user-sized");
+      panel.style.removeProperty("--panel-user-height");
+      continue;
+    }
     const panelId = panel.dataset.panelId || panel.id;
     const storedHeight = Number(localStorage.getItem(panelStorageKey(panelId)));
     if (Number.isFinite(storedHeight) && storedHeight > 0) {
@@ -7958,21 +8161,48 @@ function wireEvents() {
     loadState({ resetEditMode: true }).catch(reportError);
   });
   $("companion-token")?.addEventListener("change", () => saveCompanionToken($("companion-token").value));
-  for (const button of document.querySelectorAll("[data-page-tab]")) {
+  const pageTabs = [...document.querySelectorAll("[data-page-tab]")];
+  for (const button of pageTabs) {
     button.addEventListener("click", () => setActivePage(button.dataset.pageTab, { updateHash: true, scrollTop: true }));
+    button.addEventListener("keydown", (event) => {
+      const keyDirections = { ArrowLeft: -1, ArrowRight: 1 };
+      if (!(event.key in keyDirections) && !["Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const currentIndex = Math.max(0, pageTabs.indexOf(button));
+      const nextIndex = event.key === "Home"
+        ? 0
+        : event.key === "End"
+          ? pageTabs.length - 1
+          : (currentIndex + keyDirections[event.key] + pageTabs.length) % pageTabs.length;
+      const next = pageTabs[nextIndex];
+      setActivePage(next.dataset.pageTab, { updateHash: true, scrollTop: true });
+      next.focus();
+    });
   }
+  $("mobile-rail-nav-toggle")?.addEventListener("click", () => toggleMobileRailDisclosure("sections"));
+  $("mobile-companion-toggle")?.addEventListener("click", () => toggleMobileRailDisclosure("companion"));
   for (const link of document.querySelectorAll("[data-page-section-link]")) {
     link.addEventListener("click", (event) => {
       event.preventDefault();
       const targetId = link.dataset.pageSectionLink;
       const page = link.dataset.pageSectionPage;
-      setActivePage(page, { updateHash: false, scrollTop: false });
+      const fromMobileSections = mobileSectionsDisclosureOpen();
+      const moveFocus = fromMobileSections && event.detail === 0;
+      setActivePage(page, {
+        updateHash: false,
+        scrollTop: false,
+        preserveMobileDisclosures: fromMobileSections
+      });
       const target = $(targetId);
       if (target) {
         replaceRouteForPage(page, targetId);
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
         setActivePageSection(targetId);
+        if (moveFocus) focusSectionNavigationTarget(target);
+        closeMobileRailDisclosures();
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
         window.setTimeout(() => setActivePageSection(targetId), 350);
+      } else {
+        closeMobileRailDisclosures();
       }
     });
   }
@@ -8011,6 +8241,7 @@ function wireEvents() {
     if (event.target === $("save-profile-modal")) closeSaveProfileModal();
   });
   document.addEventListener("keydown", (event) => {
+    if (trapModalFocus(event)) return;
     if (event.key !== "Escape") return;
     if (!$("segment-info-modal")?.hidden) {
       closeSegmentInfoModal();
@@ -8250,12 +8481,21 @@ function wireEvents() {
         scrollToStep(state.custom_workflow?.current_step || "study");
       } else {
         event.preventDefault();
-        setActivePage("toolkit", { updateHash: true });
+        const fromMobileSections = mobileSectionsDisclosureOpen();
+        const moveFocus = fromMobileSections && event.detail === 0;
+        setActivePage("toolkit", {
+          updateHash: true,
+          preserveMobileDisclosures: fromMobileSections
+        });
+        const target = $(STEP_TARGETS[stepId] || stepId);
+        if (moveFocus) focusSectionNavigationTarget(target);
+        closeMobileRailDisclosures();
         scrollToStep(stepId);
       }
     });
   }
   window.addEventListener("scroll", updateActiveNav, { passive: true });
+  window.matchMedia("(max-width: 760px)").addEventListener("change", () => initializeResizablePanels());
   window.addEventListener("message", (event) => {
     const frame = $("trajectory-frame");
     if (event.source !== frame.contentWindow) return;
@@ -8272,6 +8512,18 @@ function wireEvents() {
     updateViewer();
   });
   document.addEventListener("click", (event) => {
+    const mobileTableToggle = event.target.closest?.("[data-mobile-table-toggle]");
+    if (mobileTableToggle) {
+      const table = $(mobileTableToggle.dataset.mobileTableToggle || "");
+      if (!table) return;
+      const expanded = !table.classList.contains("mobile-show-all");
+      table.classList.toggle("mobile-show-all", expanded);
+      mobileTableToggle.setAttribute("aria-expanded", String(expanded));
+      mobileTableToggle.textContent = expanded
+        ? "Show first 6 rows"
+        : `Show all ${mobileTableToggle.dataset.rowCount || ""} rows`;
+      return;
+    }
     const autosaveMutation = event.target.closest?.(
       "[data-remove-noise], [data-remove-audio], [data-remove-strip], [data-remove-strip-element], [data-add-strip-element], [data-add-strip-row], [data-add-box-label], [data-remove-box-label], [data-strip-move]"
     );

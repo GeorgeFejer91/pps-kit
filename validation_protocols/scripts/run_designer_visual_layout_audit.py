@@ -16,6 +16,7 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Iterator
+from urllib.parse import parse_qsl, urlencode, urljoin, urlsplit, urlunsplit
 
 from PIL import Image, ImageDraw, ImageOps
 
@@ -33,10 +34,19 @@ class ViewportCase:
     height: int
     theme: str
     desktop: bool
+    full_workflow: bool = True
 
     @property
     def stacked_segment_zero(self) -> bool:
         return self.width <= 760
+
+    @property
+    def phone(self) -> bool:
+        return self.width <= 760
+
+    @property
+    def workflow_segment_indices(self) -> tuple[int, ...]:
+        return tuple(range(7)) if self.full_workflow else (5, 6)
 
 
 CASES = (
@@ -47,6 +57,13 @@ CASES = (
     ViewportCase("narrow_720_light", 720, 900, "light", False),
     ViewportCase("phone_390_dark", 390, 844, "dark", False),
     ViewportCase("phone_360_light", 360, 800, "light", False),
+    # Breakpoint probes navigate directly to the late, layout-heavy stages.
+    # The established cases above retain the complete seven-stage evidence set.
+    ViewportCase("phone_320_light", 320, 800, "light", False, False),
+    ViewportCase("phone_landscape_568_light", 568, 320, "light", False, False),
+    ViewportCase("boundary_600_dark", 600, 900, "dark", False, False),
+    ViewportCase("boundary_760_light", 760, 900, "light", False, False),
+    ViewportCase("boundary_761_light", 761, 900, "light", False, False),
 )
 
 
@@ -73,7 +90,18 @@ def serve_repository() -> Iterator[str]:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--base-url", default="", help="Use an existing server instead of starting a local one.")
+    source = parser.add_mutually_exclusive_group()
+    source.add_argument("--base-url", default="", help="Use an existing server instead of starting a local one.")
+    source.add_argument(
+        "--page-url",
+        default="",
+        help="Audit an absolute page URL directly, including a production deployment.",
+    )
+    parser.add_argument(
+        "--page-path",
+        default=COMPILED_PAGE,
+        help="Page path relative to the local or --base-url server.",
+    )
     parser.add_argument("--review-note", default="", help="Record who inspected the generated images and what was checked.")
     return parser
 
@@ -110,13 +138,26 @@ def assess_geometry(case: ViewportCase, geometry: dict[str, Any]) -> list[str]:
         failures.append("desktop applet still shows the redundant hosted top bar")
     if not case.desktop and metrics.get("topbar_visible", 0) < 1:
         failures.append("hosted layout is missing its page-navigation top bar")
-    if case.width <= 600 and metrics.get("mobile_topbar_above_rail", 0) < 1:
+    if case.phone and metrics.get("mobile_topbar_above_rail", 0) < 1:
         failures.append("mobile page navigation is not above the sidebar")
+    if case.phone and metrics.get("mobile_rail_toggles_visible", 1) < 1:
+        failures.append("mobile sidebar is missing its compact section and connection disclosures")
+    if case.phone and metrics.get("mobile_sections_collapsed", 1) < 1:
+        failures.append("mobile section navigation is expanded before the user requests it")
+    if case.phone and metrics.get("mobile_companion_collapsed", 1) < 1:
+        failures.append("mobile companion controls are expanded before the user requests them")
+    if case.phone and metrics.get("mobile_rail_height_px", 0) > 300:
+        failures.append("collapsed mobile sidebar is taller than 300 CSS px")
+    if case.width == 761 and metrics.get("mobile_rail_toggles_visible", 0) > 0:
+        failures.append("mobile sidebar disclosures remain visible above the 760px breakpoint")
     if metrics.get("site_tab_labels_fit", 0) < 1:
         failures.append("page-navigation tab labels are clipped")
     if metrics.get("site_tab_overlap_px", 0) > 0:
         failures.append("page-navigation tabs overlap")
-    if metrics.get("mode_icon_center_delta_px", 0) > 1 or metrics.get("mode_switch_center_delta_px", 0) > 1:
+    if not case.phone and (
+        metrics.get("mode_icon_center_delta_px", 0) > 1
+        or metrics.get("mode_switch_center_delta_px", 0) > 1
+    ):
         failures.append("profile lock and View/Edit switch are not centered on the sidebar meridian")
     if metrics.get("mode_view_switch_gap_px", 0) < 0 or metrics.get("mode_switch_edit_gap_px", 0) < 0:
         failures.append("View/Edit labels overlap the profile-mode switch")
@@ -124,9 +165,48 @@ def assess_geometry(case: ViewportCase, geometry: dict[str, Any]) -> list[str]:
         failures.append("View/Edit labels do not share the switch's horizontal centerline")
     if not geometry["primary_label_fits"]:
         failures.append("Start New Custom Design label is clipped")
-    if geometry["undersized_targets"]:
-        targets = ", ".join(item["selector"] for item in geometry["undersized_targets"][:6])
-        failures.append(f"visible interactive targets are below 24x24 CSS px: {targets}")
+    target_floor = 44 if case.phone else 24
+    undersized_targets = geometry.get(
+        "undersized_phone_targets" if case.phone else "undersized_targets",
+        geometry.get("undersized_targets", []),
+    )
+    if undersized_targets:
+        targets = ", ".join(item["selector"] for item in undersized_targets[:6])
+        failures.append(
+            f"visible interactive targets are below {target_floor}x{target_floor} CSS px: {targets}"
+        )
+    if case.width <= 760 and metrics.get("resize_handles_visible", 0) > 0:
+        failures.append("panel resize handles remain interactive at or below the 760px breakpoint")
+    if case.width == 761 and metrics.get("resize_handles_visible", 1) < 1:
+        failures.append("panel resize handles do not return above the 760px breakpoint")
+    return failures
+
+
+def assess_mobile_segment(case: ViewportCase, segment_index: int, geometry: dict[str, Any]) -> list[str]:
+    """Assess phone-only layout contracts that appear late in the workflow."""
+    if not case.phone:
+        return []
+    failures: list[str] = []
+    if geometry.get("footer_count", 0) and geometry.get("static_footer_count", 0) != geometry["footer_count"]:
+        failures.append(f"Segment {segment_index} step footer is not in static document flow on phone")
+    if geometry.get("local_horizontal_overflow_px", 0) > 1:
+        failures.append(
+            f"Segment {segment_index} has {geometry['local_horizontal_overflow_px']:.2f}px local horizontal overflow"
+        )
+    if segment_index in (5, 6):
+        if geometry.get("card_table_count", 0) < 1:
+            failures.append(f"Segment {segment_index} is missing its readable mobile card table")
+        if geometry.get("card_table_unstacked_cells", 0) > 0:
+            failures.append(f"Segment {segment_index} mobile table cells are not stacked as labeled card rows")
+        if geometry.get("card_table_min_font_px", 12) < 12:
+            failures.append(f"Segment {segment_index} mobile table text is smaller than 12 CSS px")
+    if segment_index == 5:
+        if geometry.get("block_summary_count", 0) < 1:
+            failures.append("Segment 5 is missing a visible block summary")
+        if geometry.get("block_summary_overflow_px", 0) > 1:
+            failures.append(
+                f"Segment 5 block summary exceeds its card by {geometry['block_summary_overflow_px']:.2f}px"
+            )
     return failures
 
 
@@ -177,21 +257,36 @@ def _make_guide_overlay(source_path: Path, destination: Path, geometry: dict[str
     image.save(destination)
 
 
-def _page_url(base_url: str, case: ViewportCase) -> str:
-    desktop = "&desktop=1" if case.desktop else ""
-    return (
-        f"{base_url.rstrip('/')}/{COMPILED_PAGE}"
-        f"?page=toolkit&forceStaticPreview=1&auditStaticPreview=1{desktop}"
-    )
+def _page_url(
+    base_url: str,
+    case: ViewportCase,
+    *,
+    page_url: str = "",
+    page_path: str = COMPILED_PAGE,
+) -> str:
+    target = page_url or urljoin(f"{base_url.rstrip('/')}/", page_path.lstrip("/"))
+    parsed = urlsplit(target)
+    query = dict(parse_qsl(parsed.query, keep_blank_values=True))
+    query.update({"page": "toolkit", "forceStaticPreview": "1", "auditStaticPreview": "1"})
+    if case.desktop:
+        query["desktop"] = "1"
+    else:
+        query.pop("desktop", None)
+    return urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query), parsed.fragment))
 
 
 def _geometry_script() -> str:
     return """
     () => {
       const visible = (element) => {
+        if (!element) return false;
         const style = getComputedStyle(element);
         const rect = element.getBoundingClientRect();
-        return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
+        return style.display !== 'none'
+          && style.visibility !== 'hidden'
+          && Number(style.opacity) > 0.01
+          && rect.width > 0
+          && rect.height > 0;
       };
       const rect = (selector) => {
         const element = document.querySelector(selector);
@@ -220,9 +315,15 @@ def _geometry_script() -> str:
       const panelTitle = rect('#study .panel-title');
       const innerLeft = panel.x + parseFloat(panelStyle.borderLeftWidth) + parseFloat(panelStyle.paddingLeft);
       const innerRight = panel.right - parseFloat(panelStyle.borderRightWidth) - parseFloat(panelStyle.paddingRight);
-      const interactive = [...document.querySelectorAll('button, input, select, [role="button"], .button-link')]
+      const interactive = [...document.querySelectorAll(
+        'button, input, select, textarea, [role="button"], [role="switch"], [role="combobox"], .button-link, .rail a, .segmented-control label, .inline-toggle, .box-mode-toggle'
+      )]
         .filter((element) => visible(element)
-          && !element.matches('.state-only, [aria-hidden="true"], input[type="hidden"], input[type="checkbox"], input[type="radio"]'))
+          && !element.closest('[hidden], [inert]')
+          && getComputedStyle(element).pointerEvents !== 'none'
+          && !element.matches(
+            '.state-only, .visually-hidden, .bounded-select-native, [aria-hidden="true"], input[type="hidden"], input[type="checkbox"], input[type="radio"], input[type="range"]'
+          ))
         .map((element) => {
           const value = element.getBoundingClientRect();
           return {
@@ -232,6 +333,18 @@ def _geometry_script() -> str:
           };
         });
       const undersizedTargets = interactive.filter((item) => item.width < 24 || item.height < 24);
+      const phoneOnlyTargets = [...document.querySelectorAll('summary')]
+        .filter((element) => visible(element) && !element.closest('[hidden], [inert]'))
+        .map((element) => {
+          const value = element.getBoundingClientRect();
+          return {
+            selector: element.id ? `#${element.id}` : 'SUMMARY',
+            width: value.width,
+            height: value.height,
+          };
+        });
+      const undersizedPhoneTargets = [...interactive, ...phoneOnlyTargets]
+        .filter((item) => item.width < 44 || item.height < 44);
       const horizontalOverlap = Math.max(0, Math.min(select.right, button.right) - Math.max(select.x, button.x));
       const siteTabs = [...document.querySelectorAll('.site-tab')];
       const siteTabRects = siteTabs.map((element) => element.getBoundingClientRect());
@@ -243,6 +356,11 @@ def _geometry_script() -> str:
         });
         return Math.max(maximum, ...overlaps, 0);
       }, 0);
+      const mobileSectionToggle = document.querySelector('#mobile-rail-nav-toggle');
+      const mobileCompanionToggle = document.querySelector('#mobile-companion-toggle');
+      const activeRailNav = document.querySelector('.rail-nav-group.active');
+      const companionPanel = document.querySelector('#companion-panel');
+      const resizeHandles = [...document.querySelectorAll('.panel-resize-handle')];
       return {
         rects: { panel, picker, card, select, button, headingKicker, panelTitle, modePanel, modeIcon, modeSwitch, modeViewLabel, modeEditLabel, topbar, rail },
         metrics: {
@@ -267,15 +385,105 @@ def _geometry_script() -> str:
             Math.abs((modeViewLabel.y + modeViewLabel.height / 2) - (modeSwitch.y + modeSwitch.height / 2)),
             Math.abs((modeEditLabel.y + modeEditLabel.height / 2) - (modeSwitch.y + modeSwitch.height / 2)),
           ),
+          mobile_rail_toggles_visible: visible(mobileSectionToggle) && visible(mobileCompanionToggle),
+          mobile_sections_collapsed: !visible(activeRailNav) && mobileSectionToggle?.getAttribute('aria-expanded') === 'false',
+          mobile_companion_collapsed: !visible(companionPanel) && mobileCompanionToggle?.getAttribute('aria-expanded') === 'false',
+          mobile_rail_height_px: rail.height,
+          resize_handles_visible: resizeHandles.filter(visible).length,
         },
         primary_label_fits: button.width + 1 >= document.querySelector('#start-new-custom-design').scrollWidth,
         undersized_targets: undersizedTargets,
+        undersized_phone_targets: undersizedPhoneTargets,
       };
     }
     """
 
 
-def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[str, Any]:
+def _mobile_segment_geometry_script() -> str:
+    return """
+    segment => {
+      const visible = (element) => {
+        if (!element) return false;
+        const style = getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
+      };
+      const footers = [...segment.querySelectorAll('.step-footer')].filter(visible);
+      const overflowElements = [
+        segment,
+        ...[...segment.querySelectorAll('.scroll-table, .mobile-card-table')].filter(visible),
+      ];
+      const localOverflow = overflowElements.reduce(
+        (maximum, element) => Math.max(maximum, element.scrollWidth - element.clientWidth),
+        0,
+      );
+      const cardTables = [...segment.querySelectorAll('.mobile-card-table')].filter(visible);
+      const cardCells = cardTables.flatMap((table) => [...table.querySelectorAll('tbody td')].filter(visible));
+      const summaries = [...segment.querySelectorAll('.block-preview-card > summary')].filter(visible);
+      const summaryOverflow = summaries.reduce((maximum, summary) => {
+        const bounds = summary.getBoundingClientRect();
+        const descendantOverflow = [...summary.querySelectorAll('*')].filter(visible).reduce((childMaximum, child) => {
+          const childBounds = child.getBoundingClientRect();
+          return Math.max(
+            childMaximum,
+            childBounds.right - bounds.right,
+            bounds.left - childBounds.left,
+          );
+        }, 0);
+        return Math.max(maximum, summary.scrollWidth - summary.clientWidth, descendantOverflow);
+      }, 0);
+      return {
+        footer_count: footers.length,
+        static_footer_count: footers.filter((footer) => getComputedStyle(footer).position === 'static').length,
+        local_horizontal_overflow_px: Math.max(0, localOverflow),
+        card_table_count: cardTables.length,
+        card_table_unstacked_cells: cardCells.filter((cell) => !['block', 'grid'].includes(getComputedStyle(cell).display)).length,
+        card_table_min_font_px: cardCells.length
+          ? Math.min(...cardCells.map((cell) => parseFloat(getComputedStyle(cell).fontSize)))
+          : 12,
+        block_summary_count: summaries.length,
+        block_summary_overflow_px: Math.max(0, summaryOverflow),
+      };
+    }
+    """
+
+
+def _phone_target_script() -> str:
+    return """
+    () => [...document.querySelectorAll(
+      'button, input, select, textarea, summary, [role="button"], [role="switch"], [role="combobox"], .button-link, .rail a'
+    )].filter((element) => {
+      const style = getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity) > 0.01
+        && style.pointerEvents !== 'none'
+        && rect.width > 0
+        && rect.height > 0
+        && !element.closest('[hidden], [inert]')
+        && !element.matches(
+          '.state-only, .visually-hidden, .bounded-select-native, [aria-hidden="true"], input[type="hidden"], input[type="checkbox"], input[type="radio"], input[type="range"]'
+        );
+    }).map((element) => {
+      const rect = element.getBoundingClientRect();
+      return {
+        selector: element.id ? `#${element.id}` : element.tagName === 'SUMMARY' ? 'SUMMARY' : element.className ? `.${String(element.className).trim().replaceAll(' ', '.')}` : element.tagName,
+        width: rect.width,
+        height: rect.height,
+      };
+    }).filter((item) => item.width < 44 || item.height < 44)
+    """
+
+
+def run_audit(
+    base_url: str,
+    output_dir: Path,
+    review_note: str = "",
+    *,
+    page_url: str = "",
+    page_path: str = COMPILED_PAGE,
+) -> dict[str, Any]:
     try:
         from playwright.sync_api import sync_playwright
     except ImportError as exc:
@@ -286,6 +494,7 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
     report: dict[str, Any] = {
         "schema": SCHEMA,
         "compiled_page": COMPILED_PAGE,
+        "audited_page": page_url or urljoin(f"{base_url.rstrip('/')}/", page_path.lstrip("/")),
         "review_note": review_note,
         "manual_review_required": not bool(review_note.strip()),
         "cases": [],
@@ -300,6 +509,7 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                     viewport={"width": case.width, "height": case.height},
                     color_scheme=case.theme,
                     device_scale_factor=1,
+                    has_touch=case.phone,
                 )
                 context.add_init_script(
                     f"localStorage.setItem('ppsDesigner.theme', {json.dumps(case.theme)});"
@@ -316,7 +526,11 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                     and not message.text.startswith("Permissions policy violation: compute-pressure")
                     else None,
                 )
-                page.goto(_page_url(base_url, case), wait_until="domcontentloaded", timeout=30_000)
+                page.goto(
+                    _page_url(base_url, case, page_url=page_url, page_path=page_path),
+                    wait_until="domcontentloaded",
+                    timeout=30_000,
+                )
                 page.wait_for_selector("#template-select option", state="attached", timeout=20_000)
                 page.wait_for_function("document.querySelector('#profile-inspection-id')?.textContent !== '—'")
                 page.add_style_tag(
@@ -355,7 +569,6 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                 page.wait_for_selector("#bounded-select-menu", state="hidden")
                 geometry["metrics"] = {key: _round(value) for key, value in geometry["metrics"].items()}
                 failures = assess_geometry(case, geometry)
-                failures.extend(f"browser error: {message}" for message in page_errors)
 
                 theme_path = output_dir / f"{case.name}_theme_toggle.png"
                 page.locator("#designer-theme-toggle").screenshot(path=str(theme_path), animations="disabled")
@@ -397,8 +610,55 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                 page.screenshot(path=str(viewport_path), animations="disabled")
                 screenshots.append(viewport_path)
 
+                phone_target_checks: dict[str, Any] = {}
+                mobile_rail_interaction: dict[str, Any] = {}
+                if case.phone:
+                    section_toggle = page.locator("#mobile-rail-nav-toggle")
+                    companion_toggle = page.locator("#mobile-companion-toggle")
+                    section_toggle.click()
+                    section_open = (
+                        section_toggle.get_attribute("aria-expanded") == "true"
+                        and page.locator(".rail-nav-group.active").is_visible()
+                    )
+                    section_path = output_dir / f"{case.name}_mobile_sections_open.png"
+                    page.locator(".rail").screenshot(path=str(section_path), animations="disabled")
+                    screenshots.append(section_path)
+                    section_targets = page.evaluate(_phone_target_script())
+                    phone_target_checks["sections_open"] = section_targets
+                    if section_targets:
+                        labels = ", ".join(item["selector"] for item in section_targets[:6])
+                        failures.append(f"mobile expanded section targets are below 44x44 CSS px: {labels}")
+                    section_toggle.click()
+                    section_closed = (
+                        section_toggle.get_attribute("aria-expanded") == "false"
+                        and not page.locator(".rail-nav-group.active").is_visible()
+                    )
+                    companion_toggle.click()
+                    companion_open = (
+                        companion_toggle.get_attribute("aria-expanded") == "true"
+                        and page.locator("#companion-panel").is_visible()
+                    )
+                    companion_targets = page.evaluate(_phone_target_script())
+                    phone_target_checks["companion_open"] = companion_targets
+                    if companion_targets:
+                        labels = ", ".join(item["selector"] for item in companion_targets[:6])
+                        failures.append(f"mobile expanded companion targets are below 44x44 CSS px: {labels}")
+                    companion_toggle.click()
+                    companion_closed = (
+                        companion_toggle.get_attribute("aria-expanded") == "false"
+                        and not page.locator("#companion-panel").is_visible()
+                    )
+                    mobile_rail_interaction = {
+                        "section_open": section_open,
+                        "section_closed": section_closed,
+                        "companion_open": companion_open,
+                        "companion_closed": companion_closed,
+                    }
+                    if not all(mobile_rail_interaction.values()):
+                        failures.append("mobile sidebar disclosures do not open and return to their compact state")
+
                 page_tab_interaction: dict[str, Any] = {}
-                if case.width <= 520:
+                if case.phone:
                     for page_name in ("documentation", "downloads", "toolkit"):
                         tab = page.locator(f'[data-page-tab="{page_name}"]')
                         tab.click()
@@ -414,6 +674,11 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                             "selected": selected,
                             "panel_visible": panel_visible,
                         }
+                        page_targets = page.evaluate(_phone_target_script())
+                        phone_target_checks[f"page_{page_name}"] = page_targets
+                        if page_targets:
+                            labels = ", ".join(item["selector"] for item in page_targets[:6])
+                            failures.append(f"mobile {page_name} page targets are below 44x44 CSS px: {labels}")
                         tab_path = output_dir / f"{case.name}_tab_{page_name}.png"
                         page.locator(".topbar").screenshot(
                             path=str(tab_path), animations="disabled"
@@ -424,6 +689,45 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                                 f"mobile {page_name} tab does not activate its page"
                             )
 
+                    keyboard_states: list[dict[str, Any]] = []
+                    keyboard_steps = (
+                        ("toolkit", "ArrowRight", "documentation"),
+                        ("documentation", "ArrowRight", "downloads"),
+                        ("downloads", "ArrowRight", "toolkit"),
+                        ("toolkit", "ArrowLeft", "downloads"),
+                        ("downloads", "Home", "toolkit"),
+                        ("toolkit", "End", "downloads"),
+                        ("downloads", "Home", "toolkit"),
+                    )
+                    page.locator('[data-page-tab="toolkit"]').focus()
+                    for source_page, key, expected_page in keyboard_steps:
+                        page.keyboard.press(key)
+                        page.wait_for_function(
+                            "pageName => document.body.dataset.activePage === pageName",
+                            arg=expected_page,
+                        )
+                        state = page.locator(f'[data-page-tab="{expected_page}"]').evaluate(
+                            """tab => ({
+                              selected: tab.getAttribute('aria-selected'),
+                              tabIndex: tab.tabIndex,
+                              focused: document.activeElement === tab,
+                              panelVisible: !document.querySelector(`#${tab.getAttribute('aria-controls')}`).hidden,
+                            })"""
+                        )
+                        state.update({"from": source_page, "key": key, "expected": expected_page})
+                        keyboard_states.append(state)
+                        if (
+                            state["selected"] != "true"
+                            or state["tabIndex"] != 0
+                            or not state["focused"]
+                            or not state["panelVisible"]
+                        ):
+                            failures.append(
+                                f"mobile tab keyboard interaction {key} does not activate and focus {expected_page}"
+                            )
+                    page_tab_interaction["keyboard"] = keyboard_states
+
+                modal_interaction: dict[str, Any] = {}
                 if case_index == 0:
                     locked_mode_path = output_dir / "desktop_1440_light_profile_lock_closed.png"
                     page.locator("#profile-mode-panel").screenshot(path=str(locked_mode_path), animations="disabled")
@@ -440,12 +744,93 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                     screenshots.append(about_path)
                     page.locator("#segment-info-modal-close").click()
 
-                # Capture every workflow stage in every target layout. Geometry
-                # gates catch measurable regressions; these images make the
-                # necessary human/vision review of hierarchy and rhythm possible.
+                if case.phone:
+                    modal_trigger = page.locator('[data-segment-info="study"]')
+                    modal_trigger.click()
+                    page.wait_for_selector("#segment-info-modal:not([hidden])")
+                    page.wait_for_timeout(50)
+                    modal_geometry = page.locator("#segment-info-modal .modal-card").evaluate(
+                        """dialog => {
+                          const bounds = dialog.getBoundingClientRect();
+                          const style = getComputedStyle(dialog);
+                          const contentOverflows = dialog.scrollHeight > dialog.clientHeight + 1;
+                          return {
+                            viewport_overflow_px: Math.max(
+                              0,
+                              -bounds.left,
+                              -bounds.top,
+                              bounds.right - window.innerWidth,
+                              bounds.bottom - window.innerHeight,
+                            ),
+                            content_clipped: contentOverflows && !['auto', 'scroll'].includes(style.overflowY),
+                            environment_inert: Boolean(document.querySelector('.app-shell')?.inert),
+                          };
+                        }"""
+                    )
+                    dialog = page.locator("#segment-info-modal [role='dialog']")
+                    focusable_count = dialog.evaluate(
+                        """element => [...element.querySelectorAll(
+                          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                        )].filter(candidate => !candidate.hidden && candidate.getClientRects().length > 0).length"""
+                    )
+                    focus_containment = [
+                        dialog.evaluate("element => element.contains(document.activeElement)")
+                    ]
+                    page.keyboard.press("Shift+Tab")
+                    focus_containment.append(
+                        dialog.evaluate("element => element.contains(document.activeElement)")
+                    )
+                    for _ in range(focusable_count + 2):
+                        page.keyboard.press("Tab")
+                        focus_containment.append(
+                            dialog.evaluate("element => element.contains(document.activeElement)")
+                        )
+                    modal_path = output_dir / f"{case.name}_about_modal.png"
+                    page.screenshot(path=str(modal_path), animations="disabled")
+                    screenshots.append(modal_path)
+                    modal_targets = page.evaluate(_phone_target_script())
+                    phone_target_checks["about_modal"] = modal_targets
+                    if modal_targets:
+                        labels = ", ".join(item["selector"] for item in modal_targets[:6])
+                        failures.append(f"mobile modal targets are below 44x44 CSS px: {labels}")
+                    page.locator("#segment-info-modal-close").click()
+                    page.wait_for_selector("#segment-info-modal", state="hidden")
+                    returned_focus = modal_trigger.evaluate("element => document.activeElement === element")
+                    modal_interaction = {
+                        **{
+                            key: _round(value)
+                            if isinstance(value, (int, float)) and not isinstance(value, bool)
+                            else value
+                            for key, value in modal_geometry.items()
+                        },
+                        "focus_contained": all(focus_containment),
+                        "returned_focus": returned_focus,
+                    }
+                    if modal_geometry["viewport_overflow_px"] > 1:
+                        failures.append("mobile About dialog extends beyond the visual viewport")
+                    if modal_geometry["content_clipped"]:
+                        failures.append("mobile About dialog clips content instead of scrolling")
+                    if not modal_geometry["environment_inert"]:
+                        failures.append("mobile modal leaves the application shell interactive")
+                    if not all(focus_containment):
+                        failures.append("mobile modal allows keyboard focus to escape its dialog")
+                    if not returned_focus:
+                        failures.append("mobile modal does not return focus to its About trigger")
+
+                # Established cases retain every workflow stage. Extra one-pixel
+                # breakpoint probes focus on Segments 5 and 6, where responsive
+                # table and footer regressions have the largest cost.
+                workflow_geometry: dict[str, Any] = {}
                 for segment_index, step_link in enumerate(page.locator("[data-step-link]").all()):
+                    if segment_index not in case.workflow_segment_indices:
+                        continue
                     # Exercise the operator's real navigation path instead of
                     # relying only on a test-only DOM scroll command.
+                    if case.phone and not step_link.is_visible():
+                        page.locator("#mobile-rail-nav-toggle").click()
+                        page.wait_for_function(
+                            "document.querySelector('#mobile-rail-nav-toggle')?.getAttribute('aria-expanded') === 'true'"
+                        )
                     step_link.click()
                     segment = page.locator(".decision-segment").nth(segment_index)
                     page.evaluate(
@@ -483,10 +868,27 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                         failures.append(
                             f"page navigation overlaps a sticky segment heading after opening Segment {segment_index}"
                         )
+                    segment_geometry = segment.evaluate(_mobile_segment_geometry_script())
+                    segment_geometry = {
+                        key: _round(value) if isinstance(value, (int, float)) else value
+                        for key, value in segment_geometry.items()
+                    }
+                    workflow_geometry[str(segment_index)] = segment_geometry
+                    failures.extend(assess_mobile_segment(case, segment_index, segment_geometry))
                     # Normalize only the evidence framing. Hash navigation can
                     # stop at the document boundary or beneath a prior sticky
                     # heading, which obscures the stage in a viewport capture.
-                    segment.evaluate("element => window.scrollTo(0, element.offsetTop - 96)")
+                    segment.evaluate(
+                        """
+                        element => {
+                          const topbar = document.querySelector('.topbar');
+                          const stickyTopbarHeight = topbar && getComputedStyle(topbar).position === 'sticky'
+                            ? topbar.getBoundingClientRect().height
+                            : 0;
+                          window.scrollTo(0, element.offsetTop - stickyTopbarHeight - 8);
+                        }
+                        """
+                    )
                     page.wait_for_timeout(150)
                     path = output_dir / f"{case.name}_segment_{segment_index}.png"
                     page.screenshot(path=str(path), animations="disabled")
@@ -537,6 +939,10 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                     if open_state["shackleTransform"] == closed_state["shackleTransform"]:
                         failures.append("profile lock shackle has no distinct open visual state")
 
+                # Read browser errors only after every tab, disclosure, modal,
+                # and workflow interaction so late failures cannot be omitted.
+                browser_errors = list(dict.fromkeys(page_errors))
+                failures.extend(f"browser error: {message}" for message in browser_errors)
                 case_record = {
                     "name": case.name,
                     "viewport": {"width": case.width, "height": case.height},
@@ -546,7 +952,12 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
                     "screenshots": [str(segment_path), str(viewport_path)],
                     "theme_interaction": theme_interaction,
                     "page_tab_interaction": page_tab_interaction,
+                    "mobile_rail_interaction": mobile_rail_interaction,
+                    "phone_target_checks": phone_target_checks,
+                    "modal_interaction": modal_interaction,
+                    "workflow_geometry": workflow_geometry,
                     "mode_interaction": mode_interaction,
+                    "browser_errors": browser_errors,
                     "failures": failures,
                     "passed": not failures,
                 }
@@ -586,11 +997,29 @@ def run_audit(base_url: str, output_dir: Path, review_note: str = "") -> dict[st
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    if args.base_url:
-        report = run_audit(args.base_url, args.output_dir, args.review_note)
+    if args.page_url:
+        report = run_audit(
+            "",
+            args.output_dir,
+            args.review_note,
+            page_url=args.page_url,
+            page_path=args.page_path,
+        )
+    elif args.base_url:
+        report = run_audit(
+            args.base_url,
+            args.output_dir,
+            args.review_note,
+            page_path=args.page_path,
+        )
     else:
         with serve_repository() as base_url:
-            report = run_audit(base_url, args.output_dir, args.review_note)
+            report = run_audit(
+                base_url,
+                args.output_dir,
+                args.review_note,
+                page_path=args.page_path,
+            )
     print(json.dumps({"passed": report["passed"], "failures": report["failures"], "contact_sheet": report["contact_sheet"]}, indent=2))
     return 0 if report["passed"] else 1
 

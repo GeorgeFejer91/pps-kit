@@ -255,7 +255,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260806-mobile-nav-top"
+    static_version = "20260807-mobile-design"
     assert f'href="styles.css?v={static_version}"' in html
     assert 'import("./hardware_pixel_art.js")' in app_js
     assert f'src="app.js?v={static_version}"' in html
@@ -597,7 +597,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "decodeAudioData" in app_js
     assert "activeSourcePreviewClearTimer" in app_js
     assert "duration_s" in app_js
-    assert 'control.matches?.("[data-preview-source-label]")' in app_js
+    assert 'control.matches?.("[data-preview-source-label], .mobile-table-more")' in app_js
     assert ".panel.profile-readonly [data-preview-source-label]" in styles_css
     assert "sequence-label-chip" in app_js
     assert "box-mode-toggle" in app_js

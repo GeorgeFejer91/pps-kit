@@ -213,13 +213,26 @@ function initializeChrome() {
   for (const segment of document.querySelectorAll(".decision-segment")) {
     const heading = segment.querySelector(":scope > .segment-heading");
     if (!heading || heading.querySelector(".segment-collapse-button")) continue;
+    const title = heading.querySelector("h2")?.textContent?.trim() || "workflow segment";
+    const kicker = heading.querySelector(".segment-kicker")?.textContent?.trim() || "Segment";
+    if (!segment.id) {
+      const stableId = heading.querySelector("h2")?.id
+        || title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      segment.id = `segment-${stableId}`;
+    }
     const button = document.createElement("button");
     button.type = "button";
     button.className = "segment-collapse-button";
     button.textContent = "Collapse";
+    button.setAttribute("aria-controls", segment.id);
+    button.setAttribute("aria-expanded", "true");
+    button.setAttribute("aria-label", `Collapse ${kicker}: ${title}`);
     button.addEventListener("click", () => {
       segment.classList.toggle("collapsed");
-      button.textContent = segment.classList.contains("collapsed") ? "Expand" : "Collapse";
+      const collapsed = segment.classList.contains("collapsed");
+      button.textContent = collapsed ? "Expand" : "Collapse";
+      button.setAttribute("aria-expanded", String(!collapsed));
+      button.setAttribute("aria-label", `${collapsed ? "Expand" : "Collapse"} ${kicker}: ${title}`);
     });
     heading.appendChild(button);
   }
