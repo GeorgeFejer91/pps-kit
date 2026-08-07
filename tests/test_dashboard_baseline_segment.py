@@ -96,7 +96,8 @@ def test_dashboard_static_assets_keep_numbered_baseline_and_block_segments():
     assert 'id="trial-pool-duration-summary"' not in html
     assert 'id="trial-pool-output-summary"' not in html
     assert "No baseline" in html
-    assert 'type="checkbox" name="baseline-option"' in html
+    assert 'type="radio" name="baseline-option"' in html
+    assert 'value="min_max"' in html
     assert "Use baseline trials" not in html
     assert "Minimum SOA anchor" in html
     assert "Maximum SOA anchor" in html
@@ -109,15 +110,16 @@ def test_dashboard_static_assets_keep_numbered_baseline_and_block_segments():
     assert 'id="trial-file-output-summary"' not in html
     assert "Trial Sequence Design" in html
     assert "percent-mixer" not in html
-    assert "Bake Trial Pool CSV" in html
-    assert "Regenerate Blocks" in html
+    assert "Create Trial Pool" in html
+    assert "Generate Blocks" in html
     assert "Accept Blocks" in html
     assert 'name="experiment-structure"' in html
-    assert "Planned participants" in html
-    assert "Prepare Experiment" in html
+    assert "Example orders to preview" in html
+    assert "Profile Validation and Save" in html
     assert "Run Setup" not in html
     assert "Block Permutation Preview" in html
-    assert "Save Design and Start Experiment Runner" in html
+    assert "Done — Lock Profile" in html
+    assert 'id="profile-validation-checklist"' in html
     assert "Prepare Experiment + Open Runner" not in html
     assert 'id="participant-id"' not in html
     assert 'id="render-action"' not in html
@@ -130,7 +132,7 @@ def test_dashboard_static_assets_keep_numbered_baseline_and_block_segments():
     assert "count-strip" in html
     assert "Default baseline %" not in html
     assert "Default catch %" not in html
-    assert "Continue To Baseline And Tactile" in html
+    assert "Save &amp; Continue to Baseline and Tactile" in html
     assert "BASELINE_STRATEGY_NOTES" in app_js
     assert "renderBaseline" in app_js
     assert "baselineCountEstimate" in app_js

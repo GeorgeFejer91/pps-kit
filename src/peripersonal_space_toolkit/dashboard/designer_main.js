@@ -180,8 +180,10 @@ function applyTheme(theme) {
   localStorage.setItem("ppsDesigner.theme", theme);
   const toggle = document.getElementById("designer-theme-toggle");
   if (toggle) {
-    toggle.textContent = theme === "dark" ? "Light" : "Dark";
     toggle.setAttribute("aria-pressed", String(theme === "dark"));
+    const nextThemeLabel = theme === "dark" ? "Use light theme" : "Use dark theme";
+    toggle.setAttribute("aria-label", nextThemeLabel);
+    toggle.title = nextThemeLabel;
   }
 }
 
@@ -193,8 +195,7 @@ function initializeChrome() {
   document.getElementById("designer-theme-toggle")?.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
   document.getElementById("designer-help")?.addEventListener("click", () => document.querySelector('[data-segment-info="study"]')?.click());
   const saveState = document.getElementById("designer-save-state");
-  document.addEventListener("input", (event) => {
-    if (!event.target.closest?.("#toolkit-page")) return;
+  document.addEventListener("pps-designer-dirty", () => {
     saveState.textContent = "unsaved";
     saveState.className = "status-label required";
   });
@@ -211,13 +212,34 @@ function initializeChrome() {
   for (const segment of document.querySelectorAll(".decision-segment")) {
     const heading = segment.querySelector(":scope > .segment-heading");
     if (!heading || heading.querySelector(".segment-collapse-button")) continue;
+    const title = heading.querySelector("h2")?.textContent?.trim() || "workflow segment";
+    const kicker = heading.querySelector(".segment-kicker")?.textContent?.trim() || "Segment";
+    if (!segment.id) {
+      const stableId = heading.querySelector("h2")?.id
+        || title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      segment.id = `segment-${stableId}`;
+    }
     const button = document.createElement("button");
     button.type = "button";
     button.className = "segment-collapse-button";
-    button.textContent = "Collapse";
+    button.innerHTML = `
+      <span class="segment-collapse-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path class="segment-collapse-arrow-accent" d="m8.25 6.75 3.75 3.75 3.75-3.75"></path>
+          <path class="segment-collapse-arrow-main" d="m6.5 11.25 5.5 5.5 5.5-5.5"></path>
+        </svg>
+      </span>
+    `;
+    button.setAttribute("aria-controls", segment.id);
+    button.setAttribute("aria-expanded", "true");
+    button.setAttribute("aria-label", `Collapse ${kicker}: ${title}`);
+    button.title = `Collapse ${kicker}: ${title}`;
     button.addEventListener("click", () => {
       segment.classList.toggle("collapsed");
-      button.textContent = segment.classList.contains("collapsed") ? "Expand" : "Collapse";
+      const collapsed = segment.classList.contains("collapsed");
+      button.setAttribute("aria-expanded", String(!collapsed));
+      button.setAttribute("aria-label", `${collapsed ? "Expand" : "Collapse"} ${kicker}: ${title}`);
+      button.title = `${collapsed ? "Expand" : "Collapse"} ${kicker}: ${title}`;
     });
     heading.appendChild(button);
   }

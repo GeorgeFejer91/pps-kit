@@ -9,6 +9,7 @@ import json
 import os
 import secrets
 import socket
+import subprocess
 import sys
 import threading
 import time
@@ -118,7 +119,40 @@ class ShellApi:
         parsed = urllib.parse.urlparse(str(url))
         if parsed.scheme not in {"http", "https", "mailto"}:
             return False
-        return bool(webbrowser.open(url))
+        if sys.platform == "win32":
+            try:
+                os.startfile(url)  # type: ignore[attr-defined]
+                return True
+            except OSError:
+                pass
+        elif sys.platform.startswith("linux"):
+            # Prefer GIO because it resolves the registered desktop application
+            # directly, including Flatpak browsers. On some XFCE systems
+            # xdg-open delegates to an unset "Web Browser" helper even when the
+            # HTTPS MIME association is valid.
+            for command in (["gio", "open", url], ["xdg-open", url]):
+                try:
+                    subprocess.Popen(
+                        command,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        start_new_session=True,
+                    )
+                    return True
+                except OSError:
+                    continue
+        elif sys.platform == "darwin":
+            try:
+                subprocess.Popen(
+                    ["open", url],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    start_new_session=True,
+                )
+                return True
+            except OSError:
+                pass
+        return bool(webbrowser.open(url, new=2))
 
     def save_profile_bundle(self, content_base64: str, suggested_name: str) -> bool:
         if self.window is None:

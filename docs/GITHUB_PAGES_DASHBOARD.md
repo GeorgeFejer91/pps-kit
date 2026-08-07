@@ -31,6 +31,71 @@ experiment software runs locally on the research PC.
   Pages or any online service.
 - Browser JavaScript does not own experiment timing. Timing-sensitive participant
   runs stay native/Python-backed.
+- The Documentation page includes a read-only, lazy-loaded PPS publication and
+  citation network. It is a static GitHub Pages asset and never calls the local
+  companion or moves literature metadata, PDFs, or participant data between the
+  browser and the research PC.
+
+## Audiotactile PPS Citation Map
+
+The `Publication & Citation Network` documentation segment renders the tracked
+`pps-publication-citation-network.v2` asset. It is deliberately focused on 64
+experimental audio-tactile PPS publications whose paradigms are covered by the
+Toolkit literature audit. Inclusion requires at least one exact-DOI audit record
+outside `adjacent_out_of_scope`, and review publications are excluded. Repeated
+experimental records from one paper remain separate in the detail view.
+
+The citation-structure layout is regenerated for the focused induced graph and
+kept within a square, collision-separated viewing area. The optional publication-
+year layout answers a different chronological question. Node size and centrality
+remain corpus-local navigation aids, not study-quality ratings. Selecting a node
+opens a detail drawer with bibliographic metadata, citation neighbors, abstract
+availability/provenance, and the DOI-linked PPS Toolkit parameter records.
+
+The focused asset contains 64 publication nodes, 68 in-scope task records, and
+456 directed citation edges. Fifteen publication nodes contain 17 runnable
+records; 49 publications have a Toolkit-supported paradigm but still lack source
+parameters needed for an honest runnable recreation. The interface labels these
+states explicitly as `Runnable profile` and
+`Supported paradigm · parameters incomplete`.
+
+The canonical v1 source remains the broader dated snapshot of 1,712 publications
+and 10,109 citation edges. It is retained for reproducible provenance and future
+audit work but is not the browser view. Neither the source nor the focused
+projection is a systematic review, exhaustive bibliography, study-quality
+ranking, or effect-size analysis. Citation direction is `citing -> cited`.
+Abstract text is included only where the generator records redistributable
+OpenAlex provenance; otherwise the asset exposes a copyright caveat and source
+link. Raw provider payloads, PDFs, supplements, extracted full text, and fuzzy
+parameter matches do not belong in the public dashboard asset.
+
+The canonical public-safe source snapshot lives in `data/publication_network/`.
+Rebuild the generated dashboard asset after changing that snapshot, modality
+reviews, or DOI-linked parameter audits:
+
+```bash
+node tools/build_publication_network_asset.mjs
+```
+
+For a deliberate initial refresh from a locally held network bundle, pass the
+bundle explicitly; the bundle itself is not committed:
+
+```bash
+node tools/build_publication_network_asset.mjs --source-bundle /path/to/pps-citation-network-YYYYMMDD
+```
+
+Then run the publication-network tests and rebuild Vite so the packaged/local
+and GitHub Pages dashboards receive the same source and generated data:
+
+```bash
+python -m pytest tests/test_publication_network.py
+npm --prefix src/peripersonal_space_toolkit/dashboard run build
+```
+
+The default data rebuild must be deterministic. Review the generated JSON diff,
+run the dashboard visual-layout audit, inspect its desktop/mobile light/dark
+screenshots, and publish the source dashboard, compiled dashboard, public
+wrappers, data snapshot, tests, and project-memory changes together.
 
 ## Publish
 

@@ -255,7 +255,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260805-designer"
+    static_version = "20260807-publication-network-focus"
     assert f'href="styles.css?v={static_version}"' in html
     assert 'import("./hardware_pixel_art.js")' in app_js
     assert f'src="app.js?v={static_version}"' in html
@@ -266,15 +266,17 @@ def test_dashboard_static_assets_are_packaged():
     assert "downloadBlockRandomization" in app_js
     assert 'control.id === "download-block-randomization"' in app_js
     assert "index % blockCount" not in app_js
-    assert "Bundled study protocols" in app_js
+    assert "Built-in Study Templates" in app_js
     assert "PPS Toolkit Study 5 white/pink protocol" in app_js
     assert 'data-page-tab="toolkit"' in html
     assert 'data-page-tab="documentation"' in html
     assert 'data-page-tab="downloads"' in html
     assert 'class="site-tab-brand"' not in html
+    assert "Peripersonal Space Design Toolkit" in html
+    assert html.count('id="designer-theme-toggle"') == 1
     assert "Researcher Workspace" not in html
     assert 'id="documentation-page"' in html
-    assert html.count('class="doc-segment-rule"') == 8
+    assert html.count('class="doc-segment-rule"') == 9
     assert 'id="downloads-page"' in html
     assert 'id="toolkit-page"' in html
     assert 'id="download-block-randomization"' in html
@@ -304,18 +306,23 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="zoom-in-camera"' in html
     assert 'id="zoom-out-camera"' in html
     assert 'id="fit-radius-camera"' in html
-    assert 'id="preload-asset-status"' in html
-    assert 'id="profile-recreation-notice"' in html
-    assert "Study/profile" in html
+    assert 'id="preload-asset-status"' not in html
+    assert 'id="profile-kind-status"' not in html
+    assert 'id="profile-recreation-notice"' not in html
+    assert 'id="segment-info-note"' in html
+    assert "note: PROFILE_RECREATION_NOTICE" in app_js
+    assert '<label for="template-select">Profile</label>' in html
+    assert 'id="start-new-custom-design"' in html
+    assert "Start New Custom Design" in html
     assert "Done — Lock Profile" in html
     assert "Export .pps-profile" in html
     assert "/api/profiles/save-prepared" in app_js
     assert "/api/run-sequence/export-bridge" in app_js
-    assert 'id="edit-profile-rail"' in html
-    assert "Edit As New Study" in html
+    assert 'id="edit-profile-rail"' not in html
+    assert "Edit As New Study" not in html
     assert 'id="customize-modal"' in html
-    assert 'id="existing-custom-project"' in html
-    assert 'id="load-custom-project"' in html
+    assert 'id="existing-custom-project"' not in html
+    assert 'id="load-custom-project"' not in html
     assert "Name This Study" in html
     assert 'id="segment-info-modal"' in html
     assert 'id="segment-info-modal-title"' in html
@@ -329,7 +336,10 @@ def test_dashboard_static_assets_are_packaged():
     assert "Purpose" in html
     assert "Your Inputs" in html
     assert "Backend Work" in html
-    assert "Used Next" in html
+    assert "Output" in html
+    assert "Used Next" not in html
+    assert "Template Directory" in app_js
+    assert "HOSTED_TEMPLATE_DIRECTORY_URL" in app_js
     for title in [
         "Choose or Create Study",
         "Build Looming Stimuli",
@@ -349,11 +359,12 @@ def test_dashboard_static_assets_are_packaged():
     ]:
         assert slugged_title not in html
     assert "/api/project/customize" in app_js
+    assert "/api/project/new-custom" in app_js
     assert "/api/projects/${encodeURIComponent(projectId)}/load" in app_js
     assert "profile-readonly-mode" in app_js
     assert "collectProfileRunPayload" in app_js
-    assert 'control.id === "prepare-experiment"' in app_js
-    assert ".panel.profile-readonly #prepare-experiment" in styles_css
+    assert 'control.id === "export-profile-bundle"' in app_js
+    assert ".panel.profile-readonly #export-profile-bundle" in styles_css
     assert ".modal-backdrop[hidden]" in styles_css
     assert ".panel.user-sized" in styles_css
     assert "min-height: var(--panel-user-height);" in styles_css
@@ -370,14 +381,15 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="import-audio-prestimulus"' not in html
     assert 'id="generated-noise-select"' in html
     assert 'id="bake-stimulus"' in html
-    assert "Bake Ingredient" in html
+    assert "Add Ingredient" in app_js
     assert 'id="bake-trial-sequences"' in html
-    assert "Bake Trial Sequences" in html
-    assert 'id="open-profile-folder"' in html
-    assert 'id="export-data-acquisition-folder"' in html
-    assert 'id="open-data-acquisition-folder"' in html
-    assert "/api/data-acquisition/export" in app_js
-    assert "renderDataAcquisitionBridge" in app_js
+    assert "Create Trial Sequences" in app_js
+    assert 'id="open-profile-folder"' not in html
+    assert 'id="export-data-acquisition-folder"' not in html
+    assert 'id="open-data-acquisition-folder"' not in html
+    assert 'id="refresh-state"' not in html
+    assert 'id="apply-design"' not in html
+    assert 'id="apply-profile-project"' not in html
     assert 'id="open-ingredient-folder"' in html
     assert 'id="open-trial-sequence-folder"' in html
     assert 'id="segment0-output-summary"' not in html
@@ -435,7 +447,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "Single-Trial Sequence Assembly" not in html
     assert "Custom Clips" not in html
     assert "Trial Sequence Rows" not in html
-    assert 'aria-label="Add trial sequence row"' in app_js
+    assert 'aria-label="Add trial family"' in app_js
     assert "Pool Oversight" in html
     assert "Repetition Controls" in html
     assert 'id="baseline-enabled"' in html
@@ -444,7 +456,8 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="baseline-percent"' in html
     assert 'id="catch-percent"' in html
     assert 'id="include-catch-trials"' in html
-    assert "Include Catch Trials (audio only)" in html
+    assert "Catch trials" in html
+    assert 'id="include-auditory-only-trials"' in html
     assert "No baseline" in html
     assert "Minimum SOA anchor" in html
     assert "Maximum SOA anchor" in html
@@ -455,7 +468,8 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="bake-trial-files"' in html
     assert 'id="baseline-factor-tree"' in html
     assert 'id="trial-file-output-summary"' not in html
-    assert 'type="checkbox" name="baseline-option"' in html
+    assert 'type="radio" name="baseline-option"' in html
+    assert 'value="min_max"' in html
     assert "Use baseline trials" not in html
     assert "Baseline % per row" not in html
     assert "Default baseline %" not in html
@@ -464,8 +478,8 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="single-baseline-anchor"' not in html
     assert 'id="composition-tree"' in html
     assert 'id="row-mix-overrides"' in html
-    assert "Bake Trial Pool CSV" in html
-    assert "Regenerate Blocks" in html
+    assert "Create Trial Pool" in html
+    assert "Generate Blocks" in html
     assert "Accept Blocks" in html
     assert "Download Randomization" in html
     assert "Edit Blocks" in app_js
@@ -499,11 +513,11 @@ def test_dashboard_static_assets_are_packaged():
     assert html.index('id="blocks"') > html.index('id="block"')
     assert html.index('id="protocol-summary"') > html.index('id="block"')
     assert "Profile Validation and Save" in html
-    assert "Portable Profile Parameters" in html
+    assert "Profile Completion" in html
     assert "Run Setup" not in html
     assert html.index('id="run"') > html.index('id="schedule"')
     assert html.index('id="participants"') > html.index('id="run"')
-    assert "Order preview rows (not study size)" in html
+    assert "Example orders to preview" in html
     assert 'name="experiment-structure"' in html
     assert "1 part" in html
     assert "2 parts" in html
@@ -512,6 +526,8 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="run-sequence-table"' in html
     assert "Refresh Order Preview" in html
     assert "Done — Lock Profile" in html
+    assert 'id="profile-validation-checklist"' in html
+    assert '<th>Example</th>' in html
     assert 'id="capture-lsl"' not in html
     assert 'id="capture-xdf"' not in html
     assert 'id="capture-analysis"' not in html
@@ -527,9 +543,9 @@ def test_dashboard_static_assets_are_packaged():
     assert "capture_options" not in app_js
     assert '["capture-lsl", "capture-xdf", "capture-analysis", "capture-backup", "enable-topup"]' not in app_js
     assert "Prepare Experiment + Open Runner" not in html
-    assert "Open Experiment Runner" in app_js
-    assert "Save Design and Start Experiment Runner" in app_js
-    assert "Profile run prepared; local runner opened" in app_js
+    assert 'id="prepare-experiment" type="button" class="state-only" hidden' in html
+    assert 'id="export-output-folder" type="button" class="state-only" hidden' in html
+    assert "bundleButton.hidden = !finalized" in app_js
     assert "/api/run-sequence/open-runner" in app_js
     assert ".block-csv-decision-actions" in styles_css
     assert ".run-sequence-actions" in styles_css
@@ -581,7 +597,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "decodeAudioData" in app_js
     assert "activeSourcePreviewClearTimer" in app_js
     assert "duration_s" in app_js
-    assert 'control.matches?.("[data-preview-source-label]")' in app_js
+    assert 'control.matches?.("[data-preview-source-label], .mobile-table-more")' in app_js
     assert ".panel.profile-readonly [data-preview-source-label]" in styles_css
     assert "sequence-label-chip" in app_js
     assert "box-mode-toggle" in app_js
@@ -631,7 +647,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "BASELINE_STRATEGY_NOTES" in app_js
     assert "baselineCountEstimate" in app_js
     assert "updateBaselineDecision" in app_js
-    assert "renderPreloadAssetStatus" in app_js
+    assert "renderPreloadAssetStatus" not in app_js
     assert "/api/local/open-folder" in app_js
     assert "data-open-folder" in app_js
     assert "Open Folder" in app_js
@@ -795,6 +811,8 @@ def test_dashboard_creates_profile_and_custom_project_folders(tmp_path: Path):
     assert fork_steps["trials"]["complete"] is False
     assert "Bake Segment 2 trial sequences." in fork_steps["trials"]["missing"]
     assert forked["custom_workflow"]["current_step"] == "trials"
+    assert forked["custom_workflow"]["edit_step"] == "stimulus"
+    assert forked["custom_workflow"]["confirmed_steps"] == ["study"]
     assert forked["project_segments"]["1_core_audio_ingredients"]["status"] == "ready"
     for noise in forked["design"]["noises"]:
         assert str(fork_dir / "1_core_audio_ingredients") in noise["prebaked_path"]
@@ -808,6 +826,7 @@ def test_dashboard_creates_profile_and_custom_project_folders(tmp_path: Path):
     assert reopened["project"]["project_id"] == fork_project["project_id"]
     assert reopened["project"]["project_kind"] == "custom"
     assert reopened["custom_workflow"]["is_custom"] is True
+    assert reopened["custom_workflow"]["edit_step"] == "stimulus"
     assert reopened["project_segments"]["1_core_audio_ingredients"]["status"] == "ready"
 
     custom = client.post("/api/templates/__custom__/load").json()
@@ -879,6 +898,9 @@ def test_dashboard_rejects_profile_mutation_and_blank_custom_names(tmp_path: Pat
     blank = client.post("/api/project/customize", json={"name": "   "})
     assert blank.status_code == 400
     assert "Enter a study name" in blank.json()["detail"]
+    blank_new = client.post("/api/project/new-custom", json={"name": "   "})
+    assert blank_new.status_code == 400
+    assert "Enter a study name" in blank_new.json()["detail"]
 
     mutated_design = dict(state["design"])
     mutated_design["name"] = "Direct API Profile Mutation"
@@ -3273,9 +3295,44 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     assert {row["phase_label"] for row in run_rows} == {"Condition 1", "Condition 2"}
     assert all(row["block_csv_file"].endswith("_final.csv") for row in run_rows)
 
-    saved_response = client.post("/api/profiles/save-prepared", json={"name": "My Lab Pilot"})
+    review_state = client.get("/api/state").json()
+    for step_id in ("stimulus", "trials", "baseline", "block"):
+        reviewed = client.post(
+            "/api/design",
+            json={
+                "workflow_action": {
+                    "type": "save_and_continue",
+                    "step_id": step_id,
+                    "expected_revision": review_state["custom_workflow"]["review_revision"],
+                }
+            },
+        )
+        assert reviewed.status_code == 200, reviewed.text
+        review_state = reviewed.json()
+    reviewed = client.post(
+        "/api/block-csv/accept",
+        json={
+            "workflow_action": {
+                "type": "accept_and_continue",
+                "step_id": "schedule",
+                "expected_revision": review_state["custom_workflow"]["review_revision"],
+            }
+        },
+    )
+    assert reviewed.status_code == 200, reviewed.text
+    review_state = reviewed.json()
+    assert review_state["workflow_action_result"]["advanced"] is True
+    assert review_state["custom_workflow"]["edit_step"] == "run"
+    saved_response = client.post(
+        "/api/profiles/save-prepared",
+        json={
+            "name": "My Lab Pilot",
+            "expected_revision": review_state["custom_workflow"]["review_revision"],
+        },
+    )
     assert saved_response.status_code == 200, saved_response.text
     saved = saved_response.json()
+    assert saved["custom_workflow"]["is_finalized"] is True
     saved_result = saved["saved_profile_result"]
     assert saved_result["profile_id"].startswith("custom_my_lab_pilot_")
     assert saved_result["source_profile_id"]

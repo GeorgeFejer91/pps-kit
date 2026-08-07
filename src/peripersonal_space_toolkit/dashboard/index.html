@@ -6,35 +6,80 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260805-designer">
+  <link rel="stylesheet" href="styles.css?v=20260807-publication-network-focus">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to page content</a>
   <div class="app-shell">
+    <header class="topbar site-tabs" aria-label="Primary dashboard pages">
+      <div class="site-tab-list" role="tablist" aria-label="Dashboard pages">
+        <button id="page-tab-toolkit" class="site-tab active" type="button" role="tab" data-page-tab="toolkit" aria-controls="toolkit-page" aria-selected="true" aria-label="Experiment Designer"><span class="tab-label-full">Experiment Designer</span><span class="tab-label-short" aria-hidden="true">Experiment</span></button>
+        <button id="page-tab-documentation" class="site-tab" type="button" role="tab" data-page-tab="documentation" aria-controls="documentation-page" aria-selected="false" aria-label="Documentation" tabindex="-1"><span class="tab-label-full">Documentation</span><span class="tab-label-short" aria-hidden="true">Docs</span></button>
+        <button id="page-tab-downloads" class="site-tab" type="button" role="tab" data-page-tab="downloads" aria-controls="downloads-page" aria-selected="false" tabindex="-1">Downloads</button>
+      </div>
+      <div class="designer-status-chrome" aria-label="Designer status">
+        <span id="designer-capability-badge" class="status-label optional">detecting mode</span>
+        <span id="designer-save-state" class="status-label optional">saved</span>
+        <button id="designer-help" type="button">Help</button>
+      </div>
+    </header>
+
     <aside class="rail">
       <div class="brand">
-        <div class="brand-name">PPS Designer</div>
-        <div class="brand-subtitle">Experiment profile composer</div>
-      </div>
-      <div class="profile-mode-panel" aria-label="Dashboard mode">
-        <div class="layout-title">Mode</div>
-        <div class="segmented-control rail-mode-switch" role="group" aria-label="View or edit mode">
-          <button id="view-mode-button" type="button" data-dashboard-mode="view" class="active" aria-pressed="true">View</button>
-          <button id="edit-mode-button" type="button" data-dashboard-mode="edit" aria-pressed="false">Edit</button>
+        <div class="brand-copy">
+          <div class="brand-name">Peripersonal Space Design Toolkit</div>
+          <div class="brand-subtitle">Experiment profile composer</div>
         </div>
-        <span id="edit-mode-status" class="status-label optional">view mode</span>
+        <button id="designer-theme-toggle" class="rail-theme-toggle" type="button" aria-pressed="false" aria-label="Use dark theme" title="Use dark theme">
+          <span class="theme-toggle-track" aria-hidden="true">
+            <span class="theme-toggle-indicator"></span>
+            <svg class="theme-toggle-icon theme-toggle-sun" viewBox="0 0 24 24" focusable="false">
+              <circle cx="12" cy="12" r="3.5"></circle>
+              <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"></path>
+            </svg>
+            <svg class="theme-toggle-icon theme-toggle-moon" viewBox="0 0 24 24" focusable="false">
+              <path d="M19 15.2A7.6 7.6 0 0 1 8.8 5a7.7 7.7 0 1 0 10.2 10.2Z"></path>
+            </svg>
+          </span>
+        </button>
       </div>
-      <nav class="rail-nav-group active" aria-label="Toolkit workflow sections" data-rail-page="toolkit">
-        <a href="#study" data-step-link="study"><span>0 Preload</span><strong class="decision-state not-ready" data-step-state="study" aria-label="Preload not ready" title="Preload not ready">✕</strong></a>
-        <a href="#stimulus" data-step-link="stimulus"><span>1 Stimuli</span><strong class="decision-state not-ready" data-step-state="stimulus" aria-label="Stimuli not ready" title="Stimuli not ready">✕</strong></a>
-        <a href="#trials" data-step-link="trials"><span>2 Sequence</span><strong class="decision-state not-ready" data-step-state="trials" aria-label="Sequence not ready" title="Sequence not ready">✕</strong></a>
-        <a href="#baseline" data-step-link="baseline"><span>3 Tactile</span><strong class="decision-state not-ready" data-step-state="baseline" aria-label="Tactile not ready" title="Tactile not ready">✕</strong></a>
-        <a href="#block" data-step-link="block"><span>4 Pool</span><strong class="decision-state not-ready" data-step-state="block" aria-label="Trial pool not ready" title="Trial pool not ready">✕</strong></a>
-        <a href="#schedule" data-step-link="schedule"><span>5 Blocks</span><strong class="decision-state not-ready" data-step-state="schedule" aria-label="Block CSV preview not ready" title="Block CSV preview not ready">✕</strong></a>
-        <a href="#run" data-step-link="run"><span>6 Validate &amp; Save</span><strong class="decision-state not-ready" data-step-state="run" aria-label="Profile not ready" title="Profile not ready">✕</strong></a>
+      <div id="profile-mode-panel" class="profile-mode-panel" data-lock-state="closed" aria-label="Profile editing state">
+        <div id="profile-lock-visual" class="profile-lock-visual" aria-hidden="true">
+          <svg class="profile-lock-icon" viewBox="0 0 48 52" focusable="false">
+            <path class="profile-lock-shackle" d="M15 25v-7a9 9 0 0 1 18 0v7"></path>
+            <rect class="profile-lock-body" x="9" y="23" width="30" height="24" rx="5"></rect>
+            <circle class="profile-lock-keyhole" cx="24" cy="34" r="2.5"></circle>
+            <path class="profile-lock-key-stem" d="M24 36.5v4"></path>
+          </svg>
+        </div>
+        <div class="profile-mode-switch-row">
+          <span id="profile-view-label" class="profile-mode-option profile-mode-option-view">View</span>
+          <button id="edit-mode-button" class="profile-mode-toggle" type="button" role="switch" aria-checked="false" aria-label="Editing locked. Switch to Edit mode.">
+            <span class="profile-mode-toggle-track" aria-hidden="true">
+              <span class="profile-mode-toggle-thumb"></span>
+            </span>
+          </button>
+          <span id="profile-edit-label" class="profile-mode-option profile-mode-option-edit">Edit</span>
+        </div>
+      </div>
+      <button id="mobile-rail-nav-toggle" class="mobile-rail-toggle" type="button" aria-expanded="false" aria-controls="toolkit-workflow-nav documentation-section-nav download-section-nav">
+        <span>Sections</span>
+        <strong id="mobile-rail-nav-current">Experiment workflow</strong>
+        <span class="mobile-disclosure-chevron" aria-hidden="true"></span>
+      </button>
+      <nav id="toolkit-workflow-nav" class="rail-nav-group active" aria-label="Toolkit workflow sections" data-rail-page="toolkit">
+        <a href="#study-segment" data-step-link="study"><span>0 Preload</span><strong class="decision-state not-ready" data-step-state="study" aria-label="Preload not ready" title="Preload not ready">✕</strong></a>
+        <a href="#stimulus-segment" data-step-link="stimulus"><span>1 Stimuli</span><strong class="decision-state not-ready" data-step-state="stimulus" aria-label="Stimuli not ready" title="Stimuli not ready">✕</strong></a>
+        <a href="#trials-segment" data-step-link="trials"><span>2 Sequence</span><strong class="decision-state not-ready" data-step-state="trials" aria-label="Sequence not ready" title="Sequence not ready">✕</strong></a>
+        <a href="#baseline-segment" data-step-link="baseline"><span>3 Tactile</span><strong class="decision-state not-ready" data-step-state="baseline" aria-label="Tactile not ready" title="Tactile not ready">✕</strong></a>
+        <a href="#block-segment" data-step-link="block"><span>4 Pool</span><strong class="decision-state not-ready" data-step-state="block" aria-label="Trial pool not ready" title="Trial pool not ready">✕</strong></a>
+        <a href="#schedule-segment" data-step-link="schedule"><span>5 Blocks</span><strong class="decision-state not-ready" data-step-state="schedule" aria-label="Block CSV preview not ready" title="Block CSV preview not ready">✕</strong></a>
+        <a href="#run-segment" data-step-link="run"><span>6 Validate &amp; Save</span><strong class="decision-state not-ready" data-step-state="run" aria-label="Profile not ready" title="Profile not ready">✕</strong></a>
       </nav>
-      <nav class="rail-nav-group" aria-label="Documentation sections" data-rail-page="documentation" hidden>
+      <nav id="documentation-section-nav" class="rail-nav-group" aria-label="Documentation sections" data-rail-page="documentation" hidden>
         <div class="rail-nav-kicker">Documentation</div>
         <a href="#docs-pps" data-page-section-link="docs-pps" data-page-section-page="documentation"><span>Peripersonal Space</span></a>
+        <a href="#docs-publication-network" data-page-section-link="docs-publication-network" data-page-section-page="documentation"><span>Audiotactile Map</span></a>
         <a href="#docs-overview" data-page-section-link="docs-overview" data-page-section-page="documentation"><span>Toolkit</span></a>
         <a href="#docs-architecture" data-page-section-link="docs-architecture" data-page-section-page="documentation"><span>Architecture</span></a>
         <a href="#docs-spatialization" data-page-section-link="docs-spatialization" data-page-section-page="documentation"><span>Stimulus Generation</span></a>
@@ -44,14 +89,19 @@
         <a href="#docs-emulatable-studies" data-page-section-link="docs-emulatable-studies" data-page-section-page="documentation"><span>Emulatable Studies</span></a>
         <a href="#docs-data-boundary" data-page-section-link="docs-data-boundary" data-page-section-page="documentation"><span>Data Boundary</span></a>
       </nav>
-      <nav class="rail-nav-group" aria-label="Download sections" data-rail-page="downloads" hidden>
+      <nav id="download-section-nav" class="rail-nav-group" aria-label="Download sections" data-rail-page="downloads" hidden>
         <div class="rail-nav-kicker">Downloads</div>
         <a href="#downloads-installer" data-page-section-link="downloads-installer" data-page-section-page="downloads"><span>Installer</span></a>
         <a href="#downloads-package" data-page-section-link="downloads-package" data-page-section-page="downloads"><span>Offline Package</span></a>
         <a href="#downloads-source" data-page-section-link="downloads-source" data-page-section-page="downloads"><span>Source</span></a>
         <a href="#downloads-companion" data-page-section-link="downloads-companion" data-page-section-page="downloads"><span>Companion</span></a>
       </nav>
-      <div class="companion-panel" aria-label="Local companion backend">
+      <button id="mobile-companion-toggle" class="mobile-rail-toggle mobile-companion-toggle" type="button" aria-expanded="false" aria-controls="companion-panel">
+        <span>Connection</span>
+        <strong>Local Companion</strong>
+        <span class="mobile-disclosure-chevron" aria-hidden="true"></span>
+      </button>
+      <div id="companion-panel" class="companion-panel" aria-label="Local companion backend">
         <div class="layout-title">Local Companion</div>
         <span id="connection-status" class="status-label required">checking</span>
         <label for="backend-url">Backend URL</label>
@@ -66,23 +116,10 @@
       </div>
     </aside>
 
-    <main class="workspace">
-      <header class="topbar site-tabs" aria-label="Primary dashboard pages">
-        <nav class="site-tab-list" aria-label="Dashboard tabs">
-          <button class="site-tab active" type="button" data-page-tab="toolkit" aria-selected="true">Experiment Designer</button>
-          <button class="site-tab" type="button" data-page-tab="documentation" aria-selected="false" aria-label="Documentation"><span class="tab-label-full">Documentation</span><span class="tab-label-short" aria-hidden="true">Docs</span></button>
-          <button class="site-tab" type="button" data-page-tab="downloads" aria-selected="false">Downloads</button>
-        </nav>
-        <div class="designer-status-chrome" aria-label="Designer status">
-          <span id="designer-capability-badge" class="status-label optional">detecting mode</span>
-          <span id="designer-save-state" class="status-label optional">saved</span>
-          <button id="designer-help" type="button">Help</button>
-          <button id="designer-theme-toggle" type="button" aria-pressed="false">Dark</button>
-        </div>
-      </header>
-
-      <div id="toolkit-page" class="page-view toolkit-page active" data-page-panel="toolkit">
-      <section class="decision-segment" aria-labelledby="study-segment-title">
+    <main id="main-content" class="workspace" tabindex="-1">
+      <div id="toolkit-page" class="page-view toolkit-page active" data-page-panel="toolkit" role="tabpanel" aria-labelledby="page-tab-toolkit" tabindex="0">
+        <h1 class="visually-hidden">PPS Experiment Designer</h1>
+      <section id="study-segment" class="decision-segment" aria-labelledby="study-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 0</span>
           <h2 id="study-segment-title">Choose or Create Study</h2>
@@ -92,69 +129,44 @@
           <section id="study" class="panel" data-step-panel="study" data-resizable-panel data-panel-id="study">
             <div class="panel-heading">
               <div class="panel-title">Study Profile <span class="step-badge" data-step-badge="study"></span></div>
-              <span id="preload-asset-status" class="status-label">inventory</span>
             </div>
-            <div class="segment-zero-status-card" aria-label="Active study controls">
-              <div class="active-design-block">
-                <div class="product-label">Active design</div>
-                <div id="design-title" class="design-title">Loading...</div>
+            <div class="segment-zero-picker" aria-label="Choose a study profile">
+              <div class="field-row segment-zero-profile-field">
+                <label for="template-select">Profile</label>
+                <select id="template-select"></select>
               </div>
-              <div class="segment-zero-status-actions">
-                <span id="workflow-pill" class="status-label">checking</span>
-                <span id="profile-mode-status" class="status-label">checking</span>
-                <button id="refresh-state" type="button">Refresh</button>
-                <button id="edit-profile-rail" type="button">Edit As New Study</button>
-                <button id="apply-design" type="button" class="primary">Apply Design</button>
-              </div>
+              <button id="start-new-custom-design" type="button" class="primary">Start New Custom Design</button>
             </div>
-            <div class="field-row">
-              <label for="template-select">Study/profile</label>
-              <select id="template-select"></select>
-            </div>
-            <div id="profile-summary" class="summary-text"></div>
-            <div id="profile-recreation-notice" class="profile-notice" hidden></div>
-            <div class="field-row">
-              <label for="design-name">Design name</label>
-              <input id="design-name" type="text" autocomplete="off">
-            </div>
-            <div class="field-row">
-              <label for="existing-custom-project">Existing custom study</label>
-              <select id="existing-custom-project"></select>
-            </div>
-            <div class="step-footer">
-              <button id="load-custom-project" type="button">Open Custom Study</button>
-              <button id="apply-profile-project" type="button" class="primary">Apply Profile / Create Project Folder</button>
-              <button id="open-profile-folder" type="button" disabled>Open Folder</button>
-            </div>
-            <div class="data-acquisition-bridge" aria-label="Data acquisition folder bridge">
-              <div>
-                <div class="product-label">Data acquisition folder</div>
-                <span id="data-acquisition-status" class="status-label required">not linked</span>
-              </div>
-              <div class="data-acquisition-actions">
-                <button id="export-data-acquisition-folder" type="button" class="primary">Export Settings to Data Acquisition Folder</button>
-                <button id="open-data-acquisition-folder" type="button" disabled>Open Folder</button>
-              </div>
-            </div>
+            <section class="profile-inspection-card" aria-label="Selected profile information">
+              <dl class="profile-inspection-details">
+                <div>
+                  <dt>Profile ID</dt>
+                  <dd id="profile-inspection-id">—</dd>
+                </div>
+                <div id="profile-source-detail" hidden>
+                  <dt>Source</dt>
+                  <dd id="profile-inspection-source">—</dd>
+                </div>
+              </dl>
+              <p id="profile-citation" class="profile-citation"></p>
+              <div id="profile-summary" class="summary-text"></div>
+            </section>
           </section>
         </div>
       </section>
 
-      <section class="decision-segment" aria-labelledby="stimulus-segment-title">
+      <section id="stimulus-segment" class="decision-segment" aria-labelledby="stimulus-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 1</span>
           <h2 id="stimulus-segment-title">Build Looming Stimuli</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="stimulus" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="stimulus" aria-label="About Segment 1: Build Looming Stimuli">About</button>
         </div>
         <section class="stimulus-grid">
           <section id="stimulus" class="panel stimulus-trajectory-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus">
             <div class="panel-heading">
-              <div class="panel-title">Trajectory And Source <span class="step-badge" data-step-badge="stimulus"></span></div>
+              <div class="panel-title"><span class="decision-sequence-label">1 · Define trajectory</span> Trajectory And Source <span class="step-badge" data-step-badge="stimulus"></span></div>
               <input id="preview-mode" type="hidden" value="2d">
-              <div class="segmented-control" aria-label="Stimulus preview mode">
-                <button id="stimulus-mode-2d" type="button" class="mode-toggle active" data-preview-mode="2d">2D</button>
-                <button id="stimulus-mode-3d" type="button" class="mode-toggle" data-preview-mode="3d">3D</button>
-              </div>
             </div>
             <div class="split-fields">
               <div class="field-row">
@@ -214,13 +226,13 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260805-designer"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260807-publication-network-focus"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
             <div class="source-module" aria-label="Stimulus source selection">
               <div class="source-module-heading">
-                <span>Stimulus Type Selection</span>
+                <span><span class="decision-sequence-label">2 · Choose a source</span> Stimulus Type Selection</span>
                 <span id="source-counts" class="status-label">0 sources</span>
               </div>
               <div class="source-action-grid">
@@ -254,9 +266,10 @@
                 </button>
               </div>
               <div class="bake-panel">
+                <div class="decision-sequence-label">3 · Name and add the ingredient</div>
                 <div class="bake-configure">
                   <div class="field-row">
-                    <label for="bake-label">Bake label</label>
+                    <label for="bake-label">Ingredient name</label>
                     <input id="bake-label" type="text" autocomplete="off">
                   </div>
                   <div id="generated-source-mode-control" class="source-mode-row" aria-label="Generated source mode">
@@ -265,7 +278,7 @@
                       <label class="source-mode-widget">
                         <input type="radio" name="generated-source-mode" value="dynaspace_gaussian_burst_train" checked>
                         <span class="source-mode-widget-body">
-                          <img src="looming_burst_train_waveform.svg" alt="" aria-hidden="true" width="960" height="360">
+                          <img class="native-signal-graphic" src="looming_burst_train_widget.svg" alt="" aria-hidden="true" width="320" height="96">
                           <span class="source-mode-widget-copy">
                             <strong>Burst train</strong>
                             <span>Hobeika et al. (2020)</span>
@@ -275,7 +288,7 @@
                       <label class="source-mode-widget">
                         <input type="radio" name="generated-source-mode" value="continuous_noise">
                         <span class="source-mode-widget-body">
-                          <img src="looming_smooth_linear_approach_waveform.svg" alt="" aria-hidden="true" width="960" height="360">
+                          <img class="native-signal-graphic" src="looming_smooth_linear_approach_widget.svg" alt="" aria-hidden="true" width="320" height="96">
                           <span class="source-mode-widget-copy">
                             <strong>Smooth linear</strong>
                             <span>Approach envelope</span>
@@ -298,11 +311,17 @@
                     <input id="loudness-end-spl" type="number" min="30" max="95" step="1" value="75">
                     <label for="instruction-offset-db">Instruction offset</label>
                     <input id="instruction-offset-db" type="number" min="-30" max="0" step="1" value="-6">
-                    <label for="estimated-full-scale-spl">0 dBFS estimate</label>
-                    <input id="estimated-full-scale-spl" type="number" min="80" max="130" step="0.1" value="109.2">
-                    <label for="audio-peak-ceiling-dbfs">Peak ceiling</label>
-                    <input id="audio-peak-ceiling-dbfs" type="number" min="-12" max="0" step="0.1" value="-1">
                   </div>
+                  <details class="advanced-settings loudness-advanced-settings">
+                    <summary>Calibration reference and safety ceiling</summary>
+                    <p class="decision-note">These values describe the playback calibration assumption. Use a measured calibration profile when one is available.</p>
+                    <div class="loudness-grid">
+                      <label for="estimated-full-scale-spl">Estimated 0 dBFS SPL</label>
+                      <input id="estimated-full-scale-spl" type="number" min="80" max="130" step="0.1" value="109.2">
+                      <label for="audio-peak-ceiling-dbfs">Digital peak ceiling</label>
+                      <input id="audio-peak-ceiling-dbfs" type="number" min="-12" max="0" step="0.1" value="-1">
+                    </div>
+                  </details>
                   <div id="loudness-derived" class="loudness-derived"></div>
                 </div>
                 <div class="bake-action-row">
@@ -328,16 +347,17 @@
             </div>
             <div class="step-footer">
               <button id="open-ingredient-folder" type="button" disabled>Open Folder</button>
-              <button type="button" class="primary" data-continue-step="stimulus">Continue To Trial Sequence</button>
+              <button type="button" class="primary" data-continue-step="stimulus">Save &amp; Continue to Trial Sequence</button>
             </div>
           </section>
         </section>
       </section>
 
-      <section class="decision-segment" aria-labelledby="trials-segment-title">
+      <section id="trials-segment" class="decision-segment" aria-labelledby="trials-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 2</span>
           <h2 id="trials-segment-title">Trial Sequence Design</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="trials" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="trials" aria-label="About Segment 2: Trial Sequence Design">About</button>
         </div>
         <section id="trials" class="panel" data-step-panel="trials" data-resizable-panel data-panel-id="trials">
@@ -350,6 +370,11 @@
             <input id="audio-file-input" type="file" accept=".wav,audio/wav,audio/x-wav,audio/mpeg,audio/mp3" hidden>
             <div class="source-card-list" id="snippet-list"></div>
           </div>
+          <div class="sequence-grammar" aria-label="Trial sequence notation">
+            <span><strong>Left → right</strong> plays in sequence</span>
+            <span><strong>Within one box</strong> lists alternatives</span>
+            <span><strong>Jitter box</strong> inserts one listed silence duration</span>
+          </div>
           <div class="filmstrip-editor" aria-label="Single-trial sequence builder">
             <div id="filmstrip-list" class="filmstrip-list"></div>
           </div>
@@ -359,15 +384,16 @@
             <button id="open-trial-sequence-folder" type="button" disabled>Open Folder</button>
           </div>
           <div class="step-footer">
-            <button type="button" class="primary" data-continue-step="trials">Continue To Baseline And Tactile</button>
+            <button type="button" class="primary" data-continue-step="trials">Save &amp; Continue to Baseline and Tactile</button>
           </div>
         </section>
       </section>
 
-      <section class="decision-segment" aria-labelledby="baseline-segment-title">
+      <section id="baseline-segment" class="decision-segment" aria-labelledby="baseline-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 3</span>
           <h2 id="baseline-segment-title">Baseline and Tactile Trial Design</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="baseline" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="baseline" aria-label="About Segment 3: Baseline and Tactile Trial Design">About</button>
         </div>
         <section id="baseline" class="baseline-tactile-workbench" data-step-panel="baseline">
@@ -399,39 +425,59 @@
               </div>
             </div>
 
-            <label class="inline-toggle catch-trial-toggle" for="include-catch-trials">
-              <input id="include-catch-trials" type="checkbox">
-              <span>Include Catch Trials (audio only)</span>
-            </label>
+            <div class="trial-family-toggles" aria-label="Additional trial families">
+              <label class="inline-toggle catch-trial-toggle" for="include-catch-trials">
+                <input id="include-catch-trials" type="checkbox">
+                <span><strong>Catch trials</strong><small>Audio only; no response required.</small></span>
+              </label>
+              <label class="inline-toggle auditory-only-trial-toggle" for="include-auditory-only-trials">
+                <input id="include-auditory-only-trials" type="checkbox">
+                <span><strong>Auditory-only trials</strong><small>Audio only; response remains part of the protocol.</small></span>
+              </label>
+            </div>
+
+            <div id="tactile-timing-summary" class="decision-summary-strip" aria-live="polite"></div>
 
             <fieldset id="baseline-options" class="baseline-option-grid" aria-label="Baseline strategy">
               <label class="baseline-option-card" data-baseline-option="none">
-                <input type="checkbox" name="baseline-option" value="none">
+                <input type="radio" name="baseline-option" value="none">
+                <img class="baseline-option-graphic native-signal-graphic" src="baseline_none.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">No baseline</span>
                 <span class="baseline-option-copy">Create only audio-tactile trial files.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="min_anchor">
-                <input type="checkbox" name="baseline-option" value="min_anchor">
+                <input type="radio" name="baseline-option" value="min_anchor">
+                <img class="baseline-option-graphic native-signal-graphic" src="baseline_min_anchor.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Minimum SOA anchor</span>
                 <span class="baseline-option-copy">Keep the trial audio and add tactile at the first entered SOA.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="max_anchor">
-                <input type="checkbox" name="baseline-option" value="max_anchor">
+                <input type="radio" name="baseline-option" value="max_anchor">
+                <img class="baseline-option-graphic native-signal-graphic" src="baseline_max_anchor.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Maximum SOA anchor</span>
                 <span class="baseline-option-copy">Keep the trial audio and add tactile at the last entered SOA.</span>
               </label>
+              <label class="baseline-option-card" data-baseline-option="min_max">
+                <input type="radio" name="baseline-option" value="min_max">
+                <img class="baseline-option-graphic native-signal-graphic" src="baseline_min_max.svg" alt="" aria-hidden="true" width="320" height="96">
+                <span class="baseline-option-title">Minimum + maximum anchors</span>
+                <span class="baseline-option-copy">Keep the trial audio and add tactile at both the first and last entered SOAs.</span>
+              </label>
               <label class="baseline-option-card" data-baseline-option="tactile_only">
-                <input type="checkbox" name="baseline-option" value="tactile_only">
+                <input type="radio" name="baseline-option" value="tactile_only">
+                <img class="baseline-option-graphic native-signal-graphic" src="baseline_tactile_only.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Full SOA tactile-only</span>
                 <span class="baseline-option-copy">Preserve fixed clips and jitter, silence looming segments, and add tactile at every SOA.</span>
               </label>
               <label class="baseline-option-card" data-baseline-option="stationary_burst">
-                <input type="checkbox" name="baseline-option" value="stationary_burst">
+                <input type="radio" name="baseline-option" value="stationary_burst">
+                <img class="baseline-option-graphic native-signal-graphic" src="baseline_stationary_burst.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Full SOA stationary bursts</span>
                 <span class="baseline-option-copy">Preserve fixed clips and jitter, replace looming segments with stationary bursts, and add tactile at every SOA.</span>
               </label>
               <label class="baseline-option-card baseline-custom" data-baseline-option="custom">
-                <input type="checkbox" name="baseline-option" value="custom">
+                <input type="radio" name="baseline-option" value="custom">
+                <img class="baseline-option-graphic native-signal-graphic" src="baseline_custom.svg" alt="" aria-hidden="true" width="320" height="96">
                 <span class="baseline-option-title">Custom timings</span>
                 <span class="baseline-option-copy">Enter custom SOAs and choose whether custom baselines are tactile-only or audio-tactile.</span>
               </label>
@@ -454,7 +500,7 @@
             </div>
 
             <div class="step-footer">
-              <button type="button" class="primary" data-continue-step="baseline">Continue To Trial Repetition Pool</button>
+              <button type="button" class="primary" data-continue-step="baseline">Save &amp; Continue to Trial Repetition Pool</button>
             </div>
           </section>
 
@@ -469,10 +515,11 @@
         </section>
       </section>
 
-      <section class="decision-segment" aria-labelledby="block-segment-title">
+      <section id="block-segment" class="decision-segment" aria-labelledby="block-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 4</span>
           <h2 id="block-segment-title">Trial Repetition Pool</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="block" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="block" aria-label="About Segment 4: Trial Repetition Pool">About</button>
         </div>
         <section id="block" class="block-workbench" data-step-panel="block">
@@ -485,11 +532,13 @@
 
             <div class="split-fields trial-decision-fields trial-pool-global-controls">
               <div class="field-row">
-                <label for="repetitions">Set all folders to</label>
+                <label for="repetitions">Set all trial groups to</label>
                 <input id="repetitions" type="number" min="0" max="100" step="0.5">
               </div>
-              <button id="apply-trial-pool-repetitions" type="button">Apply To Folders</button>
+              <button id="apply-trial-pool-repetitions" type="button">Apply To Trial Groups</button>
             </div>
+
+            <p class="decision-note half-step-note">Half-step repetitions add balanced extra trials deterministically across families, rows, SOAs, and source lineage.</p>
 
             <input id="blocks" type="hidden" value="1">
             <input id="baseline-percent" type="hidden" value="0">
@@ -499,13 +548,13 @@
             <div id="trial-pool-folder-list" class="trial-pool-folder-list"></div>
 
             <div class="action-row segment-bake-actions">
-              <button id="bake-trial-pool" type="button" class="primary">Bake Trial Pool CSV</button>
+              <button id="bake-trial-pool" type="button" class="primary">Create Trial Pool</button>
               <span id="trial-pool-bake-status" class="status-label">waiting</span>
               <button id="open-trial-pool-folder" type="button" disabled>Open Folder</button>
             </div>
 
             <div class="step-footer">
-              <button type="button" class="primary" data-continue-step="block">Continue To Block CSV Preview</button>
+              <button type="button" class="primary" data-continue-step="block">Save &amp; Continue to Block CSV Preview</button>
             </div>
           </section>
 
@@ -519,10 +568,11 @@
         </section>
       </section>
 
-      <section class="decision-segment" aria-labelledby="schedule-segment-title">
+      <section id="schedule-segment" class="decision-segment" aria-labelledby="schedule-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 5</span>
           <h2 id="schedule-segment-title">Generate and Review Blocks</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="schedule" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="schedule" aria-label="About Segment 5: Generate and Review Blocks">About</button>
         </div>
         <section id="schedule" class="panel block-csv-preview-panel" data-step-panel="schedule" data-resizable-panel data-panel-id="block-csv-preview">
@@ -542,12 +592,17 @@
             </div>
           </div>
 
+          <div id="block-order-policy-summary" class="decision-summary-strip block-policy-summary" aria-live="polite">
+            <span><strong>Method</strong> row-preserving seeded randomization</span>
+            <span><strong>Seed</strong> assigned when blocks are generated</span>
+          </div>
+
           <div class="block-build-progress" aria-label="Block CSV creation progress">
             <div class="block-build-progress-header">
               <strong>Block CSV bake</strong>
               <span id="block-build-progress-label">waiting</span>
             </div>
-            <div id="block-build-progress-track" class="block-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div id="block-build-progress-track" class="block-progress-track" role="progressbar" aria-label="Block generation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
               <span id="block-build-progress-fill" class="block-progress-fill"></span>
             </div>
             <div class="block-build-progress-meta">
@@ -561,13 +616,13 @@
           </div>
 
           <div class="step-footer block-csv-decision-actions">
-            <button id="regenerate-block-csvs" type="button">Regenerate Blocks</button>
-            <button id="accept-block-csvs" type="button" class="primary">Accept Blocks</button>
+            <button id="regenerate-block-csvs" type="button">Generate Blocks</button>
+            <button id="accept-block-csvs" type="button" class="primary">Accept Blocks &amp; Continue</button>
           </div>
         </section>
       </section>
 
-      <section class="decision-segment" aria-labelledby="run-segment-title">
+      <section id="run-segment" class="decision-segment" aria-labelledby="run-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 6</span>
           <h2 id="run-segment-title">Profile Validation and Save</h2>
@@ -576,12 +631,19 @@
         <section class="run-grid">
           <section id="run" class="panel" data-step-panel="run" data-resizable-panel data-panel-id="run">
             <div class="panel-heading">
-              <div class="panel-title">Portable Profile Parameters <span class="step-badge" data-step-badge="run"></span></div>
+              <div class="panel-title">Profile Completion <span class="step-badge" data-step-badge="run"></span></div>
               <span id="run-sequence-status" class="status-label">checking</span>
             </div>
+            <section class="profile-validation-panel" aria-label="Profile validation checklist">
+              <div class="run-preview-toolbar">
+                <div class="panel-subtitle">Validation Checklist</div>
+                <span id="profile-validation-summary" class="status-label">checking</span>
+              </div>
+              <div id="profile-validation-checklist" class="profile-validation-checklist"></div>
+            </section>
             <div class="run-decision-grid" aria-label="Experiment-level parameters">
               <div class="field-row">
-                <label for="participants">Order preview rows (not study size)</label>
+                <label for="participants">Example orders to preview</label>
                 <input id="participants" type="number" min="1" max="100" step="1">
               </div>
               <div class="field-row">
@@ -610,10 +672,10 @@
               <span id="run-sequence-summary" class="status-label">waiting</span>
             </div>
             <div class="scroll-table compact run-sequence-table-wrap">
-              <table class="data-table" id="run-sequence-table">
+              <table class="data-table mobile-card-table" id="run-sequence-table">
                 <thead>
                   <tr>
-                    <th>Participant</th>
+                    <th>Example</th>
                     <th>Part</th>
                     <th>Blocks</th>
                     <th>Block order</th>
@@ -622,23 +684,19 @@
                 <tbody></tbody>
               </table>
             </div>
-            <div class="run-output-summary" aria-label="Acquisition output folder">
-              <span>Output folder</span>
-              <span id="output-folder-summary" class="status-label">runner default</span>
-            </div>
             <div class="step-footer run-sequence-actions">
               <button id="regenerate-run-sequence" type="button">Refresh Order Preview</button>
-              <button id="save-study-profile" type="button">Done — Lock Profile</button>
+              <button id="save-study-profile" type="button" class="primary">Done — Lock Profile</button>
               <button id="export-profile-bundle" type="button">Export .pps-profile</button>
-              <button id="export-output-folder" type="button" class="legacy-session-action">Legacy: Prepare Session</button>
-              <button id="prepare-experiment" type="button" class="primary legacy-session-action">Save and Open Runner</button>
+              <button id="export-output-folder" type="button" class="state-only" hidden aria-hidden="true" tabindex="-1">Legacy: Prepare Session</button>
+              <button id="prepare-experiment" type="button" class="state-only" hidden aria-hidden="true" tabindex="-1">Legacy: Save and Open Runner</button>
             </div>
           </section>
         </section>
       </section>
       </div>
 
-      <section id="documentation-page" class="page-view info-page" data-page-panel="documentation" hidden>
+      <section id="documentation-page" class="page-view info-page" data-page-panel="documentation" role="tabpanel" aria-labelledby="page-tab-documentation" tabindex="0" hidden>
         <div class="info-page-heading">
           <span class="segment-kicker">Documentation</span>
           <h1>PPS Toolkit Public Documentation</h1>
@@ -655,6 +713,111 @@
               <iframe src="https://www.youtube.com/embed/elfbiCzUVSA" title="What is Peripersonal Space?" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             </div>
             <p class="info-lede pps-intro-lede">The standard behavioral approach for measuring peripersonal space in humans is the audio-tactile interaction task. In the canonical version reported by Canzoneri et al. (<a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306" target="_blank" rel="noopener noreferrer">2012</a>), participants respond to body-surface tactile stimuli while auditory stimuli approach from varying distances; tactile response times are faster when the sound is near the body. This distance-dependent facilitation profile serves as a behavioral index of the spatial boundary of an individual's peripersonal space representation. Despite the paradigm's widespread adoption, standardized implementations are lacking and task parameters are rarely shared across labs.</p>
+          </div>
+        </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
+
+        <section id="docs-publication-network" class="info-segment publication-network-segment" aria-labelledby="docs-publication-network-title" data-publication-network-root>
+          <div class="info-segment-heading publication-network-heading">
+            <div>
+              <span class="segment-kicker">Research Landscape</span>
+              <h2 id="docs-publication-network-title">Audio–Tactile PPS Experiment and Citation Network</h2>
+            </div>
+          </div>
+          <p class="info-copy publication-network-intro">This focused map contains experimental audio–tactile PPS papers whose audited task structure is supported by PPS Toolkit. Reviews and adjacent visual-only or auditory-only studies are excluded. A supported paradigm may still lack original assets, apparatus settings, or publication parameters needed for a runnable profile.</p>
+
+          <div class="publication-network-shell" aria-describedby="publication-network-help">
+            <div class="publication-network-toolbar" aria-label="Publication network controls">
+              <div class="publication-network-search-group">
+                <label for="publication-network-search">Find a paper</label>
+                <input id="publication-network-search" type="search" autocomplete="off" placeholder="Title, author, DOI, or year">
+              </div>
+
+              <fieldset class="publication-network-layout-group">
+                <legend>Arrange nodes</legend>
+                <div class="publication-network-segmented">
+                  <label>
+                    <input id="publication-layout-prominence" type="radio" name="publication-network-layout" value="prominence" checked>
+                    <span>Citation prominence</span>
+                  </label>
+                  <label>
+                    <input id="publication-layout-year" type="radio" name="publication-network-layout" value="timeline">
+                    <span>Publication year</span>
+                  </label>
+                </div>
+              </fieldset>
+
+              <div class="publication-network-select-group">
+                <label for="publication-network-size-metric">Size nodes by</label>
+                <select id="publication-network-size-metric">
+                  <option value="withinCorpusReceived">PPS-corpus citations</option>
+                  <option value="pageRank">PageRank</option>
+                  <option value="betweennessApprox">Betweenness</option>
+                  <option value="externalMax">External citations</option>
+                  <option value="uniform">Uniform size</option>
+                </select>
+              </div>
+
+              <div class="publication-network-select-group">
+                <label for="publication-network-edge-mode">Citation links</label>
+                <select id="publication-network-edge-mode">
+                  <option value="neighborhood" selected>Selected paper only</option>
+                  <option value="all">All included links</option>
+                  <option value="none">Hide links</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="publication-network-summary-row">
+              <p id="publication-network-status" class="publication-network-status" role="status" aria-live="polite">Loading publication network…</p>
+              <p class="publication-network-metric-note">Citation metrics describe this dated PPS corpus and are navigation aids, not study-quality scores.</p>
+              <button id="publication-network-fullscreen" type="button" aria-label="Open publication network full screen">Full screen</button>
+            </div>
+            <div class="publication-network-legend" aria-label="Node legend">
+              <span><i class="publication-network-legend-node legend-node-runnable" aria-hidden="true"></i>Runnable Toolkit profile</span>
+              <span><i class="publication-network-legend-node legend-node-supported" aria-hidden="true"></i>Supported paradigm; parameters incomplete</span>
+            </div>
+
+            <div id="publication-network-workspace" class="publication-network-workspace">
+              <div id="publication-network-stage" class="publication-network-stage">
+                <canvas id="publication-network-canvas" tabindex="0" aria-label="Interactive square citation map of toolkit-supported audio-tactile PPS experiments. Use the search and publication list for keyboard access, or use arrow keys to move between visible nodes." aria-describedby="publication-network-help publication-network-status"></canvas>
+                <div id="publication-network-loading" class="publication-network-loading" role="status">
+                  <span class="publication-network-spinner" aria-hidden="true"></span>
+                  <span>Preparing publication network…</span>
+                </div>
+                <div id="publication-network-tooltip" class="publication-network-tooltip" role="tooltip" hidden></div>
+              </div>
+
+              <aside id="publication-network-detail" class="publication-network-detail" role="dialog" aria-modal="false" aria-labelledby="publication-network-detail-title" tabindex="-1" hidden>
+                <div class="publication-network-detail-heading">
+                  <div>
+                    <span id="publication-network-detail-kicker" class="segment-kicker">Publication</span>
+                    <h3 id="publication-network-detail-title">Publication details</h3>
+                  </div>
+                  <button id="publication-network-detail-close" class="icon-action" type="button" aria-label="Close publication details">×</button>
+                </div>
+                <div id="publication-network-detail-body" class="publication-network-detail-body"></div>
+              </aside>
+            </div>
+
+            <p id="publication-network-help" class="publication-network-help">Select a circle to inspect the paper and its Toolkit parameters. Citation-prominence view places more-cited papers toward the centre without overlapping nodes; publication-year view reads chronologically from top left. Arrow keys move through included papers and Enter opens the selected paper.</p>
+
+            <details class="publication-network-results-panel">
+              <summary><span>Included experiment papers</span><strong id="publication-network-results-count">0 results</strong></summary>
+              <div class="publication-network-results-toolbar">
+                <label for="publication-network-results-sort">Sort list by</label>
+                <select id="publication-network-results-sort">
+                  <option value="withinCorpusReceived">PPS-corpus citations</option>
+                  <option value="pageRank">PageRank</option>
+                  <option value="year-desc">Newest first</option>
+                  <option value="year-asc">Oldest first</option>
+                  <option value="title">Title</option>
+                </select>
+              </div>
+              <ol id="publication-network-results" class="publication-network-results"></ol>
+              <button id="publication-network-results-more" type="button" hidden>Show more publications</button>
+            </details>
           </div>
         </section>
 
@@ -771,7 +934,7 @@
                   <p>Native Windows application that opens the prepared session package and plays the three-channel ASIO stream to the lab hardware. Owns all timing-sensitive playback and response recording entirely outside the browser.</p>
                   <figure class="audiogram-figure" aria-label="Audiogram of an example looming stimulus trial">
                     <div class="audiogram-frame">
-                      <img src="audiogram_looming_trial.svg" alt="Waveform display of a three-channel looming trial WAV showing Channel 1 Left Audio and Channel 2 Right Audio with growing amplitude, and Channel 3 Tactile Drive with burst onset at the SOA" width="820" height="300">
+                      <img class="native-signal-graphic" src="audiogram_looming_trial.svg" alt="Waveform display of a three-channel looming trial WAV showing Channel 1 Left Audio and Channel 2 Right Audio with growing amplitude, and Channel 3 Tactile Drive with burst onset at the SOA" width="820" height="300">
                     </div>
                     <figcaption class="audiogram-figcaption">
                       <span class="audiogram-figcaption-label">Fig.</span>
@@ -892,22 +1055,22 @@
 
           <div class="spatial-explain-grid">
             <article class="info-card">
-              <h2>What Is An HRTF?</h2>
+              <h3>What Is An HRTF?</h3>
               <p>A head-related transfer function is a small acoustic fingerprint for one direction. It describes how the head, torso, and ears reshape a sound before it reaches the left and right eardrums. Applying different HRTFs over time makes a stationary source file behave like it is moving.</p>
             </article>
             <article class="info-card">
-              <h2>What Is SOFA?</h2>
+              <h3>What Is SOFA?</h3>
               <p>SOFA, the Spatially Oriented Format for Acoustics, is the standardized file container that stores spatial acoustic measurements such as HRTFs, HRIRs, and binaural room impulse responses with enough metadata for different tools to read them consistently.</p>
               <a class="button-link" href="https://www.sofaconventions.org/mediawiki/index.php/SOFA_%28Spatially_Oriented_Format_for_Acoustics%29" target="_blank" rel="noopener noreferrer">Open SOFA Conventions</a>
             </article>
             <article class="info-card">
-              <h2>What Is FABIAN?</h2>
+              <h3>What Is FABIAN?</h3>
               <p>FABIAN is TU Berlin's head-and-torso simulator dataset. PPS uses its HRIR/HRTF measurements as the reference listener model when creating binaural looming audio, and credits the source data to Brinkmann.</p>
               <a class="button-link" href="https://depositonce.tu-berlin.de/items/bff6568a-5735-4ebc-b3fa-ac10707b7beb" target="_blank" rel="noopener noreferrer">Open TU DepositOnce Record</a>
               <a class="button-link secondary-link" href="https://sofacoustics.org/data/database/tu-berlin/" target="_blank" rel="noopener noreferrer">Open TU Berlin SOFA Files</a>
             </article>
             <article class="info-card">
-              <h2>Where Do 3DTI And BRT Fit?</h2>
+              <h3>Where Do 3DTI And BRT Fit?</h3>
               <p>3DTI and its newer BRT line provide the binaural-rendering toolbox layer: software that takes source audio, listener/source geometry, and HRIR data, then computes the left and right headphone signals. In PPS, this renderer layer is local infrastructure, not browser logic or participant data storage.</p>
               <a class="button-link" href="https://github.com/GrupoDiana/BRTLibrary" target="_blank" rel="noopener noreferrer">Open BRT Library</a>
               <a class="button-link secondary-link" href="https://www.3d-tune-in.eu/toolkit-developers" target="_blank" rel="noopener noreferrer">Open 3DTI Toolkit Page</a>
@@ -1015,15 +1178,15 @@
           <p class="info-copy">PPS Toolkit is released under the MIT License. Permission is granted to use, copy, modify, merge, publish, distribute, sublicense, and sell copies of the software, provided the copyright notice and permission notice stay with the software. The software is provided as is, without warranty of any kind, including implied warranties of merchantability, fitness for a particular purpose, or noninfringement. The authors and copyright holders are not liable for claims, damages, or other liability arising from use of the toolkit.</p>
           <div class="info-card-grid">
             <article class="info-card">
-              <h2>License Scope</h2>
+              <h3>License Scope</h3>
               <p>The MIT License covers the toolkit code and included project materials. It does not grant rights to redistribute third-party assets, vendor software, or external datasets.</p>
             </article>
             <article class="info-card">
-              <h2>Local Data</h2>
+              <h3>Local Data</h3>
               <p>Generated designs, sessions, participant outputs, and validation artifacts stay local under ignored folders such as <code>local_data/</code> and <code>artifacts/</code>.</p>
             </article>
             <article class="info-card">
-              <h2>No Warranty</h2>
+              <h3>No Warranty</h3>
               <p>Researchers are responsible for validating timing, hardware routing, ethics approvals, and local data-handling procedures before using the toolkit for data collection.</p>
             </article>
           </div>
@@ -1035,7 +1198,7 @@
         </section>
       </section>
 
-      <section id="downloads-page" class="page-view info-page" data-page-panel="downloads" hidden>
+      <section id="downloads-page" class="page-view info-page" data-page-panel="downloads" role="tabpanel" aria-labelledby="page-tab-downloads" tabindex="0" hidden>
         <div class="info-page-heading">
           <span class="segment-kicker">Downloads</span>
           <h1>Install and Run Locally</h1>
@@ -1047,7 +1210,7 @@
           </div>
           <div class="download-page-grid single">
             <article class="info-card download-card primary-download">
-            <h2>Windows Downloader</h2>
+            <h3>Windows Downloader</h3>
             <p>Small GitHub-hosted bootstrapper published through GitHub Releases after a reviewed Windows package build.</p>
             <a id="download-software" class="button-link primary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer">Open Installer Releases</a>
           </article>
@@ -1060,7 +1223,7 @@
           </div>
           <div class="download-page-grid single">
             <article class="info-card download-card">
-            <h2>Offline Lab Package</h2>
+            <h3>Offline Lab Package</h3>
             <p>Heavyweight release payload hosted outside GitHub for labs that need the full packaged toolkit bundle.</p>
             <a id="download-full-package" class="button-link secondary-link" href="https://zenodo.org/search?q=%22peripersonal-space-toolkit%22" target="_blank" rel="noopener noreferrer">Open Full Package Search</a>
           </article>
@@ -1073,7 +1236,7 @@
           </div>
           <div class="download-page-grid single">
             <article class="info-card download-card">
-            <h2>Source Repository</h2>
+            <h3>Source Repository</h3>
             <p>Browse source, issues, release notes, and development documentation on GitHub.</p>
             <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit" target="_blank" rel="noopener noreferrer">Open GitHub Repository</a>
           </article>
@@ -1086,7 +1249,7 @@
           </div>
           <div class="download-page-grid single">
             <article class="info-card download-card">
-            <h2>Local Companion</h2>
+            <h3>Local Companion</h3>
             <p>After installing, start the trusted local companion before using hosted dashboard actions.</p>
             <code>windows\Start_Website_Companion.bat</code>
           </article>
@@ -1099,7 +1262,7 @@
 
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="segment-info-modal" class="modal-backdrop" hidden>
-    <div class="modal-card segment-info-card" role="dialog" aria-modal="true" aria-labelledby="segment-info-modal-title">
+    <div class="modal-card segment-info-card" role="dialog" aria-modal="true" aria-labelledby="segment-info-modal-title" tabindex="-1">
       <div class="modal-heading">
         <div>
           <div id="segment-info-kicker" class="segment-kicker">Segment</div>
@@ -1121,18 +1284,22 @@
           <p id="segment-info-backend"></p>
         </section>
         <section>
-          <h3>Used Next</h3>
+          <h3>Output</h3>
           <p id="segment-info-next"></p>
         </section>
       </div>
+      <section id="segment-info-note-card" class="segment-info-note" hidden>
+        <h3>Template Note</h3>
+        <p id="segment-info-note"></p>
+      </section>
     </div>
   </div>
   <div id="customize-modal" class="modal-backdrop" hidden>
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="customize-modal-title">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="customize-modal-title" tabindex="-1">
       <form id="customize-form">
         <div class="modal-heading">
           <div>
-            <div class="segment-kicker">New Custom Study</div>
+            <div id="customize-modal-kicker" class="segment-kicker">New Custom Study</div>
             <h2 id="customize-modal-title">Name This Study</h2>
           </div>
           <button id="customize-modal-close" class="icon-action" type="button" aria-label="Close">X</button>
@@ -1151,7 +1318,7 @@
     </div>
   </div>
   <div id="save-profile-modal" class="modal-backdrop" hidden>
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="save-profile-modal-title">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="save-profile-modal-title" tabindex="-1">
       <form id="save-profile-form">
         <div class="modal-heading">
           <div>
@@ -1172,7 +1339,7 @@
       </form>
     </div>
   </div>
-  <script type="module" src="app.js?v=20260805-designer"></script>
-  <script type="module" src="designer_main.js?v=20260805-designer"></script>
+  <script type="module" src="app.js?v=20260807-publication-network-focus"></script>
+  <script type="module" src="designer_main.js?v=20260807-publication-network-focus"></script>
 </body>
 </html>

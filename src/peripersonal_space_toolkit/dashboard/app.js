@@ -1,6 +1,7 @@
 let state = null;
 let viewerReady = false;
 let viewerInitialFitDone = false;
+let publicationNetworkInitPromise = null;
 const activePolls = new Set();
 let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
@@ -68,6 +69,7 @@ const DEFAULT_LOUDNESS_POLICY = {
 const STATIC_REPO_ROOT = new URL(import.meta.url.includes("/compiled/assets/") ? "../../../../../" : "../../../", import.meta.url).href;
 const STATIC_PRELOAD_INVENTORY_PATH = "assets/preloads/preload_inventory.json";
 const STATIC_TEMPLATE_DIR = "study_templates/";
+const HOSTED_TEMPLATE_DIRECTORY_URL = "https://github.com/GeorgeFejer91/pps-kit/tree/main/study_templates";
 const STATIC_AUDIT_SNAPSHOT_SCHEMA = "pps-static-dashboard-preview-audit-snapshot.v1";
 const STATIC_AUDIT_QUERY_PARAM = "auditStaticPreview";
 const STATIC_FORCE_QUERY_PARAM = "forceStaticPreview";
@@ -76,14 +78,16 @@ const STATIC_COMPANION_REQUIRED_MESSAGE =
 const PROFILE_RECREATION_NOTICE =
   "Be aware: this is not the exact stimulus set used in the original study. This preload recreates the study's reported parameters within this interface, using the toolkit's local rendering and bundled profile assets.";
 const WORKFLOW_STEPS = ["study", "stimulus", "trials", "baseline", "block", "schedule", "run"];
+const DESIGNER_PROGRESS_KEY = "designer_progress";
+const DESIGNER_PROGRESS_SCHEMA = "pps-designer-progress.v1";
 const STEP_TARGETS = {
-  study: "study",
-  stimulus: "stimulus",
-  trials: "trials",
-  baseline: "baseline",
-  block: "block",
-  schedule: "schedule",
-  run: "run"
+  study: "study-segment",
+  stimulus: "stimulus-segment",
+  trials: "trials-segment",
+  baseline: "baseline-segment",
+  block: "block-segment",
+  schedule: "schedule-segment",
+  run: "run-segment"
 };
 const NEXT_STEP = {
   study: "stimulus",
@@ -106,34 +110,37 @@ const SEGMENT_INFO = {
   study: {
     kicker: "Segment 0",
     title: "Choose or Create Study",
-    purpose: "Select a published profile or start a custom study.",
-    inputs: "Study/profile preload and design name.",
-    backend: "Creates or activates the 0_profile study project folder and writes profile/study manifests.",
-    next: "Provides the active project context for every later segment."
+    purpose: "Choose an existing study profile or create a new custom experiment design.",
+    inputs: "Select a built-in template or custom profile, or name a new clean-slate design.",
+    backendBeforeLink: "The application loads the selected profile from its ",
+    backendLinkLabel: "Template Directory",
+    backendAfterLink: ". New custom drafts are stored automatically in the researcher workspace. No folder selection is required.",
+    output: "A new template starts a dedicated folder for storing assets used to run the experiment.",
+    note: PROFILE_RECREATION_NOTICE
   },
   stimulus: {
     kicker: "Segment 1",
     title: "Build Looming Stimuli",
     purpose: "Define the auditory ingredients available to the experiment.",
-    inputs: "Trajectory values, generated noise type, custom tones, custom clips, bake label, and loudness policy.",
+    inputs: "Trajectory values, one generated or imported source, an ingredient name, and the loudness policy. Calibration assumptions are available as advanced settings.",
     backend: "Copies, imports, or bakes 1_core_audio_ingredients audio ingredients and records source metadata.",
-    next: "Supplies stimulus ingredients for Trial Sequence Design."
+    output: "Supplies stimulus ingredients for Trial Sequence Design."
   },
   trials: {
     kicker: "Segment 2",
     title: "Trial Sequence Design",
     purpose: "Arrange ingredients into within-trial audio sequences.",
-    inputs: "Row/box order, fixed clips, looming sources, alternatives, jitter values.",
+    inputs: "Trial-family rows, left-to-right box order, fixed clips, alternatives within a box, and jitter values.",
     backend: "Bakes 2_trial_sequence_designs row-level sequence WAVs and a manifest mapping each file to its components and timing.",
-    next: "Feeds exact trial sequences into baseline/tactile trial generation."
+    output: "Feeds exact trial sequences into baseline/tactile trial generation."
   },
   baseline: {
     kicker: "Segment 3",
     title: "Baseline and Tactile Trial Design",
-    purpose: "Add tactile timing and baseline/catch trial variants.",
-    inputs: "SOAs, baseline strategy, custom baseline SOAs, catch trial choice.",
-    backend: "Creates 3_tactile_and_baseline_trials three-channel target and baseline WAVs, optional catch WAVs, and row-preserving manifests.",
-    next: "Supplies final trial files for repetition-pool construction."
+    purpose: "Add tactile timing and define the baseline, catch, and auditory-only trial families.",
+    inputs: "SOAs, one explicit baseline strategy, optional custom baseline SOAs, and separate catch/auditory-only choices.",
+    backend: "Creates 3_tactile_and_baseline_trials target and baseline WAVs with tactile on channel 3, optional audio-only families, and row-preserving manifests.",
+    output: "Supplies final trial files for repetition-pool construction."
   },
   block: {
     kicker: "Segment 4",
@@ -141,23 +148,23 @@ const SEGMENT_INFO = {
     purpose: "Decide how many times each trial family/file should appear.",
     inputs: "Global, folder, or file-level repetition counts.",
     backend: "Writes the 4_trial_repetition_pool CSV and manifest without duplicating WAV files.",
-    next: "Provides the trial rows that will be arranged into blocks."
+    output: "Provides the trial rows that will be arranged into blocks."
   },
   schedule: {
     kicker: "Segment 5",
     title: "Generate and Review Blocks",
     purpose: "Generate block CSVs and accept the final block set.",
-    inputs: "Block count, regenerate/accept decision.",
+    inputs: "Block count, generated seed, reproducibility review, and regenerate/accept decision.",
     backend: "Creates 5_block_csv_preview block CSV previews, then finalizes accepted block CSVs.",
-    next: "Unlocks experiment preparation and provides block order inputs."
+    output: "Unlocks profile validation and provides the accepted block definitions."
   },
   run: {
     kicker: "Segment 6",
     title: "Profile Validation and Save",
     purpose: "Validate and save a reusable design without fixing the eventual study size.",
-    inputs: "Part membership, instruction policy, a non-scientific preview row count, and the versioned block-order policy.",
+    inputs: "Part membership, instruction policy, example-order preview count, and the versioned block-order policy.",
     backend: "Stores the profile contract and deterministic order policy. The Runner materializes an immutable participant session later.",
-    next: "Exports a portable .pps-profile or registers the profile for Runner discovery."
+    output: "Exports a portable .pps-profile or registers the profile for Runner discovery."
   }
 };
 const DOWNSTREAM_STEPS = {
@@ -172,11 +179,7 @@ const LOCAL_BACKEND_DEFAULT = "http://127.0.0.1:8766";
 const COMPANION_TOKEN_STORAGE_KEY = "ppsDashboard.companionToken";
 const STATIC_AUDIT_CONTROL_IDS = [
   "edit-mode-button",
-  "edit-profile-rail",
-  "apply-design",
-  "load-custom-project",
-  "apply-profile-project",
-  "export-data-acquisition-folder",
+  "start-new-custom-design",
   "import-audio-spatialize",
   "import-audio-preserve",
   "bake-stimulus",
@@ -188,6 +191,8 @@ const STATIC_AUDIT_CONTROL_IDS = [
   "accept-block-csvs",
   "regenerate-run-sequence",
   "save-study-profile",
+  "export-profile-bundle",
+  "export-data-acquisition-folder",
   "export-output-folder",
   "prepare-experiment"
 ];
@@ -232,7 +237,8 @@ const SOURCE_COLOR_OPTIONS = [
 const TRIAL_FAMILY_COLORS = {
   audio_tactile: "#1c7a86",
   baseline: "#4b5fa8",
-  catch: "#a4631b"
+  catch: "#a4631b",
+  auditory_only: "#86622d"
 };
 const RUN_INSTRUCTION_SLOTS = [
   { slot: "before_experiment", label: "Before experiment" },
@@ -309,6 +315,14 @@ const TRIAL_PREVIEW_LIMIT = 240;
 
 const $ = (id) => document.getElementById(id);
 const cssEscape = (value) => (window.CSS && window.CSS.escape ? window.CSS.escape(String(value)) : String(value).replace(/["\\]/g, "\\$&"));
+const BOUNDED_SELECT_SELECTOR = "select:not([multiple]):not(.state-only):not([aria-hidden=\"true\"])";
+const boundedSelectButtons = new WeakMap();
+let boundedSelectMenu = null;
+let activeBoundedSelect = null;
+let activeBoundedOptionIndex = -1;
+let boundedSelectTypeahead = "";
+let boundedSelectTypeaheadTimer = 0;
+let boundedSelectSequence = 0;
 let apiBase = "";
 let companionToken = "";
 let templateLoadInFlight = false;
@@ -322,6 +336,7 @@ let activeSourcePreviewButton = null;
 let activeSourcePreviewClearTimer = null;
 let sourcePreviewAudioContext = null;
 let customizeModalReturnFocus = null;
+let customizeModalMode = "copy";
 let saveProfileModalReturnFocus = null;
 let segmentInfoModalReturnFocus = null;
 let trialPoolRepetitionDraft = {
@@ -333,12 +348,321 @@ let trialPoolRepetitionDraft = {
 };
 let trialPoolDraftSourceHash = "";
 let trialPoolDraftInitialized = false;
+
+function boundedSelectLabel(select) {
+  const option = select.selectedOptions?.[0] || select.options?.[select.selectedIndex];
+  return String(option?.textContent || "Choose an option").trim();
+}
+
+function boundedSelectFieldLabel(select) {
+  const explicitLabel = select.id ? document.querySelector(`label[for="${cssEscape(select.id)}"]`) : null;
+  return String(
+    select.getAttribute("aria-label")
+    || explicitLabel?.textContent
+    || select.closest(".field-row, .trial-condition-field, .source-card-field")?.querySelector("label")?.textContent
+    || "Choose an option"
+  ).trim();
+}
+
+function isBoundedSelectOptionDisabled(option) {
+  return option.disabled || (option.parentElement?.tagName === "OPTGROUP" && option.parentElement.disabled);
+}
+
+function enabledBoundedSelectItems() {
+  if (!boundedSelectMenu) return [];
+  return [...boundedSelectMenu.querySelectorAll('[data-bounded-option-index]:not([aria-disabled="true"])')];
+}
+
+function closeBoundedSelect({ restoreFocus = false } = {}) {
+  if (!boundedSelectMenu || !activeBoundedSelect) return;
+  const button = boundedSelectButtons.get(activeBoundedSelect);
+  boundedSelectMenu.hidden = true;
+  boundedSelectMenu.replaceChildren();
+  button?.setAttribute("aria-expanded", "false");
+  activeBoundedSelect = null;
+  activeBoundedOptionIndex = -1;
+  boundedSelectTypeahead = "";
+  window.clearTimeout(boundedSelectTypeaheadTimer);
+  if (restoreFocus) button?.focus();
+}
+
+function selectBoundedOption(optionIndex) {
+  if (!activeBoundedSelect) return;
+  const option = activeBoundedSelect.options[optionIndex];
+  if (!option || isBoundedSelectOptionDisabled(option) || option.hidden) return;
+  const select = activeBoundedSelect;
+  select.value = option.value;
+  closeBoundedSelect({ restoreFocus: true });
+  syncBoundedSelect(select);
+  select.dispatchEvent(new Event("input", { bubbles: true }));
+  select.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+function focusBoundedOption(direction) {
+  if (!boundedSelectMenu || !activeBoundedSelect) return;
+  const enabled = enabledBoundedSelectItems();
+  if (!enabled.length) return;
+  const current = enabled.findIndex((item) => Number(item.dataset.boundedOptionIndex) === activeBoundedOptionIndex);
+  let next = current;
+  if (direction === "first") next = 0;
+  else if (direction === "last") next = enabled.length - 1;
+  else if (direction === "next") next = current < 0 ? 0 : (current + 1) % enabled.length;
+  else if (direction === "previous") next = current < 0 ? enabled.length - 1 : (current - 1 + enabled.length) % enabled.length;
+  const item = enabled[next];
+  activeBoundedOptionIndex = Number(item.dataset.boundedOptionIndex);
+  for (const option of enabled) option.tabIndex = -1;
+  item.tabIndex = 0;
+  item.focus({ preventScroll: true });
+  item.scrollIntoView({ block: "nearest" });
+}
+
+function focusBoundedOptionByText(query) {
+  const cleanQuery = String(query || "").trim().toLowerCase();
+  if (!cleanQuery || !boundedSelectMenu) return;
+  const items = enabledBoundedSelectItems();
+  const item = items.find((candidate) => candidate.textContent.trim().toLowerCase().startsWith(cleanQuery));
+  if (!item) return;
+  for (const option of items) option.tabIndex = -1;
+  item.tabIndex = 0;
+  activeBoundedOptionIndex = Number(item.dataset.boundedOptionIndex);
+  item.focus({ preventScroll: true });
+  item.scrollIntoView({ block: "nearest" });
+}
+
+function moveFocusFromBoundedSelect(reverse = false) {
+  const button = activeBoundedSelect ? boundedSelectButtons.get(activeBoundedSelect) : null;
+  closeBoundedSelect();
+  if (!button) return;
+  const focusable = [...document.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  )].filter((element) => (
+    !element.hidden
+    && element.tabIndex >= 0
+    && !element.closest('[inert], [aria-hidden="true"]')
+    && element.getClientRects().length > 0
+  ));
+  const current = focusable.indexOf(button);
+  const next = focusable[current + (reverse ? -1 : 1)];
+  (next || button).focus();
+}
+
+function positionBoundedSelectMenu(button) {
+  const rect = button.getBoundingClientRect();
+  const viewportInset = 8;
+  const menuGap = 4;
+  const availableBelow = Math.max(0, window.innerHeight - rect.bottom - viewportInset - menuGap);
+  const availableAbove = Math.max(0, rect.top - viewportInset - menuGap);
+  const openAbove = availableBelow < 200 && availableAbove > availableBelow;
+  const available = openAbove ? availableAbove : availableBelow;
+  const menuHeight = Math.max(96, Math.min(320, available));
+  boundedSelectMenu.style.left = `${rect.left}px`;
+  boundedSelectMenu.style.width = `${rect.width}px`;
+  boundedSelectMenu.style.maxHeight = `${menuHeight}px`;
+  if (openAbove) {
+    boundedSelectMenu.style.top = "auto";
+    boundedSelectMenu.style.bottom = `${window.innerHeight - rect.top + menuGap}px`;
+  } else {
+    boundedSelectMenu.style.top = `${rect.bottom + menuGap}px`;
+    boundedSelectMenu.style.bottom = "auto";
+  }
+}
+
+function openBoundedSelect(select) {
+  const button = boundedSelectButtons.get(select);
+  if (!button) return;
+  if (select.disabled) {
+    if (isProfileReadonlyMode()) openCustomizeModal();
+    return;
+  }
+  if (activeBoundedSelect === select && !boundedSelectMenu.hidden) {
+    closeBoundedSelect({ restoreFocus: true });
+    return;
+  }
+  closeBoundedSelect();
+  activeBoundedSelect = select;
+  activeBoundedOptionIndex = select.selectedIndex;
+  boundedSelectMenu.replaceChildren();
+  let lastGroup = null;
+  let groupContainer = boundedSelectMenu;
+  [...select.options].forEach((option, optionIndex) => {
+    const group = option.parentElement?.tagName === "OPTGROUP" ? option.parentElement : null;
+    if (group && group !== lastGroup) {
+      groupContainer = document.createElement("div");
+      groupContainer.className = "bounded-select-group-options";
+      groupContainer.setAttribute("role", "group");
+      groupContainer.setAttribute("aria-label", group.label);
+      const heading = document.createElement("div");
+      heading.className = "bounded-select-group";
+      heading.textContent = group.label;
+      heading.setAttribute("aria-hidden", "true");
+      groupContainer.appendChild(heading);
+      boundedSelectMenu.appendChild(groupContainer);
+    } else if (!group) {
+      groupContainer = boundedSelectMenu;
+    }
+    lastGroup = group;
+    if (option.hidden) return;
+    const optionDisabled = isBoundedSelectOptionDisabled(option);
+    const item = document.createElement("div");
+    item.className = "bounded-select-option";
+    item.dataset.boundedOptionIndex = String(optionIndex);
+    item.setAttribute("role", "option");
+    item.setAttribute("aria-selected", String(option.selected));
+    item.tabIndex = !optionDisabled && optionIndex === select.selectedIndex ? 0 : -1;
+    item.textContent = option.textContent;
+    if (optionDisabled) {
+      item.classList.add("disabled");
+      item.setAttribute("aria-disabled", "true");
+    } else {
+      item.addEventListener("click", () => selectBoundedOption(optionIndex));
+    }
+    groupContainer.appendChild(item);
+  });
+  boundedSelectMenu.setAttribute("aria-label", `${boundedSelectFieldLabel(select)} options`);
+  positionBoundedSelectMenu(button);
+  boundedSelectMenu.hidden = false;
+  button.setAttribute("aria-expanded", "true");
+  window.requestAnimationFrame(() => {
+    const selected = boundedSelectMenu.querySelector(`[data-bounded-option-index="${select.selectedIndex}"]`);
+    const target = selected && selected.getAttribute("aria-disabled") !== "true"
+      ? selected
+      : enabledBoundedSelectItems()[0];
+    if (target) {
+      target.tabIndex = 0;
+      activeBoundedOptionIndex = Number(target.dataset.boundedOptionIndex);
+      target.focus({ preventScroll: true });
+    }
+  });
+}
+
+function syncBoundedSelect(select) {
+  const button = boundedSelectButtons.get(select);
+  if (!button) return;
+  const label = boundedSelectLabel(select);
+  button.querySelector(".bounded-select-value").textContent = label;
+  button.title = label;
+  const fieldLabel = boundedSelectFieldLabel(select);
+  // The custom proxy must mirror the native select's interaction lock. The
+  // one exception is an inherited read-only profile, where the proxy remains
+  // actionable so it can open the "create a custom copy" dialog.
+  const opensCustomize = select.disabled && isProfileReadonlyMode();
+  button.disabled = select.disabled && !opensCustomize;
+  if (opensCustomize) {
+    button.setAttribute("role", "button");
+    button.setAttribute("aria-haspopup", "dialog");
+    button.setAttribute("aria-controls", "customize-modal");
+    button.removeAttribute("aria-disabled");
+    button.setAttribute("aria-label", `${fieldLabel === "Choose an option" ? label : fieldLabel}: ${label}. Create a custom copy to edit.`);
+  } else {
+    button.setAttribute("role", "combobox");
+    button.setAttribute("aria-haspopup", "listbox");
+    button.setAttribute("aria-controls", "bounded-select-menu");
+    button.setAttribute("aria-disabled", String(select.disabled));
+    button.setAttribute("aria-label", fieldLabel);
+  }
+  button.classList.toggle("disabled", select.disabled);
+  if (activeBoundedSelect === select && select.disabled) closeBoundedSelect();
+}
+
+function upgradeBoundedSelect(select) {
+  if (!select.matches(BOUNDED_SELECT_SELECTOR) || boundedSelectButtons.has(select)) return;
+  const shell = document.createElement("div");
+  shell.className = "bounded-select-shell";
+  select.before(shell);
+  shell.appendChild(select);
+  select.classList.add("bounded-select-native");
+  select.tabIndex = -1;
+  select.setAttribute("aria-hidden", "true");
+
+  const button = document.createElement("button");
+  const controlId = select.id || `bounded-select-${++boundedSelectSequence}`;
+  button.type = "button";
+  button.id = `${controlId}-combobox`;
+  button.className = "bounded-select-button";
+  button.dataset.boundedSelectFor = controlId;
+  button.setAttribute("role", "combobox");
+  button.setAttribute("aria-haspopup", "listbox");
+  button.setAttribute("aria-controls", "bounded-select-menu");
+  button.setAttribute("aria-expanded", "false");
+  button.setAttribute("aria-label", boundedSelectFieldLabel(select));
+  button.innerHTML = '<span class="bounded-select-value"></span><span class="bounded-select-arrow" aria-hidden="true"></span>';
+  shell.appendChild(button);
+  boundedSelectButtons.set(select, button);
+  button.addEventListener("click", () => openBoundedSelect(select));
+  button.addEventListener("keydown", (event) => {
+    if (!["Enter", " ", "ArrowDown", "ArrowUp"].includes(event.key)) return;
+    event.preventDefault();
+    openBoundedSelect(select);
+    if (event.key === "ArrowUp") window.requestAnimationFrame(() => focusBoundedOption("previous"));
+  });
+  syncBoundedSelect(select);
+}
+
+function upgradeBoundedSelects(root = document) {
+  if (root instanceof HTMLSelectElement) upgradeBoundedSelect(root);
+  for (const select of root.querySelectorAll?.(BOUNDED_SELECT_SELECTOR) || []) upgradeBoundedSelect(select);
+  for (const select of document.querySelectorAll(".bounded-select-native")) syncBoundedSelect(select);
+}
+
+function initializeBoundedSelects() {
+  boundedSelectMenu = document.createElement("div");
+  boundedSelectMenu.id = "bounded-select-menu";
+  boundedSelectMenu.className = "bounded-select-menu";
+  boundedSelectMenu.setAttribute("role", "listbox");
+  boundedSelectMenu.hidden = true;
+  document.body.appendChild(boundedSelectMenu);
+  boundedSelectMenu.addEventListener("keydown", (event) => {
+    const action = { ArrowDown: "next", ArrowUp: "previous", Home: "first", End: "last" }[event.key];
+    if (action) {
+      event.preventDefault();
+      focusBoundedOption(action);
+    } else if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      selectBoundedOption(activeBoundedOptionIndex);
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      closeBoundedSelect({ restoreFocus: true });
+    } else if (event.key === "Tab") {
+      event.preventDefault();
+      moveFocusFromBoundedSelect(event.shiftKey);
+    } else if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      boundedSelectTypeahead += event.key.toLowerCase();
+      window.clearTimeout(boundedSelectTypeaheadTimer);
+      boundedSelectTypeaheadTimer = window.setTimeout(() => { boundedSelectTypeahead = ""; }, 650);
+      focusBoundedOptionByText(boundedSelectTypeahead);
+    }
+  });
+  document.addEventListener("pointerdown", (event) => {
+    const button = activeBoundedSelect ? boundedSelectButtons.get(activeBoundedSelect) : null;
+    if (!activeBoundedSelect || boundedSelectMenu.contains(event.target) || button?.contains(event.target)) return;
+    closeBoundedSelect();
+  });
+  document.addEventListener("change", (event) => {
+    if (event.target instanceof HTMLSelectElement) syncBoundedSelect(event.target);
+  });
+  document.addEventListener("scroll", (event) => {
+    if (activeBoundedSelect && !boundedSelectMenu.contains(event.target)) closeBoundedSelect();
+  }, true);
+  window.addEventListener("resize", () => closeBoundedSelect());
+  new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === "attributes" && mutation.target instanceof HTMLSelectElement) {
+        syncBoundedSelect(mutation.target);
+      }
+      for (const node of mutation.addedNodes) {
+        if (node instanceof Element) upgradeBoundedSelects(node);
+      }
+      if (mutation.target instanceof HTMLSelectElement) syncBoundedSelect(mutation.target);
+    }
+  }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["disabled"] });
+  upgradeBoundedSelects();
+}
 let runSequencePreviewTimer = null;
 let activePage = "toolkit";
 let editModeActive = false;
 let staticModeActive = false;
-let autosaveTimer = 0;
-let autosaveRevision = 0;
+let designerDirty = false;
+let workflowSaveInFlight = false;
 let staticModeReason = "";
 let staticPreloadInventory = null;
 let staticTemplatesCache = null;
@@ -479,11 +803,158 @@ function isProfileReadonlyMode() {
   return Boolean(state && (!isCustomMode() || state.custom_workflow?.is_finalized));
 }
 
+function isProfileFinalized() {
+  if (!state) return false;
+  if (state.custom_workflow?.is_custom) return Boolean(state.custom_workflow.is_finalized);
+  return true;
+}
+
 function customViewModeLocked() {
   return Boolean(isCustomMode() && !editModeActive);
 }
 
-function setEditMode(active) {
+function normalizedDesignerProgress() {
+  const workflow = state?.custom_workflow || {};
+  const stored = state?.design?.study_profile_reference_parameters?.[DESIGNER_PROGRESS_KEY] || {};
+  const fallbackStep = WORKFLOW_STEPS.includes(workflow.current_step) ? workflow.current_step : "stimulus";
+  const editStep = WORKFLOW_STEPS.includes(workflow.edit_step)
+    ? workflow.edit_step
+    : WORKFLOW_STEPS.includes(stored.edit_step)
+      ? stored.edit_step
+      : fallbackStep;
+  const confirmed = new Set(workflow.confirmed_steps || stored.confirmed_steps || WORKFLOW_STEPS.slice(0, WORKFLOW_STEPS.indexOf(editStep)));
+  confirmed.add("study");
+  confirmed.delete(editStep);
+  const needsReview = new Set(workflow.needs_review_steps || stored.needs_review_steps || []);
+  needsReview.delete(editStep);
+  for (const stepId of confirmed) needsReview.delete(stepId);
+  return {
+    schema: DESIGNER_PROGRESS_SCHEMA,
+    edit_step: editStep,
+    confirmed_steps: WORKFLOW_STEPS.filter((stepId) => confirmed.has(stepId)),
+    needs_review_steps: WORKFLOW_STEPS.filter((stepId) => needsReview.has(stepId)),
+    revision: Math.max(0, Number(workflow.review_revision ?? stored.revision ?? 0)),
+  };
+}
+
+function setHostedDesignerProgress(progress) {
+  if (!state?.design) return;
+  state.design.study_profile_reference_parameters = state.design.study_profile_reference_parameters || {};
+  state.design.study_profile_reference_parameters[DESIGNER_PROGRESS_KEY] = clone(progress);
+  state.custom_workflow = state.custom_workflow || {};
+  state.custom_workflow.edit_step = progress.edit_step;
+  state.custom_workflow.confirmed_steps = [...progress.confirmed_steps];
+  state.custom_workflow.needs_review_steps = [...progress.needs_review_steps];
+  state.custom_workflow.review_revision = progress.revision;
+  const confirmed = new Set(progress.confirmed_steps);
+  const needsReview = new Set(progress.needs_review_steps);
+  state.custom_workflow.steps = (state.custom_workflow.steps || []).map((step) => ({
+    ...step,
+    decision_state: step.id === progress.edit_step
+      ? "editing"
+      : confirmed.has(step.id)
+        ? "confirmed"
+        : needsReview.has(step.id)
+          ? "needs_review"
+          : "locked",
+  }));
+}
+
+function refreshHostedWorkflowSteps() {
+  if (!staticModeActive || !state?.custom_workflow?.is_custom) return;
+  const design = state.design || {};
+  const protocol = design.protocol || {};
+  const sources = [
+    ...(design.noises || []),
+    ...(design.custom_looming_files || []),
+    ...(design.prestimulus_files || []),
+  ];
+  const strips = protocol.trial_strips || [];
+  const steps = WORKFLOW_STEPS.map((stepId) => {
+    const artifact = profileStepStatus(stepId);
+    let complete = artifact.complete;
+    let missing = [...(artifact.missing || [])];
+    if (stepId === "study") {
+      complete = Boolean(String(design.name || "").trim());
+      missing = complete ? [] : ["Name this study before continuing."];
+    } else if (stepId === "stimulus" && !sources.length) {
+      complete = false;
+      missing = ["Add at least one stimulus or instruction source."];
+    } else if (stepId === "trials" && (!strips.length || strips.some((strip) => stripPreviewVariants(strip).length < 1))) {
+      complete = false;
+      missing = ["Add at least one complete trial family."];
+    } else if (stepId === "baseline" && !(protocol.soa_values_ms || []).length) {
+      complete = false;
+      missing = ["Add at least one SOA value."];
+    }
+    return {
+      id: stepId,
+      label: SEGMENT_INFO[stepId]?.title || humanize(stepId),
+      complete,
+      missing: complete ? [] : missing,
+    };
+  });
+  const firstIncomplete = steps.find((step) => !step.complete);
+  state.custom_workflow.steps = steps;
+  state.custom_workflow.current_step = firstIncomplete?.id || "run";
+  state.custom_workflow.ready_to_render = steps.slice(0, -1).every((step) => step.complete);
+  state.custom_workflow.ready_to_prepare = steps.every((step) => step.complete);
+  state.custom_workflow.missing = steps.flatMap((step) => step.missing || []);
+}
+
+function initializeHostedDesignerProgress(editStep = "stimulus") {
+  refreshHostedWorkflowSteps();
+  setHostedDesignerProgress({
+    schema: DESIGNER_PROGRESS_SCHEMA,
+    edit_step: editStep,
+    confirmed_steps: ["study"],
+    needs_review_steps: [],
+    revision: 0,
+  });
+}
+
+function markDesignerDirty() {
+  if (!state || !isCustomMode() || isProfileReadonlyMode() || !editModeActive || designerDirty) return;
+  designerDirty = true;
+  document.dispatchEvent(new CustomEvent("pps-designer-dirty"));
+}
+
+function markDesignerSaved() {
+  designerDirty = false;
+  document.dispatchEvent(new CustomEvent("pps-designer-saved"));
+}
+
+function confirmDiscardUnsaved(actionLabel = "continue") {
+  if (!designerDirty) return true;
+  return window.confirm(`Discard unsaved changes and ${actionLabel}?`);
+}
+
+async function restorePersistedDraftForView() {
+  if (staticModeActive) {
+    const stored = await window.PPSDesigner?.drafts?.load?.().catch(() => null);
+    if (!stored?.design || stored?.project?.project_id !== state?.project?.project_id) {
+      throw new Error("The last saved browser draft could not be restored. Stay in Edit mode and export the draft before leaving.");
+    }
+    state = clone(stored);
+    editModeActive = false;
+    markDesignerSaved();
+    renderAll();
+    updateViewer();
+    return;
+  }
+  editModeActive = false;
+  markDesignerSaved();
+  await loadState({ resetEditMode: true });
+}
+
+async function reconnectBackendFromControls({ includeToken = true } = {}) {
+  if (!confirmDiscardUnsaved("reconnect to the companion")) return;
+  saveApiBase($("backend-url").value);
+  if (includeToken) saveCompanionToken($("companion-token")?.value || "");
+  await loadState({ resetEditMode: true });
+}
+
+async function setEditMode(active) {
   if (active) {
     if (!state) {
       showToast("Wait for the dashboard state to load before editing.");
@@ -500,6 +971,14 @@ function setEditMode(active) {
     }
     editModeActive = true;
   } else {
+    if (!confirmDiscardUnsaved("return to View mode")) {
+      renderEditModePanel();
+      return editModeActive;
+    }
+    if (designerDirty) {
+      await restorePersistedDraftForView();
+      return false;
+    }
     editModeActive = false;
   }
   renderAll();
@@ -509,34 +988,33 @@ function setEditMode(active) {
 
 function resetEditMode() {
   editModeActive = false;
+  designerDirty = false;
 }
 
 function renderEditModePanel() {
-  const viewButton = $("view-mode-button");
   const editButton = $("edit-mode-button");
-  const status = $("edit-mode-status");
-  if (!viewButton || !editButton || !status) return;
+  const panel = $("profile-mode-panel");
+  if (!editButton || !panel) return;
+  if (editModeActive && isProfileReadonlyMode()) editModeActive = false;
   const canEnterEdit = Boolean(state);
-  viewButton.classList.toggle("active", !editModeActive);
-  editButton.classList.toggle("active", editModeActive);
-  viewButton.setAttribute("aria-pressed", String(!editModeActive));
+  panel.dataset.lockState = editModeActive ? "open" : "closed";
+  editButton.setAttribute("aria-checked", String(editModeActive));
   editButton.disabled = !canEnterEdit;
-  editButton.title = isProfileReadonlyMode()
-      ? "Create a named custom copy before editing this loaded profile."
-      : "Unlock editable custom-study decisions.";
+  editButton.title = editModeActive
+    ? "Return to locked View mode."
+    : isProfileReadonlyMode()
+      ? "Create a named custom copy and unlock Edit mode."
+      : "Unlock this custom draft for editing.";
+  editButton.setAttribute("aria-label", editModeActive
+    ? "Editing unlocked. Switch to View mode."
+    : isProfileReadonlyMode()
+      ? "Editing locked. Create a named custom copy and switch to Edit mode."
+      : "Editing locked. Switch this custom draft to Edit mode.");
   if (isProfileReadonlyMode()) {
-    // Acts as a dialog launcher (opens the customize-naming modal), not a
-    // toggle; advertising aria-pressed here would be a lie to screen readers.
-    editButton.textContent = "Customize";
-    editButton.removeAttribute("aria-pressed");
     editButton.setAttribute("aria-haspopup", "dialog");
   } else {
-    editButton.textContent = "Edit";
-    editButton.setAttribute("aria-pressed", String(editModeActive));
     editButton.removeAttribute("aria-haspopup");
   }
-  status.textContent = editModeActive ? "edit mode" : "view mode";
-  status.className = `status-label ${editModeActive ? "ready" : "optional"}`;
 }
 
 // Editing the trajectory (typing distances/rotations OR dragging the preview
@@ -578,29 +1056,26 @@ function setWorkflowDisabled(control, disabled) {
 
 function profileReadonlyControlAllowed(control) {
   if (!control) return false;
-  if (control.matches?.("[data-preview-source-label]")) return true;
+  if (control.matches?.("[data-preview-source-label], .mobile-table-more")) return true;
   return Boolean(
     control.id
     && (
       control.id.startsWith("open-")
       || control.id === "download-block-randomization"
-      || control.id === "prepare-experiment"
-      || control.id === "export-data-acquisition-folder"
       || control.id === "save-study-profile"
-      || control.id === "export-output-folder"
+      || control.id === "export-profile-bundle"
     )
   );
 }
 
 function viewModeControlAllowed(control) {
   if (!control) return false;
-  if (control.matches?.("[data-preview-source-label]")) return true;
+  if (control.matches?.("[data-preview-source-label], .mobile-table-more")) return true;
   if (control.id?.startsWith("open-")) return true;
   if (control.id === "download-block-randomization") return true;
-  const prepared = Boolean(state?.run_sequence_setup?.prepared || projectSegment("6_experiment_run_setup").status === "ready");
   return Boolean(
-    prepared
-    && ["prepare-experiment", "save-study-profile", "export-output-folder"].includes(control.id || "")
+    isProfileFinalized()
+    && control.id === "export-profile-bundle"
   );
 }
 
@@ -920,8 +1395,14 @@ async function staticStateForTemplate(templateId) {
     static_mode_reason: staticModeReason,
     design,
     design_path: "",
+    template_directory: {
+      kind: "hosted",
+      path: "",
+      url: HOSTED_TEMPLATE_DIRECTORY_URL,
+    },
     project,
     custom_projects: [],
+    profile_catalog: { entries: [] },
     participant_id: "P001",
     templates,
     selected_template: cleanId,
@@ -2390,9 +2871,7 @@ function renderAll() {
   document.body.classList.toggle("dashboard-edit-mode", editModeActive);
   document.body.classList.toggle("dashboard-view-mode", !editModeActive);
   renderEditModePanel();
-  renderHeader();
   renderPageTabs();
-  renderProfileMode();
   renderStudy();
   renderStimulus();
   renderTrials();
@@ -2402,8 +2881,8 @@ function renderAll() {
   renderPreviewTables();
   renderSegmentRegistryOutputs();
   renderWorkflow();
-  renderDataAcquisitionBridge();
   renderCapabilityLocks();
+  upgradeBoundedSelects();
 }
 
 function renderCapabilityLocks() {
@@ -2532,12 +3011,14 @@ function setActivePage(page, options = {}) {
     const active = button.dataset.pageTab === nextPage;
     button.classList.toggle("active", active);
     button.setAttribute("aria-selected", String(active));
+    button.tabIndex = active ? 0 : -1;
   }
   for (const panel of document.querySelectorAll("[data-page-panel]")) {
     panel.hidden = panel.dataset.pagePanel !== nextPage;
     panel.classList.toggle("active", panel.dataset.pagePanel === nextPage);
   }
   syncRailForPage(nextPage);
+  if (!options.preserveMobileDisclosures) closeMobileRailDisclosures();
   if (options.updateHash) {
     replaceRouteForPage(nextPage);
   }
@@ -2557,6 +3038,60 @@ function syncRailForPage(page) {
     group.hidden = !active;
     group.classList.toggle("active", active);
   }
+  syncMobileRailSummary();
+}
+
+function closeMobileRailDisclosures() {
+  const rail = document.querySelector(".rail");
+  if (!rail) return;
+  rail.classList.remove("mobile-sections-open", "mobile-companion-open");
+  $("mobile-rail-nav-toggle")?.setAttribute("aria-expanded", "false");
+  $("mobile-companion-toggle")?.setAttribute("aria-expanded", "false");
+}
+
+function mobileSectionsDisclosureOpen() {
+  return window.matchMedia("(max-width: 760px)").matches
+    && document.querySelector(".rail")?.classList.contains("mobile-sections-open");
+}
+
+function focusSectionNavigationTarget(target) {
+  if (!target) return;
+  const originalTabIndex = target.getAttribute("tabindex");
+  if (originalTabIndex === null) target.tabIndex = -1;
+  target.focus({ preventScroll: true });
+  if (originalTabIndex !== null) return;
+  if (document.activeElement !== target) {
+    target.removeAttribute("tabindex");
+    return;
+  }
+  target.addEventListener("blur", () => target.removeAttribute("tabindex"), { once: true });
+}
+
+function toggleMobileRailDisclosure(kind) {
+  const rail = document.querySelector(".rail");
+  if (!rail) return;
+  const sections = kind === "sections";
+  const className = sections ? "mobile-sections-open" : "mobile-companion-open";
+  const otherClass = sections ? "mobile-companion-open" : "mobile-sections-open";
+  const toggle = $(sections ? "mobile-rail-nav-toggle" : "mobile-companion-toggle");
+  const otherToggle = $(sections ? "mobile-companion-toggle" : "mobile-rail-nav-toggle");
+  const expanded = !rail.classList.contains(className);
+  rail.classList.toggle(className, expanded);
+  rail.classList.remove(otherClass);
+  toggle?.setAttribute("aria-expanded", String(expanded));
+  otherToggle?.setAttribute("aria-expanded", "false");
+}
+
+function syncMobileRailSummary() {
+  const current = $("mobile-rail-nav-current");
+  if (!current) return;
+  const selector = activePage === "toolkit"
+    ? '[data-step-link].active'
+    : `[data-page-section-page="${cssEscape(activePage)}"].active`;
+  const fallback = document.querySelector(`[data-rail-page="${cssEscape(activePage)}"] a`);
+  const link = document.querySelector(selector) || fallback;
+  current.textContent = link?.querySelector("span")?.textContent?.trim()
+    || (activePage === "toolkit" ? "Experiment workflow" : humanize(activePage));
 }
 
 function setActivePageSection(sectionId) {
@@ -2610,51 +3145,47 @@ function initializeLazySurfaces() {
   observer.observe(frame);
 }
 
-function renderHeader() {
-  $("design-title").textContent = state.design.name || "Untitled PPS design";
-  const applyButton = $("apply-design");
-  if (applyButton) {
-    const readonly = isProfileReadonlyMode();
-    const viewLocked = customViewModeLocked();
-    applyButton.textContent = readonly ? "Profile Read-Only" : "Save Custom Design";
-    applyButton.title = readonly
-      ? "Create a custom project before editing this loaded profile."
-      : viewLocked
-        ? "Switch to Edit mode before saving custom design changes."
-      : "Save the current custom project decisions.";
-    applyButton.disabled = readonly || viewLocked;
+function initializePublicationNetworkSurface() {
+  const root = document.querySelector("[data-publication-network-root]");
+  if (!root) return;
+  root.dataset.publicationNetworkState = "idle";
+  const load = () => {
+    if (publicationNetworkInitPromise) return publicationNetworkInitPromise;
+    root.dataset.publicationNetworkState = "loading";
+    publicationNetworkInitPromise = import("./publication_network.js")
+      .then(({ initializePublicationNetwork }) => initializePublicationNetwork(root))
+      .catch((error) => {
+        root.dataset.publicationNetworkState = "error";
+        const loading = $("publication-network-loading");
+        if (loading) {
+          loading.hidden = false;
+          loading.classList.add("error");
+          const message = loading.querySelector("span:last-child");
+          if (message) message.textContent = "The publication network could not be loaded.";
+        }
+        console.error(error);
+        throw error;
+      });
+    return publicationNetworkInitPromise;
+  };
+  if (!("IntersectionObserver" in window)) {
+    load();
+    return;
   }
-}
-
-function renderProfileMode() {
-  const status = $("profile-mode-status");
-  const button = $("edit-profile-rail");
-  if (!status || !button) return;
-  const readonly = isProfileReadonlyMode();
-  status.textContent = staticModeActive && readonly
-    ? "static profile"
-    : readonly
-      ? "profile run mode"
-      : editModeActive ? "custom edit mode" : "custom view mode";
-  status.className = `status-label ${readonly || customViewModeLocked() ? "required" : "ready"}`;
-  button.textContent = readonly ? "Edit As New Study" : "Editing Custom Study";
-  button.disabled = !readonly;
-  button.title = readonly
-    ? "Create a named custom copy before changing this loaded profile."
-    : "This project is already editable.";
+  const observer = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    observer.disconnect();
+    load();
+  }, { rootMargin: "480px" });
+  observer.observe(root);
 }
 
 function renderStudy() {
   const select = $("template-select");
   select.innerHTML = "";
-  const activeProjectId = state.project?.project_kind === "custom" ? state.project.project_id : "";
-  const customOption = document.createElement("option");
-  customOption.value = CUSTOM_TEMPLATE_ID;
-  customOption.textContent = "Custom design (define manually)";
-  customOption.selected = !state.selected_template && !activeProjectId;
-  select.appendChild(customOption);
+  const activeProjectId = isCustomMode() ? String(state.project?.project_id || "") : "";
   const bundledGroup = document.createElement("optgroup");
-  bundledGroup.label = "Bundled study protocols";
+  bundledGroup.label = "Built-in Study Templates";
   for (const template of state.templates) {
     const option = document.createElement("option");
     option.value = template.template_id;
@@ -2663,31 +3194,24 @@ function renderStudy() {
     bundledGroup.appendChild(option);
   }
   select.appendChild(bundledGroup);
-  const customEntries = profileCatalogEntries().filter((entry) => entry.kind === "custom");
+  const customEntries = customProfileEntries();
   if (customEntries.length) {
     const customGroup = document.createElement("optgroup");
-    customGroup.label = "Stored local profiles";
+    customGroup.label = "My Custom Designs";
     for (const entry of customEntries) {
       const option = document.createElement("option");
       option.value = customProfileSelectValue(entry.profile_id);
-      const created = entry.created_at ? ` (${entry.created_at})` : "";
-      option.textContent = `${entry.display_name || entry.profile_id}${created}`;
+      const status = entry.is_finalized ? "Finalized" : "Draft";
+      option.textContent = `${entry.display_name || entry.profile_id} — ${status}`;
       option.selected = entry.profile_id === activeProjectId;
       customGroup.appendChild(option);
     }
     select.appendChild(customGroup);
   }
-  $("design-name").value = state.design.name || "";
-  const readonly = isProfileReadonlyMode();
-  const applyProject = $("apply-profile-project");
-  if (applyProject) {
-    applyProject.hidden = readonly;
-    applyProject.textContent = isCustomMode() ? "Create / Update Custom Project Folder" : "Apply Profile / Create Project Folder";
+  if (activeProjectId && [...select.options].some((option) => option.value === customProfileSelectValue(activeProjectId))) {
+    select.value = customProfileSelectValue(activeProjectId);
   }
-  renderExistingCustomProjects();
   renderProfileSummary();
-  renderPreloadAssetStatus();
-  renderDataAcquisitionBridge();
 }
 
 function profileCatalogEntries() {
@@ -2698,6 +3222,37 @@ function customProfileSelectValue(profileId) {
   return `custom-profile:${profileId}`;
 }
 
+function customProfileEntries() {
+  const entries = new Map();
+  for (const project of state.custom_projects || []) {
+    entries.set(project.project_id, {
+      profile_id: project.project_id,
+      display_name: project.project_label || project.project_id,
+      created_at: project.created_at || "",
+      is_finalized: false,
+    });
+  }
+  for (const entry of profileCatalogEntries().filter((item) => item.kind === "custom")) {
+    entries.set(entry.profile_id, {
+      ...(entries.get(entry.profile_id) || {}),
+      ...entry,
+      is_finalized: Boolean(entry.profile_ready || entry.profile_status === "finalized"),
+    });
+  }
+  if (isCustomMode()) {
+    const profileId = String(state.project?.project_id || "browser_draft");
+    entries.set(profileId, {
+      ...(entries.get(profileId) || {}),
+      profile_id: profileId,
+      display_name: state.design?.name || state.project?.project_label || profileId,
+      is_finalized: Boolean(state.custom_workflow?.is_finalized),
+    });
+  }
+  return [...entries.values()].sort((left, right) =>
+    String(left.display_name || left.profile_id).localeCompare(String(right.display_name || right.profile_id))
+  );
+}
+
 function selectedProfileChoice(value = $("template-select")?.value || "") {
   const raw = String(value || "");
   if (raw.startsWith("custom-profile:")) {
@@ -2706,74 +3261,36 @@ function selectedProfileChoice(value = $("template-select")?.value || "") {
   return { kind: raw === CUSTOM_TEMPLATE_ID ? "manual" : "bundled", id: raw };
 }
 
-function renderExistingCustomProjects() {
-  const select = $("existing-custom-project");
-  const button = $("load-custom-project");
-  if (!select || !button) return;
-  const projects = state.custom_projects || [];
-  const activeProjectId = state.project?.project_kind === "custom" ? state.project.project_id : "";
-  select.innerHTML = "";
-  const placeholder = document.createElement("option");
-  placeholder.value = "";
-  placeholder.textContent = projects.length ? "Choose a saved custom study" : "No saved custom studies";
-  select.appendChild(placeholder);
-  for (const project of projects) {
-    const option = document.createElement("option");
-    option.value = project.project_id;
-    option.textContent = project.created_at
-      ? `${project.project_label} (${project.created_at})`
-      : project.project_label;
-    option.selected = project.project_id === activeProjectId;
-    select.appendChild(option);
-  }
-  if (activeProjectId && [...select.options].some((option) => option.value === activeProjectId)) {
-    select.value = activeProjectId;
-  }
-  button.disabled = !select.value;
-  button.title = projects.length
-    ? "Open a custom study already saved in the local dashboard project registry."
-    : "No custom studies have been saved in the local dashboard project registry yet.";
-}
-
 function renderProfileSummary() {
   const choice = selectedProfileChoice();
   const selectedId = choice.kind === "bundled" ? choice.id : "";
   const current = state.templates.find((item) => item.template_id === selectedId);
+  const custom = isCustomMode();
+  const params = state.design?.study_profile_reference_parameters || {};
+  const profileId = custom
+    ? String(state.project?.project_id || choice.id || "browser_draft")
+    : String(state.design?.study_profile_id || selectedId || "");
+  const sourceId = custom ? String(
+    params.customized_from_profile_id
+    || params.customized_from_project_id
+    || state.project?.source_template_id
+    || state.project?.source_profile_id
+    || ""
+  ) : "";
+  const citation = $("profile-citation");
+  if (citation) citation.textContent = custom ? "" : String(current?.citation || current?.citation_label || "");
   const href = current?.doi ? doiUrl(current.doi) : "";
   const summary = $("profile-summary");
   summary.hidden = !href;
   summary.innerHTML = href
-    ? `<a href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(href)}</a>`
+    ? `DOI: <a href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(current.doi)}</a>`
     : "";
-  const notice = $("profile-recreation-notice");
-  if (notice) {
-    const showNotice = Boolean(href && selectedId);
-    notice.hidden = !showNotice;
-    notice.textContent = showNotice ? PROFILE_RECREATION_NOTICE : "";
-  }
-}
-
-function renderPreloadAssetStatus() {
-  const badge = $("preload-asset-status");
-  if (!badge) return;
-  const choice = selectedProfileChoice();
-  const selectedId = choice.kind === "bundled" ? choice.id : "";
-  if (!selectedId) {
-    badge.hidden = true;
-    return;
-  }
-  const current = state.templates.find((item) => item.template_id === selectedId);
-  const status = current?.preload_asset_status || state.preload_inventory || {};
-  const value = status.status || "not_indexed";
-  const ready = Boolean(status.ready);
-  badge.hidden = false;
-  badge.textContent = ready
-    ? `${status.ready_asset_count || status.asset_count || 0} ${staticModeActive ? "online" : "local"} assets`
-    : value === "recipe_only"
-      ? "recipe only"
-      : value.replace(/_/g, " ");
-  badge.className = `status-label ${ready ? "ready" : value === "recipe_only" ? "" : "required"}`;
-  badge.title = status.message || "";
+  const idField = $("profile-inspection-id");
+  if (idField) idField.textContent = profileId || "—";
+  const sourceDetail = $("profile-source-detail");
+  const sourceField = $("profile-inspection-source");
+  if (sourceDetail) sourceDetail.hidden = !sourceId;
+  if (sourceField) sourceField.textContent = sourceId || "—";
 }
 
 function renderDataAcquisitionBridge() {
@@ -2930,7 +3447,9 @@ function syncNoiseTypeButtons() {
     select.value = PROCEDURAL_NOISE_TYPES.some((item) => item.value === activeType) ? activeType : "";
   }
   for (const button of document.querySelectorAll(".noise-type-button")) {
-    button.classList.toggle("active", Boolean(activeType) && button.dataset.noiseType === activeType);
+    const active = Boolean(activeType) && button.dataset.noiseType === activeType;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
   }
 }
 
@@ -2989,7 +3508,7 @@ function renderNoiseTable() {
       <div class="source-card-heading">
         <strong>${escapeHtml(noiseTypeLabel(selectedNoise))} noise</strong>
         <div class="source-card-actions">
-          ${sourceFolderAction(localPath)}
+          ${sourceFolderAction(localPath, noise.label || `${noiseTypeLabel(selectedNoise)} noise`)}
           <button type="button" data-remove-noise>Remove</button>
         </div>
       </div>
@@ -3060,7 +3579,7 @@ function renderAudioTable() {
       <div class="source-card-heading">
         <strong>${escapeHtml(audioRoleTitle(role))}</strong>
         <div class="source-card-actions">
-          ${sourceFolderAction(audio.path)}
+          ${sourceFolderAction(audio.path, audio.label || audioRoleTitle(role))}
           <button type="button" data-remove-audio>Remove</button>
         </div>
       </div>
@@ -3275,12 +3794,12 @@ function readJsonField(field) {
   }
 }
 
-function sourceFolderAction(path) {
+function sourceFolderAction(path, label = "source") {
   if (!path) return "";
   if (staticModeActive) {
-    return `<a class="source-folder-link" href="${escapeAttr(staticResourceUrl(path))}" target="_blank" rel="noopener noreferrer">Open Asset</a>`;
+    return `<a class="source-folder-link" href="${escapeAttr(staticResourceUrl(path))}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeAttr(label)} asset">Open Asset</a>`;
   }
-  return `<button type="button" class="source-folder-link" data-open-folder="${escapeAttr(path)}">Open Folder</button>`;
+  return `<button type="button" class="source-folder-link" data-open-folder="${escapeAttr(path)}" aria-label="Open ${escapeAttr(label)} folder">Open Folder</button>`;
 }
 
 function renderedWavForLabel(label) {
@@ -3380,10 +3899,20 @@ function renderSegmentRegistryOutputs() {
   const downloadButton = $("download-block-randomization");
   const segment4Ready = segment4.status === "ready";
   const blockAccepted = Boolean(segment5.accepted || state.block_csv_preview?.accepted);
-  if (blockButton) blockButton.disabled = !segment4Ready || blockAccepted;
+  if (blockButton) {
+    blockButton.disabled = !segment4Ready || blockAccepted;
+    blockButton.textContent = (state.block_csv_preview?.blocks || []).length ? "Regenerate Blocks" : "Generate Blocks";
+  }
   if (acceptButton) {
     acceptButton.disabled = !(segment5.status === "ready");
-    acceptButton.textContent = blockAccepted ? "Edit Blocks" : "Accept Blocks";
+    const reviewingSchedule = Boolean(
+      isCustomMode()
+      && editModeActive
+      && normalizedDesignerProgress().edit_step === "schedule"
+    );
+    acceptButton.textContent = reviewingSchedule || !blockAccepted
+      ? "Accept Blocks & Continue"
+      : "Edit Blocks";
   }
   if (downloadButton) downloadButton.disabled = !(state.block_csv_preview?.blocks || []).length;
   const blockStatus = $("block-csv-bake-status");
@@ -3392,6 +3921,25 @@ function renderSegmentRegistryOutputs() {
       ? `${segment5.block_count || 0} CSVs${blockAccepted ? " accepted" : ""}`
       : (segment4Ready ? "ready to bake" : "waiting for Segment 4");
     blockStatus.className = `status-label ${segment5.status === "ready" || segment4Ready ? "ready" : "required"}`;
+  }
+  updateStageActionHierarchy();
+}
+
+function updateStageActionHierarchy() {
+  const stages = [
+    { step: "stimulus", artifact: "bake-stimulus", ready: projectSegment("1_core_audio_ingredients").status === "ready", create: "Add Ingredient", rebuild: "Add Another Ingredient" },
+    { step: "trials", artifact: "bake-trial-sequences", ready: projectSegment("2_trial_sequence_designs").status === "ready", create: "Create Trial Sequences", rebuild: "Rebuild Trial Sequences" },
+    { step: "baseline", artifact: "bake-trial-files", ready: projectSegment("3_tactile_and_baseline_trials").status === "ready", create: "Create Trial Files", rebuild: "Rebuild Trial Files" },
+    { step: "block", artifact: "bake-trial-pool", ready: projectSegment("4_trial_repetition_pool").status === "ready", create: "Create Trial Pool", rebuild: "Rebuild Trial Pool" },
+  ];
+  for (const stage of stages) {
+    const artifact = $(stage.artifact);
+    const continueButton = document.querySelector(`[data-continue-step="${stage.step}"]`);
+    if (artifact) {
+      artifact.textContent = stage.ready ? stage.rebuild : stage.create;
+      artifact.classList.toggle("primary", !stage.ready);
+    }
+    if (continueButton) continueButton.classList.toggle("primary", stage.ready);
   }
 }
 
@@ -3433,6 +3981,7 @@ function renderBlockCsvPreview() {
   if (blockInput && document.activeElement !== blockInput) blockInput.value = protocolBlocks;
   const segment5 = projectSegment("5_block_csv_preview");
   const preview = state.block_csv_preview || {};
+  renderBlockPolicySummary(preview);
   const blockAccepted = Boolean(segment5.accepted || preview.accepted);
   if (blockInput) blockInput.disabled = blockAccepted;
   if ($("download-block-randomization")) $("download-block-randomization").disabled = !(preview.blocks || []).length;
@@ -3460,11 +4009,22 @@ function renderBlockCsvPreview() {
   list.innerHTML = blocks.map((block, index) => renderBlockPreviewCard(block, index)).join("");
 }
 
+function renderBlockPolicySummary(preview = {}) {
+  const container = $("block-order-policy-summary");
+  if (!container) return;
+  const strategy = preview.randomization_strategy || "seeded row-preserving randomization";
+  const seed = preview.randomization_seed ?? state.design?.protocol?.random_seed;
+  container.innerHTML = `
+    <span><strong>Method</strong> ${escapeHtml(humanize(strategy))}</span>
+    <span><strong>Seed</strong> ${seed === undefined || seed === null || seed === "" ? "assigned when blocks are generated" : escapeHtml(seed)}</span>
+  `;
+}
+
 function renderBlockPreviewCard(block, index = 0) {
   const rows = block.preview_rows || [];
   const familyCounts = block.family_counts || {};
   const total = Number(block.trial_count || rows.length || 0);
-  const distribution = ["audio_tactile", "baseline", "catch"].map((family) => {
+  const distribution = ["audio_tactile", "baseline", "catch", "auditory_only"].map((family) => {
     const count = Number(familyCounts[family] || 0);
     return `
       <div class="block-distribution-segment" style="--segment-color:${escapeAttr(TRIAL_FAMILY_COLORS[family] || "#5e695f")}">
@@ -3479,6 +4039,10 @@ function renderBlockPreviewCard(block, index = 0) {
   ].join("");
   const bodyRows = rows.map(renderBlockPreviewRow).join("");
   const csvName = block.csv_file_name || "";
+  const tableId = `block-preview-table-${index + 1}`;
+  const mobileTableToggle = rows.length > 6
+    ? `<button class="mobile-table-more" type="button" data-mobile-table-toggle="${tableId}" data-row-count="${rows.length}" aria-controls="${tableId}" aria-expanded="false">Show all ${rows.length} rows</button>`
+    : "";
   return `
     <details class="block-preview-card" ${index === 0 ? "open" : ""}>
       <summary>
@@ -3492,7 +4056,7 @@ function renderBlockPreviewCard(block, index = 0) {
       <div class="block-preview-body">
         <div class="block-preview-meta">${meta}</div>
         <div class="scroll-table compact">
-          <table class="data-table compact block-preview-table">
+          <table id="${tableId}" class="data-table compact block-preview-table mobile-card-table">
             <thead>
               <tr>
                 <th>#</th>
@@ -3507,6 +4071,7 @@ function renderBlockPreviewCard(block, index = 0) {
             </thead>
             <tbody>${bodyRows}</tbody>
           </table>
+          ${mobileTableToggle}
         </div>
       </div>
     </details>
@@ -3532,20 +4097,20 @@ function blockFeatureChips(counts = {}, prefix, rows, valueKey, colorKey, limit)
 function renderBlockPreviewRow(row) {
   return `
     <tr>
-      <td>${escapeHtml(row.block_trial_index || "")}</td>
-      ${coloredPreviewCell(row.family_label || familyDisplayName(row.family), row.family_color_hex)}
-      ${coloredPreviewCell(row.row_label || "", row.row_color_hex)}
-      ${coloredPreviewCell(row.soa_ms ? `${row.soa_ms} ms` : "", row.soa_color_hex)}
-      ${coloredPreviewCell(row.noise_type || "", row.noise_color_hex)}
-      <td>${escapeHtml(row.sequence_labels || row.sequence_variant_key || "")}</td>
-      <td>${escapeHtml(formatDurationMs(row.duration_ms || 0))}</td>
-      <td>${escapeHtml(row.source_file_name || "")}</td>
+      <td data-label="#">${escapeHtml(row.block_trial_index || "")}</td>
+      ${coloredPreviewCell(row.family_label || familyDisplayName(row.family), row.family_color_hex, "Family")}
+      ${coloredPreviewCell(row.row_label || "", row.row_color_hex, "Row")}
+      ${coloredPreviewCell(row.soa_ms ? `${row.soa_ms} ms` : "", row.soa_color_hex, "SOA")}
+      ${coloredPreviewCell(row.noise_type || "", row.noise_color_hex, "Noise")}
+      <td data-label="Sequence">${escapeHtml(row.sequence_labels || row.sequence_variant_key || "")}</td>
+      <td data-label="Duration">${escapeHtml(formatDurationMs(row.duration_ms || 0))}</td>
+      <td data-label="WAV">${escapeHtml(row.source_file_name || "")}</td>
     </tr>
   `;
 }
 
-function coloredPreviewCell(value, color) {
-  return `<td class="preview-color-cell" style="--cell-color:${escapeAttr(color || "transparent")}">${escapeHtml(value || "")}</td>`;
+function coloredPreviewCell(value, color, label) {
+  return `<td class="preview-color-cell" data-label="${escapeAttr(label)}" style="--cell-color:${escapeAttr(color || "transparent")}">${escapeHtml(value || "")}</td>`;
 }
 
 function stimulusTargetOptionsFromDesign(selected = "") {
@@ -3880,10 +4445,10 @@ function trialPoolCompositionEstimate() {
     const key = record.file.file_key || `source-${record.index}`;
     occurrenceByFileKey.set(key, record.baseRepetitions + (record.fractionalExtra ? 1 : 0));
   }
-  const familyCounts = { audio_tactile: 0, baseline: 0, catch: 0 };
-  const familyDurationMs = { audio_tactile: 0, baseline: 0, catch: 0 };
-  const subgroupCounts = { audio_tactile: {}, baseline: {}, catch: {} };
-  const subgroupDurationMs = { audio_tactile: {}, baseline: {}, catch: {} };
+  const familyCounts = { audio_tactile: 0, baseline: 0, catch: 0, auditory_only: 0 };
+  const familyDurationMs = { audio_tactile: 0, baseline: 0, catch: 0, auditory_only: 0 };
+  const subgroupCounts = { audio_tactile: {}, baseline: {}, catch: {}, auditory_only: {} };
+  const subgroupDurationMs = { audio_tactile: {}, baseline: {}, catch: {}, auditory_only: {} };
   const folderSummaries = [];
   let totalTrials = 0;
   let totalDurationMs = 0;
@@ -3941,6 +4506,7 @@ function renderProtocolSummary() {
     ["Audio-tactile", composition.familyCounts.audio_tactile, "audio"],
     ["Baseline", composition.familyCounts.baseline, "baseline"],
     ["Catch", composition.familyCounts.catch, "catch"],
+    ["Auditory-only", composition.familyCounts.auditory_only, "auditory"],
   ];
   for (const [label, value, family] of rows) {
     const item = document.createElement("div");
@@ -4065,9 +4631,10 @@ function renderTrialPoolDurationCalculus(composition) {
     ${durationCalculusFamilyRow("audio", "Audio-tactile", "audio_tactile", composition)}
     ${durationCalculusFamilyRow("baseline", "Baseline", "baseline", composition)}
     ${durationCalculusFamilyRow("catch", "Catch", "catch", composition)}
+    ${durationCalculusFamilyRow("auditory", "Auditory-only", "auditory_only", composition)}
     <div class="duration-calculus-total">
       <span>Total</span>
-      <code>${escapeHtml(formatDurationMs(composition.familyDurationMs.audio_tactile || 0))} + ${escapeHtml(formatDurationMs(composition.familyDurationMs.baseline || 0))} + ${escapeHtml(formatDurationMs(composition.familyDurationMs.catch || 0))}</code>
+      <code>${escapeHtml(formatDurationMs(composition.familyDurationMs.audio_tactile || 0))} + ${escapeHtml(formatDurationMs(composition.familyDurationMs.baseline || 0))} + ${escapeHtml(formatDurationMs(composition.familyDurationMs.catch || 0))} + ${escapeHtml(formatDurationMs(composition.familyDurationMs.auditory_only || 0))}</code>
       <strong>${escapeHtml(total)}</strong>
     </div>
     <div class="duration-calculus-total muted-total">
@@ -4083,6 +4650,7 @@ function familyDisplayName(family) {
     audio_tactile: "Audio-tactile",
     baseline: "Baseline",
     catch: "Catch",
+    auditory_only: "Auditory-only",
   }[family] || humanize(family || "trial");
 }
 
@@ -4100,10 +4668,10 @@ function renderTrialPoolFolderCards(composition = trialPoolCompositionEstimate()
       const inherited = !Object.prototype.hasOwnProperty.call(trialPoolRepetitionDraft.fileRepetitionOverrides, file.file_key || "");
       return `
         <tr>
-          <td>${escapeHtml(file.source_file_name || "")}</td>
-          <td>${formatDurationMs(file.duration_ms || 0)}</td>
-          <td>${escapeHtml(file.soa_ms ?? "")}</td>
-          <td>
+          <td data-label="WAV">${escapeHtml(file.source_file_name || "")}</td>
+          <td data-label="Duration">${formatDurationMs(file.duration_ms || 0)}</td>
+          <td data-label="SOA">${escapeHtml(file.soa_ms ?? "")}</td>
+          <td data-label="Reps">
             <input data-trial-pool-file="${escapeAttr(file.file_key || "")}" type="number" min="0" max="1000" step="0.5" value="${escapeAttr(formatRepetitionValue(fileReps))}" aria-label="File repetitions">
             <span class="muted">${inherited ? "folder" : "custom"}</span>
           </td>
@@ -4130,8 +4698,8 @@ function renderTrialPoolFolderCards(composition = trialPoolCompositionEstimate()
           <span>${formatDurationMs(folderSummary.durationMs || 0)}</span>
         </div>
         <details class="trial-pool-file-details">
-          <summary>Files</summary>
-          <table class="data-table compact">
+          <summary>Advanced file-level overrides</summary>
+          <table class="data-table compact mobile-card-table">
             <thead><tr><th>WAV</th><th>Duration</th><th>SOA</th><th>Reps</th></tr></thead>
             <tbody>${fileRows}</tbody>
           </table>
@@ -4156,6 +4724,7 @@ function renderCompositionTree(composition, context = {}) {
     ${compositionSliderRow("audio", "Audio-tactile", "audio_tactile", composition)}
     ${compositionSliderRow("baseline", "Baseline", "baseline", composition)}
     ${compositionSliderRow("catch", "Catch", "catch", composition)}
+    ${compositionSliderRow("auditory", "Auditory-only", "auditory_only", composition)}
     <div class="balance-note ${balanceClass}">${escapeHtml(balanceMessage)}</div>
   `;
   renderTrialPoolDurationCalculus(composition);
@@ -4217,10 +4786,12 @@ function renderBaselineTactileSummary() {
   const soaValues = currentSoaValues();
   const anchors = baselineAnchorSpecsFromInputs();
   const includeCatch = $("include-catch-trials")?.checked || false;
+  const includeAuditoryOnly = $("include-auditory-only-trials")?.checked || false;
   const audioFiles = sequence.variantCount * soaValues.length;
   const baselineFiles = sequence.variantCount * anchors.length;
   const catchFiles = includeCatch ? sequence.variantCount : 0;
-  const folderCount = sequence.rowCount * (audioFiles ? 1 : 0) + sequence.rowCount * (baselineFiles ? 1 : 0) + sequence.rowCount * (catchFiles ? 1 : 0);
+  const auditoryOnlyFiles = includeAuditoryOnly ? sequence.variantCount : 0;
+  const folderCount = sequence.rowCount * (audioFiles ? 1 : 0) + sequence.rowCount * (baselineFiles ? 1 : 0) + sequence.rowCount * (catchFiles ? 1 : 0) + sequence.rowCount * (auditoryOnlyFiles ? 1 : 0);
 
   const rows = [
     ["Row variants", sequence.variantCount, "total"],
@@ -4229,6 +4800,7 @@ function renderBaselineTactileSummary() {
     ["Baseline anchors", anchors.length, "baseline"],
     ["Baseline files", baselineFiles, "baseline"],
     ["Catch files", catchFiles, "catch"],
+    ["Auditory-only files", auditoryOnlyFiles, "auditory"],
     ["Output folders", folderCount, "total"],
   ];
   strip.innerHTML = rows.map(([label, value, family]) => `
@@ -4249,6 +4821,9 @@ function renderBaselineTactileSummary() {
   const catchExpression = includeCatch
     ? `${sequence.variantCount} row variant${sequence.variantCount === 1 ? "" : "s"} copied from Segment 2 audio`
     : "Catch file generation disabled";
+  const auditoryOnlyExpression = includeAuditoryOnly
+    ? `${sequence.variantCount} response-required audio-only variant${sequence.variantCount === 1 ? "" : "s"}`
+    : "Auditory-only file generation disabled";
   tree.innerHTML = `
     <div class="tree-root">
       <strong>Segment 3 trial files</strong>
@@ -4257,6 +4832,7 @@ function renderBaselineTactileSummary() {
     ${compositionTreeRow("audio", "Audio-tactile files", audioExpression, audioFiles)}
     ${compositionTreeRow("baseline", "Baseline files", baselineExpression, baselineFiles)}
     ${compositionTreeRow("catch", "Catch files", catchExpression, catchFiles)}
+    ${compositionTreeRow("auditory", "Auditory-only files", auditoryOnlyExpression, auditoryOnlyFiles)}
   `;
 
   const bake = state.trial_file_bake || {};
@@ -4291,16 +4867,16 @@ function renderRowMixOverrides(composition = blockCompositionEstimate()) {
     const mix = counts.mix;
     return `
       <tr>
-        <td>${escapeHtml(label)}</td>
-        <td><input data-row-mix-index="${index}" data-row-mix-field="audio_tactile_percentage" type="number" min="0" max="100" step="1" value="${escapeAttr(mix.audioTactile)}"></td>
-        <td><input data-row-mix-index="${index}" data-row-mix-field="baseline_percentage" type="number" min="0" max="100" step="1" value="${escapeAttr(mix.baseline)}"></td>
-        <td><input data-row-mix-index="${index}" data-row-mix-field="catch_percentage" type="number" min="0" max="100" step="1" value="${escapeAttr(mix.catch)}"></td>
-        <td>${counts.totalPerBlock}</td>
+        <td data-label="Row">${escapeHtml(label)}</td>
+        <td data-label="Audio %"><input aria-label="${escapeAttr(label)} audio percentage" data-row-mix-index="${index}" data-row-mix-field="audio_tactile_percentage" type="number" min="0" max="100" step="1" value="${escapeAttr(mix.audioTactile)}"></td>
+        <td data-label="Baseline %"><input aria-label="${escapeAttr(label)} baseline percentage" data-row-mix-index="${index}" data-row-mix-field="baseline_percentage" type="number" min="0" max="100" step="1" value="${escapeAttr(mix.baseline)}"></td>
+        <td data-label="Catch %"><input aria-label="${escapeAttr(label)} catch percentage" data-row-mix-index="${index}" data-row-mix-field="catch_percentage" type="number" min="0" max="100" step="1" value="${escapeAttr(mix.catch)}"></td>
+        <td data-label="Trials / block">${counts.totalPerBlock}</td>
       </tr>
     `;
   }).join("");
   container.innerHTML = `
-    <table class="data-table compact">
+    <table class="data-table compact mobile-card-table">
       <thead>
         <tr>
           <th>Row</th>
@@ -4322,6 +4898,9 @@ function renderBaseline() {
     : (protocol.include_baseline_trials === false ? "none" : (protocol.baseline_strategy || "tactile_only"));
   $("catch-percent").value = protocol.catch_trial_percentage ?? 0;
   if ($("include-catch-trials")) $("include-catch-trials").checked = Boolean(protocol.include_catch_trials);
+  if ($("include-auditory-only-trials")) {
+    $("include-auditory-only-trials").checked = Boolean(protocol.include_auditory_only_trials);
+  }
   $("baseline-percent").value = !savedStrategy || savedStrategy === "none" ? 0 : (protocol.baseline_trial_percentage ?? 0);
   $("baseline-soa-values").value = formatList(protocol.baseline_soa_values_ms || []);
   $("baseline-custom-audio-tactile").checked = protocol.baseline_custom_trial_mode === "audio_tactile";
@@ -4364,28 +4943,12 @@ function syncBaselineStrategyControls() {
 }
 
 function baselineOptionCheckedForStrategy(value, strategy) {
-  if (!strategy) return false;
-  if (strategy === "min_max") return value === "min_anchor" || value === "max_anchor";
-  return value === strategy;
+  return Boolean(strategy) && value === strategy;
 }
 
-function strategyFromBaselineCheckboxes(changedInput = null) {
-  const checked = new Set(baselineOptionInputs().filter((input) => input.checked).map((input) => input.value));
-  const changed = changedInput?.value || "";
-  if (changed === "none" && changedInput.checked) return "none";
-  if (changed === "custom" && changedInput.checked) return "custom";
-  if (changed === "tactile_only" && changedInput.checked) return "tactile_only";
-  if (changed === "stationary_burst" && changedInput.checked) return "stationary_burst";
-  checked.delete("none");
-  checked.delete("custom");
-  checked.delete("tactile_only");
-  checked.delete("stationary_burst");
-  const wantsMin = checked.has("min_anchor");
-  const wantsMax = checked.has("max_anchor");
-  if (wantsMin && wantsMax) return "min_max";
-  if (wantsMin) return "min_anchor";
-  if (wantsMax) return "max_anchor";
-  return "";
+function strategyFromBaselineOptions(changedInput = null) {
+  if (changedInput?.checked) return changedInput.value || "";
+  return baselineOptionInputs().find((input) => input.checked)?.value || "";
 }
 
 function derivedBaselineTimingsMs(strategy = currentBaselineStrategy()) {
@@ -4629,6 +5192,18 @@ function updateBaselineDecision() {
     status.className = `status-label ${valid ? "ready" : "required"}`;
   }
   if (strategy === "none") $("baseline-percent").value = 0;
+  const timingSummary = $("tactile-timing-summary");
+  if (timingSummary) {
+    const timingText = soaValues.length
+      ? `${soaValues.length} tactile timing${soaValues.length === 1 ? "" : "s"}: ${soaValues.join(", ")} ms`
+      : "Enter at least one tactile timing.";
+    const familyNotes = [
+      $("include-catch-trials")?.checked ? "catch included" : "no catch trials",
+      $("include-auditory-only-trials")?.checked ? "auditory-only included" : "no auditory-only trials",
+    ];
+    timingSummary.innerHTML = `<span><strong>Tactile channel 3</strong> ${escapeHtml(timingText)}</span><span>${escapeHtml(familyNotes.join(" · "))}</span>`;
+    timingSummary.classList.toggle("required", !soaValues.length);
+  }
   enforceGlobalPercentBounds("baseline-percent");
   updatePercentMixerDisplay();
   renderBaselineTactileSummary();
@@ -4688,6 +5263,10 @@ function renderTrialStripRow(strip, index, options = {}) {
         <label>Condition label</label>
         <input data-strip-field="label" value="${escapeAttr(strip.label || `Trial type ${index + 1}`)}">
       </div>
+      <div class="filmstrip-row-summary" aria-live="polite">
+        <span class="filmstrip-row-expression">${escapeHtml(trialStripExpression(strip))}</span>
+        <span class="status-label optional filmstrip-row-variant-count">${stripPreviewVariants(strip).length} ${stripPreviewVariants(strip).length === 1 ? "variant" : "variants"}</span>
+      </div>
       <div class="filmstrip-sequence"></div>
     </div>
     <div class="filmstrip-row-mix state-only" aria-label="Trial type row composition">
@@ -4738,7 +5317,7 @@ function renderAddEventControl(rowIndex, insertAfter, strip = {}, isEmpty = fals
   const wrapper = document.createElement("div");
   wrapper.className = `sequence-event-add ${isEmpty ? "empty-row-add" : ""}`;
   wrapper.innerHTML = `
-    <button type="button" class="sequence-event-add-symbol" data-add-strip-element="fixed_audio" data-insert-after="${insertAfter}" title="Add sequence box" aria-label="Add sequence box">+</button>
+    <button type="button" class="sequence-event-add-symbol with-label" data-add-strip-element="fixed_audio" data-insert-after="${insertAfter}" title="Add sequence box" aria-label="Add sequence box"><span aria-hidden="true">+</span> ${isEmpty ? "Add first box" : "Add box"}</button>
   `;
   return wrapper;
 }
@@ -4747,7 +5326,7 @@ function renderAddRowControl(insertAfter = -1, isEmpty = false) {
   const wrapper = document.createElement("div");
   wrapper.className = `trial-row-add ${isEmpty ? "trial-row-empty" : "between-row-add"}`;
   wrapper.innerHTML = `
-    <button type="button" class="sequence-event-add-symbol" data-add-strip-row data-insert-row-after="${insertAfter}" title="Add trial sequence row" aria-label="Add trial sequence row">+</button>
+    <button type="button" class="sequence-event-add-symbol with-label" data-add-strip-row data-insert-row-after="${insertAfter}" title="Add trial family" aria-label="Add trial family"><span aria-hidden="true">+</span> ${isEmpty ? "Add first trial family" : "Add trial family"}</button>
   `;
   return wrapper;
 }
@@ -4762,6 +5341,19 @@ function audioBoxLabels(element = {}) {
   const fallback = String(element.label || "").trim();
   if (!labels.length && fallback && !genericAudioBoxLabel(fallback)) labels.push(fallback);
   return Array.from(new Set(labels));
+}
+
+function trialStripExpression(strip = {}) {
+  const expressions = (strip.elements || []).map((element) => {
+    if (element.kind === "jitter") {
+      const values = (element.jitter_values_ms || []).filter((value) => Number.isFinite(Number(value)));
+      return values.length ? `Jitter (${values.join(" | ")} ms)` : "Jitter (add a duration)";
+    }
+    const labels = audioBoxLabels(element);
+    if (!labels.length) return "Empty audio box";
+    return labels.length === 1 ? labels[0] : `(${labels.join(" | ")})`;
+  });
+  return expressions.length ? expressions.join(" → ") : "Add an audio or jitter box to define this trial family.";
 }
 
 function genericAudioBoxLabel(label = "") {
@@ -5006,10 +5598,17 @@ function collectTrialStrips() {
 }
 
 function updateFilmstripCounts() {
-  for (const row of $("filmstrip-list").querySelectorAll(".filmstrip-row")) {
+  const strips = collectTrialStrips();
+  for (const [index, row] of [...$("filmstrip-list").querySelectorAll(".filmstrip-row")].entries()) {
     const rowCounts = rowCompositionCounts(row);
     const mixValid = Math.abs(rowCounts.mix.total - 100) <= 0.5 && rowCounts.mix.audioTactile > 0;
     row.classList.toggle("mix-warning", !mixValid);
+    const strip = strips[index] || {};
+    const variants = stripPreviewVariants(strip).length;
+    const expression = row.querySelector(".filmstrip-row-expression");
+    const count = row.querySelector(".filmstrip-row-variant-count");
+    if (expression) expression.textContent = trialStripExpression(strip);
+    if (count) count.textContent = `${variants} ${variants === 1 ? "variant" : "variants"}`;
   }
   renderProtocolSummary();
   renderLiveTrialPreviewTables();
@@ -5243,6 +5842,7 @@ async function playSourcePreviewAudio(url, button, audioContext, contextReady, d
 function setTrialStrips(strips) {
   state.design.protocol = state.design.protocol || {};
   state.design.protocol.trial_strips = strips;
+  markDesignerDirty();
   renderTrialStrips();
 }
 
@@ -5430,68 +6030,83 @@ function syncFilmstripSourceOptions() {
 
 function renderRun() {
   const setup = state.run_sequence_setup || {};
-  const segment6 = projectSegment("6_experiment_run_setup");
-  const prepared = Boolean(setup.prepared || segment6.status === "ready");
   const profileValid = Boolean(setup.ready || getWorkflowStep("run")?.complete);
-  const profileFinalizeAvailable = profileValid;
-  const localProfileActionsAvailable = profileValid && !staticModeActive;
+  const finalized = isProfileFinalized();
   if ($("participants") && document.activeElement !== $("participants")) {
     $("participants").value = state.design.protocol?.participants ?? setup.participant_count ?? 1;
   }
   for (const input of document.querySelectorAll('input[name="experiment-structure"]')) {
     if (document.activeElement !== input) input.checked = input.value === (setup.experiment_structure || "single");
-    input.disabled = prepared;
+    input.disabled = finalized;
   }
-  if ($("participants")) $("participants").disabled = prepared;
+  if ($("participants")) $("participants").disabled = finalized;
   const pill = $("run-sequence-status");
   if (pill) {
-    pill.textContent = prepared ? "legacy session prepared" : profileValid ? "profile valid" : "required";
-    pill.className = `status-label ${prepared || setup.ready ? "ready" : "required"}`;
+    pill.textContent = finalized ? "profile locked" : profileValid ? "ready to lock" : "review required";
+    pill.className = `status-label ${finalized || profileValid ? "ready" : "required"}`;
   }
   const regenerateButton = $("regenerate-run-sequence");
-  if (regenerateButton) regenerateButton.disabled = prepared || !setup.ready;
+  if (regenerateButton) regenerateButton.disabled = finalized || !setup.ready;
   const prepareButton = $("prepare-experiment");
   if (prepareButton) {
-    prepareButton.disabled = staticModeActive || (!setup.ready && !isProfileReadonlyMode());
-    prepareButton.textContent = prepared ? "Open Experiment Runner" : "Save Design and Start Experiment Runner";
-    prepareButton.title = staticModeActive
-      ? STATIC_COMPANION_REQUIRED_MESSAGE
-      : "";
+    prepareButton.disabled = true;
+    prepareButton.hidden = true;
   }
   const saveProfileButton = $("save-study-profile");
   if (saveProfileButton) {
-    saveProfileButton.disabled = !profileFinalizeAvailable;
-    saveProfileButton.title = profileFinalizeAvailable
+    saveProfileButton.hidden = finalized;
+    saveProfileButton.disabled = !profileValid;
+    saveProfileButton.title = profileValid
       ? (staticModeActive ? "Lock this browser-local profile for portable export." : "Register and lock this validated profile in the researcher workspace.")
       : "Complete profile validation before finalizing.";
   }
-  const exportButton = $("export-output-folder");
-  if (exportButton) {
-    exportButton.disabled = !localProfileActionsAvailable;
-    exportButton.title = localProfileActionsAvailable
-      ? "Copy the active profile snapshot into the runner output folder for data collection."
-      : (prepared ? STATIC_COMPANION_REQUIRED_MESSAGE : "Prepare Segment 6 before preparing the output folder.");
-  }
-  const outputSummary = $("output-folder-summary");
-  if (outputSummary) {
-    const folder = state.runner_settings?.active_output_folder || "";
-    outputSummary.textContent = folder ? folderDisplayName(folder) : "runner default";
-    outputSummary.title = folder || "Output folder is selected in PPSExperimentRunner.exe.";
-    outputSummary.className = `status-label ${folder ? "ready" : "optional"}`;
+  const bundleButton = $("export-profile-bundle");
+  if (bundleButton) {
+    bundleButton.hidden = !finalized;
+    bundleButton.disabled = !finalized;
+    bundleButton.title = finalized ? "Export this locked profile as a portable bundle." : "Lock the validated profile before exporting it.";
   }
   const summary = $("run-sequence-summary");
   if (summary) {
-    const participantCount = Number(setup.participant_count || state.design.protocol?.participants || 0);
+    const exampleCount = Number(setup.participant_count || state.design.protocol?.participants || 0);
+    const visibleCount = Number(setup.rows?.length || 0);
     const partCount = Number(setup.parts_per_participant || (currentExperimentStructure() === "pre_post" ? 2 : 1));
-    const blockRuns = Number(setup.total_block_runs || 0);
+    const orderSummary = visibleCount < exampleCount
+      ? `${visibleCount} of ${exampleCount} example orders shown`
+      : `${exampleCount} example order${exampleCount === 1 ? "" : "s"}`;
     summary.textContent = setup.ready
-      ? `${participantCount} participants / ${partCount} ${partCount === 1 ? "part" : "parts"} / ${blockRuns} block runs`
+      ? `${orderSummary} · ${partCount} ${partCount === 1 ? "part" : "parts"} · deterministic preview`
       : (setup.message || "waiting for accepted blocks");
     summary.className = `status-label ${setup.ready ? "ready" : "required"}`;
   }
+  renderProfileValidationChecklist(profileValid, finalized);
   renderRunInstructions(setup.instruction_profile || state.design?.study_profile_reference_parameters?.dashboard_run_setup?.instruction_profile || {});
   renderRunSequenceTable(setup.rows || []);
   renderProtocolSummary();
+}
+
+function renderProfileValidationChecklist(profileValid = false, finalized = false) {
+  const container = $("profile-validation-checklist");
+  const summary = $("profile-validation-summary");
+  if (!container) return;
+  const workflow = state.custom_workflow || {};
+  const stepMap = new Map((workflow.steps || []).map((step) => [step.id, step]));
+  const items = WORKFLOW_STEPS.slice(0, -1).map((stepId) => {
+    const step = workflow.is_custom ? (stepMap.get(stepId) || profileStepStatus(stepId)) : profileStepStatus(stepId);
+    return { id: stepId, label: step.label || stepLabel(stepId), complete: Boolean(step.complete) };
+  });
+  const completeCount = items.filter((item) => item.complete).length;
+  container.innerHTML = items.map((item) => `
+    <div class="profile-validation-item ${item.complete ? "complete" : "required"}">
+      <span aria-hidden="true">${item.complete ? "✓" : "!"}</span>
+      <span>${escapeHtml(item.label)}</span>
+      <strong>${item.complete ? "validated" : "review required"}</strong>
+    </div>
+  `).join("");
+  if (summary) {
+    summary.textContent = finalized ? "locked" : profileValid ? "all checks passed" : `${completeCount} of ${items.length} passed`;
+    summary.className = `status-label ${finalized || profileValid ? "ready" : "required"}`;
+  }
 }
 
 function folderDisplayName(path) {
@@ -5531,8 +6146,7 @@ function normalizedRunInstructionSlots(profile = {}) {
 function renderRunInstructions(profile = {}) {
   const container = $("run-instruction-slots");
   if (!container) return;
-  const setup = state.run_sequence_setup || {};
-  const prepared = Boolean(setup.prepared || projectSegment("6_experiment_run_setup").status === "ready");
+  const prepared = isProfileFinalized();
   const slots = normalizedRunInstructionSlots(profile);
   const enabledCount = slots.filter((slot) => slot.enabled && slot.path).length;
   const summary = $("run-instructions-summary");
@@ -5597,17 +6211,25 @@ function renderWorkflow() {
   const customMode = Boolean(workflow.is_custom);
   const profileReadonly = isProfileReadonlyMode();
   const viewLocked = customViewModeLocked();
+  const sequentialEdit = Boolean(customMode && editModeActive && !profileReadonly);
+  const progress = normalizedDesignerProgress();
+  const activeStep = sequentialEdit ? progress.edit_step : (workflow.current_step || "run");
+  const activeIndex = WORKFLOW_STEPS.indexOf(activeStep);
+  const confirmedSteps = new Set(progress.confirmed_steps);
+  const needsReviewSteps = new Set(progress.needs_review_steps);
   document.body.classList.toggle("custom-mode", customMode);
   document.body.classList.toggle("profile-readonly-mode", profileReadonly);
+  document.body.classList.toggle("sequential-edit-mode", sequentialEdit);
   const pill = $("workflow-pill");
-  const activeStep = workflow.current_step || "run";
-  const activeIndex = WORKFLOW_STEPS.indexOf(activeStep);
-  const unlockedIndex = customMode && activeIndex >= 0 ? activeIndex : WORKFLOW_STEPS.length - 1;
 
-  pill.textContent = customMode
-    ? workflow.ready_to_prepare ? "custom ready" : `${stepLabel(activeStep)} required`
-    : "profile loaded";
-  pill.className = `status-label ${customMode && !workflow.ready_to_prepare ? "required" : "ready"}`;
+  if (pill) {
+    pill.textContent = sequentialEdit
+      ? `${stepLabel(activeStep)} editing`
+      : customMode
+        ? workflow.ready_to_prepare ? "custom ready" : `${stepLabel(workflow.current_step || "run")} required`
+      : "profile loaded";
+    pill.className = `status-label ${sequentialEdit || (customMode && !workflow.ready_to_prepare) ? "required" : "ready"}`;
+  }
 
   const stepMap = new Map((workflow.steps || []).map((step) => [step.id, step]));
   for (const stepId of WORKFLOW_STEPS) {
@@ -5615,19 +6237,59 @@ function renderWorkflow() {
     const step = customMode
       ? (stepMap.get(stepId) || { id: stepId, complete: false, missing: [] })
       : profileStepStatus(stepId);
-    const locked = Boolean(customMode && index > unlockedIndex);
-    const current = Boolean(customMode && stepId === activeStep);
+    const current = Boolean(sequentialEdit && stepId === activeStep);
+    const confirmed = Boolean(sequentialEdit && confirmedSteps.has(stepId));
+    const needsReview = Boolean(sequentialEdit && needsReviewSteps.has(stepId));
+    const downstream = Boolean(sequentialEdit && index > activeIndex);
+    const locked = Boolean(sequentialEdit && !current);
     const complete = Boolean(step.complete);
     const link = document.querySelector(`[data-step-link="${stepId}"]`);
     const stateLabel = document.querySelector(`[data-step-state="${stepId}"]`);
     const badges = document.querySelectorAll(`[data-step-badge="${stepId}"]`);
+    const segment = $(STEP_TARGETS[stepId]);
+    const reopenButton = document.querySelector(`[data-reopen-step="${stepId}"]`);
+    const continueButton = document.querySelector(`[data-continue-step="${stepId}"]`);
 
     if (link) {
       link.classList.toggle("locked", locked);
+      link.classList.toggle("downstream", downstream);
       link.classList.toggle("current", current);
       link.classList.toggle("complete", complete);
       link.classList.toggle("not-ready", !complete);
-      link.setAttribute("aria-disabled", String(locked));
+      if (current) link.setAttribute("aria-current", "step");
+      else link.removeAttribute("aria-current");
+      link.removeAttribute("aria-disabled");
+      link.title = downstream
+        ? `Read-only until ${stepLabel(activeStep)} is saved.`
+        : confirmed
+          ? "Saved and read-only. Use Reopen segment to change it."
+          : "";
+    }
+    if (segment) {
+      segment.classList.toggle("workflow-current", current);
+      segment.classList.toggle("workflow-confirmed", confirmed);
+      segment.classList.toggle("workflow-downstream", downstream);
+      segment.classList.toggle("workflow-needs-review", needsReview);
+      segment.dataset.workflowState = current
+        ? "editing"
+        : confirmed
+          ? "confirmed"
+          : needsReview
+            ? "needs-review"
+            : sequentialEdit
+              ? "locked"
+              : "overview";
+    }
+    if (reopenButton) {
+      reopenButton.hidden = !(confirmed && index > 0 && index < activeIndex);
+      reopenButton.disabled = !sequentialEdit || workflowSaveInFlight;
+    }
+    if (continueButton) continueButton.hidden = !(sequentialEdit && current);
+    if (stepId === "schedule" && $("accept-block-csvs")) {
+      $("accept-block-csvs").hidden = !(sequentialEdit && current);
+    }
+    if (stepId === "run" && $("save-study-profile")) {
+      $("save-study-profile").hidden = isProfileFinalized() || !(sequentialEdit && current);
     }
     if (stateLabel) {
       const label = step.label || humanize(stepId);
@@ -5644,39 +6306,69 @@ function renderWorkflow() {
       ? step.missing.join(", ")
       : "";
     for (const badge of badges) {
-      const baseText = profileReadonly ? "read-only" : locked ? "locked" : complete ? "ready" : "required";
-      badge.textContent = baseText === "required" && missingSummary
-        ? `required - ${missingSummary}`
+      badge.hidden = profileReadonly;
+      if (profileReadonly) {
+        badge.textContent = "";
+        badge.removeAttribute("title");
+        badge.className = "step-badge";
+        continue;
+      }
+      const baseText = sequentialEdit
+        ? current
+          ? "editing"
+          : confirmed
+            ? "saved"
+            : needsReview
+              ? "needs review"
+              : "locked"
+        : complete
+          ? "validated"
+          : "review required";
+      badge.textContent = (baseText === "editing" || baseText === "review required") && missingSummary
+        ? `${baseText} · ${missingSummary}`
         : baseText;
       badge.title = missingSummary ? `Needs: ${missingSummary}` : "";
-      badge.className = `step-badge ${profileReadonly ? "readonly" : locked ? "locked" : complete ? "complete" : current ? "current" : ""}`;
+      badge.className = `step-badge ${current ? "current" : confirmed ? "complete" : needsReview ? "needs-review" : locked ? "locked" : complete ? "complete" : ""}`;
     }
   }
 
   for (const panel of document.querySelectorAll("[data-step-panel]")) {
     const stepId = panel.dataset.stepPanel;
-    const locked = Boolean(customMode && WORKFLOW_STEPS.indexOf(stepId) > unlockedIndex);
+    const stepIndex = WORKFLOW_STEPS.indexOf(stepId);
+    const editLocked = Boolean(sequentialEdit && stepId !== activeStep);
+    const downstream = Boolean(editLocked && stepIndex > activeIndex);
+    const confirmed = Boolean(editLocked && confirmedSteps.has(stepId));
     const readonly = Boolean(profileReadonly && stepId !== "study");
     const viewReadonly = Boolean(viewLocked && stepId !== "study");
-    panel.classList.toggle("locked", locked);
+    panel.classList.toggle("locked", downstream);
+    panel.classList.toggle("workflow-confirmed", confirmed);
     panel.classList.toggle("profile-readonly", readonly);
     panel.classList.toggle("view-readonly", viewReadonly);
-    if (readonly || viewReadonly) {
+    if (editLocked) {
+      panel.title = downstream
+        ? `Read-only until ${stepLabel(activeStep)} is saved.`
+        : "This segment is saved. Use Reopen segment before changing it.";
+    } else if (readonly || viewReadonly) {
       panel.title = readonly
         ? "Create a custom study before editing this loaded profile."
         : "Switch to Edit mode before changing this custom study.";
     } else if (
       panel.title === "Create a custom study before editing this loaded profile."
       || panel.title === "Switch to Edit mode before changing this custom study."
+      || panel.title === "This segment is saved. Use Reopen segment before changing it."
+      || panel.title.startsWith("Read-only until ")
     ) {
       panel.title = "";
     }
-    for (const control of panel.querySelectorAll("input, select, button")) {
+    for (const control of panel.querySelectorAll("input, select, textarea, button")) {
       // Preview view-controls (2D/3D, zoom, Fit Radius, Reset Camera) only change
       // the camera/view, never the trajectory data, so they stay usable even when
       // the step is read-only or locked. People can always look at the preview;
       // editing the trajectory itself remains gated to edit mode.
       const previewViewControl = Boolean(control.matches?.("[data-preview-view-control]"));
+      // One hidden picker is shared by Segment 1 source import and Segment 6
+      // instruction import even though its DOM home is inside Segment 2.
+      const sharedFilePicker = control.id === "audio-file-input";
       const readonlyLocked = readonly && !previewViewControl && !profileReadonlyControlAllowed(control);
       const viewModeLocked = viewReadonly && !previewViewControl && !viewModeControlAllowed(control);
       if (readonlyLocked) {
@@ -5697,13 +6389,23 @@ function renderWorkflow() {
         control.title = "";
         delete control.dataset.viewReadonlyTitle;
       }
-      setWorkflowDisabled(control, previewViewControl ? false : (locked || readonlyLocked || viewModeLocked));
+      setWorkflowDisabled(
+        control,
+        previewViewControl ? false : ((editLocked && !sharedFilePicker) || readonlyLocked || viewModeLocked)
+      );
     }
   }
 
-  setWorkflowDisabled($("design-name"), profileReadonly || viewLocked);
-  setWorkflowDisabled($("apply-profile-project"), profileReadonly || viewLocked);
-  setWorkflowDisabled($("apply-design"), profileReadonly || viewLocked);
+  for (const footer of document.querySelectorAll(".step-footer")) {
+    footer.hidden = ![...footer.children].some((child) => (
+      !child.hidden
+      && (!sequentialEdit || child.matches("[data-continue-step], #accept-block-csvs, #save-study-profile"))
+    ));
+  }
+
+  setWorkflowDisabled($("design-name"), profileReadonly || viewLocked || sequentialEdit);
+  setWorkflowDisabled($("apply-profile-project"), profileReadonly || viewLocked || sequentialEdit);
+  setWorkflowDisabled($("apply-design"), profileReadonly || viewLocked || sequentialEdit);
   updateActiveNav();
 }
 
@@ -5712,7 +6414,13 @@ function renderPreviewTables() {
 }
 
 function renderRunSequenceTable(rows) {
-  fillTable("run-sequence-table", rows, ["participant", "part", "block_count", "block_order"]);
+  const exampleIndex = new Map();
+  const examples = rows.map((row) => {
+    const key = String(row.participant || row.participant_index || `row-${exampleIndex.size + 1}`);
+    if (!exampleIndex.has(key)) exampleIndex.set(key, exampleIndex.size + 1);
+    return { ...row, participant: `Example ${exampleIndex.get(key)}` };
+  });
+  fillTable("run-sequence-table", examples, ["participant", "part", "block_count", "block_order"]);
 }
 
 function renderTrialPreviewTable(trialRows, totalRows = trialRows.length) {
@@ -5797,6 +6505,7 @@ function fillTable(id, rows, keys) {
   const table = $(id);
   const body = table?.querySelector("tbody");
   if (!body) return;
+  const labels = [...table.querySelectorAll("thead th")].map((header) => header.textContent.trim());
   body.innerHTML = "";
   for (const row of rows) {
     const tr = body.insertRow();
@@ -5804,8 +6513,9 @@ function fillTable(id, rows, keys) {
     if (family.includes("baseline")) tr.classList.add("preview-baseline");
     else if (family.includes("catch")) tr.classList.add("preview-catch");
     else if (family.includes("audio")) tr.classList.add("preview-audio");
-    for (const key of keys) {
+    for (const [index, key] of keys.entries()) {
       const cell = tr.insertCell();
+      cell.dataset.label = labels[index] || humanize(key);
       cell.textContent = row[key] ?? "";
     }
   }
@@ -5825,7 +6535,7 @@ function renderJob(job) {
 function collectPayload() {
   const design = clone(state.design);
   const trajectoryControls = currentTrajectoryControls();
-  design.name = $("design-name").value.trim() || "Untitled PPS design";
+  design.name = String(state.design?.name || "Untitled PPS design").trim() || "Untitled PPS design";
   design.noises = collectNoises();
   const audio = collectAudioFiles();
   design.custom_looming_files = audio.looming;
@@ -5851,7 +6561,7 @@ function collectPayload() {
     include_catch_trials: $("include-catch-trials")?.checked || false,
     catch_crosses_sequence_variants: design.protocol?.catch_crosses_sequence_variants !== false,
     catch_trial_percentage: numberValue("catch-percent", 0),
-    include_auditory_only_trials: Boolean(design.protocol?.include_auditory_only_trials),
+    include_auditory_only_trials: Boolean($("include-auditory-only-trials")?.checked),
     auditory_only_crosses_sequence_variants: design.protocol?.auditory_only_crosses_sequence_variants !== false,
     auditory_only_trial_percentage: Number(design.protocol?.auditory_only_trial_percentage || 0),
     auditory_only_trials_exact: design.protocol?.auditory_only_trials_exact ?? null,
@@ -5953,64 +6663,147 @@ async function applyDesign() {
       body: JSON.stringify(collectPayload())
     });
   }
+  markDesignerSaved();
   renderAll();
   updateViewer();
   const staleSegments = Object.values(state.project_segments || {}).filter((segment) => segment.status === "stale");
   showToast(staticModeActive ? "Browser draft saved locally" : staleSegments.length ? "Design saved; downstream segments need rebake" : "Design saved");
 }
 
-function scheduleCustomAutosave() {
-  if (!state || !isCustomMode() || isProfileReadonlyMode() || !editModeActive) return;
-  window.clearTimeout(autosaveTimer);
-  const revision = ++autosaveRevision;
-  autosaveTimer = window.setTimeout(() => autosaveCustomDraft(revision).catch(reportError), 700);
-}
-
-async function autosaveCustomDraft(revision) {
-  if (revision !== autosaveRevision || !state || !isCustomMode() || isProfileReadonlyMode() || !editModeActive) return;
-  const payload = collectPayload();
-  if (staticModeActive) {
-    state.design = payload.design;
-    await window.PPSDesigner?.drafts?.save(state);
-  } else {
-    const updated = await api("/api/design", { method: "POST", body: JSON.stringify(payload) });
-    if (revision !== autosaveRevision) return;
-    state = updated;
-    renderWorkflow();
-    renderHeader();
-    document.dispatchEvent(new CustomEvent("pps-designer-saved"));
+function revealWorkflowStep(stepId) {
+  const segment = $(STEP_TARGETS[stepId] || stepId);
+  if (segment?.classList.contains("collapsed")) {
+    segment.querySelector(":scope > .segment-heading .segment-collapse-button")?.click();
   }
+  scrollToStep(stepId);
 }
 
 async function continueWorkflowStep(stepId) {
   if (!ensureEditableProject()) return;
-  if (staticModeActive) {
-    state.design = collectPayload().design;
-    await window.PPSDesigner?.drafts?.save(state);
-  } else {
-    state = await api("/api/design", {
-      method: "POST",
-      body: JSON.stringify(collectPayload())
-    });
-  }
-  renderAll();
-  updateViewer();
-  const step = getWorkflowStep(stepId);
-  if (!step || step.complete) {
-    const next = NEXT_STEP[stepId];
-    if (next) {
-      scrollToStep(next);
-    }
-    showToast("Step saved");
+  if (workflowSaveInFlight) return;
+  const progress = normalizedDesignerProgress();
+  if (stepId !== progress.edit_step) {
+    showToast(`Save ${stepLabel(progress.edit_step)} first.`);
+    revealWorkflowStep(progress.edit_step);
     return;
   }
-  showToast(step.missing.join(" "));
-  scrollToStep(stepId);
+  if (designerDirty && !confirmDownstreamInvalidation(`Saving ${stepLabel(stepId)}`, stepId)) return;
+  workflowSaveInFlight = true;
+  const button = document.querySelector(`[data-continue-step="${stepId}"]`);
+  if (button) button.disabled = true;
+  let actionResult = null;
+  const payload = collectPayload();
+  payload.workflow_action = {
+    type: "save_and_continue",
+    step_id: stepId,
+    expected_revision: progress.revision,
+  };
+  try {
+    if (staticModeActive) {
+      state.design = payload.design;
+      refreshHostedWorkflowSteps();
+      const step = getWorkflowStep(stepId) || profileStepStatus(stepId);
+      if (step?.complete) {
+        const next = NEXT_STEP[stepId] || "run";
+        setHostedDesignerProgress({
+          ...progress,
+          edit_step: next,
+          confirmed_steps: WORKFLOW_STEPS.filter((id) => new Set([...progress.confirmed_steps, stepId]).has(id)),
+          needs_review_steps: progress.needs_review_steps.filter((id) => id !== stepId),
+          revision: progress.revision + 1,
+        });
+        actionResult = { advanced: true, unlocked_step: next, missing: [] };
+      } else {
+        actionResult = { advanced: false, missing: [...(step?.missing || ["Complete this segment before continuing."])] };
+      }
+      await window.PPSDesigner?.drafts?.save(state);
+    } else {
+      state = await api("/api/design", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+      actionResult = state.workflow_action_result || null;
+    }
+    markDesignerSaved();
+    renderAll();
+    updateViewer();
+    if (actionResult?.advanced) {
+      const next = actionResult.unlocked_step || NEXT_STEP[stepId];
+      showToast(`${stepLabel(stepId)} saved. ${stepLabel(next)} is ready to edit.`);
+      if (next) revealWorkflowStep(next);
+      return;
+    }
+    const missing = actionResult?.missing || getWorkflowStep(stepId)?.missing || [];
+    showToast(missing.join(" ") || `${stepLabel(stepId)} saved; complete its required output to continue.`);
+    revealWorkflowStep(stepId);
+  } finally {
+    workflowSaveInFlight = false;
+    if (button) button.disabled = false;
+    renderWorkflow();
+  }
+}
+
+async function reopenWorkflowStep(stepId) {
+  if (!ensureEditableProject() || workflowSaveInFlight) return;
+  const progress = normalizedDesignerProgress();
+  if (!progress.confirmed_steps.includes(stepId)) return;
+  if (!confirmDiscardUnsaved(`reopen ${stepLabel(stepId)}`)) return;
+  const later = progress.confirmed_steps.filter(
+    (id) => WORKFLOW_STEPS.indexOf(id) > WORKFLOW_STEPS.indexOf(stepId)
+  );
+  const consequence = later.length
+    ? ` Later saved segments (${later.map(stepLabel).join(", ")}) will need review.`
+    : "";
+  if (!window.confirm(`Reopen ${stepLabel(stepId)} for editing?${consequence}`)) return;
+  workflowSaveInFlight = true;
+  try {
+    if (staticModeActive) {
+      const stored = await window.PPSDesigner?.drafts?.load?.().catch(() => null);
+      if (stored?.design && stored?.project?.project_id === state?.project?.project_id) state = clone(stored);
+      const refreshed = normalizedDesignerProgress();
+      const targetIndex = WORKFLOW_STEPS.indexOf(stepId);
+      setHostedDesignerProgress({
+        ...refreshed,
+        edit_step: stepId,
+        confirmed_steps: refreshed.confirmed_steps.filter((id) => WORKFLOW_STEPS.indexOf(id) < targetIndex),
+        needs_review_steps: WORKFLOW_STEPS.filter((id) => (
+          refreshed.needs_review_steps.includes(id)
+          || (refreshed.confirmed_steps.includes(id) && WORKFLOW_STEPS.indexOf(id) > targetIndex)
+        )),
+        revision: refreshed.revision + 1,
+      });
+      await window.PPSDesigner?.drafts?.save(state);
+    } else {
+      state = await api("/api/design", {
+        method: "POST",
+        body: JSON.stringify({
+          workflow_action: {
+            type: "reopen",
+            step_id: stepId,
+            expected_revision: progress.revision,
+          },
+        }),
+      });
+    }
+    markDesignerSaved();
+    renderAll();
+    updateViewer();
+    revealWorkflowStep(stepId);
+    showToast(`${stepLabel(stepId)} reopened. Later segments are read-only until reviewed again.`);
+  } finally {
+    workflowSaveInFlight = false;
+    renderWorkflow();
+  }
 }
 
 async function loadTemplate() {
   if (templateLoadInFlight) return;
   const select = $("template-select");
+  if (!confirmDiscardUnsaved("load another profile")) {
+    renderStudy();
+    return;
+  }
+  if (designerDirty) markDesignerSaved();
   const choice = selectedProfileChoice(select.value);
   const id = choice.id;
   if (!id) return;
@@ -6074,6 +6867,44 @@ async function exportDataAcquisitionFolder() {
   showToast("Data acquisition folder linked");
 }
 
+function activeModalBackdrop() {
+  return [...document.querySelectorAll(".modal-backdrop")].find((modal) => !modal.hidden) || null;
+}
+
+function syncModalEnvironment() {
+  const open = Boolean(activeModalBackdrop());
+  const shell = document.querySelector(".app-shell");
+  const skipLink = document.querySelector(".skip-link");
+  if (shell) shell.inert = open;
+  if (skipLink) skipLink.inert = open;
+  document.body.classList.toggle("modal-open", open);
+}
+
+function trapModalFocus(event) {
+  if (event.key !== "Tab") return false;
+  const modal = activeModalBackdrop();
+  const dialog = modal?.querySelector('[role="dialog"]');
+  if (!dialog) return false;
+  const focusable = [...dialog.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  )].filter((element) => !element.hidden && element.getClientRects().length > 0);
+  if (!focusable.length) {
+    event.preventDefault();
+    dialog.focus();
+    return true;
+  }
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) {
+    event.preventDefault();
+    first.focus();
+  }
+  return true;
+}
+
 function openSegmentInfoModal(stepId, trigger = null) {
   const info = SEGMENT_INFO[stepId];
   if (!info) return;
@@ -6084,18 +6915,53 @@ function openSegmentInfoModal(stepId, trigger = null) {
   $("segment-info-modal-title").textContent = info.title;
   $("segment-info-purpose").textContent = info.purpose;
   $("segment-info-inputs").textContent = info.inputs;
-  $("segment-info-backend").textContent = info.backend;
-  $("segment-info-next").textContent = info.next;
+  const backend = $("segment-info-backend");
+  backend.replaceChildren();
+  if (info.backendLinkLabel) {
+    backend.append(document.createTextNode(info.backendBeforeLink || ""));
+    const link = document.createElement("a");
+    link.textContent = info.backendLinkLabel;
+    configureTemplateDirectoryLink(link);
+    backend.append(link, document.createTextNode(info.backendAfterLink || ""));
+  } else {
+    backend.textContent = info.backend || "";
+  }
+  $("segment-info-next").textContent = info.output || "";
+  const noteCard = $("segment-info-note-card");
+  const note = $("segment-info-note");
+  noteCard.hidden = !info.note;
+  note.textContent = info.note || "";
   $("segment-info-modal").hidden = false;
-  document.body.classList.add("modal-open");
+  syncModalEnvironment();
   window.setTimeout(() => $("segment-info-modal-close")?.focus(), 0);
+}
+
+function configureTemplateDirectoryLink(link) {
+  const directory = state?.template_directory || {};
+  const localPath = !staticModeActive ? String(directory.path || "") : "";
+  if (localPath) {
+    link.href = "#";
+    link.title = localPath;
+    link.removeAttribute("target");
+    link.removeAttribute("rel");
+    link.onclick = (event) => {
+      event.preventDefault();
+      openLocalFolder(localPath).catch(reportError);
+    };
+    return;
+  }
+  link.href = String(directory.url || HOSTED_TEMPLATE_DIRECTORY_URL);
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.title = "Open the template directory on GitHub";
+  link.onclick = null;
 }
 
 function closeSegmentInfoModal() {
   const modal = $("segment-info-modal");
   if (!modal || modal.hidden) return;
   modal.hidden = true;
-  document.body.classList.remove("modal-open");
+  syncModalEnvironment();
   if (segmentInfoModalReturnFocus && document.contains(segmentInfoModalReturnFocus)) {
     segmentInfoModalReturnFocus.focus();
   }
@@ -6112,28 +6978,57 @@ function defaultCustomStudyName() {
 
 function openCustomizeModal() {
   if (!state || !isProfileReadonlyMode()) return;
+  customizeModalMode = "copy";
   const modal = $("customize-modal");
   const input = $("customize-study-name");
   const source = $("customize-source-label");
   const error = $("customize-error");
+  $("customize-modal-kicker").textContent = "Custom Profile Copy";
+  $("customize-modal-title").textContent = "Name This Custom Copy";
+  $("customize-submit").textContent = "Create Custom Copy";
   customizeModalReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   input.value = defaultCustomStudyName();
   source.textContent = state?.design?.study_profile_title || state?.design?.name || "";
+  source.hidden = false;
   error.hidden = true;
   error.textContent = "";
   modal.hidden = false;
-  document.body.classList.add("modal-open");
+  syncModalEnvironment();
   window.setTimeout(() => {
     input.focus();
     input.select();
   }, 0);
 }
 
+function openNewCustomDesignModal() {
+  if (!state) {
+    showToast("Wait for the profile catalogue to load.");
+    return;
+  }
+  customizeModalMode = "blank";
+  const modal = $("customize-modal");
+  const input = $("customize-study-name");
+  const source = $("customize-source-label");
+  const error = $("customize-error");
+  customizeModalReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  $("customize-modal-kicker").textContent = "New Custom Design";
+  $("customize-modal-title").textContent = "Start With a Clean Slate";
+  $("customize-submit").textContent = "Create Design";
+  input.value = "";
+  source.textContent = "";
+  source.hidden = true;
+  error.hidden = true;
+  error.textContent = "";
+  modal.hidden = false;
+  syncModalEnvironment();
+  window.setTimeout(() => input.focus(), 0);
+}
+
 function closeCustomizeModal() {
   const modal = $("customize-modal");
   if (modal.hidden) return;
   modal.hidden = true;
-  document.body.classList.remove("modal-open");
+  syncModalEnvironment();
   if (customizeModalReturnFocus && document.contains(customizeModalReturnFocus)) {
     customizeModalReturnFocus.focus();
   }
@@ -6156,13 +7051,180 @@ async function submitCustomizeModal() {
   }
   $("customize-submit").disabled = true;
   try {
-    await customizeAsNewProject(name);
+    if (customizeModalMode === "blank") {
+      await createBlankCustomProject(name);
+    } else {
+      await customizeAsNewProject(name);
+    }
     closeCustomizeModal();
   } catch (error) {
     showCustomizeError(error.message || String(error));
   } finally {
     $("customize-submit").disabled = false;
   }
+}
+
+function hostedBlankDesign(name) {
+  const seed = 20250604;
+  const design = clone(state?.design || {});
+  design.name = name;
+  design.study_profile_id = "";
+  design.study_profile_title = "";
+  design.study_profile_notes = "";
+  design.study_profile_reference_parameters = {
+    dashboard_mode: "custom",
+    profile_status: "draft",
+    created_from: "blank_design",
+    capability_provenance: "hosted_compose",
+  };
+  design.noises = [];
+  design.custom_looming_files = [];
+  design.prestimulus_files = [];
+  design.trajectory = {
+    start_radius_m: 1.1,
+    end_radius_m: 0.1,
+    path_direction: "approach",
+    coordinate_mode: "polar",
+    start_x_m: null,
+    start_y_m: null,
+    start_z_m: null,
+    end_x_m: null,
+    end_y_m: null,
+    end_z_m: null,
+    path_length_m: 1,
+    propagation_speed_mps: 1 / 3,
+    azimuth_start_deg: 0,
+    azimuth_end_deg: 0,
+    elevation_deg: 0,
+    padding_pre_s: 0.5,
+    padding_post_s: 0.5,
+    sample_rate: 44100,
+    use_inverse_square: true,
+  };
+  design.protocol = {
+    ...(design.protocol || {}),
+    repetitions_per_condition: 1,
+    trial_pool_repetition_defaults: {},
+    soa_values_ms: [],
+    spatial_values_cm: [],
+    pair_spatial_values_with_soas: false,
+    auditory_motion_directions: ["looming"],
+    tactile_sites: ["hand"],
+    include_catch_trials: false,
+    catch_trial_percentage: 0,
+    catch_trials_exact: null,
+    include_auditory_only_trials: false,
+    auditory_only_trial_percentage: 0,
+    auditory_only_trials_exact: null,
+    include_baseline_trials: false,
+    baseline_strategy: "",
+    baseline_trials_exact: null,
+    baseline_trial_percentage: 0,
+    baseline_soa_values_ms: [],
+    baseline_custom_trial_mode: "tactile_only",
+    blocks: 1,
+    block_specs: [],
+    distribute_trial_pool_across_blocks: false,
+    trial_strips: [],
+    participants: 1,
+    random_seed: seed,
+    participant_order_policy: {
+      schema: "pps-participant-order-policy.v1",
+      algorithm: "seeded_factoradic_cycle.v1",
+      seed,
+      preview_count: 12,
+    },
+  };
+  return design;
+}
+
+function browserDraftId(name) {
+  const slug = String(name || "profile").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 40) || "profile";
+  return `browser_${slug}_${Date.now().toString(36)}`;
+}
+
+async function createBlankCustomProject(name) {
+  const cleanName = String(name || "").trim();
+  if (!cleanName) {
+    openNewCustomDesignModal();
+    return;
+  }
+  if (staticModeActive) {
+    const profileId = browserDraftId(cleanName);
+    state = clone(state);
+    state.design = hostedBlankDesign(cleanName);
+    state.selected_template = CUSTOM_TEMPLATE_ID;
+    state.project = {
+      project_id: profileId,
+      project_kind: "browser_draft",
+      project_label: cleanName,
+      source_template_id: "",
+      source_profile_id: "",
+      created_at: new Date().toISOString(),
+      project_dir: "",
+      profile_dir: "",
+      segment_folders: {},
+    };
+    const labels = {
+      study: "Study Profile",
+      stimulus: "Stimulus Design",
+      trials: "Trial Sequence Design",
+      baseline: "Baseline and Tactile Trial Design",
+      block: "Trial Composition",
+      schedule: "Block CSV Preview",
+      run: "Profile Validation and Save",
+    };
+    state.custom_workflow = {
+      is_custom: true,
+      is_finalized: false,
+      current_step: "stimulus",
+      ready_to_render: false,
+      ready_to_prepare: false,
+      missing: ["Define and bake at least one stimulus ingredient."],
+      steps: WORKFLOW_STEPS.map((id) => ({
+        id,
+        label: labels[id],
+        complete: id === "study",
+        missing: id === "study" ? [] : [id === "stimulus" ? "Define and bake at least one stimulus ingredient." : "Complete the preceding segment."],
+      })),
+    };
+    initializeHostedDesignerProgress("stimulus");
+    state.trajectory_controls = {
+      start_distance_cm: 110,
+      end_distance_cm: 10,
+      start_rotation_deg: 0,
+      end_rotation_deg: 0,
+      movement_duration_s: 3,
+      start_hold_s: 0.5,
+      end_hold_s: 0.5,
+    };
+    state.viewer_payload = staticViewerPayload(state.design);
+    state.project_segments = Object.fromEntries(Object.entries(STEP_SEGMENT_FOLDERS).map(([id, folderName]) => [folderName, {
+      folder_name: folderName,
+      folder_path: "",
+      status: id === "study" ? "ready" : "missing",
+      manifest_exists: id === "study",
+      last_validation_message: id === "study" ? "Browser draft created." : "Complete the preceding segment.",
+    }]));
+    state.trial_sequence_bake = {};
+    state.trial_file_bake = {};
+    state.trial_pool_bake = {};
+    state.block_csv_preview = {};
+    state.run_sequence_setup = {};
+    state.preload_inventory = {};
+    await window.PPSDesigner?.drafts?.save(state);
+  } else {
+    state = await api("/api/project/new-custom", {
+      method: "POST",
+      body: JSON.stringify({ name: cleanName }),
+    });
+  }
+  editModeActive = true;
+  markDesignerSaved();
+  renderAll();
+  updateViewer();
+  showToast(staticModeActive ? "Clean browser draft created; nothing was uploaded" : "Clean custom design created");
+  scrollToStep("stimulus");
 }
 
 async function customizeAsNewProject(name) {
@@ -6174,6 +7236,7 @@ async function customizeAsNewProject(name) {
   if (staticModeActive) {
     const sourceId = state.design?.study_profile_id || state.selected_template || state.project?.project_id || "source";
     const derivedName = cleanName.toLowerCase().includes(sourceId.toLowerCase()) ? cleanName : `${cleanName} [${sourceId}]`;
+    const profileId = browserDraftId(derivedName);
     state = clone(state);
     state.design.name = derivedName;
     state.design.study_profile_id = "";
@@ -6195,7 +7258,18 @@ async function customizeAsNewProject(name) {
         };
     state.selected_template = CUSTOM_TEMPLATE_ID;
     state.custom_workflow = { ...(state.custom_workflow || {}), is_custom: true, is_finalized: false };
-    state.project = { ...(state.project || {}), project_kind: "browser_draft", project_label: derivedName };
+    initializeHostedDesignerProgress("stimulus");
+    state.project = {
+      ...(state.project || {}),
+      project_id: profileId,
+      project_kind: "browser_draft",
+      project_label: derivedName,
+      source_template_id: sourceId,
+      source_profile_id: sourceId,
+      created_at: new Date().toISOString(),
+      project_dir: "",
+      profile_dir: "",
+    };
     await window.PPSDesigner?.drafts?.save(state);
   } else {
     state = await api("/api/project/customize", {
@@ -6204,10 +7278,11 @@ async function customizeAsNewProject(name) {
     });
   }
   editModeActive = true;
+  markDesignerSaved();
   renderAll();
   updateViewer();
   showToast(staticModeActive ? "Browser draft created; nothing was uploaded" : "Custom project created");
-  scrollToStep(state.custom_workflow?.current_step || "study");
+  scrollToStep(state.custom_workflow?.edit_step || "stimulus");
 }
 
 async function startBakeStimulus() {
@@ -6224,6 +7299,7 @@ async function startBakeStimulus() {
     method: "POST",
     body: JSON.stringify(payload)
   });
+  markDesignerSaved();
   showToast("Ingredient bake started");
   pollJob(job.job_id);
   await loadState();
@@ -6248,6 +7324,7 @@ async function startBakeTrialSequences() {
     method: "POST",
     body: JSON.stringify(payload)
   });
+  markDesignerSaved();
   showToast("Trial sequence bake started");
   pollJob(job.job_id);
   await loadState();
@@ -6266,6 +7343,7 @@ async function startBakeTrialFiles() {
     method: "POST",
     body: JSON.stringify(payload)
   });
+  markDesignerSaved();
   showToast("Baseline/tactile trial bake started");
   pollJob(job.job_id);
   await loadState();
@@ -6303,6 +7381,7 @@ async function startBakeTrialPool() {
     method: "POST",
     body: JSON.stringify(payload)
   });
+  markDesignerSaved();
   showToast("Trial pool CSV bake started");
   pollJob(job.job_id);
   await loadState();
@@ -6316,8 +7395,12 @@ async function startBakeBlockCsvs() {
     return;
   }
   if (projectSegment("5_block_csv_preview").accepted || state.block_csv_preview?.accepted) {
-    showToast("Click Edit Blocks before regenerating accepted block CSVs");
-    return;
+    if (!window.confirm("Reopen the accepted Segment 5 blocks and generate a new set?")) return;
+    if (staticModeActive) {
+      showToast("Block generation needs the installed PPS Designer. Export this browser draft to continue locally.");
+      return;
+    }
+    state = await api("/api/block-csv/edit", { method: "POST" });
   }
   const blockCount = Math.max(1, Math.round(numberValue("block-count", numberValue("blocks", 1))));
   if ($("blocks")) $("blocks").value = blockCount;
@@ -6336,6 +7419,7 @@ async function startBakeBlockCsvs() {
       method: "POST",
       body: JSON.stringify(payload)
     });
+    markDesignerSaved();
     setBlockProgress(job.progress_current || 0, job.progress_total || blockCount, job.progress_label || "queued");
     showToast("Block regeneration started");
     pollJob(job.job_id);
@@ -6357,20 +7441,53 @@ async function acceptBlockCsvs() {
   }
   const acceptButton = $("accept-block-csvs");
   if (acceptButton) acceptButton.disabled = true;
-  const accepted = Boolean(segment5.accepted || state.block_csv_preview?.accepted);
-  if (accepted && !confirmDownstreamInvalidation("Editing accepted Segment 5 blocks", "schedule")) {
+  const progress = normalizedDesignerProgress();
+  if (progress.edit_step !== "schedule") {
+    showToast(`Save ${stepLabel(progress.edit_step)} first.`);
     if (acceptButton) acceptButton.disabled = false;
     return;
   }
-  state = await api(accepted ? "/api/block-csv/edit" : "/api/block-csv/accept", { method: "POST" });
-  renderAll();
-  if (accepted) {
-    showToast("Blocks reopened for editing");
-    scrollToStep("schedule");
+  if (staticModeActive) {
+    state.design = collectPayload().design;
+    state.block_csv_preview = { ...(state.block_csv_preview || {}), accepted: true };
+    const segment = state.project_segments?.[STEP_SEGMENT_FOLDERS.schedule];
+    if (segment) segment.accepted = true;
+    refreshHostedWorkflowSteps();
+    const schedule = getWorkflowStep("schedule");
+    if (!schedule?.complete) {
+      showToast((schedule?.missing || ["Complete Segment 5 before continuing."]).join(" "));
+      if (acceptButton) acceptButton.disabled = false;
+      renderAll();
+      return;
+    }
+    setHostedDesignerProgress({
+      ...progress,
+      edit_step: "run",
+      confirmed_steps: WORKFLOW_STEPS.filter((id) => new Set([...progress.confirmed_steps, "schedule"]).has(id)),
+      needs_review_steps: progress.needs_review_steps.filter((id) => id !== "schedule"),
+      revision: progress.revision + 1,
+    });
+    await window.PPSDesigner?.drafts?.save(state);
+    state.workflow_action_result = { type: "accept_and_continue", advanced: true, unlocked_step: "run" };
   } else {
-    showToast("Blocks accepted; CSVs marked final");
-    scrollToStep("run");
+    const payload = collectPayload();
+    payload.workflow_action = {
+      type: "accept_and_continue",
+      step_id: "schedule",
+      expected_revision: progress.revision,
+    };
+    state = await api("/api/block-csv/accept", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
   }
+  markDesignerSaved();
+  renderAll();
+  const advanced = state.workflow_action_result?.advanced === true;
+  showToast(advanced
+    ? "Blocks accepted and saved. Profile validation is ready."
+    : (state.workflow_action_result?.missing || ["Blocks were accepted, but Segment 5 still needs review."]).join(" "));
+  revealWorkflowStep(advanced ? "run" : "schedule");
 }
 
 function csvEscape(value) {
@@ -6487,6 +7604,16 @@ function scheduleRunSequencePreview() {
 
 async function previewRunSequence() {
   if (!ensureEditableProject()) return;
+  if (staticModeActive) {
+    state.design = collectPayload().design;
+    refreshHostedWorkflowSteps();
+    state.run_sequence_setup = staticRunSetupPreview(state.design, {
+      finished_profile: Boolean(getWorkflowStep("run")?.complete),
+      message: "Browser-local order preview",
+    });
+    renderAll();
+    return;
+  }
   state = await api("/api/run-sequence/preview", {
     method: "POST",
     body: JSON.stringify(collectPayload())
@@ -6496,12 +7623,8 @@ async function previewRunSequence() {
 
 async function regenerateRunSequence() {
   if (!ensureEditableProject()) return;
-  state = await api("/api/run-sequence/regenerate", {
-    method: "POST",
-    body: JSON.stringify(collectPayload())
-  });
-  renderAll();
-  showToast("Block sequence regenerated");
+  await previewRunSequence();
+  showToast("Order preview refreshed. Save by locking the profile when review is complete.");
 }
 
 async function ensureLocalBackendState() {
@@ -6517,18 +7640,30 @@ async function ensureLocalBackendState() {
 
 async function savePreparedStudyProfile() {
   if (staticModeActive) {
+    state.design = collectPayload().design;
+    refreshHostedWorkflowSteps();
+    const progress = normalizedDesignerProgress();
+    const required = WORKFLOW_STEPS.slice(0, -1);
+    if (
+      progress.edit_step !== "run"
+      || required.some((stepId) => !progress.confirmed_steps.includes(stepId))
+      || progress.needs_review_steps.length
+    ) {
+      showToast("Save each segment in order and resolve reopened reviews before locking this profile.");
+      return;
+    }
     if (!getWorkflowStep("run")?.complete) {
       showToast("Complete every required segment before finalizing this profile.");
       return;
     }
-    state.design = collectPayload().design;
     state.design.study_profile_reference_parameters.profile_status = "finalized";
     state.design.study_profile_reference_parameters.finalized_at = new Date().toISOString();
     state.custom_workflow.is_finalized = true;
     editModeActive = false;
     await window.PPSDesigner?.drafts?.save(state);
+    markDesignerSaved();
     renderAll();
-    showToast("Profile finalized and locked. Use Customize to create another editable copy.");
+    showToast("Profile finalized and locked. Use Edit to create another named custom copy.");
     return;
   }
   if (!(await ensureLocalBackendState())) return;
@@ -6545,7 +7680,7 @@ function openSaveProfileModal() {
   error.hidden = true;
   error.textContent = "";
   modal.hidden = false;
-  document.body.classList.add("modal-open");
+  syncModalEnvironment();
   window.setTimeout(() => {
     input.focus();
     input.select();
@@ -6556,7 +7691,7 @@ function closeSaveProfileModal() {
   const modal = $("save-profile-modal");
   if (!modal || modal.hidden) return;
   modal.hidden = true;
-  document.body.classList.remove("modal-open");
+  syncModalEnvironment();
   if (saveProfileModalReturnFocus && document.contains(saveProfileModalReturnFocus)) {
     saveProfileModalReturnFocus.focus();
   }
@@ -6580,14 +7715,23 @@ async function submitSaveProfileModal() {
   }
   $("save-profile-submit").disabled = true;
   try {
+    state = await api("/api/design", {
+      method: "POST",
+      body: JSON.stringify(collectPayload()),
+    });
     state = await api("/api/profiles/save-prepared", {
       method: "POST",
-      body: JSON.stringify({ name: cleanName })
+      body: JSON.stringify({
+        name: cleanName,
+        expected_revision: normalizedDesignerProgress().revision,
+      })
     });
+    editModeActive = false;
+    markDesignerSaved();
     closeSaveProfileModal();
     renderAll();
     updateViewer();
-    showToast("Study profile saved");
+    showToast("Profile finalized and locked");
   } catch (error) {
     showSaveProfileError(error.message || String(error));
   } finally {
@@ -6850,6 +7994,7 @@ function applyTrajectoryControlUpdate(controls) {
     $(id).value = formatTrajectoryValue(key, controls[key]);
   }
   state.trajectory_controls = { ...(state.trajectory_controls || {}), ...currentTrajectoryControls() };
+  markDesignerDirty();
   updateViewer();
 }
 
@@ -6921,6 +8066,7 @@ function updateActiveNav() {
         link.dataset.pageSectionPage === activePage && link.dataset.pageSectionLink === activeSection
       );
     }
+    syncMobileRailSummary();
     return;
   }
   for (const link of document.querySelectorAll("[data-page-section-link]")) {
@@ -6938,6 +8084,7 @@ function updateActiveNav() {
   for (const link of document.querySelectorAll("[data-step-link]")) {
     link.classList.toggle("active", link.dataset.stepLink === active);
   }
+  syncMobileRailSummary();
 }
 
 function scheduleActiveNavUpdate() {
@@ -6955,7 +8102,14 @@ function loadResizableLayoutSettings() {
 }
 
 function initializeResizablePanels() {
+  const mobileLayout = window.matchMedia("(max-width: 760px)").matches;
   for (const panel of document.querySelectorAll("[data-resizable-panel]")) {
+    if (mobileLayout) {
+      panel.querySelector(":scope > .panel-resize-handle")?.remove();
+      panel.classList.remove("user-sized");
+      panel.style.removeProperty("--panel-user-height");
+      continue;
+    }
     const panelId = panel.dataset.panelId || panel.id;
     const storedHeight = Number(localStorage.getItem(panelStorageKey(panelId)));
     if (Number.isFinite(storedHeight) && storedHeight > 0) {
@@ -7250,6 +8404,7 @@ async function importAudioFromPicker() {
       state.design.custom_looming_files.push(audio);
     }
     await window.PPSDesigner?.drafts?.save(state);
+    markDesignerSaved();
     renderAll();
     showToast("Local audio added to this browser only; it was not uploaded");
     return;
@@ -7268,6 +8423,7 @@ async function importAudioFromPicker() {
     });
     state = importedState;
     pendingInstructionSlot = "";
+    markDesignerSaved();
     renderAll();
     showToast("Instruction audio clip imported locally");
     return;
@@ -7389,6 +8545,29 @@ function enforceExternalLinkTargets(root = document) {
   }
 }
 
+function handoffExternalLinkToNative(event) {
+  const link = event.target.closest?.("a[href]");
+  const nativeOpener = window.pywebview?.api?.open_external;
+  if (!link || typeof nativeOpener !== "function") return;
+  let url;
+  try {
+    url = new URL(link.getAttribute("href"), window.location.href);
+  } catch (_err) {
+    return;
+  }
+  if (!/^(https?|mailto):$/i.test(url.protocol) || url.origin === window.location.origin) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  Promise.resolve(nativeOpener(url.href))
+    .then((opened) => {
+      if (opened === false) showToast("The system browser could not open this link.");
+    })
+    .catch((error) => {
+      console.error(error);
+      showToast("The system browser could not open this link.");
+    });
+}
+
 function renderHardwarePixelArt() {
   const store = window.HARDWARE_PIXEL_ART || {};
   for (const canvas of document.querySelectorAll("canvas[data-hardware-pixel]")) {
@@ -7415,37 +8594,58 @@ function renderHardwarePixelArt() {
 }
 
 function wireEvents() {
+  document.addEventListener("click", handoffExternalLinkToNative, true);
   document.addEventListener("pointerdown", (event) => {
     const control = event.target.closest?.("#toolkit-page input:disabled, #toolkit-page select:disabled, #toolkit-page textarea:disabled, #toolkit-page button:disabled");
     if (!control || !isProfileReadonlyMode() || control.matches("[data-preview-view-control]")) return;
     event.preventDefault();
     openCustomizeModal();
   }, true);
-  $("refresh-state").addEventListener("click", () => loadState({ resetEditMode: true }).catch(reportError));
-  $("apply-design").addEventListener("click", () => applyDesign().catch(reportError));
-  $("view-mode-button")?.addEventListener("click", () => setEditMode(false));
-  $("edit-mode-button")?.addEventListener("click", () => setEditMode(true));
-  $("connect-backend").addEventListener("click", () => {
-    saveApiBase($("backend-url").value);
-    saveCompanionToken($("companion-token")?.value || "");
-    loadState({ resetEditMode: true }).catch(reportError);
-  });
+  $("edit-mode-button")?.addEventListener("click", () => setEditMode(!editModeActive).catch(reportError));
+  $("connect-backend").addEventListener("click", () => reconnectBackendFromControls().catch(reportError));
   $("companion-token")?.addEventListener("change", () => saveCompanionToken($("companion-token").value));
-  for (const button of document.querySelectorAll("[data-page-tab]")) {
+  const pageTabs = [...document.querySelectorAll("[data-page-tab]")];
+  for (const button of pageTabs) {
     button.addEventListener("click", () => setActivePage(button.dataset.pageTab, { updateHash: true, scrollTop: true }));
+    button.addEventListener("keydown", (event) => {
+      const keyDirections = { ArrowLeft: -1, ArrowRight: 1 };
+      if (!(event.key in keyDirections) && !["Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const currentIndex = Math.max(0, pageTabs.indexOf(button));
+      const nextIndex = event.key === "Home"
+        ? 0
+        : event.key === "End"
+          ? pageTabs.length - 1
+          : (currentIndex + keyDirections[event.key] + pageTabs.length) % pageTabs.length;
+      const next = pageTabs[nextIndex];
+      setActivePage(next.dataset.pageTab, { updateHash: true, scrollTop: true });
+      next.focus();
+    });
   }
+  $("mobile-rail-nav-toggle")?.addEventListener("click", () => toggleMobileRailDisclosure("sections"));
+  $("mobile-companion-toggle")?.addEventListener("click", () => toggleMobileRailDisclosure("companion"));
   for (const link of document.querySelectorAll("[data-page-section-link]")) {
     link.addEventListener("click", (event) => {
       event.preventDefault();
       const targetId = link.dataset.pageSectionLink;
       const page = link.dataset.pageSectionPage;
-      setActivePage(page, { updateHash: false, scrollTop: false });
+      const fromMobileSections = mobileSectionsDisclosureOpen();
+      const moveFocus = fromMobileSections && event.detail === 0;
+      setActivePage(page, {
+        updateHash: false,
+        scrollTop: false,
+        preserveMobileDisclosures: fromMobileSections
+      });
       const target = $(targetId);
       if (target) {
         replaceRouteForPage(page, targetId);
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
         setActivePageSection(targetId);
+        if (moveFocus) focusSectionNavigationTarget(target);
+        closeMobileRailDisclosures();
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
         window.setTimeout(() => setActivePageSection(targetId), 350);
+      } else {
+        closeMobileRailDisclosures();
       }
     });
   }
@@ -7464,7 +8664,7 @@ function wireEvents() {
   $("segment-info-modal")?.addEventListener("click", (event) => {
     if (event.target === $("segment-info-modal")) closeSegmentInfoModal();
   });
-  $("edit-profile-rail")?.addEventListener("click", openCustomizeModal);
+  $("start-new-custom-design")?.addEventListener("click", openNewCustomDesignModal);
   $("customize-form")?.addEventListener("submit", (event) => {
     event.preventDefault();
     submitCustomizeModal().catch(reportError);
@@ -7484,6 +8684,7 @@ function wireEvents() {
     if (event.target === $("save-profile-modal")) closeSaveProfileModal();
   });
   document.addEventListener("keydown", (event) => {
+    if (trapModalFocus(event)) return;
     if (event.key !== "Escape") return;
     if (!$("segment-info-modal")?.hidden) {
       closeSegmentInfoModal();
@@ -7495,36 +8696,24 @@ function wireEvents() {
   });
   $("backend-url").addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
-      saveApiBase($("backend-url").value);
-      loadState({ resetEditMode: true }).catch(reportError);
+      reconnectBackendFromControls({ includeToken: false }).catch(reportError);
     }
   });
   $("template-select").addEventListener("change", () => {
     renderProfileSummary();
     loadTemplate().catch(reportError);
   });
-  $("existing-custom-project")?.addEventListener("change", () => {
-    const button = $("load-custom-project");
-    if (button) button.disabled = !$("existing-custom-project").value;
-  });
-  $("load-custom-project")?.addEventListener("click", () => loadCustomProject().catch(reportError));
-  $("apply-profile-project")?.addEventListener("click", () => continueWorkflowStep("study").catch(reportError));
-  $("export-data-acquisition-folder")?.addEventListener("click", () => exportDataAcquisitionFolder().catch(reportError));
   $("bake-stimulus").addEventListener("click", () => startBakeStimulus().catch(reportError));
   $("bake-trial-sequences")?.addEventListener("click", () => startBakeTrialSequences().catch(reportError));
   $("bake-trial-files")?.addEventListener("click", () => startBakeTrialFiles().catch(reportError));
   $("bake-trial-pool")?.addEventListener("click", () => startBakeTrialPool().catch(reportError));
   $("regenerate-block-csvs")?.addEventListener("click", () => startBakeBlockCsvs().catch(reportError));
-  $("accept-block-csvs")?.addEventListener("click", () => acceptBlockCsvs().catch(reportError));
+  $("accept-block-csvs")?.addEventListener("click", () => acceptBlockCsvs().catch((error) => {
+    const button = $("accept-block-csvs");
+    if (button) button.disabled = false;
+    reportError(error);
+  }));
   $("download-block-randomization")?.addEventListener("click", () => downloadBlockRandomization().catch(reportError));
-  $("open-profile-folder")?.addEventListener("click", () => {
-    const path = $("open-profile-folder")?.dataset.folderPath || projectSegment("0_profile").folder_path || "";
-    openLocalFolder(path).catch(reportError);
-  });
-  $("open-data-acquisition-folder")?.addEventListener("click", () => {
-    const path = $("open-data-acquisition-folder")?.dataset.folderPath || state?.data_acquisition?.root || "";
-    openLocalFolder(path).catch(reportError);
-  });
   $("open-ingredient-folder")?.addEventListener("click", () => {
     const path = $("open-ingredient-folder")?.dataset.folderPath || projectSegment("1_core_audio_ingredients").folder_path || "";
     openLocalFolder(path).catch(reportError);
@@ -7603,6 +8792,7 @@ function wireEvents() {
     for (const group of trialPoolFolderGroups()) {
       trialPoolRepetitionDraft.folderRepetitions[group.folderKey] = next;
     }
+    markDesignerDirty();
     updateFilmstripCounts();
   });
   $("blocks").addEventListener("input", updateFilmstripCounts);
@@ -7639,7 +8829,7 @@ function wireEvents() {
   });
   for (const input of baselineOptionInputs()) {
     input.addEventListener("change", () => {
-      const nextStrategy = strategyFromBaselineCheckboxes(input);
+      const nextStrategy = strategyFromBaselineOptions(input);
       setBaselineStrategy(nextStrategy);
       if (!baselineStrategyIsActive(nextStrategy)) applyBaselineDefaultToTrialRows();
       updateFilmstripCounts();
@@ -7656,6 +8846,10 @@ function wireEvents() {
     updateFilmstripCounts();
   });
   $("include-catch-trials")?.addEventListener("change", () => {
+    updateBaselineDecision();
+    updateFilmstripCounts();
+  });
+  $("include-auditory-only-trials")?.addEventListener("change", () => {
     updateBaselineDecision();
     updateFilmstripCounts();
   });
@@ -7725,21 +8919,31 @@ function wireEvents() {
   for (const button of document.querySelectorAll("[data-continue-step]")) {
     button.addEventListener("click", () => continueWorkflowStep(button.dataset.continueStep).catch(reportError));
   }
+  for (const button of document.querySelectorAll("[data-reopen-step]")) {
+    button.addEventListener("click", () => reopenWorkflowStep(button.dataset.reopenStep).catch(reportError));
+  }
   for (const link of document.querySelectorAll("[data-step-link]")) {
     link.addEventListener("click", (event) => {
       const stepId = link.dataset.stepLink;
+      event.preventDefault();
+      const fromMobileSections = mobileSectionsDisclosureOpen();
+      const moveFocus = fromMobileSections && event.detail === 0;
+      setActivePage("toolkit", {
+        updateHash: true,
+        preserveMobileDisclosures: fromMobileSections
+      });
+      const target = $(STEP_TARGETS[stepId] || stepId);
+      if (moveFocus) focusSectionNavigationTarget(target);
+      closeMobileRailDisclosures();
+      scrollToStep(stepId);
       if (link.classList.contains("locked")) {
-        event.preventDefault();
-        showToast("Complete the current custom step first.");
-        scrollToStep(state.custom_workflow?.current_step || "study");
-      } else {
-        event.preventDefault();
-        setActivePage("toolkit", { updateHash: true });
-        scrollToStep(stepId);
+        const active = normalizedDesignerProgress().edit_step;
+        showToast(`${stepLabel(stepId)} is read-only while ${stepLabel(active)} is being edited.`);
       }
     });
   }
   window.addEventListener("scroll", updateActiveNav, { passive: true });
+  window.matchMedia("(max-width: 760px)").addEventListener("change", () => initializeResizablePanels());
   window.addEventListener("message", (event) => {
     const frame = $("trajectory-frame");
     if (event.source !== frame.contentWindow) return;
@@ -7756,7 +8960,19 @@ function wireEvents() {
     updateViewer();
   });
   document.addEventListener("click", (event) => {
-    const autosaveMutation = event.target.closest?.(
+    const mobileTableToggle = event.target.closest?.("[data-mobile-table-toggle]");
+    if (mobileTableToggle) {
+      const table = $(mobileTableToggle.dataset.mobileTableToggle || "");
+      if (!table) return;
+      const expanded = !table.classList.contains("mobile-show-all");
+      table.classList.toggle("mobile-show-all", expanded);
+      mobileTableToggle.setAttribute("aria-expanded", String(expanded));
+      mobileTableToggle.textContent = expanded
+        ? "Show first 6 rows"
+        : `Show all ${mobileTableToggle.dataset.rowCount || ""} rows`;
+      return;
+    }
+    const structuralMutation = event.target.closest?.(
       "[data-remove-noise], [data-remove-audio], [data-remove-strip], [data-remove-strip-element], [data-add-strip-element], [data-add-strip-row], [data-add-box-label], [data-remove-box-label], [data-strip-move]"
     );
     const previewButton = event.target.closest?.("[data-preview-strip]");
@@ -7797,7 +9013,7 @@ function wireEvents() {
     if (event.target.matches("[data-strip-move]")) {
       moveFilmstripRow(event.target, event.target.dataset.stripMove);
     }
-    if (autosaveMutation) window.setTimeout(scheduleCustomAutosave, 0);
+    if (structuralMutation) markDesignerDirty();
   });
   document.addEventListener("input", (event) => {
     const card = event.target.closest?.(".source-card");
@@ -7810,7 +9026,7 @@ function wireEvents() {
       state.design.protocol.trial_strips = collectTrialStrips();
       updateFilmstripCounts();
     }
-    if (event.target.closest?.("#toolkit-page")) scheduleCustomAutosave();
+    if (event.target.closest?.("#toolkit-page") && !event.target.matches?.("[data-preview-view-control]")) markDesignerDirty();
   });
   document.addEventListener("change", (event) => {
     const sourceLabelCard = event.target.closest?.(".source-card");
@@ -7851,14 +9067,19 @@ function wireEvents() {
     }
     if (event.target.matches('[data-element-field="is_jitter"]')) {
       setFilmstripElementMode(event.target);
-      scheduleCustomAutosave();
+      markDesignerDirty();
       return;
     }
     if (event.target.closest?.(".filmstrip-row")) {
       state.design.protocol.trial_strips = collectTrialStrips();
       updateFilmstripCounts();
     }
-    if (event.target.closest?.("#toolkit-page")) scheduleCustomAutosave();
+    if (event.target.closest?.("#toolkit-page") && !event.target.matches?.("[data-preview-view-control]")) markDesignerDirty();
+  });
+  window.addEventListener("beforeunload", (event) => {
+    if (!designerDirty) return;
+    event.preventDefault();
+    event.returnValue = "";
   });
 }
 
@@ -7872,9 +9093,11 @@ loadCompanionToken();
 loadResizableLayoutSettings();
 enforceExternalLinkTargets();
 exposeDashboardAuditHook();
+initializeBoundedSelects();
 wireEvents();
 initializePageTabs();
 initializeLazySurfaces();
+initializePublicationNetworkSurface();
 window.PPSDesignerApp = Object.freeze({
   getState: () => clone(state),
   isHosted: () => staticModeActive,
@@ -7882,12 +9105,14 @@ window.PPSDesignerApp = Object.freeze({
     if (!snapshot?.design) return false;
     state = clone(snapshot);
     staticModeActive = true;
-    editModeActive = !state.custom_workflow?.is_finalized;
+    editModeActive = false;
+    markDesignerSaved();
     renderAll();
     updateViewer();
     return true;
   },
-  markSaved: () => document.dispatchEvent(new CustomEvent("pps-designer-saved")),
+  isDirty: () => designerDirty,
+  markSaved: markDesignerSaved,
 });
 
 loadState({ resetEditMode: true }).catch(reportError);

@@ -2,6 +2,21 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-08-07 — mobile dashboard design contract
+
+- Apply the interface-design principles to the complete phone workflow, not only the hosted top bar. At 600 px and narrower, page tabs are the sticky first surface; the compact View/Edit state follows; workflow sections and Local Companion are collapsed disclosures by default; ordinary controls have 44 px touch targets; segment headings/actions reflow consistently; action footers become static; and resize handles are disabled at 760 px and narrower. Dense trial/block tables reflow into labeled records without local horizontal scrolling, long block rows use explicit progressive reveal, and read-only views omit mutation-only affordances while retaining previews.
+- Treat mobile accessibility and visual parity as release behavior. Viewport-bounded modals scroll, trap focus, inert the application shell, and restore focus; dark documentation and modal surfaces use semantic theme variables. Responsive validation covers all Segment 0-6 stages at 320 px and 390 px portrait, short phone landscape, and both sides of the 600/601 px and 760/761 px breakpoints, including navigation/disclosure interactions, targets, overflow/overlap, table reflow, modal containment, and browser errors.
+
+## 2026-08-06 — interface design system and visual QA
+
+- Adopt a repository-wide PPS interface-design contract based on task ownership, common grid meridians, a 4 px base/8 px primary spacing rhythm, consistent control geometry, proximity grouping, hierarchy-driven salience, responsive reflow, WCAG-aware contrast/focus/targets, and restrained progressive disclosure. Symmetry is a balance tool rather than a universal rule; deliberate hierarchy may be asymmetric, while accidental misalignment is a defect. Every visual change now requires deterministic desktop/hosted build output, visible rail-click navigation, multi-viewport light/dark screenshots for every Segment 0-6 stage, DOM geometry checks, explicit image inspection, correction, and a repeated audit until both hard criteria and qualitative review pass. Read-only scientific content retains full opacity; state is communicated with badges and locked controls rather than degraded legibility.
+- Replace the redundant left-rail `Mode` heading, two-button selector, and textual mode chip with one animated SVG lock above a switch positioned between `View` and `Edit`. Immutable templates and finalized profiles keep the lock closed until the naming dialog has created a provenance-linked custom copy. Named drafts may toggle View/Edit directly. Segment 6 finalization explicitly returns the switch to View and closes the lock; further edits require another named copy.
+- Replace the ambiguous nested black/white theme squares with a minimal sun/moon pill. The active theme is shown by one high-contrast sliding indicator beneath its familiar line icon; accessibility continues to expose the next theme action through the button label/title.
+
+## 2026-08-06
+
+- Reduce Segment 0 to one grouped profile selector, one `Start New Custom Design` action, and one read-only profile information card. Built-in templates remain permanent package resources; custom drafts and finalized profiles share the same selector under a separate group. Remove duplicate custom-project selection, explicit Apply/Save/Refresh/folder buttons, and the data-acquisition bridge from this design stage. A clean-slate profile must be named before its dedicated researcher-workspace folder is created; subsequent draft decisions persist at explicit `Save & Continue` boundaries (the earlier autosave direction was superseded on 2026-08-07). The About modal links `Template Directory` to the physical local template directory or the hosted GitHub directory, labels its final section `Output`, and does not discuss acquisition responsibilities.
+
 ## 2026-08-05
 
 - Adopt a central PPS Toolkit hub with independently runnable applets for
@@ -1907,8 +1922,8 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   applet for Windows WebView2 and Linux GTK/WebKitGTK, with one compiled Vite
   frontend shared by the native package and GitHub Pages.
 - Implemented hosted browser-local composition, IndexedDB draft/audio storage,
-  immutable-template copy-on-edit, source-ID-bearing derived names, draft
-  autosave, downstream invalidation, finalization locking, themes, collapsible
+  immutable-template copy-on-edit, source-ID-bearing derived names, the original
+  draft-autosave path (superseded by explicit saves on 2026-08-07), downstream invalidation, finalization locking, themes, collapsible
   sticky stages, and portable `.pps-profile` export.
 - Added SHA-256-verified profile bundles and
   `seeded_factoradic_cycle.v1`. Segment 6 is the profile validation/finalization
@@ -1917,3 +1932,105 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - Added Windows x64 and Linux DEB/RPM/source packaging definitions. The central
   hub, broader Runner GUI redesign, and Android acquisition remain out of this
   unit.
+
+## 2026-08-06 — Segment usability and profile boundary
+
+- Standardized the Designer's action hierarchy: artifact creation is primary
+  until its segment validates, then Continue becomes primary. Researcher-facing
+  labels distinguish initial creation from rebuilding while stable DOM/API IDs
+  retain backward compatibility.
+- Segment 1 now presents trajectory, source choice, and ingredient creation as
+  an explicit three-step decision flow. The trajectory preview owns the only
+  visible 2D/3D toggle, and playback-calibration reference/peak ceiling fields
+  are disclosed as advanced assumptions rather than primary stimulus choices.
+- Segment 2 keeps the empty clean-slate start but adds a compact grammar legend,
+  named plus actions, and a live expression plus Cartesian variant count for
+  each trial family. It still owns no repetition, SOA, or block decisions.
+- Segment 3 uses mutually exclusive radio-card baseline strategies, including a
+  dedicated minimum+maximum option. Catch and auditory-only trial families are
+  separate protocol decisions, and a timing strip makes the channel-3 tactile
+  cue and selected SOAs inspectable.
+- Segment 4 uses researcher language (`trial groups`) with advanced file-level
+  overrides and an explicit explanation of deterministic half-step balancing.
+  Segment 5 labels the first action `Generate Blocks`, labels later runs
+  `Regenerate Blocks`, and displays the randomization strategy and seed.
+- Segment 6 is definitively `Profile Validation and Save`. It shows a Segments
+  0-5 checklist, treats its numeric count as example-order preview count, labels
+  table rows as examples, and uses `Done — Lock Profile` as the sole primary
+  pre-final action. Portable export is revealed after finalization. Output-folder
+  selection, actual participant count/IDs, session materialization, capture
+  settings, and Runner launch are no longer normal Designer controls; legacy
+  `6_experiment_run_setup` files/routes remain readable for compatibility.
+
+## 2026-08-06 — Bounded selector consistency
+
+- Native WebKitGTK and Windows select popups may expand to the longest option,
+  so all visible single-choice Designer selectors now use one shared accessible
+  combobox presentation. The native select remains authoritative for form/API
+  state, while the visible listbox is anchored to and exactly as wide as its
+  trigger, wraps long labels, uses a bounded vertical menu, and supports
+  pointer and keyboard selection.
+- Visual QA now opens the Segment 0 profile menu at every target viewport and
+  fails when its width or leading edge differs from the selector by more than
+  one CSS pixel or when it crosses the viewport edge.
+- Segment 0's profile card is intentionally reduced to profile ID, citation,
+  DOI, and optional source provenance. Repeated profile title, template/status
+  chips, asset-count chip, and the recreation warning are removed; the warning
+  now appears only in Segment 0 About. The desktop applet also omits the entire
+  hosted top navigation/status bar, while the hosted website retains it for
+  page navigation.
+- The sidebar spells out `Peripersonal Space Design Toolkit`. Theme selection
+  lives beside the sidebar subtitle as a compact horizontal sun/moon pill with
+  one sliding selected-state indicator; the former text `Dark`/`Light` top-bar
+  button is removed.
+- Native DOI/external-link clicks are explicitly delegated from the shared
+  frontend to the pywebview shell. The shell validates HTTP(S)/mailto schemes
+  and uses the operating system browser handoff (`xdg-open`, the Windows shell,
+  or macOS `open`) instead of asking WebKitGTK/WebView2 to navigate externally.
+
+## 2026-08-06 — Mobile hosted navigation
+
+- The hosted `Experiment Designer`/`Documentation`/`Downloads` header now
+  precedes the sidebar in source and visual order. At phone widths it is the
+  first in-flow application surface, so users can choose the public page before
+  traversing workflow navigation or Local Companion settings.
+- At `760px` or narrower, the complete phone layout is continuous: the sticky
+  page tabs own a full-width first row, status controls sit below, the sidebar
+  becomes compact collapsed disclosures, stage headings and footers return to
+  document flow, and dense tables become readable labeled records. Short
+  visible `Experiment` and `Docs` labels preserve complete accessible names.
+- Visual QA covers `320x800`, `360x800`, and `390x844` portraits, a `568x320`
+  landscape, the `760/761px` mobile boundary, and a `600/601px` continuity
+  probe. It rejects misplaced navigation, clipped or overlapping tabs,
+  undersized controls (including selectable labels), expanded-by-default rail
+  content, sticky content overlays, table compression/overflow, focus escaping
+  mobile dialogs, and page tabs that fail to activate their matching panel.
+
+## 2026-08-07 — Read-only indicator simplification
+
+- Built-in and finalized profiles no longer repeat their global capability state
+  with `inherited · read-only` or `finalized · locked` pills on every panel. The
+  animated sidebar lock is the single visible editability indicator; disabled
+  mutation controls continue to enforce the boundary. Editable drafts retain
+  per-step review badges because those communicate workflow progress.
+
+## 2026-08-07 — Focused experimental audio-tactile publication network
+
+- The Documentation page now gives the PPS literature map its own segment. It
+  now focuses only on experimental audio-tactile PPS papers whose paradigms are
+  covered by the Toolkit literature audit. Reviews and
+  `adjacent_out_of_scope` records are excluded. The current view contains 64
+  publication nodes, 68 in-scope task records, and 456 induced citation edges.
+- The structural view uses a square-bounded, collision-separated layout for the
+  focused graph; publication-year arrangement remains an optional complementary
+  view. Selecting a node opens an accessible detail drawer rather than navigating
+  away from the Toolkit.
+- The canonical broad source remains `citation_snapshot.v1.json` with 1,712
+  publications and 10,109 edges. A deterministic Node generator emits the
+  focused `pps-publication-citation-network.v2` browser asset, which is packaged
+  identically into the local Designer and compiled GitHub Pages dashboard.
+- Runnable status is an explicit evidence boundary: 15 publication nodes contain
+  17 runnable records, while 49 publications have structurally supported
+  paradigms with incomplete source parameters. Toolkit parameters join only by
+  normalized exact DOI; abstracts without reusable provenance remain unavailable;
+  and corpus-local centrality is never presented as study quality.
