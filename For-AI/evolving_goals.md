@@ -2014,21 +2014,23 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   mutation controls continue to enforce the boundary. Editable drafts retain
   per-step review badges because those communicate workflow progress.
 
-## 2026-08-07 — Interactive PPS publication and citation network
+## 2026-08-07 — Focused experimental audio-tactile publication network
 
 - The Documentation page now gives the PPS literature map its own segment. It
-  supports complementary citation-structure and publication-year layouts,
-  modality/preset filters, search, edge-density choices, and centrality-based
-  node sizing. Selecting a node opens an accessible detail drawer rather than
-  immediately navigating away from the toolkit.
-- The canonical graph snapshot is public-safe and reproducible: source records
-  live under `data/publication_network/`, a deterministic Node generator emits
-  `pps-publication-citation-network.v1`, and the same generated asset is packaged
-  into the local Designer and compiled GitHub Pages dashboard.
-- Modality verification, parameter extraction, and abstract reuse are explicit
-  evidence boundaries. Audiotactile manual confirmations remain distinct from
-  provisional keyword candidates; no visuotactile candidate is called verified
-  without review; toolkit parameters join only through normalized exact DOI;
-  and abstracts without recorded reusable provenance stay unavailable in the
-  public asset. Centrality values describe this corpus and are not study-quality
-  ratings.
+  now focuses only on experimental audio-tactile PPS papers whose paradigms are
+  covered by the Toolkit literature audit. Reviews and
+  `adjacent_out_of_scope` records are excluded. The current view contains 64
+  publication nodes, 68 in-scope task records, and 456 induced citation edges.
+- The structural view uses a square-bounded, collision-separated layout for the
+  focused graph; publication-year arrangement remains an optional complementary
+  view. Selecting a node opens an accessible detail drawer rather than navigating
+  away from the Toolkit.
+- The canonical broad source remains `citation_snapshot.v1.json` with 1,712
+  publications and 10,109 edges. A deterministic Node generator emits the
+  focused `pps-publication-citation-network.v2` browser asset, which is packaged
+  identically into the local Designer and compiled GitHub Pages dashboard.
+- Runnable status is an explicit evidence boundary: 15 publication nodes contain
+  17 runnable records, while 49 publications have structurally supported
+  paradigms with incomplete source parameters. Toolkit parameters join only by
+  normalized exact DOI; abstracts without reusable provenance remain unavailable;
+  and corpus-local centrality is never presented as study quality.

@@ -39,41 +39,35 @@ experiment software runs locally on the research PC.
 ## Publication And Citation Network
 
 The `Publication & Citation Network` documentation segment renders the tracked
-`pps-publication-citation-network.v1` snapshot. Its two layouts answer different
-questions: `Citation structure` uses precomputed network coordinates to expose
-connected clusters, while `Publication year` places papers on a chronological
-axis. The selected size metric controls node size, not the scientific
-meaning of the layout. Within-corpus citations are the default; PageRank,
-approximate betweenness, external citation count, and uniform sizing are
-available for comparison.
+`pps-publication-citation-network.v2` asset. It is deliberately focused on 64
+experimental audio-tactile PPS publications whose paradigms are covered by the
+Toolkit literature audit. Inclusion requires at least one exact-DOI audit record
+outside `adjacent_out_of_scope`, and review publications are excluded. Repeated
+experimental records from one paper remain separate in the detail view.
 
-The graph can be filtered to audiotactile, visuotactile, other PPS, or
-foundational/context records. Verified modality labels and provisional keyword
-candidates are separate states; provisional records are included in the complete
-corpus view with explicit dashed/candidate styling and can be excluded independently.
-They must never be presented as manually confirmed studies. Selecting a node opens a
-detail drawer with bibliographic metadata, citation neighbors, metric
-definitions, abstract availability/provenance, and any DOI-linked PPS Toolkit
-parameter audit. Missing or unaudited fields are displayed explicitly rather
-than inferred.
+The citation-structure layout is regenerated for the focused induced graph and
+kept within a square, collision-separated viewing area. The optional publication-
+year layout answers a different chronological question. Node size and centrality
+remain corpus-local navigation aids, not study-quality ratings. Selecting a node
+opens a detail drawer with bibliographic metadata, citation neighbors, abstract
+availability/provenance, and the DOI-linked PPS Toolkit parameter records.
 
-The public snapshot is a broad, dated PPS discovery corpus, not a systematic
-review, exhaustive bibliography, study-quality ranking, or effect-size
-analysis. Centrality values describe this snapshot only. Citation direction is
-`citing -> cited`. Abstract text is included only where the generator records a
-redistributable OpenAlex source; otherwise the public asset carries an
-availability/copyright caveat and links researchers to the publication source.
-Raw provider payloads, PDFs, supplements, extracted full text, and fuzzy
+The focused asset contains 64 publication nodes, 68 in-scope task records, and
+456 directed citation edges. Fifteen publication nodes contain 17 runnable
+records; 49 publications have a Toolkit-supported paradigm but still lack source
+parameters needed for an honest runnable recreation. The interface labels these
+states explicitly as `Runnable profile` and
+`Supported paradigm · parameters incomplete`.
+
+The canonical v1 source remains the broader dated snapshot of 1,712 publications
+and 10,109 citation edges. It is retained for reproducible provenance and future
+audit work but is not the browser view. Neither the source nor the focused
+projection is a systematic review, exhaustive bibliography, study-quality
+ranking, or effect-size analysis. Citation direction is `citing -> cited`.
+Abstract text is included only where the generator records redistributable
+OpenAlex provenance; otherwise the asset exposes a copyright caveat and source
+link. Raw provider payloads, PDFs, supplements, extracted full text, and fuzzy
 parameter matches do not belong in the public dashboard asset.
-
-The 2026-08-07 snapshot contains 1,712 publication nodes and 10,109 citation
-edges. It has 101 manually verified audiotactile nodes, no manually verified
-visuotactile nodes, and 164 explicitly provisional visuotactile lexical
-candidates. Exact DOI matching attaches 73 toolkit literature-audit records to
-69 publication nodes; repeated task records for one paper remain separate.
-Forty-two abstracts are included with OpenAlex CC0 metadata provenance and an
-underlying-publication copyright caveat; all other abstract states remain
-link-only or unavailable.
 
 The canonical public-safe source snapshot lives in `data/publication_network/`.
 Rebuild the generated dashboard asset after changing that snapshot, modality

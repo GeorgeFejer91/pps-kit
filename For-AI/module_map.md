@@ -9,10 +9,11 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
 - Versioned participant order and portable profile interchange: `participant_orders.py` owns `seeded_factoradic_cycle.v1`; `profile_bundle.py` owns `.pps-profile` verification and installation.
 - Designer frontend source/build: `dashboard/{index.html,styles.css,app.js,designer_main.js}` plus its Vite configuration; `dashboard/compiled/` is the shared native/GitHub-Pages artifact.
 - Documentation publication-network UI/data: `dashboard/publication_network.js`
-  renders `dashboard/publication_network.v1.json`; canonical public-safe inputs
-  live under `data/publication_network/` and
+  renders the focused `dashboard/publication_network.v2.json`; the broad
+  canonical public-safe v1 source
+  lives under `data/publication_network/`, and
   `tools/build_publication_network_asset.mjs` owns deterministic generation and
-  exact-DOI joins to tracked toolkit parameter audits.
+  exact-DOI joins to tracked Toolkit parameter audits.
 - Designer packaging: `windows/PPSDesigner.spec`, `windows/Build_PPS_Designer.ps1`, and `packaging/linux/` for the generic source launcher and DEB/RPM staging.
 - Dashboard backend helper seams: `src/peripersonal_space_toolkit/dashboard_backend/`.
 - Browser dashboard/static GitHub Pages surface: `src/peripersonal_space_toolkit/dashboard/`, root `index.html`, `.nojekyll`, `CNAME`.
@@ -394,8 +395,11 @@ Keep public imports stable while extracting:
 The paper audit is a core pipeline, not a side report. It catalogs the needs, profiles, parameters, missing publication details, and toolkit-structure gaps across audio-tactile PPS studies so future implementations can be built from a growing knowledge base. Keep tracked audit files source-pointer-only; keep PDFs, supplements, extracted full text, screenshots, and local bundles ignored.
 
 The public citation-network projection is a separate, generated discovery
-surface. Keep its `pps-publication-citation-network.v1` schema and counts covered
-by `tests/test_publication_network.py`; keep citation direction as
-`citing -> cited`; distinguish manual modality verification from provisional
-keyword classification; and present PageRank, betweenness, and citation counts
-as corpus-local navigation metrics rather than scientific quality measures.
+surface. Keep its `pps-publication-citation-network.v2` schema and focused counts
+covered by `tests/test_publication_network.py`: 64 non-review publications with
+at least one DOI-linked audit record outside `adjacent_out_of_scope`, 68 in-scope
+task records, and 456 induced edges. Keep citation direction as `citing -> cited`,
+preserve the 15-runnable-publication/17-runnable-record distinction, and present
+PageRank, betweenness, and citation counts as corpus-local navigation metrics
+rather than scientific quality measures. The broad 1,712-node/10,109-edge
+`citation_snapshot.v1.json` remains the reproducible source, not the browser view.

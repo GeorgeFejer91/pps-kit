@@ -6,8 +6,8 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="./assets/pps_toolkit_icon-PI4CIL5w.png">
-  <script type="module" crossorigin src="./assets/index-CFKt_i9n.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-DFWKW_dv.css">
+  <script type="module" crossorigin src="./assets/index-CFRdVmR7.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DeiY1qA3.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -226,7 +226,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../../viewer/index.html?v=20260807-publication-network"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../../viewer/index.html?v=20260807-publication-network-focus"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -718,10 +718,10 @@
           <div class="info-segment-heading publication-network-heading">
             <div>
               <span class="segment-kicker">Research Landscape</span>
-              <h2 id="docs-publication-network-title">Peripersonal Space Publication and Citation Network</h2>
+              <h2 id="docs-publication-network-title">Audio–Tactile PPS Experiment and Citation Network</h2>
             </div>
           </div>
-          <p class="info-copy publication-network-intro">Explore citation relationships across the toolkit's peripersonal-space literature snapshot. Switch between citation structure and publication year, filter modality classifications, and select a paper to inspect its metadata and any parameters mapped into the toolkit.</p>
+          <p class="info-copy publication-network-intro">This focused map contains experimental audio–tactile PPS papers whose audited task structure is supported by PPS Toolkit. Reviews and adjacent visual-only or auditory-only studies are excluded. A supported paradigm may still lack original assets, apparatus settings, or publication parameters needed for a runnable profile.</p>
 
           <div class="publication-network-shell" aria-describedby="publication-network-help">
             <div class="publication-network-toolbar" aria-label="Publication network controls">
@@ -730,50 +730,12 @@
                 <input id="publication-network-search" type="search" autocomplete="off" placeholder="Title, author, DOI, or year">
               </div>
 
-              <div class="publication-network-presets" aria-label="Publication filter presets">
-                <span class="publication-network-control-label">Quick views</span>
-                <div class="publication-network-button-row">
-                  <button type="button" data-network-preset="all">All publications</button>
-                  <button type="button" data-network-preset="audiotactile">Audiotactile only</button>
-                  <button type="button" data-network-preset="visuotactile">Visuotactile candidates</button>
-                </div>
-              </div>
-
-              <fieldset class="publication-network-filter-group">
-                <legend>Show publications</legend>
-                <label class="publication-network-check publication-network-check-at">
-                  <input id="publication-filter-audiotactile" type="checkbox" checked>
-                  <span class="publication-network-swatch" aria-hidden="true"></span>
-                  Audiotactile
-                </label>
-                <label class="publication-network-check publication-network-check-vt">
-                  <input id="publication-filter-visuotactile" type="checkbox" checked>
-                  <span class="publication-network-swatch" aria-hidden="true"></span>
-                  Visuotactile
-                </label>
-                <label class="publication-network-check publication-network-check-other">
-                  <input id="publication-filter-other" type="checkbox" checked>
-                  <span class="publication-network-swatch" aria-hidden="true"></span>
-                  Other PPS
-                </label>
-                <label class="publication-network-check publication-network-check-context">
-                  <input id="publication-filter-context" type="checkbox" checked>
-                  <span class="publication-network-swatch" aria-hidden="true"></span>
-                  Context
-                </label>
-                <label class="publication-network-check publication-network-check-provisional">
-                  <input id="publication-filter-provisional" type="checkbox" checked>
-                  <span class="publication-network-swatch publication-network-swatch-provisional" aria-hidden="true"></span>
-                  Provisional candidates
-                </label>
-              </fieldset>
-
               <fieldset class="publication-network-layout-group">
                 <legend>Arrange nodes</legend>
                 <div class="publication-network-segmented">
                   <label>
-                    <input id="publication-layout-structure" type="radio" name="publication-network-layout" value="structure" checked>
-                    <span>Citation structure</span>
+                    <input id="publication-layout-prominence" type="radio" name="publication-network-layout" value="prominence" checked>
+                    <span>Citation prominence</span>
                   </label>
                   <label>
                     <input id="publication-layout-year" type="radio" name="publication-network-layout" value="timeline">
@@ -785,7 +747,7 @@
               <div class="publication-network-select-group">
                 <label for="publication-network-size-metric">Size nodes by</label>
                 <select id="publication-network-size-metric">
-                  <option value="withinCorpusReceived">Within-corpus citations</option>
+                  <option value="withinCorpusReceived">PPS-corpus citations</option>
                   <option value="pageRank">PageRank</option>
                   <option value="betweennessApprox">Betweenness</option>
                   <option value="externalMax">External citations</option>
@@ -796,9 +758,8 @@
               <div class="publication-network-select-group">
                 <label for="publication-network-edge-mode">Citation links</label>
                 <select id="publication-network-edge-mode">
-                  <option value="neighborhood">Selected neighbourhood</option>
-                  <option value="context" selected>Faint context</option>
-                  <option value="all">All visible links</option>
+                  <option value="neighborhood" selected>Selected paper only</option>
+                  <option value="all">All included links</option>
                   <option value="none">Hide links</option>
                 </select>
               </div>
@@ -806,29 +767,22 @@
 
             <div class="publication-network-summary-row">
               <p id="publication-network-status" class="publication-network-status" role="status" aria-live="polite">Loading publication network…</p>
-              <p class="publication-network-metric-note"><abbr title="PageRank">PR</abbr> and betweenness describe position within this corpus, not study quality.</p>
+              <p class="publication-network-metric-note">Citation metrics describe this dated PPS corpus and are navigation aids, not study-quality scores.</p>
               <button id="publication-network-fullscreen" type="button" aria-label="Open publication network full screen">Full screen</button>
             </div>
+            <div class="publication-network-legend" aria-label="Node legend">
+              <span><i class="publication-network-legend-node legend-node-runnable" aria-hidden="true"></i>Runnable Toolkit profile</span>
+              <span><i class="publication-network-legend-node legend-node-supported" aria-hidden="true"></i>Supported paradigm; parameters incomplete</span>
+            </div>
 
-            <div id="publication-network-stage" class="publication-network-stage">
-              <canvas id="publication-network-canvas" tabindex="0" aria-label="Interactive citation network. Use the search and publication list for keyboard access, or use arrow keys to move between visible nodes." aria-describedby="publication-network-help publication-network-status"></canvas>
-              <div id="publication-network-loading" class="publication-network-loading" role="status">
-                <span class="publication-network-spinner" aria-hidden="true"></span>
-                <span>Preparing publication network…</span>
-              </div>
-              <div id="publication-network-tooltip" class="publication-network-tooltip" role="tooltip" hidden></div>
-              <div class="publication-network-map-controls" aria-label="Network map controls">
-                <button id="publication-network-zoom-in" type="button" aria-label="Zoom in">+</button>
-                <button id="publication-network-zoom-out" type="button" aria-label="Zoom out">−</button>
-                <button id="publication-network-fit" type="button">Fit</button>
-              </div>
-              <div class="publication-network-legend" aria-label="Node legend">
-                <span><i class="publication-network-legend-node legend-node-at" aria-hidden="true"></i>Audiotactile, verified</span>
-                <span><i class="publication-network-legend-node legend-node-vt" aria-hidden="true"></i>Visuotactile</span>
-                <span><i class="publication-network-legend-node legend-node-both" aria-hidden="true"></i>Audiotactile + visuotactile candidate</span>
-                <span><i class="publication-network-legend-node legend-node-other" aria-hidden="true"></i>Other PPS</span>
-                <span><i class="publication-network-legend-node legend-node-context" aria-hidden="true"></i>Context</span>
-                <span><i class="publication-network-legend-node legend-node-provisional" aria-hidden="true"></i>Provisional</span>
+            <div id="publication-network-workspace" class="publication-network-workspace">
+              <div id="publication-network-stage" class="publication-network-stage">
+                <canvas id="publication-network-canvas" tabindex="0" aria-label="Interactive square citation map of toolkit-supported audio-tactile PPS experiments. Use the search and publication list for keyboard access, or use arrow keys to move between visible nodes." aria-describedby="publication-network-help publication-network-status"></canvas>
+                <div id="publication-network-loading" class="publication-network-loading" role="status">
+                  <span class="publication-network-spinner" aria-hidden="true"></span>
+                  <span>Preparing publication network…</span>
+                </div>
+                <div id="publication-network-tooltip" class="publication-network-tooltip" role="tooltip" hidden></div>
               </div>
 
               <aside id="publication-network-detail" class="publication-network-detail" role="dialog" aria-modal="false" aria-labelledby="publication-network-detail-title" tabindex="-1" hidden>
@@ -843,14 +797,14 @@
               </aside>
             </div>
 
-            <p id="publication-network-help" class="publication-network-help">Drag to pan, use the wheel or map buttons to zoom, and select a node for publication details. Arrow keys move through visible papers; Enter opens the selected paper. Links connect citing and cited papers; the details panel preserves citation direction.</p>
+            <p id="publication-network-help" class="publication-network-help">Select a circle to inspect the paper and its Toolkit parameters. Citation-prominence view places more-cited papers toward the centre without overlapping nodes; publication-year view reads chronologically from top left. Arrow keys move through included papers and Enter opens the selected paper.</p>
 
             <details class="publication-network-results-panel">
-              <summary><span>Accessible publication list</span><strong id="publication-network-results-count">0 results</strong></summary>
+              <summary><span>Included experiment papers</span><strong id="publication-network-results-count">0 results</strong></summary>
               <div class="publication-network-results-toolbar">
                 <label for="publication-network-results-sort">Sort list by</label>
                 <select id="publication-network-results-sort">
-                  <option value="withinCorpusReceived">Within-corpus citations</option>
+                  <option value="withinCorpusReceived">PPS-corpus citations</option>
                   <option value="pageRank">PageRank</option>
                   <option value="year-desc">Newest first</option>
                   <option value="year-asc">Oldest first</option>

@@ -12,7 +12,7 @@ const DEFAULT_SNAPSHOT = path.join(
 );
 const DEFAULT_OUTPUT = path.join(
   REPO_ROOT,
-  "src/peripersonal_space_toolkit/dashboard/publication_network.v1.json",
+  "src/peripersonal_space_toolkit/dashboard/publication_network.v2.json",
 );
 const COVERAGE_PATH = path.join(
   REPO_ROOT,
@@ -23,21 +23,35 @@ const MANUAL_REVIEW_DIR = path.join(
   "For-AI/audiotactile-paper-metadata-audit/manual_reviews",
 );
 
-const EXPECTED = Object.freeze({
+const SOURCE_EXPECTED = Object.freeze({
   nodes: 1712,
   edges: 10109,
   audiotactileConfirmed: 101,
   toolkitRecordJoins: 73,
   toolkitNodeJoins: 69,
+});
+
+const FOCUSED_EXPECTED = Object.freeze({
+  nodes: 64,
+  edges: 456,
+  toolkitRecordJoins: 68,
+  toolkitNodeJoins: 64,
+  toolkitRunnableNodes: 15,
+  toolkitRunnableRecords: 17,
   toolkitManualReviewRecords: 24,
   toolkitManualReviewNodes: 21,
+  abstractsAvailable: 33,
+  abstractsSourceLinkOnly: 28,
+  abstractsNotAvailable: 3,
 });
 
 const SOURCE_SCHEMA = "pps-publication-citation-source.v1";
-const ASSET_SCHEMA = "pps-publication-citation-network.v1";
+const ASSET_SCHEMA = "pps-publication-citation-network.v2";
 const SNAPSHOT_ID = "pps-citation-network-20260807";
 const SNAPSHOT_DATE = "2026-08-07";
-const GENERATOR_VERSION = "1.0.0";
+const GENERATOR_VERSION = "2.0.0";
+const GRID_SIZE = 8;
+const GRID_MARGIN = 0.07;
 
 function usage() {
   return `Build the PPS publication/citation network asset.
@@ -137,19 +151,6 @@ function reconstructOpenAlexAbstract(index) {
 
 function openAlexShort(value) {
   return String(value || "").match(/W\d+$/)?.[0] || "";
-}
-
-function fnv1a(value) {
-  let hash = 0x811c9dc5;
-  for (const char of String(value)) {
-    hash ^= char.charCodeAt(0);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return hash >>> 0;
-}
-
-function hashUnit(value) {
-  return fnv1a(value) / 0xffffffff;
 }
 
 function roundCoordinate(value) {
@@ -333,186 +334,84 @@ function createSourceSnapshot(bundleDir) {
   };
 }
 
-function createTimelineLayout(nodes) {
-  const themes = [...new Set(nodes.map((node) => node.corpus.theme))].sort();
-  const themeIndex = new Map(themes.map((theme, index) => [theme, index]));
-  const years = nodes.map((node) => node.year).filter(Number.isInteger);
-  const minYear = Math.min(...years);
-  const maxYear = Math.max(...years);
-  const span = Math.max(1, maxYear - minYear);
-  const positions = new Map();
-  for (const node of nodes) {
-    const x = Number.isInteger(node.year)
-      ? 0.04 + ((node.year - minYear) / span) * 0.92
-      : 0.015;
-    const band = themeIndex.get(node.corpus.theme) || 0;
-    const jitter = (hashUnit(`${node.id}:timeline-y`) - 0.5) * Math.min(0.055, 0.62 / themes.length);
-    const y = (band + 0.5) / themes.length + jitter;
-    positions.set(node.id, { x: roundCoordinate(x), y: roundCoordinate(y) });
+function createSquareGrid() {
+  const spacing = (1 - (2 * GRID_MARGIN)) / (GRID_SIZE - 1);
+  const slots = [];
+  for (let row = 0; row < GRID_SIZE; row += 1) {
+    for (let column = 0; column < GRID_SIZE; column += 1) {
+      const x = roundCoordinate(GRID_MARGIN + (column * spacing));
+      const y = roundCoordinate(GRID_MARGIN + (row * spacing));
+      slots.push({
+        row,
+        column,
+        x,
+        y,
+        centerDistanceRank: (((2 * row) - (GRID_SIZE - 1)) ** 2)
+          + (((2 * column) - (GRID_SIZE - 1)) ** 2),
+      });
+    }
   }
-  return { positions, themes, minYear, maxYear };
+  const minimumCenterSpacing = slots.reduce((minimum, slot, index) => {
+    for (let other = index + 1; other < slots.length; other += 1) {
+      minimum = Math.min(minimum, Math.hypot(
+        slot.x - slots[other].x,
+        slot.y - slots[other].y,
+      ));
+    }
+    return minimum;
+  }, Number.POSITIVE_INFINITY);
+  return {
+    slots,
+    minimumCenterSpacing: Number(minimumCenterSpacing.toFixed(6)),
+  };
 }
 
-function createStructuralLayout(nodes, edges) {
-  const indexById = new Map(nodes.map((node, index) => [node.id, index]));
-  const degrees = new Uint32Array(nodes.length);
-  const indexedEdges = [];
-  for (const edge of edges) {
-    const source = indexById.get(edge.source);
-    const target = indexById.get(edge.target);
-    if (source === undefined || target === undefined || source === target) continue;
-    indexedEdges.push([source, target]);
-    degrees[source] += 1;
-    degrees[target] += 1;
-  }
+function prominenceNodeOrder(left, right) {
+  return right.citations.withinCorpusReceived - left.citations.withinCorpusReceived
+    || right.centrality.pageRank - left.centrality.pageRank
+    || right.centrality.influence - left.centrality.influence
+    || left.id.localeCompare(right.id);
+}
 
-  const active = nodes.map((_, index) => index).filter((index) => degrees[index] > 0);
-  const isolated = nodes.map((_, index) => index).filter((index) => degrees[index] === 0);
-  const activeSet = new Set(active);
-  const x = new Float64Array(nodes.length);
-  const y = new Float64Array(nodes.length);
-  const themes = [...new Set(nodes.map((node) => node.corpus.theme))].sort();
-  const themeIndex = new Map(themes.map((theme, index) => [theme, index]));
+function timelineNodeOrder(left, right) {
+  const leftYear = Number.isInteger(left.year) ? left.year : Number.POSITIVE_INFINITY;
+  const rightYear = Number.isInteger(right.year) ? right.year : Number.POSITIVE_INFINITY;
+  return leftYear - rightYear
+    || left.title.localeCompare(right.title)
+    || left.id.localeCompare(right.id);
+}
 
-  for (const index of active) {
-    const node = nodes[index];
-    const sector = (themeIndex.get(node.corpus.theme) || 0) / Math.max(1, themes.length);
-    const angle = (sector + (hashUnit(`${node.id}:structure-angle`) - 0.5) * 0.075) * Math.PI * 2;
-    const desiredRadius = 0.07 + 0.32 * (1 - Math.sqrt(Math.max(0, node.centrality.influence)));
-    const radius = desiredRadius * (0.78 + 0.44 * hashUnit(`${node.id}:structure-radius`));
-    x[index] = Math.cos(angle) * radius;
-    y[index] = Math.sin(angle) * radius;
-  }
-
-  // Deterministic centrality-aware force simulation. Attraction follows citation
-  // links; a local repulsion grid keeps dense areas legible; influence pulls
-  // highly central publications toward the structural overview's centre.
-  const iterations = 260;
-  const fx = new Float64Array(nodes.length);
-  const fy = new Float64Array(nodes.length);
-  for (let iteration = 0; iteration < iterations; iteration += 1) {
-    fx.fill(0);
-    fy.fill(0);
-
-    for (const [source, target] of indexedEdges) {
-      if (!activeSet.has(source) || !activeSet.has(target)) continue;
-      let dx = x[target] - x[source];
-      let dy = y[target] - y[source];
-      let distance = Math.hypot(dx, dy);
-      if (distance < 1e-7) {
-        const angle = hashUnit(`${nodes[source].id}:${nodes[target].id}`) * Math.PI * 2;
-        dx = Math.cos(angle) * 1e-4;
-        dy = Math.sin(angle) * 1e-4;
-        distance = 1e-4;
-      }
-      const desired = 0.018 + 0.018 / Math.sqrt(1 + Math.min(degrees[source], degrees[target]));
-      const strength = (distance - desired) * 0.0055;
-      const ux = dx / distance;
-      const uy = dy / distance;
-      fx[source] += ux * strength;
-      fy[source] += uy * strength;
-      fx[target] -= ux * strength;
-      fy[target] -= uy * strength;
-    }
-
-    const cellSize = 0.032;
-    const grid = new Map();
-    for (const index of active) {
-      const gx = Math.floor(x[index] / cellSize);
-      const gy = Math.floor(y[index] / cellSize);
-      const key = `${gx}:${gy}`;
-      const bucket = grid.get(key) || [];
-      bucket.push(index);
-      grid.set(key, bucket);
-    }
-    for (const index of active) {
-      const gx = Math.floor(x[index] / cellSize);
-      const gy = Math.floor(y[index] / cellSize);
-      for (let ox = -1; ox <= 1; ox += 1) {
-        for (let oy = -1; oy <= 1; oy += 1) {
-          for (const other of grid.get(`${gx + ox}:${gy + oy}`) || []) {
-            if (other <= index) continue;
-            let dx = x[other] - x[index];
-            let dy = y[other] - y[index];
-            let distance = Math.hypot(dx, dy);
-            if (distance < 1e-7) {
-              const angle = hashUnit(`${nodes[index].id}|${nodes[other].id}`) * Math.PI * 2;
-              dx = Math.cos(angle) * 1e-4;
-              dy = Math.sin(angle) * 1e-4;
-              distance = 1e-4;
-            }
-            const minimum = 0.012 + 0.002 * Math.log1p(degrees[index] + degrees[other]);
-            if (distance >= minimum) continue;
-            const push = (minimum - distance) * 0.065;
-            const ux = dx / distance;
-            const uy = dy / distance;
-            fx[index] -= ux * push;
-            fy[index] -= uy * push;
-            fx[other] += ux * push;
-            fy[other] += uy * push;
-          }
-        }
-      }
-    }
-
-    for (const index of active) {
-      const node = nodes[index];
-      const radius = Math.max(1e-7, Math.hypot(x[index], y[index]));
-      const desiredRadius = 0.055 + 0.31 * (1 - Math.sqrt(Math.max(0, node.centrality.influence)));
-      const radialForce = (desiredRadius - radius) * 0.008;
-      fx[index] += (x[index] / radius) * radialForce;
-      fy[index] += (y[index] / radius) * radialForce;
-
-      const sector = (themeIndex.get(node.corpus.theme) || 0) / Math.max(1, themes.length);
-      const angle = sector * Math.PI * 2;
-      const communityRadius = 0.17 + 0.08 * (1 - node.centrality.influence);
-      fx[index] += (Math.cos(angle) * communityRadius - x[index]) * 0.00016;
-      fy[index] += (Math.sin(angle) * communityRadius - y[index]) * 0.00016;
-    }
-
-    const temperature = 0.014 * (1 - iteration / iterations) + 0.0012;
-    for (const index of active) {
-      const magnitude = Math.hypot(fx[index], fy[index]);
-      const scale = magnitude > temperature ? temperature / magnitude : 1;
-      x[index] = Math.max(-0.39, Math.min(0.39, x[index] + fx[index] * scale));
-      y[index] = Math.max(-0.39, Math.min(0.39, y[index] + fy[index] * scale));
-    }
-  }
-
-  const positions = new Map();
-  for (const index of active) {
-    positions.set(nodes[index].id, {
-      x: roundCoordinate(0.5 + x[index]),
-      y: roundCoordinate(0.5 + y[index]),
-    });
-  }
-
-  const sortedIsolated = [...isolated].sort((left, right) => {
-    const leftNode = nodes[left];
-    const rightNode = nodes[right];
-    return leftNode.corpus.theme.localeCompare(rightNode.corpus.theme)
-      || (leftNode.year || 9999) - (rightNode.year || 9999)
-      || leftNode.id.localeCompare(rightNode.id);
+function createFocusedLayouts(nodes) {
+  assert(nodes.length === GRID_SIZE * GRID_SIZE, `Expected ${GRID_SIZE * GRID_SIZE} focused nodes for the square grid`);
+  const grid = createSquareGrid();
+  const rowMajorSlots = [...grid.slots].sort((left, right) => left.row - right.row
+    || left.column - right.column);
+  const centerOutSlots = [...grid.slots].sort((left, right) =>
+    left.centerDistanceRank - right.centerDistanceRank
+    || left.row - right.row
+    || left.column - right.column);
+  const prominenceNodes = [...nodes].sort(prominenceNodeOrder);
+  const timelineNodes = [...nodes].sort(timelineNodeOrder);
+  const prominence = new Map();
+  const timeline = new Map();
+  prominenceNodes.forEach((node, index) => {
+    const slot = centerOutSlots[index];
+    prominence.set(node.id, { x: slot.x, y: slot.y });
   });
-  const ringCount = Math.max(1, Math.ceil(sortedIsolated.length / 72));
-  sortedIsolated.forEach((index, order) => {
-    const ring = order % ringCount;
-    const slot = Math.floor(order / ringCount);
-    const slots = Math.ceil((sortedIsolated.length - ring) / ringCount);
-    const radius = 0.425 + (ring / Math.max(1, ringCount - 1)) * 0.062;
-    const angle = (slot / Math.max(1, slots) + hashUnit(`${nodes[index].id}:isolated`) * 0.0025) * Math.PI * 2;
-    positions.set(nodes[index].id, {
-      x: roundCoordinate(0.5 + Math.cos(angle) * radius),
-      y: roundCoordinate(0.5 + Math.sin(angle) * radius),
-    });
+  timelineNodes.forEach((node, index) => {
+    const slot = rowMajorSlots[index];
+    timeline.set(node.id, { x: slot.x, y: slot.y });
   });
-
+  const years = timelineNodes.map((node) => node.year).filter(Number.isInteger);
   return {
-    positions,
-    algorithm: "deterministic centrality-aware citation-force layout with isolated-node rings",
-    connectedNodeCount: active.length,
-    isolatedNodeCount: isolated.length,
-    iterations,
+    prominence,
+    timeline,
+    minYear: Math.min(...years),
+    maxYear: Math.max(...years),
+    gridSize: GRID_SIZE,
+    margin: GRID_MARGIN,
+    minimumCenterSpacing: grid.minimumCenterSpacing,
+    maximumRecommendedNodeRadius: Number((grid.minimumCenterSpacing * 0.4).toFixed(6)),
   };
 }
 
@@ -599,39 +498,74 @@ function countValues(values) {
   return Object.fromEntries(Object.entries(counts).sort(([left], [right]) => left.localeCompare(right)));
 }
 
+function isInScopeToolkitRecord(record) {
+  return Boolean(record.coverageCategory)
+    && record.coverageCategory !== "adjacent_out_of_scope";
+}
+
+function isFocusedExperimentalNode(node) {
+  return node.corpus.documentRole !== "review"
+    && node.toolkit.records.some(isInScopeToolkitRecord);
+}
+
 function buildAsset(snapshot) {
   assert(snapshot.schema === SOURCE_SCHEMA, `Expected ${SOURCE_SCHEMA}; got ${snapshot.schema}`);
-  const nodes = [...snapshot.nodes].sort((left, right) => left.id.localeCompare(right.id));
-  const edges = [...snapshot.edges].sort((left, right) => left.source.localeCompare(right.source)
+  const sourceNodes = [...snapshot.nodes].sort((left, right) => left.id.localeCompare(right.id));
+  const sourceEdges = [...snapshot.edges].sort((left, right) => left.source.localeCompare(right.source)
     || left.target.localeCompare(right.target)
     || left.provenance.localeCompare(right.provenance));
-  const timeline = createTimelineLayout(nodes);
-  const structure = createStructuralLayout(nodes, edges);
   const audits = loadToolkitAudits();
-  const nodeIndex = new Map(nodes.map((node, index) => [node.id, index]));
-
-  const assetNodes = nodes.map((node) => ({
+  const joinedSourceNodes = sourceNodes.map((node) => ({
     ...node,
-    layouts: {
-      timeline: timeline.positions.get(node.id),
-      structure: structure.positions.get(node.id),
-    },
     toolkit: toolkitForNode(node, audits),
   }));
-  const assetEdges = edges.map((edge) => [
+  const focusedNodes = joinedSourceNodes
+    .filter(isFocusedExperimentalNode)
+    .map((node) => ({
+      ...node,
+      toolkit: {
+        ...node.toolkit,
+        records: node.toolkit.records.filter(isInScopeToolkitRecord),
+      },
+    }));
+  const focusedIds = new Set(focusedNodes.map((node) => node.id));
+  const focusedEdges = sourceEdges.filter((edge) =>
+    focusedIds.has(edge.source) && focusedIds.has(edge.target));
+  const layouts = createFocusedLayouts(focusedNodes);
+  const nodeIndex = new Map(focusedNodes.map((node, index) => [node.id, index]));
+
+  const assetNodes = focusedNodes.map((node) => {
+    return {
+      ...node,
+      layouts: {
+        prominence: layouts.prominence.get(node.id),
+        timeline: layouts.timeline.get(node.id),
+      },
+    };
+  });
+  const assetEdges = focusedEdges.map((edge) => [
     nodeIndex.get(edge.source),
     nodeIndex.get(edge.target),
     edge.provenance,
   ]);
 
+  const sourceCounts = {
+    nodes: joinedSourceNodes.length,
+    edges: sourceEdges.length,
+    audiotactileConfirmed: joinedSourceNodes.filter((node) => node.modality.audiotactile.verified).length,
+    toolkitRecordJoins: joinedSourceNodes.reduce((total, node) => total + node.toolkit.records.length, 0),
+    toolkitNodeJoins: joinedSourceNodes.filter((node) => node.toolkit.records.length).length,
+  };
   const counts = {
     nodes: assetNodes.length,
     edges: assetEdges.length,
     audiotactileConfirmed: assetNodes.filter((node) => node.modality.audiotactile.verified).length,
-    visuotactileVerified: assetNodes.filter((node) => node.modality.visuotactile.verified).length,
-    visuotactileProvisional: assetNodes.filter((node) => node.modality.visuotactile.status === "provisional_keyword_candidate").length,
     toolkitRecordJoins: assetNodes.reduce((total, node) => total + node.toolkit.records.length, 0),
     toolkitNodeJoins: assetNodes.filter((node) => node.toolkit.records.length).length,
+    toolkitRunnableNodes: assetNodes.filter((node) =>
+      node.toolkit.records.some((record) => record.recreatable)).length,
+    toolkitRunnableRecords: assetNodes.reduce((total, node) =>
+      total + node.toolkit.records.filter((record) => record.recreatable).length, 0),
     toolkitManualReviewRecords: assetNodes.reduce((total, node) =>
       total + node.toolkit.records.filter((record) => record.manualReview).length, 0),
     toolkitManualReviewNodes: assetNodes.filter((node) =>
@@ -639,7 +573,6 @@ function buildAsset(snapshot) {
     abstractsAvailable: assetNodes.filter((node) => node.abstract.status === "available").length,
     abstractsSourceLinkOnly: assetNodes.filter((node) => node.abstract.status === "source_link_only").length,
     abstractsNotAvailable: assetNodes.filter((node) => node.abstract.status === "not_available").length,
-    isolatedNodes: structure.isolatedNodeCount,
   };
 
   return {
@@ -651,34 +584,44 @@ function buildAsset(snapshot) {
       builtOn: snapshot.builtOn,
       scopeClaim: snapshot.scopeClaim,
     },
+    sourceCounts,
     methodology: {
       edgeDirection: snapshot.sourceMethodology.edgeDirection,
+      selection: "Includes a publication when an exact-DOI toolkit audit join has at least one non-empty coverage category other than adjacent_out_of_scope and the source document role is not review. The focused asset is publication-level, so multiple runnable paradigms from one paper remain one node and all in-scope audit records remain attached.",
       centrality: {
-        pageRank: "PageRank computed on directed within-corpus citations.",
-        betweennessApprox: "Approximate betweenness centrality sampled over 80 source nodes.",
-        influence: "Navigation score combining PageRank percentile (55%), indexed-citation percentile (30%), and approximate-betweenness percentile (15%); not a quality score.",
+        pageRank: "Retained from the directed 1,712-publication source corpus.",
+        betweennessApprox: "Retained approximate betweenness from the 1,712-publication source corpus.",
+        influence: "Retained source-corpus navigation score; it is not a quality score.",
       },
       layouts: {
-        timeline: "Publication year on x and corpus theme lane on y; unknown years occupy the far-left lane.",
-        structure: `${structure.algorithm}; ${structure.iterations} fixed iterations. Positions aid navigation and are not Cartesian scientific measurements.`,
-      },
-      modality: {
-        audiotactile: snapshot.sourceMethodology.audiotactilePolicy,
-        visuotactile: snapshot.sourceMethodology.visuotactilePolicy,
+        prominence: "Deterministic 8 by 8 normalized square grid. Publications are ranked by source-corpus citations received, PageRank, influence, then stable ID and assigned to slots from the centre outward.",
+        timeline: "Deterministic 8 by 8 normalized square grid. Publications are sorted by year, title, then stable ID and assigned row-major from top left to bottom right.",
       },
       abstracts: snapshot.sourceMethodology.abstractPolicy,
       toolkitJoin: "Toolkit literature coverage and manual parameter reviews are joined by normalized DOI only; fuzzy title/author matching is not used.",
     },
     counts,
     layoutBounds: {
-      timeline: {
-        minYear: timeline.minYear,
-        maxYear: timeline.maxYear,
-        themes: timeline.themes,
+      grid: {
+        rows: layouts.gridSize,
+        columns: layouts.gridSize,
+        minX: layouts.margin,
+        maxX: roundCoordinate(1 - layouts.margin),
+        minY: layouts.margin,
+        maxY: roundCoordinate(1 - layouts.margin),
+        minimumCenterSpacing: layouts.minimumCenterSpacing,
+        maximumRecommendedNodeRadius: layouts.maximumRecommendedNodeRadius,
       },
-      structure: {
-        connectedNodeCount: structure.connectedNodeCount,
-        isolatedNodeCount: structure.isolatedNodeCount,
+      prominence: {
+        algorithm: "8x8 square grid; prominence-ranked nodes mapped to centre-out slots",
+        nodeOrder: ["withinCorpusReceived desc", "pageRank desc", "influence desc", "id asc"],
+        slotOrder: "distance from centre asc, row asc, column asc",
+      },
+      timeline: {
+        algorithm: "8x8 square grid; chronological nodes mapped to row-major slots",
+        nodeOrder: ["year asc (unknown last)", "title asc", "id asc"],
+        minYear: layouts.minYear,
+        maxYear: layouts.maxYear,
       },
     },
     facets: {
@@ -686,7 +629,7 @@ function buildAsset(snapshot) {
       themes: countValues(assetNodes.map((node) => node.corpus.theme)),
       documentRoles: countValues(assetNodes.map((node) => node.corpus.documentRole)),
       years: countValues(assetNodes.map((node) => node.year ?? "unknown")),
-      edgeProvenance: countValues(edges.map((edge) => edge.provenance)),
+      edgeProvenance: countValues(focusedEdges.map((edge) => edge.provenance)),
     },
     nodes: assetNodes,
     edges: assetEdges,
@@ -695,16 +638,16 @@ function buildAsset(snapshot) {
 
 function validateSnapshot(snapshot) {
   assert(snapshot.schema === SOURCE_SCHEMA, `Unexpected source schema: ${snapshot.schema}`);
-  assert(snapshot.nodes.length === EXPECTED.nodes, `Expected ${EXPECTED.nodes} nodes; got ${snapshot.nodes.length}`);
-  assert(snapshot.edges.length === EXPECTED.edges, `Expected ${EXPECTED.edges} edges; got ${snapshot.edges.length}`);
+  assert(snapshot.nodes.length === SOURCE_EXPECTED.nodes, `Expected ${SOURCE_EXPECTED.nodes} source nodes; got ${snapshot.nodes.length}`);
+  assert(snapshot.edges.length === SOURCE_EXPECTED.edges, `Expected ${SOURCE_EXPECTED.edges} source edges; got ${snapshot.edges.length}`);
   const ids = snapshot.nodes.map((node) => node.id);
   assert(new Set(ids).size === ids.length, "Source node IDs must be unique");
   assert(ids.every((id, index) => index === 0 || ids[index - 1].localeCompare(id) <= 0), "Source nodes must be sorted by ID");
   const idSet = new Set(ids);
   assert(snapshot.edges.every((edge) => idSet.has(edge.source) && idSet.has(edge.target)), "Every source edge endpoint must resolve");
   assert(
-    snapshot.nodes.filter((node) => node.modality.audiotactile.verified).length === EXPECTED.audiotactileConfirmed,
-    `Expected ${EXPECTED.audiotactileConfirmed} verified audiotactile nodes`,
+    snapshot.nodes.filter((node) => node.modality.audiotactile.verified).length === SOURCE_EXPECTED.audiotactileConfirmed,
+    `Expected ${SOURCE_EXPECTED.audiotactileConfirmed} verified audiotactile source nodes`,
   );
   assert(snapshot.nodes.every((node) => !node.modality.visuotactile.verified), "No visuotactile node may be marked verified without a manual audit");
   const abstractStatuses = new Set(["available", "source_link_only", "not_available"]);
@@ -714,19 +657,74 @@ function validateSnapshot(snapshot) {
 
 function validateAsset(asset) {
   assert(asset.schema === ASSET_SCHEMA, `Unexpected asset schema: ${asset.schema}`);
-  assert(asset.counts.nodes === EXPECTED.nodes, `Expected ${EXPECTED.nodes} asset nodes`);
-  assert(asset.counts.edges === EXPECTED.edges, `Expected ${EXPECTED.edges} asset edges`);
-  assert(asset.counts.audiotactileConfirmed === EXPECTED.audiotactileConfirmed, `Expected ${EXPECTED.audiotactileConfirmed} verified audiotactile nodes`);
-  assert(asset.counts.visuotactileVerified === 0, "No visuotactile nodes should be verified");
-  assert(asset.counts.toolkitRecordJoins === EXPECTED.toolkitRecordJoins, `Expected ${EXPECTED.toolkitRecordJoins} toolkit record joins`);
-  assert(asset.counts.toolkitNodeJoins === EXPECTED.toolkitNodeJoins, `Expected ${EXPECTED.toolkitNodeJoins} toolkit node joins`);
-  assert(asset.counts.toolkitManualReviewRecords === EXPECTED.toolkitManualReviewRecords, `Expected ${EXPECTED.toolkitManualReviewRecords} manual-review record joins`);
-  assert(asset.counts.toolkitManualReviewNodes === EXPECTED.toolkitManualReviewNodes, `Expected ${EXPECTED.toolkitManualReviewNodes} nodes with manual reviews`);
-  assert(asset.edges.every((edge) => Number.isInteger(edge[0]) && edge[0] >= 0 && edge[0] < asset.nodes.length
-    && Number.isInteger(edge[1]) && edge[1] >= 0 && edge[1] < asset.nodes.length), "Every indexed asset edge must resolve");
-  assert(asset.nodes.every((node) => [node.layouts.timeline, node.layouts.structure].every((position) =>
-    Number.isFinite(position.x) && Number.isFinite(position.y)
-    && position.x >= 0 && position.x <= 1 && position.y >= 0 && position.y <= 1)), "All layout coordinates must be finite and normalized");
+  for (const [name, expected] of Object.entries(SOURCE_EXPECTED)) {
+    assert(asset.sourceCounts[name] === expected, `Expected sourceCounts.${name}=${expected}; got ${asset.sourceCounts[name]}`);
+  }
+  for (const [name, expected] of Object.entries(FOCUSED_EXPECTED)) {
+    assert(asset.counts[name] === expected, `Expected counts.${name}=${expected}; got ${asset.counts[name]}`);
+  }
+  assert(asset.nodes.length === FOCUSED_EXPECTED.nodes, "Focused node array length does not match counts");
+  assert(asset.edges.length === FOCUSED_EXPECTED.edges, "Focused edge array length does not match counts");
+  const ids = asset.nodes.map((node) => node.id);
+  assert(new Set(ids).size === ids.length, "Focused publication IDs must be unique");
+  assert(ids.every((id, index) => index === 0 || ids[index - 1].localeCompare(id) <= 0), "Focused publication nodes must remain ID-sorted");
+  assert(asset.nodes.every((node) => isFocusedExperimentalNode(node)), "Every focused node must satisfy the toolkit-coverage and non-review predicate");
+  assert(asset.nodes.every((node) => node.toolkit.records.length > 0
+    && node.toolkit.records.every(isInScopeToolkitRecord)), "Focused nodes may contain only in-scope toolkit audit records");
+
+  const edgeKeys = new Set();
+  for (const edge of asset.edges) {
+    assert(Array.isArray(edge) && edge.length === 3, "Every focused edge must be [source, target, provenance]");
+    const [source, target, provenance] = edge;
+    assert(Number.isInteger(source) && source >= 0 && source < asset.nodes.length, "Focused edge source must resolve");
+    assert(Number.isInteger(target) && target >= 0 && target < asset.nodes.length, "Focused edge target must resolve");
+    assert(source !== target, "Focused citation edges must not be self-links");
+    assert(typeof provenance === "string" && provenance, "Focused citation edges require provenance");
+    const key = `${source}:${target}`;
+    assert(!edgeKeys.has(key), `Duplicate focused citation edge ${key}`);
+    edgeKeys.add(key);
+  }
+
+  const grid = createSquareGrid();
+  const bounds = asset.layoutBounds.grid;
+  assert(bounds.rows === GRID_SIZE && bounds.columns === GRID_SIZE, "Focused layouts must use an 8x8 grid");
+  assert(bounds.minX === GRID_MARGIN && bounds.minY === GRID_MARGIN
+    && bounds.maxX === roundCoordinate(1 - GRID_MARGIN)
+    && bounds.maxY === roundCoordinate(1 - GRID_MARGIN), "Focused layout bounds must preserve the normalized grid margin");
+  assert(bounds.minimumCenterSpacing === grid.minimumCenterSpacing, "Focused layout minimum spacing metadata is stale");
+  for (const layoutName of ["prominence", "timeline"]) {
+    const positions = asset.nodes.map((node) => node.layouts[layoutName]);
+    assert(positions.every((position) => position
+      && Number.isFinite(position.x) && Number.isFinite(position.y)
+      && position.x >= bounds.minX && position.x <= bounds.maxX
+      && position.y >= bounds.minY && position.y <= bounds.maxY), `All ${layoutName} coordinates must be finite and inside the normalized square bounds`);
+    const slotKeys = positions.map((position) => `${position.x.toFixed(6)}:${position.y.toFixed(6)}`);
+    assert(new Set(slotKeys).size === asset.nodes.length, `${layoutName} must assign one unique slot to every publication`);
+    for (let index = 0; index < positions.length; index += 1) {
+      for (let other = index + 1; other < positions.length; other += 1) {
+        const distance = Math.hypot(
+          positions[index].x - positions[other].x,
+          positions[index].y - positions[other].y,
+        );
+        assert(distance >= bounds.minimumCenterSpacing - 1e-6, `${layoutName} publications violate the declared minimum spacing`);
+      }
+    }
+  }
+
+  const rowMajorSlots = [...grid.slots].sort((left, right) => left.row - right.row
+    || left.column - right.column);
+  const centerOutSlots = [...grid.slots].sort((left, right) =>
+    left.centerDistanceRank - right.centerDistanceRank
+    || left.row - right.row
+    || left.column - right.column);
+  [...asset.nodes].sort(prominenceNodeOrder).forEach((node, index) => {
+    const slot = centerOutSlots[index];
+    assert(node.layouts.prominence.x === slot.x && node.layouts.prominence.y === slot.y, "Prominence slot ordering is stale");
+  });
+  [...asset.nodes].sort(timelineNodeOrder).forEach((node, index) => {
+    const slot = rowMajorSlots[index];
+    assert(node.layouts.timeline.x === slot.x && node.layouts.timeline.y === slot.y, "Timeline slot ordering is stale");
+  });
 }
 
 function report(asset, output, snapshotOutput, wrote) {
@@ -735,6 +733,7 @@ function report(asset, output, snapshotOutput, wrote) {
     wrote,
     output: path.relative(REPO_ROOT, output),
     snapshotOutput: snapshotOutput ? path.relative(REPO_ROOT, snapshotOutput) : null,
+    sourceCounts: asset.sourceCounts,
     counts: asset.counts,
   };
   if (wrote && fs.existsSync(output)) result.outputBytes = fs.statSync(output).size;
