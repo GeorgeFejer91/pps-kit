@@ -2014,19 +2014,25 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   mutation controls continue to enforce the boundary. Editable drafts retain
   per-step review badges because those communicate workflow progress.
 
-## 2026-08-07 — Verified/audited audio-tactile publication network v3
+## 2026-08-08 — Dense, citation-refreshed audio-tactile publication network v3
 
 - The Documentation map now projects 97 non-review audio-tactile publications
-  and 571 directed citation links: 93 original manually confirmed records plus
-  4 later exact-DOI audit additions. Readiness is encoded, not used as an
-  inclusion gate; the four Toolkit states are 15 runnable, 49 incomplete, 32
-  not assessed, and 1 adjacent/scope conflict.
-- The default square topology is a deterministic continuous force layout with
-  citation attraction, prominence-aware centring, radius-aware collision
-  separation, and 22 stable perimeter isolates. Node area represents normalized
-  displayed-network citations received. A collision-free year-anchored layout
-  remains the complementary chronological view.
-- All links stay faintly visible; selecting a paper distinguishes incoming from
+  and 698 directed citation links: 93 original manually confirmed records plus
+  4 later exact-DOI audit additions, with 571 links from the frozen snapshot and
+  127 non-overlapping links from a 2026-08-08 exact-DOI OpenAlex overlay.
+  Readiness is encoded, not used as an inclusion gate; the map shows 15
+  implemented versus 82 not implemented yet, while details retain the four
+  Toolkit states of 15 runnable, 49 incomplete, 32 not assessed, and 1
+  adjacent/scope conflict.
+- The default responsive topology is a deterministic continuous force layout
+  with citation attraction, all-node repulsion and weak centring, and
+  radius-aware collision separation. The 87-node main component spans most of
+  the map; the 10 records without an indexed within-map link are no longer
+  assigned to a perimeter. Node area represents normalized displayed-network
+  citations received. A collision-free year-anchored layout remains the
+  complementary chronological view.
+- All links stay visible during search; search highlights matching nodes and
+  filters only the semantic result list. Selecting a paper distinguishes incoming from
   outgoing neighbours and opens accessible metadata, provenance, abstract, and
   exact-DOI Toolkit-parameter details. The broad 1,712-node/10,109-edge v1
   source remains a dated discovery corpus, while the generated v3 asset is the

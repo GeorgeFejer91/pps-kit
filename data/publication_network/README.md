@@ -9,21 +9,31 @@ The corpus is a maximum-coverage, multi-index PPS-explicit snapshot with
 citation context. It is not a claim that every PPS publication is present. The
 generator projects this broad input into `publication_network.v3.json`, a
 focused `pps-publication-citation-network.v3` browser asset containing 97
-non-review audio-tactile publications and 571 induced citation links. Inclusion
+non-review audio-tactile publications and 698 tracked citation links. The
+generator preserves all 571 induced links in the frozen snapshot and adds the
+127 non-overlapping links in
+`openalex_audiotactile_citation_overlay.20260808.json`. That overlay records an
+exact-DOI OpenAlex refresh for all 94 DOI-bearing displayed records, including
+query fields, capture date, endpoint scope, and expected union counts. Inclusion
 comes from either the original manually confirmed audio-tactile audit (93
 publications after review removal) or a later exact-DOI Toolkit literature audit
 (4 additions). Toolkit readiness is an encoding, not an inclusion gate.
 
-The four Toolkit assessment states are 15 runnable, 49 supported but parameter-
-incomplete, 32 not yet assessed, and 1 adjacent/scope-conflict publication.
-The default map uses a deterministic, continuous, radius-aware force layout:
-citation neighbours attract, nodes remain collision-free, and 22 isolates sit
-on a stable square perimeter. Node area encodes normalized displayed-network
-citations received. The alternative layout anchors horizontal position to year.
+The detailed Toolkit assessment remains 15 runnable, 49 supported but parameter-
+incomplete, 32 not yet assessed, and 1 adjacent/scope-conflict publication. The
+map reduces that to two visual states: 15 implemented and 82 not implemented
+yet. The default deterministic force layout uses one continuous rule for every
+paper: citation neighbours attract, all nodes repel and share weak centering,
+and radius-aware collision separation keeps them distinct. The 87-node main
+component spreads broadly across the map; the 10 records with no indexed
+within-map link are not assigned to a perimeter. Node area encodes normalized
+displayed-network citations received. The alternative layout anchors horizontal
+position to year.
 
 ## Rebuild
 
-Generate the dashboard asset from the tracked snapshot:
+Generate the dashboard asset from the tracked snapshot and tracked citation
+overlay:
 
 ```bash
 node tools/build_publication_network_asset.mjs
@@ -57,8 +67,10 @@ and outputs to temporary paths for deterministic validation.
 - PPS Toolkit literature and parameter audits are joined by normalized DOI
   only. All in-scope task records sharing a DOI are kept, and no fuzzy title or
   author matching is used.
-- Displayed links are faint by default; selecting a node distinguishes incoming
-  from outgoing citations. Citation counts, node area, and centrality remain
+- Every tracked within-map link stays visible, including while search highlights
+  matching papers; selecting a node distinguishes incoming from outgoing
+  citations. A missing line means only that the dated providers captured no
+  resolvable link inside this 97-paper projection. Citation counts, node area, and centrality remain
   corpus-local navigation encodings, not study-quality ratings or effect estimates.
 - Raw provider responses, PDFs, supplements, and extracted full text are not
   part of this tracked asset.

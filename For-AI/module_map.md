@@ -399,11 +399,14 @@ The paper audit is a core pipeline, not a side report. It catalogs the needs, pr
 The public citation-network projection is a separate generated discovery
 surface. Keep its `pps-publication-citation-network.v3` schema and focused counts
 covered by `tests/test_publication_network.py`: 97 non-review verified/audited
-audio-tactile publications, 571 induced links, and four Toolkit states of 15
-runnable, 49 supported-incomplete, 32 not-assessed, and 1 adjacent/scope-
-conflict. The generator owns deterministic radius-aware force/year coordinates,
-22 perimeter isolates, citation-received area sizing, and directional edge
-metadata. The browser shows all links faintly and emphasizes selected incoming
+audio-tactile publications and 698 tracked links (571 frozen-snapshot links plus
+127 non-overlapping exact-DOI OpenAlex overlay links). The map exposes two
+implementation states, 15 implemented and 82 not yet, while paper details retain
+the four Toolkit states of 15 runnable, 49 supported-incomplete, 32 not-assessed,
+and 1 adjacent/scope-conflict. The generator owns deterministic density-preserving
+radius-aware force/year coordinates, citation-received area sizing, and
+directional edge metadata; it must never hard-place indexed isolates on a
+perimeter. The browser always shows every tracked link and emphasizes selected incoming
 versus outgoing neighbours. Treat citation and centrality values as navigation
 metrics rather than scientific quality. The broad 1,712-node/10,109-edge
 `citation_snapshot.v1.json` remains the dated reproducible source, not the

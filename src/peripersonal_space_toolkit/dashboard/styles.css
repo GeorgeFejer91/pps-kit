@@ -38,7 +38,7 @@
   --network-conflict-stroke: #9d3f2f;
   --network-node-stroke: #75502d;
   --network-selection: #246b55;
-  --network-edge: rgba(82, 98, 115, 0.18);
+  --network-edge: rgba(82, 98, 115, 0.24);
   --network-edge-incoming: rgba(35, 107, 148, 0.9);
   --network-edge-outgoing: rgba(169, 87, 13, 0.9);
   --font: "Aptos", "Noto Sans", "Helvetica Neue", sans-serif;
@@ -1061,7 +1061,7 @@ code {
 
 .publication-network-toolbar {
   display: grid;
-  grid-template-columns: minmax(260px, 1.35fr) minmax(240px, 1fr) minmax(200px, 0.8fr);
+  grid-template-columns: minmax(260px, 1.35fr) minmax(280px, 1fr);
   align-items: end;
   gap: var(--space-4);
   padding: var(--space-4);
@@ -1218,22 +1218,13 @@ code {
   border-radius: 50%;
 }
 
-.legend-node-runnable {
+.legend-node-implemented {
   background: var(--network-runnable);
 }
 
-.legend-node-supported {
-  background: var(--network-supported);
-}
-
-.legend-node-unassessed {
+.legend-node-not-implemented {
   border-style: dashed;
   background: var(--network-unassessed);
-}
-
-.legend-node-conflict {
-  border: 2px dashed var(--network-conflict-stroke);
-  background: var(--network-conflict);
 }
 
 .publication-network-size-key {
@@ -1245,7 +1236,7 @@ code {
   flex: 0 0 auto;
   border: 1.5px solid var(--network-node-stroke);
   border-radius: 50%;
-  background: var(--network-supported);
+  background: var(--network-unassessed);
 }
 
 .publication-network-size-key i:first-child {
@@ -1276,7 +1267,7 @@ code {
 
 .publication-network-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 704px);
+  grid-template-columns: minmax(0, 960px);
   justify-content: center;
   align-items: stretch;
   gap: var(--space-4);
@@ -1286,14 +1277,14 @@ code {
 }
 
 .publication-network-workspace.detail-open {
-  grid-template-columns: minmax(320px, 704px) minmax(320px, 420px);
+  grid-template-columns: minmax(320px, 720px) minmax(320px, 420px);
 }
 
 .publication-network-stage {
   position: relative;
   width: 100%;
-  max-width: 704px;
-  aspect-ratio: 1 / 1;
+  max-width: 960px;
+  aspect-ratio: 4 / 3;
   min-width: 0;
   align-self: start;
   justify-self: center;
@@ -1795,6 +1786,7 @@ code {
   .publication-network-stage {
     width: 100%;
     max-width: none;
+    aspect-ratio: 1 / 1;
   }
 
   .publication-network-detail {
@@ -7269,7 +7261,7 @@ body.desktop-applet .segment-heading {
   --network-conflict-stroke: #ff9b84;
   --network-node-stroke: #d6af86;
   --network-selection: #6bc7a2;
-  --network-edge: rgba(183, 201, 191, 0.22);
+  --network-edge: rgba(183, 201, 191, 0.3);
   --network-edge-incoming: rgba(111, 193, 232, 0.92);
   --network-edge-outgoing: rgba(241, 167, 92, 0.92);
 }

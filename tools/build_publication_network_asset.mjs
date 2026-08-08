@@ -14,6 +14,10 @@ const DEFAULT_OUTPUT = path.join(
   REPO_ROOT,
   "src/peripersonal_space_toolkit/dashboard/publication_network.v3.json",
 );
+const CITATION_OVERLAY_PATH = path.join(
+  REPO_ROOT,
+  "data/publication_network/openalex_audiotactile_citation_overlay.20260808.json",
+);
 const COVERAGE_PATH = path.join(
   REPO_ROOT,
   "assets/preloads/audiotactile_literature_coverage.json",
@@ -33,7 +37,7 @@ const SOURCE_EXPECTED = Object.freeze({
 
 const NETWORK_EXPECTED = Object.freeze({
   nodes: 97,
-  edges: 571,
+  edges: 698,
   audiotactileConfirmed: 93,
   laterAuditAdditions: 4,
   toolkitRecordJoins: 69,
@@ -47,9 +51,9 @@ const NETWORK_EXPECTED = Object.freeze({
   toolkitAdjacentConflictNodes: 1,
   toolkitManualReviewRecords: 24,
   toolkitManualReviewNodes: 21,
-  connectedNodes: 75,
-  isolatedNodes: 22,
-  weakComponents: 23,
+  connectedNodes: 87,
+  isolatedNodes: 10,
+  weakComponents: 11,
   abstractsAvailable: 37,
   abstractsSourceLinkOnly: 48,
   abstractsNotAvailable: 12,
@@ -57,14 +61,15 @@ const NETWORK_EXPECTED = Object.freeze({
 
 const SOURCE_SCHEMA = "pps-publication-citation-source.v1";
 const ASSET_SCHEMA = "pps-publication-citation-network.v3";
+const OVERLAY_SCHEMA = "pps-publication-citation-overlay.v1";
 const SNAPSHOT_ID = "pps-citation-network-20260807";
 const SNAPSHOT_DATE = "2026-08-07";
-const GENERATOR_VERSION = "3.0.0";
+const GENERATOR_VERSION = "3.1.0";
 const LAYOUT_MARGIN = 0.045;
 const NODE_RADIUS_MIN = 0.009;
 const NODE_RADIUS_MAX = 0.021;
 const NODE_CLEARANCE = 0.0045;
-const TOPOLOGY_ITERATIONS = 1200;
+const TOPOLOGY_ITERATIONS = 500;
 
 function usage() {
   return `Build the PPS publication/citation network asset.
@@ -587,7 +592,7 @@ function createTopologyLayout(nodes, metrics) {
   const rank = Array(count).fill(0);
   order.forEach((nodeIndex, index) => { rank[nodeIndex] = index; });
   const positions = nodes.map((node, index) => {
-    const radial = 0.045 + 0.39 * Math.sqrt(rank[index] / Math.max(1, count - 1));
+    const radial = 0.055 + 0.405 * Math.sqrt(rank[index] / Math.max(1, count - 1));
     const angle = rank[index] * goldenAngle + 0.17;
     return {
       x: 0.5 + radial * Math.cos(angle),
@@ -595,25 +600,6 @@ function createTopologyLayout(nodes, metrics) {
     };
   });
   const velocities = nodes.map(() => ({ x: 0, y: 0 }));
-  const connectedOrder = order.filter((index) => metrics.weakDegree[index] > 0);
-  const connectedRank = new Map(connectedOrder.map((index, rankIndex) => [index, rankIndex]));
-  const targetRadius = nodes.map((node, index) => metrics.weakDegree[index]
-    ? 0.045 + 0.34 * ((connectedRank.get(index)
-      / Math.max(1, connectedOrder.length - 1)) ** 0.72)
-    : 0.515);
-  const isolates = nodes
-    .map((node, index) => ({ node, index }))
-    .filter(({ index }) => metrics.weakDegree[index] === 0)
-    .sort((left, right) => left.node.id.localeCompare(right.node.id));
-  const isolateExtent = 0.5 - LAYOUT_MARGIN - NODE_RADIUS_MAX;
-  const isolateTargets = new Map();
-  isolates.forEach(({ index }, isolateIndex) => {
-    const angle = ((isolateIndex + 0.5) * Math.PI * 2) / isolates.length + 0.11;
-    const rawX = Math.cos(angle);
-    const rawY = Math.sin(angle);
-    const scale = isolateExtent / Math.max(Math.abs(rawX), Math.abs(rawY));
-    isolateTargets.set(index, { x: 0.5 + rawX * scale, y: 0.5 + rawY * scale });
-  });
   clampPositions(positions, metrics.radii);
 
   for (let iteration = 0; iteration < TOPOLOGY_ITERATIONS; iteration += 1) {
@@ -629,8 +615,7 @@ function createTopologyLayout(nodes, metrics) {
           dy = direction.y * 1e-6;
           distance = 1e-6;
         }
-        const pairScale = (metrics.radii[left] + metrics.radii[right] + 0.032) ** 2;
-        const magnitude = (0.00043 * pairScale) / (distance ** 2 + 0.0015);
+        const magnitude = 0.0000045 / (distance ** 2 + 0.0018);
         const forceX = (dx / distance) * magnitude;
         const forceY = (dy / distance) * magnitude;
         forces[left].x += forceX;
@@ -643,10 +628,9 @@ function createTopologyLayout(nodes, metrics) {
       const dx = positions[source].x - positions[target].x;
       const dy = positions[source].y - positions[target].y;
       const distance = Math.max(1e-12, Math.hypot(dx, dy));
-      const ideal = 0.086
-        + 0.043 / (1 + Math.sqrt(Math.min(metrics.weakDegree[source], metrics.weakDegree[target])));
-      const strength = 0.020
-        / (Math.max(1, metrics.weakDegree[source] * metrics.weakDegree[target]) ** 0.12);
+      const ideal = 0.21;
+      const strength = 0.0035
+        / (Math.max(1, metrics.weakDegree[source] * metrics.weakDegree[target]) ** 0.22);
       const magnitude = -strength * (distance - ideal);
       const forceX = (dx / distance) * magnitude;
       const forceY = (dy / distance) * magnitude;
@@ -656,25 +640,13 @@ function createTopologyLayout(nodes, metrics) {
       forces[target].y -= forceY;
     }
     for (let index = 0; index < count; index += 1) {
-      const dx = positions[index].x - 0.5;
-      const dy = positions[index].y - 0.5;
-      const radial = Math.max(1e-12, Math.hypot(dx, dy));
-      const radialMagnitude = -0.011 * (radial - targetRadius[index]) / radial;
-      forces[index].x += radialMagnitude * dx;
-      forces[index].y += radialMagnitude * dy;
-      if (metrics.weakDegree[index]) {
-        forces[index].x += 0.0015 * (0.5 - positions[index].x);
-        forces[index].y += 0.0015 * (0.5 - positions[index].y);
-      } else {
-        const target = isolateTargets.get(index);
-        forces[index].x += 0.018 * (target.x - positions[index].x);
-        forces[index].y += 0.018 * (target.y - positions[index].y);
-      }
+      forces[index].x += 0.008 * (0.5 - positions[index].x);
+      forces[index].y += 0.008 * (0.5 - positions[index].y);
     }
-    const temperature = 0.027 * (1 - iteration / TOPOLOGY_ITERATIONS) + 0.0024;
+    const temperature = 0.0185 * (1 - iteration / TOPOLOGY_ITERATIONS) + 0.0015;
     for (let index = 0; index < count; index += 1) {
-      velocities[index].x = 0.80 * velocities[index].x + forces[index].x;
-      velocities[index].y = 0.80 * velocities[index].y + forces[index].y;
+      velocities[index].x = 0.78 * velocities[index].x + forces[index].x;
+      velocities[index].y = 0.78 * velocities[index].y + forces[index].y;
       const speed = Math.hypot(velocities[index].x, velocities[index].y);
       if (speed > temperature) {
         velocities[index].x *= temperature / speed;
@@ -809,6 +781,23 @@ function layoutQuality(positions, metrics) {
     Math.hypot(position.x - 0.5, position.y - 0.5));
   const connectedRadialDistances = radialDistances.filter((value, index) => metrics.weakDegree[index] > 0);
   const isolatedRadialDistances = radialDistances.filter((value, index) => metrics.weakDegree[index] === 0);
+  const principalIndices = positions.map((_, index) => index)
+    .filter((index) => metrics.component[index] === 0);
+  const principalX = principalIndices.map((index) => positions[index].x);
+  const principalY = principalIndices.map((index) => positions[index].y);
+  const principalGridCells = new Set(principalIndices.map((index) => {
+    const column = Math.min(5, Math.floor(positions[index].x * 6));
+    const row = Math.min(5, Math.floor(positions[index].y * 6));
+    return `${column}:${row}`;
+  }));
+  const nearestNeighbourDistances = positions.map((position, index) => Math.min(
+    ...positions.map((other, otherIndex) => otherIndex === index
+      ? Number.POSITIVE_INFINITY
+      : Math.hypot(position.x - other.x, position.y - other.y)),
+  ));
+  const isolatedNearBoundary = positions.filter((position, index) =>
+    metrics.weakDegree[index] === 0
+      && Math.min(position.x, 1 - position.x, position.y, 1 - position.y) < 0.09).length;
   return {
     minimumCenterDistance: Number(minimumCenterDistance.toFixed(6)),
     minimumClearance: Number(minimumClearance.toFixed(6)),
@@ -822,6 +811,11 @@ function layoutQuality(positions, metrics) {
     prominenceRadialSpearman: Number(spearman(metrics.prominence, radialDistances).toFixed(6)),
     connectedMeanRadialDistance: Number(mean(connectedRadialDistances).toFixed(6)),
     isolatedMeanRadialDistance: Number(mean(isolatedRadialDistances).toFixed(6)),
+    medianNearestNeighbourDistance: Number(median(nearestNeighbourDistances).toFixed(6)),
+    principalComponentSpanX: Number((Math.max(...principalX) - Math.min(...principalX)).toFixed(6)),
+    principalComponentSpanY: Number((Math.max(...principalY) - Math.min(...principalY)).toFixed(6)),
+    principalComponentOccupiedGridCells6x6: principalGridCells.size,
+    isolatedNodesNearBoundary: isolatedNearBoundary,
     uniqueRoundedX: new Set(positions.map((position) => position.x.toFixed(4))).size,
     uniqueRoundedY: new Set(positions.map((position) => position.y.toFixed(4))).size,
     minNodeExtentX: Number(Math.min(...positions.map((position, index) =>
@@ -971,6 +965,31 @@ function scopeForNode(node) {
   };
 }
 
+function loadCitationOverlay(networkIds, snapshotNetworkEdges) {
+  const overlay = readJson(CITATION_OVERLAY_PATH);
+  assert(overlay.schema === OVERLAY_SCHEMA, `Expected ${OVERLAY_SCHEMA}; got ${overlay.schema}`);
+  assert(overlay.scope?.nodeCount === networkIds.size, "Citation overlay node scope is stale");
+  assert(overlay.scope?.snapshotEdges === snapshotNetworkEdges.length, "Citation overlay snapshot edge count is stale");
+  assert(overlay.scope?.overlayEdges === overlay.edges?.length, "Citation overlay edge count is stale");
+  assert(overlay.scope?.expectedUnionEdges === snapshotNetworkEdges.length + overlay.edges.length, "Citation overlay union count is stale");
+  assert(typeof overlay.edgeProvenance === "string" && overlay.edgeProvenance, "Citation overlay requires edge provenance");
+  const snapshotKeys = new Set(snapshotNetworkEdges.map((edge) => `${edge.source}\u0000${edge.target}`));
+  const overlayKeys = new Set();
+  const edges = overlay.edges.map((pair) => {
+    assert(Array.isArray(pair) && pair.length === 2, "Citation overlay edges must be [source, target]");
+    const [source, target] = pair;
+    assert(networkIds.has(source) && networkIds.has(target), `Citation overlay endpoint is outside the 97-node scope: ${source} -> ${target}`);
+    assert(source !== target, `Citation overlay contains self-link ${source}`);
+    const key = `${source}\u0000${target}`;
+    assert(!snapshotKeys.has(key), `Citation overlay duplicates snapshot edge ${source} -> ${target}`);
+    assert(!overlayKeys.has(key), `Citation overlay contains duplicate edge ${source} -> ${target}`);
+    overlayKeys.add(key);
+    return { source, target, provenance: overlay.edgeProvenance };
+  });
+  assert(edges.length === 127, `Expected 127 citation overlay edges; got ${edges.length}`);
+  return { overlay, edges };
+}
+
 function buildAsset(snapshot) {
   assert(snapshot.schema === SOURCE_SCHEMA, `Expected ${SOURCE_SCHEMA}; got ${snapshot.schema}`);
   const sourceNodes = [...snapshot.nodes].sort((left, right) => left.id.localeCompare(right.id));
@@ -989,8 +1008,13 @@ function buildAsset(snapshot) {
       scope: scopeForNode(node),
     }));
   const networkIds = new Set(networkNodes.map((node) => node.id));
-  const networkEdges = sourceEdges.filter((edge) =>
+  const snapshotNetworkEdges = sourceEdges.filter((edge) =>
     networkIds.has(edge.source) && networkIds.has(edge.target));
+  const citationOverlay = loadCitationOverlay(networkIds, snapshotNetworkEdges);
+  const networkEdges = [...snapshotNetworkEdges, ...citationOverlay.edges]
+    .sort((left, right) => left.source.localeCompare(right.source)
+      || left.target.localeCompare(right.target)
+      || left.provenance.localeCompare(right.provenance));
   const layouts = createNetworkLayouts(networkNodes, networkEdges);
   const nodeIndex = new Map(networkNodes.map((node, index) => [node.id, index]));
 
@@ -1060,16 +1084,25 @@ function buildAsset(snapshot) {
 
   return {
     schema: ASSET_SCHEMA,
-    generatedOn: snapshot.builtOn,
+    generatedOn: citationOverlay.overlay.capturedOn,
     generatorVersion: GENERATOR_VERSION,
     sourceSnapshot: {
       id: snapshot.snapshotId,
       builtOn: snapshot.builtOn,
       scopeClaim: snapshot.scopeClaim,
     },
+    citationOverlays: [{
+      id: citationOverlay.overlay.overlayId,
+      capturedOn: citationOverlay.overlay.capturedOn,
+      provider: citationOverlay.overlay.provider.name,
+      edgeProvenance: citationOverlay.overlay.edgeProvenance,
+      addedEdges: citationOverlay.edges.length,
+      scope: citationOverlay.overlay.scope,
+    }],
     sourceCounts,
     methodology: {
       edgeDirection: snapshot.sourceMethodology.edgeDirection,
+      edgeCoverage: "Every directed citation captured between displayed publications is retained from the frozen multi-source snapshot and the dated exact-DOI OpenAlex overlay. Missing lines can still reflect provider coverage or reference-resolution gaps.",
       selection: "Includes every non-review publication manually confirmed as audiotactile in the legacy citation audit, plus non-review publications added by an exact-DOI Toolkit literature audit with at least one non-adjacent audiotactile PPS task record. Toolkit readiness is an encoding, never an inclusion gate.",
       scopeProvenance: {
         legacyConfirmed: "Manually confirmed audiotactile in the legacy citation-corpus audit.",
@@ -1087,7 +1120,7 @@ function buildAsset(snapshot) {
         encoding: "Circle area (radius squared) is linear in normalized log1p displayed-network indegree between the declared minimum and maximum radii.",
       },
       layouts: {
-        topology: "Deterministic continuous square force layout. Citation neighbours attract, all nodes repel, prominence softly pulls influential publications inward, radii participate in collision separation, and isolates occupy a stable square perimeter.",
+        topology: "Deterministic continuous density-preserving force layout. Citation neighbours attract, every paper repels every other paper, all nodes share one weak centering force, and radius-aware collision separation keeps each publication distinct. No node class is assigned to a perimeter.",
         timeline: "Deterministic continuous year-anchored layout. Horizontal position follows publication year (unknown years last), citation topology softly informs vertical position, and radius-aware collision separation remains active.",
       },
       abstracts: snapshot.sourceMethodology.abstractPolicy,
@@ -1106,7 +1139,7 @@ function buildAsset(snapshot) {
         requiredNodeClearance: NODE_CLEARANCE,
       },
       topology: {
-        algorithm: "deterministic continuous radius-aware citation force layout",
+        algorithm: "deterministic continuous density-preserving citation force layout",
         iterations: TOPOLOGY_ITERATIONS,
         weakCitationSprings: layouts.metrics.weakEdges.length,
         principalComponentNodes: layouts.metrics.components[0].length,
@@ -1214,7 +1247,7 @@ function validateAsset(asset) {
     outgoingDegree[source] += 1;
     weakEdgeKeys.add(source < target ? `${source}:${target}` : `${target}:${source}`);
   }
-  assert(weakEdgeKeys.size === 569, `Expected 569 weak citation links; got ${weakEdgeKeys.size}`);
+  assert(weakEdgeKeys.size === 695, `Expected 695 weak citation links; got ${weakEdgeKeys.size}`);
   assert(asset.nodes.every((node, index) => node.network.inDegree === incomingDegree[index]
     && node.network.outDegree === outgoingDegree[index]), "Displayed-network directed degrees are stale");
   const normalizedIncoming = normalizedValues(incomingDegree, true);
@@ -1261,10 +1294,12 @@ function validateAsset(asset) {
     }
     assert(asset.layoutBounds[layoutName].clearanceViolations === 0, `${layoutName} quality metadata reports a collision`);
   }
-  assert(asset.layoutBounds.topology.edgeToPrincipalNonNeighbourRatio < 0.8, "Topology layout must place citation neighbours materially closer than principal-component non-neighbours");
-  assert(asset.layoutBounds.topology.prominenceRadialSpearman < -0.5, "Topology prominence must be materially associated with central placement");
-  assert(asset.layoutBounds.topology.connectedMeanRadialDistance
-    < asset.layoutBounds.topology.isolatedMeanRadialDistance, "Topology isolates must remain outside the connected citation component");
+  assert(asset.layoutBounds.topology.edgeToPrincipalNonNeighbourRatio < 0.75, "Topology layout must place citation neighbours materially closer than principal-component non-neighbours");
+  assert(asset.layoutBounds.topology.principalComponentSpanX >= 0.7
+    && asset.layoutBounds.topology.principalComponentSpanY >= 0.7, "Topology principal component must use the available map area");
+  assert(asset.layoutBounds.topology.principalComponentOccupiedGridCells6x6 >= 20, "Topology density must occupy a broad set of map regions");
+  assert(asset.layoutBounds.topology.medianNearestNeighbourDistance >= 0.055, "Topology papers must remain visually separated");
+  assert(asset.layoutBounds.topology.isolatedNodesNearBoundary <= 3, "Topology must not force isolates onto a perimeter");
   assert(asset.layoutBounds.topology.uniqueRoundedX >= 85
     && asset.layoutBounds.topology.uniqueRoundedY >= 85, "Topology coordinates must remain continuous rather than grid-snapped");
   const knownTimeline = asset.nodes

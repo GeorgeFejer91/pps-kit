@@ -103,7 +103,6 @@ export async function initializePublicationNetwork(root) {
   const controls = {
     search: root.querySelector("#publication-network-search"),
     layout: [...root.querySelectorAll('input[name="publication-network-layout"]')],
-    edgeMode: root.querySelector("#publication-network-edge-mode"),
     resultsSort: root.querySelector("#publication-network-results-sort"),
   };
   const shell = root.querySelector(".publication-network-shell");
@@ -143,10 +142,14 @@ export async function initializePublicationNetwork(root) {
     incoming[target].push(source);
   }
   const searchText = nodes.map(nodeSearchText);
+  const allIndices = nodes.map((_, index) => index);
   const state = {
     layout: "topology",
-    visible: [],
-    visibleSet: new Set(),
+    visible: allIndices,
+    visibleSet: new Set(allIndices),
+    matches: allIndices,
+    matchSet: new Set(allIndices),
+    searchActive: false,
     selected: null,
     hovered: null,
     resultLimit: RESULT_PAGE_SIZE,
@@ -165,27 +168,30 @@ export async function initializePublicationNetwork(root) {
     const rect = canvas.getBoundingClientRect();
     const width = Math.max(1, rect.width);
     const height = Math.max(1, rect.height);
-    const padding = Math.max(24, Math.min(52, Math.min(width, height) * 0.075));
-    const plotSide = Math.max(1, Math.min(width, height) - padding * 2);
+    const padding = Math.max(18, Math.min(42, Math.min(width, height) * 0.055));
+    const plotWidth = Math.max(1, width - padding * 2);
+    const plotHeight = Math.max(1, height - padding * 2);
     return {
       width,
       height,
-      plotSide,
-      originX: (width - plotSide) / 2,
-      originY: (height - plotSide) / 2,
+      plotWidth,
+      plotHeight,
+      plotScale: Math.min(plotWidth, plotHeight),
+      originX: padding,
+      originY: padding,
     };
   }
 
   function screenPoint(index, geometry) {
     const position = positionFor(index);
     return {
-      x: geometry.originX + position.x * geometry.plotSide,
-      y: geometry.originY + position.y * geometry.plotSide,
+      x: geometry.originX + position.x * geometry.plotWidth,
+      y: geometry.originY + position.y * geometry.plotHeight,
     };
   }
 
   function radiusFor(index, geometry) {
-    return geometry.plotSide * Number(nodes[index].network?.radius || 0.009);
+    return geometry.plotScale * Number(nodes[index].network?.radius || 0.009);
   }
 
   function overlapCount(projected, geometry) {
@@ -225,16 +231,6 @@ export async function initializePublicationNetwork(root) {
     requestDraw();
   }
 
-  function shouldDrawEdge(source, target) {
-    if (!state.visibleSet.has(source) || !state.visibleSet.has(target)) return false;
-    const mode = controls.edgeMode.value;
-    if (mode === "none") return false;
-    if (mode === "neighborhood") {
-      return state.selected !== null && (source === state.selected || target === state.selected);
-    }
-    return true;
-  }
-
   function drawTimelineLabels(projected, geometry) {
     if (state.layout !== "timeline") return;
     const years = [...new Set(state.visible.map((index) => nodes[index].year).filter(Number.isFinite))].sort((a, b) => a - b);
@@ -244,7 +240,7 @@ export async function initializePublicationNetwork(root) {
       : [0, 0.25, 0.5, 0.75, 1].map((fraction) => years[Math.round((years.length - 1) * fraction)]);
     context2d.save();
     context2d.fillStyle = cssValue("--muted", "#65716a");
-    context2d.font = `${geometry.plotSide < 420 ? 8 : 10}px system-ui, sans-serif`;
+    context2d.font = `${geometry.plotScale < 420 ? 8 : 10}px system-ui, sans-serif`;
     context2d.textAlign = "center";
     context2d.strokeStyle = cssValue("--network-edge", "rgba(82, 98, 115, 0.15)");
     context2d.lineWidth = 0.75;
@@ -253,7 +249,7 @@ export async function initializePublicationNetwork(root) {
       const x = matches.reduce((sum, index) => sum + projected.get(index).x, 0) / matches.length;
       context2d.beginPath();
       context2d.moveTo(x, geometry.originY);
-      context2d.lineTo(x, geometry.originY + geometry.plotSide);
+      context2d.lineTo(x, geometry.originY + geometry.plotHeight);
       context2d.stroke();
       context2d.fillText(String(year), x, Math.max(12, geometry.originY - 10));
     }
@@ -312,25 +308,23 @@ export async function initializePublicationNetwork(root) {
     context2d.clearRect(0, 0, width, height);
     drawTimelineLabels(projected, geometry);
 
-    if (controls.edgeMode.value !== "none") {
-      context2d.save();
-      const drawableEdges = edges
-        .filter(([source, target]) => shouldDrawEdge(source, target))
-        .sort(([leftSource, leftTarget], [rightSource, rightTarget]) =>
-          Number(Boolean(selectedEdgeRelation(leftSource, leftTarget))) - Number(Boolean(selectedEdgeRelation(rightSource, rightTarget))));
-      for (const [source, target] of drawableEdges) {
-        drawCitationEdge(source, target, projected, geometry);
-      }
-      context2d.restore();
+    context2d.save();
+    const drawableEdges = [...edges]
+      .sort(([leftSource, leftTarget], [rightSource, rightTarget]) =>
+        Number(Boolean(selectedEdgeRelation(leftSource, leftTarget))) - Number(Boolean(selectedEdgeRelation(rightSource, rightTarget))));
+    for (const [source, target] of drawableEdges) {
+      drawCitationEdge(source, target, projected, geometry);
     }
+    context2d.restore();
 
     const ordered = [...state.visible].sort((left, right) =>
       radiusFor(left, geometry) - radiusFor(right, geometry));
     for (const index of ordered) {
       const point = projected.get(index);
       const radius = radiusFor(index, geometry);
-      const nodeStatus = toolkitStatus(nodes[index]);
+      const implemented = isRunnable(nodes[index]);
       context2d.save();
+      if (state.searchActive && !state.matchSet.has(index) && state.selected !== index) context2d.globalAlpha = 0.22;
       if (state.selected === index) {
         context2d.beginPath();
         context2d.arc(point.x, point.y, radius + 4, 0, Math.PI * 2);
@@ -340,21 +334,15 @@ export async function initializePublicationNetwork(root) {
       }
       context2d.beginPath();
       context2d.arc(point.x, point.y, radius, 0, Math.PI * 2);
-      context2d.fillStyle = nodeStatus === "runnable"
+      context2d.fillStyle = implemented
         ? cssValue("--network-runnable", "#a9570d")
-        : nodeStatus === "supported_incomplete"
-          ? cssValue("--network-supported", "#e6c39e")
-          : nodeStatus === "adjacent_scope_conflict"
-            ? cssValue("--network-conflict", "#fff1e8")
-            : cssValue("--network-unassessed", "#f7f8f5");
+        : cssValue("--network-unassessed", "#f7f8f5");
       context2d.fill();
       context2d.strokeStyle = state.hovered === index
         ? cssValue("--text", "#1f2a25")
-        : nodeStatus === "adjacent_scope_conflict"
-          ? cssValue("--network-conflict-stroke", "#9d3f2f")
-          : cssValue("--network-node-stroke", "rgba(82, 58, 34, 0.72)");
-      context2d.lineWidth = state.hovered === index ? 2.2 : (nodeStatus === "runnable" ? 1.1 : 1.6);
-      context2d.setLineDash(nodeStatus === "not_assessed" ? [3, 2] : nodeStatus === "adjacent_scope_conflict" ? [5, 2] : []);
+        : cssValue("--network-node-stroke", "rgba(82, 58, 34, 0.72)");
+      context2d.lineWidth = state.hovered === index ? 2.2 : (implemented ? 1.1 : 1.6);
+      context2d.setLineDash(implemented ? [] : [3, 2]);
       context2d.stroke();
       context2d.restore();
     }
@@ -416,7 +404,7 @@ export async function initializePublicationNetwork(root) {
   }
 
   function renderResults() {
-    const sorted = sortResults(state.visible);
+    const sorted = sortResults(state.matches);
     const shown = sorted.slice(0, state.resultLimit);
     resultList.replaceChildren(...shown.map((index) => {
       const node = nodes[index];
@@ -441,29 +429,23 @@ export async function initializePublicationNetwork(root) {
   }
 
   function updateStatus() {
-    let availableEdges = 0;
-    let shownEdges = 0;
-    for (const [source, target] of edges) {
-      if (!state.visibleSet.has(source) || !state.visibleSet.has(target)) continue;
-      availableEdges += 1;
-      if (shouldDrawEdge(source, target)) shownEdges += 1;
-    }
-    const prefix = state.visible.length === nodes.length
-      ? `${nodes.length.toLocaleString()} audio–tactile study publications`
-      : `${state.visible.length.toLocaleString()} of ${nodes.length.toLocaleString()} audio–tactile study publications`;
+    const notImplemented = nodes.length - data.counts.toolkitRunnableNodes;
+    const matchText = state.searchActive
+      ? ` · ${state.matches.length.toLocaleString()} search match${state.matches.length === 1 ? "" : "es"} highlighted`
+      : "";
     const layoutLabel = state.layout === "timeline" ? "publication-year arrangement" : "citation topology";
     const selectedText = state.selected === null
       ? ""
       : ` · selected: ${nodes[state.selected].title} (${incoming[state.selected].length} incoming, ${outgoing[state.selected].length} outgoing)`;
-    status.textContent = `${prefix} · ${data.counts.toolkitRunnableNodes} runnable · ${data.counts.toolkitSupportedIncompleteNodes} incomplete · ${data.counts.toolkitNotAssessedNodes} to assess · ${data.counts.toolkitAdjacentConflictNodes} scope conflict · ${shownEdges.toLocaleString()} / ${availableEdges.toLocaleString()} links shown · ${layoutLabel}${selectedText}`;
+    status.textContent = `${nodes.length.toLocaleString()} audio–tactile papers · ${data.counts.toolkitRunnableNodes} implemented · ${notImplemented} not yet · all ${edges.length.toLocaleString()} indexed direct citations shown${matchText} · ${layoutLabel}${selectedText}`;
   }
 
   function updateVisible() {
     const query = controls.search.value.trim().toLocaleLowerCase();
     state.layout = currentLayout();
-    state.visible = nodes.map((_, index) => index).filter((index) => !query || searchText[index].includes(query));
-    state.visibleSet = new Set(state.visible);
-    if (state.selected !== null && !state.visibleSet.has(state.selected)) closeDetail({ restoreFocus: false });
+    state.searchActive = Boolean(query);
+    state.matches = allIndices.filter((index) => !query || searchText[index].includes(query));
+    state.matchSet = new Set(state.matches);
     state.resultLimit = RESULT_PAGE_SIZE;
     updateStatus();
     renderResults();
@@ -489,15 +471,8 @@ export async function initializePublicationNetwork(root) {
   function citationList(indices, emptyText) {
     if (!indices.length) return element("p", { className: "publication-network-detail-muted", text: emptyText });
     const sorted = [...indices]
-      .filter((index) => state.visibleSet.has(index))
       .sort((left, right) => (nodes[right].network?.inDegree || 0) - (nodes[left].network?.inDegree || 0))
       .slice(0, 24);
-    if (!sorted.length) {
-      return element("p", {
-        className: "publication-network-detail-muted",
-        text: "Citation neighbours are hidden by the current search.",
-      });
-    }
     return element("ul", { className: "publication-network-citation-list" }, sorted.map((index) => {
       const button = element("button", {
         text: `${nodes[index].title} (${nodes[index].year || "n.d."})`,
@@ -661,10 +636,6 @@ export async function initializePublicationNetwork(root) {
 
   controls.search.addEventListener("input", updateVisible);
   for (const input of controls.layout) input.addEventListener("change", updateVisible);
-  controls.edgeMode.addEventListener("change", () => {
-    updateStatus();
-    requestDraw();
-  });
   controls.resultsSort.addEventListener("change", renderResults);
   resultMore.addEventListener("click", () => {
     state.resultLimit += RESULT_PAGE_SIZE;
@@ -707,13 +678,14 @@ export async function initializePublicationNetwork(root) {
       closeDetail();
       return;
     }
-    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Enter"].includes(event.key) || !state.visible.length) return;
+    const navigable = state.searchActive && state.matches.length ? state.matches : state.visible;
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Enter"].includes(event.key) || !navigable.length) return;
     event.preventDefault();
     if (event.key === "Enter") {
-      selectNode(state.selected ?? sortResults(state.visible)[0], canvas);
+      selectNode(state.selected ?? sortResults(navigable)[0], canvas);
       return;
     }
-    const ordered = sortResults(state.visible);
+    const ordered = sortResults(navigable);
     const current = Math.max(0, ordered.indexOf(state.selected));
     const direction = event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1;
     const next = ordered[(current + direction + ordered.length) % ordered.length];
@@ -736,9 +708,17 @@ export async function initializePublicationNetwork(root) {
     const geometry = canvasGeometry();
     return {
       schema: data.schema,
-      canvas: { width: geometry.width, height: geometry.height, plotSide: geometry.plotSide },
+      canvas: {
+        width: geometry.width,
+        height: geometry.height,
+        plotWidth: geometry.plotWidth,
+        plotHeight: geometry.plotHeight,
+      },
       layout: state.layout,
       visibleCount: state.visible.length,
+      searchMatchCount: state.matches.length,
+      drawnEdgeCount: edges.length,
+      totalEdgeCount: edges.length,
       overlapCount: state.overlapCount,
       nodes: state.visible.map((index) => {
         const point = state.projected.get(index) || screenPoint(index, geometry);
@@ -747,6 +727,7 @@ export async function initializePublicationNetwork(root) {
           x: point.x,
           y: point.y,
           radius: radiusFor(index, geometry),
+          implemented: isRunnable(nodes[index]),
           runnable: isRunnable(nodes[index]),
           status: toolkitStatus(nodes[index]),
           inDegree: nodes[index].network?.inDegree || 0,

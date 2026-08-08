@@ -41,20 +41,25 @@ experiment software runs locally on the research PC.
 The `Publication & Citation Network` documentation segment renders the tracked
 `pps-publication-citation-network.v3` asset. It contains 97 non-review
 audio-tactile publications: 93 retained from the original manual confirmation
-audit and 4 added by later exact-DOI Toolkit literature audits. Its 571 directed
-citation links run from the citing publication to the cited publication.
+audit and 4 added by later exact-DOI Toolkit literature audits. Its 698 tracked
+directed citation links run from the citing publication to the cited publication:
+571 come from the frozen multi-source snapshot and 127 are a non-overlapping,
+dated exact-DOI OpenAlex refresh.
 
 The default topology is a real deterministic force layout, not a ranked grid:
-citation neighbours attract, radius-aware collision separation keeps every node
-distinct, and 22 isolates occupy a stable square perimeter. Circle area encodes
-normalized citations received within the displayed network. All links remain
-faint for context; selecting a paper emphasizes and distinguishes incoming from
-outgoing citations. The optional year layout anchors horizontal position to
-publication year while retaining collision separation.
+citation neighbours attract, all papers repel and share weak centering, and
+radius-aware collision separation keeps every node distinct. The 87-node main
+component uses the map broadly, while 10 records with no indexed within-map link
+settle under the same force rule instead of occupying an artificial perimeter.
+Circle area encodes normalized citations received within the displayed network.
+All 698 links remain visible even during search; selecting a paper emphasizes
+and distinguishes incoming from outgoing citations. The optional year layout
+anchors horizontal position to publication year while retaining collision separation.
 
-The legend exposes four Toolkit assessment states: 15 runnable, 49 supported
-but parameter-incomplete, 32 not yet assessed, and 1 adjacent/scope-conflict
-publication. Selecting a node opens bibliographic metadata, abstract
+The map legend exposes two implementation states: 15 implemented and 82 not
+implemented yet. Selecting a node still exposes the full four-state assessment
+(15 runnable, 49 supported but parameter-incomplete, 32 not yet assessed, and
+1 adjacent/scope conflict) alongside bibliographic metadata, abstract
 availability/provenance, directional citation neighbours, and every exact-DOI
 Toolkit audit record and extracted parameter available for that publication.
 

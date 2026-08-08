@@ -15,6 +15,12 @@ ROOT = Path(__file__).resolve().parents[1]
 DASHBOARD = ROOT / "src" / "peripersonal_space_toolkit" / "dashboard"
 NETWORK_ASSET = DASHBOARD / "publication_network.v3.json"
 SOURCE_SNAPSHOT = ROOT / "data" / "publication_network" / "citation_snapshot.v1.json"
+CITATION_OVERLAY = (
+    ROOT
+    / "data"
+    / "publication_network"
+    / "openalex_audiotactile_citation_overlay.20260808.json"
+)
 COVERAGE_AUDIT = ROOT / "assets" / "preloads" / "audiotactile_literature_coverage.json"
 
 
@@ -62,6 +68,10 @@ def _load_network() -> dict:
 
 def _load_source() -> dict:
     return json.loads(SOURCE_SNAPSHOT.read_text(encoding="utf-8"))
+
+
+def _load_citation_overlay() -> dict:
+    return json.loads(CITATION_OVERLAY.read_text(encoding="utf-8"))
 
 
 def _normalize_doi(value: object) -> str:
@@ -190,7 +200,6 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
         assert "checked" in topology and "checked" not in timeline
 
         assert markup.by_id("publication-network-search")[0] == "input"
-        assert markup.by_id("publication-network-edge-mode")[0] == "select"
         assert markup.by_id("publication-network-results-sort")[0] == "select"
         assert markup.by_id("publication-network-workspace")[0] == "div"
         assert markup.by_id("publication-network-stage")[0] == "div"
@@ -200,7 +209,8 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
         assert canvas["tabindex"] == "0"
         assert "publication-network-help" in (canvas["aria-describedby"] or "").split()
         assert "publication-network-status" in (canvas["aria-describedby"] or "").split()
-        assert "square citation network" in (canvas["aria-label"] or "")
+        assert "citation network" in (canvas["aria-label"] or "")
+        assert "Every paper remains visible" in (canvas["aria-label"] or "")
 
         status = markup.by_id("publication-network-status")[1]
         assert status["role"] == "status"
@@ -214,11 +224,6 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
         assert markup.by_id("publication-network-detail-close")[0] == "button"
         assert markup.by_id("publication-network-results")[0] == "ol"
 
-        all_links = re.search(
-            r'<option value="all"([^>]*)>All citation links</option>', html
-        )
-        assert all_links and "selected" in all_links.group(1)
-
         for removed_contract in (
             "publication-layout-prominence",
             "publication-network-size-metric",
@@ -229,17 +234,17 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
             "publication-network-zoom-in",
             "publication-network-zoom-out",
             "publication-network-reset-view",
+            "publication-network-edge-mode",
         ):
             assert f'id="{removed_contract}"' not in html
         assert 'value="prominence"' not in html
 
         assert "Audio–Tactile PPS Study Citation Network" in html
-        assert "all 97 non-review publications" in html
-        assert "Citation links determine the topology" in html
-        assert "Runnable Toolkit profile" in html
-        assert "Supported paradigm; parameters incomplete" in html
-        assert "Not yet assessed for Toolkit" in html
-        assert "Adjacent / scope conflict" in html
+        assert "Each of the 97 non-review publications" in html
+        assert "Every direct citation captured" in html
+        assert "Implemented in Toolkit" in html
+        assert "Not implemented yet" in html
+        assert "without an artificial perimeter" in html
 
 
 def test_publication_network_source_and_compiled_contracts_stay_in_sync() -> None:
@@ -253,9 +258,6 @@ def test_publication_network_source_and_compiled_contracts_stay_in_sync() -> Non
     for value in (
         "topology",
         "timeline",
-        "all",
-        "neighborhood",
-        "none",
         "networkReceived",
         "review-priority",
         "networkPageRank",
@@ -291,7 +293,6 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         "pps-publication-citation-network.v3",
         "publication-network-search",
         "publication-network-layout",
-        "publication-network-edge-mode",
         "publication-network-results-sort",
         "publication-network-results",
         "publication-network-detail",
@@ -300,7 +301,9 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         "nodes[index].network?.radius",
         "network?.inDegree",
         "network?.pageRank",
-        "plotSide",
+        "plotWidth",
+        "plotHeight",
+        "drawnEdgeCount",
         "overlapCount",
         "publicationNetworkAudit",
         "publicationNetworkOverlaps",
@@ -322,13 +325,14 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         "pps-publication-citation-network.v3",
         "publication-network-search",
         "publication-network-layout",
-        "publication-network-edge-mode",
         "publication-network-results-sort",
         "publication-network-results",
         "publication-network-detail",
         "publication-network-fullscreen",
         "topology",
-        "plotSide",
+        "plotWidth",
+        "plotHeight",
+        "drawnEdgeCount",
         "overlapCount",
         "publicationNetworkAudit",
         "publicationNetworkOverlaps",
@@ -370,11 +374,14 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         "publication-network-reset-view",
         "state.zoom",
         "state.pan",
+        "publication-network-edge-mode",
+        "controls.edgeMode",
+        "shouldDrawEdge",
     ):
         assert removed_contract not in network_js
 
 
-def test_publication_network_styles_cover_square_statuses_mobile_and_theme() -> None:
+def test_publication_network_styles_cover_simple_statuses_mobile_and_theme() -> None:
     styles = (DASHBOARD / "styles.css").read_text(encoding="utf-8")
     compiled_css = _compiled_assets("css")
 
@@ -390,8 +397,8 @@ def test_publication_network_styles_cover_square_statuses_mobile_and_theme() -> 
             ".publication-network-detail",
             ".publication-network-results",
             ".publication-network-tooltip",
-            ".legend-node-unassessed",
-            ".legend-node-conflict",
+            ".legend-node-implemented",
+            ".legend-node-not-implemented",
             ".legend-line-incoming",
             ".legend-line-outgoing",
         ):
@@ -409,7 +416,7 @@ def test_publication_network_styles_cover_square_statuses_mobile_and_theme() -> 
             "--network-edge-outgoing",
         ):
             assert color_variable in css
-        assert "aspect-ratio:1 / 1" in compact
+        assert "aspect-ratio:4 / 3" in compact
         assert "#publication-network-canvas" in css
         assert "width:100%" in compact
         assert "height:100%" in compact
@@ -418,6 +425,7 @@ def test_publication_network_styles_cover_square_statuses_mobile_and_theme() -> 
         assert ".publication-network-toolbar" in mobile
         assert ".publication-network-detail" in mobile
         assert "min-height:44px" in mobile
+        assert "aspect-ratio:1 / 1" in mobile
 
     for removed_variable in (
         "--network-at",
@@ -436,7 +444,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
 
     data = _load_network()
     assert data["schema"] == "pps-publication-citation-network.v3"
-    assert data["generatorVersion"] == "3.0.0"
+    assert data["generatorVersion"] == "3.1.0"
     assert data["sourceCounts"] == {
         "nodes": 1712,
         "edges": 10109,
@@ -446,7 +454,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
     }
     assert data["counts"] == {
         "nodes": 97,
-        "edges": 571,
+        "edges": 698,
         "audiotactileConfirmed": 93,
         "laterAuditAdditions": 4,
         "toolkitRecordJoins": 69,
@@ -460,9 +468,9 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "toolkitAdjacentConflictNodes": 1,
         "toolkitManualReviewRecords": 24,
         "toolkitManualReviewNodes": 21,
-        "connectedNodes": 75,
-        "isolatedNodes": 22,
-        "weakComponents": 23,
+        "connectedNodes": 87,
+        "isolatedNodes": 10,
+        "weakComponents": 11,
         "abstractsAvailable": 37,
         "abstractsSourceLinkOnly": 48,
         "abstractsNotAvailable": 12,
@@ -471,7 +479,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
     nodes = data["nodes"]
     edges = data["edges"]
     assert len(nodes) == 97
-    assert len(edges) == 571
+    assert len(edges) == 698
     node_ids = [node["id"] for node in nodes]
     assert node_ids == sorted(node_ids)
     assert len(node_ids) == len(set(node_ids))
@@ -606,21 +614,33 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "runnable": 15,
         "supported_incomplete": 49,
     }
+    assert data["facets"]["edgeProvenance"]["openalex_live_20260808"] == 127
+    assert data["citationOverlays"] == [
+        {
+            "id": "openalex-audiotactile-20260808",
+            "capturedOn": "2026-08-08",
+            "provider": "OpenAlex",
+            "edgeProvenance": "openalex_live_20260808",
+            "addedEdges": 127,
+            "scope": _load_citation_overlay()["scope"],
+        }
+    ]
     assert "readiness is an encoding, never an inclusion gate" in data["methodology"]["selection"]
     assert data["methodology"]["edgeDirection"] == "source publication cites target publication"
     assert "normalized DOI only" in data["methodology"]["toolkitJoin"]
 
 
-def test_publication_network_edges_are_the_exact_induced_citation_graph() -> None:
+def test_publication_network_edges_are_the_complete_tracked_snapshot_overlay_union() -> None:
     data = _load_network()
     source = _load_source()
+    overlay = _load_citation_overlay()
     nodes = data["nodes"]
     edges = data["edges"]
     node_ids = [node["id"] for node in nodes]
     node_index = {node_id: index for index, node_id in enumerate(node_ids)}
     selected_ids = set(node_ids)
 
-    expected_edges = {
+    expected_snapshot_edges = {
         (
             node_index[edge["source"]],
             node_index[edge["target"]],
@@ -629,6 +649,29 @@ def test_publication_network_edges_are_the_exact_induced_citation_graph() -> Non
         for edge in source["edges"]
         if edge["source"] in selected_ids and edge["target"] in selected_ids
     }
+    assert overlay["schema"] == "pps-publication-citation-overlay.v1"
+    assert overlay["scope"]["nodeCount"] == 97
+    assert overlay["scope"]["snapshotEdges"] == 571
+    assert overlay["scope"]["overlayEdges"] == 127
+    assert overlay["scope"]["expectedUnionEdges"] == 698
+    overlay_pairs = [tuple(pair) for pair in overlay["edges"]]
+    assert len(overlay_pairs) == len(set(overlay_pairs)) == 127
+    assert all(source_id in selected_ids and target_id in selected_ids
+               for source_id, target_id in overlay_pairs)
+    expected_overlay_edges = {
+        (
+            node_index[source_id],
+            node_index[target_id],
+            overlay["edgeProvenance"],
+        )
+        for source_id, target_id in overlay_pairs
+    }
+    snapshot_pairs = {(source_index, target_index) for source_index, target_index, _ in expected_snapshot_edges}
+    assert not snapshot_pairs.intersection(
+        (source_index, target_index)
+        for source_index, target_index, _ in expected_overlay_edges
+    )
+    expected_edges = expected_snapshot_edges | expected_overlay_edges
     actual_edges: set[tuple[int, int, str]] = set()
     actual_pairs: set[tuple[int, int]] = set()
     for edge in edges:
@@ -641,7 +684,8 @@ def test_publication_network_edges_are_the_exact_induced_citation_graph() -> Non
         assert (source_index, target_index) not in actual_pairs
         actual_pairs.add((source_index, target_index))
         actual_edges.add((source_index, target_index, provenance))
-    assert len(expected_edges) == 571
+    assert len(expected_snapshot_edges) == 571
+    assert len(expected_edges) == 698
     assert actual_edges == expected_edges
 
     adjacency = _weak_adjacency(len(nodes), edges)
@@ -649,14 +693,14 @@ def test_publication_network_edges_are_the_exact_induced_citation_graph() -> Non
         (min(source, target), max(source, target))
         for source, target, _provenance in edges
     }
-    assert len(weak_pairs) == 569
+    assert len(weak_pairs) == 695
     components = _weak_components(adjacency)
-    assert [len(component) for component in components] == [75] + [1] * 22
-    assert sum(bool(neighbours) for neighbours in adjacency) == 75
-    assert sum(not neighbours for neighbours in adjacency) == 22
-    assert data["counts"]["connectedNodes"] == 75
-    assert data["counts"]["isolatedNodes"] == 22
-    assert data["counts"]["weakComponents"] == 23
+    assert [len(component) for component in components] == [87] + [1] * 10
+    assert sum(bool(neighbours) for neighbours in adjacency) == 87
+    assert sum(not neighbours for neighbours in adjacency) == 10
+    assert data["counts"]["connectedNodes"] == 87
+    assert data["counts"]["isolatedNodes"] == 10
+    assert data["counts"]["weakComponents"] == 11
 
     incoming = [0] * len(nodes)
     outgoing = [0] * len(nodes)
@@ -759,34 +803,58 @@ def test_publication_network_layouts_are_continuous_collision_free_and_meaningfu
         if left < right and (left, right) not in weak_pairs
     ]
     proximity_ratio = _mean(linked_distances) / _mean(principal_non_neighbour_distances)
-    assert proximity_ratio < 0.8
+    assert proximity_ratio < 0.75
     assert math.isclose(
         data["layoutBounds"]["topology"]["edgeToPrincipalNonNeighbourRatio"],
         proximity_ratio,
         abs_tol=1e-6,
     )
 
-    radial_distances = [
-        math.hypot(position["x"] - 0.5, position["y"] - 0.5)
-        for position in topology
-    ]
-    prominence = [node["network"]["prominence"] for node in nodes]
-    prominence_centrality = _spearman(prominence, radial_distances)
-    assert prominence_centrality < -0.5
+    principal_x = [topology[index]["x"] for index in principal_component]
+    principal_y = [topology[index]["y"] for index in principal_component]
+    span_x = max(principal_x) - min(principal_x)
+    span_y = max(principal_y) - min(principal_y)
+    assert span_x >= 0.7
+    assert span_y >= 0.7
     assert math.isclose(
-        data["layoutBounds"]["topology"]["prominenceRadialSpearman"],
-        prominence_centrality,
+        data["layoutBounds"]["topology"]["principalComponentSpanX"],
+        span_x,
         abs_tol=1e-6,
     )
-    prominence_order = sorted(range(len(nodes)), key=lambda index: prominence[index], reverse=True)
-    assert _mean([radial_distances[index] for index in prominence_order[:24]]) < _mean(
-        [radial_distances[index] for index in prominence_order[-24:]]
+    assert math.isclose(
+        data["layoutBounds"]["topology"]["principalComponentSpanY"],
+        span_y,
+        abs_tol=1e-6,
     )
-    assert _mean(
-        [radial_distances[index] for index, neighbours in enumerate(adjacency) if neighbours]
-    ) < _mean(
-        [radial_distances[index] for index, neighbours in enumerate(adjacency) if not neighbours]
+    occupied_cells = {
+        (min(5, int(topology[index]["x"] * 6)), min(5, int(topology[index]["y"] * 6)))
+        for index in principal_component
+    }
+    assert len(occupied_cells) >= 20
+    assert data["layoutBounds"]["topology"]["principalComponentOccupiedGridCells6x6"] == len(occupied_cells)
+
+    nearest_distances = [
+        min(
+            math.hypot(position["x"] - other["x"], position["y"] - other["y"])
+            for other_index, other in enumerate(topology)
+            if other_index != index
+        )
+        for index, position in enumerate(topology)
+    ]
+    nearest_median = _median(nearest_distances)
+    assert nearest_median >= 0.055
+    assert math.isclose(
+        data["layoutBounds"]["topology"]["medianNearestNeighbourDistance"],
+        nearest_median,
+        abs_tol=1e-6,
     )
+    isolated_near_boundary = sum(
+        not adjacency[index]
+        and min(position["x"], 1 - position["x"], position["y"], 1 - position["y"]) < 0.09
+        for index, position in enumerate(topology)
+    )
+    assert isolated_near_boundary <= 3
+    assert data["layoutBounds"]["topology"]["isolatedNodesNearBoundary"] == isolated_near_boundary
 
     timeline_entries = [
         (node["year"], node["layouts"]["timeline"]["x"])
