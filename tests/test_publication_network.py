@@ -21,6 +21,12 @@ CITATION_OVERLAY = (
     / "publication_network"
     / "openalex_audiotactile_citation_overlay.20260808.json"
 )
+PRIMARY_SOURCE_CITATION_OVERLAY = (
+    ROOT
+    / "data"
+    / "publication_network"
+    / "primary_source_citation_overlay.20260808.json"
+)
 COVERAGE_AUDIT = ROOT / "assets" / "preloads" / "audiotactile_literature_coverage.json"
 
 
@@ -72,6 +78,10 @@ def _load_source() -> dict:
 
 def _load_citation_overlay() -> dict:
     return json.loads(CITATION_OVERLAY.read_text(encoding="utf-8"))
+
+
+def _load_primary_source_citation_overlay() -> dict:
+    return json.loads(PRIMARY_SOURCE_CITATION_OVERLAY.read_text(encoding="utf-8"))
 
 
 def _normalize_doi(value: object) -> str:
@@ -199,7 +209,6 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
         assert timeline["value"] == "timeline"
         assert "checked" in topology and "checked" not in timeline
 
-        assert markup.by_id("publication-network-search")[0] == "input"
         assert markup.by_id("publication-network-results-sort")[0] == "select"
         assert markup.by_id("publication-network-workspace")[0] == "div"
         assert markup.by_id("publication-network-stage")[0] == "div"
@@ -210,7 +219,7 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
         assert "publication-network-help" in (canvas["aria-describedby"] or "").split()
         assert "publication-network-status" in (canvas["aria-describedby"] or "").split()
         assert "citation network" in (canvas["aria-label"] or "")
-        assert "Every paper remains visible" in (canvas["aria-label"] or "")
+        assert "Use the publication list" in (canvas["aria-label"] or "")
 
         status = markup.by_id("publication-network-status")[1]
         assert status["role"] == "status"
@@ -235,6 +244,7 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
             "publication-network-zoom-out",
             "publication-network-reset-view",
             "publication-network-edge-mode",
+            "publication-network-search",
         ):
             assert f'id="{removed_contract}"' not in html
         assert 'value="prominence"' not in html
@@ -291,7 +301,6 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
     source_contracts = (
         "publication_network.v3.json",
         "pps-publication-citation-network.v3",
-        "publication-network-search",
         "publication-network-layout",
         "publication-network-results-sort",
         "publication-network-results",
@@ -323,7 +332,6 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
     for compiled_contract in (
         "publication_network.v3",
         "pps-publication-citation-network.v3",
-        "publication-network-search",
         "publication-network-layout",
         "publication-network-results-sort",
         "publication-network-results",
@@ -377,6 +385,11 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         "publication-network-edge-mode",
         "controls.edgeMode",
         "shouldDrawEdge",
+        "nodeSearchText",
+        "searchActive",
+        "searchMatchCount",
+        "matchSet",
+        "controls.search",
     ):
         assert removed_contract not in network_js
 
@@ -416,7 +429,7 @@ def test_publication_network_styles_cover_simple_statuses_mobile_and_theme() -> 
             "--network-edge-outgoing",
         ):
             assert color_variable in css
-        assert "aspect-ratio:4 / 3" in compact
+        assert "aspect-ratio:1 / 1" in compact
         assert "#publication-network-canvas" in css
         assert "width:100%" in compact
         assert "height:100%" in compact
@@ -444,7 +457,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
 
     data = _load_network()
     assert data["schema"] == "pps-publication-citation-network.v3"
-    assert data["generatorVersion"] == "3.1.0"
+    assert data["generatorVersion"] == "3.2.0"
     assert data["sourceCounts"] == {
         "nodes": 1712,
         "edges": 10109,
@@ -454,7 +467,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
     }
     assert data["counts"] == {
         "nodes": 97,
-        "edges": 698,
+        "edges": 758,
         "audiotactileConfirmed": 93,
         "laterAuditAdditions": 4,
         "toolkitRecordJoins": 69,
@@ -468,9 +481,9 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "toolkitAdjacentConflictNodes": 1,
         "toolkitManualReviewRecords": 24,
         "toolkitManualReviewNodes": 21,
-        "connectedNodes": 87,
-        "isolatedNodes": 10,
-        "weakComponents": 11,
+        "connectedNodes": 93,
+        "isolatedNodes": 4,
+        "weakComponents": 5,
         "abstractsAvailable": 37,
         "abstractsSourceLinkOnly": 48,
         "abstractsNotAvailable": 12,
@@ -479,7 +492,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
     nodes = data["nodes"]
     edges = data["edges"]
     assert len(nodes) == 97
-    assert len(edges) == 698
+    assert len(edges) == 758
     node_ids = [node["id"] for node in nodes]
     assert node_ids == sorted(node_ids)
     assert len(node_ids) == len(set(node_ids))
@@ -615,6 +628,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "supported_incomplete": 49,
     }
     assert data["facets"]["edgeProvenance"]["openalex_live_20260808"] == 127
+    assert data["facets"]["edgeProvenance"]["primary_source_audit_20260808"] == 60
     assert data["citationOverlays"] == [
         {
             "id": "openalex-audiotactile-20260808",
@@ -623,7 +637,15 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
             "edgeProvenance": "openalex_live_20260808",
             "addedEdges": 127,
             "scope": _load_citation_overlay()["scope"],
-        }
+        },
+        {
+            "id": "primary-source-isolate-audit-20260808",
+            "capturedOn": "2026-08-08",
+            "provider": "Primary-source reference-list audit",
+            "edgeProvenance": "primary_source_audit_20260808",
+            "addedEdges": 60,
+            "scope": _load_primary_source_citation_overlay()["scope"],
+        },
     ]
     assert "readiness is an encoding, never an inclusion gate" in data["methodology"]["selection"]
     assert data["methodology"]["edgeDirection"] == "source publication cites target publication"
@@ -634,6 +656,7 @@ def test_publication_network_edges_are_the_complete_tracked_snapshot_overlay_uni
     data = _load_network()
     source = _load_source()
     overlay = _load_citation_overlay()
+    primary_overlay = _load_primary_source_citation_overlay()
     nodes = data["nodes"]
     edges = data["edges"]
     node_ids = [node["id"] for node in nodes]
@@ -653,6 +676,7 @@ def test_publication_network_edges_are_the_complete_tracked_snapshot_overlay_uni
     assert overlay["scope"]["nodeCount"] == 97
     assert overlay["scope"]["snapshotEdges"] == 571
     assert overlay["scope"]["overlayEdges"] == 127
+    assert overlay["scope"]["baseUnionEdges"] == 571
     assert overlay["scope"]["expectedUnionEdges"] == 698
     overlay_pairs = [tuple(pair) for pair in overlay["edges"]]
     assert len(overlay_pairs) == len(set(overlay_pairs)) == 127
@@ -671,7 +695,45 @@ def test_publication_network_edges_are_the_complete_tracked_snapshot_overlay_uni
         (source_index, target_index)
         for source_index, target_index, _ in expected_overlay_edges
     )
-    expected_edges = expected_snapshot_edges | expected_overlay_edges
+    assert primary_overlay["schema"] == "pps-publication-citation-overlay.v1"
+    assert primary_overlay["scope"] == {
+        "networkSchema": "pps-publication-citation-network.v3",
+        "nodeCount": 97,
+        "auditedSourceNodes": 6,
+        "baseUnionEdges": 698,
+        "overlayEdges": 60,
+        "expectedUnionEdges": 758,
+    }
+    primary_pairs = [tuple(pair) for pair in primary_overlay["edges"]]
+    assert len(primary_pairs) == len(set(primary_pairs)) == 60
+    assert all(source_id in selected_ids and target_id in selected_ids
+               for source_id, target_id in primary_pairs)
+    expected_primary_edges = {
+        (
+            node_index[source_id],
+            node_index[target_id],
+            primary_overlay["edgeProvenance"],
+        )
+        for source_id, target_id in primary_pairs
+    }
+    earlier_pairs = snapshot_pairs | {
+        (source_index, target_index)
+        for source_index, target_index, _ in expected_overlay_edges
+    }
+    assert not earlier_pairs.intersection(
+        (source_index, target_index)
+        for source_index, target_index, _ in expected_primary_edges
+    )
+    assert sum(source["verifiedEdges"] for source in primary_overlay["sources"]) == 60
+    assert {source["nodeId"] for source in primary_overlay["sources"]} == {
+        "doi:10.1101/2024.10.25.619776",
+        "doi:10.17605/osf.io/73x59",
+        "doi:10.31234/osf.io/etvb6_v1",
+        "doi:10.61782/fa.2025.0866",
+        "s2:a59674e92994a1800d2b458998ca84ec8173bff1",
+        "s2:dc9efaa028822672316fdac32cf9b5c66e656594",
+    }
+    expected_edges = expected_snapshot_edges | expected_overlay_edges | expected_primary_edges
     actual_edges: set[tuple[int, int, str]] = set()
     actual_pairs: set[tuple[int, int]] = set()
     for edge in edges:
@@ -685,7 +747,7 @@ def test_publication_network_edges_are_the_complete_tracked_snapshot_overlay_uni
         actual_pairs.add((source_index, target_index))
         actual_edges.add((source_index, target_index, provenance))
     assert len(expected_snapshot_edges) == 571
-    assert len(expected_edges) == 698
+    assert len(expected_edges) == 758
     assert actual_edges == expected_edges
 
     adjacency = _weak_adjacency(len(nodes), edges)
@@ -693,14 +755,14 @@ def test_publication_network_edges_are_the_complete_tracked_snapshot_overlay_uni
         (min(source, target), max(source, target))
         for source, target, _provenance in edges
     }
-    assert len(weak_pairs) == 695
+    assert len(weak_pairs) == 755
     components = _weak_components(adjacency)
-    assert [len(component) for component in components] == [87] + [1] * 10
-    assert sum(bool(neighbours) for neighbours in adjacency) == 87
-    assert sum(not neighbours for neighbours in adjacency) == 10
-    assert data["counts"]["connectedNodes"] == 87
-    assert data["counts"]["isolatedNodes"] == 10
-    assert data["counts"]["weakComponents"] == 11
+    assert [len(component) for component in components] == [93] + [1] * 4
+    assert sum(bool(neighbours) for neighbours in adjacency) == 93
+    assert sum(not neighbours for neighbours in adjacency) == 4
+    assert data["counts"]["connectedNodes"] == 93
+    assert data["counts"]["isolatedNodes"] == 4
+    assert data["counts"]["weakComponents"] == 5
 
     incoming = [0] * len(nodes)
     outgoing = [0] * len(nodes)
@@ -743,7 +805,7 @@ def test_publication_network_layouts_are_continuous_collision_free_and_meaningfu
         "nodeExtentMargin": 0.045,
         "minimumNodeRadius": 0.009,
         "maximumNodeRadius": 0.021,
-        "requiredNodeClearance": 0.0045,
+        "requiredNodeClearance": 0.0075,
     }
 
     for layout_name in ("topology", "timeline"):

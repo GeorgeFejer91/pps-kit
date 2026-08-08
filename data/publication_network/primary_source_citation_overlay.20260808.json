@@ -1,0 +1,125 @@
+{
+  "schema": "pps-publication-citation-overlay.v1",
+  "overlayId": "primary-source-isolate-audit-20260808",
+  "capturedOn": "2026-08-08",
+  "provider": {
+    "name": "Primary-source reference-list audit",
+    "method": "Manual verification of each reference list against exact DOI or unambiguous title/author identity in the 97-publication network.",
+    "reuseBoundary": "Only bibliographic citation facts are recorded; source full text is not redistributed."
+  },
+  "scope": {
+    "networkSchema": "pps-publication-citation-network.v3",
+    "nodeCount": 97,
+    "auditedSourceNodes": 6,
+    "baseUnionEdges": 698,
+    "overlayEdges": 60,
+    "expectedUnionEdges": 758
+  },
+  "edgeDirection": "source publication cites target publication",
+  "edgeProvenance": "primary_source_audit_20260808",
+  "sources": [
+    {
+      "nodeId": "doi:10.1101/2024.10.25.619776",
+      "sourceUrl": "https://www.biorxiv.org/content/10.1101/2024.10.25.619776v1.full.pdf",
+      "verifiedEdges": 7,
+      "note": "Preprint reference list; this record is a version of the final article 10.1016/j.xcrm.2026.102705, which remains a separate node pending study-level consolidation."
+    },
+    {
+      "nodeId": "doi:10.17605/osf.io/73x59",
+      "sourceUrl": "https://osf.io/download/fncxq/",
+      "verifiedEdges": 23,
+      "note": "Deposited manuscript in the OSF project; the project corresponds to the publication 10.1007/s00221-020-05771-5, which remains a separate node pending study-level consolidation."
+    },
+    {
+      "nodeId": "doi:10.31234/osf.io/etvb6_v1",
+      "sourceUrl": "https://osf.io/download/gnv46/",
+      "verifiedEdges": 13,
+      "note": "PsyArXiv preprint reference list."
+    },
+    {
+      "nodeId": "doi:10.61782/fa.2025.0866",
+      "sourceUrl": "https://dael.euracoustics.org/confs/fa2025/data/articles/000866.pdf",
+      "verifiedEdges": 9,
+      "note": "Forum Acusticum proceedings-paper reference list."
+    },
+    {
+      "nodeId": "s2:dc9efaa028822672316fdac32cf9b5c66e656594",
+      "sourceUrl": "https://www.myk.dis.titech.ac.jp/2007hp/paper/doctor2/2011m/doctor2_2011m_2.pdf",
+      "verifiedEdges": 5,
+      "note": "MSc thesis reference list; retained as an empirical gray-literature candidate pending scope review."
+    },
+    {
+      "nodeId": "s2:a59674e92994a1800d2b458998ca84ec8173bff1",
+      "sourceUrl": "https://www.epfl.ch/labs/lnco/wp-content/uploads/2018/08/PPSsetup.pdf",
+      "verifiedEdges": 3,
+      "note": "Technical setup document, not an experimental paper; retained temporarily pending study/resource separation."
+    }
+  ],
+  "edges": [
+    ["doi:10.1101/2024.10.25.619776", "doi:10.1016/j.cognition.2015.07.012"],
+    ["doi:10.1101/2024.10.25.619776", "doi:10.1016/j.cortex.2021.08.004"],
+    ["doi:10.1101/2024.10.25.619776", "doi:10.1016/j.neuropsychologia.2014.10.027"],
+    ["doi:10.1101/2024.10.25.619776", "doi:10.1016/j.neuropsychologia.2021.107823"],
+    ["doi:10.1101/2024.10.25.619776", "doi:10.1016/j.nicl.2019.101940"],
+    ["doi:10.1101/2024.10.25.619776", "doi:10.1073/pnas.2024548118"],
+    ["doi:10.1101/2024.10.25.619776", "doi:10.1093/cercor/bhy156"],
+
+    ["doi:10.17605/osf.io/73x59", "doi:10.1007/s00221-005-2393-8"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1007/s00221-013-3532-2"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1007/s00221-013-3574-5"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1007/s00221-017-5158-2"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1007/s00221-019-05469-3"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1016/j.cognition.2015.07.012"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1016/j.cognition.2018.04.001"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1016/j.cub.2013.01.043"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1016/j.neuropsychologia.2008.07.025"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1016/j.neuropsychologia.2009.11.009"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1016/j.neuropsychologia.2014.08.030"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1016/j.neuropsychologia.2014.10.027"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1016/j.neuropsychologia.2015.03.001"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1038/srep02844"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1038/srep18603"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1111/ejn.13872"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1111/j.1467-9280.2007.01952.x"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1152/jn.00652.2017"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1162/jocn_a_00006"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1371/journal.pone.0044306"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.1523/jneurosci.1696-15.2015"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.3233/rnn-120286"],
+    ["doi:10.17605/osf.io/73x59", "doi:10.3389/fpsyg.2015.00639"],
+
+    ["doi:10.31234/osf.io/etvb6_v1", "doi:10.1007/s00426-020-01365-6"],
+    ["doi:10.31234/osf.io/etvb6_v1", "doi:10.1016/j.cognition.2015.07.012"],
+    ["doi:10.31234/osf.io/etvb6_v1", "doi:10.1016/j.cortex.2017.08.033"],
+    ["doi:10.31234/osf.io/etvb6_v1", "doi:10.1016/j.cub.2013.01.043"],
+    ["doi:10.31234/osf.io/etvb6_v1", "doi:10.1016/j.neuropsychologia.2014.10.027"],
+    ["doi:10.31234/osf.io/etvb6_v1", "doi:10.1016/j.neuropsychologia.2020.107579"],
+    ["doi:10.31234/osf.io/etvb6_v1", "doi:10.1093/cercor/bhy156"],
+    ["doi:10.31234/osf.io/etvb6_v1", "doi:10.1093/schbul/sbac067"],
+    ["doi:10.31234/osf.io/etvb6_v1", "doi:10.1098/rsos.181878"],
+    ["doi:10.31234/osf.io/etvb6_v1", "doi:10.1111/j.1467-9280.2007.01952.x"],
+    ["doi:10.31234/osf.io/etvb6_v1", "doi:10.1371/journal.pone.0006582"],
+    ["doi:10.31234/osf.io/etvb6_v1", "doi:10.1371/journal.pone.0044306"],
+    ["doi:10.31234/osf.io/etvb6_v1", "doi:10.3389/fnbeh.2015.00004"],
+
+    ["doi:10.61782/fa.2025.0866", "doi:10.1016/j.cognition.2015.07.012"],
+    ["doi:10.61782/fa.2025.0866", "doi:10.1016/j.cub.2013.01.043"],
+    ["doi:10.61782/fa.2025.0866", "doi:10.1016/j.jneumeth.2019.108534"],
+    ["doi:10.61782/fa.2025.0866", "doi:10.1016/j.neuropsychologia.2015.03.001"],
+    ["doi:10.61782/fa.2025.0866", "doi:10.1038/srep02844"],
+    ["doi:10.61782/fa.2025.0866", "doi:10.1038/srep18603"],
+    ["doi:10.61782/fa.2025.0866", "doi:10.1111/ejn.13872"],
+    ["doi:10.61782/fa.2025.0866", "doi:10.1371/journal.pone.0044306"],
+    ["doi:10.61782/fa.2025.0866", "doi:10.3389/fict.2017.00031"],
+
+    ["s2:dc9efaa028822672316fdac32cf9b5c66e656594", "doi:10.1007/s00221-005-2393-8"],
+    ["s2:dc9efaa028822672316fdac32cf9b5c66e656594", "doi:10.1016/j.actpsy.2004.10.017"],
+    ["s2:dc9efaa028822672316fdac32cf9b5c66e656594", "doi:10.1016/j.neuropsychologia.2006.12.004"],
+    ["s2:dc9efaa028822672316fdac32cf9b5c66e656594", "doi:10.1093/cercor/bhh197"],
+    ["s2:dc9efaa028822672316fdac32cf9b5c66e656594", "doi:10.1162/089892902320474481"],
+
+    ["s2:a59674e92994a1800d2b458998ca84ec8173bff1", "doi:10.1016/j.cub.2013.01.043"],
+    ["s2:a59674e92994a1800d2b458998ca84ec8173bff1", "doi:10.1016/j.neuropsychologia.2014.08.030"],
+    ["s2:a59674e92994a1800d2b458998ca84ec8173bff1", "doi:10.1371/journal.pone.0044306"]
+  ]
+}

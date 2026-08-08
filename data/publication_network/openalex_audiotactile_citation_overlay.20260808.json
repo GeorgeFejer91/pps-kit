@@ -20,6 +20,7 @@
     "overlapWithSnapshot": 563,
     "overlayEdges": 127,
     "snapshotOnlyEdges": 8,
+    "baseUnionEdges": 571,
     "expectedUnionEdges": 698
   },
   "edgeDirection": "source publication cites target publication",

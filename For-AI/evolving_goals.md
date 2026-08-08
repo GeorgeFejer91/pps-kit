@@ -2017,23 +2017,27 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 ## 2026-08-08 — Dense, citation-refreshed audio-tactile publication network v3
 
 - The Documentation map now projects 97 non-review audio-tactile publications
-  and 698 directed citation links: 93 original manually confirmed records plus
-  4 later exact-DOI audit additions, with 571 links from the frozen snapshot and
-  127 non-overlapping links from a 2026-08-08 exact-DOI OpenAlex overlay.
+  and 758 directed citation links: 93 original manually confirmed records plus
+  4 later exact-DOI audit additions, with 571 links from the frozen snapshot,
+  127 non-overlapping links from a 2026-08-08 exact-DOI OpenAlex overlay, and
+  60 links verified directly in six provider-isolated primary reference lists.
   Readiness is encoded, not used as an inclusion gate; the map shows 15
   implemented versus 82 not implemented yet, while details retain the four
   Toolkit states of 15 runnable, 49 incomplete, 32 not assessed, and 1
   adjacent/scope conflict.
 - The default responsive topology is a deterministic continuous force layout
   with citation attraction, all-node repulsion and weak centring, and
-  radius-aware collision separation. The 87-node main component spans most of
-  the map; the 10 records without an indexed within-map link are no longer
-  assigned to a perimeter. Node area represents normalized displayed-network
+  radius-aware collision separation with declared clearance increased from
+  `0.0045` to `0.0075`. The 93-node main component spans most of the map; the 4
+  records without a verified within-map link are no longer
+  assigned to a perimeter. The canvas is square at desktop and phone widths.
+  Node area represents normalized displayed-network
   citations received. A collision-free year-anchored layout remains the
   complementary chronological view.
-- All links stay visible during search; search highlights matching nodes and
-  filters only the semantic result list. Selecting a paper distinguishes incoming from
-  outgoing neighbours and opens accessible metadata, provenance, abstract, and
+- The compact toolbar contains only the topology/year arrangement choice; the
+  paper-search field and citation-link selector are intentionally absent. All
+  links stay visible. Selecting a paper distinguishes incoming from outgoing
+  neighbours and opens accessible metadata, provenance, abstract, and
   exact-DOI Toolkit-parameter details. The broad 1,712-node/10,109-edge v1
   source remains a dated discovery corpus, while the generated v3 asset is the
   identical packaged/local and GitHub Pages view. Neither is exhaustive,

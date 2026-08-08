@@ -61,19 +61,6 @@ function isRunnable(node) {
   return toolkitStatus(node) === "runnable";
 }
 
-function nodeSearchText(node) {
-  return [
-    node.title,
-    node.authors?.join(" "),
-    node.doi,
-    node.year,
-    node.venue,
-    toolkitStatusLabel(node),
-    node.corpus?.documentRole,
-    ...(node.toolkit?.records || []).map((record) => record.taskFamily),
-  ].join(" ").toLocaleLowerCase();
-}
-
 function makeBadge(text, className = "") {
   return element("span", { className: `publication-network-badge ${className}`.trim(), text });
 }
@@ -101,7 +88,6 @@ export async function initializePublicationNetwork(root) {
   if (!root || root.dataset.publicationNetworkState === "ready") return;
 
   const controls = {
-    search: root.querySelector("#publication-network-search"),
     layout: [...root.querySelectorAll('input[name="publication-network-layout"]')],
     resultsSort: root.querySelector("#publication-network-results-sort"),
   };
@@ -141,15 +127,11 @@ export async function initializePublicationNetwork(root) {
     outgoing[source].push(target);
     incoming[target].push(source);
   }
-  const searchText = nodes.map(nodeSearchText);
   const allIndices = nodes.map((_, index) => index);
   const state = {
     layout: "topology",
     visible: allIndices,
     visibleSet: new Set(allIndices),
-    matches: allIndices,
-    matchSet: new Set(allIndices),
-    searchActive: false,
     selected: null,
     hovered: null,
     resultLimit: RESULT_PAGE_SIZE,
@@ -324,7 +306,6 @@ export async function initializePublicationNetwork(root) {
       const radius = radiusFor(index, geometry);
       const implemented = isRunnable(nodes[index]);
       context2d.save();
-      if (state.searchActive && !state.matchSet.has(index) && state.selected !== index) context2d.globalAlpha = 0.22;
       if (state.selected === index) {
         context2d.beginPath();
         context2d.arc(point.x, point.y, radius + 4, 0, Math.PI * 2);
@@ -404,7 +385,7 @@ export async function initializePublicationNetwork(root) {
   }
 
   function renderResults() {
-    const sorted = sortResults(state.matches);
+    const sorted = sortResults(state.visible);
     const shown = sorted.slice(0, state.resultLimit);
     resultList.replaceChildren(...shown.map((index) => {
       const node = nodes[index];
@@ -430,22 +411,15 @@ export async function initializePublicationNetwork(root) {
 
   function updateStatus() {
     const notImplemented = nodes.length - data.counts.toolkitRunnableNodes;
-    const matchText = state.searchActive
-      ? ` · ${state.matches.length.toLocaleString()} search match${state.matches.length === 1 ? "" : "es"} highlighted`
-      : "";
     const layoutLabel = state.layout === "timeline" ? "publication-year arrangement" : "citation topology";
     const selectedText = state.selected === null
       ? ""
       : ` · selected: ${nodes[state.selected].title} (${incoming[state.selected].length} incoming, ${outgoing[state.selected].length} outgoing)`;
-    status.textContent = `${nodes.length.toLocaleString()} audio–tactile papers · ${data.counts.toolkitRunnableNodes} implemented · ${notImplemented} not yet · all ${edges.length.toLocaleString()} indexed direct citations shown${matchText} · ${layoutLabel}${selectedText}`;
+    status.textContent = `${nodes.length.toLocaleString()} audio–tactile papers · ${data.counts.toolkitRunnableNodes} implemented · ${notImplemented} not yet · all ${edges.length.toLocaleString()} indexed direct citations shown · ${layoutLabel}${selectedText}`;
   }
 
-  function updateVisible() {
-    const query = controls.search.value.trim().toLocaleLowerCase();
+  function updateLayout() {
     state.layout = currentLayout();
-    state.searchActive = Boolean(query);
-    state.matches = allIndices.filter((index) => !query || searchText[index].includes(query));
-    state.matchSet = new Set(state.matches);
     state.resultLimit = RESULT_PAGE_SIZE;
     updateStatus();
     renderResults();
@@ -634,8 +608,7 @@ export async function initializePublicationNetwork(root) {
     }
   }
 
-  controls.search.addEventListener("input", updateVisible);
-  for (const input of controls.layout) input.addEventListener("change", updateVisible);
+  for (const input of controls.layout) input.addEventListener("change", updateLayout);
   controls.resultsSort.addEventListener("change", renderResults);
   resultMore.addEventListener("click", () => {
     state.resultLimit += RESULT_PAGE_SIZE;
@@ -678,7 +651,7 @@ export async function initializePublicationNetwork(root) {
       closeDetail();
       return;
     }
-    const navigable = state.searchActive && state.matches.length ? state.matches : state.visible;
+    const navigable = state.visible;
     if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Enter"].includes(event.key) || !navigable.length) return;
     event.preventDefault();
     if (event.key === "Enter") {
@@ -716,7 +689,6 @@ export async function initializePublicationNetwork(root) {
       },
       layout: state.layout,
       visibleCount: state.visible.length,
-      searchMatchCount: state.matches.length,
       drawnEdgeCount: edges.length,
       totalEdgeCount: edges.length,
       overlapCount: state.overlapCount,
@@ -747,7 +719,7 @@ export async function initializePublicationNetwork(root) {
   root.dataset.publicationNetworkNodes = String(nodes.length);
   root.dataset.publicationNetworkEdges = String(edges.length);
   root.dataset.publicationNetworkRecords = String(data.counts.toolkitRecordJoins);
-  updateVisible();
+  updateLayout();
   resizeCanvas();
   root.dispatchEvent(new CustomEvent("pps:publication-network-ready", {
     bubbles: true,

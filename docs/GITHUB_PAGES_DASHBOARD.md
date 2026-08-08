@@ -41,19 +41,21 @@ experiment software runs locally on the research PC.
 The `Publication & Citation Network` documentation segment renders the tracked
 `pps-publication-citation-network.v3` asset. It contains 97 non-review
 audio-tactile publications: 93 retained from the original manual confirmation
-audit and 4 added by later exact-DOI Toolkit literature audits. Its 698 tracked
+audit and 4 added by later exact-DOI Toolkit literature audits. Its 758 tracked
 directed citation links run from the citing publication to the cited publication:
 571 come from the frozen multi-source snapshot and 127 are a non-overlapping,
-dated exact-DOI OpenAlex refresh.
+dated exact-DOI OpenAlex refresh. A further 60 links were verified directly in
+the primary reference lists of six records that remained provider-isolated.
 
 The default topology is a real deterministic force layout, not a ranked grid:
 citation neighbours attract, all papers repel and share weak centering, and
-radius-aware collision separation keeps every node distinct. The 87-node main
-component uses the map broadly, while 10 records with no indexed within-map link
+radius-aware collision separation keeps every node distinct on the same square
+plotting surface at desktop and phone widths. The 93-node main
+component uses the map broadly, while 4 records with no verified within-map link
 settle under the same force rule instead of occupying an artificial perimeter.
 Circle area encodes normalized citations received within the displayed network.
-All 698 links remain visible even during search; selecting a paper emphasizes
-and distinguishes incoming from outgoing citations. The optional year layout
+All 758 links remain visible; selecting a paper emphasizes and distinguishes
+incoming from outgoing citations. The optional year layout
 anchors horizontal position to publication year while retaining collision separation.
 
 The map legend exposes two implementation states: 15 implemented and 82 not

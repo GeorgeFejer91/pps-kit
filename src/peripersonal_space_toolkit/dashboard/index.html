@@ -6,7 +6,7 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260808-publication-network-density">
+  <link rel="stylesheet" href="styles.css?v=20260808-publication-network-clean">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -226,7 +226,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260808-publication-network-density"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260808-publication-network-clean"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -729,11 +729,6 @@
 
           <div class="publication-network-shell" aria-describedby="publication-network-help">
             <div class="publication-network-toolbar" aria-label="Publication network controls">
-              <div class="publication-network-search-group">
-                <label for="publication-network-search">Find and highlight a paper</label>
-                <input id="publication-network-search" type="search" autocomplete="off" placeholder="Title, author, DOI, or year">
-              </div>
-
               <fieldset class="publication-network-layout-group">
                 <legend>Arrange nodes</legend>
                 <div class="publication-network-segmented">
@@ -765,7 +760,7 @@
 
             <div id="publication-network-workspace" class="publication-network-workspace">
               <div id="publication-network-stage" class="publication-network-stage">
-                <canvas id="publication-network-canvas" tabindex="0" aria-label="Interactive citation network of 97 audio-tactile PPS study publications. Every paper remains visible while search highlights matches. Use the publication list for keyboard access, or use arrow keys to move between papers." aria-describedby="publication-network-help publication-network-status"></canvas>
+                <canvas id="publication-network-canvas" tabindex="0" aria-label="Interactive citation network of 97 audio-tactile PPS study publications. Use the publication list for keyboard access, or use arrow keys to move between papers." aria-describedby="publication-network-help publication-network-status"></canvas>
                 <div id="publication-network-loading" class="publication-network-loading" role="status">
                   <span class="publication-network-spinner" aria-hidden="true"></span>
                   <span>Preparing publication network…</span>
@@ -785,7 +780,7 @@
               </aside>
             </div>
 
-            <p id="publication-network-help" class="publication-network-help">In Citation topology, linked papers stay nearer one another while every paper repels its neighbours, producing dense and sparse regions without an artificial perimeter. A paper with no line has no direct within-map citation captured by the dated sources; it may still cite or be cited by work outside this 97-paper set, or by references an index could not match. Search highlights matches without removing any paper or citation. Select a circle to distinguish its incoming and outgoing citations and inspect the full readiness assessment. Publication year provides a chronological arrangement.</p>
+            <p id="publication-network-help" class="publication-network-help">In Citation topology, linked papers stay nearer one another while every paper repels its neighbours, producing dense and sparse regions without an artificial perimeter. A paper with no line has no direct within-map citation captured by the dated sources; it may still cite or be cited by work outside this 97-paper set, or by references an index could not match. Select a circle to distinguish its incoming and outgoing citations and inspect the full readiness assessment. Publication year provides a chronological arrangement.</p>
 
             <details class="publication-network-results-panel">
               <summary><span>Audio–tactile study publications</span><strong id="publication-network-results-count">0 results</strong></summary>
@@ -1324,7 +1319,7 @@
       </form>
     </div>
   </div>
-  <script type="module" src="app.js?v=20260808-publication-network-density"></script>
-  <script type="module" src="designer_main.js?v=20260808-publication-network-density"></script>
+  <script type="module" src="app.js?v=20260808-publication-network-clean"></script>
+  <script type="module" src="designer_main.js?v=20260808-publication-network-clean"></script>
 </body>
 </html>

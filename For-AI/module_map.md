@@ -399,8 +399,9 @@ The paper audit is a core pipeline, not a side report. It catalogs the needs, pr
 The public citation-network projection is a separate generated discovery
 surface. Keep its `pps-publication-citation-network.v3` schema and focused counts
 covered by `tests/test_publication_network.py`: 97 non-review verified/audited
-audio-tactile publications and 698 tracked links (571 frozen-snapshot links plus
-127 non-overlapping exact-DOI OpenAlex overlay links). The map exposes two
+audio-tactile publications and 758 tracked links (571 frozen-snapshot links,
+127 non-overlapping exact-DOI OpenAlex overlay links, and 60 primary-reference
+audit links). The map exposes two
 implementation states, 15 implemented and 82 not yet, while paper details retain
 the four Toolkit states of 15 runnable, 49 supported-incomplete, 32 not-assessed,
 and 1 adjacent/scope-conflict. The generator owns deterministic density-preserving

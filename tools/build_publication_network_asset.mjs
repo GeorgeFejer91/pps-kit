@@ -14,10 +14,10 @@ const DEFAULT_OUTPUT = path.join(
   REPO_ROOT,
   "src/peripersonal_space_toolkit/dashboard/publication_network.v3.json",
 );
-const CITATION_OVERLAY_PATH = path.join(
-  REPO_ROOT,
+const CITATION_OVERLAY_PATHS = [
   "data/publication_network/openalex_audiotactile_citation_overlay.20260808.json",
-);
+  "data/publication_network/primary_source_citation_overlay.20260808.json",
+].map((relativePath) => path.join(REPO_ROOT, relativePath));
 const COVERAGE_PATH = path.join(
   REPO_ROOT,
   "assets/preloads/audiotactile_literature_coverage.json",
@@ -37,7 +37,7 @@ const SOURCE_EXPECTED = Object.freeze({
 
 const NETWORK_EXPECTED = Object.freeze({
   nodes: 97,
-  edges: 698,
+  edges: 758,
   audiotactileConfirmed: 93,
   laterAuditAdditions: 4,
   toolkitRecordJoins: 69,
@@ -51,9 +51,9 @@ const NETWORK_EXPECTED = Object.freeze({
   toolkitAdjacentConflictNodes: 1,
   toolkitManualReviewRecords: 24,
   toolkitManualReviewNodes: 21,
-  connectedNodes: 87,
-  isolatedNodes: 10,
-  weakComponents: 11,
+  connectedNodes: 93,
+  isolatedNodes: 4,
+  weakComponents: 5,
   abstractsAvailable: 37,
   abstractsSourceLinkOnly: 48,
   abstractsNotAvailable: 12,
@@ -64,11 +64,11 @@ const ASSET_SCHEMA = "pps-publication-citation-network.v3";
 const OVERLAY_SCHEMA = "pps-publication-citation-overlay.v1";
 const SNAPSHOT_ID = "pps-citation-network-20260807";
 const SNAPSHOT_DATE = "2026-08-07";
-const GENERATOR_VERSION = "3.1.0";
+const GENERATOR_VERSION = "3.2.0";
 const LAYOUT_MARGIN = 0.045;
 const NODE_RADIUS_MIN = 0.009;
 const NODE_RADIUS_MAX = 0.021;
-const NODE_CLEARANCE = 0.0045;
+const NODE_CLEARANCE = 0.0075;
 const TOPOLOGY_ITERATIONS = 500;
 
 function usage() {
@@ -965,29 +965,38 @@ function scopeForNode(node) {
   };
 }
 
-function loadCitationOverlay(networkIds, snapshotNetworkEdges) {
-  const overlay = readJson(CITATION_OVERLAY_PATH);
-  assert(overlay.schema === OVERLAY_SCHEMA, `Expected ${OVERLAY_SCHEMA}; got ${overlay.schema}`);
-  assert(overlay.scope?.nodeCount === networkIds.size, "Citation overlay node scope is stale");
-  assert(overlay.scope?.snapshotEdges === snapshotNetworkEdges.length, "Citation overlay snapshot edge count is stale");
-  assert(overlay.scope?.overlayEdges === overlay.edges?.length, "Citation overlay edge count is stale");
-  assert(overlay.scope?.expectedUnionEdges === snapshotNetworkEdges.length + overlay.edges.length, "Citation overlay union count is stale");
-  assert(typeof overlay.edgeProvenance === "string" && overlay.edgeProvenance, "Citation overlay requires edge provenance");
-  const snapshotKeys = new Set(snapshotNetworkEdges.map((edge) => `${edge.source}\u0000${edge.target}`));
-  const overlayKeys = new Set();
-  const edges = overlay.edges.map((pair) => {
-    assert(Array.isArray(pair) && pair.length === 2, "Citation overlay edges must be [source, target]");
-    const [source, target] = pair;
-    assert(networkIds.has(source) && networkIds.has(target), `Citation overlay endpoint is outside the 97-node scope: ${source} -> ${target}`);
-    assert(source !== target, `Citation overlay contains self-link ${source}`);
-    const key = `${source}\u0000${target}`;
-    assert(!snapshotKeys.has(key), `Citation overlay duplicates snapshot edge ${source} -> ${target}`);
-    assert(!overlayKeys.has(key), `Citation overlay contains duplicate edge ${source} -> ${target}`);
-    overlayKeys.add(key);
-    return { source, target, provenance: overlay.edgeProvenance };
-  });
-  assert(edges.length === 127, `Expected 127 citation overlay edges; got ${edges.length}`);
-  return { overlay, edges };
+function loadCitationOverlays(networkIds, snapshotNetworkEdges) {
+  const existingKeys = new Set(snapshotNetworkEdges.map((edge) => `${edge.source}\u0000${edge.target}`));
+  const overlays = [];
+  let unionEdgeCount = snapshotNetworkEdges.length;
+  for (const overlayPath of CITATION_OVERLAY_PATHS) {
+    const overlay = readJson(overlayPath);
+    assert(overlay.schema === OVERLAY_SCHEMA, `Expected ${OVERLAY_SCHEMA}; got ${overlay.schema}`);
+    assert(overlay.scope?.nodeCount === networkIds.size, "Citation overlay node scope is stale");
+    assert(overlay.scope?.baseUnionEdges === unionEdgeCount, "Citation overlay base-union count is stale");
+    assert(overlay.scope?.overlayEdges === overlay.edges?.length, "Citation overlay edge count is stale");
+    assert(overlay.scope?.expectedUnionEdges === unionEdgeCount + overlay.edges.length, "Citation overlay union count is stale");
+    assert(typeof overlay.edgeProvenance === "string" && overlay.edgeProvenance, "Citation overlay requires edge provenance");
+    const overlayKeys = new Set();
+    const edges = overlay.edges.map((pair) => {
+      assert(Array.isArray(pair) && pair.length === 2, "Citation overlay edges must be [source, target]");
+      const [source, target] = pair;
+      assert(networkIds.has(source) && networkIds.has(target), `Citation overlay endpoint is outside the 97-node scope: ${source} -> ${target}`);
+      assert(source !== target, `Citation overlay contains self-link ${source}`);
+      const key = `${source}\u0000${target}`;
+      assert(!existingKeys.has(key), `Citation overlay duplicates an earlier edge ${source} -> ${target}`);
+      assert(!overlayKeys.has(key), `Citation overlay contains duplicate edge ${source} -> ${target}`);
+      overlayKeys.add(key);
+      return { source, target, provenance: overlay.edgeProvenance };
+    });
+    for (const key of overlayKeys) existingKeys.add(key);
+    unionEdgeCount += edges.length;
+    overlays.push({ overlay, edges });
+  }
+  return {
+    overlays,
+    edges: overlays.flatMap((entry) => entry.edges),
+  };
 }
 
 function buildAsset(snapshot) {
@@ -1010,8 +1019,8 @@ function buildAsset(snapshot) {
   const networkIds = new Set(networkNodes.map((node) => node.id));
   const snapshotNetworkEdges = sourceEdges.filter((edge) =>
     networkIds.has(edge.source) && networkIds.has(edge.target));
-  const citationOverlay = loadCitationOverlay(networkIds, snapshotNetworkEdges);
-  const networkEdges = [...snapshotNetworkEdges, ...citationOverlay.edges]
+  const citationOverlays = loadCitationOverlays(networkIds, snapshotNetworkEdges);
+  const networkEdges = [...snapshotNetworkEdges, ...citationOverlays.edges]
     .sort((left, right) => left.source.localeCompare(right.source)
       || left.target.localeCompare(right.target)
       || left.provenance.localeCompare(right.provenance));
@@ -1084,25 +1093,28 @@ function buildAsset(snapshot) {
 
   return {
     schema: ASSET_SCHEMA,
-    generatedOn: citationOverlay.overlay.capturedOn,
+    generatedOn: citationOverlays.overlays
+      .map((entry) => entry.overlay.capturedOn)
+      .sort()
+      .at(-1),
     generatorVersion: GENERATOR_VERSION,
     sourceSnapshot: {
       id: snapshot.snapshotId,
       builtOn: snapshot.builtOn,
       scopeClaim: snapshot.scopeClaim,
     },
-    citationOverlays: [{
-      id: citationOverlay.overlay.overlayId,
-      capturedOn: citationOverlay.overlay.capturedOn,
-      provider: citationOverlay.overlay.provider.name,
-      edgeProvenance: citationOverlay.overlay.edgeProvenance,
-      addedEdges: citationOverlay.edges.length,
-      scope: citationOverlay.overlay.scope,
-    }],
+    citationOverlays: citationOverlays.overlays.map(({ overlay, edges }) => ({
+      id: overlay.overlayId,
+      capturedOn: overlay.capturedOn,
+      provider: overlay.provider.name,
+      edgeProvenance: overlay.edgeProvenance,
+      addedEdges: edges.length,
+      scope: overlay.scope,
+    })),
     sourceCounts,
     methodology: {
       edgeDirection: snapshot.sourceMethodology.edgeDirection,
-      edgeCoverage: "Every directed citation captured between displayed publications is retained from the frozen multi-source snapshot and the dated exact-DOI OpenAlex overlay. Missing lines can still reflect provider coverage or reference-resolution gaps.",
+      edgeCoverage: "Every directed citation captured between displayed publications is retained from the frozen multi-source snapshot, the dated exact-DOI OpenAlex overlay, and the primary-source reference-list audit of provider-isolated records. Missing lines can still reflect provider coverage, reference-resolution gaps, or unavailable reference lists.",
       selection: "Includes every non-review publication manually confirmed as audiotactile in the legacy citation audit, plus non-review publications added by an exact-DOI Toolkit literature audit with at least one non-adjacent audiotactile PPS task record. Toolkit readiness is an encoding, never an inclusion gate.",
       scopeProvenance: {
         legacyConfirmed: "Manually confirmed audiotactile in the legacy citation-corpus audit.",
@@ -1247,7 +1259,7 @@ function validateAsset(asset) {
     outgoingDegree[source] += 1;
     weakEdgeKeys.add(source < target ? `${source}:${target}` : `${target}:${source}`);
   }
-  assert(weakEdgeKeys.size === 695, `Expected 695 weak citation links; got ${weakEdgeKeys.size}`);
+  assert(weakEdgeKeys.size === 755, `Expected 755 weak citation links; got ${weakEdgeKeys.size}`);
   assert(asset.nodes.every((node, index) => node.network.inDegree === incomingDegree[index]
     && node.network.outDegree === outgoingDegree[index]), "Displayed-network directed degrees are stale");
   const normalizedIncoming = normalizedValues(incomingDegree, true);
