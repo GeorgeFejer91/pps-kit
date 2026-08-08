@@ -6,8 +6,8 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="./assets/pps_toolkit_icon-PI4CIL5w.png">
-  <script type="module" crossorigin src="./assets/index-_Ak9wq_U.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-BlTedY3f.css">
+  <script type="module" crossorigin src="./assets/index-CMPv-BXc.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CUMifvQd.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -586,6 +586,11 @@
             <div class="field-row">
               <label for="block-count">Blocks</label>
               <input id="block-count" type="number" min="1" max="200" step="1">
+            </div>
+            <div class="field-row block-seed-row">
+              <label for="block-randomization-seed">Seed</label>
+              <input id="block-randomization-seed" type="number" min="0" max="2147483647" step="1" inputmode="numeric">
+              <button id="generate-block-randomization-seed" type="button">New Seed</button>
             </div>
             <div class="field-row block-csv-download-row">
               <span class="field-label">Export</span>

@@ -5112,6 +5112,18 @@ a:focus-visible,
   max-width: 360px;
 }
 
+.block-seed-row {
+  grid-template-columns: minmax(84px, 1fr) auto;
+}
+
+.block-seed-row label {
+  grid-column: 1 / -1;
+}
+
+.block-seed-row button {
+  white-space: nowrap;
+}
+
 .block-csv-download-row .field-label {
   color: var(--muted);
   font-size: 12px;

@@ -4389,9 +4389,10 @@ def _run_setup_settings(design: StimulusDesign) -> dict[str, Any]:
     if structure not in EXPERIMENT_STRUCTURES:
         structure = "single"
     try:
-        seed = int(settings.get("seed") or (int(design.protocol.random_seed or 20250604) + 6000))
+        raw_seed = settings.get("seed")
+        seed = int(design.protocol.random_seed if raw_seed is None else raw_seed)
     except (TypeError, ValueError):
-        seed = int(design.protocol.random_seed or 20250604) + 6000
+        seed = int(design.protocol.random_seed)
     return {
         "experiment_structure": structure,
         "seed": seed,
@@ -4532,9 +4533,10 @@ def _set_run_setup_settings(design: StimulusDesign, settings: dict[str, Any]) ->
     if structure not in EXPERIMENT_STRUCTURES:
         structure = "single"
     try:
-        seed = int(current.get("seed") or (int(design.protocol.random_seed or 20250604) + 6000))
+        raw_seed = current.get("seed")
+        seed = int(design.protocol.random_seed if raw_seed is None else raw_seed)
     except (TypeError, ValueError):
-        seed = int(design.protocol.random_seed or 20250604) + 6000
+        seed = int(design.protocol.random_seed)
     design.study_profile_reference_parameters[RUN_SETUP_METADATA_KEY] = {
         "experiment_structure": structure,
         "seed": seed,
@@ -6568,7 +6570,8 @@ def _trial_pool_recipe_settings(recipe: dict[str, Any], design: StimulusDesign) 
         if str(key).strip()
     }
     try:
-        fractional_seed = int(payload.get("fractional_seed", getattr(design.protocol, "random_seed", 20250604)) or 20250604)
+        raw_fractional_seed = payload.get("fractional_seed", getattr(design.protocol, "random_seed", 20250604))
+        fractional_seed = int(20250604 if raw_fractional_seed is None else raw_fractional_seed)
     except (TypeError, ValueError):
         fractional_seed = 20250604
     exact_family_counts = _protocol_trial_pool_exact_family_counts(design)
@@ -6651,7 +6654,8 @@ def _trial_pool_fractional_records(
     source_files: list[dict[str, Any]],
     settings: dict[str, Any],
 ) -> tuple[list[dict[str, Any]], list[str], str]:
-    seed = int(settings.get("fractional_seed", 20250604) or 20250604)
+    raw_seed = settings.get("fractional_seed", 20250604)
+    seed = int(20250604 if raw_seed is None else raw_seed)
     records: list[dict[str, Any]] = []
     for index, source in enumerate(source_files):
         configured = _configured_trial_pool_repetitions(source, settings)
@@ -6768,7 +6772,8 @@ def _apply_trial_pool_exact_family_counts(
     }
     if not exact_counts:
         return {}, None
-    seed = int(settings.get("fractional_seed", 20250604) or 20250604)
+    raw_seed = settings.get("fractional_seed", 20250604)
+    seed = int(20250604 if raw_seed is None else raw_seed)
     signature_payload: list[dict[str, Any]] = []
     for family, target_count in sorted(exact_counts.items()):
         family_records = [
@@ -6862,7 +6867,8 @@ def _bake_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recipe
     exact_family_counts, exact_signature = _apply_trial_pool_exact_family_counts(records, settings, balance_warnings)
     if exact_signature is not None:
         balancing_signature = hashlib.sha256(f"{balancing_signature}|exact|{exact_signature}".encode("utf-8")).hexdigest()[:16]
-    balancing_seed = int(settings.get("fractional_seed", 20250604) or 20250604)
+    raw_balancing_seed = settings.get("fractional_seed", 20250604)
+    balancing_seed = int(20250604 if raw_balancing_seed is None else raw_balancing_seed)
     root = _trial_pool_root(render_dir)
     _remove_tree(root)
     _ensure_dir(root)
@@ -7399,7 +7405,8 @@ def _bake_block_csv_preview(
         raise ValueError("Segment 4 trial-pool CSV does not contain any rows.")
 
     block_count = max(1, int(recipe.get("block_count") or getattr(design.protocol, "blocks", 1) or 1))
-    seed = int(recipe.get("seed") or getattr(design.protocol, "random_seed", 20250604) or 20250604)
+    recipe_seed = recipe.get("seed")
+    seed = int(getattr(design.protocol, "random_seed", 20250604) if recipe_seed is None else recipe_seed)
     recipe_repeat = recipe.get("repeat_trial_pool_per_block")
     if isinstance(recipe_repeat, str):
         recipe_repeat = recipe_repeat.strip().lower() in {"1", "true", "yes", "on"}

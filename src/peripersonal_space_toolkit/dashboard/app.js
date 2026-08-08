@@ -1662,7 +1662,7 @@ function staticTrialPoolSettings(protocol) {
     family_repetitions: familyRepetitions,
     folder_repetitions: {},
     file_repetition_overrides: {},
-    fractional_seed: Number(protocol.random_seed || 20250604) || 20250604,
+    fractional_seed: normalizedRandomizationSeed(protocol.random_seed),
   };
   if (Object.keys(exactFamilyCounts).length) settings.exact_family_trial_counts = exactFamilyCounts;
   return settings;
@@ -1701,7 +1701,7 @@ function trialPoolExactRecordSortKey(record, seed, family) {
 function applyTrialPoolExactFamilyCounts(records, settings = {}, warnings = []) {
   const exactCounts = trialPoolExactFamilyCounts(settings);
   if (!Object.keys(exactCounts).length) return {};
-  const seed = Number(settings.fractional_seed || state?.design?.protocol?.random_seed || 20250604) || 20250604;
+  const seed = normalizedRandomizationSeed(settings.fractional_seed ?? state?.design?.protocol?.random_seed);
   for (const family of Object.keys(exactCounts).sort()) {
     const targetCount = exactCounts[family];
     const familyRecords = records.filter((record) => trialPoolFamilyKey(record?.file?.family) === family);
@@ -1759,7 +1759,7 @@ function staticTrialPoolRows(files, settings) {
     if (!fractionalGroups.has(record.balancingStratum)) fractionalGroups.set(record.balancingStratum, []);
     fractionalGroups.get(record.balancingStratum).push(record);
   }
-  const seed = Number(settings.fractional_seed || 20250604) || 20250604;
+  const seed = normalizedRandomizationSeed(settings.fractional_seed);
   for (const [stratum, group] of fractionalGroups.entries()) {
     const extraCount = Math.max(0, Math.min(group.length, Math.floor(group.length * group[0].fractionalRemainder + 0.5)));
     if (!extraCount) continue;
@@ -2115,8 +2115,7 @@ function staticBlockCsvPreviewPayload(design, trialPoolBake, status) {
   const poolRows = trialPoolBake.preview_rows || [];
   if (!status.finished_profile || !poolRows.length) return {};
   const blockCount = Math.max(1, Math.round(Number(design.protocol?.blocks || 1)));
-  const rawSeed = Number(design.protocol?.random_seed || 20250604);
-  const seed = Number.isFinite(rawSeed) ? Math.round(rawSeed) : 20250604;
+  const seed = normalizedRandomizationSeed(design.protocol?.random_seed);
   const soaValues = poolRows.map((row) => Number(row.soa_ms || 0)).filter((value) => value > 0);
   const soaMin = soaValues.length ? Math.min(...soaValues) : 0;
   const soaMax = soaValues.length ? Math.max(...soaValues) : 0;
@@ -3977,13 +3976,18 @@ function setBlockProgress(current, total, label) {
 
 function renderBlockCsvPreview() {
   const blockInput = $("block-count");
+  const seedInput = $("block-randomization-seed");
   const protocolBlocks = Math.max(1, Math.round(Number(state?.design?.protocol?.blocks || $("blocks")?.value || 1)));
+  const protocolSeed = normalizedRandomizationSeed(state?.design?.protocol?.random_seed, 20250604);
   if (blockInput && document.activeElement !== blockInput) blockInput.value = protocolBlocks;
+  if (seedInput && document.activeElement !== seedInput) seedInput.value = protocolSeed;
   const segment5 = projectSegment("5_block_csv_preview");
   const preview = state.block_csv_preview || {};
   renderBlockPolicySummary(preview);
   const blockAccepted = Boolean(segment5.accepted || preview.accepted);
   if (blockInput) blockInput.disabled = blockAccepted;
+  if (seedInput) seedInput.disabled = blockAccepted;
+  if ($("generate-block-randomization-seed")) $("generate-block-randomization-seed").disabled = blockAccepted;
   if ($("download-block-randomization")) $("download-block-randomization").disabled = !(preview.blocks || []).length;
   if ($("blocks")) $("blocks").value = blockInput?.value || protocolBlocks;
   const job = latestBlockCsvJob();
@@ -4007,6 +4011,18 @@ function renderBlockCsvPreview() {
     return;
   }
   list.innerHTML = blocks.map((block, index) => renderBlockPreviewCard(block, index)).join("");
+}
+
+function normalizedRandomizationSeed(value, fallback = 20250604) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(0, Math.min(2147483647, Math.round(parsed)));
+}
+
+function newRandomizationSeed() {
+  const values = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(values);
+  return values[0] & 0x7fffffff;
 }
 
 function renderBlockPolicySummary(preview = {}) {
@@ -4316,7 +4332,7 @@ function syncTrialPoolDraftFromState() {
     familyRepetitions,
     folderRepetitions: Object.fromEntries(Object.entries(settings.folder_repetitions || {}).map(([key, value]) => [key, normalizeRepetitionValue(value, defaultRepetitions)])),
     fileRepetitionOverrides: Object.fromEntries(Object.entries(settings.file_repetition_overrides || {}).map(([key, value]) => [key, normalizeRepetitionValue(value, defaultRepetitions)])),
-    fractionalSeed: Number(settings.fractional_seed ?? protocol.random_seed ?? 20250604) || 20250604,
+    fractionalSeed: normalizedRandomizationSeed(settings.fractional_seed ?? protocol.random_seed),
   };
   trialPoolDraftSourceHash = sourceHash;
   trialPoolDraftInitialized = true;
@@ -4391,7 +4407,7 @@ function trialPoolCompositionEstimate() {
     if (!fractionalGroups.has(record.balancingStratum)) fractionalGroups.set(record.balancingStratum, []);
     fractionalGroups.get(record.balancingStratum).push(record);
   }
-  const seed = Number(trialPoolRepetitionDraft.fractionalSeed || state?.design?.protocol?.random_seed || 20250604) || 20250604;
+  const seed = normalizedRandomizationSeed(trialPoolRepetitionDraft.fractionalSeed ?? state?.design?.protocol?.random_seed);
   const strataByParent = new Map();
   for (const [stratum, group] of fractionalGroups.entries()) {
     const parent = group[0]?.balancingParentStratum || stratum;
@@ -6574,11 +6590,13 @@ function collectPayload() {
     baseline_crosses_sequence_variants: design.protocol?.baseline_crosses_sequence_variants !== false,
     distribute_trial_pool_across_blocks: Boolean(design.protocol?.distribute_trial_pool_across_blocks),
     blocks: Math.max(1, Math.round(numberValue("block-count", numberValue("blocks", 1)))),
+    random_seed: normalizedRandomizationSeed($("block-randomization-seed")?.value, normalizedRandomizationSeed(design.protocol?.random_seed)),
     participants: Math.max(1, Math.round(numberValue("participants", 1))),
     trial_strips: trialStrips
   };
   if (design.protocol.participant_order_policy?.algorithm === "seeded_factoradic_cycle.v1") {
     design.protocol.participant_order_policy.preview_count = design.protocol.participants;
+    design.protocol.participant_order_policy.seed = design.protocol.random_seed;
   }
   return {
     participant_id: state.participant_id || (state.custom_workflow?.is_custom ? "" : "P001"),
@@ -6586,7 +6604,7 @@ function collectPayload() {
     trajectory_controls: trajectoryControls,
     run_setup: {
       experiment_structure: currentExperimentStructure(),
-      seed: state.run_sequence_setup?.seed || state.design?.study_profile_reference_parameters?.dashboard_run_setup?.seed || 0,
+      seed: design.protocol.random_seed,
       instruction_profile: collectRunInstructionProfile(),
     }
   };
@@ -7253,7 +7271,7 @@ async function customizeAsNewProject(name) {
       : {
           schema: "pps-participant-order-policy.v1",
           algorithm: "seeded_factoradic_cycle.v1",
-          seed: Number(state.design.protocol.random_seed || 20250604),
+          seed: normalizedRandomizationSeed(state.design.protocol.random_seed),
           preview_count: Math.max(1, Math.min(100, Number(state.design.protocol.participants || 12))),
         };
     state.selected_template = CUSTOM_TEMPLATE_ID;
@@ -7358,7 +7376,7 @@ function trialPoolBakeRecipe() {
     family_repetitions: { ...trialPoolRepetitionDraft.familyRepetitions },
     folder_repetitions: { ...trialPoolRepetitionDraft.folderRepetitions },
     file_repetition_overrides: { ...trialPoolRepetitionDraft.fileRepetitionOverrides },
-    fractional_seed: Number(trialPoolRepetitionDraft.fractionalSeed || state?.design?.protocol?.random_seed || 20250604) || 20250604,
+    fractional_seed: normalizedRandomizationSeed(trialPoolRepetitionDraft.fractionalSeed ?? state?.design?.protocol?.random_seed),
   };
   if (Object.keys(exactFamilyCounts).length) recipe.exact_family_trial_counts = exactFamilyCounts;
   return recipe;
@@ -7403,7 +7421,9 @@ async function startBakeBlockCsvs() {
     state = await api("/api/block-csv/edit", { method: "POST" });
   }
   const blockCount = Math.max(1, Math.round(numberValue("block-count", numberValue("blocks", 1))));
+  const seed = normalizedRandomizationSeed($("block-randomization-seed")?.value, normalizedRandomizationSeed(state?.design?.protocol?.random_seed));
   if ($("blocks")) $("blocks").value = blockCount;
+  if ($("block-randomization-seed")) $("block-randomization-seed").value = seed;
   const blockButton = $("regenerate-block-csvs");
   if (blockButton) blockButton.disabled = true;
   setBlockProgress(0, blockCount, "regenerating block CSVs");
@@ -7413,7 +7433,7 @@ async function startBakeBlockCsvs() {
       kind: "block_csv_preview",
       label: "5_block_csv_preview",
       block_count: blockCount,
-      seed: Date.now() + Math.floor(Math.random() * 1000000),
+      seed,
     };
     const job = await api("/api/stimulus/bake", {
       method: "POST",
@@ -8800,6 +8820,20 @@ function wireEvents() {
     const blockCount = Math.max(1, Math.round(numberValue("block-count", 1)));
     if ($("blocks")) $("blocks").value = blockCount;
     renderBlockCsvPreview();
+  });
+  $("block-randomization-seed")?.addEventListener("input", () => {
+    const seed = normalizedRandomizationSeed($("block-randomization-seed").value);
+    state.design.protocol.random_seed = seed;
+    renderBlockPolicySummary({});
+    markDesignerDirty();
+  });
+  $("generate-block-randomization-seed")?.addEventListener("click", () => {
+    if (!ensureEditableProject()) return;
+    const seed = newRandomizationSeed();
+    $("block-randomization-seed").value = seed;
+    state.design.protocol.random_seed = seed;
+    renderBlockPolicySummary({});
+    markDesignerDirty();
   });
   $("participants").addEventListener("input", scheduleRunSequencePreview);
   for (const input of document.querySelectorAll('input[name="experiment-structure"]')) {

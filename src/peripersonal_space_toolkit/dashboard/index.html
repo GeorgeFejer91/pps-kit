@@ -586,6 +586,11 @@
               <label for="block-count">Blocks</label>
               <input id="block-count" type="number" min="1" max="200" step="1">
             </div>
+            <div class="field-row block-seed-row">
+              <label for="block-randomization-seed">Seed</label>
+              <input id="block-randomization-seed" type="number" min="0" max="2147483647" step="1" inputmode="numeric">
+              <button id="generate-block-randomization-seed" type="button">New Seed</button>
+            </div>
             <div class="field-row block-csv-download-row">
               <span class="field-label">Export</span>
               <button id="download-block-randomization" type="button">Download Randomization</button>

@@ -98,6 +98,19 @@ The local companion must also serve the committed public static asset roots at
 the same `staticStateForTemplate()` overlay as hosted/static mode, so these
 routes must stay mounted alongside `/dashboard`, `/viewer`, and `/api/*`.
 
+## Final-Segment Randomization Seed
+
+Segments 4-6 use one explicit non-negative 31-bit randomization seed. Segment 5
+shows the persisted seed beside block count, accepts researcher-entered values,
+and offers `New Seed` using the browser cryptographic random source, which works
+without network access. `Generate Blocks` and `Regenerate Blocks` reuse the
+visible value; they must never silently replace it. The seed is saved as
+`protocol.random_seed`, controls Segment 4 fractional balancing and Segment 5
+row-preserving block assignment, and is copied into the Segment 6 participant
+order policy/run manifest. Seed `0` is valid and must not trigger default-value
+fallbacks. The same seed and inputs must produce the same order in hosted/static
+preview JavaScript, the local companion backend, and packaged desktop webviews.
+
 ## Auditory-Only Response Trials
 
 `Auditory-Only` is a first-class response-required trial family, separate from

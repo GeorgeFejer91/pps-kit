@@ -50,6 +50,7 @@ from peripersonal_space_toolkit.output_layout import (
     output_project_state_dir,
     output_runner_logs_dir,
 )
+from peripersonal_space_toolkit.participant_orders import default_order_policy
 from peripersonal_space_toolkit.subprocess_utils import windows_no_console_kwargs
 
 
@@ -280,6 +281,10 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="downloads-page"' in html
     assert 'id="toolkit-page"' in html
     assert 'id="download-block-randomization"' in html
+    assert 'id="block-randomization-seed"' in html
+    assert 'id="generate-block-randomization-seed"' in html
+    assert "globalThis.crypto.getRandomValues" in app_js
+    assert "Date.now() + Math.floor(Math.random()" not in app_js
     assert ".panel.profile-readonly #download-block-randomization" in styles_css
     assert f'data-lazy-src="../viewer/index.html?v={static_version}"' in html
     assert "PAGE_ROUTE_SEGMENTS" in app_js
@@ -773,6 +778,34 @@ def test_segment5_block_scheduler_is_seeded_gellermann_and_row_order_preserving(
             for key in ("family", "soa", "source", "variant", "baseline"):
                 values = [dashboard_app._block_csv_run_features(row)[key] for row in recent]
                 assert not values[0] or len(set(values)) > 1
+
+
+def test_final_segment_randomization_seed_zero_is_valid_and_reproducible():
+    design = default_design()
+    design.protocol.random_seed = 0
+    design.protocol.participant_order_policy = default_order_policy(seed=0)
+
+    assert dashboard_app._run_setup_settings(design)["seed"] == 0
+    rows = [
+        {
+            "trial_pool_index": index,
+            "family": "audio_tactile",
+            "row_label": "Trial row",
+            "folder_key": "row_01__trial_row__audio_tactile",
+            "soa_ms": str(soa),
+            "source_lineage": source,
+            "sequence_variant_key": f"{source}_{soa}",
+        }
+        for index, (source, soa) in enumerate(
+            (("pink", 300), ("white", 900), ("pink", 900), ("white", 300)),
+            start=1,
+        )
+    ]
+    first = dashboard_app._assign_trial_pool_rows_to_blocks(rows, 2, seed=0)
+    second = dashboard_app._assign_trial_pool_rows_to_blocks(rows, 2, seed=0)
+    assert [[row["trial_pool_index"] for row in block] for block in first] == [
+        [row["trial_pool_index"] for row in block] for block in second
+    ]
 
 
 def test_dashboard_creates_profile_and_custom_project_folders(tmp_path: Path):
