@@ -2019,6 +2019,29 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   mutation controls continue to enforce the boundary. Editable drafts retain
   per-step review badges because those communicate workflow progress.
 
+## 2026-08-11 — DOI- and citation-metadata-gated publication network
+
+- The same update doubles the declared normalized edge-to-edge node clearance
+  from `0.0075` to `0.015`, raises all-node repulsion, and expands the
+  citation-size radius range from `0.009`–`0.021` to `0.009`–`0.024`. Circle
+  area is a monotonic log-normalized encoding of incoming citations from other
+  papers in the displayed subset only. The visible legend and canvas
+  description state this directly; external counts and centrality do not size
+  nodes.
+- The Documentation map now treats canonical DOI linkage and available citation
+  metadata as node eligibility requirements. Starting from the prior 97-paper
+  non-review audio-tactile candidate set, it excludes 3 DOI-less records and
+  displays 94 papers. Every displayed node has a normalized DOI that agrees with
+  its DOI-keyed identity and canonical `https://doi.org/` URL, is confirmed by
+  the dated exact-DOI resolver audit, and has at least one identified provider
+  with a finite citation count; a valid zero count remains
+  available metadata. The graph retains 750 links between eligible nodes: all
+  571 frozen-snapshot links, all 127 OpenAlex overlay links, and 52 of the 60
+  primary-reference links. Current states are 15 implemented and 79 not yet;
+  detailed readiness is 15 runnable, 49 incomplete, 29 not assessed, and 1
+  adjacent/scope conflict. The source/local and compiled/hosted dashboards use
+  the same generated asset and state the exclusion rule explicitly.
+
 ## 2026-08-08 — Dense, citation-refreshed audio-tactile publication network v3
 
 - The Documentation map now projects 97 non-review audio-tactile publications

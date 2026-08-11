@@ -13,7 +13,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   canonical public-safe v1 source
   lives under `data/publication_network/`, and
   `tools/build_publication_network_asset.mjs` owns deterministic generation and
-  exact-DOI joins to tracked Toolkit parameter audits. The generator also owns
+  exact-DOI joins to tracked Toolkit parameter audits, then admits only nodes
+  with an internally consistent, resolver-confirmed canonical DOI URL and
+  provider-backed citation metadata. The generator also owns
   the collision-free force topology, year layout, displayed-network metrics,
   and four-state Toolkit assessment encoding; the browser only renders them.
 - Designer packaging: `windows/PPSDesigner.spec`, `windows/Build_PPS_Designer.ps1`, and `packaging/linux/` for the generic source launcher and DEB/RPM staging.
@@ -398,14 +400,16 @@ The paper audit is a core pipeline, not a side report. It catalogs the needs, pr
 
 The public citation-network projection is a separate generated discovery
 surface. Keep its `pps-publication-citation-network.v3` schema and focused counts
-covered by `tests/test_publication_network.py`: 97 non-review verified/audited
-audio-tactile publications and 758 tracked links (571 frozen-snapshot links,
-127 non-overlapping exact-DOI OpenAlex overlay links, and 60 primary-reference
+covered by `tests/test_publication_network.py`: 94 non-review verified/audited
+audio-tactile publications with canonical DOI links and citation metadata, and
+750 tracked links (571 frozen-snapshot links, 127 non-overlapping exact-DOI
+OpenAlex overlay links, and 52 retained primary-reference
 audit links). The map exposes two
-implementation states, 15 implemented and 82 not yet, while paper details retain
-the four Toolkit states of 15 runnable, 49 supported-incomplete, 32 not-assessed,
+implementation states, 15 implemented and 79 not yet, while paper details retain
+the four Toolkit states of 15 runnable, 49 supported-incomplete, 29 not-assessed,
 and 1 adjacent/scope-conflict. The generator owns deterministic density-preserving
-radius-aware force/year coordinates, citation-received area sizing, and
+radius-aware force/year coordinates with `0.015` normalized clearance,
+displayed-network-indegree area sizing (`0.009`–`0.024` radii), and
 directional edge metadata; it must never hard-place indexed isolates on a
 perimeter. The browser always shows every tracked link and emphasizes selected incoming
 versus outgoing neighbours. Treat citation and centrality values as navigation

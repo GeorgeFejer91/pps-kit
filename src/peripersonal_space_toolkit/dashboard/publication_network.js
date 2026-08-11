@@ -529,7 +529,7 @@ export async function initializePublicationNetwork(root) {
     const overview = makeSection("Publication", [
       element("p", { className: "publication-network-byline", text: node.authors?.join(", ") || "Authors unavailable" }),
       element("div", { className: "publication-network-badges" }, badges),
-      element("p", { className: "publication-network-detail-muted", text: [node.venue, node.publicationDate || node.year, node.doi ? `DOI ${node.doi}` : "DOI unavailable"].filter(Boolean).join(" · ") }),
+      element("p", { className: "publication-network-detail-muted", text: [node.venue, node.publicationDate || node.year, `DOI ${node.doi}`].filter(Boolean).join(" · ") }),
       links.length ? element("div", { className: "publication-network-detail-links" }, links) : element("p", { className: "publication-network-detail-muted", text: "No external publication link is available." }),
     ]);
 

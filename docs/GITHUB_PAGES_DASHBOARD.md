@@ -39,28 +39,39 @@ experiment software runs locally on the research PC.
 ## Audiotactile PPS Citation Map
 
 The `Publication & Citation Network` documentation segment renders the tracked
-`pps-publication-citation-network.v3` asset. It contains 97 non-review
-audio-tactile publications: 93 retained from the original manual confirmation
-audit and 4 added by later exact-DOI Toolkit literature audits. Its 758 tracked
-directed citation links run from the citing publication to the cited publication:
-571 come from the frozen multi-source snapshot and 127 are a non-overlapping,
-dated exact-DOI OpenAlex refresh. A further 60 links were verified directly in
-the primary reference lists of six records that remained provider-isolated.
+`pps-publication-citation-network.v3` asset. It starts from 97 non-review
+audio-tactile candidates but displays only the 94 publications for which the
+normalized DOI, DOI-keyed identity, and canonical `https://doi.org/` link agree,
+the dated exact-DOI resolver audit confirms the link, and an identified metadata
+provider supplies a finite citation count. A valid zero
+count is available citation metadata; a missing provider record is not. The
+displayed set contains 90 publications retained from the original manual
+confirmation audit and 4 added by later exact-DOI Toolkit literature audits.
+Its 750 tracked directed citation links run from the citing publication to the
+cited publication: 571 come from the frozen multi-source snapshot and 127 from
+a non-overlapping, dated exact-DOI OpenAlex refresh. The retained graph also
+includes 52 of 60 links verified directly in six primary reference lists; the
+other 8 originate from the two DOI-less source records excluded by the stricter
+node policy.
 
 The default topology is a real deterministic force layout, not a ranked grid:
 citation neighbours attract, all papers repel and share weak centering, and
 radius-aware collision separation keeps every node distinct on the same square
-plotting surface at desktop and phone widths. The 93-node main
-component uses the map broadly, while 4 records with no verified within-map link
+plotting surface at desktop and phone widths. The 91-node main
+component uses the map broadly, while 3 records with no verified within-map link
 settle under the same force rule instead of occupying an artificial perimeter.
 Circle area encodes normalized citations received within the displayed network.
-All 758 links remain visible; selecting a paper emphasizes and distinguishes
+Specifically, each radius is derived only from the number of incoming links from
+the other 93 displayed papers, using a monotonic log-normalized area scale from
+`0.009` to `0.024`; external citation totals and centrality do not size nodes.
+The declared normalized edge-to-edge clearance is `0.015` in both layouts.
+All 750 eligible-set links remain visible; selecting a paper emphasizes and distinguishes
 incoming from outgoing citations. The optional year layout
 anchors horizontal position to publication year while retaining collision separation.
 
-The map legend exposes two implementation states: 15 implemented and 82 not
+The map legend exposes two implementation states: 15 implemented and 79 not
 implemented yet. Selecting a node still exposes the full four-state assessment
-(15 runnable, 49 supported but parameter-incomplete, 32 not yet assessed, and
+(15 runnable, 49 supported but parameter-incomplete, 29 not yet assessed, and
 1 adjacent/scope conflict) alongside bibliographic metadata, abstract
 availability/provenance, directional citation neighbours, and every exact-DOI
 Toolkit audit record and extracted parameter available for that publication.

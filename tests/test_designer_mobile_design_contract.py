@@ -437,7 +437,7 @@ def test_compiled_dashboard_and_public_wrappers_share_one_cache_token() -> None:
     )
     assert len(versions) == 1
     version = versions.pop()
-    assert version == "20260811-pretext-documentation"
+    assert version == "20260811-publication-network-spaced"
 
     wrappers = {
         "toolkit": (ROOT / "index.html").read_text(encoding="utf-8"),

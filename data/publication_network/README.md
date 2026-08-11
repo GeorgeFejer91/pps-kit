@@ -8,31 +8,36 @@ dated `pps-citation-network-20260807` research snapshot.
 The corpus is a maximum-coverage, multi-index PPS-explicit snapshot with
 citation context. It is not a claim that every PPS publication is present. The
 generator projects this broad input into `publication_network.v3.json`, a
-focused `pps-publication-citation-network.v3` browser asset containing 97
-non-review audio-tactile publications and 758 tracked citation links. The
+focused `pps-publication-citation-network.v3` browser asset containing 94
+non-review audio-tactile publications and 750 tracked citation links. The
 generator preserves all 571 induced links in the frozen snapshot and adds the
 127 non-overlapping links in
 `openalex_audiotactile_citation_overlay.20260808.json`. That overlay records an
-exact-DOI OpenAlex refresh for all 94 DOI-bearing displayed records, including
+exact-DOI OpenAlex refresh for all 94 displayed records, including
 query fields, capture date, endpoint scope, and expected union counts. The
-subsequent `primary_source_citation_overlay.20260808.json` adds 60 citation
+subsequent `primary_source_citation_overlay.20260808.json` contains 60 citation
 facts verified directly in the reference lists of six records that remained
-provider-isolated. It records source URLs and audit notes without redistributing
-full text. Inclusion comes from either the original manually confirmed audio-tactile audit (93
+provider-isolated; 52 have both endpoints in the displayed set. It records
+source URLs and audit notes without redistributing full text. Candidate scope
+comes from either the original manually confirmed audio-tactile audit (93
 publications after review removal) or a later exact-DOI Toolkit literature audit
-(4 additions). Toolkit readiness is an encoding, not an inclusion gate.
+(4 additions). Display eligibility additionally requires a resolver-confirmed,
+internally consistent canonical DOI link and provider-backed citation metadata, leaving 90
+legacy-confirmed records plus the 4 later additions. A finite provider count of
+zero is valid metadata. Toolkit readiness is an encoding, not an inclusion gate.
 
 The detailed Toolkit assessment remains 15 runnable, 49 supported but parameter-
-incomplete, 32 not yet assessed, and 1 adjacent/scope-conflict publication. The
-map reduces that to two visual states: 15 implemented and 82 not implemented
+incomplete, 29 not yet assessed, and 1 adjacent/scope-conflict publication. The
+map reduces that to two visual states: 15 implemented and 79 not implemented
 yet. The default deterministic force layout uses one continuous rule for every
 paper: citation neighbours attract, all nodes repel and share weak centering,
 and radius-aware collision separation keeps them distinct on a square canvas.
-The 93-node main
-component spreads broadly across the map; the 4 records with no verified
+The declared normalized edge-to-edge clearance is `0.015`. The 91-node main
+component spreads broadly across the map; the 3 records with no verified
 within-map link are not assigned to a perimeter. Node area encodes normalized
-displayed-network citations received. The alternative layout anchors horizontal
-position to year.
+displayed-network citations received: radii run from `0.009` for the least-cited
+nodes to `0.024` for the most-cited node, using a monotonic log-normalized area
+scale. The alternative layout anchors horizontal position to year.
 
 ## Rebuild
 
@@ -58,7 +63,8 @@ and outputs to temporary paths for deterministic validation.
 - Citation edges run from the citing publication to the cited publication.
 - The broad v1 source retains all 1,712 publications, including 101 manually
   confirmed audiotactile labels and provisional modality screens. The browser
-  excludes reviews and shows only the 97-publication verified/audited projection.
+  excludes reviews and shows only the 94-publication DOI- and metadata-eligible
+  projection drawn from 97 verified/audited candidates.
 - One included exact-DOI record is retained as `adjacent_scope_conflict` so the
   audit disagreement stays visible. A supported paradigm means the Toolkit can
   represent the task structure, not that every original asset, apparatus
@@ -74,7 +80,7 @@ and outputs to temporary paths for deterministic validation.
 - Every tracked within-map link stays visible; selecting a node distinguishes
   incoming from outgoing citations. A missing line means only that the dated
   provider and primary-source audits captured no resolvable link inside this
-  97-paper projection. Citation counts, node area, and centrality remain
+  94-paper projection. Citation counts, node area, and centrality remain
   corpus-local navigation encodings, not study-quality ratings or effect estimates.
 - Raw provider responses, PDFs, supplements, and extracted full text are not
   part of this tracked asset.

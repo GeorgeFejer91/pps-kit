@@ -6,7 +6,7 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="./assets/pps_toolkit_icon-PI4CIL5w.png">
-  <script type="module" crossorigin src="./assets/index-CWOanvd-.js"></script>
+  <script type="module" crossorigin src="./assets/index-JtTrc3O-.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-CaoQ_Z8s.css">
 </head>
 <body>
@@ -227,7 +227,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../../viewer/index.html?v=20260811-pretext-documentation"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../../viewer/index.html?v=20260811-publication-network-spaced"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -737,7 +737,7 @@
               <h2 id="docs-publication-network-title">Audio–Tactile PPS Study Citation Network</h2>
             </div>
           </div>
-          <p class="info-copy publication-network-intro">Each of the 97 non-review publications in the Toolkit's manually verified or later exact-DOI-audited audio–tactile PPS set is shown as its own node. Every direct citation captured between those papers is always drawn. Colour shows the simple implementation split; the paper panel retains the more specific readiness assessment. This is a dated, multi-source evidence map, not a claim of universal bibliographic completeness.</p>
+          <p class="info-copy publication-network-intro">Each of the 94 non-review publications shown has a verified canonical DOI link and provider-backed citation metadata, in addition to belonging to the Toolkit's manually verified or later exact-DOI-audited audio–tactile PPS set. Papers without either requirement are excluded. Every direct citation captured between the eligible papers is always drawn. Colour shows the simple implementation split; the paper panel retains the more specific readiness assessment. This is a dated, multi-source evidence map, not a claim of universal bibliographic completeness.</p>
 
           <div class="publication-network-shell" aria-describedby="publication-network-help">
             <div class="publication-network-toolbar" aria-label="Publication network controls">
@@ -759,20 +759,20 @@
 
             <div class="publication-network-summary-row">
               <p id="publication-network-status" class="publication-network-status" role="status" aria-live="polite">Loading publication network…</p>
-              <p class="publication-network-metric-note">Linked papers pull closer together; circle area follows citations received from papers in this map. These are navigation encodings, not study-quality scores.</p>
+              <p id="publication-network-size-note" class="publication-network-metric-note">Circle area increases with incoming citations from other papers in this 94-paper map; a larger circle was cited by more included papers. Node size and position are navigation encodings, not study-quality scores.</p>
               <button id="publication-network-fullscreen" type="button" aria-label="Open publication network full screen">Full screen</button>
             </div>
             <div class="publication-network-legend" aria-label="Node legend">
               <span><i class="publication-network-legend-node legend-node-implemented" aria-hidden="true"></i>Implemented in Toolkit</span>
               <span><i class="publication-network-legend-node legend-node-not-implemented" aria-hidden="true"></i>Not implemented yet</span>
-              <span class="publication-network-size-key"><i aria-hidden="true"></i><i aria-hidden="true"></i>More citations in this map</span>
+              <span class="publication-network-size-key"><i aria-hidden="true"></i><i aria-hidden="true"></i>Larger circle = cited by more included papers</span>
               <span><i class="publication-network-legend-line legend-line-incoming" aria-hidden="true"></i>Incoming to selection</span>
               <span><i class="publication-network-legend-line legend-line-outgoing" aria-hidden="true"></i>Outgoing from selection</span>
             </div>
 
             <div id="publication-network-workspace" class="publication-network-workspace">
               <div id="publication-network-stage" class="publication-network-stage">
-                <canvas id="publication-network-canvas" tabindex="0" aria-label="Interactive citation network of 97 audio-tactile PPS study publications. Use the publication list for keyboard access, or use arrow keys to move between papers." aria-describedby="publication-network-help publication-network-status"></canvas>
+                <canvas id="publication-network-canvas" tabindex="0" aria-label="Interactive citation network of 94 audio-tactile PPS study publications with verified DOI links and citation metadata. Use the publication list for keyboard access, or use arrow keys to move between papers." aria-describedby="publication-network-help publication-network-status publication-network-size-note"></canvas>
                 <div id="publication-network-loading" class="publication-network-loading" role="status">
                   <span class="publication-network-spinner" aria-hidden="true"></span>
                   <span>Preparing publication network…</span>
@@ -792,7 +792,7 @@
               </aside>
             </div>
 
-            <p id="publication-network-help" class="publication-network-help">In Citation topology, linked papers stay nearer one another while every paper repels its neighbours, producing dense and sparse regions without an artificial perimeter. A paper with no line has no direct within-map citation captured by the dated sources; it may still cite or be cited by work outside this 97-paper set, or by references an index could not match. Select a circle to distinguish its incoming and outgoing citations and inspect the full readiness assessment. Publication year provides a chronological arrangement.</p>
+            <p id="publication-network-help" class="publication-network-help">In Citation topology, linked papers stay nearer one another while every paper repels its neighbours, producing dense and sparse regions without an artificial perimeter. A paper with no line has no direct within-map citation captured by the dated sources; it may still cite or be cited by work outside this 94-paper set, or by references an index could not match. Select a circle to distinguish its incoming and outgoing citations and inspect the full readiness assessment. Publication year provides a chronological arrangement.</p>
 
             <details class="publication-network-results-panel">
               <summary><span>Audio–tactile study publications</span><strong id="publication-network-results-count">0 results</strong></summary>

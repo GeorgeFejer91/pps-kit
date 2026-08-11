@@ -36,9 +36,9 @@ const SOURCE_EXPECTED = Object.freeze({
 });
 
 const NETWORK_EXPECTED = Object.freeze({
-  nodes: 97,
-  edges: 758,
-  audiotactileConfirmed: 93,
+  nodes: 94,
+  edges: 750,
+  audiotactileConfirmed: 90,
   laterAuditAdditions: 4,
   toolkitRecordJoins: 69,
   toolkitInScopeRecordJoins: 68,
@@ -47,16 +47,16 @@ const NETWORK_EXPECTED = Object.freeze({
   toolkitRunnableNodes: 15,
   toolkitRunnableRecords: 17,
   toolkitSupportedIncompleteNodes: 49,
-  toolkitNotAssessedNodes: 32,
+  toolkitNotAssessedNodes: 29,
   toolkitAdjacentConflictNodes: 1,
   toolkitManualReviewRecords: 24,
   toolkitManualReviewNodes: 21,
-  connectedNodes: 93,
-  isolatedNodes: 4,
-  weakComponents: 5,
+  connectedNodes: 91,
+  isolatedNodes: 3,
+  weakComponents: 4,
   abstractsAvailable: 37,
   abstractsSourceLinkOnly: 48,
-  abstractsNotAvailable: 12,
+  abstractsNotAvailable: 9,
 });
 
 const SOURCE_SCHEMA = "pps-publication-citation-source.v1";
@@ -64,11 +64,11 @@ const ASSET_SCHEMA = "pps-publication-citation-network.v3";
 const OVERLAY_SCHEMA = "pps-publication-citation-overlay.v1";
 const SNAPSHOT_ID = "pps-citation-network-20260807";
 const SNAPSHOT_DATE = "2026-08-07";
-const GENERATOR_VERSION = "3.2.0";
+const GENERATOR_VERSION = "3.4.0";
 const LAYOUT_MARGIN = 0.045;
 const NODE_RADIUS_MIN = 0.009;
-const NODE_RADIUS_MAX = 0.021;
-const NODE_CLEARANCE = 0.0075;
+const NODE_RADIUS_MAX = 0.024;
+const NODE_CLEARANCE = 0.015;
 const TOPOLOGY_ITERATIONS = 500;
 
 function usage() {
@@ -615,7 +615,7 @@ function createTopologyLayout(nodes, metrics) {
           dy = direction.y * 1e-6;
           distance = 1e-6;
         }
-        const magnitude = 0.0000045 / (distance ** 2 + 0.0018);
+        const magnitude = 0.0000055 / (distance ** 2 + 0.0018);
         const forceX = (dx / distance) * magnitude;
         const forceY = (dy / distance) * magnitude;
         forces[left].x += forceX;
@@ -946,10 +946,52 @@ function isInScopeToolkitRecord(record) {
     && record.coverageCategory !== "adjacent_out_of_scope");
 }
 
-function isNetworkPublication(node) {
+function isCandidateNetworkPublication(node) {
   return node.corpus.documentRole !== "review"
     && (node.modality.audiotactile.verified
       || node.toolkit.records.some(isInScopeToolkitRecord));
+}
+
+function hasVerifiedDoiUrl(node) {
+  const doi = normalizeDoi(node.doi);
+  return /^10\.\d{4,9}\/\S+$/i.test(doi)
+    && node.id === `doi:${doi}`
+    && node.links?.doi === `https://doi.org/${doi}`;
+}
+
+function citationMetadataProviders(node) {
+  const sources = new Set(node.metadata?.sources || []);
+  const providers = node.citations?.providers || {};
+  const available = [];
+  if (sources.has("openalex")
+      && node.openAlexIds?.length
+      && Number.isFinite(providers.openAlex)
+      && providers.openAlex >= 0) {
+    available.push("OpenAlex");
+  }
+  if (sources.has("semantic_scholar")
+      && node.semanticScholarIds?.length
+      && Number.isFinite(providers.semanticScholar)
+      && providers.semanticScholar >= 0) {
+    available.push("Semantic Scholar");
+  }
+  if (sources.has("europe_pmc")
+      && node.pmid
+      && Number.isFinite(providers.europePmc)
+      && providers.europePmc >= 0) {
+    available.push("Europe PMC");
+  }
+  return available;
+}
+
+function hasCitationMetadata(node) {
+  return citationMetadataProviders(node).length > 0;
+}
+
+function isNetworkPublication(node) {
+  return isCandidateNetworkPublication(node)
+    && hasVerifiedDoiUrl(node)
+    && hasCitationMetadata(node);
 }
 
 function scopeForNode(node) {
@@ -965,14 +1007,14 @@ function scopeForNode(node) {
   };
 }
 
-function loadCitationOverlays(networkIds, snapshotNetworkEdges) {
-  const existingKeys = new Set(snapshotNetworkEdges.map((edge) => `${edge.source}\u0000${edge.target}`));
+function loadCitationOverlays(candidateIds, networkIds, candidateSnapshotEdges) {
+  const existingKeys = new Set(candidateSnapshotEdges.map((edge) => `${edge.source}\u0000${edge.target}`));
   const overlays = [];
-  let unionEdgeCount = snapshotNetworkEdges.length;
+  let unionEdgeCount = candidateSnapshotEdges.length;
   for (const overlayPath of CITATION_OVERLAY_PATHS) {
     const overlay = readJson(overlayPath);
     assert(overlay.schema === OVERLAY_SCHEMA, `Expected ${OVERLAY_SCHEMA}; got ${overlay.schema}`);
-    assert(overlay.scope?.nodeCount === networkIds.size, "Citation overlay node scope is stale");
+    assert(overlay.scope?.nodeCount === candidateIds.size, "Citation overlay candidate scope is stale");
     assert(overlay.scope?.baseUnionEdges === unionEdgeCount, "Citation overlay base-union count is stale");
     assert(overlay.scope?.overlayEdges === overlay.edges?.length, "Citation overlay edge count is stale");
     assert(overlay.scope?.expectedUnionEdges === unionEdgeCount + overlay.edges.length, "Citation overlay union count is stale");
@@ -981,7 +1023,7 @@ function loadCitationOverlays(networkIds, snapshotNetworkEdges) {
     const edges = overlay.edges.map((pair) => {
       assert(Array.isArray(pair) && pair.length === 2, "Citation overlay edges must be [source, target]");
       const [source, target] = pair;
-      assert(networkIds.has(source) && networkIds.has(target), `Citation overlay endpoint is outside the 97-node scope: ${source} -> ${target}`);
+      assert(candidateIds.has(source) && candidateIds.has(target), `Citation overlay endpoint is outside the candidate scope: ${source} -> ${target}`);
       assert(source !== target, `Citation overlay contains self-link ${source}`);
       const key = `${source}\u0000${target}`;
       assert(!existingKeys.has(key), `Citation overlay duplicates an earlier edge ${source} -> ${target}`);
@@ -991,7 +1033,11 @@ function loadCitationOverlays(networkIds, snapshotNetworkEdges) {
     });
     for (const key of overlayKeys) existingKeys.add(key);
     unionEdgeCount += edges.length;
-    overlays.push({ overlay, edges });
+    overlays.push({
+      overlay,
+      sourceEdges: edges,
+      edges: edges.filter((edge) => networkIds.has(edge.source) && networkIds.has(edge.target)),
+    });
   }
   return {
     overlays,
@@ -1010,16 +1056,32 @@ function buildAsset(snapshot) {
     ...node,
     toolkit: toolkitForNode(node, audits),
   }));
-  const networkNodes = joinedSourceNodes
-    .filter(isNetworkPublication)
+  const candidateNodes = joinedSourceNodes
+    .filter(isCandidateNetworkPublication)
     .map((node) => ({
       ...node,
       scope: scopeForNode(node),
-    }));
+  }));
+  const verifiedDoiNodes = candidateNodes.filter(hasVerifiedDoiUrl);
+  const networkNodes = candidateNodes.filter(isNetworkPublication);
+  const candidateIds = new Set(candidateNodes.map((node) => node.id));
   const networkIds = new Set(networkNodes.map((node) => node.id));
+  const candidateSnapshotEdges = sourceEdges.filter((edge) =>
+    candidateIds.has(edge.source) && candidateIds.has(edge.target));
   const snapshotNetworkEdges = sourceEdges.filter((edge) =>
     networkIds.has(edge.source) && networkIds.has(edge.target));
-  const citationOverlays = loadCitationOverlays(networkIds, snapshotNetworkEdges);
+  const citationOverlays = loadCitationOverlays(
+    candidateIds,
+    networkIds,
+    candidateSnapshotEdges,
+  );
+  const doiResolutionScope = citationOverlays.overlays
+    .map((entry) => entry.overlay.scope)
+    .find((scope) => Number.isInteger(scope?.resolvedDoiNodes));
+  assert(doiResolutionScope?.doiBearingNodes === verifiedDoiNodes.length,
+    "Exact-DOI overlay bearing-node count is stale");
+  assert(doiResolutionScope?.resolvedDoiNodes === verifiedDoiNodes.length,
+    "Every canonical DOI node must be resolver-verified");
   const networkEdges = [...snapshotNetworkEdges, ...citationOverlays.edges]
     .sort((left, right) => left.source.localeCompare(right.source)
       || left.target.localeCompare(right.target)
@@ -1029,6 +1091,11 @@ function buildAsset(snapshot) {
 
   const assetNodes = networkNodes.map((node, index) => ({
     ...node,
+    eligibility: {
+      verifiedDoiUrl: true,
+      citationMetadataAvailable: true,
+      citationMetadataProviders: citationMetadataProviders(node),
+    },
     network: {
       inDegree: layouts.metrics.incomingDegree[index],
       outDegree: layouts.metrics.outgoingDegree[index],
@@ -1103,19 +1170,28 @@ function buildAsset(snapshot) {
       builtOn: snapshot.builtOn,
       scopeClaim: snapshot.scopeClaim,
     },
-    citationOverlays: citationOverlays.overlays.map(({ overlay, edges }) => ({
+    citationOverlays: citationOverlays.overlays.map(({ overlay, sourceEdges: overlaySourceEdges, edges }) => ({
       id: overlay.overlayId,
       capturedOn: overlay.capturedOn,
       provider: overlay.provider.name,
       edgeProvenance: overlay.edgeProvenance,
+      sourceEdges: overlaySourceEdges.length,
       addedEdges: edges.length,
       scope: overlay.scope,
     })),
     sourceCounts,
+    selectionAudit: {
+      candidatePublications: candidateNodes.length,
+      withVerifiedDoiUrl: verifiedDoiNodes.length,
+      doiResolverVerified: doiResolutionScope.resolvedDoiNodes,
+      withCitationMetadata: networkNodes.length,
+      excludedMissingVerifiedDoiUrl: candidateNodes.length - verifiedDoiNodes.length,
+      excludedMissingCitationMetadata: verifiedDoiNodes.length - networkNodes.length,
+    },
     methodology: {
       edgeDirection: snapshot.sourceMethodology.edgeDirection,
-      edgeCoverage: "Every directed citation captured between displayed publications is retained from the frozen multi-source snapshot, the dated exact-DOI OpenAlex overlay, and the primary-source reference-list audit of provider-isolated records. Missing lines can still reflect provider coverage, reference-resolution gaps, or unavailable reference lists.",
-      selection: "Includes every non-review publication manually confirmed as audiotactile in the legacy citation audit, plus non-review publications added by an exact-DOI Toolkit literature audit with at least one non-adjacent audiotactile PPS task record. Toolkit readiness is an encoding, never an inclusion gate.",
+      edgeCoverage: "Every directed citation captured between eligible displayed publications is retained from the frozen multi-source snapshot, the dated exact-DOI OpenAlex overlay, and the primary-source reference-list audit of provider-isolated records. Missing lines can still reflect provider coverage, reference-resolution gaps, or unavailable reference lists.",
+      selection: "Starts with every non-review publication manually confirmed as audiotactile in the legacy citation audit, plus non-review publications added by an exact-DOI Toolkit literature audit with at least one non-adjacent audiotactile PPS task record. A paper is displayed only when its normalized DOI, DOI-keyed source identity, and canonical https://doi.org URL agree, the dated exact-DOI resolver audit confirms every DOI-bearing candidate, and at least one identified metadata provider supplies a finite citation count, including a valid count of zero. Toolkit readiness is an encoding, never an inclusion gate.",
       scopeProvenance: {
         legacyConfirmed: "Manually confirmed audiotactile in the legacy citation-corpus audit.",
         laterExactDoiAudit: "Added by an exact normalized DOI join to a non-adjacent Toolkit literature record.",
@@ -1124,7 +1200,7 @@ function buildAsset(snapshot) {
         pageRank: "Retained from the directed 1,712-publication source corpus.",
         betweennessApprox: "Retained approximate betweenness from the 1,712-publication source corpus.",
         influence: "Retained source-corpus navigation score; it is not a quality score.",
-        inducedPageRank: "Recomputed deterministically over the displayed 97-publication directed citation graph with damping 0.85 and 100 fixed iterations.",
+        inducedPageRank: "Recomputed deterministically over the displayed 94-publication directed citation graph with damping 0.85 and 100 fixed iterations.",
         prominence: "Layout-only score: 55% normalized log source-corpus citations received, 30% displayed-network PageRank, and 15% normalized log displayed-network indegree. It is not a study-quality score.",
       },
       sizing: {
@@ -1213,6 +1289,17 @@ function validateAsset(asset) {
   assert(new Set(ids).size === ids.length, "Network publication IDs must be unique");
   assert(ids.every((id, index) => index === 0 || ids[index - 1].localeCompare(id) <= 0), "Network publication nodes must remain ID-sorted");
   assert(asset.nodes.every((node) => node.corpus.documentRole !== "review"), "Review publications must not enter the audiotactile study network");
+  assert(asset.nodes.every(hasVerifiedDoiUrl), "Every network publication requires a verified canonical DOI URL");
+  assert(asset.nodes.every(hasCitationMetadata), "Every network publication requires provider-backed citation metadata");
+  assert(asset.nodes.every((node) => node.eligibility?.verifiedDoiUrl
+    && node.eligibility?.citationMetadataAvailable
+    && node.eligibility?.citationMetadataProviders?.length), "Network eligibility metadata is stale");
+  assert(asset.selectionAudit?.candidatePublications === 97, "Candidate publication count is stale");
+  assert(asset.selectionAudit?.withVerifiedDoiUrl === NETWORK_EXPECTED.nodes, "Verified DOI selection count is stale");
+  assert(asset.selectionAudit?.doiResolverVerified === NETWORK_EXPECTED.nodes, "DOI resolver-verification count is stale");
+  assert(asset.selectionAudit?.withCitationMetadata === NETWORK_EXPECTED.nodes, "Citation-metadata selection count is stale");
+  assert(asset.selectionAudit?.excludedMissingVerifiedDoiUrl === 3, "Missing-DOI exclusion count is stale");
+  assert(asset.selectionAudit?.excludedMissingCitationMetadata === 0, "Missing-citation-metadata exclusion count is stale");
   assert(asset.nodes.every((node) => node.modality.audiotactile.verified
     || (node.scope.provenance === "later_exact_doi_audit"
       && node.toolkit.records.some(isInScopeToolkitRecord))), "Every network node needs legacy confirmation or a later exact-DOI in-scope audit basis");
@@ -1259,7 +1346,7 @@ function validateAsset(asset) {
     outgoingDegree[source] += 1;
     weakEdgeKeys.add(source < target ? `${source}:${target}` : `${target}:${source}`);
   }
-  assert(weakEdgeKeys.size === 755, `Expected 755 weak citation links; got ${weakEdgeKeys.size}`);
+  assert(weakEdgeKeys.size === 747, `Expected 747 weak citation links; got ${weakEdgeKeys.size}`);
   assert(asset.nodes.every((node, index) => node.network.inDegree === incomingDegree[index]
     && node.network.outDegree === outgoingDegree[index]), "Displayed-network directed degrees are stale");
   const normalizedIncoming = normalizedValues(incomingDegree, true);
