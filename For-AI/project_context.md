@@ -100,6 +100,14 @@ Primary users are cognitive neuroscience and psychology researchers who need to 
   continuous_noise`. Segment 1 exposes this as a `Source mode` toggle with
   `Burst train` as the default; the renderer still owns SOFA/FABIAN/3DTI
   spatialization instead of baking binaural cues into the dry source.
+- Segment 1 uses one unified stimulus/trajectory workspace and an isolated
+  ingredient draft. Every spatialized ingredient owns a `trajectory_snapshot`;
+  the top-level trajectory is only the next-new-source default. Imported audio
+  records may carry backward-compatible `display_color_hex` and retained
+  backend-managed `source_input_path` provenance. Create/remake/update is the
+  only ingredient commit boundary, and remakes validate a temporary candidate
+  before atomically replacing the source/manifest row, propagating renames, and
+  invalidating Segments 2-6.
 - Focus Mode `Test Audio` is a pre-run comfort/channel check using the same
   Study 5 burst-train source standard: it plays the pink frontal preload
   `assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Pink_frontal.wav`

@@ -1584,14 +1584,16 @@ class DashboardController:
         recipe = dict(payload.get("bake_recipe") or {})
         if not recipe:
             raise ValueError("Choose a stimulus source before baking.")
+        recipe_kind = str(recipe.get("kind") or "").strip().lower()
+        ingredient_recipe = recipe_kind in {"generated_noise", "imported_audio", "fixed_audio"}
         design_payload = {key: value for key, value in payload.items() if key != "bake_recipe"}
-        if design_payload:
+        if design_payload and not ingredient_recipe:
             self.update_design(design_payload)
         self._require_artifact_mutation_allowed()
         with self._lock:
             project = self._ensure_project_context(self.design)
-            design = _copy_design(self.design)
-        recipe_kind = str(recipe.get("kind") or "").strip().lower()
+            saved_design = _copy_design(self.design)
+            design = _candidate_design_from_payload(saved_design, design_payload) if ingredient_recipe else saved_design
         self._append_dashboard_diary_event(
             "dashboard_bake_requested",
             design=design,
@@ -1688,7 +1690,167 @@ class DashboardController:
                 }
 
             return self.jobs.start("block_csv_preview", _block_csv_bake, progress=True)
-        label = _unique_stimulus_label(_bake_recipe_label(recipe), design)
+        action = str(recipe.get("action") or "create").strip().lower()
+        if action not in {"create", "remake"}:
+            raise ValueError(f"Unsupported Segment 1 action: {action}")
+        original_label = str(recipe.get("original_label") or "").strip()
+        original_entry = _stimulus_source_entry(saved_design, original_label) if action == "remake" else None
+        if action == "remake" and original_entry is None:
+            raise ValueError(f"Cannot remake missing Segment 1 ingredient: {original_label or 'unnamed'}")
+        expected_kind = "fixed_audio" if recipe_kind == "fixed_audio" else recipe_kind
+        if original_entry is not None and original_entry[0] != expected_kind:
+            raise ValueError("A remake cannot convert an ingredient between generated noise, custom looming tone, and fixed clip.")
+        label = _stimulus_label_for_action(_bake_recipe_label(recipe), design, action=action, original_label=original_label)
+        display_color_hex = _normalize_display_color_hex(
+            recipe.get("display_color_hex")
+            or (recipe.get("audio") or {}).get("display_color_hex")
+            if isinstance(recipe.get("audio"), dict)
+            else ""
+        )
+        if recipe_kind == "fixed_audio":
+            audio_payload = dict(recipe.get("audio") or {})
+            source_input_path = str(audio_payload.get("source_input_path") or audio_payload.get("path") or "").strip()
+            source_path = _resolve_dashboard_local_path(source_input_path)
+            if not source_input_path or not _path_exists(source_path):
+                raise ValueError("Choose a local audio file before creating or updating the fixed clip.")
+            target_duration_s = max(0.1, _float(audio_payload.get("target_duration_s"), 4.0))
+            ingredient_dir = project.segment1_dir
+
+            def _commit_fixed_audio() -> dict[str, Any]:
+                _ensure_dir(ingredient_dir)
+                staging_dir = ingredient_dir / ".staging" / uuid.uuid4().hex
+                _ensure_dir(staging_dir)
+                try:
+                    candidate_copy = _copy_materialize_ingredient_audio_file(
+                        source_path,
+                        staging_dir,
+                        label,
+                        motion_mode="stationary",
+                    )
+                    info = _audio_file_info(candidate_copy)
+                    if int(info.get("duration_ms") or 0) <= 0:
+                        raise RuntimeError(f"Imported fixed clip is not a valid audio file: {label}")
+                    staged_copy = _materialize_ingredient_audio_file(
+                        candidate_copy,
+                        ingredient_dir,
+                        label,
+                        motion_mode="stationary",
+                    )
+                finally:
+                    _remove_tree(staging_dir)
+                source = AudioFileSpec(
+                    label=label,
+                    path=str(staged_copy),
+                    target_duration_s=target_duration_s or float(info["duration_s"]),
+                    render_mode="preserve",
+                    tone_type=str(audio_payload.get("tone_type") or CUSTOM_AUDIO_NOISE_TYPE),
+                    gain=max(0.01, _float(audio_payload.get("gain"), 1.0)),
+                    placement=str(audio_payload.get("placement") or "before"),
+                    target_source_label=str(audio_payload.get("target_source_label") or ""),
+                    phase=str(audio_payload.get("phase") or ""),
+                    gap_s=max(0.0, _float(audio_payload.get("gap_s"), 0.0)),
+                    motion_mode="stationary",
+                    trajectory_snapshot={},
+                    display_color_hex=display_color_hex or _source_color_hex(audio_payload.get("tone_type") or "prestimulus"),
+                    source_input_path=str(source_path),
+                )
+                commit_design = _copy_design(design)
+                commit_design.trajectory = _copy_design(saved_design).trajectory
+                _replace_stimulus_source(commit_design, source, "fixed_audio", original_label=original_label if action == "remake" else "")
+                _propagate_source_label_rename(commit_design, original_label, label)
+                with self._lock:
+                    active_project = self._ensure_project_context(self.design)
+                    _record_ingredient_file(
+                        active_project,
+                        staged_copy,
+                        label=label,
+                        source_kind="fixed_audio",
+                        trajectory_snapshot={},
+                        motion_mode="stationary",
+                        provenance={
+                            "display_color_hex": source.display_color_hex,
+                            "source_input_path": source.source_input_path,
+                            "action": action,
+                            "original_label": original_label,
+                        },
+                        replace_label=original_label if action == "remake" else "",
+                    )
+                    self.design = commit_design
+                    _clear_downstream_segment_outputs(active_project, from_segment=1)
+                    report = _write_segment_validation_report(active_project, self.design)
+                    self.current_run_package = None
+                    save_design(self.design, self.design_path)
+                _remove_replaced_ingredient_file(original_entry, staged_copy, active_project.segment1_dir, keep_paths={source_path})
+                return {
+                    "status": "baked",
+                    "source_kind": "fixed_audio",
+                    "source_label": label,
+                    "source": asdict(source),
+                    "wav_path": str(staged_copy),
+                    "validation_report_path": str(report),
+                    "local_only": True,
+                    "message": "Fixed audio clip was committed by the local companion backend.",
+                }
+
+            return self.jobs.start("stimulus_bake", _commit_fixed_audio)
+
+        if recipe_kind == "imported_audio" and original_entry is not None:
+            original_audio = original_entry[1]
+            audio_payload = dict(recipe.get("audio") or {})
+            retained_source = str(audio_payload.get("source_input_path") or getattr(original_audio, "source_input_path", "") or "").strip()
+            if not retained_source:
+                proposed_snapshot = _stimulus_trajectory_snapshot(
+                    design,
+                    label=label,
+                    source_kind="imported_audio",
+                    noise_type=str(getattr(original_audio, "tone_type", "") or CUSTOM_AUDIO_NOISE_TYPE),
+                )
+                if not _trajectory_snapshots_equivalent(getattr(original_audio, "trajectory_snapshot", {}), proposed_snapshot):
+                    raise ValueError("This legacy looming import has no retained dry source. Re-upload the source audio before changing trajectory or acoustic settings.")
+
+                def _metadata_only_remake() -> dict[str, Any]:
+                    source = AudioFileSpec(**asdict(original_audio))
+                    source.label = label
+                    source.display_color_hex = display_color_hex or _source_color_hex(source.tone_type)
+                    commit_design = _copy_design(design)
+                    _replace_stimulus_source(commit_design, source, "imported_audio", original_label=original_label)
+                    _propagate_source_label_rename(commit_design, original_label, label)
+                    with self._lock:
+                        active_project = self._ensure_project_context(self.design)
+                        _record_ingredient_file(
+                            active_project,
+                            Path(source.path),
+                            label=label,
+                            source_kind="imported_audio",
+                            trajectory_snapshot=source.trajectory_snapshot,
+                            motion_mode="looming",
+                            provenance={
+                                "display_color_hex": source.display_color_hex,
+                                "source_input_path": "",
+                                "action": "remake",
+                                "original_label": original_label,
+                                "metadata_only": True,
+                            },
+                            replace_label=original_label,
+                        )
+                        self.design = commit_design
+                        _clear_downstream_segment_outputs(active_project, from_segment=1)
+                        report = _write_segment_validation_report(active_project, self.design)
+                        self.current_run_package = None
+                        save_design(self.design, self.design_path)
+                    return {
+                        "status": "baked",
+                        "source_kind": "imported_audio",
+                        "source_label": label,
+                        "source": asdict(source),
+                        "wav_path": source.path,
+                        "validation_report_path": str(report),
+                        "local_only": True,
+                        "metadata_only": True,
+                    }
+
+                return self.jobs.start("stimulus_bake", _metadata_only_remake)
+
         bake_design, source_kind, source_payload = _design_for_bake_recipe(design, recipe, label)
         trajectory_snapshot = _stimulus_trajectory_snapshot(
             design,
@@ -1698,27 +1860,33 @@ class DashboardController:
         )
         source_payload["trajectory_snapshot"] = trajectory_snapshot
         seed = int(design.protocol.random_seed or 20250604)
-        render_dir = project.project_dir
         ingredient_dir = project.segment1_dir
 
         def _bake() -> dict[str, Any]:
             _ensure_dir(ingredient_dir)
-            design_path = ingredient_dir / f"stimulus_design.bake_{_slug(label)}.json"
-            _ensure_dir(design_path.parent)
-            _save_design_file(bake_design, design_path)
-            result = render_backend.render_design_with_3dti(
-                Path(_filesystem_path(design_path)),
-                Path(_filesystem_path(ingredient_dir)),
-                seed=seed,
-                engine="python-sofa-reference",
-                include_tactile=False,
-            )
-            raw_wav_path = _baked_wav_path(result, label)
-            if raw_wav_path is None or not _path_exists(raw_wav_path):
-                raise RuntimeError(f"Bake did not create a WAV for {label}.")
-            wav_path = _materialize_ingredient_audio_file(raw_wav_path, ingredient_dir, label, motion_mode="looming")
-            _rewrite_render_manifest_wav_path(result.manifest_path, old_path=raw_wav_path, new_path=wav_path)
+            staging_dir = ingredient_dir / ".staging" / uuid.uuid4().hex
+            _ensure_dir(staging_dir)
+            try:
+                design_path = staging_dir / f"stimulus_design.bake_{_slug(label)}.json"
+                _save_design_file(bake_design, design_path)
+                result = render_backend.render_design_with_3dti(
+                    Path(_filesystem_path(design_path)),
+                    Path(_filesystem_path(staging_dir)),
+                    seed=seed,
+                    engine="python-sofa-reference",
+                    include_tactile=False,
+                )
+                raw_wav_path = _baked_wav_path(result, label)
+                if raw_wav_path is None or not _path_exists(raw_wav_path):
+                    raise RuntimeError(f"Bake did not create a WAV for {label}.")
+                wav_path = _materialize_ingredient_audio_file(raw_wav_path, ingredient_dir, label, motion_mode="looming")
+                manifest_path = _copy_bake_sidecar(result.manifest_path, ingredient_dir, label, "render_manifest")
+                qc_path = _copy_bake_sidecar(result.qc_path, ingredient_dir, label, "render_qc")
+                _rewrite_render_manifest_wav_path(manifest_path, old_path=raw_wav_path, new_path=wav_path)
+            finally:
+                _remove_tree(staging_dir)
 
+            commit_design = _copy_design(design)
             with self._lock:
                 active_project = self._ensure_project_context(self.design)
                 _record_ingredient_file(
@@ -1728,39 +1896,51 @@ class DashboardController:
                     source_kind=source_kind,
                     trajectory_snapshot=trajectory_snapshot,
                     motion_mode="looming",
-                    provenance={"loudness_policy": loudness_policy_for_design(bake_design)},
+                    provenance={
+                        "loudness_policy": loudness_policy_for_design(bake_design),
+                        "display_color_hex": display_color_hex,
+                        "source_input_path": str(source_payload.get("source_input_path") or ""),
+                        "action": action,
+                        "original_label": original_label,
+                    },
+                    replace_label=original_label if action == "remake" else "",
                 )
                 if source_kind == "generated_noise":
                     source_payload["prebaked_path"] = str(wav_path)
                     source = NoiseDefinition(**source_payload)
-                    self.design.noises.append(source)
                     saved_source = asdict(source)
                 else:
                     source = AudioFileSpec(
                         label=label,
                         path=str(wav_path),
                         target_duration_s=float(source_payload.get("target_duration_s", design.trajectory.total_duration_s)),
-                        render_mode="preserve",
+                        render_mode="spatialize",
                         tone_type=str(source_payload.get("tone_type") or CUSTOM_AUDIO_NOISE_TYPE),
                         gain=1.0,
                         motion_mode="looming",
                         trajectory_snapshot=trajectory_snapshot,
+                        display_color_hex=display_color_hex or _source_color_hex(source_payload.get("tone_type") or CUSTOM_AUDIO_NOISE_TYPE),
+                        source_input_path=str(source_payload.get("source_input_path") or ""),
                     )
-                    self.design.custom_looming_files.append(source)
                     saved_source = asdict(source)
+                _replace_stimulus_source(commit_design, source, source_kind, original_label=original_label if action == "remake" else "")
+                _propagate_source_label_rename(commit_design, original_label, label)
+                self.design = commit_design
                 _clear_downstream_segment_outputs(active_project, from_segment=1)
                 report = _write_segment_validation_report(active_project, self.design)
                 self.current_run_package = None
                 save_design(self.design, self.design_path)
+            _remove_replaced_ingredient_file(original_entry, wav_path, active_project.segment1_dir, keep_paths={Path(str(source_payload.get("source_input_path") or "."))})
 
             return {
                 "status": result.status,
                 "exit_code": result.exit_code,
                 "source_kind": source_kind,
+                "source_label": label,
                 "source": saved_source,
                 "wav_path": str(wav_path),
-                "manifest_path": str(result.manifest_path),
-                "qc_path": str(result.qc_path),
+                "manifest_path": str(manifest_path),
+                "qc_path": str(qc_path),
                 "validation_report_path": str(report),
                 "include_tactile": False,
                 "local_only": True,
@@ -2380,10 +2560,13 @@ class DashboardController:
         original = Path(filename)
         suffix = original.suffix or ".wav"
         label = str(payload.get("label") or Path(filename).stem).strip() or Path(filename).stem
+        stage_only = bool(payload.get("stage_only"))
+        display_color_hex = _normalize_display_color_hex(payload.get("display_color_hex"), _source_color_hex(CUSTOM_AUDIO_NOISE_TYPE))
         with self._lock:
             project = self._ensure_project_context(self.design)
-        _ensure_dir(project.segment1_dir)
-        temp_path = project.segment1_dir / f"_import_{uuid.uuid4().hex[:10]}{suffix}"
+        target_dir = project.segment1_dir / "source_inputs" if stage_only else project.segment1_dir
+        _ensure_dir(target_dir)
+        temp_path = target_dir / f"_import_{uuid.uuid4().hex[:10]}{suffix}"
         _write_bytes_file(temp_path, content)
         duration_s = _float(payload.get("target_duration_s"), 0.0)
         if duration_s <= 0:
@@ -2400,7 +2583,7 @@ class DashboardController:
         motion_mode = str(payload.get("motion_mode") or "looming").strip().lower()
         if motion_mode not in {"looming", "stationary"}:
             motion_mode = "looming"
-        path = _materialize_ingredient_audio_file(temp_path, project.segment1_dir, label, motion_mode=motion_mode)
+        path = _materialize_ingredient_audio_file(temp_path, target_dir, label, motion_mode="" if stage_only else motion_mode)
         audio = AudioFileSpec(
             label=label,
             path=str(path),
@@ -2413,20 +2596,28 @@ class DashboardController:
             gap_s=max(0.0, _float(payload.get("gap_s"), 0.0)),
             sequence_order=max(0, int(_float(payload.get("sequence_order"), 0.0))),
             motion_mode=motion_mode,
+            display_color_hex=display_color_hex,
+            source_input_path=str(path),
         )
-        _record_ingredient_file(
-            project,
-            path,
-            label=label,
-            source_kind="imported_audio",
-            trajectory_snapshot={},
-            motion_mode=motion_mode,
-            provenance={"loudness_policy": loudness_policy_for_design(self.design)},
-        )
-        _clear_downstream_segment_outputs(project, from_segment=1)
-        _write_segment_validation_report(project, self.design)
+        if not stage_only:
+            _record_ingredient_file(
+                project,
+                path,
+                label=label,
+                source_kind="imported_audio",
+                trajectory_snapshot={},
+                motion_mode=motion_mode,
+                provenance={
+                    "loudness_policy": loudness_policy_for_design(self.design),
+                    "display_color_hex": display_color_hex,
+                    "source_input_path": str(path),
+                },
+            )
+            _clear_downstream_segment_outputs(project, from_segment=1)
+            _write_segment_validation_report(project, self.design)
         return {
             "audio": asdict(audio),
+            "staged": stage_only,
             "local_only": True,
             "message": "Stored by the local companion backend; no online upload was performed.",
         }
@@ -3040,6 +3231,7 @@ def _viewer_source_trajectories(design: StimulusDesign) -> list[dict[str, Any]]:
             label=asset.label,
             source_kind="imported_audio",
             tone_type=tone_type,
+            display_color_hex=asset.display_color_hex,
             local_path=asset.path,
             snapshot=snapshot,
         ))
@@ -3051,6 +3243,7 @@ def _viewer_source_trajectory_row(
     label: str,
     source_kind: str,
     tone_type: str,
+    display_color_hex: str = "",
     local_path: str,
     snapshot: dict[str, Any],
 ) -> dict[str, Any]:
@@ -3060,7 +3253,7 @@ def _viewer_source_trajectory_row(
         "label": label,
         "source_kind": source_kind,
         "tone_type": tone_type,
-        "color_hex": _source_color_hex(tone_type),
+        "color_hex": _normalize_display_color_hex(display_color_hex, _source_color_hex(tone_type)),
         "local_path": local_path,
         "trajectory_snapshot": snapshot,
         "start": start,
@@ -3909,6 +4102,7 @@ def _record_ingredient_file(
     trajectory_snapshot: dict[str, Any] | None = None,
     motion_mode: str = "",
     provenance: dict[str, Any] | None = None,
+    replace_label: str = "",
 ) -> dict[str, Any]:
     info = _audio_file_info(path)
     descriptor = _ingredient_descriptor(label, int(info["duration_ms"]), motion_mode=motion_mode)
@@ -3928,9 +4122,12 @@ def _record_ingredient_file(
     }
     manifest = _load_ingredient_manifest(project)
     rows = []
+    replace_key = _source_key(replace_label)
     for item in manifest.get("ingredients", []):
         item_path = str(item.get("path") or "")
         if item_path and not _path_exists(Path(item_path)):
+            continue
+        if replace_key and _source_key(str(item.get("label") or "")) == replace_key:
             continue
         if item_path == str(path):
             continue
@@ -7584,6 +7781,146 @@ def _unique_stimulus_label(label: str, design: StimulusDesign) -> str:
     return f"{base} {index}"
 
 
+def _normalize_display_color_hex(value: Any, fallback: str = "") -> str:
+    text = str(value or "").strip()
+    if not re.fullmatch(r"#[0-9A-Fa-f]{6}", text):
+        return fallback
+    return text.upper()
+
+
+def _stimulus_source_entry(design: StimulusDesign, label: str) -> tuple[str, NoiseDefinition | AudioFileSpec] | None:
+    key = _source_key(label)
+    if not key:
+        return None
+    for source in design.noises:
+        if _source_key(source.label) == key:
+            return "generated_noise", source
+    for source in design.custom_looming_files:
+        if _source_key(source.label) != key:
+            continue
+        # Collection ownership distinguishes an imported spatialized source
+        # from a fixed clip. Some published spatialized profiles deliberately
+        # use stationary paths, so motion_mode alone is not a clip category.
+        return "imported_audio", source
+    for source in design.prestimulus_files:
+        if _source_key(source.label) == key:
+            return "fixed_audio", source
+    return None
+
+
+def _stimulus_label_for_action(label: str, design: StimulusDesign, *, action: str, original_label: str = "") -> str:
+    requested = str(label or "").strip()
+    if not requested:
+        raise ValueError("A stimulus name is required.")
+    if action == "create":
+        return _unique_stimulus_label(requested, design)
+    original_key = _source_key(original_label)
+    for source in [*design.noises, *design.custom_looming_files, *design.prestimulus_files]:
+        if _source_key(source.label) == _source_key(requested) and _source_key(source.label) != original_key:
+            raise ValueError(f"Another Segment 1 ingredient already uses the name: {requested}")
+    return requested
+
+
+def _replace_stimulus_source(
+    design: StimulusDesign,
+    source: NoiseDefinition | AudioFileSpec,
+    source_kind: str,
+    *,
+    original_label: str = "",
+) -> None:
+    original_key = _source_key(original_label)
+    if original_key:
+        design.noises = [item for item in design.noises if _source_key(item.label) != original_key]
+        design.custom_looming_files = [item for item in design.custom_looming_files if _source_key(item.label) != original_key]
+        design.prestimulus_files = [item for item in design.prestimulus_files if _source_key(item.label) != original_key]
+    if source_kind == "generated_noise":
+        if not isinstance(source, NoiseDefinition):
+            raise TypeError("Generated-noise commits require NoiseDefinition.")
+        design.noises.append(source)
+    elif source_kind == "imported_audio":
+        if not isinstance(source, AudioFileSpec):
+            raise TypeError("Imported looming commits require AudioFileSpec.")
+        design.custom_looming_files.append(source)
+    elif source_kind == "fixed_audio":
+        if not isinstance(source, AudioFileSpec):
+            raise TypeError("Fixed-audio commits require AudioFileSpec.")
+        design.prestimulus_files.append(source)
+    else:
+        raise ValueError(f"Unsupported source kind: {source_kind}")
+
+
+def _propagate_source_label_rename(design: StimulusDesign, original_label: str, new_label: str) -> None:
+    original_key = _source_key(original_label)
+    if not original_key or original_key == _source_key(new_label):
+        return
+    for strip in design.protocol.trial_strips:
+        for element in strip.elements:
+            element.source_labels = [new_label if _source_key(label) == original_key else label for label in element.source_labels]
+            if _source_key(element.source_label) == original_key:
+                element.source_label = new_label
+            if _source_key(element.label) == original_key:
+                element.label = new_label
+    for asset in [*design.custom_looming_files, *design.prestimulus_files]:
+        if _source_key(asset.target_source_label) == original_key:
+            asset.target_source_label = new_label
+
+
+def _trajectory_snapshots_equivalent(left: dict[str, Any] | None, right: dict[str, Any] | None) -> bool:
+    left = dict(left or {})
+    right = dict(right or {})
+    fields = (
+        "start_distance_cm",
+        "end_distance_cm",
+        "start_rotation_deg",
+        "end_rotation_deg",
+        "movement_duration_s",
+        "start_hold_s",
+        "end_hold_s",
+    )
+    for field_name in fields:
+        try:
+            if not math.isclose(float(left.get(field_name)), float(right.get(field_name)), rel_tol=1e-7, abs_tol=1e-6):
+                return False
+        except (TypeError, ValueError):
+            return False
+    return True
+
+
+def _copy_bake_sidecar(source: Path, ingredient_dir: Path, label: str, sidecar_kind: str) -> Path:
+    source = Path(source)
+    suffix = source.suffix or ".json"
+    target = _unique_output_path(ingredient_dir, f"{_slug(label)}_{sidecar_kind}", suffix)
+    if _path_exists(source):
+        _copy_file(source, target)
+    return target
+
+
+def _remove_replaced_ingredient_file(
+    original_entry: tuple[str, NoiseDefinition | AudioFileSpec] | None,
+    replacement_path: Path,
+    ingredient_dir: Path,
+    *,
+    keep_paths: set[Path] | None = None,
+) -> None:
+    if original_entry is None:
+        return
+    source = original_entry[1]
+    old_text = str(getattr(source, "prebaked_path", "") or getattr(source, "path", "") or "").strip()
+    if not old_text:
+        return
+    old_path = _resolve_dashboard_local_path(old_text)
+    keep_resolved = {Path(item).resolve() for item in (keep_paths or set()) if str(item)}
+    try:
+        if old_path.resolve() == Path(replacement_path).resolve() or old_path.resolve() in keep_resolved:
+            return
+        if not _path_is_within(old_path, ingredient_dir):
+            return
+        if _path_exists(old_path):
+            os.unlink(_filesystem_path(old_path))
+    except OSError:
+        pass
+
+
 def _design_for_bake_recipe(design: StimulusDesign, recipe: dict[str, Any], label: str) -> tuple[StimulusDesign, str, dict[str, Any]]:
     bake_design = _copy_design(design)
     bake_design.name = f"{design.name} - baked {label}"
@@ -7627,7 +7964,7 @@ def _design_for_bake_recipe(design: StimulusDesign, recipe: dict[str, Any], labe
 
     if kind == "imported_audio":
         audio = recipe.get("audio") if isinstance(recipe.get("audio"), dict) else {}
-        path = str(audio.get("path") or recipe.get("path") or "").strip()
+        path = str(audio.get("source_input_path") or audio.get("path") or recipe.get("path") or "").strip()
         if not path or not _path_exists(Path(path).expanduser()):
             raise ValueError("Imported audio must be stored locally before baking.")
         render_mode = str(recipe.get("render_mode") or audio.get("render_mode") or "preserve").strip().lower()
@@ -7641,11 +7978,20 @@ def _design_for_bake_recipe(design: StimulusDesign, recipe: dict[str, Any], labe
                 path=path,
                 target_duration_s=duration_s,
                 render_mode=render_mode,
+                tone_type=str(audio.get("tone_type") or CUSTOM_AUDIO_NOISE_TYPE),
                 gain=gain,
                 motion_mode="looming",
+                display_color_hex=_normalize_display_color_hex(audio.get("display_color_hex") or recipe.get("display_color_hex")),
+                source_input_path=path,
             )
         ]
-        return bake_design, "imported_audio", {"target_duration_s": duration_s, "render_mode": render_mode}
+        return bake_design, "imported_audio", {
+            "target_duration_s": duration_s,
+            "render_mode": render_mode,
+            "tone_type": str(audio.get("tone_type") or CUSTOM_AUDIO_NOISE_TYPE),
+            "display_color_hex": _normalize_display_color_hex(audio.get("display_color_hex") or recipe.get("display_color_hex")),
+            "source_input_path": path,
+        }
 
     raise ValueError(f"Unsupported bake recipe kind: {kind or 'missing'}")
 

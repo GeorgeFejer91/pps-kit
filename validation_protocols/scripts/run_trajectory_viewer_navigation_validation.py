@@ -225,7 +225,12 @@ def _run_browser_validation(*, server: DashboardServer, output_dir: Path, browse
         )
 
         frame = page.frame_locator("#trajectory-frame")
-        canvas_box = frame.locator("canvas").bounding_box()
+        canvas = frame.locator("canvas")
+        # Segment 1 is a taller merged workspace now. Keep the embedded canvas
+        # inside the viewport before dispatching page-level mouse coordinates;
+        # Playwright does not auto-scroll for raw page.mouse gestures.
+        canvas.scroll_into_view_if_needed()
+        canvas_box = canvas.bounding_box()
         if not canvas_box:
             raise AssertionError("Could not locate trajectory viewer canvas.")
         before_pan = states["zoom_in"]

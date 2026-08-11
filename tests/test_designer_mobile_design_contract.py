@@ -357,7 +357,7 @@ def test_modals_contain_focus_and_scroll_within_the_phone_viewport() -> None:
         dialogs = _Markup(html).with_role("dialog")
         modal_dialogs = [(tag, attrs) for tag, attrs in dialogs if attrs.get("aria-modal") == "true"]
         nonmodal_dialogs = [(tag, attrs) for tag, attrs in dialogs if attrs.get("aria-modal") == "false"]
-        assert len(modal_dialogs) == 3
+        assert len(modal_dialogs) == 4
         assert len(nonmodal_dialogs) == 1
         assert nonmodal_dialogs[0][1]["id"] == "publication-network-detail"
         assert all(attrs["tabindex"] == "-1" for _tag, attrs in dialogs)
@@ -480,7 +480,7 @@ def test_compiled_dashboard_and_public_wrappers_share_one_cache_token() -> None:
     )
     assert len(versions) == 1
     version = versions.pop()
-    assert version == "20260811-segment2-noise-guide"
+    assert version == "20260811-segment1-workspace"
 
     wrappers = {
         "toolkit": (ROOT / "index.html").read_text(encoding="utf-8"),

@@ -10,7 +10,7 @@ The HTML dashboard segments are not only visual UI sections. They correspond to 
 
 The local packaged HTML dashboard and the hosted/GitHub Pages HTML dashboard must expose the same visible Segment numbering used by the writable registry folders. Segment 0 maps to `0_profile`, Segment 1 maps to `1_core_audio_ingredients`, Segment 2 maps to `2_trial_sequence_designs`, Segment 3 maps to `3_tactile_and_baseline_trials`, Segment 4 maps to `4_trial_repetition_pool`, Segment 5 maps to `5_block_csv_preview`, and Segment 6 maps to `6_experiment_run_setup`.
 
-Segments 1-6 have short explicit action buttons where they create artifacts and a clear registry state. Registry state belongs in backend manifests, compact status chips, previews, and stage-appropriate Open Folder affordances; do not add generic registry feedback panels with `Status`/`Variants`/`WAVs`/`Folder`/`Message` summary rows to any visible segment. Researcher-facing action labels distinguish creation from rebuilding: Segment 1 uses `Add Ingredient`/`Add Another Ingredient`; Segment 2 uses `Create Trial Sequences`/`Rebuild Trial Sequences`; Segment 3 uses `Create Trial Files`/`Rebuild Trial Files`; Segment 4 uses `Create Trial Pool`/`Rebuild Trial Pool`; Segment 5 uses `Generate Blocks`/`Regenerate Blocks` plus `Accept Blocks & Continue`; Segment 6 owns validation/finalization. Segment 0 is deliberately simpler: profile selection activates an existing context automatically, while `Start New Custom Design` requires a name and creates the clean-slate project context without a separate Apply button. Artifact creation is the primary action until a stage is ready; `Save & Continue` becomes primary after validation and is the only action that confirms the current decision segment and advances sequential editing. Segment actions should not secretly bake downstream layers or advance the edit cursor.
+Segments 1-6 have short explicit action buttons where they create artifacts and a clear registry state. Registry state belongs in backend manifests, compact status chips, previews, and stage-appropriate Open Folder affordances; do not add generic registry feedback panels with `Status`/`Variants`/`WAVs`/`Folder`/`Message` summary rows to any visible segment. Researcher-facing action labels distinguish creation from rebuilding: Segment 1 uses contextual `Create Stimulus`/`Create Clip` and `Remake Stimulus`/`Update Clip` actions; Segment 2 uses `Create Trial Sequences`/`Rebuild Trial Sequences`; Segment 3 uses `Create Trial Files`/`Rebuild Trial Files`; Segment 4 uses `Create Trial Pool`/`Rebuild Trial Pool`; Segment 5 uses `Generate Blocks`/`Regenerate Blocks` plus `Accept Blocks & Continue`; Segment 6 owns validation/finalization. Segment 0 is deliberately simpler: profile selection activates an existing context automatically, while `Start New Custom Design` requires a name and creates the clean-slate project context without a separate Apply button. Artifact creation is the primary action until a stage is ready; `Save & Continue` becomes primary after validation and is the only action that confirms the current decision segment and advances sequential editing. Segment actions should not secretly bake downstream layers or advance the edit cursor.
 
 Visible segment surfaces should not create their own scroll controls. The browser page/workspace is the central scroll surface; segment panels, tables, and row builders should grow or wrap content instead of using nested vertical or horizontal scrollbars.
 
@@ -80,12 +80,24 @@ Segment 1 creates, imports, stores, and catalogs the reusable auditory ingredien
 
 ### User Decisions
 
-- Generate looming noise.
-- Import a custom looming tone to spatialize with the selected trajectory.
-- Import or preserve a custom audio clip for later sequence use.
-- Define trajectory controls for generated/spatialized looming sources.
-- Inspect the Segment 1 starting stimulus pool in the full-width `Stimulus Type Selection` box, arranged as generated stimuli and local stimulus clips with source cards filling two slots per row from left to right on desktop.
+- Start a `New Ingredient`, then choose `Generate Looming Noise`, `Custom Looming Tone`, or `Custom Audio Clip` at the top of one merged workspace.
+- Give every new ingredient a required name. Generated sources additionally choose scientific noise colour, burst-train or smooth mode, trajectory, and loudness settings. Custom looming tones choose a retained local source file, arbitrary display colour, trajectory, and loudness settings. Fixed custom clips choose a retained local source file, arbitrary display colour, name, and duration and remain unspatialized.
+- Inspect or select existing ingredients from two compact groups: `Looming / spatialized stimuli` and `Fixed audio clips`. Selection loads the saved name, type, colour, timing, source settings, and source-owned trajectory snapshot without mutating the design.
+- In Edit mode, remake the selected spatialized ingredient or update the selected fixed clip. A source cannot change category during remake; create a new ingredient and remove the old one instead. A generated source may change its scientific noise colour during remake.
+- Use the advanced Segment 1 Loudness Contract as a shared policy rather than presenting calibration as a separate per-source property.
 - Keep local stimulus clip cards neutral. Segment 1 should not decide which clip is attached to which source; Segment 2 owns that relationship through row/box order and alternatives.
+
+### Workspace And Selection Contract
+
+- The visual order is source-type selection; contextual settings beside the trajectory viewer; contextual create/remake action; grouped ingredient inventory; then the existing Segment 1 folder and `Save & Continue` footer. The settings/viewer columns stack on narrow screens.
+- Inventory cards are selectable in View and Edit modes and show name, source/noise type, display swatch, duration, compact trajectory metadata where applicable, folder access, Edit-only removal, and a speaker play/stop control for the exact ingredient.
+- All spatialized source trajectories remain visible in 2D and 3D. The active path is thicker and fully opaque; other paths are muted. Paths are independently clickable and select the corresponding inventory card. Overlapping paths use deterministic offsets and contrast outlines so their hit targets remain distinct for arbitrary light or dark imported-audio colours.
+- Path selection must remain distinct from endpoint dragging, 2D panning, and 3D camera movement. View mode permits inventory/path selection, audio preview, and camera controls but locks all mutations.
+- Selecting a fixed clip reports `Preserved audio clip — no trajectory` while retaining the muted spatialized inventory in the viewer.
+- Editing happens in an isolated unsaved ingredient draft. Typing and card/path selection never update saved trajectory data. Switching source category, starting another ingredient, leaving Edit mode, or continuing to Segment 2 prompts before discarding an uncommitted draft.
+- Create/remake is the only ingredient commit boundary. A remake renders/imports and validates through a temporary output before replacing the matching design and manifest row, propagating a rename to Segment 2 source labels, and invalidating Segments 2-6. Failure preserves the original ingredient and downstream artifacts.
+- Every spatialized source owns its `trajectory_snapshot`; the design-level trajectory remains only the default for the next new spatialized ingredient. Imported looming tones retain a backend-managed dry source for future remakes. Legacy looming imports without that source may still be renamed/recoloured, but trajectory or acoustic changes require re-upload.
+- Imported `AudioFileSpec` and manifest provenance may carry optional `display_color_hex` and `source_input_path`. Hex colours are normalized to uppercase `#RRGGBB`; legacy records derive their initial colour from `tone_type`. Generated noise colours remain tied to scientific noise type. Manual-audio colour editing uses a focus-trapped overlay with a visual picker, validated hex field, live swatch, and Apply/Cancel.
 
 ### Folder And File Operations
 
@@ -96,7 +108,7 @@ Segment 1 creates, imports, stores, and catalogs the reusable auditory ingredien
 - Segment 1 outputs are reusable ingredients, not final trial designs.
 - Segment 1 auditory outputs do not contain the tactile cue channel. Tactile is introduced in Segment 3.
 - Published profiles such as Study 5 should materialize writable Segment 1 working copies from read-only preload/source catalogs when activated, while preserving provenance in the ingredient manifest.
-- Segment 1 baking/import actions may invalidate downstream Segment 2 and Segment 3 outputs, but must not silently rebuild them.
+- Segment 1 create/update/remake actions invalidate downstream Segments 2-6 when their committed ingredient or label changes, but must not silently rebuild them.
 
 Filename convention:
 

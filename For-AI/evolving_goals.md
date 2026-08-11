@@ -2,6 +2,14 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-08-11 — merged Segment 1 stimulus and trajectory workspace
+
+- Merge the former Segment 1 trajectory/source and stimulus-selection boxes into one ordered workspace: source type first, contextual settings beside the 2D/3D viewer, explicit create/remake, grouped selectable stimulus pool, and the unchanged folder/`Save & Continue` footer. Segment 2 remains Trial Sequence Design and registry numbering is unchanged.
+- Treat an ingredient edit as an isolated draft. `New Ingredient` begins creation; selection only inspects saved data; and create/remake/update is the sole commit boundary. Discard prompts cover source switches, new drafts, View mode, and Segment 2 navigation. Remakes are temporary-output validated and atomic, propagate renamed source labels, replace manifest provenance, and invalidate Segments 2-6 only after success.
+- Persist every dynamic ingredient's own trajectory snapshot and keep the top-level trajectory as the next-new-source default. Retain managed dry inputs for imported looming-tone remakes. Add backward-compatible `display_color_hex` and `source_input_path` fields for imported audio, normalize manual colours to uppercase six-digit hex, and keep generated colours bound to scientific noise type.
+- Keep the whole spatialized inventory visible in 2D/3D, emphasize the selected path, mute others, offset coincident paths deterministically, outline arbitrary colours for contrast, and make paths select their cards without interfering with drag/pan/orbit. Fixed clips show a no-trajectory status. View mode retains card/path selection, exact-ingredient audio play/stop, and camera inspection while mutation stays locked.
+- Manual looming tones and fixed clips use a focus-trapped colour overlay with a visual picker, validated hex entry, live swatch, Apply/Cancel, Escape, and focus return. The same Segment 1 implementation and cache revision ships in source/local and compiled/hosted dashboards.
+
 ## 2026-08-11 — Segment 2 noise-spectrum About guide
 
 - Extend Segment 2's existing `About` overlay with a comparative logarithmic power-spectrum plot and compact explanations for brown, pink, white, blue, and violet generated noise. Keep the spectral definitions aligned with the renderer and normalize the idealized curves at 1 kHz.

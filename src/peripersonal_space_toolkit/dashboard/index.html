@@ -6,7 +6,14 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260811-segment2-noise-guide">
+  <link rel="stylesheet" href="styles.css?v=20260811-segment1-workspace">
+  <script type="importmap">
+    {
+      "imports": {
+        "@chenglou/pretext": "./node_modules/@chenglou/pretext/dist/layout.js"
+      }
+    }
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -162,194 +169,184 @@
           <button class="segment-reopen-button" type="button" data-reopen-step="stimulus" hidden>Reopen segment</button>
           <button class="segment-info-button" type="button" data-segment-info="stimulus" aria-label="About Segment 1: Build Looming Stimuli">About</button>
         </div>
-        <section class="stimulus-grid">
-          <section id="stimulus" class="panel stimulus-trajectory-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus">
-            <div class="panel-heading">
-              <div class="panel-title"><span class="decision-sequence-label">1 · Define trajectory</span> Trajectory And Source <span class="step-badge" data-step-badge="stimulus"></span></div>
-              <input id="preview-mode" type="hidden" value="2d">
+        <section id="stimulus" class="panel stimulus-workspace-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus">
+          <div class="panel-heading stimulus-workspace-heading">
+            <div class="panel-title">Stimulus and Trajectory Workspace <span class="step-badge" data-step-badge="stimulus"></span></div>
+            <div class="toolbar-actions">
+              <span id="source-counts" class="status-label">0 sources</span>
+              <button id="new-ingredient" type="button">New Ingredient</button>
             </div>
-            <div class="split-fields">
-              <div class="field-row">
-                <label for="start-distance">Start distance cm</label>
-                <input id="start-distance" type="number" min="1" max="1000" step="1">
+            <input id="preview-mode" type="hidden" value="2d">
+          </div>
+
+          <section class="source-module stimulus-type-module" aria-labelledby="stimulus-type-heading">
+            <div class="source-module-heading">
+              <span id="stimulus-type-heading"><span class="decision-sequence-label">1 · Choose stimulus type</span> Stimulus Type Selection</span>
+            </div>
+            <div class="source-action-grid">
+              <div class="source-action source-picker-card noise-picker-card" data-source-kind-card="generated_noise">
+                <span class="noise-picker-label">Generate Looming Noise</span>
+                <select id="generated-noise-select" class="state-only" tabindex="-1" aria-hidden="true">
+                  <option value="">Choose noise type to bake...</option>
+                </select>
+                <div class="noise-type-buttons" role="group" aria-label="Generate looming noise type">
+                  <div class="noise-type-row noise-type-row-primary">
+                    <button type="button" class="noise-type-button noise-type-primary" data-noise-type="white" data-noise-hint="White noise - flat spectrum. Rated the most pleasant and least arousing of the five colours in Ferri et al. (2015), who used it as the neutral looming sound.">White</button>
+                    <button type="button" class="noise-type-button noise-type-primary" data-noise-type="pink" data-noise-hint="Pink noise - power falls ~3 dB/octave (1/f). Rated more arousing and less pleasant than white in Ferri et al. (2015).">Pink</button>
+                  </div>
+                  <div class="noise-type-row noise-type-row-secondary">
+                    <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="blue" data-noise-hint="Blue noise - power rises ~3 dB/octave (f); high-frequency emphasis. One of the five colours validated in Ferri et al. (2015) Experiment 1.">Blue</button>
+                    <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="violet" data-noise-hint="Violet noise - power rises ~6 dB/octave (f^2), the derivative of white noise. Validated in Ferri et al. (2015); its valence differed from white.">Violet</button>
+                    <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="brown" data-noise-hint="Brown noise - power falls ~6 dB/octave (1/f^2); low rumble. Ferri et al. (2015) used it as the negative-valence sound, which expanded peripersonal space.">Brown</button>
+                  </div>
+                </div>
               </div>
-              <div class="field-row">
-                <label for="end-distance">End distance cm</label>
-                <input id="end-distance" type="number" min="1" max="1000" step="1">
-              </div>
-              <div class="field-row">
-                <label for="start-rotation">Start rotation deg</label>
-                <input id="start-rotation" type="number" min="0" max="360" step="1">
-              </div>
-              <div class="field-row">
-                <label for="end-rotation">End rotation deg</label>
-                <input id="end-rotation" type="number" min="0" max="360" step="1">
-              </div>
-              <div class="field-row">
-                <label for="movement-duration">Movement duration s</label>
-                <input id="movement-duration" type="number" min="0.1" max="30" step="0.1">
-              </div>
-              <div class="field-row">
-                <label for="start-hold">Start hold s</label>
-                <input id="start-hold" type="number" min="0" max="30" step="0.1">
-              </div>
-              <div class="field-row">
-                <label for="end-hold">End hold s</label>
-                <input id="end-hold" type="number" min="0" max="30" step="0.1">
-              </div>
+              <button id="import-audio-spatialize" type="button" class="source-action" data-source-kind-card="custom_looming">
+                <strong>Custom Looming Tone</strong>
+                <span>Upload audio and spatialize it with this trajectory</span>
+              </button>
+              <button id="import-audio-preserve" type="button" class="source-action" data-source-kind-card="fixed_clip">
+                <strong>Custom Audio Clip</strong>
+                <span>Upload audio and preserve it for later trial use</span>
+              </button>
             </div>
           </section>
 
-          <div class="workspace-splitter" data-resize-gutter="workspace" role="separator" aria-label="Resize trajectory and preview columns" aria-orientation="vertical" tabindex="0"></div>
-
-          <section class="panel preview-panel stimulus-preview-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="trajectory-preview">
-            <div class="panel-heading">
-              <div>Trajectory Preview</div>
-              <div class="preview-actions">
-                <div class="segmented-control" aria-label="Trajectory preview mode">
-                  <button id="preview-mode-2d" type="button" class="mode-toggle active" data-preview-mode="2d" data-preview-view-control>2D</button>
-                  <button id="preview-mode-3d" type="button" class="mode-toggle" data-preview-mode="3d" data-preview-view-control>3D</button>
+          <div class="stimulus-editor-grid">
+            <section class="ingredient-editor" aria-labelledby="ingredient-editor-heading">
+              <div class="ingredient-editor-heading">
+                <div>
+                  <span class="decision-sequence-label">2 · Configure ingredient</span>
+                  <h3 id="ingredient-editor-heading">Ingredient Settings</h3>
                 </div>
-                <div id="view-preset-control" class="view-preset-control" aria-label="3D view angle presets" hidden>
-                  <button type="button" data-view-preset="front" data-preview-view-control title="Front view">Front</button>
-                  <button type="button" data-view-preset="back" data-preview-view-control title="Back view">Back</button>
-                  <button type="button" data-view-preset="left" data-preview-view-control title="Left view">Left</button>
-                  <button type="button" data-view-preset="right" data-preview-view-control title="Right view">Right</button>
-                  <button type="button" data-view-preset="top" data-preview-view-control title="Top view">Top</button>
-                  <button type="button" data-view-preset="iso" data-preview-view-control title="Isometric view">Iso</button>
-                </div>
-                <div class="zoom-control" aria-label="Trajectory preview zoom">
-                  <button id="zoom-out-camera" type="button" title="Zoom out" aria-label="Zoom out" data-preview-view-control>-</button>
-                  <button id="zoom-in-camera" type="button" title="Zoom in" aria-label="Zoom in" data-preview-view-control>+</button>
-                </div>
-                <button id="fit-radius-camera" type="button" data-preview-view-control>Fit Radius</button>
-                <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
+                <span id="ingredient-editor-mode" class="status-label optional">Select an ingredient</span>
               </div>
+              <div class="field-row">
+                <label for="bake-label">Stimulus name</label>
+                <input id="bake-label" type="text" autocomplete="off" required>
+              </div>
+              <div id="manual-audio-settings" class="manual-audio-settings" hidden>
+                <div class="field-row">
+                  <label>Uploaded audio</label>
+                  <div class="audio-source-file-row">
+                    <span id="selected-audio-file-status" class="audio-source-file-status">No audio selected</span>
+                    <button id="choose-editor-audio" type="button">Choose Audio File</button>
+                  </div>
+                </div>
+                <div class="field-row">
+                  <label for="manual-audio-color">Display colour</label>
+                  <button id="manual-audio-color" class="color-picker-button" type="button" aria-haspopup="dialog">
+                    <span id="manual-audio-color-swatch" class="color-picker-swatch" aria-hidden="true"></span>
+                    <span id="manual-audio-color-value">#1C7A86</span>
+                  </button>
+                </div>
+                <div id="fixed-audio-duration-field" class="field-row" hidden>
+                  <label for="fixed-audio-duration">Duration s</label>
+                  <input id="fixed-audio-duration" type="number" min="0.1" max="3600" step="0.1" value="4">
+                </div>
+              </div>
+              <div id="generated-source-mode-control" class="source-mode-row" aria-label="Generated source mode" hidden>
+                <span>Source mode</span>
+                <div class="source-mode-choice-grid" role="radiogroup" aria-label="Generated source mode">
+                  <label class="source-mode-widget">
+                    <input type="radio" name="generated-source-mode" value="dynaspace_gaussian_burst_train" checked>
+                    <span class="source-mode-widget-body">
+                      <img class="native-signal-graphic" src="looming_burst_train_widget.svg" alt="" aria-hidden="true" width="320" height="96">
+                      <span class="source-mode-widget-copy"><strong>Burst train</strong><span>Hobeika et al. (2020)</span></span>
+                    </span>
+                  </label>
+                  <label class="source-mode-widget">
+                    <input type="radio" name="generated-source-mode" value="continuous_noise">
+                    <span class="source-mode-widget-body">
+                      <img class="native-signal-graphic" src="looming_smooth_linear_approach_widget.svg" alt="" aria-hidden="true" width="320" height="96">
+                      <span class="source-mode-widget-copy"><strong>Smooth linear</strong><span>Approach envelope</span></span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+              <fieldset id="trajectory-settings" class="trajectory-settings">
+                <legend>Trajectory</legend>
+                <div class="split-fields">
+                  <div class="field-row"><label for="start-distance">Start distance cm</label><input id="start-distance" type="number" min="1" max="1000" step="1"></div>
+                  <div class="field-row"><label for="end-distance">End distance cm</label><input id="end-distance" type="number" min="1" max="1000" step="1"></div>
+                  <div class="field-row"><label for="start-rotation">Start rotation deg</label><input id="start-rotation" type="number" min="0" max="360" step="1"></div>
+                  <div class="field-row"><label for="end-rotation">End rotation deg</label><input id="end-rotation" type="number" min="0" max="360" step="1"></div>
+                  <div class="field-row"><label for="movement-duration">Movement duration s</label><input id="movement-duration" type="number" min="0.1" max="30" step="0.1"></div>
+                  <div class="field-row"><label for="start-hold">Start hold s</label><input id="start-hold" type="number" min="0" max="30" step="0.1"></div>
+                  <div class="field-row"><label for="end-hold">End hold s</label><input id="end-hold" type="number" min="0" max="30" step="0.1"></div>
+                </div>
+                <p id="trajectory-derived-note" class="decision-note" hidden></p>
+              </fieldset>
+              <div id="fixed-clip-trajectory-note" class="fixed-clip-trajectory-note" hidden>Preserved audio clip — no trajectory</div>
+              <input id="bake-gain" type="hidden" value="1">
+            </section>
+
+            <section class="preview-panel stimulus-preview-panel" data-panel-id="trajectory-preview">
+              <div class="panel-heading">
+                <div>Trajectory Preview</div>
+                <div class="preview-actions">
+                  <div class="segmented-control" aria-label="Trajectory preview mode">
+                    <button id="preview-mode-2d" type="button" class="mode-toggle active" data-preview-mode="2d" data-preview-view-control>2D</button>
+                    <button id="preview-mode-3d" type="button" class="mode-toggle" data-preview-mode="3d" data-preview-view-control>3D</button>
+                  </div>
+                  <div id="view-preset-control" class="view-preset-control" aria-label="3D view angle presets" hidden>
+                    <button type="button" data-view-preset="front" data-preview-view-control title="Front view">Front</button>
+                    <button type="button" data-view-preset="back" data-preview-view-control title="Back view">Back</button>
+                    <button type="button" data-view-preset="left" data-preview-view-control title="Left view">Left</button>
+                    <button type="button" data-view-preset="right" data-preview-view-control title="Right view">Right</button>
+                    <button type="button" data-view-preset="top" data-preview-view-control title="Top view">Top</button>
+                    <button type="button" data-view-preset="iso" data-preview-view-control title="Isometric view">Iso</button>
+                  </div>
+                  <div class="zoom-control" aria-label="Trajectory preview zoom">
+                    <button id="zoom-out-camera" type="button" title="Zoom out" aria-label="Zoom out" data-preview-view-control>-</button>
+                    <button id="zoom-in-camera" type="button" title="Zoom in" aria-label="Zoom in" data-preview-view-control>+</button>
+                  </div>
+                  <button id="fit-radius-camera" type="button" data-preview-view-control>Fit Radius</button>
+                  <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
+                </div>
+              </div>
+              <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260811-segment1-workspace"></iframe>
+            </section>
+          </div>
+
+          <details class="loudness-panel stimulus-loudness-panel" aria-label="Loudness policy">
+            <summary class="loudness-panel-heading"><span>Loudness Contract</span><span class="status-label optional">advanced · estimated SPL</span></summary>
+            <div class="loudness-grid">
+              <label for="loudness-start-spl">Start dB SPL</label><input id="loudness-start-spl" type="number" min="30" max="95" step="1" value="55">
+              <label for="loudness-end-spl">Endpoint dB SPL</label><input id="loudness-end-spl" type="number" min="30" max="95" step="1" value="75">
+              <label for="instruction-offset-db">Instruction offset</label><input id="instruction-offset-db" type="number" min="-30" max="0" step="1" value="-6">
+              <label for="estimated-full-scale-spl">Estimated 0 dBFS SPL</label><input id="estimated-full-scale-spl" type="number" min="80" max="130" step="0.1" value="109.2">
+              <label for="audio-peak-ceiling-dbfs">Digital peak ceiling</label><input id="audio-peak-ceiling-dbfs" type="number" min="-12" max="0" step="0.1" value="-1">
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260811-segment2-noise-guide"></iframe>
-          </section>
+            <p class="decision-note"><strong>Calibration reference and safety ceiling.</strong> These values describe the playback calibration assumption. Use a measured calibration profile when one is available.</p>
+            <div id="loudness-derived" class="loudness-derived"></div>
+          </details>
 
-          <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
-            <div class="source-module" aria-label="Stimulus source selection">
-              <div class="source-module-heading">
-                <span><span class="decision-sequence-label">2 · Choose a source</span> Stimulus Type Selection</span>
-                <span id="source-counts" class="status-label">0 sources</span>
-              </div>
-              <div class="source-action-grid">
-                <div class="source-action source-picker-card noise-picker-card">
-                  <span class="noise-picker-label">Generate Looming Noise</span>
-                  <!-- Hidden state mirror: preserves the #generated-noise-select hook that app.js
-                       populates (renderGeneratedNoiseSelect) and resets after a bake. The visible
-                       quick-pick buttons below drive staging via stageGeneratedNoise(). -->
-                  <select id="generated-noise-select" class="state-only" tabindex="-1" aria-hidden="true">
-                    <option value="">Choose noise type to bake...</option>
-                  </select>
-                  <div class="noise-type-buttons" role="group" aria-label="Generate looming noise type">
-                    <div class="noise-type-row noise-type-row-primary">
-                      <button type="button" class="noise-type-button noise-type-primary" data-noise-type="white" data-noise-hint="White noise - flat spectrum. Rated the most pleasant and least arousing of the five colours in Ferri et al. (2015), who used it as the neutral looming sound.">White</button>
-                      <button type="button" class="noise-type-button noise-type-primary" data-noise-type="pink" data-noise-hint="Pink noise - power falls ~3 dB/octave (1/f). Rated more arousing and less pleasant than white in Ferri et al. (2015).">Pink</button>
-                    </div>
-                    <div class="noise-type-row noise-type-row-secondary">
-                      <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="blue" data-noise-hint="Blue noise - power rises ~3 dB/octave (f); high-frequency emphasis. One of the five colours validated in Ferri et al. (2015) Experiment 1.">Blue</button>
-                      <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="violet" data-noise-hint="Violet noise - power rises ~6 dB/octave (f^2), the derivative of white noise. Validated in Ferri et al. (2015); its valence differed from white.">Violet</button>
-                      <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="brown" data-noise-hint="Brown noise - power falls ~6 dB/octave (1/f^2); low rumble. Ferri et al. (2015) used it as the negative-valence sound, which expanded peripersonal space.">Brown</button>
-                    </div>
-                  </div>
-                </div>
-                <button id="import-audio-spatialize" type="button" class="source-action">
-                  <strong>Custom Looming Tone</strong>
-                  <span>Make clip looming with selected trajectory</span>
-                </button>
-                <button id="import-audio-preserve" type="button" class="source-action">
-                  <strong>Custom Audio Clip</strong>
-                  <span>Preserve clip as-is for later trial use</span>
-                </button>
-              </div>
-              <div class="bake-panel">
-                <div class="decision-sequence-label">3 · Name and add the ingredient</div>
-                <div class="bake-configure">
-                  <div class="field-row">
-                    <label for="bake-label">Ingredient name</label>
-                    <input id="bake-label" type="text" autocomplete="off">
-                  </div>
-                  <div id="generated-source-mode-control" class="source-mode-row" aria-label="Generated source mode">
-                    <span>Source mode</span>
-                    <div class="source-mode-choice-grid" role="radiogroup" aria-label="Generated source mode">
-                      <label class="source-mode-widget">
-                        <input type="radio" name="generated-source-mode" value="dynaspace_gaussian_burst_train" checked>
-                        <span class="source-mode-widget-body">
-                          <img class="native-signal-graphic" src="looming_burst_train_widget.svg" alt="" aria-hidden="true" width="320" height="96">
-                          <span class="source-mode-widget-copy">
-                            <strong>Burst train</strong>
-                            <span>Hobeika et al. (2020)</span>
-                          </span>
-                        </span>
-                      </label>
-                      <label class="source-mode-widget">
-                        <input type="radio" name="generated-source-mode" value="continuous_noise">
-                        <span class="source-mode-widget-body">
-                          <img class="native-signal-graphic" src="looming_smooth_linear_approach_widget.svg" alt="" aria-hidden="true" width="320" height="96">
-                          <span class="source-mode-widget-copy">
-                            <strong>Smooth linear</strong>
-                            <span>Approach envelope</span>
-                          </span>
-                        </span>
-                      </label>
-                    </div>
-                  </div>
-                  <input id="bake-gain" type="hidden" value="1">
-                </div>
-                <div class="loudness-panel" aria-label="Loudness policy">
-                  <div class="loudness-panel-heading">
-                    <span>Loudness Contract</span>
-                    <span class="status-label optional">estimated SPL</span>
-                  </div>
-                  <div class="loudness-grid">
-                    <label for="loudness-start-spl">Start dB SPL</label>
-                    <input id="loudness-start-spl" type="number" min="30" max="95" step="1" value="55">
-                    <label for="loudness-end-spl">Endpoint dB SPL</label>
-                    <input id="loudness-end-spl" type="number" min="30" max="95" step="1" value="75">
-                    <label for="instruction-offset-db">Instruction offset</label>
-                    <input id="instruction-offset-db" type="number" min="-30" max="0" step="1" value="-6">
-                  </div>
-                  <details class="advanced-settings loudness-advanced-settings">
-                    <summary>Calibration reference and safety ceiling</summary>
-                    <p class="decision-note">These values describe the playback calibration assumption. Use a measured calibration profile when one is available.</p>
-                    <div class="loudness-grid">
-                      <label for="estimated-full-scale-spl">Estimated 0 dBFS SPL</label>
-                      <input id="estimated-full-scale-spl" type="number" min="80" max="130" step="0.1" value="109.2">
-                      <label for="audio-peak-ceiling-dbfs">Digital peak ceiling</label>
-                      <input id="audio-peak-ceiling-dbfs" type="number" min="-12" max="0" step="0.1" value="-1">
-                    </div>
-                  </details>
-                  <div id="loudness-derived" class="loudness-derived"></div>
-                </div>
-                <div class="bake-action-row">
-                  <button id="bake-stimulus" type="button" class="primary">Bake Ingredient</button>
-                  <span id="bake-status" class="status-label required">No source staged</span>
-                </div>
-              </div>
+          <div class="bake-action-row stimulus-commit-row">
+            <button id="bake-stimulus" type="button" class="primary">Create Stimulus</button>
+            <span id="bake-status" class="status-label required">Choose a stimulus type</span>
+          </div>
+
+          <section id="stimulus-pool" class="stimulus-inventory" aria-labelledby="stimulus-pool-heading">
+            <div class="source-module-heading">
+              <span id="stimulus-pool-heading"><span class="decision-sequence-label">3 · Inspect created audio</span> Stimulus Pool</span>
             </div>
-
             <div class="stimulus-pool-columns">
-              <div class="stimulus-pool-column">
-                <div class="table-toolbar">
-                  <span>Baked generated stimuli</span>
-                </div>
+              <section class="stimulus-pool-column" aria-labelledby="looming-pool-heading">
+                <div class="table-toolbar"><span id="looming-pool-heading">Looming / spatialized stimuli</span></div>
                 <div class="source-card-list" id="noise-list"></div>
-              </div>
-              <div class="stimulus-pool-column">
-                <div class="table-toolbar">
-                  <span>Local stimulus clips</span>
-                </div>
+              </section>
+              <section class="stimulus-pool-column" aria-labelledby="fixed-pool-heading">
+                <div class="table-toolbar"><span id="fixed-pool-heading">Fixed audio clips</span></div>
                 <div class="source-card-list" id="audio-list"></div>
-              </div>
-            </div>
-            <div class="step-footer">
-              <button id="open-ingredient-folder" type="button" disabled>Open Folder</button>
-              <button type="button" class="primary" data-continue-step="stimulus">Save &amp; Continue to Trial Sequence</button>
+              </section>
             </div>
           </section>
+
+          <div class="step-footer">
+            <button id="open-ingredient-folder" type="button" disabled>Open Folder</button>
+            <button type="button" class="primary" data-continue-step="stimulus">Save &amp; Continue to Trial Sequence</button>
+          </div>
         </section>
       </section>
 
@@ -1416,7 +1413,39 @@
       </form>
     </div>
   </div>
-  <script type="module" src="app.js?v=20260811-segment2-noise-guide"></script>
-  <script type="module" src="designer_main.js?v=20260811-segment2-noise-guide"></script>
+  <div id="audio-color-modal" class="modal-backdrop" hidden>
+    <div class="modal-card color-picker-modal-card" role="dialog" aria-modal="true" aria-labelledby="audio-color-modal-title" tabindex="-1">
+      <form id="audio-color-form">
+        <div class="modal-heading">
+          <div>
+            <div class="segment-kicker">Manual audio</div>
+            <h2 id="audio-color-modal-title">Choose Display Colour</h2>
+          </div>
+          <button id="audio-color-modal-close" class="icon-action" type="button" aria-label="Close">X</button>
+        </div>
+        <div class="color-picker-dialog-body">
+          <label class="visual-color-picker" for="audio-color-native">
+            <span>Manual colour picker</span>
+            <input id="audio-color-native" type="color" value="#1c7a86">
+          </label>
+          <div class="field-row">
+            <label for="audio-color-hex">Hex colour</label>
+            <input id="audio-color-hex" type="text" value="#1C7A86" inputmode="text" autocomplete="off" pattern="#[0-9A-Fa-f]{6}" required>
+          </div>
+          <div class="color-picker-preview" aria-label="Selected colour preview">
+            <span id="audio-color-preview" aria-hidden="true"></span>
+            <strong id="audio-color-preview-value">#1C7A86</strong>
+          </div>
+        </div>
+        <p id="audio-color-error" class="modal-error" role="alert" hidden></p>
+        <div class="modal-actions">
+          <button id="audio-color-cancel" type="button">Cancel</button>
+          <button id="audio-color-apply" class="primary" type="submit">Apply Colour</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script type="module" src="app.js?v=20260811-segment1-workspace"></script>
+  <script type="module" src="designer_main.js?v=20260811-segment1-workspace"></script>
 </body>
 </html>

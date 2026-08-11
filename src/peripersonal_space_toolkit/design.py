@@ -119,6 +119,8 @@ class AudioFileSpec:
     sequence_order: int = 0
     motion_mode: str = "looming"
     trajectory_snapshot: dict[str, Any] = field(default_factory=dict)
+    display_color_hex: str = ""
+    source_input_path: str = ""
 
 
 @dataclass
@@ -319,6 +321,9 @@ def _audio_file_specs_from_dicts(items: list[Any], *, default_motion_mode: str =
         else:
             data = dict(item)
             data.setdefault("motion_mode", default_motion_mode)
+            display_color = str(data.get("display_color_hex") or "").strip()
+            data["display_color_hex"] = display_color.upper() if re.fullmatch(r"#[0-9A-Fa-f]{6}", display_color) else ""
+            data["source_input_path"] = str(data.get("source_input_path") or "")
             specs.append(AudioFileSpec(**data))
     return specs
 

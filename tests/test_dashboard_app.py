@@ -258,7 +258,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260811-segment2-noise-guide"
+    static_version = "20260811-segment1-workspace"
     assert f'href="styles.css?v={static_version}"' in html
     assert 'import("./hardware_pixel_art.js")' in app_js
     assert f'src="app.js?v={static_version}"' in html
@@ -428,7 +428,8 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="builder-noise-type"' not in html
     assert 'id="source-counts"' in html
     assert 'id="stimulus-pool"' in html
-    assert 'data-panel-id="stimulus-pool"' in html
+    assert 'data-panel-id="stimulus-pool"' not in html
+    assert 'data-panel-id="stimulus"' in html
     assert "stimulus-pool-columns" in html
     assert html.index('id="stimulus"') < html.index('data-panel-id="trajectory-preview"')
     assert html.index('data-panel-id="trajectory-preview"') < html.index('id="stimulus-pool"')
@@ -436,7 +437,7 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="add-audio-preserve"' not in html
     assert "Stimulus Type Selection" in html
     assert "Build Looming Stimuli" in html
-    assert "Trajectory And Source" in html
+    assert "Stimulus and Trajectory Workspace" in html
     assert "Backend Feedback" not in html
     assert "Trial Sequence Design" in html
     assert "Baseline and Tactile Trial Design" in html
@@ -578,7 +579,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "stressAudio" not in app_js
     assert "startFocus" not in app_js
     assert "Custom Stimulus Builder" not in html
-    assert "Bake Ingredient" in html
+    assert "Create Stimulus" in html
     assert "Bake Stimulus" not in html
     assert "Filmstrip Trial Assembly" not in html
     assert "Add Trial Type" not in html
@@ -694,7 +695,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "SOURCE_COLOR_OPTIONS" in app_js
     assert "sourceColorOptions" in app_js
     assert "applySourceCardColor" in app_js
-    assert "Box color" in app_js
+    assert "Display colour" in html
     assert "Attach to" not in app_js
     assert "Gap s" not in app_js
     assert "assembly-only" not in app_js
@@ -958,7 +959,9 @@ def test_dashboard_rejects_profile_mutation_and_blank_custom_names(tmp_path: Pat
 def test_dashboard_payload_uses_normalized_trajectory_controls_for_render_and_bake():
     app_js = files("peripersonal_space_toolkit.dashboard").joinpath("app.js").read_text(encoding="utf-8")
 
-    assert "const trajectoryControls = currentTrajectoryControls();" in app_js
+    assert "const trajectoryControls = includeIngredientDraft" in app_js
+    assert "? currentTrajectoryControls()" in app_js
+    assert "collectPayload({ includeIngredientDraft: true })" in app_js
     assert "trajectory_controls: trajectoryControls" in app_js
     assert ": [trajectoryControls.end_distance_cm]" in app_js
     assert 'body: JSON.stringify(collectPayload())' in app_js
@@ -2358,6 +2361,205 @@ def test_dashboard_import_audio_is_local_only(tmp_path: Path):
     assert snippet["audio"]["motion_mode"] == "stationary"
 
 
+def test_dashboard_stage_only_import_retains_dry_source_without_committing_manifest(tmp_path: Path):
+    client = _client(tmp_path)
+    initial_state = client.get("/api/state").json()
+    manifest_path = Path(initial_state["project"]["segment_folders"]["1_core_audio_ingredients"]) / "stimulus_ingredients_manifest.json"
+    manifest_before = _read_json_file(manifest_path)
+    source = tmp_path / "dry_custom_tone.wav"
+    sf.write(source, np.zeros((882, 1), dtype=np.float32), 44100)
+
+    imported = client.post(
+        "/api/audio/import",
+        json={
+            "filename": source.name,
+            "content_base64": base64.b64encode(source.read_bytes()).decode("ascii"),
+            "render_mode": "spatialize",
+            "motion_mode": "looming",
+            "display_color_hex": "#1a2b3c",
+            "stage_only": True,
+        },
+    ).json()
+
+    staged = Path(imported["audio"]["source_input_path"])
+    assert imported["staged"] is True
+    assert imported["audio"]["display_color_hex"] == "#1A2B3C"
+    assert imported["audio"]["path"] == str(staged)
+    assert staged.parent.name == "source_inputs"
+    assert dashboard_app._path_exists(staged)
+    assert _read_json_file(manifest_path) == manifest_before
+
+
+def test_audio_file_optional_colour_and_source_fields_are_backward_compatible():
+    legacy = design_to_dict(_compact_design())
+    legacy["custom_looming_files"] = [
+        {
+            "label": "Legacy tone",
+            "path": "legacy.wav",
+            "target_duration_s": 3.0,
+            "render_mode": "spatialize",
+            "tone_type": "violet",
+            "motion_mode": "looming",
+        }
+    ]
+    loaded_legacy = design_from_dict(legacy)
+    assert loaded_legacy.custom_looming_files[0].display_color_hex == ""
+    assert loaded_legacy.custom_looming_files[0].source_input_path == ""
+
+    current = dict(legacy)
+    current["custom_looming_files"] = [
+        {
+            **legacy["custom_looming_files"][0],
+            "display_color_hex": "#a1b2c3",
+            "source_input_path": "managed/dry.wav",
+        }
+    ]
+    round_trip = design_to_dict(design_from_dict(current))["custom_looming_files"][0]
+    assert round_trip["display_color_hex"] == "#A1B2C3"
+    assert round_trip["source_input_path"] == "managed/dry.wav"
+
+
+def test_dashboard_fixed_clip_create_and_atomic_update_propagate_rename(tmp_path: Path):
+    client = _client(tmp_path)
+    custom = client.post("/api/templates/__custom__/load").json()
+    custom["design"]["name"] = "Fixed clip update contract"
+    source = tmp_path / "instruction_clip.wav"
+    sf.write(source, np.zeros((1323, 1), dtype=np.float32), 44100)
+    staged = client.post(
+        "/api/audio/import",
+        json={
+            "filename": source.name,
+            "content_base64": base64.b64encode(source.read_bytes()).decode("ascii"),
+            "render_mode": "preserve",
+            "motion_mode": "stationary",
+            "display_color_hex": "#0f7ea5",
+            "stage_only": True,
+        },
+    ).json()["audio"]
+    create_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "design": custom["design"],
+            "bake_recipe": {
+                "kind": "fixed_audio",
+                "action": "create",
+                "label": "Ready cue",
+                "display_color_hex": "#0f7ea5",
+                "audio": staged,
+            },
+        },
+    ).json()
+    created = _wait_job(client, create_job["job_id"])
+    assert created["status"] == "succeeded"
+    state = client.get("/api/state").json()
+    clip = next(item for item in state["design"]["prestimulus_files"] if item["label"] == "Ready cue")
+    assert clip["display_color_hex"] == "#0F7EA5"
+    assert clip["source_input_path"] == staged["source_input_path"]
+    assert clip["trajectory_snapshot"] == {}
+
+    state["design"]["protocol"]["trial_strips"] = [
+        {
+            "strip_id": "strip-1",
+            "label": "Cue then loom",
+            "elements": [
+                {
+                    "element_id": "fixed-1",
+                    "kind": "fixed_audio",
+                    "label": "Ready cue",
+                    "source_label": "Ready cue",
+                    "source_labels": ["Ready cue"],
+                }
+            ],
+        }
+    ]
+    segment2 = Path(state["project"]["segment_folders"]["2_trial_sequence_designs"])
+    segment2.mkdir(parents=True, exist_ok=True)
+    marker = segment2 / "must_be_invalidated.txt"
+    marker.write_text("downstream", encoding="utf-8")
+    update_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "design": state["design"],
+            "bake_recipe": {
+                "kind": "fixed_audio",
+                "action": "remake",
+                "original_label": "Ready cue",
+                "label": "Start cue",
+                "display_color_hex": "#Aa33Cc",
+                "audio": clip,
+            },
+        },
+    ).json()
+    updated = _wait_job(client, update_job["job_id"])
+    assert updated["status"] == "succeeded"
+    state = client.get("/api/state").json()
+    assert [item["label"] for item in state["design"]["prestimulus_files"]] == ["Start cue"]
+    updated_clip = state["design"]["prestimulus_files"][0]
+    assert updated_clip["display_color_hex"] == "#AA33CC"
+    element = state["design"]["protocol"]["trial_strips"][0]["elements"][0]
+    assert element["source_label"] == "Start cue"
+    assert element["source_labels"] == ["Start cue"]
+    assert not marker.exists()
+    manifest = _read_json_file(Path(updated_clip["path"]).parent / "stimulus_ingredients_manifest.json")
+    assert [item["label"] for item in manifest["ingredients"]] == ["Start cue"]
+    assert manifest["ingredients"][0]["provenance"]["original_label"] == "Ready cue"
+
+
+def test_dashboard_custom_looming_bake_retains_managed_dry_source(tmp_path: Path, monkeypatch):
+    client = _client(tmp_path)
+    custom = client.post("/api/templates/__custom__/load").json()
+    source = tmp_path / "dry_tone.wav"
+    sf.write(source, np.zeros((2205, 1), dtype=np.float32), 44100)
+    staged = client.post(
+        "/api/audio/import",
+        json={
+            "filename": source.name,
+            "content_base64": base64.b64encode(source.read_bytes()).decode("ascii"),
+            "render_mode": "spatialize",
+            "motion_mode": "looming",
+            "display_color_hex": "#2345ab",
+            "stage_only": True,
+        },
+    ).json()["audio"]
+
+    def fake_render(design_path, output_dir, **_kwargs):
+        baked = json.loads(Path(design_path).read_text(encoding="utf-8"))
+        imported = baked["custom_looming_files"][0]
+        assert imported["path"] == staged["source_input_path"]
+        assert imported["source_input_path"] == staged["source_input_path"]
+        wav_path = Path(output_dir) / "custom_loom.wav"
+        sf.write(wav_path, np.zeros((441, 2), dtype=np.float32), 44100)
+        manifest = Path(output_dir) / "render_manifest.json"
+        qc = Path(output_dir) / "render_qc.csv"
+        manifest.write_text(json.dumps({"wav_outputs": [{"path": str(wav_path)}]}), encoding="utf-8")
+        qc.write_text("", encoding="utf-8")
+        return RenderResult("rendered_reference", 0, Path(output_dir), Path(design_path), manifest, qc, wav_paths=(wav_path,))
+
+    monkeypatch.setattr(dashboard_app.render_backend, "render_design_with_3dti", fake_render)
+    job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "design": custom["design"],
+            "bake_recipe": {
+                "kind": "imported_audio",
+                "action": "create",
+                "label": "Teal loom",
+                "render_mode": "spatialize",
+                "display_color_hex": "#2345ab",
+                "audio": staged,
+            },
+        },
+    ).json()
+    done = _wait_job(client, job["job_id"])
+    assert done["status"] == "succeeded"
+    state = client.get("/api/state").json()
+    baked = next(item for item in state["design"]["custom_looming_files"] if item["label"] == "Teal loom")
+    assert baked["display_color_hex"] == "#2345AB"
+    assert baked["source_input_path"] == staged["source_input_path"]
+    assert Path(baked["path"]) != Path(baked["source_input_path"])
+    assert dashboard_app._path_exists(Path(baked["source_input_path"]))
+
+
 def test_dashboard_import_instruction_audio_is_segment6_local_only(tmp_path: Path):
     client = _client(tmp_path)
     source = tmp_path / "general_instruction.wav"
@@ -2509,6 +2711,90 @@ def test_dashboard_bake_stimulus_job_adds_source_after_render(tmp_path: Path, mo
     assert state["custom_workflow"]["ready_to_render"] is False
     assert state["custom_workflow"]["current_step"] == "trials"
     assert "Bake Segment 2 trial sequences." in state["custom_workflow"]["missing"]
+
+
+def test_dashboard_failed_generated_remake_preserves_original_and_downstream(tmp_path: Path, monkeypatch):
+    client = _client(tmp_path)
+    custom = client.post("/api/templates/__custom__/load").json()
+    custom["design"]["name"] = "Atomic remake contract"
+
+    def successful_render(design_path, output_dir, **_kwargs):
+        baked = json.loads(Path(design_path).read_text(encoding="utf-8"))
+        label = baked["noises"][0]["label"]
+        wav_path = Path(output_dir) / f"{dashboard_app._slug(label)}.wav"
+        sf.write(wav_path, np.zeros((441, 2), dtype=np.float32), 44100)
+        manifest = Path(output_dir) / "render_manifest.json"
+        qc = Path(output_dir) / "render_qc.csv"
+        manifest.write_text(json.dumps({"wav_outputs": [{"path": str(wav_path)}]}), encoding="utf-8")
+        qc.write_text("", encoding="utf-8")
+        return RenderResult("rendered_reference", 0, Path(output_dir), Path(design_path), manifest, qc, wav_paths=(wav_path,))
+
+    monkeypatch.setattr(dashboard_app.render_backend, "render_design_with_3dti", successful_render)
+    create = client.post(
+        "/api/stimulus/bake",
+        json={
+            "design": custom["design"],
+            "trajectory_controls": {
+                "start_distance_cm": 110,
+                "end_distance_cm": 10,
+                "start_rotation_deg": 0,
+                "end_rotation_deg": 0,
+                "movement_duration_s": 3,
+                "start_hold_s": 0.5,
+                "end_hold_s": 0.5,
+            },
+            "bake_recipe": {
+                "kind": "generated_noise",
+                "action": "create",
+                "label": "Original pink",
+                "noise_type": "pink",
+            },
+        },
+    ).json()
+    assert _wait_job(client, create["job_id"])["status"] == "succeeded"
+    before = client.get("/api/state").json()
+    before_noise = next(item for item in before["design"]["noises"] if item["label"] == "Original pink")
+    segment2 = Path(before["project"]["segment_folders"]["2_trial_sequence_designs"])
+    segment2.mkdir(parents=True, exist_ok=True)
+    marker = segment2 / "keep_on_failed_remake.txt"
+    marker.write_text("intact", encoding="utf-8")
+
+    def failed_render(*_args, **_kwargs):
+        raise RuntimeError("simulated render failure")
+
+    monkeypatch.setattr(dashboard_app.render_backend, "render_design_with_3dti", failed_render)
+    remake = client.post(
+        "/api/stimulus/bake",
+        json={
+            "design": before["design"],
+            "trajectory_controls": {
+                "start_distance_cm": 160,
+                "end_distance_cm": 20,
+                "start_rotation_deg": 45,
+                "end_rotation_deg": 315,
+                "movement_duration_s": 2,
+                "start_hold_s": 0.1,
+                "end_hold_s": 0.2,
+            },
+            "bake_recipe": {
+                "kind": "generated_noise",
+                "action": "remake",
+                "original_label": "Original pink",
+                "label": "Renamed pink",
+                "noise_type": "pink",
+            },
+        },
+    ).json()
+    failed = _wait_job(client, remake["job_id"])
+    after = client.get("/api/state").json()
+
+    assert failed["status"] == "failed"
+    assert "simulated render failure" in failed["error"]
+    assert marker.read_text(encoding="utf-8") == "intact"
+    assert not any(item["label"] == "Renamed pink" for item in after["design"]["noises"])
+    after_noise = next(item for item in after["design"]["noises"] if item["label"] == "Original pink")
+    assert after_noise["prebaked_path"] == before_noise["prebaked_path"]
+    assert after_noise["trajectory_snapshot"] == before_noise["trajectory_snapshot"]
 
 
 def test_dashboard_bake_generated_noise_can_use_continuous_source_mode(tmp_path: Path, monkeypatch):

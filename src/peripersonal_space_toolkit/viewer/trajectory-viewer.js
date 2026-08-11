@@ -76,11 +76,17 @@ const raycaster = new THREE.Raycaster();
 const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 const dragPoint = new THREE.Vector3();
 const dragHandles = new Map();
+const sourceTrajectoryHitTargets = [];
 let activeDragHandle = "";
 let activePan2D = false;
+let pendingPan2D = false;
 let editingEnabled = true;
 let panStartClientX = 0;
 let panStartClientY = 0;
+let pointerStartClientX = 0;
+let pointerStartClientY = 0;
+let pointerMoved = false;
+let pointerSourceLabel = "";
 const panStartTarget = new THREE.Vector3();
 let current3DViewPreset = "iso";
 const last3DCameraPosition = avatarViewCenter.clone().add(DEFAULT_3D_CAMERA_OFFSET);
@@ -381,6 +387,25 @@ function intersectTrajectoryPlane(event) {
   return raycaster.ray.intersectPlane(dragPlane, dragPoint);
 }
 
+function intersectSourceTrajectory(event) {
+  if (!sourceTrajectoryHitTargets.length) return "";
+  setPointerFromEvent(event);
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(sourceTrajectoryHitTargets, false);
+  return String(hits[0]?.object?.userData?.sourceLabel || "");
+}
+
+function emitSourceTrajectorySelection(sourceLabel) {
+  if (!sourceLabel) return;
+  window.parent.postMessage(
+    {
+      type: "pps-source-trajectory-select",
+      source_label: sourceLabel,
+    },
+    "*"
+  );
+}
+
 function emitTrajectoryControlChange(handle, point) {
   const controls = threeToTrajectoryControls(point, handle);
   window.parent.postMessage(
@@ -573,28 +598,47 @@ function addArrowHead(start, end, material) {
 
 function drawSourceTrajectoryInventory(payload, is2D, radius) {
   const groups = groupedSourceTrajectories(payload.source_trajectories || []);
+  const activeLabel = String(payload.active_source_label || "").trim();
   let sourceCount = 0;
   let sharedGroupCount = 0;
   for (const group of groups) {
     sourceCount += group.sources.length;
-    if (group.colors.length > 1) sharedGroupCount += 1;
+    if (group.sources.length > 1) sharedGroupCount += 1;
     const start = appToThree(group.start, is2D);
     const end = appToThree(group.end, is2D);
-    const lineCount = Math.max(1, group.colors.length);
-    group.colors.forEach((color, index) => {
+    const sources = [...group.sources].sort((left, right) => String(left.label || "").localeCompare(String(right.label || "")));
+    const lineCount = Math.max(1, sources.length);
+    sources.forEach((source, index) => {
+      const color = safeSourceColor(source.color_hex);
+      const active = Boolean(activeLabel) && String(source.label || "") === activeLabel;
+      const muted = Boolean(activeLabel) && !active;
       const offset = sourceTrajectoryOffset(start, end, index, lineCount, is2D);
       const lineStart = start.clone().add(offset);
       const lineEnd = end.clone().add(offset);
-      const material = new THREE.MeshBasicMaterial({
-        color: safeSourceColor(color),
+      const width = Math.max(active ? 0.014 : 0.008, radius * (active ? 0.011 : 0.006));
+      const outlineMaterial = new THREE.MeshBasicMaterial({
+        color: contrastSourceColor(color),
         transparent: true,
-        opacity: is2D ? 0.92 : 0.78,
+        opacity: muted ? 0.16 : 0.92,
+        depthTest: !is2D,
+        depthWrite: false,
+      });
+      const outline = addCylinderBetween(lineStart, lineEnd, width * 1.62, outlineMaterial);
+      if (outline) {
+        outline.renderOrder = is2D ? 43 : 18;
+        dynamicGroup.add(outline);
+      }
+      const material = new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity: active ? 1 : muted ? 0.22 : (is2D ? 0.82 : 0.72),
         depthTest: !is2D,
         depthWrite: false
       });
-      const tube = addCylinderBetween(lineStart, lineEnd, Math.max(0.007, radius * 0.006), material);
+      const tube = addCylinderBetween(lineStart, lineEnd, width, material);
       if (tube) {
         tube.renderOrder = is2D ? 45 : 20;
+        tube.userData.sourceLabel = String(source.label || "");
         dynamicGroup.add(tube);
       }
       const arrow = addArrowHead(lineStart, lineEnd, material);
@@ -603,8 +647,16 @@ function drawSourceTrajectoryInventory(payload, is2D, radius) {
         arrow.renderOrder = is2D ? 46 : 21;
         dynamicGroup.add(arrow);
       }
-      addSourceTrajectoryDot(lineStart, color, radius, is2D);
-      addSourceTrajectoryDot(lineEnd, color, radius, is2D);
+      addSourceTrajectoryDot(lineStart, color, radius, is2D, muted ? 0.22 : active ? 1 : 0.78);
+      addSourceTrajectoryDot(lineEnd, color, radius, is2D, muted ? 0.22 : active ? 1 : 0.78);
+      const hitMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.001, depthWrite: false });
+      const hitTarget = addCylinderBetween(lineStart, lineEnd, Math.max(0.035, radius * 0.028), hitMaterial);
+      if (hitTarget) {
+        hitTarget.userData.sourceLabel = String(source.label || "");
+        hitTarget.renderOrder = 70;
+        sourceTrajectoryHitTargets.push(hitTarget);
+        dynamicGroup.add(hitTarget);
+      }
     });
   }
   return { sourceCount, groupCount: groups.length, sharedGroupCount };
@@ -620,15 +672,10 @@ function groupedSourceTrajectories(rows) {
         start: row.start,
         end: row.end,
         sources: [],
-        colors: []
       });
     }
     const group = groups.get(key);
     group.sources.push(row);
-    const color = safeSourceColor(row.color_hex);
-    if (!group.colors.includes(color)) {
-      group.colors.push(color);
-    }
   }
   return [...groups.values()];
 }
@@ -666,13 +713,13 @@ function sourceTrajectoryOffset(start, end, index, count, is2D) {
   return perpendicular.normalize().multiplyScalar(offsetAmount).add(new THREE.Vector3(0, lift, 0));
 }
 
-function addSourceTrajectoryDot(position, color, radius, is2D) {
+function addSourceTrajectoryDot(position, color, radius, is2D, opacity = 0.8) {
   const dot = new THREE.Mesh(
     new THREE.SphereGeometry(Math.max(0.018, radius * 0.015), 18, 12),
     new THREE.MeshBasicMaterial({
       color: safeSourceColor(color),
       transparent: true,
-      opacity: is2D ? 0.95 : 0.72,
+      opacity,
       depthTest: !is2D,
       depthWrite: false
     })
@@ -687,6 +734,12 @@ function safeSourceColor(value) {
   return /^#[0-9A-Fa-f]{6}$/.test(text) ? text : "#f08b4f";
 }
 
+function contrastSourceColor(value) {
+  const color = new THREE.Color(safeSourceColor(value));
+  const luminance = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;
+  return luminance > 0.48 ? "#15120F" : "#FFFFFF";
+}
+
 function numberLike(value) {
   return Number.isFinite(Number(value));
 }
@@ -698,6 +751,7 @@ function keyNumber(value) {
 
 function drawScene(payload) {
   dragHandles.clear();
+  sourceTrajectoryHitTargets.length = 0;
   dynamicGroup.clear();
 
   const mode = payload.preview_mode === "2d" ? "2d" : "3d";
@@ -752,18 +806,24 @@ function drawScene(payload) {
   const start = appToThree(payload.start, is2D);
   const end = appToThree(payload.end, is2D);
   const inventorySummary = drawSourceTrajectoryInventory(payload, is2D, radius);
+  const showDraftPath = !payload.active_source_label;
+  const showTrajectoryHandles = payload.active_source_has_trajectory !== false;
   const pathMat = new THREE.MeshStandardMaterial({ color: 0xf08b4f, roughness: 0.45, metalness: 0.0 });
-  const path = addCylinderBetween(start, end, Math.max(0.012, radius * 0.016), pathMat);
-  if (path) dynamicGroup.add(path);
-  const arrow = addArrowHead(start, end, pathMat);
-  if (arrow) dynamicGroup.add(arrow);
+  if (showDraftPath) {
+    const path = addCylinderBetween(start, end, Math.max(0.012, radius * 0.016), pathMat);
+    if (path) dynamicGroup.add(path);
+    const arrow = addArrowHead(start, end, pathMat);
+    if (arrow) dynamicGroup.add(arrow);
+  }
 
-  const startMarkerPosition = addEndpointHandle("start", start, START_MARKER_COLOR, radius, is2D);
-  const endMarkerPosition = addEndpointHandle("end", end, END_MARKER_COLOR, radius, is2D);
+  const startMarkerPosition = showTrajectoryHandles ? addEndpointHandle("start", start, START_MARKER_COLOR, radius, is2D) : start;
+  const endMarkerPosition = showTrajectoryHandles ? addEndpointHandle("end", end, END_MARKER_COLOR, radius, is2D) : end;
 
   const labelLift = is2D ? 0.02 : 0.08;
-  dynamicGroup.add(makeLabel("Start", startMarkerPosition.clone().add(new THREE.Vector3(0.08, labelLift, 0))));
-  dynamicGroup.add(makeLabel("End", endMarkerPosition.clone().add(new THREE.Vector3(0.08, labelLift, 0))));
+  if (showTrajectoryHandles) {
+    dynamicGroup.add(makeLabel("Start", startMarkerPosition.clone().add(new THREE.Vector3(0.08, labelLift, 0))));
+    dynamicGroup.add(makeLabel("End", endMarkerPosition.clone().add(new THREE.Vector3(0.08, labelLift, 0))));
+  }
   // In 2D the circle now fills the centered square, so keep the orientation
   // labels just inside the ring to stop them clipping at the view edge. In 3D
   // there is room around the sphere, so keep them outside as before.
@@ -790,7 +850,9 @@ function drawScene(payload) {
     hudTitle.textContent = is2D ? "2D Sound Path" : "3D Sound Path";
   }
   const sourceStatus = inventorySummary.sourceCount ? `, ${inventorySummary.sourceCount} source trajector${inventorySummary.sourceCount === 1 ? "y" : "ies"}` : "";
-  statusEl.textContent = `${payload.path_length_m.toFixed(2)} m path, ${payload.movement_duration_s.toFixed(2)} s movement${sourceStatus}`;
+  statusEl.textContent = payload.active_source_label && payload.active_source_has_trajectory === false
+    ? `Preserved audio clip — no trajectory${sourceStatus}`
+    : `${payload.path_length_m.toFixed(2)} m path, ${payload.movement_duration_s.toFixed(2)} s movement${sourceStatus}`;
   const avatarScreenCenter = currentAvatarScreenCenter();
   const radiusScreenBounds = is2D ? twoDRadiusScreenBounds(radius) : null;
   window.__trajectoryViewerState = {
@@ -800,7 +862,7 @@ function drawScene(payload) {
     camera_locked_top_down: is2D,
     path_length_m: payload.path_length_m.toFixed(3),
     camera_max_polar_angle: controls.maxPolarAngle.toFixed(6),
-    drag_enabled: is2D,
+    drag_enabled: is2D && editingEnabled,
     drag_handles: [...dragHandles.keys()].sort(),
     start_marker_color: "#4ecb71",
     end_marker_color: "#e0524d",
@@ -835,6 +897,8 @@ function drawScene(payload) {
     start_rotation_deg: payload.controls?.start_rotation_deg ?? "",
     end_rotation_deg: payload.controls?.end_rotation_deg ?? ""
   };
+  window.__trajectoryViewerState.active_source_label = String(payload.active_source_label || "");
+  window.__trajectoryViewerState.active_source_has_trajectory = payload.active_source_has_trajectory !== false;
   window.__trajectoryViewerState.source_trajectory_count = inventorySummary.sourceCount;
   window.__trajectoryViewerState.source_trajectory_group_count = inventorySummary.groupCount;
   window.__trajectoryViewerState.shared_tone_trajectory_group_count = inventorySummary.sharedGroupCount;
@@ -881,29 +945,42 @@ function drawScene(payload) {
   container.dataset.sourceTrajectoryCount = String(window.__trajectoryViewerState.source_trajectory_count);
   container.dataset.sourceTrajectoryGroupCount = String(window.__trajectoryViewerState.source_trajectory_group_count);
   container.dataset.sharedToneTrajectoryGroupCount = String(window.__trajectoryViewerState.shared_tone_trajectory_group_count);
+  container.dataset.activeSourceLabel = window.__trajectoryViewerState.active_source_label;
+  container.dataset.activeSourceHasTrajectory = String(window.__trajectoryViewerState.active_source_has_trajectory);
 }
 
 function handlePointerDown(event) {
   renderer.domElement.focus({ preventScroll: true });
+  pointerStartClientX = event.clientX;
+  pointerStartClientY = event.clientY;
+  pointerMoved = false;
   const handle = intersectDragHandle(event);
+  pointerSourceLabel = handle ? "" : intersectSourceTrajectory(event);
   if (!handle && currentViewMode !== "2d") return;
   event.preventDefault();
   controls.enabled = false;
-  renderer.domElement.style.cursor = "grabbing";
   renderer.domElement.setPointerCapture(event.pointerId);
   if (handle) {
+    renderer.domElement.style.cursor = "grabbing";
     activeDragHandle = handle;
     const point = intersectTrajectoryPlane(event);
     if (point) emitTrajectoryControlChange(activeDragHandle, point);
     return;
   }
-  activePan2D = true;
+  pendingPan2D = true;
   panStartClientX = event.clientX;
   panStartClientY = event.clientY;
   panStartTarget.copy(controls.target);
 }
 
 function handlePointerMove(event) {
+  const movement = Math.hypot(event.clientX - pointerStartClientX, event.clientY - pointerStartClientY);
+  if (movement > 5) pointerMoved = true;
+  if (pendingPan2D && pointerMoved) {
+    pendingPan2D = false;
+    activePan2D = true;
+    renderer.domElement.style.cursor = "grabbing";
+  }
   if (activePan2D) {
     event.preventDefault();
     const spans = twoDViewSpans();
@@ -923,14 +1000,17 @@ function handlePointerMove(event) {
 }
 
 function handlePointerUp(event) {
-  if (!activeDragHandle && !activePan2D) return;
+  const sourceLabel = !pointerMoved && !activeDragHandle ? pointerSourceLabel : "";
   activeDragHandle = "";
   activePan2D = false;
+  pendingPan2D = false;
+  pointerSourceLabel = "";
   controls.enabled = currentViewMode !== "2d";
   renderer.domElement.style.cursor = "";
   if (renderer.domElement.hasPointerCapture(event.pointerId)) {
     renderer.domElement.releasePointerCapture(event.pointerId);
   }
+  if (sourceLabel) emitSourceTrajectorySelection(sourceLabel);
 }
 
 function handleViewerKeyDown(event) {

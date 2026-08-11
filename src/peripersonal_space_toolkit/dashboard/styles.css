@@ -3173,8 +3173,14 @@ body.sequential-edit-mode .step-footer > :not([data-continue-step]):not(#accept-
 .panel.profile-readonly #export-profile-bundle,
 .panel.profile-readonly .bounded-select-button,
 .panel.profile-readonly .mobile-table-more,
-.panel.profile-readonly [data-preview-source-label] {
+.panel.profile-readonly [data-preview-source-label],
+.panel.profile-readonly [data-select-ingredient] {
   pointer-events: auto;
+}
+
+.panel.profile-readonly [data-remove-noise],
+.panel.profile-readonly [data-remove-audio] {
+  display: none !important;
 }
 
 /* The trajectory preview stays viewable even when its step is read-only or
@@ -3190,6 +3196,8 @@ body.sequential-edit-mode .step-footer > :not([data-continue-step]):not(#accept-
 
 .panel.stimulus-preview-panel.locked iframe,
 .panel.stimulus-preview-panel.profile-readonly iframe,
+.panel.stimulus-workspace-panel.locked .stimulus-preview-panel iframe,
+.panel.stimulus-workspace-panel.profile-readonly .stimulus-preview-panel iframe,
 .panel.locked button[data-preview-view-control],
 .panel.profile-readonly button[data-preview-view-control] {
   pointer-events: auto;
@@ -4229,6 +4237,10 @@ a:focus-visible,
   align-items: start;
 }
 
+.source-mode-row[hidden] {
+  display: none;
+}
+
 .stimulus-pool-columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4253,6 +4265,225 @@ a:focus-visible,
   background: linear-gradient(90deg, var(--source-card-color-soft), var(--surface-2) 38%);
   padding: 9px;
   min-width: 0;
+}
+
+/* Segment 1 is one task workspace: the source decision feeds a single draft
+   editor, the shared viewer, and a compact read-only inventory. */
+.stimulus-workspace-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.stimulus-workspace-panel > .panel-heading,
+.stimulus-workspace-panel > .source-module,
+.stimulus-workspace-panel > .stimulus-editor-grid,
+.stimulus-workspace-panel > .stimulus-loudness-panel,
+.stimulus-workspace-panel > .stimulus-commit-row,
+.stimulus-workspace-panel > .stimulus-inventory,
+.stimulus-workspace-panel > .step-footer {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.stimulus-type-module {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  padding: 12px;
+}
+
+.source-action[data-source-kind-card].active,
+.source-picker-card[data-source-kind-card].active {
+  border-color: var(--text);
+  box-shadow: inset 0 0 0 2px var(--text);
+}
+
+.stimulus-editor-grid {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.82fr) minmax(480px, 1.18fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.ingredient-editor,
+.stimulus-editor-grid > .stimulus-preview-panel {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 12px;
+}
+
+.ingredient-editor-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ingredient-editor-heading h3 {
+  margin: 3px 0 0;
+  font-size: 15px;
+}
+
+.ingredient-editor > .field-row:last-child {
+  margin-bottom: 0;
+}
+
+.audio-source-file-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.audio-source-file-status {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-2);
+  padding: 9px 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.color-picker-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+}
+
+.color-picker-swatch,
+.source-card-swatch {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(0, 0, 0, 0.32);
+  border-radius: 50%;
+  background: var(--source-card-color, #1c7a86);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55);
+}
+
+.trajectory-settings {
+  min-width: 0;
+  margin: 12px 0 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.trajectory-settings legend {
+  padding: 0 5px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.trajectory-settings .field-row {
+  margin-bottom: 8px;
+}
+
+.fixed-clip-trajectory-note {
+  display: grid;
+  place-items: center;
+  min-height: 92px;
+  margin-top: 12px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-weight: 750;
+  text-align: center;
+}
+
+.fixed-clip-trajectory-note[hidden] {
+  display: none;
+}
+
+.stimulus-loudness-panel summary {
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+.stimulus-loudness-panel[open] summary {
+  margin-bottom: 10px;
+}
+
+.stimulus-commit-row {
+  justify-content: flex-start;
+  margin-top: 0;
+}
+
+.stimulus-inventory {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.stimulus-inventory-card {
+  position: relative;
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.stimulus-inventory-card:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+
+.stimulus-inventory-card.selected {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--text);
+}
+
+.stimulus-inventory-card:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.stimulus-inventory-card .source-card-heading {
+  margin-bottom: 5px;
+}
+
+.stimulus-inventory-card .source-card-heading strong::before {
+  width: 12px;
+  height: 12px;
+  box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px rgba(0, 0, 0, 0.45);
+}
+
+.stimulus-card-summary {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.stimulus-card-summary strong {
+  color: var(--text);
+}
+
+.stimulus-card-audio-button {
+  min-width: 34px;
+  min-height: 34px;
+  padding: 5px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.stimulus-card-audio-button.playing {
+  border-color: var(--primary);
+  background: var(--ok-bg);
+  color: var(--primary);
+}
+
+.stimulus-card-hidden-fields {
+  display: none;
 }
 
 .stimulus-trajectory-trace {
@@ -6056,6 +6287,60 @@ body.modal-open {
   margin-top: 16px;
 }
 
+.color-picker-modal-card {
+  width: min(520px, 100%);
+}
+
+.color-picker-dialog-body {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(180px, 1.2fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.visual-color-picker {
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.visual-color-picker input[type="color"] {
+  width: 100%;
+  height: 112px;
+  min-height: 112px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  padding: 5px;
+  cursor: crosshair;
+}
+
+.color-picker-dialog-body .field-row {
+  align-self: start;
+  margin-bottom: 0;
+}
+
+.color-picker-preview {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  padding: 9px;
+}
+
+.color-picker-preview span {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(0, 0, 0, 0.36);
+  border-radius: 8px;
+  background: #1c7a86;
+}
+
 .segment-info-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -6415,6 +6700,10 @@ body.modal-open {
     grid-template-columns: 1fr;
   }
 
+  .stimulus-editor-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .workspace-splitter {
     display: none;
   }
@@ -6617,6 +6906,43 @@ body.modal-open {
     grid-template-columns: 1fr;
   }
 
+  .stimulus-workspace-panel {
+    gap: 10px;
+  }
+
+  .stimulus-workspace-heading .toolbar-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .ingredient-editor,
+  .stimulus-editor-grid > .stimulus-preview-panel,
+  .stimulus-type-module {
+    padding: 10px;
+  }
+
+  .ingredient-editor-heading,
+  .audio-source-file-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ingredient-editor-heading {
+    display: grid;
+  }
+
+  .audio-source-file-row button,
+  .stimulus-commit-row button {
+    width: 100%;
+  }
+
+  .color-picker-dialog-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .color-picker-preview {
+    grid-column: 1;
+  }
+
   .baseline-option-grid {
     grid-template-columns: 1fr;
   }
@@ -6719,6 +7045,11 @@ body.modal-open {
 }
 
 @media (max-width: 600px) {
+  .noise-type-button[data-noise-hint]::after {
+    width: min(260px, calc(100vw - 88px));
+    max-width: calc(100vw - 88px);
+  }
+
   .topbar {
     top: var(--space-2);
     margin: var(--space-2) var(--space-2) 0;
@@ -6966,6 +7297,7 @@ body.desktop-applet .segment-heading {
   .segmented-control label,
   .zoom-control button,
   .segment-info-button,
+  .stimulus-card-audio-button,
   .filmstrip-preview-button,
   .sequence-label-chip button,
   .box-add-label-row button,
@@ -6976,7 +7308,8 @@ body.desktop-applet .segment-heading {
   .arch-hw-dep-link,
   .arch-hw-dep-grid .arch-hw-dep-link,
   .trial-pool-file-details summary,
-  .advanced-settings summary {
+  .advanced-settings summary,
+  .stimulus-loudness-panel summary {
     min-height: 44px;
   }
 
@@ -6995,7 +7328,8 @@ body.desktop-applet .segment-heading {
 
   .source-folder-link,
   .arch-hw-dep-link,
-  .advanced-settings summary {
+  .advanced-settings summary,
+  .stimulus-loudness-panel summary {
     display: inline-flex;
     align-items: center;
   }
@@ -7009,6 +7343,7 @@ body.desktop-applet .segment-heading {
   }
 
   .zoom-control button,
+  .stimulus-card-audio-button,
   .sequence-label-chip button,
   .filmstrip-preview-button {
     width: 44px;
