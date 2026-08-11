@@ -2021,9 +2021,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 ## 2026-08-11 — DOI- and citation-metadata-gated publication network
 
-- Final responsive verification stacks Segment 5's block controls into one
-  column at phone widths, eliminating the 320/360 px local and page overflow.
-  Publication-detail citation metric tooltips derive the displayed-paper count
+- Publication-detail citation metric tooltips derive the displayed-paper count
   from the loaded network instead of repeating a hard-coded snapshot count.
 - The same update doubles the declared normalized edge-to-edge node clearance
   from `0.0075` to `0.015`, raises all-node repulsion, and expands the
@@ -2032,6 +2030,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   papers in the displayed subset only. The visible legend and canvas
   description state this directly; external counts and centrality do not size
   nodes.
+- The mandatory visual pass exposed a pre-existing 320/360 px Segment 5
+  overflow caused by placing Blocks beside the internally split Seed/New Seed
+  control. `block-csv-controls` now stacks its three field rows at the phone
+  breakpoint while Seed and New Seed remain one bounded row; the corrected
+  320/360 px audit has zero page or local horizontal overflow.
 - The Documentation map now treats canonical DOI linkage and available citation
   metadata as node eligibility requirements. Starting from the prior 97-paper
   non-review audio-tactile candidate set, it excludes 3 DOI-less records and
