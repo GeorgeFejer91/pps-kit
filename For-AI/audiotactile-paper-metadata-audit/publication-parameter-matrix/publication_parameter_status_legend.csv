@@ -1,0 +1,24 @@
+layer,status,meaning,manual_review_required,recommended_action
+publication_evidence,reported,Source directly reports the parameter.,No,Implement from the cited value after ordinary verification.
+publication_evidence,reported_absent,Source explicitly reports that the element is absent.,No,Encode the explicit absence; do not treat it as a blank.
+publication_evidence,reported_with_caveat,Reported value has a bounded caveat.,Yes,Resolve or accept the caveat before an exact-recreation claim.
+publication_evidence,reported_with_toolkit_distribution,Source value is represented through a declared toolkit distribution.,Yes,Verify the distribution is an acceptable translation.
+publication_evidence,source_inconsistency_caveat,Tracked sources disagree.,Yes,Resolve the inconsistency or preserve both variants.
+publication_evidence,derived,Value is arithmetically or visually derived from reported evidence.,Yes,Check the derivation and coordinate frame.
+publication_evidence,protocol_lineage_derived,Value comes from a cited predecessor protocol.,Yes,Verify that inheritance is justified for this study.
+publication_evidence,inferred_low_confidence,Automated source-mining candidate; not manually confirmed.,Yes,Inspect the primary source/figure/supplement.
+publication_evidence,not_reported_after_review,Full review did not recover the parameter.,Yes,Inspect lineage or choose and document an explicit toolkit default.
+publication_evidence,source_unavailable,No usable source was available to the audit.,Yes,Acquire/open the paper or supplement.
+publication_evidence,not_applicable,Parameter is not applicable to the study design.,No,Preserve as explicit not-applicable.
+publication_evidence,not_assessed,No exact-DOI paper-audit record joins to the network node.,Yes,Create a literature audit before templating.
+publication_evidence,mixed,Multiple experiment records under one publication have different statuses.,Yes,Review each record/variant in Evidence Detail.
+toolkit_implementation,encoded,All attached profiles encode the field as reported.,No,Verify values against evidence before exact-recreation claims.
+toolkit_implementation,inferred,The profile encodes an inferred value.,Yes,Verify or replace the inference.
+toolkit_implementation,defaulted,The profile uses an explicit toolkit default.,Yes,Validate the default against the study or retain a caveat.
+toolkit_implementation,missing_publication_parameter,Profile manifest flags the parameter as missing.,Yes,Recover the source value or document a deliberate default.
+toolkit_implementation,not_encoded,An attached profile lacks the expected gate field.,Yes,Add the field to the profile manifest.
+toolkit_implementation,no_profile,No current toolkit profile is attached to this publication.,Yes,Create a profile only after evidence review.
+toolkit_implementation,none,No segment-level profile gap is declared.,No,No gap action from this column.
+toolkit_implementation,gap_defaulted,A nonblocking/defaulted segment gap is declared.,Yes,Review the caveat and decide whether to implement it.
+toolkit_implementation,gap_missing,A blocking missing-publication parameter is declared in the segment.,Yes,Resolve before launch readiness.
+toolkit_implementation,mixed,Attached profile variants differ in encoding/gap status.,Yes,Review each profile variant.

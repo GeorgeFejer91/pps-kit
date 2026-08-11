@@ -2110,3 +2110,41 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   source remains a dated discovery corpus, while the generated v3 asset is the
   identical packaged/local and GitHub Pages view. Neither is exhaustive,
   systematic-review evidence, a quality ranking, or an effect-size synthesis.
+
+## 2026-08-11 — Publication-to-Toolkit atomic input review contract
+
+- Treat the 94-node citation network as the publication authority but preserve
+  a conservative 121-row study-instance registry. Fourteen publications with
+  tracked multi-experiment/profile evidence use contiguous lowercase display
+  suffixes (`a`, `b`, `c`, ...); papers without a registry entry remain
+  `experiment_count_not_assessed`. Do not rename or mutate exact literature
+  `record_id` or Toolkit `profile_id` values, and do not copy composite-record
+  evidence into child experiments as though it were experiment-specific.
+- Use the 111 exact code-derived `design.*` paths accepted by
+  `design_from_dict` and emitted by `design_to_dict` as the primary current
+  Toolkit columns. Keep arbitrary dictionaries atomic and trace StudyTemplate
+  aliases. Treat the 281 `target.*` leaves as a separate future method,
+  validation, and implementation-gap inventory, with a conservative exact-path
+  crosswalk; never describe those target leaves as the current serializer or a
+  superset. Six target leaves are validation/derived candidates and 22 exact
+  current paths have no target relation. Keep audit
+  evidence, orientation/visualization details, participant/run outputs,
+  calibration evidence, and QC artifacts in normalized side tables.
+- Treat the existing 25 Segment 1-4 paper fields as coarse migration parents,
+  not atomic completion evidence. A reported parent remains
+  `parent_reported_atomic_unreviewed` until every mapped target leaf is separately
+  confirmed. Keep `not_assessed`, `source_unavailable`,
+  `parent_reviewed_missing`, `not_covered_by_current_audit`, and
+  `composite_parent_atomic_unreviewed` distinct.
+- Merge the legacy reported Segment 4 block count into one proposed
+  `target.block_design.block_count`. Segment 6's legacy `participants` field is
+  an order-preview count, never planned sample size; `planned_sample_n` belongs
+  to the study/Runner boundary, while recruited/analyzed N remains evidence or
+  analysis output rather than a wide Toolkit input.
+- Prioritize implementation gaps exposed by the matrix: typed speaker-switching,
+  start/end elevation, visual/MR trajectory and synchrony inputs, planned sample
+  fields, untyped metadata dictionaries, incomplete loudness GUI coverage,
+  participant-order enum/registry mismatch, and explicit analysis criterion.
+  Exact current-path bindings are authoritative only for the current design
+  serializer. Older GUI/backend routing labels remain provisional and are not
+  source-fidelity or implementation claims.

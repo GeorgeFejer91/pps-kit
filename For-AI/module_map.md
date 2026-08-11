@@ -382,6 +382,17 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `validation_protocols/scripts/analyze_mobile_pps_replication.py`.
 - Paper-audit acquisition/refresh tools: `tools/paper_metadata_parser/`.
 - Tracked paper-audit memory and ledgers: `For-AI/audiotactile-paper-metadata-audit/`.
+- Publication-to-Toolkit input schemas and deterministic matrix builders:
+  `tools/current_toolkit_input_schema.py` derives the 111 exact current
+  `design.*` parser/serializer paths; `tools/publication_parameter_taxonomy.mjs`
+  owns the separate 281-leaf proposed `target.*` method/validation inventory; and
+  `tools/publication_target_current_crosswalk.mjs` maps the latter
+  conservatively to the former. `tools/build_publication_parameter_review_matrix.mjs`
+  owns exact-DOI joins, the 94-publication/121-study registry views, target
+  review sidecars/queues, orientation and visualization ledgers,
+  implementation-surface inventory, and generated
+  `For-AI/audiotactile-paper-metadata-audit/publication-parameter-matrix/`
+  artifacts. Keep output/evidence fields out of both wide input schemas.
 - Validation protocols and lab evidence scripts: `validation_protocols/`.
 
 ## Refactor Direction
@@ -397,6 +408,19 @@ Keep public imports stable while extracting:
 ## Literature/Paper Audit Rule
 
 The paper audit is a core pipeline, not a side report. It catalogs the needs, profiles, parameters, missing publication details, and toolkit-structure gaps across audio-tactile PPS studies so future implementations can be built from a growing knowledge base. Keep tracked audit files source-pointer-only; keep PDFs, supplements, extracted full text, screenshots, and local bundles ignored.
+
+The primary current-input matrix is the code-bound view of what can enter the
+current design/profile serializer: 111 exact serialized paths over 121
+registered study rows. Other operational namespaces remain separately
+inventoried. Use
+the 94-row publication view only for node-level aggregation. The secondary
+281-leaf target matrix is a migration/gap inventory for published methods and
+reported validation targets, not the current serializer or a superset of the
+111 current paths. Multi-experiment letter suffixes are display labels;
+exact network, audit-record, and profile IDs remain join authorities. Composite
+paper records must be disaggregated before their evidence is accepted at an
+experiment row. The 25 legacy audit parents do not satisfy the target review,
+and output/QC schemas are inventory evidence rather than input columns.
 
 The public citation-network projection is a separate generated discovery
 surface. Keep its `pps-publication-citation-network.v3` schema and focused counts

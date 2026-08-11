@@ -107,24 +107,100 @@ The detailed tucked-away parameter triage matrix lives in `parameter_checklist.m
 - `missing_pdf_request_list.csv`: actionable download queue for missing main PDFs and supplement/methods files.
 - `running_checklist.csv`: compact all-record metadata audit progress checklist.
 
+## Publication-To-Toolkit Input Matrix
+
+`publication-parameter-matrix/` is the tracked manual-review surface for the
+current focused citation network. Rebuild it deterministically with:
+
+```bash
+node tools/build_publication_parameter_review_matrix.mjs
+```
+
+The row authority is
+`src/peripersonal_space_toolkit/dashboard/publication_network.v3.json`. Keep two
+views rather than silently collapsing experiments:
+
+- `publication_current_input_review_matrix.csv` has exactly 94
+  publication-node rows and categorical evidence-review states for every exact
+  current design/profile input.
+- `study_instance_current_input_review_matrix.csv` has 121 registered rows and
+  is the primary manual-review matrix.
+  Fourteen publications with tracked evidence for multiple experiments or
+  profile variants use contiguous `(a)`, `(b)`, `(c)`, ... suffixes; Serino
+  2015 Scientific Reports reaches `(g)`. Publications without a registry entry
+  remain one `experiment_count_not_assessed` review unit, which is not a claim
+  that the paper contains only one experiment. The authoritative splits and
+  evidence pointers live in `study_instance_registry.json`.
+
+The companion `publication_current_toolkit_input_matrix.csv` and
+`study_instance_current_toolkit_input_matrix.csv` encode whether attached
+profiles explicitly serialize each path, use a typed/parser default, lack a
+repeatable entity, or have no experiment-scoped profile.
+
+The primary wide columns are the 111 exact `design.*` paths accepted by
+`design_from_dict` and emitted by `design_to_dict`, derived from `design.py`
+rather than hand-written. `current_toolkit_input_dictionary.csv` records type,
+default, repeatable cardinality, parser, serializer, template-loader aliases,
+and source line. Arbitrary dictionaries remain one object input; they are not
+expanded into fictitious typed leaves.
+
+The separate 281-column
+`study_instance_target_method_validation_gap_matrix.csv` is a proposed
+scientific method/validation inventory, with `target.*` paths. It is neither the
+current serializer nor a superset of every current identity/operational input;
+six leaves are explicit reported/target validation values rather than
+configuration inputs. `target_method_to_current_input_crosswalk.csv` classifies
+each target as a typed current input, transformed/composite binding, partial
+proxy, untyped object container, derived value, or not in the current design
+serializer. The inverse current-path crosswalk keeps all 22 current paths that
+have no target relation visible. Runtime, calibration, analysis, participant
+outputs, and QC surfaces remain separately inventoried.
+
+The current 25 Segment 1-4 audit fields are coarse parents, not an atomic input
+schema. A reported parent in the target review therefore becomes
+`parent_reported_atomic_unreviewed` until every constituent target leaf is
+independently checked. Preserve these distinctions:
+
+- `not_assessed`: no exact-DOI audit record joins to the network node.
+- `source_unavailable`: an audit record exists but usable evidence is absent or
+  not yet extracted; this status is overloaded in automated records and must be
+  interpreted with PDF/extraction stage.
+- `parent_reviewed_missing`: critical review did not recover the coarse parent.
+- `not_covered_by_current_audit`: the proposed target leaf has no parent in the
+  current 25-field extraction schema.
+- `composite_parent_atomic_unreviewed`: the audit record combines experiments;
+  disaggregate it before accepting any experiment-specific value.
+
+`current_toolkit_input_dictionary.csv` is authoritative for current serialized
+design/profile input columns. `target_method_validation_dictionary.csv` owns
+the proposed future method/validation leaves and their evidence/crosswalk
+metadata. Its older GUI/backend routing hints are only provisional triage, not
+implementation claims. Output-only surfaces and other operational input
+namespaces remain listed separately in `implementation_surface_inventory.csv`.
+
+Exact DOI normalization is the only publication-to-audit join: trim, lowercase,
+strip DOI resolver/`doi:` prefixes and trailing whitespace/periods, and never
+fuzzy-match title or author. Manual-review JSON overrides automated audit
+candidates by exact `record_id`.
+
 ## Current Inventory
 
 - Literature records: 75
-- PDF status counts: `{"downloaded": 26, "needs_user_download": 12, "not_applicable": 5, "open_access_unavailable": 13, "paywalled": 18}`
-- Main PDFs retrieved/missing/not applicable: 26 / 43 / 5
-- Supplement status counts: `{"downloaded": 10, "needs_user_download": 17, "not_applicable": 5, "not_checked": 6, "not_found": 21, "paywalled": 15}`
-- Extraction status counts: `{"parsed_with_warnings": 31, "pending_pdf": 43}`
-- Metadata confidence counts: `{"not_applicable": 5, "partial_extraction": 28, "pending_source": 12, "source_unavailable": 29}`
-- Automated evidence status counts: `{"no_extracted_source": 41, "not_applicable": 5, "source_mined": 28}`
+- PDF status counts: `{"downloaded": 26, "needs_user_download": 12, "not_applicable": 4, "open_access_unavailable": 14, "paywalled": 18, "public_pdf_reviewed": 1}`
+- Main PDFs retrieved/missing/not applicable: 27 / 44 / 4
+- Supplement status counts: `{"downloaded": 10, "needs_user_download": 17, "not_applicable": 4, "not_checked": 7, "not_found": 22, "paywalled": 15}`
+- Extraction status counts: `{"parsed_with_warnings": 30, "pending_pdf": 45}`
+- Metadata confidence counts: `{"high_confidence_extraction": 4, "not_applicable": 4, "partial_extraction": 23, "pending_source": 12, "publisher_html_methods_review": 2, "source_unavailable": 30}`
+- Automated evidence status counts: `{"no_extracted_source": 43, "not_applicable": 4, "source_mined": 28}`
 - Automated evidence mined field total: 477
 - Supplement extracted records/files: 10 records / 13 files
 - Semantic review strategy count: 6
-- Semantic review pass status counts: `{"completed": 164, "completed_no_hits": 4, "not_applicable": 30, "source_unavailable": 246}`
+- Semantic review pass status counts: `{"completed": 170, "completed_no_hits": 4, "not_applicable": 24, "source_unavailable": 252}`
 - PPS visualization taxonomy count: 9
 - PPS visualization candidate records/forms: 27 records / 173 candidates
-- PPS visualization status counts: `{"no_extracted_source": 41, "no_visualization_terms_found": 1, "not_applicable": 5, "source_mined": 27}`
+- PPS visualization status counts: `{"no_extracted_source": 43, "no_visualization_terms_found": 1, "not_applicable": 4, "source_mined": 27}`
 - PPS visualization type counts: `{"apparatus_trajectory_schematic": 27, "condition_group_bar_box_summary": 21, "model_parameter_or_fit_table": 13, "near_far_or_distance_bin_plot": 25, "neural_trace_topography_or_brain_map": 16, "pps_boundary_or_size_index": 20, "rt_by_soa_or_distance_curve": 26, "sigmoid_psychometric_fit": 14, "spatial_map_heatmap_or_body_boundary": 11}`
-- Missing download/check requests: 81
+- Missing download/check requests: 83
 
 ## Environment Readiness
 
@@ -143,6 +219,26 @@ The detailed tucked-away parameter triage matrix lives in `parameter_checklist.m
 6. Review `pps_visualization_inventory.csv` to see every mined candidate for how PPS is plotted, modelled, mapped, or summarized across studies.
 7. Review `running_checklist.csv`, `missing_pdf_request_list.csv`, and `paper_audits/<record_id>.md`.
 8. Promote critically checked Segment 1-4 values and confirmed PPS visualization notes into `manual_reviews/<record_id>.json` and update `manual_review_index.csv`.
+9. Rebuild `publication-parameter-matrix/`, then start with
+   `current_input_review_queue.csv` for the exact current design/profile inputs.
+   Use `study_instance_target_method_review_queue.csv` and
+   `study_instance_target_method_evidence_sidecar.csv` for the broader proposed
+   method/validation gap review.
+   Join titles, DOI, experiment letters, and immutable IDs through
+   `study_instance_index.csv` rather than copying them into every evidence row.
+   The builder overwrites generated CSVs, so copy the worksheet to a dated
+   working file before annotation and promote accepted results into a durable
+   reviewed-data source before rebuilding.
+10. For a reviewed current input, enter the normalized value/unit, reviewer
+    note, and date under its exact `current_toolkit_input_path`. For a proposed
+    target, use `target_parameter_path`. Do not replace a categorical
+    missingness state with a blank. Preserve arrays/mappings for repeating
+    sources, trajectories, rows, blocks, parts, and instructions.
+11. Promote accepted target candidates into the typed Toolkit profile/config
+    schema only after deciding they are real configuration inputs. If the
+    target dictionary marks a leaf `freeform_metadata_only` or
+    `unsupported_structural_gap`, implement or explicitly caveat that support
+    boundary before claiming exact recreation.
 
 Automated evidence-mined values are `inferred_low_confidence` candidates. Treat them as a triage map for critical review, not as final paper metadata.
 

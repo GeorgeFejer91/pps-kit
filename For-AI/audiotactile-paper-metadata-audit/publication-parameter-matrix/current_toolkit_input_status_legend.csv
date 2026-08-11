@@ -1,0 +1,9 @@
+categorical_status,meaning,manual_review_implication
+serialized_explicit,Every attached profile explicitly supplies this input path directly or through a tracked StudyTemplate loader alias.,Inspect the value sidecar and publication evidence before changing the profile.
+typed_or_parser_default_not_serialized,The path is omitted and the current dataclass/parser supplies its defined default.,Inspect the value sidecar and publication evidence before changing the profile.
+partially_serialized_with_defaults,At least one repeated entity explicitly serializes the path and another uses its default.,Inspect the value sidecar and publication evidence before changing the profile.
+repeatable_entity_absent,"The owning repeatable entity list is absent or empty, so this leaf has no instance.",Inspect the value sidecar and publication evidence before changing the profile.
+required_field_missing,A present repeated entity omits a constructor-required leaf; the serialized input is invalid.,Inspect the value sidecar and publication evidence before changing the profile.
+invalid_serialized_shape,The stored JSON shape is incompatible with the typed path.,Inspect the value sidecar and publication evidence before changing the profile.
+mixed,Attached profiles or registered study instances have different categorical states.,Inspect the value sidecar and publication evidence before changing the profile.
+no_profile,No current study template/profile is attached to this row.,No current profile value is available to compare with the publication.
