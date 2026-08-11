@@ -244,11 +244,13 @@ def test_dashboard_static_assets_are_packaged():
     assert dashboard_files.joinpath("index.html").is_file()
     assert dashboard_files.joinpath("styles.css").is_file()
     assert dashboard_files.joinpath("app.js").is_file()
+    assert dashboard_files.joinpath("documentation_typography.js").is_file()
     assert dashboard_files.joinpath("hardware_pixel_art.js").is_file()
     assert viewer_files.joinpath("trajectory-viewer.js").is_file()
 
     html = dashboard_files.joinpath("index.html").read_text(encoding="utf-8")
     app_js = dashboard_files.joinpath("app.js").read_text(encoding="utf-8")
+    documentation_typography_js = dashboard_files.joinpath("documentation_typography.js").read_text(encoding="utf-8")
     hardware_pixel_js = dashboard_files.joinpath("hardware_pixel_art.js").read_text(encoding="utf-8")
     styles_css = dashboard_files.joinpath("styles.css").read_text(encoding="utf-8")
     viewer_js = viewer_files.joinpath("trajectory-viewer.js").read_text(encoding="utf-8")
@@ -256,10 +258,15 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260808-publication-network-clean"
+    static_version = "20260811-pretext-documentation"
     assert f'href="styles.css?v={static_version}"' in html
     assert 'import("./hardware_pixel_art.js")' in app_js
     assert f'src="app.js?v={static_version}"' in html
+    assert 'data-pretext-fit="line-budget"' in html
+    assert 'data-pretext-fit="media-height"' in html
+    assert "initializeDocumentationTypography" in app_js
+    assert 'from "@chenglou/pretext"' in documentation_typography_js
+    assert "ResizeObserver" in documentation_typography_js
     assert f"compiled/index.html?page=toolkit&v={static_version}" in public_index
     assert f"compiled/index.html?page=documentation&v={static_version}" in public_docs
     assert f"compiled/index.html?page=downloads&v={static_version}" in public_download

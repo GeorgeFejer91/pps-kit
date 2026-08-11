@@ -16,6 +16,12 @@ The applet retains the long Segment 0-6 scroll surface, per-stage headings/actio
 
 All layout and styling changes follow `interface_design_principles.md`: a 4 px base/8 px primary rhythm, shared panel and control geometry, explicit alignment meridians, hierarchy-driven salience, WCAG-aware target/focus/reflow behavior, and iterative screenshot inspection after every visual change.
 
+## Documentation Typography
+
+The opening `What Is Peripersonal Space` section uses `@chenglou/pretext` for bounded text fitting while preserving ordinary semantic HTML, links, selection, and accessibility. After named fonts are ready, the lead is fitted to a six-line desktop budget and the canonical-measure paragraph is fitted against the media column's available height; a width observer recalculates those values without DOM measurement loops. Sizes remain within declared readable minimum/maximum bounds, and any unsupported or failed measurement removes the computed values so CSS typography remains a complete fallback.
+
+The opening media/copy composition must never stretch the embedded video. It preserves a 16:9 frame, uses a labeled figure/caption and a distinct canonical-measure text group, and switches to one column when the section container reaches 780 px or narrower. The documentation canvas may be wider than ordinary prose, but later body copy remains line-length constrained. Packaged/local and hosted/static dashboards use the same compiled module and pinned dependency.
+
 Read-only profile inspection remains fully legible. View mode always restores the complete, unmuted Segment 0-6 overview; no workflow segment is hidden or gray merely because the profile is finished or the draft is being inspected. Do not dim entire read-only panels or repeat the global lock state with per-panel `inherited · read-only` or `finalized · locked` pills: the animated sidebar lock, disabled mutation controls, and pointer-event gating communicate capability while retaining normal content/surface contrast in both themes. Only downstream segments in sequential Edit mode receive the subtle muted treatment. Editable drafts retain per-step review badges because those describe workflow progress rather than profile editability. Themeable application cards and controls use semantic surface/color variables; white backgrounds are reserved for content that inherently needs a white canvas, such as a waveform image.
 
 ## Mobile Phone Layout And Interaction

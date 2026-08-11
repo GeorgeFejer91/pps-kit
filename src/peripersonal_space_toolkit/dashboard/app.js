@@ -1,3 +1,8 @@
+import {
+  initializeDocumentationTypography,
+  refreshDocumentationTypography,
+} from "./documentation_typography.js";
+
 let state = null;
 let viewerReady = false;
 let viewerInitialFitDone = false;
@@ -3016,6 +3021,7 @@ function setActivePage(page, options = {}) {
     panel.hidden = panel.dataset.pagePanel !== nextPage;
     panel.classList.toggle("active", panel.dataset.pagePanel === nextPage);
   }
+  if (nextPage === "documentation") refreshDocumentationTypography();
   syncRailForPage(nextPage);
   if (!options.preserveMobileDisclosures) closeMobileRailDisclosures();
   if (options.updateHash) {
@@ -9130,6 +9136,7 @@ exposeDashboardAuditHook();
 initializeBoundedSelects();
 wireEvents();
 initializePageTabs();
+initializeDocumentationTypography();
 initializeLazySurfaces();
 initializePublicationNetworkSurface();
 window.PPSDesignerApp = Object.freeze({

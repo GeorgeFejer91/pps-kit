@@ -2,6 +2,11 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-08-11 — adaptive documentation typography
+
+- The public Documentation background section now uses the pinned `@chenglou/pretext` layout engine to choose bounded lead and companion-copy sizes from measured text, available width, and the media column's height. The semantic DOM remains the renderer and CSS remains the fallback; Pretext only supplies font-size and line-height values after fonts load and when the section width changes.
+- The opening video/copy row is now a bordered responsive composition with an undistorted 16:9 video, concise caption and measure label, a wider desktop reading canvas, and a single-column flow when the section is 780 px wide or narrower. Packaged/local and GitHub Pages builds share the same implementation and cache token.
+
 ## 2026-08-07 — mobile dashboard design contract
 
 - Apply the interface-design principles to the complete phone workflow, not only the hosted top bar. At 600 px and narrower, page tabs are the sticky first surface; the compact View/Edit state follows; workflow sections and Local Companion are collapsed disclosures by default; ordinary controls have 44 px touch targets; segment headings/actions reflow consistently; action footers become static; and resize handles are disabled at 760 px and narrower. Dense trial/block tables reflow into labeled records without local horizontal scrolling, long block rows use explicit progressive reveal, and read-only views omit mutation-only affordances while retaining previews.
