@@ -37,6 +37,10 @@ const EXTRACTION_SCHEMA_PATH = path.join(AUDIT_DIR, "extraction_schema.json");
 const STUDY_INSTANCE_REGISTRY_PATH = path.join(AUDIT_DIR, "study_instance_registry.json");
 const CURRENT_INPUT_SCHEMA_PATH = path.join(REPO_ROOT, "tools/current_toolkit_input_schema.json");
 const CURRENT_INPUT_BUILDER_PATH = path.join(REPO_ROOT, "tools/build_current_toolkit_input_matrices.py");
+const PARSIMONIOUS_BUILDER_PATH = path.join(
+  REPO_ROOT,
+  "tools/build_parsimonious_publication_matrix.py",
+);
 const METADATA_AUDIT_PATH = path.join(AUDIT_DIR, "metadata_audit.jsonl");
 const MANUAL_REVIEW_DIR = path.join(AUDIT_DIR, "manual_reviews");
 const PRELOAD_DIR = path.join(REPO_ROOT, "assets/preloads");
@@ -48,7 +52,8 @@ if (outputArgumentIndex >= 0 && !outputArgument) {
 const OUTPUT_DIR = outputArgument
   ? path.resolve(REPO_ROOT, outputArgument)
   : path.join(AUDIT_DIR, "publication-parameter-matrix");
-const GENERATED_ON = "2026-08-11";
+const GENERATED_ON = "2026-08-12";
+const PARSIMONIOUS_CONTRACT_COUNT = 11;
 const PYTHON_EXECUTABLE = process.env.PYTHON || (process.platform === "win32" ? "python" : "python3");
 const GENERATED_OUTPUT_FILENAMES = [
   "README.md",
@@ -61,6 +66,12 @@ const GENERATED_OUTPUT_FILENAMES = [
   "current_toolkit_input_values.csv",
   "implementation_discrepancies.csv",
   "implementation_surface_inventory.csv",
+  "parsimonious_contract_dictionary.csv",
+  "parsimonious_contract_evidence.csv",
+  "parsimonious_contract_review_queue.csv",
+  "parsimonious_contract_summary.csv",
+  "parsimonious_status_legend.csv",
+  "publication_parsimonious_status_matrix.csv",
   "publication_current_input_review_matrix.csv",
   "publication_current_toolkit_input_matrix.csv",
   "publication_current_toolkit_input_values.csv",
@@ -75,6 +86,8 @@ const GENERATED_OUTPUT_FILENAMES = [
   "study_instance_current_input_review_matrix.csv",
   "study_instance_current_toolkit_input_matrix.csv",
   "study_instance_index.csv",
+  "study_instance_parsimonious_status_matrix.csv",
+  "study_instance_parsimonious_value_matrix.csv",
   "study_instance_target_method_evidence_sidecar.csv",
   "study_instance_target_method_validation_gap_matrix.csv",
   "study_instance_target_method_review_queue.csv",
@@ -576,8 +589,8 @@ if (studyInstanceRegistry.schema !== "pps-publication-study-instance-registry.v1
 }
 if (
   currentInputSchema.schema_version !== "current-toolkit-input-schema.v1" ||
-  currentInputSchema.input_count !== 111 ||
-  currentSchemaBuild.current_toolkit_input_count !== 111
+  currentInputSchema.input_count !== 115 ||
+  currentSchemaBuild.current_toolkit_input_count !== 115
 ) {
   throw new Error("Unexpected current Toolkit input schema; regenerate and review design.py drift");
 }
@@ -1323,8 +1336,8 @@ for (const node of network.nodes) {
   }
 }
 
-if (studyInstanceRows.length !== 121) {
-  throw new Error(`Expected 121 registered study-instance rows, found ${studyInstanceRows.length}`);
+if (studyInstanceRows.length !== 124) {
+  throw new Error(`Expected 124 registered study-instance rows, found ${studyInstanceRows.length}`);
 }
 if (atomicEvidenceRows.length !== studyInstanceRows.length * PAPER_PARAMETERS.length) {
   throw new Error("Atomic evidence ledger is not a complete study-by-parameter Cartesian product");
@@ -1639,12 +1652,12 @@ if (outsideAuditRows.length !== 6) {
 }
 
 const implementationSurfaceRows = [
-  ["current_design_serialized_inputs", 111, "current_profile_input_contract", "primary", "tools/current_toolkit_input_schema.json", "Exact paths derived from StimulusDesign dataclasses and verified against design_from_dict/design_to_dict; arbitrary dict fields remain atomic."],
+  ["current_design_serialized_inputs", 115, "current_profile_input_contract", "primary", "tools/current_toolkit_input_schema.json", "Exact paths derived from StimulusDesign dataclasses and verified against design_from_dict/design_to_dict; arbitrary dict fields remain atomic."],
   ["proposed_target_method_validation_leaves", 281, "future_method_validation_inventory", "secondary", "tools/publication_parameter_taxonomy.mjs", "Secondary scientific-method/validation-gap review: 275 configuration candidates plus six reported/target validation leaves. These are neither current serialized Toolkit paths nor a superset of every current operational/identity input."],
   ["current_publication_audit_composites", 25, "evidence", "no", "For-AI/audiotactile-paper-metadata-audit/extraction_schema.json", "Coarse Segment 1-4 parents retained only to bootstrap atomic review."],
   ["current_recreation_gate_segments_0_to_4", 15, "readiness_check", "no", "src/peripersonal_space_toolkit/profile_recreation.py", "Current authoritative gate is a coarse subset, not the final schema."],
   ["legacy_extended_profile_inventory_segments_0_to_6", 19, "readiness_check", "no", "assets/preloads/*/01_profile/profile_parameters_manifest.json", "Includes legacy Segment 6 participant/part labels; participant count is order-preview count."],
-  ["design_dataclass_attributes", 106, "current_code_input_surface", "expanded_to_111_paths", "src/peripersonal_space_toolkit/design.py", "106 attributes expand to 111 exact paths because AudioFileSpec is used by two separate collections."],
+  ["design_dataclass_attributes", 108, "current_code_input_surface", "expanded_to_115_paths", "src/peripersonal_space_toolkit/design.py", "108 attributes expand to 115 exact paths because AudioFileSpec is used by two separate collections; the new display colour and retained source-input path are implementation bookkeeping, not additional paper-extraction contracts."],
   ["gui_method_coverage_rows", 51, "gui_input_surface", "not_path_validated_here", "For-AI GUI method audit", "51 method-bearing rows plus 13 non-method controls; GUI binding claims require separate control-to-serializer tests."],
   ["runtime_capture_options", 14, "runtime_policy_input", "namespace_only", "src/peripersonal_space_toolkit/session_runner.py::SessionCaptureOptions", "Operational capture policy; only paper-defining choices belong in study review."],
   ["normalized_loudness_leaves", 32, "input_policy_and_derived", "mapped_subset", "src/peripersonal_space_toolkit/loudness.py::normalize_loudness_policy", "26 inputs/policies, five derived values, one schema field."],
@@ -2145,11 +2158,11 @@ const markdown = `# Publication-to-Toolkit Input Review Matrix
 
 Generated ${GENERATED_ON} from the tracked \`pps-publication-citation-network.v3\` asset, exact-DOI audit joins, manual-review overrides, current profile manifests, and the repository's code/schema surfaces.
 
-The primary requested deliverable is a **${studyInstanceRows.length}-row × ${currentInputSchema.input_count}-column categorical review matrix** whose columns are exact current serialized design/profile inputs. Every one of the ${publicationAtomicRows.length} citation-network publications is represented, and a strict ${publicationAtomicRows.length}-row aggregate is supplied. The registered view has ${studyInstanceRows.length} rows because ${studyInstanceRegistry.entries.length} publications have tracked multi-experiment or multi-profile splits.
+The primary paper-review deliverable is a **${studyInstanceRows.length}-row × ${PARSIMONIOUS_CONTRACT_COUNT}-contract categorical matrix** aligned to Toolkit Segments 1-5 and runtime: auditory stimulus; trajectory geometry plus kinematics; trial sequence; task/response behavior; jitter/ITI; SOA schedule; tactile target; baseline trials; catch trials; repetition allocation; and block composition/order. Every one of the ${publicationAtomicRows.length} citation-network publications is represented, and a strict ${publicationAtomicRows.length}-row aggregate is supplied. The registered view has ${studyInstanceRows.length} rows because ${studyInstanceRegistry.entries.length} publications have tracked multi-experiment or multi-profile splits.
 
-The secondary **${studyInstanceRows.length}-row × ${PAPER_PARAMETERS.length}-column** matrix is a proposed scientific-method and validation-gap inventory—not claims about fields accepted by the current serializer and not a superset of every current identity/operational input. Publications without a registry entry remain one review unit and are explicitly marked \`experiment_count_not_assessed\`; do not infer that they contain only one experiment. Only ${publicationNodesWithAbstract} of ${publicationAtomicRows.length} nodes have tracked abstract text, and ${publicationNodesWithoutAbstractOrAudit} have neither abstract text nor an exact-DOI audit record, so ${studyInstanceRows.length} is an evidence-backed review-row count rather than an exhaustive true experiment count.
+The exact **${studyInstanceRows.length}-row × ${currentInputSchema.input_count}-input** current design/profile matrices remain the implementation crosswalk. The broader **${studyInstanceRows.length}-row × ${PAPER_PARAMETERS.length}-leaf** target matrix remains a scientific-method and validation-gap inventory—not claims about fields accepted by the current serializer. Publications without a registry entry remain one review unit and are explicitly marked \`experiment_count_not_assessed\`; do not infer that they contain only one experiment. Only ${publicationNodesWithAbstract} of ${publicationAtomicRows.length} nodes have tracked abstract text, and ${publicationNodesWithoutAbstractOrAudit} have neither abstract text nor an exact-DOI audit record, so ${studyInstanceRows.length} is an evidence-backed review-row count rather than an exhaustive true experiment count.
 
-Every atomic cell currently remains a review task. Existing reviews were performed against 25 coarse parent fields, so even a reported parent is labeled \`parent_reported_atomic_unreviewed\` until its constituent target method/validation leaves are separately verified. Values/evidence live in normalized side tables; categorical status stays in the wide matrices.
+The compact matrix reports whether contract-level evidence is complete, derived, partial, absent, unavailable, unassessed, or still composite. A reported or derived completion is component-gated: every required final component must have experiment-scoped evidence. The normalized evidence ledger preserves final component states, the underlying coarse-parent evidence, short paper value, source/page pointer, derivation note, exact current input paths, and any attached template encoding. It never promotes a coarse 25-field audit parent, template value, or Toolkit default to complete publication evidence. Controlled vocabularies distinguish generated/imported/physical sources, motion modes, timing policies, baseline trial families, catch target roles, and exact versus unresolved allocation rules. The 281-leaf atomic matrix remains stricter: each constituent target leaf still requires separate verification.
 
 The builder overwrites the named files recorded in
 \`generated_output_manifest.json\`; it removes only obsolete files named by a
@@ -2157,9 +2170,22 @@ prior manifest and leaves unrelated files alone. Before entering manual values,
 copy the review queue/sidecar to a dated working CSV and promote accepted
 annotations into a durable reviewed-data source before rebuilding.
 
-## Primary Current-Toolkit Files
+## Primary Parsimonious Paper-Review Files
 
-- \`study_instance_current_input_review_matrix.csv\`: the requested categorical review table—${studyInstanceRows.length} registered study/profile rows × ${currentInputSchema.input_count} exact current serialized input columns.
+- \`study_instance_parsimonious_status_matrix.csv\`: the primary compact have/missing table—${studyInstanceRows.length} registered study rows × ${PARSIMONIOUS_CONTRACT_COUNT} scientific emulation contracts.
+- \`study_instance_parsimonious_value_matrix.csv\`: the same rows with short extracted paper values; composite-record evidence is visibly prefixed and never presented as experiment-specific.
+- \`publication_parsimonious_status_matrix.csv\`: strict ${publicationAtomicRows.length}-publication aggregate; differing child rows become \`mixed_across_studies\`.
+- \`parsimonious_contract_evidence.csv\`: normalized study × contract ledger with value, source/page, final and coarse component states, derivation, current-path crosswalk, and template encoding.
+- \`parsimonious_contract_review_queue.csv\`: prioritized unresolved, caveated, and derived contract decisions.
+- \`parsimonious_contract_dictionary.csv\`, \`parsimonious_contract_summary.csv\`, and \`parsimonious_status_legend.csv\`: contract definitions, coverage counts, and status meanings.
+
+Experiment-scoped values recovered from locally verified PDFs are stored as short tracked source reviews in \`parsimonious_source_reviews.v1.json\`; raw PDFs remain ignored and unredistributed.
+
+The compact status matrix is intentionally categorical. Detailed values stay in the value matrix and evidence ledger so the paper-facing sheet remains small. Geometry and kinematics are one reconstructibility contract: a canonical 3D/body-relative path plus enough of duration, path length, and speed to derive the redundant quantity. Baseline and catch remain separate because a tactile-only or endpoint control is not equivalent to a no-target/withhold trial, and auditory-only response trials must not be mislabeled as catches. EEG/prestimulus analysis baselines are excluded from the trial-generation baseline contract.
+
+## Current-Toolkit Implementation Crosswalk Files
+
+- \`study_instance_current_input_review_matrix.csv\`: implementation-level evidence table—${studyInstanceRows.length} registered study/profile rows × ${currentInputSchema.input_count} exact current serialized input columns.
 - \`publication_current_input_review_matrix.csv\`: the same evidence-review states aggregated to the ${publicationAtomicRows.length} citation-network publications.
 - \`current_input_review_queue.csv\`: normalized long manual-review queue for all ${studyInstanceRows.length * currentInputSchema.input_count} current-input cells, including composite-evidence and untyped-object warnings.
 - \`current_input_to_target_crosswalk.csv\`: inverse mapping from every exact current input to the proposed target leaves and coarse audit parents used to seed its review status.
@@ -2171,7 +2197,7 @@ annotations into a durable reviewed-data source before rebuilding.
 - \`publication_current_toolkit_input_values.csv\`: publication-scoped profile values, including composite profiles that are intentionally not assigned to individual experiment rows.
 - \`current_toolkit_input_status_legend.csv\`: categorical encoding states used in the current matrices.
 
-The primary matrices describe the exact current **design/profile serialization** surface and what attached templates encode. They are not an inventory of every operational Toolkit namespace: capture, loudness, tactile calibration, adaptive tactile, top-up, latency validation, and analysis policies remain separately listed in \`implementation_surface_inventory.csv\`. They also do not by themselves prove that a value was reported by, or faithfully reconstructed from, a publication. Check \`publication_profile_scope\`: a \`composite_profile_not_experiment_scoped\` profile is visible only in the publication aggregate until its values are disaggregated.
+These implementation matrices describe the exact current **design/profile serialization** surface and what attached templates encode. They are not an inventory of every operational Toolkit namespace: capture, loudness, tactile calibration, adaptive tactile, top-up, latency validation, and analysis policies remain separately listed in \`implementation_surface_inventory.csv\`. They also do not by themselves prove that a value was reported by, or faithfully reconstructed from, a publication. Check \`publication_profile_scope\`: a \`composite_profile_not_experiment_scoped\` profile is visible only in the publication aggregate until its values are disaggregated.
 
 ## Secondary Target Method/Validation-Gap Files
 
@@ -2203,6 +2229,8 @@ The primary matrices describe the exact current **design/profile serialization**
 | Focused publication nodes | ${publicationAtomicRows.length} |
 | Citation links | ${network.edges.length} |
 | Evidence-backed registered study/profile rows | ${studyInstanceRows.length} |
+| Parsimonious paper-facing contract columns | ${PARSIMONIOUS_CONTRACT_COUNT} |
+| Parsimonious study-contract evidence cells | ${studyInstanceRows.length * PARSIMONIOUS_CONTRACT_COUNT} |
 | Exact current serialized Toolkit input columns | ${currentInputSchema.input_count} |
 | Current-input categorical review cells | ${studyInstanceRows.length * currentInputSchema.input_count} |
 | Proposed target method/validation columns | ${PAPER_PARAMETERS.length} |
@@ -2459,6 +2487,13 @@ const currentMatrixBuild = JSON.parse(
     { cwd: REPO_ROOT, encoding: "utf8" },
   ),
 );
+const parsimoniousMatrixBuild = JSON.parse(
+  execFileSync(
+    PYTHON_EXECUTABLE,
+    [PARSIMONIOUS_BUILDER_PATH, "--output", OUTPUT_DIR],
+    { cwd: REPO_ROOT, encoding: "utf8" },
+  ),
+);
 await fs.writeFile(
   path.join(OUTPUT_DIR, GENERATED_OUTPUT_MANIFEST_FILENAME),
   `${JSON.stringify(
@@ -2482,6 +2517,10 @@ console.log(
       networkEdges: network.edges.length,
       publicationParameters: publicationParameters.length,
       currentToolkitInputParameters: currentMatrixBuild.current_toolkit_input_count,
+      parsimoniousContractCount: parsimoniousMatrixBuild.contract_count,
+      parsimoniousReviewCells: parsimoniousMatrixBuild.evidence_cell_count,
+      parsimoniousReviewQueueRows: parsimoniousMatrixBuild.review_queue_count,
+      parsimoniousStatusCounts: parsimoniousMatrixBuild.status_counts,
       currentInputReviewCells: currentInputReviewQueueRows.length,
       currentInputsOutsideTargetInventory: currentInputsOutsideTargetInventory.length,
       targetMethodValidationParameters: PAPER_PARAMETERS.length,

@@ -1,0 +1,14 @@
+status,description,default_review_action
+reported_complete,An experiment-scoped final-contract review found the required scientific components reported. This does not independently certify Toolkit implementation fidelity.,verify_current_toolkit_mapping_or_approve_adapter
+derived_complete,An experiment-scoped final-contract review found the contract reconstructible using a recorded formula or reviewed protocol lineage.,verify_derivation_and_current_toolkit_mapping
+approximation_required,"The paper constrains the method but a private asset, calibration, exact renderer field, or other implementation-defining component needs an explicit substitute.",choose_and_document_approved_substitute
+partial,"Useful contract evidence is present, but final required components have not all been reviewed or remain unresolved. Coarse 25-field audit parents never promote beyond this state.",extract_missing_required_components
+conflicting_evidence,Tracked sources or reported quantities conflict and require resolution.,resolve_source_or_arithmetic_conflict
+low_confidence,Only automated or explicitly low-confidence candidate evidence is available.,verify_candidate_against_primary_source
+explicitly_absent,The publication explicitly reports that this conditional control family or feature was absent.,confirm_absence_is_experiment_scoped
+not_reported,The required value was not found after the tracked review attempts; protocol lineage or an explicit approximation is needed.,check_protocol_lineage_or_choose_documented_approximation
+source_unavailable,No inspectable source evidence currently supports a contract-level decision.,acquire_or_open_source
+not_assessed,The publication/study has no exact joined audit evidence for this contract.,create_publication_audit
+not_applicable,The reviewed evidence marks the contract as not applicable to this study.,no_action_unless_scope_changes
+composite_requires_split,Evidence exists only for a combined multi-experiment record and must not be copied to an individual experiment row before disaggregation.,disaggregate_record_by_experiment
+mixed_across_studies,The publication's registered study rows have different statuses.,review_each_registered_study_row

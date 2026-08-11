@@ -120,29 +120,50 @@ The row authority is
 `src/peripersonal_space_toolkit/dashboard/publication_network.v3.json`. Keep two
 views rather than silently collapsing experiments:
 
-- `publication_current_input_review_matrix.csv` has exactly 94
-  publication-node rows and categorical evidence-review states for every exact
-  current design/profile input.
-- `study_instance_current_input_review_matrix.csv` has 121 registered rows and
-  is the primary manual-review matrix.
-  Fourteen publications with tracked evidence for multiple experiments or
+- `publication_parsimonious_status_matrix.csv` has exactly 94
+  publication-node rows and categorical evidence states for the compact
+  scientific emulation contracts.
+- `study_instance_parsimonious_status_matrix.csv` has 124 registered rows and
+  is the primary manual-review matrix. Its 11 paper-facing columns cover the
+  auditory stimulus; trajectory geometry plus kinematics; trial sequence;
+  task/response behavior; jitter/ITI; SOAs; tactile target; baseline trials;
+  catch trials; repetition allocation; and block composition/order. Geometry,
+  path length, duration, and speed are one reconstructibility contract rather
+  than redundant columns. Baseline and catch are separate because they have
+  different target roles and allocation arithmetic.
+  Sixteen publications with tracked evidence for multiple experiments or
   profile variants use contiguous `(a)`, `(b)`, `(c)`, ... suffixes; Serino
   2015 Scientific Reports reaches `(g)`. Publications without a registry entry
   remain one `experiment_count_not_assessed` review unit, which is not a claim
   that the paper contains only one experiment. The authoritative splits and
   evidence pointers live in `study_instance_registry.json`.
 
+`study_instance_parsimonious_value_matrix.csv` places short normalized values
+beside those statuses. `parsimonious_contract_evidence.csv` is the lossless
+study-by-contract sidecar for final component states, the underlying coarse
+parent evidence, source/page pointers, derivations, current-path mappings, and
+attached-profile encodings. A contract becomes `reported_complete` or
+`derived_complete` only after every required final component is reviewed.
+Coarse 25-field audit values, profile values, and Toolkit defaults never certify
+paper completeness. The controlled vocabularies in
+`parsimonious_emulation_contract.v1.json` distinguish generated/imported/
+physical sound sources, motion modes, timing policies, baseline families,
+catch target roles, and exact versus unresolved allocation rules.
+
 The companion `publication_current_toolkit_input_matrix.csv` and
 `study_instance_current_toolkit_input_matrix.csv` encode whether attached
 profiles explicitly serialize each path, use a typed/parser default, lack a
 repeatable entity, or have no experiment-scoped profile.
 
-The primary wide columns are the 111 exact `design.*` paths accepted by
+Those implementation crosswalks use the 115 exact `design.*` paths accepted by
 `design_from_dict` and emitted by `design_to_dict`, derived from `design.py`
-rather than hand-written. `current_toolkit_input_dictionary.csv` records type,
+rather than hand-written. They are intentionally not the parsimonious
+paper-extraction surface. `current_toolkit_input_dictionary.csv` records type,
 default, repeatable cardinality, parser, serializer, template-loader aliases,
-and source line. Arbitrary dictionaries remain one object input; they are not
-expanded into fictitious typed leaves.
+and source line. The four imported-audio `display_color_hex` and
+`source_input_path` paths are implementation bookkeeping, not paper-derived
+scientific parameters. Arbitrary dictionaries remain one object input; they
+are not expanded into fictitious typed leaves.
 
 The separate 281-column
 `study_instance_target_method_validation_gap_matrix.csv` is a proposed
@@ -152,7 +173,7 @@ six leaves are explicit reported/target validation values rather than
 configuration inputs. `target_method_to_current_input_crosswalk.csv` classifies
 each target as a typed current input, transformed/composite binding, partial
 proxy, untyped object container, derived value, or not in the current design
-serializer. The inverse current-path crosswalk keeps all 22 current paths that
+serializer. The inverse current-path crosswalk keeps all 26 current paths that
 have no target relation visible. Runtime, calibration, analysis, participant
 outputs, and QC surfaces remain separately inventoried.
 
