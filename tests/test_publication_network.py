@@ -28,6 +28,7 @@ PRIMARY_SOURCE_CITATION_OVERLAY = (
     / "primary_source_citation_overlay.20260808.json"
 )
 COVERAGE_AUDIT = ROOT / "assets" / "preloads" / "audiotactile_literature_coverage.json"
+PRELOAD_INVENTORY = ROOT / "assets" / "preloads" / "preload_inventory.json"
 
 
 class _Markup(HTMLParser):
@@ -277,6 +278,11 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
         assert markup.by_id("publication-network-detail-close")[0] == "button"
         assert markup.by_id("publication-network-results")[0] == "ol"
 
+        workspace_position = html.index('id="publication-network-workspace"')
+        utilities_position = html.index('class="publication-network-utilities"')
+        help_position = html.index('id="publication-network-help"')
+        assert workspace_position < utilities_position < help_position
+
         for removed_contract in (
             "publication-layout-prominence",
             "publication-network-size-metric",
@@ -294,10 +300,10 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
         assert 'value="prominence"' not in html
 
         assert "Audio–Tactile PPS Study Citation Network" in html
-        assert "Each of the 94 non-review publications" in html
-        assert "verified canonical DOI link and provider-backed citation metadata" in html
-        assert "Papers without either requirement are excluded" in html
-        assert "Every direct citation captured" in html
+        assert "a curated cross-section of audio–tactile peripersonal-space research" in html
+        assert "main experimental paradigms and design variations" in html
+        assert "not a systematic or exhaustive review" in html
+        assert "Each of the 94 non-review publications" not in html
         assert "Implemented in Toolkit" in html
         assert "Not implemented yet" in html
         assert "Circle area increases with incoming citations from other papers" in html
@@ -361,6 +367,16 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         'publicationNetworkRenderer = "inline-svg"',
         "publication-network-edge-line",
         "publication-network-node-mark",
+        "designerTemplateUrl",
+        "designerTemplateLink",
+        'url.searchParams.set("page", "toolkit")',
+        'url.searchParams.set("template", templateId)',
+        'url.hash = "study-segment"',
+        'target: "_blank"',
+        'rel: "noopener noreferrer"',
+        '"data-open-designer-template": templateId',
+        "records.flatMap",
+        "Open in Experiment Designer",
         'layout: "topology"',
         "nodes[index].network?.radius",
         "network?.inDegree",
@@ -396,6 +412,10 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         "createElementNS",
         "publication-network-edge-line",
         "publication-network-node-mark",
+        "data-open-designer-template",
+        "Open in Experiment Designer",
+        "study-segment",
+        "template",
         "topology",
         "plotWidth",
         "plotHeight",
@@ -428,6 +448,22 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
     assert "DOI unavailable" not in network_js
     assert "DOI unavailable" not in compiled_js
     assert "displayedPublicationCount = nodes.length.toLocaleString()" in network_js
+    for contract in (
+        'const TEMPLATE_QUERY_PARAM = "template"',
+        "INITIAL_TEMPLATE_REQUEST",
+        "pendingInitialTemplateRequest",
+        "initialTemplateRequestHandled",
+        "The requested Toolkit template is not available in this Designer.",
+        "Opened the paper's Toolkit template in Experiment Designer.",
+        'link.hasAttribute("data-open-designer-template")',
+    ):
+        assert contract in app_js
+    for compiled_contract in (
+        "data-open-designer-template",
+        "The requested Toolkit template is not available in this Designer.",
+        "Opened the paper's Toolkit template in Experiment Designer.",
+    ):
+        assert compiled_contract in compiled_js
     assert "97 displayed publications" not in network_js
     assert "97 displayed publications" not in compiled_js
 
@@ -468,7 +504,9 @@ def test_publication_network_styles_cover_simple_statuses_mobile_and_theme() -> 
         for selector in (
             ".publication-network-shell",
             ".publication-network-shell:fullscreen",
-            ".publication-network-toolbar",
+            ".publication-network-utilities",
+            ".publication-network-layout-group",
+            ".publication-network-segmented",
             ".publication-network-workspace",
             ".publication-network-workspace.detail-open",
             ".publication-network-stage",
@@ -485,6 +523,7 @@ def test_publication_network_styles_cover_simple_statuses_mobile_and_theme() -> 
             ".publication-network-node",
             ".publication-network-node-mark.implemented .publication-network-node",
             ".publication-network-node-mark.selected .publication-network-node-selection",
+            ".publication-network-template-links a",
         ):
             assert selector in css
         for color_variable in (
@@ -511,10 +550,11 @@ def test_publication_network_styles_cover_simple_statuses_mobile_and_theme() -> 
         assert "height:100%" in compact
         assert "@media(prefers-reduced-motion:reduce)" in compact
         mobile = compact[compact.index("@media(max-width:760px)") :]
-        assert ".publication-network-toolbar" in mobile
+        assert ".publication-network-utilities" in mobile
         assert ".publication-network-detail" in mobile
         assert "min-height:44px" in mobile
         assert "aspect-ratio:1 / 1" in mobile
+        assert "grid-template-columns:repeat(2,minmax(0,1fr))" in compact
 
     for removed_variable in (
         "--network-at",
@@ -523,6 +563,23 @@ def test_publication_network_styles_cover_simple_statuses_mobile_and_theme() -> 
         "--network-edge-selected",
     ):
         assert removed_variable not in styles
+
+
+def test_publication_network_template_links_resolve_to_bundled_profiles() -> None:
+    data = _load_network()
+    inventory = json.loads(PRELOAD_INVENTORY.read_text(encoding="utf-8"))
+    available_template_ids = {profile["template_id"] for profile in inventory["profiles"]}
+    node_template_ids = [
+        sorted({template_id for record in node["toolkit"]["records"] for template_id in record.get("templateIds", [])})
+        for node in data["nodes"]
+    ]
+    linked_template_ids = {template_id for template_ids in node_template_ids for template_id in template_ids}
+
+    assert linked_template_ids
+    assert linked_template_ids <= available_template_ids
+    assert any(len(template_ids) == 0 for template_ids in node_template_ids)
+    assert any(len(template_ids) == 1 for template_ids in node_template_ids)
+    assert any(len(template_ids) > 1 for template_ids in node_template_ids)
 
 
 def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> None:

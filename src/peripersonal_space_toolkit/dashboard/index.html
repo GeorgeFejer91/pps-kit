@@ -6,7 +6,7 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260811-publication-network-svg-theme">
+  <link rel="stylesheet" href="styles.css?v=20260811-segment2-noise-guide">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -226,7 +226,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260811-publication-network-svg-theme"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260811-segment2-noise-guide"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -736,37 +736,13 @@
               <h2 id="docs-publication-network-title">Audio–Tactile PPS Study Citation Network</h2>
             </div>
           </div>
-          <p class="info-copy publication-network-intro">Each of the 94 non-review publications shown has a verified canonical DOI link and provider-backed citation metadata, in addition to belonging to the Toolkit's manually verified or later exact-DOI-audited audio–tactile PPS set. Papers without either requirement are excluded. Every direct citation captured between the eligible papers is always drawn. Colour shows the simple implementation split; the paper panel retains the more specific readiness assessment. This is a dated, multi-source evidence map, not a claim of universal bibliographic completeness.</p>
+          <p class="info-copy publication-network-intro">The papers in this map are a curated cross-section of audio–tactile peripersonal-space research chosen to capture the main experimental paradigms and design variations that inform PPS Toolkit. Some already have Toolkit templates, while others help show the wider range of approaches the Toolkit aims to represent. This is a field overview, not a systematic or exhaustive review of all PPS publications.</p>
 
           <div class="publication-network-shell" aria-describedby="publication-network-help">
-            <div class="publication-network-toolbar" aria-label="Publication network controls">
-              <fieldset class="publication-network-layout-group">
-                <legend>Arrange nodes</legend>
-                <div class="publication-network-segmented">
-                  <label>
-                    <input id="publication-layout-topology" type="radio" name="publication-network-layout" value="topology" checked>
-                    <span>Citation topology</span>
-                  </label>
-                  <label>
-                    <input id="publication-layout-year" type="radio" name="publication-network-layout" value="timeline">
-                    <span>Publication year</span>
-                  </label>
-                </div>
-              </fieldset>
-
-            </div>
-
             <div class="publication-network-summary-row">
               <p id="publication-network-status" class="publication-network-status" role="status" aria-live="polite">Loading publication network…</p>
               <p id="publication-network-size-note" class="publication-network-metric-note">Circle area increases with incoming citations from other papers in this 94-paper map; a larger circle was cited by more included papers. Node size and position are navigation encodings, not study-quality scores.</p>
               <button id="publication-network-fullscreen" type="button" aria-label="Open publication network full screen">Full screen</button>
-            </div>
-            <div class="publication-network-legend" aria-label="Node legend">
-              <span><i class="publication-network-legend-node legend-node-implemented" aria-hidden="true"></i>Implemented in Toolkit</span>
-              <span><i class="publication-network-legend-node legend-node-not-implemented" aria-hidden="true"></i>Not implemented yet</span>
-              <span class="publication-network-size-key"><i aria-hidden="true"></i><i aria-hidden="true"></i>Larger circle = cited by more included papers</span>
-              <span><i class="publication-network-legend-line legend-line-incoming" aria-hidden="true"></i>Incoming to selection</span>
-              <span><i class="publication-network-legend-line legend-line-outgoing" aria-hidden="true"></i>Outgoing from selection</span>
             </div>
 
             <div id="publication-network-workspace" class="publication-network-workspace">
@@ -789,6 +765,29 @@
                 </div>
                 <div id="publication-network-detail-body" class="publication-network-detail-body"></div>
               </aside>
+            </div>
+
+            <div class="publication-network-utilities" aria-label="Publication network layout and map key">
+              <fieldset class="publication-network-layout-group">
+                <legend class="visually-hidden">Arrange nodes</legend>
+                <div class="publication-network-segmented">
+                  <label>
+                    <input id="publication-layout-topology" type="radio" name="publication-network-layout" value="topology" checked>
+                    <span>Citation topology</span>
+                  </label>
+                  <label>
+                    <input id="publication-layout-year" type="radio" name="publication-network-layout" value="timeline">
+                    <span>Publication year</span>
+                  </label>
+                </div>
+              </fieldset>
+              <div class="publication-network-legend" aria-label="Map key">
+                <span><i class="publication-network-legend-node legend-node-implemented" aria-hidden="true"></i>Implemented in Toolkit</span>
+                <span><i class="publication-network-legend-node legend-node-not-implemented" aria-hidden="true"></i>Not implemented yet</span>
+                <span class="publication-network-size-key"><i aria-hidden="true"></i><i aria-hidden="true"></i>Larger circle = cited by more included papers</span>
+                <span><i class="publication-network-legend-line legend-line-incoming" aria-hidden="true"></i>Incoming to selection</span>
+                <span><i class="publication-network-legend-line legend-line-outgoing" aria-hidden="true"></i>Outgoing from selection</span>
+              </div>
             </div>
 
             <p id="publication-network-help" class="publication-network-help">In Citation topology, linked papers stay nearer one another while every paper repels its neighbours, producing dense and sparse regions without an artificial perimeter. A paper with no line has no direct within-map citation captured by the dated sources; it may still cite or be cited by work outside this 94-paper set, or by references an index could not match. Select a circle to distinguish its incoming and outgoing citations and inspect the full readiness assessment. Publication year provides a chronological arrangement.</p>
@@ -1279,6 +1278,93 @@
           <p id="segment-info-next"></p>
         </section>
       </div>
+      <section id="segment-info-noise-guide" class="noise-guide" aria-labelledby="noise-guide-title" hidden>
+        <div class="noise-guide-heading">
+          <div>
+            <span class="noise-guide-eyebrow">Source spectrum guide</span>
+            <h3 id="noise-guide-title">Five generated noise types</h3>
+          </div>
+          <p>Segment 2 combines the ingredients created in Segment 1. Their noise colour changes spectral energy and can change how a looming sequence is perceived.</p>
+        </div>
+
+        <figure class="noise-spectrum-figure">
+          <svg class="noise-spectrum-plot" viewBox="0 0 720 220" role="img" aria-labelledby="noise-spectrum-title noise-spectrum-description">
+            <title id="noise-spectrum-title">Relative power spectral density for five noise colours</title>
+            <desc id="noise-spectrum-description">Brown and pink noise decrease in power as frequency increases, white noise stays level, and blue and violet noise increase in power. All five idealized curves meet at zero decibels at one kilohertz.</desc>
+            <g class="noise-spectrum-grid" aria-hidden="true">
+              <path d="M56 24V176M194 24V176M391 24V176M589 24V176M664 24V176" />
+              <path d="M56 37H664M56 100H664M56 163H664" />
+            </g>
+            <g class="noise-spectrum-axes" aria-hidden="true">
+              <path d="M56 20V176H670" />
+              <text x="48" y="41" text-anchor="end">+30</text>
+              <text x="48" y="104" text-anchor="end">0</text>
+              <text x="48" y="167" text-anchor="end">−30</text>
+              <text x="56" y="196" text-anchor="middle">20</text>
+              <text x="194" y="196" text-anchor="middle">100</text>
+              <text x="391" y="196" text-anchor="middle">1k</text>
+              <text x="589" y="196" text-anchor="middle">10k</text>
+              <text x="664" y="196" text-anchor="middle">20k</text>
+              <text class="noise-spectrum-y-label" x="14" y="100" text-anchor="middle" transform="rotate(-90 14 100)">Relative power dB</text>
+              <text x="360" y="216" text-anchor="middle">Frequency Hz · logarithmic scale</text>
+            </g>
+            <g class="noise-spectrum-curves" aria-hidden="true">
+              <path class="noise-spectrum-curve noise-spectrum-brown" d="M56 28.5L391 100L664 154.7" />
+              <path class="noise-spectrum-curve noise-spectrum-pink" d="M56 64.3L391 100L664 127.4" />
+              <path class="noise-spectrum-curve noise-spectrum-white" d="M56 100L664 100" />
+              <path class="noise-spectrum-curve noise-spectrum-blue" d="M56 135.7L391 100L664 72.6" />
+              <path class="noise-spectrum-curve noise-spectrum-violet" d="M56 171.5L391 100L664 45.3" />
+            </g>
+          </svg>
+          <figcaption>Idealized relative power spectra, normalized at 1 kHz. The rendered result also depends on duration, random seed, spatial filtering, trajectory, playback chain, and calibration.</figcaption>
+          <div class="noise-spectrum-legend" aria-label="Noise spectrum legend">
+            <span data-noise-guide="brown"><i aria-hidden="true"></i>Brown −6 dB/oct</span>
+            <span data-noise-guide="pink"><i aria-hidden="true"></i>Pink −3 dB/oct</span>
+            <span data-noise-guide="white"><i aria-hidden="true"></i>White 0 dB/oct</span>
+            <span data-noise-guide="blue"><i aria-hidden="true"></i>Blue +3 dB/oct</span>
+            <span data-noise-guide="violet"><i aria-hidden="true"></i>Violet +6 dB/oct</span>
+          </div>
+        </figure>
+
+        <div class="noise-guide-grid">
+          <article class="noise-guide-card" data-noise-guide="brown">
+            <h4><i aria-hidden="true"></i>Brown</h4>
+            <p class="noise-guide-formula">Power ∝ 1/f²</p>
+            <p>Strong low-frequency weighting; commonly heard as deep or rumbling. Brown and pink were rated less tense and more pleasant than blue and violet in one controlled comparison.</p>
+          </article>
+          <article class="noise-guide-card" data-noise-guide="pink">
+            <h4><i aria-hidden="true"></i>Pink</h4>
+            <p class="noise-guide-formula">Power ∝ 1/f</p>
+            <p>Equal power per octave, with less top-end hiss than white. It often sounds spectrally balanced, but a looming validation rated pink more arousing and less pleasant than white.</p>
+          </article>
+          <article class="noise-guide-card" data-noise-guide="white">
+            <h4><i aria-hidden="true"></i>White</h4>
+            <p class="noise-guide-formula">Power ∝ f⁰</p>
+            <p>Equal power per hertz; wider high-frequency octaves therefore contain more total power and produce a broadband hiss. Ferri et al. used it as their neutral looming comparator.</p>
+          </article>
+          <article class="noise-guide-card" data-noise-guide="blue">
+            <h4><i aria-hidden="true"></i>Blue</h4>
+            <p class="noise-guide-formula">Power ∝ f</p>
+            <p>High-frequency weighting gives a bright, sharp character. Blue and violet were associated with more perceived tension and movement, and lower pleasantness, than pink and brown.</p>
+          </article>
+          <article class="noise-guide-card" data-noise-guide="violet">
+            <h4><i aria-hidden="true"></i>Violet</h4>
+            <p class="noise-guide-formula">Power ∝ f²</p>
+            <p>The strongest high-frequency weighting, usually heard as the sharpest hiss. Violet reached the highest modeled roughness and the greatest perceived movement in the five-noise comparison.</p>
+          </article>
+        </div>
+
+        <aside class="noise-guide-evidence">
+          <strong>Interpret associations as context-dependent.</strong>
+          Equal loudness, duration, headphones, spatialization, motion, and listener differences can change ratings; noise colour does not carry a fixed emotional meaning.
+          <span class="noise-guide-references">
+            Evidence context:
+            <a href="https://doi.org/10.1016/j.neuropsychologia.2015.03.001" target="_blank" rel="noopener noreferrer">Ferri et al. (2015)</a>
+            and
+            <a href="https://doi.org/10.1525/mp.2020.37.4.298" target="_blank" rel="noopener noreferrer">Costa &amp; Nese (2020)</a>.
+          </span>
+        </aside>
+      </section>
       <section id="segment-info-note-card" class="segment-info-note" hidden>
         <h3>Template Note</h3>
         <p id="segment-info-note"></p>
@@ -1330,7 +1416,7 @@
       </form>
     </div>
   </div>
-  <script type="module" src="app.js?v=20260811-publication-network-svg-theme"></script>
-  <script type="module" src="designer_main.js?v=20260811-publication-network-svg-theme"></script>
+  <script type="module" src="app.js?v=20260811-segment2-noise-guide"></script>
+  <script type="module" src="designer_main.js?v=20260811-segment2-noise-guide"></script>
 </body>
 </html>

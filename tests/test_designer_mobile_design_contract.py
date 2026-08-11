@@ -387,6 +387,49 @@ def test_modals_contain_focus_and_scroll_within_the_phone_viewport() -> None:
         assert contract in compiled_js
 
 
+def test_segment_2_about_explains_all_five_noise_spectra_with_evidence_bounds() -> None:
+    source_html, styles, app_js, _designer_main = _read_sources()
+    compiled_html, compiled_css, compiled_js = _read_compiled()
+    expected_noises = {"brown", "pink", "white", "blue", "violet"}
+
+    for html in (source_html, compiled_html):
+        markup = _Markup(html)
+        guide_tag, guide = markup.by_id("segment-info-noise-guide")
+        assert guide_tag == "section"
+        assert "noise-guide" in (guide["class"] or "").split()
+        assert "hidden" in guide
+
+        cards = {
+            attrs["data-noise-guide"]
+            for tag, attrs in markup.elements
+            if tag == "article" and "noise-guide-card" in (attrs.get("class") or "").split()
+        }
+        assert cards == expected_noises
+        assert html.count('class="noise-spectrum-curve ') == 5
+        assert 'role="img" aria-labelledby="noise-spectrum-title noise-spectrum-description"' in html
+        assert "normalized at 1 kHz" in html
+        assert "context-dependent" in html
+        for noise in expected_noises:
+            assert html.count(f'data-noise-guide="{noise}"') == 2
+        for doi in (
+            "https://doi.org/10.1016/j.neuropsychologia.2015.03.001",
+            "https://doi.org/10.1525/mp.2020.37.4.298",
+        ):
+            assert f'href="{doi}" target="_blank" rel="noopener noreferrer"' in html
+
+    assert 'const showNoiseGuide = stepId === "trials"' in app_js
+    assert '$("segment-info-noise-guide").hidden = !showNoiseGuide' in app_js
+    assert 'classList.toggle("noise-guide-active", showNoiseGuide)' in app_js
+    for marker in ("segment-info-noise-guide", "noise-guide-active"):
+        assert marker in compiled_js
+
+    assert _rule_has(styles, r"\.segment-info-card\.noise-guide-active", r"width:\s*min\(960px, 100%\)")
+    assert _rule_has(styles, r"\.noise-guide-grid", r"grid-template-columns:\s*repeat\(5, minmax\(0, 1fr\)\)")
+    assert _rule_has(styles, r"\.noise-spectrum-curve", r"stroke-width:\s*3")
+    for marker in (".noise-guide-active", ".noise-guide-grid", ".noise-spectrum-curve"):
+        assert marker in compiled_css
+
+
 def test_collapse_and_noise_choice_states_are_exposed_to_assistive_technology() -> None:
     _html, _styles, app_js, designer_main = _read_sources()
     _compiled_html, _compiled_css, compiled_js = _read_compiled()
@@ -437,7 +480,7 @@ def test_compiled_dashboard_and_public_wrappers_share_one_cache_token() -> None:
     )
     assert len(versions) == 1
     version = versions.pop()
-    assert version == "20260811-publication-network-svg-theme"
+    assert version == "20260811-segment2-noise-guide"
 
     wrappers = {
         "toolkit": (ROOT / "index.html").read_text(encoding="utf-8"),

@@ -89,6 +89,27 @@ function safeExternalLink(label, href) {
   });
 }
 
+function designerTemplateUrl(templateId) {
+  const url = new URL(window.location.href);
+  url.searchParams.set("page", "toolkit");
+  url.searchParams.set("template", templateId);
+  url.hash = "study-segment";
+  return url.href;
+}
+
+function designerTemplateLink(templateId) {
+  return element("a", {
+    text: titleCase(templateId),
+    attributes: {
+      href: designerTemplateUrl(templateId),
+      target: "_blank",
+      rel: "noopener noreferrer",
+      title: `Open ${titleCase(templateId)} in Experiment Designer`,
+      "data-open-designer-template": templateId,
+    },
+  });
+}
+
 export async function initializePublicationNetwork(root) {
   if (!root || root.dataset.publicationNetworkState === "ready") return;
 
@@ -484,7 +505,6 @@ export async function initializePublicationNetwork(root) {
     ]));
     const content = element("div", { className: "publication-network-detail-section" });
     if (record.taskFamily) content.append(element("p", { text: record.taskFamily }));
-    if (record.templateIds?.length) content.append(element("small", { text: `Toolkit profiles: ${record.templateIds.join(", ")}` }));
     if (record.missingParameters?.length) content.append(element("small", { text: `Missing publication parameters: ${record.missingParameters.join(", ")}` }));
     const review = record.manualReview;
     if (!review) {
@@ -572,6 +592,16 @@ export async function initializePublicationNetwork(root) {
       element("p", { text: inclusionBasis }),
       element("p", { text: statusExplanation }),
     ]);
+    const templateIds = [...new Set(records.flatMap((record) => record.templateIds || []))];
+    const templateSection = templateIds.length
+      ? makeSection("Open in Experiment Designer", [
+        element("p", {
+          className: "publication-network-detail-muted",
+          text: "Load this paper's available Toolkit template in a new browser tab.",
+        }),
+        element("div", { className: "publication-network-detail-links publication-network-template-links" }, templateIds.map(designerTemplateLink)),
+      ])
+      : null;
 
     const parameterChildren = records.length
       ? records.map(toolkitRecord)
@@ -582,6 +612,7 @@ export async function initializePublicationNetwork(root) {
 
     detailBody.replaceChildren(
       overview,
+      ...(templateSection ? [templateSection] : []),
       makeSection("Abstract", abstractChildren),
       classification,
       makeSection("Citation metrics", [makeMetricGrid(node), element("small", { text: "Displayed-network metrics determine this map's size and topology. Broader source counts are provided for context. Neither is a study-quality score." })]),

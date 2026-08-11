@@ -78,6 +78,8 @@ const HOSTED_TEMPLATE_DIRECTORY_URL = "https://github.com/GeorgeFejer91/pps-kit/
 const STATIC_AUDIT_SNAPSHOT_SCHEMA = "pps-static-dashboard-preview-audit-snapshot.v1";
 const STATIC_AUDIT_QUERY_PARAM = "auditStaticPreview";
 const STATIC_FORCE_QUERY_PARAM = "forceStaticPreview";
+const TEMPLATE_QUERY_PARAM = "template";
+const INITIAL_TEMPLATE_REQUEST = String(new URLSearchParams(window.location.search || "").get(TEMPLATE_QUERY_PARAM) || "").trim();
 const STATIC_COMPANION_REQUIRED_MESSAGE =
   "This action needs the installed PPS Designer. Hosted mode can compose and export profiles, but cannot render audio, write workspace folders, or launch the Runner.";
 const PROFILE_RECREATION_NOTICE =
@@ -331,6 +333,7 @@ let boundedSelectSequence = 0;
 let apiBase = "";
 let companionToken = "";
 let templateLoadInFlight = false;
+let initialTemplateRequestHandled = !INITIAL_TEMPLATE_REQUEST;
 let pendingAudioImportMode = "preserve";
 let pendingInstructionSlot = "";
 let pendingBakeRecipe = null;
@@ -2552,6 +2555,18 @@ function forceStaticPreviewEnabled() {
   return queryFlagEnabled(STATIC_FORCE_QUERY_PARAM);
 }
 
+function pendingInitialTemplateRequest(templates = []) {
+  if (initialTemplateRequestHandled) return { id: "", error: "" };
+  if (!/^[a-z0-9_]+$/i.test(INITIAL_TEMPLATE_REQUEST)) {
+    return { id: "", error: "The requested Toolkit template ID is not valid." };
+  }
+  const available = templates.some((template) => template.template_id === INITIAL_TEMPLATE_REQUEST);
+  if (!available) {
+    return { id: "", error: "The requested Toolkit template is not available in this Designer." };
+  }
+  return { id: INITIAL_TEMPLATE_REQUEST, error: "" };
+}
+
 function auditControlSnapshot(id) {
   const control = $(id);
   return {
@@ -2795,15 +2810,24 @@ function exposeDashboardAuditHook() {
 
 async function loadStaticState(fallbackError = null) {
   staticModeReason = fallbackError?.message || "";
-  const selected = state?.selected_template && state.selected_template !== CUSTOM_TEMPLATE_ID
+  const templates = await loadStaticTemplates();
+  const request = pendingInitialTemplateRequest(templates);
+  if (request.error) initialTemplateRequestHandled = true;
+  const selected = request.id || (state?.selected_template && state.selected_template !== CUSTOM_TEMPLATE_ID
     ? state.selected_template
-    : DEFAULT_STUDY_TEMPLATE_ID;
+    : DEFAULT_STUDY_TEMPLATE_ID);
   state = await staticStateForTemplate(selected);
+  if (request.id) initialTemplateRequestHandled = true;
   staticModeActive = true;
   setConnectionStatus(false, "static profile");
   renderAll();
   updateViewer();
-  showToast("Loaded committed preload assets from GitHub. Start the local companion for local generation or runner launch.");
+  showToast(
+    request.error
+      || (request.id
+        ? "Opened the paper's Toolkit template in Experiment Designer."
+        : "Loaded committed preload assets from GitHub. Start the local companion for local generation or runner launch.")
+  );
   return true;
 }
 
@@ -2854,10 +2878,22 @@ async function loadState(options = {}) {
     state = await api("/api/state", { skipStaticGuard: true });
     staticModeActive = false;
     staticModeReason = "";
+    const request = pendingInitialTemplateRequest(state.templates || []);
+    if (request.error) {
+      initialTemplateRequestHandled = true;
+    } else if (request.id) {
+      const alreadySelected = state.selected_template === request.id && state.design?.study_profile_id === request.id;
+      if (!alreadySelected) {
+        state = await api(`/api/templates/${encodeURIComponent(request.id)}/load`, { method: "POST" });
+      }
+      initialTemplateRequestHandled = true;
+    }
     await applyStaticProfileInspectionPreview();
     if (resetMode) resetEditMode();
     renderAll();
     updateViewer();
+    if (request.error) showToast(request.error);
+    if (request.id) showToast("Opened the paper's Toolkit template in Experiment Designer.");
   } catch (error) {
     try {
       if (resetMode) resetEditMode();
@@ -6932,6 +6968,7 @@ function trapModalFocus(event) {
 function openSegmentInfoModal(stepId, trigger = null) {
   const info = SEGMENT_INFO[stepId];
   if (!info) return;
+  const showNoiseGuide = stepId === "trials";
   segmentInfoModalReturnFocus = trigger instanceof HTMLElement
     ? trigger
     : (document.activeElement instanceof HTMLElement ? document.activeElement : null);
@@ -6955,6 +6992,8 @@ function openSegmentInfoModal(stepId, trigger = null) {
   const note = $("segment-info-note");
   noteCard.hidden = !info.note;
   note.textContent = info.note || "";
+  $("segment-info-noise-guide").hidden = !showNoiseGuide;
+  document.querySelector(".segment-info-card")?.classList.toggle("noise-guide-active", showNoiseGuide);
   $("segment-info-modal").hidden = false;
   syncModalEnvironment();
   window.setTimeout(() => $("segment-info-modal-close")?.focus(), 0);
@@ -8581,7 +8620,8 @@ function handoffExternalLinkToNative(event) {
   } catch (_err) {
     return;
   }
-  if (!/^(https?|mailto):$/i.test(url.protocol) || url.origin === window.location.origin) return;
+  const designerTemplateLink = link.hasAttribute("data-open-designer-template");
+  if (!/^(https?|mailto):$/i.test(url.protocol) || (url.origin === window.location.origin && !designerTemplateLink)) return;
   event.preventDefault();
   event.stopImmediatePropagation();
   Promise.resolve(nativeOpener(url.href))

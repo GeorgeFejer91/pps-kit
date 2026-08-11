@@ -54,6 +54,12 @@ includes 52 of 60 links verified directly in six primary reference lists; the
 other 8 originate from the two DOI-less source records excluded by the stricter
 node policy.
 
+The visible introduction presents this set as a curated cross-section for
+understanding the main audio–tactile PPS paradigms and design variations that
+inform the Toolkit. It is an orientation to the field, not a systematic or
+exhaustive review. The compact topology/year choice and map key sit below the
+graph, while live status, node-size guidance, and Full screen remain above it.
+
 The default topology is a real deterministic force layout, not a ranked grid:
 citation neighbours attract, all papers repel and share weak centering, and
 radius-aware collision separation keeps every node distinct on the same square
@@ -75,6 +81,13 @@ implemented yet. Selecting a node still exposes the full four-state assessment
 1 adjacent/scope conflict) alongside bibliographic metadata, abstract
 availability/provenance, directional citation neighbours, and every exact-DOI
 Toolkit audit record and extracted parameter available for that publication.
+When a paper record declares bundled Toolkit template IDs, its details show one
+new-tab Designer link for every deduplicated ID, including profiles that remain
+parameter-incomplete. The link targets the shared dashboard with
+`page=toolkit&template=<template_id>#study-segment`. The Designer validates the
+ID against its built-in template catalogue and loads it once through committed
+static assets or the existing local companion endpoint; papers without a
+declared template show no template-link section.
 
 The canonical v1 source remains the broader dated snapshot of 1,712 publications
 and 10,109 citation edges. It is retained for reproducible provenance and future

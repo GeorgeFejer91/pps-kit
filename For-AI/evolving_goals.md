@@ -2,6 +2,26 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-08-11 — Segment 2 noise-spectrum About guide
+
+- Extend Segment 2's existing `About` overlay with a comparative logarithmic power-spectrum plot and compact explanations for brown, pink, white, blue, and violet generated noise. Keep the spectral definitions aligned with the renderer and normalize the idealized curves at 1 kHz.
+- Present perceptual descriptions as contextual research associations, not inherent emotional effects. The guide links Ferri et al. (2015) and Costa and Nese (2020), distinguishes their task-specific findings, and notes that loudness, duration, motion/spatial filtering, playback/calibration, and listener differences can change ratings.
+
+## 2026-08-11 — viewer-facing citation map and Designer template links
+
+- Present the Documentation citation network as a curated orientation to the
+  main audio–tactile PPS paradigms and design variations represented around PPS
+  Toolkit, explicitly not as a systematic or exhaustive literature review.
+- Keep status, size guidance, and Full screen above the graph. Place the compact
+  topology/year segmented choice and complete map legend directly below the
+  graph/detail workspace, retaining two side-by-side choices on phone layouts.
+- Paper details link every deduplicated declared template ID, including
+  incomplete profiles, to a new Experiment Designer tab. The internal URL uses
+  `page=toolkit&template=<template_id>#study-segment`; hosted/static mode loads
+  committed profile data, while a connected dashboard reuses the existing
+  companion template-load endpoint. Invalid or unavailable IDs leave the
+  current/default profile intact and produce a concise message.
+
 ## 2026-08-11 — adaptive documentation typography
 
 - The public Documentation background section now uses the pinned `@chenglou/pretext` layout engine to choose bounded lead and companion-copy sizes from measured text, available width, and the media column's height. The semantic DOM remains the renderer and CSS remains the fallback; Pretext only supplies font-size and line-height values after fonts load and when the section width changes.
