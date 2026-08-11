@@ -383,16 +383,25 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
 - Paper-audit acquisition/refresh tools: `tools/paper_metadata_parser/`.
 - Tracked paper-audit memory and ledgers: `For-AI/audiotactile-paper-metadata-audit/`.
 - Publication-to-Toolkit input schemas and deterministic matrix builders:
-  `tools/current_toolkit_input_schema.py` derives the 111 exact current
+  `tools/current_toolkit_input_schema.py` derives the 115 exact current
   `design.*` parser/serializer paths; `tools/publication_parameter_taxonomy.mjs`
   owns the separate 281-leaf proposed `target.*` method/validation inventory; and
   `tools/publication_target_current_crosswalk.mjs` maps the latter
   conservatively to the former. `tools/build_publication_parameter_review_matrix.mjs`
-  owns exact-DOI joins, the 94-publication/121-study registry views, target
+  owns exact-DOI joins, the 94-publication/124-study registry views, target
   review sidecars/queues, orientation and visualization ledgers,
   implementation-surface inventory, and generated
   `For-AI/audiotactile-paper-metadata-audit/publication-parameter-matrix/`
-  artifacts. Keep output/evidence fields out of both wide input schemas.
+  artifacts. `tools/build_parsimonious_publication_matrix.py` compiles the
+  primary 11-contract paper-facing status/value matrices and evidence/review
+  sidecars from `parsimonious_emulation_contract.v1.json`, coarse audit
+  parents, and experiment-scoped `parsimonious_source_reviews.v1.json`. Keep
+  output/evidence fields out of all wide input schemas. The 11 contracts are
+  auditory stimulus; trajectory geometry plus kinematics; trial sequence;
+  task/response; jitter/ITI; SOA schedule; tactile target; baseline trials;
+  catch trials; repetition allocation; and block composition/order. Final
+  completion is component-gated; legacy coarse parents can seed review but
+  cannot certify completeness.
 - Validation protocols and lab evidence scripts: `validation_protocols/`.
 
 ## Refactor Direction
@@ -409,14 +418,20 @@ Keep public imports stable while extracting:
 
 The paper audit is a core pipeline, not a side report. It catalogs the needs, profiles, parameters, missing publication details, and toolkit-structure gaps across audio-tactile PPS studies so future implementations can be built from a growing knowledge base. Keep tracked audit files source-pointer-only; keep PDFs, supplements, extracted full text, screenshots, and local bundles ignored.
 
-The primary current-input matrix is the code-bound view of what can enter the
-current design/profile serializer: 111 exact serialized paths over 121
-registered study rows. Other operational namespaces remain separately
-inventoried. Use
-the 94-row publication view only for node-level aggregation. The secondary
+The primary paper-review matrix is the compact 11-contract scientific view over
+124 registered study rows. Use its normalized evidence sidecar for values,
+source/page pointers, final and coarse component states, derivations, and
+template-encoding state; never promote a coarse audit parent, Toolkit default,
+or template value to complete paper evidence. Use the controlled source,
+motion, timing, baseline, catch, and allocation vocabularies when normalizing
+paper methods. The 115-path current-input matrix is the
+code-bound implementation crosswalk for what can enter the current
+design/profile serializer. Other operational namespaces remain separately
+inventoried. Use the 94-row publication view only for node-level aggregation.
+The secondary
 281-leaf target matrix is a migration/gap inventory for published methods and
 reported validation targets, not the current serializer or a superset of the
-111 current paths. Multi-experiment letter suffixes are display labels;
+115 current paths. Multi-experiment letter suffixes are display labels;
 exact network, audit-record, and profile IDs remain join authorities. Composite
 paper records must be disaggregated before their evidence is accepted at an
 experiment row. The 25 legacy audit parents do not satisfy the target review,

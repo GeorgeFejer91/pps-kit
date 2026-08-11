@@ -16,6 +16,17 @@
       ]
     },
     {
+      "network_node_id": "doi:10.1007/s00221-013-3532-2",
+      "doi": "10.1007/s00221-013-3532-2",
+      "inventory_status": "confirmed_audio_tactile_instances",
+      "instance_count_basis": "The reviewed main PDF identifies audio-tactile PPS measurements in Experiment 1A (tool-use training) and Experiment 3 (pointing-control training). Experiments 1B and 2 are body-representation controls without the audio-tactile PPS task and remain outside this task-instance matrix.",
+      "evidence_pointer": "artifacts/paper_metadata_audit/publication_pdfs/doi_10.1007_s00221-013-3532-2__299a1419d7a1.pdf::PDF pp.3-6,14; metadata_audit.jsonl::canzoneri_2013_tool_use_reshaping",
+      "instances": [
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1A — tool-use training PPS task", "record_id": "canzoneri_2013_tool_use_reshaping", "template_ids": [], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 3 — pointing-control PPS task", "record_id": "canzoneri_2013_tool_use_reshaping", "template_ids": [], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
+      ]
+    },
+    {
       "network_node_id": "doi:10.1016/j.cognition.2015.07.012",
       "doi": "10.1016/j.cognition.2015.07.012",
       "inventory_status": "confirmed_main_plus_supplemental_variant",
@@ -39,14 +50,26 @@
       ]
     },
     {
+      "network_node_id": "doi:10.1016/j.cub.2013.01.043",
+      "doi": "10.1016/j.cub.2013.01.043",
+      "inventory_status": "confirmed_total",
+      "instance_count_basis": "The reviewed main PDF explicitly describes three audio-tactile PPS experiments: social presence/mannequin, cooperative versus noncooperative interaction, and cooperative interaction before/after. Their sound durations and condition structures differ, so the prior single review row was not lossless.",
+      "evidence_pointer": "artifacts/paper_metadata_audit/publication_pdfs/doi_10.1016_j.cub.2013.01.043__105d921e527a.pdf::PDF pp.1-5; metadata_audit.jsonl::teneggi_2013_social_face",
+      "instances": [
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — mannequin versus other-person PPS", "record_id": "teneggi_2013_social_face", "template_ids": [], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — cooperative versus noncooperative interaction", "record_id": "teneggi_2013_social_face", "template_ids": [], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "c", "instance_kind": "experiment", "experiment_label": "Experiment 3 — cooperative interaction before versus after", "record_id": "teneggi_2013_social_face", "template_ids": [], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
+      ]
+    },
+    {
       "network_node_id": "doi:10.1016/j.neuropsychologia.2015.03.001",
       "doi": "10.1016/j.neuropsychologia.2015.03.001",
-      "inventory_status": "formal_experiment_numbering_unverified",
-      "instance_count_basis": "Two exact-DOI audit records and two templates preserve separate artificial-valence and ecological-valence task/profile instances; tracked evidence does not establish formal Experiment 1/2 numbering.",
-      "evidence_pointer": "metadata_audit.jsonl::ferri_2015_artificial_valence; metadata_audit.jsonl::ferri_2015_ecological_valence",
+      "inventory_status": "confirmed_total",
+      "instance_count_basis": "The reviewed accepted-manuscript PDF explicitly labels the artificial power-law-noise task as Experiment 1 and the ecological/IADS-sound task as Experiment 2 in the abstract, Methods, Results, Discussion, figures, and table. The two exact-DOI audit records therefore correspond to formal experiments rather than informal profile variants.",
+      "evidence_pointer": "artifacts/paper_metadata_audit/publication_pdfs/doi_10.1016_j.neuropsychologia.2015.03.001__8a3e82fe7431.pdf::PDF pp.1,8-13; parsimonious_source_reviews.v1.json::doi:10.1016/j.neuropsychologia.2015.03.001::a,b",
       "instances": [
-        {"suffix": "a", "instance_kind": "profile_variant", "experiment_label": "Artificial-valence profile variant", "record_id": "ferri_2015_artificial_valence", "toolkit_scope": "profile_variant_in_scope", "disaggregation_status": "variant_record_already_disaggregated"},
-        {"suffix": "b", "instance_kind": "profile_variant", "experiment_label": "Ecological-valence profile variant", "record_id": "ferri_2015_ecological_valence", "toolkit_scope": "profile_variant_in_scope", "disaggregation_status": "variant_record_already_disaggregated"}
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — artificial power-law-noise valence", "record_id": "ferri_2015_artificial_valence", "toolkit_scope": "in_scope", "disaggregation_status": "record_already_experiment_specific"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — ecological/IADS-sound valence", "record_id": "ferri_2015_ecological_valence", "toolkit_scope": "in_scope", "disaggregation_status": "record_already_experiment_specific"}
       ]
     },
     {

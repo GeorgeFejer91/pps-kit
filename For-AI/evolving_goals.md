@@ -2,6 +2,44 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-08-12 — parsimonious publication-emulation audit contract
+
+- Make the primary publication audit a compact paper-facing matrix rather than
+  the 115-field design serializer or the 281-leaf target-gap inventory. Its 11
+  structured contracts are: auditory stimulus; trajectory geometry plus
+  kinematics; trial sequence; task/response behavior; jitter/ITI; SOA schedule;
+  tactile target; baseline trials; catch trials; repetition allocation; and
+  block composition/order. This is the smallest accepted scientific surface
+  for faithful task emulation: geometry and kinematics are one reconstructible
+  dependency, while trial sequence and response remain separate because either
+  can be missing independently.
+- Preserve exactly one canonical position representation and derive redundant
+  radius/angles, path length, direction, or speed when the reported inputs
+  permit it. Preserve SOA anchor/sign, not only numeric values. Keep stimulus
+  asset/recipe provenance, tactile waveform/routing, target/nontarget behavior,
+  and response-window anchor visible even when the current Toolkit stores some
+  of them only in untyped metadata.
+- Normalize baseline and catch strategies with explicit controlled families
+  and allocation rules. Trial-generation baselines are distinct from EEG or
+  prestimulus analysis windows; auditory-only response targets and factorial
+  unisensory controls are distinct from no-target/withhold catches. A percentage
+  without a denominator/crossing rule is unresolved and cannot certify an exact
+  trial count.
+- A contract becomes `reported_complete` or `derived_complete` only when every
+  required final component has experiment-scoped evidence. The legacy 25-field
+  parents may seed review but cannot establish completeness; low-confidence
+  candidates, composite publication records, template values, and Toolkit
+  defaults remain separate states. Derived claims retain their formula, and
+  completed evidence retains source and page/section pointers.
+- The registered review surface contains 124 evidence-backed study/profile rows
+  across the 94 current citation nodes. Lettered `(a)`, `(b)`, ... rows follow
+  the tracked study-instance registry; papers without an assessed experiment
+  count remain one review unit without being asserted single-experiment papers.
+  The 115 exact `design.*` inputs remain the implementation crosswalk, and the
+  281 target method/validation leaves remain a secondary gap inventory. Four
+  imported-audio colour/source-path fields are implementation bookkeeping and
+  do not expand the 11 paper-extraction contracts.
+
 ## 2026-08-11 — merged Segment 1 stimulus and trajectory workspace
 
 - Merge the former Segment 1 trajectory/source and stimulus-selection boxes into one ordered workspace: source type first, contextual settings beside the 2D/3D viewer, explicit create/remake, grouped selectable stimulus pool, and the unchanged folder/`Save & Continue` footer. Segment 2 remains Trial Sequence Design and registry numbering is unchanged.
@@ -2119,19 +2157,26 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   identical packaged/local and GitHub Pages view. Neither is exhaustive,
   systematic-review evidence, a quality ranking, or an effect-size synthesis.
 
-## 2026-08-11 — Publication-to-Toolkit atomic input review contract
+## 2026-08-11 — Parsimonious publication emulation matrix
 
 - Treat the 94-node citation network as the publication authority but preserve
-  a conservative 121-row study-instance registry. Fourteen publications with
+  a conservative 124-row study-instance registry. Sixteen publications with
   tracked multi-experiment/profile evidence use contiguous lowercase display
   suffixes (`a`, `b`, `c`, ...); papers without a registry entry remain
   `experiment_count_not_assessed`. Do not rename or mutate exact literature
   `record_id` or Toolkit `profile_id` values, and do not copy composite-record
   evidence into child experiments as though it were experiment-specific.
-- Use the 111 exact code-derived `design.*` paths accepted by
-  `design_from_dict` and emitted by `design_to_dict` as the primary current
-  Toolkit columns. Keep arbitrary dictionaries atomic and trace StudyTemplate
-  aliases. Treat the 281 `target.*` leaves as a separate future method,
+- Use 11 structured scientific contracts as the primary paper-facing columns:
+  auditory stimulus, 3D trajectory, looming duration/kinematics, trial
+  sequence/response, jitter/ITI, SOAs, tactile target, baseline, catch trials,
+  repetitions, and block allocation. Store concise normalized values and
+  source/page/derivation evidence in sidecars, not additional wide columns.
+  Treat an attached profile as Toolkit encoding evidence only; never promote a
+  profile value or default to publication-reported evidence.
+- Retain the 111 exact code-derived `design.*` paths accepted by
+  `design_from_dict` and emitted by `design_to_dict` as the current
+  implementation crosswalk. Keep arbitrary dictionaries atomic and trace
+  StudyTemplate aliases. Treat the 281 `target.*` leaves as a separate method,
   validation, and implementation-gap inventory, with a conservative exact-path
   crosswalk; never describe those target leaves as the current serializer or a
   superset. Six target leaves are validation/derived candidates and 22 exact

@@ -49,14 +49,16 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         summary = self.build_summary
         self.assertEqual(summary["publications"], 94)
         self.assertEqual(summary["networkEdges"], 750)
-        self.assertEqual(summary["studyInstances"], 121)
-        self.assertEqual(summary["currentToolkitInputParameters"], 111)
-        self.assertEqual(summary["currentInputReviewCells"], 13_431)
-        self.assertEqual(summary["currentInputsOutsideTargetInventory"], 22)
+        self.assertEqual(summary["studyInstances"], 124)
+        self.assertEqual(summary["parsimoniousContractCount"], 11)
+        self.assertEqual(summary["parsimoniousReviewCells"], 1_364)
+        self.assertEqual(summary["currentToolkitInputParameters"], 115)
+        self.assertEqual(summary["currentInputReviewCells"], 14_260)
+        self.assertEqual(summary["currentInputsOutsideTargetInventory"], 26)
         self.assertEqual(summary["targetMethodValidationParameters"], 281)
         self.assertEqual(summary["targetConfigurationCandidates"], 275)
         self.assertEqual(summary["targetValidationLeaves"], 6)
-        self.assertEqual(summary["targetMethodReviewCells"], 34_001)
+        self.assertEqual(summary["targetMethodReviewCells"], 34_844)
         self.assertEqual(summary["structuredOrientationReviewRecords"], 7)
         self.assertEqual(summary["experimentSpecificOrientationRows"], 4)
         self.assertEqual(summary["combinedOrientationRows"], 8)
@@ -75,11 +77,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             self.output_dir / "study_instance_current_toolkit_input_matrix.csv"
         )
         paths = [row["serialized_path"] for row in dictionary]
-        self.assertEqual(len(dictionary), 111)
+        self.assertEqual(len(dictionary), 115)
         self.assertEqual(len(paths), len(set(paths)))
         self.assertTrue(all(path.startswith("design.") for path in paths))
-        self.assertEqual(matrix_header[-111:], paths)
-        self.assertEqual(len(rows), 121)
+        self.assertEqual(matrix_header[-115:], paths)
+        self.assertEqual(len(rows), 124)
         self.assertTrue(all(row[path] for row in rows for path in paths))
         self.assertIn("parser", dictionary_header)
         self.assertIn("serializer", dictionary_header)
@@ -95,11 +97,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         header, rows = read_csv(
             self.output_dir / "study_instance_current_input_review_matrix.csv"
         )
-        self.assertEqual(len(rows), 121)
-        self.assertEqual(header[-111:], paths)
+        self.assertEqual(len(rows), 124)
+        self.assertEqual(header[-115:], paths)
         self.assertTrue(all(row[path] for row in rows for path in paths))
         _, queue = read_csv(self.output_dir / "current_input_review_queue.csv")
-        self.assertEqual(len(queue), 121 * 111)
+        self.assertEqual(len(queue), 124 * 115)
         self.assertEqual(
             len({(row["study_row_id"], row["current_toolkit_input_path"]) for row in queue}),
             len(queue),
@@ -114,9 +116,9 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         _, crosswalk = read_csv(
             self.output_dir / "current_input_to_target_crosswalk.csv"
         )
-        self.assertEqual(len(crosswalk), 111)
+        self.assertEqual(len(crosswalk), 115)
         uncovered = [row for row in crosswalk if row["mapped_target_count"] == "0"]
-        self.assertEqual(len(uncovered), 22)
+        self.assertEqual(len(uncovered), 26)
 
     def test_target_gap_matrix_is_separate_and_crosswalked(self) -> None:
         dictionary_header, dictionary = read_csv(
@@ -130,7 +132,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(len(target_paths), len(set(target_paths)))
         self.assertTrue(all(path.startswith("target.") for path in target_paths))
         self.assertEqual(matrix_header[-281:], target_paths)
-        self.assertEqual(len(rows), 121)
+        self.assertEqual(len(rows), 124)
         self.assertTrue(all(row[path] for row in rows for path in target_paths))
         for field in (
             "current_design_binding_state",
@@ -190,7 +192,22 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 14)
+        self.assertEqual(len(registry["entries"]), 16)
+        registered_instance_count = sum(
+            len(entry["instances"]) for entry in registry["entries"]
+        )
+        self.assertEqual(registered_instance_count, 46)
+        network = json.loads(
+            (
+                ROOT
+                / "src/peripersonal_space_toolkit/dashboard/publication_network.v3.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(
+            len(rows),
+            len(network["nodes"]) - len(registry["entries"]) + registered_instance_count,
+        )
+        self.assertEqual(len({row["study_row_id"] for row in rows}), len(rows))
         by_node: dict[str, list[dict[str, str]]] = {}
         for row in rows:
             by_node.setdefault(row["network_node_id"], []).append(row)
@@ -224,6 +241,29 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         )
         self.assertTrue(
             all(row["parameter_evidence_scope"] == "composite_requires_split" for row in cell)
+        )
+
+        canzoneri_tool = sorted(
+            by_node["doi:10.1007/s00221-013-3532-2"],
+            key=lambda row: row["experiment_letter"],
+        )
+        self.assertEqual(
+            [row["experiment_letter"] for row in canzoneri_tool], ["a", "b"]
+        )
+        self.assertEqual(
+            [row["experiment_label"] for row in canzoneri_tool],
+            [
+                "Experiment 1A — tool-use training PPS task",
+                "Experiment 3 — pointing-control PPS task",
+            ],
+        )
+
+        teneggi = sorted(
+            by_node["doi:10.1016/j.cub.2013.01.043"],
+            key=lambda row: row["experiment_letter"],
+        )
+        self.assertEqual(
+            [row["experiment_letter"] for row in teneggi], list("abc")
         )
 
     def test_template_mappings_are_experiment_safe(self) -> None:
@@ -274,13 +314,13 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         _, values = read_csv(
             self.output_dir / "publication_current_toolkit_input_values.csv"
         )
-        self.assertEqual(len(values), 3_108)
+        self.assertEqual(len(values), 3_220)
 
     def test_target_sidecar_is_complete_and_marks_composites(self) -> None:
         header, rows = read_csv(
             self.output_dir / "study_instance_target_method_evidence_sidecar.csv"
         )
-        self.assertEqual(len(rows), 121 * 281)
+        self.assertEqual(len(rows), 124 * 281)
         for field in (
             "study_row_id",
             "network_node_id",
@@ -312,7 +352,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
 
     def test_orientation_and_visualization_reviews_remain_unconfounded(self) -> None:
         _, orientation = read_csv(self.output_dir / "study_orientation_review.csv")
-        self.assertEqual(len(orientation), 121)
+        self.assertEqual(len(orientation), 124)
         orientation_counts = Counter(
             row["orientation_review_status"] for row in orientation
         )
@@ -335,6 +375,357 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             123,
         )
         self.assertNotIn("confirmed", visualization_counts)
+
+    def test_parsimonious_matrix_is_complete_compact_and_evidence_guarded(self) -> None:
+        expected_contracts = [
+            "auditory_stimulus",
+            "trajectory_kinematics",
+            "trial_sequence",
+            "task_response",
+            "jitter_iti_policy",
+            "soa_schedule",
+            "tactile_target",
+            "baseline_trial_contract",
+            "catch_trial_contract",
+            "repetition_allocation",
+            "block_order_contract",
+        ]
+        dictionary_header, dictionary = read_csv(
+            self.output_dir / "parsimonious_contract_dictionary.csv"
+        )
+        self.assertEqual(
+            [row["contract_key"] for row in dictionary], expected_contracts
+        )
+        for field in (
+            "required_components",
+            "conditional_components",
+            "partial_missing_components",
+            "normalization_vocabularies",
+            "controlled_vocabulary_json",
+            "current_toolkit_support",
+        ):
+            self.assertIn(field, dictionary_header)
+        contract_document = json.loads(
+            (
+                ROOT
+                / "For-AI/audiotactile-paper-metadata-audit/parsimonious_emulation_contract.v1.json"
+            ).read_text(encoding="utf-8")
+        )
+        vocabularies = set(contract_document["controlled_vocabularies"])
+        for row in dictionary:
+            self.assertTrue(row["required_components"])
+            self.assertTrue(row["current_toolkit_support"])
+            referenced_vocabularies = {
+                value.strip()
+                for value in row["normalization_vocabularies"].split("|")
+                if value.strip()
+            }
+            self.assertTrue(referenced_vocabularies <= vocabularies)
+            serialized_vocabularies = json.loads(row["controlled_vocabulary_json"])
+            self.assertEqual(set(serialized_vocabularies), referenced_vocabularies)
+
+        current_paths = {
+            row["serialized_path"]
+            for row in read_csv(
+                self.output_dir / "current_toolkit_input_dictionary.csv"
+            )[1]
+        }
+        for row in dictionary:
+            mapped = {
+                item.strip()
+                for item in row["current_toolkit_paths"].split("|")
+                if item.strip()
+            }
+            self.assertTrue(mapped <= current_paths)
+
+        header, rows = read_csv(
+            self.output_dir / "study_instance_parsimonious_status_matrix.csv"
+        )
+        self.assertEqual(len(rows), 124)
+        self.assertEqual(
+            header[:-11],
+            [
+                "study_row_id",
+                "study_label",
+                "year",
+                "doi",
+                "experiment_label",
+                "evidence_stage",
+                "toolkit_status",
+                "resolved_contracts",
+                "contract_coverage_pct",
+            ],
+        )
+        self.assertEqual(header[-11:], expected_contracts)
+        _, study_index = read_csv(self.output_dir / "study_instance_index.csv")
+        self.assertEqual(
+            [row["study_row_id"] for row in rows],
+            [row["study_row_id"] for row in study_index],
+        )
+        _, legend = read_csv(self.output_dir / "parsimonious_status_legend.csv")
+        documented_statuses = {row["status"] for row in legend}
+        observed_statuses = {
+            row[contract] for row in rows for contract in expected_contracts
+        }
+        self.assertTrue(observed_statuses <= documented_statuses)
+        self.assertNotIn("mixed_across_studies", observed_statuses)
+        self.assertTrue(all(row[contract] for row in rows for contract in expected_contracts))
+
+        evidence_header, evidence = read_csv(
+            self.output_dir / "parsimonious_contract_evidence.csv"
+        )
+        for field in (
+            "current_toolkit_support",
+            "review_date",
+            "coarse_parent_status_json",
+            "coarse_parent_value_json",
+            "component_evidence_note_json",
+        ):
+            self.assertIn(field, evidence_header)
+        self.assertEqual(len(evidence), 124 * 11)
+        self.assertEqual(
+            len({(row["study_row_id"], row["contract_key"]) for row in evidence}),
+            len(evidence),
+        )
+        dictionary_by_key = {row["contract_key"]: row for row in dictionary}
+        final_component_statuses = {
+            "reported",
+            "derived",
+            "approximation_required",
+            "not_reported",
+            "source_unavailable",
+            "explicitly_absent",
+            "not_applicable",
+            "conflicting_evidence",
+            "low_confidence",
+        }
+        legacy_statuses = {
+            "available_reported",
+            "available_with_derivation",
+            "available_caveated",
+            "missing_after_review",
+        }
+        for row in evidence:
+            component_statuses = json.loads(row["component_status_json"])
+            component_values = json.loads(row["component_value_json"])
+            component_notes = json.loads(row["component_evidence_note_json"])
+            json.loads(row["coarse_parent_status_json"])
+            json.loads(row["coarse_parent_value_json"])
+            self.assertIn(row["contract_key"], expected_contracts)
+            self.assertNotIn(row["evidence_status"], legacy_statuses)
+            declared_components = {
+                value.strip()
+                for field in ("required_components", "conditional_components")
+                for value in dictionary_by_key[row["contract_key"]][field].split("|")
+                if value.strip()
+            }
+            self.assertEqual(
+                row["current_toolkit_support"],
+                dictionary_by_key[row["contract_key"]]["current_toolkit_support"],
+            )
+            self.assertTrue(set(component_statuses) <= declared_components)
+            self.assertEqual(set(component_values), set(component_statuses))
+            self.assertTrue(set(component_notes) <= set(component_statuses))
+            self.assertTrue(set(component_statuses.values()) <= final_component_statuses)
+            for component, component_status in component_statuses.items():
+                if component_status in {
+                    "reported",
+                    "derived",
+                    "approximation_required",
+                    "explicitly_absent",
+                    "conflicting_evidence",
+                    "low_confidence",
+                }:
+                    self.assertTrue(component_values[component])
+            if "derived" in component_statuses.values():
+                self.assertTrue(row["derivation_note"])
+            if row["paper_value"] and row["evidence_status"] in {
+                "reported_complete",
+                "derived_complete",
+                "approximation_required",
+                "partial",
+                "conflicting_evidence",
+                "low_confidence",
+                "explicitly_absent",
+            }:
+                self.assertTrue(row["source_file"])
+                self.assertTrue(row["page_or_section"])
+            if row["experiment_scoped_source_override"] == "yes":
+                self.assertTrue(row["source_file"])
+                self.assertTrue(row["page_or_section"])
+                self.assertTrue(row["source_review_keys"])
+                self.assertTrue(row["review_date"])
+                self.assertNotEqual(row["evidence_status"], "composite_requires_split")
+                if row["evidence_status"] == "derived_complete":
+                    self.assertTrue(row["derivation_note"])
+            elif row["evidence_status"] in {"reported_complete", "derived_complete"}:
+                self.fail(
+                    "Coarse parents, profiles, and defaults cannot establish final completion: "
+                    f"{row['study_row_id']}/{row['contract_key']}"
+                )
+            if row["evidence_status"] in {"reported_complete", "derived_complete"}:
+                self.assertFalse(row["missing_required_components"])
+                required = {
+                    value.strip()
+                    for value in dictionary_by_key[row["contract_key"]][
+                        "required_components"
+                    ].split("|")
+                    if value.strip()
+                }
+                self.assertTrue(required <= set(component_statuses))
+                self.assertTrue(
+                    all(
+                        component_statuses[component]
+                        in {"reported", "derived", "explicitly_absent", "not_applicable"}
+                        for component in required
+                    )
+                )
+            if row["evidence_status"] == "explicitly_absent":
+                self.assertIn(
+                    row["contract_key"],
+                    {"baseline_trial_contract", "catch_trial_contract"},
+                )
+            if row["evidence_status"] == "composite_requires_split":
+                self.assertFalse(row["paper_value"])
+                self.assertEqual(row["parameter_evidence_scope"], "composite_requires_split")
+
+        evidence_by_pair = {
+            (row["study_row_id"], row["contract_key"]): row for row in evidence
+        }
+        for matrix_row in rows:
+            for contract_key in expected_contracts:
+                self.assertEqual(
+                    matrix_row[contract_key],
+                    evidence_by_pair[(matrix_row["study_row_id"], contract_key)][
+                        "evidence_status"
+                    ],
+                )
+            resolved_count = sum(
+                matrix_row[contract_key]
+                in {"reported_complete", "derived_complete", "explicitly_absent"}
+                for contract_key in expected_contracts
+            )
+            self.assertEqual(matrix_row["resolved_contracts"], f"{resolved_count}/11")
+            self.assertEqual(
+                float(matrix_row["contract_coverage_pct"]),
+                round(100 * resolved_count / 11, 1),
+            )
+        adjacent = next(
+            row for row in rows if row["doi"] == "10.1038/s41598-022-21469-w"
+        )
+        self.assertEqual(
+            {adjacent[contract_key] for contract_key in expected_contracts},
+            {"not_applicable"},
+        )
+        self.assertEqual(adjacent["resolved_contracts"], "0/11")
+        self.assertEqual(adjacent["contract_coverage_pct"], "0.0")
+
+        source_reviews = json.loads(
+            (
+                ROOT
+                / "For-AI/audiotactile-paper-metadata-audit/parsimonious_source_reviews.v1.json"
+            ).read_text(encoding="utf-8")
+        )
+        for entry in source_reviews["entries"]:
+            self.assertEqual(list(entry["contracts"]), expected_contracts)
+            for contract_key, review in entry["contracts"].items():
+                self.assertNotIn(review["status"], legacy_statuses)
+                self.assertIn("component_reviews", review)
+                self.assertTrue(
+                    set(review["component_reviews"])
+                    <= {
+                        value.strip()
+                        for field in ("required_components", "conditional_components")
+                        for value in dictionary_by_key[contract_key][field].split("|")
+                        if value.strip()
+                    }
+                )
+        self.assertEqual(
+            sum(row["experiment_scoped_source_override"] == "yes" for row in evidence),
+            len(source_reviews["entries"]) * len(expected_contracts),
+        )
+
+        _, summary = read_csv(
+            self.output_dir / "parsimonious_contract_summary.csv"
+        )
+        self.assertEqual([row["contract_key"] for row in summary], expected_contracts)
+        summary_statuses = [
+            status
+            for status in documented_statuses
+            if status != "mixed_across_studies"
+        ]
+        for summary_row in summary:
+            contract_key = summary_row["contract_key"]
+            counts = Counter(
+                row["evidence_status"]
+                for row in evidence
+                if row["contract_key"] == contract_key
+            )
+            self.assertEqual(summary_row["study_count"], "124")
+            for status in summary_statuses:
+                self.assertEqual(int(summary_row[status]), counts[status])
+            resolved = sum(
+                counts[status]
+                for status in {
+                    "reported_complete",
+                    "derived_complete",
+                    "explicitly_absent",
+                }
+            )
+            self.assertEqual(int(summary_row["available_or_resolved_count"]), resolved)
+            self.assertEqual(
+                float(summary_row["available_or_resolved_pct"]),
+                round(100 * resolved / 124, 1),
+            )
+
+        _, review_queue = read_csv(
+            self.output_dir / "parsimonious_contract_review_queue.csv"
+        )
+        queue_pairs = {
+            (row["study_row_id"], row["contract_key"]) for row in review_queue
+        }
+        expected_queue_pairs = {
+            (row["study_row_id"], row["contract_key"])
+            for row in evidence
+            if row["evidence_status"]
+            not in {"reported_complete", "explicitly_absent", "not_applicable"}
+        }
+        self.assertEqual(len(queue_pairs), len(review_queue))
+        self.assertEqual(queue_pairs, expected_queue_pairs)
+
+        _, publications = read_csv(
+            self.output_dir / "publication_parsimonious_status_matrix.csv"
+        )
+        network = json.loads(
+            (
+                ROOT
+                / "src/peripersonal_space_toolkit/dashboard/publication_network.v3.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(len(publications), 94)
+        self.assertEqual(
+            {row["network_node_id"] for row in publications},
+            {node["id"] for node in network["nodes"]},
+        )
+        rows_by_node: dict[str, list[dict[str, str]]] = {}
+        study_index_by_id = {
+            row["study_row_id"]: row
+            for row in read_csv(self.output_dir / "study_instance_index.csv")[1]
+        }
+        for row in rows:
+            rows_by_node.setdefault(
+                study_index_by_id[row["study_row_id"]]["network_node_id"], []
+            ).append(row)
+        publication_by_node = {row["network_node_id"]: row for row in publications}
+        for node_id, child_rows in rows_by_node.items():
+            for contract_key in expected_contracts:
+                child_statuses = {row[contract_key] for row in child_rows}
+                expected = (
+                    next(iter(child_statuses))
+                    if len(child_statuses) == 1
+                    else "mixed_across_studies"
+                )
+                self.assertEqual(publication_by_node[node_id][contract_key], expected)
 
     def test_output_only_surfaces_are_not_wide_matrix_columns(self) -> None:
         _, surfaces = read_csv(
