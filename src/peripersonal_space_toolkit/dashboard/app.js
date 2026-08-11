@@ -1,3 +1,8 @@
+import {
+  initializeDocumentationTypography,
+  refreshDocumentationTypography,
+} from "./documentation_typography.js";
+
 let state = null;
 let viewerReady = false;
 let viewerInitialFitDone = false;
@@ -73,6 +78,8 @@ const HOSTED_TEMPLATE_DIRECTORY_URL = "https://github.com/GeorgeFejer91/pps-kit/
 const STATIC_AUDIT_SNAPSHOT_SCHEMA = "pps-static-dashboard-preview-audit-snapshot.v1";
 const STATIC_AUDIT_QUERY_PARAM = "auditStaticPreview";
 const STATIC_FORCE_QUERY_PARAM = "forceStaticPreview";
+const TEMPLATE_QUERY_PARAM = "template";
+const INITIAL_TEMPLATE_REQUEST = String(new URLSearchParams(window.location.search || "").get(TEMPLATE_QUERY_PARAM) || "").trim();
 const STATIC_COMPANION_REQUIRED_MESSAGE =
   "This action needs the installed PPS Designer. Hosted mode can compose and export profiles, but cannot render audio, write workspace folders, or launch the Runner.";
 const PROFILE_RECREATION_NOTICE =
@@ -326,9 +333,15 @@ let boundedSelectSequence = 0;
 let apiBase = "";
 let companionToken = "";
 let templateLoadInFlight = false;
+let initialTemplateRequestHandled = !INITIAL_TEMPLATE_REQUEST;
 let pendingAudioImportMode = "preserve";
 let pendingInstructionSlot = "";
 let pendingBakeRecipe = null;
+let selectedIngredientLabel = "";
+let ingredientEditorDirty = false;
+let ingredientEditorMode = "idle";
+let audioColorModalReturnFocus = null;
+let pendingDisplayColorHex = "#1C7A86";
 let activeTrialRowPreviewAudio = null;
 let activeSourcePreviewAudio = null;
 let activeSourcePreviewNode = null;
@@ -924,9 +937,31 @@ function markDesignerSaved() {
   document.dispatchEvent(new CustomEvent("pps-designer-saved"));
 }
 
+function discardIngredientEditorDraft() {
+  ingredientEditorDirty = false;
+  const selected = ingredientEntryForLabel(selectedIngredientLabel);
+  if (selected) {
+    hydrateIngredientEditor(selected);
+    return;
+  }
+  selectedIngredientLabel = "";
+  ingredientEditorMode = "idle";
+  pendingBakeRecipe = null;
+  pendingDisplayColorHex = "#1C7A86";
+  if (state) applyTrajectoryControls(state.trajectory_controls || {});
+  if ($("bake-label")) $("bake-label").value = "";
+}
+
 function confirmDiscardUnsaved(actionLabel = "continue") {
-  if (!designerDirty) return true;
-  return window.confirm(`Discard unsaved changes and ${actionLabel}?`);
+  if (!designerDirty && !ingredientEditorDirty) return true;
+  const message = ingredientEditorDirty && designerDirty
+    ? `Discard the uncommitted Segment 1 ingredient draft and other unsaved changes, then ${actionLabel}?`
+    : ingredientEditorDirty
+      ? `Discard the uncommitted Segment 1 ingredient draft and ${actionLabel}?`
+      : `Discard unsaved changes and ${actionLabel}?`;
+  if (!window.confirm(message)) return false;
+  if (ingredientEditorDirty) discardIngredientEditorDraft();
+  return true;
 }
 
 async function restorePersistedDraftForView() {
@@ -989,6 +1024,7 @@ async function setEditMode(active) {
 function resetEditMode() {
   editModeActive = false;
   designerDirty = false;
+  ingredientEditorDirty = false;
 }
 
 function renderEditModePanel() {
@@ -1025,7 +1061,8 @@ function renderEditModePanel() {
 function trajectoryEditingEnabled() {
   if (staticModeActive) return false;
   const input = $("start-distance");
-  return Boolean(input && !input.disabled);
+  const dynamicDraft = Boolean(pendingBakeRecipe && pendingBakeRecipe.kind !== "fixed_audio");
+  return Boolean(dynamicDraft && input && !input.disabled);
 }
 
 function ensureEditableProject() {
@@ -1070,7 +1107,7 @@ function profileReadonlyControlAllowed(control) {
 
 function viewModeControlAllowed(control) {
   if (!control) return false;
-  if (control.matches?.("[data-preview-source-label], .mobile-table-more")) return true;
+  if (control.matches?.("[data-preview-source-label], [data-select-ingredient], .mobile-table-more")) return true;
   if (control.id?.startsWith("open-")) return true;
   if (control.id === "download-block-randomization") return true;
   return Boolean(
@@ -1662,7 +1699,7 @@ function staticTrialPoolSettings(protocol) {
     family_repetitions: familyRepetitions,
     folder_repetitions: {},
     file_repetition_overrides: {},
-    fractional_seed: Number(protocol.random_seed || 20250604) || 20250604,
+    fractional_seed: normalizedRandomizationSeed(protocol.random_seed),
   };
   if (Object.keys(exactFamilyCounts).length) settings.exact_family_trial_counts = exactFamilyCounts;
   return settings;
@@ -1701,7 +1738,7 @@ function trialPoolExactRecordSortKey(record, seed, family) {
 function applyTrialPoolExactFamilyCounts(records, settings = {}, warnings = []) {
   const exactCounts = trialPoolExactFamilyCounts(settings);
   if (!Object.keys(exactCounts).length) return {};
-  const seed = Number(settings.fractional_seed || state?.design?.protocol?.random_seed || 20250604) || 20250604;
+  const seed = normalizedRandomizationSeed(settings.fractional_seed ?? state?.design?.protocol?.random_seed);
   for (const family of Object.keys(exactCounts).sort()) {
     const targetCount = exactCounts[family];
     const familyRecords = records.filter((record) => trialPoolFamilyKey(record?.file?.family) === family);
@@ -1759,7 +1796,7 @@ function staticTrialPoolRows(files, settings) {
     if (!fractionalGroups.has(record.balancingStratum)) fractionalGroups.set(record.balancingStratum, []);
     fractionalGroups.get(record.balancingStratum).push(record);
   }
-  const seed = Number(settings.fractional_seed || 20250604) || 20250604;
+  const seed = normalizedRandomizationSeed(settings.fractional_seed);
   for (const [stratum, group] of fractionalGroups.entries()) {
     const extraCount = Math.max(0, Math.min(group.length, Math.floor(group.length * group[0].fractionalRemainder + 0.5)));
     if (!extraCount) continue;
@@ -2115,8 +2152,7 @@ function staticBlockCsvPreviewPayload(design, trialPoolBake, status) {
   const poolRows = trialPoolBake.preview_rows || [];
   if (!status.finished_profile || !poolRows.length) return {};
   const blockCount = Math.max(1, Math.round(Number(design.protocol?.blocks || 1)));
-  const rawSeed = Number(design.protocol?.random_seed || 20250604);
-  const seed = Number.isFinite(rawSeed) ? Math.round(rawSeed) : 20250604;
+  const seed = normalizedRandomizationSeed(design.protocol?.random_seed);
   const soaValues = poolRows.map((row) => Number(row.soa_ms || 0)).filter((value) => value > 0);
   const soaMin = soaValues.length ? Math.min(...soaValues) : 0;
   const soaMax = soaValues.length ? Math.max(...soaValues) : 0;
@@ -2548,6 +2584,18 @@ function forceStaticPreviewEnabled() {
   return queryFlagEnabled(STATIC_FORCE_QUERY_PARAM);
 }
 
+function pendingInitialTemplateRequest(templates = []) {
+  if (initialTemplateRequestHandled) return { id: "", error: "" };
+  if (!/^[a-z0-9_]+$/i.test(INITIAL_TEMPLATE_REQUEST)) {
+    return { id: "", error: "The requested Toolkit template ID is not valid." };
+  }
+  const available = templates.some((template) => template.template_id === INITIAL_TEMPLATE_REQUEST);
+  if (!available) {
+    return { id: "", error: "The requested Toolkit template is not available in this Designer." };
+  }
+  return { id: INITIAL_TEMPLATE_REQUEST, error: "" };
+}
+
 function auditControlSnapshot(id) {
   const control = $(id);
   return {
@@ -2791,15 +2839,24 @@ function exposeDashboardAuditHook() {
 
 async function loadStaticState(fallbackError = null) {
   staticModeReason = fallbackError?.message || "";
-  const selected = state?.selected_template && state.selected_template !== CUSTOM_TEMPLATE_ID
+  const templates = await loadStaticTemplates();
+  const request = pendingInitialTemplateRequest(templates);
+  if (request.error) initialTemplateRequestHandled = true;
+  const selected = request.id || (state?.selected_template && state.selected_template !== CUSTOM_TEMPLATE_ID
     ? state.selected_template
-    : DEFAULT_STUDY_TEMPLATE_ID;
+    : DEFAULT_STUDY_TEMPLATE_ID);
   state = await staticStateForTemplate(selected);
+  if (request.id) initialTemplateRequestHandled = true;
   staticModeActive = true;
   setConnectionStatus(false, "static profile");
   renderAll();
   updateViewer();
-  showToast("Loaded committed preload assets from GitHub. Start the local companion for local generation or runner launch.");
+  showToast(
+    request.error
+      || (request.id
+        ? "Opened the paper's Toolkit template in Experiment Designer."
+        : "Loaded committed preload assets from GitHub. Start the local companion for local generation or runner launch.")
+  );
   return true;
 }
 
@@ -2850,10 +2907,22 @@ async function loadState(options = {}) {
     state = await api("/api/state", { skipStaticGuard: true });
     staticModeActive = false;
     staticModeReason = "";
+    const request = pendingInitialTemplateRequest(state.templates || []);
+    if (request.error) {
+      initialTemplateRequestHandled = true;
+    } else if (request.id) {
+      const alreadySelected = state.selected_template === request.id && state.design?.study_profile_id === request.id;
+      if (!alreadySelected) {
+        state = await api(`/api/templates/${encodeURIComponent(request.id)}/load`, { method: "POST" });
+      }
+      initialTemplateRequestHandled = true;
+    }
     await applyStaticProfileInspectionPreview();
     if (resetMode) resetEditMode();
     renderAll();
     updateViewer();
+    if (request.error) showToast(request.error);
+    if (request.id) showToast("Opened the paper's Toolkit template in Experiment Designer.");
   } catch (error) {
     try {
       if (resetMode) resetEditMode();
@@ -3017,6 +3086,7 @@ function setActivePage(page, options = {}) {
     panel.hidden = panel.dataset.pagePanel !== nextPage;
     panel.classList.toggle("active", panel.dataset.pagePanel === nextPage);
   }
+  if (nextPage === "documentation") refreshDocumentationTypography();
   syncRailForPage(nextPage);
   if (!options.preserveMobileDisclosures) closeMobileRailDisclosures();
   if (options.updateHash) {
@@ -3314,7 +3384,54 @@ function renderDataAcquisitionBridge() {
 }
 
 function renderStimulus() {
-  const controls = state.trajectory_controls || {};
+  const inventory = ingredientInventoryEntries();
+  if (selectedIngredientLabel && !inventory.some((entry) => entry.label === selectedIngredientLabel)) {
+    selectedIngredientLabel = "";
+    ingredientEditorMode = "idle";
+    ingredientEditorDirty = false;
+    pendingBakeRecipe = null;
+  }
+  if (!selectedIngredientLabel && !pendingBakeRecipe && inventory.length) {
+    hydrateIngredientEditor(inventory[0], { preserveMode: false });
+  } else if (!pendingBakeRecipe || !ingredientEditorDirty) {
+    const selected = ingredientEntryForLabel(selectedIngredientLabel);
+    if (selected) hydrateIngredientEditor(selected, { preserveMode: true });
+    else applyTrajectoryControls(state.trajectory_controls || {});
+  }
+  syncPreviewModeControls($("preview-mode").value || "2d");
+  renderLoudnessControls();
+  renderGeneratedNoiseSelect();
+  renderNoiseTable();
+  renderAudioTable();
+  renderBakePanel();
+  refreshAssemblyTargetOptions();
+  renderSourceCounts();
+}
+
+function ingredientInventoryEntries() {
+  const entries = [];
+  for (const source of state?.design?.noises || []) {
+    entries.push({ label: sourceCardLabelFromSpec(source, "Generated noise"), kind: "generated_noise", source });
+  }
+  for (const source of state?.design?.custom_looming_files || []) {
+    entries.push({
+      label: sourceCardLabelFromSpec(source, "Custom looming tone"),
+      kind: "imported_audio",
+      source,
+    });
+  }
+  for (const source of state?.design?.prestimulus_files || []) {
+    entries.push({ label: sourceCardLabelFromSpec(source, "Custom audio clip"), kind: "fixed_audio", source });
+  }
+  return entries;
+}
+
+function ingredientEntryForLabel(label) {
+  const key = normalizeSourceKey(label);
+  return ingredientInventoryEntries().find((entry) => normalizeSourceKey(entry.label) === key) || null;
+}
+
+function applyTrajectoryControls(controls = {}) {
   $("start-distance").value = controls.start_distance_cm ?? 110;
   $("end-distance").value = controls.end_distance_cm ?? 10;
   $("start-rotation").value = controls.start_rotation_deg ?? 0;
@@ -3322,14 +3439,68 @@ function renderStimulus() {
   $("movement-duration").value = controls.movement_duration_s ?? 3;
   $("start-hold").value = controls.start_hold_s ?? 0.5;
   $("end-hold").value = controls.end_hold_s ?? 0.5;
-  syncPreviewModeControls($("preview-mode").value || "2d");
-  renderLoudnessControls();
-  renderGeneratedNoiseSelect();
-  renderBakePanel();
+}
+
+function recipeForIngredientEntry(entry) {
+  if (!entry) return null;
+  const source = clone(entry.source || {});
+  if (entry.kind === "generated_noise") {
+    return {
+      kind: "generated_noise",
+      action: "remake",
+      original_label: entry.label,
+      label: entry.label,
+      noise_type: source.noise_type || "pink",
+      gain: Number(source.gain || 1),
+      source_profile: source.source_profile || GOLD_STANDARD_SOURCE_PROFILE,
+      source_profile_parameters: source.source_profile_parameters || {},
+      loudness_policy: collectLoudnessPolicy(),
+    };
+  }
+  return {
+    kind: entry.kind === "fixed_audio" ? "fixed_audio" : "imported_audio",
+    action: "remake",
+    original_label: entry.label,
+    render_mode: entry.kind === "fixed_audio" ? "preserve" : "spatialize",
+    label: entry.label,
+    audio: source,
+    gain: Number(source.gain || 1),
+    display_color_hex: displayColorForSource(source),
+    loudness_policy: collectLoudnessPolicy(),
+  };
+}
+
+function hydrateIngredientEditor(entry, { preserveMode = false } = {}) {
+  if (!entry) return;
+  selectedIngredientLabel = entry.label;
+  ingredientEditorMode = preserveMode && ingredientEditorMode === "remake" ? "remake" : (editModeActive ? "remake" : "inspect");
+  ingredientEditorDirty = false;
+  pendingBakeRecipe = recipeForIngredientEntry(entry);
+  const snapshot = entry.source?.trajectory_snapshot || {};
+  applyTrajectoryControls(entry.kind === "fixed_audio" ? (state.trajectory_controls || {}) : { ...(state.trajectory_controls || {}), ...snapshot });
+  const color = displayColorForSource(entry.source, entry.kind === "fixed_audio" ? "prestimulus" : "custom_audio");
+  pendingDisplayColorHex = color;
+  $("bake-label").value = entry.label;
+  if ($("fixed-audio-duration")) {
+    $("fixed-audio-duration").value = Number(entry.source?.target_duration_s || entry.source?.duration_s || 4);
+  }
+}
+
+function confirmDiscardIngredientDraft(actionLabel = "continue") {
+  if (!ingredientEditorDirty) return true;
+  return window.confirm(`Discard the uncommitted Segment 1 ingredient draft and ${actionLabel}?`);
+}
+
+function selectIngredient(label, { force = false } = {}) {
+  const entry = ingredientEntryForLabel(label);
+  if (!entry) return false;
+  if (!force && !confirmDiscardIngredientDraft(`inspect “${entry.label}”`)) return false;
+  hydrateIngredientEditor(entry);
   renderNoiseTable();
   renderAudioTable();
-  refreshAssemblyTargetOptions();
-  renderSourceCounts();
+  renderBakePanel();
+  updateViewer();
+  return true;
 }
 
 function dbToLinear(db) {
@@ -3382,7 +3553,7 @@ function savedLoudnessPolicy() {
   return normalizeLoudnessPolicy(params.loudness_policy || {});
 }
 
-function collectLoudnessPolicy() {
+function collectLoudnessPolicy(trajectoryControls = currentTrajectoryControls()) {
   const saved = savedLoudnessPolicy();
   const policy = normalizeLoudnessPolicy({
     ...saved,
@@ -3391,7 +3562,7 @@ function collectLoudnessPolicy() {
     instruction_offset_db: Number($("instruction-offset-db")?.value || saved.instruction_offset_db),
     estimated_full_scale_spl_db: Number($("estimated-full-scale-spl")?.value || saved.estimated_full_scale_spl_db),
     audio_peak_ceiling_dbfs: Number($("audio-peak-ceiling-dbfs")?.value || saved.audio_peak_ceiling_dbfs)
-  }, currentTrajectoryControls());
+  }, trajectoryControls);
   return policy;
 }
 
@@ -3464,31 +3635,66 @@ function renderBakePanel() {
   for (const noiseButton of document.querySelectorAll(".noise-type-button")) {
     noiseButton.disabled = controlsLocked;
   }
+  $("new-ingredient").disabled = controlsLocked;
+  $("import-audio-spatialize").disabled = controlsLocked;
+  $("import-audio-preserve").disabled = controlsLocked;
   if (!pendingBakeRecipe) {
-    status.textContent = "No source staged";
+    status.textContent = "Choose a stimulus type";
     status.className = "status-label required";
     button.disabled = true;
+    button.textContent = "Create Stimulus";
+    $("ingredient-editor-mode").textContent = "New ingredient";
+    $("manual-audio-settings").hidden = true;
+    $("trajectory-settings").hidden = false;
+    $("fixed-clip-trajectory-note").hidden = true;
     const sourceModeControl = $("generated-source-mode-control");
     if (sourceModeControl) sourceModeControl.hidden = true;
+    for (const card of document.querySelectorAll("[data-source-kind-card]")) card.classList.remove("active");
     return;
   }
   const label = pendingBakeRecipe.label || pendingBakeRecipe.audio?.label || noiseTypeLabel(pendingBakeRecipe.noise_type);
-  $("bake-label").value = label || "";
+  if (document.activeElement !== $("bake-label") && !ingredientEditorDirty) $("bake-label").value = label || "";
   if ($("bake-gain")) $("bake-gain").value = 1;
   pendingBakeRecipe.loudness_policy = collectLoudnessPolicy();
+  const isGenerated = pendingBakeRecipe.kind === "generated_noise";
+  const isFixed = pendingBakeRecipe.kind === "fixed_audio" || pendingBakeRecipe.render_mode === "preserve";
+  const isManual = !isGenerated;
   const sourceModeControl = $("generated-source-mode-control");
   if (sourceModeControl) {
-    const isGenerated = pendingBakeRecipe.kind === "generated_noise";
     sourceModeControl.hidden = !isGenerated;
     if (isGenerated) {
       pendingBakeRecipe.source_profile = pendingBakeRecipe.source_profile || GOLD_STANDARD_SOURCE_PROFILE;
       setGeneratedSourceProfileControl(pendingBakeRecipe.source_profile);
     }
   }
-  const kind = pendingBakeRecipe.kind === "imported_audio" ? audioRoleTitle(pendingBakeRecipe.render_mode) : `${noiseTypeLabel(pendingBakeRecipe.noise_type)} noise`;
-  status.textContent = `Staged: ${kind}`;
-  status.className = "status-label ready";
-  button.disabled = controlsLocked;
+  $("manual-audio-settings").hidden = !isManual;
+  $("fixed-audio-duration-field").hidden = !isFixed;
+  $("trajectory-settings").hidden = isFixed;
+  $("fixed-clip-trajectory-note").hidden = !isFixed;
+  $("choose-editor-audio").textContent = pendingBakeRecipe.audio?.source_input_path || pendingBakeRecipe.audio?.path ? "Replace Audio File" : "Choose Audio File";
+  const sourcePath = pendingBakeRecipe.audio?.source_input_path || pendingBakeRecipe.audio?.path || "";
+  $("selected-audio-file-status").textContent = sourcePath ? sourcePath.split(/[\\/]/).pop() : "No audio selected";
+  const displayColor = normalizeDisplayColorHex(pendingBakeRecipe.display_color_hex || pendingBakeRecipe.audio?.display_color_hex) || pendingDisplayColorHex;
+  pendingDisplayColorHex = normalizeDisplayColorHex(displayColor, "#1C7A86");
+  $("manual-audio-color-value").textContent = pendingDisplayColorHex;
+  $("manual-audio-color-swatch").style.background = pendingDisplayColorHex;
+  const kind = isGenerated ? `${noiseTypeLabel(pendingBakeRecipe.noise_type)} noise` : (isFixed ? "Custom audio clip" : "Custom looming tone");
+  const remake = pendingBakeRecipe.action === "remake";
+  $("ingredient-editor-mode").textContent = remake ? `Selected · ${kind}` : `New · ${kind}`;
+  button.textContent = remake ? (isFixed ? "Update Clip" : "Remake Stimulus") : (isFixed ? "Create Clip" : "Create Stimulus");
+  const hasName = Boolean($("bake-label").value.trim());
+  const hasAudio = !isManual || Boolean(sourcePath);
+  status.textContent = !hasName ? "Stimulus name is required" : !hasAudio ? "Choose an audio file" : `${remake ? "Ready to remake" : "Ready to create"}: ${kind}`;
+  status.className = `status-label ${hasName && hasAudio ? "ready" : "required"}`;
+  button.disabled = controlsLocked || !hasName || !hasAudio;
+  const activeSourceKind = pendingBakeRecipe.kind === "fixed_audio"
+    ? "fixed_clip"
+    : pendingBakeRecipe.kind === "imported_audio"
+      ? "custom_looming"
+      : pendingBakeRecipe.kind;
+  for (const card of document.querySelectorAll("[data-source-kind-card]")) {
+    card.classList.toggle("active", card.dataset.sourceKindCard === activeSourceKind);
+  }
 }
 
 function renderNoiseTable() {
@@ -3501,13 +3707,18 @@ function renderNoiseTable() {
     const wav = renderedWavForLabel(noise.label || `${noiseTypeLabel(selectedNoise)} noise`);
     const localPath = noise.prebaked_path || wav?.path || "";
     const card = document.createElement("div");
-    card.className = "source-card noise-source-card";
+    card.className = `source-card stimulus-inventory-card noise-source-card${normalizeSourceKey(selectedIngredientLabel) === normalizeSourceKey(noise.label) ? " selected" : ""}`;
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-pressed", String(normalizeSourceKey(selectedIngredientLabel) === normalizeSourceKey(noise.label)));
+    card.dataset.selectIngredient = noise.label || "";
     card.dataset.sourceLabel = sourceCardLabelFromSpec(noise, "Generated noise");
     applySourceCardColor(card, selectedNoise);
     card.innerHTML = `
       <div class="source-card-heading">
-        <strong>${escapeHtml(noiseTypeLabel(selectedNoise))} noise</strong>
+        <strong>${escapeHtml(noise.label || `${noiseTypeLabel(selectedNoise)} noise`)}</strong>
         <div class="source-card-actions">
+          <button class="stimulus-card-audio-button" type="button" data-preview-source-label="${escapeAttr(noise.label || "")}" aria-label="Play or stop ${escapeAttr(noise.label || "stimulus")}">&#128266;</button>
           ${sourceFolderAction(localPath, noise.label || `${noiseTypeLabel(selectedNoise)} noise`)}
           <button type="button" data-remove-noise>Remove</button>
         </div>
@@ -3518,31 +3729,19 @@ function renderNoiseTable() {
       <input data-field="motion_mode" type="hidden" value="${escapeAttr(noise.motion_mode || "looming")}">
       <input data-field="source_profile" type="hidden" value="${escapeAttr(sourceProfile)}">
       <input data-field="source_profile_parameters" type="hidden" value="${escapeAttr(JSON.stringify(noise.source_profile_parameters || {}))}">
-      <div class="source-card-meta">
-        <span class="source-mode-chip">${escapeHtml(sourceProfileLabel)}</span>
-      </div>
-      <div class="source-card-fields">
-        <div class="field-row">
-          <label>Label</label>
-          <input data-field="label" value="${escapeAttr(noise.label || "")}">
-        </div>
-        <div class="field-row">
-          <label>Noise color</label>
-          <select data-field="noise_type">
-          ${PROCEDURAL_NOISE_TYPES.map((item) => `<option value="${item.value}" ${item.value === selectedNoise ? "selected" : ""}>${item.label}</option>`).join("")}
-          </select>
-        </div>
-        <div class="field-row">
-          <label>Azimuth</label>
-          <input data-field="azimuth_deg" type="number" step="1" value="${Number(noise.azimuth_deg || 0)}">
-        </div>
-        <div class="field-row">
-          <label>Elevation</label>
-          <input data-field="elevation_deg" type="number" step="1" value="${Number(noise.elevation_deg || 0)}">
-        </div>
+      <div class="source-card-meta"><span class="source-mode-chip">${escapeHtml(noiseTypeLabel(selectedNoise))} noise</span><span class="source-mode-chip">${escapeHtml(sourceProfileLabel)}</span></div>
+      <p class="stimulus-card-summary">${escapeHtml(compactTrajectorySummary(noise.trajectory_snapshot))}</p>
+      <div class="stimulus-card-hidden-fields">
+        <input data-field="label" value="${escapeAttr(noise.label || "")}">
+        <input data-field="noise_type" value="${escapeAttr(selectedNoise)}">
+        <input data-field="azimuth_deg" value="${Number(noise.azimuth_deg || 0)}">
+        <input data-field="elevation_deg" value="${Number(noise.elevation_deg || 0)}">
       </div>
     `;
     list.appendChild(card);
+  }
+  for (const audio of state.design.custom_looming_files || []) {
+    list.appendChild(renderAudioInventoryCard(audio, "spatialize"));
   }
 }
 
@@ -3551,77 +3750,59 @@ function renderAudioTable() {
   const snippetList = $("snippet-list");
   list.innerHTML = "";
   snippetList.innerHTML = "";
-  const customFiles = state.design.custom_looming_files || [];
-  const snippets = state.design.prestimulus_files || [];
-  const rows = [
-    ...customFiles.map((item) => ({
-      ...item,
-      audio_role: item.render_mode || "preserve",
-      target_list: list,
-    })),
-    ...snippets.map((item) => ({
-      ...item,
-      audio_role: "prestimulus",
-      target_list: list,
-    }))
-  ];
-  for (const audio of rows) {
-    const role = String(audio.audio_role || audio.use || audio.render_mode || "preserve").toLowerCase();
-    const phase = audio.phase || "";
-    const colorKey = role === "prestimulus" ? "prestimulus" : (audio.tone_type || audio.noise_type || "custom_audio");
-    const motionMode = String(audio.motion_mode || (role === "prestimulus" ? "stationary" : "looming")).toLowerCase();
-    const card = document.createElement("div");
-    card.className = "source-card audio-source-card";
-    card.dataset.audioRole = role;
-    card.dataset.sourceLabel = sourceCardLabelFromSpec(audio, audioRoleTitle(role));
-    applySourceCardColor(card, colorKey);
-    card.innerHTML = `
-      <div class="source-card-heading">
-        <strong>${escapeHtml(audioRoleTitle(role))}</strong>
-        <div class="source-card-actions">
-          ${sourceFolderAction(audio.path, audio.label || audioRoleTitle(role))}
-          <button type="button" data-remove-audio>Remove</button>
-        </div>
+  for (const audio of state.design.prestimulus_files || []) list.appendChild(renderAudioInventoryCard(audio, "prestimulus"));
+}
+
+function compactTrajectorySummary(snapshot = {}) {
+  if (!snapshot || snapshot.start_distance_cm === undefined) return "Trajectory saved with source";
+  const duration = Number(snapshot.movement_duration_s || 0);
+  return `${Number(snapshot.start_distance_cm)} → ${Number(snapshot.end_distance_cm)} cm · ${Number(snapshot.start_rotation_deg || 0)}° → ${Number(snapshot.end_rotation_deg || 0)}° · ${duration.toFixed(1)} s`;
+}
+
+function renderAudioInventoryCard(audio, role) {
+  const fixed = role === "prestimulus";
+  const color = displayColorForSource(audio, fixed ? "prestimulus" : "custom_audio");
+  const motionMode = fixed ? "stationary" : "looming";
+  const label = sourceCardLabelFromSpec(audio, fixed ? "Custom audio clip" : "Custom looming tone");
+  const phase = audio.phase || "";
+  const card = document.createElement("div");
+  card.className = `source-card stimulus-inventory-card audio-source-card${normalizeSourceKey(selectedIngredientLabel) === normalizeSourceKey(label) ? " selected" : ""}`;
+  card.dataset.audioRole = role;
+  card.dataset.sourceLabel = label;
+  card.dataset.selectIngredient = label;
+  card.tabIndex = 0;
+  card.setAttribute("role", "button");
+  card.setAttribute("aria-pressed", String(normalizeSourceKey(selectedIngredientLabel) === normalizeSourceKey(label)));
+  applySourceCardColor(card, color);
+  card.innerHTML = `
+    <div class="source-card-heading">
+      <strong>${escapeHtml(label)}</strong>
+      <div class="source-card-actions">
+        <button class="stimulus-card-audio-button" type="button" data-preview-source-label="${escapeAttr(label)}" aria-label="Play or stop ${escapeAttr(label)}">&#128266;</button>
+        ${sourceFolderAction(audio.path, label)}
+        <button type="button" data-remove-audio>Remove</button>
       </div>
-      ${stimulusTrajectoryHiddenFields(audio, colorKey, role === "prestimulus" ? "fixed_audio" : "imported_audio")}
-      <input data-field="path" type="hidden" value="${escapeAttr(audio.path || "")}">
-      <input data-field="motion_mode" type="hidden" value="${escapeAttr(motionMode)}">
-      ${role === "prestimulus" ? `<input data-field="audio_role" type="hidden" value="prestimulus">` : ""}
-      ${role === "prestimulus" ? `<input data-field="tone_type" type="hidden" value="${escapeAttr(colorKey)}">` : ""}
-      <input data-field="placement" type="hidden" value="before">
-      <input data-field="target_source_label" type="hidden" value="">
-      <input data-field="phase" type="hidden" value="${escapeAttr(phase)}">
-      <input data-field="gap_s" type="hidden" value="0">
-      <input data-field="gain" type="hidden" value="${Number(audio.gain || 1)}">
-      <div class="source-card-fields audio-source-fields">
-        ${role === "prestimulus" ? "" : `
-        <div class="field-row">
-          <label>Source handling</label>
-          <select data-field="audio_role">
-            ${IMPORTED_AUDIO_HANDLING.map((item) => `<option value="${item.value}" ${item.value === role ? "selected" : ""}>${item.label}</option>`).join("")}
-          </select>
-        </div>
-        `}
-        ${role === "prestimulus" ? "" : `
-        <div class="field-row source-color-field">
-          <label>Box color</label>
-          <select data-field="tone_type">
-            ${sourceColorOptions(colorKey)}
-          </select>
-        </div>
-        `}
-        <div class="field-row">
-          <label>Label</label>
-          <input data-field="label" value="${escapeAttr(audio.label || "")}">
-        </div>
-        <div class="field-row">
-          <label>Target s</label>
-          <input data-field="target_duration_s" type="number" min="0.1" step="0.1" value="${Number(audio.target_duration_s || 4)}">
-        </div>
-      </div>
-    `;
-    audio.target_list.appendChild(card);
-  }
+    </div>
+    <div class="source-card-meta"><span class="source-mode-chip">${fixed ? "Fixed clip" : "Custom looming tone"}</span><span class="source-mode-chip">${escapeHtml(color)}</span></div>
+    <p class="stimulus-card-summary"><strong>${Number(audio.target_duration_s || audio.duration_s || 4).toFixed(1)} s</strong>${fixed ? " · Preserved audio clip — no trajectory" : ` · ${escapeHtml(compactTrajectorySummary(audio.trajectory_snapshot))}`}</p>
+    ${stimulusTrajectoryHiddenFields(audio, color, fixed ? "fixed_audio" : "imported_audio")}
+    <div class="stimulus-card-hidden-fields">
+      <input data-field="path" value="${escapeAttr(audio.path || "")}">
+      <input data-field="source_input_path" value="${escapeAttr(audio.source_input_path || "")}">
+      <input data-field="display_color_hex" value="${escapeAttr(color)}">
+      <input data-field="motion_mode" value="${escapeAttr(motionMode)}">
+      <input data-field="audio_role" value="${fixed ? "prestimulus" : "spatialize"}">
+      <input data-field="tone_type" value="${escapeAttr(audio.tone_type || "custom_audio")}">
+      <input data-field="placement" value="before">
+      <input data-field="target_source_label" value="">
+      <input data-field="phase" value="${escapeAttr(phase)}">
+      <input data-field="gap_s" value="0">
+      <input data-field="gain" value="${Number(audio.gain || 1)}">
+      <input data-field="label" value="${escapeAttr(label)}">
+      <input data-field="target_duration_s" value="${Number(audio.target_duration_s || audio.duration_s || 4)}">
+    </div>
+  `;
+  return card;
 }
 
 function stimulusTrajectoryHiddenFields(source, colorKey = "custom_audio", sourceKind = "") {
@@ -3690,7 +3871,7 @@ function stimulusInventorySources() {
     ...(state?.design?.custom_looming_files || []).map((source) => ({
       ...source,
       source_kind: "imported_audio",
-      color_key: source.tone_type || source.noise_type || "custom_audio"
+      color_key: source.display_color_hex || source.tone_type || source.noise_type || "custom_audio"
     }))
   ];
 }
@@ -3721,7 +3902,19 @@ function roundedKeyPart(value) {
 }
 
 function sourceColor(key = "custom_audio") {
+  const normalizedHex = normalizeDisplayColorHex(key);
+  if (normalizedHex) return normalizedHex;
   return STIMULUS_TRAJECTORY_COLORS[String(key || "").toLowerCase()] || STIMULUS_TRAJECTORY_COLORS.custom_audio;
+}
+
+function normalizeDisplayColorHex(value, fallback = "") {
+  const raw = String(value || "").trim();
+  if (!/^#[0-9a-f]{6}$/i.test(raw)) return fallback;
+  return raw.toUpperCase();
+}
+
+function displayColorForSource(source = {}, fallbackKey = "custom_audio") {
+  return normalizeDisplayColorHex(source.display_color_hex) || sourceColor(source.tone_type || source.noise_type || fallbackKey);
 }
 
 function sourceColorOptions(selected = "custom_audio") {
@@ -3827,7 +4020,10 @@ function normalizeSourceKey(value) {
 
 function renderSourceCounts() {
   const generated = $("noise-list").querySelectorAll(".noise-source-card").length;
-  const audioCards = [...$("audio-list").querySelectorAll(".audio-source-card")];
+  const audioCards = [
+    ...$("noise-list").querySelectorAll(".audio-source-card"),
+    ...$("audio-list").querySelectorAll(".audio-source-card"),
+  ];
   const snippetCards = [...$("snippet-list").querySelectorAll(".audio-source-card")];
   const imported = audioCards.filter((card) => card.dataset.audioRole !== "prestimulus").length;
   const prestimulus = audioCards.filter((card) => card.dataset.audioRole === "prestimulus").length
@@ -3977,13 +4173,18 @@ function setBlockProgress(current, total, label) {
 
 function renderBlockCsvPreview() {
   const blockInput = $("block-count");
+  const seedInput = $("block-randomization-seed");
   const protocolBlocks = Math.max(1, Math.round(Number(state?.design?.protocol?.blocks || $("blocks")?.value || 1)));
+  const protocolSeed = normalizedRandomizationSeed(state?.design?.protocol?.random_seed, 20250604);
   if (blockInput && document.activeElement !== blockInput) blockInput.value = protocolBlocks;
+  if (seedInput && document.activeElement !== seedInput) seedInput.value = protocolSeed;
   const segment5 = projectSegment("5_block_csv_preview");
   const preview = state.block_csv_preview || {};
   renderBlockPolicySummary(preview);
   const blockAccepted = Boolean(segment5.accepted || preview.accepted);
   if (blockInput) blockInput.disabled = blockAccepted;
+  if (seedInput) seedInput.disabled = blockAccepted;
+  if ($("generate-block-randomization-seed")) $("generate-block-randomization-seed").disabled = blockAccepted;
   if ($("download-block-randomization")) $("download-block-randomization").disabled = !(preview.blocks || []).length;
   if ($("blocks")) $("blocks").value = blockInput?.value || protocolBlocks;
   const job = latestBlockCsvJob();
@@ -4007,6 +4208,18 @@ function renderBlockCsvPreview() {
     return;
   }
   list.innerHTML = blocks.map((block, index) => renderBlockPreviewCard(block, index)).join("");
+}
+
+function normalizedRandomizationSeed(value, fallback = 20250604) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(0, Math.min(2147483647, Math.round(parsed)));
+}
+
+function newRandomizationSeed() {
+  const values = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(values);
+  return values[0] & 0x7fffffff;
 }
 
 function renderBlockPolicySummary(preview = {}) {
@@ -4137,7 +4350,7 @@ function stimulusSourceOptionsFromDom() {
     const label = card.querySelector('[data-field="label"]')?.value || "Generated noise";
     addStimulusSourceOption(options, seen, label);
   }
-  for (const card of $("audio-list").querySelectorAll(".audio-source-card")) {
+  for (const card of $("noise-list").querySelectorAll(".audio-source-card")) {
     const role = card.querySelector('[data-field="audio_role"]')?.value;
     if (role === "prestimulus") continue;
     const label = card.querySelector('[data-field="label"]')?.value || audioRoleTitle(role);
@@ -4316,7 +4529,7 @@ function syncTrialPoolDraftFromState() {
     familyRepetitions,
     folderRepetitions: Object.fromEntries(Object.entries(settings.folder_repetitions || {}).map(([key, value]) => [key, normalizeRepetitionValue(value, defaultRepetitions)])),
     fileRepetitionOverrides: Object.fromEntries(Object.entries(settings.file_repetition_overrides || {}).map(([key, value]) => [key, normalizeRepetitionValue(value, defaultRepetitions)])),
-    fractionalSeed: Number(settings.fractional_seed ?? protocol.random_seed ?? 20250604) || 20250604,
+    fractionalSeed: normalizedRandomizationSeed(settings.fractional_seed ?? protocol.random_seed),
   };
   trialPoolDraftSourceHash = sourceHash;
   trialPoolDraftInitialized = true;
@@ -4391,7 +4604,7 @@ function trialPoolCompositionEstimate() {
     if (!fractionalGroups.has(record.balancingStratum)) fractionalGroups.set(record.balancingStratum, []);
     fractionalGroups.get(record.balancingStratum).push(record);
   }
-  const seed = Number(trialPoolRepetitionDraft.fractionalSeed || state?.design?.protocol?.random_seed || 20250604) || 20250604;
+  const seed = normalizedRandomizationSeed(trialPoolRepetitionDraft.fractionalSeed ?? state?.design?.protocol?.random_seed);
   const strataByParent = new Map();
   for (const [stratum, group] of fractionalGroups.entries()) {
     const parent = group[0]?.balancingParentStratum || stratum;
@@ -5541,7 +5754,10 @@ function stimulusSourceDetailsFromDom() {
       noise_type: card.querySelector('[data-field="noise_type"]')?.value || "pink",
     });
   }
-  for (const card of $("audio-list").querySelectorAll(".audio-source-card")) {
+  for (const card of [
+    ...$("noise-list").querySelectorAll(".audio-source-card"),
+    ...$("audio-list").querySelectorAll(".audio-source-card"),
+  ]) {
     const role = card.querySelector('[data-field="audio_role"]')?.value;
     if (role === "prestimulus") continue;
     const label = card.querySelector('[data-field="label"]')?.value.trim() || audioRoleTitle(role);
@@ -5654,6 +5870,10 @@ async function previewFilmstripRow(button) {
 async function previewSourceLabel(button) {
   const label = button.dataset.previewSourceLabel || "";
   if (!label) return;
+  if (activeSourcePreviewButton === button) {
+    stopActiveSourcePreview();
+    return;
+  }
   state.design.protocol = state.design.protocol || {};
   state.design.protocol.trial_strips = collectTrialStrips();
   const staticAsset = staticModeActive ? staticPreviewAssetForLabel(label) : null;
@@ -6532,9 +6752,11 @@ function renderJob(job) {
   `;
 }
 
-function collectPayload() {
+function collectPayload({ includeIngredientDraft = false } = {}) {
   const design = clone(state.design);
-  const trajectoryControls = currentTrajectoryControls();
+  const trajectoryControls = includeIngredientDraft
+    ? currentTrajectoryControls()
+    : { ...(state.trajectory_controls || currentTrajectoryControls()) };
   design.name = String(state.design?.name || "Untitled PPS design").trim() || "Untitled PPS design";
   design.noises = collectNoises();
   const audio = collectAudioFiles();
@@ -6542,7 +6764,7 @@ function collectPayload() {
   design.prestimulus_files = audio.prestimulus;
   design.study_profile_reference_parameters = {
     ...(design.study_profile_reference_parameters || {}),
-    loudness_policy: collectLoudnessPolicy()
+    loudness_policy: collectLoudnessPolicy(trajectoryControls)
   };
   const trialStrips = collectTrialStrips();
   const legacySpatial = design.protocol?.spatial_values_cm?.length
@@ -6574,11 +6796,13 @@ function collectPayload() {
     baseline_crosses_sequence_variants: design.protocol?.baseline_crosses_sequence_variants !== false,
     distribute_trial_pool_across_blocks: Boolean(design.protocol?.distribute_trial_pool_across_blocks),
     blocks: Math.max(1, Math.round(numberValue("block-count", numberValue("blocks", 1)))),
+    random_seed: normalizedRandomizationSeed($("block-randomization-seed")?.value, normalizedRandomizationSeed(design.protocol?.random_seed)),
     participants: Math.max(1, Math.round(numberValue("participants", 1))),
     trial_strips: trialStrips
   };
   if (design.protocol.participant_order_policy?.algorithm === "seeded_factoradic_cycle.v1") {
     design.protocol.participant_order_policy.preview_count = design.protocol.participants;
+    design.protocol.participant_order_policy.seed = design.protocol.random_seed;
   }
   return {
     participant_id: state.participant_id || (state.custom_workflow?.is_custom ? "" : "P001"),
@@ -6586,7 +6810,7 @@ function collectPayload() {
     trajectory_controls: trajectoryControls,
     run_setup: {
       experiment_structure: currentExperimentStructure(),
-      seed: state.run_sequence_setup?.seed || state.design?.study_profile_reference_parameters?.dashboard_run_setup?.seed || 0,
+      seed: design.protocol.random_seed,
       instruction_profile: collectRunInstructionProfile(),
     }
   };
@@ -6623,6 +6847,7 @@ function collectNoises() {
 function collectAudioFiles() {
   const result = { looming: [], prestimulus: [] };
   const cards = [
+    ...$("noise-list").querySelectorAll(".audio-source-card"),
     ...$("audio-list").querySelectorAll(".audio-source-card"),
     ...$("snippet-list").querySelectorAll(".audio-source-card"),
   ];
@@ -6641,6 +6866,8 @@ function collectAudioFiles() {
       phase: field("phase")?.value.trim() || "",
       gap_s: Math.max(0, Number(field("gap_s")?.value || 0)),
       motion_mode: field("motion_mode")?.value || (role === "prestimulus" ? "stationary" : "looming"),
+      display_color_hex: normalizeDisplayColorHex(field("display_color_hex")?.value) || sourceColor(field("tone_type")?.value || "custom_audio"),
+      source_input_path: field("source_input_path")?.value.trim() || "",
       trajectory_snapshot: readJsonField(field("trajectory_snapshot"))
     };
     if (role === "prestimulus") {
@@ -6681,6 +6908,11 @@ function revealWorkflowStep(stepId) {
 async function continueWorkflowStep(stepId) {
   if (!ensureEditableProject()) return;
   if (workflowSaveInFlight) return;
+  if (stepId === "stimulus" && ingredientEditorDirty) {
+    if (!confirmDiscardIngredientDraft("continue to Trial Sequence Design")) return;
+    discardIngredientEditorDraft();
+    renderBakePanel();
+  }
   const progress = normalizedDesignerProgress();
   if (stepId !== progress.edit_step) {
     showToast(`Save ${stepLabel(progress.edit_step)} first.`);
@@ -6905,9 +7137,59 @@ function trapModalFocus(event) {
   return true;
 }
 
+function renderAudioColorPreview(value) {
+  const normalized = normalizeDisplayColorHex(value);
+  const error = $("audio-color-error");
+  if (!normalized) {
+    if (error) {
+      error.textContent = "Enter a colour as #RRGGBB using six hexadecimal digits.";
+      error.hidden = false;
+    }
+    return false;
+  }
+  if (error) error.hidden = true;
+  $("audio-color-preview").style.background = normalized;
+  $("audio-color-preview-value").textContent = normalized;
+  return true;
+}
+
+function openAudioColorModal() {
+  if (!pendingBakeRecipe || pendingBakeRecipe.kind === "generated_noise") return;
+  audioColorModalReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const color = normalizeDisplayColorHex(pendingDisplayColorHex, "#1C7A86");
+  $("audio-color-native").value = color.toLowerCase();
+  $("audio-color-hex").value = color;
+  renderAudioColorPreview(color);
+  $("audio-color-modal").hidden = false;
+  syncModalEnvironment();
+  window.requestAnimationFrame(() => $("audio-color-native").focus());
+}
+
+function closeAudioColorModal() {
+  $("audio-color-modal").hidden = true;
+  $("audio-color-error").hidden = true;
+  syncModalEnvironment();
+  if (audioColorModalReturnFocus && document.contains(audioColorModalReturnFocus)) audioColorModalReturnFocus.focus();
+  audioColorModalReturnFocus = null;
+}
+
+function applyAudioColorModal() {
+  const normalized = normalizeDisplayColorHex($("audio-color-hex").value);
+  if (!normalized || !renderAudioColorPreview(normalized)) return false;
+  pendingDisplayColorHex = normalized;
+  pendingBakeRecipe.display_color_hex = normalized;
+  if (pendingBakeRecipe.audio) pendingBakeRecipe.audio.display_color_hex = normalized;
+  ingredientEditorDirty = true;
+  renderBakePanel();
+  updateViewer();
+  closeAudioColorModal();
+  return true;
+}
+
 function openSegmentInfoModal(stepId, trigger = null) {
   const info = SEGMENT_INFO[stepId];
   if (!info) return;
+  const showNoiseGuide = stepId === "trials";
   segmentInfoModalReturnFocus = trigger instanceof HTMLElement
     ? trigger
     : (document.activeElement instanceof HTMLElement ? document.activeElement : null);
@@ -6931,6 +7213,8 @@ function openSegmentInfoModal(stepId, trigger = null) {
   const note = $("segment-info-note");
   noteCard.hidden = !info.note;
   note.textContent = info.note || "";
+  $("segment-info-noise-guide").hidden = !showNoiseGuide;
+  document.querySelector(".segment-info-card")?.classList.toggle("noise-guide-active", showNoiseGuide);
   $("segment-info-modal").hidden = false;
   syncModalEnvironment();
   window.setTimeout(() => $("segment-info-modal-close")?.focus(), 0);
@@ -7253,7 +7537,7 @@ async function customizeAsNewProject(name) {
       : {
           schema: "pps-participant-order-policy.v1",
           algorithm: "seeded_factoradic_cycle.v1",
-          seed: Number(state.design.protocol.random_seed || 20250604),
+          seed: normalizedRandomizationSeed(state.design.protocol.random_seed),
           preview_count: Math.max(1, Math.min(100, Number(state.design.protocol.participants || 12))),
         };
     state.selected_template = CUSTOM_TEMPLATE_ID;
@@ -7287,20 +7571,50 @@ async function customizeAsNewProject(name) {
 
 async function startBakeStimulus() {
   if (!ensureEditableProject()) return;
-  if (!confirmDownstreamInvalidation("Baking Segment 1 ingredients", "stimulus")) return;
   const recipe = collectBakeRecipe();
   if (!recipe) {
-    showToast("Choose a source to bake as a Segment 1 ingredient");
+    showToast("Choose a source and enter a stimulus name");
     return;
   }
-  const payload = collectPayload();
+  if (!confirmDownstreamInvalidation(recipe.action === "remake" ? "Remaking a Segment 1 ingredient" : "Creating a Segment 1 ingredient", "stimulus")) return;
+  if (staticModeActive) {
+    if (recipe.kind !== "fixed_audio" || recipe.action === "remake") {
+      showToast(STATIC_COMPANION_REQUIRED_MESSAGE);
+      return;
+    }
+    state.design.prestimulus_files = state.design.prestimulus_files || [];
+    state.design.prestimulus_files.push({
+      ...recipe.audio,
+      label: recipe.label,
+      render_mode: "preserve",
+      motion_mode: "stationary",
+      display_color_hex: recipe.display_color_hex,
+      trajectory_snapshot: {},
+      placement: "before",
+      target_source_label: "",
+      phase: "",
+      gap_s: 0,
+    });
+    await window.PPSDesigner?.drafts?.save(state);
+    selectedIngredientLabel = recipe.label;
+    ingredientEditorDirty = false;
+    ingredientEditorMode = "inspect";
+    pendingBakeRecipe = null;
+    markDesignerSaved();
+    renderAll();
+    updateViewer();
+    showToast("Fixed clip created in this browser draft");
+    return;
+  }
+  const payload = collectPayload({ includeIngredientDraft: true });
   payload.bake_recipe = recipe;
   const job = await api("/api/stimulus/bake", {
     method: "POST",
     body: JSON.stringify(payload)
   });
+  ingredientEditorDirty = false;
   markDesignerSaved();
-  showToast("Ingredient bake started");
+  showToast(recipe.action === "remake" ? "Atomic ingredient remake started" : "Ingredient creation started");
   pollJob(job.job_id);
   await loadState();
 }
@@ -7358,7 +7672,7 @@ function trialPoolBakeRecipe() {
     family_repetitions: { ...trialPoolRepetitionDraft.familyRepetitions },
     folder_repetitions: { ...trialPoolRepetitionDraft.folderRepetitions },
     file_repetition_overrides: { ...trialPoolRepetitionDraft.fileRepetitionOverrides },
-    fractional_seed: Number(trialPoolRepetitionDraft.fractionalSeed || state?.design?.protocol?.random_seed || 20250604) || 20250604,
+    fractional_seed: normalizedRandomizationSeed(trialPoolRepetitionDraft.fractionalSeed ?? state?.design?.protocol?.random_seed),
   };
   if (Object.keys(exactFamilyCounts).length) recipe.exact_family_trial_counts = exactFamilyCounts;
   return recipe;
@@ -7403,7 +7717,9 @@ async function startBakeBlockCsvs() {
     state = await api("/api/block-csv/edit", { method: "POST" });
   }
   const blockCount = Math.max(1, Math.round(numberValue("block-count", numberValue("blocks", 1))));
+  const seed = normalizedRandomizationSeed($("block-randomization-seed")?.value, normalizedRandomizationSeed(state?.design?.protocol?.random_seed));
   if ($("blocks")) $("blocks").value = blockCount;
+  if ($("block-randomization-seed")) $("block-randomization-seed").value = seed;
   const blockButton = $("regenerate-block-csvs");
   if (blockButton) blockButton.disabled = true;
   setBlockProgress(0, blockCount, "regenerating block CSVs");
@@ -7413,7 +7729,7 @@ async function startBakeBlockCsvs() {
       kind: "block_csv_preview",
       label: "5_block_csv_preview",
       block_count: blockCount,
-      seed: Date.now() + Math.floor(Math.random() * 1000000),
+      seed,
     };
     const job = await api("/api/stimulus/bake", {
       method: "POST",
@@ -7797,10 +8113,14 @@ async function pollJob(jobId) {
       activePolls.delete(jobId);
       if (job.status === "succeeded" && (job.kind === "stimulus_bake" || job.kind === "block_csv_preview")) {
         if (!["audiotactile_trial_batch", "trial_sequence_batch", "trial_repetition_pool"].includes(job.result?.source_kind)) {
+          selectedIngredientLabel = String(job.result?.source_label || job.result?.source?.label || selectedIngredientLabel || "");
+          ingredientEditorDirty = false;
+          ingredientEditorMode = "inspect";
           pendingBakeRecipe = null;
           if (job.kind === "stimulus_bake") $("generated-noise-select").value = "";
         }
-        renderBakePanel();
+        if (job.kind === "stimulus_bake") renderStimulus();
+        else renderBakePanel();
         renderBaselineTactileSummary();
         renderBlockCsvPreview();
         renderProtocolSummary();
@@ -7876,6 +8196,8 @@ function trajectoryPayloadFromControls() {
   const sourceTrajectories = sourceTrajectoriesFromDom();
   const sourceRadius = maxSourceTrajectoryRadius(sourceTrajectories);
   const radius = Math.max(0.1, controls.start_distance_cm / 100, controls.end_distance_cm / 100, sourceRadius);
+  const selectedEntry = ingredientEntryForLabel(selectedIngredientLabel);
+  const draftHasTrajectory = Boolean(pendingBakeRecipe && pendingBakeRecipe.kind !== "fixed_audio");
   return {
     ...clone(state.viewer_payload || {}),
     preview_mode: $("preview-mode").value || "2d",
@@ -7886,6 +8208,10 @@ function trajectoryPayloadFromControls() {
     end,
     controls,
     source_trajectories: sourceTrajectories,
+    active_source_label: selectedIngredientLabel,
+    active_source_has_trajectory: selectedIngredientLabel
+      ? Boolean(selectedEntry && selectedEntry.kind !== "fixed_audio")
+      : draftHasTrajectory,
     editable: trajectoryEditingEnabled()
   };
 }
@@ -7906,7 +8232,10 @@ function sourceTrajectoriesFromDom() {
     });
     if (row) rows.push(row);
   }
-  for (const card of $("audio-list").querySelectorAll(".audio-source-card")) {
+  for (const card of [
+    ...$("noise-list").querySelectorAll(".audio-source-card"),
+    ...$("audio-list").querySelectorAll(".audio-source-card"),
+  ]) {
     const field = (name) => card.querySelector(`[data-field="${name}"]`);
     const role = field("audio_role")?.value || "preserve";
     if (role === "prestimulus") continue;
@@ -7916,6 +8245,7 @@ function sourceTrajectoriesFromDom() {
       label,
       sourceKind: "imported_audio",
       toneType,
+      colorHex: field("display_color_hex")?.value || "",
       localPath: field("path")?.value || "",
       snapshot: readJsonField(field("trajectory_snapshot"))
     });
@@ -7924,13 +8254,13 @@ function sourceTrajectoriesFromDom() {
   return rows.length ? rows : clone(state.viewer_payload?.source_trajectories || []);
 }
 
-function sourceTrajectoryRow({ label, sourceKind, toneType, localPath, snapshot }) {
+function sourceTrajectoryRow({ label, sourceKind, toneType, colorHex = "", localPath, snapshot }) {
   if (!snapshot || !snapshot.start || !snapshot.end) return null;
   return {
     label,
     source_kind: sourceKind,
     tone_type: toneType,
-    color_hex: sourceColor(toneType),
+    color_hex: normalizeDisplayColorHex(colorHex) || sourceColor(toneType),
     local_path: localPath,
     trajectory_snapshot: snapshot,
     start: snapshot.start,
@@ -7993,8 +8323,7 @@ function applyTrajectoryControlUpdate(controls) {
     if (controls[key] === undefined) continue;
     $(id).value = formatTrajectoryValue(key, controls[key]);
   }
-  state.trajectory_controls = { ...(state.trajectory_controls || {}), ...currentTrajectoryControls() };
-  markDesignerDirty();
+  ingredientEditorDirty = true;
   updateViewer();
 }
 
@@ -8273,27 +8602,57 @@ function setGeneratedSourceProfileControl(profile) {
 
 function stageGeneratedNoise(noiseType = "pink") {
   const type = PROCEDURAL_NOISE_TYPES.some((item) => item.value === noiseType) ? noiseType : "pink";
+  const remakingSelectedNoise = pendingBakeRecipe?.kind === "generated_noise"
+    && pendingBakeRecipe?.action === "remake"
+    && Boolean(selectedIngredientLabel);
+  if (remakingSelectedNoise) {
+    const changed = pendingBakeRecipe.noise_type !== type;
+    pendingBakeRecipe.noise_type = type;
+    if (changed) ingredientEditorDirty = true;
+    renderBakePanel();
+    renderNoiseTable();
+    updateViewer();
+    if (changed) showToast(`${noiseTypeLabel(type)} noise selected for remake`);
+    return;
+  }
+  if (!confirmDiscardIngredientDraft("start a new generated stimulus")) return;
   const label = `${noiseTypeLabel(type)} noise`;
+  selectedIngredientLabel = "";
+  ingredientEditorMode = "create";
+  ingredientEditorDirty = false;
   pendingBakeRecipe = {
     kind: "generated_noise",
+    action: "create",
+    original_label: "",
     noise_type: type,
     label,
     gain: 1,
     source_profile: selectedGeneratedSourceProfile(),
     loudness_policy: collectLoudnessPolicy()
   };
+  applyTrajectoryControls(state.trajectory_controls || {});
   $("bake-label").value = label;
   renderBakePanel();
+  renderNoiseTable();
+  renderAudioTable();
+  updateViewer();
   showToast(`${noiseTypeLabel(type)} noise staged`);
 }
 
 function stageImportedAudioForBake(audio, renderMode) {
   const mode = renderMode === "spatialize" ? "spatialize" : "preserve";
+  selectedIngredientLabel = "";
+  ingredientEditorMode = "create";
+  ingredientEditorDirty = false;
+  pendingDisplayColorHex = normalizeDisplayColorHex(audio.display_color_hex) || sourceColor(audio.tone_type || "custom_audio");
   pendingBakeRecipe = {
-    kind: "imported_audio",
+    kind: mode === "preserve" ? "fixed_audio" : "imported_audio",
+    action: "create",
+    original_label: "",
     render_mode: mode,
     label: audio.label || audioRoleTitle(mode),
     audio,
+    display_color_hex: pendingDisplayColorHex,
     gain: 1,
     loudness_policy: collectLoudnessPolicy()
   };
@@ -8304,9 +8663,13 @@ function stageImportedAudioForBake(audio, renderMode) {
 function collectBakeRecipe() {
   if (!pendingBakeRecipe) return null;
   const recipe = clone(pendingBakeRecipe);
-  recipe.label = $("bake-label").value.trim() || recipe.label || "Baked stimulus";
+  recipe.label = $("bake-label").value.trim();
+  if (!recipe.label) return null;
   recipe.gain = 1;
   recipe.loudness_policy = collectLoudnessPolicy();
+  recipe.action = recipe.action === "remake" ? "remake" : "create";
+  recipe.original_label = recipe.action === "remake" ? String(recipe.original_label || selectedIngredientLabel || "").trim() : "";
+  recipe.display_color_hex = normalizeDisplayColorHex(pendingDisplayColorHex, "#1C7A86");
   if (recipe.kind === "generated_noise") {
     recipe.source_profile = selectedGeneratedSourceProfile();
     recipe.source_profile_parameters = recipe.source_profile === GOLD_STANDARD_SOURCE_PROFILE
@@ -8317,10 +8680,56 @@ function collectBakeRecipe() {
     recipe.audio = {
       ...recipe.audio,
       label: recipe.label,
-      gain: 1
+      gain: 1,
+      display_color_hex: recipe.display_color_hex,
+      target_duration_s: recipe.kind === "fixed_audio"
+        ? clampNumber(numberValue("fixed-audio-duration", recipe.audio.target_duration_s || 4), 0.1, 3600, 4)
+        : Number(recipe.audio.target_duration_s || currentTrajectoryControls().movement_duration_s),
     };
   }
   return recipe;
+}
+
+function startNewIngredient() {
+  if (!confirmDiscardIngredientDraft("start another ingredient")) return;
+  selectedIngredientLabel = "";
+  ingredientEditorMode = "idle";
+  ingredientEditorDirty = false;
+  pendingBakeRecipe = null;
+  applyTrajectoryControls(state.trajectory_controls || {});
+  $("bake-label").value = "";
+  renderNoiseTable();
+  renderAudioTable();
+  renderBakePanel();
+  updateViewer();
+  $("bake-label").focus();
+}
+
+function stageManualAudioKind(renderMode) {
+  if (!confirmDiscardIngredientDraft(`start a new ${renderMode === "spatialize" ? "custom looming tone" : "fixed clip"}`)) return false;
+  const mode = renderMode === "spatialize" ? "spatialize" : "preserve";
+  selectedIngredientLabel = "";
+  ingredientEditorMode = "create";
+  ingredientEditorDirty = false;
+  pendingDisplayColorHex = "#1C7A86";
+  pendingBakeRecipe = {
+    kind: mode === "preserve" ? "fixed_audio" : "imported_audio",
+    action: "create",
+    original_label: "",
+    render_mode: mode,
+    label: mode === "preserve" ? "Custom audio clip" : "Custom looming tone",
+    audio: null,
+    display_color_hex: pendingDisplayColorHex,
+    gain: 1,
+    loudness_policy: collectLoudnessPolicy(),
+  };
+  applyTrajectoryControls(state.trajectory_controls || {});
+  $("bake-label").value = pendingBakeRecipe.label;
+  renderNoiseTable();
+  renderAudioTable();
+  renderBakePanel();
+  updateViewer();
+  return true;
 }
 
 function addNoiseRow(noiseType = "pink") {
@@ -8387,6 +8796,8 @@ async function importAudioFromPicker() {
       render_mode: "preserve",
       motion_mode: "stationary",
       tone_type: "custom_audio",
+      display_color_hex: pendingDisplayColorHex,
+      source_input_path: `browser-asset:${stored.id}`,
       trajectory_snapshot: {}
     };
     if (pendingInstructionSlot) {
@@ -8396,17 +8807,18 @@ async function importAudioFromPicker() {
       profile.instruction_profile.slots.push({ slot: pendingInstructionSlot, label: audio.label, path: audio.path, browser_asset_id: stored.id });
       state.design.study_profile_reference_parameters.dashboard_run_setup = profile;
       pendingInstructionSlot = "";
-    } else if (pendingAudioImportMode === "prestimulus") {
-      state.design.prestimulus_files = state.design.prestimulus_files || [];
-      state.design.prestimulus_files.push({ ...audio, placement: "before", target_source_label: "", phase: "", gap_s: 0 });
     } else {
-      state.design.custom_looming_files = state.design.custom_looming_files || [];
-      state.design.custom_looming_files.push(audio);
+      const remake = pendingBakeRecipe?.action === "remake";
+      if (remake) {
+        pendingBakeRecipe.audio = { ...audio, label: $("bake-label").value.trim() || audio.label };
+        pendingBakeRecipe.display_color_hex = pendingDisplayColorHex;
+        ingredientEditorDirty = true;
+      } else {
+        stageImportedAudioForBake(audio, "preserve");
+      }
     }
-    await window.PPSDesigner?.drafts?.save(state);
-    markDesignerSaved();
-    renderAll();
-    showToast("Local audio added to this browser only; it was not uploaded");
+    renderBakePanel();
+    showToast("Local audio staged in this browser; create the clip to commit it");
     return;
   }
   const contentBase64 = await fileToBase64(file);
@@ -8439,37 +8851,25 @@ async function importAudioFromPicker() {
       placement: "before",
       target_source_label: "",
       phase: "",
-      gap_s: 0
+      gap_s: 0,
+      display_color_hex: pendingDisplayColorHex,
+      stage_only: true
     })
   });
-  if (pendingAudioImportMode === "prestimulus") {
-    state.design.prestimulus_files = state.design.prestimulus_files || [];
-    state.design.prestimulus_files.push({ ...imported.audio, placement: "before", target_source_label: "", phase: "", gap_s: 0 });
-    renderAudioTable();
-    refreshAssemblyTargetOptions();
-    syncFilmstripSourceOptions();
-    renderSourceCounts();
-    showToast("Custom clip imported locally");
-  } else if (pendingAudioImportMode === "preserve") {
-    state.design.custom_looming_files = state.design.custom_looming_files || [];
-    state.design.custom_looming_files.push({
+  if (pendingBakeRecipe?.action === "remake") {
+    pendingBakeRecipe.audio = {
+      ...pendingBakeRecipe.audio,
       ...imported.audio,
-      render_mode: "preserve",
-      motion_mode: "stationary",
-      tone_type: imported.audio.tone_type || "custom_audio",
-      trajectory_snapshot: {}
-    });
-    pendingBakeRecipe = null;
+      label: $("bake-label").value.trim() || imported.audio.label,
+      display_color_hex: pendingDisplayColorHex,
+    };
+    pendingBakeRecipe.display_color_hex = pendingDisplayColorHex;
+    ingredientEditorDirty = true;
     renderBakePanel();
-    renderAudioTable();
-    refreshAssemblyTargetOptions();
-    syncFilmstripSourceOptions();
-    renderSourceCounts();
-    updateViewer();
-    showToast("Custom audio clip imported locally");
+    showToast("Replacement audio staged; use the remake action to commit it");
   } else {
     stageImportedAudioForBake(imported.audio, pendingAudioImportMode);
-    showToast("Audio staged for baking");
+    showToast("Audio staged; use the create action to commit it");
   }
 }
 
@@ -8489,6 +8889,14 @@ function removeSourceCard(button) {
   const card = button.closest(".source-card");
   const removedLabel = sourceCardCurrentLabel(card);
   if (card) card.remove();
+  if (normalizeSourceKey(removedLabel) === normalizeSourceKey(selectedIngredientLabel)) {
+    selectedIngredientLabel = "";
+    ingredientEditorMode = "idle";
+    ingredientEditorDirty = false;
+    pendingBakeRecipe = null;
+    renderBakePanel();
+    updateViewer();
+  }
   if (removedLabel) {
     reconcileTrialStripLabelsWithSourcePool({ [removedLabel]: "" });
   }
@@ -8555,7 +8963,8 @@ function handoffExternalLinkToNative(event) {
   } catch (_err) {
     return;
   }
-  if (!/^(https?|mailto):$/i.test(url.protocol) || url.origin === window.location.origin) return;
+  const designerTemplateLink = link.hasAttribute("data-open-designer-template");
+  if (!/^(https?|mailto):$/i.test(url.protocol) || (url.origin === window.location.origin && !designerTemplateLink)) return;
   event.preventDefault();
   event.stopImmediatePropagation();
   Promise.resolve(nativeOpener(url.href))
@@ -8692,6 +9101,8 @@ function wireEvents() {
       closeCustomizeModal();
     } else if (!$("save-profile-modal")?.hidden) {
       closeSaveProfileModal();
+    } else if (!$("audio-color-modal")?.hidden) {
+      closeAudioColorModal();
     }
   });
   $("backend-url").addEventListener("keydown", (event) => {
@@ -8704,6 +9115,7 @@ function wireEvents() {
     loadTemplate().catch(reportError);
   });
   $("bake-stimulus").addEventListener("click", () => startBakeStimulus().catch(reportError));
+  $("new-ingredient")?.addEventListener("click", startNewIngredient);
   $("bake-trial-sequences")?.addEventListener("click", () => startBakeTrialSequences().catch(reportError));
   $("bake-trial-files")?.addEventListener("click", () => startBakeTrialFiles().catch(reportError));
   $("bake-trial-pool")?.addEventListener("click", () => startBakeTrialPool().catch(reportError));
@@ -8751,7 +9163,11 @@ function wireEvents() {
     });
   }
   $("bake-label").addEventListener("input", () => {
-    if (pendingBakeRecipe) pendingBakeRecipe.label = $("bake-label").value.trim();
+    if (pendingBakeRecipe) {
+      pendingBakeRecipe.label = $("bake-label").value.trim();
+      ingredientEditorDirty = true;
+      renderBakePanel();
+    }
   });
   for (const input of document.querySelectorAll('input[name="generated-source-mode"]')) {
     input.addEventListener("change", () => {
@@ -8760,6 +9176,7 @@ function wireEvents() {
         if (pendingBakeRecipe.source_profile !== GOLD_STANDARD_SOURCE_PROFILE) {
           pendingBakeRecipe.source_profile_parameters = {};
         }
+        ingredientEditorDirty = true;
         renderBakePanel();
       }
     });
@@ -8770,8 +9187,34 @@ function wireEvents() {
       if (pendingBakeRecipe) pendingBakeRecipe.loudness_policy = collectLoudnessPolicy();
     });
   }
-  $("import-audio-spatialize").addEventListener("click", () => openAudioPicker("spatialize"));
-  $("import-audio-preserve").addEventListener("click", () => openAudioPicker("preserve"));
+  $("import-audio-spatialize").addEventListener("click", () => {
+    if (stageManualAudioKind("spatialize")) openAudioPicker("spatialize");
+  });
+  $("import-audio-preserve").addEventListener("click", () => {
+    if (stageManualAudioKind("preserve")) openAudioPicker("preserve");
+  });
+  $("choose-editor-audio")?.addEventListener("click", () => openAudioPicker(pendingBakeRecipe?.render_mode || "preserve"));
+  $("manual-audio-color")?.addEventListener("click", openAudioColorModal);
+  $("audio-color-native")?.addEventListener("input", () => {
+    const value = normalizeDisplayColorHex($("audio-color-native").value, "#1C7A86");
+    $("audio-color-hex").value = value;
+    renderAudioColorPreview(value);
+  });
+  $("audio-color-hex")?.addEventListener("input", () => renderAudioColorPreview($("audio-color-hex").value));
+  $("audio-color-form")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    applyAudioColorModal();
+  });
+  $("audio-color-cancel")?.addEventListener("click", closeAudioColorModal);
+  $("audio-color-modal-close")?.addEventListener("click", closeAudioColorModal);
+  $("audio-color-modal")?.addEventListener("click", (event) => {
+    if (event.target === $("audio-color-modal")) closeAudioColorModal();
+  });
+  $("fixed-audio-duration")?.addEventListener("input", () => {
+    if (!pendingBakeRecipe) return;
+    ingredientEditorDirty = true;
+    renderBakePanel();
+  });
   $("import-audio-prestimulus")?.addEventListener("click", () => openAudioPicker("prestimulus"));
   $("audio-file-input").addEventListener("change", () => importAudioFromPicker().catch(reportError));
   $("soa-values").addEventListener("input", updateFilmstripCounts);
@@ -8800,6 +9243,20 @@ function wireEvents() {
     const blockCount = Math.max(1, Math.round(numberValue("block-count", 1)));
     if ($("blocks")) $("blocks").value = blockCount;
     renderBlockCsvPreview();
+  });
+  $("block-randomization-seed")?.addEventListener("input", () => {
+    const seed = normalizedRandomizationSeed($("block-randomization-seed").value);
+    state.design.protocol.random_seed = seed;
+    renderBlockPolicySummary({});
+    markDesignerDirty();
+  });
+  $("generate-block-randomization-seed")?.addEventListener("click", () => {
+    if (!ensureEditableProject()) return;
+    const seed = newRandomizationSeed();
+    $("block-randomization-seed").value = seed;
+    state.design.protocol.random_seed = seed;
+    renderBlockPolicySummary({});
+    markDesignerDirty();
   });
   $("participants").addEventListener("input", scheduleRunSequencePreview);
   for (const input of document.querySelectorAll('input[name="experiment-structure"]')) {
@@ -8910,6 +9367,7 @@ function wireEvents() {
       updateViewer();
       updateLoudnessDerived();
       if (pendingBakeRecipe) pendingBakeRecipe.loudness_policy = collectLoudnessPolicy();
+      if (pendingBakeRecipe) ingredientEditorDirty = true;
     });
   }
   wireSplitters();
@@ -8948,6 +9406,10 @@ function wireEvents() {
     const frame = $("trajectory-frame");
     if (event.source !== frame.contentWindow) return;
     const data = event.data || {};
+    if (data.type === "pps-source-trajectory-select") {
+      selectIngredient(String(data.source_label || ""));
+      return;
+    }
     if (data.type !== "pps-trajectory-control-change") return;
     // Ignore preview marker drags unless editing is enabled, so the preview is
     // look-only in read-only/locked mode.
@@ -8985,6 +9447,11 @@ function wireEvents() {
       previewSourceLabel(sourcePreviewButton).catch(reportError);
       return;
     }
+    const ingredientCard = event.target.closest?.("[data-select-ingredient]");
+    if (ingredientCard && !event.target.closest("button, a, input, select, textarea")) {
+      selectIngredient(ingredientCard.dataset.selectIngredient || "");
+      return;
+    }
     if (event.target.matches("[data-open-folder]")) {
       openLocalFolder(event.target.dataset.openFolder).catch(reportError);
       return;
@@ -9015,7 +9482,17 @@ function wireEvents() {
     }
     if (structuralMutation) markDesignerDirty();
   });
+  document.addEventListener("keydown", (event) => {
+    const card = event.target.closest?.("[data-select-ingredient]");
+    if (!card || !["Enter", " "].includes(event.key)) return;
+    event.preventDefault();
+    selectIngredient(card.dataset.selectIngredient || "");
+  });
   document.addEventListener("input", (event) => {
+    if (event.target.closest?.(".ingredient-editor") || event.target.closest?.("#trajectory-settings")) {
+      if (pendingBakeRecipe) ingredientEditorDirty = true;
+      return;
+    }
     const card = event.target.closest?.(".source-card");
     if (card && event.target.matches('[data-field="label"]')) {
       refreshAssemblyTargetOptions();
@@ -9029,6 +9506,10 @@ function wireEvents() {
     if (event.target.closest?.("#toolkit-page") && !event.target.matches?.("[data-preview-view-control]")) markDesignerDirty();
   });
   document.addEventListener("change", (event) => {
+    if (event.target.closest?.(".ingredient-editor") || event.target.closest?.("#trajectory-settings")) {
+      if (pendingBakeRecipe) ingredientEditorDirty = true;
+      return;
+    }
     const sourceLabelCard = event.target.closest?.(".source-card");
     if (sourceLabelCard && event.target.matches('[data-field="label"]')) {
       reconcileSourceCardLabel(sourceLabelCard);
@@ -9077,7 +9558,7 @@ function wireEvents() {
     if (event.target.closest?.("#toolkit-page") && !event.target.matches?.("[data-preview-view-control]")) markDesignerDirty();
   });
   window.addEventListener("beforeunload", (event) => {
-    if (!designerDirty) return;
+    if (!designerDirty && !ingredientEditorDirty) return;
     event.preventDefault();
     event.returnValue = "";
   });
@@ -9096,6 +9577,7 @@ exposeDashboardAuditHook();
 initializeBoundedSelects();
 wireEvents();
 initializePageTabs();
+initializeDocumentationTypography();
 initializeLazySurfaces();
 initializePublicationNetworkSurface();
 window.PPSDesignerApp = Object.freeze({
@@ -9111,7 +9593,7 @@ window.PPSDesignerApp = Object.freeze({
     updateViewer();
     return true;
   },
-  isDirty: () => designerDirty,
+  isDirty: () => designerDirty || ingredientEditorDirty,
   markSaved: markDesignerSaved,
 });
 

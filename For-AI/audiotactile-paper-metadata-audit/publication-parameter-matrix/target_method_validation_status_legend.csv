@@ -1,0 +1,35 @@
+legend_type,status,meaning,manual_action
+atomic_review_status,composite_parent_atomic_unreviewed,"The only available audit record combines multiple experiments, so no parent value is experiment-specific.",Disaggregate the source record by experiment before accepting any atomic value.
+atomic_review_status,parent_reported_atomic_unreviewed,"A coarse audit parent is reported, but this target method/validation leaf has not been separately verified.",Disaggregate the parent evidence and enter the atomic value.
+atomic_review_status,parent_reported_absent_atomic_unreviewed,A coarse parent is explicitly absent; applicability/absence of this individual leaf still needs confirmation.,Verify which leaves are absent versus not applicable.
+atomic_review_status,parent_caveated_atomic_unreviewed,The coarse parent is reported with a caveat.,Recover the leaf and preserve/resolve the caveat.
+atomic_review_status,parent_toolkit_distribution_atomic_unreviewed,The parent is represented with a Toolkit distribution rather than one source-exact value.,Verify the target-leaf translation.
+atomic_review_status,parent_conflict_atomic_unreviewed,Tracked sources conflict at the parent level.,Resolve the source conflict before encoding the leaf.
+atomic_review_status,parent_derived_atomic_unreviewed,The parent contains a derived value.,Verify the derivation at this leaf's unit/frame.
+atomic_review_status,parent_lineage_derived_atomic_unreviewed,The parent comes from a cited predecessor protocol.,Verify lineage applicability to this experiment.
+atomic_review_status,parent_low_confidence_atomic_unreviewed,Only an automated/weak parent candidate exists.,Inspect the primary source and confirm the atomic value.
+atomic_review_status,parent_reviewed_missing,Critical review found the parent unreported.,Inspect lineage or choose/document an explicit default.
+atomic_review_status,parent_not_applicable_atomic_unreviewed,The coarse parent is not applicable.,Confirm applicability for this individual leaf.
+atomic_review_status,source_unavailable,An audit record exists but usable evidence for the parent is absent or not yet extracted.,Acquire/open and review the source.
+atomic_review_status,not_assessed,No exact-DOI audit record joins to this network publication.,Create a publication audit.
+atomic_review_status,not_covered_by_current_audit,The target method/validation leaf has no parent in the current 25-field extraction schema.,Review the new atomic leaf directly from source.
+atomic_review_status,multiple_parent_statuses_atomic_unreviewed,This leaf maps to multiple coarse parents with different states.,Resolve each parent before atomic entry.
+atomic_review_status,mixed,Study instances under the same publication differ.,Use the registered study-instance matrix rather than the aggregate node row.
+current_design_binding,typed_current_input,The target concept has a conservative direct binding to one or more exact current serialized design paths.,Review the exact path values and publication evidence.
+current_design_binding,typed_current_input_with_transform,A current typed input exists but units or representation must be transformed.,Verify the transformation explicitly.
+current_design_binding,composite_over_typed_current_inputs,The target concept spans multiple exact current typed inputs.,Review every mapped path together.
+current_design_binding,partial_or_proxy_current_input,The current typed field represents only part of the target concept or an approximation.,Treat the uncovered portion as an implementation gap.
+current_design_binding,untyped_object_container_only,The value can be stored in an arbitrary object but lacks its own typed serializer field.,Promote it to a typed input when method-defining.
+current_design_binding,derived_not_input,The target value is computed from current inputs rather than entered directly.,Keep source target and computed value in validation evidence.
+current_design_binding,not_in_current_design_serializer,No conservative binding to the current StimulusDesign serializer was established.,Implement a typed input or trace a separate versioned runtime/analysis contract.
+provisional_routing_hint,first_class_gui,Earlier inventory suggested a GUI route; this is unverified until an exact serialized-path binding test exists.,Confirm against the current-input crosswalk and a control-to-serializer test.
+provisional_routing_hint,backend_schema_only,Earlier inventory suggested a backend route; this is unverified until an exact parser/serializer binding exists.,Confirm against the current-input crosswalk.
+provisional_routing_hint,runtime_only,Likely belongs to runtime configuration rather than the current study-design serializer.,Trace the exact runtime input contract.
+provisional_routing_hint,analysis_only,Likely belongs to analysis configuration rather than the current study-design serializer.,Trace the exact analysis input contract.
+provisional_routing_hint,calibration_only,Likely belongs to calibration configuration rather than the current study-design serializer.,Trace the exact calibration input contract.
+provisional_routing_hint,freeform_metadata_only,Likely retained only in an untyped/free-form object.,Promote to a typed input if it is method-defining.
+provisional_routing_hint,derived_materialized,Likely computed/materialized rather than accepted as a primary design input.,Keep as validation evidence unless a real input binding is traced.
+provisional_routing_hint,fixed_policy_not_configurable,Toolkit behavior appears fixed rather than profile-configurable.,Expose a typed policy only when publications differ.
+provisional_routing_hint,proxy_or_substitution,Toolkit may only approximate or substitute the source method.,Document the equivalence boundary and caveat.
+provisional_routing_hint,unsupported_structural_gap,No candidate typed structure was found in the earlier inventory.,"Confirm against the exact crosswalk, then implement and validate."
+provisional_routing_hint,not_assessed,No route has been assessed.,"Trace code, serializer, and production consumers."

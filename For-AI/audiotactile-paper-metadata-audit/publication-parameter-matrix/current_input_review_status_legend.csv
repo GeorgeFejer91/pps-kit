@@ -1,0 +1,21 @@
+current_review_status,meaning,manual_action
+composite_parent_atomic_unreviewed,"The only available audit record combines multiple experiments, so no parent value is experiment-specific.",Disaggregate the source record by experiment before accepting any atomic value.
+parent_reported_atomic_unreviewed,"A coarse audit parent is reported, but this target method/validation leaf has not been separately verified.",Disaggregate the parent evidence and enter the atomic value.
+parent_reported_absent_atomic_unreviewed,A coarse parent is explicitly absent; applicability/absence of this individual leaf still needs confirmation.,Verify which leaves are absent versus not applicable.
+parent_caveated_atomic_unreviewed,The coarse parent is reported with a caveat.,Recover the leaf and preserve/resolve the caveat.
+parent_toolkit_distribution_atomic_unreviewed,The parent is represented with a Toolkit distribution rather than one source-exact value.,Verify the target-leaf translation.
+parent_conflict_atomic_unreviewed,Tracked sources conflict at the parent level.,Resolve the source conflict before encoding the leaf.
+parent_derived_atomic_unreviewed,The parent contains a derived value.,Verify the derivation at this leaf's unit/frame.
+parent_lineage_derived_atomic_unreviewed,The parent comes from a cited predecessor protocol.,Verify lineage applicability to this experiment.
+parent_low_confidence_atomic_unreviewed,Only an automated/weak parent candidate exists.,Inspect the primary source and confirm the atomic value.
+parent_reviewed_missing,Critical review found the parent unreported.,Inspect lineage or choose/document an explicit default.
+parent_not_applicable_atomic_unreviewed,The coarse parent is not applicable.,Confirm applicability for this individual leaf.
+source_unavailable,An audit record exists but usable evidence for the parent is absent or not yet extracted.,Acquire/open and review the source.
+not_assessed,No exact-DOI audit record joins to this network publication.,Create a publication audit.
+not_covered_by_current_audit,The target method/validation leaf has no parent in the current 25-field extraction schema.,Review the new atomic leaf directly from source.
+multiple_parent_statuses_atomic_unreviewed,This leaf maps to multiple coarse parents with different states.,Resolve each parent before atomic entry.
+mixed,Study instances under the same publication differ.,Use the registered study-instance matrix rather than the aggregate node row.
+untyped_object_requires_key_level_review,One current serialized object holds multiple target concepts without typed keys.,Review each mapped target leaf and promote method-defining keys to a versioned typed contract.
+not_covered_by_target_inventory,The current input has no mapping in the proposed scientific target taxonomy.,"Classify it as method-defining or operational, then add a target mapping if needed."
+mapped_only_to_derived_targets,The current input contributes only to computed target values.,Validate the computed value against the publication target rather than entering it twice.
+multiple_target_review_states,Target leaves mapped to this exact current input have different evidence states.,Review each mapped target leaf in the long queue.

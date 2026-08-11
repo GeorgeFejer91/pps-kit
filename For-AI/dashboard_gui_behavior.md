@@ -16,6 +16,12 @@ The applet retains the long Segment 0-6 scroll surface, per-stage headings/actio
 
 All layout and styling changes follow `interface_design_principles.md`: a 4 px base/8 px primary rhythm, shared panel and control geometry, explicit alignment meridians, hierarchy-driven salience, WCAG-aware target/focus/reflow behavior, and iterative screenshot inspection after every visual change.
 
+## Documentation Typography
+
+The opening `What Is Peripersonal Space` section uses `@chenglou/pretext` for bounded text fitting while preserving ordinary semantic HTML, links, selection, and accessibility. After named fonts are ready, the lead is fitted to a six-line desktop budget and the canonical-measure paragraph is fitted against the media column's available height; a width observer recalculates those values without DOM measurement loops. Sizes remain within declared readable minimum/maximum bounds, and any unsupported or failed measurement removes the computed values so CSS typography remains a complete fallback.
+
+The opening media/copy composition must never stretch the embedded video. It preserves a 16:9 frame, uses a labeled figure/caption and a distinct canonical-measure text group, and switches to one column when the section container reaches 780 px or narrower. The documentation canvas may be wider than ordinary prose, but later body copy remains line-length constrained. Packaged/local and hosted/static dashboards use the same compiled module and pinned dependency.
+
 Read-only profile inspection remains fully legible. View mode always restores the complete, unmuted Segment 0-6 overview; no workflow segment is hidden or gray merely because the profile is finished or the draft is being inspected. Do not dim entire read-only panels or repeat the global lock state with per-panel `inherited · read-only` or `finalized · locked` pills: the animated sidebar lock, disabled mutation controls, and pointer-event gating communicate capability while retaining normal content/surface contrast in both themes. Only downstream segments in sequential Edit mode receive the subtle muted treatment. Editable drafts retain per-step review badges because those describe workflow progress rather than profile editability. Themeable application cards and controls use semantic surface/color variables; white backgrounds are reserved for content that inherently needs a white canvas, such as a waveform image.
 
 ## Mobile Phone Layout And Interaction
@@ -30,11 +36,13 @@ Responsive verification covers at least 320 px and 390 px portrait widths, a sho
 
 ## Documentation Publication Network
 
-The Documentation page contains one focused audio–tactile PPS experiment and citation network. It includes only DOI-audited experimental papers with at least one Toolkit-supported, non-adjacent task record; reviews and visual-only or auditory-only adjacent records are excluded. The broad citation snapshot remains provenance and metrics input, not a user-facing filterable corpus.
+The Documentation page contains one focused audio–tactile PPS publication and citation network. Its viewer-facing introduction describes the map as a curated cross-section chosen to convey the main paradigms and design variations that inform PPS Toolkit, not a systematic or exhaustive literature review. Its v3 projection contains 94 non-review publications: 90 manually confirmed by the original audio-tactile corpus audit plus 4 later exact-DOI Toolkit-audit additions. Candidate scope is then gated by a canonical DOI-keyed `https://doi.org/` link confirmed by the dated exact-DOI resolver audit and provider-backed citation metadata; a finite zero count is valid available metadata. Papers missing either requirement are excluded. Toolkit readiness never determines inclusion. The broad 1,712-publication snapshot remains provenance input rather than a user-facing filterable corpus.
 
-The graph is a responsive square in both source/local and compiled/hosted dashboards. Its 64 papers occupy deterministic, collision-separated 8×8 slots. `Citation prominence` is the default: papers with higher source-corpus citation prominence sit nearer the centre, while less prominent papers occupy outward slots. `Publication year` uses the same square slots in chronological row-major order. Node radius may encode a selected metric but must never cause circle overlap; selection uses a separate halo so selecting a paper cannot violate that invariant.
+The graph uses a responsive square surface in both source/local and compiled/hosted dashboards at desktop and phone widths. `Citation topology` is the default deterministic density-preserving force layout: citation neighbours attract, every paper participates in the same repulsion and weak-centering forces, and radius-aware separation prevents overlap. The declared normalized node clearance is `0.015`. The 91-node main component spans most of the map without erasing genuine density differences; the 3 records with no verified within-map link are not forced onto a perimeter. Circle area encodes only normalized incoming citations from other papers in the displayed 94-paper network, using a monotonic log-area scale with radii from `0.009` to `0.024`; external citation totals, broad-corpus counts, PageRank, and prominence do not determine circle size. `Publication year` is the alternative continuous year-anchored layout and remains collision-free.
 
-The default graph is intentionally quiet: citation links appear only for the selected paper. Researchers can show all included links or hide them, search by paper metadata, and switch size metrics. Solid nodes identify the 15 papers with at least one currently runnable Toolkit record; light outlined nodes identify supported paradigms whose audited parameters are incomplete. Selecting a node opens a sibling details panel without changing the graph's aspect ratio and shows title, authors, DOI/source links, abstract availability, source-corpus metrics, included-neighborhood citations, and all in-scope extracted Toolkit task records and parameters. The equivalent paper list and keyboard navigation remain available for accessible inspection.
+The network plot is an inline SVG, not a raster canvas. Nodes, edges, selected-direction arrowheads, selection rings, and year guides use the same semantic `--network-*` CSS variables as the visible legend. A `data-theme` change therefore recolors the page, legend, and every graph mark in the same browser style update without a JavaScript repaint race. Preserve the SVG renderer and its separate semantic publication list when changing graph interaction or styling.
+
+All 750 tracked directed links between eligible publications are always visible: 571 from the frozen multi-source snapshot, 127 non-overlapping links from the exact-DOI OpenAlex overlay captured 2026-08-08, and 52 retained links from the 60-link primary-reference audit after excluding DOI-less endpoints. The compact two-choice topology/year control and the map legend sit directly below the graph/detail workspace; status, size guidance, and Full screen remain above it. There is no paper-search or citation-link control. Selecting a node distinguishes incoming from outgoing citation direction. The map legend has only two implementation states, 15 implemented and 79 not implemented yet; the detail panel preserves the full four-state evidence assessment of 15 runnable, 49 supported but parameter-incomplete, 29 not assessed, and 1 adjacent/scope conflict. Details show title, authors, DOI/source links, abstract provenance or availability caveat, metrics, directional citation neighbours, and every exact-DOI Toolkit record and extracted parameter. When those records declare one or more bundled template IDs, the panel deduplicates them and shows one new-tab Experiment Designer link per template, including incomplete profiles; papers without a declared template omit the link section. The generated Designer URL uses `page=toolkit&template=<template_id>#study-segment`, and the Designer validates and loads that built-in template once in hosted/static or connected-companion mode. The semantic publication list, keyboard navigation, focus return, live status, dark theme, and reduced-motion/mobile behavior remain equivalent accessible inspection paths; citation size and centrality are navigation encodings, never study-quality measures.
 
 ## Segment 0 Profile Chooser
 
@@ -46,9 +54,21 @@ The profile selector and `Start New Custom Design` share an exact control height
 
 DOI and other external HTTP(S)/mailto links remain ordinary new-tab links in hosted mode. In the native desktop applet, the shared frontend intercepts the click and calls the pywebview shell explicitly; Linux prefers `gio open` so registered desktop and Flatpak browsers resolve reliably, with `xdg-open` as a compatibility fallback. Windows uses the shell URL handler and macOS uses `open`, with Python's browser module as the final fallback. The embedded webview must not attempt to navigate to the external page itself.
 
+## Segment 1 Unified Stimulus Workspace
+
+Segment 1 is one merged task surface. Its fixed visual order is stimulus-type selection; a responsive two-column source/settings editor and trajectory viewer; the contextual create/remake action; grouped compact inventory cards; and the existing folder plus `Save & Continue` footer. The source choices are `Generate Looming Noise`, `Custom Looming Tone`, and `Custom Audio Clip`. A `New Ingredient` action starts an isolated draft, names are required at creation, and source-specific controls hide irrelevant geometry for fixed clips. The shared Loudness Contract stays in an advanced disclosure.
+
+Inventory cards are grouped as `Looming / spatialized stimuli` and `Fixed audio clips`. They remain selectable and previewable in View mode, while removal and all other mutation controls are Edit-only. A selected saved item hydrates the workspace for inspection or remake without altering the committed design. Ingredient edits stay in a separate dirty draft and prompt before source/category changes, another new ingredient, View mode, or Segment 2 navigation discards them. Only `Create Stimulus`, `Create Clip`, `Remake Stimulus`, or `Update Clip` commits the draft.
+
+Generated noise colour remains a scientific noise-type decision. Uploaded looming tones and fixed clips use optional uppercase `display_color_hex` values, edited through a viewport-bounded, focus-trapped colour dialog with a native visual picker, validated `#RRGGBB` entry, live swatch, Apply/Cancel, Escape, and opener-focus restoration. Imported files retain an optional backend-managed `source_input_path`; older designs omit both fields safely and derive their display colour from `tone_type`.
+
+Remake is atomic at the local companion boundary: render/import and validate a temporary candidate, then replace the design and ingredient-manifest row, propagate any source rename into Segment 2 labels, and invalidate Segments 2-6. A failed candidate leaves the committed ingredient and downstream artifacts intact. Legacy imported looming sources without a retained dry input permit metadata-only rename/colour changes but require re-upload for trajectory or acoustic changes.
+
 ## Trajectory Preview
 
-The Segment 1 trajectory preview is an embedded Three.js viewer that is lazy-loaded as it approaches the viewport. The right-side preview controls (`2D`, `3D`, view presets, zoom, fit radius, reset) are view-only camera controls and must stay usable in read-only, locked, and hosted/static modes. The left trajectory/source controls remain mutation controls and are gated by View/Edit mode.
+The Segment 1 trajectory preview is an embedded Three.js viewer that is lazy-loaded as it approaches the viewport. The right-side preview controls (`2D`, `3D`, view presets, zoom, fit radius, reset) are view-only camera controls and must stay usable in read-only, locked, and hosted/static modes. Source-owned trajectories remain visible together: the selected trajectory is thicker and opaque, inactive trajectories are muted, arbitrary imported-audio colours use a contrast outline, and coincident paths receive small deterministic offsets. Both 2D and 3D paths are clickable and select their matching inventory card. A fixed-clip selection reports `Preserved audio clip — no trajectory` while leaving the spatialized paths visible but muted.
+
+Path clicks must remain distinguishable from endpoint dragging, 2D pan, and 3D orbit/pan. Viewer-to-card and card-to-viewer selection, camera navigation, and audio preview remain available in View mode; endpoint and form mutation are gated by Edit mode. Saved source trajectories always render from each source's `trajectory_snapshot`; the design-level trajectory is only the initial geometry for a new spatialized draft.
 
 The dashboard must not depend solely on catching the iframe `load` event before it sends preview payloads. If the viewer iframe loads before listeners are attached, `updateViewer()` should detect the viewer API when it becomes available, mark it ready, and push the current payload so online/static previews do not remain stuck on the viewer's initial placeholder 2D scene.
 
@@ -57,6 +77,10 @@ The dashboard must not depend solely on catching the iframe `load` event before 
 Top-level source-card labels are parent decisions for Segment 2 trial-sequence audio boxes. When a source card is removed in Edit mode, that label is pruned immediately from every downstream sequence box before save. When a source-card label changes, existing downstream labels are renamed to the new label. Future label pickers are rebuilt from the current source pool.
 
 The backend also prunes stale custom-design `trial_strips[*].elements[*].source_labels` during save, so direct/API payloads cannot persist labels for deleted sources. Bundled profile preloads remain unchanged and read-only until copied.
+
+## Segment 2 Noise Guide
+
+Segment 2 retains its standard `About` button and shared focus-trapped overlay. Its About view also explains the five generated source colours available from Segment 1: brown, pink, white, blue, and violet. The guide plots their idealized relative power spectral densities on a logarithmic frequency axis, normalized at 1 kHz, and labels the Toolkit renderer's slopes from −6 to +6 dB per octave. It describes audible spectral emphasis and bounded psychophysical associations from Ferri et al. (2015) and Costa and Nese (2020), while explicitly warning that noise colour has no fixed emotional meaning and that loudness, duration, spatialization, playback, calibration, and listener context can change ratings.
 
 ## Study 5 Bundled Profiles
 
@@ -97,6 +121,19 @@ The local companion must also serve the committed public static asset roots at
 `/assets` and `/study_templates`. Connected read-only profile inspection uses
 the same `staticStateForTemplate()` overlay as hosted/static mode, so these
 routes must stay mounted alongside `/dashboard`, `/viewer`, and `/api/*`.
+
+## Final-Segment Randomization Seed
+
+Segments 4-6 use one explicit non-negative 31-bit randomization seed. Segment 5
+shows the persisted seed beside block count, accepts researcher-entered values,
+and offers `New Seed` using the browser cryptographic random source, which works
+without network access. `Generate Blocks` and `Regenerate Blocks` reuse the
+visible value; they must never silently replace it. The seed is saved as
+`protocol.random_seed`, controls Segment 4 fractional balancing and Segment 5
+row-preserving block assignment, and is copied into the Segment 6 participant
+order policy/run manifest. Seed `0` is valid and must not trigger default-value
+fallbacks. The same seed and inputs must produce the same order in hosted/static
+preview JavaScript, the local companion backend, and packaged desktop webviews.
 
 ## Auditory-Only Response Trials
 

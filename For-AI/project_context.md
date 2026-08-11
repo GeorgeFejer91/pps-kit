@@ -43,16 +43,36 @@ Primary users are cognitive neuroscience and psychology researchers who need to 
   `data/publication_network/citation_snapshot.v1.json` is its broad canonical
   public-safe source snapshot,
   `tools/build_publication_network_asset.mjs` deterministically joins it to
-  DOI-matched literature/toolkit audits, and `dashboard/publication_network.v2.json`
-  is the focused `pps-publication-citation-network.v2` browser asset. The browser
-  projection includes a paper when at least one audit record is outside
-  `adjacent_out_of_scope` and the publication is not a review. Its structural
-  layout is square-bounded and collision-separated; browser interaction is
-  read-only and requires no companion API.
+  DOI-matched literature/toolkit audits, and `dashboard/publication_network.v3.json`
+  is the focused `pps-publication-citation-network.v3` browser asset. The
+  projection contains 94 non-review publications: it first applies original
+  manual audio-tactile confirmation or a later exact-DOI audit, then requires a
+  canonical DOI-keyed `https://doi.org/` link confirmed by the dated exact-DOI
+  resolver audit and provider-backed citation metadata. A finite provider count
+  of zero is valid; an unavailable provider
+  record is not. Its 750 links are the union of 571 frozen multi-source snapshot
+  links, 127 non-overlapping links from
+  `openalex_audiotactile_citation_overlay.20260808.json`, and 52 of the 60 links
+  verified in six primary reference lists and tracked in
+  `primary_source_citation_overlay.20260808.json`. The topology and
+  year layouts are deterministic, continuous, radius-aware, collision-free,
+  and rendered on a square plotting surface; the main 91-node component spans
+  the map and 3 unresolved/zero-link records follow the
+  same force rule instead of a perimeter constraint. The normalized
+  edge-to-edge clearance is `0.015`, and circle area is sized only by
+  log-normalized incoming citations from the 94 displayed papers (radii
+  `0.009`–`0.024`). Browser interaction is
+  read-only, accessible, and requires no companion API. Paper details expose
+  deduplicated new-tab links for every declared bundled template ID. Those
+  links use the dashboard's `template=<template_id>` query contract to load the
+  selected built-in profile in Segment 0 through either committed static assets
+  or the existing local companion template endpoint.
+- The Documentation introduction uses the pinned, zero-transitive-dependency `@chenglou/pretext` browser package for bounded text measurement. `documentation_typography.js` keeps semantic DOM rendering intact, applies measured font-size/line-height values only after fonts are ready, observes width changes, and falls back to CSS if measurement is unavailable. The opening video remains a true 16:9 figure and the paired text/media layout collapses by container width.
 - `publication/behavior-research-methods/` is the tracked manuscript-preparation workspace for a planned Springer Nature `Behavior Research Methods` submission about PPS Toolkit. It preserves the official Springer Nature LaTeX author template ZIP and extracted template files, with source URL, download date, and SHA-256 provenance in the workspace README. It also contains `manuscript/`, a Springer `sn-apa` methods/software draft with `main.tex`, `references.bib`, `evidence_matrix.csv`, `gui_control_coverage.csv`, `dashboard_control_recheck_20260630.md`, `claim_boundary_audit.csv`, `brm_comparator_articles.csv`, `brm_recommended_article_models.csv`, `profile_family_examples.csv`, `profile_recreation_audit.csv`, `figure_source_plan.csv`, `figures/generate_figures.py`, generated source-owned figure PNGs, `procedural_gap_register.csv`, `pre_run_qualification_checklist.csv`, `output_schema_dictionary.csv`, `submission_readiness_audit.md`, `render_pdf.ps1`, `render_pdf.cmd`, `latexmkrc`, and a local README. The manuscript argues that PPS Toolkit makes heterogeneous audio-tactile PPS design choices explicit and auditable; it is an evidence-matrix methods paper, not a PRISMA systematic review or effect-size meta-analysis. The current evidence matrix has 44 source-pointer rows covering Segment 0-6 controls, dashboard apply/bake/accept/prepare materialization gates, runner/analysis decisions, loudness policy, response-window/classification rules, and the dashboard view/edit/hosted-preview versus native-acquisition boundary. The accompanying 64-row `gui_control_coverage.csv` audits visible dashboard controls separately, mapping literature-bearing design decisions to matrix rows while classifying tabs, camera controls, folder openers, refresh controls, readiness badge glyphs, and modal mechanics as non-method or operational UI. `dashboard_control_recheck_20260630.md` records a point-in-time source recheck of the current local dashboard source and found no new literature-bearing PPS design control beyond the existing readiness-badge coverage; it is not visual or click-path validation. `claim_boundary_audit.csv` maps major manuscript claims to current evidence, safe phrasing, unsafe phrasing, and the artifact needed before stronger claims are made. `brm_comparator_articles.csv` records same-journal software/toolbox, hosting/sharing, tutorial, sensory-suite, and timing-validation article models used to guide the BRM style. `brm_recommended_article_models.csv` records article-level same-journal recommendations and style-transfer notes for the closest BRM suite, builder, calibration, device-validation, analysis-handoff, embodied-toolkit, and interoperability comparators; the current article-model set now has verified BibTeX keys for direct manuscript citation, while any newly added source-pointer rows still need verification before citation. `profile_family_examples.csv` maps canonical dynamic looming, baseline/expectancy, directional/body-frame, mobile/DynaSpace, affective/ecological, and action/immersive PPS method families to toolkit representations and caveats. `profile_recreation_audit.csv` is the per-profile claim ledger for all current preload profiles, separating local examples, published run-ready profiles, partial materializable scaffolds, missing-parameter blockers, and toolkit structural gaps so exact-recreation language remains conditional. `figure_source_plan.csv` maps recommended figures to source artifacts, generated PNG paths, supported claims, and evidence boundaries; current schematics cover workflow, design-decision mapping, stimulus alternatives, evidence tiers, tactile safeguards, and exploratory analysis, but they are not runtime screenshots or empirical validation plots. `procedural_gap_register.csv` records reviewer-facing procedural gaps that must be closed or caveated before final submission: listening/headphone checks, route-specific timing, tactile delivery, spatial perception, rights/provenance, and analysis governance. `pre_run_qualification_checklist.csv` turns those gaps into a BRM-facing participant/session readiness checklist covering listening eligibility, spatial rendering/perception, route timing, tactile readiness, task/response governance, and profile provenance/rights while preserving the boundary between checklist reporting and actual lab evidence. `output_schema_dictionary.csv` documents the runner's public `1.Data_min` exports, private/rich `2.Data_max` reconstruction mirror, event/marker/XDF files, tactile calibration/top-up/adaptive-threshold artifacts, exploratory analysis outputs, and private metadata sidecars with evidence-role and release-boundary caveats. `render_pdf.ps1` plus `render_pdf.cmd` are the manuscript-local Windows PDF-render path for this PC, while `windows/Render_BRM_Manuscript_PDF.ps1` and `.cmd` are the permanent repo-root PC entry points; both routes set the local Springer template paths, run the manual `pdflatex`/`bibtex`/rerun sequence, and repeat final `pdflatex` passes when labels or citations change because MiKTeX `latexmk.exe` currently lacks Perl. The draft title now names PPS Toolkit as a suite for designing, running, and recreating audio-tactile PPS experiments, with a same-journal comparator table, a tutorial reader-guide table, a practical entry-point table for new-study design, published-profile recreation, profile claim-state audit, and native acquisition, a profile-family table, an output schema/archive-boundary table, a pre-run qualification checklist table, an operator procedure/evidence handoff table, a procedural gap register table, a figure/source-material plan table, and a dedicated archive-layer table separating design archives, profile-recreation archives, validation archives, and deidentified participant archives. `submission_readiness_audit.md` tracks which manuscript goals are source-ready, partially supported, intentionally not claimed, or blocked until final release/hardware/declaration artifacts. Tactile hit-rate decline during pilot use is described only as anecdotal design motivation unless traceable runner artifacts are later added. The Springer template files are third-party author-support materials and are not covered by the PPS Toolkit MIT license grant.
 - The current BRM manuscript self-review loop includes a targeted Consensus spot-check/manuscript-voice pass and a source-owned figure-integration pass. Keep the paper body in present-tense article prose rather than internal planning notes, while preserving evidence boundaries for release metadata, measured SPL, publication-hardware validation, profile recreation, schematic figures, and tactile safeguards.
 - `src/peripersonal_space_toolkit/loudness.py` is the shared Study 5 loudness-policy module. Designs store `study_profile_reference_parameters.loudness_policy`; the HTML dashboard exposes it as the Segment 1 `Loudness Contract`, the renderer uses it to apply linear-dB looming envelopes and final-active-window RMS scaling without hidden peak normalization, and Segment 1-6/session manifests plus standalone `loudness_manifest.json` exports carry the same metadata. The 0.5 s pre/post trajectory holds remain constant at start/endpoint level but are excluded from calibration; the default hardware mapping is an estimated Komplete Audio 6 MK2 max-headphone-output to Sennheiser HD 560S SPL correspondence, not a measured SPL calibration. Replace it with physical coupler/HATS measurement before making publication-grade participant-level SPL claims.
 - The paper metadata audit is now exposed through the read-only package module `peripersonal_space_toolkit.paper_audit` so tests and future profile-scaffolding code can consume tracked paper-audit ledgers without importing the refresh/acquisition CLI. The refresh/acquisition implementation remains under `tools/paper_metadata_parser/`, and raw PDFs, supplements, extracted full text, page images, and local resume ZIPs remain ignored under `artifacts/paper_metadata_audit/`.
+- The publication-to-Toolkit review contract lives under `For-AI/audiotactile-paper-metadata-audit/publication-parameter-matrix/` and is rebuilt by `tools/build_publication_parameter_review_matrix.mjs`. Its primary wide schema is code-derived from `design.py`: 111 exact `design.*` paths accepted by `design_from_dict` and emitted by `design_to_dict`, with arbitrary dictionaries kept atomic and StudyTemplate aliases traced. It preserves the exact 94-node citation-network view and a conservative 121-row study-instance registry; 14 publications with tracked multi-experiment/profile evidence receive contiguous `(a)`, `(b)`, ... suffixes while immutable record/profile IDs stay separate. Unregistered papers remain `experiment_count_not_assessed`, not asserted single experiments. A secondary 281-leaf `target.*` method/validation inventory and exact current-design crosswalk expose typed bindings, transformations/composites, partial proxies, untyped containers, derived-only values, and missing current bindings. It is not the current serializer or a superset: six target leaves are validation/derived candidates and 22 exact current paths have no target relation. Values and evidence stay in long sidecars. The 25-field Segment 1-4 audit remains only a coarse parent layer: 61 target leaves have no audit parent, composite records require experiment-specific disaggregation, only 7 of 24 manual reviews contain orientation ledgers, and all 173 visualization candidates remain unconfirmed. Exact normalized DOI is the only network-to-audit join, with manual JSON overriding automated evidence by exact `record_id`.
 - Validation tiers are documented in `docs/VALIDATION.md` and implemented by `tools/check_all.ps1`. `Quick` is the fresh-clone-safe routine check, `Standard` adds the full tracked pytest suite, and `Deep` is reserved for explicit generated-artifact or hardware/lab-PC checks.
 - `src/peripersonal_space_toolkit/mobile_pps_replication.py` owns the
   behavioral replication check for collected/public derived PPS CSVs. It tests
@@ -80,6 +100,14 @@ Primary users are cognitive neuroscience and psychology researchers who need to 
   continuous_noise`. Segment 1 exposes this as a `Source mode` toggle with
   `Burst train` as the default; the renderer still owns SOFA/FABIAN/3DTI
   spatialization instead of baking binaural cues into the dry source.
+- Segment 1 uses one unified stimulus/trajectory workspace and an isolated
+  ingredient draft. Every spatialized ingredient owns a `trajectory_snapshot`;
+  the top-level trajectory is only the next-new-source default. Imported audio
+  records may carry backward-compatible `display_color_hex` and retained
+  backend-managed `source_input_path` provenance. Create/remake/update is the
+  only ingredient commit boundary, and remakes validate a temporary candidate
+  before atomically replacing the source/manifest row, propagating renames, and
+  invalidating Segments 2-6.
 - Focus Mode `Test Audio` is a pre-run comfort/channel check using the same
   Study 5 burst-train source standard: it plays the pink frontal preload
   `assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Pink_frontal.wav`
@@ -236,15 +264,16 @@ The public repo is a toolkit plus deidentified sample-data package. It is not a 
 
 Public documentation should present the MIT License boundary explicitly: toolkit code and included project materials are MIT-licensed and provided without warranty, while participant outputs, local generated artifacts, third-party assets, vendor software, and external datasets remain outside that license grant unless separate rights are documented.
 
-The v1 publication-network source is a dated broad-coverage discovery corpus;
-the v2 browser asset is its focused projection of 64 experimental audio-tactile
-PPS publications, 68 in-scope task records, and 456 induced citation edges.
-Neither is a systematic review, exhaustive PPS bibliography, study-quality
-score, or effect-size synthesis. Treat centrality as corpus-local. Join Toolkit
-parameters by normalized exact DOI only, exclude reviews and
-`adjacent_out_of_scope` records from the browser projection, and distinguish the
-15 publication nodes with runnable records from the 49 whose supported paradigms
-still have incomplete parameters. Never infer missing study parameters. Public
+The v1 publication-network source is a dated 1,712-node/10,109-edge discovery
+corpus; the v3 browser asset is a 94-publication/750-link non-review audio-
+tactile projection that unions 571 snapshot links with 127 dated OpenAlex
+overlay links and 52 retained primary-reference-audit links. Neither is a systematic review, exhaustive bibliography,
+study-quality score, or effect-size synthesis. The inclusion audits, provider
+metadata, and citation graph are dated and incomplete. Toolkit parameters join
+by normalized exact DOI only; never infer missing values. Preserve the four
+assessment states—15 runnable, 49 supported-incomplete, 29 not-assessed, and 1
+adjacent/scope-conflict—without using them as inclusion gates. Citation-received
+area, force topology, and centrality are navigation encodings only. Public
 abstract text requires recorded redistributable provenance; otherwise expose an
-availability/copyright caveat and a publication link. Raw provider responses,
+availability/copyright caveat and publication link. Raw provider responses,
 PDFs, supplements, and extracted full text remain outside the public asset.

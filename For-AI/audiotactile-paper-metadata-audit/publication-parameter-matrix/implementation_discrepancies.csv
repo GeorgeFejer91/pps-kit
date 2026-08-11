@@ -1,0 +1,13 @@
+discrepancy_id,severity,area,current_state,required_resolution
+D01,critical,Audit granularity,Current extraction schema has 25 composite fields limited to Segments 1-4.,"Use the 281-leaf method/validation gap inventory and evidence sidecar to decide which candidates should become typed inputs; six leaves are validation targets, and the inventory is not a current serializer contract."
+D02,critical,Readiness gate granularity,Current recreation gate has 15 checks through Segment 4; legacy inventory reaches 19 with overlap.,Generate gate status from typed leaves rather than generic profile_gap rows.
+D03,high,Segment 6 participant semantics,Legacy participants is used/named like planned N although current contract defines order-preview count.,Separate target.study.planned_sample_n from target.profile_finalization.order_preview_count.
+D04,high,Participant-order algorithm,"Registry requires seeded_factoradic_cycle.v1; design enum exposes rotation, seeded permutation, and fixed.",Add/version the canonical factoradic policy or reconcile the registry.
+D05,critical,Typed design coverage,"Detailed tactile, response, orientation, speaker switching, visual, and MR inputs often live only in free-form metadata/output rows.","Promote required leaves to typed, validated input schemas."
+D06,high,Untyped dictionaries,"source_profile_parameters, participant_order_policy, and row metadata are untyped dictionaries.",Replace/validate them with versioned structured models.
+D07,high,Loudness GUI coverage,Normalized loudness has 32 leaves but GUI exposes only headline controls.,Expose or deliberately lock every method-defining loudness policy.
+D08,high,Tactile safety/flow documentation,"For-AI module map says 0.5% ceiling and automatic return; code/newer handoff use 0.7%, 1.0% hard guard, and explicit Continue.","Reconcile documentation, code, and qualification protocol before release."
+D09,medium,Data_min count,Manuscript evidence says 17 fields; code/dictionary contain 18.,Regenerate manuscript evidence from the authoritative field dictionary.
+D10,high,Segment folder contract,Legacy preload folders use 01_profile through 05_run_setup while registry defines Segments 0-6.,Version/migrate generated artifact folders and manifests.
+D11,medium,Model-selection criterion,Legacy comparison uses AIC while condition-lens triage uses AICc.,Make the selected criterion an explicit analysis input.
+D12,high,Trajectory elevation,TrajectorySpec has one elevation scalar while publications/output may require separate start/end elevations.,Add typed start/end elevation inputs and migration rules.

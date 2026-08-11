@@ -2,6 +2,39 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-08-11 — merged Segment 1 stimulus and trajectory workspace
+
+- Merge the former Segment 1 trajectory/source and stimulus-selection boxes into one ordered workspace: source type first, contextual settings beside the 2D/3D viewer, explicit create/remake, grouped selectable stimulus pool, and the unchanged folder/`Save & Continue` footer. Segment 2 remains Trial Sequence Design and registry numbering is unchanged.
+- Treat an ingredient edit as an isolated draft. `New Ingredient` begins creation; selection only inspects saved data; and create/remake/update is the sole commit boundary. Discard prompts cover source switches, new drafts, View mode, and Segment 2 navigation. Remakes are temporary-output validated and atomic, propagate renamed source labels, replace manifest provenance, and invalidate Segments 2-6 only after success.
+- Persist every dynamic ingredient's own trajectory snapshot and keep the top-level trajectory as the next-new-source default. Retain managed dry inputs for imported looming-tone remakes. Add backward-compatible `display_color_hex` and `source_input_path` fields for imported audio, normalize manual colours to uppercase six-digit hex, and keep generated colours bound to scientific noise type.
+- Keep the whole spatialized inventory visible in 2D/3D, emphasize the selected path, mute others, offset coincident paths deterministically, outline arbitrary colours for contrast, and make paths select their cards without interfering with drag/pan/orbit. Fixed clips show a no-trajectory status. View mode retains card/path selection, exact-ingredient audio play/stop, and camera inspection while mutation stays locked.
+- Manual looming tones and fixed clips use a focus-trapped colour overlay with a visual picker, validated hex entry, live swatch, Apply/Cancel, Escape, and focus return. The same Segment 1 implementation and cache revision ships in source/local and compiled/hosted dashboards.
+
+## 2026-08-11 — Segment 2 noise-spectrum About guide
+
+- Extend Segment 2's existing `About` overlay with a comparative logarithmic power-spectrum plot and compact explanations for brown, pink, white, blue, and violet generated noise. Keep the spectral definitions aligned with the renderer and normalize the idealized curves at 1 kHz.
+- Present perceptual descriptions as contextual research associations, not inherent emotional effects. The guide links Ferri et al. (2015) and Costa and Nese (2020), distinguishes their task-specific findings, and notes that loudness, duration, motion/spatial filtering, playback/calibration, and listener differences can change ratings.
+
+## 2026-08-11 — viewer-facing citation map and Designer template links
+
+- Present the Documentation citation network as a curated orientation to the
+  main audio–tactile PPS paradigms and design variations represented around PPS
+  Toolkit, explicitly not as a systematic or exhaustive literature review.
+- Keep status, size guidance, and Full screen above the graph. Place the compact
+  topology/year segmented choice and complete map legend directly below the
+  graph/detail workspace, retaining two side-by-side choices on phone layouts.
+- Paper details link every deduplicated declared template ID, including
+  incomplete profiles, to a new Experiment Designer tab. The internal URL uses
+  `page=toolkit&template=<template_id>#study-segment`; hosted/static mode loads
+  committed profile data, while a connected dashboard reuses the existing
+  companion template-load endpoint. Invalid or unavailable IDs leave the
+  current/default profile intact and produce a concise message.
+
+## 2026-08-11 — adaptive documentation typography
+
+- The public Documentation background section now uses the pinned `@chenglou/pretext` layout engine to choose bounded lead and companion-copy sizes from measured text, available width, and the media column's height. The semantic DOM remains the renderer and CSS remains the fallback; Pretext only supplies font-size and line-height values after fonts load and when the section width changes.
+- The opening video/copy row is now a bordered responsive composition with an undistorted 16:9 video, concise caption and measure label, a wider desktop reading canvas, and a single-column flow when the section is 780 px wide or narrower. Packaged/local and GitHub Pages builds share the same implementation and cache token.
+
 ## 2026-08-07 — mobile dashboard design contract
 
 - Apply the interface-design principles to the complete phone workflow, not only the hosted top bar. At 600 px and narrower, page tabs are the sticky first surface; the compact View/Edit state follows; workflow sections and Local Companion are collapsed disclosures by default; ordinary controls have 44 px touch targets; segment headings/actions reflow consistently; action footers become static; and resize handles are disabled at 760 px and narrower. Dense trial/block tables reflow into labeled records without local horizontal scrolling, long block rows use explicit progressive reveal, and read-only views omit mutation-only affordances while retaining previews.
@@ -2014,23 +2047,112 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   mutation controls continue to enforce the boundary. Editable drafts retain
   per-step review badges because those communicate workflow progress.
 
-## 2026-08-07 — Focused experimental audio-tactile publication network
+## 2026-08-11 — Theme-atomic SVG citation network
 
-- The Documentation page now gives the PPS literature map its own segment. It
-  now focuses only on experimental audio-tactile PPS papers whose paradigms are
-  covered by the Toolkit literature audit. Reviews and
-  `adjacent_out_of_scope` records are excluded. The current view contains 64
-  publication nodes, 68 in-scope task records, and 456 induced citation edges.
-- The structural view uses a square-bounded, collision-separated layout for the
-  focused graph; publication-year arrangement remains an optional complementary
-  view. Selecting a node opens an accessible detail drawer rather than navigating
-  away from the Toolkit.
-- The canonical broad source remains `citation_snapshot.v1.json` with 1,712
-  publications and 10,109 edges. A deterministic Node generator emits the
-  focused `pps-publication-citation-network.v2` browser asset, which is packaged
-  identically into the local Designer and compiled GitHub Pages dashboard.
-- Runnable status is an explicit evidence boundary: 15 publication nodes contain
-  17 runnable records, while 49 publications have structurally supported
-  paradigms with incomplete source parameters. Toolkit parameters join only by
-  normalized exact DOI; abstracts without reusable provenance remain unavailable;
-  and corpus-local centrality is never presented as study quality.
+- The Documentation citation map now renders all graph marks as inline SVG.
+  Nodes, links, selected-direction arrowheads, selection rings, and timeline
+  guides inherit the same semantic CSS variables as the legend, so the sidebar
+  light/dark switch recolors the complete network in the same style update.
+  Do not return the plot to canvas pixels that require an asynchronous repaint
+  after a theme change.
+- The source/local and compiled/hosted dashboards share this renderer. Browser
+  validation covers repeated visible theme-toggle clicks, SVG/legend palette
+  equality, both layouts, collision count, node selection, and directional-link
+  emphasis.
+
+## 2026-08-11 — DOI- and citation-metadata-gated publication network
+
+- Publication-detail citation metric tooltips derive the displayed-paper count
+  from the loaded network instead of repeating a hard-coded snapshot count.
+- The same update doubles the declared normalized edge-to-edge node clearance
+  from `0.0075` to `0.015`, raises all-node repulsion, and expands the
+  citation-size radius range from `0.009`–`0.021` to `0.009`–`0.024`. Circle
+  area is a monotonic log-normalized encoding of incoming citations from other
+  papers in the displayed subset only. The visible legend and canvas
+  description state this directly; external counts and centrality do not size
+  nodes.
+- The mandatory visual pass exposed a pre-existing 320/360 px Segment 5
+  overflow caused by placing Blocks beside the internally split Seed/New Seed
+  control. `block-csv-controls` now stacks its three field rows at the phone
+  breakpoint while Seed and New Seed remain one bounded row; the corrected
+  320/360 px audit has zero page or local horizontal overflow.
+- The Documentation map now treats canonical DOI linkage and available citation
+  metadata as node eligibility requirements. Starting from the prior 97-paper
+  non-review audio-tactile candidate set, it excludes 3 DOI-less records and
+  displays 94 papers. Every displayed node has a normalized DOI that agrees with
+  its DOI-keyed identity and canonical `https://doi.org/` URL, is confirmed by
+  the dated exact-DOI resolver audit, and has at least one identified provider
+  with a finite citation count; a valid zero count remains
+  available metadata. The graph retains 750 links between eligible nodes: all
+  571 frozen-snapshot links, all 127 OpenAlex overlay links, and 52 of the 60
+  primary-reference links. Current states are 15 implemented and 79 not yet;
+  detailed readiness is 15 runnable, 49 incomplete, 29 not assessed, and 1
+  adjacent/scope conflict. The source/local and compiled/hosted dashboards use
+  the same generated asset and state the exclusion rule explicitly.
+
+## 2026-08-08 — Dense, citation-refreshed audio-tactile publication network v3
+
+- The Documentation map now projects 97 non-review audio-tactile publications
+  and 758 directed citation links: 93 original manually confirmed records plus
+  4 later exact-DOI audit additions, with 571 links from the frozen snapshot,
+  127 non-overlapping links from a 2026-08-08 exact-DOI OpenAlex overlay, and
+  60 links verified directly in six provider-isolated primary reference lists.
+  Readiness is encoded, not used as an inclusion gate; the map shows 15
+  implemented versus 82 not implemented yet, while details retain the four
+  Toolkit states of 15 runnable, 49 incomplete, 32 not assessed, and 1
+  adjacent/scope conflict.
+- The default responsive topology is a deterministic continuous force layout
+  with citation attraction, all-node repulsion and weak centring, and
+  radius-aware collision separation with declared clearance increased from
+  `0.0045` to `0.0075`. The 93-node main component spans most of the map; the 4
+  records without a verified within-map link are no longer
+  assigned to a perimeter. The canvas is square at desktop and phone widths.
+  Node area represents normalized displayed-network
+  citations received. A collision-free year-anchored layout remains the
+  complementary chronological view.
+- The compact toolbar contains only the topology/year arrangement choice; the
+  paper-search field and citation-link selector are intentionally absent. All
+  links stay visible. Selecting a paper distinguishes incoming from outgoing
+  neighbours and opens accessible metadata, provenance, abstract, and
+  exact-DOI Toolkit-parameter details. The broad 1,712-node/10,109-edge v1
+  source remains a dated discovery corpus, while the generated v3 asset is the
+  identical packaged/local and GitHub Pages view. Neither is exhaustive,
+  systematic-review evidence, a quality ranking, or an effect-size synthesis.
+
+## 2026-08-11 — Publication-to-Toolkit atomic input review contract
+
+- Treat the 94-node citation network as the publication authority but preserve
+  a conservative 121-row study-instance registry. Fourteen publications with
+  tracked multi-experiment/profile evidence use contiguous lowercase display
+  suffixes (`a`, `b`, `c`, ...); papers without a registry entry remain
+  `experiment_count_not_assessed`. Do not rename or mutate exact literature
+  `record_id` or Toolkit `profile_id` values, and do not copy composite-record
+  evidence into child experiments as though it were experiment-specific.
+- Use the 111 exact code-derived `design.*` paths accepted by
+  `design_from_dict` and emitted by `design_to_dict` as the primary current
+  Toolkit columns. Keep arbitrary dictionaries atomic and trace StudyTemplate
+  aliases. Treat the 281 `target.*` leaves as a separate future method,
+  validation, and implementation-gap inventory, with a conservative exact-path
+  crosswalk; never describe those target leaves as the current serializer or a
+  superset. Six target leaves are validation/derived candidates and 22 exact
+  current paths have no target relation. Keep audit
+  evidence, orientation/visualization details, participant/run outputs,
+  calibration evidence, and QC artifacts in normalized side tables.
+- Treat the existing 25 Segment 1-4 paper fields as coarse migration parents,
+  not atomic completion evidence. A reported parent remains
+  `parent_reported_atomic_unreviewed` until every mapped target leaf is separately
+  confirmed. Keep `not_assessed`, `source_unavailable`,
+  `parent_reviewed_missing`, `not_covered_by_current_audit`, and
+  `composite_parent_atomic_unreviewed` distinct.
+- Merge the legacy reported Segment 4 block count into one proposed
+  `target.block_design.block_count`. Segment 6's legacy `participants` field is
+  an order-preview count, never planned sample size; `planned_sample_n` belongs
+  to the study/Runner boundary, while recruited/analyzed N remains evidence or
+  analysis output rather than a wide Toolkit input.
+- Prioritize implementation gaps exposed by the matrix: typed speaker-switching,
+  start/end elevation, visual/MR trajectory and synchrony inputs, planned sample
+  fields, untyped metadata dictionaries, incomplete loudness GUI coverage,
+  participant-order enum/registry mismatch, and explicit analysis criterion.
+  Exact current-path bindings are authoritative only for the current design
+  serializer. Older GUI/backend routing labels remain provisional and are not
+  source-fidelity or implementation claims.
