@@ -253,14 +253,17 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
         assert markup.by_id("publication-network-workspace")[0] == "div"
         assert markup.by_id("publication-network-stage")[0] == "div"
 
-        canvas_tag, canvas = markup.by_id("publication-network-canvas")
-        assert canvas_tag == "canvas"
-        assert canvas["tabindex"] == "0"
-        assert "publication-network-help" in (canvas["aria-describedby"] or "").split()
-        assert "publication-network-status" in (canvas["aria-describedby"] or "").split()
-        assert "publication-network-size-note" in (canvas["aria-describedby"] or "").split()
-        assert "citation network" in (canvas["aria-label"] or "")
-        assert "Use the publication list" in (canvas["aria-label"] or "")
+        graph_tag, graph = markup.by_id("publication-network-graph")
+        assert graph_tag == "svg"
+        assert graph["role"] == "img"
+        assert graph["tabindex"] == "0"
+        assert graph["focusable"] == "true"
+        assert graph["preserveaspectratio"] == "none"
+        assert "publication-network-help" in (graph["aria-describedby"] or "").split()
+        assert "publication-network-status" in (graph["aria-describedby"] or "").split()
+        assert "publication-network-size-note" in (graph["aria-describedby"] or "").split()
+        assert "citation network" in (graph["aria-label"] or "")
+        assert "Use the publication list" in (graph["aria-label"] or "")
 
         status = markup.by_id("publication-network-status")[1]
         assert status["role"] == "status"
@@ -351,6 +354,13 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         "publication-network-results",
         "publication-network-detail",
         "publication-network-fullscreen",
+        "publication-network-graph",
+        "SVG_NAMESPACE",
+        "createElementNS",
+        'renderer: "inline-svg"',
+        'publicationNetworkRenderer = "inline-svg"',
+        "publication-network-edge-line",
+        "publication-network-node-mark",
         'layout: "topology"',
         "nodes[index].network?.radius",
         "network?.inDegree",
@@ -363,7 +373,6 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         "publicationNetworkOverlaps",
         "toolkitRecordJoins",
         "requestAnimationFrame",
-        "devicePixelRatio",
         "textContent",
         "keydown",
         "ArrowLeft",
@@ -382,6 +391,11 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         "publication-network-results",
         "publication-network-detail",
         "publication-network-fullscreen",
+        "publication-network-graph",
+        "inline-svg",
+        "createElementNS",
+        "publication-network-edge-line",
+        "publication-network-node-mark",
         "topology",
         "plotWidth",
         "plotHeight",
@@ -391,7 +405,6 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         "publicationNetworkOverlaps",
         "toolkitRecordJoins",
         "requestAnimationFrame",
-        "devicePixelRatio",
         "textContent",
         "ArrowLeft",
         "ArrowRight",
@@ -402,6 +415,8 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
 
     assert "innerHTML = node." not in network_js
     assert "insertAdjacentHTML" not in network_js
+    assert "getContext" not in network_js
+    assert "devicePixelRatio" not in network_js
     assert "new Map(state.visible.map" in network_js
     assert "document.fullscreenElement === shell" in network_js
     assert "shell.requestFullscreen()" in network_js
@@ -464,6 +479,12 @@ def test_publication_network_styles_cover_simple_statuses_mobile_and_theme() -> 
             ".legend-node-not-implemented",
             ".legend-line-incoming",
             ".legend-line-outgoing",
+            ".publication-network-edge-line",
+            ".publication-network-edge.incoming .publication-network-edge-line",
+            ".publication-network-edge.outgoing .publication-network-edge-line",
+            ".publication-network-node",
+            ".publication-network-node-mark.implemented .publication-network-node",
+            ".publication-network-node-mark.selected .publication-network-node-selection",
         ):
             assert selector in css
         for color_variable in (
@@ -480,7 +501,12 @@ def test_publication_network_styles_cover_simple_statuses_mobile_and_theme() -> 
         ):
             assert color_variable in css
         assert "aspect-ratio:1 / 1" in compact
-        assert "#publication-network-canvas" in css
+        assert "#publication-network-graph" in css
+        assert "fill:var(--network-unassessed)" in compact
+        assert "fill:var(--network-runnable)" in compact
+        assert "stroke:var(--network-edge)" in compact
+        assert "stroke:var(--network-edge-incoming)" in compact
+        assert "stroke:var(--network-edge-outgoing)" in compact
         assert "width:100%" in compact
         assert "height:100%" in compact
         assert "@media(prefers-reduced-motion:reduce)" in compact

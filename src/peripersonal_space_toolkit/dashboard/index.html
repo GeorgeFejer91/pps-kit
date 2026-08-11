@@ -6,7 +6,7 @@
   <title>PPS Experiment Designer</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260811-publication-network-spaced">
+  <link rel="stylesheet" href="styles.css?v=20260811-publication-network-svg-theme">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -226,7 +226,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260811-publication-network-spaced"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="../viewer/index.html?v=20260811-publication-network-svg-theme"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -771,7 +771,7 @@
 
             <div id="publication-network-workspace" class="publication-network-workspace">
               <div id="publication-network-stage" class="publication-network-stage">
-                <canvas id="publication-network-canvas" tabindex="0" aria-label="Interactive citation network of 94 audio-tactile PPS study publications with verified DOI links and citation metadata. Use the publication list for keyboard access, or use arrow keys to move between papers." aria-describedby="publication-network-help publication-network-status publication-network-size-note"></canvas>
+                <svg id="publication-network-graph" role="img" tabindex="0" focusable="true" preserveAspectRatio="none" aria-label="Interactive citation network of 94 audio-tactile PPS study publications with verified DOI links and citation metadata. Use the publication list for keyboard access, or use arrow keys to move between papers." aria-describedby="publication-network-help publication-network-status publication-network-size-note"></svg>
                 <div id="publication-network-loading" class="publication-network-loading" role="status">
                   <span class="publication-network-spinner" aria-hidden="true"></span>
                   <span>Preparing publication network…</span>
@@ -1330,7 +1330,7 @@
       </form>
     </div>
   </div>
-  <script type="module" src="app.js?v=20260811-publication-network-spaced"></script>
-  <script type="module" src="designer_main.js?v=20260811-publication-network-spaced"></script>
+  <script type="module" src="app.js?v=20260811-publication-network-svg-theme"></script>
+  <script type="module" src="designer_main.js?v=20260811-publication-network-svg-theme"></script>
 </body>
 </html>

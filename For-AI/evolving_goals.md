@@ -2019,6 +2019,19 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   mutation controls continue to enforce the boundary. Editable drafts retain
   per-step review badges because those communicate workflow progress.
 
+## 2026-08-11 — Theme-atomic SVG citation network
+
+- The Documentation citation map now renders all graph marks as inline SVG.
+  Nodes, links, selected-direction arrowheads, selection rings, and timeline
+  guides inherit the same semantic CSS variables as the legend, so the sidebar
+  light/dark switch recolors the complete network in the same style update.
+  Do not return the plot to canvas pixels that require an asynchronous repaint
+  after a theme change.
+- The source/local and compiled/hosted dashboards share this renderer. Browser
+  validation covers repeated visible theme-toggle clicks, SVG/legend palette
+  equality, both layouts, collision count, node selection, and directional-link
+  emphasis.
+
 ## 2026-08-11 — DOI- and citation-metadata-gated publication network
 
 - Publication-detail citation metric tooltips derive the displayed-paper count

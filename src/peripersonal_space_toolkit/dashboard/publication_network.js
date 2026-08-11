@@ -1,5 +1,6 @@
 const DATA_URL = new URL("./publication_network.v3.json", import.meta.url);
 const RESULT_PAGE_SIZE = 40;
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
 function element(tag, options = {}, children = []) {
   const node = document.createElement(tag);
@@ -10,6 +11,14 @@ function element(tag, options = {}, children = []) {
   }
   for (const child of Array.isArray(children) ? children : [children]) {
     if (child) node.append(child);
+  }
+  return node;
+}
+
+function svgElement(tag, attributes = {}) {
+  const node = document.createElementNS(SVG_NAMESPACE, tag);
+  for (const [name, value] of Object.entries(attributes)) {
+    if (value !== null && value !== undefined && value !== false) node.setAttribute(name, String(value));
   }
   return node;
 }
@@ -80,10 +89,6 @@ function safeExternalLink(label, href) {
   });
 }
 
-function cssValue(name, fallback) {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
-}
-
 export async function initializePublicationNetwork(root) {
   if (!root || root.dataset.publicationNetworkState === "ready") return;
 
@@ -93,7 +98,7 @@ export async function initializePublicationNetwork(root) {
   };
   const shell = root.querySelector(".publication-network-shell");
   const workspace = root.querySelector("#publication-network-workspace");
-  const canvas = root.querySelector("#publication-network-canvas");
+  const graph = root.querySelector("#publication-network-graph");
   const stage = root.querySelector("#publication-network-stage");
   const loading = root.querySelector("#publication-network-loading");
   const tooltip = root.querySelector("#publication-network-tooltip");
@@ -107,9 +112,8 @@ export async function initializePublicationNetwork(root) {
   const detailBody = root.querySelector("#publication-network-detail-body");
   const detailClose = root.querySelector("#publication-network-detail-close");
   const fullscreenButton = root.querySelector("#publication-network-fullscreen");
-  const context2d = canvas?.getContext("2d");
-  if (!shell || !workspace || !canvas || !stage || !context2d) {
-    throw new Error("Publication-network canvas is unavailable.");
+  if (!shell || !workspace || !graph || !stage) {
+    throw new Error("Publication-network SVG is unavailable.");
   }
 
   const response = await fetch(DATA_URL);
@@ -135,7 +139,7 @@ export async function initializePublicationNetwork(root) {
     selected: null,
     hovered: null,
     resultLimit: RESULT_PAGE_SIZE,
-    lastFocus: canvas,
+    lastFocus: graph,
     lastFocusNode: null,
     redrawPending: false,
     projected: new Map(),
@@ -146,8 +150,8 @@ export async function initializePublicationNetwork(root) {
     return nodes[index].layouts[state.layout] || nodes[index].layouts.topology;
   }
 
-  function canvasGeometry() {
-    const rect = canvas.getBoundingClientRect();
+  function graphGeometry() {
+    const rect = graph.getBoundingClientRect();
     const width = Math.max(1, rect.width);
     const height = Math.max(1, rect.height);
     const padding = Math.max(18, Math.min(42, Math.min(width, height) * 0.055));
@@ -196,46 +200,70 @@ export async function initializePublicationNetwork(root) {
     state.redrawPending = true;
     requestAnimationFrame(() => {
       state.redrawPending = false;
-      draw();
+      renderGraph();
     });
   }
 
-  function resizeCanvas() {
-    const { width, height } = canvasGeometry();
-    const ratio = Math.min(2, window.devicePixelRatio || 1);
-    const pixelWidth = Math.round(width * ratio);
-    const pixelHeight = Math.round(height * ratio);
-    if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
-      canvas.width = pixelWidth;
-      canvas.height = pixelHeight;
-    }
-    context2d.setTransform(ratio, 0, 0, ratio, 0, 0);
+  function resizeGraph() {
     requestDraw();
   }
 
-  function drawTimelineLabels(projected, geometry) {
+  const timelineLayer = svgElement("g", { class: "publication-network-timeline" });
+  const edgeLayer = svgElement("g", { class: "publication-network-edges" });
+  const nodeLayer = svgElement("g", { class: "publication-network-nodes" });
+  graph.replaceChildren(timelineLayer, edgeLayer, nodeLayer);
+
+  const edgeElements = edges.map(() => {
+    const group = svgElement("g", { class: "publication-network-edge" });
+    const line = svgElement("line", { class: "publication-network-edge-line" });
+    const arrow = svgElement("polygon", { class: "publication-network-edge-arrow" });
+    group.append(line, arrow);
+    edgeLayer.append(group);
+    return { group, line, arrow };
+  });
+
+  const orderedNodeIndices = [...state.visible].sort((left, right) =>
+    Number(nodes[left].network?.radius || 0.009) - Number(nodes[right].network?.radius || 0.009));
+  const nodeElements = new Map(orderedNodeIndices.map((index) => {
+    const group = svgElement("g", {
+      class: "publication-network-node-mark",
+      "data-node-index": index,
+    });
+    const selection = svgElement("circle", { class: "publication-network-node-selection" });
+    const circle = svgElement("circle", { class: "publication-network-node" });
+    group.append(selection, circle);
+    nodeLayer.append(group);
+    return [index, { group, selection, circle }];
+  }));
+
+  function renderTimelineLabels(projected, geometry) {
+    timelineLayer.replaceChildren();
     if (state.layout !== "timeline") return;
     const years = [...new Set(state.visible.map((index) => nodes[index].year).filter(Number.isFinite))].sort((a, b) => a - b);
     if (!years.length) return;
     const guideYears = years.length <= 5
       ? years
       : [0, 0.25, 0.5, 0.75, 1].map((fraction) => years[Math.round((years.length - 1) * fraction)]);
-    context2d.save();
-    context2d.fillStyle = cssValue("--muted", "#65716a");
-    context2d.font = `${geometry.plotScale < 420 ? 8 : 10}px system-ui, sans-serif`;
-    context2d.textAlign = "center";
-    context2d.strokeStyle = cssValue("--network-edge", "rgba(82, 98, 115, 0.15)");
-    context2d.lineWidth = 0.75;
     for (const year of new Set(guideYears)) {
       const matches = state.visible.filter((index) => nodes[index].year === year);
       const x = matches.reduce((sum, index) => sum + projected.get(index).x, 0) / matches.length;
-      context2d.beginPath();
-      context2d.moveTo(x, geometry.originY);
-      context2d.lineTo(x, geometry.originY + geometry.plotHeight);
-      context2d.stroke();
-      context2d.fillText(String(year), x, Math.max(12, geometry.originY - 10));
+      timelineLayer.append(
+        svgElement("line", {
+          class: "publication-network-timeline-guide",
+          x1: x,
+          y1: geometry.originY,
+          x2: x,
+          y2: geometry.originY + geometry.plotHeight,
+        }),
+        svgElement("text", {
+          class: "publication-network-timeline-label",
+          x,
+          y: Math.max(12, geometry.originY - 10),
+          "font-size": geometry.plotScale < 420 ? 8 : 10,
+        }),
+      );
+      timelineLayer.lastElementChild.textContent = String(year);
     }
-    context2d.restore();
   }
 
   function selectedEdgeRelation(source, target) {
@@ -244,7 +272,8 @@ export async function initializePublicationNetwork(root) {
     return "";
   }
 
-  function drawCitationEdge(source, target, projected, geometry) {
+  function renderCitationEdge(edgeIndex, source, target, projected, geometry) {
+    const { group, line, arrow } = edgeElements[edgeIndex];
     const from = projected.get(source);
     const to = projected.get(target);
     const relation = selectedEdgeRelation(source, target);
@@ -259,79 +288,66 @@ export async function initializePublicationNetwork(root) {
     const startY = from.y + uy * startInset;
     const endX = to.x - ux * endInset;
     const endY = to.y - uy * endInset;
-    context2d.strokeStyle = relation === "incoming"
-      ? cssValue("--network-edge-incoming", "rgba(35, 107, 148, 0.9)")
-      : relation === "outgoing"
-        ? cssValue("--network-edge-outgoing", "rgba(169, 87, 13, 0.9)")
-        : cssValue("--network-edge", "rgba(82, 98, 115, 0.18)");
-    context2d.fillStyle = context2d.strokeStyle;
-    context2d.lineWidth = relation ? 1.7 : 0.65;
-    context2d.beginPath();
-    context2d.moveTo(startX, startY);
-    context2d.lineTo(endX, endY);
-    context2d.stroke();
-    if (!relation) return;
+    group.setAttribute("class", `publication-network-edge${relation ? ` ${relation}` : ""}`);
+    line.setAttribute("x1", String(startX));
+    line.setAttribute("y1", String(startY));
+    line.setAttribute("x2", String(endX));
+    line.setAttribute("y2", String(endY));
+    if (!relation) {
+      arrow.removeAttribute("points");
+      return relation;
+    }
     const arrowSize = 4.5;
-    context2d.beginPath();
-    context2d.moveTo(endX, endY);
-    context2d.lineTo(endX - ux * arrowSize - uy * arrowSize * 0.58, endY - uy * arrowSize + ux * arrowSize * 0.58);
-    context2d.lineTo(endX - ux * arrowSize + uy * arrowSize * 0.58, endY - uy * arrowSize - ux * arrowSize * 0.58);
-    context2d.closePath();
-    context2d.fill();
+    arrow.setAttribute("points", [
+      `${endX},${endY}`,
+      `${endX - ux * arrowSize - uy * arrowSize * 0.58},${endY - uy * arrowSize + ux * arrowSize * 0.58}`,
+      `${endX - ux * arrowSize + uy * arrowSize * 0.58},${endY - uy * arrowSize - ux * arrowSize * 0.58}`,
+    ].join(" "));
+    return relation;
   }
 
-  function draw() {
-    const geometry = canvasGeometry();
+  function renderGraph() {
+    const geometry = graphGeometry();
     const { width, height } = geometry;
+    graph.setAttribute("viewBox", `0 0 ${width} ${height}`);
     const projected = new Map(state.visible.map((index) => [index, screenPoint(index, geometry)]));
     state.projected = projected;
     state.overlapCount = overlapCount(projected, geometry);
     root.dataset.publicationNetworkOverlaps = String(state.overlapCount);
-    context2d.clearRect(0, 0, width, height);
-    drawTimelineLabels(projected, geometry);
+    renderTimelineLabels(projected, geometry);
 
-    context2d.save();
-    const drawableEdges = [...edges]
-      .sort(([leftSource, leftTarget], [rightSource, rightTarget]) =>
-        Number(Boolean(selectedEdgeRelation(leftSource, leftTarget))) - Number(Boolean(selectedEdgeRelation(rightSource, rightTarget))));
-    for (const [source, target] of drawableEdges) {
-      drawCitationEdge(source, target, projected, geometry);
+    const selectedEdgeGroups = [];
+    for (let edgeIndex = 0; edgeIndex < edges.length; edgeIndex += 1) {
+      const [source, target] = edges[edgeIndex];
+      if (renderCitationEdge(edgeIndex, source, target, projected, geometry)) {
+        selectedEdgeGroups.push(edgeElements[edgeIndex].group);
+      }
     }
-    context2d.restore();
+    edgeLayer.append(...selectedEdgeGroups);
 
-    const ordered = [...state.visible].sort((left, right) =>
-      radiusFor(left, geometry) - radiusFor(right, geometry));
-    for (const index of ordered) {
+    for (const index of orderedNodeIndices) {
       const point = projected.get(index);
       const radius = radiusFor(index, geometry);
       const implemented = isRunnable(nodes[index]);
-      context2d.save();
-      if (state.selected === index) {
-        context2d.beginPath();
-        context2d.arc(point.x, point.y, radius + 4, 0, Math.PI * 2);
-        context2d.strokeStyle = cssValue("--network-selection", "#246b55");
-        context2d.lineWidth = 2.5;
-        context2d.stroke();
+      const { group, selection, circle } = nodeElements.get(index);
+      group.setAttribute("class", [
+        "publication-network-node-mark",
+        implemented ? "implemented" : "not-implemented",
+        state.hovered === index ? "hovered" : "",
+        state.selected === index ? "selected" : "",
+      ].filter(Boolean).join(" "));
+      for (const node of [selection, circle]) {
+        node.setAttribute("cx", String(point.x));
+        node.setAttribute("cy", String(point.y));
       }
-      context2d.beginPath();
-      context2d.arc(point.x, point.y, radius, 0, Math.PI * 2);
-      context2d.fillStyle = implemented
-        ? cssValue("--network-runnable", "#a9570d")
-        : cssValue("--network-unassessed", "#f7f8f5");
-      context2d.fill();
-      context2d.strokeStyle = state.hovered === index
-        ? cssValue("--text", "#1f2a25")
-        : cssValue("--network-node-stroke", "rgba(82, 58, 34, 0.72)");
-      context2d.lineWidth = state.hovered === index ? 2.2 : (implemented ? 1.1 : 1.6);
-      context2d.setLineDash(implemented ? [] : [3, 2]);
-      context2d.stroke();
-      context2d.restore();
+      selection.setAttribute("r", String(radius + 4));
+      circle.setAttribute("r", String(radius));
     }
   }
 
   function hitTest(clientX, clientY) {
-    const rect = canvas.getBoundingClientRect();
-    const geometry = canvasGeometry();
+    const rect = graph.getBoundingClientRect();
+    const geometry = graphGeometry();
     const x = clientX - rect.left;
     const y = clientY - rect.top;
     let best = null;
@@ -575,7 +591,7 @@ export async function initializePublicationNetwork(root) {
     );
   }
 
-  function selectNode(index, trigger = canvas) {
+  function selectNode(index, trigger = graph) {
     if (!Number.isInteger(index) || !state.visibleSet.has(index)) return;
     state.selected = index;
     state.lastFocus = trigger;
@@ -587,7 +603,7 @@ export async function initializePublicationNetwork(root) {
     updateStatus();
     requestDraw();
     requestAnimationFrame(() => {
-      resizeCanvas();
+      resizeGraph();
       detail.focus({ preventScroll: true });
     });
   }
@@ -599,12 +615,12 @@ export async function initializePublicationNetwork(root) {
     detailBody.replaceChildren();
     renderResults();
     updateStatus();
-    requestAnimationFrame(resizeCanvas);
+    requestAnimationFrame(resizeGraph);
     if (restoreFocus) {
       const resultTrigger = state.lastFocusNode === null
         ? null
         : resultList.querySelector(`[data-node-index="${state.lastFocusNode}"]`);
-      const focusTarget = resultTrigger || (state.lastFocus?.isConnected ? state.lastFocus : canvas);
+      const focusTarget = resultTrigger || (state.lastFocus?.isConnected ? state.lastFocus : graph);
       focusTarget.focus({ preventScroll: true });
     }
   }
@@ -624,10 +640,10 @@ export async function initializePublicationNetwork(root) {
   document.addEventListener("fullscreenchange", () => {
     fullscreenButton.textContent = document.fullscreenElement === shell ? "Exit full screen" : "Full screen";
     fullscreenButton.setAttribute("aria-label", fullscreenButton.textContent);
-    requestAnimationFrame(resizeCanvas);
+    requestAnimationFrame(resizeGraph);
   });
 
-  canvas.addEventListener("pointermove", (event) => {
+  graph.addEventListener("pointermove", (event) => {
     const index = hitTest(event.clientX, event.clientY);
     if (state.hovered !== index) {
       state.hovered = index;
@@ -637,16 +653,16 @@ export async function initializePublicationNetwork(root) {
       setTooltip(index, event.clientX, event.clientY);
     }
   });
-  canvas.addEventListener("pointerleave", () => {
+  graph.addEventListener("pointerleave", () => {
     state.hovered = null;
     tooltip.hidden = true;
     requestDraw();
   });
-  canvas.addEventListener("click", (event) => {
+  graph.addEventListener("click", (event) => {
     const index = hitTest(event.clientX, event.clientY);
-    if (index !== null) selectNode(index, canvas);
+    if (index !== null) selectNode(index, graph);
   });
-  canvas.addEventListener("keydown", (event) => {
+  graph.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !detail.hidden) {
       event.preventDefault();
       closeDetail();
@@ -656,7 +672,7 @@ export async function initializePublicationNetwork(root) {
     if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Enter"].includes(event.key) || !navigable.length) return;
     event.preventDefault();
     if (event.key === "Enter") {
-      selectNode(state.selected ?? sortResults(navigable)[0], canvas);
+      selectNode(state.selected ?? sortResults(navigable)[0], graph);
       return;
     }
     const ordered = sortResults(navigable);
@@ -679,14 +695,18 @@ export async function initializePublicationNetwork(root) {
   });
 
   root.publicationNetworkAudit = () => {
-    const geometry = canvasGeometry();
+    const geometry = graphGeometry();
     return {
       schema: data.schema,
-      canvas: {
+      renderer: "inline-svg",
+      theme: document.documentElement.dataset.theme || "light",
+      graph: {
         width: geometry.width,
         height: geometry.height,
         plotWidth: geometry.plotWidth,
         plotHeight: geometry.plotHeight,
+        nodeElementCount: nodeElements.size,
+        edgeElementCount: edgeElements.length,
       },
       layout: state.layout,
       visibleCount: state.visible.length,
@@ -713,15 +733,16 @@ export async function initializePublicationNetwork(root) {
     };
   };
 
-  const resizeObserver = new ResizeObserver(resizeCanvas);
+  const resizeObserver = new ResizeObserver(resizeGraph);
   resizeObserver.observe(stage);
   loading.hidden = true;
   root.dataset.publicationNetworkState = "ready";
   root.dataset.publicationNetworkNodes = String(nodes.length);
   root.dataset.publicationNetworkEdges = String(edges.length);
   root.dataset.publicationNetworkRecords = String(data.counts.toolkitRecordJoins);
+  root.dataset.publicationNetworkRenderer = "inline-svg";
   updateLayout();
-  resizeCanvas();
+  resizeGraph();
   root.dispatchEvent(new CustomEvent("pps:publication-network-ready", {
     bubbles: true,
     detail: { nodes: nodes.length, edges: edges.length, records: data.counts.toolkitRecordJoins },
