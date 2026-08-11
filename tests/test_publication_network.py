@@ -412,6 +412,9 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
     assert 'root.dataset.publicationNetworkRecords = String(data.counts.toolkitRecordJoins)' in network_js
     assert "DOI unavailable" not in network_js
     assert "DOI unavailable" not in compiled_js
+    assert "displayedPublicationCount = nodes.length.toLocaleString()" in network_js
+    assert "97 displayed publications" not in network_js
+    assert "97 displayed publications" not in compiled_js
 
     for removed_contract in (
         "publication_network.v2",

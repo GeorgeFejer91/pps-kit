@@ -2021,6 +2021,10 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 ## 2026-08-11 — DOI- and citation-metadata-gated publication network
 
+- Final responsive verification stacks Segment 5's block controls into one
+  column at phone widths, eliminating the 320/360 px local and page overflow.
+  Publication-detail citation metric tooltips derive the displayed-paper count
+  from the loaded network instead of repeating a hard-coded snapshot count.
 - The same update doubles the declared normalized edge-to-edge node clearance
   from `0.0075` to `0.015`, raises all-node repulsion, and expands the
   citation-size radius range from `0.009`–`0.021` to `0.009`–`0.024`. Circle

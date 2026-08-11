@@ -427,9 +427,10 @@ export async function initializePublicationNetwork(root) {
   }
 
   function makeMetricGrid(node) {
+    const displayedPublicationCount = nodes.length.toLocaleString();
     const descriptions = [
-      ["Citations in this map", node.network?.inDegree || 0, "Incoming links from the 97 displayed publications"],
-      ["References in this map", node.network?.outDegree || 0, "Outgoing links to the 97 displayed publications"],
+      ["Citations in this map", node.network?.inDegree || 0, `Incoming links from the ${displayedPublicationCount} displayed publications`],
+      ["References in this map", node.network?.outDegree || 0, `Outgoing links to the ${displayedPublicationCount} displayed publications`],
       ["Network PageRank", compactNumber(node.network?.pageRank, 6), "PageRank recalculated only for this displayed network"],
       ["External citations", node.citations.externalMax, "Largest provider count at snapshot time"],
       ["Broad PPS citations", node.citations.withinCorpusReceived, "Incoming links from the broad 1,712-publication source snapshot"],

@@ -6288,6 +6288,14 @@ body.modal-open {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .block-csv-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .block-csv-controls .field-row {
+    max-width: none;
+  }
+
   .trial-decision-fields {
     grid-template-columns: 1fr;
   }
