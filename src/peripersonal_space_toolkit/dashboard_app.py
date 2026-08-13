@@ -10,6 +10,7 @@ import hashlib
 import hmac
 import itertools
 import json
+import logging
 import math
 import os
 import random
@@ -23,7 +24,8 @@ import time
 import urllib.request
 import uuid
 import webbrowser
-from dataclasses import asdict, dataclass, field
+from contextlib import asynccontextmanager
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from importlib.resources import files
 from pathlib import Path
@@ -112,6 +114,14 @@ from .preload_inventory import ensure_preload_assets, load_preload_inventory, pr
 from .runtime_paths import repo_root, writable_root
 from .subprocess_utils import windows_no_console_kwargs
 from .dashboard_backend.security import CompanionSecurity, TOKEN_HEADER
+from .dashboard_backend.jobs import DashboardJob, JobManager
+from .dashboard_backend.contracts import ApplicationError, application_error_from_exception
+from .designer_segments import (
+    build_segment_lineage,
+    downstream_definitions,
+    ordered_definitions,
+    validate_segment_lineage,
+)
 from .runner_diary import (
     append_diary_entry,
     find_output_diary,
@@ -456,22 +466,6 @@ STIMULUS_TRAJECTORY_COLORS = {
 }
 
 
-@dataclass
-class DashboardJob:
-    job_id: str
-    kind: str
-    status: str = "queued"
-    message: str = ""
-    result: dict[str, Any] | None = None
-    error: str = ""
-    progress_current: int = 0
-    progress_total: int = 0
-    progress_percent: float = 0.0
-    progress_label: str = ""
-    created_at: float = field(default_factory=time.time)
-    updated_at: float = field(default_factory=time.time)
-
-
 @dataclass(frozen=True)
 class DashboardProjectContext:
     project_id: str
@@ -514,65 +508,6 @@ class DashboardProjectContext:
             },
             "shared_tactile_path": str(self.shared_tactile_path),
         }
-
-
-class JobManager:
-    def __init__(self) -> None:
-        self._jobs: dict[str, DashboardJob] = {}
-        self._lock = threading.Lock()
-
-    def start(self, kind: str, func: Callable[..., dict[str, Any]], *, progress: bool = False) -> DashboardJob:
-        job = DashboardJob(job_id=uuid.uuid4().hex[:12], kind=kind)
-        with self._lock:
-            self._jobs[job.job_id] = job
-
-        def _progress(current: int, total: int, label: str = "") -> None:
-            total = max(0, int(total or 0))
-            current = max(0, min(int(current or 0), total if total else int(current or 0)))
-            percent = round((current / total) * 100.0, 1) if total else 0.0
-            self._update(
-                job.job_id,
-                progress_current=current,
-                progress_total=total,
-                progress_percent=percent,
-                progress_label=label,
-                message=label or f"{kind} running",
-            )
-
-        def _run() -> None:
-            self._update(job.job_id, status="running", message=f"{kind} started")
-            try:
-                result = func(_progress) if progress else func()
-            except Exception as exc:
-                self._update(job.job_id, status="failed", error=str(exc), message=f"{kind} failed")
-            else:
-                total = int(job.progress_total or 0)
-                if total:
-                    self._update(
-                        job.job_id,
-                        progress_current=total,
-                        progress_percent=100.0,
-                        progress_label=f"{kind} complete",
-                    )
-                self._update(job.job_id, status="succeeded", result=_json_ready(result), message=f"{kind} complete")
-
-        threading.Thread(target=_run, daemon=True).start()
-        return job
-
-    def get(self, job_id: str) -> DashboardJob | None:
-        with self._lock:
-            return self._jobs.get(job_id)
-
-    def recent(self, limit: int = 12) -> list[DashboardJob]:
-        with self._lock:
-            return sorted(self._jobs.values(), key=lambda item: item.created_at, reverse=True)[:limit]
-
-    def _update(self, job_id: str, **changes: Any) -> None:
-        with self._lock:
-            job = self._jobs[job_id]
-            for key, value in changes.items():
-                setattr(job, key, value)
-            job.updated_at = time.time()
 
 
 class DashboardController:
@@ -634,6 +569,33 @@ class DashboardController:
         self.jobs = JobManager()
         self._lock = threading.Lock()
         self._workflow_lock = threading.RLock()
+
+    def design_copy(self) -> StimulusDesign:
+        """Return an isolated design value for another applet or service."""
+        with self._lock:
+            return _copy_design(self.design)
+
+    def active_project_context(self, *, clear_stale_profile_outputs: bool = False) -> DashboardProjectContext:
+        """Return the active registry context without exposing controller locking."""
+        with self._lock:
+            return self._ensure_project_context(
+                self.design,
+                clear_stale_profile_outputs=clear_stale_profile_outputs,
+            )
+
+    def ensure_profile_run_artifacts(
+        self,
+        *,
+        progress_callback: Callable[[dict[str, Any]], None] | None = None,
+    ) -> dict[str, Any]:
+        """Materialize an immutable bundled profile through the ordered segment chain."""
+        project = self.active_project_context(clear_stale_profile_outputs=True)
+        design = self.design_copy()
+        return self._ensure_profile_run_artifacts(project, design, progress_callback=progress_callback)
+
+    def active_run_setup_manifest_path(self) -> Path:
+        project = self.active_project_context()
+        return _run_setup_manifest_path(project.project_dir)
 
     def _load_initial_design(self) -> StimulusDesign:
         if self.design_path.exists():
@@ -2842,15 +2804,52 @@ def create_app(
         token=companion_token,
         require_mutation_token=require_mutation_token,
     )
-    app = FastAPI(title="PPS Local Dashboard", docs_url=None, redoc_url=None)
+    @asynccontextmanager
+    async def lifespan(_app: Any) -> Any:
+        try:
+            yield
+        finally:
+            controller.jobs.shutdown(timeout=5.0)
+
+    app = FastAPI(title="PPS Local Dashboard", docs_url=None, redoc_url=None, lifespan=lifespan)
     app.state.companion_security = security
+
+    def api_error(
+        exc: Exception,
+        *,
+        status_code: int = 400,
+        code: str = "request_failed",
+    ) -> HTTPException:
+        if not isinstance(exc, (ValueError, RuntimeError, FileNotFoundError, KeyError)):
+            logging.getLogger(__name__).exception("Unexpected Designer API failure")
+        boundary_error = application_error_from_exception(exc, code=code)
+        error = HTTPException(status_code=status_code, detail=boundary_error.message)
+        error.pps_application_error = boundary_error
+        return error
+
+    @app.exception_handler(HTTPException)
+    async def structured_http_error(_request: Request, exc: HTTPException) -> JSONResponse:
+        boundary_error = getattr(exc, "pps_application_error", None)
+        if not isinstance(boundary_error, ApplicationError):
+            status_codes = {400: "invalid_request", 403: "forbidden", 404: "not_found"}
+            boundary_error = ApplicationError(
+                code=status_codes.get(int(exc.status_code), "request_failed"),
+                message=str(exc.detail),
+                retryable=False,
+            )
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": boundary_error.message, "error": boundary_error.to_dict()},
+            headers=exc.headers,
+        )
+
     configured_origins = DEFAULT_WEB_ORIGINS if web_origins is None else web_origins
     origins = [origin.rstrip("/") for origin in configured_origins if origin]
     if origins:
         app.add_middleware(
             CORSMiddleware,
             allow_origins=origins,
-            allow_methods=["GET", "POST"],
+            allow_methods=["GET", "POST", "DELETE"],
             allow_headers=["Content-Type", TOKEN_HEADER],
             allow_credentials=False,
         )
@@ -2906,6 +2905,10 @@ def create_app(
                     status_code=403,
                     content={
                         "detail": "Local companion mutation token is missing or invalid.",
+                        "error": ApplicationError(
+                            code="invalid_companion_token",
+                            message="Local companion mutation token is missing or invalid.",
+                        ).to_dict(),
                         "reason": reason,
                         "token_header": TOKEN_HEADER,
                     },
@@ -2927,6 +2930,7 @@ def create_app(
             "can_preview_hosted_assets": True,
             "can_save_profile": True,
             "can_launch_runner": True,
+            "segments": [asdict(definition) for definition in ordered_definitions()],
         }
 
     @app.get("/api/health")
@@ -2983,7 +2987,7 @@ def create_app(
                 headers={"Content-Disposition": f'attachment; filename="{_safe_filename(profile_id)}.pps-profile"'},
             )
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/profiles/import-bundle")
     def api_import_profile_bundle(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
@@ -2999,7 +3003,7 @@ def create_app(
                 bundle.write_bytes(content)
                 return controller.import_profile_bundle(bundle)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/preloads/{template_id}/sync")
     def api_sync_preload(template_id: str) -> dict[str, Any]:
@@ -3017,28 +3021,28 @@ def create_app(
         try:
             return controller.customize_as_new_project(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/project/new-custom")
     def api_new_custom_project(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.create_blank_custom_project(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/data-acquisition/export")
     def api_export_data_acquisition_folder(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.export_data_acquisition_folder(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/profiles/save-prepared")
     def api_save_prepared_profile(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.save_prepared_study_profile(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/projects/{project_id}/load")
     def api_load_custom_project(project_id: str) -> dict[str, Any]:
@@ -3047,21 +3051,21 @@ def create_app(
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=f"Custom project not found: {project_id}") from exc
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/design")
     def api_design(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.update_design(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/render")
     def api_render(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             job = controller.start_render_job(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
         return _job_to_dict(job)
 
     @app.post("/api/stimulus/bake")
@@ -3069,7 +3073,7 @@ def create_app(
         try:
             job = controller.start_bake_stimulus_job(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
         return _job_to_dict(job)
 
     @app.post("/api/block-csv/accept")
@@ -3077,56 +3081,56 @@ def create_app(
         try:
             return controller.accept_block_csv_preview(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/block-csv/edit")
     def api_edit_block_csv() -> dict[str, Any]:
         try:
             return controller.edit_block_csv_preview()
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/run-sequence/preview")
     def api_preview_run_sequence(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.preview_run_sequence(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/run-sequence/regenerate")
     def api_regenerate_run_sequence(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.regenerate_run_sequence(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/run-sequence/prepare")
     def api_prepare_run_sequence(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.prepare_experiment_run_setup(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/run-sequence/export-bridge")
     def api_export_run_sequence_bridge(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.export_active_output_folder(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/run-sequence/open-runner")
     def api_open_experiment_runner(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.open_experiment_runner(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/session/prepare")
     def api_prepare(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.prepare_session(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/audio/stress")
     def api_audio_stress() -> dict[str, Any]:
@@ -3137,47 +3141,54 @@ def create_app(
         try:
             return controller.import_audio_source(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/run-instructions/import")
     def api_run_instruction_import(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.import_run_instruction_audio(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/trials/preview-row")
     def api_preview_trial_row(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.preview_trial_strip_audio(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/audio/preview-source")
     def api_preview_source_audio(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.preview_source_audio(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/local/open-folder")
     def api_open_local_folder(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.open_local_folder(payload)
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
 
     @app.post("/api/focus/start")
     def api_focus_start() -> dict[str, Any]:
         try:
             job = controller.start_focus_job()
         except Exception as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise api_error(exc) from exc
         return _job_to_dict(job)
 
     @app.get("/api/jobs/{job_id}")
     def api_job(job_id: str) -> dict[str, Any]:
         job = controller.jobs.get(job_id)
+        if job is None:
+            raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
+        return _job_to_dict(job)
+
+    @app.delete("/api/jobs/{job_id}")
+    def api_cancel_job(job_id: str) -> dict[str, Any]:
+        job = controller.jobs.cancel(job_id)
         if job is None:
             raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
         return _job_to_dict(job)
@@ -3664,6 +3675,41 @@ def _remove_tree(path: str | Path) -> None:
         shutil.rmtree(_filesystem_path(path))
 
 
+_SEGMENT_REBUILD_LOCKS: dict[str, threading.Lock] = {}
+_SEGMENT_REBUILD_LOCKS_GUARD = threading.Lock()
+
+
+def _segment_rebuild_lock(root: Path) -> threading.Lock:
+    key = str(Path(root).resolve())
+    with _SEGMENT_REBUILD_LOCKS_GUARD:
+        return _SEGMENT_REBUILD_LOCKS.setdefault(key, threading.Lock())
+
+
+def _transactional_segment_rebuild(root: Path, build: Callable[[], dict[str, Any]]) -> dict[str, Any]:
+    """Restore the last complete segment folder when a rebuild does not publish."""
+
+    root = Path(root)
+    backup_root = root.with_name(f".{root.name}.pps-backup-{uuid.uuid4().hex}")
+    with _segment_rebuild_lock(root):
+        _ensure_dir(root.parent)
+        had_previous = _path_exists(root)
+        if had_previous:
+            os.replace(_filesystem_path(root), _filesystem_path(backup_root))
+        try:
+            result = build()
+        except BaseException:
+            _remove_tree(root)
+            if had_previous and _path_exists(backup_root):
+                os.replace(_filesystem_path(backup_root), _filesystem_path(root))
+            raise
+        if _path_exists(backup_root):
+            try:
+                _remove_tree(backup_root)
+            except OSError:
+                logging.getLogger(__name__).warning("Could not remove segment rebuild backup: %s", backup_root)
+        return result
+
+
 def _move_file(source: str | Path, target: str | Path) -> None:
     _ensure_dir(Path(target).parent)
     shutil.move(_filesystem_path(source), _filesystem_path(target))
@@ -4141,6 +4187,10 @@ def _record_ingredient_file(
         "root": str(project.segment1_dir),
         "ingredient_count": len(rows),
         "ingredients": rows,
+        "segment_lineage": build_segment_lineage(
+            "1_core_audio_ingredients",
+            upstream_manifest_path=project.profile_dir / "project_manifest.json",
+        ),
     }
     path_manifest = _ingredient_manifest_path(project)
     _write_text_file(path_manifest, json.dumps(_json_ready(manifest), indent=2) + "\n", encoding="utf-8")
@@ -4334,6 +4384,11 @@ def _write_variant_wav_lossless(path: Path, chunks: list[dict[str, Any]], silenc
 
 
 def _bake_trial_sequence_variants(design: StimulusDesign, render_dir: Path) -> dict[str, Any]:
+    root = _trial_sequence_bake_root(render_dir)
+    return _transactional_segment_rebuild(root, lambda: _build_trial_sequence_variants(design, render_dir))
+
+
+def _build_trial_sequence_variants(design: StimulusDesign, render_dir: Path) -> dict[str, Any]:
     rows = [strip for strip in design.protocol.trial_strips if strip.elements]
     root = _trial_sequence_bake_root(render_dir)
     if not rows:
@@ -4411,6 +4466,11 @@ def _bake_trial_sequence_variants(design: StimulusDesign, render_dir: Path) -> d
             "status": "baked",
             "root": str(root),
             "design_signature": _segment2_design_signature(design),
+            "segment_lineage": build_segment_lineage(
+                "2_trial_sequence_designs",
+                upstream_manifest_path=_ingredient_manifest_path(render_dir),
+                design_signature=_segment2_design_signature(design),
+            ),
             "loudness_policy": loudness_policy_for_design(design),
             "variant_count": len(manifest_rows),
             "rows": row_summaries,
@@ -5026,7 +5086,7 @@ def _trial_sequence_bake_status(render_dir: Path) -> dict[str, Any]:
 
 
 def _project_segments_status(project: DashboardProjectContext, design: StimulusDesign) -> dict[str, Any]:
-    segments = {
+    status_builders = {
         "0_profile": _segment_status_profile(project),
         "1_core_audio_ingredients": _segment_status_ingredients(project),
         "2_trial_sequence_designs": _segment_status_trial_sequences(project.project_dir, design),
@@ -5035,6 +5095,7 @@ def _project_segments_status(project: DashboardProjectContext, design: StimulusD
         "5_block_csv_preview": _segment_status_block_csv_preview(project.project_dir, design),
         "6_experiment_run_setup": _segment_status_run_setup(project.project_dir, design),
     }
+    segments = {definition.key: status_builders[definition.key] for definition in ordered_definitions()}
     expected = _expected_segment_counts(design, project.project_dir)
     for key, value in segments.items():
         value["expected"] = expected.get(key, {})
@@ -5071,8 +5132,15 @@ def _segment_status_profile(project: DashboardProjectContext) -> dict[str, Any]:
     active_design_path = project.profile_dir / "active_design.json"
     study_manifest_path = project.profile_dir / "study_manifest.json"
     missing = [path.name for path in (manifest_path, active_design_path, study_manifest_path) if not _path_exists(path)]
-    status = "ready" if not missing else "missing"
-    message = "Profile, study settings, and active design are ready." if not missing else f"Missing: {', '.join(missing)}."
+    lineage_errors = validate_segment_lineage(_load_json(manifest_path), "0_profile") if not missing else []
+    status = "ready" if not missing and not lineage_errors else "stale" if lineage_errors else "missing"
+    message = (
+        "Profile, study settings, and active design are ready."
+        if status == "ready"
+        else lineage_errors[0]
+        if lineage_errors
+        else f"Missing: {', '.join(missing)}."
+    )
     record = _segment_status_record(
         index=0,
         folder_name="0_profile",
@@ -5084,6 +5152,7 @@ def _segment_status_profile(project: DashboardProjectContext) -> dict[str, Any]:
     )
     record["active_design_path"] = str(active_design_path)
     record["study_manifest_path"] = str(study_manifest_path)
+    record["validation_errors"] = lineage_errors
     return record
 
 
@@ -5091,7 +5160,14 @@ def _segment_status_ingredients(project: DashboardProjectContext) -> dict[str, A
     manifest_path = _ingredient_manifest_path(project)
     manifest = _load_ingredient_manifest(project)
     ingredients = manifest.get("ingredients", []) if isinstance(manifest.get("ingredients"), list) else []
-    errors = _validate_ingredient_rows(ingredients)
+    errors = [
+        *validate_segment_lineage(
+            manifest,
+            "1_core_audio_ingredients",
+            upstream_manifest_path=project.profile_dir / "project_manifest.json",
+        ),
+        *_validate_ingredient_rows(ingredients),
+    ]
     if not _path_exists(manifest_path) or not ingredients:
         status = "missing"
         message = "No Segment 1 ingredient manifest has been created yet."
@@ -5383,11 +5459,26 @@ def _validate_ingredient_rows(ingredients: list[Any]) -> list[str]:
     return errors
 
 
+def _recorded_lineage_upstream_path(manifest: dict[str, Any]) -> Path | None:
+    lineage = manifest.get("segment_lineage") if isinstance(manifest, dict) else None
+    if not isinstance(lineage, dict):
+        return None
+    path_text = str(lineage.get("upstream_manifest_path") or "").strip()
+    return Path(path_text) if path_text else None
+
+
 def _validate_trial_sequence_manifest(manifest: dict[str, Any], *, design: StimulusDesign | None = None) -> list[str]:
     if not manifest:
         return ["Segment 2 manifest is missing."]
     if manifest.get("schema") != "pps-trial-sequence-variants.v1":
         return ["Segment 2 manifest schema is not recognized."]
+    lineage_errors = validate_segment_lineage(
+        manifest,
+        "2_trial_sequence_designs",
+        upstream_manifest_path=_recorded_lineage_upstream_path(manifest),
+    )
+    if lineage_errors:
+        return lineage_errors
     if design is not None:
         expected_signature = _segment2_design_signature(design)
         manifest_signature = str(manifest.get("design_signature") or "")
@@ -5442,6 +5533,13 @@ def _validate_tactile_trial_manifest(manifest: dict[str, Any], *, design: Stimul
         if manifest_signature and manifest_signature != expected_signature:
             return ["Segment 3 manifest is stale because SOA or baseline settings changed."]
     trial_sequence_manifest = Path(str(manifest.get("trial_sequence_manifest") or ""))
+    lineage_errors = validate_segment_lineage(
+        manifest,
+        "3_tactile_and_baseline_trials",
+        upstream_manifest_path=trial_sequence_manifest,
+    )
+    if lineage_errors:
+        return lineage_errors
     expected_sequence_hash = str(manifest.get("trial_sequence_manifest_sha256") or "").strip()
     if expected_sequence_hash:
         if not _path_exists(trial_sequence_manifest):
@@ -5492,6 +5590,13 @@ def _validate_trial_pool_manifest(
     source_manifest = _load_json(source_manifest_path)
     if not _path_exists(source_manifest_path):
         return ["Segment 4 manifest is stale because the Segment 3 manifest is missing."]
+    lineage_errors = validate_segment_lineage(
+        manifest,
+        "4_trial_repetition_pool",
+        upstream_manifest_path=source_manifest_path,
+    )
+    if lineage_errors:
+        return lineage_errors
     source_errors = _validate_tactile_trial_manifest(source_manifest, design=design)
     if source_errors:
         return [f"Segment 4 manifest is stale because Segment 3 is not ready: {source_errors[0]}"]
@@ -5519,6 +5624,13 @@ def _validate_block_csv_preview_manifest(
     if manifest.get("schema") != BLOCK_CSV_PREVIEW_MANIFEST_SCHEMA:
         return ["Segment 5 manifest schema is not recognized."]
     source_manifest_path = _trial_pool_manifest_path(project_dir)
+    lineage_errors = validate_segment_lineage(
+        manifest,
+        "5_block_csv_preview",
+        upstream_manifest_path=source_manifest_path,
+    )
+    if lineage_errors:
+        return lineage_errors
     source_manifest = _load_json(source_manifest_path)
     source_errors = _validate_trial_pool_manifest(source_manifest, project_dir=project_dir, design=design)
     if source_errors:
@@ -5559,6 +5671,13 @@ def _validate_run_setup_manifest(
     if manifest.get("schema") != RUN_SETUP_MANIFEST_SCHEMA:
         return ["Segment 6 manifest schema is not recognized."]
     block_manifest_path = _block_csv_preview_manifest_path(project_dir)
+    lineage_errors = validate_segment_lineage(
+        manifest,
+        "6_experiment_run_setup",
+        upstream_manifest_path=block_manifest_path,
+    )
+    if lineage_errors:
+        return lineage_errors
     block_manifest = _load_json(block_manifest_path)
     block_errors = _validate_block_csv_preview_manifest(block_manifest, project_dir=project_dir, design=design)
     if block_errors:
@@ -5651,6 +5770,11 @@ def _write_run_setup_outputs(project_dir: Path, design: StimulusDesign) -> dict[
         "loudness_manifest_path": str(loudness_manifest_path),
         "source_segment5_manifest": preview["source_segment5_manifest"],
         "source_segment5_manifest_sha256": preview["source_segment5_manifest_sha256"],
+        "segment_lineage": build_segment_lineage(
+            "6_experiment_run_setup",
+            upstream_manifest_path=Path(preview["source_segment5_manifest"]),
+            design_signature=_design_segment_signatures(design)[6],
+        ),
         "summary_rows": preview["rows"],
     }
     errors = _validate_run_setup_manifest(manifest, project_dir=project_dir, design=design)
@@ -6302,6 +6426,11 @@ def _validate_trial_sequence_variant(variant: dict[str, Any]) -> None:
 
 
 def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -> dict[str, Any]:
+    root = _baseline_tactile_bake_root(render_dir)
+    return _transactional_segment_rebuild(root, lambda: _build_audio_tactile_trial_files(design, render_dir))
+
+
+def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -> dict[str, Any]:
     if not design.protocol.soa_values_ms:
         raise ValueError("Enter at least one SOA value before baking baseline/tactile trial files.")
     manifest = _ensure_trial_sequence_manifest(design, render_dir)
@@ -6593,6 +6722,11 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
             "status": "baked",
             "root": str(root),
             "design_signature": _segment3_design_signature(design),
+            "segment_lineage": build_segment_lineage(
+                "3_tactile_and_baseline_trials",
+                upstream_manifest_path=trial_sequence_manifest_path,
+                design_signature=_segment3_design_signature(design),
+            ),
             "trial_sequence_manifest": str(trial_sequence_manifest_path),
             "trial_sequence_manifest_sha256": _local_file_sha256(trial_sequence_manifest_path),
             "tactile_cue_path": str(DEFAULT_TACTILE_CUE_PATH),
@@ -7050,6 +7184,11 @@ def _trial_pool_row_from_record(
 
 
 def _bake_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recipe: dict[str, Any]) -> dict[str, Any]:
+    root = _trial_pool_root(render_dir)
+    return _transactional_segment_rebuild(root, lambda: _build_trial_repetition_pool(design, render_dir, recipe))
+
+
+def _build_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recipe: dict[str, Any]) -> dict[str, Any]:
     source_manifest_path = _baseline_tactile_bake_root(render_dir) / "baseline_tactile_trial_files_manifest.json"
     source_manifest = _load_json(source_manifest_path)
     source_errors = _validate_tactile_trial_manifest(source_manifest, design=design)
@@ -7182,6 +7321,11 @@ def _bake_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recipe
         "csv_path": str(csv_path),
         "source_segment3_manifest": str(source_manifest_path),
         "source_segment3_manifest_sha256": _local_file_sha256(source_manifest_path),
+        "segment_lineage": build_segment_lineage(
+            "4_trial_repetition_pool",
+            upstream_manifest_path=source_manifest_path,
+            design_signature=_design_segment_signatures(design)[4],
+        ),
         "loudness_policy": loudness_policy_for_design(design),
         "settings": settings,
         "balancing_seed": balancing_seed,
@@ -7591,6 +7735,20 @@ def _bake_block_csv_preview(
     *,
     progress: Callable[[int, int, str], None] | None = None,
 ) -> dict[str, Any]:
+    root = _block_csv_preview_root(render_dir)
+    return _transactional_segment_rebuild(
+        root,
+        lambda: _build_block_csv_preview(design, render_dir, recipe, progress=progress),
+    )
+
+
+def _build_block_csv_preview(
+    design: StimulusDesign,
+    render_dir: Path,
+    recipe: dict[str, Any],
+    *,
+    progress: Callable[[int, int, str], None] | None = None,
+) -> dict[str, Any]:
     source_manifest_path = _trial_pool_manifest_path(render_dir)
     source_manifest = _load_json(source_manifest_path)
     source_errors = _validate_trial_pool_manifest(source_manifest, project_dir=render_dir, design=design)
@@ -7705,6 +7863,11 @@ def _bake_block_csv_preview(
         "root": str(root),
         "source_segment4_manifest": str(source_manifest_path),
         "source_segment4_manifest_sha256": _local_file_sha256(source_manifest_path),
+        "segment_lineage": build_segment_lineage(
+            "5_block_csv_preview",
+            upstream_manifest_path=source_manifest_path,
+            design_signature=_design_segment_signatures(design)[5],
+        ),
         "source_segment4_csv": str(pool_csv_path),
         "loudness_policy": loudness_policy_for_design(design),
         "block_count": block_count,
@@ -8517,6 +8680,11 @@ def _normalize_dashboard_design(design: StimulusDesign) -> StimulusDesign:
     updated = _ensure_source_trajectory_snapshots(updated)
     updated = _ensure_preload_source_assets(updated)
     return _prune_custom_trial_strip_source_labels(updated)
+
+
+def load_dashboard_design(path: Path) -> StimulusDesign:
+    """Load a normalized Designer document through a public applet boundary."""
+    return _normalize_dashboard_design(load_design(Path(path)))
 
 
 def _available_sequence_source_labels(design: StimulusDesign) -> set[str]:
@@ -9451,17 +9619,19 @@ def _ensure_project_directories(context: DashboardProjectContext) -> None:
 
 
 def _clear_downstream_segment_outputs(context: DashboardProjectContext, *, from_segment: int) -> None:
-    targets: list[Path] = []
-    if from_segment <= 1:
-        targets.extend([context.segment2_dir, context.segment3_dir, context.segment4_dir, context.segment5_dir, context.segment6_dir])
-    elif from_segment <= 2:
-        targets.extend([context.segment3_dir, context.segment4_dir, context.segment5_dir, context.segment6_dir])
-    elif from_segment <= 3:
-        targets.extend([context.segment4_dir, context.segment5_dir, context.segment6_dir])
-    elif from_segment <= 4:
-        targets.extend([context.segment5_dir, context.segment6_dir])
-    elif from_segment <= 5:
-        targets.append(context.segment6_dir)
+    segment_folders = {
+        "1_core_audio_ingredients": context.segment1_dir,
+        "2_trial_sequence_designs": context.segment2_dir,
+        "3_tactile_and_baseline_trials": context.segment3_dir,
+        "4_trial_repetition_pool": context.segment4_dir,
+        "5_block_csv_preview": context.segment5_dir,
+        "6_experiment_run_setup": context.segment6_dir,
+    }
+    targets = [
+        segment_folders[definition.key]
+        for definition in downstream_definitions(from_segment)
+        if definition.key in segment_folders
+    ]
     for target in targets:
         resolved = target.resolve()
         project_resolved = context.project_dir.resolve()
@@ -10079,6 +10249,7 @@ def _write_project_context_files(context: DashboardProjectContext, design: Stimu
         **context.to_dict(),
         "active_design_path": str(context.profile_dir / "active_design.json"),
         "study_manifest_path": str(context.profile_dir / "study_manifest.json"),
+        "segment_lineage": build_segment_lineage("0_profile", created_at=context.created_at),
     }
     _write_text_file(context.profile_dir / "project_manifest.json", json.dumps(_json_ready(manifest), indent=2) + "\n", encoding="utf-8")
     _write_text_file(

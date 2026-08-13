@@ -2201,3 +2201,22 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   Exact current-path bindings are authoritative only for the current design
   serializer. Older GUI/backend routing labels remain provisional and are not
   source-fidelity or implementation claims.
+
+## 2026-08-13 — Stable modular Designer-to-Runner boundary
+
+- Preserve the current frontend and seven visible workflow segments while
+  keeping their backend and AI-memory ownership equally modular. The canonical
+  chain is Segment 0 through Segment 6, and every new segment manifest records
+  the previous manifest as its hashed input through
+  `pps-segment-lineage.v1`. Legacy manifests remain readable.
+- Use named product operations and stable `pps-application-error.v1` payloads
+  at the frontend/backend boundary. REST remains the current adapter; a future
+  Tauri shell should implement the same narrow operations rather than expose a
+  generic filesystem/process bridge or rewrite the interface.
+- Treat background work as owned application state: fixed worker count,
+  bounded pending work, cancellation, safe terminal snapshots, and lifecycle
+  shutdown. Segment 2-5 rebuild failures restore the previous complete output.
+- Keep the Runner decoupled from private dashboard helpers through
+  `profile_preparation.py`, whose successful result is a validated and hashed
+  Segment 6 handoff. Keep this module graph current in `For-AI/` whenever UI
+  segment names, manifests, dependencies, or applet boundaries change.

@@ -2,6 +2,13 @@ import {
   initializeDocumentationTypography,
   refreshDocumentationTypography,
 } from "./documentation_typography.js";
+import { DesignerApiError, createDesignerApi } from "./designer_api.js";
+import {
+  NEXT_STEP,
+  STEP_SEGMENT_FOLDERS,
+  STEP_TARGETS,
+  WORKFLOW_STEPS,
+} from "./segment_registry.js";
 
 let state = null;
 let viewerReady = false;
@@ -84,35 +91,8 @@ const STATIC_COMPANION_REQUIRED_MESSAGE =
   "This action needs the installed PPS Designer. Hosted mode can compose and export profiles, but cannot render audio, write workspace folders, or launch the Runner.";
 const PROFILE_RECREATION_NOTICE =
   "Be aware: this is not the exact stimulus set used in the original study. This preload recreates the study's reported parameters within this interface, using the toolkit's local rendering and bundled profile assets.";
-const WORKFLOW_STEPS = ["study", "stimulus", "trials", "baseline", "block", "schedule", "run"];
 const DESIGNER_PROGRESS_KEY = "designer_progress";
 const DESIGNER_PROGRESS_SCHEMA = "pps-designer-progress.v1";
-const STEP_TARGETS = {
-  study: "study-segment",
-  stimulus: "stimulus-segment",
-  trials: "trials-segment",
-  baseline: "baseline-segment",
-  block: "block-segment",
-  schedule: "schedule-segment",
-  run: "run-segment"
-};
-const NEXT_STEP = {
-  study: "stimulus",
-  stimulus: "trials",
-  trials: "baseline",
-  baseline: "block",
-  block: "schedule",
-  schedule: "run"
-};
-const STEP_SEGMENT_FOLDERS = {
-  study: "0_profile",
-  stimulus: "1_core_audio_ingredients",
-  trials: "2_trial_sequence_designs",
-  baseline: "3_tactile_and_baseline_trials",
-  block: "4_trial_repetition_pool",
-  schedule: "5_block_csv_preview",
-  run: "6_experiment_run_setup"
-};
 const SEGMENT_INFO = {
   study: {
     kicker: "Segment 0",
@@ -715,20 +695,29 @@ async function api(path, options = {}) {
   }
   if (!response.ok) {
     let detail = `${response.status} ${response.statusText}`;
+    let boundaryError = {};
     try {
       const raw = await response.text();
       const data = raw ? JSON.parse(raw) : {};
       detail = data.detail || detail;
+      boundaryError = data.error && typeof data.error === "object" ? data.error : {};
     } catch (_err) {
       // Keep the status line when the response is not JSON, such as a static-site 404.
     }
     // HTTP errors still mean the companion answered; only fetch failures are disconnected.
     setConnectionStatus(true);
-    throw new Error(detail);
+    throw new DesignerApiError(detail, {
+      code: boundaryError.code,
+      retryable: boundaryError.retryable,
+      segmentKey: boundaryError.segment_key,
+      status: response.status,
+    });
   }
   setConnectionStatus(true);
   return response.json();
 }
+
+const designerApi = createDesignerApi(api);
 
 function apiUrl(path) {
   if (/^https?:\/\//i.test(path)) return path;
@@ -2904,7 +2893,7 @@ async function loadState(options = {}) {
     return;
   }
   try {
-    state = await api("/api/state", { skipStaticGuard: true });
+    state = await designerApi.state({ skipStaticGuard: true });
     staticModeActive = false;
     staticModeReason = "";
     const request = pendingInitialTemplateRequest(state.templates || []);
@@ -2913,7 +2902,7 @@ async function loadState(options = {}) {
     } else if (request.id) {
       const alreadySelected = state.selected_template === request.id && state.design?.study_profile_id === request.id;
       if (!alreadySelected) {
-        state = await api(`/api/templates/${encodeURIComponent(request.id)}/load`, { method: "POST" });
+        state = await designerApi.loadTemplate(request.id);
       }
       initialTemplateRequestHandled = true;
     }
@@ -5843,10 +5832,7 @@ async function previewFilmstripRow(button) {
   button.classList.add("playing");
   let started = false;
   try {
-    const preview = await api("/api/trials/preview-row", {
-      method: "POST",
-      body: JSON.stringify(payload)
-    });
+    const preview = await designerApi.previewTrialRow(payload);
     if (activeTrialRowPreviewAudio) {
       activeTrialRowPreviewAudio.pause();
       activeTrialRowPreviewAudio = null;
@@ -5898,10 +5884,7 @@ async function previewSourceLabel(button) {
       showToast(`Soundcheck: ${staticAsset.label || label}`);
       return;
     }
-    const preview = await api("/api/audio/preview-source", {
-      method: "POST",
-      body: JSON.stringify(payload)
-    });
+    const preview = await designerApi.previewAudioSource(payload);
     button.disabled = false;
     await playSourcePreviewAudio(
       apiUrl(`${preview.url}?v=${Date.now()}`),
@@ -6885,10 +6868,7 @@ async function applyDesign() {
     state.design = collectPayload().design;
     await window.PPSDesigner?.drafts?.save(state);
   } else {
-    state = await api("/api/design", {
-      method: "POST",
-      body: JSON.stringify(collectPayload())
-    });
+    state = await designerApi.saveDesign(collectPayload());
   }
   markDesignerSaved();
   renderAll();
@@ -6950,10 +6930,7 @@ async function continueWorkflowStep(stepId) {
       }
       await window.PPSDesigner?.drafts?.save(state);
     } else {
-      state = await api("/api/design", {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
+      state = await designerApi.saveDesign(payload);
       actionResult = state.workflow_action_result || null;
     }
     markDesignerSaved();
@@ -7006,15 +6983,12 @@ async function reopenWorkflowStep(stepId) {
       });
       await window.PPSDesigner?.drafts?.save(state);
     } else {
-      state = await api("/api/design", {
-        method: "POST",
-        body: JSON.stringify({
-          workflow_action: {
-            type: "reopen",
-            step_id: stepId,
-            expected_revision: progress.revision,
-          },
-        }),
+      state = await designerApi.saveDesign({
+        workflow_action: {
+          type: "reopen",
+          step_id: stepId,
+          expected_revision: progress.revision,
+        },
       });
     }
     markDesignerSaved();
@@ -7061,7 +7035,7 @@ async function loadTemplate() {
   templateLoadInFlight = true;
   select.disabled = true;
   try {
-    state = await api(`/api/templates/${encodeURIComponent(id)}/load`, { method: "POST" });
+    state = await designerApi.loadTemplate(id);
     await applyStaticProfileInspectionPreview();
     resetEditMode();
     renderAll();
@@ -7080,7 +7054,7 @@ async function loadCustomProject(projectIdOverride = "") {
     showToast("Choose a custom study to open");
     return;
   }
-  state = await api(`/api/projects/${encodeURIComponent(projectId)}/load`, { method: "POST" });
+  state = await designerApi.loadProject(projectId);
   resetEditMode();
   renderAll();
   updateViewer();
@@ -7090,10 +7064,7 @@ async function loadCustomProject(projectIdOverride = "") {
 
 async function exportDataAcquisitionFolder() {
   const payload = isProfileReadonlyMode() ? collectProfileRunPayload() : collectPayload();
-  state = await api("/api/data-acquisition/export", {
-    method: "POST",
-    body: JSON.stringify(payload)
-  });
+  state = await designerApi.exportDataAcquisition(payload);
   renderAll();
   updateViewer();
   showToast("Data acquisition folder linked");
@@ -7498,10 +7469,7 @@ async function createBlankCustomProject(name) {
     state.preload_inventory = {};
     await window.PPSDesigner?.drafts?.save(state);
   } else {
-    state = await api("/api/project/new-custom", {
-      method: "POST",
-      body: JSON.stringify({ name: cleanName }),
-    });
+    state = await designerApi.createCustomProject({ name: cleanName });
   }
   editModeActive = true;
   markDesignerSaved();
@@ -7556,10 +7524,7 @@ async function customizeAsNewProject(name) {
     };
     await window.PPSDesigner?.drafts?.save(state);
   } else {
-    state = await api("/api/project/customize", {
-      method: "POST",
-      body: JSON.stringify({ name: cleanName })
-    });
+    state = await designerApi.customizeProject({ name: cleanName });
   }
   editModeActive = true;
   markDesignerSaved();
@@ -7608,10 +7573,7 @@ async function startBakeStimulus() {
   }
   const payload = collectPayload({ includeIngredientDraft: true });
   payload.bake_recipe = recipe;
-  const job = await api("/api/stimulus/bake", {
-    method: "POST",
-    body: JSON.stringify(payload)
-  });
+  const job = await designerApi.bakeStimulus(payload);
   ingredientEditorDirty = false;
   markDesignerSaved();
   showToast(recipe.action === "remake" ? "Atomic ingredient remake started" : "Ingredient creation started");
@@ -7634,10 +7596,7 @@ async function startBakeTrialSequences() {
   }
   const payload = collectPayload();
   payload.bake_recipe = { kind: "trial_sequence_batch", label: "2_trial_sequence_designs" };
-  const job = await api("/api/stimulus/bake", {
-    method: "POST",
-    body: JSON.stringify(payload)
-  });
+  const job = await designerApi.bakeStimulus(payload);
   markDesignerSaved();
   showToast("Trial sequence bake started");
   pollJob(job.job_id);
@@ -7653,10 +7612,7 @@ async function startBakeTrialFiles() {
   }
   const payload = collectPayload();
   payload.bake_recipe = { kind: "audiotactile_trial_batch", label: "3_tactile_and_baseline_trials" };
-  const job = await api("/api/stimulus/bake", {
-    method: "POST",
-    body: JSON.stringify(payload)
-  });
+  const job = await designerApi.bakeStimulus(payload);
   markDesignerSaved();
   showToast("Baseline/tactile trial bake started");
   pollJob(job.job_id);
@@ -7691,10 +7647,7 @@ async function startBakeTrialPool() {
   }
   const payload = collectPayload();
   payload.bake_recipe = trialPoolBakeRecipe();
-  const job = await api("/api/stimulus/bake", {
-    method: "POST",
-    body: JSON.stringify(payload)
-  });
+  const job = await designerApi.bakeStimulus(payload);
   markDesignerSaved();
   showToast("Trial pool CSV bake started");
   pollJob(job.job_id);
@@ -7714,7 +7667,7 @@ async function startBakeBlockCsvs() {
       showToast("Block generation needs the installed PPS Designer. Export this browser draft to continue locally.");
       return;
     }
-    state = await api("/api/block-csv/edit", { method: "POST" });
+    state = await designerApi.editBlockCsv();
   }
   const blockCount = Math.max(1, Math.round(numberValue("block-count", numberValue("blocks", 1))));
   const seed = normalizedRandomizationSeed($("block-randomization-seed")?.value, normalizedRandomizationSeed(state?.design?.protocol?.random_seed));
@@ -7731,10 +7684,7 @@ async function startBakeBlockCsvs() {
       block_count: blockCount,
       seed,
     };
-    const job = await api("/api/stimulus/bake", {
-      method: "POST",
-      body: JSON.stringify(payload)
-    });
+    const job = await designerApi.bakeStimulus(payload);
     markDesignerSaved();
     setBlockProgress(job.progress_current || 0, job.progress_total || blockCount, job.progress_label || "queued");
     showToast("Block regeneration started");
@@ -7792,10 +7742,7 @@ async function acceptBlockCsvs() {
       step_id: "schedule",
       expected_revision: progress.revision,
     };
-    state = await api("/api/block-csv/accept", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
+    state = await designerApi.acceptBlockCsv(payload);
   }
   markDesignerSaved();
   renderAll();
@@ -7930,10 +7877,7 @@ async function previewRunSequence() {
     renderAll();
     return;
   }
-  state = await api("/api/run-sequence/preview", {
-    method: "POST",
-    body: JSON.stringify(collectPayload())
-  });
+  state = await designerApi.previewRunSequence(collectPayload());
   renderAll();
 }
 
@@ -8031,16 +7975,10 @@ async function submitSaveProfileModal() {
   }
   $("save-profile-submit").disabled = true;
   try {
-    state = await api("/api/design", {
-      method: "POST",
-      body: JSON.stringify(collectPayload()),
-    });
-    state = await api("/api/profiles/save-prepared", {
-      method: "POST",
-      body: JSON.stringify({
-        name: cleanName,
-        expected_revision: normalizedDesignerProgress().revision,
-      })
+    state = await designerApi.saveDesign(collectPayload());
+    state = await designerApi.savePreparedProfile({
+      name: cleanName,
+      expected_revision: normalizedDesignerProgress().revision,
     });
     editModeActive = false;
     markDesignerSaved();
@@ -8063,10 +8001,7 @@ async function exportOutputFolder() {
     return;
   }
   const payload = isProfileReadonlyMode() ? collectProfileRunPayload() : collectPayload();
-  state = await api("/api/run-sequence/export-bridge", {
-    method: "POST",
-    body: JSON.stringify(payload)
-  });
+  state = await designerApi.exportRunSequenceBridge(payload);
   renderAll();
   showToast("Output folder prepared for data collection");
 }
@@ -8076,15 +8011,9 @@ async function prepareExperiment() {
   if (!profileRunMode && !ensureEditableProject()) return;
   const prepared = Boolean(state.run_sequence_setup?.prepared || projectSegment("6_experiment_run_setup").status === "ready");
   if (!prepared && !profileRunMode) {
-    state = await api("/api/run-sequence/prepare", {
-      method: "POST",
-      body: JSON.stringify(collectPayload())
-    });
+    state = await designerApi.prepareRunSequence(collectPayload());
   }
-  state = await api("/api/run-sequence/open-runner", {
-    method: "POST",
-    body: JSON.stringify(profileRunMode ? collectProfileRunPayload() : collectPayload())
-  });
+  state = await designerApi.openRunner(profileRunMode ? collectProfileRunPayload() : collectPayload());
   renderAll();
   const toastMessage = prepared
     ? "Local runner opened"
@@ -8095,10 +8024,7 @@ async function prepareExperiment() {
 
 async function openLocalFolder(path) {
   if (!path) return;
-  await api("/api/local/open-folder", {
-    method: "POST",
-    body: JSON.stringify({ path })
-  });
+  await designerApi.openLocalFolder({ path });
   showToast("Opened local folder");
 }
 
@@ -8107,9 +8033,9 @@ async function pollJob(jobId) {
   activePolls.add(jobId);
   for (;;) {
     await delay(900);
-    const job = await api(`/api/jobs/${jobId}`);
+    const job = await designerApi.job(jobId);
     await loadState();
-    if (job.status === "succeeded" || job.status === "failed") {
+    if (["succeeded", "failed", "cancelled"].includes(job.status)) {
       activePolls.delete(jobId);
       if (job.status === "succeeded" && (job.kind === "stimulus_bake" || job.kind === "block_csv_preview")) {
         if (!["audiotactile_trial_batch", "trial_sequence_batch", "trial_repetition_pool"].includes(job.result?.source_kind)) {
@@ -8824,14 +8750,11 @@ async function importAudioFromPicker() {
   const contentBase64 = await fileToBase64(file);
   if (pendingInstructionSlot) {
     const current = collectRunInstructionProfile().slots.find((slot) => slot.slot === pendingInstructionSlot) || {};
-    const importedState = await api("/api/run-instructions/import", {
-      method: "POST",
-      body: JSON.stringify({
-        slot: pendingInstructionSlot,
-        filename: file.name,
-        content_base64: contentBase64,
-        label: current.label || file.name.replace(/\.[^.]+$/, "")
-      })
+    const importedState = await designerApi.importRunInstructions({
+      slot: pendingInstructionSlot,
+      filename: file.name,
+      content_base64: contentBase64,
+      label: current.label || file.name.replace(/\.[^.]+$/, ""),
     });
     state = importedState;
     pendingInstructionSlot = "";
@@ -8840,21 +8763,18 @@ async function importAudioFromPicker() {
     showToast("Instruction audio clip imported locally");
     return;
   }
-  const imported = await api("/api/audio/import", {
-    method: "POST",
-    body: JSON.stringify({
-      filename: file.name,
-      content_base64: contentBase64,
-      use: pendingAudioImportMode === "prestimulus" ? "prestimulus" : "looming",
-      render_mode: pendingAudioImportMode === "spatialize" ? "spatialize" : "preserve",
-      motion_mode: pendingAudioImportMode === "preserve" || pendingAudioImportMode === "prestimulus" ? "stationary" : "looming",
-      placement: "before",
-      target_source_label: "",
-      phase: "",
-      gap_s: 0,
-      display_color_hex: pendingDisplayColorHex,
-      stage_only: true
-    })
+  const imported = await designerApi.importAudio({
+    filename: file.name,
+    content_base64: contentBase64,
+    use: pendingAudioImportMode === "prestimulus" ? "prestimulus" : "looming",
+    render_mode: pendingAudioImportMode === "spatialize" ? "spatialize" : "preserve",
+    motion_mode: pendingAudioImportMode === "preserve" || pendingAudioImportMode === "prestimulus" ? "stationary" : "looming",
+    placement: "before",
+    target_source_label: "",
+    phase: "",
+    gap_s: 0,
+    display_color_hex: pendingDisplayColorHex,
+    stage_only: true,
   });
   if (pendingBakeRecipe?.action === "remake") {
     pendingBakeRecipe.audio = {

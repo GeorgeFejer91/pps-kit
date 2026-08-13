@@ -400,12 +400,16 @@ def remove_project_tree(path: Path) -> None:
 def refresh_project_dependency_hashes(project_dir: Path) -> None:
     """Refresh manifest-to-manifest hashes after copying and rebasing a profile."""
     root = Path(project_dir)
+    segment0_manifest = root / "0_profile" / "project_manifest.json"
+    segment1_manifest = root / "1_core_audio_ingredients" / "stimulus_ingredients_manifest.json"
     segment2_manifest = root / "2_trial_sequence_designs" / "trial_sequence_variants_manifest.json"
     segment3_manifest = root / "3_tactile_and_baseline_trials" / "baseline_tactile_trial_files_manifest.json"
     segment4_manifest = root / "4_trial_repetition_pool" / "trial_repetition_pool_manifest.json"
     segment5_manifest = root / "5_block_csv_preview" / "block_csv_preview_manifest.json"
     segment6_manifest = root / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
     updates = (
+        (segment1_manifest, "", segment0_manifest),
+        (segment2_manifest, "", segment1_manifest),
         (segment3_manifest, "trial_sequence_manifest_sha256", segment2_manifest),
         (segment4_manifest, "source_segment3_manifest_sha256", segment3_manifest),
         (segment5_manifest, "source_segment4_manifest_sha256", segment4_manifest),
@@ -418,10 +422,18 @@ def refresh_project_dependency_hashes(project_dir: Path) -> None:
         if not payload:
             continue
         digest = _sha256_file(source_path)
-        if not digest or payload.get(field_name) == digest:
+        if not digest:
             continue
-        payload[field_name] = digest
-        _write_json_file(manifest_path, payload)
+        changed = False
+        if field_name and payload.get(field_name) != digest:
+            payload[field_name] = digest
+            changed = True
+        lineage = payload.get("segment_lineage")
+        if isinstance(lineage, dict) and lineage.get("upstream_manifest_sha256") != digest:
+            lineage["upstream_manifest_sha256"] = digest
+            changed = True
+        if changed:
+            _write_json_file(manifest_path, payload)
 
 
 def rebase_project_copy_paths(project_dir: Path, *, old_root: Path, new_root: Path) -> None:

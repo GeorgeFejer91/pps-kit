@@ -48,9 +48,39 @@ def test_desktop_capability_contract(tmp_path: Path) -> None:
     assert capabilities["mode"] == "desktop_full"
     assert capabilities["can_render_looming"] is True
     assert capabilities["can_launch_runner"] is True
+    assert [segment["key"] for segment in capabilities["segments"]] == [
+        "0_profile",
+        "1_core_audio_ingredients",
+        "2_trial_sequence_designs",
+        "3_tactile_and_baseline_trials",
+        "4_trial_repetition_pool",
+        "5_block_csv_preview",
+        "6_experiment_run_setup",
+    ]
     compiled = client.get("/dashboard/compiled/index.html")
     assert compiled.status_code == 200
     assert "PPS Experiment Designer" in compiled.text
+
+
+def test_designer_api_errors_have_stable_machine_readable_contract(tmp_path: Path) -> None:
+    controller = DashboardController(
+        design_path=tmp_path / "design.json",
+        render_dir=tmp_path / "render",
+        session_root=tmp_path / "sessions",
+        import_dir=tmp_path / "imports",
+        preview_dir=tmp_path / "previews",
+        project_registry_root=tmp_path / "registry",
+    )
+    client = TestClient(create_app(controller))
+
+    response = client.post("/api/project/new-custom", json={"name": "   "})
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["detail"] == payload["error"]["message"]
+    assert payload["error"]["schema"] == "pps-application-error.v1"
+    assert payload["error"]["code"] == "request_failed"
+    assert payload["error"]["retryable"] is False
 
 
 def test_segment_zero_creates_named_clean_slate_in_researcher_workspace(tmp_path: Path) -> None:

@@ -244,12 +244,15 @@ def test_dashboard_static_assets_are_packaged():
     assert dashboard_files.joinpath("index.html").is_file()
     assert dashboard_files.joinpath("styles.css").is_file()
     assert dashboard_files.joinpath("app.js").is_file()
+    assert dashboard_files.joinpath("designer_api.js").is_file()
+    assert dashboard_files.joinpath("segment_registry.js").is_file()
     assert dashboard_files.joinpath("documentation_typography.js").is_file()
     assert dashboard_files.joinpath("hardware_pixel_art.js").is_file()
     assert viewer_files.joinpath("trajectory-viewer.js").is_file()
 
     html = dashboard_files.joinpath("index.html").read_text(encoding="utf-8")
     app_js = dashboard_files.joinpath("app.js").read_text(encoding="utf-8")
+    designer_api_js = dashboard_files.joinpath("designer_api.js").read_text(encoding="utf-8")
     documentation_typography_js = dashboard_files.joinpath("documentation_typography.js").read_text(encoding="utf-8")
     hardware_pixel_js = dashboard_files.joinpath("hardware_pixel_art.js").read_text(encoding="utf-8")
     styles_css = dashboard_files.joinpath("styles.css").read_text(encoding="utf-8")
@@ -258,7 +261,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260811-segment1-workspace"
+    static_version = "20260813-segment-contracts"
     assert f'href="styles.css?v={static_version}"' in html
     assert 'import("./hardware_pixel_art.js")' in app_js
     assert f'src="app.js?v={static_version}"' in html
@@ -328,8 +331,8 @@ def test_dashboard_static_assets_are_packaged():
     assert "Start New Custom Design" in html
     assert "Done — Lock Profile" in html
     assert "Export .pps-profile" in html
-    assert "/api/profiles/save-prepared" in app_js
-    assert "/api/run-sequence/export-bridge" in app_js
+    assert "/api/profiles/save-prepared" in designer_api_js
+    assert "/api/run-sequence/export-bridge" in designer_api_js
     assert 'id="edit-profile-rail"' not in html
     assert "Edit As New Study" not in html
     assert 'id="customize-modal"' in html
@@ -370,9 +373,9 @@ def test_dashboard_static_assets_are_packaged():
         "4_trial_repetition_pool Trial Repetition Pool",
     ]:
         assert slugged_title not in html
-    assert "/api/project/customize" in app_js
-    assert "/api/project/new-custom" in app_js
-    assert "/api/projects/${encodeURIComponent(projectId)}/load" in app_js
+    assert "/api/project/customize" in designer_api_js
+    assert "/api/project/new-custom" in designer_api_js
+    assert "/api/projects/${encodeURIComponent(projectId)}/load" in designer_api_js
     assert "profile-readonly-mode" in app_js
     assert "collectProfileRunPayload" in app_js
     assert 'control.id === "export-profile-bundle"' in app_js
@@ -549,7 +552,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "Preload Instruction Audio Clips" in html
     assert 'id="run-instruction-slots"' in html
     assert "RUN_INSTRUCTION_SLOTS" in app_js
-    assert "/api/run-instructions/import" in app_js
+    assert "/api/run-instructions/import" in designer_api_js
     assert "required: false" in app_js
     assert ".run-instruction-slot" in styles_css
     assert ".status-label.optional" in styles_css
@@ -559,7 +562,7 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="prepare-experiment" type="button" class="state-only" hidden' in html
     assert 'id="export-output-folder" type="button" class="state-only" hidden' in html
     assert "bundleButton.hidden = !finalized" in app_js
-    assert "/api/run-sequence/open-runner" in app_js
+    assert "/api/run-sequence/open-runner" in designer_api_js
     assert ".block-csv-decision-actions" in styles_css
     assert ".run-sequence-actions" in styles_css
     assert 'id="participant-id"' not in html
@@ -594,9 +597,9 @@ def test_dashboard_static_assets_are_packaged():
     assert "Add Instruction Clip" not in html
     assert "Instruction Snippets" not in html
     assert "Instruction Snippet" not in app_js
-    assert "/api/stimulus/bake" in app_js
-    assert "/api/trials/preview-row" in app_js
-    assert "/api/audio/preview-source" in app_js
+    assert "/api/stimulus/bake" in designer_api_js
+    assert "/api/trials/preview-row" in designer_api_js
+    assert "/api/audio/preview-source" in designer_api_js
     assert "data-preview-strip" in app_js
     assert "filmstrip-preview-button" in app_js
     assert "trial-row-empty" in app_js
@@ -661,7 +664,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "baselineCountEstimate" in app_js
     assert "updateBaselineDecision" in app_js
     assert "renderPreloadAssetStatus" not in app_js
-    assert "/api/local/open-folder" in app_js
+    assert "/api/local/open-folder" in designer_api_js
     assert "data-open-folder" in app_js
     assert "Open Folder" in app_js
     assert "HTTP errors still mean the companion answered" in app_js
@@ -964,7 +967,8 @@ def test_dashboard_payload_uses_normalized_trajectory_controls_for_render_and_ba
     assert "collectPayload({ includeIngredientDraft: true })" in app_js
     assert "trajectory_controls: trajectoryControls" in app_js
     assert ": [trajectoryControls.end_distance_cm]" in app_js
-    assert 'body: JSON.stringify(collectPayload())' in app_js
+    assert "designerApi.saveDesign(collectPayload())" in app_js
+    assert "designerApi.bakeStimulus(payload)" in app_js
     assert "payload.bake_recipe = recipe" in app_js
     assert 'movement_duration_s: clampNumber(numberValue("movement-duration", 3), 0.1, 30, 3)' in app_js
     assert 'start_hold_s: clampNumber(numberValue("start-hold", 0.5), 0, 30, 0.5)' in app_js

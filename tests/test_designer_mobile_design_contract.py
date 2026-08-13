@@ -480,7 +480,7 @@ def test_compiled_dashboard_and_public_wrappers_share_one_cache_token() -> None:
     )
     assert len(versions) == 1
     version = versions.pop()
-    assert version == "20260811-segment1-workspace"
+    assert version == "20260813-segment-contracts"
 
     wrappers = {
         "toolkit": (ROOT / "index.html").read_text(encoding="utf-8"),

@@ -181,6 +181,7 @@ from .profile_memory import (
     resolve_profile_entry,
     update_runner_settings as update_profile_runner_settings,
 )
+from .profile_preparation import load_prepared_design, prepare_profile_for_runner
 from .runtime_paths import repo_root
 from .tactile_calibration import (
     CALIBRATION_SCHEMA,
@@ -5709,20 +5710,6 @@ def prepare_last_or_latest_focus_session(
     )
 
 
-def _focus_dashboard_controller() -> Any:
-    from . import dashboard_app
-
-    output_root = active_output_folder(state_root=DEFAULT_DASHBOARD_STATE_ROOT, fallback=DEFAULT_SESSION_ROOT)
-    return dashboard_app.DashboardController(
-        design_path=DEFAULT_FOCUS_PROFILE_DESIGN_PATH,
-        render_dir=DEFAULT_RENDER_DIR,
-        session_root=output_root,
-        import_dir=dashboard_app.DEFAULT_IMPORT_DIR,
-        preview_dir=dashboard_app.DEFAULT_PREVIEW_DIR,
-        project_registry_root=DEFAULT_PROJECT_REGISTRY_ROOT,
-    )
-
-
 def finished_profile_options() -> list[tuple[str, str]]:
     """Return Segment 6-launchable bundled and local profiles for the launcher."""
     catalog = build_profile_catalog(
@@ -5793,9 +5780,7 @@ def _environment_design_and_run_setup(profile_id: str, output_root: Path | None 
     design_path = snapshot_dir / "0_profile" / "active_design.json"
     if not design_path.is_file():
         return None
-    from . import dashboard_app
-
-    design = dashboard_app._normalize_dashboard_design(dashboard_app.load_design(design_path))
+    design = load_prepared_design(design_path)
     return design, run_setup
 
 
@@ -6607,61 +6592,17 @@ def _materialize_profile_run_setup(
     *,
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> tuple[Any, Any, Path]:
-    from . import dashboard_app
-
-    entry = resolve_profile_entry(
+    prepared = prepare_profile_for_runner(
         profile_id,
+        progress_callback=progress_callback,
+        design_path=DEFAULT_FOCUS_PROFILE_DESIGN_PATH,
+        render_dir=DEFAULT_RENDER_DIR,
         registry_root=DEFAULT_PROJECT_REGISTRY_ROOT,
         state_root=DEFAULT_DASHBOARD_STATE_ROOT,
         session_root=active_output_folder(state_root=DEFAULT_DASHBOARD_STATE_ROOT, fallback=DEFAULT_SESSION_ROOT),
-        inventory=load_preload_inventory(repo_root()),
     )
-    if entry.get("kind") == "custom":
-        run_setup_manifest_path = Path(str(entry.get("run_setup_manifest_path") or ""))
-        if not bool(entry.get("profile_ready", entry.get("segment_6_ready"))):
-            reasons = entry.get("missing_or_stale_asset_reasons") or ["The profile is not ready for Runner materialization."]
-            raise ValueError(f"Local study profile '{profile_id}' cannot be launched: {str(reasons[0])}")
-        design_path = Path(str(entry.get("project_dir") or "")) / "0_profile" / "active_design.json"
-        if not design_path.is_file():
-            raise FileNotFoundError(f"Stored profile design is missing: {design_path}")
-        if not run_setup_manifest_path.is_file() or bool(entry.get("runner_materialization_required")):
-            controller = dashboard_app.DashboardController(
-                design_path=design_path,
-                render_dir=DEFAULT_RENDER_DIR,
-                session_root=active_output_folder(state_root=DEFAULT_DASHBOARD_STATE_ROOT, fallback=DEFAULT_SESSION_ROOT),
-                project_registry_root=DEFAULT_PROJECT_REGISTRY_ROOT,
-            )
-            result = controller.prepare_experiment_run_setup()
-            run_setup_manifest_path = Path(str(result.get("run_sequence_prepare_result", {}).get("manifest_path") or ""))
-            if not run_setup_manifest_path.is_file():
-                raise RuntimeError(f"Runner could not materialize an order manifest for '{profile_id}'.")
-            return controller, dashboard_app._copy_design(controller.design), run_setup_manifest_path
-        design = dashboard_app._normalize_dashboard_design(dashboard_app.load_design(design_path))
-        return SimpleNamespace(design_path=design_path), design, run_setup_manifest_path
-
-    controller = _focus_dashboard_controller()
-    inventory_profiles = controller.preload_inventory_payload().get("profiles", [])
-    status = next((item for item in inventory_profiles if item.get("template_id") == profile_id), None)
-    if status is None:
-        raise ValueError(f"Unknown study/profile preset: {profile_id}")
-    if not (status.get("finished_profile") and status.get("segment_6_launchable")):
-        reason = str(status.get("profile_completion_status") or status.get("runner_readiness") or "unfinished_preload")
-        raise ValueError(
-            f"Study/profile preset '{profile_id}' is not a finished Segment 6 launchable profile yet ({reason})."
-        )
-
-    controller.load_template(profile_id, snapshot=False)
-    with controller._lock:
-        project = controller._ensure_project_context(controller.design, clear_stale_profile_outputs=True)
-        design = dashboard_app._copy_design(controller.design)
-    controller._ensure_profile_run_artifacts(project, design, progress_callback=progress_callback)
-    with controller._lock:
-        project = controller._ensure_project_context(controller.design)
-        design = dashboard_app._copy_design(controller.design)
-    run_setup_manifest_path = dashboard_app._run_setup_manifest_path(project.project_dir)
-    if not run_setup_manifest_path.is_file():
-        raise RuntimeError(f"Study/profile preset '{profile_id}' did not produce a Segment 6 run setup.")
-    return controller, design, run_setup_manifest_path
+    controller = prepared.controller or SimpleNamespace(design_path=prepared.design_path)
+    return controller, prepared.design, prepared.run_setup_manifest_path
 
 
 def _parse_participant_number(value: str) -> int:

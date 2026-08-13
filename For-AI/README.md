@@ -46,7 +46,7 @@ Every future AI agent should:
 2. Check whether the current chat changed aims, scope, GUI behavior, data schemas, runner behavior, tests, publication boundaries, or repo structure.
 3. When changing the HTML dashboard, keep the packaged local dashboard and the online/static GitHub Pages dashboard synchronized in the same change set; update and verify both before finalizing.
 4. Preserve the public domain and route contract in `agent_update_protocol.md`: `https://ppskit.qzz.io/` is the toolkit route, `/documentation` is documentation, `/download` is downloads, `https://georgefejer91.github.io/pps-kit/` is the GitHub Pages fallback, and the old `/peripersonal-space-toolkit/` Pages path should not be reintroduced.
-5. Treat `segment_registry_contract.md` as authoritative for Segments 0-3 unless the user explicitly asks to revise that contract.
+5. Treat `segment_registry_contract.md` as authoritative for the full Segment 0-6 chain unless the user explicitly asks to revise that contract.
 6. Preserve the tracked downloader package definition in `windows/installer_package_inventory.v1.json` and the single-file downloader/install-payload boundary in `download_package_inventory.md` when changing packaging.
 7. When changing experiment-runner functionality, update and verify the packaged/local `PPSExperimentRunner.exe` path in the same change set so the installable runner carries the source behavior, not only the Python development entrypoint.
 8. Update the relevant `For-AI/` files before finalizing substantive work.

@@ -93,4 +93,4 @@ def test_compiled_segment1_workspace_matches_source_contract() -> None:
     assert "pps-source-trajectory-select" in compiled_js
     assert ".stimulus-editor-grid" in compiled_css
     versions = set(re.findall(r"(?:styles\.css|app\.js|designer_main\.js)\?v=([\w.-]+)", source_html))
-    assert versions == {"20260811-segment1-workspace"}
+    assert versions == {"20260813-segment-contracts"}

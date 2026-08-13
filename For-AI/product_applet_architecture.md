@@ -198,3 +198,26 @@ reopened review debt; finalization metadata is server-owned. It finalizes the
 profile and makes both design and generated artifacts copy-to-edit-only. The Runner catalogue excludes drafts
 and can materialize the legacy Segment 6 session/order artifact on demand from
 a finalized Segment 0-5 profile.
+
+## Implemented Stable Applet Boundary (2026-08-13)
+
+The Designer now exposes a framework-neutral application boundary that can be
+reused by the current FastAPI/pywebview shell or a future Tauri shell without
+changing the visible frontend. `designer_segments/` owns one backend module per
+visible Segment 0-6, a canonical ordered registry, and additive
+`pps-segment-lineage.v1` hashes so the output manifest of each segment is the
+declared input of the next. Segment 2-5 rebuilds restore their last complete
+folder on failure or cancellation.
+
+The browser calls named product operations through `dashboard/designer_api.js`
+and reads its workflow graph from `dashboard/segment_registry.js`. REST is one
+adapter for that product API; a future Tauri command adapter should implement
+the same operations and `pps-application-error.v1` error object instead of
+changing UI components. Background work uses a fixed daemon worker pool, a
+bounded pending queue, copy-only job snapshots, cooperative cancellation,
+terminal-state retention, and application-lifespan shutdown.
+
+`profile_preparation.py` is the public Designer-to-Runner seam. It resolves a
+profile, invokes only public controller methods, materializes the ordered chain
+when required, validates Segment 6, and returns a hashed `PreparedProfile`.
+Runner code must use this boundary rather than import private dashboard helpers.
