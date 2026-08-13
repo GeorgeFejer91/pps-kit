@@ -53,7 +53,7 @@ const OUTPUT_DIR = outputArgument
   ? path.resolve(REPO_ROOT, outputArgument)
   : path.join(AUDIT_DIR, "publication-parameter-matrix");
 const GENERATED_ON = "2026-08-12";
-const PARSIMONIOUS_CONTRACT_COUNT = 11;
+const PARSIMONIOUS_CONTRACT_COUNT = 13;
 const PYTHON_EXECUTABLE = process.env.PYTHON || (process.platform === "win32" ? "python" : "python3");
 const GENERATED_OUTPUT_FILENAMES = [
   "README.md",
@@ -91,7 +91,11 @@ const GENERATED_OUTPUT_FILENAMES = [
   "study_instance_target_method_evidence_sidecar.csv",
   "study_instance_target_method_validation_gap_matrix.csv",
   "study_instance_target_method_review_queue.csv",
+  "study_factor_levels.csv",
+  "study_measurement_acquisitions.csv",
   "study_orientation_review.csv",
+  "study_schedule_events.csv",
+  "study_structure.csv",
   "study_visualizations.csv",
   "target_method_validation_dictionary.csv",
   "target_method_validation_group_summary.csv",
@@ -402,10 +406,25 @@ function experimentLetter(index) {
   return result;
 }
 
+const RECORD_LEVEL_EVIDENCE_REQUIRES_EXPERIMENT_SPLIT = new Set([
+  "combined_record_requires_experiment_specific_review",
+  "experiment_specific_source_review_available",
+]);
+const REGISTERED_DISAGGREGATION_STATUSES = new Set([
+  ...RECORD_LEVEL_EVIDENCE_REQUIRES_EXPERIMENT_SPLIT,
+  "record_already_experiment_specific",
+  "variant_record_already_disaggregated",
+  "experiment_record_not_available",
+]);
+
+function recordLevelEvidenceRequiresExperimentSplit(disaggregationStatus = "") {
+  return RECORD_LEVEL_EVIDENCE_REQUIRES_EXPERIMENT_SPLIT.has(disaggregationStatus);
+}
+
 function atomicStatusFromParentFields(fields, parentKeys, hasAuditRecord, disaggregationStatus = "") {
   if (!parentKeys.length) return "not_covered_by_current_audit";
   if (!hasAuditRecord) return "not_assessed";
-  if (disaggregationStatus === "combined_record_requires_experiment_specific_review") {
+  if (recordLevelEvidenceRequiresExperimentSplit(disaggregationStatus)) {
     return "composite_parent_atomic_unreviewed";
   }
   const sourceStatuses = unique(
@@ -428,7 +447,7 @@ function joinedParentFieldText(fields, parentKeys, property) {
 
 function orientationStatus(manual, audit, disaggregationStatus = "") {
   if (manual?.orientation_ledger) {
-    return disaggregationStatus === "combined_record_requires_experiment_specific_review"
+    return recordLevelEvidenceRequiresExperimentSplit(disaggregationStatus)
       ? "combined_record_orientation_requires_experiment_check"
       : "structured_orientation_review_present";
   }
@@ -691,10 +710,15 @@ for (const entry of studyInstanceRegistry.entries || []) {
     return counts;
   }, {});
   for (const instance of entry.instances || []) {
+    if (!REGISTERED_DISAGGREGATION_STATUSES.has(instance.disaggregation_status)) {
+      throw new Error(
+        `Unknown disaggregation status ${instance.disaggregation_status} for ${entry.network_node_id}`,
+      );
+    }
     if (
       instance.record_id &&
       recordUseCounts[instance.record_id] > 1 &&
-      instance.disaggregation_status !== "combined_record_requires_experiment_specific_review"
+      !recordLevelEvidenceRequiresExperimentSplit(instance.disaggregation_status)
     ) {
       throw new Error(
         `Reused composite record ${instance.record_id} lacks an experiment-disaggregation flag`,
@@ -1133,7 +1157,7 @@ for (const node of network.nodes) {
           ? "experiment_specific"
           : recordUnit.disaggregationStatus === "variant_record_already_disaggregated"
             ? "variant_specific"
-            : recordUnit.disaggregationStatus === "combined_record_requires_experiment_specific_review"
+            : recordLevelEvidenceRequiresExperimentSplit(recordUnit.disaggregationStatus)
               ? "composite_requires_split"
               : "none",
       known_instance_count: registryEntry?.instances?.length || "",
@@ -1277,7 +1301,7 @@ for (const node of network.nodes) {
           figure_table_panel: "",
           visualization_type: candidate.visualization_type || "",
           confirmation_status:
-            recordUnit.disaggregationStatus === "combined_record_requires_experiment_specific_review"
+            recordLevelEvidenceRequiresExperimentSplit(recordUnit.disaggregationStatus)
               ? "record_level_candidate_requires_experiment_check"
               : "automated_candidate_unverified",
           x_encoding: "",
@@ -1336,8 +1360,8 @@ for (const node of network.nodes) {
   }
 }
 
-if (studyInstanceRows.length !== 124) {
-  throw new Error(`Expected 124 registered study-instance rows, found ${studyInstanceRows.length}`);
+if (studyInstanceRows.length !== 142) {
+  throw new Error(`Expected 142 registered study-instance rows, found ${studyInstanceRows.length}`);
 }
 if (atomicEvidenceRows.length !== studyInstanceRows.length * PAPER_PARAMETERS.length) {
   throw new Error("Atomic evidence ledger is not a complete study-by-parameter Cartesian product");
@@ -2158,11 +2182,13 @@ const markdown = `# Publication-to-Toolkit Input Review Matrix
 
 Generated ${GENERATED_ON} from the tracked \`pps-publication-citation-network.v3\` asset, exact-DOI audit joins, manual-review overrides, current profile manifests, and the repository's code/schema surfaces.
 
-The primary paper-review deliverable is a **${studyInstanceRows.length}-row × ${PARSIMONIOUS_CONTRACT_COUNT}-contract categorical matrix** aligned to Toolkit Segments 1-5 and runtime: auditory stimulus; trajectory geometry plus kinematics; trial sequence; task/response behavior; jitter/ITI; SOA schedule; tactile target; baseline trials; catch trials; repetition allocation; and block composition/order. Every one of the ${publicationAtomicRows.length} citation-network publications is represented, and a strict ${publicationAtomicRows.length}-row aggregate is supplied. The registered view has ${studyInstanceRows.length} rows because ${studyInstanceRegistry.entries.length} publications have tracked multi-experiment or multi-profile splits.
+The primary paper-review deliverable is a **${studyInstanceRows.length}-row × ${PARSIMONIOUS_CONTRACT_COUNT}-contract categorical matrix** aligned to Toolkit Segments 1-5, runtime, pre-run study planning, and measurement acquisition: auditory stimulus; trajectory geometry plus kinematics; trial sequence; task/response behavior; jitter/ITI; SOA schedule; tactile target; baseline trials; catch trials; repetition allocation; block composition/order; study structure/schedule; and measurement acquisition/primary outcome. Every one of the ${publicationAtomicRows.length} citation-network publications is represented, and a strict ${publicationAtomicRows.length}-row aggregate is supplied. The registered view has ${studyInstanceRows.length} rows because ${studyInstanceRegistry.entries.length} publications have tracked multi-experiment or multi-profile splits.
 
 The exact **${studyInstanceRows.length}-row × ${currentInputSchema.input_count}-input** current design/profile matrices remain the implementation crosswalk. The broader **${studyInstanceRows.length}-row × ${PAPER_PARAMETERS.length}-leaf** target matrix remains a scientific-method and validation-gap inventory—not claims about fields accepted by the current serializer. Publications without a registry entry remain one review unit and are explicitly marked \`experiment_count_not_assessed\`; do not infer that they contain only one experiment. Only ${publicationNodesWithAbstract} of ${publicationAtomicRows.length} nodes have tracked abstract text, and ${publicationNodesWithoutAbstractOrAudit} have neither abstract text nor an exact-DOI audit record, so ${studyInstanceRows.length} is an evidence-backed review-row count rather than an exhaustive true experiment count.
 
-The compact matrix reports whether contract-level evidence is complete, derived, partial, absent, unavailable, unassessed, or still composite. A reported or derived completion is component-gated: every required final component must have experiment-scoped evidence. The normalized evidence ledger preserves final component states, the underlying coarse-parent evidence, short paper value, source/page pointer, derivation note, exact current input paths, and any attached template encoding. It never promotes a coarse 25-field audit parent, template value, or Toolkit default to complete publication evidence. Controlled vocabularies distinguish generated/imported/physical sources, motion modes, timing policies, baseline trial families, catch target roles, and exact versus unresolved allocation rules. The 281-leaf atomic matrix remains stricter: each constituent target leaf still requires separate verification.
+The compact matrix reports whether contract-level evidence is complete, derived, partial, absent, unavailable, unassessed, or still composite. A reported or derived completion is component-gated: every required final component must have experiment-scoped evidence. The normalized evidence ledger preserves final component states, the underlying coarse-parent evidence, short paper value, source/page pointer, derivation note, exact current input paths, and any attached template encoding. It never promotes a coarse 25-field audit parent, template value, or Toolkit default to complete publication evidence. Controlled vocabularies distinguish generated/imported/physical sources, motion modes, timing policies, baseline trial families, catch target roles, exact versus unresolved allocation rules, study topology, assignment, factor scope/role, schedule events, outcome families, acquisition bindings, and synchronization methods. The 281-leaf atomic matrix remains stricter: each constituent target leaf still requires separate verification.
+
+A registry state of \`experiment_specific_source_review_available\` authorizes only the dedicated experiment-scoped source-review override. It does not make a reused audit record or its record-level templates experiment-specific: coarse values remain composite in the atomic matrices, and templates are attached to child rows only when the registry names them explicitly.
 
 The builder overwrites the named files recorded in
 \`generated_output_manifest.json\`; it removes only obsolete files named by a
@@ -2178,10 +2204,14 @@ annotations into a durable reviewed-data source before rebuilding.
 - \`parsimonious_contract_evidence.csv\`: normalized study × contract ledger with value, source/page, final and coarse component states, derivation, current-path crosswalk, and template encoding.
 - \`parsimonious_contract_review_queue.csv\`: prioritized unresolved, caveated, and derived contract decisions.
 - \`parsimonious_contract_dictionary.csv\`, \`parsimonious_contract_summary.csv\`, and \`parsimonious_status_legend.csv\`: contract definitions, coverage counts, and status meanings.
+- \`study_structure.csv\`: one conservative structure-review row per registered study, including sample/assignment summaries, normalized topology, compiler-derived counts, provenance, and the explicit current Toolkit structural gap.
+- \`study_factor_levels.csv\`: normalized factor/level rows with role, scope, assignment method, allocation rule, and optional planned/analyzed N per level.
+- \`study_schedule_events.csv\`: normalized visit/session/PPS-occurrence schedule events with event links, factor bindings, execution mode, profile/protocol binding, and parameter overrides.
+- \`study_measurement_acquisitions.csv\`: normalized dependent-measure/acquisition rows with outcome family, device/native binding, channels/sites, trigger/clock synchronization, acquisition window, primary outcome definition, and schedule/profile links. Analysis/model fitting is deliberately excluded.
 
-Experiment-scoped values recovered from locally verified PDFs are stored as short tracked source reviews in \`parsimonious_source_reviews.v1.json\`; raw PDFs remain ignored and unredistributed.
+Experiment-scoped values recovered from locally verified PDFs are stored as short tracked source reviews in \`parsimonious_source_reviews.v1.json\`; study-level topology/factor/event reviews use the separate versioned \`study_structure_reviews.v1.json\`, and dependent-measure/acquisition reviews use \`measurement_acquisition_reviews.v1.json\`, when present. Raw PDFs remain ignored and unredistributed.
 
-The compact status matrix is intentionally categorical. Detailed values stay in the value matrix and evidence ledger so the paper-facing sheet remains small. Geometry and kinematics are one reconstructibility contract: a canonical 3D/body-relative path plus enough of duration, path length, and speed to derive the redundant quantity. Baseline and catch remain separate because a tactile-only or endpoint control is not equivalent to a no-target/withhold trial, and auditory-only response trials must not be mislabeled as catches. EEG/prestimulus analysis baselines are excluded from the trial-generation baseline contract.
+The compact status matrix is intentionally categorical. Detailed values stay in the value matrix and evidence ledger so the paper-facing sheet remains small. Geometry and kinematics are one reconstructibility contract: a canonical 3D/body-relative path plus enough of duration, path length, and speed to derive the redundant quantity. Baseline and catch remain separate because a tactile-only or endpoint control is not equivalent to a no-target/withhold trial, and auditory-only response trials must not be mislabeled as catches. EEG/prestimulus analysis baselines are excluded from the trial-generation baseline contract. Study structure is one contract in the wide matrix but normalizes into parent/factor/event child tables; its destination is a future pre-run \`pps-study-plan.v1\` artifact, not Segment 6 and not the current design serializer. Existing dashboard/run-setup dictionaries are retained only as legacy untyped metadata and do not count as implementation support. Measurement acquisition is a separate dependency-gated contract so EEG/iEEG/TMS-MEP/ECG/physiology studies cannot appear reproducible from stimulus and RT settings alone. Behavioral-only studies can bind to the native response log and reference \`task_response\` without repeating response mechanics. Current LSL/LabRecorder support is runtime scaffolding, not a typed device/channel/epoch/outcome plan; the future destination is an acquisition binding from \`pps-study-plan.v1\` to \`pps-acquisition-plan.v1\`. Offline analysis and model fitting remain outside this input matrix.
 
 ## Current-Toolkit Implementation Crosswalk Files
 
@@ -2521,6 +2551,11 @@ console.log(
       parsimoniousReviewCells: parsimoniousMatrixBuild.evidence_cell_count,
       parsimoniousReviewQueueRows: parsimoniousMatrixBuild.review_queue_count,
       parsimoniousStatusCounts: parsimoniousMatrixBuild.status_counts,
+      studyStructureReviewRows: parsimoniousMatrixBuild.structure_review_count,
+      studyFactorLevelRows: parsimoniousMatrixBuild.structure_factor_level_row_count,
+      studyScheduleEventRows: parsimoniousMatrixBuild.structure_event_row_count,
+      measurementAcquisitionReviewRows: parsimoniousMatrixBuild.measurement_review_count,
+      studyMeasurementAcquisitionRows: parsimoniousMatrixBuild.measurement_acquisition_row_count,
       currentInputReviewCells: currentInputReviewQueueRows.length,
       currentInputsOutsideTargetInventory: currentInputsOutsideTargetInventory.length,
       targetMethodValidationParameters: PAPER_PARAMETERS.length,

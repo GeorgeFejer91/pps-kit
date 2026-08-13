@@ -1,0 +1,110 @@
+{
+  "schema": "pps-paper-pdf-source-overrides.v1",
+  "reviewed_on": "2026-08-12",
+  "scope": "Human-curated, lawful, anonymous PDF routes for DOI-bearing nodes in publication_network.v3.json.",
+  "policy": {
+    "inclusion": "The URL returned PDF magic bytes without authentication and the linked source record or indexed PDF identified the expected publication.",
+    "exclusion": "Do not add paywalled URLs, authenticated sessions, ResearchGate-only routes, stale 403/404 candidates, search-cache-only copies, thesis-only reproductions, or URLs with expiring signatures.",
+    "redistribution": "Availability for local retrieval does not establish redistribution permission; downloaded files remain local-only unless their license is independently verified."
+  },
+  "sources": [
+    {
+      "doi": "10.1007/s00221-024-06782-2",
+      "url": "https://muroran-it.repo.nii.ac.jp/record/2000223/files/Comparison%20of%20peripersonal%20space%20in%20front%20and%20rear%20spaces.pdf",
+      "source_type": "institutional_repository_pdf",
+      "evidence": "Anonymous HTTP 200 response with application/pdf and PDF magic bytes; repository filename and indexed first-page text match the publication title.",
+      "notes": "Muroran Institute of Technology repository copy."
+    },
+    {
+      "doi": "10.1016/j.neuropsychologia.2009.07.025",
+      "url": "https://r.unitn.it/filesresearch/images/common/CPP-Lab/10collignonneuropsy09.pdf",
+      "source_type": "institutional_author_lab_pdf",
+      "evidence": "Anonymous HTTP 206 response with application/pdf and PDF magic bytes; indexed first-page text contains the expected title, journal, year, and authors.",
+      "notes": "University of Trento research-site copy."
+    },
+    {
+      "doi": "10.1016/j.cognition.2015.07.012",
+      "url": "https://noel-lab.org/wp-content/uploads/2024/05/noet-et-al-cognition-2015.pdf",
+      "source_type": "author_lab_pdf",
+      "evidence": "Anonymous HTTP 200 response with application/pdf and PDF magic bytes; pypdf metadata contains the exact DOI and title and the first-page text matches the authors and journal.",
+      "notes": "Noel Lab publication copy."
+    },
+    {
+      "doi": "10.1016/j.neuropsychologia.2014.08.030",
+      "url": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+      "source_type": "author_lab_pdf",
+      "evidence": "Anonymous HTTP 200 response with application/pdf and PDF magic bytes; indexed first-page text contains the expected title and DOI.",
+      "notes": "Noel Lab publication copy."
+    },
+    {
+      "doi": "10.1016/j.neuropsychologia.2014.10.027",
+      "url": "https://pure.royalholloway.ac.uk/ws/files/26296780/Maister_et_al_Neuropsychologia.pdf",
+      "source_type": "institutional_repository_accepted_manuscript",
+      "evidence": "Anonymous HTTP 200 response with application/pdf and PDF magic bytes; the Royal Holloway record identifies the DOI and accepted manuscript, and indexed first-page text matches the title.",
+      "notes": "Accepted author manuscript in the Royal Holloway research portal."
+    },
+    {
+      "doi": "10.1111/ejn.13872",
+      "url": "https://noel-lab.org/wp-content/uploads/2024/05/pfeiffer_et_al-2018-european_journal_of_neuroscience.pdf",
+      "source_type": "author_lab_pdf",
+      "evidence": "Anonymous HTTP 200 response with application/pdf and PDF magic bytes; indexed first-page text contains the expected title, journal, year, and authors.",
+      "notes": "Noel Lab publication copy."
+    },
+    {
+      "doi": "10.1111/j.1460-9568.2010.07210.x",
+      "url": "https://infoscience.epfl.ch/server/api/core/bitstreams/7ad4a81f-a9f1-4dd4-a802-367dfd1aae95/content",
+      "source_type": "institutional_repository_pdf",
+      "evidence": "Anonymous HTTP 206 response with application/pdf and PDF magic bytes; the EPFL record and original filename identify the expected publication.",
+      "notes": "Stable EPFL Infoscience bitstream resolved from the public item record."
+    },
+    {
+      "doi": "10.1111/j.1467-9280.2007.01952.x",
+      "url": "https://web.archive.org/web/20230128074444id_/http://wexler.free.fr/library/files/serino%20%282007%29%20extended%20multisensory%20space%20in%20blind%20cane%20users.pdf",
+      "source_type": "web_archive_author_library_pdf",
+      "evidence": "Anonymous HTTP 200 response with PDF magic bytes; the timestamped Internet Archive copy has seven pages, exact title metadata, and matching first-page title and authors.",
+      "notes": "Archived copy of a public researcher-curated library file; the original HTTP-only host remains anonymously accessible."
+    },
+    {
+      "doi": "10.1162/jocn_a_00006",
+      "url": "https://www.alessioavenanti.com/pdf_library/Serino_2011JOCN.pdf",
+      "source_type": "author_site_pdf",
+      "evidence": "Anonymous HTTP 206 response with application/pdf and PDF magic bytes; indexed first-page text contains the expected title and article content.",
+      "notes": "Corresponding researcher's publication library."
+    },
+    {
+      "doi": "10.1177/1362361319838950",
+      "url": "https://ndownloader.figshare.com/files/42197946",
+      "source_type": "institutional_figshare_pdf",
+      "evidence": "Anonymous HTTP 206 response with application/pdf and PDF magic bytes; the Figshare API names the file Mul_et_al_2019.pdf and its article record matches the DOI and title.",
+      "notes": "Anglia Ruskin University Figshare deposit."
+    },
+    {
+      "doi": "10.53829/ntr201911fa4",
+      "url": "https://ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf",
+      "source_type": "public_encrypted_pdf",
+      "evidence": "Anonymous HTTP 200 response with PDF magic bytes, a complete PDF trailer, and an indexed title matching the publication.",
+      "notes": "Public NTT Technical Review PDF. The file uses AES document encryption with anonymous reading enabled, so pypdf requires its crypto extra to validate and extract it."
+    },
+    {
+      "doi": "10.61782/fa.2025.0866",
+      "url": "https://dael.euracoustics.org/confs/fa2025/data/articles/000866.pdf",
+      "source_type": "public_encrypted_pdf",
+      "evidence": "Anonymous HTTP 200 response with PDF magic bytes, a complete PDF trailer, and the official conference article path matching the publication.",
+      "notes": "Public Forum Acusticum proceedings PDF. The file uses AES document encryption with anonymous reading enabled, so pypdf requires its crypto extra to validate and extract it."
+    },
+    {
+      "doi": "10.31234/osf.io/etvb6_v1",
+      "url": "https://osf.io/download/gnv46/",
+      "source_type": "osf_preprint_pdf",
+      "evidence": "Anonymous HTTP 206 response with PDF magic bytes; the OSF Preprints API identifies this as the primary file for the DOI-bearing preprint and gives the matching title.",
+      "notes": "Stable OSF download route for Preprint_Rastelli_2025.pdf."
+    },
+    {
+      "doi": "10.31234/osf.io/t8h6a",
+      "url": "https://osf.io/download/86j4g/",
+      "source_type": "osf_preprint_pdf",
+      "evidence": "Anonymous HTTP 206 response with PDF magic bytes; the OSF Preprints API identifies this as the primary file for the DOI-bearing preprint and gives the matching title.",
+      "notes": "Stable OSF download route for Ferroni&Arcuri2023.pdf."
+    }
+  ]
+}

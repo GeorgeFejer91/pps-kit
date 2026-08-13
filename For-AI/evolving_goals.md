@@ -5,11 +5,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 ## 2026-08-12 — parsimonious publication-emulation audit contract
 
 - Make the primary publication audit a compact paper-facing matrix rather than
-  the 115-field design serializer or the 281-leaf target-gap inventory. Its 11
+  the 115-field design serializer or the 281-leaf target-gap inventory. Its 13
   structured contracts are: auditory stimulus; trajectory geometry plus
   kinematics; trial sequence; task/response behavior; jitter/ITI; SOA schedule;
-  tactile target; baseline trials; catch trials; repetition allocation; and
-  block composition/order. This is the smallest accepted scientific surface
+  tactile target; baseline trials; catch trials; repetition allocation;
+  block composition/order; study structure/schedule; and measurement
+  acquisition/primary outcome. This is the smallest accepted scientific surface
   for faithful task emulation: geometry and kinematics are one reconstructible
   dependency, while trial sequence and response remain separate because either
   can be missing independently.
@@ -31,14 +32,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   candidates, composite publication records, template values, and Toolkit
   defaults remain separate states. Derived claims retain their formula, and
   completed evidence retains source and page/section pointers.
-- The registered review surface contains 124 evidence-backed study/profile rows
+- The registered review surface contains 142 evidence-backed study/profile rows
   across the 94 current citation nodes. Lettered `(a)`, `(b)`, ... rows follow
   the tracked study-instance registry; papers without an assessed experiment
   count remain one review unit without being asserted single-experiment papers.
   The 115 exact `design.*` inputs remain the implementation crosswalk, and the
   281 target method/validation leaves remain a secondary gap inventory. Four
   imported-audio colour/source-path fields are implementation bookkeeping and
-  do not expand the 11 paper-extraction contracts.
+  do not expand the 13 paper-extraction contracts.
 
 ## 2026-08-11 — merged Segment 1 stimulus and trajectory workspace
 
@@ -2160,26 +2161,27 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 ## 2026-08-11 — Parsimonious publication emulation matrix
 
 - Treat the 94-node citation network as the publication authority but preserve
-  a conservative 124-row study-instance registry. Sixteen publications with
+  a conservative 142-row study-instance registry. Twenty-nine publications with
   tracked multi-experiment/profile evidence use contiguous lowercase display
   suffixes (`a`, `b`, `c`, ...); papers without a registry entry remain
   `experiment_count_not_assessed`. Do not rename or mutate exact literature
   `record_id` or Toolkit `profile_id` values, and do not copy composite-record
   evidence into child experiments as though it were experiment-specific.
-- Use 11 structured scientific contracts as the primary paper-facing columns:
+- Use 13 structured scientific contracts as the primary paper-facing columns:
   auditory stimulus, 3D trajectory, looming duration/kinematics, trial
   sequence/response, jitter/ITI, SOAs, tactile target, baseline, catch trials,
-  repetitions, and block allocation. Store concise normalized values and
+  repetitions, block allocation, study structure/schedule, and measurement
+  acquisition/primary outcome. Store concise normalized values and
   source/page/derivation evidence in sidecars, not additional wide columns.
   Treat an attached profile as Toolkit encoding evidence only; never promote a
   profile value or default to publication-reported evidence.
-- Retain the 111 exact code-derived `design.*` paths accepted by
+- Retain the 115 exact code-derived `design.*` paths accepted by
   `design_from_dict` and emitted by `design_to_dict` as the current
   implementation crosswalk. Keep arbitrary dictionaries atomic and trace
   StudyTemplate aliases. Treat the 281 `target.*` leaves as a separate method,
   validation, and implementation-gap inventory, with a conservative exact-path
   crosswalk; never describe those target leaves as the current serializer or a
-  superset. Six target leaves are validation/derived candidates and 22 exact
+  superset. Six target leaves are validation/derived candidates and 26 exact
   current paths have no target relation. Keep audit
   evidence, orientation/visualization details, participant/run outputs,
   calibration evidence, and QC artifacts in normalized side tables.
@@ -2201,3 +2203,50 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   Exact current-path bindings are authoritative only for the current design
   serializer. Older GUI/backend routing labels remain provisional and are not
   source-fidelity or implementation claims.
+
+## 2026-08-12 — Study-plan and acquisition-complete publication audit
+
+- Keep the paper-facing matrix parsimonious at 13 dependency-gated scientific
+  contracts. The original 11 describe one PPS protocol's stimulus, trajectory,
+  timing, task, controls, allocation, and block order. Add exactly one
+  `study_structure_schedule` contract for who receives which PPS measurement
+  and when, and one conditional `measurement_acquisition_outcome` contract for
+  what dependent measure is actually recorded. Do not expand pre/post, visits,
+  arms, interventions, EEG, or TMS into many mutually redundant wide columns.
+- Normalize study structure into a parent study-plan row, factor/level rows,
+  and ordered schedule-event rows. The plan must preserve sample and arm
+  assignment, within- versus between-participant factor scope, repeated PPS
+  occasions, visits/sessions, interventions or training, protocol bindings,
+  counterbalancing, spacing, and method-defining eligibility. Pre/post or
+  condition-specific PPS administrations remain events in one study row;
+  lowercase `(a)`, `(b)`, ... suffixes remain reserved for formally distinct
+  experiments or incompatible protocol/population variants.
+- Treat the future typed destination as a pre-run `pps-study-plan.v1` artifact
+  above reusable PPS profiles. The current dashboard's `single|pre_post`
+  metadata, two-part runner adapter, and opaque participant-order membership
+  are compatibility scaffolding, not a general factorial/crossover scheduler.
+  `design.protocol.participants` remains an order-preview count and must never
+  be promoted to planned sample size.
+- Normalize the recorded dependent measure into an acquisition row containing
+  outcome family and primary measure, native-response or external-device
+  binding, channels/sites, event trigger and clock synchronization, acquisition
+  epoch/window, primary-outcome definition, and any method-defining calibration
+  or online processing. Native response logs, LSL markers, and optional
+  LabRecorder capture are useful runtime scaffolding; a future typed
+  `pps-acquisition-plan.v1` is still required for EEG/ERP, iEEG, TMS/MEP,
+  ECG/physiology, and other external streams. Keep statistical models,
+  exclusions, and publication visualizations in a separate analysis contract.
+- Use the 94-node DOI network as the PDF-access authority. The completed lawful
+  acquisition pass stores 58 identity-validated main PDFs locally and leaves 36
+  without a local main PDF. Only 14 of those require institutional or author
+  access; the other 22 have a usable public/alternate source, are public but not
+  yet materialized, have no distinct main-paper PDF, or are scope-adjacent. Keep
+  the full 94-row access inventory and exact 14-row credential request tracked,
+  while all PDFs, extracted full text, and review-batch working files remain in
+  ignored artifacts and the private research archive.
+- The evidence-backed registry now yields 142 review rows across the 94
+  publication nodes, with 29 publications explicitly split. A child marked
+  `experiment_specific_source_review_available` may use its dedicated compact
+  source review, but must not inherit a reused record's composite audit values
+  or templates. A record-level template binds to a child only through explicit
+  registry `template_ids`.

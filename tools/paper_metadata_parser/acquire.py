@@ -577,7 +577,13 @@ def acquire_for_record(repo_root: Path, record: dict[str, Any], *, force: bool =
     }
 
 
-def run_acquisition(repo_root: Path, *, force: bool = False, limit: int | None = None) -> dict[str, Any]:
+def run_acquisition(
+    repo_root: Path,
+    *,
+    force: bool = False,
+    limit: int | None = None,
+    main_only: bool = False,
+) -> dict[str, Any]:
     started_at = datetime.now(timezone.utc).isoformat()
     coverage = load_json(repo_root / COVERAGE_PATH)
     records = [
@@ -586,11 +592,25 @@ def run_acquisition(repo_root: Path, *, force: bool = False, limit: int | None =
     ]
     if limit is not None:
         records = records[:limit]
-    copied_supplements = copy_existing_holmes_supplements(repo_root, repo_root / SUPPLEMENT_DIR)
+    copied_supplements = (
+        0
+        if main_only
+        else copy_existing_holmes_supplements(repo_root, repo_root / SUPPLEMENT_DIR)
+    )
     results = []
     for record in records:
         result = acquire_for_record(repo_root, record, force=force)
-        result["supplement_acquisition"] = acquire_supplements_for_record(repo_root, record)
+        if main_only:
+            result["supplement_acquisition"] = {
+                "record_id": record["record_id"],
+                "supplement_status": "not_checked",
+                "last_status": "skipped_main_only",
+                "attempt_count": 0,
+                "downloaded_files": [],
+                "attempts": [],
+            }
+        else:
+            result["supplement_acquisition"] = acquire_supplements_for_record(repo_root, record)
         results.append(result)
 
     counts: dict[str, int] = {}
@@ -617,20 +637,79 @@ def run_acquisition(repo_root: Path, *, force: bool = False, limit: int | None =
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Download legally reachable open-access PDFs for the paper metadata audit.")
     parser.add_argument("--repo-root", type=Path, default=Path("."))
+    parser.add_argument(
+        "--source",
+        choices=("coverage", "network"),
+        default="coverage",
+        help="Use the legacy audit coverage records or every DOI-deduplicated publication-network node.",
+    )
+    parser.add_argument(
+        "--network-path",
+        type=Path,
+        default=Path("src/peripersonal_space_toolkit/dashboard/publication_network.v3.json"),
+        help="Publication-network JSON path used with --source network.",
+    )
     parser.add_argument("--force", action="store_true", help="Retry and overwrite existing valid PDFs.")
     parser.add_argument("--limit", type=int, default=None, help="Limit records for a quick smoke run.")
+    parser.add_argument(
+        "--main-only",
+        action="store_true",
+        help="Skip supplement discovery/download. Network mode always acquires main PDFs only.",
+    )
+    parser.add_argument("--delay-seconds", type=float, default=1.0, help="Minimum delay between network requests in network mode.")
+    parser.add_argument("--max-retries", type=int, default=3, help="Retries for HTTP 429/5xx and transient network failures in network mode.")
+    parser.add_argument(
+        "--contact-email",
+        default="",
+        help="Contact email for Unpaywall/API polite pools; may instead use PPSKIT_UNPAYWALL_EMAIL or UNPAYWALL_EMAIL.",
+    )
     parser.add_argument("--verbose", action="store_true", help="Print the full acquisition ledger instead of a summary.")
     args = parser.parse_args(argv)
-    payload = run_acquisition(args.repo_root.resolve(), force=args.force, limit=args.limit)
+    if args.source == "network":
+        from .network_acquire import (
+            contact_email_from_environment,
+            run_network_acquisition,
+            semantic_scholar_key_from_environment,
+        )
+
+        payload = run_network_acquisition(
+            args.repo_root.resolve(),
+            network_path=args.network_path,
+            force=args.force,
+            limit=args.limit,
+            delay_seconds=args.delay_seconds,
+            max_retries=args.max_retries,
+            contact_email=contact_email_from_environment(args.contact_email),
+            semantic_scholar_api_key=semantic_scholar_key_from_environment(),
+        )
+    else:
+        payload = run_acquisition(
+            args.repo_root.resolve(),
+            force=args.force,
+            limit=args.limit,
+            main_only=args.main_only,
+        )
     if args.verbose:
         print(json.dumps(payload, indent=2, ensure_ascii=True))
     else:
         summary = {
             "source_count": payload["source_count"],
             "pdf_status_counts": payload["pdf_status_counts"],
-            "supplement_status_counts": payload["supplement_status_counts"],
-            "copied_existing_holmes_supplement_count": payload["copied_existing_holmes_supplement_count"],
         }
+        if "supplement_status_counts" in payload:
+            summary["supplement_status_counts"] = payload["supplement_status_counts"]
+            summary["copied_existing_holmes_supplement_count"] = payload[
+                "copied_existing_holmes_supplement_count"
+            ]
+        if payload.get("source") == "publication_network":
+            summary.update(
+                {
+                    "source_node_count": payload["source_node_count"],
+                    "unique_doi_count": payload["unique_doi_count"],
+                    "attempted_this_run_count": payload["attempted_this_run_count"],
+                    "ledger": "artifacts/paper_metadata_audit/network_acquisition_status.json",
+                }
+            )
         print(json.dumps(summary, indent=2, ensure_ascii=True))
     return 0
 

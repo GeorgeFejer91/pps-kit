@@ -1,12 +1,14 @@
 contract_key,segment,label,study_count,reported_complete,derived_complete,approximation_required,partial,conflicting_evidence,low_confidence,explicitly_absent,not_reported,source_unavailable,not_assessed,not_applicable,composite_requires_split,available_or_resolved_count,available_or_resolved_pct,toolkit_encoded_count
-auditory_stimulus,1,Auditory stimulus,124,6,0,21,16,0,7,0,3,26,32,1,12,6,4.8,19
-trajectory_kinematics,1,Trajectory and kinematics,124,12,13,2,20,0,8,0,0,24,32,1,12,25,20.2,19
-trial_sequence,2,Trial sequence,124,13,0,0,34,0,9,0,0,23,32,1,12,13,10.5,19
-task_response,runtime,Task and response,124,8,0,0,39,0,7,0,0,25,32,1,12,8,6.5,4
-jitter_iti_policy,2,Jitter and ITI policy,124,15,0,0,17,0,6,0,11,30,32,1,12,15,12.1,19
-soa_schedule,3,SOA schedule,124,24,3,0,19,1,6,0,0,26,32,1,12,27,21.8,19
-tactile_target,3,Tactile target,124,22,0,1,24,0,6,0,0,26,32,1,12,22,17.7,19
-baseline_trial_contract,3,Baseline/control trials,124,10,6,0,17,1,8,8,2,27,32,1,12,24,19.4,19
-catch_trial_contract,3,Catch/no-target trials,124,10,9,0,19,0,7,6,0,25,32,4,12,25,20.2,19
-repetition_allocation,4,Repetition allocation,124,17,5,0,17,2,5,0,3,30,32,1,12,22,17.7,19
-block_order_contract,5,Block and order policy,124,16,1,0,26,1,6,0,3,26,32,1,12,17,13.7,19
+auditory_stimulus,1,Auditory stimulus,142,8,0,73,9,0,1,0,3,15,14,13,6,8,5.6,16
+trajectory_kinematics,1,Trajectory and kinematics,142,53,21,3,16,0,1,0,0,15,14,13,6,74,52.1,16
+trial_sequence,2,Trial sequence,142,68,0,0,25,1,2,0,0,14,14,12,6,68,47.9,16
+task_response,runtime,Task and response,142,19,0,0,72,2,1,0,0,15,14,13,6,19,13.4,3
+jitter_iti_policy,2,Jitter and ITI policy,142,55,0,0,17,0,1,0,18,19,14,12,6,55,38.7,16
+soa_schedule,3,SOA schedule,142,72,11,0,8,1,1,0,0,15,14,14,6,83,58.5,16
+tactile_target,3,Tactile target,142,68,0,1,23,1,1,0,0,16,14,12,6,68,47.9,16
+baseline_trial_contract,3,Baseline/control trials,142,25,25,0,14,3,1,22,2,18,14,12,6,72,50.7,16
+catch_trial_contract,3,Catch/no-target trials,142,34,17,0,15,2,1,21,5,15,14,12,6,72,50.7,16
+repetition_allocation,4,Repetition allocation,142,44,16,0,19,8,0,0,4,19,14,12,6,60,42.3,16
+block_order_contract,5,Block and order policy,142,45,8,0,29,4,1,0,7,16,14,12,6,53,37.3,16
+study_structure_schedule,study_plan,Study structure and schedule,142,54,0,0,40,4,0,0,0,0,30,8,6,54,38.0,0
+measurement_acquisition_outcome,acquisition,Measurement acquisition and outcome,142,4,0,0,89,0,0,0,0,0,32,9,8,4,2.8,0

@@ -388,20 +388,33 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   owns the separate 281-leaf proposed `target.*` method/validation inventory; and
   `tools/publication_target_current_crosswalk.mjs` maps the latter
   conservatively to the former. `tools/build_publication_parameter_review_matrix.mjs`
-  owns exact-DOI joins, the 94-publication/124-study registry views, target
+  owns exact-DOI joins, the 94-publication/142-study registry views, target
   review sidecars/queues, orientation and visualization ledgers,
   implementation-surface inventory, and generated
   `For-AI/audiotactile-paper-metadata-audit/publication-parameter-matrix/`
   artifacts. `tools/build_parsimonious_publication_matrix.py` compiles the
-  primary 11-contract paper-facing status/value matrices and evidence/review
+  primary 13-contract paper-facing status/value matrices and evidence/review
   sidecars from `parsimonious_emulation_contract.v1.json`, coarse audit
-  parents, and experiment-scoped `parsimonious_source_reviews.v1.json`. Keep
-  output/evidence fields out of all wide input schemas. The 11 contracts are
+  parents, experiment-scoped `parsimonious_source_reviews.v1.json`, and the
+  optional versioned `study_structure_reviews.v1.json`. It also normalizes the
+  structure review into `study_structure.csv`, `study_factor_levels.csv`, and
+  `study_schedule_events.csv`; optional versioned
+  `measurement_acquisition_reviews.v1.json` becomes
+  `study_measurement_acquisitions.csv`. Keep output/evidence fields out of all
+  wide input schemas. The 13 contracts are
   auditory stimulus; trajectory geometry plus kinematics; trial sequence;
   task/response; jitter/ITI; SOA schedule; tactile target; baseline trials;
-  catch trials; repetition allocation; and block composition/order. Final
-  completion is component-gated; legacy coarse parents can seed review but
-  cannot certify completeness.
+  catch trials; repetition allocation; block composition/order; study
+  structure/schedule; and measurement acquisition/primary outcome. Final
+  completion is component-gated; legacy coarse
+  parents can seed review but cannot certify completeness. Study structure is
+  an explicit current structural gap whose typed destination is a future
+  pre-run `pps-study-plan.v1` artifact, not Segment 6 and not the current
+  `design.*` serializer; dashboard run-setup and participant-order dictionaries
+  remain provenance-only legacy metadata. The acquisition contract maps native
+  behavioral logs and optional LSL/LabRecorder support as runtime scaffolding,
+  but device/channel/trigger/epoch/outcome configuration remains an explicit
+  typed gap targeted at `pps-acquisition-plan.v1`; analysis models are excluded.
 - Validation protocols and lab evidence scripts: `validation_protocols/`.
 
 ## Refactor Direction
@@ -418,13 +431,22 @@ Keep public imports stable while extracting:
 
 The paper audit is a core pipeline, not a side report. It catalogs the needs, profiles, parameters, missing publication details, and toolkit-structure gaps across audio-tactile PPS studies so future implementations can be built from a growing knowledge base. Keep tracked audit files source-pointer-only; keep PDFs, supplements, extracted full text, screenshots, and local bundles ignored.
 
-The primary paper-review matrix is the compact 11-contract scientific view over
-124 registered study rows. Use its normalized evidence sidecar for values,
+The primary paper-review matrix is the compact 13-contract scientific view over
+142 registered study rows. Use its normalized evidence sidecar for values,
 source/page pointers, final and coarse component states, derivations, and
 template-encoding state; never promote a coarse audit parent, Toolkit default,
 or template value to complete paper evidence. Use the controlled source,
-motion, timing, baseline, catch, and allocation vocabularies when normalizing
-paper methods. The 115-path current-input matrix is the
+motion, timing, baseline, catch, allocation, study-topology, factor, assignment,
+event, outcome-family, acquisition-binding, and clock-sync vocabularies when
+normalizing paper methods. Keep the structure
+contract compact in the wide matrix and use the normalized parent/factor/event
+tables for repeated PPS occasions and participant schedules. The future typed
+destination is pre-run `pps-study-plan.v1`; do not treat Segment 6 or legacy
+untyped run-setup dictionaries as equivalent support. Keep measurement
+acquisition/primary outcome as the final compact dependency-gated contract;
+use its normalized child table for multiple streams, and do not add analysis or
+model-fitting settings to this input matrix. The 115-path current-input matrix
+is the
 code-bound implementation crosswalk for what can enter the current
 design/profile serializer. Other operational namespaces remain separately
 inventoried. Use the 94-row publication view only for node-level aggregation.

@@ -7,7 +7,8 @@
     "Normalize SOAs to a declared auditory-onset anchor/sign convention; distance-at-touch anchors count only when trajectory kinematics can derive SOAs.",
     "Use one trial-allocation rule per family and derive include flags, percentages and totals.",
     "Keep paper evidence, derived values, low-confidence candidates, Toolkit defaults and template encodings distinguishable.",
-    "Keep trial-generation baselines separate from EEG or analysis baseline windows."
+    "Keep trial-generation baselines separate from EEG or analysis baseline windows.",
+    "Keep measurement acquisition and primary-outcome definitions separate from offline analysis/model fitting; behavioral-only studies may reference the task-response contract through a native response-log binding."
   ],
   "controlled_vocabularies": {
     "auditory_source_mode": {
@@ -67,6 +68,138 @@
       "derived_formula": "The allocation is derived from reported factors and the formula is preserved.",
       "unresolved_percentage": "A percentage is reported without enough denominator/crossing information to resolve the count.",
       "not_reported": "No defensible allocation rule was recovered."
+    },
+    "study_design_family": {
+      "single_measurement": "One PPS measurement occasion is scheduled for each participant or cohort.",
+      "repeated_measure": "PPS is measured more than once without requiring a parallel-group or crossover topology.",
+      "parallel_group": "Participants are assigned to distinct between-participant arms or cohorts.",
+      "crossover": "Participants receive multiple interventions or conditions in a declared within-participant sequence.",
+      "mixed_factorial": "The study combines between-participant and within-participant factors.",
+      "adaptive": "Later study activities or assignments depend on earlier observations.",
+      "custom": "A study-specific topology requires an explicit schedule beyond the standard families.",
+      "unclear": "The reviewed source does not resolve the study-design family."
+    },
+    "study_assignment_scope": {
+      "single_cohort": "All participants follow one declared cohort schedule.",
+      "between_participant_arms": "Participants are assigned to distinct arms that receive different schedules or conditions.",
+      "within_participant": "The same participants receive all declared conditions or occasions.",
+      "mixed_between_within": "Both between-participant assignment and within-participant repetition are present.",
+      "observational_cohorts": "Pre-existing cohorts are compared without experimental assignment.",
+      "custom": "A study-specific assignment topology is declared explicitly.",
+      "unclear": "Assignment scope remains unresolved."
+    },
+    "pps_occurrence_pattern": {
+      "single_pps": "One PPS measurement occurs per participant schedule.",
+      "repeated_pre_post": "PPS is measured before and after an intervention or manipulation.",
+      "repeated_multi_timepoint": "PPS is measured at three or more declared timepoints.",
+      "condition_specific_pps_sessions": "Separate PPS sessions or visits are bound to different conditions.",
+      "within_session_block_conditions": "Conditions are manipulated between PPS blocks in one session.",
+      "within_session_trial_conditions": "Conditions vary between trials within a PPS measurement.",
+      "multi_scope": "The design combines more than one PPS occurrence pattern.",
+      "custom": "A study-specific PPS occurrence pattern is declared explicitly.",
+      "unclear": "The PPS occurrence pattern remains unresolved."
+    },
+    "study_factor_scope": {
+      "between_participant": "A factor level is assigned between participants or cohorts.",
+      "between_visit": "A factor varies between visits for the same participant.",
+      "between_session": "A factor varies between sessions within a visit or study schedule.",
+      "between_measurement": "A factor varies between distinct PPS measurement occasions.",
+      "between_block": "A factor varies between blocks within one PPS measurement.",
+      "within_block_trial": "A factor varies trial-by-trial within a block.",
+      "continuous_during_measurement": "A factor changes continuously during a PPS measurement.",
+      "event_locked": "A factor level is tied to a specific scheduled event.",
+      "custom": "A study-specific factor scope is declared explicitly.",
+      "unclear": "The factor scope remains unresolved."
+    },
+    "study_factor_role": {
+      "experimental_manipulation": "A manipulated experimental condition whose levels are scheduled or assigned.",
+      "timepoint": "A repeated measurement occasion or temporal sampling factor.",
+      "intervention_arm": "A treatment, training, or comparison arm assigned between participants or sequences.",
+      "participant_attribute": "A measured participant attribute or pre-existing cohort characteristic.",
+      "protocol_variant": "A variant of the PPS protocol/profile rather than an external intervention.",
+      "counterbalance": "A sequence/order group used to counterbalance conditions.",
+      "context_state": "A participant or environmental state varied or observed around PPS measurement.",
+      "control_task": "A control or secondary task factor.",
+      "nuisance": "A tracked nuisance or adjustment factor needed for faithful scheduling or analysis."
+    },
+    "study_assignment_method": {
+      "all_participants": "Every participant receives all declared levels or follows the same schedule.",
+      "observed_cohort": "Levels identify observed or pre-existing cohorts rather than randomized assignment.",
+      "random_parallel": "Participants are randomized to parallel between-participant arms.",
+      "stratified_random": "Random assignment is stratified or blocked by declared participant attributes.",
+      "counterbalanced_sequence": "Within-participant condition order is counterbalanced across declared sequences.",
+      "latin_square": "Order is allocated using a Latin-square schedule.",
+      "crossover_random_order": "Participants receive crossover conditions in randomized order.",
+      "fixed_order": "All participants or a declared group follow a fixed order.",
+      "custom": "A study-specific assignment/order algorithm is declared explicitly.",
+      "unclear": "Assignment or order method remains unresolved."
+    },
+    "study_schedule_event_kind": {
+      "pps_measurement": "A PPS measurement using a bound Toolkit protocol/profile.",
+      "intervention": "A treatment or experimental intervention outside the PPS protocol itself.",
+      "training": "A training procedure intended to alter later performance or state.",
+      "manipulation": "A scheduled manipulation that is not itself the PPS measurement.",
+      "calibration": "A calibration or threshold-setting activity.",
+      "practice": "Practice or familiarization activity.",
+      "rest": "A scheduled rest interval.",
+      "washout": "A washout interval between conditions or interventions.",
+      "secondary_task": "A scheduled non-PPS measurement or task.",
+      "instruction": "A scheduled instruction or briefing event.",
+      "custom": "A study-specific event kind is declared explicitly."
+    },
+    "study_schedule_execution_mode": {
+      "toolkit_protocol": "The activity is executed by a typed PPS Toolkit protocol/profile.",
+      "toolkit_instruction_timer": "The Toolkit can represent the activity only as instructions and/or a timer.",
+      "external_operator": "An operator performs or controls the activity outside the PPS protocol.",
+      "external_device": "An external device or software system executes the activity.",
+      "metadata_only": "The activity is retained for scheduling/provenance but is not executable by the Toolkit.",
+      "custom": "A study-specific execution adapter is declared explicitly.",
+      "unclear": "Execution responsibility remains unresolved."
+    },
+    "study_schedule_relation": {
+      "sequence_start": "The event starts the declared participant schedule or branch.",
+      "before": "The event occurs before its referenced event.",
+      "after": "The event occurs after its referenced event.",
+      "between": "The event occurs between referenced schedule anchors.",
+      "during": "The event occurs during its referenced event.",
+      "concurrent": "The event is concurrent with its referenced event.",
+      "same_session": "The event shares a session with its referenced event without a more exact order claim.",
+      "separate_session": "The event occurs in a separate session from its referenced event.",
+      "separate_visit": "The event occurs in a separate visit from its referenced event.",
+      "custom": "A study-specific temporal relation is declared explicitly.",
+      "unclear": "The event relation remains unresolved."
+    },
+    "measurement_outcome_family": {
+      "behavioral_response": "The primary measurement is a behavioral response such as reaction time, accuracy, detection, or localization.",
+      "eeg_erp": "Scalp EEG or an event-related EEG potential is the primary measurement.",
+      "intracranial_eeg": "Intracranial EEG/ECoG/depth-electrode activity is the primary measurement.",
+      "tms_mep": "TMS-evoked motor potentials or related corticospinal excitability measures are primary.",
+      "ecg_cardiac": "ECG or another cardiac measure is primary.",
+      "other_physiology": "A physiological signal outside the named families is primary.",
+      "multimodal": "More than one acquisition family jointly defines the study outcome.",
+      "custom": "A study-specific outcome family is declared explicitly.",
+      "unclear": "The primary measurement family remains unresolved."
+    },
+    "measurement_binding_mode": {
+      "native_response_log": "The Toolkit's native response/event log is the acquisition authority; response mechanics stay in the task-response contract.",
+      "lsl_external_stream": "An external acquisition stream is synchronized through LSL markers or clocks.",
+      "labrecorder_xdf": "A LabRecorder XDF capture binds Toolkit markers to external streams.",
+      "hardware_triggered_external_system": "A hardware trigger binds the Toolkit schedule to an external acquisition system.",
+      "external_file_import": "Acquisition occurs externally and is joined later through declared IDs/timestamps.",
+      "operator_recorded": "An operator records the primary outcome outside a direct software/device binding.",
+      "custom": "A study-specific acquisition adapter is declared explicitly.",
+      "unclear": "The acquisition binding remains unresolved."
+    },
+    "measurement_clock_sync_method": {
+      "native_audio_sample_clock": "Native response/events are anchored to the Toolkit audio/sample timing authority.",
+      "toolkit_lsl_markers": "Toolkit LSL markers provide the synchronization contract.",
+      "hardware_trigger": "A physical trigger/TTL channel provides synchronization.",
+      "shared_device_clock": "Stimulus and acquisition share one device clock.",
+      "synchronized_clocks": "Separate systems use an explicit clock-synchronization method.",
+      "posthoc_alignment": "Signals are aligned after acquisition using declared events or timestamps.",
+      "none": "No cross-system synchronization is required for the declared native measurement.",
+      "custom": "A study-specific synchronization method is declared explicitly.",
+      "unclear": "Clock/trigger synchronization remains unresolved."
     }
   },
   "contracts": [
@@ -335,6 +468,77 @@
         "design.protocol.max_consecutive_same_trial_type"
       ],
       "runtime_or_untyped_inputs": []
+    },
+    {
+      "column_key": "study_structure_schedule",
+      "segment": "study_plan",
+      "label": "Study structure and schedule",
+      "current_toolkit_support": "unsupported_no_typed_study_plan",
+      "completion_rule": "study_structure_dependency",
+      "required_components": ["sample_and_assignment", "design_topology", "pps_occasion_schedule", "factor_scope_map", "protocol_binding"],
+      "conditional_components": ["order_assignment_spacing", "intervention_schedule"],
+      "partial_missing_components": ["sample_and_assignment", "design_topology", "pps_occasion_schedule", "factor_scope_map", "protocol_binding"],
+      "normalization_vocabularies": ["study_design_family", "study_assignment_scope", "pps_occurrence_pattern", "study_factor_role", "study_factor_scope", "study_assignment_method", "study_schedule_event_kind", "study_schedule_execution_mode", "study_schedule_relation"],
+      "required_parent_fields": [],
+      "conditional_parent_fields": [],
+      "description": "Participant sample/arm assignment, study topology, repeated PPS occasions, factor scopes, protocol bindings, and any intervention/order/spacing schedule needed to reproduce who receives which PPS measurement and when. This belongs in a future pre-run pps-study-plan.v1 artifact; it is not a Segment 6 participant-order count and is not currently typed by the design serializer.",
+      "current_toolkit_paths": [],
+      "future_toolkit_paths": [
+        "pps-study-plan.v1::sample_and_assignment",
+        "pps-study-plan.v1::factors[]",
+        "pps-study-plan.v1::schedule.events[]",
+        "pps-study-plan.v1::schedule.events[].protocol_binding",
+        "pps-study-plan.v1::assignment_and_order_policy"
+      ],
+      "legacy_untyped_metadata_paths": [
+        "design.study_profile_reference_parameters.dashboard_run_setup",
+        "design.protocol.participant_order_policy.part_membership"
+      ],
+      "compiler_derived_outputs": [
+        "participant-to-arm allocation",
+        "participant visit/session/measurement schedule",
+        "session-group/part identifiers",
+        "event-specific profile plus parameter overrides"
+      ],
+      "runtime_or_untyped_inputs": [
+        "legacy metadata is provenance-only and must not be treated as a typed study-plan adapter",
+        "prepared runner packages currently encode at most one fixed one/two-part participant schedule"
+      ]
+    },
+    {
+      "column_key": "measurement_acquisition_outcome",
+      "segment": "acquisition",
+      "label": "Measurement acquisition and outcome",
+      "current_toolkit_support": "native_behavioral_runtime_plus_external_capture_scaffolding_no_typed_acquisition_plan",
+      "completion_rule": "measurement_acquisition_dependency",
+      "required_components": ["outcome_family_and_primary_measure", "acquisition_device_channels_or_native_response_binding", "event_trigger_and_clock_sync", "acquisition_epoch_or_response_window", "primary_outcome_definition"],
+      "conditional_components": ["calibration_and_online_processing"],
+      "partial_missing_components": ["outcome_family_and_primary_measure", "acquisition_device_channels_or_native_response_binding", "event_trigger_and_clock_sync", "acquisition_epoch_or_response_window", "primary_outcome_definition"],
+      "normalization_vocabularies": ["measurement_outcome_family", "measurement_binding_mode", "measurement_clock_sync_method"],
+      "required_parent_fields": [],
+      "conditional_parent_fields": [],
+      "description": "The recorded dependent measure and its acquisition binding: outcome family/measure, native response-log or external device/channels, event/clock synchronization, acquisition epoch or response-window reference, and primary outcome definition. Behavioral-only studies may bind to the native response log and reference the task-response contract instead of duplicating response mechanics. Analysis models and offline inferential pipelines are excluded.",
+      "current_toolkit_paths": [],
+      "future_toolkit_paths": [
+        "pps-study-plan.v1::schedule.events[].measurement_binding",
+        "pps-acquisition-plan.v1::acquisitions[]"
+      ],
+      "legacy_untyped_metadata_paths": [
+        "design.protocol.trial_strips[].metadata::<response/acquisition hints>",
+        "FocusLaunchOptions.enable_lsl",
+        "FocusLaunchOptions.start_external_labrecorder"
+      ],
+      "compiler_derived_outputs": [
+        "native participant response/event rows",
+        "PPSMarkersV2 and PPSTriggerCodes marker streams",
+        "optional LabRecorder XDF capture and capture report"
+      ],
+      "runtime_or_untyped_inputs": [
+        "src/peripersonal_space_toolkit/session_events.py::RunEventRecorder",
+        "src/peripersonal_space_toolkit/focus_launch.py::build_focus_command",
+        "src/peripersonal_space_toolkit/labrecorder_capture.py::LabRecorderCapture",
+        "no typed EEG/iEEG/TMS/ECG device, channel, epoch, or primary-outcome adapter"
+      ]
     }
   ]
 }

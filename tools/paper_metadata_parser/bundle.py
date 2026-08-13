@@ -15,7 +15,13 @@ from .parser import ARTIFACT_DIR, AUDIT_DIR
 BUNDLE_DIRNAME = "resume_bundles"
 INVENTORY_FILENAME = "local_artifact_inventory.json"
 MAX_HASH_BYTES = 1024 * 1024 * 1024
-INCLUDED_TOP_LEVEL = {"publication_pdfs", "supplements", "extracted", "acquisition_status.json"}
+INCLUDED_TOP_LEVEL = {
+    "publication_pdfs",
+    "supplements",
+    "extracted",
+    "acquisition_status.json",
+    "network_acquisition_status.json",
+}
 
 
 def sha256_file(path: Path) -> str:

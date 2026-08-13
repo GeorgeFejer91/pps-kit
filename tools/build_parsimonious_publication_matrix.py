@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the compact paper-facing PPS emulation review matrices.
 
-The compact matrix deliberately reports evidence state at the eleven-contract
+The compact matrix deliberately reports evidence state at the thirteen-contract
 level. Exact serializer fields and profile values remain in the current-input
 matrices and are linked from the normalized evidence ledger.
 """
@@ -25,6 +25,10 @@ METADATA_AUDIT_PATH = AUDIT_DIR / "metadata_audit.jsonl"
 MANUAL_REVIEW_DIR = AUDIT_DIR / "manual_reviews"
 CURRENT_INPUT_SCHEMA_PATH = REPO_ROOT / "tools" / "current_toolkit_input_schema.json"
 SOURCE_REVIEW_PATH = AUDIT_DIR / "parsimonious_source_reviews.v1.json"
+STRUCTURE_REVIEW_PATH = AUDIT_DIR / "study_structure_reviews.v1.json"
+STRUCTURE_CONTRACT_KEY = "study_structure_schedule"
+MEASUREMENT_REVIEW_PATH = AUDIT_DIR / "measurement_acquisition_reviews.v1.json"
+MEASUREMENT_CONTRACT_KEY = "measurement_acquisition_outcome"
 
 
 EXPECTED_CONTRACT_KEYS = (
@@ -39,6 +43,8 @@ EXPECTED_CONTRACT_KEYS = (
     "catch_trial_contract",
     "repetition_allocation",
     "block_order_contract",
+    STRUCTURE_CONTRACT_KEY,
+    MEASUREMENT_CONTRACT_KEY,
 )
 EXPECTED_COMPLETION_RULES = {
     "auditory_stimulus": "dependency_review",
@@ -52,6 +58,21 @@ EXPECTED_COMPLETION_RULES = {
     "catch_trial_contract": "control_family_dependency",
     "repetition_allocation": "all_required",
     "block_order_contract": "all_required",
+    STRUCTURE_CONTRACT_KEY: "study_structure_dependency",
+    MEASUREMENT_CONTRACT_KEY: "measurement_acquisition_dependency",
+}
+EXPECTED_FUTURE_TOOLKIT_PATHS = {
+    STRUCTURE_CONTRACT_KEY: (
+        "pps-study-plan.v1::sample_and_assignment",
+        "pps-study-plan.v1::factors[]",
+        "pps-study-plan.v1::schedule.events[]",
+        "pps-study-plan.v1::schedule.events[].protocol_binding",
+        "pps-study-plan.v1::assignment_and_order_policy",
+    ),
+    MEASUREMENT_CONTRACT_KEY: (
+        "pps-study-plan.v1::schedule.events[].measurement_binding",
+        "pps-acquisition-plan.v1::acquisitions[]",
+    ),
 }
 RESOLVED_EVIDENCE_STATUSES = {
     "reported_complete",
@@ -188,6 +209,46 @@ SOURCE_KEYS_BY_CONTRACT = {
     "block_order_contract": ["block_order_contract", "block_allocation"],
 }
 
+STRUCTURE_ENTRY_STATUSES = {
+    "reported_complete",
+    "derived_complete",
+    "partial",
+    "conflicting_evidence",
+}
+MEASUREMENT_ENTRY_STATUSES = {
+    *STRUCTURE_ENTRY_STATUSES,
+    "not_applicable",
+}
+STRUCTURE_COMPONENT_STATUSES = {
+    "reported",
+    "derived",
+    "partial",
+    "conflicting_evidence",
+    "not_reported",
+    "not_assessed",
+    "not_applicable",
+}
+STRUCTURE_ENUM_FIELDS = {
+    "design_family": "study_design_family",
+    "assignment_scope": "study_assignment_scope",
+    "pps_occurrence_pattern": "pps_occurrence_pattern",
+}
+FACTOR_ENUM_FIELDS = {
+    "role": "study_factor_role",
+    "scope": "study_factor_scope",
+    "assignment_method": "study_assignment_method",
+}
+EVENT_ENUM_FIELDS = {
+    "event_kind": "study_schedule_event_kind",
+    "execution_mode": "study_schedule_execution_mode",
+    "relation": "study_schedule_relation",
+}
+MEASUREMENT_ENUM_FIELDS = {
+    "outcome_family": "measurement_outcome_family",
+    "binding_mode": "measurement_binding_mode",
+    "clock_sync_method": "measurement_clock_sync_method",
+}
+
 
 def _normalize_source_status(status: str, value: str = "") -> str:
     if status in STATUS_LEGEND and status != "mixed_across_studies":
@@ -212,7 +273,6 @@ def _source_override_for_contract(
     source_reviews: dict[tuple[str, str], dict[str, Any]],
 ) -> dict[str, Any] | None:
     key = contract["column_key"]
-    candidate_keys = SOURCE_KEYS_BY_CONTRACT[key]
     direct = source_reviews.get((study_row_id, key))
     if direct:
         result = dict(direct)
@@ -221,6 +281,8 @@ def _source_override_for_contract(
         )
         result["source_review_keys"] = key
         return result
+
+    candidate_keys = SOURCE_KEYS_BY_CONTRACT.get(key, [])
 
     if key == "trajectory_kinematics":
         parts = [
@@ -537,7 +599,7 @@ def _validate_source_component_reviews(
     target_contracts = [
         contract
         for contract in contracts
-        if source_key in SOURCE_KEYS_BY_CONTRACT[contract["column_key"]]
+        if source_key in SOURCE_KEYS_BY_CONTRACT.get(contract["column_key"], [])
         or (
             source_key == "trial_sequence_response"
             and contract["column_key"] == "trial_sequence"
@@ -585,6 +647,1168 @@ def _validate_source_component_reviews(
                 "explicitly_absent is only valid for family_or_explicit_none: "
                 f"{study_row_id}/{source_key}/{component_key}"
             )
+
+
+def _json_text(value: Any) -> str:
+    if value in (None, "", [], {}):
+        return ""
+    if isinstance(value, str):
+        return value.strip()
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
+def _require_identifier(value: Any, *, context: str) -> str:
+    identifier = str(value or "").strip()
+    if not identifier:
+        raise RuntimeError(f"Blank identifier: {context}")
+    return identifier
+
+
+def _validate_enum_value(
+    container: dict[str, Any],
+    field: str,
+    vocabulary_name: str,
+    controlled_vocabularies: dict[str, dict[str, str]],
+    *,
+    context: str,
+    required: bool,
+) -> str:
+    value = str(container.get(field) or "").strip()
+    if not value:
+        if required:
+            raise RuntimeError(f"Missing {field}: {context}")
+        return ""
+    vocabulary = controlled_vocabularies.get(vocabulary_name)
+    if not isinstance(vocabulary, dict):
+        raise RuntimeError(f"Missing controlled vocabulary: {vocabulary_name}")
+    if value not in vocabulary:
+        raise RuntimeError(
+            f"Unknown {field} {value!r} on {context}; expected {vocabulary_name}"
+        )
+    return value
+
+
+def _validate_optional_count(container: dict[str, Any], field: str, *, context: str) -> None:
+    value = container.get(field)
+    if value in (None, ""):
+        return
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise RuntimeError(f"{field} must be a non-negative integer: {context}")
+    if value < 0 or int(value) != value:
+        raise RuntimeError(f"{field} must be a non-negative integer: {context}")
+
+
+def _normalize_id_list(value: Any, *, context: str) -> list[str]:
+    if value in (None, "", []):
+        return []
+    raw_values = value if isinstance(value, list) else [value]
+    identifiers = [
+        _require_identifier(item, context=f"{context}[{index}]")
+        for index, item in enumerate(raw_values)
+    ]
+    if len(identifiers) != len(set(identifiers)):
+        raise RuntimeError(f"Duplicate identifier reference: {context}")
+    return identifiers
+
+
+def _normalize_factor_level_bindings(
+    value: Any,
+    *,
+    context: str,
+) -> dict[str, str]:
+    if value in (None, "", [], {}):
+        return {}
+    if isinstance(value, dict):
+        bindings = {
+            _require_identifier(factor_id, context=f"{context}/factor_id"):
+            _require_identifier(level_id, context=f"{context}/{factor_id}")
+            for factor_id, level_id in value.items()
+        }
+    elif isinstance(value, list):
+        bindings = {}
+        for index, raw_binding in enumerate(value):
+            if not isinstance(raw_binding, dict):
+                raise RuntimeError(f"Factor binding must be an object: {context}[{index}]")
+            factor_id = _require_identifier(
+                raw_binding.get("factor_id"), context=f"{context}[{index}]/factor_id"
+            )
+            level_id = _require_identifier(
+                raw_binding.get("level_id"), context=f"{context}[{index}]/level_id"
+            )
+            if factor_id in bindings:
+                raise RuntimeError(f"Duplicate factor binding: {context}/{factor_id}")
+            bindings[factor_id] = level_id
+    else:
+        raise RuntimeError(f"factor_level_bindings must be an object or list: {context}")
+    return bindings
+
+
+def _structure_value_summary(entry: dict[str, Any]) -> str:
+    explicit = _json_text(entry.get("value"))
+    if explicit:
+        return explicit
+    normalized = entry.get("normalized_structure") or {}
+    parts = [
+        f"{_title(field)}: {_json_text(normalized.get(field))}"
+        for field in STRUCTURE_ENUM_FIELDS
+        if _json_text(normalized.get(field))
+    ]
+    if parts:
+        return " | ".join(parts)
+    component_reviews = entry.get("component_reviews") or {}
+    component_values = [
+        f"{_title(component)}: {_json_text(review.get('value'))}"
+        for component, review in component_reviews.items()
+        if isinstance(review, dict) and _json_text(review.get("value"))
+    ]
+    if component_values:
+        return " | ".join(component_values)
+    component_statuses = [
+        f"{component}={str(review.get('status') or '').strip()}"
+        for component, review in component_reviews.items()
+        if isinstance(review, dict) and str(review.get("status") or "").strip()
+    ]
+    return "Component review states: " + ", ".join(component_statuses)
+
+
+def _structure_source_override(entry: dict[str, Any]) -> dict[str, Any]:
+    component_reviews = entry.get("component_reviews") or {}
+    component_derivations = _unique_text(
+        review.get("derivation_note", "")
+        for review in component_reviews.values()
+        if isinstance(review, dict)
+    )
+    return {
+        "status": str(entry.get("status") or ""),
+        "value": _structure_value_summary(entry),
+        "page_or_section": str(entry.get("page_or_section") or ""),
+        "evidence_note": str(entry.get("evidence_note") or ""),
+        "derivation_note": _unique_text(
+            (entry.get("derivation_note", ""), component_derivations)
+        ),
+        "component_reviews": component_reviews,
+        "source_review_keys": "study_structure_reviews.v1",
+    }
+
+
+def _load_structure_reviews(
+    *,
+    valid_study_row_ids: set[str],
+    contract: dict[str, Any],
+    controlled_vocabularies: dict[str, dict[str, str]],
+) -> tuple[str, dict[str, dict[str, Any]], dict[tuple[str, str], dict[str, Any]]]:
+    if not STRUCTURE_REVIEW_PATH.exists():
+        return "", {}, {}
+    document = json.loads(STRUCTURE_REVIEW_PATH.read_text(encoding="utf-8"))
+    if document.get("schema") != "pps-study-structure-reviews.v1":
+        raise RuntimeError("Unexpected study-structure review schema")
+    document_review_date = str(document.get("review_date") or "").strip()
+    raw_entries = document.get("entries", [])
+    if not isinstance(raw_entries, list):
+        raise RuntimeError("Study-structure review entries must be a list")
+
+    required_components = set(contract["required_components"])
+    allowed_components = set(_contract_component_keys(contract))
+    entries: dict[str, dict[str, Any]] = {}
+    overrides: dict[tuple[str, str], dict[str, Any]] = {}
+    for entry_index, entry in enumerate(raw_entries):
+        if not isinstance(entry, dict):
+            raise RuntimeError(f"Study-structure entry must be an object: entries[{entry_index}]")
+        study_row_id = _require_identifier(
+            entry.get("study_row_id"), context=f"entries[{entry_index}]/study_row_id"
+        )
+        if study_row_id in entries:
+            raise RuntimeError(f"Duplicate study-structure review row: {study_row_id}")
+        if study_row_id not in valid_study_row_ids:
+            raise RuntimeError(f"Unknown study-structure review row: {study_row_id}")
+        status = str(entry.get("status") or "").strip()
+        if status not in STRUCTURE_ENTRY_STATUSES:
+            raise RuntimeError(
+                f"Unknown study-structure entry status {status}: {study_row_id}"
+            )
+        for provenance_field in ("source_type", "source_file", "page_or_section"):
+            if not str(entry.get(provenance_field) or "").strip():
+                raise RuntimeError(
+                    f"Study-structure review lacks {provenance_field}: {study_row_id}"
+                )
+        if not str(entry.get("review_date") or document_review_date).strip():
+            raise RuntimeError(f"Study-structure review lacks review_date: {study_row_id}")
+
+        component_reviews = entry.get("component_reviews")
+        if not isinstance(component_reviews, dict):
+            raise RuntimeError(f"component_reviews must be an object: {study_row_id}")
+        unknown_components = sorted(set(component_reviews) - allowed_components)
+        if unknown_components:
+            raise RuntimeError(
+                f"Unknown study-structure component(s) on {study_row_id}: "
+                + ", ".join(unknown_components)
+            )
+        missing_component_reviews = sorted(required_components - set(component_reviews))
+        if missing_component_reviews:
+            raise RuntimeError(
+                f"Missing required study-structure component review(s) on {study_row_id}: "
+                + ", ".join(missing_component_reviews)
+            )
+        for component_key, component_review in component_reviews.items():
+            if not isinstance(component_review, dict):
+                raise RuntimeError(
+                    f"Component review must be an object: {study_row_id}/{component_key}"
+                )
+            component_status = str(component_review.get("status") or "").strip()
+            if component_status not in STRUCTURE_COMPONENT_STATUSES:
+                raise RuntimeError(
+                    f"Unknown study-structure component status {component_status}: "
+                    f"{study_row_id}/{component_key}"
+                )
+            if component_status in {
+                "reported",
+                "derived",
+                "partial",
+                "conflicting_evidence",
+            } and component_review.get("value") in (None, "", [], {}):
+                raise RuntimeError(
+                    f"Component status {component_status} requires a value: "
+                    f"{study_row_id}/{component_key}"
+                )
+            if component_status == "derived" and not str(
+                component_review.get("derivation_note")
+                or entry.get("derivation_note")
+                or ""
+            ).strip():
+                raise RuntimeError(
+                    f"Derived component requires a derivation note: "
+                    f"{study_row_id}/{component_key}"
+                )
+
+        normalized = entry.get("normalized_structure") or {}
+        if not isinstance(normalized, dict):
+            raise RuntimeError(f"normalized_structure must be an object: {study_row_id}")
+        sample_and_assignment = normalized.get("sample_and_assignment")
+        if sample_and_assignment not in (None, ""):
+            if not isinstance(sample_and_assignment, dict):
+                raise RuntimeError(
+                    f"normalized_structure.sample_and_assignment must be an object: {study_row_id}"
+                )
+            for count_field in (
+                "planned_n",
+                "analyzed_n",
+                "planned_sample_n",
+                "analyzed_sample_n",
+                "cohort_or_arm_count",
+                "arm_count",
+                "cohort_count",
+            ):
+                _validate_optional_count(
+                    sample_and_assignment,
+                    count_field,
+                    context=f"{study_row_id}/normalized_structure/sample_and_assignment",
+                )
+            per_arm = _first_present(
+                sample_and_assignment,
+                (
+                    "per_arm_n",
+                    "per_arm_sample",
+                    "arm_sample_sizes",
+                    "cohort_sample_sizes",
+                ),
+            )
+            if per_arm not in (None, "", {}):
+                if not isinstance(per_arm, dict):
+                    raise RuntimeError(
+                        f"Per-arm sample values must be an object: {study_row_id}"
+                    )
+                for arm_id, arm_sample in per_arm.items():
+                    _require_identifier(
+                        arm_id,
+                        context=f"{study_row_id}/sample_and_assignment/per_arm_n",
+                    )
+                    if isinstance(arm_sample, dict):
+                        for count_field in ("planned_n", "analyzed_n"):
+                            _validate_optional_count(
+                                arm_sample,
+                                count_field,
+                                context=f"{study_row_id}/sample_and_assignment/{arm_id}",
+                            )
+                    else:
+                        _validate_optional_count(
+                            {"n": arm_sample},
+                            "n",
+                            context=f"{study_row_id}/sample_and_assignment/{arm_id}",
+                        )
+        complete = status in {"reported_complete", "derived_complete"}
+        for field, vocabulary_name in STRUCTURE_ENUM_FIELDS.items():
+            _validate_enum_value(
+                normalized,
+                field,
+                vocabulary_name,
+                controlled_vocabularies,
+                context=f"{study_row_id}/normalized_structure",
+                required=complete,
+            )
+
+        factors = entry.get("factors", [])
+        if not isinstance(factors, list):
+            raise RuntimeError(f"factors must be a list: {study_row_id}")
+        factor_levels: dict[str, set[str]] = {}
+        for factor_index, factor in enumerate(factors):
+            context = f"{study_row_id}/factors[{factor_index}]"
+            if not isinstance(factor, dict):
+                raise RuntimeError(f"Factor must be an object: {context}")
+            factor_id = _require_identifier(factor.get("factor_id"), context=f"{context}/factor_id")
+            if factor_id in factor_levels:
+                raise RuntimeError(f"Duplicate factor_id {factor_id}: {study_row_id}")
+            for field, vocabulary_name in FACTOR_ENUM_FIELDS.items():
+                _validate_enum_value(
+                    factor,
+                    field,
+                    vocabulary_name,
+                    controlled_vocabularies,
+                    context=context,
+                    required=True,
+                )
+            levels = factor.get("levels", [])
+            if not isinstance(levels, list):
+                raise RuntimeError(f"levels must be a list: {context}")
+            level_ids: set[str] = set()
+            for level_index, level in enumerate(levels):
+                level_context = f"{context}/levels[{level_index}]"
+                if not isinstance(level, dict):
+                    raise RuntimeError(f"Factor level must be an object: {level_context}")
+                level_id = _require_identifier(
+                    level.get("level_id"), context=f"{level_context}/level_id"
+                )
+                if level_id in level_ids:
+                    raise RuntimeError(
+                        f"Duplicate level_id {level_id}: {study_row_id}/{factor_id}"
+                    )
+                level_ids.add(level_id)
+                _validate_optional_count(level, "planned_n", context=level_context)
+                _validate_optional_count(level, "analyzed_n", context=level_context)
+            factor_levels[factor_id] = level_ids
+
+        events = entry.get("events", [])
+        if not isinstance(events, list):
+            raise RuntimeError(f"events must be a list: {study_row_id}")
+        event_ids: set[str] = set()
+        occurrence_ids: set[str] = set()
+        for event_index, event in enumerate(events):
+            context = f"{study_row_id}/events[{event_index}]"
+            if not isinstance(event, dict):
+                raise RuntimeError(f"Event must be an object: {context}")
+            event_id = _require_identifier(event.get("event_id"), context=f"{context}/event_id")
+            if event_id in event_ids:
+                raise RuntimeError(f"Duplicate event_id {event_id}: {study_row_id}")
+            event_ids.add(event_id)
+            for field, vocabulary_name in EVENT_ENUM_FIELDS.items():
+                _validate_enum_value(
+                    event,
+                    field,
+                    vocabulary_name,
+                    controlled_vocabularies,
+                    context=context,
+                    required=True,
+                )
+            _validate_optional_count(event, "order_index", context=context)
+            _validate_optional_count(event, "repeat_count", context=context)
+            duration_s = event.get("duration_s")
+            if duration_s not in (None, "") and (
+                isinstance(duration_s, bool)
+                or not isinstance(duration_s, (int, float))
+                or duration_s < 0
+            ):
+                raise RuntimeError(f"duration_s must be non-negative: {context}")
+            occurrence_id = str(event.get("pps_occurrence_id") or "").strip()
+            if occurrence_id:
+                if occurrence_id in occurrence_ids:
+                    raise RuntimeError(
+                        f"Duplicate pps_occurrence_id {occurrence_id}: {study_row_id}"
+                    )
+                occurrence_ids.add(occurrence_id)
+            if event.get("parameter_overrides") not in (None, "", {}) and not isinstance(
+                event.get("parameter_overrides"), dict
+            ):
+                raise RuntimeError(f"parameter_overrides must be an object: {context}")
+
+        for event_index, event in enumerate(events):
+            context = f"{study_row_id}/events[{event_index}]"
+            event_id = str(event["event_id"]).strip()
+            relative_to = str(event.get("relative_to_event_id") or "").strip()
+            if relative_to:
+                if relative_to not in event_ids:
+                    raise RuntimeError(
+                        f"Unknown relative_to_event_id {relative_to}: {context}"
+                    )
+                if relative_to == event_id:
+                    raise RuntimeError(f"Event cannot reference itself: {context}")
+            for reference_field in ("predecessor_event_ids", "concurrent_event_ids"):
+                for reference_id in _normalize_id_list(
+                    event.get(reference_field), context=f"{context}/{reference_field}"
+                ):
+                    if reference_id not in event_ids:
+                        raise RuntimeError(
+                            f"Unknown {reference_field} reference {reference_id}: {context}"
+                        )
+                    if reference_id == event_id:
+                        raise RuntimeError(f"Event cannot reference itself: {context}")
+            bindings = _normalize_factor_level_bindings(
+                event.get("factor_level_bindings"),
+                context=f"{context}/factor_level_bindings",
+            )
+            for factor_id, level_id in bindings.items():
+                if factor_id not in factor_levels:
+                    raise RuntimeError(
+                        f"Unknown factor binding {factor_id}: {context}"
+                    )
+                if level_id not in factor_levels[factor_id]:
+                    raise RuntimeError(
+                        f"Unknown factor level binding {factor_id}/{level_id}: {context}"
+                    )
+
+        override = _structure_source_override(entry)
+        finalized = _finalize_source_override(contract, override)
+        _validate_source_override(study_row_id, contract, finalized)
+        entries[study_row_id] = entry
+        overrides[(study_row_id, STRUCTURE_CONTRACT_KEY)] = finalized
+    return document_review_date, entries, overrides
+
+
+def _measurement_value_summary(entry: dict[str, Any]) -> str:
+    explicit = _json_text(entry.get("value"))
+    if explicit:
+        return explicit
+    acquisitions = entry.get("acquisitions") or []
+    parts = []
+    for acquisition in acquisitions:
+        acquisition_id = str(acquisition.get("acquisition_id") or "").strip()
+        family = str(acquisition.get("outcome_family") or "").strip()
+        measure = _json_text(acquisition.get("primary_measure"))
+        binding = str(acquisition.get("binding_mode") or "").strip()
+        details = ", ".join(value for value in (family, measure, binding) if value)
+        if details:
+            parts.append(f"{acquisition_id}: {details}")
+    if parts:
+        return " | ".join(parts)
+    component_reviews = entry.get("component_reviews") or {}
+    component_values = [
+        f"{_title(component)}: {_json_text(review.get('value'))}"
+        for component, review in component_reviews.items()
+        if isinstance(review, dict) and _json_text(review.get("value"))
+    ]
+    if component_values:
+        return " | ".join(component_values)
+    component_statuses = [
+        f"{component}={str(review.get('status') or '').strip()}"
+        for component, review in component_reviews.items()
+        if isinstance(review, dict) and str(review.get("status") or "").strip()
+    ]
+    return "Component review states: " + ", ".join(component_statuses)
+
+
+def _measurement_source_override(entry: dict[str, Any]) -> dict[str, Any]:
+    component_reviews = entry.get("component_reviews") or {}
+    component_derivations = _unique_text(
+        review.get("derivation_note", "")
+        for review in component_reviews.values()
+        if isinstance(review, dict)
+    )
+    return {
+        "status": str(entry.get("status") or ""),
+        "value": _measurement_value_summary(entry),
+        "page_or_section": str(entry.get("page_or_section") or ""),
+        "evidence_note": str(entry.get("evidence_note") or ""),
+        "derivation_note": _unique_text(
+            (entry.get("derivation_note", ""), component_derivations)
+        ),
+        "component_reviews": component_reviews,
+        "source_review_keys": "measurement_acquisition_reviews.v1",
+    }
+
+
+def _load_measurement_reviews(
+    *,
+    valid_study_row_ids: set[str],
+    contract: dict[str, Any],
+    controlled_vocabularies: dict[str, dict[str, str]],
+) -> tuple[str, dict[str, dict[str, Any]], dict[tuple[str, str], dict[str, Any]]]:
+    if not MEASUREMENT_REVIEW_PATH.exists():
+        return "", {}, {}
+    document = json.loads(MEASUREMENT_REVIEW_PATH.read_text(encoding="utf-8"))
+    if document.get("schema") != "pps-measurement-acquisition-reviews.v1":
+        raise RuntimeError("Unexpected measurement-acquisition review schema")
+    document_review_date = str(document.get("review_date") or "").strip()
+    raw_entries = document.get("entries", [])
+    if not isinstance(raw_entries, list):
+        raise RuntimeError("Measurement-acquisition review entries must be a list")
+
+    required_components = set(contract["required_components"])
+    allowed_components = set(_contract_component_keys(contract))
+    entries: dict[str, dict[str, Any]] = {}
+    overrides: dict[tuple[str, str], dict[str, Any]] = {}
+    forbidden_analysis_fields = {
+        "analysis",
+        "analysis_model",
+        "statistical_model",
+        "model_fitting",
+        "inferential_model",
+    }
+    for entry_index, entry in enumerate(raw_entries):
+        if not isinstance(entry, dict):
+            raise RuntimeError(
+                f"Measurement-acquisition entry must be an object: entries[{entry_index}]"
+            )
+        study_row_id = _require_identifier(
+            entry.get("study_row_id"), context=f"entries[{entry_index}]/study_row_id"
+        )
+        if study_row_id in entries:
+            raise RuntimeError(f"Duplicate measurement-acquisition review row: {study_row_id}")
+        if study_row_id not in valid_study_row_ids:
+            raise RuntimeError(f"Unknown measurement-acquisition review row: {study_row_id}")
+        status = str(entry.get("status") or "").strip()
+        if status not in MEASUREMENT_ENTRY_STATUSES:
+            raise RuntimeError(
+                f"Unknown measurement-acquisition entry status {status}: {study_row_id}"
+            )
+        for provenance_field in ("source_type", "source_file", "page_or_section"):
+            if not str(entry.get(provenance_field) or "").strip():
+                raise RuntimeError(
+                    f"Measurement-acquisition review lacks {provenance_field}: {study_row_id}"
+                )
+        if not str(entry.get("review_date") or document_review_date).strip():
+            raise RuntimeError(
+                f"Measurement-acquisition review lacks review_date: {study_row_id}"
+            )
+
+        component_reviews = entry.get("component_reviews")
+        if not isinstance(component_reviews, dict):
+            raise RuntimeError(f"component_reviews must be an object: {study_row_id}")
+        unknown_components = sorted(set(component_reviews) - allowed_components)
+        if unknown_components:
+            raise RuntimeError(
+                f"Unknown measurement-acquisition component(s) on {study_row_id}: "
+                + ", ".join(unknown_components)
+            )
+        missing_components = sorted(required_components - set(component_reviews))
+        if missing_components:
+            raise RuntimeError(
+                f"Missing required measurement-acquisition component review(s) on {study_row_id}: "
+                + ", ".join(missing_components)
+            )
+        for component_key, component_review in component_reviews.items():
+            if not isinstance(component_review, dict):
+                raise RuntimeError(
+                    f"Component review must be an object: {study_row_id}/{component_key}"
+                )
+            component_status = str(component_review.get("status") or "").strip()
+            if component_status not in STRUCTURE_COMPONENT_STATUSES:
+                raise RuntimeError(
+                    f"Unknown measurement-acquisition component status {component_status}: "
+                    f"{study_row_id}/{component_key}"
+                )
+            if component_status in {
+                "reported",
+                "derived",
+                "partial",
+                "conflicting_evidence",
+            } and component_review.get("value") in (None, "", [], {}):
+                raise RuntimeError(
+                    f"Component status {component_status} requires a value: "
+                    f"{study_row_id}/{component_key}"
+                )
+            if component_status == "derived" and not str(
+                component_review.get("derivation_note")
+                or entry.get("derivation_note")
+                or ""
+            ).strip():
+                raise RuntimeError(
+                    f"Derived component requires a derivation note: "
+                    f"{study_row_id}/{component_key}"
+                )
+
+        acquisitions = entry.get("acquisitions", [])
+        if not isinstance(acquisitions, list):
+            raise RuntimeError(f"acquisitions must be a list: {study_row_id}")
+        if status == "not_applicable":
+            non_na_required = sorted(
+                component_key
+                for component_key in required_components
+                if str(component_reviews[component_key].get("status") or "")
+                != "not_applicable"
+            )
+            if non_na_required:
+                raise RuntimeError(
+                    f"A not_applicable measurement review requires all required components "
+                    f"to be not_applicable on {study_row_id}: "
+                    + ", ".join(non_na_required)
+                )
+            if acquisitions:
+                raise RuntimeError(
+                    f"A not_applicable measurement review cannot contain acquisitions: {study_row_id}"
+                )
+        if status in {"reported_complete", "derived_complete"} and not acquisitions:
+            raise RuntimeError(
+                f"Complete measurement-acquisition review needs an acquisition row: {study_row_id}"
+            )
+        acquisition_ids: set[str] = set()
+        for acquisition_index, acquisition in enumerate(acquisitions):
+            context = f"{study_row_id}/acquisitions[{acquisition_index}]"
+            if not isinstance(acquisition, dict):
+                raise RuntimeError(f"Acquisition must be an object: {context}")
+            forbidden = sorted(set(acquisition) & forbidden_analysis_fields)
+            if forbidden:
+                raise RuntimeError(
+                    f"Analysis/model fields are outside the acquisition contract on {context}: "
+                    + ", ".join(forbidden)
+                )
+            acquisition_id = _require_identifier(
+                acquisition.get("acquisition_id"), context=f"{context}/acquisition_id"
+            )
+            if acquisition_id in acquisition_ids:
+                raise RuntimeError(
+                    f"Duplicate acquisition_id {acquisition_id}: {study_row_id}"
+                )
+            acquisition_ids.add(acquisition_id)
+            for field, vocabulary_name in MEASUREMENT_ENUM_FIELDS.items():
+                _validate_enum_value(
+                    acquisition,
+                    field,
+                    vocabulary_name,
+                    controlled_vocabularies,
+                    context=context,
+                    required=True,
+                )
+            if status in {"reported_complete", "derived_complete"}:
+                for field in (
+                    "modality_or_signal",
+                    "primary_measure",
+                    "event_trigger",
+                    "acquisition_window",
+                    "primary_outcome_definition",
+                ):
+                    if not _json_text(acquisition.get(field)):
+                        raise RuntimeError(f"Missing {field}: {context}")
+            binding_mode = str(acquisition.get("binding_mode") or "")
+            outcome_family = str(acquisition.get("outcome_family") or "")
+            if binding_mode == "native_response_log" and outcome_family not in {
+                "behavioral_response",
+                "multimodal",
+            }:
+                raise RuntimeError(
+                    f"native_response_log requires a behavioral outcome family: {context}"
+                )
+            for reference_field in (
+                "applies_to_event_ids",
+                "applies_to_pps_occurrence_ids",
+            ):
+                _normalize_id_list(
+                    acquisition.get(reference_field),
+                    context=f"{context}/{reference_field}",
+                )
+
+        override = _measurement_source_override(entry)
+        finalized = _finalize_source_override(contract, override)
+        _validate_source_override(study_row_id, contract, finalized)
+        entries[study_row_id] = entry
+        overrides[(study_row_id, MEASUREMENT_CONTRACT_KEY)] = finalized
+    return document_review_date, entries, overrides
+
+
+def _first_present(container: dict[str, Any], keys: Iterable[str]) -> Any:
+    for key in keys:
+        value = container.get(key)
+        if value not in (None, "", [], {}):
+            return value
+    return ""
+
+
+def _sample_assignment_value(entry: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+    component_review = (entry.get("component_reviews") or {}).get(
+        "sample_and_assignment", {}
+    )
+    raw_value = (
+        component_review.get("value") if isinstance(component_review, dict) else ""
+    )
+    if isinstance(raw_value, dict):
+        return _json_text(raw_value), raw_value
+    normalized = entry.get("normalized_structure") or {}
+    normalized_sample = normalized.get("sample_and_assignment")
+    if isinstance(normalized_sample, dict):
+        return _json_text(raw_value) or _json_text(normalized_sample), normalized_sample
+    return _json_text(raw_value), {}
+
+
+def _compiled_event_links(
+    events: list[dict[str, Any]],
+) -> tuple[dict[str, set[str]], dict[str, set[str]]]:
+    predecessors: dict[str, set[str]] = {
+        str(event.get("event_id") or "").strip(): set() for event in events
+    }
+    concurrent: dict[str, set[str]] = {
+        str(event.get("event_id") or "").strip(): set() for event in events
+    }
+    for event in events:
+        event_id = str(event.get("event_id") or "").strip()
+        predecessors[event_id].update(
+            _normalize_id_list(
+                event.get("predecessor_event_ids"),
+                context=f"{event_id}/predecessor_event_ids",
+            )
+        )
+        concurrent[event_id].update(
+            _normalize_id_list(
+                event.get("concurrent_event_ids"),
+                context=f"{event_id}/concurrent_event_ids",
+            )
+        )
+        relation = str(event.get("relation") or "").strip()
+        relative_to = str(event.get("relative_to_event_id") or "").strip()
+        if not relative_to:
+            continue
+        if relation == "after":
+            predecessors[event_id].add(relative_to)
+        elif relation == "before":
+            predecessors[relative_to].add(event_id)
+        elif relation == "concurrent":
+            concurrent[event_id].add(relative_to)
+            concurrent[relative_to].add(event_id)
+    return predecessors, concurrent
+
+
+def _build_structure_tables(
+    *,
+    study_index: list[dict[str, str]],
+    entries: dict[str, dict[str, Any]],
+    evidence_rows: list[dict[str, Any]],
+    contract: dict[str, Any],
+    document_review_date: str,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    evidence_by_study = {
+        row["study_row_id"]: row
+        for row in evidence_rows
+        if row["contract_key"] == STRUCTURE_CONTRACT_KEY
+    }
+    structure_rows: list[dict[str, Any]] = []
+    factor_level_rows: list[dict[str, Any]] = []
+    event_rows: list[dict[str, Any]] = []
+    future_paths = " | ".join(contract.get("future_toolkit_paths", []))
+    legacy_paths = " | ".join(contract.get("legacy_untyped_metadata_paths", []))
+    compiler_outputs = " | ".join(contract.get("compiler_derived_outputs", []))
+
+    for study in study_index:
+        study_row_id = study["study_row_id"]
+        entry = entries.get(study_row_id, {})
+        evidence = evidence_by_study[study_row_id]
+        normalized = entry.get("normalized_structure") or {}
+        component_reviews = entry.get("component_reviews") or {}
+        factors = entry.get("factors") or []
+        events = entry.get("events") or []
+        sample_summary, sample = _sample_assignment_value(entry)
+        visit_ids = {
+            str(event.get("visit_id") or "").strip()
+            for event in events
+            if str(event.get("visit_id") or "").strip()
+        }
+        session_ids = {
+            str(event.get("session_id") or "").strip()
+            for event in events
+            if str(event.get("session_id") or "").strip()
+        }
+        occurrence_ids = {
+            str(event.get("pps_occurrence_id") or "").strip()
+            for event in events
+            if str(event.get("pps_occurrence_id") or "").strip()
+        }
+        assignment_methods = _unique_text(
+            factor.get("assignment_method", "") for factor in factors
+        )
+        structure_rows.append(
+            {
+                "study_row_id": study_row_id,
+                "network_node_id": study["network_node_id"],
+                "record_id": study.get("record_id", ""),
+                "study_label": study["study_label"],
+                "experiment_letter": study.get("experiment_letter", ""),
+                "structure_review_status": evidence["evidence_status"],
+                "source_type": str(entry.get("source_type") or ""),
+                "review_date": str(
+                    (entry.get("review_date") or document_review_date)
+                    if entry
+                    else ""
+                ),
+                "source_file": evidence["source_file"],
+                "page_or_section": evidence["page_or_section"],
+                "evidence_note": evidence["evidence_note"],
+                "derivation_note": evidence["derivation_note"],
+                "sample_and_assignment_status": str(
+                    (component_reviews.get("sample_and_assignment") or {}).get(
+                        "status", ""
+                    )
+                ),
+                "sample_and_assignment_summary": sample_summary,
+                "population_summary": _json_text(
+                    sample.get("population_summary")
+                ),
+                "inclusion_criteria": _json_text(
+                    sample.get("inclusion_criteria")
+                ),
+                "exclusion_criteria": _json_text(
+                    sample.get("exclusion_criteria")
+                ),
+                "planned_sample_n": _first_present(
+                    sample, ("planned_n", "planned_sample_n", "planned_sample_size")
+                ),
+                "analyzed_sample_n": _first_present(
+                    sample, ("analyzed_n", "analyzed_sample_n", "analyzed_sample_size")
+                ),
+                "cohort_or_arm_count": _first_present(
+                    sample, ("cohort_or_arm_count", "arm_count", "cohort_count")
+                ),
+                "per_arm_sample_json": json.dumps(
+                    _first_present(
+                        sample,
+                        (
+                            "per_arm_n",
+                            "per_arm_sample",
+                            "arm_sample_sizes",
+                            "cohort_sample_sizes",
+                        ),
+                    )
+                    or {},
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
+                "assignment_summary": _first_present(
+                    sample, ("assignment_summary", "allocation_summary", "allocation_rule")
+                ),
+                "assignment_or_order_methods": assignment_methods,
+                "design_topology_status": str(
+                    (component_reviews.get("design_topology") or {}).get(
+                        "status", ""
+                    )
+                ),
+                "design_topology_summary": _json_text(
+                    (component_reviews.get("design_topology") or {}).get("value")
+                ),
+                "pps_occasion_schedule_status": str(
+                    (component_reviews.get("pps_occasion_schedule") or {}).get(
+                        "status", ""
+                    )
+                ),
+                "pps_occasion_schedule_summary": _json_text(
+                    (component_reviews.get("pps_occasion_schedule") or {}).get(
+                        "value"
+                    )
+                ),
+                "factor_scope_map_status": str(
+                    (component_reviews.get("factor_scope_map") or {}).get(
+                        "status", ""
+                    )
+                ),
+                "factor_scope_map_summary": _json_text(
+                    (component_reviews.get("factor_scope_map") or {}).get("value")
+                ),
+                "protocol_binding_status": str(
+                    (component_reviews.get("protocol_binding") or {}).get(
+                        "status", ""
+                    )
+                ),
+                "protocol_binding_summary": _json_text(
+                    (component_reviews.get("protocol_binding") or {}).get("value")
+                ),
+                "order_assignment_spacing_status": str(
+                    (component_reviews.get("order_assignment_spacing") or {}).get(
+                        "status", ""
+                    )
+                ),
+                "order_assignment_spacing_summary": _json_text(
+                    (component_reviews.get("order_assignment_spacing") or {}).get(
+                        "value"
+                    )
+                ),
+                "intervention_schedule_status": str(
+                    (component_reviews.get("intervention_schedule") or {}).get(
+                        "status", ""
+                    )
+                ),
+                "intervention_schedule_summary": _json_text(
+                    (component_reviews.get("intervention_schedule") or {}).get(
+                        "value"
+                    )
+                ),
+                "design_family": str(normalized.get("design_family") or ""),
+                "assignment_scope": str(normalized.get("assignment_scope") or ""),
+                "pps_occurrence_pattern": str(
+                    normalized.get("pps_occurrence_pattern") or ""
+                ),
+                "compiled_factor_count": len(factors),
+                "compiled_factor_level_count": sum(
+                    len(factor.get("levels") or []) for factor in factors
+                ),
+                "compiled_event_count": len(events),
+                "compiled_pps_measurement_event_count": sum(
+                    event.get("event_kind") == "pps_measurement" for event in events
+                ),
+                "compiled_distinct_visit_id_count": len(visit_ids),
+                "compiled_distinct_session_id_count": len(session_ids),
+                "compiled_distinct_pps_occurrence_id_count": len(occurrence_ids),
+                "normalized_structure_json": json.dumps(
+                    normalized,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
+                "component_status_json": json.dumps(
+                    {
+                        key: review.get("status", "")
+                        for key, review in component_reviews.items()
+                    },
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
+                "component_value_json": json.dumps(
+                    {
+                        key: review.get("value", "")
+                        for key, review in component_reviews.items()
+                    },
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
+                "current_toolkit_support": contract["current_toolkit_support"],
+                "current_toolkit_paths": "",
+                "future_toolkit_paths": future_paths,
+                "legacy_untyped_metadata_paths": legacy_paths,
+                "compiler_derived_outputs": compiler_outputs,
+            }
+        )
+
+        provenance = {
+            "source_type": str(entry.get("source_type") or ""),
+            "source_file": evidence["source_file"],
+            "page_or_section": evidence["page_or_section"],
+            "evidence_note": evidence["evidence_note"],
+        }
+        identity = {
+            "study_row_id": study_row_id,
+            "network_node_id": study["network_node_id"],
+            "record_id": study.get("record_id", ""),
+            "study_label": study["study_label"],
+        }
+        for factor in factors:
+            levels = factor.get("levels") or [{}]
+            for level in levels:
+                factor_level_rows.append(
+                    {
+                        **identity,
+                        "factor_id": str(factor.get("factor_id") or ""),
+                        "factor_label": str(factor.get("label") or ""),
+                        "factor_role": str(factor.get("role") or ""),
+                        "factor_scope": str(factor.get("scope") or ""),
+                        "assignment_method": str(
+                            factor.get("assignment_method") or ""
+                        ),
+                        "allocation_rule": _json_text(
+                            factor.get("allocation_rule")
+                        ),
+                        "level_id": str(level.get("level_id") or ""),
+                        "level_label": str(level.get("label") or ""),
+                        "planned_n": level.get("planned_n", ""),
+                        "analyzed_n": level.get("analyzed_n", ""),
+                        "level_record_status": (
+                            "declared_level"
+                            if level.get("level_id")
+                            else "factor_without_discrete_levels"
+                        ),
+                        **provenance,
+                        "current_toolkit_support": contract["current_toolkit_support"],
+                        "future_toolkit_path": "pps-study-plan.v1::factors[]",
+                    }
+                )
+
+        predecessors, concurrent = _compiled_event_links(events)
+        for event in events:
+            event_id = str(event.get("event_id") or "")
+            bindings = _normalize_factor_level_bindings(
+                event.get("factor_level_bindings"),
+                context=f"{study_row_id}/{event_id}/factor_level_bindings",
+            )
+            event_rows.append(
+                {
+                    **identity,
+                    "event_id": event_id,
+                    "event_label": str(event.get("label") or ""),
+                    "order_index": event.get("order_index", ""),
+                    "event_kind": str(event.get("event_kind") or ""),
+                    "execution_mode": str(event.get("execution_mode") or ""),
+                    "relation": str(event.get("relation") or ""),
+                    "relative_to_event_id": str(
+                        event.get("relative_to_event_id") or ""
+                    ),
+                    "compiled_predecessor_event_ids": " | ".join(
+                        sorted(predecessors[event_id])
+                    ),
+                    "compiled_concurrent_event_ids": " | ".join(
+                        sorted(concurrent[event_id])
+                    ),
+                    "visit_id": str(event.get("visit_id") or ""),
+                    "session_id": str(event.get("session_id") or ""),
+                    "pps_occurrence_id": str(
+                        event.get("pps_occurrence_id") or ""
+                    ),
+                    "timepoint_label": str(event.get("timepoint_label") or ""),
+                    "repeat_count": event.get("repeat_count", ""),
+                    "duration_s": event.get("duration_s", ""),
+                    "duration_text": str(event.get("duration_text") or ""),
+                    "spacing_notes": str(event.get("spacing_notes") or ""),
+                    "factor_level_bindings_json": json.dumps(
+                        bindings,
+                        ensure_ascii=False,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    "profile_or_protocol_ref": _json_text(
+                        event.get("profile_or_protocol_ref")
+                    ),
+                    "parameter_overrides_json": json.dumps(
+                        event.get("parameter_overrides") or {},
+                        ensure_ascii=False,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    **provenance,
+                    "current_toolkit_support": contract["current_toolkit_support"],
+                    "future_toolkit_path": "pps-study-plan.v1::schedule.events[]",
+                }
+            )
+    return structure_rows, factor_level_rows, event_rows
+
+
+def _build_measurement_acquisition_table(
+    *,
+    study_index: list[dict[str, str]],
+    entries: dict[str, dict[str, Any]],
+    structure_entries: dict[str, dict[str, Any]],
+    evidence_rows: list[dict[str, Any]],
+    contract: dict[str, Any],
+) -> list[dict[str, Any]]:
+    evidence_by_study = {
+        row["study_row_id"]: row
+        for row in evidence_rows
+        if row["contract_key"] == MEASUREMENT_CONTRACT_KEY
+    }
+    study_by_id = {row["study_row_id"]: row for row in study_index}
+    rows: list[dict[str, Any]] = []
+    for study_row_id, entry in entries.items():
+        study = study_by_id[study_row_id]
+        evidence = evidence_by_study[study_row_id]
+        structure_events = (structure_entries.get(study_row_id) or {}).get("events", [])
+        valid_event_ids = {
+            str(event.get("event_id") or "").strip() for event in structure_events
+        }
+        valid_occurrence_ids = {
+            str(event.get("pps_occurrence_id") or "").strip()
+            for event in structure_events
+            if str(event.get("pps_occurrence_id") or "").strip()
+        }
+        for acquisition in entry.get("acquisitions", []):
+            acquisition_id = str(acquisition.get("acquisition_id") or "")
+            applies_to_event_ids = _normalize_id_list(
+                acquisition.get("applies_to_event_ids"),
+                context=f"{study_row_id}/{acquisition_id}/applies_to_event_ids",
+            )
+            applies_to_occurrence_ids = _normalize_id_list(
+                acquisition.get("applies_to_pps_occurrence_ids"),
+                context=(
+                    f"{study_row_id}/{acquisition_id}/applies_to_pps_occurrence_ids"
+                ),
+            )
+            unknown_events = sorted(set(applies_to_event_ids) - valid_event_ids)
+            if unknown_events:
+                raise RuntimeError(
+                    f"Unknown acquisition schedule event reference(s) on "
+                    f"{study_row_id}/{acquisition_id}: {', '.join(unknown_events)}"
+                )
+            unknown_occurrences = sorted(
+                set(applies_to_occurrence_ids) - valid_occurrence_ids
+            )
+            if unknown_occurrences:
+                raise RuntimeError(
+                    f"Unknown acquisition PPS occurrence reference(s) on "
+                    f"{study_row_id}/{acquisition_id}: {', '.join(unknown_occurrences)}"
+                )
+            rows.append(
+                {
+                    "study_row_id": study_row_id,
+                    "network_node_id": study["network_node_id"],
+                    "record_id": study.get("record_id", ""),
+                    "study_label": study["study_label"],
+                    "acquisition_id": acquisition_id,
+                    "acquisition_label": str(acquisition.get("label") or ""),
+                    "outcome_family": str(
+                        acquisition.get("outcome_family") or ""
+                    ),
+                    "modality_or_signal": _json_text(
+                        acquisition.get("modality_or_signal")
+                    ),
+                    "primary_measure": _json_text(
+                        acquisition.get("primary_measure")
+                    ),
+                    "binding_mode": str(acquisition.get("binding_mode") or ""),
+                    "device_or_system": _json_text(
+                        acquisition.get("device_or_system")
+                    ),
+                    "channels_or_sites_json": json.dumps(
+                        acquisition.get("channels_or_sites") or [],
+                        ensure_ascii=False,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    "event_trigger": _json_text(
+                        acquisition.get("event_trigger")
+                    ),
+                    "clock_sync_method": str(
+                        acquisition.get("clock_sync_method") or ""
+                    ),
+                    "acquisition_window": _json_text(
+                        acquisition.get("acquisition_window")
+                    ),
+                    "primary_outcome_definition": _json_text(
+                        acquisition.get("primary_outcome_definition")
+                    ),
+                    "calibration_or_online_processing": _json_text(
+                        acquisition.get("calibration_or_online_processing")
+                    ),
+                    "applies_to_event_ids": " | ".join(applies_to_event_ids),
+                    "applies_to_pps_occurrence_ids": " | ".join(
+                        applies_to_occurrence_ids
+                    ),
+                    "profile_or_protocol_ref": _json_text(
+                        acquisition.get("profile_or_protocol_ref")
+                    ),
+                    "source_type": str(entry.get("source_type") or ""),
+                    "review_date": str(entry.get("review_date") or ""),
+                    "source_file": evidence["source_file"],
+                    "page_or_section": evidence["page_or_section"],
+                    "evidence_note": evidence["evidence_note"],
+                    "derivation_note": evidence["derivation_note"],
+                    "current_toolkit_support": contract["current_toolkit_support"],
+                    "current_toolkit_paths": "",
+                    "runtime_or_untyped_inputs": " | ".join(
+                        contract.get("runtime_or_untyped_inputs", [])
+                    ),
+                    "future_toolkit_paths": " | ".join(
+                        contract.get("future_toolkit_paths", [])
+                    ),
+                    "analysis_model_scope": "excluded_from_acquisition_contract",
+                }
+            )
+    return rows
 
 
 def _read_csv(path: Path) -> list[dict[str, str]]:
@@ -718,6 +1942,8 @@ def _evaluate_contract(
     final_components = list(contract["required_components"])
     if composite:
         return "composite_requires_split", final_components, component_classes
+    if not all_parent_fields:
+        return "not_assessed", final_components, component_classes
     if not has_audit:
         return "not_assessed", final_components, component_classes
 
@@ -779,6 +2005,8 @@ def _toolkit_evidence(
     current_paths: list[str],
     values_by_study_path: dict[tuple[str, str], list[dict[str, str]]],
 ) -> tuple[str, str, str]:
+    if not current_paths:
+        return "not_in_current_design_or_run_plan_schema", "", ""
     matched = [
         row
         for current_path in current_paths
@@ -835,7 +2063,7 @@ def build(output_dir: Path) -> dict[str, Any]:
     contract_keys = [contract["column_key"] for contract in contracts]
     if tuple(contract_keys) != EXPECTED_CONTRACT_KEYS:
         raise RuntimeError(
-            "The parsimonious contract must contain the eleven canonical columns in order: "
+            "The parsimonious contract must contain the thirteen canonical columns in order: "
             + ", ".join(EXPECTED_CONTRACT_KEYS)
         )
     for contract in contracts:
@@ -856,6 +2084,17 @@ def build(output_dir: Path) -> dict[str, Any]:
             raise RuntimeError(
                 f"Unknown normalization vocabulary for {key}: "
                 + ", ".join(unknown_vocabularies)
+            )
+        expected_future_paths = EXPECTED_FUTURE_TOOLKIT_PATHS.get(key, ())
+        actual_future_paths = tuple(contract.get("future_toolkit_paths", []))
+        if actual_future_paths != expected_future_paths:
+            raise RuntimeError(
+                f"Unexpected future Toolkit destination path(s) for {key}: "
+                + ", ".join(actual_future_paths)
+            )
+        if expected_future_paths and contract.get("current_toolkit_paths"):
+            raise RuntimeError(
+                f"Future study/acquisition plan contract cannot claim current design paths: {key}"
             )
 
     current_schema = json.loads(CURRENT_INPUT_SCHEMA_PATH.read_text(encoding="utf-8"))
@@ -920,6 +2159,53 @@ def build(output_dir: Path) -> dict[str, Any]:
                 study_row_id, contract_key, review, contracts
             )
             source_reviews[(study_row_id, contract_key)] = review
+    structure_contract = next(
+        contract
+        for contract in contracts
+        if contract["column_key"] == STRUCTURE_CONTRACT_KEY
+    )
+    (
+        structure_review_date,
+        structure_review_entries,
+        structure_review_overrides,
+    ) = _load_structure_reviews(
+        valid_study_row_ids=valid_study_row_ids,
+        contract=structure_contract,
+        controlled_vocabularies=controlled_vocabularies,
+    )
+    source_reviews.update(structure_review_overrides)
+    measurement_contract = next(
+        contract
+        for contract in contracts
+        if contract["column_key"] == MEASUREMENT_CONTRACT_KEY
+    )
+    (
+        measurement_review_date,
+        measurement_review_entries,
+        measurement_review_overrides,
+    ) = _load_measurement_reviews(
+        valid_study_row_ids=valid_study_row_ids,
+        contract=measurement_contract,
+        controlled_vocabularies=controlled_vocabularies,
+    )
+    source_reviews.update(measurement_review_overrides)
+    for study in study_index:
+        if (
+            study.get("experiment_disaggregation_status")
+            == "experiment_specific_source_review_available"
+        ):
+            missing_contracts = [
+                contract["column_key"]
+                for contract in contracts
+                if (study["study_row_id"], contract["column_key"])
+                not in source_reviews
+            ]
+            if missing_contracts:
+                raise RuntimeError(
+                    "experiment_specific_source_review_available requires a dedicated "
+                    f"source review for every compact contract on {study['study_row_id']}: "
+                    + ", ".join(missing_contracts)
+                )
     audit_by_id = {row["record_id"]: row for row in audits}
     manual_by_id = {row["record_id"]: row for row in manuals}
     values_by_study_path: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
@@ -972,7 +2258,19 @@ def build(output_dir: Path) -> dict[str, Any]:
                 *contract["required_parent_fields"],
                 *contract.get("conditional_parent_fields", []),
             ]
-            source_entry = source_review_entries.get(study["study_row_id"], {})
+            if key == STRUCTURE_CONTRACT_KEY:
+                source_entry = structure_review_entries.get(
+                    study["study_row_id"], {}
+                )
+                effective_source_review_date = structure_review_date
+            elif key == MEASUREMENT_CONTRACT_KEY:
+                source_entry = measurement_review_entries.get(
+                    study["study_row_id"], {}
+                )
+                effective_source_review_date = measurement_review_date
+            else:
+                source_entry = source_review_entries.get(study["study_row_id"], {})
+                effective_source_review_date = source_review_date
             source_files = (
                 str(source_entry.get("source_file") or "")
                 if source_override
@@ -1096,7 +2394,7 @@ def build(output_dir: Path) -> dict[str, Any]:
                     else "manual_review" if manual else "metadata_audit" if audit else "not_assessed"
                 ),
                 "review_date": (
-                    str(source_entry.get("review_date") or source_review_date)
+                    str(source_entry.get("review_date") or effective_source_review_date)
                     if source_override
                     else str(manual.get("review_date") or "") if manual else ""
                 ),
@@ -1109,6 +2407,15 @@ def build(output_dir: Path) -> dict[str, Any]:
                 "profile_source_files": profile_sources,
                 "current_toolkit_support": contract["current_toolkit_support"],
                 "current_toolkit_paths": " | ".join(contract["current_toolkit_paths"]),
+                "future_toolkit_paths": " | ".join(
+                    contract.get("future_toolkit_paths", [])
+                ),
+                "legacy_untyped_metadata_paths": " | ".join(
+                    contract.get("legacy_untyped_metadata_paths", [])
+                ),
+                "compiler_derived_outputs": " | ".join(
+                    contract.get("compiler_derived_outputs", [])
+                ),
                 "runtime_or_untyped_inputs": " | ".join(
                     contract.get("runtime_or_untyped_inputs", [])
                 ),
@@ -1254,6 +2561,15 @@ def build(output_dir: Path) -> dict[str, Any]:
                 contract.get("conditional_parent_fields", [])
             ),
             "current_toolkit_paths": " | ".join(contract["current_toolkit_paths"]),
+            "future_toolkit_paths": " | ".join(
+                contract.get("future_toolkit_paths", [])
+            ),
+            "legacy_untyped_metadata_paths": " | ".join(
+                contract.get("legacy_untyped_metadata_paths", [])
+            ),
+            "compiler_derived_outputs": " | ".join(
+                contract.get("compiler_derived_outputs", [])
+            ),
             "runtime_or_untyped_inputs": " | ".join(
                 contract.get("runtime_or_untyped_inputs", [])
             ),
@@ -1289,6 +2605,21 @@ def build(output_dir: Path) -> dict[str, Any]:
                 ),
             }
         )
+
+    structure_rows, factor_level_rows, event_rows = _build_structure_tables(
+        study_index=study_index,
+        entries=structure_review_entries,
+        evidence_rows=evidence_rows,
+        contract=structure_contract,
+        document_review_date=structure_review_date,
+    )
+    measurement_acquisition_rows = _build_measurement_acquisition_table(
+        study_index=study_index,
+        entries=measurement_review_entries,
+        structure_entries=structure_review_entries,
+        evidence_rows=evidence_rows,
+        contract=measurement_contract,
+    )
 
     # Keep the primary have/missing table genuinely compact. Join/debug IDs,
     # component counts, and profile scope remain in study_instance_index.csv
@@ -1339,6 +2670,149 @@ def build(output_dir: Path) -> dict[str, Any]:
     review_columns = list(review_queue_rows[0])
     dictionary_columns = list(dictionary_rows[0])
     summary_columns = list(summary_rows[0])
+    structure_columns = [
+        "study_row_id",
+        "network_node_id",
+        "record_id",
+        "study_label",
+        "experiment_letter",
+        "structure_review_status",
+        "source_type",
+        "review_date",
+        "source_file",
+        "page_or_section",
+        "evidence_note",
+        "derivation_note",
+        "sample_and_assignment_status",
+        "sample_and_assignment_summary",
+        "population_summary",
+        "inclusion_criteria",
+        "exclusion_criteria",
+        "planned_sample_n",
+        "analyzed_sample_n",
+        "cohort_or_arm_count",
+        "per_arm_sample_json",
+        "assignment_summary",
+        "assignment_or_order_methods",
+        "design_topology_status",
+        "design_topology_summary",
+        "pps_occasion_schedule_status",
+        "pps_occasion_schedule_summary",
+        "factor_scope_map_status",
+        "factor_scope_map_summary",
+        "protocol_binding_status",
+        "protocol_binding_summary",
+        "order_assignment_spacing_status",
+        "order_assignment_spacing_summary",
+        "intervention_schedule_status",
+        "intervention_schedule_summary",
+        "design_family",
+        "assignment_scope",
+        "pps_occurrence_pattern",
+        "compiled_factor_count",
+        "compiled_factor_level_count",
+        "compiled_event_count",
+        "compiled_pps_measurement_event_count",
+        "compiled_distinct_visit_id_count",
+        "compiled_distinct_session_id_count",
+        "compiled_distinct_pps_occurrence_id_count",
+        "normalized_structure_json",
+        "component_status_json",
+        "component_value_json",
+        "current_toolkit_support",
+        "current_toolkit_paths",
+        "future_toolkit_paths",
+        "legacy_untyped_metadata_paths",
+        "compiler_derived_outputs",
+    ]
+    factor_level_columns = [
+        "study_row_id",
+        "network_node_id",
+        "record_id",
+        "study_label",
+        "factor_id",
+        "factor_label",
+        "factor_role",
+        "factor_scope",
+        "assignment_method",
+        "allocation_rule",
+        "level_id",
+        "level_label",
+        "planned_n",
+        "analyzed_n",
+        "level_record_status",
+        "source_type",
+        "source_file",
+        "page_or_section",
+        "evidence_note",
+        "current_toolkit_support",
+        "future_toolkit_path",
+    ]
+    event_columns = [
+        "study_row_id",
+        "network_node_id",
+        "record_id",
+        "study_label",
+        "event_id",
+        "event_label",
+        "order_index",
+        "event_kind",
+        "execution_mode",
+        "relation",
+        "relative_to_event_id",
+        "compiled_predecessor_event_ids",
+        "compiled_concurrent_event_ids",
+        "visit_id",
+        "session_id",
+        "pps_occurrence_id",
+        "timepoint_label",
+        "repeat_count",
+        "duration_s",
+        "duration_text",
+        "spacing_notes",
+        "factor_level_bindings_json",
+        "profile_or_protocol_ref",
+        "parameter_overrides_json",
+        "source_type",
+        "source_file",
+        "page_or_section",
+        "evidence_note",
+        "current_toolkit_support",
+        "future_toolkit_path",
+    ]
+    measurement_acquisition_columns = [
+        "study_row_id",
+        "network_node_id",
+        "record_id",
+        "study_label",
+        "acquisition_id",
+        "acquisition_label",
+        "outcome_family",
+        "modality_or_signal",
+        "primary_measure",
+        "binding_mode",
+        "device_or_system",
+        "channels_or_sites_json",
+        "event_trigger",
+        "clock_sync_method",
+        "acquisition_window",
+        "primary_outcome_definition",
+        "calibration_or_online_processing",
+        "applies_to_event_ids",
+        "applies_to_pps_occurrence_ids",
+        "profile_or_protocol_ref",
+        "source_type",
+        "review_date",
+        "source_file",
+        "page_or_section",
+        "evidence_note",
+        "derivation_note",
+        "current_toolkit_support",
+        "current_toolkit_paths",
+        "runtime_or_untyped_inputs",
+        "future_toolkit_paths",
+        "analysis_model_scope",
+    ]
     legend_rows = [
         {
             "status": status,
@@ -1388,6 +2862,26 @@ def build(output_dir: Path) -> dict[str, Any]:
         legend_rows,
         ["status", "description", "default_review_action"],
     )
+    _write_csv(
+        output_dir / "study_structure.csv",
+        structure_rows,
+        structure_columns,
+    )
+    _write_csv(
+        output_dir / "study_factor_levels.csv",
+        factor_level_rows,
+        factor_level_columns,
+    )
+    _write_csv(
+        output_dir / "study_schedule_events.csv",
+        event_rows,
+        event_columns,
+    )
+    _write_csv(
+        output_dir / "study_measurement_acquisitions.csv",
+        measurement_acquisition_rows,
+        measurement_acquisition_columns,
+    )
 
     return {
         "schema": contract_document["schema"],
@@ -1396,6 +2890,11 @@ def build(output_dir: Path) -> dict[str, Any]:
         "publication_count": len(publication_rows),
         "evidence_cell_count": len(evidence_rows),
         "review_queue_count": len(review_queue_rows),
+        "structure_review_count": len(structure_review_entries),
+        "structure_factor_level_row_count": len(factor_level_rows),
+        "structure_event_row_count": len(event_rows),
+        "measurement_review_count": len(measurement_review_entries),
+        "measurement_acquisition_row_count": len(measurement_acquisition_rows),
         "status_counts": dict(sorted(Counter(row["evidence_status"] for row in evidence_rows).items())),
     }
 

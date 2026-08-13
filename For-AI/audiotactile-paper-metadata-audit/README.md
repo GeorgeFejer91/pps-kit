@@ -123,20 +123,29 @@ views rather than silently collapsing experiments:
 - `publication_parsimonious_status_matrix.csv` has exactly 94
   publication-node rows and categorical evidence states for the compact
   scientific emulation contracts.
-- `study_instance_parsimonious_status_matrix.csv` has 124 registered rows and
-  is the primary manual-review matrix. Its 11 paper-facing columns cover the
+- `study_instance_parsimonious_status_matrix.csv` has 142 registered rows and
+  is the primary manual-review matrix. Its 13 paper-facing columns cover the
   auditory stimulus; trajectory geometry plus kinematics; trial sequence;
   task/response behavior; jitter/ITI; SOAs; tactile target; baseline trials;
-  catch trials; repetition allocation; and block composition/order. Geometry,
-  path length, duration, and speed are one reconstructibility contract rather
-  than redundant columns. Baseline and catch are separate because they have
-  different target roles and allocation arithmetic.
-  Sixteen publications with tracked evidence for multiple experiments or
+  catch trials; repetition allocation; block composition/order; and study
+  structure/schedule; and measurement acquisition/primary outcome. Geometry,
+  path length, duration, and speed are one
+  reconstructibility contract rather than redundant columns. Baseline and
+  catch are separate because they have different target roles and allocation
+  arithmetic. Study structure remains one wide contract and normalizes into
+  parent, factor-level, and schedule-event child tables.
+  Twenty-nine publications with tracked evidence for multiple experiments or
   profile variants use contiguous `(a)`, `(b)`, `(c)`, ... suffixes; Serino
   2015 Scientific Reports reaches `(g)`. Publications without a registry entry
   remain one `experiment_count_not_assessed` review unit, which is not a claim
   that the paper contains only one experiment. The authoritative splits and
   evidence pointers live in `study_instance_registry.json`.
+
+  `experiment_specific_source_review_available` means that a dedicated child
+  review exists for every compact contract. It never authorizes inheritance of
+  a reused record's coarse values or templates; record-level evidence remains
+  composite, and a child receives a profile only from an explicit registry
+  `template_ids` mapping.
 
 `study_instance_parsimonious_value_matrix.csv` places short normalized values
 beside those statuses. `parsimonious_contract_evidence.csv` is the lossless
@@ -149,6 +158,42 @@ paper completeness. The controlled vocabularies in
 `parsimonious_emulation_contract.v1.json` distinguish generated/imported/
 physical sound sources, motion modes, timing policies, baseline families,
 catch target roles, and exact versus unresolved allocation rules.
+
+`study_structure.csv` is the conservative one-row-per-study topology ledger.
+It exposes sample/assignment summaries (including population, eligibility,
+planned/analyzed N, and per-arm N when reported), normalized design family/assignment
+scope/PPS occurrence pattern, source provenance, and clearly labeled
+compiler-derived factor/event/visit/session counts. `study_factor_levels.csv`
+holds factor role, scope, assignment method, allocation prose, and optional
+planned/analyzed N per level. `study_schedule_events.csv` holds ordered
+visit/session/PPS-occurrence events, event relations, factor bindings,
+execution mode, profile/protocol binding, and overrides. These tables are
+sourced only from the versioned `study_structure_reviews.v1.json` when a row
+has been reviewed; missing rows remain unassessed or composite rather than
+being inferred from templates.
+
+The structure contract has no current typed Toolkit path. Its intended
+destination is a future pre-run `pps-study-plan.v1` artifact between finalized
+PPS profiles and runner preparation. It is not Segment 6's order-preview
+participant count. Existing
+`design.study_profile_reference_parameters.dashboard_run_setup` and
+`design.protocol.participant_order_policy.part_membership` values are legacy
+untyped metadata only and do not count as study-plan implementation support.
+
+The 13th compact contract, `measurement_acquisition_outcome`, prevents a study
+whose scientific dependent measure is EEG/ERP, iEEG, TMS/MEP, ECG, or other
+physiology from appearing reproducible from stimulus and response settings
+alone. `study_measurement_acquisitions.csv` normalizes outcome family/primary
+measure, native-response or external-device binding, channels/sites,
+trigger/clock synchronization, acquisition window, primary-outcome definition,
+and optional method-defining calibration/online processing. Behavioral-only
+studies bind to `native_response_log` and may refer to the task-response
+contract instead of duplicating its response mechanics. Current native logs,
+LSL markers, and LabRecorder XDF capture are runtime scaffolding, not a typed
+device/channel/epoch/outcome schema. The intended typed destination is a future
+`pps-study-plan.v1::schedule.events[].measurement_binding` referencing
+`pps-acquisition-plan.v1::acquisitions[]`. Offline analysis/model fitting is
+explicitly excluded from this extraction contract.
 
 The companion `publication_current_toolkit_input_matrix.csv` and
 `study_instance_current_toolkit_input_matrix.csv` encode whether attached
