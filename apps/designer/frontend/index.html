@@ -1084,8 +1084,8 @@
           </ol>
 
           <div class="doc-link-row">
-            <a class="button-link" href="../../../docs/STIMULUS_DESIGNER.md">Open Stimulus Designer Docs</a>
-            <a class="button-link" href="../../../docs/REPLICATION.md">Open Replication Notes</a>
+            <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/docs/STIMULUS_DESIGNER.md">Open Stimulus Designer Docs</a>
+            <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/docs/REPLICATION.md">Open Replication Notes</a>
             <a class="button-link" href="https://github.com/3DTune-In/3dti_AudioToolkit" target="_blank" rel="noopener noreferrer">Open Original 3DTI GitHub</a>
           </div>
         </section>
@@ -1098,7 +1098,7 @@
             <h2 id="docs-hardware-title">Hardware Specifications and Latency Evidence</h2>
           </div>
           <p class="info-copy">The validated lab route runs on Windows and delivers auditory and tactile stimuli through a single synchronized multichannel ASIO output stream using the Native Instruments Komplete Audio 6 MK2 interface. Channels 1 and 2 route binaural left and right audio to participant headphones while channel 3 drives a Woojer Strap 4 connected as a wired analog load, removing the timing variability introduced by Bluetooth. The tactile signal is not a separate conversion path but a conventional audio waveform written to output 3 and routed into the Woojer's wired analog auxiliary input, whose transducer converts low-frequency signal energy into vibrotactile stimulation. Encoding the tactile cue as an audio channel keeps its onset timing under exactly the same software and hardware control as the auditory channels, making the stimulus onset asynchrony between sound and touch a direct function of the SOA schedule.</p>
-          <p class="info-copy">Latency was measured using a direct electrical loopback in which the three output channels were patched back into the Komplete Audio 6 MK2's own analog inputs via TRS cables, and a calibration pulse train was played while the return signal was simultaneously recorded. Comparing transmitted and received pulse timing gives the round-trip delay per channel. The physical-minus-digital latency is 33.462 &plusmn; 0.013 ms across 20 recovered pulses, representing the time between when the software schedules a sample and when that signal appears at the physical output. All 20 response marker pulses were recovered. The critical finding for audio-tactile research is the inter-channel skew: the left and right audio channels are synchronized to within 0.023 ms of each other, and the tactile drive channel deviates from the audio channels by only 0.011 ms. These sub-millisecond differences are possible because the Komplete Audio 6 MK2, operated through its ASIO driver as a single multichannel device, clocks all three outputs from the same sample clock and renders them within the same output buffer; this result cannot be replicated by routing stimuli through separate Windows stereo endpoints. The full loopback protocol is documented in <a href="../../../For-AI/engineering/validation/For-AI/engineering/validation/docs/EXPERIMENT_LATENCY_VALIDATION.md">the latency validation report</a>.</p>
+          <p class="info-copy">Latency was measured using a direct electrical loopback in which the three output channels were patched back into the Komplete Audio 6 MK2's own analog inputs via TRS cables, and a calibration pulse train was played while the return signal was simultaneously recorded. Comparing transmitted and received pulse timing gives the round-trip delay per channel. The physical-minus-digital latency is 33.462 &plusmn; 0.013 ms across 20 recovered pulses, representing the time between when the software schedules a sample and when that signal appears at the physical output. All 20 response marker pulses were recovered. The critical finding for audio-tactile research is the inter-channel skew: the left and right audio channels are synchronized to within 0.023 ms of each other, and the tactile drive channel deviates from the audio channels by only 0.011 ms. These sub-millisecond differences are possible because the Komplete Audio 6 MK2, operated through its ASIO driver as a single multichannel device, clocks all three outputs from the same sample clock and renders them within the same output buffer; this result cannot be replicated by routing stimuli through separate Windows stereo endpoints. The full loopback protocol is documented in <a href="https://github.com/GeorgeFejer91/pps-kit/blob/main/For-AI/engineering/validation/docs/EXPERIMENT_LATENCY_VALIDATION.md">the latency validation report</a>.</p>
         </section>
 
         <hr class="doc-segment-rule" aria-hidden="true">
@@ -1119,8 +1119,8 @@
             <div><strong>6 Prepare</strong><span>Create participant block orders and hand off to the native runner.</span></div>
           </div>
           <div class="doc-link-row">
-            <a class="button-link" href="../../../docs/GITHUB_PAGES_DASHBOARD.md">Open Dashboard Guide</a>
-            <a class="button-link" href="../../../docs/PUBLISHED_STUDY_RECREATION_STATUS.md">Open Profile Status</a>
+            <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/docs/GITHUB_PAGES_DASHBOARD.md">Open Dashboard Guide</a>
+            <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/docs/PUBLISHED_STUDY_RECREATION_STATUS.md">Open Profile Status</a>
           </div>
         </section>
 
@@ -1133,8 +1133,8 @@
           </div>
           <p class="info-copy">The Experiment Runner is a native Windows application, PPSExperimentRunner.exe, launched from the Segment 6 setup package and entirely separate from the browser dashboard. It is responsible for all timing-sensitive work during data collection, opening the prepared session package, playing the three-channel ASIO stream to the lab hardware, and recording participant responses and event markers. All playback timing is handled natively to avoid the latency variability inherent in browser JavaScript execution. Session output folders contain event CSVs, XDF and marker mirrors for Lab Streaming Layer integrations, trigger dictionaries, timing quality-control reports, and analysis-ready trial rows.</p>
           <div class="doc-link-row">
-            <a class="button-link" href="../../../docs/WINDOWS_APP.md">Open Windows App Guide</a>
-            <a class="button-link" href="../../../For-AI/engineering/validation/For-AI/engineering/validation/docs/AUDIO_ROUTING_STRESS_TEST.md">Open Audio Stress Notes</a>
+            <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/docs/WINDOWS_APP.md">Open Windows App Guide</a>
+            <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/For-AI/engineering/validation/docs/AUDIO_ROUTING_STRESS_TEST.md">Open Audio Stress Notes</a>
           </div>
         </section>
 
