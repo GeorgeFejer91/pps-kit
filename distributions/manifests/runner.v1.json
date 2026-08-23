@@ -1,0 +1,23 @@
+{
+  "schema": "pps-component-manifest.v1",
+  "component_id": "runner",
+  "version": "0.1.0",
+  "platform": "windows-x64",
+  "dependencies": [{"component_id": "shared", "version": "0.1.0"}],
+  "source_to_install": [
+    {"source": "dist/PPSExperimentRunner", "install": "apps/PPSExperimentRunner", "kind": "generated_tree"},
+    {"source": "distributions/windows-support", "install": "support/windows", "kind": "tree"}
+  ],
+  "entrypoints": [
+    {"id": "pps-experiment-runner", "path": "apps/PPSExperimentRunner/PPSExperimentRunner.exe", "shortcut": "PPS Experiment Runner"},
+    {"id": "post-run-review", "path": "apps/PPSExperimentRunner/PPSExperimentRunner.exe", "mode": "review"}
+  ],
+  "required_runtime_paths": [
+    "apps/PPSExperimentRunner/_internal/PySide6/plugins/platforms/qwindows.dll"
+  ],
+  "licenses": ["shared/LICENSE", "shared/THIRD_PARTY_LICENSES.md"],
+  "exclusions": [
+    "For-AI/**", "dist/PPSDesigner/**", "**/*android*", "**/*.apk",
+    "**/participant_data/**", "**/generated_outputs/**", "**/unreviewed/**"
+  ]
+}

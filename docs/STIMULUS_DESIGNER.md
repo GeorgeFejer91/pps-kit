@@ -3,7 +3,7 @@
 The standard researcher-facing design surface is the local HTML dashboard:
 
 ```bat
-windows\Launch_HTML_Dashboard.bat
+apps\designer\launchers\Launch_HTML_Dashboard.bat
 ```
 
 or:
@@ -19,7 +19,7 @@ the Study 5 defaults as a reproducible baseline.
 Launch the Qt designer with:
 
 ```bat
-windows\Launch_Stimulus_Designer.bat
+apps\designer\launchers\Launch_Stimulus_Designer.bat
 ```
 
 Or from an installed environment:
@@ -49,7 +49,7 @@ transitions, and after the experiment; within-trial instruction snippets remain
 owned by Segment 2.
 
 The dashboard can also be served as a GitHub Pages site. In that mode, start
-`windows\Start_Website_Companion.bat` on the research PC and use the left-rail
+`apps\designer\launchers\Start_Website_Companion.bat` on the research PC and use the left-rail
 companion controls to connect the hosted page to the local backend. See
 [GitHub Pages Dashboard](GITHUB_PAGES_DASHBOARD.md).
 
@@ -84,7 +84,7 @@ The Qt UI uses a modern Fusion-styled control skin instead of native Windows chr
 
 The designer uses the packaged PPS Toolkit icon for the window/taskbar entry.
 The native participant runner now uses a light PySide Focus Mode shell with the
-same visual identity. `windows\Build_Experiment_Runner_Exe.ps1` packages it as
+same visual identity. `For-AI\engineering\build\windows\Build_Experiment_Runner_Exe.ps1` packages it as
 `dist\PPSExperimentRunner\PPSExperimentRunner.exe`; launchers activate that exe
 only. `focus_app.py` imports remain internal to that exe and validation
 harnesses; direct Python/module launch is retired.
@@ -201,7 +201,7 @@ locked until the minimum runnable custom profile is present: custom design name,
 valid trajectory/noise information, SOA/spatial trial values, participant/block
 counts, and participant ID.
 
-For the bundled Pfeiffer-style preload, run `python tools\verify_pfeiffer_profile.py`.
+For the bundled Pfeiffer-style preload, run `python For-AI\research\literature\tools\verify_pfeiffer_profile.py`.
 The verifier checks the saved trajectory/noise/SOA parameters, renders the
 profile, writes `pfeiffer_verification_report.json`, and checks that the
 left-to-right trajectory is left-ear dominant in the first half and right-ear
@@ -231,7 +231,7 @@ The profile selector displays paper-like labels, for example author/year plus th
 Run the screenshot verification loop after UI changes:
 
 ```powershell
-python tools\ui_screenshot_check.py --iterations 2
+python For-AI\engineering\validation\scripts\ui_screenshot_check.py --iterations 2
 ```
 
 The script opens the designer, captures `Stimulus Design`, `Trial Assembler`, and `Experiment Runner`, writes screenshots to `artifacts\ui_verification\`, and records a JSON report with tab, image, and widget-geometry checks. Use the screenshots for visual inspection before publishing a Windows build.

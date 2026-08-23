@@ -34,7 +34,14 @@ Update `For-AI/` after changes to:
 
 ## Web GUI Website Sync
 
-Every change to the new HTML/dashboard web GUI must be reflected on the online website version before the work is considered complete. The local packaged dashboard and the hosted/static GitHub Pages dashboard are mutual mirrors: if either one changes, the other must be updated in the same change set so they stay in sync. Future agents should not stop after updating only the local dashboard files or only the website-facing files. They must update and verify both sides together, then commit and push the synchronized change immediately so the public website can update from the same source state. The website version must still use relative dashboard/viewer assets and talk to the local companion backend rather than trying to run timing-sensitive experiments in browser JavaScript.
+`apps/designer/frontend/compiled/` is the single offline/online Designer
+artifact. Every HTML/dashboard change must rebuild that artifact, validate it in
+the local package, assemble GitHub Pages from those exact compiled bytes, and
+verify the hosted routes in the same change set. Do not maintain or edit a
+second dashboard implementation under `website/`; that folder owns only public
+route wrappers, Pages metadata, and other hosted product inputs. Hosted mode
+must keep relative Designer/viewer assets and must not run timing-sensitive
+experiments in browser JavaScript.
 
 ## Public Domain And Pages URL Rule
 
@@ -50,7 +57,12 @@ Keep the matching GitHub Pages fallback routes available at `https://georgefejer
 
 Do not reintroduce the old project Pages URL `https://georgefejer91.github.io/peripersonal-space-toolkit/` except as migration or historical context. The repository name controls the project Pages fallback path, so the GitHub repository should remain named `pps-kit` while this public URL contract is active.
 
-The root `CNAME` file is part of the Pages contract. It must be named exactly `CNAME`, contain only one bare domain, and currently contain only `ppskit.qzz.io` with no protocol, path, or second domain. The DNS provider must point the `ppskit.qzz.io` subdomain to the default GitHub Pages domain `georgefejer91.github.io` without appending the repository name. If additional domains are ever needed, use DNS/provider redirects rather than adding multiple lines to `CNAME`.
+`website/CNAME` is the tracked Pages source. Pages assembly must copy it to root
+`CNAME` in the staged/deployed artifact. It contains only `ppskit.qzz.io`, with
+no protocol, path, or second domain. The DNS provider points the subdomain to
+`georgefejer91.github.io` without appending the repository name. If additional
+domains are needed, use DNS/provider redirects rather than multiple CNAME
+lines.
 
 For hosted companion access, CORS origins are origins only: keep `https://ppskit.qzz.io` and `https://georgefejer91.github.io` allowed, but do not include paths such as `/pps-kit/`, `/documentation`, or `/download` in an origin. When changing public URLs or tab routes, update repository references, release-manifest URLs, dashboard links, preloaded asset URLs, human docs, CORS tests, static deep-link handling, and this `For-AI/` rule together.
 
@@ -80,7 +92,7 @@ an equivalent visual artifact under an ignored validation folder, and explicitly
 check for nonblank output, clipping, overlap, text visibility, panel placement,
 and adaptive behavior across the target screen sizes when screen size matters.
 For the HTML Experiment Designer, follow `interface_design_principles.md` and run
-`python validation_protocols/scripts/run_designer_visual_layout_audit.py`. Inspect
+`python For-AI/engineering/validation/scripts/run_designer_visual_layout_audit.py`. Inspect
 the screenshots/contact sheet, correct defects, rebuild, and rerun; collecting one
 set of screenshots without a documented inspection-and-correction pass is not
 visual approval.
@@ -98,13 +110,22 @@ run validation automation that moves or resizes Android emulator windows; manual
 desktop arrangement by the human operator is outside the validation signal, and
 the target remains the phone viewport, not a stretched desktop pane. Do not run
 persistent desktop placement loops against Android emulator windows.
-`windows/Set_Companion_Emulation_Layout.ps1` intentionally leaves emulator
+`For-AI/experiments/android-companion/tooling/Set_Companion_Emulation_Layout.ps1` intentionally leaves emulator
 windows untouched and accepts old `-KeepForSeconds` arguments only as inert
 compatibility input.
 
 ## Preload Catalog Storage Rule
 
-Preload profile storage should mirror the dashboard workflow instead of becoming a flat asset bucket. Every preload profile should have a folder under `assets/preloads/<template_id>/` with segment folders matching the HTML GUI stages: `01_profile/`, `02_looming_stimuli/`, `03_baseline_strategy/`, `04_trial_designer/`, and `05_run_setup/`. Put prebaked auditory-only profile WAVs and source/trajectory metadata in `02_looming_stimuli/`, profile/citation metadata in `01_profile/`, baseline/catch defaults in `03_baseline_strategy/`, trial-row/SOA/snippet metadata in `04_trial_designer/`, and participant/randomization defaults in `05_run_setup/`. Rebuild this cabinet and the inventory with `tools/build_preload_catalog.py` whenever preload templates, source labels, trajectory metadata, or bundled WAVs change.
+Preload profile storage should mirror the dashboard workflow instead of becoming
+a flat asset bucket. Repository source profiles live under
+`packages/pps-resources/assets/preloads/<template_id>/`; installed and serialized
+logical paths remain `assets/preloads/<template_id>/`. Keep the existing segment
+folders `01_profile/` through `05_run_setup/`. Research screening, expected
+outcome coverage, and full-pipeline evidence ledgers belong under
+`For-AI/research/literature/preload-ledgers/`, not in the product preload
+cabinet. Rebuild the approved catalogue with
+`For-AI/engineering/tooling/build_preload_catalog.py` whenever templates,
+source labels, trajectory metadata, or bundled WAVs change.
 
 ## What To Update
 

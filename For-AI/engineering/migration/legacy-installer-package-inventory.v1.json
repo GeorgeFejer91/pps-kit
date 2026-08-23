@@ -1,0 +1,340 @@
+{
+  "created_utc": "",
+  "items": [
+    {
+      "kind": "generated_binary",
+      "path": "dist/PPSExperimentRunner/PPSExperimentRunner.exe",
+      "required": true,
+      "role": "active packaged native Experiment Runner",
+      "source": "built by For-AI/engineering/build/windows/Build_Experiment_Runner_Exe.ps1"
+    },
+    {
+      "kind": "generated_directory",
+      "path": "dist/PPSExperimentRunner",
+      "required": true,
+      "role": "PyInstaller onedir runner resources",
+      "source": "built by For-AI/engineering/build/windows/Build_Experiment_Runner_Exe.ps1"
+    },
+    {
+      "kind": "qt_platform_plugin",
+      "path": "dist/PPSExperimentRunner/_internal/PySide6/plugins/platforms/qwindows.dll",
+      "required": true,
+      "role": "required Qt Windows platform plugin for PPSExperimentRunner.exe startup",
+      "source": "collected from PySide6 by apps/runner/packaging/PPSExperimentRunner.spec"
+    },
+    {
+      "kind": "generated_binary",
+      "path": "dist/PPSDashboardLauncher/PPSDashboardLauncher.exe",
+      "required": true,
+      "role": "packaged offline/local HTML dashboard and companion launcher",
+      "source": "built by For-AI/engineering/build/windows/Build_Dashboard_Launcher_Exe.ps1"
+    },
+    {
+      "kind": "generated_directory",
+      "path": "dist/PPSDashboardLauncher",
+      "required": true,
+      "role": "PyInstaller onedir dashboard launcher resources",
+      "source": "built by For-AI/engineering/build/windows/Build_Dashboard_Launcher_Exe.ps1"
+    },
+    {
+      "kind": "installer_source",
+      "path": "distributions/downloader",
+      "required": true,
+      "role": "lightweight GitHub-hosted downloader source package",
+      "source": "tracked"
+    },
+    {
+      "kind": "installer_build_script",
+      "path": "For-AI/engineering/build/windows/Build_PPS_Downloader.ps1",
+      "required": true,
+      "role": "builds PPS-Toolkit-Downloader.exe",
+      "source": "tracked"
+    },
+    {
+      "kind": "installer_build_script",
+      "path": "For-AI/engineering/build/windows/Build_PPS_Distribution.ps1",
+      "required": true,
+      "role": "builds the offline lab ZIP and download manifest",
+      "source": "tracked"
+    },
+    {
+      "kind": "launcher_build_script",
+      "path": "For-AI/engineering/build/windows/Build_Dashboard_Launcher_Exe.ps1",
+      "required": true,
+      "role": "builds PPSDashboardLauncher.exe",
+      "source": "tracked"
+    },
+    {
+      "kind": "android_build_script",
+      "path": "For-AI/experiments/android-companion/tooling/Build_Android_Companion.ps1",
+      "required": true,
+      "role": "builds the native Android runner companion debug APK from source",
+      "source": "tracked"
+    },
+    {
+      "kind": "android_validation_support",
+      "path": "For-AI/experiments/android-companion/tooling/Set_Companion_Emulation_Layout.ps1",
+      "required": true,
+      "role": "places the runner on the designated validation screen while leaving the Android emulator fixed-size",
+      "source": "tracked"
+    },
+    {
+      "kind": "android_source_tree",
+      "path": "For-AI/experiments/android-companion/runner-companion",
+      "required": true,
+      "role": "native Kotlin/Compose runner companion source and Gradle wrapper",
+      "source": "tracked"
+    },
+    {
+      "kind": "launcher_support",
+      "path": "For-AI/engineering/build/windows/Setup_Windows_App.ps1",
+      "required": true,
+      "role": "creates local venv for source installs",
+      "source": "tracked"
+    },
+    {
+      "kind": "entrypoint",
+      "path": "apps/designer/launchers/Launch_HTML_Dashboard.bat",
+      "required": true,
+      "role": "starts the local HTML dashboard",
+      "source": "tracked"
+    },
+    {
+      "kind": "entrypoint",
+      "path": "apps/designer/launchers/Start_Website_Companion.bat",
+      "required": true,
+      "role": "starts the companion backend for GitHub Pages dashboard use",
+      "source": "tracked"
+    },
+    {
+      "kind": "entrypoint",
+      "path": "apps/runner/launchers/Launch_Experiment_Runner.bat",
+      "required": true,
+      "role": "opens the packaged native Experiment Runner",
+      "source": "tracked"
+    },
+    {
+      "kind": "installer_support",
+      "path": "distributions/windows-support/Create_Desktop_Shortcut.ps1",
+      "required": true,
+      "role": "creates local dashboard and runner shortcuts",
+      "source": "tracked"
+    },
+    {
+      "kind": "installer_manifest_tool",
+      "path": "For-AI/engineering/release/tools/make_download_manifest.py",
+      "required": true,
+      "role": "writes pps_download_manifest.v1.json for downloader verification",
+      "source": "tracked"
+    },
+    {
+      "kind": "installer_archive_tool",
+      "path": "For-AI/engineering/release/tools/make_offline_lab_zip.py",
+      "required": true,
+      "role": "creates the heavyweight offline lab ZIP",
+      "source": "tracked"
+    },
+    {
+      "kind": "installer_inventory_tool",
+      "path": "For-AI/engineering/release/tools/package_inventory.py",
+      "required": true,
+      "role": "validates required files before packaging",
+      "source": "tracked"
+    },
+    {
+      "kind": "installer_preflight_tool",
+      "path": "For-AI/engineering/release/tools/check_qt_runtime.py",
+      "required": true,
+      "role": "validates PySide6 import and packaged Qt platform plugin presence",
+      "source": "tracked"
+    },
+    {
+      "kind": "installer_package_definition",
+      "path": "distributions/manifests/legacy-installer-package-inventory.v1.json",
+      "required": true,
+      "role": "repo-visible installer package inventory definition",
+      "source": "tracked/generated from For-AI/engineering/release/tools/package_inventory.py"
+    },
+    {
+      "kind": "installer_protocol_tree",
+      "path": "For-AI/engineering/release/protocols",
+      "required": true,
+      "role": "release build, content orchestration, verification, and missing-link protocols",
+      "source": "tracked"
+    },
+    {
+      "kind": "dashboard_asset_tree",
+      "path": "apps/designer/frontend",
+      "required": true,
+      "role": "packaged local HTML dashboard",
+      "source": "tracked"
+    },
+    {
+      "kind": "hosted_dashboard_entry",
+      "path": "index.html",
+      "required": true,
+      "role": "GitHub Pages static dashboard entrypoint",
+      "source": "tracked"
+    },
+    {
+      "kind": "trajectory_viewer_asset_tree",
+      "path": "apps/designer/frontend/viewer",
+      "required": true,
+      "role": "local trajectory viewer and Three.js assets",
+      "source": "tracked"
+    },
+    {
+      "kind": "app_identity_assets",
+      "path": "packages/pps-resources/assets/app",
+      "required": true,
+      "role": "icons and app identity resources",
+      "source": "tracked"
+    },
+    {
+      "kind": "preload_catalog",
+      "path": "assets/preloads/preload_inventory.json",
+      "required": true,
+      "role": "machine-readable preload asset inventory",
+      "source": "tracked"
+    },
+    {
+      "kind": "preload_readiness_ledger",
+      "path": "assets/preloads/profile_recreation_status.json",
+      "required": true,
+      "role": "finished-profile and runner-readiness ledger",
+      "source": "tracked"
+    },
+    {
+      "kind": "preload_asset_tree",
+      "path": "assets/preloads",
+      "required": true,
+      "role": "segment-mirrored preload catalogs and bundled auditory assets",
+      "source": "tracked"
+    },
+    {
+      "kind": "audio_asset_tree",
+      "path": "assets/breathing",
+      "required": true,
+      "role": "bundled Study 5 spoken instruction WAV assets",
+      "source": "tracked"
+    },
+    {
+      "kind": "audio_asset_tree",
+      "path": "assets/click",
+      "required": true,
+      "role": "tactile-channel response marker and click-tone WAV assets",
+      "source": "tracked"
+    },
+    {
+      "kind": "audio_asset",
+      "path": "assets/tactile/default_tactile_cue.wav",
+      "required": true,
+      "role": "default tactile channel cue",
+      "source": "tracked"
+    },
+    {
+      "kind": "audio_asset",
+      "path": "assets/breathing/runner_output_test_audio.wav",
+      "required": true,
+      "role": "standardized spoken Output 1/2 runner test asset",
+      "source": "tracked"
+    },
+    {
+      "kind": "audio_asset",
+      "path": "assets/tactile/runner_output_test_tactile.wav",
+      "required": true,
+      "role": "standardized Output 3/4 tactile pulse runner test asset",
+      "source": "tracked"
+    },
+    {
+      "kind": "hrir_asset",
+      "path": "assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa",
+      "required": true,
+      "role": "redistributable FABIAN/TU SOFA resource",
+      "source": "tracked"
+    },
+    {
+      "kind": "study_template_tree",
+      "path": "study_templates",
+      "required": true,
+      "role": "published-study and Study 5 preload templates",
+      "source": "tracked"
+    },
+    {
+      "kind": "example_config_tree",
+      "path": "configs",
+      "required": true,
+      "role": "example design and runner configs",
+      "source": "tracked"
+    },
+    {
+      "kind": "sample_data_tree",
+      "path": "data/sample",
+      "required": true,
+      "role": "deidentified sample analysis data",
+      "source": "tracked"
+    },
+    {
+      "kind": "documentation_tree",
+      "path": "docs",
+      "required": true,
+      "role": "user, hardware, validation, and release docs",
+      "source": "tracked"
+    },
+    {
+      "kind": "documentation",
+      "path": "README.md",
+      "required": true,
+      "role": "top-level quick start",
+      "source": "tracked"
+    },
+    {
+      "kind": "license",
+      "path": "LICENSE",
+      "required": true,
+      "role": "source license",
+      "source": "tracked"
+    },
+    {
+      "kind": "license",
+      "path": "THIRD_PARTY_LICENSES.md",
+      "required": true,
+      "role": "third-party license and attribution notes",
+      "source": "tracked"
+    },
+    {
+      "kind": "citation",
+      "path": "CITATION.cff",
+      "required": true,
+      "role": "citation metadata",
+      "source": "tracked"
+    },
+    {
+      "kind": "renderer_binary_tree",
+      "path": "third_party/3dti_renderer/bin",
+      "required": false,
+      "role": "approved native 3DTI renderer binaries when available",
+      "source": "local/generated"
+    },
+    {
+      "kind": "renderer_source_tree",
+      "path": "third_party/3dti_AudioToolkit",
+      "required": false,
+      "role": "pinned 3DTI source snapshot and attribution boundary",
+      "source": "tracked/pinned"
+    }
+  ],
+  "missing_required": [],
+  "optional_absent": [],
+  "project": "peripersonal-space-toolkit",
+  "purpose": "Defines and validates the files needed for the easy-download Windows offline lab package.",
+  "schema": "pps-installer-package-inventory.v1",
+  "stage_root": "",
+  "summary": {
+    "item_count": 46,
+    "missing_required_count": 0,
+    "optional_absent_count": 0,
+    "optional_item_count": 2,
+    "required_item_count": 44
+  }
+}

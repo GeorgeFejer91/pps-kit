@@ -2,7 +2,7 @@
 
 ## Current State
 
-- Source changes are implemented in `src/peripersonal_space_toolkit/tactile_calibration/`, `src/peripersonal_space_toolkit/focus_app.py`, and the matching tests.
+- Source changes are implemented in `packages/pps-runtime/src/peripersonal_space_toolkit/tactile_calibration/`, `packages/pps-runtime/src/peripersonal_space_toolkit/focus_app.py`, and the matching tests.
 - The active tactile calibration protocol keeps the 2-down/1-up staircase as the detection-threshold estimator, then runs a final confirmation phase before saving a participant preset.
 - The saved staircase estimate is `detection_threshold_output_34_percent`; the confirmed task preset is `recommended_output_34_percent`, with `final_output_34_percent` retained as the legacy-compatible alias.
 - Confirmation accepts only after 10 consecutive tactile hits and 5 clean confirmation catch trials using the shared 100-1300 ms tactile response window.

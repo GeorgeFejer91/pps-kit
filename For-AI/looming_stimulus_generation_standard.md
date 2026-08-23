@@ -112,5 +112,5 @@ Every generated looming WAV should record or export:
 - expected ILD/ITD/channel-sign direction for the requested azimuth
 - IACC/DRR/reverb metrics when a room/externalization layer is enabled
 
-See `docs/dynaspace_spectral_feature_audit/` for the source audit, Consensus
+See `For-AI/research/literature/docs/dynaspace_spectral_feature_audit/` for the source audit, Consensus
 search export, implementation rationale, and generated PDF report.

@@ -1,0 +1,54 @@
+{
+  "schema": "pps-internal-validation-run.v1",
+  "run_id": "VALIDATION_YYYYMMDD_HHMMSS",
+  "created_at": "YYYY-MM-DDTHH:MM:SS",
+  "operator": "lab initials only",
+  "purpose": "Internal validation of GUI traceability, timing logs, LSL, and loopback.",
+  "dummy_3ch_validation": {
+    "stimulus": "dummy_3ch_pulses.wav",
+    "goal": "Verify one 3-channel WAV splits to left Sennheiser, right Sennheiser, and Woojer/tactile output paths with correct channel identity, no downmixing, and no channel loss.",
+    "expected_mapping": {
+      "channel_1": "left Sennheiser headphone path",
+      "channel_2": "right Sennheiser headphone path",
+      "channel_3": "Woojer/tactile output path"
+    }
+  },
+  "study_profile": "study5_box_breathing_pps",
+  "participant_id": "VALIDATION_P001",
+  "hardware": {
+    "audio_interface": "Komplete Audio 6 MK2",
+    "driver": "Komplete Audio ASIO Driver",
+    "sample_rate_hz": 44100,
+    "channels": 3,
+    "requested_latency_s": 0.01,
+    "blocksize": 256,
+    "loopback_state": "outputs 1/2/3 patched to inputs 1/2/3"
+  },
+  "software": {
+    "git_commit": "",
+    "git_status_summary": "",
+    "python": "",
+    "pylsl_available": false,
+    "labrecorder_used": false
+  },
+  "commands": [
+    "python .\\For-AI/engineering/validation\\scripts\\run_dummy_pulse_latency.py --device-query Komplete --record-asio-loopback",
+    "python .\\For-AI/engineering/validation\\scripts\\compare_dummy_pulse_recordings.py --run-dir artifacts\\validation_runs\\dummy_pulse_YYYYMMDD_HHMMSS",
+    ".\\For-AI/engineering/validation\\scripts\\run_loopback_calibration.ps1 -EstablishBaseline -Repeats 5",
+    "python .\\For-AI/engineering/validation\\scripts\\lsl_marker_probe.py --stream-name PPSMarkersV2 --duration-s 120",
+    "python .\\For-AI/engineering/validation\\scripts\\summarize_validation_run.py --session-dir local_data\\sessions\\VALIDATION_P001_YYYYMMDD_HHMMSS"
+  ],
+  "artifacts": {
+    "validation_run_dir": "artifacts/validation_runs/VALIDATION_YYYYMMDD_HHMMSS",
+    "session_dir": "local_data/sessions/VALIDATION_P001_YYYYMMDD_HHMMSS",
+    "latex_report": "For-AI/engineering/validation/reports/latency_reliability_validations.tex",
+    "dummy_pulse_report": "",
+    "lsl_probe_csv": "",
+    "loopback_report": "",
+    "summary_report": ""
+  },
+  "not_measured": [
+    "Woojer mechanical vibration onset",
+    "participant motor response latency"
+  ]
+}

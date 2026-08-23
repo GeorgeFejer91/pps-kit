@@ -1,0 +1,94 @@
+{
+  "schema": "pps-audiotactile-openalex-broad-screening.v1",
+  "screened_on": "2026-06-13",
+  "query": "audio-tactile peripersonal space",
+  "source_full_file": "artifacts/literature_audit/openalex_audio_tactile_peripersonal_space_full.json",
+  "candidate_triage_file": "artifacts/literature_audit/openalex_broad_candidate_triage.json",
+  "candidate_screening_file": "For-AI/research/literature/preload-ledgers/audiotactile_openalex_candidate_screening.json",
+  "retrieved_count": 755,
+  "automated_candidate_like_count": 103,
+  "linked_candidate_like_count": 47,
+  "unlinked_candidate_like_count": 56,
+  "screening_rule": "OpenAlex search is intentionally broad and includes reviews, preprints, duplicates, visual-tactile studies, auditory-only studies, VR/haptic studies, dissertations, modeling papers, and non-PPS audiotactile tasks. The tracked audit promotes only records that plausibly contain an audio-plus-tactile PPS task or alter an already known PPS task family.",
+  "new_or_promoted_candidate_records": [
+    {
+      "record_id": "social_perception_2017",
+      "doi": "10.1016/j.cortex.2017.08.033",
+      "reason": "Likely audio-tactile PPS task with social-perception context; context is non-blocking but task parameters need extraction."
+    },
+    {
+      "record_id": "lower_limb_pps_2017",
+      "doi": "10.1007/s00221-017-5115-0",
+      "reason": "Broad-screen false positive retained for accountability: source check describes a visuo-tactile lower-limb PPS task, so it is adjacent/out of scope for audiotactile toolkit integration."
+    },
+    {
+      "record_id": "newborn_boundaries_2019",
+      "doi": "10.1038/s41598-019-45084-4",
+      "reason": "Newborn sound-intensity/tactile PPS boundary task; participant age is non-blocking, but static/intensity task mechanics need extraction."
+    },
+    {
+      "record_id": "ronga_2021_newborn_erp",
+      "doi": "10.1073/pnas.2024548118",
+      "reason": "Near/far auditory plus electrical tactile stimulation with ERP endpoint; requires static near/far and trigger/tactile details."
+    },
+    {
+      "record_id": "serino_2018_mixed_reality_pps",
+      "doi": "10.3389/fict.2017.00031",
+      "reason": "Mixed-reality PPS task with visual/audiovisual looming stimuli paired with tactile detection; exact audio-tactile extraction needs audiovisual/trisensory task-family handling."
+    },
+    {
+      "record_id": "amemiya_2017_pseudowalking_footsole",
+      "doi": "10.1109/WHC.2017.7989970",
+      "reason": "Pseudo-walking foot-sole vibration study uses a looming sound plus chest vibrotactile PPS readout; exact timing and secondary tactile-context handling need extraction."
+    },
+    {
+      "record_id": "serino_2011_professional_fencers",
+      "doi": "",
+      "reason": "Conference abstract reports an audio-tactile right-hand PPS task in professional fencers while holding a weapon or handle; exact task parameters need extraction."
+    },
+    {
+      "record_id": "novel_two_phase_audio_tactile_2025",
+      "doi": "",
+      "reason": "OpenAlex-only candidate for a new two-phase audio-tactile PPS paradigm; bibliographic identity and method details need verification."
+    },
+    {
+      "record_id": "looming_duration_2025",
+      "doi": "10.61782/fa.2025.0866",
+      "reason": "Proceedings-style candidate manipulating looming sound duration in PPS measurement; exact task parameters need extraction."
+    },
+    {
+      "record_id": "ferri_2015_jneurosci_itv",
+      "doi": "10.1523/jneurosci.1696-15.2015",
+      "reason": "fMRI paper using an audio-tactile PPS boundary task; behavioral task must be extracted separately from neuroimaging endpoint."
+    },
+    {
+      "record_id": "interoception_exteroception_2025",
+      "doi": "10.1073/pnas.2516229122",
+      "reason": "Corrected the PubMed/OA-linked task DOI for the PNAS audio-tactile self-relevance/HEP study."
+    },
+    {
+      "record_id": "taffou_2021_auditory_roughness",
+      "doi": "10.1038/s41598-020-79767-0",
+      "reason": "OpenAlex broad-screen hit for a rear-hemifield rough/non-rough looming sound plus tactile detection PPS task; requires rear trajectory, binaural rendering, and sound-synthesis extraction."
+    }
+  ],
+  "detailed_screening_decision_counts": {
+    "linked_to_coverage_ledger": 34,
+    "promoted_to_coverage_ledger": 3,
+    "duplicate_or_supporting_source_linked_to_coverage_record": 10,
+    "excluded_visual_tactile_or_non_auditory_pps": 16,
+    "excluded_non_pps_audiotactile_or_haptic": 13,
+    "excluded_review_theory_or_model": 11,
+    "excluded_auditory_only_no_tactile_pps": 7,
+    "grey_literature_or_source_not_counted": 9
+  },
+  "remaining_unlinked_candidate_like_hit_types": [
+    "preprint duplicates of tracked articles",
+    "review or theory articles",
+    "visual-tactile PPS tasks without auditory stimuli",
+    "auditory-only peripersonal/reachability tasks without tactile stimuli",
+    "VR/haptic interaction studies rather than PPS boundary tasks",
+    "modeling papers without a distinct participant task",
+    "dissertations or theses that may contain multiple studies and need separate manual extraction"
+  ]
+}

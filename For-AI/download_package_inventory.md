@@ -1,186 +1,131 @@
-# Download Package Inventory
+# Download and Component Inventory
 
-This file records what future agents must preserve when packaging PPS Toolkit as an easy-to-download Windows software package.
+This file records the V1 Windows distribution boundary future agents must
+preserve.
 
-## Release Shape
+## Published Downloads
 
-The user-facing download must be a single lightweight downloader executable, not
-a source ZIP and not a heavyweight bundled installer.
+One parameterized source tree under `distributions/downloader/` builds three
+GitHub-hosted bootstrapper artifacts:
 
-- Public download-page artifact: `PPS-Toolkit-Downloader.exe`.
-- Hard size limit: below 100 MiB so GitHub Releases can host it directly.
-- Preferred size target: below 25 MiB.
-- The downloader is a bootstrapper/orchestrator. It must actually download the
-  toolkit payloads and dependencies; a link-only or no-op exe is a broken
-  release.
-- The downloader should ask for, or at minimum clearly offer, the installation
-  location. The installed toolkit should become a repo-shaped program directory
-  at the user's chosen path, not only a hidden cache under `%LOCALAPPDATA%`.
-- The installed directory should preserve enough repository structure that a
-  researcher/developer can inspect docs, launchers, source package files,
-  assets, configs, and release manifests from the installed location.
-- The installed directory must expose normal user entrypoints, including an exe
-  that launches the offline/local HTML GUI and `PPSExperimentRunner.exe` for the
-  native experiment runner.
+- `PPS-Designer-Downloader.exe`
+- `PPS-Experiment-Runner-Downloader.exe`
+- `PPS-Toolkit-Downloader.exe`
 
-The repo should contain downloader source and packaging manifests, not generated
-release binaries.
+Each must remain below GitHub's 100 MiB asset limit and should remain below 25
+MiB. Heavy, pinned payload ZIPs may be hosted on Zenodo. A bootstrapper must
+download, hash-verify, inventory-verify, install, and launch its declared
+product; a link-only executable is not a valid release.
 
-- Tracked installer source: `windows/downloader/`
-- Tracked installer package definition: `windows/installer_package_inventory.v1.json`
-- Package inventory generator and validator: `tools/package_inventory.py`
-- Installer protocol folder: `installer_protocols/`
-- Lightweight GitHub release output: `dist/PPS-Toolkit-Downloader.exe`
-- Download verification manifest: `dist/pps_download_manifest.v1.json`
-- Installed package inventory written into the target folder: `pps_package_inventory.v1.json`
+## Authoritative Component Manifests
 
-`dist/` stays ignored. Generated downloader binaries, packaged runner builds,
-packaged dashboard launcher builds, runtime bundles, dependency bundles, and any
-assembled repository payloads are attached to GitHub Releases or fetched from
-declared upstream URLs; they are not committed to the source repo. Generated
-Android APKs and Gradle build outputs are also ignored unless a release
-explicitly attaches a reviewed APK artifact.
+The tracked schema is `pps-component-manifest.v1`:
 
-Do not point the public download page directly at
-`https://github.com/GeorgeFejer91/pps-kit/releases/latest/download/PPS-Toolkit-Downloader.exe`
-until a public GitHub Release actually contains that asset and the matching
-`pps_download_manifest.v1.json`. Before that release exists, link the installer
-card to `https://github.com/GeorgeFejer91/pps-kit/releases` so the website does
-not expose a dead direct-download button.
+- `distributions/manifests/shared.v1.json`
+- `distributions/manifests/designer.v1.json`
+- `distributions/manifests/runner.v1.json`
+- `distributions/manifests/full.v1.json`
 
-## Downloader Payload Contract
+Each component records ID, version, platform, source-to-install mappings,
+dependencies, entrypoints, licenses, and explicit exclusions.
 
-The downloader must orchestrate downloads declared in
-`pps_download_manifest.v1.json`. That manifest should pin every payload by URL,
-filename, size, SHA256, version, and role. The current release topology is a
-GitHub-hosted downloader and manifest plus a Zenodo-hosted heavyweight
-repo-shaped Windows payload. If any additional external upstream URL is
-unavoidable, the manifest must include the URL, hash, license/provenance note,
-and whether the payload is required or optional.
+- **Shared** owns approved templates, resources, public docs, required
+  runtime/renderer dependencies, and licenses.
+- **Designer** owns `PPSDesigner.exe`, the one compiled Designer frontend, and
+  Designer-specific installed support. It depends on Shared.
+- **Runner** owns `PPSExperimentRunner.exe`, Qt runtime/support, Runner assets,
+  installed-PC support, and normal post-run analysis/review. It depends on
+  Shared and must include `qwindows.dll`.
+- **Full** is exact composition: Designer + Runner + one Shared. It does not
+  introduce a hub and creates separate Designer and Runner shortcuts.
 
-External PC dependencies that are not PPS payloads belong under the manifest's
-`external_dependencies` list. The downloader may auto-download and locally cache
-an external installer only when all of these are true: the provider/source URL is
-declared, the filename/size/SHA256 are pinned, and the manifest records that
-redistribution or automated caching is permitted. If the license does not grant
-redistribution or mirroring rights, the downloader must not fetch from a PPS
-mirror; it should open the official provider page in the user's default browser
-and record `provider_action_required`.
+Every distributable file has exactly one owning leaf component. Composition may
+reference dependencies but must not duplicate their files.
 
-Current ASIO policy:
+## Compatibility and Install Root
 
-- Native Instruments Komplete Audio ASIO Driver is proprietary. PPS may point to
-  or open the official NI driver page, but must not bundle or mirror the driver
-  installer unless written redistribution permission is recorded in the manifest.
-- Treat the Komplete driver dependency as a state machine in installers and the
-  runner: (1) registry absent means open the official NI driver page and show the
-  install guide; (2) registry present but `sounddevice` route absent means ask the
-  user to reconnect or power-cycle the Komplete Audio 6 MK2 and retry detection;
-  (3) `Komplete Audio ASIO Driver` visible with at least three outputs means PPS
-  automatically selects that native multichannel route.
-- The required user-facing instructions are: disconnect the interface, download
-  `Komplete Audio 6 MK2 Driver 5.22.0 - Windows 10` from the NI drivers page,
-  extract the ZIP, run `setup.exe`, reconnect the interface, and click Retry
-  Audio Detection or restart the runner. Package/downloader UI should reuse these
-  same words rather than inventing a parallel flow.
-- FlexASIO may be declared as an optional diagnostic fallback from Etienne
-  Dechamps' GitHub release with pinned SHA256. It is not the validated
-  publication timing route for synchronized left/right/tactile output.
-- A green installer state does not by itself prove audio readiness. The
-  experiment runner must still run sounddevice/ASIO preflight and tell the
-  experimenter when the native Komplete 3+ channel ASIO route is missing.
-- The packaged runner entry point must set `SD_ENABLE_ASIO=1` before importing
-  `peripersonal_space_toolkit.focus_app` or any module that might import
-  `sounddevice`. Without this import-order guard, python-sounddevice can lock
-  the frozen app into a non-ASIO PortAudio backend even though source validation
-  tools can see the Komplete ASIO route.
-- `windows\Build_Experiment_Runner_Exe.ps1` may retry PyInstaller once with
-  `PPS_EXPERIMENT_RUNNER_DISABLE_ICON=1` if the normal branded build fails while
-  embedding the `.ico` resource, such as a Windows Defender
-  `BeginUpdateResource` false-positive path. Treat this as a packaging
-  continuity fallback only: the runner code path, Qt runtime checks, packaged
-  `qwindows.dll`, and packaged-exe audio validation still have to pass.
-- The Komplete ASIO route may need an even stream width. The runner should use
-  a 4-channel ASIO stream when the native driver exposes 4+ outputs, while still
-  routing auditory left/right to outputs 1/2, tactile stimuli and response
-  marker click tone to output 3, and a duplicate tactile mirror to output 4.
+Standalone products may share one chosen install root. The downloader records a
+component marker and the Shared version/inventory hash. A second installer must
+reject an incompatible Shared component rather than silently mixing releases.
 
-The downloader must materialize a complete program repository into the chosen
-install folder. At minimum the installed folder must include:
+Each download manifest pins its own payload URL, filename, size, SHA256,
+component ID/version, component-manifest hash, package-inventory hash,
+entrypoints, and dependency declarations. The Full manifest pins the exact
+Designer, Runner, and Shared composition.
 
-- `dist/PPSExperimentRunner/PPSExperimentRunner.exe` and its PyInstaller onedir resources.
-- The packaged Qt Windows platform plugin at `dist/PPSExperimentRunner/_internal/PySide6/plugins/platforms/qwindows.dll`; without it the runner shows "no Qt platform plugin could be initialized" and cannot start.
-- `dist/PPSDashboardLauncher/PPSDashboardLauncher.exe` and its PyInstaller onedir resources. This is the exe entrypoint for the offline/local HTML GUI; it should start the local companion and open the dashboard without requiring users to run Python commands or batch files.
-- Dashboard launchers kept for inspectability and fallback: `windows/Launch_HTML_Dashboard.bat`, `windows/Start_Website_Companion.bat`, and `windows/Launch_Experiment_Runner.bat`.
-- Installer/build support needed to audit or rebuild the package: `windows/downloader/`, `windows/Build_PPS_Downloader.ps1`, `windows/Build_PPS_Distribution.ps1`, `windows/Build_Dashboard_Launcher_Exe.ps1`, `windows/Build_Android_Companion.ps1`, `windows/Setup_Windows_App.ps1`, and `windows/Create_Desktop_Shortcut.ps1`.
-- Native Android runner companion source/build files under `android/runner-companion/`; generated APKs remain build outputs, not tracked source.
-- Installer protocols and current missing-link ledger under `installer_protocols/`.
-- Local dashboard and hosted-dashboard assets: `src/peripersonal_space_toolkit/dashboard/`, root `index.html`, `.nojekyll`, and `src/peripersonal_space_toolkit/viewer/`.
-- App identity assets under `src/peripersonal_space_toolkit/assets/`.
-- Preload catalogs and readiness ledgers under `assets/preloads/`, including `preload_inventory.json` and `profile_recreation_status.json`.
-- Study 5 and shared audio assets: `assets/breathing/` and `assets/tactile/default_tactile_cue.wav`.
-- Tactile-channel response marker/click assets under `assets/click/`; the
-  click-tone WAV is emitted into physical output 3 by the runner and must be
-  included in the packaged exe resources and downloader payload.
-- The redistributable FABIAN/TU SOFA file and manifest under `assets/0. Head-Related Impulse Response (HRIR) model/`.
-- `study_templates/`, `configs/`, and `data/sample/`.
-- User docs, release docs, licenses, citation metadata, and third-party attribution: `docs/`, `README.md`, `LICENSE`, `THIRD_PARTY_LICENSES.md`, and `CITATION.cff`.
-- Release helper tools needed to audit, manifest, and rebuild the package.
-- A local runtime/dependency environment or runtime bootstrap metadata sufficient for the GUI exe and runner exe to work after installation.
+## Required Product Contents
 
-The public `/download` path should lead to the single sub-100 MiB downloader exe
-once that asset exists. The heavy offline ZIP remains the Zenodo-hosted payload
-that the downloader installs after SHA256 and package-inventory verification;
-it is not the public first-click artifact.
+Designer inventory includes:
 
-Do not include `For-AI/` in the end-user install payload. It remains tracked
-source-repo memory for future agents, while `installer_protocols/` carries the
-installer-facing build and missing-link protocols that should be visible in the
-installed package.
+- `dist/PPSDesigner/PPSDesigner.exe` and required onedir support
+- `apps/designer/frontend/compiled/` as the offline UI
+- Designer launch/support material declared by its manifest
+- compatible Shared component
 
-Optional but preferred when available:
+Runner inventory includes:
 
-- Approved native 3DTI renderer binaries under `third_party/3dti_renderer/bin/`.
-- Pinned 3DTI source/attribution material under `third_party/3dti_AudioToolkit/`.
+- `dist/PPSExperimentRunner/PPSExperimentRunner.exe`
+- `dist/PPSExperimentRunner/_internal/PySide6/plugins/platforms/qwindows.dll`
+- audio/ASIO preflight and the frozen-entrypoint `SD_ENABLE_ASIO=1` guard
+- prepared-experiment playback, runtime assets, output review/analysis needed
+  for ordinary Runner use
+- compatible Shared component
 
-## Runner Executable Sync Rule
+Shared inventory includes:
 
-Any completed change to experiment-runner functionality must carry through to
-the local packaged runner executable path. This includes Focus Mode behavior,
-standalone launcher behavior, audio routing/preflight behavior, participant or
-session state handling, generated-session playback behavior, and
-validation-visible runner workflows. Do not treat a runner change as complete if
-only the Python source entrypoint was updated; rebuild or refresh the
-`PPSExperimentRunner.exe` packaging path, update the package inventory or
-release payload metadata if needed, and verify the packaged/local exe exercises
-the changed behavior.
+- `packages/pps-resources/assets/`
+- `packages/pps-resources/study_templates/`
+- `packages/pps-resources/configs/`
+- `packages/pps-resources/data/sample/`
+- reviewed `third_party/` dependencies and licenses
+- public docs, `LICENSE`, `THIRD_PARTY_LICENSES.md`, and `CITATION.cff`
 
-## Build And Verification Order
+Logical installed paths remain `assets/...`, `study_templates/...`, and related
+scientific/profile paths even though the repository sources live under
+`packages/pps-resources/`.
 
-1. Install dependencies into `.venv` with the Windows setup path or `python -m pip install -e ".[tts,gui,web,lsl,xdf,validation,dev,package]"`. The GUI extra is pinned to PySide6 6.7.x because newer PySide6 releases have broken Qt imports in the current Anaconda-based lab venv.
-2. Run tests and release audit before packaging.
-3. Build the packaged runner with `windows/Build_Experiment_Runner_Exe.ps1`. This must run `tools/check_qt_runtime.py` before and after PyInstaller so broken PySide6 imports or missing `qwindows.dll` fail the build. After any runner-functionality change, this packaged/local exe path must be refreshed and verified so the installable runner carries the new source behavior. After building, verify the packaged exe, not just source Python, can open `Komplete Audio ASIO Driver` through the real runner path because ASIO depends on the frozen entrypoint setting `SD_ENABLE_ASIO=1` before any sounddevice import.
-4. Build or stage `PPSDashboardLauncher.exe`, the offline/local HTML GUI exe entrypoint that starts the companion and opens the dashboard.
-5. Build the Android companion source when phone APK evidence is needed with `windows/Build_Android_Companion.ps1`; do not commit the generated APK.
-6. Stage the repo-shaped program directory and all dependency/runtime payloads that the downloader will install.
-7. Let `tools/package_inventory.py --strict` validate the staged repository-shaped package and write `pps_package_inventory.v1.json`.
-8. Generate `pps_download_manifest.v1.json` with the final GitHub manifest/downloader context, Zenodo payload URL, external dependency URL if unavoidable, SHA256, size, version, and role.
-9. Build `PPS-Toolkit-Downloader.exe` with the final manifest URL embedded; fail the build if it is 100 MiB or larger.
-10. Attach the downloader, manifest, and any GitHub-hosted dependency/runtime/repo payloads to the GitHub Release.
-11. Test from the public download page on a clean Windows folder. The proof must show the single downloader exe downloading content, installing into a user-chosen location, creating/opening the offline HTML GUI exe, and launching `PPSExperimentRunner.exe`.
-12. On a clean Windows lab PC without Komplete ASIO, verify the downloader/setup
-    opens the official NI driver page, reports provider action required, and the
-    runner launcher shows an audio dependency message plus an `Audio Driver
-    Instructions` action with official links and Retry Audio Detection. After
-    installing the NI driver, rerun the PC audit and
-    `pps-audio-stress --device-query Komplete --channels 3`.
-13. On a Windows lab PC where the NI driver is installed but the interface is
-    unplugged or not enumerated, verify setup/runner messaging switches to the
-    reconnect/power-cycle/retry path and does not keep telling the user to
-    download the driver. After the interface appears, the runner should proceed
-    automatically from Retry Audio Detection without requiring manual device
-    selection.
+## Explicit Exclusions
 
-## Do Not Package
+No component, package inventory, payload, or download manifest may include:
 
-Do not include raw participant data, name-bearing exports, generated participant/session outputs, generated APKs unless explicitly release-reviewed, local validation artifacts, downloaded model caches, private local paths, credentials, or unreviewed third-party audio/assets. Local runtime folders such as `local_data/`, `artifacts/`, and `models/` remain ignored.
+- `For-AI/`
+- Android companion source, APKs, Android administration CLIs, phone bridges,
+  or visible phone controls
+- participant/demographic data or name-bearing exports
+- generated sessions, renders, recordings, validation runs, or local caches
+- `local_data/`, `artifacts/`, build work directories, or downloaded models
+- private absolute paths, credentials, or secrets
+- unreviewed third-party assets, unapproved research ledgers, or private paper
+  artifacts
+
+The Android companion remains under `For-AI/experiments/android-companion/` and
+is development-only for V1.
+
+## Build and Acceptance Order
+
+1. Run structural classification, ownership, release, privacy, and path audits.
+2. Build `PPSDesigner.exe` and `PPSExperimentRunner.exe`; verify the Runner's Qt
+   plugin and ASIO preflight.
+3. Assemble Shared, Designer, Runner, and Full payloads from the component
+   manifests and write independent `pps_package_inventory.v1.json` files.
+4. Generate component-specific `pps_download_manifest.v1.json` files with final
+   URLs and hashes.
+5. Build all three downloader executables from the parameterized Go source.
+6. On clean Windows folders verify Designer-only, Runner-only, and Full. Full
+   must install two shortcuts and one compatible Shared component.
+7. Verify the public `/download` route references only assets that exist on the
+   release; use the Releases page until direct assets exist.
+
+Build execution lives under `For-AI/engineering/build/`; release assembly and
+audits live under `For-AI/engineering/release/`. Generated release outputs stay
+under ignored `dist/` and are never committed.
+
+## External Driver Policy
+
+The Native Instruments Komplete Audio ASIO driver is proprietary. PPS may open
+the official provider page and display install/reconnect guidance but must not
+mirror or bundle the installer without documented redistribution permission.
+Installer success does not replace Runner audio preflight. The validated route
+uses one native multichannel ASIO stream: auditory outputs 1/2, tactile and
+response marker output 3, with output 4 available as a tactile mirror when the
+driver requires an even stream width.

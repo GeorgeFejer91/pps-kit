@@ -1,100 +1,81 @@
-# PPS Download Distribution
+# PPS Kit Downloads
 
-The finished Windows distribution uses two download layers:
+PPS Kit V1 publishes two independent Windows programs and one combined suite.
 
-- `PPS-Toolkit-Downloader.exe` is the small GitHub-hosted bootstrapper. It must stay below 100 MiB, should stay below 50 MiB, and preferably stays below 25 MiB.
-- `PPS-Toolkit-vX.Y.Z-offline-lab-windows-x64.zip` is the heavyweight Zenodo-hosted offline lab package. It contains the runner, packaged dashboard launcher, dashboard files, Android companion source/build files, redistributable assets, FABIAN SOFA resource, approved 3DTI files, docs, licenses, and Windows launchers.
+## Choose a Download
 
-The repo contains the installer package source under `windows/downloader/`
-and the tracked package definition at
-`windows/installer_package_inventory.v1.json`. Generated release outputs stay
-under ignored `dist/`: the downloader exe, offline ZIP,
-`pps_download_manifest.v1.json`, and the generated
-`pps_package_inventory.v1.json` embedded inside the offline ZIP. Installer
-build protocols and missing-link ledgers live in `installer_protocols/`.
+### PPS Designer
 
-## Build
+`PPS-Designer-Downloader.exe` installs the stimulus/profile Designer, its
+compiled offline interface, approved templates/resources, documentation, and
+the compatible Shared component. It does not require the Experiment Runner to
+launch.
 
-Build the downloader only:
+### PPS Experiment Runner
+
+`PPS-Experiment-Runner-Downloader.exe` installs the participant Runner, Qt
+runtime, runtime assets, normal post-run analysis/review, documentation, and the
+compatible Shared component. It can open a prepared experiment without the
+Designer being installed.
+
+### Full PPS Toolkit
+
+`PPS-Toolkit-Downloader.exe` installs Designer, Runner, and one Shared
+component. It creates separate Designer and Runner shortcuts; V1 does not add a
+central hub.
+
+Until a GitHub Release contains the matching downloader and manifest assets,
+use the [PPS Kit Releases page](https://github.com/GeorgeFejer91/pps-kit/releases)
+rather than a guessed direct asset URL.
+
+## Installation Integrity
+
+Each downloader is built from the same parameterized source but pins a distinct
+product/component ID, payload, component-manifest hash, and package-inventory
+hash. The downloader verifies SHA256 and inventory metadata before extraction
+or launch.
+
+Designer and Runner may share one chosen installation root. If the existing
+Shared component has a different version or inventory hash, installation stops
+with an incompatibility message instead of mixing releases.
+
+Heavy offline payload ZIPs may be hosted on Zenodo while the small downloader
+executables and download manifests are attached to GitHub Releases.
+
+## Installed Entrypoints
+
+- Designer: `PPSDesigner.exe`
+- Runner: `PPSExperimentRunner.exe`
+
+The Runner package includes the Windows Qt platform plugin (`qwindows.dll`)
+and performs its own audio/ASIO preflight. A successful installation alone does
+not prove that the lab audio interface and native multichannel driver are
+ready.
+
+## Data and Privacy
+
+End-user packages contain approved application source/resources,
+documentation, licenses, and deidentified sample data. They exclude internal
+`For-AI/` research/development material, participant data, generated sessions,
+private paths, downloaded model caches, unreviewed assets, and the experimental
+Android companion.
+
+See [privacy boundary](privacy_boundary.md), [Windows operation](WINDOWS_APP.md),
+and [Windows PC requirements](WINDOWS_PC_SOFTWARE_REQUIREMENTS.md).
+
+## Release Engineering
+
+For maintainers, component definitions live in
+`distributions/manifests/*.v1.json`. Build execution and release audits live
+under `For-AI/engineering/` and are not installed with the products.
 
 ```powershell
-windows\Build_PPS_Downloader.ps1
+.\For-AI\engineering\build\windows\Build_PPS_Designer.ps1
+.\For-AI\engineering\build\windows\Build_Experiment_Runner_Exe.ps1
+.\For-AI\engineering\build\windows\Build_PPS_Downloader.ps1
+.\For-AI\engineering\build\windows\Build_PPS_Distribution.ps1 -Version 0.1.0 -ZenodoPayloadUrl "https://zenodo.org/records/<record>/files/<payload>.zip?download=1" -ZenodoDoi "10.5281/zenodo.<record>"
 ```
 
-Build the packaged dashboard launcher:
-
-```powershell
-windows\Build_Dashboard_Launcher_Exe.ps1
-```
-
-Build the optional Android companion debug APK from source:
-
-```powershell
-windows\Build_Android_Companion.ps1
-```
-
-Build the release package and manifest:
-
-```powershell
-windows\Build_PPS_Distribution.ps1 -Version 0.1.0 -ZenodoPayloadUrl "https://zenodo.org/records/<record>/files/PPS-Toolkit-v0.1.0-offline-lab-windows-x64.zip?download=1" -ZenodoDoi "10.5281/zenodo.<record>"
-```
-
-The downloader build requires Go for Windows. The script embeds the PPS icon, writes both a versioned exe and `dist\PPS-Toolkit-Downloader.exe`, and fails if the exe is at or above 100 MiB.
-
-The distribution build validates the staged offline package with the repo venv
-Python:
-
-```powershell
-.\.venv\Scripts\python.exe tools\package_inventory.py --stage-root dist\<stage-folder> --output dist\<stage-folder>\pps_package_inventory.v1.json --strict
-```
-
-This fails the package before zipping if a required item is missing, including
-the packaged runner exe, packaged dashboard launcher exe, dashboard assets,
-preload catalogs, Study 5 audio/tactile assets, FABIAN SOFA resource, docs,
-licenses, `installer_protocols/`, and installer source/build scripts. It also checks the packaged Qt platform plugin
-`dist/PPSExperimentRunner/_internal/PySide6/plugins/platforms/qwindows.dll`,
-because the Experiment Runner cannot start on Windows without it.
-
-`windows\Build_Experiment_Runner_Exe.ps1` runs `tools\check_qt_runtime.py`
-before and after PyInstaller. The preflight verifies that PySide6 imports
-cleanly and that the packaged runner contains the Windows Qt platform plugin.
-`windows\Build_Dashboard_Launcher_Exe.ps1` builds
-`dist\PPSDashboardLauncher\PPSDashboardLauncher.exe`, which starts the local
-dashboard companion and opens the browser UI without requiring Python on the
-installed PC.
-
-## Manifest
-
-The downloader reads `pps_download_manifest.v1.json`. Generate it with:
-
-```powershell
-python tools\make_download_manifest.py --payload dist\PPS-Toolkit-v0.1.0-offline-lab-windows-x64.zip --payload-url "https://zenodo.org/records/<record>/files/PPS-Toolkit-v0.1.0-offline-lab-windows-x64.zip?download=1" --zenodo-doi "10.5281/zenodo.<record>"
-```
-
-The manifest records the version, source tag, commit, Zenodo DOI, payload URL,
-size, SHA256, platform, installed entrypoints, and the package inventory hash.
-The dashboard entrypoint is `dist/PPSDashboardLauncher/PPSDashboardLauncher.exe`.
-The downloader refuses to extract or launch the package until the payload hash
-matches the manifest, and it rejects manifests whose package inventory reports
-missing required items.
-
-Generated APKs are build outputs and stay outside Git and the release source
-inventory unless a release explicitly attaches an APK artifact. The offline lab
-package includes `android/runner-companion/` and
-`windows/Build_Android_Companion.ps1` so labs can rebuild/install locally.
-
-## Release Order
-
-1. Create the `release/vX.Y.Z` branch and tag `vX.Y.Z`.
-2. Build the Focus Mode runner with `windows\Build_Experiment_Runner_Exe.ps1`.
-3. Build the dashboard launcher with `windows\Build_Dashboard_Launcher_Exe.ps1`.
-4. Build the offline lab ZIP and manifest with `windows\Build_PPS_Distribution.ps1`.
-5. Upload the heavyweight ZIP to Zenodo and record the version DOI.
-6. Rebuild the manifest with the final Zenodo URL if needed.
-7. Build the lightweight downloader with the final manifest URL embedded.
-8. Attach the downloader and manifest to the GitHub release.
-9. Verify downloader install on a clean Windows folder before announcing the release.
-
-Keep `installer_protocols/missing_links.md` current until the GitHub release
-assets and Zenodo payload URL exist.
+Generated binaries, package inventories, manifests, and ZIPs remain under the
+ignored `dist/` tree until attached to a reviewed release.
 

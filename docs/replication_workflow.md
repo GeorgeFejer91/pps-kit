@@ -7,7 +7,7 @@ This workflow describes the public, reusable path for reproducing the Study 5 au
 Run the Windows setup script from the repository root:
 
 ```powershell
-.\windows\Setup_Windows_App.ps1
+.\For-AI\engineering\build\windows\Setup_Windows_App.ps1
 ```
 
 The script creates a local virtual environment and installs the package in editable mode.
@@ -17,7 +17,7 @@ The script creates a local virtual environment and installs the package in edita
 Open the local HTML dashboard:
 
 ```bat
-windows\Launch_HTML_Dashboard.bat
+apps\designer\launchers\Launch_HTML_Dashboard.bat
 ```
 
 or:
@@ -29,7 +29,7 @@ pps-dashboard
 The Qt stimulus designer remains available for comparison and fallback:
 
 ```bat
-windows\Launch_Stimulus_Designer.bat
+apps\designer\launchers\Launch_Stimulus_Designer.bat
 ```
 
 Use the dashboard Segments for study profiles, noise types, custom looming files, prestimulus files, trajectory geometry, SOAs, repetitions, catch/baseline trials, block CSV preview, and experiment preparation. The fixed FABIAN/TU SOFA HRIR path is handled under the hood.
@@ -65,7 +65,7 @@ The integrated runner writes session outputs under `local_data\sessions\<partici
 For designed experiments, use `events.csv` / `events.xdf`, the internal `PPSMarkersV2`/`PPSTriggerCodes` marker mirror, and optional runner-owned LabRecorder `<session_id>_external_labrecorder.xdf` as reconstruction records. The native LabRecorder XDF is written directly into the participant session folder beside `<session_id>_trials.csv`. The runner keeps the LSL outlets alive for the participant session after setup submission. When requested, it waits for the session LSL streams, refreshes LabRecorder's stream list, selects all visible network LSL streams by default, and starts LabRecorder through RCS before playback. Closing the Focus Mode runner also closes the owned LabRecorder child; normal session teardown still waits for the final marker settle interval before stopping it. The optional local audio evidence WAV is a data-heavy safety copy of the runner's mixed output buffers, including tactile-channel response marker clicks. Physical electrical loopback WAVs are validation-only traces used to quantify how well those software records match the physical outputs.
 
 The legacy Tk runner is no longer a public launch path. Use Focus Mode through
-the dashboard handoff or `windows\Launch_Experiment_Runner.bat`.
+the dashboard handoff or `apps\runner\launchers\Launch_Experiment_Runner.bat`.
 
 Local recordings, demographics, settings, and session outputs belong under `local_data/`, which is ignored by Git.
 
@@ -88,7 +88,7 @@ The sample command writes summary tables under `artifacts/analysis`.
 ## 7. Audit Before Publication
 
 ```powershell
-python tools\release_audit.py
+python For-AI\engineering\release\tools\release_audit.py
 pytest
 ```
 

@@ -1,0 +1,38 @@
+{
+  "schema": "pps-repository-path-migration.v1",
+  "created": "2026-08-23",
+  "classification_rule": {
+    "product": "Shipped application source, resources, public specifications, public documentation, and website inputs live outside For-AI.",
+    "internal": "Build execution, tests, validation, diagnostics, research, release work, generation, audits, and unapproved experiments live under For-AI."
+  },
+  "moves": [
+    {"old": "src/", "new": "packages/pps-runtime/src/", "batch": "product-runtime"},
+    {"old": "assets/", "new": "packages/pps-resources/assets/", "batch": "product-resources"},
+    {"old": "study_templates/", "new": "packages/pps-resources/study_templates/", "batch": "product-resources"},
+    {"old": "configs/", "new": "packages/pps-resources/configs/", "batch": "product-resources"},
+    {"old": "data/sample/", "new": "packages/pps-resources/data/sample/", "batch": "product-resources"},
+    {"old": "src/peripersonal_space_toolkit/dashboard/", "new": "apps/designer/frontend/", "batch": "designer"},
+    {"old": "src/peripersonal_space_toolkit/viewer/", "new": "apps/designer/frontend/viewer/", "batch": "designer"},
+    {"old": "windows/PPSDesigner.spec", "new": "apps/designer/packaging/PPSDesigner.spec", "batch": "designer"},
+    {"old": "windows/PPSExperimentRunner.spec", "new": "apps/runner/packaging/PPSExperimentRunner.spec", "batch": "runner"},
+    {"old": "windows/downloader/", "new": "distributions/downloader/", "batch": "distribution"},
+    {"old": "tests/", "new": "For-AI/engineering/tests/", "batch": "engineering"},
+    {"old": "tools/", "new": "For-AI/engineering/tooling/ and specialized release/research tool folders", "batch": "engineering"},
+    {"old": "validation_protocols/", "new": "For-AI/engineering/validation/", "batch": "engineering"},
+    {"old": "installer_protocols/", "new": "For-AI/engineering/release/protocols/", "batch": "release"},
+    {"old": "output/", "new": "For-AI/engineering/diagnostics/reference-captures/", "batch": "diagnostics"},
+    {"old": "publication/", "new": "For-AI/research/publication/", "batch": "research"},
+    {"old": "exploratory/", "new": "For-AI/research/calibration/", "batch": "research"},
+    {"old": "data/publication_network/", "new": "For-AI/research/literature/publication-network/", "batch": "research"},
+    {"old": "woojer_latency_testing/", "new": "For-AI/research/hardware/woojer-latency-testing/", "batch": "research"},
+    {"old": "android/runner-companion/", "new": "For-AI/experiments/android-companion/runner-companion/", "batch": "experiments"},
+    {"old": "validation_protocols/scripts/*android* and Android-only mobile validation tools", "new": "For-AI/experiments/android-companion/validation/", "batch": "experiments"},
+    {"old": "installer_protocols/android_emulator_verification_protocol.md", "new": "For-AI/experiments/android-companion/protocols/android_emulator_verification_protocol.md", "batch": "experiments"},
+    {"old": "index.html and route/CNAME files", "new": "website/", "batch": "website"}
+  ],
+  "compatibility": {
+    "python_import": "peripersonal_space_toolkit",
+    "repository_root_alias": "runtime_paths.repo_root() remains for one release",
+    "frozen_root_environment": "PPS_TOOLKIT_ROOT"
+  }
+}

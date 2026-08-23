@@ -1,0 +1,21 @@
+namespace,field_count,role,primary_matrix_treatment,source_path,note
+current_design_serialized_inputs,115,current_profile_input_contract,primary,tools/current_toolkit_input_schema.json,Exact paths derived from StimulusDesign dataclasses and verified against design_from_dict/design_to_dict; arbitrary dict fields remain atomic.
+proposed_target_method_validation_leaves,281,future_method_validation_inventory,secondary,tools/publication_parameter_taxonomy.mjs,Secondary scientific-method/validation-gap review: 275 configuration candidates plus six reported/target validation leaves. These are neither current serialized Toolkit paths nor a superset of every current operational/identity input.
+current_publication_audit_composites,25,evidence,no,For-AI/research/literature/audiotactile-paper-metadata-audit/extraction_schema.json,Coarse Segment 1-4 parents retained only to bootstrap atomic review.
+current_recreation_gate_segments_0_to_4,15,readiness_check,no,src/peripersonal_space_toolkit/profile_recreation.py,"Current authoritative gate is a coarse subset, not the final schema."
+legacy_extended_profile_inventory_segments_0_to_6,19,readiness_check,no,assets/preloads/*/01_profile/profile_parameters_manifest.json,Includes legacy Segment 6 participant/part labels; participant count is order-preview count.
+design_dataclass_attributes,108,current_code_input_surface,expanded_to_115_paths,src/peripersonal_space_toolkit/design.py,"108 attributes expand to 115 exact paths because AudioFileSpec is used by two separate collections; the new display colour and retained source-input path are implementation bookkeeping, not additional paper-extraction contracts."
+gui_method_coverage_rows,51,gui_input_surface,not_path_validated_here,For-AI GUI method audit,51 method-bearing rows plus 13 non-method controls; GUI binding claims require separate control-to-serializer tests.
+runtime_capture_options,14,runtime_policy_input,namespace_only,src/peripersonal_space_toolkit/session_runner.py::SessionCaptureOptions,Operational capture policy; only paper-defining choices belong in study review.
+normalized_loudness_leaves,32,input_policy_and_derived,mapped_subset,src/peripersonal_space_toolkit/loudness.py::normalize_loudness_policy,"26 inputs/policies, five derived values, one schema field."
+tactile_calibration_policy_constants,27,calibration_policy_input,namespace_only,src/peripersonal_space_toolkit/tactile_calibration,Include only paper-defining calibration policy in the per-study matrix.
+tactile_calibration_run_inputs,7,calibration_run_input,namespace_only,src/peripersonal_space_toolkit/tactile_calibration,Operational run identity/paths and current output levels.
+adaptive_tactile_inputs,7,runtime_policy_input,namespace_only,src/peripersonal_space_toolkit/tactile_threshold_adaptation.py,Runtime adaptation policy inputs.
+topup_policy_inputs,7,runtime_analysis_policy_input,mapped_subset,src/peripersonal_space_toolkit/topup.py,Paper-relevant policy is represented in runtime/analysis inputs.
+latency_validation_config,22,calibration_policy_input,namespace_only,src/peripersonal_space_toolkit/latency_validation.py,"Eight pulse-train controls, four route controls, ten thresholds."
+rich_participant_trial_schema,130,output_evidence,no,runner participant output schema,"Materialized evidence/output, not paper input columns."
+public_data_min,18,output_evidence,no,output field dictionary / session runner,Public minimized export has 18 fields; older manuscript matrix says 17.
+tactile_calibration_trial_fields,33,output_evidence,no,tactile calibration TRIAL_FIELDNAMES,"Evidence output, not configuration input."
+adaptive_adjustment_fields,15,output_evidence,no,src/peripersonal_space_toolkit/tactile_threshold_adaptation.py,Adjustment dataclass output; CSV adds schema metadata.
+topup_ledger_fields,39,output_evidence,no,src/peripersonal_space_toolkit/topup.py,"Ledger output, not configuration input."
+analysis_result_artifact_groups,16,output_evidence,no,src/peripersonal_space_toolkit/session_analysis.py::SessionAnalysisResult,"Analysis artifacts and QC, not paper input columns."

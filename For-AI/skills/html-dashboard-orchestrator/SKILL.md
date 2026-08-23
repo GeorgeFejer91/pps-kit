@@ -15,12 +15,12 @@ Treat the packaged local dashboard and the online/static GitHub Pages dashboard 
 
 In this repo:
 
-- Dashboard assets live in `src/peripersonal_space_toolkit/dashboard/`.
-- The embedded trajectory viewer lives in `src/peripersonal_space_toolkit/viewer/`.
-- The companion backend lives in `src/peripersonal_space_toolkit/dashboard_app.py`.
-- Experiment schemas and render behavior live in `src/peripersonal_space_toolkit/design.py` and `src/peripersonal_space_toolkit/render_backend.py`.
+- Dashboard assets live in `apps/designer/frontend/`.
+- The embedded trajectory viewer lives in `apps/designer/frontend/viewer/`.
+- The companion backend lives in `apps/designer/frontend_app.py`.
+- Experiment schemas and render behavior live in `packages/pps-runtime/src/peripersonal_space_toolkit/design.py` and `packages/pps-runtime/src/peripersonal_space_toolkit/render_backend.py`.
 - Preload asset readiness lives in `assets/preloads/preload_inventory.json`; the browser may display status, but the local companion verifies, downloads, or bakes profile assets.
-- Preload profile file cabinets live under `assets/preloads/<template_id>/` and should mirror the dashboard decision segments (`01_profile`, `02_looming_stimuli`, `03_baseline_strategy`, `04_trial_designer`, `05_run_setup`). Rebuild them with `tools/build_preload_catalog.py` when preload sources, trajectories, or metadata change.
+- Preload profile file cabinets live under `assets/preloads/<template_id>/` and should mirror the dashboard decision segments (`01_profile`, `02_looming_stimuli`, `03_baseline_strategy`, `04_trial_designer`, `05_run_setup`). Rebuild them with `For-AI/engineering/tooling/build_preload_catalog.py` when preload sources, trajectories, or metadata change.
 - Public/hosted static behavior must still use relative assets and connect to `127.0.0.1` for backend actions.
 
 ## Workflow
@@ -84,7 +84,7 @@ In this repo:
    - Smoke-test the dashboard in a browser with the local backend running.
    - For viewer or canvas changes, verify the page is nonblank and interaction updates fields.
    - For static/hosted changes, push or otherwise update the GitHub Pages-facing files and verify the hosted URL with cache-busting query params.
-   - For any visual change, run `python validation_protocols/scripts/run_designer_visual_layout_audit.py`, inspect its multi-viewport light/dark screenshots and contact sheet, correct hard or qualitative defects, rebuild, and rerun. Geometry checks and pixel diffs do not replace direct image inspection; one unreviewed screenshot pass is insufficient.
+   - For any visual change, run `python For-AI/engineering/validation/scripts/run_designer_visual_layout_audit.py`, inspect its multi-viewport light/dark screenshots and contact sheet, correct hard or qualitative defects, rebuild, and rerun. Geometry checks and pixel diffs do not replace direct image inspection; one unreviewed screenshot pass is insufficient.
 
 7. Update project memory.
    - Update `For-AI/project_context.md` for durable architecture/boundary changes.

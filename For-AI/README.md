@@ -1,59 +1,106 @@
 # For-AI Project Memory
 
-This folder is the required starting point for AI agents working on the Peripersonal Space Toolkit.
+This is the required starting point for AI agents working on PPS Kit. `For-AI/`
+is public, tracked development memory and orchestration; it is never part of an
+end-user package.
 
-Read this file before modifying the repository. Then read:
+## Repository Boundary
 
-- [project_context.md](project_context.md) for aims, scope, architecture, and current boundaries.
-- [evolving_goals.md](evolving_goals.md) for active decisions and dated project direction.
-- [segment_registry_contract.md](segment_registry_contract.md) for the locked Segments 0-3 project/folder/manifest contract.
-- [download_package_inventory.md](download_package_inventory.md) for the installer/offline-package inventory and release packaging boundary.
-- [module_map.md](module_map.md) for the current source ownership map and refactor direction.
-- [product_applet_architecture.md](product_applet_architecture.md) for the agreed central-hub, independently runnable applet, shared-workspace, and immutable-template/profile lifecycle direction.
-- [loudness_calibration.md](loudness_calibration.md) for the Study 5 headphone/interface loudness calibration findings and policy direction.
-- [looming_stimulus_generation_standard.md](looming_stimulus_generation_standard.md) for the current DynaSpace-derived golden standard for generated looming stimuli.
-- [dashboard_gui_behavior.md](dashboard_gui_behavior.md) for current HTML dashboard edit/view-mode and downward-decision-propagation behavior.
-- [interface_design_principles.md](interface_design_principles.md) for the evidence-based PPS grid, spacing, hierarchy, accessibility, and mandatory iterative visual-validation contract.
-- [audiotactile-paper-metadata-audit/README.md](audiotactile-paper-metadata-audit/README.md) for the standalone paper/PDF/supplement metadata extraction audit that is independent from GUI profile recreation.
-- [agent_update_protocol.md](agent_update_protocol.md) for how to keep this folder current.
-- [skills/html-dashboard-orchestrator/SKILL.md](skills/html-dashboard-orchestrator/SKILL.md) before making HTML dashboard or hosted-GitHub-Pages GUI changes.
+Use one classification rule:
 
-## Project Summary
+- Outside `For-AI/`: source, resources, specifications, documentation, and
+  declarative manifests that form or define a shipped application or public
+  website.
+- Inside `For-AI/`: build execution, testing, validation, diagnostics,
+  research, publication work, code generation, audits, migration records, and
+  unapproved experiments.
 
-The repository is a public, reusable Python toolkit for audio-tactile peripersonal-space (PPS) experiments. It began as a cleaned and compartmentalized Study 5 replication tool and is evolving into a general Windows-ready PPS experiment designer/runner.
+The public products are two independently shippable applications:
 
-The release-direction architecture is one central PPS Toolkit hub with independently runnable applets over a shared core and researcher workspace. Built-in study templates are immutable package resources; editing one creates a provenance-linked custom profile, and running either a template or custom profile produces an immutable prepared-experiment snapshot for the runner. See `product_applet_architecture.md`.
+- Designer: `apps/designer/`
+- Experiment Runner: `apps/runner/`
 
-The toolkit currently centers on:
+They share the Python runtime in `packages/pps-runtime/`, approved resources in
+`packages/pps-resources/`, and versioned component manifests in
+`distributions/manifests/`. The Full download composes Designer, Runner, and
+exactly one compatible Shared component. V1 has no central hub.
 
-- stimulus generation for looming audio and tactile cues
-- a Windows-first experiment runner with audio/tactile channel routing
-- a standalone runner launcher with bounded participant dropdowns and explicit local audio-asset generation controls
-- loopback WAV decoding for onset and response recovery
-- deidentified sample-data analysis
-- a stimulus/trial designer for configurable audio-tactile PPS paradigms
-- preloadable published-study templates
-- a tracked lightweight downloader package source plus a validated repo-shaped install payload contract
-- a Qt runtime preflight that prevents packaging the runner without the Windows `qwindows.dll` platform plugin
-- public-release safeguards that keep participant data, generated outputs, models, SOFA/HRIR files, and third-party assets out of Git
-- a project-local skill workflow for safely changing the HTML dashboard as a local software orchestrator
+`peripersonal_space_toolkit` remains the Python import name. `repo_root()` is a
+one-release compatibility alias; new code should use `product_root()`,
+`resource_root()`, `designer_frontend_root()`, and `writable_root()` from
+`runtime_paths.py`. Frozen applications continue to honor `PPS_TOOLKIT_ROOT`.
 
-## Agent Requirement
+## Read Next
 
-Every future AI agent should:
+- [project_context.md](project_context.md): scientific scope, product behavior,
+  and current boundaries.
+- [evolving_goals.md](evolving_goals.md): dated decisions and ongoing work.
+- [module_map.md](module_map.md): code and resource ownership.
+- [download_package_inventory.md](download_package_inventory.md): component and
+  installer contract.
+- [segment_registry_contract.md](segment_registry_contract.md): preserved
+  Segment 0-6 manifests and handoff contracts.
+- [dashboard_gui_behavior.md](dashboard_gui_behavior.md): Designer UI behavior.
+- [agent_update_protocol.md](agent_update_protocol.md): memory update rules.
+- [engineering/migration/repository-layout.v1.json](engineering/migration/repository-layout.v1.json):
+  machine-readable migration ledger.
+- [engineering/migration/root-allowlist.v1.json](engineering/migration/root-allowlist.v1.json):
+  allowed repository-root entries.
 
-1. Read this folder before planning or editing.
-2. Check whether the current chat changed aims, scope, GUI behavior, data schemas, runner behavior, tests, publication boundaries, or repo structure.
-3. When changing the HTML dashboard, keep the packaged local dashboard and the online/static GitHub Pages dashboard synchronized in the same change set; update and verify both before finalizing.
-4. Preserve the public domain and route contract in `agent_update_protocol.md`: `https://ppskit.qzz.io/` is the toolkit route, `/documentation` is documentation, `/download` is downloads, `https://georgefejer91.github.io/pps-kit/` is the GitHub Pages fallback, and the old `/peripersonal-space-toolkit/` Pages path should not be reintroduced.
-5. Treat `segment_registry_contract.md` as authoritative for the full Segment 0-6 chain unless the user explicitly asks to revise that contract.
-6. Preserve the tracked downloader package definition in `windows/installer_package_inventory.v1.json` and the single-file downloader/install-payload boundary in `download_package_inventory.md` when changing packaging.
-7. When changing experiment-runner functionality, update and verify the packaged/local `PPSExperimentRunner.exe` path in the same change set so the installable runner carries the source behavior, not only the Python development entrypoint.
-8. Update the relevant `For-AI/` files before finalizing substantive work.
-9. State in the final response whether `For-AI/` was updated or why no update was needed.
+## Internal Layout
 
-Do not put secrets, participant data, generated artifacts, local absolute paths, or private notes in this folder.
+```text
+For-AI/
+  engineering/
+    automation/     CI and Pages implementation called by thin GitHub wrappers
+    build/          executable build and environment setup
+    release/        component assembly, inventories, protocols, and audits
+    tooling/        generators and maintenance utilities
+    tests/          pytest and downloader tests
+    validation/     software, UI, audio, and hardware validation
+    diagnostics/    approved diagnostic tools and reference captures
+    migration/      compatibility ledgers and housekeeping records
+  research/
+    literature/     paper audits, citation sources, and screening ledgers
+    calibration/    exploratory loudness/calibration work
+    publication/    manuscript and legacy methods material
+    hardware/       research-only device investigations
+  experiments/
+    android-companion/  unapproved Android companion and PC-side experiments
+```
 
-## Global Publishing Rule
+The generated, approved publication-network projection may ship with the
+Designer; its broad source/audit graph remains under `For-AI/research/`.
+Android source, Android administration CLIs, phone bridges, tests, and visible
+controls are development-only and excluded from V1 manifests. The Android
+test/Gradle suites are future-development checks, not V1 release gates; the
+default pytest scope remains `For-AI/engineering/tests/`.
 
-Every completed repository change must be committed and pushed to GitHub before finalizing. Keep commits scoped to the intended work and do not stage unrelated pre-existing worktree changes. HTML/dashboard GUI changes must keep the packaged local dashboard and the hosted/static GitHub Pages dashboard mutually synchronized: any change to one side requires the matching change to the other side in the same change set, followed by an immediate push so the website updates from the same source state.
+## Product and Publication Contracts
+
+- The Designer compiled frontend is the single offline/online UI artifact.
+  Local packaging consumes `apps/designer/frontend/compiled/`; Pages assembly
+  copies those same bytes into ignored staging alongside approved catalogues.
+- `website/CNAME` is the tracked Pages source. The assembled Pages root must
+  contain `CNAME` with `ppskit.qzz.io`.
+- Preserve `/`, `/documentation`, `/download`,
+  `https://georgefejer91.github.io/pps-kit/`, and the existing fallback routes.
+- Any Designer HTML change must rebuild the compiled frontend, assemble Pages,
+  and verify both local and hosted-facing copies in the same change.
+- Preserve `.pps-profile`, prepared-experiment, Segment 0-6, and existing
+  scientific schemas. Preserve `pps-designer`, generation/rendering CLIs, the
+  Runner executable, and `pps-dashboard` as a one-release Designer alias.
+
+## Agent Requirements
+
+1. Read this file before planning or editing.
+2. Keep product files out of `For-AI/` and development execution out of product
+   manifests.
+3. Update project memory when goals, GUI behavior, schemas, runner behavior,
+   publication boundaries, tests, or repository structure change.
+4. Never add secrets, participant data, generated runtime outputs, or private
+   absolute paths.
+5. Run the relevant structural, package-inventory, release/privacy, frontend,
+   and runtime tests.
+6. Commit and push every completed repository change. Stage only the intended
+   change set; report the exact blocker if pushing is not possible.

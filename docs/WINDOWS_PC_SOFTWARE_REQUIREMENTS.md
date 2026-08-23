@@ -39,7 +39,7 @@ The Windows source setup script installs the PPS Python/runtime package as one
 environment, then runs the PC software audit:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\windows\Setup_Windows_App.ps1
+powershell -ExecutionPolicy Bypass -File .\For-AI\engineering\build\windows\Setup_Windows_App.ps1
 ```
 
 If the audit cannot see the native Komplete Audio ASIO route, setup opens the
@@ -131,11 +131,11 @@ LaTeX:
 The manuscript has a permanent repo-root Windows render path:
 
 ```powershell
-.\windows\Render_BRM_Manuscript_PDF.ps1
+.\For-AI\research\publication\Render_BRM_Manuscript_PDF.ps1
 ```
 
 That wrapper delegates to
-`publication\behavior-research-methods\manuscript\render_pdf.ps1`, which sets
+`For-AI\research\publication\behavior-research-methods\manuscript\render_pdf.ps1`, which sets
 the Springer template path, runs `pdflatex`/`bibtex`/reruns, checks the LaTeX
 log for unresolved citations/references, repeats extra final passes when labels
 or citations changed, and leaves the ignored local `main.pdf` beside the
@@ -182,7 +182,7 @@ vibration onset without a sensor measurement.
 Run the machine-readable PC audit:
 
 ```powershell
-python .\validation_protocols\scripts\audit_pc_software_requirements.py
+python .\For-AI/engineering/validation\scripts\audit_pc_software_requirements.py
 ```
 
 Expected key results on a ready lab PC:
@@ -203,8 +203,8 @@ python -m peripersonal_space_toolkit.audio_device_stress --device-query Komplete
 Check safe route identity before any publication latency baseline:
 
 ```powershell
-python .\validation_protocols\scripts\run_dummy_output_route_sweep.py --device 31 --device-query Komplete --amplitude 0.05
-python .\validation_protocols\scripts\analyze_dummy_signal_levels.py --run-dir artifacts\validation_runs\dummy_output_route_sweep_YYYYMMDD_HHMMSS
+python .\For-AI/engineering/validation\scripts\run_dummy_output_route_sweep.py --device 31 --device-query Komplete --amplitude 0.05
+python .\For-AI/engineering/validation\scripts\analyze_dummy_signal_levels.py --run-dir artifacts\validation_runs\dummy_output_route_sweep_YYYYMMDD_HHMMSS
 ```
 
 Proceed to `pps-latency-validate calibrate --establish-baseline` only when all
@@ -214,7 +214,7 @@ amplitude.
 Check external LSL/XDF recording:
 
 ```powershell
-python .\validation_protocols\scripts\run_labrecorder_lsl_xdf_stress.py --output-dir artifacts\validation_runs\labrecorder_lsl_xdf_current
+python .\For-AI/engineering/validation\scripts\run_labrecorder_lsl_xdf_stress.py --output-dir artifacts\validation_runs\labrecorder_lsl_xdf_current
 ```
 
 Expected ready-PC result: all expected rich and numeric PPS LSL markers are

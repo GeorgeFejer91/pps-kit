@@ -1,0 +1,1461 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PPS Experiment Designer</title>
+  <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
+  <link rel="icon" type="image/png" href="./assets/pps_toolkit_icon-PI4CIL5w.png">
+
+  <script type="importmap">
+    {
+      "imports": {
+        "@chenglou/pretext": "./node_modules/@chenglou/pretext/dist/layout.js"
+      }
+    }
+  </script>
+  <script type="module" crossorigin src="./assets/index-Drphq8Xh.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DcUavyqi.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to page content</a>
+  <div class="app-shell">
+    <header class="topbar site-tabs" aria-label="Primary dashboard pages">
+      <div class="site-tab-list" role="tablist" aria-label="Dashboard pages">
+        <button id="page-tab-toolkit" class="site-tab active" type="button" role="tab" data-page-tab="toolkit" aria-controls="toolkit-page" aria-selected="true" aria-label="Experiment Designer"><span class="tab-label-full">Experiment Designer</span><span class="tab-label-short" aria-hidden="true">Experiment</span></button>
+        <button id="page-tab-documentation" class="site-tab" type="button" role="tab" data-page-tab="documentation" aria-controls="documentation-page" aria-selected="false" aria-label="Documentation" tabindex="-1"><span class="tab-label-full">Documentation</span><span class="tab-label-short" aria-hidden="true">Docs</span></button>
+        <button id="page-tab-downloads" class="site-tab" type="button" role="tab" data-page-tab="downloads" aria-controls="downloads-page" aria-selected="false" tabindex="-1">Downloads</button>
+      </div>
+      <div class="designer-status-chrome" aria-label="Designer status">
+        <span id="designer-capability-badge" class="status-label optional">detecting mode</span>
+        <span id="designer-save-state" class="status-label optional">saved</span>
+        <button id="designer-help" type="button">Help</button>
+      </div>
+    </header>
+
+    <aside class="rail">
+      <div class="brand">
+        <div class="brand-copy">
+          <div class="brand-name">Peripersonal Space Design Toolkit</div>
+          <div class="brand-subtitle">Experiment profile composer</div>
+        </div>
+        <button id="designer-theme-toggle" class="rail-theme-toggle" type="button" aria-pressed="false" aria-label="Use dark theme" title="Use dark theme">
+          <span class="theme-toggle-track" aria-hidden="true">
+            <span class="theme-toggle-indicator"></span>
+            <svg class="theme-toggle-icon theme-toggle-sun" viewBox="0 0 24 24" focusable="false">
+              <circle cx="12" cy="12" r="3.5"></circle>
+              <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"></path>
+            </svg>
+            <svg class="theme-toggle-icon theme-toggle-moon" viewBox="0 0 24 24" focusable="false">
+              <path d="M19 15.2A7.6 7.6 0 0 1 8.8 5a7.7 7.7 0 1 0 10.2 10.2Z"></path>
+            </svg>
+          </span>
+        </button>
+      </div>
+      <div id="profile-mode-panel" class="profile-mode-panel" data-lock-state="closed" aria-label="Profile editing state">
+        <div id="profile-lock-visual" class="profile-lock-visual" aria-hidden="true">
+          <svg class="profile-lock-icon" viewBox="0 0 48 52" focusable="false">
+            <path class="profile-lock-shackle" d="M15 25v-7a9 9 0 0 1 18 0v7"></path>
+            <rect class="profile-lock-body" x="9" y="23" width="30" height="24" rx="5"></rect>
+            <circle class="profile-lock-keyhole" cx="24" cy="34" r="2.5"></circle>
+            <path class="profile-lock-key-stem" d="M24 36.5v4"></path>
+          </svg>
+        </div>
+        <div class="profile-mode-switch-row">
+          <span id="profile-view-label" class="profile-mode-option profile-mode-option-view">View</span>
+          <button id="edit-mode-button" class="profile-mode-toggle" type="button" role="switch" aria-checked="false" aria-label="Editing locked. Switch to Edit mode.">
+            <span class="profile-mode-toggle-track" aria-hidden="true">
+              <span class="profile-mode-toggle-thumb"></span>
+            </span>
+          </button>
+          <span id="profile-edit-label" class="profile-mode-option profile-mode-option-edit">Edit</span>
+        </div>
+      </div>
+      <button id="mobile-rail-nav-toggle" class="mobile-rail-toggle" type="button" aria-expanded="false" aria-controls="toolkit-workflow-nav documentation-section-nav download-section-nav">
+        <span>Sections</span>
+        <strong id="mobile-rail-nav-current">Experiment workflow</strong>
+        <span class="mobile-disclosure-chevron" aria-hidden="true"></span>
+      </button>
+      <nav id="toolkit-workflow-nav" class="rail-nav-group active" aria-label="Toolkit workflow sections" data-rail-page="toolkit">
+        <a href="#study-segment" data-step-link="study"><span>0 Preload</span><strong class="decision-state not-ready" data-step-state="study" aria-label="Preload not ready" title="Preload not ready">✕</strong></a>
+        <a href="#stimulus-segment" data-step-link="stimulus"><span>1 Stimuli</span><strong class="decision-state not-ready" data-step-state="stimulus" aria-label="Stimuli not ready" title="Stimuli not ready">✕</strong></a>
+        <a href="#trials-segment" data-step-link="trials"><span>2 Sequence</span><strong class="decision-state not-ready" data-step-state="trials" aria-label="Sequence not ready" title="Sequence not ready">✕</strong></a>
+        <a href="#baseline-segment" data-step-link="baseline"><span>3 Tactile</span><strong class="decision-state not-ready" data-step-state="baseline" aria-label="Tactile not ready" title="Tactile not ready">✕</strong></a>
+        <a href="#block-segment" data-step-link="block"><span>4 Pool</span><strong class="decision-state not-ready" data-step-state="block" aria-label="Trial pool not ready" title="Trial pool not ready">✕</strong></a>
+        <a href="#schedule-segment" data-step-link="schedule"><span>5 Blocks</span><strong class="decision-state not-ready" data-step-state="schedule" aria-label="Block CSV preview not ready" title="Block CSV preview not ready">✕</strong></a>
+        <a href="#run-segment" data-step-link="run"><span>6 Validate &amp; Save</span><strong class="decision-state not-ready" data-step-state="run" aria-label="Profile not ready" title="Profile not ready">✕</strong></a>
+      </nav>
+      <nav id="documentation-section-nav" class="rail-nav-group" aria-label="Documentation sections" data-rail-page="documentation" hidden>
+        <div class="rail-nav-kicker">Documentation</div>
+        <a href="#docs-pps" data-page-section-link="docs-pps" data-page-section-page="documentation"><span>Peripersonal Space</span></a>
+        <a href="#docs-publication-network" data-page-section-link="docs-publication-network" data-page-section-page="documentation"><span>Audiotactile Map</span></a>
+        <a href="#docs-overview" data-page-section-link="docs-overview" data-page-section-page="documentation"><span>Toolkit</span></a>
+        <a href="#docs-architecture" data-page-section-link="docs-architecture" data-page-section-page="documentation"><span>Architecture</span></a>
+        <a href="#docs-spatialization" data-page-section-link="docs-spatialization" data-page-section-page="documentation"><span>Stimulus Generation</span></a>
+        <a href="#docs-hardware" data-page-section-link="docs-hardware" data-page-section-page="documentation"><span>Hardware</span></a>
+        <a href="#docs-designer" data-page-section-link="docs-designer" data-page-section-page="documentation"><span>Designer</span></a>
+        <a href="#docs-runner" data-page-section-link="docs-runner" data-page-section-page="documentation"><span>Runner</span></a>
+        <a href="#docs-emulatable-studies" data-page-section-link="docs-emulatable-studies" data-page-section-page="documentation"><span>Emulatable Studies</span></a>
+        <a href="#docs-data-boundary" data-page-section-link="docs-data-boundary" data-page-section-page="documentation"><span>Data Boundary</span></a>
+      </nav>
+      <nav id="download-section-nav" class="rail-nav-group" aria-label="Download sections" data-rail-page="downloads" hidden>
+        <div class="rail-nav-kicker">Downloads</div>
+        <a href="#downloads-installer" data-page-section-link="downloads-installer" data-page-section-page="downloads"><span>Installer</span></a>
+        <a href="#downloads-package" data-page-section-link="downloads-package" data-page-section-page="downloads"><span>Offline Package</span></a>
+        <a href="#downloads-source" data-page-section-link="downloads-source" data-page-section-page="downloads"><span>Source</span></a>
+        <a href="#downloads-companion" data-page-section-link="downloads-companion" data-page-section-page="downloads"><span>Companion</span></a>
+      </nav>
+      <button id="mobile-companion-toggle" class="mobile-rail-toggle mobile-companion-toggle" type="button" aria-expanded="false" aria-controls="companion-panel">
+        <span>Connection</span>
+        <strong>Local Companion</strong>
+        <span class="mobile-disclosure-chevron" aria-hidden="true"></span>
+      </button>
+      <div id="companion-panel" class="companion-panel" aria-label="Local companion backend">
+        <div class="layout-title">Local Companion</div>
+        <span id="connection-status" class="status-label required">checking</span>
+        <label for="backend-url">Backend URL</label>
+        <input id="backend-url" type="url" autocomplete="off">
+        <label for="companion-token">Mutation token</label>
+        <input id="companion-token" type="password" autocomplete="off">
+        <button id="connect-backend" type="button">Connect</button>
+      </div>
+      <div class="rail-note">
+        <span>Qt UI remains available as</span>
+        <code>pps-design</code>
+      </div>
+    </aside>
+
+    <main id="main-content" class="workspace" tabindex="-1">
+      <div id="toolkit-page" class="page-view toolkit-page active" data-page-panel="toolkit" role="tabpanel" aria-labelledby="page-tab-toolkit" tabindex="0">
+        <h1 class="visually-hidden">PPS Experiment Designer</h1>
+      <section id="study-segment" class="decision-segment" aria-labelledby="study-segment-title">
+        <div class="segment-heading">
+          <span class="segment-kicker">Segment 0</span>
+          <h2 id="study-segment-title">Choose or Create Study</h2>
+          <button class="segment-info-button" type="button" data-segment-info="study" aria-label="About Segment 0: Choose or Create Study">About</button>
+        </div>
+        <div class="main-column">
+          <section id="study" class="panel" data-step-panel="study" data-resizable-panel data-panel-id="study">
+            <div class="panel-heading">
+              <div class="panel-title">Study Profile <span class="step-badge" data-step-badge="study"></span></div>
+            </div>
+            <div class="segment-zero-picker" aria-label="Choose a study profile">
+              <div class="field-row segment-zero-profile-field">
+                <label for="template-select">Profile</label>
+                <select id="template-select"></select>
+              </div>
+              <button id="start-new-custom-design" type="button" class="primary">Start New Custom Design</button>
+            </div>
+            <section class="profile-inspection-card" aria-label="Selected profile information">
+              <dl class="profile-inspection-details">
+                <div>
+                  <dt>Profile ID</dt>
+                  <dd id="profile-inspection-id">—</dd>
+                </div>
+                <div id="profile-source-detail" hidden>
+                  <dt>Source</dt>
+                  <dd id="profile-inspection-source">—</dd>
+                </div>
+              </dl>
+              <p id="profile-citation" class="profile-citation"></p>
+              <div id="profile-summary" class="summary-text"></div>
+            </section>
+          </section>
+        </div>
+      </section>
+
+      <section id="stimulus-segment" class="decision-segment" aria-labelledby="stimulus-segment-title">
+        <div class="segment-heading">
+          <span class="segment-kicker">Segment 1</span>
+          <h2 id="stimulus-segment-title">Build Looming Stimuli</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="stimulus" hidden>Reopen segment</button>
+          <button class="segment-info-button" type="button" data-segment-info="stimulus" aria-label="About Segment 1: Build Looming Stimuli">About</button>
+        </div>
+        <section id="stimulus" class="panel stimulus-workspace-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus">
+          <div class="panel-heading stimulus-workspace-heading">
+            <div class="panel-title">Stimulus and Trajectory Workspace <span class="step-badge" data-step-badge="stimulus"></span></div>
+            <div class="toolbar-actions">
+              <span id="source-counts" class="status-label">0 sources</span>
+              <button id="new-ingredient" type="button">New Ingredient</button>
+            </div>
+            <input id="preview-mode" type="hidden" value="2d">
+          </div>
+
+          <section class="source-module stimulus-type-module" aria-labelledby="stimulus-type-heading">
+            <div class="source-module-heading">
+              <span id="stimulus-type-heading"><span class="decision-sequence-label">1 · Choose stimulus type</span> Stimulus Type Selection</span>
+            </div>
+            <div class="source-action-grid">
+              <div class="source-action source-picker-card noise-picker-card" data-source-kind-card="generated_noise">
+                <span class="noise-picker-label">Generate Looming Noise</span>
+                <select id="generated-noise-select" class="state-only" tabindex="-1" aria-hidden="true">
+                  <option value="">Choose noise type to bake...</option>
+                </select>
+                <div class="noise-type-buttons" role="group" aria-label="Generate looming noise type">
+                  <div class="noise-type-row noise-type-row-primary">
+                    <button type="button" class="noise-type-button noise-type-primary" data-noise-type="white" data-noise-hint="White noise - flat spectrum. Rated the most pleasant and least arousing of the five colours in Ferri et al. (2015), who used it as the neutral looming sound.">White</button>
+                    <button type="button" class="noise-type-button noise-type-primary" data-noise-type="pink" data-noise-hint="Pink noise - power falls ~3 dB/octave (1/f). Rated more arousing and less pleasant than white in Ferri et al. (2015).">Pink</button>
+                  </div>
+                  <div class="noise-type-row noise-type-row-secondary">
+                    <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="blue" data-noise-hint="Blue noise - power rises ~3 dB/octave (f); high-frequency emphasis. One of the five colours validated in Ferri et al. (2015) Experiment 1.">Blue</button>
+                    <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="violet" data-noise-hint="Violet noise - power rises ~6 dB/octave (f^2), the derivative of white noise. Validated in Ferri et al. (2015); its valence differed from white.">Violet</button>
+                    <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="brown" data-noise-hint="Brown noise - power falls ~6 dB/octave (1/f^2); low rumble. Ferri et al. (2015) used it as the negative-valence sound, which expanded peripersonal space.">Brown</button>
+                  </div>
+                </div>
+              </div>
+              <button id="import-audio-spatialize" type="button" class="source-action" data-source-kind-card="custom_looming">
+                <strong>Custom Looming Tone</strong>
+                <span>Upload audio and spatialize it with this trajectory</span>
+              </button>
+              <button id="import-audio-preserve" type="button" class="source-action" data-source-kind-card="fixed_clip">
+                <strong>Custom Audio Clip</strong>
+                <span>Upload audio and preserve it for later trial use</span>
+              </button>
+            </div>
+          </section>
+
+          <div class="stimulus-editor-grid">
+            <section class="ingredient-editor" aria-labelledby="ingredient-editor-heading">
+              <div class="ingredient-editor-heading">
+                <div>
+                  <span class="decision-sequence-label">2 · Configure ingredient</span>
+                  <h3 id="ingredient-editor-heading">Ingredient Settings</h3>
+                </div>
+                <span id="ingredient-editor-mode" class="status-label optional">Select an ingredient</span>
+              </div>
+              <div class="field-row">
+                <label for="bake-label">Stimulus name</label>
+                <input id="bake-label" type="text" autocomplete="off" required>
+              </div>
+              <div id="manual-audio-settings" class="manual-audio-settings" hidden>
+                <div class="field-row">
+                  <label>Uploaded audio</label>
+                  <div class="audio-source-file-row">
+                    <span id="selected-audio-file-status" class="audio-source-file-status">No audio selected</span>
+                    <button id="choose-editor-audio" type="button">Choose Audio File</button>
+                  </div>
+                </div>
+                <div class="field-row">
+                  <label for="manual-audio-color">Display colour</label>
+                  <button id="manual-audio-color" class="color-picker-button" type="button" aria-haspopup="dialog">
+                    <span id="manual-audio-color-swatch" class="color-picker-swatch" aria-hidden="true"></span>
+                    <span id="manual-audio-color-value">#1C7A86</span>
+                  </button>
+                </div>
+                <div id="fixed-audio-duration-field" class="field-row" hidden>
+                  <label for="fixed-audio-duration">Duration s</label>
+                  <input id="fixed-audio-duration" type="number" min="0.1" max="3600" step="0.1" value="4">
+                </div>
+              </div>
+              <div id="generated-source-mode-control" class="source-mode-row" aria-label="Generated source mode" hidden>
+                <span>Source mode</span>
+                <div class="source-mode-choice-grid" role="radiogroup" aria-label="Generated source mode">
+                  <label class="source-mode-widget">
+                    <input type="radio" name="generated-source-mode" value="dynaspace_gaussian_burst_train" checked>
+                    <span class="source-mode-widget-body">
+                      <img class="native-signal-graphic" src="./assets/looming_burst_train_widget-HLYUYvl9.svg" alt="" aria-hidden="true" width="320" height="96">
+                      <span class="source-mode-widget-copy"><strong>Burst train</strong><span>Hobeika et al. (2020)</span></span>
+                    </span>
+                  </label>
+                  <label class="source-mode-widget">
+                    <input type="radio" name="generated-source-mode" value="continuous_noise">
+                    <span class="source-mode-widget-body">
+                      <img class="native-signal-graphic" src="./assets/looming_smooth_linear_approach_widget-6HvDtxuv.svg" alt="" aria-hidden="true" width="320" height="96">
+                      <span class="source-mode-widget-copy"><strong>Smooth linear</strong><span>Approach envelope</span></span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+              <fieldset id="trajectory-settings" class="trajectory-settings">
+                <legend>Trajectory</legend>
+                <div class="split-fields">
+                  <div class="field-row"><label for="start-distance">Start distance cm</label><input id="start-distance" type="number" min="1" max="1000" step="1"></div>
+                  <div class="field-row"><label for="end-distance">End distance cm</label><input id="end-distance" type="number" min="1" max="1000" step="1"></div>
+                  <div class="field-row"><label for="start-rotation">Start rotation deg</label><input id="start-rotation" type="number" min="0" max="360" step="1"></div>
+                  <div class="field-row"><label for="end-rotation">End rotation deg</label><input id="end-rotation" type="number" min="0" max="360" step="1"></div>
+                  <div class="field-row"><label for="movement-duration">Movement duration s</label><input id="movement-duration" type="number" min="0.1" max="30" step="0.1"></div>
+                  <div class="field-row"><label for="start-hold">Start hold s</label><input id="start-hold" type="number" min="0" max="30" step="0.1"></div>
+                  <div class="field-row"><label for="end-hold">End hold s</label><input id="end-hold" type="number" min="0" max="30" step="0.1"></div>
+                </div>
+                <p id="trajectory-derived-note" class="decision-note" hidden></p>
+              </fieldset>
+              <div id="fixed-clip-trajectory-note" class="fixed-clip-trajectory-note" hidden>Preserved audio clip — no trajectory</div>
+              <input id="bake-gain" type="hidden" value="1">
+            </section>
+
+            <section class="preview-panel stimulus-preview-panel" data-panel-id="trajectory-preview">
+              <div class="panel-heading">
+                <div>Trajectory Preview</div>
+                <div class="preview-actions">
+                  <div class="segmented-control" aria-label="Trajectory preview mode">
+                    <button id="preview-mode-2d" type="button" class="mode-toggle active" data-preview-mode="2d" data-preview-view-control>2D</button>
+                    <button id="preview-mode-3d" type="button" class="mode-toggle" data-preview-mode="3d" data-preview-view-control>3D</button>
+                  </div>
+                  <div id="view-preset-control" class="view-preset-control" aria-label="3D view angle presets" hidden>
+                    <button type="button" data-view-preset="front" data-preview-view-control title="Front view">Front</button>
+                    <button type="button" data-view-preset="back" data-preview-view-control title="Back view">Back</button>
+                    <button type="button" data-view-preset="left" data-preview-view-control title="Left view">Left</button>
+                    <button type="button" data-view-preset="right" data-preview-view-control title="Right view">Right</button>
+                    <button type="button" data-view-preset="top" data-preview-view-control title="Top view">Top</button>
+                    <button type="button" data-view-preset="iso" data-preview-view-control title="Isometric view">Iso</button>
+                  </div>
+                  <div class="zoom-control" aria-label="Trajectory preview zoom">
+                    <button id="zoom-out-camera" type="button" title="Zoom out" aria-label="Zoom out" data-preview-view-control>-</button>
+                    <button id="zoom-in-camera" type="button" title="Zoom in" aria-label="Zoom in" data-preview-view-control>+</button>
+                  </div>
+                  <button id="fit-radius-camera" type="button" data-preview-view-control>Fit Radius</button>
+                  <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
+                </div>
+              </div>
+              <iframe id="trajectory-frame" title="Trajectory preview" src="about:blank" data-lazy-src="./viewer/index.html?v=20260823-modular-monorepo"></iframe>
+            </section>
+          </div>
+
+          <details class="loudness-panel stimulus-loudness-panel" aria-label="Loudness policy">
+            <summary class="loudness-panel-heading"><span>Loudness Contract</span><span class="status-label optional">advanced · estimated SPL</span></summary>
+            <div class="loudness-grid">
+              <label for="loudness-start-spl">Start dB SPL</label><input id="loudness-start-spl" type="number" min="30" max="95" step="1" value="55">
+              <label for="loudness-end-spl">Endpoint dB SPL</label><input id="loudness-end-spl" type="number" min="30" max="95" step="1" value="75">
+              <label for="instruction-offset-db">Instruction offset</label><input id="instruction-offset-db" type="number" min="-30" max="0" step="1" value="-6">
+              <label for="estimated-full-scale-spl">Estimated 0 dBFS SPL</label><input id="estimated-full-scale-spl" type="number" min="80" max="130" step="0.1" value="109.2">
+              <label for="audio-peak-ceiling-dbfs">Digital peak ceiling</label><input id="audio-peak-ceiling-dbfs" type="number" min="-12" max="0" step="0.1" value="-1">
+            </div>
+            <p class="decision-note"><strong>Calibration reference and safety ceiling.</strong> These values describe the playback calibration assumption. Use a measured calibration profile when one is available.</p>
+            <div id="loudness-derived" class="loudness-derived"></div>
+          </details>
+
+          <div class="bake-action-row stimulus-commit-row">
+            <button id="bake-stimulus" type="button" class="primary">Create Stimulus</button>
+            <span id="bake-status" class="status-label required">Choose a stimulus type</span>
+          </div>
+
+          <section id="stimulus-pool" class="stimulus-inventory" aria-labelledby="stimulus-pool-heading">
+            <div class="source-module-heading">
+              <span id="stimulus-pool-heading"><span class="decision-sequence-label">3 · Inspect created audio</span> Stimulus Pool</span>
+            </div>
+            <div class="stimulus-pool-columns">
+              <section class="stimulus-pool-column" aria-labelledby="looming-pool-heading">
+                <div class="table-toolbar"><span id="looming-pool-heading">Looming / spatialized stimuli</span></div>
+                <div class="source-card-list" id="noise-list"></div>
+              </section>
+              <section class="stimulus-pool-column" aria-labelledby="fixed-pool-heading">
+                <div class="table-toolbar"><span id="fixed-pool-heading">Fixed audio clips</span></div>
+                <div class="source-card-list" id="audio-list"></div>
+              </section>
+            </div>
+          </section>
+
+          <div class="step-footer">
+            <button id="open-ingredient-folder" type="button" disabled>Open Folder</button>
+            <button type="button" class="primary" data-continue-step="stimulus">Save &amp; Continue to Trial Sequence</button>
+          </div>
+        </section>
+      </section>
+
+      <section id="trials-segment" class="decision-segment" aria-labelledby="trials-segment-title">
+        <div class="segment-heading">
+          <span class="segment-kicker">Segment 2</span>
+          <h2 id="trials-segment-title">Trial Sequence Design</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="trials" hidden>Reopen segment</button>
+          <button class="segment-info-button" type="button" data-segment-info="trials" aria-label="About Segment 2: Trial Sequence Design">About</button>
+        </div>
+        <section id="trials" class="panel" data-step-panel="trials" data-resizable-panel data-panel-id="trials">
+          <span class="state-only step-badge" data-step-badge="trials"></span>
+          <div class="trial-sequence-state-fields" aria-hidden="true">
+            <input id="soa-values" type="hidden">
+          </div>
+          <div class="trial-snippet-module state-only" aria-label="Custom clip source imports">
+            <span id="snippet-counts" class="status-label">0 clips</span>
+            <input id="audio-file-input" type="file" accept=".wav,audio/wav,audio/x-wav,audio/mpeg,audio/mp3" hidden>
+            <div class="source-card-list" id="snippet-list"></div>
+          </div>
+          <div class="sequence-grammar" aria-label="Trial sequence notation">
+            <span><strong>Left → right</strong> plays in sequence</span>
+            <span><strong>Within one box</strong> lists alternatives</span>
+            <span><strong>Jitter box</strong> inserts one listed silence duration</span>
+          </div>
+          <div class="filmstrip-editor" aria-label="Single-trial sequence builder">
+            <div id="filmstrip-list" class="filmstrip-list"></div>
+          </div>
+          <div class="action-row segment-bake-actions">
+            <button id="bake-trial-sequences" type="button" class="primary">Bake Trial Sequences</button>
+            <span id="trial-sequence-bake-status" class="status-label">waiting</span>
+            <button id="open-trial-sequence-folder" type="button" disabled>Open Folder</button>
+          </div>
+          <div class="step-footer">
+            <button type="button" class="primary" data-continue-step="trials">Save &amp; Continue to Baseline and Tactile</button>
+          </div>
+        </section>
+      </section>
+
+      <section id="baseline-segment" class="decision-segment" aria-labelledby="baseline-segment-title">
+        <div class="segment-heading">
+          <span class="segment-kicker">Segment 3</span>
+          <h2 id="baseline-segment-title">Baseline and Tactile Trial Design</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="baseline" hidden>Reopen segment</button>
+          <button class="segment-info-button" type="button" data-segment-info="baseline" aria-label="About Segment 3: Baseline and Tactile Trial Design">About</button>
+        </div>
+        <section id="baseline" class="baseline-tactile-workbench" data-step-panel="baseline">
+          <section class="panel baseline-tactile-panel" data-step-panel="baseline" data-resizable-panel data-panel-id="baseline-tactile-design">
+            <div class="panel-heading">
+              <div class="panel-title">Tactile Timing <span class="step-badge" data-step-badge="baseline"></span></div>
+              <span id="baseline-status" class="status-label required">required</span>
+            </div>
+
+            <div class="baseline-state-fields" aria-hidden="true">
+              <input id="baseline-enabled" class="state-only" type="checkbox" tabindex="-1">
+              <select id="baseline-strategy" class="state-only" aria-hidden="true" tabindex="-1">
+                <option value="none">No baseline trials</option>
+                <option value="min_anchor">Minimum SOA anchor</option>
+                <option value="max_anchor">Maximum SOA anchor</option>
+                <option value="min_max">Minimum + maximum SOA anchors</option>
+                <option value="tactile_only">Full SOA tactile-only</option>
+                <option value="stationary_burst">Full SOA stationary bursts</option>
+                <option value="custom">Custom timings</option>
+                <option value="soa_zero">Legacy sound onset</option>
+                <option value="sound_offset">Legacy sound offset</option>
+              </select>
+            </div>
+
+            <div class="split-fields tactile-decision-fields">
+              <div class="field-row wide-field">
+                <label for="block-soa-values">SOA values ms</label>
+                <input id="block-soa-values" type="text" autocomplete="off" placeholder="500, 1000, 2700">
+              </div>
+            </div>
+
+            <div class="trial-family-toggles" aria-label="Additional trial families">
+              <label class="inline-toggle catch-trial-toggle" for="include-catch-trials">
+                <input id="include-catch-trials" type="checkbox">
+                <span><strong>Catch trials</strong><small>Audio only; no response required.</small></span>
+              </label>
+              <label class="inline-toggle auditory-only-trial-toggle" for="include-auditory-only-trials">
+                <input id="include-auditory-only-trials" type="checkbox">
+                <span><strong>Auditory-only trials</strong><small>Audio only; response remains part of the protocol.</small></span>
+              </label>
+            </div>
+
+            <div id="tactile-timing-summary" class="decision-summary-strip" aria-live="polite"></div>
+
+            <fieldset id="baseline-options" class="baseline-option-grid" aria-label="Baseline strategy">
+              <label class="baseline-option-card" data-baseline-option="none">
+                <input type="radio" name="baseline-option" value="none">
+                <img class="baseline-option-graphic native-signal-graphic" src="./assets/baseline_none-C9N8z1Uy.svg" alt="" aria-hidden="true" width="320" height="96">
+                <span class="baseline-option-title">No baseline</span>
+                <span class="baseline-option-copy">Create only audio-tactile trial files.</span>
+              </label>
+              <label class="baseline-option-card" data-baseline-option="min_anchor">
+                <input type="radio" name="baseline-option" value="min_anchor">
+                <img class="baseline-option-graphic native-signal-graphic" src="./assets/baseline_min_anchor-DNPfkiSt.svg" alt="" aria-hidden="true" width="320" height="96">
+                <span class="baseline-option-title">Minimum SOA anchor</span>
+                <span class="baseline-option-copy">Keep the trial audio and add tactile at the first entered SOA.</span>
+              </label>
+              <label class="baseline-option-card" data-baseline-option="max_anchor">
+                <input type="radio" name="baseline-option" value="max_anchor">
+                <img class="baseline-option-graphic native-signal-graphic" src="./assets/baseline_max_anchor-8J7r6-X1.svg" alt="" aria-hidden="true" width="320" height="96">
+                <span class="baseline-option-title">Maximum SOA anchor</span>
+                <span class="baseline-option-copy">Keep the trial audio and add tactile at the last entered SOA.</span>
+              </label>
+              <label class="baseline-option-card" data-baseline-option="min_max">
+                <input type="radio" name="baseline-option" value="min_max">
+                <img class="baseline-option-graphic native-signal-graphic" src="./assets/baseline_min_max-Pt_lnKbD.svg" alt="" aria-hidden="true" width="320" height="96">
+                <span class="baseline-option-title">Minimum + maximum anchors</span>
+                <span class="baseline-option-copy">Keep the trial audio and add tactile at both the first and last entered SOAs.</span>
+              </label>
+              <label class="baseline-option-card" data-baseline-option="tactile_only">
+                <input type="radio" name="baseline-option" value="tactile_only">
+                <img class="baseline-option-graphic native-signal-graphic" src="./assets/baseline_tactile_only-BXvPqxjq.svg" alt="" aria-hidden="true" width="320" height="96">
+                <span class="baseline-option-title">Full SOA tactile-only</span>
+                <span class="baseline-option-copy">Preserve fixed clips and jitter, silence looming segments, and add tactile at every SOA.</span>
+              </label>
+              <label class="baseline-option-card" data-baseline-option="stationary_burst">
+                <input type="radio" name="baseline-option" value="stationary_burst">
+                <img class="baseline-option-graphic native-signal-graphic" src="./assets/baseline_stationary_burst-CK_ZqC0B.svg" alt="" aria-hidden="true" width="320" height="96">
+                <span class="baseline-option-title">Full SOA stationary bursts</span>
+                <span class="baseline-option-copy">Preserve fixed clips and jitter, replace looming segments with stationary bursts, and add tactile at every SOA.</span>
+              </label>
+              <label class="baseline-option-card baseline-custom" data-baseline-option="custom">
+                <input type="radio" name="baseline-option" value="custom">
+                <img class="baseline-option-graphic native-signal-graphic" src="./assets/baseline_custom-elHuY6Jn.svg" alt="" aria-hidden="true" width="320" height="96">
+                <span class="baseline-option-title">Custom timings</span>
+                <span class="baseline-option-copy">Enter custom SOAs and choose whether custom baselines are tactile-only or audio-tactile.</span>
+              </label>
+            </fieldset>
+
+            <div id="baseline-custom-controls" class="baseline-custom-controls" hidden>
+              <div class="field-row">
+                <label for="baseline-soa-values">Custom baseline SOAs ms</label>
+                <textarea id="baseline-soa-values" rows="3" autocomplete="off" placeholder="500, 1000, 2700"></textarea>
+              </div>
+              <label class="inline-toggle" for="baseline-custom-audio-tactile">
+                <input id="baseline-custom-audio-tactile" type="checkbox">
+                <span>Custom baselines keep full trial audio</span>
+              </label>
+            </div>
+
+            <div class="action-row baseline-bake-actions">
+              <button id="bake-trial-files" type="button" class="primary">Bake Baseline/Tactile Trials</button>
+              <span id="trial-file-bake-status" class="status-label">waiting</span>
+            </div>
+
+            <div class="step-footer">
+              <button type="button" class="primary" data-continue-step="baseline">Save &amp; Continue to Trial Repetition Pool</button>
+            </div>
+          </section>
+
+          <section class="panel baseline-output-panel" data-step-panel="baseline" data-resizable-panel data-panel-id="baseline-tactile-output">
+            <div class="panel-heading">
+              <div>Trial File Oversight</div>
+              <button id="open-trial-file-folder" type="button" disabled>Open Folder</button>
+            </div>
+            <div id="baseline-count-strip" class="count-strip"></div>
+            <div id="baseline-factor-tree" class="composition-tree" aria-label="Baseline and tactile file factor tree"></div>
+          </section>
+        </section>
+      </section>
+
+      <section id="block-segment" class="decision-segment" aria-labelledby="block-segment-title">
+        <div class="segment-heading">
+          <span class="segment-kicker">Segment 4</span>
+          <h2 id="block-segment-title">Trial Repetition Pool</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="block" hidden>Reopen segment</button>
+          <button class="segment-info-button" type="button" data-segment-info="block" aria-label="About Segment 4: Trial Repetition Pool">About</button>
+        </div>
+        <section id="block" class="block-workbench" data-step-panel="block">
+          <section class="panel block-control-panel" data-step-panel="block" data-resizable-panel data-panel-id="block-design">
+            <div class="panel-heading">
+              <div class="panel-title">Repetition Controls <span class="step-badge" data-step-badge="block"></span></div>
+            </div>
+
+            <div id="protocol-summary" class="count-strip trial-pool-calculator"></div>
+
+            <div class="split-fields trial-decision-fields trial-pool-global-controls">
+              <div class="field-row">
+                <label for="repetitions">Set all trial groups to</label>
+                <input id="repetitions" type="number" min="0" max="100" step="0.5">
+              </div>
+              <button id="apply-trial-pool-repetitions" type="button">Apply To Trial Groups</button>
+            </div>
+
+            <p class="decision-note half-step-note">Half-step repetitions add balanced extra trials deterministically across families, rows, SOAs, and source lineage.</p>
+
+            <input id="blocks" type="hidden" value="1">
+            <input id="baseline-percent" type="hidden" value="0">
+            <input id="catch-percent" type="hidden" value="0">
+            <div id="row-mix-overrides" class="state-only"></div>
+
+            <div id="trial-pool-folder-list" class="trial-pool-folder-list"></div>
+
+            <div class="action-row segment-bake-actions">
+              <button id="bake-trial-pool" type="button" class="primary">Create Trial Pool</button>
+              <span id="trial-pool-bake-status" class="status-label">waiting</span>
+              <button id="open-trial-pool-folder" type="button" disabled>Open Folder</button>
+            </div>
+
+            <div class="step-footer">
+              <button type="button" class="primary" data-continue-step="block">Save &amp; Continue to Block CSV Preview</button>
+            </div>
+          </section>
+
+          <section class="panel composition-oversight-panel" data-step-panel="block" data-resizable-panel data-panel-id="composition-oversight">
+            <div class="panel-heading">
+              <div>Pool Oversight</div>
+            </div>
+            <div id="composition-tree" class="composition-sliders" aria-label="Trial pool family percentages"></div>
+            <div id="trial-pool-duration-calculus" class="duration-calculus" aria-label="Trial pool duration calculation"></div>
+          </section>
+        </section>
+      </section>
+
+      <section id="schedule-segment" class="decision-segment" aria-labelledby="schedule-segment-title">
+        <div class="segment-heading">
+          <span class="segment-kicker">Segment 5</span>
+          <h2 id="schedule-segment-title">Generate and Review Blocks</h2>
+          <button class="segment-reopen-button" type="button" data-reopen-step="schedule" hidden>Reopen segment</button>
+          <button class="segment-info-button" type="button" data-segment-info="schedule" aria-label="About Segment 5: Generate and Review Blocks">About</button>
+        </div>
+        <section id="schedule" class="panel block-csv-preview-panel" data-step-panel="schedule" data-resizable-panel data-panel-id="block-csv-preview">
+          <div class="panel-heading">
+            <div class="panel-title">Block CSV Preview <span class="step-badge" data-step-badge="schedule"></span></div>
+            <span id="block-csv-bake-status" class="status-label">waiting</span>
+          </div>
+
+          <div class="split-fields block-csv-controls">
+            <div class="field-row">
+              <label for="block-count">Blocks</label>
+              <input id="block-count" type="number" min="1" max="200" step="1">
+            </div>
+            <div class="field-row block-seed-row">
+              <label for="block-randomization-seed">Seed</label>
+              <input id="block-randomization-seed" type="number" min="0" max="2147483647" step="1" inputmode="numeric">
+              <button id="generate-block-randomization-seed" type="button">New Seed</button>
+            </div>
+            <div class="field-row block-csv-download-row">
+              <span class="field-label">Export</span>
+              <button id="download-block-randomization" type="button">Download Randomization</button>
+            </div>
+          </div>
+
+          <div id="block-order-policy-summary" class="decision-summary-strip block-policy-summary" aria-live="polite">
+            <span><strong>Method</strong> row-preserving seeded randomization</span>
+            <span><strong>Seed</strong> assigned when blocks are generated</span>
+          </div>
+
+          <div class="block-build-progress" aria-label="Block CSV creation progress">
+            <div class="block-build-progress-header">
+              <strong>Block CSV bake</strong>
+              <span id="block-build-progress-label">waiting</span>
+            </div>
+            <div id="block-build-progress-track" class="block-progress-track" role="progressbar" aria-label="Block generation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span id="block-build-progress-fill" class="block-progress-fill"></span>
+            </div>
+            <div class="block-build-progress-meta">
+              <span id="block-build-progress-count">0 / 0 blocks</span>
+              <span id="block-build-progress-percent">0%</span>
+            </div>
+          </div>
+
+          <div id="block-csv-preview-list" class="block-csv-preview-list" aria-label="Generated block CSV previews">
+            <div class="summary-text">No block CSVs yet.</div>
+          </div>
+
+          <div class="step-footer block-csv-decision-actions">
+            <button id="regenerate-block-csvs" type="button">Generate Blocks</button>
+            <button id="accept-block-csvs" type="button" class="primary">Accept Blocks &amp; Continue</button>
+          </div>
+        </section>
+      </section>
+
+      <section id="run-segment" class="decision-segment" aria-labelledby="run-segment-title">
+        <div class="segment-heading">
+          <span class="segment-kicker">Segment 6</span>
+          <h2 id="run-segment-title">Profile Validation and Save</h2>
+          <button class="segment-info-button" type="button" data-segment-info="run" aria-label="About Segment 6: Profile Validation and Save">About</button>
+        </div>
+        <section class="run-grid">
+          <section id="run" class="panel" data-step-panel="run" data-resizable-panel data-panel-id="run">
+            <div class="panel-heading">
+              <div class="panel-title">Profile Completion <span class="step-badge" data-step-badge="run"></span></div>
+              <span id="run-sequence-status" class="status-label">checking</span>
+            </div>
+            <section class="profile-validation-panel" aria-label="Profile validation checklist">
+              <div class="run-preview-toolbar">
+                <div class="panel-subtitle">Validation Checklist</div>
+                <span id="profile-validation-summary" class="status-label">checking</span>
+              </div>
+              <div id="profile-validation-checklist" class="profile-validation-checklist"></div>
+            </section>
+            <div class="run-decision-grid" aria-label="Experiment-level parameters">
+              <div class="field-row">
+                <label for="participants">Example orders to preview</label>
+                <input id="participants" type="number" min="1" max="100" step="1">
+              </div>
+              <div class="field-row">
+                <label>Experiment parts</label>
+                <div class="segmented-control run-mode-control" role="radiogroup" aria-label="Experiment parts">
+                  <label>
+                    <input type="radio" name="experiment-structure" value="single" checked>
+                    <span>1 part</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="experiment-structure" value="pre_post">
+                    <span>2 parts</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <section class="run-instructions-panel" aria-label="Preload instruction audio clips">
+              <div class="run-preview-toolbar">
+                <div class="panel-subtitle">Preload Instruction Audio Clips</div>
+                <span id="run-instructions-summary" class="status-label">checking</span>
+              </div>
+              <div id="run-instruction-slots" class="run-instruction-slots"></div>
+            </section>
+            <div class="run-preview-toolbar">
+              <div class="panel-subtitle">Block Permutation Preview</div>
+              <span id="run-sequence-summary" class="status-label">waiting</span>
+            </div>
+            <div class="scroll-table compact run-sequence-table-wrap">
+              <table class="data-table mobile-card-table" id="run-sequence-table">
+                <thead>
+                  <tr>
+                    <th>Example</th>
+                    <th>Part</th>
+                    <th>Blocks</th>
+                    <th>Block order</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="step-footer run-sequence-actions">
+              <button id="regenerate-run-sequence" type="button">Refresh Order Preview</button>
+              <button id="save-study-profile" type="button" class="primary">Done — Lock Profile</button>
+              <button id="export-profile-bundle" type="button">Export .pps-profile</button>
+              <button id="export-output-folder" type="button" class="state-only" hidden aria-hidden="true" tabindex="-1">Legacy: Prepare Session</button>
+              <button id="prepare-experiment" type="button" class="state-only" hidden aria-hidden="true" tabindex="-1">Legacy: Save and Open Runner</button>
+            </div>
+          </section>
+        </section>
+      </section>
+      </div>
+
+      <section id="documentation-page" class="page-view info-page" data-page-panel="documentation" role="tabpanel" aria-labelledby="page-tab-documentation" tabindex="0" hidden>
+        <div class="info-page-heading">
+          <span class="segment-kicker">Documentation</span>
+          <h1>PPS Toolkit Public Documentation</h1>
+        </div>
+
+        <section id="docs-pps" class="info-segment" aria-labelledby="docs-pps-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Background</span>
+            <h2 id="docs-pps-title">What Is Peripersonal Space</h2>
+          </div>
+          <p class="info-lede pps-intro-summary" data-pretext-fit="line-budget" data-pretext-min-width="800" data-pretext-min-size="16" data-pretext-max-size="19" data-pretext-max-lines="6">Peripersonal space is the multisensory region immediately surrounding the body within which stimuli are processed differently from those beyond arm's reach. It was first characterized by Rizzolatti et al. (<a href="https://www.sciencedirect.com/science/article/pii/0166432881900528" target="_blank" rel="noopener noreferrer">1981a</a>, <a href="https://www.sciencedirect.com/science/article/pii/016643288190053X" target="_blank" rel="noopener noreferrer">1981b</a>) in studies of periarcuate neurons, cells in the ventral premotor cortex and putamen that respond to both tactile stimulation of the body surface and nearby external stimuli, and has since been linked to defensive behavior, tool use, and bodily self-awareness.</p>
+          <div class="pps-intro-layout">
+            <figure class="pps-intro-media">
+              <div class="pps-intro-video">
+                <iframe src="https://www.youtube.com/embed/elfbiCzUVSA" title="What is Peripersonal Space?" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              </div>
+              <figcaption><strong>Video primer</strong><span>A short visual introduction to the space around the body.</span></figcaption>
+            </figure>
+            <div class="pps-intro-copy">
+              <span class="segment-kicker">Canonical Measure</span>
+              <p class="info-lede pps-intro-lede" data-pretext-fit="media-height" data-pretext-min-size="15" data-pretext-max-size="18">The standard behavioral measure of human peripersonal space is the audio-tactile interaction task. In Canzoneri et al. (<a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306" target="_blank" rel="noopener noreferrer">2012</a>), participants respond to tactile stimulation on the body while sounds approach from several distances. Responses become faster as the sound nears the body. That distance-dependent facilitation curve is used to estimate the boundary of peripersonal-space representation. Although the paradigm is widely adopted, complete task parameters are rarely shared and implementations remain difficult to compare across labs.</p>
+            </div>
+          </div>
+        </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
+
+        <section id="docs-publication-network" class="info-segment publication-network-segment" aria-labelledby="docs-publication-network-title" data-publication-network-root>
+          <div class="info-segment-heading publication-network-heading">
+            <div>
+              <span class="segment-kicker">Research Landscape</span>
+              <h2 id="docs-publication-network-title">Audio–Tactile PPS Study Citation Network</h2>
+            </div>
+          </div>
+          <p class="info-copy publication-network-intro">The papers in this map are a curated cross-section of audio–tactile peripersonal-space research chosen to capture the main experimental paradigms and design variations that inform PPS Toolkit. Some already have Toolkit templates, while others help show the wider range of approaches the Toolkit aims to represent. This is a field overview, not a systematic or exhaustive review of all PPS publications.</p>
+
+          <div class="publication-network-shell" aria-describedby="publication-network-help">
+            <div class="publication-network-summary-row">
+              <p id="publication-network-status" class="publication-network-status" role="status" aria-live="polite">Loading publication network…</p>
+              <p id="publication-network-size-note" class="publication-network-metric-note">Circle area increases with incoming citations from other papers in this 94-paper map; a larger circle was cited by more included papers. Node size and position are navigation encodings, not study-quality scores.</p>
+              <button id="publication-network-fullscreen" type="button" aria-label="Open publication network full screen">Full screen</button>
+            </div>
+
+            <div id="publication-network-workspace" class="publication-network-workspace">
+              <div id="publication-network-stage" class="publication-network-stage">
+                <svg id="publication-network-graph" role="img" tabindex="0" focusable="true" preserveAspectRatio="none" aria-label="Interactive citation network of 94 audio-tactile PPS study publications with verified DOI links and citation metadata. Use the publication list for keyboard access, or use arrow keys to move between papers." aria-describedby="publication-network-help publication-network-status publication-network-size-note"></svg>
+                <div id="publication-network-loading" class="publication-network-loading" role="status">
+                  <span class="publication-network-spinner" aria-hidden="true"></span>
+                  <span>Preparing publication network…</span>
+                </div>
+                <div id="publication-network-tooltip" class="publication-network-tooltip" role="tooltip" hidden></div>
+              </div>
+
+              <aside id="publication-network-detail" class="publication-network-detail" role="dialog" aria-modal="false" aria-labelledby="publication-network-detail-title" tabindex="-1" hidden>
+                <div class="publication-network-detail-heading">
+                  <div>
+                    <span id="publication-network-detail-kicker" class="segment-kicker">Publication</span>
+                    <h3 id="publication-network-detail-title">Publication details</h3>
+                  </div>
+                  <button id="publication-network-detail-close" class="icon-action" type="button" aria-label="Close publication details">×</button>
+                </div>
+                <div id="publication-network-detail-body" class="publication-network-detail-body"></div>
+              </aside>
+            </div>
+
+            <div class="publication-network-utilities" aria-label="Publication network layout and map key">
+              <fieldset class="publication-network-layout-group">
+                <legend class="visually-hidden">Arrange nodes</legend>
+                <div class="publication-network-segmented">
+                  <label>
+                    <input id="publication-layout-topology" type="radio" name="publication-network-layout" value="topology" checked>
+                    <span>Citation topology</span>
+                  </label>
+                  <label>
+                    <input id="publication-layout-year" type="radio" name="publication-network-layout" value="timeline">
+                    <span>Publication year</span>
+                  </label>
+                </div>
+              </fieldset>
+              <div class="publication-network-legend" aria-label="Map key">
+                <span><i class="publication-network-legend-node legend-node-implemented" aria-hidden="true"></i>Implemented in Toolkit</span>
+                <span><i class="publication-network-legend-node legend-node-not-implemented" aria-hidden="true"></i>Not implemented yet</span>
+                <span class="publication-network-size-key"><i aria-hidden="true"></i><i aria-hidden="true"></i>Larger circle = cited by more included papers</span>
+                <span><i class="publication-network-legend-line legend-line-incoming" aria-hidden="true"></i>Incoming to selection</span>
+                <span><i class="publication-network-legend-line legend-line-outgoing" aria-hidden="true"></i>Outgoing from selection</span>
+              </div>
+            </div>
+
+            <p id="publication-network-help" class="publication-network-help">In Citation topology, linked papers stay nearer one another while every paper repels its neighbours, producing dense and sparse regions without an artificial perimeter. A paper with no line has no direct within-map citation captured by the dated sources; it may still cite or be cited by work outside this 94-paper set, or by references an index could not match. Select a circle to distinguish its incoming and outgoing citations and inspect the full readiness assessment. Publication year provides a chronological arrangement.</p>
+
+            <details class="publication-network-results-panel">
+              <summary><span>Audio–tactile study publications</span><strong id="publication-network-results-count">0 results</strong></summary>
+              <div class="publication-network-results-toolbar">
+                <label for="publication-network-results-sort">Sort list by</label>
+                <select id="publication-network-results-sort">
+                  <option value="networkReceived">Citations in this map</option>
+                  <option value="review-priority">Toolkit review priority</option>
+                  <option value="networkPageRank">Network PageRank</option>
+                  <option value="year-desc">Newest first</option>
+                  <option value="year-asc">Oldest first</option>
+                  <option value="title">Title</option>
+                </select>
+              </div>
+              <ol id="publication-network-results" class="publication-network-results"></ol>
+              <button id="publication-network-results-more" type="button" hidden>Show more publications</button>
+            </details>
+          </div>
+        </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
+
+        <section id="docs-overview" class="info-segment" aria-labelledby="docs-overview-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Project</span>
+            <h2 id="docs-overview-title">The Toolkit</h2>
+          </div>
+          <p class="info-lede">The Peripersonal Space Toolkit is a local-first research platform for designing and running audio-tactile peripersonal space experiments. Researchers can build a study from scratch by specifying trajectory, source material, timing, and tactile onset asynchronies through a graphical interface, or they can load published parameter sets to reproduce the design decisions reported in existing studies. The toolkit does not redistribute the stimuli from those studies, since these are rarely made available by authors, but it makes the decision parameters themselves explicit, version-controlled, and shareable across labs. All stimulus generation, experiment preparation, and data collection run locally on the lab PC through a local Python backend and a native experiment runner; the browser-based dashboard is a configuration interface only and communicates with the local backend at 127.0.0.1.</p>
+        </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
+
+        <section id="docs-architecture" class="info-segment" aria-labelledby="docs-architecture-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Software Flow</span>
+            <h2 id="docs-architecture-title">Architecture</h2>
+          </div>
+          <p class="info-copy">The toolkit is organized as a layered system in which the browser dashboard collects researcher decisions and passes them to a local Python backend that does all computational work. The browser never generates stimuli or controls timing directly. All rendering, file creation, and experiment execution happen on the lab PC, keeping participant data local and timing-sensitive work entirely out of the browser. The three-channel output design, enabled by the Komplete Audio 6 MK2 ASIO interface, carries left audio, right audio, and the tactile drive signal as a single synchronized stream whose inter-channel timing is governed by one hardware sample clock.</p>
+          <div class="arch-diagram" aria-label="PPS Toolkit layered architecture">
+
+            <div class="arch-tier">
+              <div class="arch-tier-label">Browser</div>
+              <div class="arch-tier-nodes">
+                <article class="arch-node">
+                  <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+                  <span class="arch-node-kicker">UI Layer</span>
+                  <strong>Dashboard</strong>
+                  <p>Researcher-facing browser interface for study profile, trajectory, timing, SOA, and trial-structure decisions, connected to the local backend via localhost.</p>
+                  <div class="arch-hw-dep">
+                    <a class="arch-hw-dep-link" href="https://github.com/GeorgeFejer91/pps-kit" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <div class="arch-vconnect"><div></div><div class="arch-vconnect-line"></div></div>
+
+            <div class="arch-tier">
+              <div class="arch-tier-label">Local Backend</div>
+              <div class="arch-tier-nodes">
+                <article class="arch-node">
+                  <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+                  <span class="arch-node-kicker">Orchestration</span>
+                  <strong>Python Companion</strong>
+                  <p>Validates researcher decisions, writes project folders and manifests, and calls render and session preparation routines. Runs entirely on the lab PC and is not accessible externally.</p>
+                  <div class="arch-hw-dep">
+                    <a class="arch-hw-dep-link" href="https://github.com/GeorgeFejer91/pps-kit" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <div class="arch-vconnect"><div></div><div class="arch-vconnect-line"></div></div>
+
+            <div class="arch-tier">
+              <div class="arch-tier-label">Rendering</div>
+              <div class="arch-tier-nodes arch-tier-nodes-2">
+                <article class="arch-node arch-node-resource">
+                  <div class="arch-node-icon arch-node-image-icon"><img src="./assets/sofa_logo-B7WShRtS.png" alt="" aria-hidden="true"></div>
+                  <span class="arch-node-kicker">Reference Path</span>
+                  <strong>SOFA/FABIAN HRIR</strong>
+                  <p>Head-related transfer functions stored in SOFA format provide the binaural reference used to spatialize looming audio along the researcher-defined trajectory.</p>
+                  <div class="arch-hw-dep">
+                    <a class="arch-hw-dep-link" href="https://www.sofaconventions.org/mediawiki/index.php/SOFA_%28Spatially_Oriented_Format_for_Acoustics%29" target="_blank" rel="noopener noreferrer">SOFA Conventions</a>
+                  </div>
+                </article>
+                <article class="arch-node arch-node-resource">
+                  <div class="arch-node-icon arch-node-image-icon arch-node-sonicom-icon"><img src="./assets/sonicom_wave-Ccwgm6Ho.png" alt="" aria-hidden="true"></div>
+                  <span class="arch-node-kicker">Native Path</span>
+                  <strong>3DTI and BRT Renderer</strong>
+                  <p>Open-source C++ spatial audio engine rendering moving binaural sources from the same trajectory decisions passed through the Python backend.</p>
+                  <div class="arch-hw-dep-grid">
+                    <a class="arch-hw-dep-link" href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0211899" target="_blank" rel="noopener noreferrer">Original PLOS ONE Publication</a>
+                    <a class="arch-hw-dep-link" href="https://github.com/3DTune-In/3dti_AudioToolkit" target="_blank" rel="noopener noreferrer">Original AudioToolkit GitHub</a>
+                    <a class="arch-hw-dep-link" href="https://github.com/GrupoDiana/BRTLibrary" target="_blank" rel="noopener noreferrer">BRT Library GitHub</a>
+                    <a class="arch-hw-dep-link" href="https://www.3d-tune-in.eu/toolkit-developers" target="_blank" rel="noopener noreferrer">3D Tune-In Toolkit Page</a>
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <div class="arch-vconnect"><div></div><div class="arch-vconnect-line"></div></div>
+
+            <div class="arch-tier">
+              <div class="arch-tier-label">Files</div>
+              <div class="arch-tier-nodes arch-tier-nodes-2">
+                <article class="arch-node">
+                  <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13h2l1 3 2-6 1 3h2" stroke-linecap="round"/></svg></div>
+                  <span class="arch-node-kicker">Rendered Assets</span>
+                  <strong>Binaural Looming WAVs</strong>
+                  <p>Channels 1 and 2 carry left and right spatial audio. Manifests record trajectory samples, render config, file hashes, and quality-control summaries alongside each WAV.</p>
+                </article>
+                <article class="arch-node">
+                  <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+                  <span class="arch-node-kicker">Experiment Assembly</span>
+                  <strong>Trial and Session Package</strong>
+                  <p>SOA schedules, block CSVs, and participant block order prepared alongside the WAVs and handed off to the experiment runner.</p>
+                </article>
+              </div>
+            </div>
+
+            <div class="arch-vconnect"><div></div><div class="arch-vconnect-line"></div></div>
+
+            <div class="arch-tier">
+              <div class="arch-tier-label">Runtime</div>
+              <div class="arch-tier-nodes">
+                <article class="arch-node arch-node-runner">
+                  <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg></div>
+                  <span class="arch-node-kicker">Experiment Runner</span>
+                  <strong>PPSExperimentRunner.exe</strong>
+                  <p>Native Windows application that opens the prepared session package and plays the three-channel ASIO stream to the lab hardware. Owns all timing-sensitive playback and response recording entirely outside the browser.</p>
+                  <figure class="audiogram-figure" aria-label="Audiogram of an example looming stimulus trial">
+                    <div class="audiogram-frame">
+                      <img class="native-signal-graphic" src="./assets/audiogram_looming_trial-LJqjglNI.svg" alt="Waveform display of a three-channel looming trial WAV showing Channel 1 Left Audio and Channel 2 Right Audio with growing amplitude, and Channel 3 Tactile Drive with burst onset at the SOA" width="820" height="300">
+                    </div>
+                    <figcaption class="audiogram-figcaption">
+                      <span class="audiogram-figcaption-label">Fig.</span>
+                      Three-channel WAV stream routed to the Komplete Audio 6 MK2. Ch 1 and Ch 2 carry binaural left and right audio with amplitude growing as the source approaches. Ch 3 carries the tactile drive signal, onset offset by the SOA schedule. All channels share one hardware sample clock.
+                    </figcaption>
+                  </figure>
+                </article>
+              </div>
+            </div>
+
+            <div class="arch-vconnect"><div></div><div class="arch-vconnect-line"></div></div>
+
+            <div class="arch-tier">
+              <div class="arch-tier-label">Hardware</div>
+              <div class="arch-hw-layout">
+                <article class="arch-node arch-node-hw arch-node-hw-main">
+                  <div class="arch-node-copy">
+                    <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
+                    <span class="arch-node-kicker">Audio Interface</span>
+                    <strong>Komplete Audio 6 MK2</strong>
+                    <p>ASIO multichannel interface clocking all three output channels from one synchronized sample clock. Operated as a single device rather than separate Windows endpoints.</p>
+                    <div class="arch-hw-dep">
+                      <span class="arch-hw-dep-label">Software dependency</span>
+                      <a class="arch-hw-dep-link" href="https://support.native-instruments.com/hc/en-us/articles/360001194217-Installing-the-ASIO-Driver-for-KOMPLETE-AUDIO-1-2-6-MK2-Windows" target="_blank" rel="noopener noreferrer">Komplete Audio ASIO Driver</a>
+                    </div>
+                  </div>
+                  <a class="arch-hw-pixel-link" href="https://www.native-instruments.com/en/products/komplete/audio-interfaces/komplete-audio-6/" target="_blank" rel="noopener noreferrer" aria-label="Open Native Instruments Komplete Audio 6 MK2 product page">
+                    <div class="hardware-pixel-frame arch-hw-pixel">
+                      <canvas data-hardware-pixel="komplete-audio6"></canvas>
+                    </div>
+                  </a>
+                </article>
+                <div class="arch-hw-arrows" aria-hidden="true">
+                  <div class="arch-hw-arrow"><span class="arch-hw-label">Channels 1+2</span></div>
+                  <div class="arch-hw-arrow"><span class="arch-hw-label">Channel 3</span></div>
+                </div>
+                <div class="arch-hw-outputs">
+                  <article class="arch-node arch-node-hw">
+                    <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg></div>
+                    <span class="arch-node-kicker">Channels 1 and 2</span>
+                    <strong>Headphones</strong>
+                    <p>Binaural left and right auditory streams delivered to the participant. The looming sound approaches along the researcher-defined spatial trajectory.</p>
+                  </article>
+                  <article class="arch-node arch-node-hw arch-node-hw-output">
+                    <div class="arch-node-copy">
+                      <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+                      <span class="arch-node-kicker">Channel 3</span>
+                      <strong>Woojer Strap 4</strong>
+                      <p>Wired analog tactile transducer receiving the audio-encoded tactile cue on output 3. The tactile onset is a direct function of the SOA schedule and shares the same hardware clock as the auditory channels.</p>
+                    </div>
+                    <a class="arch-hw-pixel-link" href="https://www.woojer.com/products/strap-4" target="_blank" rel="noopener noreferrer" aria-label="Open Woojer Strap 4 product page">
+                      <div class="hardware-pixel-frame arch-hw-pixel">
+                        <canvas data-hardware-pixel="woojer-strap-4"></canvas>
+                      </div>
+                    </a>
+                  </article>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
+
+        <section id="docs-spatialization" class="info-segment" aria-labelledby="docs-spatialization-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Stimulus Generation</span>
+            <h2 id="docs-spatialization-title">How are spatialized/binaural stimuli generated?</h2>
+          </div>
+          <span id="docs-3dti" class="anchor-preserve" aria-hidden="true"></span>
+          <p class="info-copy">Spatialized sound is generated before a participant run. A researcher chooses a dry source, such as pink noise or a tone, and defines how that source should move through space: start distance, end distance, azimuth/elevation, duration, and whether the path is looming or receding. The local backend samples that path over time, looks up the matching left-ear and right-ear filters from a SOFA/FABIAN HRTF dataset, and asks the renderer to turn the moving source into a stereo binaural WAV. Channels 1 and 2 carry the headphone signal; tactile cues are added later as a separate channel-3 schedule, so the spatial audio bake stays auditory-only and auditable.</p>
+
+          <figure class="spatial-pipeline-figure" aria-label="Pictographic flow showing how a dry source becomes a binaural looming WAV">
+            <div class="spatial-pipeline">
+              <article class="spatial-pipeline-step">
+                <div class="spatial-step-icon" aria-hidden="true">
+                  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20v-8l6-4v16l-6-4Z"/><path d="M17 12a5 5 0 010 8"/><path d="M21 9a9 9 0 010 14"/></svg>
+                </div>
+                <strong>Source sound</strong>
+                <span>Noise, tone, or imported clip</span>
+              </article>
+              <div class="spatial-pipeline-arrow" aria-hidden="true"></div>
+              <article class="spatial-pipeline-step">
+                <div class="spatial-step-icon" aria-hidden="true">
+                  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 24c7-13 15-17 22-16"/><path d="M20 6h7v7"/><circle cx="8" cy="21" r="2"/><circle cx="24" cy="9" r="2"/></svg>
+                </div>
+                <strong>Trajectory</strong>
+                <span>Distance and direction over time</span>
+              </article>
+              <div class="spatial-pipeline-arrow" aria-hidden="true"></div>
+              <article class="spatial-pipeline-step">
+                <div class="spatial-step-icon spatial-step-image-icon" aria-hidden="true">
+                  <img src="./assets/sofa_logo-B7WShRtS.png" alt="">
+                </div>
+                <strong>SOFA / FABIAN</strong>
+                <span>Ear filters for each direction</span>
+              </article>
+              <div class="spatial-pipeline-arrow" aria-hidden="true"></div>
+              <article class="spatial-pipeline-step">
+                <div class="spatial-step-icon spatial-step-sonicom-icon" aria-hidden="true">
+                  <img src="./assets/sonicom_wave-Ccwgm6Ho.png" alt="">
+                </div>
+                <strong>3DTI / BRT</strong>
+                <span>Renderer applies filters and motion</span>
+              </article>
+              <div class="spatial-pipeline-arrow" aria-hidden="true"></div>
+              <article class="spatial-pipeline-step">
+                <div class="spatial-step-icon" aria-hidden="true">
+                  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 24V8"/><path d="M25 24V8"/><path d="M10 18c1.5-4 3-4 4.5 0s3 4 4.5 0 3-4 4.5 0"/><path d="M10 13c1.5-4 3-4 4.5 0s3 4 4.5 0 3-4 4.5 0"/></svg>
+                </div>
+                <strong>Binaural WAV</strong>
+                <span>Left/right channels plus manifests</span>
+              </article>
+            </div>
+            <figcaption class="spatial-pipeline-caption">The loom is not a volume trick alone: the renderer changes the left and right ear signals across time so the headphone audio carries direction, distance, and approach motion.</figcaption>
+          </figure>
+
+          <div class="spatial-explain-grid">
+            <article class="info-card">
+              <h3>What Is An HRTF?</h3>
+              <p>A head-related transfer function is a small acoustic fingerprint for one direction. It describes how the head, torso, and ears reshape a sound before it reaches the left and right eardrums. Applying different HRTFs over time makes a stationary source file behave like it is moving.</p>
+            </article>
+            <article class="info-card">
+              <h3>What Is SOFA?</h3>
+              <p>SOFA, the Spatially Oriented Format for Acoustics, is the standardized file container that stores spatial acoustic measurements such as HRTFs, HRIRs, and binaural room impulse responses with enough metadata for different tools to read them consistently.</p>
+              <a class="button-link" href="https://www.sofaconventions.org/mediawiki/index.php/SOFA_%28Spatially_Oriented_Format_for_Acoustics%29" target="_blank" rel="noopener noreferrer">Open SOFA Conventions</a>
+            </article>
+            <article class="info-card">
+              <h3>What Is FABIAN?</h3>
+              <p>FABIAN is TU Berlin's head-and-torso simulator dataset. PPS uses its HRIR/HRTF measurements as the reference listener model when creating binaural looming audio, and credits the source data to Brinkmann.</p>
+              <a class="button-link" href="https://depositonce.tu-berlin.de/items/bff6568a-5735-4ebc-b3fa-ac10707b7beb" target="_blank" rel="noopener noreferrer">Open TU DepositOnce Record</a>
+              <a class="button-link secondary-link" href="https://sofacoustics.org/data/database/tu-berlin/" target="_blank" rel="noopener noreferrer">Open TU Berlin SOFA Files</a>
+            </article>
+            <article class="info-card">
+              <h3>Where Do 3DTI And BRT Fit?</h3>
+              <p>3DTI and its newer BRT line provide the binaural-rendering toolbox layer: software that takes source audio, listener/source geometry, and HRIR data, then computes the left and right headphone signals. In PPS, this renderer layer is local infrastructure, not browser logic or participant data storage.</p>
+              <a class="button-link" href="https://github.com/GrupoDiana/BRTLibrary" target="_blank" rel="noopener noreferrer">Open BRT Library</a>
+              <a class="button-link secondary-link" href="https://www.3d-tune-in.eu/toolkit-developers" target="_blank" rel="noopener noreferrer">Open 3DTI Toolkit Page</a>
+            </article>
+          </div>
+
+          <div class="spatial-output-band">
+            <div>
+              <span class="card-kicker">What gets written</span>
+              <p>Each bake writes the binaural WAV, trajectory samples, render configuration, quality-control rows, file hashes, and manifests. Those files make the exact spatialization decisions reviewable before data collection.</p>
+            </div>
+            <div>
+              <span class="card-kicker">What happens later</span>
+              <p>Segment 3 adds SOA-driven tactile cues as channel 3 for audio-tactile trial files. The native runner then plays channels 1, 2, and 3 together through one synchronized ASIO device.</p>
+            </div>
+          </div>
+
+          <p class="info-copy"><strong>Citable sources and toolboxes:</strong></p>
+          <ol class="pub-reference-list">
+            <li>Brinkmann, F. (2017). <em>The FABIAN head-related transfer function data base</em>. TU Berlin DepositOnce. <a class="pub-doi-link" href="https://doi.org/10.14279/depositonce-5718" target="_blank" rel="noopener noreferrer">https://doi.org/10.14279/depositonce-5718</a></li>
+            <li>SOFA Conventions. <em>SOFA (Spatially Oriented Format for Acoustics)</em>. <a class="pub-doi-link" href="https://www.sofaconventions.org/mediawiki/index.php/SOFA_%28Spatially_Oriented_Format_for_Acoustics%29" target="_blank" rel="noopener noreferrer">https://www.sofaconventions.org/mediawiki/index.php/SOFA_(Spatially_Oriented_Format_for_Acoustics)</a></li>
+            <li>Gonz&aacute;lez-Toledo, D., Molina-Tanco, L., Cuevas-Rodr&iacute;guez, M., Majdak, P., &amp; Reyes-Lecuona, A. (2023). The Binaural Rendering Toolbox. A Virtual Laboratory for Reproducible Research in Psychoacoustics. <em>Proceedings of the 10th Convention of the European Acoustics Association</em>. <a class="pub-doi-link" href="https://dael.euracoustics.org/confs/landing_pages/fa2023/001042.html" target="_blank" rel="noopener noreferrer">https://dael.euracoustics.org/confs/landing_pages/fa2023/001042.html</a></li>
+            <li>Cuevas-Rodr&iacute;guez, M., Picinali, L., Gonz&aacute;lez-Toledo, D., Garre, C., de la Rubia-Cuestas, E., Molina-Tanco, L., &amp; Reyes-Lecuona, A. (2019). 3D Tune-In Toolkit: An open-source library for real-time binaural spatialisation. <em>PLOS ONE, 14</em>(3), e0211899. <a class="pub-doi-link" href="https://doi.org/10.1371/journal.pone.0211899" target="_blank" rel="noopener noreferrer">https://doi.org/10.1371/journal.pone.0211899</a></li>
+          </ol>
+
+          <div class="doc-link-row">
+            <a class="button-link" href="../../../../docs/STIMULUS_DESIGNER.md">Open Stimulus Designer Docs</a>
+            <a class="button-link" href="../../../../docs/REPLICATION.md">Open Replication Notes</a>
+            <a class="button-link" href="https://github.com/3DTune-In/3dti_AudioToolkit" target="_blank" rel="noopener noreferrer">Open Original 3DTI GitHub</a>
+          </div>
+        </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
+
+        <section id="docs-hardware" class="info-segment" aria-labelledby="docs-hardware-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Lab Route</span>
+            <h2 id="docs-hardware-title">Hardware Specifications and Latency Evidence</h2>
+          </div>
+          <p class="info-copy">The validated lab route runs on Windows and delivers auditory and tactile stimuli through a single synchronized multichannel ASIO output stream using the Native Instruments Komplete Audio 6 MK2 interface. Channels 1 and 2 route binaural left and right audio to participant headphones while channel 3 drives a Woojer Strap 4 connected as a wired analog load, removing the timing variability introduced by Bluetooth. The tactile signal is not a separate conversion path but a conventional audio waveform written to output 3 and routed into the Woojer's wired analog auxiliary input, whose transducer converts low-frequency signal energy into vibrotactile stimulation. Encoding the tactile cue as an audio channel keeps its onset timing under exactly the same software and hardware control as the auditory channels, making the stimulus onset asynchrony between sound and touch a direct function of the SOA schedule.</p>
+          <p class="info-copy">Latency was measured using a direct electrical loopback in which the three output channels were patched back into the Komplete Audio 6 MK2's own analog inputs via TRS cables, and a calibration pulse train was played while the return signal was simultaneously recorded. Comparing transmitted and received pulse timing gives the round-trip delay per channel. The physical-minus-digital latency is 33.462 &plusmn; 0.013 ms across 20 recovered pulses, representing the time between when the software schedules a sample and when that signal appears at the physical output. All 20 response marker pulses were recovered. The critical finding for audio-tactile research is the inter-channel skew: the left and right audio channels are synchronized to within 0.023 ms of each other, and the tactile drive channel deviates from the audio channels by only 0.011 ms. These sub-millisecond differences are possible because the Komplete Audio 6 MK2, operated through its ASIO driver as a single multichannel device, clocks all three outputs from the same sample clock and renders them within the same output buffer; this result cannot be replicated by routing stimuli through separate Windows stereo endpoints. The full loopback protocol is documented in <a href="../../../../For-AI/engineering/validation/For-AI/engineering/validation/docs/EXPERIMENT_LATENCY_VALIDATION.md">the latency validation report</a>.</p>
+        </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
+
+        <section id="docs-designer" class="info-segment" aria-labelledby="docs-designer-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Design Workflow</span>
+            <h2 id="docs-designer-title">How The Experiment Designer Works</h2>
+          </div>
+          <p class="info-copy">The Experiment Designer is a linear seven-segment workflow in which each segment owns a distinct decision layer and produces its own set of local files and manifests. Beginning with study or profile selection at Segment 0, the researcher progresses through defining auditory ingredients such as looming trajectories and source materials at Segment 1, assembling those into trial sequences at Segment 2, adding tactile timing via SOA schedules with baseline and catch-trial logic at Segment 3, setting repetition counts to build a trial-pool CSV at Segment 4, generating and inspecting block CSVs at Segment 5, and finally preparing participant block orders for handoff to the native runner at Segment 6. This sequential structure ensures every file produced at each stage is traceable to the decisions that generated it, supporting design transparency and replication.</p>
+          <div class="workflow-summary-grid">
+            <div><strong>0 Preload</strong><span>Choose a published profile or custom project.</span></div>
+            <div><strong>1 Stimuli</strong><span>Create or import reusable auditory ingredients.</span></div>
+            <div><strong>2 Sequence</strong><span>Arrange ingredients into within-trial rows and variants.</span></div>
+            <div><strong>3 Tactile</strong><span>Add SOAs, baseline logic, catch files, and channel-3 tactile cues.</span></div>
+            <div><strong>4 Pool</strong><span>Set repetition counts and write the trial-pool CSV.</span></div>
+            <div><strong>5 Blocks</strong><span>Generate, inspect, and accept block CSVs.</span></div>
+            <div><strong>6 Prepare</strong><span>Create participant block orders and hand off to the native runner.</span></div>
+          </div>
+          <div class="doc-link-row">
+            <a class="button-link" href="../../../../docs/GITHUB_PAGES_DASHBOARD.md">Open Dashboard Guide</a>
+            <a class="button-link" href="../../../../docs/PUBLISHED_STUDY_RECREATION_STATUS.md">Open Profile Status</a>
+          </div>
+        </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
+
+        <section id="docs-runner" class="info-segment" aria-labelledby="docs-runner-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Native Runtime</span>
+            <h2 id="docs-runner-title">How The Experiment Runner Works</h2>
+          </div>
+          <p class="info-copy">The Experiment Runner is a native Windows application, PPSExperimentRunner.exe, launched from the Segment 6 setup package and entirely separate from the browser dashboard. It is responsible for all timing-sensitive work during data collection, opening the prepared session package, playing the three-channel ASIO stream to the lab hardware, and recording participant responses and event markers. All playback timing is handled natively to avoid the latency variability inherent in browser JavaScript execution. Session output folders contain event CSVs, XDF and marker mirrors for Lab Streaming Layer integrations, trigger dictionaries, timing quality-control reports, and analysis-ready trial rows.</p>
+          <div class="doc-link-row">
+            <a class="button-link" href="../../../../docs/WINDOWS_APP.md">Open Windows App Guide</a>
+            <a class="button-link" href="../../../../For-AI/engineering/validation/For-AI/engineering/validation/docs/AUDIO_ROUTING_STRESS_TEST.md">Open Audio Stress Notes</a>
+          </div>
+        </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
+
+        <section id="docs-emulatable-studies" class="info-segment" aria-labelledby="docs-emulatable-studies-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Published Profiles</span>
+            <h2 id="docs-emulatable-studies-title">Studies Currently Emulatable</h2>
+          </div>
+          <p class="info-copy">The toolkit can currently recreate six study profiles whose reported parameters pass the Segment 0&ndash;4 profile gate and can be materialized for native runner handoff, drawn from the five publications below.</p>
+          <ol class="pub-reference-list">
+            <li>Matsuda, Y., Sugimoto, M., Inami, M., &amp; Kitazaki, M. (2021). Peripersonal space in the front, rear, left and right directions for audio-tactile multisensory integration. <em>Scientific Reports, 11</em>, Article 11303. <a class="pub-doi-link" href="https://www.nature.com/articles/s41598-021-90784-5" target="_blank" rel="noopener noreferrer">https://doi.org/10.1038/s41598-021-90784-5</a></li>
+            <li>Lamia, P., Shabani, N., &amp; Candidi, M. (2026). Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution. <em>Scientific Reports, 16</em>, Article 7133. <a class="pub-doi-link" href="https://www.nature.com/articles/s41598-026-36796-5" target="_blank" rel="noopener noreferrer">https://doi.org/10.1038/s41598-026-36796-5</a></li>
+            <li>Noel, J.-P., Pfeiffer, C., Blanke, O., &amp; Serino, A. (2015). Peripersonal space as the space of the bodily self. <em>Cognition, 144</em>, 49&ndash;57. <a class="pub-doi-link" href="https://www.sciencedirect.com/science/article/pii/S001002771530038X" target="_blank" rel="noopener noreferrer">https://doi.org/10.1016/j.cognition.2015.07.012</a></li>
+            <li>Pfeiffer, C., Noel, J. P., Serino, A., &amp; Blanke, O. (2018). Vestibular modulation of peripersonal space boundaries. <em>European Journal of Neuroscience, 47</em>(7), 800&ndash;811. <a class="pub-doi-link" href="https://onlinelibrary.wiley.com/doi/10.1111/ejn.13872" target="_blank" rel="noopener noreferrer">https://doi.org/10.1111/ejn.13872</a></li>
+            <li>Serino, A., Noel, J. P., Galli, G., Canzoneri, E., Marmaroli, P., Lissek, H., &amp; Blanke, O. (2015). Body part-centered and full body-centered peripersonal space representations. <em>Scientific Reports, 5</em>, Article 18603. <a class="pub-doi-link" href="https://www.nature.com/articles/srep18603" target="_blank" rel="noopener noreferrer">https://doi.org/10.1038/srep18603</a></li>
+          </ol>
+        </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
+
+        <section id="docs-data-boundary" class="info-segment" aria-labelledby="docs-data-boundary-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Public Release</span>
+            <h2 id="docs-data-boundary-title">MIT License Disclaimer</h2>
+          </div>
+          <p class="info-copy">PPS Toolkit is released under the MIT License. Permission is granted to use, copy, modify, merge, publish, distribute, sublicense, and sell copies of the software, provided the copyright notice and permission notice stay with the software. The software is provided as is, without warranty of any kind, including implied warranties of merchantability, fitness for a particular purpose, or noninfringement. The authors and copyright holders are not liable for claims, damages, or other liability arising from use of the toolkit.</p>
+          <div class="info-card-grid">
+            <article class="info-card">
+              <h3>License Scope</h3>
+              <p>The MIT License covers the toolkit code and included project materials. It does not grant rights to redistribute third-party assets, vendor software, or external datasets.</p>
+            </article>
+            <article class="info-card">
+              <h3>Local Data</h3>
+              <p>Generated designs, sessions, participant outputs, and validation artifacts stay local under ignored folders such as <code>local_data/</code> and <code>artifacts/</code>.</p>
+            </article>
+            <article class="info-card">
+              <h3>No Warranty</h3>
+              <p>Researchers are responsible for validating timing, hardware routing, ethics approvals, and local data-handling procedures before using the toolkit for data collection.</p>
+            </article>
+          </div>
+          <div class="doc-link-row">
+            <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">Open MIT License</a>
+            <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/docs/PRIVACY_RELEASE.md" target="_blank" rel="noopener noreferrer">Open Privacy Guide</a>
+            <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/docs/PPS_DOWNLOADS.md" target="_blank" rel="noopener noreferrer">Open Download Notes</a>
+          </div>
+        </section>
+      </section>
+
+      <section id="downloads-page" class="page-view info-page" data-page-panel="downloads" role="tabpanel" aria-labelledby="page-tab-downloads" tabindex="0" hidden>
+        <div class="info-page-heading">
+          <span class="segment-kicker">Downloads</span>
+          <h1>Install and Run Locally</h1>
+        </div>
+        <section id="downloads-installer" class="info-segment" aria-labelledby="downloads-installer-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Windows</span>
+            <h2 id="downloads-installer-title">Choose an Application</h2>
+          </div>
+          <div class="download-page-grid">
+            <article class="info-card download-card">
+            <h3>PPS Designer</h3>
+            <p>Install the stimulus and profile design framework with approved Shared templates and resources.</p>
+            <a id="download-designer" class="button-link secondary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer">Open Designer Releases</a>
+          </article>
+            <article class="info-card download-card">
+            <h3>Experiment Runner</h3>
+            <p>Install the independent participant Runner, Qt runtime, Shared resources, and post-run review tools.</p>
+            <a id="download-runner" class="button-link secondary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer">Open Runner Releases</a>
+          </article>
+            <article class="info-card download-card primary-download">
+            <h3>Full PPS Toolkit</h3>
+            <p>Install Designer and Runner as separate applications with one compatible Shared component and two shortcuts.</p>
+            <a id="download-software" class="button-link primary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer">Open Full Toolkit Releases</a>
+          </article>
+          </div>
+        </section>
+        <section id="downloads-package" class="info-segment" aria-labelledby="downloads-package-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Integrity</span>
+            <h2 id="downloads-package-title">Verified Component Payloads</h2>
+          </div>
+          <div class="download-page-grid single">
+            <article class="info-card download-card">
+            <h3>How Downloads Are Verified</h3>
+            <p>Each bootstrapper pins its own payload, component manifest, and inventory hashes. Incompatible Shared versions are rejected instead of mixed.</p>
+            <a id="download-full-package" class="button-link secondary-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/docs/PPS_DOWNLOADS.md" target="_blank" rel="noopener noreferrer">Read Download Notes</a>
+          </article>
+          </div>
+        </section>
+        <section id="downloads-source" class="info-segment" aria-labelledby="downloads-source-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Source</span>
+            <h2 id="downloads-source-title">Repository</h2>
+          </div>
+          <div class="download-page-grid single">
+            <article class="info-card download-card">
+            <h3>Source Repository</h3>
+            <p>Browse source, issues, release notes, and development documentation on GitHub.</p>
+            <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit" target="_blank" rel="noopener noreferrer">Open GitHub Repository</a>
+          </article>
+          </div>
+        </section>
+        <section id="downloads-companion" class="info-segment" aria-labelledby="downloads-companion-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Local Companion</span>
+            <h2 id="downloads-companion-title">Local Companion</h2>
+          </div>
+          <div class="download-page-grid single">
+            <article class="info-card download-card">
+            <h3>Local Companion</h3>
+            <p>After installing, start the trusted local companion before using hosted dashboard actions.</p>
+            <code>apps\designer\launchers\Start_Website_Companion.bat</code>
+          </article>
+          </div>
+        </section>
+      </section>
+
+    </main>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="segment-info-modal" class="modal-backdrop" hidden>
+    <div class="modal-card segment-info-card" role="dialog" aria-modal="true" aria-labelledby="segment-info-modal-title" tabindex="-1">
+      <div class="modal-heading">
+        <div>
+          <div id="segment-info-kicker" class="segment-kicker">Segment</div>
+          <h2 id="segment-info-modal-title">Segment Description</h2>
+        </div>
+        <button id="segment-info-modal-close" class="icon-action" type="button" aria-label="Close">X</button>
+      </div>
+      <div class="segment-info-grid">
+        <section>
+          <h3>Purpose</h3>
+          <p id="segment-info-purpose"></p>
+        </section>
+        <section>
+          <h3>Your Inputs</h3>
+          <p id="segment-info-inputs"></p>
+        </section>
+        <section>
+          <h3>Backend Work</h3>
+          <p id="segment-info-backend"></p>
+        </section>
+        <section>
+          <h3>Output</h3>
+          <p id="segment-info-next"></p>
+        </section>
+      </div>
+      <section id="segment-info-noise-guide" class="noise-guide" aria-labelledby="noise-guide-title" hidden>
+        <div class="noise-guide-heading">
+          <div>
+            <span class="noise-guide-eyebrow">Source spectrum guide</span>
+            <h3 id="noise-guide-title">Five generated noise types</h3>
+          </div>
+          <p>Segment 2 combines the ingredients created in Segment 1. Their noise colour changes spectral energy and can change how a looming sequence is perceived.</p>
+        </div>
+
+        <figure class="noise-spectrum-figure">
+          <svg class="noise-spectrum-plot" viewBox="0 0 720 220" role="img" aria-labelledby="noise-spectrum-title noise-spectrum-description">
+            <title id="noise-spectrum-title">Relative power spectral density for five noise colours</title>
+            <desc id="noise-spectrum-description">Brown and pink noise decrease in power as frequency increases, white noise stays level, and blue and violet noise increase in power. All five idealized curves meet at zero decibels at one kilohertz.</desc>
+            <g class="noise-spectrum-grid" aria-hidden="true">
+              <path d="M56 24V176M194 24V176M391 24V176M589 24V176M664 24V176" />
+              <path d="M56 37H664M56 100H664M56 163H664" />
+            </g>
+            <g class="noise-spectrum-axes" aria-hidden="true">
+              <path d="M56 20V176H670" />
+              <text x="48" y="41" text-anchor="end">+30</text>
+              <text x="48" y="104" text-anchor="end">0</text>
+              <text x="48" y="167" text-anchor="end">−30</text>
+              <text x="56" y="196" text-anchor="middle">20</text>
+              <text x="194" y="196" text-anchor="middle">100</text>
+              <text x="391" y="196" text-anchor="middle">1k</text>
+              <text x="589" y="196" text-anchor="middle">10k</text>
+              <text x="664" y="196" text-anchor="middle">20k</text>
+              <text class="noise-spectrum-y-label" x="14" y="100" text-anchor="middle" transform="rotate(-90 14 100)">Relative power dB</text>
+              <text x="360" y="216" text-anchor="middle">Frequency Hz · logarithmic scale</text>
+            </g>
+            <g class="noise-spectrum-curves" aria-hidden="true">
+              <path class="noise-spectrum-curve noise-spectrum-brown" d="M56 28.5L391 100L664 154.7" />
+              <path class="noise-spectrum-curve noise-spectrum-pink" d="M56 64.3L391 100L664 127.4" />
+              <path class="noise-spectrum-curve noise-spectrum-white" d="M56 100L664 100" />
+              <path class="noise-spectrum-curve noise-spectrum-blue" d="M56 135.7L391 100L664 72.6" />
+              <path class="noise-spectrum-curve noise-spectrum-violet" d="M56 171.5L391 100L664 45.3" />
+            </g>
+          </svg>
+          <figcaption>Idealized relative power spectra, normalized at 1 kHz. The rendered result also depends on duration, random seed, spatial filtering, trajectory, playback chain, and calibration.</figcaption>
+          <div class="noise-spectrum-legend" aria-label="Noise spectrum legend">
+            <span data-noise-guide="brown"><i aria-hidden="true"></i>Brown −6 dB/oct</span>
+            <span data-noise-guide="pink"><i aria-hidden="true"></i>Pink −3 dB/oct</span>
+            <span data-noise-guide="white"><i aria-hidden="true"></i>White 0 dB/oct</span>
+            <span data-noise-guide="blue"><i aria-hidden="true"></i>Blue +3 dB/oct</span>
+            <span data-noise-guide="violet"><i aria-hidden="true"></i>Violet +6 dB/oct</span>
+          </div>
+        </figure>
+
+        <div class="noise-guide-grid">
+          <article class="noise-guide-card" data-noise-guide="brown">
+            <h4><i aria-hidden="true"></i>Brown</h4>
+            <p class="noise-guide-formula">Power ∝ 1/f²</p>
+            <p>Strong low-frequency weighting; commonly heard as deep or rumbling. Brown and pink were rated less tense and more pleasant than blue and violet in one controlled comparison.</p>
+          </article>
+          <article class="noise-guide-card" data-noise-guide="pink">
+            <h4><i aria-hidden="true"></i>Pink</h4>
+            <p class="noise-guide-formula">Power ∝ 1/f</p>
+            <p>Equal power per octave, with less top-end hiss than white. It often sounds spectrally balanced, but a looming validation rated pink more arousing and less pleasant than white.</p>
+          </article>
+          <article class="noise-guide-card" data-noise-guide="white">
+            <h4><i aria-hidden="true"></i>White</h4>
+            <p class="noise-guide-formula">Power ∝ f⁰</p>
+            <p>Equal power per hertz; wider high-frequency octaves therefore contain more total power and produce a broadband hiss. Ferri et al. used it as their neutral looming comparator.</p>
+          </article>
+          <article class="noise-guide-card" data-noise-guide="blue">
+            <h4><i aria-hidden="true"></i>Blue</h4>
+            <p class="noise-guide-formula">Power ∝ f</p>
+            <p>High-frequency weighting gives a bright, sharp character. Blue and violet were associated with more perceived tension and movement, and lower pleasantness, than pink and brown.</p>
+          </article>
+          <article class="noise-guide-card" data-noise-guide="violet">
+            <h4><i aria-hidden="true"></i>Violet</h4>
+            <p class="noise-guide-formula">Power ∝ f²</p>
+            <p>The strongest high-frequency weighting, usually heard as the sharpest hiss. Violet reached the highest modeled roughness and the greatest perceived movement in the five-noise comparison.</p>
+          </article>
+        </div>
+
+        <aside class="noise-guide-evidence">
+          <strong>Interpret associations as context-dependent.</strong>
+          Equal loudness, duration, headphones, spatialization, motion, and listener differences can change ratings; noise colour does not carry a fixed emotional meaning.
+          <span class="noise-guide-references">
+            Evidence context:
+            <a href="https://doi.org/10.1016/j.neuropsychologia.2015.03.001" target="_blank" rel="noopener noreferrer">Ferri et al. (2015)</a>
+            and
+            <a href="https://doi.org/10.1525/mp.2020.37.4.298" target="_blank" rel="noopener noreferrer">Costa &amp; Nese (2020)</a>.
+          </span>
+        </aside>
+      </section>
+      <section id="segment-info-note-card" class="segment-info-note" hidden>
+        <h3>Template Note</h3>
+        <p id="segment-info-note"></p>
+      </section>
+    </div>
+  </div>
+  <div id="customize-modal" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="customize-modal-title" tabindex="-1">
+      <form id="customize-form">
+        <div class="modal-heading">
+          <div>
+            <div id="customize-modal-kicker" class="segment-kicker">New Custom Study</div>
+            <h2 id="customize-modal-title">Name This Study</h2>
+          </div>
+          <button id="customize-modal-close" class="icon-action" type="button" aria-label="Close">X</button>
+        </div>
+        <div class="field-row">
+          <label for="customize-study-name">Study name</label>
+          <input id="customize-study-name" type="text" autocomplete="off" required>
+        </div>
+        <p id="customize-source-label" class="modal-source"></p>
+        <p id="customize-error" class="modal-error" role="alert" hidden></p>
+        <div class="modal-actions">
+          <button id="customize-cancel" type="button">Cancel</button>
+          <button id="customize-submit" class="primary" type="submit">Create Study</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="save-profile-modal" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="save-profile-modal-title" tabindex="-1">
+      <form id="save-profile-form">
+        <div class="modal-heading">
+          <div>
+            <div class="segment-kicker">Segment 6</div>
+            <h2 id="save-profile-modal-title">Finalize and Lock Profile</h2>
+          </div>
+          <button id="save-profile-modal-close" class="icon-action" type="button" aria-label="Close">X</button>
+        </div>
+        <div class="field-row">
+          <label for="save-profile-name">Profile name</label>
+          <input id="save-profile-name" type="text" autocomplete="off" required>
+        </div>
+        <p id="save-profile-error" class="modal-error" role="alert" hidden></p>
+        <div class="modal-actions">
+          <button id="save-profile-cancel" type="button">Cancel</button>
+          <button id="save-profile-submit" class="primary" type="submit">Finalize Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="audio-color-modal" class="modal-backdrop" hidden>
+    <div class="modal-card color-picker-modal-card" role="dialog" aria-modal="true" aria-labelledby="audio-color-modal-title" tabindex="-1">
+      <form id="audio-color-form">
+        <div class="modal-heading">
+          <div>
+            <div class="segment-kicker">Manual audio</div>
+            <h2 id="audio-color-modal-title">Choose Display Colour</h2>
+          </div>
+          <button id="audio-color-modal-close" class="icon-action" type="button" aria-label="Close">X</button>
+        </div>
+        <div class="color-picker-dialog-body">
+          <label class="visual-color-picker" for="audio-color-native">
+            <span>Manual colour picker</span>
+            <input id="audio-color-native" type="color" value="#1c7a86">
+          </label>
+          <div class="field-row">
+            <label for="audio-color-hex">Hex colour</label>
+            <input id="audio-color-hex" type="text" value="#1C7A86" inputmode="text" autocomplete="off" pattern="#[0-9A-Fa-f]{6}" required>
+          </div>
+          <div class="color-picker-preview" aria-label="Selected colour preview">
+            <span id="audio-color-preview" aria-hidden="true"></span>
+            <strong id="audio-color-preview-value">#1C7A86</strong>
+          </div>
+        </div>
+        <p id="audio-color-error" class="modal-error" role="alert" hidden></p>
+        <div class="modal-actions">
+          <button id="audio-color-cancel" type="button">Cancel</button>
+          <button id="audio-color-apply" class="primary" type="submit">Apply Colour</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

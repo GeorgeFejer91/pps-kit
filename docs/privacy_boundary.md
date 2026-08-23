@@ -25,7 +25,7 @@ The public repository is a toolkit plus deidentified sample-data package. It is 
 Before publishing or pushing a release, run:
 
 ```powershell
-python tools\release_audit.py
+python For-AI\engineering\release\tools\release_audit.py
 pytest
 ```
 

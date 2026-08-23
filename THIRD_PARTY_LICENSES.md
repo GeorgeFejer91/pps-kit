@@ -71,13 +71,13 @@ The native `pps-3dti-renderer` builds this 3DTI-pinned SOFA API source so it
 can load the bundled FABIAN `.sofa` file directly. The pinned SOFA API snapshot
 also includes Windows x64 runtime binaries for NetCDF, HDF5, Curl, and Zlib;
 these are copied beside the renderer executable by
-`windows/Build_3DTI_Renderer.ps1`.
+`For-AI/engineering/build/windows/Build_3DTI_Renderer.ps1`.
 
 ## Three.js
 
 - Project: Three.js
 - Repository: https://github.com/mrdoob/three.js
-- Vendored files: `src/peripersonal_space_toolkit/viewer/vendor/three/`
+- Vendored files: `apps/designer/frontend/viewer/vendor/three/`
 - License: MIT
 
 Three.js is used only for the embedded trajectory preview. Its license text is
@@ -87,7 +87,7 @@ included with the vendored files.
 
 - Project: Gradle
 - Repository: https://github.com/gradle/gradle
-- Vendored file: `android/runner-companion/gradle/wrapper/gradle-wrapper.jar`
+- Vendored file: `For-AI/experiments/android-companion/runner-companion/gradle/wrapper/gradle-wrapper.jar`
 - License: Apache License 2.0
 
 The Android runner companion source uses the Gradle wrapper to reproduce the
@@ -103,9 +103,9 @@ source tree.
 - Overleaf entry:
   https://www.overleaf.com/latex/templates/springer-nature-latex-template/myxmhdsbzkyd
 - Downloaded package:
-  `publication/behavior-research-methods/springer-nature-latex-template-dec-2024.zip`
+  `For-AI/research/publication/behavior-research-methods/springer-nature-latex-template-dec-2024.zip`
 - Extracted files:
-  `publication/behavior-research-methods/springer-nature-latex-template/`
+  `For-AI/research/publication/behavior-research-methods/springer-nature-latex-template/`
 - Download date: 2026-06-30
 - ZIP SHA-256:
   `812E76DCAA9C28DC1BFF1FB6065D51729B67D4EA140552A05088317414A3ECAE`

@@ -1,0 +1,173 @@
+{
+  "schema": "pps-validation-evidence-audit.v1",
+  "artifact_paths": {
+    "audio_stress": "artifacts/validation_runs/audio_route_stress_20260612_131802/audio_device_stress_20260612_131804.json",
+    "dummy_comparison": "artifacts/validation_runs/final_functional_dummy_pulse_20260612_channel_scaled_lslprobe/dummy_pulse_comparison_report.json",
+    "dummy_lsl_probe": "artifacts/validation_runs/lsl_probe_dummy_channel_scaled_20260612/lsl_marker_probe_summary.json",
+    "dummy_route_sweep": "artifacts/validation_runs/final_functional_route_sweep_20260612_channel_scaled/dummy_output_route_sweep_report.json",
+    "dummy_signal_qc": "artifacts/validation_runs/final_functional_route_sweep_20260612_channel_scaled/dummy_signal_level_qc.json",
+    "safe_calibration": "artifacts/validation_runs/final_functional_loopback_calibration/latency_validation_report.json",
+    "lsl_reconciliation": "artifacts/validation_runs/mouse_response_timing_lsl_monotonic_20260612_134927/lsl_reconciliation/lsl_local_reconciliation_report.json",
+    "response_strategy": "artifacts/validation_runs/mouse_response_timing_lsl_monotonic_20260612_134927/response_strategy_comparison/response_timing_strategy_comparison.json",
+    "mouse_response": "artifacts/validation_runs/mouse_response_timing_lsl_monotonic_20260612_134927/mouse_response_timing_report.json",
+    "response_marker_physical": "artifacts/validation_runs/response_marker_physical_from_dummy_20260612/response_marker_loopback_report.json",
+    "session_runner_click_path": "artifacts/validation_runs/session_runner_click_path_stress_20260612_deferred_lsl/session_runner_click_path_report.json",
+    "visible_runner_os_click": "artifacts/validation_runs/visible_runner_os_click_stress_current/visible_runner_os_click_report.json",
+    "actual_condition_one_block": "artifacts/validation_runs/recording_layer_actual_condition_20260613_anchor/actual_condition_validation/one_block_actual_condition_validation.json",
+    "actual_block_loopback": "artifacts/validation_runs/one_block_actual_condition_current/sessions/P001_20260612_182812/analysis/actual_block_loopback/actual_block_loopback_report.json",
+    "recording_layer_alignment": "artifacts/validation_runs/recording_layer_alignment_20260613_anchor/recording_layer_alignment_report.json",
+    "pc_software_requirements": "artifacts/validation_runs/pc_software_requirements_current/pc_software_requirements_audit.json",
+    "labrecorder_xdf": "artifacts/validation_runs/labrecorder_lsl_xdf_current/labrecorder_lsl_xdf_report.json",
+    "report_pdf": "artifacts/validation_runs/report_build/latency_reliability_validations.pdf"
+  },
+  "status_counts": {
+    "proven": 19,
+    "deferred": 1
+  },
+  "requirements": [
+    {
+      "requirement": "Internal validation assets are separated from participant runtime",
+      "status": "proven",
+      "evidence": "For-AI/engineering/validation/ contains manual protocols/scripts/reports and no public package entry point was added for these stress protocols.",
+      "artifact": "For-AI/engineering/validation",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "Komplete ASIO can sustain a 3-channel output stream",
+      "status": "proven",
+      "evidence": "Current audio stress evidence reports stable 3-channel ASIO callback output with no callback status flags.",
+      "artifact": "artifacts/validation_runs/audio_route_stress_20260612_131802/audio_device_stress_20260612_131804.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "Windows validation PC software dependencies are installed and documented",
+      "status": "proven",
+      "evidence": "PC audit reports no missing runtime, validation, or external-tool dependencies; Komplete ASIO is present in the registry and visible to sounddevice.",
+      "artifact": "artifacts/validation_runs/pc_software_requirements_current/pc_software_requirements_audit.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "One 3-channel WAV routes to the intended physical channel identities",
+      "status": "proven",
+      "evidence": "Selected functional-route sweep confirms the expected 1-to-1, 2-to-2, and 3-to-3 channel identities and passes the shared signal-quality gate.",
+      "artifact": "artifacts/validation_runs/final_functional_route_sweep_20260612_channel_scaled/dummy_output_route_sweep_report.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "Publication-grade all-channel electrical latency/skew baseline",
+      "status": "proven",
+      "evidence": "Channel-scaled simultaneous 3-channel dummy WAV direct loopback passed=True; ch1: detection=1.0, mean=33.605442176870746 ms, SD=0.0 ms, peak=0.160430908203125, clipped=False; ch2: detection=1.0, mean=33.5827664399093 ms, SD=0.0 ms, peak=0.081268310546875, clipped=False; ch3: detection=1.0, mean=33.605442176870746 ms, SD=0.0 ms, peak=0.022674560546875, clipped=False; left/right skew mean=0.022675999999997032 ms, SD=0.0 ms; tactile/audio skew mean=0.011337999999994963 ms, SD=0.0 ms.",
+      "artifact": "artifacts/validation_runs/final_functional_dummy_pulse_20260612_channel_scaled_lslprobe/dummy_pulse_comparison_report.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "Publication-facing audio/tactile electrical skew estimate",
+      "status": "proven",
+      "evidence": "Channel-scaled simultaneous 3-channel dummy WAV direct loopback passed=True; ch1: detection=1.0, mean=33.605442176870746 ms, SD=0.0 ms, peak=0.160430908203125, clipped=False; ch2: detection=1.0, mean=33.5827664399093 ms, SD=0.0 ms, peak=0.081268310546875, clipped=False; ch3: detection=1.0, mean=33.605442176870746 ms, SD=0.0 ms, peak=0.022674560546875, clipped=False; left/right skew mean=0.022675999999997032 ms, SD=0.0 ms; tactile/audio skew mean=0.011337999999994963 ms, SD=0.0 ms.",
+      "artifact": "artifacts/validation_runs/final_functional_dummy_pulse_20260612_channel_scaled_lslprobe/dummy_pulse_comparison_report.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "WASAPI loopback is excluded from the core ASIO validation strategy",
+      "status": "proven",
+      "evidence": "WASAPI was requested during ASIO dummy playback and reported status=no_data; because ASIO multichannel playback can bypass the Windows WASAPI endpoint, direct electrical loopback remains the physical ground truth.",
+      "artifact": "artifacts/validation_runs/final_functional_dummy_pulse_20260612_channel_scaled_lslprobe/dummy_pulse_comparison_report.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "Rich and numeric LSL streams reconstruct local event records",
+      "status": "proven",
+      "evidence": "Reconciliation compared 104 events; rich samples=104; numeric samples=104; field mismatches=0. External dummy-pulse LSL probe resolved=True and recorded 5/5 markers; duplicates=[]; event types={'dummy_pulse': 5}.",
+      "artifact": "artifacts/validation_runs/mouse_response_timing_lsl_monotonic_20260612_134927/lsl_reconciliation/lsl_local_reconciliation_report.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "External LabRecorder XDF preserves PPS rich and numeric LSL streams",
+      "status": "proven",
+      "evidence": "LabRecorderCLI captured 16 rich PPSMarkersV2 samples and 16 numeric PPSTriggerCodes samples for 16 expected markers; missing IDs=[]; field mismatches=[]; timestamp delta mean=-0.005300000339047983 ms.",
+      "artifact": "artifacts/validation_runs/labrecorder_lsl_xdf_current/labrecorder_lsl_xdf_report.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "Response timing strategy and LSL timing tradeoffs",
+      "status": "proven",
+      "evidence": "Local click-to-marker mean=8.00000000061118 ms, SD=2.5502946864716478e-09 ms, median=8.000000001629815 ms; rich LSL mouse sample lag mean=0.0808160005544778 ms, SD=0.05578911238560606 ms, median=0.06650000068475492 ms; probe arrival lag mean=0.4208660003496334 ms, SD=0.22318059776497887 ms, median=0.3392999969946686 ms.",
+      "artifact": "artifacts/validation_runs/mouse_response_timing_lsl_monotonic_20260612_134927/response_strategy_comparison/response_timing_strategy_comparison.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "Synthetic mouse click to callback-derived response marker linkage",
+      "status": "proven",
+      "evidence": "Mouse response stress passed=True; mouse clicks=50; response markers=50.",
+      "artifact": "artifacts/validation_runs/mouse_response_timing_lsl_monotonic_20260612_134927/mouse_response_timing_report.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "Session runner click path triggers linked response markers during playback",
+      "status": "proven",
+      "evidence": "SessionRunnerController stress passed=True; clicks=25; response markers=25; mean marker-minus-mouse=8.149887150211725 ms, SD=0.08073066995085858 ms, median=8.105435146717355 ms; max=8.317435153003316 ms.",
+      "artifact": "artifacts/validation_runs/session_runner_click_path_stress_20260612_deferred_lsl/session_runner_click_path_report.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "Real active-runner OS click injection during playback",
+      "status": "proven",
+      "evidence": "Visible Tk runner OS-click stress passed=True; armed=True; requested=10; mouse clicks=10; response markers=10; in-target=10; during-playback=10; mean marker-minus-mouse=8.759905147599056 ms, SD=0.3647640736793851 ms, median=8.661335145006888 ms.",
+      "artifact": "artifacts/validation_runs/visible_runner_os_click_stress_current/visible_runner_os_click_report.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "One actual prepared experimental block produces analysis-ready runner outputs",
+      "status": "proven",
+      "evidence": "Actual-condition one-block audit passed=True; evidence_level=actual_experimental_condition_one_block; trials=22; analysis rows=20; XDF loaded=True samples=146; LSL mirror rows=146; suspicious sources=[].",
+      "artifact": "artifacts/validation_runs/recording_layer_actual_condition_20260613_anchor/actual_condition_validation/one_block_actual_condition_validation.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "One actual prepared experimental block has direct loopback channel-timing evidence",
+      "status": "proven",
+      "evidence": "Actual one-block direct loopback comparison passed=True; capture peaks=[0.810272216796875, 0.006866455078125, 0.03863525390625]; left/right skew={'count': 11, 'mean_ms': -0.02267573696144609, 'sd_ms': 0.0, 'median_ms': -0.02267573696144609, 'p95_ms': -0.02267573696144609, 'min_ms': -0.02267573696144609, 'max_ms': -0.02267573696144609}; tactile/audio mean skew={'count': 10, 'mean_ms': -0.07936507936508974, 'sd_ms': 0.0, 'median_ms': -0.07936507936508974, 'p95_ms': -0.07936507936508974, 'min_ms': -0.07936507936508974, 'max_ms': -0.07936507936508974}.",
+      "artifact": "artifacts/validation_runs/one_block_actual_condition_current/sessions/P001_20260612_182812/analysis/actual_block_loopback/actual_block_loopback_report.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "Actual-condition event/LSL and digital audio evidence align with physical loopback",
+      "status": "proven",
+      "evidence": "Recording-layer alignment passed=True; physical-minus-digital latency mean=33.46182917611489 ms, SD=0.01309184283876815 ms, median=33.46938775510204 ms, p95=33.46938775510204 ms, min=33.44671201814059 ms, max=33.46938775510204 ms; left/right skew=-0.022675736961453197 ms; tactile/audio skew=0.011337868480730151 ms; digital evidence dropped buffers=0, clipped channels=[]; internal events=146, markers=146, missing=[], extra=[], duplicate events=[]; LSL timestamp p95 error=9.89530235528946e-07 ms; response markers=20/20, residual p95=0.0 ms; external LSL checked=False.",
+      "artifact": "artifacts/validation_runs/recording_layer_alignment_20260613_anchor/recording_layer_alignment_report.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "Response-marker loopback recovery analyzer is implemented",
+      "status": "proven",
+      "evidence": "The internal analyzer compares response_marker_start sample indices against tactile-channel loopback pulses, fits recording/hardware offset, and reports detection rate plus residual jitter.",
+      "artifact": "For-AI/engineering/validation/scripts/compare_response_marker_loopback.py",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "Physical tactile-channel response-marker recovery",
+      "status": "proven",
+      "evidence": "Physical channel-3 response-marker-style loopback recovery passed=True; detected=5/5; offset mean=33.605442176870746 ms, SD=0.0 ms; absolute residual mean=0.0 ms, SD=0.0 ms.",
+      "artifact": "artifacts/validation_runs/response_marker_physical_from_dummy_20260612/response_marker_loopback_report.json",
+      "remaining_work": ""
+    },
+    {
+      "requirement": "Woojer mechanical vibration onset is outside the current electrical validation scope",
+      "status": "deferred",
+      "evidence": "The Woojer device is not physically in the current loop. The accepted claim is electrical channel-3 timing at the Komplete route; mechanical vibration onset is a later sensor-based extension.",
+      "artifact": "",
+      "remaining_work": "When the Woojer is physically added, attach a vibration/contact sensor and compare mechanical onset against channel-3 electrical drive timing."
+    },
+    {
+      "requirement": "Living LaTeX report is built",
+      "status": "proven",
+      "evidence": "PDF exists: True",
+      "artifact": "artifacts/validation_runs/report_build/latency_reliability_validations.pdf",
+      "remaining_work": ""
+    }
+  ],
+  "completion_gate": {
+    "complete": true,
+    "reason": "All active validation requirements in the current audit are proven. Deferred requirements are outside the current physical setup: Woojer mechanical vibration onset is outside the current electrical validation scope."
+  }
+}

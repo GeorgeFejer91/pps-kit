@@ -7,7 +7,7 @@ This toolkit is designed to run as a local Windows experiment app from a cloned 
 Run once:
 
 ```powershell
-.\windows\Setup_Windows_App.ps1
+.\For-AI\engineering\build\windows\Setup_Windows_App.ps1
 ```
 
 The script creates `.venv`, installs the toolkit in editable mode, installs test and TTS extras, and creates local runtime folders.
@@ -15,13 +15,13 @@ The script creates `.venv`, installs the toolkit in editable mode, installs test
 ## Launch
 
 ```bat
-windows\Launch_HTML_Dashboard.bat
+apps\designer\launchers\Launch_HTML_Dashboard.bat
 ```
 
 Create a desktop shortcut:
 
 ```powershell
-.\windows\Create_Desktop_Shortcut.ps1
+.\distributions\windows-support\Create_Desktop_Shortcut.ps1
 ```
 
 The source shortcut uses the packaged PPS Toolkit icon and opens the standard
@@ -38,7 +38,7 @@ window/taskbar entries do not fall back to the generic Python icon.
 Build the packaged local dashboard launcher:
 
 ```powershell
-.\windows\Build_Dashboard_Launcher_Exe.ps1
+.\For-AI\engineering\build\windows\Build_Dashboard_Launcher_Exe.ps1
 ```
 
 The build writes `dist\PPSDashboardLauncher\PPSDashboardLauncher.exe` as an
@@ -53,13 +53,13 @@ Build the native participant runner as a Windows program when you want the
 runner to appear as its own app rather than as Python:
 
 ```powershell
-.\windows\Build_Experiment_Runner_Exe.ps1
+.\For-AI\engineering\build\windows\Build_Experiment_Runner_Exe.ps1
 ```
 
 The build writes `dist\PPSExperimentRunner\PPSExperimentRunner.exe` as an
 onedir PyInstaller app with no console window and the packaged PPS Toolkit icon
 embedded. This exe is the only active operator experiment runner. The
-`windows\Launch_Experiment_Runner.bat` wrapper only activates that exe and
+`apps\runner\launchers\Launch_Experiment_Runner.bat` wrapper only activates that exe and
 fails with build instructions if it is missing; it does not fall back to a
 Python module runner, and direct module launch exits with retirement guidance.
 With no batch arguments, the wrapper opens the standalone Experiment Runner
@@ -89,13 +89,13 @@ firewall, privacy, and APK build steps.
 Build the native Android companion debug APK:
 
 ```powershell
-.\windows\Build_Android_Companion.ps1
+.\For-AI\experiments\android-companion\tooling\Build_Android_Companion.ps1
 ```
 
 For finished public releases, build the lightweight downloader separately:
 
 ```powershell
-.\windows\Build_PPS_Downloader.ps1
+.\For-AI\engineering\build\windows\Build_PPS_Downloader.ps1
 ```
 
 That creates a small `dist\PPS-Toolkit-Downloader.exe` intended for GitHub
@@ -108,14 +108,14 @@ packaged dashboard launcher. See
 Open the Qt stimulus design layer for comparison:
 
 ```bat
-windows\Launch_Stimulus_Designer.bat
+apps\designer\launchers\Launch_Stimulus_Designer.bat
 ```
 
 Run the native Focus Mode participant app directly when reopening a prepared
 dashboard experiment or choosing a finished study/profile preset:
 
 ```bat
-windows\Launch_Experiment_Runner.bat
+apps\runner\launchers\Launch_Experiment_Runner.bat
 ```
 
 The HTML dashboard is the standard researcher-facing interface. It runs as a
@@ -130,7 +130,7 @@ The same HTML interface can be hosted on GitHub Pages. For that workflow, start
 the local companion backend and use the website as the visible UI:
 
 ```bat
-windows\Start_Website_Companion.bat
+apps\designer\launchers\Start_Website_Companion.bat
 ```
 
 See [GitHub Pages Dashboard](GITHUB_PAGES_DASHBOARD.md).
@@ -138,11 +138,11 @@ See [GitHub Pages Dashboard](GITHUB_PAGES_DASHBOARD.md).
 Useful launch variants:
 
 ```bat
-windows\Launch_HTML_Dashboard.bat --port 8770
-windows\Launch_HTML_Dashboard.bat --no-browser
-windows\Launch_Experiment_Runner.bat --participant-id P001
+apps\designer\launchers\Launch_HTML_Dashboard.bat --port 8770
+apps\designer\launchers\Launch_HTML_Dashboard.bat --no-browser
+apps\runner\launchers\Launch_Experiment_Runner.bat --participant-id P001
 dist\PPSExperimentRunner\PPSExperimentRunner.exe --launcher
-windows\Start_Website_Companion.bat --web-origin https://example.github.io
+apps\designer\launchers\Start_Website_Companion.bat --web-origin https://example.github.io
 ```
 
 Segment 6 in the dashboard includes **Preload Instruction Audio Clips** for
@@ -154,13 +154,13 @@ auditory channels only.
 ## Audio Device Check
 
 ```bat
-windows\List_Audio_Devices.bat
+apps\runner\launchers\List_Audio_Devices.bat
 ```
 
 For rendered binaural+tactile files, run the silent routing stress test:
 
 ```bat
-windows\Stress_Audio_Device.bat
+apps\runner\launchers\Stress_Audio_Device.bat
 ```
 
 The retired two-channel Study 5 WAV layout used the original stereo routing:

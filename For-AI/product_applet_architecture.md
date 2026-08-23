@@ -1,11 +1,13 @@
 # Product Applet And Shared-Workspace Architecture
 
+> **Status (2026-08-23): historical design exploration.** The V1 product decision supersedes the central-hub proposal below: Designer and Runner ship as independent applications, Full installs both shortcuts, and no new central hub is part of V1. Use `module_map.md` and `engineering/architecture/ARCHITECTURE.md` for current ownership.
+
 ## Status
 
 This document records the agreed product direction as of 2026-08-05. It is a
 target architecture for release maturation, not a claim that every current
 source module already follows these boundaries. Current implementation
-ownership remains documented in `module_map.md` and `docs/ARCHITECTURE.md`.
+ownership remains documented in `module_map.md` and `engineering/architecture/ARCHITECTURE.md`.
 
 ## Product Shape
 

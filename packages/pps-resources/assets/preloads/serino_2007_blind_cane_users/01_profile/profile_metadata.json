@@ -1,0 +1,64 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "serino_2007_blind_cane_users",
+  "title": "Serino 2007 blind cane-user static near/far PPS",
+  "citation": "Serino, A., Bassolino, M., Farne, A., & Ladavas, E. (2007). Extended multisensory space in blind cane users. Psychological Science, 18(7), 642-648.",
+  "doi": "10.1111/j.1467-9280.2007.01952.x",
+  "source_url": "https://doi.org/10.1111/j.1467-9280.2007.01952.x",
+  "verification_status": "partial",
+  "notes": "Manual PDF audit extracted the static near/far audio-tactile task: 150 ms white-noise bursts, near hand versus far cane/handle-tip source positions, weak electrical tactile targets, strong electrical tactile nontargets, auditory-only catch trials, and vocal response to weak tactile targets. Exact source noise, electrical pulse details, ITI, and numeric response window were not reported, so this profile is a known-parameter runnable contract rather than a full physical reproduction.",
+  "reference_parameters": {
+    "publication_status": "published",
+    "profile_type": "static_near_far_electrical_gonogo_tool_context",
+    "manual_review_file": "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_reviews/serino_2007_blind_cane_users.json",
+    "reported_sound_type": "white noise",
+    "reported_sound_duration_ms": 150,
+    "reported_sound_level_db_spl": 70,
+    "reported_near_sound_to_tactile_soa_ms": 0,
+    "reported_far_sound_to_tactile_soa_ms": 5,
+    "reported_near_sound_position": "close to the stimulated right hand",
+    "reported_far_sound_position": "on the floor approximately 125 cm from the hand at the cane or handle tip",
+    "reported_tactile_stimulators": "two DS7A Digitimer constant-current stimulators",
+    "reported_tactile_site": "upper side of the right index finger",
+    "reported_tactile_intensities": {
+      "weak_target": "about 90% perception",
+      "strong_nontarget": "about 100% perception"
+    },
+    "reported_response_rule": "verbal response only to weak tactile targets; withhold response for strong tactile nontargets and auditory-only catches",
+    "reported_trial_formula": "30 weak-target near + 30 weak-target far + 30 strong-nontarget near + 30 strong-nontarget far + 30 auditory-only catch trials = 150 trials per described task.",
+    "profile_scope": "The audiotactile task parameters are encoded. Cane versus handle and training-session context remain non-blocking experimental context until ordered intervention phases are needed.",
+    "loudness_policy": {
+      "mode": "estimated_spl",
+      "calibration_mode": "estimate_allowed",
+      "calibration_status": "estimated_not_measured",
+      "start_spl_db": 70.0,
+      "end_spl_db": 70.0,
+      "instruction_offset_db": 0.0,
+      "distance_gain_policy": "disable_direct_path_gain_for_calibrated_loudness"
+    },
+    "implementation_gaps": [
+      "exact white-noise source asset, seed, and spectral recipe",
+      "exact electrical tactile pulse duration, waveform, current, and electrode impedance calibration",
+      "exact ITI or jitter distribution and numeric response window",
+      "exact voice-key response capture threshold and latency correction"
+    ]
+  },
+  "provenance": [
+    {
+      "field": "source review",
+      "source": "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_reviews/serino_2007_blind_cane_users.json records a high-confidence manual PDF review of the main paper text and rendered pages."
+    },
+    {
+      "field": "auditory parameters",
+      "source": "Manual review records 150 ms white-noise bursts, 70 dB ear-level equalization, near hand sound simultaneous with touch, and far floor/cane-tip sound 5 ms before touch."
+    },
+    {
+      "field": "tactile and response parameters",
+      "source": "Manual review records Digitimer DS7A electrical stimulation of the upper right index finger, weak targets at about 90% perception, strong nontargets at about 100% perception, and verbal response only to weak tactile targets."
+    },
+    {
+      "field": "trial counts",
+      "source": "Manual review records 30 weak-target near, 30 weak-target far, 30 strong-nontarget near, 30 strong-nontarget far, and 30 sound-only catch trials per described task."
+    }
+  ]
+}

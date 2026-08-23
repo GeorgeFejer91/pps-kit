@@ -55,7 +55,7 @@ Every visual/layout change must repeat this loop until the criteria pass:
 
 1. State the affected components and measurable criteria before editing.
 2. Build the deterministic shared frontend used by both the desktop package and hosted site.
-3. Run `python validation_protocols/scripts/run_designer_visual_layout_audit.py` from the repository root. The audit clicks the visible workflow rail and captures every Segment 0-6 stage at multiple viewports, light/dark states, plus the Segment 0/About views; it also records DOM geometry invariants.
+3. Run `python For-AI/engineering/validation/scripts/run_designer_visual_layout_audit.py` from the repository root. The audit clicks the visible workflow rail and captures every Segment 0-6 stage at multiple viewports, light/dark states, plus the Segment 0/About views; it also records DOM geometry invariants.
 4. Inspect the clean screenshots and generated contact sheet, not only the numeric report. Check hierarchy, balance, grouping, clipping, overlap, whitespace, text wrapping, and whether the intended action dominates appropriately.
 5. Correct every hard failure and any material visual defect, rebuild, and rerun the audit.
 6. Repeat visual inspection after the correction. A first-pass screenshot is evidence collection, not approval.

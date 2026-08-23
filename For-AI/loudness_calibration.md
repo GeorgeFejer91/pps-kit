@@ -3,7 +3,7 @@
 Created: 2026-06-20
 
 This repo now has an exploratory loudness-calibration workspace at
-`exploratory/loudness-calibration/`.
+`For-AI/research/calibration/loudness-calibration/`.
 
 Key findings:
 
@@ -39,7 +39,7 @@ Policy direction:
 
 Implemented software policy:
 
-- `src/peripersonal_space_toolkit/loudness.py` defines the shared
+- `packages/pps-runtime/src/peripersonal_space_toolkit/loudness.py` defines the shared
   `loudness_policy` schema and defaults: 55 dB SPL start, 75 dB SPL endpoint,
   -6 dB instruction offset, estimated 0 dBFS = 109.2 dB SPL for Komplete Audio
   6 MK2 at maximum headphone output into HD 560S, and -1 dBFS audio peak
@@ -73,9 +73,9 @@ assumptions.
 
 Local source update:
 
-- `exploratory/loudness-calibration/sources/` is the local-only publication
+- `For-AI/research/calibration/loudness-calibration/sources/` is the local-only publication
   review folder for this loudness work. PDFs there are ignored by Git.
 - The Ferri et al. PPS paper is locally downloaded as
   `ferri_2015_emotion_inducing_approaching_sounds_pps.pdf` from UCL Discovery;
   tracked metadata, hash, page count, and short facts live in
-  `exploratory/loudness-calibration/source_manifest.json`.
+  `For-AI/research/calibration/loudness-calibration/source_manifest.json`.

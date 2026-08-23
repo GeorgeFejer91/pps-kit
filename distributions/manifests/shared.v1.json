@@ -1,0 +1,25 @@
+{
+  "schema": "pps-component-manifest.v1",
+  "component_id": "shared",
+  "version": "0.1.0",
+  "platform": "any",
+  "dependencies": [],
+  "source_to_install": [
+    {"source": "packages/pps-resources/assets", "install": "shared/assets", "kind": "tree"},
+    {"source": "packages/pps-resources/study_templates", "install": "shared/study_templates", "kind": "tree"},
+    {"source": "packages/pps-resources/configs", "install": "shared/configs", "kind": "tree"},
+    {"source": "packages/pps-resources/data/sample", "install": "shared/data/sample", "kind": "tree"},
+    {"source": "third_party", "install": "shared/third_party", "kind": "tree"},
+    {"source": "docs", "install": "shared/docs", "kind": "tree"},
+    {"source": "LICENSE", "install": "shared/LICENSE", "kind": "file"},
+    {"source": "THIRD_PARTY_LICENSES.md", "install": "shared/THIRD_PARTY_LICENSES.md", "kind": "file"},
+    {"source": "CITATION.cff", "install": "shared/CITATION.cff", "kind": "file"}
+  ],
+  "entrypoints": [],
+  "licenses": ["LICENSE", "THIRD_PARTY_LICENSES.md"],
+  "exclusions": [
+    "For-AI/**", "artifacts/**", "build/**", "dist/**/build/**", "local_data/**",
+    "**/private/**", "**/*.apk", "**/*.xdf", "**/participant_data/**",
+    "**/generated_outputs/**", "**/unreviewed/**"
+  ]
+}

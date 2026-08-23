@@ -1,0 +1,19 @@
+{
+  "schema": "pps-component-manifest.v1",
+  "component_id": "designer",
+  "version": "0.1.0",
+  "platform": "windows-x64",
+  "dependencies": [{"component_id": "shared", "version": "0.1.0"}],
+  "source_to_install": [
+    {"source": "dist/PPSDesigner", "install": "apps/PPSDesigner", "kind": "generated_tree"}
+  ],
+  "entrypoints": [
+    {"id": "pps-designer", "path": "apps/PPSDesigner/PPSDesigner.exe", "shortcut": "PPS Experiment Designer"},
+    {"id": "pps-dashboard", "path": "apps/PPSDesigner/PPSDesigner.exe", "compatibility_alias_until": "0.2.0"}
+  ],
+  "licenses": ["shared/LICENSE", "shared/THIRD_PARTY_LICENSES.md"],
+  "exclusions": [
+    "For-AI/**", "dist/PPSExperimentRunner/**", "**/*android*", "**/*.apk",
+    "**/participant_data/**", "**/generated_outputs/**", "**/unreviewed/**"
+  ]
+}

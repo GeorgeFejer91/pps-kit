@@ -44,20 +44,22 @@ before registration.
 Build the shared frontend:
 
 ```text
-npm --prefix src/peripersonal_space_toolkit/dashboard ci
-npm --prefix src/peripersonal_space_toolkit/dashboard run build
+npm --prefix apps/designer/frontend ci
+npm --prefix apps/designer/frontend run build
 ```
 
-The output is `src/peripersonal_space_toolkit/dashboard/compiled/`; both FastAPI
-and the root GitHub Pages wrapper use this directory.
+The output is `apps/designer/frontend/compiled/`; FastAPI and local packaging
+consume it directly, while Pages assembly copies the same bytes into ignored
+deployment staging.
 
 Windows x64:
 
 ```powershell
-.\windows\Build_PPS_Designer.ps1
+.\For-AI\engineering\build\windows\Build_PPS_Designer.ps1
 ```
 
-Linux source launcher and package builder are under `packaging/linux/`.
+Linux source launcher and package builder are under
+`apps/designer/packaging/linux/`.
 `build_designer_packages.sh` uses a clean virtual environment, PyInstaller, and
 `fpm` to emit DEB/RPM staging packages. Runtime systems need GTK 3 and a current
 WebKitGTK package. Qt, CEF, Electron, and bundled Chromium are excluded.

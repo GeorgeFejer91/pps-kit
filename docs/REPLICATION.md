@@ -37,7 +37,7 @@ Generated stimuli are written under `artifacts\stimuli\` and are intentionally i
 To draft variants before generating or piloting them:
 
 ```bat
-windows\Launch_Stimulus_Designer.bat
+apps\designer\launchers\Launch_Stimulus_Designer.bat
 ```
 
 The designer has separate `Stimulus Design`, `Trial Assembler`, and `Experiment Runner` tabs. It uses the fixed FABIAN/TU SOFA HRIR path under the hood, while the GUI focuses on experimenter-facing controls: study profile, noise types, custom looming and prestimulus audio files, `Starting Point`/`End Point` distance in cm, full 0-360 degree endpoint rotation around the listener, movement timing, 2D/3D trajectory preview, SOA/spatial timing, trial assembly, participant session preparation, Focus Mode running, and immediate review/QC. The default trajectory is horizontal on the listener head/ear plane; endpoint height offsets are available only in deliberate `3D orbit` mode. Block contents stay fixed across participants, while participant block order is randomized or counterbalanced from the saved seed. Use `Save Settings` for local repeated runs, and keep published JSON design files with your protocol materials when running a non-default variant.
@@ -54,7 +54,7 @@ The locked Study 5 flow now runs through the dashboard Segment 6 handoff and
 native Focus Mode:
 
 ```bat
-windows\Launch_Experiment_Runner.bat --participant-id P001
+apps\runner\launchers\Launch_Experiment_Runner.bat --participant-id P001
 ```
 
 The standalone Experiment Runner uses a participant-number dropdown for finished

@@ -1,7 +1,8 @@
 # GitHub Pages Dashboard
 
-The HTML dashboard can be published as a static GitHub Pages interface while the
-experiment software runs locally on the research PC.
+The compiled Designer can be published as a static GitHub Pages interface while
+the experiment software runs locally on the research PC. Local packaging and
+Pages use the exact same `apps/designer/frontend/compiled/` bytes.
 
 ## Architecture
 
@@ -100,27 +101,27 @@ OpenAlex provenance; otherwise the asset exposes a copyright caveat and source
 link. Raw provider payloads, PDFs, supplements, extracted full text, and fuzzy
 parameter matches do not belong in the public dashboard asset.
 
-The canonical public-safe source snapshot lives in `data/publication_network/`.
+The canonical public-safe source snapshot lives in `For-AI/research/literature/publication-network/`.
 Rebuild the generated dashboard asset after changing that snapshot, modality
 reviews, or DOI-linked parameter audits:
 
 ```bash
-node tools/build_publication_network_asset.mjs
+node For-AI/research/literature/tools/build_publication_network_asset.mjs
 ```
 
 For a deliberate initial refresh from a locally held network bundle, pass the
 bundle explicitly; the bundle itself is not committed:
 
 ```bash
-node tools/build_publication_network_asset.mjs --source-bundle /path/to/pps-citation-network-YYYYMMDD
+node For-AI/research/literature/tools/build_publication_network_asset.mjs --source-bundle /path/to/pps-citation-network-YYYYMMDD
 ```
 
 Then run the publication-network tests and rebuild Vite so the packaged/local
 and GitHub Pages dashboards receive the same source and generated data:
 
 ```bash
-python -m pytest tests/test_publication_network.py
-npm --prefix src/peripersonal_space_toolkit/dashboard run build
+python -m pytest For-AI/engineering/tests/test_publication_network.py
+npm --prefix apps/designer/frontend run build
 ```
 
 The default data rebuild must be deterministic. Review the generated JSON diff,
@@ -130,7 +131,11 @@ wrappers, data snapshot, tests, and project-memory changes together.
 
 ## Publish
 
-Enable GitHub Pages for the repository branch root. The public dashboard URL is:
+GitHub Pages deploys the artifact assembled by
+`For-AI/engineering/automation/build_pages.mjs` through the thin
+`.github/workflows/pages.yml` wrapper. The assembly copies `website/` route
+inputs, the compiled Designer, approved catalogues, and `website/CNAME` into
+ignored `dist/pages/`. The public dashboard URL is:
 
 ```text
 https://ppskit.qzz.io/
@@ -143,23 +148,22 @@ https://georgefejer91.github.io/pps-kit/
 ```
 
 The `github.com/GeorgeFejer91/pps-kit` URL is the GitHub repository/code view.
-The Pages root `index.html` displays the dashboard from the same packaged
-dashboard assets instead of redirecting visitors to a nested source path. The
-dashboard uses relative static paths, so the same files work when served from
-GitHub Pages or from the local FastAPI app.
+The assembled Pages root `index.html` loads the copied compiled Designer, and
+the assembled root `CNAME` comes from `website/CNAME`. Relative static paths
+allow the same compiled files to work on Pages and through local FastAPI.
 
 ## Use On A Research PC
 
 Install the toolkit once:
 
 ```powershell
-.\windows\Setup_Windows_App.ps1
+.\For-AI\engineering\build\windows\Setup_Windows_App.ps1
 ```
 
 Start the local companion backend:
 
 ```bat
-windows\Start_Website_Companion.bat
+apps\designer\launchers\Start_Website_Companion.bat
 ```
 
 Then open the GitHub Pages dashboard. The left rail shows the local companion
@@ -168,11 +172,11 @@ status and lets the user set the backend URL if a non-default port is used.
 ## Safety Boundary
 
 A public website cannot silently install Python, packages, audio drivers, or
-experiment dependencies. The dashboard includes a `Download Installer` link for
-the small GitHub-hosted PPS downloader plus a secondary full-package link for
-the Zenodo-hosted offline lab ZIP. Installation still happens locally on the
-research PC, and the downloader verifies `pps_download_manifest.v1.json` hashes
-before extracting or launching software.
+experiment dependencies. The download route offers separate Designer, Runner,
+and Full bootstrapper artifacts when their matching GitHub Release assets
+exist. Heavy payloads may live on Zenodo. Installation happens locally, and
+each downloader verifies its component-specific payload and inventory hashes
+before extraction or launch.
 
 The companion backend allows the default project GitHub Pages origin
 (`https://georgefejer91.github.io`) and the custom domain
@@ -180,7 +184,7 @@ The companion backend allows the default project GitHub Pages origin
 companion with an explicit origin:
 
 ```bat
-windows\Start_Website_Companion.bat --web-origin https://example.github.io
+apps\designer\launchers\Start_Website_Companion.bat --web-origin https://example.github.io
 ```
 
 Use `--no-default-web-origin` if only a custom origin should be allowed.

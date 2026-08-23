@@ -1,44 +1,33 @@
-# Privacy And Release Checklist
+# Privacy-Safe Release Checks
 
-Before publishing a release, run:
+Run the release audit before assembling any Designer, Runner, Shared, Full, or
+Pages artifact:
 
 ```powershell
-python tools\release_audit.py
-python tools\make_release_bundle.py
-pytest
+python For-AI\engineering\release\tools\release_audit.py
 ```
 
-## Files Intended For Publication
+The audit and structural tests enforce these boundaries:
 
-- source code under `src\`
-- Windows scripts under `windows\`
-- Android companion source under `android\runner-companion\`
-- reusable seed assets under `assets\`
-- the bundled FABIAN/TU SOFA HRIR plus its attribution/hash manifest
-- pinned third-party source snapshots under `third_party\`
-- deidentified sample CSVs under `data\sample\`
-- documentation, tests, and tool scripts
+- `For-AI/` is tracked development/research material and never ships.
+- participant/demographic data, recordings, generated sessions/renders,
+  validation outputs, private paths, credentials, and caches never ship.
+- only deidentified product sample data under
+  `packages/pps-resources/data/sample/` may ship.
+- Android companion source, APKs, phone bridges/CLIs/assets, and experimental
+  controls do not ship in V1.
+- each distributable file has exactly one Shared, Designer, or Runner owner.
+- every manifest uses reviewed product roots and explicit exclusion patterns.
 
-## Files Not Intended For Publication
+Generated releases remain under ignored `dist/`. The component assembler and
+inventory validator live under `For-AI/engineering/release/`; their outputs are
+release artifacts, not repository source.
 
-- `local_data\`
-- `artifacts\`
-- `models\`
-- `Example-configs\`
-- raw loopback recordings
-- generated APKs and Android build outputs unless a release explicitly attaches a reviewed APK artifact
-- participant demographics
-- name-bearing decoder outputs
-- third-party HRIR/SOFA files if their license does not permit redistribution
-- licensed background music
+To create a reviewed source bundle for development/archive use:
 
-## One-Bundle Archive
+```powershell
+python For-AI\engineering\release\tools\make_release_bundle.py
+```
 
-Use `python tools\make_release_bundle.py` to create a single reviewed zip for
-distribution or repository upload. The generated zip contains a
-`bundle_manifest.json` file with SHA256 hashes for every bundled file, including
-the FABIAN SOFA asset and the pinned 3DTI source snapshot metadata.
-
-## Data Handling
-
-The runner defaults to local ignored paths for participant data. If a lab changes these paths, it should preserve the same separation between public repository files and participant-specific runtime files. The Android companion uses a per-run LAN token and must not be treated as a public internet API; participant names are not exposed in the QR payload or health endpoint, and name-sharing opt-in still controls whether names are written into local session/LSL metadata.
+That source bundle is not an end-user component payload and must retain its own
+privacy audit result.
