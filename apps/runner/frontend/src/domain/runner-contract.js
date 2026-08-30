@@ -154,7 +154,7 @@ function validateSetup(value) {
   snapshotBoolean(setup.submitted, "snapshot.setup.submitted");
   snapshotBoolean(setup.ready, "snapshot.setup.ready");
   stringArray(setup.required_missing, "snapshot.setup.required_missing", 32);
-  snapshotString(setup.participant_code, "snapshot.setup.participant_code", 32);
+  snapshotString(setup.participant_code, "snapshot.setup.participant_code", 64);
   snapshotBoolean(setup.participant_name_present, "snapshot.setup.participant_name_present");
   snapshotBoolean(setup.name_sharing_opt_in, "snapshot.setup.name_sharing_opt_in");
   nullable(setup.age, (age) => snapshotUint(age, "snapshot.setup.age", 255));

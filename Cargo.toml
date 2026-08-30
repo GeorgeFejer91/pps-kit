@@ -4,6 +4,7 @@ members = [
     "packages/pps-contracts",
     "packages/pps-brsp",
     "packages/pps-runner-core",
+    "packages/pps-session-package",
     "apps/runner/src-tauri",
     "apps/quest-runner/native/pps-quest-core",
 ]
@@ -16,6 +17,7 @@ rust-version = "1.88"
 
 [workspace.dependencies]
 base64 = "0.22"
+csv = "1"
 hmac = "0.12"
 rand = "0.8"
 serde = { version = "1", features = ["derive"] }

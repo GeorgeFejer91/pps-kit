@@ -6,6 +6,7 @@ fn main() {
             "remote_status",
             "configure_remote",
             "rotate_pairing",
+            "select_prepared_session",
             "remote_session_claim",
             "remote_session_renew",
             "remote_session_dispatch",

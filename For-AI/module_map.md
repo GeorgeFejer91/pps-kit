@@ -49,6 +49,10 @@ Candidate V2 boundaries coexist with, but do not replace, that V1 path:
 - Versioned action/state/wire contracts: `packages/pps-contracts/`.
 - Transport-neutral BRSP/1 proof and sequence rules: `packages/pps-brsp/`.
 - Pure target-authoritative reducer: `packages/pps-runner-core/`.
+- Pure read-only V1 prepared-session verifier:
+  `packages/pps-session-package/`. Its native receipt owns resolved paths and
+  digests but is deliberately non-serializable; only its path-free summary may
+  cross Tauri IPC.
 - Optional experimental Quest/Spatial SDK application context and JNI adapter:
   `apps/quest-runner/`.
 
@@ -59,6 +63,16 @@ owns a strict JavaScript reducer mirroring the closed action/state contract; it
 still needs Rust-to-JavaScript differential fixtures before promotion. The
 validated Python Runner remains the scientific compatibility oracle while
 functionality is migrated incrementally.
+
+The Tauri prepared-session chooser is a no-argument command restricted to the
+bundled main window. Rust owns the operating-system picker, verification, and
+receipt retention. Package adoption disarms the reducer and rotates remote
+authority, while verified V1 plans remain non-runnable until a native execution
+adapter is present. The Python/Rust differential status probe lives in
+`For-AI/engineering/tests/test_rust_session_package_differential.py` and runs
+as its own Windows/macOS/Linux Runner-preview CI matrix in addition to the Rust
+crate matrix. Picker/verification is native single-flight; a retained verified
+plan cannot be replaced by the demo action.
 
 Android/phone execution is not a V1 Runner module. The earlier Python/Kotlin
 phone source, bridges, tests, protocols, and CLIs remain under
@@ -144,8 +158,9 @@ Release assembly code and tests are internal:
 GitHub workflows must remain minimal wrappers because GitHub requires their
 location. Their substantive logic belongs under `For-AI/engineering/automation/`.
 The thin `.github/workflows/runner-next.yml` wrapper runs
-`check_runner_next.ps1`: transport-neutral Rust crates are checked on Windows,
-macOS, and Linux, while the canonical browser companion is tested and compiled
+`check_runner_next.ps1`: transport-neutral Rust crates, including the V1
+prepared-session verifier, are checked on Windows, macOS, and Linux, while the
+canonical browser companion is tested and compiled
 on Node 22. These software gates do not constitute platform hardware/timing
 qualification or signed Tauri bundle evidence.
 

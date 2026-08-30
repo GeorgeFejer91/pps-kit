@@ -28,7 +28,7 @@ use serde::de::DeserializeOwned;
 use tokio::sync::{mpsc, watch, Mutex as AsyncMutex};
 use tower_http::services::ServeDir;
 
-use crate::runtime::{ActiveController, AppRuntime};
+use crate::runtime::{random_owner_token, ActiveController, AppRuntime};
 
 const HANDSHAKE_TIMEOUT: Duration = Duration::from_secs(12);
 const STATE_HEARTBEAT: Duration = Duration::from_millis(250);
@@ -169,7 +169,7 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
     // `controllerConnected` means the complete mutual hello/proof/ready
     // exchange succeeded. Reserve the single-controller authority only now,
     // so a stalled or invalid ready cannot appear as an authenticated owner.
-    let owner_token = random_nonce();
+    let owner_token = random_owner_token();
     {
         let current = runtime.0.remote_config()?;
         if !current.enabled || current.session_id != remote.session_id {
@@ -1043,7 +1043,7 @@ mod tests {
 
     fn active_guard(runtime: &AppRuntime, controller_id: &str) -> ActiveControllerGuard {
         let remote = runtime.0.remote_config().unwrap();
-        let owner_token = random_nonce();
+        let owner_token = random_owner_token();
         *runtime.0.active_controller.lock().unwrap() = Some(ActiveController {
             id: controller_id.to_owned(),
             session_id: remote.session_id.clone(),

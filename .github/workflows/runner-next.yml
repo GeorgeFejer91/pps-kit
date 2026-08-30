@@ -5,24 +5,32 @@ on:
     paths:
       - "Cargo.lock"
       - "Cargo.toml"
+      - "pyproject.toml"
       - "apps/quest-runner/**"
       - "apps/runner/**"
       - "packages/pps-brsp/**"
       - "packages/pps-contracts/**"
       - "packages/pps-runner-core/**"
+      - "packages/pps-session-package/**"
+      - "packages/pps-runtime/src/peripersonal_space_toolkit/**"
       - "For-AI/engineering/automation/check_runner_next.ps1"
+      - "For-AI/engineering/tests/test_rust_session_package_differential.py"
       - ".github/workflows/runner-next.yml"
   push:
     branches: [main]
     paths:
       - "Cargo.lock"
       - "Cargo.toml"
+      - "pyproject.toml"
       - "apps/quest-runner/**"
       - "apps/runner/**"
       - "packages/pps-brsp/**"
       - "packages/pps-contracts/**"
       - "packages/pps-runner-core/**"
+      - "packages/pps-session-package/**"
+      - "packages/pps-runtime/src/peripersonal_space_toolkit/**"
       - "For-AI/engineering/automation/check_runner_next.ps1"
+      - "For-AI/engineering/tests/test_rust_session_package_differential.py"
       - ".github/workflows/runner-next.yml"
   workflow_dispatch:
 
@@ -64,6 +72,26 @@ jobs:
       - name: Check and test the native desktop shell
         shell: pwsh
         run: ./For-AI/engineering/automation/check_runner_next.ps1 -Mode Desktop
+
+  python-rust-package-oracle:
+    name: Python/Rust V1 package oracle (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - uses: dtolnay/rust-toolchain@1.88.0
+      - name: Install the Python oracle and test dependencies
+        run: python -m pip install --disable-pip-version-check -e ".[dev]"
+      - name: Compare Rust verification with the Python V1 oracle
+        run: python -m pytest -q For-AI/engineering/tests/test_rust_session_package_differential.py
 
   browser-companion:
     name: Browser companion

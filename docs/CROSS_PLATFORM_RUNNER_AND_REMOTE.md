@@ -95,7 +95,7 @@ the snapshot.
 ## Desktop preview
 
 The desktop app uses Tauri v2 and a plain Vite/ES-module frontend. Tauri exposes
-five local/configuration commands plus four remote-session commands: claim,
+six local/configuration commands plus four remote-session commands: claim,
 renew, dispatch, and revoke. Those four commands are restricted to the bundled
 `main` WebView and preserve remote origin, negotiated scopes, the exact owner
 token, canonical control sequence, and the native five-second watchdog. VDO
@@ -106,6 +106,25 @@ For a WebView-carried VDO session, negotiated `session.read` alone is not enough
 to publish desktop state: initial snapshot/state remain suppressed until the
 native claim succeeds, every requested snapshot awaits a fresh native renewal,
 and publication stops when the native controller ID/deadline no longer matches.
+
+The sixth local command selects a real `pps-run-session.v1` manifest. It takes
+no path argument: the bundled main window asks Rust to open the native operating
+system file chooser, and `packages/pps-session-package/` verifies the chosen
+manifest and its ordered block assets. For `participant_block_wavs`, it also
+checks the recorded Segment 6 hash, source-block CSV provenance and row counts,
+and source-trial WAV hashes using the V1 Python Runner's first-failure order.
+Resolved paths and digests remain in a non-serializable Rust receipt; the
+WebView receives only a path-free identity/block summary. Adopting a package
+disarms the target, clears any controller owner, and rotates pairing authority.
+The native picker/verifier is single-flight even when the WebView invokes its
+command concurrently. Once a real plan is retained, the demo-preparation
+action is removed and rejected so native receipt and reducer identity cannot
+diverge. Unambiguous foreign-host absolute path syntax fails closed instead of
+being joined as a relative path. V1 has no source-host marker, so ambiguous
+rooted spellings retain native Python behavior; reliable relocation requires a
+future versioned format.
+The retained receipt must be reverified at the future execution boundary to
+close the filesystem time-of-check/use gap.
 
 Local-only startup does not bind a LAN socket. The first explicit **Enable
 phone remote** action reserves `0.0.0.0` and launches the companion server; a
@@ -134,10 +153,12 @@ npm --prefix apps/runner run tauri build -- --debug --no-bundle
 ```
 
 The desktop UI retains the existing Runner's visual palette and high-level
-Experiment Control, Data Logging, and Phone Remote hierarchy. The current
-slice intentionally drives a deterministic compatibility session. The
-validated Python scheduler and acquisition stack remain the production Runner
-until their behavior has been ported behind supervised adapters and qualified.
+Experiment Control, Data Logging, and Phone Remote hierarchy. It can inspect
+and adopt a genuine verified V1 prepared plan, but that plan is intentionally
+not armable yet: only the deterministic compatibility demo has an execution
+adapter. The validated Python scheduler and acquisition stack remain the
+production Runner until their behavior has been ported behind supervised
+adapters and qualified.
 
 ## Browser companion
 
@@ -255,7 +276,11 @@ The migration order is:
 
 1. Freeze versioned contracts and differential fixtures against the Python
    Runner.
-2. Port package verification and the session state machine.
+2. Port package verification and the session state machine. V1 prepared-package
+   verification/adoption is now native; execution scheduling is still open.
+   Before promotion, add early manifest/allocation bounds, legacy `~` path
+   differential fixtures, summary recovery after WebView reload, and a v2
+   content-addressed prepared-asset contract.
 3. Add a bounded supervised compatibility worker for still-Python behavior.
 4. Port logging and artifact writers with golden-output comparison.
 5. Port target-native audio, response, tactile, and acquisition backends.

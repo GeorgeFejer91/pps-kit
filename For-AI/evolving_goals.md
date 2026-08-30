@@ -2322,3 +2322,22 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   not the final authority. Platform promotion requires
   host-native signing, installers/updater manifests, rollback, privacy/license
   inventories, and physical Windows/macOS/Linux/phone/Quest qualification.
+- The first real V1 package slice is now native Rust. A no-argument Tauri
+  command opens the operating-system picker, `pps-session-package` checks the
+  selected `pps-run-session.v1` in the Python oracle's first-failure order, and
+  the runtime retains its path-bearing non-serializable verification receipt.
+  Only a path-free ordered-block summary reaches the WebView. Adoption disarms
+  and rotates remote authority. The picker/verifier is native single-flight;
+  `package.prepare_demo` cannot replace a retained real receipt, and foreign-
+  host absolute path syntax is rejected before lookup when unambiguous. A
+  Windows/macOS/Linux CI matrix compares the Rust verifier with the Python V1
+  oracle. V1's ambiguous rooted spellings retain native Python behavior. Keep
+  “verified” separate from “execution
+  ready”: real prepared plans remain unarmable until the Rust scheduler/audio
+  adapter is implemented, rechecks the receipt at use time, and passes
+  differential plus physical timing qualification. Do not reinterpret V1
+  Windows absolute paths on another host; introduce a versioned relocatable
+  package instead. Before promoting the verifier beyond this inspect/adopt
+  slice, bound manifest bytes/blocks/strings before allocation, add Python
+  `expanduser` path differential cases, restore the retained path-free summary
+  after WebView reload, and define a v2 content-addressed prepared-asset schema.

@@ -10,6 +10,7 @@
     "allow-remote-status",
     "allow-configure-remote",
     "allow-rotate-pairing",
+    "allow-select-prepared-session",
     "allow-remote-session-claim",
     "allow-remote-session-renew",
     "allow-remote-session-dispatch",

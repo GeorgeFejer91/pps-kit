@@ -302,6 +302,27 @@ authentication primitives, and target-authoritative reducer. The current
 Python/PySide Focus Mode remains the production and scientific oracle until
 each migrated operation passes differential fixtures and hardware validation.
 
+The first real-package migration slice is `packages/pps-session-package/`, a
+pure Rust, read-only verifier for `pps-run-session.v1`. It mirrors the Python
+prepared-session status order, including legacy block existence and
+`participant_block_wavs` Segment 6/source-CSV/source-trial freshness checks. The
+Tauri main window invokes a no-argument native chooser; a browser or remote
+caller cannot submit a path. Native resolved paths and hashes stay in a
+non-serializable receipt retained by `AppRuntime`, while the WebView receives a
+path-free ordered-block summary. Adoption sets the real participant/session/
+part identity, disarms locally, clears remote ownership, and rotates pairing.
+The native selection/verification path is single-flight, and an adopted real
+plan cannot be replaced through `package.prepare_demo`; selecting another real
+plan must pass through the native picker and rotate authority again. Foreign-
+host absolute path syntax is rejected before lookup when it is unambiguous.
+V1 has no source-host marker, so ambiguous rooted syntax retains native Python
+behavior and is not a relocatable-package contract.
+Verification is not execution readiness: real plans cannot arm until the Rust
+scheduler/audio adapter exists, and the retained package must be reverified at
+that final use boundary. V1 absolute-path semantics remain source-host native;
+cross-OS relocation needs a future relative/content-addressed schema rather
+than silently reinterpreting V1 paths.
+
 Remote control means an exhaustive registry of safe semantic outcomes, never
 arbitrary DOM events, native functions, Android intents, shell/file operations,
 paths, URLs, or synthetic participant input. The target validates action,

@@ -21,6 +21,7 @@ const outboundActionButtons = [...document.querySelectorAll("[data-controller-ac
 const MAX_PENDING_NATIVE_COMMANDS = 32;
 
 let snapshot = null;
+let preparedPlan = null;
 let remoteStatus = null;
 let invitationUrl = "";
 let toastTimer = null;
@@ -61,6 +62,34 @@ function showToast(message, { error = false } = {}) {
 
 function normalizedSnapshot(result) {
   return result?.snapshot ?? result;
+}
+
+function planValue(plan, camelName, snakeName) {
+  return plan?.[camelName] ?? plan?.[snakeName];
+}
+
+function renderPreparedPlan(nextPlan) {
+  preparedPlan = nextPlan && typeof nextPlan === "object" ? nextPlan : null;
+  const blocks = Array.isArray(preparedPlan?.blocks) ? preparedPlan.blocks : [];
+  text("package-block-count", preparedPlan ? blocks.length : null);
+  text("package-mode", preparedPlan ? planValue(preparedPlan, "executionMode", "execution_mode") : null);
+  elements["package-block-list"].replaceChildren(...blocks.map((block) => {
+    const item = document.createElement("li");
+    const label = document.createElement("strong");
+    const details = document.createElement("span");
+    label.textContent = `${block.index}. ${block.label}`;
+    const trialCount = Number(planValue(block, "trialCount", "trial_count")) || 0;
+    const duration = Number(planValue(block, "durationS", "duration_s")) || 0;
+    details.textContent = `${trialCount} trials · ${formatDuration(duration)}`;
+    item.append(label, details);
+    return item;
+  }));
+  text(
+    "package-detail",
+    preparedPlan
+      ? `${blocks.length} ordered block${blocks.length === 1 ? "" : "s"} passed native V1 provenance checks. Playback remains disabled until the Rust execution adapter is ready.`
+      : "The native verifier checks the V1 manifest, ordered block files, source hashes, and trial counts before adoption.",
+  );
 }
 
 function remoteSessionId(status = remoteStatus) {
@@ -146,6 +175,8 @@ function renderSnapshot(next) {
   text("package-badge", next.package_verified ? "Verified" : "Unverified");
   elements["package-badge"].dataset.tone = next.package_verified ? "ready" : "";
   text("package-label", next.package_label, "No package loaded.");
+  const preparedSessionId = planValue(preparedPlan, "sessionId", "session_id");
+  if (preparedPlan && preparedSessionId !== next.identity?.session_id) renderPreparedPlan(null);
   text("audio-route", next.safety?.audio_route_ready ? "Ready" : "Not ready");
   text("local-armed", next.safety?.local_armed ? "Yes" : "No");
   text("lsl-ready", next.safety?.lsl_ready ? "Ready" : "Not ready");
@@ -165,6 +196,11 @@ function renderSnapshot(next) {
     token.textContent = action;
     return token;
   }));
+  const active = ["instruction_gate", "running", "paused", "stopping"].includes(phase);
+  elements["select-session-manifest"].disabled = api.kind !== "tauri-native" || active;
+  elements["select-session-manifest"].title = api.kind === "tauri-native"
+    ? "Select and verify a pps-run-session.v1 manifest locally"
+    : "Prepared-session selection is available in the native Tauri app";
   updateInboundPolicyUi();
 
   if (inboundPrivateTarget?.nativeClaimReceipt && !next.safety?.local_armed) {
@@ -796,6 +832,26 @@ function bindLocalActions() {
       try { await dispatch(action, argsForAction(action)); } catch (error) { showToast(error.message, { error: true }); }
       finally { if (snapshot) renderSnapshot(snapshot); }
     });
+  });
+
+  elements["select-session-manifest"].addEventListener("click", async () => {
+    const button = elements["select-session-manifest"];
+    button.disabled = true;
+    try {
+      const selection = await api.selectPreparedSession();
+      renderSnapshot(normalizedSnapshot(selection));
+      if (selection?.cancelled) {
+        showToast("Prepared-session selection cancelled.");
+        return;
+      }
+      renderPreparedPlan(selection?.summary);
+      await refreshRemote();
+      showToast("Prepared session verified and adopted by the native Rust authority.");
+    } catch (error) {
+      showToast(error.message, { error: true });
+    } finally {
+      if (snapshot) renderSnapshot(snapshot);
+    }
   });
 
   elements["setup-form"].addEventListener("submit", async (event) => {

@@ -19,6 +19,25 @@ const DEDUPE_LIMIT: usize = 256;
 const MIN_COMMAND_ID_BYTES: usize = 8;
 const MAX_COMMAND_ID_BYTES: usize = 96;
 const MAX_NOTE_BYTES: usize = 512;
+const MAX_PARTICIPANT_ID_BYTES: usize = 64;
+const MAX_PACKAGE_ID_BYTES: usize = 160;
+const MAX_PACKAGE_BLOCKS: u32 = 10_000;
+
+/// Sanitized, filesystem-free projection of a package that has already passed
+/// the native prepared-session verifier. The Tauri adapter retains the
+/// path-bearing verified package; the reducer receives only semantic identity
+/// and provenance needed to adopt it as target authority state.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VerifiedPackageSummary {
+    pub fingerprint: String,
+    pub participant_id: String,
+    pub session_id: String,
+    pub session_group_id: String,
+    pub part_number: Option<u8>,
+    pub part_session_id: String,
+    pub execution_mode: String,
+    pub block_count: u32,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DispatchOrigin {
@@ -62,6 +81,8 @@ pub struct RunnerCore {
     snapshot: RunnerSnapshot,
     dedupe: VecDeque<DedupeEntry>,
     local_sequence: u64,
+    package_fingerprint: Option<String>,
+    package_execution_ready: bool,
 }
 
 impl RunnerCore {
@@ -172,6 +193,8 @@ impl RunnerCore {
             },
             dedupe: VecDeque::new(),
             local_sequence: 0,
+            package_fingerprint: None,
+            package_execution_ready: false,
         };
         core.refresh_derived();
         core
@@ -187,6 +210,91 @@ impl RunnerCore {
 
     pub fn revision(&self) -> u64 {
         self.snapshot.revision
+    }
+
+    /// Adopt an already verified V1 prepared-session plan without importing
+    /// filesystem authority into the reducer. Adoption is local/native policy,
+    /// disarms the target, and remains non-runnable until a qualified execution
+    /// adapter explicitly owns the real block scheduler and media outputs.
+    pub fn adopt_verified_package(
+        &mut self,
+        package: VerifiedPackageSummary,
+        now: ClockStamp,
+    ) -> Result<RunnerSnapshot, &'static str> {
+        if matches!(
+            self.snapshot.run.phase,
+            RunnerPhase::Running
+                | RunnerPhase::Paused
+                | RunnerPhase::InstructionGate
+                | RunnerPhase::Stopping
+        ) {
+            return Err("cannot_replace_active_package");
+        }
+        validate_verified_package_summary(&package)?;
+        if self.snapshot.setup.submitted
+            && self.snapshot.setup.participant_code != package.participant_id
+        {
+            return Err("prepared_package_participant_mismatch");
+        }
+
+        let already = self.package_fingerprint.as_deref() == Some(package.fingerprint.as_str())
+            && self.snapshot.package_verified
+            && self.snapshot.run.phase == RunnerPhase::Prepared
+            && !self.snapshot.safety.local_armed;
+        if already {
+            self.stamp(&now);
+            return Ok(self.snapshot());
+        }
+
+        let part_label = package
+            .part_number
+            .map(|part| format!(" · Part {part:02}"))
+            .unwrap_or_default();
+        self.snapshot.package_verified = true;
+        self.snapshot.package_label = format!(
+            "{} · {} block{}{} · verified V1 plan",
+            package.participant_id,
+            package.block_count,
+            if package.block_count == 1 { "" } else { "s" },
+            part_label,
+        );
+        self.snapshot.identity.participant_id = package.participant_id.clone();
+        self.snapshot.identity.selected_participant_id = package.participant_id.clone();
+        self.snapshot.identity.session_id = package.session_id;
+        self.snapshot.identity.session_group_id = package.session_group_id;
+        self.snapshot.identity.part_session_id = package.part_session_id;
+        if !self.snapshot.setup.submitted {
+            self.snapshot.setup.participant_code = package.participant_id;
+        }
+        self.snapshot.setup.ready = self.snapshot.setup.submitted;
+        self.snapshot.part.available_parts = vec![package.part_number.unwrap_or(1)];
+        self.snapshot.part.selected_part = None;
+        self.snapshot.part.current_package_part = package.part_number;
+        self.snapshot.part.pending_start_part = None;
+        self.snapshot.run.phase = RunnerPhase::Prepared;
+        self.snapshot.run.complete = false;
+        self.snapshot.instruction_gate.waiting = false;
+        self.snapshot.instruction_gate.gate_id.clear();
+        self.snapshot.active_block.active = false;
+        self.snapshot.active_block.part_number = None;
+        self.snapshot.active_block.phase_label.clear();
+        self.snapshot.active_block.block_index = None;
+        self.snapshot.active_block.block_label.clear();
+        self.snapshot.active_block.display_block_index = None;
+        self.snapshot.active_block.duration_s = None;
+        self.snapshot.active_block.elapsed_s = None;
+        self.snapshot.active_block.last_anchor_server_monotonic_ns = None;
+        self.snapshot.active_block.running = false;
+        self.snapshot.active_block.paused = false;
+        self.snapshot.active_block.instruction_waiting = false;
+        self.snapshot.safety.local_armed = false;
+        self.snapshot.safety.capture_started = false;
+        self.snapshot.safety.publication_ready = false;
+        self.package_fingerprint = Some(package.fingerprint);
+        self.package_execution_ready = false;
+        self.snapshot.audit_event_count = self.snapshot.audit_event_count.saturating_add(1);
+        self.bump_revision(&now);
+        Ok(self.snapshot())
     }
 
     pub fn set_connection_state(&mut self, state: &str, now: ClockStamp) -> RunnerSnapshot {
@@ -407,6 +515,9 @@ impl RunnerCore {
                 if !self.snapshot.setup.ready || !self.snapshot.package_verified {
                     return Err("setup_or_package_not_ready");
                 }
+                if !self.package_execution_ready {
+                    return Err("package_execution_adapter_not_ready");
+                }
                 if matches!(
                     self.snapshot.run.phase,
                     RunnerPhase::Running | RunnerPhase::Paused | RunnerPhase::InstructionGate
@@ -526,6 +637,9 @@ impl RunnerCore {
     }
 
     fn prepare_demo(&mut self, args: &Value) -> Result<bool, &'static str> {
+        if self.package_fingerprint.is_some() {
+            return Err("verified_package_replacement_requires_native_picker");
+        }
         let parsed: PrepareDemoArgs = parse_args(args)?;
         if matches!(
             self.snapshot.run.phase,
@@ -551,6 +665,8 @@ impl RunnerCore {
         self.snapshot.identity.session_id = format!("demo-session-{}", self.snapshot.epoch);
         self.snapshot.identity.session_group_id = format!("demo-group-{}", self.snapshot.epoch);
         self.snapshot.setup.ready = self.snapshot.setup.submitted;
+        self.package_fingerprint = None;
+        self.package_execution_ready = true;
         Ok(!already)
     }
 
@@ -570,10 +686,15 @@ impl RunnerCore {
         }
         let participant_code = parsed.participant_code.trim();
         if participant_code.is_empty()
-            || participant_code.len() > 32
+            || participant_code.len() > MAX_PARTICIPANT_ID_BYTES
             || !participant_code.chars().all(is_safe_participant_char)
         {
             return Err("invalid_participant_code");
+        }
+        if self.package_fingerprint.is_some()
+            && self.snapshot.identity.participant_id != participant_code
+        {
+            return Err("prepared_package_participant_mismatch");
         }
         if !(1..=120).contains(&parsed.age) {
             return Err("invalid_age");
@@ -773,6 +894,11 @@ impl RunnerCore {
         .to_owned();
         self.snapshot.run.progress_label = match phase {
             RunnerPhase::Idle => "Prepare a validated session package",
+            RunnerPhase::Prepared
+                if self.snapshot.package_verified && !self.package_execution_ready =>
+            {
+                "Verified plan loaded — Rust playback adapter pending"
+            }
             RunnerPhase::Prepared => "Submit setup and arm on this target",
             RunnerPhase::Ready => "Start Part 01 or Part 02",
             RunnerPhase::InstructionGate => "Instruction acknowledgement required",
@@ -804,10 +930,15 @@ impl RunnerCore {
             phase,
             RunnerPhase::Running | RunnerPhase::Paused | RunnerPhase::InstructionGate
         ) {
-            actions.push(Action::PackagePrepareDemo);
+            if self.package_fingerprint.is_none() {
+                actions.push(Action::PackagePrepareDemo);
+            }
             actions.push(Action::SetupSubmit);
         }
-        if self.snapshot.package_verified && self.snapshot.setup.ready {
+        if self.snapshot.package_verified
+            && self.snapshot.setup.ready
+            && self.package_execution_ready
+        {
             if self.snapshot.safety.local_armed {
                 actions.push(Action::TargetDisarm);
             } else if !matches!(phase, RunnerPhase::Running | RunnerPhase::Paused) {
@@ -920,6 +1051,47 @@ fn validate_json_shape(value: &Value, depth: usize) -> Result<(), &'static str> 
     }
 }
 
+fn validate_verified_package_summary(package: &VerifiedPackageSummary) -> Result<(), &'static str> {
+    if package.fingerprint.len() != 64
+        || !package
+            .fingerprint
+            .bytes()
+            .all(|byte| byte.is_ascii_hexdigit())
+    {
+        return Err("invalid_package_fingerprint");
+    }
+    if package.participant_id.is_empty()
+        || package.participant_id.len() > MAX_PARTICIPANT_ID_BYTES
+        || !package.participant_id.chars().all(is_safe_participant_char)
+    {
+        return Err("invalid_package_participant");
+    }
+    for value in [&package.session_id, &package.part_session_id] {
+        if value.is_empty() || value.len() > MAX_PACKAGE_ID_BYTES || !is_safe_command_id(value) {
+            return Err("invalid_package_session_identity");
+        }
+    }
+    if (!package.session_group_id.is_empty()
+        && (package.session_group_id.len() > MAX_PACKAGE_ID_BYTES
+            || !is_safe_command_id(&package.session_group_id)))
+        || package.execution_mode.is_empty()
+        || package.execution_mode.len() > 64
+        || !package.execution_mode.chars().all(is_safe_token_char)
+    {
+        return Err("invalid_package_metadata");
+    }
+    if package
+        .part_number
+        .is_some_and(|part_number| !matches!(part_number, 1 | 2))
+    {
+        return Err("invalid_package_part");
+    }
+    if package.block_count == 0 || package.block_count > MAX_PACKAGE_BLOCKS {
+        return Err("invalid_package_block_count");
+    }
+    Ok(())
+}
+
 fn required_part_label<'a>(
     labels: &'a BTreeMap<String, String>,
     key: &str,
@@ -1005,6 +1177,19 @@ mod tests {
             AppliedStatus::Accepted
         );
         core
+    }
+
+    fn verified_package(participant_id: &str) -> VerifiedPackageSummary {
+        VerifiedPackageSummary {
+            fingerprint: "a".repeat(64),
+            participant_id: participant_id.to_owned(),
+            session_id: "P001_session_20260831".to_owned(),
+            session_group_id: "P001_group_20260831".to_owned(),
+            part_number: Some(2),
+            part_session_id: "P001_session_20260831_part_02".to_owned(),
+            execution_mode: "participant_block_wavs".to_owned(),
+            block_count: 6,
+        }
     }
 
     #[test]
@@ -1338,6 +1523,115 @@ mod tests {
         );
         assert_eq!(start.status, AppliedStatus::Rejected);
         assert_eq!(start.reason, "target_not_locally_armed");
+    }
+
+    #[test]
+    fn verified_package_adoption_sets_real_identity_but_cannot_fake_execution_readiness() {
+        let mut core = RunnerCore::new(
+            "target-test",
+            "desktop",
+            7,
+            TimingTier::DesktopPreview,
+            clock(0),
+        );
+
+        let adopted = core
+            .adopt_verified_package(verified_package("P001"), clock(1))
+            .unwrap();
+        assert!(adopted.package_verified);
+        assert_eq!(adopted.identity.participant_id, "P001");
+        assert_eq!(adopted.identity.session_id, "P001_session_20260831");
+        assert_eq!(adopted.part.available_parts, vec![2]);
+        assert_eq!(adopted.part.current_package_part, Some(2));
+        assert_eq!(adopted.run.phase, RunnerPhase::Prepared);
+        assert_eq!(
+            adopted.run.progress_label,
+            "Verified plan loaded — Rust playback adapter pending"
+        );
+        assert!(!adopted
+            .allowed_actions
+            .contains(&Action::PackagePrepareDemo));
+        assert!(!adopted.allowed_actions.contains(&Action::TargetArm));
+
+        let demo_replacement = core.dispatch_local(
+            Action::PackagePrepareDemo,
+            json!({"label": "Must not replace verified plan"}),
+            clock(2),
+        );
+        assert_eq!(demo_replacement.status, AppliedStatus::Rejected);
+        assert_eq!(
+            demo_replacement.reason,
+            "verified_package_replacement_requires_native_picker"
+        );
+        assert_eq!(demo_replacement.snapshot.identity.participant_id, "P001");
+
+        let substituted = core.dispatch_local(
+            Action::SetupSubmit,
+            json!({
+                "participant_code": "P002",
+                "age": 30,
+                "handedness": "right",
+                "gender": "prefer_not_to_say",
+                "name_sharing_opt_in": false,
+                "part_labels": {"1": "Near", "2": "Far"}
+            }),
+            clock(3),
+        );
+        assert_eq!(substituted.status, AppliedStatus::Rejected);
+        assert_eq!(substituted.reason, "prepared_package_participant_mismatch");
+        assert_eq!(substituted.snapshot.identity.participant_id, "P001");
+
+        core.dispatch_local(
+            Action::SetupSubmit,
+            json!({
+                "participant_code": "P001",
+                "age": 30,
+                "handedness": "right",
+                "gender": "prefer_not_to_say",
+                "name_sharing_opt_in": false,
+                "part_labels": {"1": "Near", "2": "Far"}
+            }),
+            clock(4),
+        );
+        let arm = core.dispatch_local(Action::TargetArm, json!({}), clock(5));
+        assert_eq!(arm.status, AppliedStatus::Rejected);
+        assert_eq!(arm.reason, "package_execution_adapter_not_ready");
+    }
+
+    #[test]
+    fn verified_package_adoption_rejects_participant_substitution_and_active_runs() {
+        let mut core = ready_core();
+        let revision = core.revision();
+        let mismatch = core
+            .adopt_verified_package(verified_package("P002"), clock(4))
+            .unwrap_err();
+        assert_eq!(mismatch, "prepared_package_participant_mismatch");
+        assert_eq!(core.revision(), revision);
+
+        core.dispatch_local(Action::PartStart, json!({"part_number": 1}), clock(5));
+        let active = core
+            .adopt_verified_package(verified_package("P001"), clock(6))
+            .unwrap_err();
+        assert_eq!(active, "cannot_replace_active_package");
+    }
+
+    #[test]
+    fn repeated_verified_package_adoption_is_idempotent() {
+        let mut core = RunnerCore::new(
+            "target-test",
+            "desktop",
+            7,
+            TimingTier::DesktopPreview,
+            clock(0),
+        );
+        let first = core
+            .adopt_verified_package(verified_package("P001"), clock(1))
+            .unwrap();
+        let second = core
+            .adopt_verified_package(verified_package("P001"), clock(2))
+            .unwrap();
+        assert_eq!(second.revision, first.revision);
+        assert_eq!(second.audit_event_count, first.audit_event_count);
     }
 
     #[test]

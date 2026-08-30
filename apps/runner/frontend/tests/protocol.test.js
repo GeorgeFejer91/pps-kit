@@ -129,6 +129,14 @@ test("PPS snapshots require the complete versioned application schema", () => {
     clock: () => ({ unixMs: 1_700_000_000_000, monotonicNs: 123_000 }),
   });
   assert.equal(validateRunnerSnapshot(snapshot), snapshot);
+  assert.equal(validateRunnerSnapshot({
+    ...snapshot,
+    setup: { ...snapshot.setup, participant_code: "P".repeat(64) },
+  }).setup.participant_code.length, 64);
+  assert.throws(() => validateRunnerSnapshot({
+    ...snapshot,
+    setup: { ...snapshot.setup, participant_code: "P".repeat(65) },
+  }), /participant_code/u);
   assert.throws(() => validateRunnerSnapshot({ ...snapshot, setup: { ready: false } }), /setup.*fields/u);
   assert.throws(() => validateRunnerSnapshot({ ...snapshot, protocol: "BRSP/1" }), /unsupported/u);
   assert.throws(() => validateRunnerSnapshot({

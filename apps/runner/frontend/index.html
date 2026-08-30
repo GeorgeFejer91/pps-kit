@@ -76,7 +76,7 @@
                     <span id="setup-badge" class="badge">Not submitted</span>
                   </div>
                   <div class="form-grid">
-                    <label>Participant code<input id="participant-code" name="participant_code" maxlength="32" autocomplete="off" required></label>
+                    <label>Participant code<input id="participant-code" name="participant_code" maxlength="64" autocomplete="off" required></label>
                     <label>Age<input id="participant-age" name="age" type="number" min="1" max="120" inputmode="numeric" required></label>
                     <label>Handedness<select id="participant-handedness" name="handedness" required><option value="">Choose…</option><option value="right">Right</option><option value="left">Left</option><option value="ambidextrous">Ambidextrous</option><option value="prefer_not_to_say">Prefer not to say</option></select></label>
                     <label>Gender<select id="participant-gender" name="gender" required><option value="">Choose…</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option><option value="prefer_not_to_say">Prefer not to say</option></select></label>
@@ -89,7 +89,10 @@
                 <div class="stack compact-stack split-border">
                   <div class="section-heading"><div><p class="eyebrow">Package</p><h2>Session Package</h2></div><span id="package-badge" class="badge">Unverified</span></div>
                   <p id="package-label" class="subtle">No package loaded.</p>
-                  <button class="button" type="button" data-action="package.prepare_demo">Prepare deterministic demo</button>
+                  <button id="select-session-manifest" class="button button-primary" type="button">Choose prepared session manifest</button>
+                  <button id="prepare-demo-button" class="button" type="button" data-action="package.prepare_demo">Prepare deterministic validation demo</button>
+                  <p id="package-detail" class="safety-copy">The native verifier checks the V1 manifest, ordered block files, source hashes, and trial counts before adoption.</p>
+                  <ol id="package-block-list" class="package-block-list" aria-label="Verified package blocks"></ol>
                   <div class="inline-actions">
                     <button class="button" type="button" data-action="target.arm">Arm local target</button>
                     <button class="button button-quiet" type="button" data-action="target.disarm">Disarm</button>
@@ -121,6 +124,8 @@
                 <dl class="summary-list">
                   <div><dt>Session</dt><dd id="session-id">—</dd></div>
                   <div><dt>Package part</dt><dd id="package-part">—</dd></div>
+                  <div><dt>Prepared blocks</dt><dd id="package-block-count">—</dd></div>
+                  <div><dt>Execution mode</dt><dd id="package-mode">—</dd></div>
                   <div><dt>Revision</dt><dd id="revision">0</dd></div>
                   <div><dt>Audit events</dt><dd id="audit-events">0</dd></div>
                 </dl>

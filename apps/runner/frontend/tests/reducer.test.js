@@ -61,6 +61,22 @@ test("expected revision conflicts preserve authority state", () => {
   assert.equal(outcome.snapshot.revision, 0);
 });
 
+test("participant codes preserve the V1 64-character boundary", () => {
+  resetClock();
+  const snapshot = createPhoneExperimentSnapshot({ targetId: "phone_target_test", epoch: 7, clock });
+  const accepted = applyPhoneAction(snapshot, "setup.submit", {
+    participant_code: "P".repeat(64),
+  }, { clock });
+  assert.equal(accepted.status, "accepted");
+  assert.equal(accepted.snapshot.setup.participant_code.length, 64);
+
+  const rejected = applyPhoneAction(snapshot, "setup.submit", {
+    participant_code: "P".repeat(65),
+  }, { clock });
+  assert.equal(rejected.status, "rejected");
+  assert.equal(rejected.reason, "invalid_participant_code");
+});
+
 test("changing phone setup revokes local arm before any remote start", () => {
   resetClock();
   let snapshot = createPhoneExperimentSnapshot({ targetId: "phone_target_test", epoch: 19, clock });

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-select-prepared-session"
+description = "Enables the select_prepared_session command without any pre-configured scope."
+commands.allow = ["select_prepared_session"]
+
+[[permission]]
+identifier = "deny-select-prepared-session"
+description = "Denies the select_prepared_session command without any pre-configured scope."
+commands.deny = ["select_prepared_session"]

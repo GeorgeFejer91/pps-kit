@@ -69,6 +69,9 @@ export function createPreviewRunnerAdapter() {
         snapshot: clone(snapshot),
       };
     },
+    async selectPreparedSession() {
+      throw new Error("Prepared-session selection is available only in the native Tauri runner.");
+    },
     async remoteStatus() {
       return remoteStatus();
     },

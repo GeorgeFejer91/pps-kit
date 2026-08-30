@@ -1,7 +1,10 @@
 use std::{
     collections::BTreeSet,
     net::{IpAddr, Ipv4Addr, SocketAddr, TcpListener as StdTcpListener},
-    sync::{Arc, Mutex},
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc, Mutex,
+    },
     thread,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
@@ -11,7 +14,8 @@ use pps_contracts::{
     Action, Applied, ClockStamp, CommandBody, RunnerPhase, RunnerSnapshot, Scope, TimingTier,
     JSON_MAX_SAFE_INTEGER,
 };
-use pps_runner_core::{DispatchOrigin, RunnerCore};
+use pps_runner_core::{DispatchOrigin, RunnerCore, VerifiedPackageSummary};
+use pps_session_package::VerifiedPreparedSession;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tokio::sync::broadcast;
@@ -178,6 +182,8 @@ pub struct RuntimeShared {
     pub remote: Mutex<RemoteConfig>,
     pub active_controller: Mutex<Option<ActiveController>>,
     webview_remote_session: Mutex<Option<WebviewRemoteSession>>,
+    prepared_session: Mutex<Option<Arc<VerifiedPreparedSession>>>,
+    prepared_session_selection_in_flight: AtomicBool,
     pub clock: ClockSource,
     pub state_tx: broadcast::Sender<RunnerSnapshot>,
     pub remote_server: Mutex<RemoteServerState>,
@@ -186,6 +192,18 @@ pub struct RuntimeShared {
 
 #[derive(Clone)]
 pub struct AppRuntime(pub Arc<RuntimeShared>);
+
+pub struct PreparedSessionSelectionGuard {
+    shared: Arc<RuntimeShared>,
+}
+
+impl Drop for PreparedSessionSelectionGuard {
+    fn drop(&mut self) {
+        self.shared
+            .prepared_session_selection_in_flight
+            .store(false, Ordering::Release);
+    }
+}
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -234,6 +252,8 @@ impl AppRuntime {
             }),
             active_controller: Mutex::new(None),
             webview_remote_session: Mutex::new(None),
+            prepared_session: Mutex::new(None),
+            prepared_session_selection_in_flight: AtomicBool::new(false),
             clock,
             state_tx,
             remote_server: Mutex::new(RemoteServerState::default()),
@@ -250,6 +270,21 @@ impl AppRuntime {
             .map(|core| core.snapshot())
     }
 
+    /// Reserve the one native prepared-session picker/verification operation.
+    /// The WebView is not trusted to serialize command invocations, so this
+    /// guard must span both the dialog callback and the blocking verifier.
+    pub fn begin_prepared_session_selection(
+        &self,
+    ) -> Result<PreparedSessionSelectionGuard, &'static str> {
+        self.0
+            .prepared_session_selection_in_flight
+            .compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed)
+            .map_err(|_| "prepared_session_selection_in_progress")?;
+        Ok(PreparedSessionSelectionGuard {
+            shared: Arc::clone(&self.0),
+        })
+    }
+
     pub fn dispatch_local(&self, action: Action, args: Value) -> Result<Applied, String> {
         let mut core = self
             .0
@@ -262,6 +297,83 @@ impl AppRuntime {
             let _ = self.0.state_tx.send(applied.snapshot.clone());
         }
         Ok(applied)
+    }
+
+    /// Adopt a path-bearing prepared-session receipt produced by the native
+    /// verifier. Only a filesystem-free semantic projection reaches the pure
+    /// reducer; the full receipt remains in Rust for the future execution
+    /// adapter and must be reverified at that final use boundary.
+    pub fn adopt_verified_session(
+        &self,
+        verified: VerifiedPreparedSession,
+    ) -> Result<RunnerSnapshot, &'static str> {
+        let summary = verified.summary();
+        let part_number = summary
+            .part_number
+            .map(u8::try_from)
+            .transpose()
+            .map_err(|_| "invalid_verified_package")?;
+        let block_count =
+            u32::try_from(summary.blocks.len()).map_err(|_| "invalid_verified_package")?;
+        let package = VerifiedPackageSummary {
+            fingerprint: verified.manifest_sha256().to_owned(),
+            participant_id: summary.participant_id.clone(),
+            session_id: summary.session_id.clone(),
+            session_group_id: summary.session_group_id.clone(),
+            part_number,
+            part_session_id: summary.part_session_id.clone(),
+            execution_mode: summary.execution_mode.clone(),
+            block_count,
+        };
+
+        // Keep the existing authority lock order: remote -> active controller
+        // -> WebView owner -> reducer -> retained package. Holding all five
+        // prevents a controller from reclaiming the old epoch between package
+        // adoption and authority rotation.
+        let mut remote = self.0.remote.lock().map_err(|_| "runtime_unavailable")?;
+        let mut active = self
+            .0
+            .active_controller
+            .lock()
+            .map_err(|_| "runtime_unavailable")?;
+        let mut webview = self
+            .0
+            .webview_remote_session
+            .lock()
+            .map_err(|_| "runtime_unavailable")?;
+        let mut core = self.0.authority.lock().map_err(|_| "runtime_unavailable")?;
+        let mut retained = self
+            .0
+            .prepared_session
+            .lock()
+            .map_err(|_| "runtime_unavailable")?;
+
+        let now = self.0.clock.stamp();
+        core.adopt_verified_package(package, now.clone())?;
+
+        remote.secret = PairingSecret::generate();
+        remote.session_id = format!("session_{}", &random_nonce()[..18]);
+        core.rotate_epoch(u64::from(random_epoch()), now.clone());
+        core.set_controller_lease(None, None, now.clone());
+        let snapshot = core.set_connection_state(
+            if remote.enabled {
+                "package_changed"
+            } else {
+                "local_only"
+            },
+            now,
+        );
+        *active = None;
+        *webview = None;
+        *retained = Some(Arc::new(verified));
+
+        drop(retained);
+        drop(core);
+        drop(webview);
+        drop(active);
+        drop(remote);
+        let _ = self.0.state_tx.send(snapshot.clone());
+        Ok(snapshot)
     }
 
     pub fn dispatch_remote(
@@ -366,7 +478,7 @@ impl AppRuntime {
             .lock()
             .map_err(|_| RemoteSessionError::unavailable())?;
 
-        let owner_token = random_nonce();
+        let owner_token = random_owner_token();
         let controller = ActiveController {
             id: request.controller_id.clone(),
             session_id: request.session_id.clone(),
@@ -932,6 +1044,13 @@ fn validate_remote_activation(
     Ok(())
 }
 
+pub(crate) fn random_owner_token() -> String {
+    // BRSP nonces are canonical base64url and may begin with `-` or `_`, while
+    // owner-token validation deliberately requires an alphanumeric first byte.
+    // Prefix the entropy instead of weakening the closed token grammar.
+    format!("owner_{}", random_nonce())
+}
+
 fn validate_owner_request(session_id: &str, owner_token: &str) -> Result<(), RemoteSessionError> {
     if !valid_peer_id(session_id) {
         return Err(RemoteSessionError::new(
@@ -1018,6 +1137,44 @@ impl RuntimeShared {
 mod tests {
     use super::*;
     use pps_contracts::AppliedStatus;
+    use pps_session_package::{verify_prepared_session, VerificationRequest};
+    use std::fs;
+
+    fn verified_legacy_package(
+        participant_id: &str,
+    ) -> (std::path::PathBuf, VerifiedPreparedSession) {
+        let root = std::env::temp_dir().join(format!("pps-tauri-package-{}", random_nonce()));
+        fs::create_dir_all(&root).unwrap();
+        fs::write(root.join("block.wav"), b"not-played-validation-bytes").unwrap();
+        fs::write(root.join("block.csv"), b"Trial_UID\ntrial-1\n").unwrap();
+        let manifest_path = root.join("run-session.json");
+        let manifest = serde_json::json!({
+            "schema": "pps-run-session.v1",
+            "participant_id": participant_id,
+            "session_id": format!("{participant_id}_session_20260831"),
+            "session_group_id": format!("{participant_id}_group_20260831"),
+            "part_number": 1,
+            "part_session_id": format!("{participant_id}_session_20260831_part_01"),
+            "session_dir": root,
+            "execution_mode": "design_schedule_blocks",
+            "blocks": [{
+                "index": 1,
+                "label": "Verification block",
+                "manifest_path": "block.csv",
+                "wav_path": "block.wav",
+                "trial_count": 1,
+                "duration_s": 1.5,
+                "metadata": {}
+            }]
+        });
+        fs::write(
+            &manifest_path,
+            serde_json::to_vec_pretty(&manifest).unwrap(),
+        )
+        .unwrap();
+        let verified = verify_prepared_session(VerificationRequest::new(&manifest_path)).unwrap();
+        (root, verified)
+    }
 
     fn claim_webview_controller(
         runtime: &AppRuntime,
@@ -1060,6 +1217,122 @@ mod tests {
         runtime
     }
 
+    #[test]
+    fn adopting_a_verified_session_rotates_remote_authority_and_retains_native_paths() {
+        let runtime = AppRuntime::new();
+        runtime.configure_remote(true, false).unwrap();
+        let receipt = claim_webview_controller(
+            &runtime,
+            "controller_package_test",
+            Scope::DEFAULT_REMOTE.to_vec(),
+        );
+        let old_status = runtime.status().unwrap();
+        let (fixture_root, verified) = verified_legacy_package("P001");
+        let expected_manifest = verified.manifest_path().to_path_buf();
+
+        let adopted = runtime.adopt_verified_session(verified).unwrap();
+        assert_eq!(adopted.identity.participant_id, "P001");
+        assert_eq!(adopted.run.phase, RunnerPhase::Prepared);
+        assert!(!adopted.safety.local_armed);
+        assert!(!adopted.allowed_actions.contains(&Action::TargetArm));
+
+        let new_status = runtime.status().unwrap();
+        assert_ne!(new_status.session_id, old_status.session_id);
+        assert_ne!(new_status.epoch, receipt.snapshot.epoch);
+        assert!(!new_status.controller_connected);
+        assert!(runtime.0.active_controller.lock().unwrap().is_none());
+        assert!(runtime.0.webview_remote_session.lock().unwrap().is_none());
+        assert_eq!(
+            runtime
+                .0
+                .prepared_session
+                .lock()
+                .unwrap()
+                .as_ref()
+                .unwrap()
+                .manifest_path(),
+            expected_manifest
+        );
+
+        let adopted_status = runtime.status().unwrap();
+        let replacement_controller = claim_webview_controller(
+            &runtime,
+            "controller_after_package_adoption",
+            Scope::DEFAULT_REMOTE.to_vec(),
+        );
+        let replacement = runtime
+            .dispatch_remote_session(remote_command(
+                &replacement_controller,
+                3,
+                "replace-verified-plan-with-demo",
+                Scope::SessionPrepare,
+                Action::PackagePrepareDemo,
+                serde_json::json!({}),
+            ))
+            .unwrap();
+        assert_eq!(replacement.status, AppliedStatus::Rejected);
+        assert_eq!(
+            replacement.reason,
+            "verified_package_replacement_requires_native_picker"
+        );
+        assert_eq!(replacement.snapshot.identity.participant_id, "P001");
+        assert_eq!(
+            runtime.status().unwrap().session_id,
+            adopted_status.session_id
+        );
+        assert_eq!(runtime.status().unwrap().epoch, adopted_status.epoch);
+        assert_eq!(
+            runtime
+                .0
+                .prepared_session
+                .lock()
+                .unwrap()
+                .as_ref()
+                .unwrap()
+                .manifest_path(),
+            expected_manifest
+        );
+
+        fs::remove_dir_all(fixture_root).unwrap();
+    }
+
+    #[test]
+    fn prepared_session_selection_is_native_single_flight() {
+        let runtime = AppRuntime::new();
+        let first = runtime.begin_prepared_session_selection().unwrap();
+        assert!(runtime.0.prepared_session.lock().unwrap().is_none());
+        assert_eq!(
+            runtime.begin_prepared_session_selection().err().unwrap(),
+            "prepared_session_selection_in_progress"
+        );
+        assert!(runtime.0.prepared_session.lock().unwrap().is_none());
+
+        drop(first);
+        let next = runtime.begin_prepared_session_selection().unwrap();
+        drop(next);
+    }
+
+    #[test]
+    fn active_run_rejects_package_replacement_without_rotating_remote_authority() {
+        let runtime = locally_ready_runtime();
+        runtime
+            .dispatch_local(Action::PartStart, serde_json::json!({"part_number": 1}))
+            .unwrap();
+        let old_status = runtime.status().unwrap();
+        let (fixture_root, verified) = verified_legacy_package("P001");
+
+        assert_eq!(
+            runtime.adopt_verified_session(verified),
+            Err("cannot_replace_active_package")
+        );
+        let unchanged = runtime.status().unwrap();
+        assert_eq!(unchanged.session_id, old_status.session_id);
+        assert_eq!(unchanged.epoch, old_status.epoch);
+        assert!(runtime.0.prepared_session.lock().unwrap().is_none());
+
+        fs::remove_dir_all(fixture_root).unwrap();
+    }
+
     fn remote_command(
         receipt: &RemoteSessionLeaseReceipt,
         control_sequence: u32,
@@ -1089,7 +1362,7 @@ mod tests {
         *runtime.0.active_controller.lock().unwrap() = Some(ActiveController {
             id: "controller_active".to_owned(),
             session_id: remote.session_id,
-            owner_token: random_nonce(),
+            owner_token: random_owner_token(),
             granted_scopes: Scope::DEFAULT_REMOTE.to_vec(),
         });
 
@@ -1234,6 +1507,13 @@ mod tests {
             runtime.snapshot().unwrap().safety.controller_lease_id,
             "controller-new"
         );
+    }
+
+    #[test]
+    fn generated_owner_tokens_always_match_the_remote_token_grammar() {
+        for _ in 0..1_024 {
+            assert!(valid_peer_id(&random_owner_token()));
+        }
     }
 
     #[test]

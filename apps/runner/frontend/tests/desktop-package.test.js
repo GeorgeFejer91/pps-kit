@@ -1,0 +1,48 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+import { fileURLToPath } from "node:url";
+
+const desktopHtml = await readFile(
+  fileURLToPath(new URL("../index.html", import.meta.url)),
+  "utf8",
+);
+const desktopSource = await readFile(
+  fileURLToPath(new URL("../src/desktop-app.js", import.meta.url)),
+  "utf8",
+);
+const nativeSource = await readFile(
+  fileURLToPath(new URL("../../src-tauri/src/lib.rs", import.meta.url)),
+  "utf8",
+);
+const mainCapability = JSON.parse(await readFile(
+  fileURLToPath(new URL("../../src-tauri/capabilities/runner-main.json", import.meta.url)),
+  "utf8",
+));
+
+test("desktop package selection is a local native operation with a bounded plan projection", () => {
+  assert.match(desktopHtml, /id="select-session-manifest"/u);
+  assert.match(desktopHtml, /id="package-block-list"/u);
+  assert.match(desktopHtml, /id="package-block-count"/u);
+  assert.match(desktopHtml, /id="package-mode"/u);
+  assert.match(desktopSource, /await api\.selectPreparedSession\(\)/u);
+  assert.match(desktopSource, /native V1 provenance checks/u);
+  assert.match(desktopSource, /document\.createElement\("li"\)/u);
+  assert.doesNotMatch(desktopSource, /package-block-list[\s\S]{0,200}innerHTML/u);
+});
+
+test("native package selection stays disabled in browser preview and during active phases", () => {
+  assert.match(desktopSource, /api\.kind !== "tauri-native" \|\| active/u);
+  assert.match(desktopSource, /"instruction_gate", "running", "paused", "stopping"/u);
+  assert.doesNotMatch(desktopSource, /prepare-demo-button"\]\.hidden/u);
+  assert.match(desktopSource, /button\.disabled = !allowed\.has\(button\.dataset\.action\)/u);
+});
+
+test("native package selection owns its picker and exposes no caller path capability", () => {
+  assert.match(nativeSource, /async fn select_prepared_session\(\s*app: tauri::AppHandle,\s*window: tauri::WebviewWindow,\s*state: tauri::State<'_, AppRuntime>,\s*\)/u);
+  assert.match(nativeSource, /require_main_window\(&window\)/u);
+  assert.match(nativeSource, /app\.dialog\(\)[\s\S]{0,240}\.pick_file/u);
+  assert.match(nativeSource, /VerificationRequest::new\(&manifest_path\)/u);
+  assert.ok(mainCapability.permissions.includes("allow-select-prepared-session"));
+  assert.ok(!mainCapability.permissions.some((permission) => permission.startsWith("dialog:")));
+});

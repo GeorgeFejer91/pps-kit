@@ -1,7 +1,7 @@
 import { SNAPSHOT_SCHEMA } from "./runner-contract.js";
 
 const ACTIVE_PHASES = new Set(["instruction_gate", "running", "paused", "stopping"]);
-const PARTICIPANT_CODE = /^[A-Za-z0-9_-]{1,32}$/u;
+const PARTICIPANT_CODE = /^[A-Za-z0-9_-]{1,64}$/u;
 
 function clone(value) {
   return structuredClone(value);
@@ -221,7 +221,7 @@ export function applyPhoneAction(current, action, args = {}, {
         break;
       }
       case "setup.submit": {
-        const participantCode = safeString(args.participant_code, 32);
+        const participantCode = String(args.participant_code ?? "").trim();
         if (!PARTICIPANT_CODE.test(participantCode)) return rejected(current, action, "invalid_participant_code", clock);
         const age = args.age === null || args.age === "" || args.age === undefined ? null : Number(args.age);
         if (age !== null && (!Number.isInteger(age) || age < 0 || age > 120)) return rejected(current, action, "invalid_age", clock);

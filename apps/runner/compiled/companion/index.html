@@ -88,7 +88,7 @@
               <button class="button remote-action" type="button" data-remote-action="run.stop">Stop</button>
               <button class="button button-danger remote-action" type="button" data-remote-action="run.abort">Abort</button>
             </div>
-            <label>Participant code<input id="remote-participant-code" maxlength="32" autocomplete="off" placeholder="P001"></label>
+            <label>Participant code<input id="remote-participant-code" maxlength="64" autocomplete="off" placeholder="P001"></label>
             <div class="form-grid">
               <label>Age<input id="remote-participant-age" type="number" min="1" max="120" inputmode="numeric"></label>
               <label>Handedness<select id="remote-participant-handedness"><option value="">Choose…</option><option value="right">Right</option><option value="left">Left</option><option value="ambidextrous">Ambidextrous</option><option value="prefer_not_to_say">Prefer not to say</option></select></label>
@@ -143,7 +143,7 @@
 
           <section class="panel stack compact-stack">
             <div class="section-heading"><div><p class="eyebrow">Demo authority</p><h2 id="phone-run-state">Idle</h2></div><span id="phone-revision" class="badge">rev 0</span></div>
-            <label>Participant code<input id="phone-participant-code" maxlength="32" autocomplete="off" value="PHONE_DEMO"></label>
+            <label>Participant code<input id="phone-participant-code" maxlength="64" autocomplete="off" value="PHONE_DEMO"></label>
             <div class="phone-action-grid">
               <button id="phone-setup" class="button" type="button" disabled>Submit setup</button>
               <button id="phone-prepare" class="button" type="button" disabled>Prepare demo</button>
