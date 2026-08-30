@@ -12,7 +12,7 @@ import {
   setPhoneConnectionMetadata,
 } from "./domain/phone-experiment-reducer.js";
 import { BrowserOutputEngine } from "./phone/browser-output-engine.js";
-import { createRelayInvitation, parseInvitation, stripInvitationFragment, webSocketUrl } from "./remote/invitation.js";
+import { createRelayInvitation, parseInvitation, stripInvitationMaterial, webSocketUrl } from "./remote/invitation.js";
 import { createPairingSecret, createProtocolEpoch, createProtocolIdentity } from "./remote/protocol.js";
 import { BrspControllerSession, BrspTargetSession } from "./remote/websocket-session.js";
 import { renderQrCode } from "./ui/qr-code.js";
@@ -123,10 +123,9 @@ function bindControllerSession(session) {
 }
 
 function initializeInvitation() {
-  if (!location.hash) return;
   try {
     controllerInvitation = parseInvitation(location.href);
-    stripInvitationFragment();
+    stripInvitationMaterial();
     if (!controllerInvitation) return;
     activateMode("controller");
     text("invite-badge", "Invite loaded");
@@ -136,7 +135,7 @@ function initializeInvitation() {
     text("controller-transport", controllerInvitation.transport === "relay" ? `Relay room ${controllerInvitation.room}` : "Desktop LAN target");
     elements["controller-connect"].disabled = false;
   } catch (error) {
-    stripInvitationFragment();
+    stripInvitationMaterial();
     text("invite-badge", "Invalid invite");
     elements["invite-badge"].dataset.tone = "danger";
     showToast(error.message, { error: true });

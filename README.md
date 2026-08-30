@@ -116,14 +116,18 @@ continue to honor `PPS_TOOLKIT_ROOT`.
 `apps/designer/frontend/compiled/` is the one compiled Designer artifact. The
 local Designer package consumes it directly. GitHub Pages assembly copies the
 same bytes—plus approved public catalogues and `website/CNAME`—into ignored
-staging; there is no second hand-edited dashboard implementation.
+staging; there is no second hand-edited dashboard implementation. The Runner's
+canonical compiled companion page is likewise copied byte-for-byte from
+`apps/runner/compiled/companion/`, with only its browser-safe assets published.
 
 Public routes:
 
 - [PPS Kit](https://ppskit.qzz.io/)
 - [Documentation](https://ppskit.qzz.io/documentation/)
 - [Downloads](https://ppskit.qzz.io/download/)
+- [Experiment Runner Companion](https://ppskit.qzz.io/experiment-runner/)
 - [GitHub Pages fallback](https://georgefejer91.github.io/pps-kit/)
+- [Runner Companion fallback](https://georgefejer91.github.io/pps-kit/experiment-runner/)
 
 See [GitHub Pages and hosted Designer](docs/GITHUB_PAGES_DASHBOARD.md) and the
 [paradigm library](docs/PARADIGM_LIBRARY.md).

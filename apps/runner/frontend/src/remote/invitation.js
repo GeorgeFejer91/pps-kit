@@ -86,7 +86,16 @@ export function webSocketUrl({ locationUrl, transport, room, role = "controller"
   return `${protocol}//${url.host}/ws/relay/${encodeURIComponent(room)}/${role}`;
 }
 
-export function stripInvitationFragment() {
+export function sanitizedInvitationLocation(href) {
+  const url = new URL(href);
+  for (const key of [...url.searchParams.keys()]) {
+    if (key.toLowerCase() === "secret") url.searchParams.delete(key);
+  }
+  url.hash = "";
+  return `${url.pathname}${url.search}`;
+}
+
+export function stripInvitationMaterial() {
   if (!globalThis.history || !globalThis.location) return;
-  history.replaceState(null, "", `${location.pathname}${location.search}`);
+  history.replaceState(null, "", sanitizedInvitationLocation(location.href));
 }

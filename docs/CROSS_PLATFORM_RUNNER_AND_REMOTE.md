@@ -131,6 +131,13 @@ The same frontend build emits `compiled/companion/index.html` and local bundled
 assets. No runtime CDN is required. Nothing connects automatically; the user
 must open a pairing invitation and press Connect.
 
+The canonical public copy is
+`https://ppskit.qzz.io/experiment-runner/`, with
+`https://georgefejer91.github.io/pps-kit/experiment-runner/` as the project-Pages
+fallback. Pages assembly copies the compiled companion HTML and its browser-only
+assets byte-for-byte; it does not publish the Tauri desktop entry or native
+capabilities.
+
 The browser has two modes:
 
 1. **Controller** authenticates to a desktop, phone, or Quest target and sends
@@ -148,7 +155,12 @@ The included lab relay uses authenticated BRSP records over a local WebSocket
 route. Cleartext LAN transport is a development preview: production browser
 deployment needs an owned WSS/WebRTC route and platform qualification. The
 VDO.Ninja transport remains a useful Internet-signalled data-only option, but
-it does not guarantee offline same-Wi-Fi operation.
+it does not guarantee offline same-Wi-Fi operation. GitHub Pages hosts static
+interface files only and cannot provide WebSocket upgrades, so publishing the
+route does not by itself make hosted controller-to-target pairing operational.
+Phone Experiment mode can run locally on the hosted page; remote control awaits
+an implemented/configured browser adapter plus its separately deployed and
+qualified WSS/WebRTC endpoint.
 
 ## Optional Meta Quest application context
 

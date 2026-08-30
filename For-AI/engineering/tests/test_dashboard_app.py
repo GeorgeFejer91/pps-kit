@@ -274,6 +274,8 @@ def test_dashboard_static_assets_are_packaged():
     assert f"app/index.html?page=toolkit&v={static_version}" in public_index
     assert f"app/index.html?page=documentation&v={static_version}" in public_docs
     assert f"app/index.html?page=downloads&v={static_version}" in public_download
+    assert 'id="open-runner-companion"' in html
+    assert 'href="https://ppskit.qzz.io/experiment-runner/"' in html
     assert "seededGellermannBlockRows" in app_js
     assert "downloadBlockRandomization" in app_js
     assert 'control.id === "download-block-randomization"' in app_js

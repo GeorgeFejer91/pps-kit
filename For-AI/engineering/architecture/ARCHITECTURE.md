@@ -33,8 +33,11 @@ files exactly once.
 - `.pps-profile` and prepared-experiment packages are the stable Designer to
   Runner handoff.
 - Segment 0-6 manifests, hashes, and stale-upstream rules remain authoritative.
-- Browser JavaScript is a request/display surface, not the timing, generated
-  file, participant runtime, or manifest authority.
+- Browser controller JavaScript is a request/display surface, not the native
+  timing, generated-file, participant-runtime, or manifest authority. The
+  explicitly exploratory Phone Experiment mode is a separate browser-owned
+  target with a strict semantic reducer plus Web Audio/vibration adapters; its
+  timing is not interchangeable with qualified native acquisition evidence.
 - Focus Mode and `SessionRunnerController` own participant timing, response
   pairing, event emission, and local outputs.
 - Logical product paths (`assets/...`, `study_templates/...`) remain stable in
@@ -44,10 +47,13 @@ files exactly once.
 
 ## Frontend and Pages
 
-`apps/designer/frontend/compiled/` is the only compiled Designer UI. PyInstaller
-consumes it directly. Pages assembly copies the same bytes into ignored staging
-with approved catalogues and `website/CNAME`. `website/` contains route wrappers
-and Pages inputs, not a second dashboard source.
+`apps/designer/frontend/compiled/` is the only compiled Designer UI, and
+`apps/runner/compiled/` is the canonical Tauri/companion web output. Native
+packaging consumes those product-owned bytes directly. Pages assembly copies
+the Designer plus the allowlisted Runner companion bytes into ignored staging,
+publishing the latter at `/experiment-runner/` with `website/CNAME` and never
+publishing the Tauri desktop entry. `website/` contains route wrappers and Pages
+inputs, not a second dashboard or companion source.
 
 ## Internal Boundaries
 
@@ -75,4 +81,7 @@ desktop Runner safety behavior remains in product code.
 4. Preserve deterministic manifest bytes unless a documented schema change is
    intentional.
 5. Reject incompatible Shared versions/hashes at install time.
-6. Never move timing-sensitive behavior into the hosted page.
+6. Keep qualified timing-sensitive behavior in native target adapters. A hosted
+   browser target may implement an explicitly exploratory output path only when
+   its separate authority, evidence tier, and device-qualification limits stay
+   visible.

@@ -107,13 +107,17 @@ Release assembly code and tests are internal:
 
 ## Website
 
-- Tracked Pages inputs: `website/`.
+- Tracked Pages inputs: `website/`, the canonical compiled Designer, and the
+  allowlisted compiled Runner companion page/assets.
 - Canonical domain source: `website/CNAME`.
 - Pages assembly: `For-AI/engineering/automation/build_pages.mjs`.
 - GitHub-required thin wrapper: `.github/workflows/pages.yml`.
-- Assembly copies the exact Designer `compiled/` bytes and approved public
-  catalogues into ignored `dist/pages/`, including root `CNAME`.
-- Preserve `/`, `/documentation`, `/download`, `ppskit.qzz.io`, and the
+- Assembly copies the exact Designer `compiled/` bytes, the exact Runner
+  companion HTML plus `companion.js`, `qr-code.js`, and `style.css`, and
+  approved public catalogues into ignored `dist/pages/`, including root
+  `CNAME`. The Tauri desktop entry is not a Pages asset.
+- Preserve `/`, `/documentation`, `/download`, `/experiment-runner/`,
+  `ppskit.qzz.io`, and the
   `georgefejer91.github.io/pps-kit/` fallback.
 
 ## Internal Engineering

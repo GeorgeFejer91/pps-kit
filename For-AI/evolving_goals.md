@@ -2286,6 +2286,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   controller or an exploratory Web Audio/vibration phone target. Keep browser
   and Quest timing claims explicitly below publication grade until measured on
   physical devices.
+- Publish that canonical browser companion at `/experiment-runner/` on the
+  GitHub Pages site and fallback project route. Pages assembly must copy the
+  compiled companion HTML and its three allowlisted browser assets byte-for-byte,
+  never the Tauri desktop entry. GitHub Pages is an interface host, not a relay:
+  phone-local exploratory mode works there, while cross-device control requires
+  a browser-side WSS/WebRTC BRSP adapter and endpoint to be implemented,
+  configured, deployed, and qualified together.
 - Keep assets/media on a verified transfer plane and experiment timing on the
   target-native scheduler/evidence plane. BRSP controls semantic outcomes; it
   is not an LSL replacement and must not be called from audio callbacks or

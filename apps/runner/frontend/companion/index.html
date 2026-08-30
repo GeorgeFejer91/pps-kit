@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#f4f5f1">
     <meta name="color-scheme" content="light">
-    <title>PPS Browser Companion</title>
+    <meta name="description" content="Control a PPS experiment target or run the exploratory phone audio and vibration interface directly in a smartphone browser.">
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
+    <title>PPS Experiment Runner Companion</title>
     <link rel="stylesheet" href="../src/styles/app.css">
   </head>
   <body class="companion-page">
@@ -20,7 +23,7 @@
 
       <div class="exploratory-banner" role="note">
         <strong>Exploratory browser timing</strong>
-        <span>Phone audio and vibration are not publication-grade stimulus timing. The active target remains authoritative.</span>
+        <span>Phone audio and vibration are not publication-grade stimulus timing. This page supplies the interface, not a network relay; the active target remains authoritative.</span>
       </div>
 
       <nav class="mode-switch" aria-label="Companion mode">
@@ -32,7 +35,7 @@
         <section id="controller-mode" class="mode-panel is-active" data-mode-panel="controller">
           <section class="panel stack compact-stack">
             <div class="section-heading"><div><p class="eyebrow">BRSP/1 controller</p><h2>Pair with a Target</h2></div><span id="invite-badge" class="badge">No invite</span></div>
-            <p id="invite-summary" class="subtle">Open a QR invitation from the desktop runner or another phone target. Pairing remains inert until you press Connect.</p>
+            <p id="invite-summary" class="subtle">Open a QR invitation from the desktop runner or another phone target. Pairing remains inert until you press Connect and requires a compatible BRSP transport.</p>
             <div class="inline-actions sticky-actions">
               <button id="controller-connect" class="button button-primary" type="button" disabled>Connect</button>
               <button id="controller-stop" class="button" type="button" disabled>Stop</button>
@@ -86,7 +89,7 @@
             <div id="target-pairing" class="target-pairing" hidden>
               <canvas id="target-qr" width="212" height="212" aria-label="Controller invitation QR code"></canvas>
               <button id="copy-target-invite" class="button" type="button">Copy controller invitation</button>
-              <button id="target-connect" class="button button-primary" type="button">Connect target to relay</button>
+              <button id="target-connect" class="button button-primary" type="button">Connect target to configured relay</button>
               <button id="target-disconnect" class="button" type="button" disabled>Stop relay</button>
             </div>
           </section>

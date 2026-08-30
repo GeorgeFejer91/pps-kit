@@ -10,6 +10,9 @@ Pages use the exact same `apps/designer/frontend/compiled/` bytes.
 - The hosted shell has three top tabs: `PPS Toolkit` for the Segment 0-6
   experiment workflow, `Documentation` for local/reference guides, and
   `Downloads` for installer/package links.
+- The separate `/experiment-runner/` subpage serves the canonical Runner
+  companion UI for controller and exploratory Phone Experiment modes. The
+  Downloads page links to it.
 - The local companion backend runs on the PC at `http://127.0.0.1:8766`.
 - The hosted page calls the companion API for design state, render jobs, session
   preparation, audio stress tests, and native Focus Mode launch.
@@ -30,8 +33,10 @@ Pages use the exact same `apps/designer/frontend/compiled/` bytes.
 - File imports are local companion actions. Selected stimulus audio is copied
   into ignored local data on the research PC; it is not uploaded to GitHub
   Pages or any online service.
-- Browser JavaScript does not own experiment timing. Timing-sensitive participant
-  runs stay native/Python-backed.
+- Designer browser JavaScript does not own experiment timing. Timing-sensitive
+  participant runs stay native-backed. The separate Runner companion can own an
+  explicitly exploratory, locally armed phone demo using Web Audio and browser
+  vibration, but it is not publication-grade timing evidence.
 - The Documentation page includes a read-only, lazy-loaded PPS publication and
   citation network. It is a static GitHub Pages asset and never calls the local
   companion or moves literature metadata, PDFs, or participant data between the
@@ -134,8 +139,9 @@ wrappers, data snapshot, tests, and project-memory changes together.
 GitHub Pages deploys the artifact assembled by
 `For-AI/engineering/automation/build_pages.mjs` through the thin
 `.github/workflows/pages.yml` wrapper. The assembly copies `website/` route
-inputs, the compiled Designer, approved catalogues, and `website/CNAME` into
-ignored `dist/pages/`. The public dashboard URL is:
+inputs, the compiled Designer, the allowlisted compiled Runner companion files,
+approved catalogues, and `website/CNAME` into ignored `dist/pages/`. The public
+dashboard URL is:
 
 ```text
 https://ppskit.qzz.io/
@@ -146,6 +152,19 @@ The GitHub Pages fallback URL is:
 ```text
 https://georgefejer91.github.io/pps-kit/
 ```
+
+The Runner companion URLs are:
+
+```text
+https://ppskit.qzz.io/experiment-runner/
+https://georgefejer91.github.io/pps-kit/experiment-runner/
+```
+
+The page files are byte-identical to the local compiled companion and contain
+no Tauri bridge. GitHub Pages does not provide WebSocket upgrades. Phone
+Experiment mode can run locally in the hosted page, but cross-device BRSP
+pairing requires a browser-side WSS/WebRTC adapter and endpoint to be
+implemented/configured, deployed, and qualified together.
 
 The `github.com/GeorgeFejer91/pps-kit` URL is the GitHub repository/code view.
 The assembled Pages root `index.html` loads the copied compiled Designer, and

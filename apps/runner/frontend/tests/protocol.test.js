@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { createPhoneExperimentSnapshot } from "../src/domain/phone-experiment-reducer.js";
 import { validateRunnerSnapshot } from "../src/domain/runner-contract.js";
-import { parseInvitation } from "../src/remote/invitation.js";
+import { parseInvitation, sanitizedInvitationLocation } from "../src/remote/invitation.js";
 import { encodeControlMessage, parseControlFrame } from "../src/remote/protocol.js";
 import { BrspControllerSession, BrspTargetSession } from "../src/remote/websocket-session.js";
 
@@ -64,6 +64,17 @@ test("invitation keeps the secret and session in a strict fragment", () => {
   assert.throws(() => parseInvitation(`https://lab.example/companion/?secret=${secret}#mode=controller`), /forbidden/u);
   assert.throws(() => parseInvitation(`${value}&secret=${secret}`), /duplicated/u);
   assert.throws(() => parseInvitation(`${value}&debug=true`), /Unknown invitation field/u);
+});
+
+test("invitation cleanup strips fragments and forbidden query secrets", () => {
+  assert.equal(
+    sanitizedInvitationLocation("https://lab.example/companion/?view=phone&Secret=leaked#secret=fragment"),
+    "/companion/?view=phone",
+  );
+  assert.equal(
+    sanitizedInvitationLocation("https://lab.example/companion/?view=phone"),
+    "/companion/?view=phone",
+  );
 });
 
 test("session construction and invitation parsing never auto-connect", () => {

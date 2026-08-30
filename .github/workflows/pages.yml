@@ -5,11 +5,13 @@ on:
   push:
     branches: [main]
     paths:
+      - ".gitattributes"
       - "apps/designer/frontend/**"
+      - "apps/runner/**"
       - "packages/pps-resources/assets/preloads/**"
       - "packages/pps-resources/study_templates/**"
       - "website/**"
-      - "For-AI/engineering/automation/build_pages.mjs"
+      - "For-AI/engineering/automation/build_pages*.mjs"
       - ".github/workflows/pages.yml"
 
 permissions:
@@ -33,10 +35,21 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: apps/designer/frontend/package-lock.json
+          cache-dependency-path: |
+            apps/designer/frontend/package-lock.json
+            apps/runner/package-lock.json
       - name: Build canonical Designer frontend
         working-directory: apps/designer/frontend
         run: npm ci && npm run build
+      - name: Reject stale compiled Designer output
+        run: git diff --exit-code -- apps/designer/frontend/compiled
+      - name: Test and build canonical Runner companion
+        working-directory: apps/runner
+        run: npm ci && npm run check
+      - name: Reject stale compiled Runner output
+        run: git diff --exit-code -- apps/runner/compiled
+      - name: Test Pages assembly
+        run: node --test For-AI/engineering/automation/build_pages.test.mjs
       - name: Assemble Pages artifact
         run: node For-AI/engineering/automation/build_pages.mjs
       - uses: actions/configure-pages@v5

@@ -91,9 +91,12 @@ Gradle/device suites are not V1 release gates. The default pytest scope remains
 - The Designer compiled frontend is the single offline/online UI artifact.
   Local packaging consumes `apps/designer/frontend/compiled/`; Pages assembly
   copies those same bytes into ignored staging alongside approved catalogues.
+- The Runner companion is built once under `apps/runner/compiled/`. Pages
+  publishes its companion HTML and allowlisted browser assets byte-for-byte at
+  `/experiment-runner/`; never publish the Tauri desktop entry or capabilities.
 - `website/CNAME` is the tracked Pages source. The assembled Pages root must
   contain `CNAME` with `ppskit.qzz.io`.
-- Preserve `/`, `/documentation`, `/download`,
+- Preserve `/`, `/documentation`, `/download`, `/experiment-runner/`,
   `https://georgefejer91.github.io/pps-kit/`, and the existing fallback routes.
 - Any Designer HTML change must rebuild the compiled frontend, assemble Pages,
   and verify both local and hosted-facing copies in the same change.

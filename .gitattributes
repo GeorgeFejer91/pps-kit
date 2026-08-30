@@ -1,0 +1,18 @@
+# Browser build inputs and committed outputs must hash identically on Windows and Linux.
+apps/designer/frontend/*.css text eol=lf
+apps/designer/frontend/*.html text eol=lf
+apps/designer/frontend/*.js text eol=lf
+apps/designer/frontend/*.json text eol=lf
+apps/designer/frontend/*.svg text eol=lf
+apps/designer/frontend/**/*.css text eol=lf
+apps/designer/frontend/**/*.html text eol=lf
+apps/designer/frontend/**/*.js text eol=lf
+apps/designer/frontend/**/*.json text eol=lf
+apps/designer/frontend/**/*.map text eol=lf
+apps/designer/frontend/**/*.svg text eol=lf
+apps/runner/*.js text eol=lf
+apps/runner/*.json text eol=lf
+apps/runner/**/*.css text eol=lf
+apps/runner/**/*.html text eol=lf
+apps/runner/**/*.js text eol=lf
+apps/runner/**/*.json text eol=lf

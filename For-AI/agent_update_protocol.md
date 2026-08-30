@@ -40,8 +40,11 @@ the local package, assemble GitHub Pages from those exact compiled bytes, and
 verify the hosted routes in the same change set. Do not maintain or edit a
 second dashboard implementation under `website/`; that folder owns only public
 route wrappers, Pages metadata, and other hosted product inputs. Hosted mode
-must keep relative Designer/viewer assets and must not run timing-sensitive
-experiments in browser JavaScript.
+must keep relative Designer/viewer assets. The Designer remains orchestration
+only and must not run timing-sensitive experiments in browser JavaScript. The
+separate canonical Runner companion may provide an explicitly exploratory,
+locally armed Web Audio/vibration phone target, but that is not native or
+publication-grade timing evidence.
 
 ## Public Domain And Pages URL Rule
 
@@ -52,8 +55,9 @@ Public route ownership is part of the product contract:
 - Toolkit/app route: `https://ppskit.qzz.io/`
 - Documentation route: `https://ppskit.qzz.io/documentation`
 - Download route: `https://ppskit.qzz.io/download`
+- Experiment Runner companion route: `https://ppskit.qzz.io/experiment-runner/`
 
-Keep the matching GitHub Pages fallback routes available at `https://georgefejer91.github.io/pps-kit/`, `https://georgefejer91.github.io/pps-kit/documentation`, and `https://georgefejer91.github.io/pps-kit/download`. The visible tab label may say `Downloads`, but the public route should remain singular `/download` unless the user explicitly changes this contract.
+Keep the matching GitHub Pages fallback routes available at `https://georgefejer91.github.io/pps-kit/`, `https://georgefejer91.github.io/pps-kit/documentation`, `https://georgefejer91.github.io/pps-kit/download`, and `https://georgefejer91.github.io/pps-kit/experiment-runner/`. The visible tab label may say `Downloads`, but the public route should remain singular `/download` unless the user explicitly changes this contract.
 
 Do not reintroduce the old project Pages URL `https://georgefejer91.github.io/peripersonal-space-toolkit/` except as migration or historical context. The repository name controls the project Pages fallback path, so the GitHub repository should remain named `pps-kit` while this public URL contract is active.
 
@@ -64,7 +68,7 @@ no protocol, path, or second domain. The DNS provider points the subdomain to
 domains are needed, use DNS/provider redirects rather than multiple CNAME
 lines.
 
-For hosted companion access, CORS origins are origins only: keep `https://ppskit.qzz.io` and `https://georgefejer91.github.io` allowed, but do not include paths such as `/pps-kit/`, `/documentation`, or `/download` in an origin. When changing public URLs or tab routes, update repository references, release-manifest URLs, dashboard links, preloaded asset URLs, human docs, CORS tests, static deep-link handling, and this `For-AI/` rule together.
+For hosted companion access, CORS origins are origins only: keep `https://ppskit.qzz.io` and `https://georgefejer91.github.io` allowed, but do not include paths such as `/pps-kit/`, `/documentation`, `/download`, or `/experiment-runner/` in an origin. GitHub Pages serves the Runner companion interface but no WebSocket relay; do not claim or configure hosted remote operation without an owned WSS or qualified WebRTC BRSP transport. When changing public URLs or tab routes, update repository references, release-manifest URLs, dashboard links, preloaded asset URLs, human docs, CORS tests, static deep-link handling, and this `For-AI/` rule together.
 
 All external website links in the hosted/local HTML dashboard should open in a new browser tab with `rel="noopener noreferrer"`. Treat external HTTP(S) links as leaving the toolkit surface; internal route links, local companion calls, and repository-relative documentation links may remain in the same tab.
 

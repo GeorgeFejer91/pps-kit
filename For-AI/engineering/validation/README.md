@@ -343,3 +343,4 @@ narrative or move it to an internal appendix.
 ## Software Preview Reports
 
 - [Cross-platform Runner and Remote Preview — 2026-08-30](reports/cross_platform_runner_preview_20260830.md)
+- [Experiment Runner Pages Companion — 2026-08-30](reports/experiment_runner_pages_companion_20260830.md)

@@ -293,6 +293,7 @@ input[type="checkbox"] {
 .sticky-actions { position: sticky; bottom: 0.5rem; z-index: 2; border-radius: 10px; background: rgba(255, 255, 255, 0.92); padding: 0.25rem 0; backdrop-filter: blur(8px); }
 .phone-action-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .target-pairing { display: grid; justify-items: center; gap: 0.65rem; border-radius: 10px; background: var(--surface-soft); padding: 0.85rem; }
+.target-pairing[hidden] { display: none; }
 .looming-orbit { display: grid; height: 120px; place-items: center; overflow: hidden; border-radius: 12px; background: radial-gradient(circle, #f5f8f5, #e7eee9); }
 .looming-orbit span { width: 22px; height: 22px; border-radius: 50%; background: var(--primary); opacity: 0.5; transform: scale(1); }
 .looming-orbit.is-running span { animation: loom 3s cubic-bezier(0.3, 0, 0.8, 1) forwards; }
