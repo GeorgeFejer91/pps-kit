@@ -34,11 +34,33 @@ Read this after `For-AI/README.md` and before structural edits.
 - The packaged executable is the only participant-facing Runner entrypoint.
   Legacy direct Python/Tk runner execution remains retired.
 
-Android/phone execution is not a V1 Runner module. Its Python/Kotlin source,
-bridges, tests, protocols, and CLIs live under
+Candidate V2 boundaries coexist with, but do not replace, that V1 path:
+
+- Tauri desktop and shared browser frontend: `apps/runner/src-tauri/` and
+  `apps/runner/frontend/`; deterministic compiled web bytes are in
+  `apps/runner/compiled/`.
+- Versioned action/state/wire contracts: `packages/pps-contracts/`.
+- Transport-neutral BRSP/1 proof and sequence rules: `packages/pps-brsp/`.
+- Pure target-authoritative reducer: `packages/pps-runner-core/`.
+- Optional experimental Quest/Spatial SDK application context and JNI adapter:
+  `apps/quest-runner/`.
+
+The desktop WebView and Quest Activity are adapters to the shared Rust reducer
+and may not own independent experiment state machines or expose arbitrary
+native calls. The browser phone experiment is itself a target and therefore
+owns a strict JavaScript reducer mirroring the closed action/state contract; it
+still needs Rust-to-JavaScript differential fixtures before promotion. The
+validated Python Runner remains the scientific compatibility oracle while
+functionality is migrated incrementally.
+
+Android/phone execution is not a V1 Runner module. The earlier Python/Kotlin
+phone source, bridges, tests, protocols, and CLIs remain under
 `For-AI/experiments/android-companion/`. `companion_v1_disabled.py` provides
-only safe disabled defaults required by the desktop product while experimental
-controls remain absent.
+only safe disabled defaults required by the desktop product while those
+experimental controls remain absent. The newer Quest candidate is isolated at
+`apps/quest-runner/` as an optional application-context proof, not a primary
+PPS Kit Runner module, and must not be confused with V1 support or timing
+qualification.
 
 ## Shared Runtime and Resources
 
@@ -109,6 +131,11 @@ Release assembly code and tests are internal:
 
 GitHub workflows must remain minimal wrappers because GitHub requires their
 location. Their substantive logic belongs under `For-AI/engineering/automation/`.
+The thin `.github/workflows/runner-next.yml` wrapper runs
+`check_runner_next.ps1`: transport-neutral Rust crates are checked on Windows,
+macOS, and Linux, while the canonical browser companion is tested and compiled
+on Node 22. These software gates do not constitute platform hardware/timing
+qualification or signed Tauri bundle evidence.
 
 ## Internal Research
 

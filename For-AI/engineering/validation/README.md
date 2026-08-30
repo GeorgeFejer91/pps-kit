@@ -339,3 +339,7 @@ it as the scientific end report, rewrite it as a conclusions-first summary:
 keep validated methods, accepted evidence, measured results, and scope-setting
 measurement boundaries; remove operational todo/progress language from the main
 narrative or move it to an internal appendix.
+
+## Software Preview Reports
+
+- [Cross-platform Runner and Remote Preview — 2026-08-30](reports/cross_platform_runner_preview_20260830.md)

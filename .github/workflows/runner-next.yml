@@ -1,0 +1,101 @@
+name: Cross-platform Runner preview
+
+on:
+  pull_request:
+    paths:
+      - "Cargo.lock"
+      - "Cargo.toml"
+      - "apps/quest-runner/**"
+      - "apps/runner/**"
+      - "packages/pps-brsp/**"
+      - "packages/pps-contracts/**"
+      - "packages/pps-runner-core/**"
+      - "For-AI/engineering/automation/check_runner_next.ps1"
+      - ".github/workflows/runner-next.yml"
+  push:
+    branches: [main]
+    paths:
+      - "Cargo.lock"
+      - "Cargo.toml"
+      - "apps/quest-runner/**"
+      - "apps/runner/**"
+      - "packages/pps-brsp/**"
+      - "packages/pps-contracts/**"
+      - "packages/pps-runner-core/**"
+      - "For-AI/engineering/automation/check_runner_next.ps1"
+      - ".github/workflows/runner-next.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rust-core:
+    name: Rust core (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.88.0
+        with:
+          components: rustfmt, clippy
+      - name: Check and test transport-neutral Rust crates
+        shell: pwsh
+        run: ./For-AI/engineering/automation/check_runner_next.ps1 -Mode Core
+
+  desktop-shell:
+    name: Tauri desktop (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.88.0
+      - name: Install Linux Tauri prerequisites
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+      - name: Check and test the native desktop shell
+        shell: pwsh
+        run: ./For-AI/engineering/automation/check_runner_next.ps1 -Mode Desktop
+
+  browser-companion:
+    name: Browser companion
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/runner/package-lock.json
+      - name: Test and build bundled browser frontend
+        shell: pwsh
+        run: ./For-AI/engineering/automation/check_runner_next.ps1 -Mode Browser
+
+  quest-apk:
+    name: Optional native Quest APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+      - uses: dtolnay/rust-toolchain@1.88.0
+        with:
+          targets: aarch64-linux-android
+      - uses: android-actions/setup-android@v3
+      - name: Install pinned Android toolchain
+        shell: bash
+        run: sdkmanager "platforms;android-34" "build-tools;35.0.0" "ndk;27.0.12077973"
+      - name: Test, build, and lint the native Quest preview
+        working-directory: apps/quest-runner
+        run: ./gradlew testDebugUnitTest assembleDebug lintDebug --no-daemon

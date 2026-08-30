@@ -2248,3 +2248,52 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `profile_preparation.py`, whose successful result is a validated and hashed
   Segment 6 handoff. Keep this module graph current in `For-AI/` whenever UI
   segment names, manifests, dependencies, or applet boundaries change.
+
+## 2026-08-30 — Cross-platform Runner, browser companion, and optional Quest context
+
+- Preserve the validated Python/PySide Runner as the V1 production path and
+  migration oracle. Build the candidate V2 desktop in Tauri/Rust incrementally;
+  do not delete or silently reinterpret existing `.pps-profile`, prepared
+  session, timing, logging, output, or analysis contracts.
+- Make the Tauri desktop and browser companion the primary candidate Runner
+  path. The native Quest shell is a separate optional experimental application
+  context that may reuse the pure Rust authority; it is not a required PPS Kit
+  runtime. Keep the browser phone target behaviorally aligned through the same
+  closed contracts and differential fixtures. When the Quest context is in
+  scope, keep Tauri out of its immersive renderer: Meta Spatial SDK/Kotlin owns
+  the Activity/frame lifecycle and crosses JNI only with bounded semantic
+  commands, actions, and snapshots.
+- The optional Quest proof may ship its canonical BRSP target enabled only
+  after Rust/JVM/APK/lint gates cover proof, scopes, replay/u32 wrap, reconnect
+  dedupe, privacy, stale-socket fencing, and deadman cleanup. Host qualification
+  does not promote Quest into V1 or establish physical headset/phone timing.
+- Use BRSP/1 as one typed control boundary instead of embedding WebSockets in
+  subsystems. Require closed actions/scopes, mutual role-bound proof, bounded
+  records, epoch/sequence/revision checks, dedupe, short leases/deadman,
+  target-local arming and override, high-impact abort scope, and audit records.
+  Never expose arbitrary native, DOM, shell, file, path, URL, or input dispatch.
+- The BRSP preview's liveness and disclosure rules are target-owned: a
+  five-second monotonic lease is refreshed by valid fresh canonical controller
+  controls, the browser controller uses a two-second canonical
+  `snapshot-request` heartbeat only with `session.read`, and silent half-open
+  expiry revokes the exact controller/session owner and pauses locally. Initial
+  snapshots, snapshot responses, live state, and state heartbeats all require
+  `session.read`. The Tauri LAN listener is first bound only after explicit
+  remote enable; startup stays listener-free and bind failure is recoverable.
+  Stale socket cleanup must be inert after replacement, rotation, or disable.
+- Build the companion once as a multi-page browser frontend. It must not
+  auto-connect, must keep pairing secrets in the URL fragment, and may act as a
+  controller or an exploratory Web Audio/vibration phone target. Keep browser
+  and Quest timing claims explicitly below publication grade until measured on
+  physical devices.
+- Keep assets/media on a verified transfer plane and experiment timing on the
+  target-native scheduler/evidence plane. BRSP controls semantic outcomes; it
+  is not an LSL replacement and must not be called from audio callbacks or
+  primary response-marker paths.
+- Leave V1 component manifests and the current Go bootstrapper intact. A
+  smaller installed Runner becomes real only as Python/PySide functionality is
+  removed or made optional after parity checks. The V2 target is a Python-free
+  default Runner; any transitional Python worker is supervised compatibility,
+  not the final authority. Platform promotion requires
+  host-native signing, installers/updater manifests, rollback, privacy/license
+  inventories, and physical Windows/macOS/Linux/phone/Quest qualification.

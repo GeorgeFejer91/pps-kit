@@ -1,0 +1,38 @@
+{
+  "secret": "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc",
+  "targetHello": {
+    "protocol": "brsp",
+    "version": 1,
+    "type": "hello",
+    "sessionId": "session_abcdefgh",
+    "senderId": "target_abcdefgh",
+    "senderEpoch": 1,
+    "sequence": 0,
+    "body": {
+      "role": "target",
+      "nonce": "dGFyZ2V0LW5vbmNlLTEyMzQ1Ng",
+      "capabilities": ["command-ack", "latest-state", "pps-runner-v1", "state-snapshot"],
+      "requestedScopes": [],
+      "grantedScopes": ["session.read", "session.transport"]
+    }
+  },
+  "controllerHello": {
+    "protocol": "brsp",
+    "version": 1,
+    "type": "hello",
+    "sessionId": "session_abcdefgh",
+    "senderId": "controller_abcdef",
+    "senderEpoch": 2,
+    "sequence": 0,
+    "body": {
+      "role": "controller",
+      "nonce": "Y29udHJvbGxlci1ub25jZS0xMjM0NTY",
+      "capabilities": ["command-ack", "latest-state", "pps-runner-v1", "state-snapshot"],
+      "requestedScopes": ["session.abort", "session.transport"],
+      "grantedScopes": []
+    }
+  },
+  "canonicalTranscript": "{\"controllerHello\":{\"body\":{\"capabilities\":[\"command-ack\",\"latest-state\",\"pps-runner-v1\",\"state-snapshot\"],\"grantedScopes\":[],\"nonce\":\"Y29udHJvbGxlci1ub25jZS0xMjM0NTY\",\"requestedScopes\":[\"session.abort\",\"session.transport\"],\"role\":\"controller\"},\"protocol\":\"brsp\",\"senderEpoch\":2,\"senderId\":\"controller_abcdef\",\"sequence\":0,\"sessionId\":\"session_abcdefgh\",\"type\":\"hello\",\"version\":1},\"protocol\":\"brsp\",\"sessionId\":\"session_abcdefgh\",\"targetHello\":{\"body\":{\"capabilities\":[\"command-ack\",\"latest-state\",\"pps-runner-v1\",\"state-snapshot\"],\"grantedScopes\":[\"session.read\",\"session.transport\"],\"nonce\":\"dGFyZ2V0LW5vbmNlLTEyMzQ1Ng\",\"requestedScopes\":[],\"role\":\"target\"},\"protocol\":\"brsp\",\"senderEpoch\":1,\"senderId\":\"target_abcdefgh\",\"sequence\":0,\"sessionId\":\"session_abcdefgh\",\"type\":\"hello\",\"version\":1},\"version\":1}",
+  "targetProof": "7xuuXecCWEELxE5C26ylJHTL_cxhgGDFwggjFrHOa98",
+  "controllerProof": "u4fZ3PAvhV1mfdpdbbIX8Qi64IehtE1ftpN_mnwjy9g"
+}

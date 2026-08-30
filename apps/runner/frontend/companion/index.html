@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#f4f5f1">
+    <meta name="color-scheme" content="light">
+    <title>PPS Browser Companion</title>
+    <link rel="stylesheet" href="../src/styles/app.css">
+  </head>
+  <body class="companion-page">
+    <div class="phone-shell">
+      <header class="phone-header">
+        <div class="brand-block">
+          <span class="brand-mark" aria-hidden="true">PPS</span>
+          <div><p class="eyebrow">Browser companion</p><h1>Remote + Phone Experiment</h1></div>
+        </div>
+        <span id="companion-status" class="connection-pill" data-phase="idle">Not connected</span>
+      </header>
+
+      <div class="exploratory-banner" role="note">
+        <strong>Exploratory browser timing</strong>
+        <span>Phone audio and vibration are not publication-grade stimulus timing. The active target remains authoritative.</span>
+      </div>
+
+      <nav class="mode-switch" aria-label="Companion mode">
+        <button type="button" class="is-active" data-mode="controller" aria-selected="true">Controller</button>
+        <button type="button" data-mode="target" aria-selected="false">Phone Experiment</button>
+      </nav>
+
+      <main>
+        <section id="controller-mode" class="mode-panel is-active" data-mode-panel="controller">
+          <section class="panel stack compact-stack">
+            <div class="section-heading"><div><p class="eyebrow">BRSP/1 controller</p><h2>Pair with a Target</h2></div><span id="invite-badge" class="badge">No invite</span></div>
+            <p id="invite-summary" class="subtle">Open a QR invitation from the desktop runner or another phone target. Pairing remains inert until you press Connect.</p>
+            <div class="inline-actions sticky-actions">
+              <button id="controller-connect" class="button button-primary" type="button" disabled>Connect</button>
+              <button id="controller-stop" class="button" type="button" disabled>Stop</button>
+            </div>
+            <dl class="summary-list">
+              <div><dt>Target</dt><dd id="controller-target">—</dd></div>
+              <div><dt>Transport</dt><dd id="controller-transport">—</dd></div>
+              <div><dt>Granted scopes</dt><dd id="controller-scopes">None</dd></div>
+              <div><dt>Pending</dt><dd id="controller-pending">0</dd></div>
+            </dl>
+          </section>
+
+          <section class="panel stack compact-stack">
+            <div class="section-heading"><div><p class="eyebrow">Authoritative state</p><h2 id="controller-run-state">Waiting</h2></div><span id="controller-revision" class="badge">rev 0</span></div>
+            <p id="controller-progress" class="subtle">No target snapshot received.</p>
+            <div class="phone-progress"><span id="controller-progress-bar"></span></div>
+            <p id="controller-event" class="timeline-event">Connect to receive target state.</p>
+          </section>
+
+          <section class="panel stack compact-stack">
+            <p class="eyebrow">Granted semantic actions</p>
+            <h2>Session Control</h2>
+            <div class="phone-action-grid">
+              <button class="button button-primary remote-action" type="button" data-remote-action="package.prepare_demo">Prepare demo</button>
+              <button class="button button-primary remote-action" type="button" data-remote-action="part.start">Start part</button>
+              <button class="button remote-action" type="button" data-remote-action="instruction.continue">Continue</button>
+              <button class="button remote-action" type="button" data-remote-action="run.pause">Pause</button>
+              <button class="button remote-action" type="button" data-remote-action="run.resume">Resume</button>
+              <button class="button remote-action" type="button" data-remote-action="run.stop">Stop</button>
+              <button class="button button-danger remote-action" type="button" data-remote-action="run.abort">Abort</button>
+            </div>
+            <label>Participant code<input id="remote-participant-code" maxlength="32" autocomplete="off" placeholder="P001"></label>
+            <div class="form-grid">
+              <label>Age<input id="remote-participant-age" type="number" min="1" max="120" inputmode="numeric"></label>
+              <label>Handedness<select id="remote-participant-handedness"><option value="">Choose…</option><option value="right">Right</option><option value="left">Left</option><option value="ambidextrous">Ambidextrous</option><option value="prefer_not_to_say">Prefer not to say</option></select></label>
+              <label class="form-span">Gender<select id="remote-participant-gender"><option value="">Choose…</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option><option value="prefer_not_to_say">Prefer not to say</option></select></label>
+            </div>
+            <button id="remote-submit-setup" class="button remote-action" type="button" data-remote-action="setup.submit">Submit setup</button>
+            <label>Session note<textarea id="remote-note" maxlength="500" rows="3" placeholder="Bounded note…"></textarea></label>
+            <button id="remote-note-button" class="button remote-action" type="button" data-remote-action="session.note">Send note</button>
+          </section>
+        </section>
+
+        <section id="target-mode" class="mode-panel" data-mode-panel="target">
+          <section class="panel stack compact-stack">
+            <div class="section-heading"><div><p class="eyebrow">Browser target</p><h2>Phone Experiment Room</h2></div><span id="target-state-badge" class="badge">Local only</span></div>
+            <label>Room code<input id="target-room" maxlength="48" autocomplete="off" placeholder="room_lab_01"></label>
+            <label class="check-row"><input id="target-allow-notes" type="checkbox" checked> Allow remote session notes</label>
+            <label class="check-row"><input id="target-allow-abort" type="checkbox"> Allow remote stop / abort</label>
+            <button id="create-phone-target" class="button button-primary" type="button">Create target and invitation</button>
+            <div id="target-pairing" class="target-pairing" hidden>
+              <canvas id="target-qr" width="212" height="212" aria-label="Controller invitation QR code"></canvas>
+              <button id="copy-target-invite" class="button" type="button">Copy controller invitation</button>
+              <button id="target-connect" class="button button-primary" type="button">Connect target to relay</button>
+              <button id="target-disconnect" class="button" type="button" disabled>Stop relay</button>
+            </div>
+          </section>
+
+          <section class="panel stack compact-stack">
+            <div class="section-heading"><div><p class="eyebrow">Local safety gate</p><h2>Phone Outputs</h2></div><span id="output-capability" class="badge">Checking</span></div>
+            <label class="check-row"><input id="phone-audio-enabled" type="checkbox" checked> Enable generated looming audio</label>
+            <label class="check-row"><input id="phone-vibration-enabled" type="checkbox" checked> Enable browser vibration when supported</label>
+            <button id="arm-phone" class="button button-primary" type="button" disabled>Arm audio + vibration locally</button>
+            <button id="disarm-phone" class="button" type="button" disabled>Disarm outputs</button>
+            <p class="safety-copy">Remote peers cannot arm phone audio or vibration. A person holding this phone must perform the local gesture.</p>
+          </section>
+
+          <section class="panel stack compact-stack">
+            <div class="section-heading"><div><p class="eyebrow">Demo authority</p><h2 id="phone-run-state">Idle</h2></div><span id="phone-revision" class="badge">rev 0</span></div>
+            <label>Participant code<input id="phone-participant-code" maxlength="32" autocomplete="off" value="PHONE_DEMO"></label>
+            <div class="phone-action-grid">
+              <button id="phone-setup" class="button" type="button" disabled>Submit setup</button>
+              <button id="phone-prepare" class="button" type="button" disabled>Prepare demo</button>
+              <button id="phone-start" class="button button-primary" type="button" disabled>Start locally</button>
+              <button id="phone-pause" class="button" type="button" disabled>Pause</button>
+              <button id="phone-resume" class="button" type="button" disabled>Resume</button>
+              <button id="phone-stop" class="button" type="button" disabled>Stop</button>
+            </div>
+            <div class="looming-orbit" id="looming-orbit" aria-hidden="true"><span></span></div>
+            <p id="phone-event" class="timeline-event">Create a target to begin.</p>
+            <button id="download-phone-log" class="button button-quiet" type="button" disabled>Download event log</button>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <div id="companion-toast" class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="../src/companion-app.js"></script>
+  </body>
+</html>

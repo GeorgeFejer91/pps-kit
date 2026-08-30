@@ -87,7 +87,9 @@ included with the vendored files.
 
 - Project: Gradle
 - Repository: https://github.com/gradle/gradle
-- Vendored file: `For-AI/experiments/android-companion/runner-companion/gradle/wrapper/gradle-wrapper.jar`
+- Vendored files:
+  `For-AI/experiments/android-companion/runner-companion/gradle/wrapper/gradle-wrapper.jar`
+  and `apps/quest-runner/gradle/wrapper/gradle-wrapper.jar`
 - License: Apache License 2.0
 
 The Android runner companion source uses the Gradle wrapper to reproduce the
@@ -95,6 +97,46 @@ requested Gradle version. Android app dependencies such as AndroidX Compose,
 CameraX, ML Kit barcode scanning, OkHttp, Kotlin coroutines, and JUnit are
 resolved from Maven repositories during build and are not vendored in this
 source tree.
+
+## Browser Remote Sync Protocol
+
+- Project: Browser Remote Sync Protocol
+- Repository: https://github.com/GeorgeFejer91/browser-remote-sync-protocol
+- Pinned commit: `62ff66c6df724847c1e54161feabb470b67b1192`
+- License: MIT
+- Consumer: `apps/runner/package.json`; bundled into the deterministic browser
+  companion build where imported
+
+BRSP supplies the browser-side typed protocol and data-transport helpers. PPS
+Kit's Rust authority and wire profile live in `packages/pps-brsp/` and
+`packages/pps-contracts/`.
+
+## Browser companion JavaScript dependencies
+
+- `@noble/hashes` 1.7.1 — MIT — HMAC/SHA-256 in browser contexts where
+  `crypto.subtle` is unavailable, including typical cleartext lab-LAN pages.
+- `qrcode` 1.5.4 — MIT — local QR rendering for fragment-based invitations.
+- Vite 6.4.3 — MIT — build-time frontend bundler; it is not a production
+  runtime dependency.
+- Tauri JavaScript API/CLI 2.x — Apache-2.0 OR MIT — desktop bridge and build
+  tooling.
+
+Exact resolved JavaScript packages and integrity hashes are recorded in
+`apps/runner/package-lock.json`. No companion runtime dependency is loaded from
+a CDN.
+
+## Tauri and Meta Spatial SDK build dependencies
+
+The candidate desktop application resolves Tauri v2 and its Rust dependencies
+through `Cargo.lock`; their individual licenses are recorded in upstream crate
+metadata. The candidate Quest application resolves Meta Spatial SDK 0.13.2,
+AndroidX Compose, Kotlin, OkHttp, and related Android dependencies from Maven
+repositories. Those binaries are not vendored source and remain subject to
+their respective vendor and open-source terms. Direct versions are pinned in
+`apps/quest-runner/gradle/libs.versions.toml`, but the preview does not yet
+commit Gradle dependency locks or verification metadata for every transitive
+artifact. Generate and review the complete resolved dependency, checksum, and
+license inventory before any public APK release.
 
 ## Springer Nature LaTeX Author Template
 

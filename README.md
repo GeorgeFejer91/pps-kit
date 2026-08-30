@@ -18,10 +18,14 @@ together; V1 does not add a central hub.
 ```text
 apps/
   designer/        compiled web UI, launchers, and product specifications
-  runner/          participant-runner launchers and product specifications
+  runner/          validated runner plus Tauri/browser preview
+  quest-runner/    optional experimental Meta Quest/Spatial SDK context
 packages/
   pps-runtime/     peripersonal_space_toolkit Python package
   pps-resources/   approved assets, templates, configs, and sample data
+  pps-contracts/   shared Rust action, scope, wire, and state contracts
+  pps-brsp/        transport-neutral authenticated remote protocol
+  pps-runner-core/ pure Rust target-authoritative runner reducer
 distributions/
   manifests/       shared, designer, runner, and full component manifests
   downloader/      one parameterized Windows downloader codebase
@@ -183,10 +187,20 @@ CLIs, assets, and visible controls are excluded from V1 products and component
 manifests. Runner safety behavior required for ordinary desktop execution
 remains product code.
 
+The next-generation Runner preview is intentionally separate from that legacy
+phone experiment. `apps/runner/` now also contains a Tauri v2 desktop shell and
+no-install browser companion backed by shared Rust contracts. The separate
+`apps/quest-runner/` tree is an optional experimental Meta Spatial SDK
+application context using the same reducer through JNI; it is not the primary
+PPS Kit Runner target. These previews do not replace the validated V1
+Python/PySide Runner or its release manifests. See
+[Cross-platform Runner and browser remote preview](docs/CROSS_PLATFORM_RUNNER_AND_REMOTE.md).
+
 ## Documentation
 
 - [Windows installation and operation](docs/WINDOWS_APP.md)
 - [PPS Designer](docs/PPS_DESIGNER.md)
+- [Cross-platform Runner and browser remote preview](docs/CROSS_PLATFORM_RUNNER_AND_REMOTE.md)
 - [Study replication workflow](docs/replication_workflow.md)
 - [Privacy boundary](docs/privacy_boundary.md)
 - [Windows PC requirements](docs/WINDOWS_PC_SOFTWARE_REQUIREMENTS.md)

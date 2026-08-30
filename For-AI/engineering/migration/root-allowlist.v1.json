@@ -4,7 +4,7 @@
     ".github", "For-AI", "apps", "distributions", "docs", "packages", "third_party", "website"
   ],
   "tracked_files": [
-    ".gitignore", "AGENTS.md", "CITATION.cff", "LICENSE", "pyproject.toml", "README.md",
+    ".gitignore", "AGENTS.md", "Cargo.lock", "Cargo.toml", "CITATION.cff", "LICENSE", "pyproject.toml", "README.md",
     "THIRD_PARTY_LICENSES.md"
   ],
   "rule": "Root contains only repository metadata, package metadata, public product trees, and unavoidable GitHub adapters."

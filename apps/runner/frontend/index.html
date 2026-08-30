@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <title>PPS Experiment Runner</title>
+    <link rel="stylesheet" href="./src/styles/app.css">
+  </head>
+  <body class="desktop-page">
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <span class="brand-mark" aria-hidden="true">PPS</span>
+          <div>
+            <p class="eyebrow">Peripersonal Space Toolkit</p>
+            <h1>Experiment Runner</h1>
+          </div>
+        </div>
+        <div class="topbar-status" aria-label="Current runner status">
+          <span class="status-chip"><span>Participant</span><strong id="participant-chip">Not set</strong></span>
+          <span class="status-chip"><span>Part</span><strong id="part-chip">—</strong></span>
+          <span class="status-chip status-chip-accent"><span>State</span><strong id="state-chip">Connecting</strong></span>
+        </div>
+      </header>
+
+      <nav class="tabbar" aria-label="Runner sections">
+        <button class="tab-button is-active" type="button" data-tab="control" aria-selected="true">Experiment Control</button>
+        <button class="tab-button" type="button" data-tab="logging" aria-selected="false">Data Logging</button>
+        <button class="tab-button" type="button" data-tab="remote" aria-selected="false">Phone Remote</button>
+      </nav>
+
+      <main>
+        <section class="tab-panel is-active" data-panel="control">
+          <div class="workspace-grid">
+            <div class="workspace-main stack">
+              <section class="hero-panel panel">
+                <div>
+                  <p class="eyebrow">Experiment running</p>
+                  <h2 id="run-heading">Waiting for a prepared package</h2>
+                  <p id="run-progress" class="subtle">The native target remains the timing and state authority.</p>
+                </div>
+                <div class="response-target" aria-hidden="true">
+                  <span></span>
+                  <small>Participant response target</small>
+                </div>
+              </section>
+
+              <section class="panel">
+                <div class="section-heading">
+                  <div>
+                    <p class="eyebrow">Session transport</p>
+                    <h2>Experiment Control</h2>
+                  </div>
+                  <button class="button button-quiet" type="button" data-action="system.snapshot">Refresh snapshot</button>
+                </div>
+                <div class="control-grid">
+                  <button class="button button-primary action-button" type="button" data-action="part.start">Start selected part</button>
+                  <button class="button action-button" type="button" data-action="instruction.continue">Continue instruction</button>
+                  <button class="button action-button" type="button" data-action="run.pause">Pause</button>
+                  <button class="button action-button" type="button" data-action="run.resume">Resume</button>
+                  <button class="button action-button" type="button" data-action="run.stop">Stop cleanly</button>
+                  <button class="button button-danger action-button" type="button" data-action="run.abort">Abort run</button>
+                </div>
+                <div class="timeline" aria-label="Active block progress">
+                  <div class="timeline-labels"><span id="block-label">No active block</span><span id="block-time">0:00 / 0:00</span></div>
+                  <div class="progress-track"><span id="block-progress"></span></div>
+                  <p id="event-label" class="timeline-event">Waiting for target snapshot</p>
+                </div>
+              </section>
+
+              <section class="panel two-column-panel">
+                <form id="setup-form" class="stack compact-stack">
+                  <div class="section-heading">
+                    <div><p class="eyebrow">Participant</p><h2>Participant Setup</h2></div>
+                    <span id="setup-badge" class="badge">Not submitted</span>
+                  </div>
+                  <div class="form-grid">
+                    <label>Participant code<input id="participant-code" name="participant_code" maxlength="32" autocomplete="off" required></label>
+                    <label>Age<input id="participant-age" name="age" type="number" min="1" max="120" inputmode="numeric" required></label>
+                    <label>Handedness<select id="participant-handedness" name="handedness" required><option value="">Choose…</option><option value="right">Right</option><option value="left">Left</option><option value="ambidextrous">Ambidextrous</option><option value="prefer_not_to_say">Prefer not to say</option></select></label>
+                    <label>Gender<select id="participant-gender" name="gender" required><option value="">Choose…</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option><option value="prefer_not_to_say">Prefer not to say</option></select></label>
+                    <label class="form-span">Participant name <span class="hint">kept local unless sharing is opted in</span><input id="participant-name" name="participant_name" maxlength="80" autocomplete="off"></label>
+                    <label class="check-row form-span"><input id="name-sharing" name="name_sharing_opt_in" type="checkbox"> Allow the participant name to enter remote state</label>
+                  </div>
+                  <button class="button button-primary" type="submit">Submit participant setup</button>
+                </form>
+
+                <div class="stack compact-stack split-border">
+                  <div class="section-heading"><div><p class="eyebrow">Package</p><h2>Session Package</h2></div><span id="package-badge" class="badge">Unverified</span></div>
+                  <p id="package-label" class="subtle">No package loaded.</p>
+                  <button class="button" type="button" data-action="package.prepare_demo">Prepare deterministic demo</button>
+                  <div class="inline-actions">
+                    <button class="button" type="button" data-action="target.arm">Arm local target</button>
+                    <button class="button button-quiet" type="button" data-action="target.disarm">Disarm</button>
+                  </div>
+                  <p class="safety-copy">Audio-device selection, tactile calibration, filesystem access, and acquisition controls remain local-only.</p>
+                </div>
+              </section>
+            </div>
+
+            <aside class="workspace-side stack">
+              <section class="panel">
+                <p class="eyebrow">Output levels</p>
+                <h2>Output Summary</h2>
+                <div class="meter-list">
+                  <div><span>Output 1 / 2</span><div class="meter"><i style="width: 58%"></i></div><strong>Audio</strong></div>
+                  <div><span>Output 3 / 4</span><div class="meter"><i style="width: 34%"></i></div><strong>Tactile</strong></div>
+                </div>
+                <dl class="summary-list">
+                  <div><dt>Audio route</dt><dd id="audio-route">Not ready</dd></div>
+                  <div><dt>Local armed</dt><dd id="local-armed">No</dd></div>
+                  <div><dt>LSL</dt><dd id="lsl-ready">Not ready</dd></div>
+                  <div><dt>Capture</dt><dd id="capture-ready">Not started</dd></div>
+                </dl>
+              </section>
+
+              <section class="panel">
+                <p class="eyebrow">Run plan</p>
+                <h2>Session Overview</h2>
+                <dl class="summary-list">
+                  <div><dt>Session</dt><dd id="session-id">—</dd></div>
+                  <div><dt>Package part</dt><dd id="package-part">—</dd></div>
+                  <div><dt>Revision</dt><dd id="revision">0</dd></div>
+                  <div><dt>Audit events</dt><dd id="audit-events">0</dd></div>
+                </dl>
+                <div id="allowed-actions" class="token-list" aria-label="Currently allowed actions"></div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <section class="tab-panel" data-panel="logging">
+          <div class="workspace-grid balanced-grid">
+            <section class="panel stack">
+              <div class="section-heading"><div><p class="eyebrow">Acquisition</p><h2>Data Logging</h2></div><span class="badge">Target-owned</span></div>
+              <div class="check-list read-only-list">
+                <label><input type="checkbox" checked disabled> Semantic runner event log</label>
+                <label><input type="checkbox" disabled> Lab Streaming Layer mirror</label>
+                <label><input type="checkbox" disabled> Multichannel audio evidence</label>
+                <label><input type="checkbox" disabled> Physical capture evidence</label>
+              </div>
+              <p class="safety-copy">This rebuild exposes state, but it does not silently enable hardware acquisition. Native readiness gates remain authoritative.</p>
+            </section>
+            <section class="panel stack">
+              <p class="eyebrow">Session annotation</p>
+              <h2>Add a Note</h2>
+              <label>Researcher note<textarea id="session-note" maxlength="500" rows="6" placeholder="Record a bounded session annotation…"></textarea></label>
+              <button id="note-button" class="button button-primary" type="button">Save note</button>
+              <div class="note-preview"><span>Latest note</span><p id="last-note">None</p></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="tab-panel" data-panel="remote">
+          <div class="workspace-grid balanced-grid">
+            <section class="panel stack">
+              <div class="section-heading">
+                <div><p class="eyebrow">Explicit activation</p><h2>Phone Remote</h2></div>
+                <span id="remote-state-badge" class="badge">Disabled</span>
+              </div>
+              <label class="switch-row"><span><strong>Enable browser remote</strong><small>Starts the local BRSP WebSocket target only after this gesture.</small></span><input id="remote-enabled" type="checkbox" role="switch"></label>
+              <label class="switch-row"><span><strong>Allow remote abort</strong><small>Grants the separate high-impact <code>session.abort</code> scope.</small></span><input id="remote-allow-abort" type="checkbox" role="switch"></label>
+              <div class="inline-actions">
+                <button id="remote-apply" class="button button-primary" type="button">Apply remote settings</button>
+                <button id="rotate-pairing" class="button" type="button">Rotate pairing</button>
+              </div>
+              <p id="remote-detail" class="safety-copy">Remote networking is inert until enabled.</p>
+              <dl class="summary-list">
+                <div><dt>Controller</dt><dd id="remote-controller">None</dd></div>
+                <div><dt>Granted scopes</dt><dd id="remote-scopes">None</dd></div>
+                <div><dt>Route</dt><dd id="remote-route">Local Wi-Fi WebSocket</dd></div>
+              </dl>
+            </section>
+            <section class="panel pairing-panel stack">
+              <p class="eyebrow">Fresh invitation</p>
+              <h2>Scan to Control</h2>
+              <canvas id="pairing-qr" width="212" height="212" hidden aria-label="Phone companion pairing QR code"></canvas>
+              <div id="pairing-placeholder" class="qr-placeholder">Enable remote control to create a short-lived pairing invitation.</div>
+              <p id="pairing-summary" class="subtle">The secret is held in the URL fragment and is not sent in an HTTP request.</p>
+              <button id="copy-invite" class="button" type="button" disabled>Copy invitation link</button>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="./src/desktop-app.js"></script>
+  </body>
+</html>

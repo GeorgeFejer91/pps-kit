@@ -5,9 +5,11 @@ __pycache__/
 .venv/
 .venv-*/
 node_modules/
+target/
 build/
 dist/
 tmp/
+apps/runner/src-tauri/gen/
 For-AI/experiments/android-companion/**/.gradle/
 For-AI/experiments/android-companion/**/.kotlin/
 For-AI/experiments/android-companion/**/build/

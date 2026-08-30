@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "PPS Experiment Runner Preview",
+  "version": "0.1.0",
+  "identifier": "org.peripersonalspace.runner.preview",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../compiled"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "PPS Experiment Runner — Cross-platform Preview",
+        "width": 1380,
+        "height": 900,
+        "minWidth": 900,
+        "minHeight": 620,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost; img-src 'self' data:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "resources": {
+      "../compiled/": "web/",
+      "../../../LICENSE": "LICENSE",
+      "../../../THIRD_PARTY_LICENSES.md": "THIRD_PARTY_LICENSES.md"
+    },
+    "icon": [
+      "../../../packages/pps-resources/assets/app/pps_toolkit_icon.png",
+      "../../../packages/pps-resources/assets/app/pps_toolkit_icon.ico"
+    ]
+  }
+}

@@ -287,6 +287,71 @@ Top-up output contract: materialized top-up block WAV/CSV package assets are pre
 
 Full Study 5 packaged-runner UI readiness evidence now includes the evaluation-only artifact `artifacts/validation_runs/full_realtime_participant_emulation_20260615_035953/`. It launched the rebuilt `dist/PPSExperimentRunner/PPSExperimentRunner.exe` with hidden validation hooks, wall-clock-paced software audio, visible Focus Mode UI, and PC mouse-event participant emulation. The run passed with exit code 0, `completed = true`, `ui_ready_for_data_collection = true`, 14 block completions including the two part-end top-up blocks, 27 instruction clips, 360 standard tactile cues, 22 planned deliberate misses, 22 top-up rescue rows, 22 final rescued hits, 385/385 planned cursor recenters, and process wall time 3800.526 s versus 3773.787 s expected played audio/instruction duration. Screenshots in that artifact show the header chips (`Part`, `Block n/N`, run state) and the `Live Tactile Timeline` visible during playback. This automated participant emulation is evaluation evidence only; it is not a packaged toolkit feature or public deliverable, and it does not replace hardware loopback validation for physical timing.
 
+## Cross-platform Runner and semantic remote preview
+
+The candidate next-generation Runner is an incremental compatibility program,
+not a big-bang replacement. `apps/runner/` contains the primary Tauri v2
+desktop preview and the one multi-page browser frontend. The separate
+`apps/quest-runner/` native Meta Spatial SDK Android tree is an optional
+experimental application context, not the primary PPS Kit Runner.
+`packages/pps-contracts/`, `packages/pps-brsp/`,
+and `packages/pps-runner-core/` provide the shared closed contracts,
+authentication primitives, and target-authoritative reducer. The current
+Python/PySide Focus Mode remains the production and scientific oracle until
+each migrated operation passes differential fixtures and hardware validation.
+
+Remote control means an exhaustive registry of safe semantic outcomes, never
+arbitrary DOM events, native functions, Android intents, shell/file operations,
+paths, URLs, or synthetic participant input. The target validates action,
+scope, epoch, sequence, expected revision, command identity, local arming, and
+lease before applying a transition once and returning authoritative state.
+Participant names and local paths do not enter ordinary remote snapshots.
+High-impact stop/abort requires the separate `session.abort` scope, and target
+arming/disarming stays local-only. The initial transport has reliable ordered
+control and replaceable state semantics with bounded records, mutual
+role-bound HMAC-SHA256 proof over the complete canonical hello transcript,
+fragment-held secrets, uint32 half-range per-lane sequencing, short controller
+leases, replay protection, and local override. The preview currently exposes a
+bounded audit-event counter; durable command audit records remain owned by the
+validated V1 runner until the V2 logging crate is implemented and qualified.
+
+The preview deadman is target-owned and monotonic: its five-second lease is
+refreshed only by valid fresh canonical controller controls, with the browser
+controller using a two-second canonical `snapshot-request` cadence when
+`session.read` is negotiated. Silent half-open sessions are revoked and active
+runs pause locally. `session.read` is mandatory before any initial snapshot,
+snapshot response, live state, or state heartbeat is disclosed. Desktop LAN
+binding is deferred until the operator explicitly enables phone remote; local
+startup remains listener-free and bind failure is a recoverable configuration
+error. Controller cleanup is bound to the exact session and owner token so a
+stale socket cannot mutate a rotated, replacement, or disabled authority. Once
+the operator has opted in, the process reuses the listener across
+disable/re-enable; disabled ingress remains fail-closed until app exit releases
+the socket.
+
+The browser companion is deliberately no-install and supports both a controller
+role and an exploratory phone-owned experiment role. Browser Web Audio and
+vibration are not publication timing evidence without device-specific physical
+qualification. Tauri is the Windows/macOS/Linux researcher shell only. Meta
+Quest immersion remains owned by a native `AppSystemActivity`; Kotlin owns the
+Spatial/Android lifecycle and Rust owns semantic state through bounded JNI.
+The optional Quest build enables canonical BRSP ingress only after an explicit
+headset-side Connect action and local arm. Host gates cover mutual proof,
+scopes, u32 wrap/replay, reconnect dedupe, read privacy, stale-socket fencing,
+state coalescing, and deadman pause/revoke; no headset, physical phone route,
+or timing path has been qualified.
+Media/package transfer and audio/haptic scheduling remain separate from the
+BRSP control plane. The local WebSocket relay is a lab preview, not a production
+offline-Wi-Fi guarantee; a production route requires owned WSS or native
+WebRTC, lifecycle/reconnect qualification, and physical device tests.
+
+V1 component manifests and the existing lightweight Go downloader remain
+unchanged. A Tauri shell is not itself a small distribution while a full
+Python/PySide compatibility payload is still bundled. Cross-platform release
+promotion requires native signed installers, platform manifests, rollback and
+update ownership, and timing/acquisition evidence for each Windows, macOS,
+Linux, phone, and Quest backend.
+
 ## Privacy And Publication Boundary
 
 The public repo is a toolkit plus deidentified sample-data package. It is not a full study archive. Before publishing, run the release audit and tests. Do not weaken release safeguards without a clear reason and corresponding documentation update.

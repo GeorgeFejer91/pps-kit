@@ -20,6 +20,14 @@ The public products are two independently shippable applications:
 - Designer: `apps/designer/`
 - Experiment Runner: `apps/runner/`
 
+V1 still ships those two validated products. The candidate V2 Runner source is
+also under `apps/runner/`, with shared Rust crates under `packages/`. An
+optional experimental Meta Quest application context lives separately at
+`apps/quest-runner/`; it is not the primary PPS Kit Runner target. Neither
+preview is present
+in V1 component manifests or allowed to weaken the validated Python/PySide
+Runner and Windows acquisition evidence.
+
 They share the Python runtime in `packages/pps-runtime/`, approved resources in
 `packages/pps-resources/`, and versioned component manifests in
 `distributions/manifests/`. The Full download composes Designer, Runner, and
@@ -72,9 +80,11 @@ For-AI/
 The generated, approved publication-network projection may ship with the
 Designer; its broad source/audit graph remains under `For-AI/research/`.
 Android source, Android administration CLIs, phone bridges, tests, and visible
-controls are development-only and excluded from V1 manifests. The Android
-test/Gradle suites are future-development checks, not V1 release gates; the
-default pytest scope remains `For-AI/engineering/tests/`.
+controls under `For-AI/experiments/android-companion/` are development-only and
+excluded from V1 manifests. The separate `apps/quest-runner/` candidate is an
+optional application-context proof, not a primary PPS Kit product; its
+Gradle/device suites are not V1 release gates. The default pytest scope remains
+`For-AI/engineering/tests/`.
 
 ## Product and Publication Contracts
 
