@@ -12,8 +12,15 @@ import {
   setPhoneConnectionMetadata,
 } from "./domain/phone-experiment-reducer.js";
 import { BrowserOutputEngine } from "./phone/browser-output-engine.js";
-import { createRelayInvitation, parseInvitation, stripInvitationMaterial, webSocketUrl } from "./remote/invitation.js";
+import {
+  createVdoInvitation,
+  parseInvitation,
+  stripInvitationMaterial,
+  webSocketUrl,
+} from "./remote/invitation.js";
 import { createPairingSecret, createProtocolEpoch, createProtocolIdentity } from "./remote/protocol.js";
+import { PpsVdoTransport, generateVdoRoomId } from "./remote/vdo-transport.js";
+import { PpsPublicBeacon } from "./remote/vdo-beacon.js";
 import { BrspControllerSession, BrspTargetSession } from "./remote/websocket-session.js";
 import { renderQrCode } from "./ui/qr-code.js";
 
@@ -21,6 +28,10 @@ const elements = Object.fromEntries([...document.querySelectorAll("[id]")].map((
 const outputEngine = new BrowserOutputEngine();
 let controllerInvitation = null;
 let controllerSession = null;
+let controllerBeacon = null;
+let controllerBeaconRequestId = "";
+let targetBeacon = null;
+let pendingTargetRequest = null;
 let phoneTarget = null;
 let phoneSnapshot = null;
 let targetInvitationUrl = "";
@@ -120,6 +131,172 @@ function bindControllerSession(session) {
     const message = event.detail.message || "Relay peer state changed.";
     showToast(message);
   });
+  session.addEventListener("transportstatus", (event) => {
+    if (event.detail?.message) text("controller-transport", `VDO data-only · ${event.detail.message}`);
+  });
+  session.addEventListener("quality", (event) => {
+    const route = event.detail?.route || "unknown";
+    const rtt = Number.isFinite(event.detail?.rttMs) ? ` · ${event.detail.rttMs} ms RTT` : "";
+    text("controller-transport", `VDO data-only · ${route}${rtt}`);
+  });
+}
+
+function vdoTransport({ role, room, secret, targetId }) {
+  return new PpsVdoTransport({
+    role,
+    room,
+    sharedSecret: secret,
+    label: role === "target" ? `PPS phone target ${targetId.slice(-8)}` : "PPS browser controller",
+  });
+}
+
+function requestedControllerScopes() {
+  return [...DEFAULT_REMOTE_SCOPES, SCOPES.ANNOTATE, SCOPES.ABORT].sort();
+}
+
+function availablePhoneScopes() {
+  const scopes = [...DEFAULT_REMOTE_SCOPES];
+  if (elements["target-allow-notes"].checked) scopes.push(SCOPES.ANNOTATE);
+  if (elements["target-allow-abort"].checked) scopes.push(SCOPES.ABORT);
+  return [...new Set(scopes)].sort();
+}
+
+function renderBeaconTargets(targets = []) {
+  const list = elements["beacon-targets"];
+  list.replaceChildren();
+  if (targets.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "subtle";
+    empty.textContent = "No public PPS targets are currently visible.";
+    list.append(empty);
+    return;
+  }
+  for (const target of targets) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "beacon-target-button";
+    button.dataset.streamId = target.streamId;
+    const name = document.createElement("strong");
+    name.textContent = target.label;
+    const identifier = document.createElement("span");
+    identifier.textContent = `Unverified public ID · ${target.streamId.slice(-12)}`;
+    button.append(name, identifier);
+    button.addEventListener("click", async () => {
+      try {
+        list.querySelectorAll("button").forEach((candidate) => { candidate.disabled = true; });
+        await controllerBeacon?.selectTarget(target.streamId);
+      } catch (error) {
+        list.querySelectorAll("button").forEach((candidate) => { candidate.disabled = false; });
+        showToast(error.message, { error: true });
+      }
+    });
+    list.append(button);
+  }
+}
+
+async function stopControllerBeacon() {
+  const beacon = controllerBeacon;
+  controllerBeacon = null;
+  controllerBeaconRequestId = "";
+  elements["beacon-request"].disabled = true;
+  elements["beacon-stop"].disabled = true;
+  elements["beacon-browse"].disabled = false;
+  renderBeaconTargets();
+  text("beacon-selection", "Select one unverified public target before requesting access.");
+  if (beacon) await beacon.stop();
+  text("beacon-status", "Beacon off");
+}
+
+function bindControllerBeacon(beacon) {
+  beacon.addEventListener("status", (event) => {
+    text("beacon-status", event.detail.error ? "Beacon error" : titleCase(event.detail.phase));
+    elements["beacon-status"].dataset.tone = event.detail.error ? "danger" : "";
+  });
+  beacon.addEventListener("targetschange", (event) => renderBeaconTargets(event.detail.targets));
+  beacon.addEventListener("targetselected", (event) => {
+    text("beacon-selection", `${event.detail.label} selected. Waiting for its private-request channel.`);
+  });
+  beacon.addEventListener("peeropen", () => {
+    elements["beacon-request"].disabled = false;
+    text("beacon-selection", "Public request channel ready. The target still has to approve locally.");
+  });
+  beacon.addEventListener("peerclose", () => {
+    elements["beacon-request"].disabled = true;
+    text("beacon-selection", "The selected public target left. Stop and browse again.");
+  });
+  beacon.addEventListener("pairingrequested", (event) => {
+    controllerBeaconRequestId = event.detail.requestId;
+    elements["beacon-request"].disabled = true;
+    text("beacon-selection", "Private access requested. Waiting for target-local approval.");
+  });
+  beacon.addEventListener("pairingoffer", (event) => {
+    if (event.detail.requestId !== controllerBeaconRequestId) return;
+    const offer = beacon.takePrivateOffer(event.detail.requestId);
+    controllerBeaconRequestId = "";
+    if (!offer) {
+      showToast("The approved private offer expired before it could be accepted.", { error: true });
+      return;
+    }
+    controllerInvitation = {
+      mode: "controller",
+      transport: "vdo",
+      targetId: offer.targetId,
+      sessionId: offer.sessionId,
+      room: offer.room,
+      secret: offer.secret,
+      requestedScopes: offer.acceptedScopes,
+      expiresUnixMs: offer.expiresUnixMs,
+    };
+    text("invite-badge", "Private offer loaded");
+    elements["invite-badge"].dataset.tone = "ready";
+    text("invite-summary", "Target approval received. Press Connect to perform mutual BRSP proof in the fresh private room.");
+    text("controller-target", offer.targetId);
+    text("controller-transport", "VDO data-only (private, not connected)");
+    elements["controller-connect"].disabled = false;
+    text("beacon-selection", "Private offer loaded. Public discovery can now stop safely.");
+    void stopControllerBeacon();
+    showToast("Target approved a private session. Press Connect to authenticate.");
+  });
+  beacon.addEventListener("pairingrejected", (event) => {
+    controllerBeaconRequestId = "";
+    text("beacon-selection", `Request not approved: ${titleCase(event.detail.reason)}.`);
+    showToast("The public target did not approve private access.", { error: true });
+  });
+  beacon.addEventListener("protocolerror", (event) => showToast(event.detail.message, { error: true }));
+}
+
+function renderPendingTargetRequest() {
+  const requests = targetBeacon?.pendingPairingRequests() ?? [];
+  pendingTargetRequest = requests[0] ?? null;
+  elements["target-pairing-request"].hidden = !pendingTargetRequest;
+  if (!pendingTargetRequest) return;
+  text("target-request-label", pendingTargetRequest.label, "Browser controller");
+  text("target-request-scopes", pendingTargetRequest.requestedScopes.join(", "), "no scopes");
+}
+
+async function stopTargetBeacon() {
+  const beacon = targetBeacon;
+  targetBeacon = null;
+  pendingTargetRequest = null;
+  elements["target-pairing-request"].hidden = true;
+  elements["target-beacon-stop"].disabled = true;
+  elements["target-beacon-start"].disabled = false;
+  if (beacon) await beacon.stop();
+  text("target-beacon-status", "Beacon off");
+}
+
+function bindTargetBeacon(beacon) {
+  beacon.addEventListener("status", (event) => {
+    text("target-beacon-status", event.detail.error ? "Beacon error" : titleCase(event.detail.phase));
+    elements["target-beacon-status"].dataset.tone = event.detail.error ? "danger" : "";
+  });
+  beacon.addEventListener("pairingrequest", () => {
+    renderPendingTargetRequest();
+    showToast("A public controller requests private access. Review it before approving.");
+  });
+  beacon.addEventListener("pairingcancelled", renderPendingTargetRequest);
+  beacon.addEventListener("pairingrejected", renderPendingTargetRequest);
+  beacon.addEventListener("protocolerror", (event) => showToast(event.detail.message, { error: true }));
 }
 
 function initializeInvitation() {
@@ -130,9 +307,18 @@ function initializeInvitation() {
     activateMode("controller");
     text("invite-badge", "Invite loaded");
     elements["invite-badge"].dataset.tone = "ready";
-    text("invite-summary", `Invitation loaded for ${controllerInvitation.targetId}. Press Connect to open ${controllerInvitation.transport === "relay" ? "the room relay" : "the desktop target"}.`);
+    const transportLabel = controllerInvitation.transport === "vdo"
+      ? "the private data-only WebRTC room"
+      : controllerInvitation.transport === "relay"
+        ? "the room relay"
+        : "the desktop target";
+    text("invite-summary", `Invitation loaded for ${controllerInvitation.targetId}. Press Connect to open ${transportLabel}.`);
     text("controller-target", controllerInvitation.targetId);
-    text("controller-transport", controllerInvitation.transport === "relay" ? `Relay room ${controllerInvitation.room}` : "Desktop LAN target");
+    text("controller-transport", controllerInvitation.transport === "vdo"
+      ? "VDO data-only (not connected)"
+      : controllerInvitation.transport === "relay"
+        ? `Relay room ${controllerInvitation.room}`
+        : "Desktop LAN target");
     elements["controller-connect"].disabled = false;
   } catch (error) {
     stripInvitationMaterial();
@@ -146,14 +332,29 @@ function bindControllerControls() {
   elements["controller-connect"].addEventListener("click", () => {
     if (!controllerInvitation) return;
     try {
+      if (controllerInvitation.expiresUnixMs && controllerInvitation.expiresUnixMs <= Date.now()) {
+        controllerInvitation = null;
+        elements["controller-connect"].disabled = true;
+        text("invite-badge", "Offer expired");
+        throw new Error("The approved private offer expired. Browse the public beacon and request a new one.");
+      }
       controllerSession?.stop();
+      const transport = controllerInvitation.transport === "vdo"
+        ? vdoTransport({
+          role: "controller",
+          room: controllerInvitation.room,
+          secret: controllerInvitation.secret,
+          targetId: controllerInvitation.targetId,
+        })
+        : undefined;
       controllerSession = new BrspControllerSession({
-        url: webSocketUrl({
+        url: transport ? undefined : webSocketUrl({
           locationUrl: location.href,
           transport: controllerInvitation.transport,
           room: controllerInvitation.room,
           role: "controller",
         }),
+        transport,
         secret: controllerInvitation.secret,
         targetId: controllerInvitation.targetId,
         sessionId: controllerInvitation.sessionId,
@@ -239,6 +440,7 @@ function renderPhoneSnapshot() {
   elements["phone-pause"].disabled = !allowed.has("run.pause");
   elements["phone-resume"].disabled = !allowed.has("run.resume");
   elements["phone-stop"].disabled = !allowed.has("run.stop");
+  elements["phone-response"].disabled = phase !== "running";
   elements["arm-phone"].disabled = !allowed.has("target.arm");
   elements["disarm-phone"].disabled = !allowed.has("target.disarm");
   text("target-state-badge", phoneTarget?.session?.phase === "ready" ? "Remote ready" : titleCase(phoneSnapshot.connection_state));
@@ -290,6 +492,18 @@ function bindTargetSession(session) {
     elements["target-disconnect"].disabled = ["idle", "closed"].includes(event.detail.phase);
   });
   session.addEventListener("ready", () => {
+    if (phoneTarget?.session === session && phoneTarget.offerExpiresUnixMs
+      && Date.now() >= phoneTarget.offerExpiresUnixMs) {
+      if (phoneTarget.offerTimer) clearTimeout(phoneTarget.offerTimer);
+      phoneTarget.offerTimer = null;
+      session.stop();
+      showToast("The approved private offer expired before authentication completed.", { error: true });
+      return;
+    }
+    if (phoneTarget?.session === session && phoneTarget.offerTimer) {
+      clearTimeout(phoneTarget.offerTimer);
+      phoneTarget.offerTimer = null;
+    }
     phoneSnapshot = setPhoneConnectionMetadata(phoneSnapshot, {
       connectionState: "ready",
       controllerId: session.controller?.id || "",
@@ -321,20 +535,20 @@ function bindTargetSession(session) {
   session.addEventListener("relaypeer", (event) => showToast(event.detail.message || "Relay peer state changed."));
 }
 
-async function createPhoneTarget() {
+async function createPhoneTarget({ pairing = null, autoConnect = false } = {}) {
+  if (phoneTarget?.offerTimer) clearTimeout(phoneTarget.offerTimer);
   phoneTarget?.session.stop();
   outputEngine.disarm();
-  const room = elements["target-room"].value.trim() || createProtocolIdentity("room");
-  const targetId = createProtocolIdentity("phone_target");
+  const room = pairing?.room ?? generateVdoRoomId();
+  const targetId = pairing?.targetId ?? createProtocolIdentity("phone_target");
+  const sessionId = pairing?.sessionId ?? room;
   const epoch = createProtocolEpoch();
-  const secret = createPairingSecret();
-  const availableScopes = [...DEFAULT_REMOTE_SCOPES];
-  if (elements["target-allow-notes"].checked) availableScopes.push(SCOPES.ANNOTATE);
-  if (elements["target-allow-abort"].checked) availableScopes.push(SCOPES.ABORT);
+  const secret = pairing?.secret ?? createPairingSecret();
+  const availableScopes = pairing?.acceptedScopes ?? availablePhoneScopes();
   const actions = Object.keys(ACTION_SCOPE);
   phoneSnapshot = createPhoneExperimentSnapshot({ targetId, epoch, clock });
   eventLog = [];
-  targetInvitationUrl = createRelayInvitation({
+  targetInvitationUrl = createVdoInvitation({
     pageUrl: location.href,
     room,
     targetId,
@@ -347,11 +561,13 @@ async function createPhoneTarget() {
     secret,
     availableScopes,
     actions,
+    offerExpiresUnixMs: pairing?.expiresUnixMs ?? null,
+    offerTimer: null,
     session: new BrspTargetSession({
-      url: webSocketUrl({ locationUrl: location.href, transport: "relay", room, role: "target" }),
+      transport: vdoTransport({ role: "target", room, secret, targetId }),
       secret,
       targetId,
-      sessionId: room,
+      sessionId,
       epoch,
       availableScopes,
       actions,
@@ -361,6 +577,15 @@ async function createPhoneTarget() {
     }),
   };
   bindTargetSession(phoneTarget.session);
+  if (pairing?.expiresUnixMs) {
+    const ownedTarget = phoneTarget;
+    ownedTarget.offerTimer = setTimeout(() => {
+      if (phoneTarget !== ownedTarget || ownedTarget.session.phase === "ready") return;
+      ownedTarget.session.stop();
+      ownedTarget.offerTimer = null;
+      showToast("The approved private offer expired before a controller authenticated.", { error: true });
+    }, Math.max(0, pairing.expiresUnixMs - Date.now()));
+  }
   elements["target-room"].value = room;
   elements["target-pairing"].hidden = false;
   await renderQrCode(elements["target-qr"], targetInvitationUrl);
@@ -368,7 +593,81 @@ async function createPhoneTarget() {
   elements["target-connect"].disabled = false;
   renderPhoneSnapshot();
   appendEvent({ action: "target.created", revision: 0, unix_ms: Date.now() }, "local");
-  showToast("Target created locally. Relay remains disconnected until you press Connect target.");
+  if (autoConnect) {
+    await Promise.resolve(phoneTarget.session.connect());
+    showToast("Approved private target started. The controller must still connect and prove its secret.");
+  } else {
+    showToast("Private target created locally. VDO signaling remains disconnected until you press Start private data target.");
+  }
+}
+
+function bindPublicBeaconControls() {
+  elements["beacon-browse"].addEventListener("click", async () => {
+    try {
+      await stopControllerBeacon();
+      const beacon = new PpsPublicBeacon({ role: "controller", label: "PPS website controller" });
+      controllerBeacon = beacon;
+      bindControllerBeacon(beacon);
+      elements["beacon-browse"].disabled = true;
+      elements["beacon-stop"].disabled = false;
+      await beacon.startBrowsing();
+    } catch (error) {
+      showToast(error.message, { error: true });
+      if (controllerBeacon) await stopControllerBeacon();
+    }
+  });
+  elements["beacon-stop"].addEventListener("click", () => {
+    void stopControllerBeacon().catch((error) => showToast(error.message, { error: true }));
+  });
+  elements["beacon-request"].addEventListener("click", () => {
+    try {
+      controllerBeacon?.requestPairing({ requestedScopes: requestedControllerScopes() });
+    } catch (error) { showToast(error.message, { error: true }); }
+  });
+
+  elements["target-beacon-start"].addEventListener("click", async () => {
+    try {
+      await stopTargetBeacon();
+      const beacon = new PpsPublicBeacon({ role: "target", label: "PPS phone experiment" });
+      targetBeacon = beacon;
+      bindTargetBeacon(beacon);
+      elements["target-beacon-start"].disabled = true;
+      elements["target-beacon-stop"].disabled = false;
+      await beacon.startAdvertising();
+    } catch (error) {
+      showToast(error.message, { error: true });
+      if (targetBeacon) await stopTargetBeacon();
+    }
+  });
+  elements["target-beacon-stop"].addEventListener("click", () => {
+    void stopTargetBeacon().catch((error) => showToast(error.message, { error: true }));
+  });
+  elements["target-request-deny"].addEventListener("click", () => {
+    if (!pendingTargetRequest || !targetBeacon) return;
+    targetBeacon.rejectPairing(pendingTargetRequest.requestId);
+    renderPendingTargetRequest();
+    showToast("Private access request denied.");
+  });
+  elements["target-request-approve"].addEventListener("click", async () => {
+    if (!pendingTargetRequest || !targetBeacon) return;
+    const request = pendingTargetRequest;
+    const allowed = new Set(availablePhoneScopes());
+    const acceptedScopes = request.requestedScopes.filter((scope) => allowed.has(scope)).sort();
+    try {
+      const offer = targetBeacon.approvePairing(request.requestId, {
+        targetId: createProtocolIdentity("phone_target"),
+        acceptedScopes,
+        expiresUnixMs: Date.now() + 90_000,
+      });
+      pendingTargetRequest = null;
+      elements["target-pairing-request"].hidden = true;
+      await createPhoneTarget({ pairing: offer, autoConnect: true });
+      await stopTargetBeacon();
+    } catch (error) {
+      showToast(error.message, { error: true });
+      renderPendingTargetRequest();
+    }
+  });
 }
 
 function bindPhoneTargetControls() {
@@ -411,6 +710,16 @@ function bindPhoneTargetControls() {
   elements["phone-pause"].addEventListener("click", () => applyPhone("run.pause"));
   elements["phone-resume"].addEventListener("click", () => applyPhone("run.resume"));
   elements["phone-stop"].addEventListener("click", () => applyPhone("run.stop"));
+  elements["phone-response"].addEventListener("click", () => {
+    if (phoneSnapshot?.run.phase !== "running") return;
+    appendEvent({
+      action: "response.tap",
+      revision: phoneSnapshot.revision,
+      unix_ms: Date.now(),
+      timing_tier: "browser_exploratory",
+    }, "local-participant");
+    showToast("Local phone response captured in the exploratory event log.");
+  });
   outputEngine.addEventListener("complete", (event) => {
     if (phoneSnapshot?.run.phase === "running") {
       const outcome = applyPhone("run.complete_demo", {}, { source: "browser-output" });
@@ -436,16 +745,41 @@ function bindPhoneTargetControls() {
   });
 }
 
+function isEmbeddedContext() {
+  try {
+    return window.top !== window.self;
+  } catch {
+    return true;
+  }
+}
+
+function blockEmbeddedContext() {
+  stripInvitationMaterial();
+  elements["embedding-warning"].hidden = false;
+  setConnectionStatus("blocked", "Open directly");
+  document.querySelectorAll("button, input, select, textarea").forEach((control) => {
+    control.disabled = true;
+  });
+}
+
 function start() {
+  if (isEmbeddedContext()) {
+    blockEmbeddedContext();
+    return;
+  }
   bindModeSwitch();
   initializeInvitation();
   bindControllerControls();
+  bindPublicBeaconControls();
   bindPhoneTargetControls();
   updateControllerActions();
   setConnectionStatus("idle", "Not connected");
   addEventListener("pagehide", () => {
     controllerSession?.stop();
+    if (phoneTarget?.offerTimer) clearTimeout(phoneTarget.offerTimer);
     phoneTarget?.session.stop();
+    void controllerBeacon?.stop();
+    void targetBeacon?.stop();
     outputEngine.disarm();
   }, { once: true });
 }

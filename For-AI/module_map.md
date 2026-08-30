@@ -39,6 +39,13 @@ Candidate V2 boundaries coexist with, but do not replace, that V1 path:
 - Tauri desktop and shared browser frontend: `apps/runner/src-tauri/` and
   `apps/runner/frontend/`; deterministic compiled web bytes are in
   `apps/runner/compiled/`.
+- Browser discovery/private transport adapters:
+  `apps/runner/frontend/src/remote/beacon-contract.js`, `vdo-beacon.js`,
+  `vdo-transport.js`, and `websocket-session.js`. Public beacon frames are not
+  control authority; private BRSP sessions are.
+- Native WebView remote-owner boundary: the exact claim/renew/dispatch/revoke
+  DTOs and watchdog in `apps/runner/src-tauri/src/runtime.rs`, exposed only to
+  the bundled main window by the Tauri capability/command manifest.
 - Versioned action/state/wire contracts: `packages/pps-contracts/`.
 - Transport-neutral BRSP/1 proof and sequence rules: `packages/pps-brsp/`.
 - Pure target-authoritative reducer: `packages/pps-runner-core/`.
@@ -113,7 +120,8 @@ Release assembly code and tests are internal:
 - Pages assembly: `For-AI/engineering/automation/build_pages.mjs`.
 - GitHub-required thin wrapper: `.github/workflows/pages.yml`.
 - Assembly copies the exact Designer `compiled/` bytes, the exact Runner
-  companion HTML plus `companion.js`, `qr-code.js`, and `style.css`, and
+  companion HTML plus `companion.js`, `qr-code.js`, `style.css`, and the pinned
+  VDO.Ninja 1.5.5 SDK/license/notice files, and
   approved public catalogues into ignored `dist/pages/`, including root
   `CNAME`. The Tauri desktop entry is not a Pages asset.
 - Preserve `/`, `/documentation`, `/download`, `/experiment-runner/`,

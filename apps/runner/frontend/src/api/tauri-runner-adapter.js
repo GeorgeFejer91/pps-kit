@@ -6,31 +6,58 @@ function messageFromError(error) {
   return "The native runner rejected the request.";
 }
 
-async function call(command, args) {
+async function call(invokeFn, command, args) {
   try {
-    return await invoke(command, args);
+    return await invokeFn(command, args);
   } catch (error) {
-    throw new Error(messageFromError(error), { cause: error });
+    const wrapped = new Error(messageFromError(error), { cause: error });
+    if (error && typeof error === "object" && typeof error.code === "string") wrapped.code = error.code;
+    throw wrapped;
   }
 }
 
-export function createTauriRunnerAdapter() {
+export function createTauriRunnerAdapter({ invokeFn = invoke } = {}) {
+  if (typeof invokeFn !== "function") throw new TypeError("A Tauri invoke function is required.");
   return Object.freeze({
     kind: "tauri-native",
     snapshot() {
-      return call("runner_snapshot");
+      return call(invokeFn, "runner_snapshot");
     },
     dispatch(action, args = {}) {
-      return call("runner_dispatch", { action, args });
+      return call(invokeFn, "runner_dispatch", { action, args });
     },
     remoteStatus() {
-      return call("remote_status");
+      return call(invokeFn, "remote_status");
     },
-    configureRemote({ enabled, allowAbort }) {
-      return call("configure_remote", { enabled: Boolean(enabled), allowAbort: Boolean(allowAbort) });
+    configureRemote({ enabled, allowAbort, lanListener = true }) {
+      return call(invokeFn, "configure_remote", {
+        enabled: Boolean(enabled),
+        allowAbort: Boolean(allowAbort),
+        lanListener: Boolean(lanListener),
+      });
     },
     rotatePairing() {
-      return call("rotate_pairing");
+      return call(invokeFn, "rotate_pairing");
+    },
+    remoteSessionClaim({ sessionId, controllerId, acceptedScopes, readySequence }) {
+      return call(invokeFn, "remote_session_claim", {
+        request: { sessionId, controllerId, acceptedScopes: [...acceptedScopes], readySequence },
+      });
+    },
+    remoteSessionRenew({ sessionId, ownerToken, controlSequence }) {
+      return call(invokeFn, "remote_session_renew", {
+        request: { sessionId, ownerToken, controlSequence },
+      });
+    },
+    remoteSessionDispatch({ sessionId, ownerToken, controlSequence, command }) {
+      return call(invokeFn, "remote_session_dispatch", {
+        request: { sessionId, ownerToken, controlSequence, command },
+      });
+    },
+    remoteSessionRevoke({ sessionId, ownerToken }) {
+      return call(invokeFn, "remote_session_revoke", {
+        request: { sessionId, ownerToken },
+      });
     },
   });
 }

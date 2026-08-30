@@ -2281,6 +2281,10 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `session.read`. The Tauri LAN listener is first bound only after explicit
   remote enable; startup stays listener-free and bind failure is recoverable.
   Stale socket cleanup must be inert after replacement, rotation, or disable.
+  A website-beacon-only activation enables native remote authority without
+  binding the LAN listener; the bundled WebView transport still enters Rust
+  only through owner-fenced claim/renew/dispatch/revoke and stopping it revokes
+  that exact authority.
 - Build the companion once as a multi-page browser frontend. It must not
   auto-connect, must keep pairing secrets in the URL fragment, and may act as a
   controller or an exploratory Web Audio/vibration phone target. Keep browser
@@ -2288,11 +2292,25 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   physical devices.
 - Publish that canonical browser companion at `/experiment-runner/` on the
   GitHub Pages site and fallback project route. Pages assembly must copy the
-  compiled companion HTML and its three allowlisted browser assets byte-for-byte,
-  never the Tauri desktop entry. GitHub Pages is an interface host, not a relay:
-  phone-local exploratory mode works there, while cross-device control requires
-  a browser-side WSS/WebRTC BRSP adapter and endpoint to be implemented,
-  configured, deployed, and qualified together.
+  compiled companion HTML, browser assets, and reviewed hash-pinned VDO.Ninja
+  SDK/license bytes byte-for-byte, never the Tauri desktop entry. The static
+  page permanently carries an explicitly activated public data-only rendezvous
+  beacon: anyone may browse unverified target labels and request access, while
+  listings and requests carry no participant state or commands. Target-local
+  approval sends a fresh private room/secret only to the exact requester-bound
+  encrypted peer channel; this trusts VDO signaling and operator-selected peer
+  identity rather than supplying durable identity. BRSP proof/scopes, expected
+  revision, owner fencing, and the target deadman govern all control. Loading the page
+  must not construct the SDK or open the network. VDO.Ninja supplies external
+  Internet signaling/ICE, so the path is not an owned SLA or an offline
+  same-Wi-Fi guarantee. Browser-to-browser and browser-to-Tauri automated
+  interop are software gates; physical phone, route, lifecycle, and timing
+  qualification remain separate.
+  GitHub Pages cannot supply `frame-ancestors`, so the companion must refuse to
+  initialize in an iframe, strip invitation material, and disable every control;
+  owned hosting should add the response header. Desktop state publication must
+  remain suppressed until native owner claim succeeds, requested snapshots must
+  await native renewal, and active-controller/expiry checks must fail closed.
 - Keep assets/media on a verified transfer plane and experiment timing on the
   target-native scheduler/evidence plane. BRSP controls semantic outcomes; it
   is not an LSL replacement and must not be called from audio callbacks or

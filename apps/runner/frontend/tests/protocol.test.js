@@ -3,7 +3,11 @@ import test from "node:test";
 
 import { createPhoneExperimentSnapshot } from "../src/domain/phone-experiment-reducer.js";
 import { validateRunnerSnapshot } from "../src/domain/runner-contract.js";
-import { parseInvitation, sanitizedInvitationLocation } from "../src/remote/invitation.js";
+import {
+  createVdoInvitation,
+  parseInvitation,
+  sanitizedInvitationLocation,
+} from "../src/remote/invitation.js";
 import { encodeControlMessage, parseControlFrame } from "../src/remote/protocol.js";
 import { BrspControllerSession, BrspTargetSession } from "../src/remote/websocket-session.js";
 
@@ -64,6 +68,25 @@ test("invitation keeps the secret and session in a strict fragment", () => {
   assert.throws(() => parseInvitation(`https://lab.example/companion/?secret=${secret}#mode=controller`), /forbidden/u);
   assert.throws(() => parseInvitation(`${value}&secret=${secret}`), /duplicated/u);
   assert.throws(() => parseInvitation(`${value}&debug=true`), /Unknown invitation field/u);
+});
+
+test("VDO invitation uses a fresh private room and keeps all pairing material in the fragment", () => {
+  const secret = Buffer.alloc(32, 11).toString("base64url");
+  const href = createVdoInvitation({
+    pageUrl: "https://ppskit.qzz.io/experiment-runner/?ignored=1#old",
+    room: "brsp_private_room_1234",
+    targetId: "phone-target-alpha",
+    secret,
+    scopes: ["session.transport", "session.read"],
+  });
+  const url = new URL(href);
+  assert.equal(url.search, "");
+  assert.equal(url.hash.includes(secret), true);
+  const parsed = parseInvitation(href);
+  assert.equal(parsed.transport, "vdo");
+  assert.equal(parsed.room, "brsp_private_room_1234");
+  assert.equal(parsed.sessionId, "brsp_private_room_1234");
+  assert.deepEqual(parsed.requestedScopes, ["session.read", "session.transport"]);
 });
 
 test("invitation cleanup strips fragments and forbidden query secrets", () => {
@@ -249,6 +272,7 @@ test("browser target deadman is renewed by canonical controller controls and exp
   const secret = Buffer.alloc(32, 7).toString("base64url");
   const snapshot = phoneSnapshot({ allowedActions: ["run.pause"] });
   const expirations = [];
+  const acceptedControls = [];
   let commandCount = 0;
   const controller = new BrspControllerSession({
     url: "wss://lab.example/ws/desktop",
@@ -281,6 +305,9 @@ test("browser target deadman is renewed by canonical controller controls and exp
         snapshot,
       };
     },
+    onAcceptedControllerControl: (envelope) => {
+      acceptedControls.push({ type: envelope.type, sequence: envelope.sequence });
+    },
     onLeaseExpired: (detail) => expirations.push(detail),
     controllerLeaseMs: 5_000,
     now: leaseClock.now,
@@ -307,6 +334,9 @@ test("browser target deadman is renewed by canonical controller controls and exp
   assert.equal((await applied).detail.status, "accepted");
   assert.equal(commandCount, 1);
   assert.equal(target.status().leaseRemainingMs, 5_000, "accepted command renews the same target lease");
+  assert(acceptedControls.some(({ type }) => type === "snapshot-request"));
+  assert(acceptedControls.some(({ type }) => type === "command"));
+  assert.equal(new Set(acceptedControls.map(({ sequence }) => sequence)).size, acceptedControls.length);
 
   const controllerTypes = sockets.controller.sent.map((frame) => parseControlFrame(frame).type);
   assert(controllerTypes.filter((type) => type === "snapshot-request").length >= 2);
@@ -322,6 +352,153 @@ test("browser target deadman is renewed by canonical controller controls and exp
   assert.equal(target.controller, null);
   assert.equal(target.phase, "closed");
   assert.equal(targetIntervals.pending.size, 0);
+
+  controller.stop();
+  target.stop();
+});
+
+test("target command handling awaits an asynchronous native authority gate", async () => {
+  const sockets = linkedSockets();
+  const secret = Buffer.alloc(32, 13).toString("base64url");
+  const snapshot = phoneSnapshot({ allowedActions: ["run.pause"] });
+  let releaseNative;
+  let applyCount = 0;
+  const controller = new BrspControllerSession({
+    url: "wss://lab.example/ws/native-gate",
+    secret,
+    targetId: "target-alpha",
+    sessionId: "session-native-gate",
+    requestedScopes: ["session.read", "session.transport"],
+    controllerId: "controller-native-gate",
+    socketFactory: () => sockets.controller,
+  });
+  const target = new BrspTargetSession({
+    url: "wss://lab.example/ws/native-gate",
+    secret,
+    targetId: "target-alpha",
+    sessionId: "session-native-gate",
+    availableScopes: ["session.read", "session.transport"],
+    actions: ["run.pause"],
+    getSnapshot: () => snapshot,
+    applyCommand: async () => {
+      applyCount += 1;
+      return {
+        status: "accepted",
+        reason: "applied",
+        acceptedRevision: snapshot.revision,
+        resultingRevision: snapshot.revision,
+        snapshot,
+      };
+    },
+    onAcceptedControllerControl: (envelope) => {
+      if (envelope.type !== "command") return true;
+      return new Promise((resolve) => { releaseNative = resolve; });
+    },
+    socketFactory: () => sockets.target,
+  });
+
+  await connectSessions(controller, target, sockets);
+  const applied = eventOnce(controller, "commandapplied");
+  controller.sendCommand("run.pause");
+  await settleMicrotasks();
+  assert.equal(applyCount, 0, "the application reducer waits for native authorization");
+  assert.equal(controller.status().pendingCommands, 1);
+
+  releaseNative(true);
+  assert.equal((await applied).detail.status, "accepted");
+  assert.equal(applyCount, 1);
+
+  controller.stop();
+  target.stop();
+});
+
+test("target publication stays private until application authority permits it", async () => {
+  const sockets = linkedSockets();
+  const secret = Buffer.alloc(32, 14).toString("base64url");
+  const snapshot = phoneSnapshot({ allowedActions: [] });
+  let publicationAllowed = false;
+  const controller = new BrspControllerSession({
+    url: "wss://lab.example/ws/publication-gate",
+    secret,
+    targetId: "target-alpha",
+    sessionId: "session-publication-gate",
+    requestedScopes: ["session.read"],
+    controllerId: "controller-publication-gate",
+    socketFactory: () => sockets.controller,
+  });
+  const target = new BrspTargetSession({
+    url: "wss://lab.example/ws/publication-gate",
+    secret,
+    targetId: "target-alpha",
+    sessionId: "session-publication-gate",
+    availableScopes: ["session.read"],
+    actions: [],
+    getSnapshot: () => snapshot,
+    applyCommand: async () => ({ status: "rejected", reason: "not_used", snapshot }),
+    canPublishTargetState: () => publicationAllowed,
+    socketFactory: () => sockets.target,
+  });
+
+  await connectSessions(controller, target, sockets);
+  assert.equal(controller.snapshot, null);
+  const blockedTypes = sockets.target.sent.map((frame) => parseControlFrame(frame).type);
+  assert(!blockedTypes.includes("snapshot"));
+  assert(!blockedTypes.includes("state"));
+
+  publicationAllowed = true;
+  const published = eventOnce(controller, "snapshot");
+  assert.equal(target.publishState(snapshot), true);
+  assert.equal((await published).detail.snapshot.target_id, "target-alpha");
+
+  controller.stop();
+  target.stop();
+});
+
+test("snapshot responses await asynchronous application lease renewal", async () => {
+  const sockets = linkedSockets();
+  const secret = Buffer.alloc(32, 15).toString("base64url");
+  const snapshot = phoneSnapshot({ allowedActions: [] });
+  let holdNextSnapshot = false;
+  let releaseRenewal;
+  const controller = new BrspControllerSession({
+    url: "wss://lab.example/ws/snapshot-gate",
+    secret,
+    targetId: "target-alpha",
+    sessionId: "session-snapshot-gate",
+    requestedScopes: ["session.read"],
+    controllerId: "controller-snapshot-gate",
+    socketFactory: () => sockets.controller,
+  });
+  const target = new BrspTargetSession({
+    url: "wss://lab.example/ws/snapshot-gate",
+    secret,
+    targetId: "target-alpha",
+    sessionId: "session-snapshot-gate",
+    availableScopes: ["session.read"],
+    actions: [],
+    getSnapshot: () => snapshot,
+    applyCommand: async () => ({ status: "rejected", reason: "not_used", snapshot }),
+    onAcceptedControllerControl: (envelope) => {
+      if (envelope.type !== "snapshot-request" || !holdNextSnapshot) return true;
+      holdNextSnapshot = false;
+      return new Promise((resolve) => { releaseRenewal = resolve; });
+    },
+    socketFactory: () => sockets.target,
+  });
+
+  await connectSessions(controller, target, sockets);
+  const before = sockets.target.sent.filter((frame) => parseControlFrame(frame).type === "snapshot").length;
+  holdNextSnapshot = true;
+  const renewedSnapshot = eventOnce(controller, "snapshot");
+  controller.requestSnapshot();
+  await settleMicrotasks();
+  const blocked = sockets.target.sent.filter((frame) => parseControlFrame(frame).type === "snapshot").length;
+  assert.equal(blocked, before, "the response is withheld while native renewal is unresolved");
+
+  releaseRenewal(true);
+  await renewedSnapshot;
+  const after = sockets.target.sent.filter((frame) => parseControlFrame(frame).type === "snapshot").length;
+  assert.equal(after, before + 1);
 
   controller.stop();
   target.stop();

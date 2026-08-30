@@ -255,6 +255,40 @@ input[type="checkbox"] {
 .pairing-panel { align-items: center; text-align: center; }
 .pairing-panel canvas, .target-pairing canvas { width: 212px; height: 212px; max-width: 100%; border: 8px solid white; border-radius: 10px; box-shadow: 0 4px 24px rgba(32, 38, 33, 0.1); }
 .qr-placeholder { display: grid; width: 212px; height: 212px; place-items: center; border: 1px dashed #bfc9c0; border-radius: 10px; background: #fafbf9; color: var(--muted); padding: 1rem; font-size: 0.76rem; }
+.remote-beacon-panel, .remote-controller-panel { grid-column: 1 / -1; }
+.remote-controller-grid { display: grid; grid-template-columns: minmax(230px, 0.72fr) minmax(0, 1.28fr); gap: 1rem; align-items: start; }
+.compact-controller-actions { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.beacon-target-list { display: grid; gap: 0.5rem; }
+.beacon-target-button {
+  display: grid;
+  width: 100%;
+  gap: 0.2rem;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #fbfcfa;
+  color: var(--text);
+  padding: 0.7rem 0.78rem;
+  text-align: left;
+  cursor: pointer;
+}
+.beacon-target-button:hover:not(:disabled) { border-color: #93a598; background: var(--surface-soft); }
+.beacon-target-button strong { font-size: 0.78rem; }
+.beacon-target-button span { color: var(--muted); font-size: 0.66rem; overflow-wrap: anywhere; }
+.beacon-target-button.is-selected,
+.beacon-target-button[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); }
+.beacon-request-card {
+  display: grid;
+  gap: 0.7rem;
+  border: 1px solid #c7d9cf;
+  border-radius: 10px;
+  background: #f5faf7;
+  padding: 0.85rem;
+}
+.beacon-request-card[hidden], .beacon-target-list[hidden], .embedding-warning[hidden] { display: none; }
+.beacon-request-card > div:first-child { display: grid; gap: 0.18rem; }
+.beacon-request-card > div:first-child span { color: var(--muted); font-size: 0.65rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.beacon-request-card > div:first-child strong { font-size: 0.86rem; overflow-wrap: anywhere; }
+.beacon-request-card p { margin: 0; font-size: 0.74rem; line-height: 1.5; overflow-wrap: anywhere; }
 .toast {
   position: fixed;
   right: 1rem;
@@ -304,6 +338,8 @@ input[type="checkbox"] {
   .workspace-side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .two-column-panel { grid-template-columns: 1fr; }
   .split-border { border-top: 1px solid var(--border); border-left: 0; padding-top: 1rem; padding-left: 0; }
+  .remote-controller-grid { grid-template-columns: 1fr; }
+  .compact-controller-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 640px) {
@@ -311,7 +347,7 @@ input[type="checkbox"] {
   .topbar-status { display: none; }
   .tabbar { overflow-x: auto; padding: 0 0.4rem; }
   .tab-panel { padding: 0.75rem; }
-  .workspace-side, .control-grid, .form-grid { grid-template-columns: 1fr; }
+  .workspace-side, .control-grid, .form-grid, .compact-controller-actions { grid-template-columns: 1fr; }
   .hero-panel { align-items: flex-start; }
   .response-target { display: none; }
   .form-span { grid-column: auto; }

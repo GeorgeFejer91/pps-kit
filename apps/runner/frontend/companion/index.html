@@ -7,7 +7,7 @@
     <meta name="color-scheme" content="light">
     <meta name="description" content="Control a PPS experiment target or run the exploratory phone audio and vibration interface directly in a smartphone browser.">
     <meta name="referrer" content="no-referrer">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' wss://wss.vdo.ninja https://turnservers.vdo.ninja; object-src 'none'; base-uri 'none'; form-action 'self'">
     <title>PPS Experiment Runner Companion</title>
     <link rel="stylesheet" href="../src/styles/app.css">
   </head>
@@ -23,7 +23,12 @@
 
       <div class="exploratory-banner" role="note">
         <strong>Exploratory browser timing</strong>
-        <span>Phone audio and vibration are not publication-grade stimulus timing. This page supplies the interface, not a network relay; the active target remains authoritative.</span>
+        <span>Phone audio and vibration are not publication-grade stimulus timing. This page carries a data-only connection beacon; the authenticated target remains authoritative.</span>
+      </div>
+
+      <div id="embedding-warning" class="exploratory-banner embedding-warning" role="alert" hidden>
+        <strong>Open this page directly</strong>
+        <span>For pairing safety, the Runner Companion is disabled inside embedded frames.</span>
       </div>
 
       <nav class="mode-switch" aria-label="Companion mode">
@@ -33,6 +38,20 @@
 
       <main>
         <section id="controller-mode" class="mode-panel is-active" data-mode-panel="controller">
+          <section class="panel stack compact-stack beacon-panel">
+            <div class="section-heading"><div><p class="eyebrow">Public rendezvous plane</p><h2>Runner Beacon</h2></div><span id="beacon-status" class="badge">Beacon off</span></div>
+            <p class="safety-copy">Anyone on this page can browse public target labels and request access. Listings and requests carry no participant state or runner commands. After target-local approval, fresh credentials go only to that exact requester over its encrypted peer data channel; VDO signaling and the approved peer selection remain part of the trust boundary. This is not an offline-LAN service.</p>
+            <div class="inline-actions">
+              <button id="beacon-browse" class="button button-primary" type="button">Browse public targets</button>
+              <button id="beacon-stop" class="button" type="button" disabled>Stop radar</button>
+            </div>
+            <div id="beacon-targets" class="beacon-target-list" aria-live="polite">
+              <p class="subtle">Radar is idle. No network connection opens until Browse is pressed.</p>
+            </div>
+            <p id="beacon-selection" class="subtle">Select one unverified public target before requesting access.</p>
+            <button id="beacon-request" class="button" type="button" disabled>Request private session</button>
+          </section>
+
           <section class="panel stack compact-stack">
             <div class="section-heading"><div><p class="eyebrow">BRSP/1 controller</p><h2>Pair with a Target</h2></div><span id="invite-badge" class="badge">No invite</span></div>
             <p id="invite-summary" class="subtle">Open a QR invitation from the desktop runner or another phone target. Pairing remains inert until you press Connect and requires a compatible BRSP transport.</p>
@@ -80,17 +99,34 @@
         </section>
 
         <section id="target-mode" class="mode-panel" data-mode-panel="target">
+          <section class="panel stack compact-stack beacon-panel">
+            <div class="section-heading"><div><p class="eyebrow">Public rendezvous plane</p><h2>Advertise This Phone</h2></div><span id="target-beacon-status" class="badge">Beacon off</span></div>
+            <p class="safety-copy">Advertising publishes only a random beacon ID and the label “PPS phone experiment.” Requests remain untrusted until you approve one here. Approval sends fresh private credentials only to that requester’s encrypted peer data channel; VDO signaling, peer selection, and ordinary WebRTC connection metadata remain part of the trust boundary.</p>
+            <div class="inline-actions">
+              <button id="target-beacon-start" class="button button-primary" type="button">Start public beacon</button>
+              <button id="target-beacon-stop" class="button" type="button" disabled>Stop beacon</button>
+            </div>
+            <div id="target-pairing-request" class="beacon-request-card" hidden>
+              <p><strong id="target-request-label">Browser controller</strong> requests <span id="target-request-scopes">no scopes</span>.</p>
+              <p class="subtle">The public label is unverified. Approve creates new pairing material and sends it only to this requester’s peer channel; it does not arm phone audio or vibration.</p>
+              <div class="inline-actions">
+                <button id="target-request-approve" class="button button-primary" type="button">Approve privately</button>
+                <button id="target-request-deny" class="button" type="button">Deny</button>
+              </div>
+            </div>
+          </section>
+
           <section class="panel stack compact-stack">
             <div class="section-heading"><div><p class="eyebrow">Browser target</p><h2>Phone Experiment Room</h2></div><span id="target-state-badge" class="badge">Local only</span></div>
-            <label>Room code<input id="target-room" maxlength="48" autocomplete="off" placeholder="room_lab_01"></label>
+            <label>Private room<input id="target-room" maxlength="64" readonly aria-readonly="true" placeholder="Created with fresh pairing material"></label>
             <label class="check-row"><input id="target-allow-notes" type="checkbox" checked> Allow remote session notes</label>
             <label class="check-row"><input id="target-allow-abort" type="checkbox"> Allow remote stop / abort</label>
-            <button id="create-phone-target" class="button button-primary" type="button">Create target and invitation</button>
+            <button id="create-phone-target" class="button button-primary" type="button">Create private target + QR</button>
             <div id="target-pairing" class="target-pairing" hidden>
               <canvas id="target-qr" width="212" height="212" aria-label="Controller invitation QR code"></canvas>
               <button id="copy-target-invite" class="button" type="button">Copy controller invitation</button>
-              <button id="target-connect" class="button button-primary" type="button">Connect target to configured relay</button>
-              <button id="target-disconnect" class="button" type="button" disabled>Stop relay</button>
+              <button id="target-connect" class="button button-primary" type="button">Start private data target</button>
+              <button id="target-disconnect" class="button" type="button" disabled>Stop private target</button>
             </div>
           </section>
 
@@ -115,6 +151,7 @@
               <button id="phone-stop" class="button" type="button" disabled>Stop</button>
             </div>
             <div class="looming-orbit" id="looming-orbit" aria-hidden="true"><span></span></div>
+            <button id="phone-response" class="button button-primary" type="button" disabled>Tap response</button>
             <p id="phone-event" class="timeline-event">Create a target to begin.</p>
             <button id="download-phone-log" class="button button-quiet" type="button" disabled>Download event log</button>
           </section>
@@ -123,6 +160,9 @@
     </div>
 
     <div id="companion-toast" class="toast" role="status" aria-live="polite"></div>
+    <!-- Reviewed classic SDK bytes are copied unchanged from public/. -->
+    <!-- @vite-ignore -->
+    <script src="../vendor/vdoninja/1.5.5/vdoninja-sdk.min.js"></script>
     <script type="module" src="../src/companion-app.js"></script>
   </body>
 </html>

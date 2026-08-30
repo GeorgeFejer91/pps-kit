@@ -46,6 +46,9 @@ export function createPreviewRunnerAdapter() {
     productionTransportQualified: false,
     message: "Browser preview is local-only. Launch the Tauri app to enable authenticated LAN control.",
   });
+  const nativeAuthorityUnavailable = () => {
+    throw new Error("Native remote authority is unavailable in ordinary-browser preview mode.");
+  };
 
   return Object.freeze({
     kind: "browser-preview",
@@ -75,6 +78,18 @@ export function createPreviewRunnerAdapter() {
     },
     async rotatePairing() {
       throw new Error("Pairing exists only in the native Tauri runner.");
+    },
+    async remoteSessionClaim() {
+      return nativeAuthorityUnavailable();
+    },
+    async remoteSessionRenew() {
+      return nativeAuthorityUnavailable();
+    },
+    async remoteSessionDispatch() {
+      return nativeAuthorityUnavailable();
+    },
+    async remoteSessionRevoke() {
+      return nativeAuthorityUnavailable();
     },
   });
 }

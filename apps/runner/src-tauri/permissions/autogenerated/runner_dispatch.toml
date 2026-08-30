@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-runner-dispatch"
+description = "Enables the runner_dispatch command without any pre-configured scope."
+commands.allow = ["runner_dispatch"]
+
+[[permission]]
+identifier = "deny-runner-dispatch"
+description = "Denies the runner_dispatch command without any pre-configured scope."
+commands.deny = ["runner_dispatch"]

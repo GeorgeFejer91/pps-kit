@@ -15,7 +15,17 @@ const designerCompiled = join(designerFrontend, "compiled");
 const runnerCompiled = join(root, "apps", "runner", "compiled");
 const resources = join(root, "packages", "pps-resources");
 const companionAssets = ["companion.js", "qr-code.js", "style.css"];
-const companionResources = companionAssets.map((asset) => `../assets/${asset}`).sort();
+const companionVendorFiles = [
+  "LICENSE-MPL-2.0.txt",
+  "NOTICE.md",
+  "vdoninja-sdk.js",
+  "vdoninja-sdk.min.js",
+];
+const companionVendorRoot = join("vendor", "vdoninja", "1.5.5");
+const companionResources = [
+  ...companionAssets.map((asset) => `../assets/${asset}`),
+  "../vendor/vdoninja/1.5.5/vdoninja-sdk.min.js",
+].sort();
 
 async function requireFile(path, label) {
   const details = await stat(path).catch(() => null);
@@ -54,6 +64,9 @@ export async function assemblePages(output = join(root, "dist", "pages")) {
   for (const asset of companionAssets) {
     await requireFile(join(runnerCompiled, "assets", asset), `compiled Runner companion asset ${asset}`);
   }
+  for (const file of companionVendorFiles) {
+    await requireFile(join(runnerCompiled, companionVendorRoot, file), `compiled VDO.Ninja file ${file}`);
+  }
 
   const cname = (await readFile(join(website, "CNAME"), "utf8")).trim();
   if (cname !== "ppskit.qzz.io") throw new Error(`Unexpected CNAME: ${cname}`);
@@ -84,6 +97,13 @@ export async function assemblePages(output = join(root, "dist", "pages")) {
       join(runnerCompiled, "assets", asset),
       join(resolvedOutput, "assets", asset),
       `Runner companion asset ${asset}`,
+    );
+  }
+  for (const file of companionVendorFiles) {
+    await copyVerified(
+      join(runnerCompiled, companionVendorRoot, file),
+      join(resolvedOutput, companionVendorRoot, file),
+      `VDO.Ninja 1.5.5 file ${file}`,
     );
   }
 

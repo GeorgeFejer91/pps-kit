@@ -225,7 +225,7 @@ When the user tasks work on a specific Segment, do not edit earlier completed Se
 
 The same dashboard can be published as a GitHub Pages static site from the repository root. The main public-facing domain for this page is `https://ppskit.qzz.io/`, with `https://georgefejer91.github.io/pps-kit/` as the GitHub Pages fallback. In hosted mode, the page uses relative static assets and connects to the local companion backend at `http://127.0.0.1:8766` by default; the companion's default CORS origins include both `https://georgefejer91.github.io` and `https://ppskit.qzz.io`. If the local companion is not running, the hosted dashboard falls back to a read-only static profile mode that loads `assets/preloads/preload_inventory.json` plus `study_templates/*.json` from GitHub and opens on Study 5 (`study5_box_breathing_pps`) by default. Static mode can inspect preloaded profile parameters, source inventories, trajectory previews, and committed WAV assets, but creating custom studies, importing files, baking new looming stimuli, materializing trial/block/session files, and launching Focus Mode still require the local companion. The companion backend is still the only trusted process allowed to render, prepare sessions, stress audio, and launch Focus Mode. GitHub Pages must not be treated as an installer or timing engine; it can offer a software download/setup link and then communicate with the local backend after the user starts it.
 
-The Pages site also owns the stable `/experiment-runner/` route, with `/pps-kit/experiment-runner/` on the GitHub project fallback. It is assembled from the byte-identical canonical Runner companion output: `apps/runner/compiled/companion/index.html` plus only `companion.js`, `qr-code.js`, and `style.css`. The Tauri desktop entry, bridge, and capabilities never enter Pages. This browser surface can act as a scoped BRSP controller or as a locally armed exploratory phone target using Web Audio and supported vibration; that phone-local mode is intentionally separate from the Designer orchestration boundary and is not publication-grade timing evidence. GitHub Pages supplies static interface files, not a relay. The current hosted route cannot complete cross-device pairing until a browser-side WSS/WebRTC BRSP adapter and endpoint are implemented/configured, deployed, and qualified together. Tauri invitations must not be repointed to the hosted route before that complete transport path passes browser/device qualification.
+The Pages site also owns the stable `/experiment-runner/` route, with `/pps-kit/experiment-runner/` on the GitHub project fallback. It is assembled from the byte-identical canonical Runner companion output: `apps/runner/compiled/companion/index.html`, `companion.js`, `qr-code.js`, `style.css`, and the reviewed/hash-pinned VDO.Ninja 1.5.5 SDK plus MPL notice. The Tauri desktop entry, bridge, and capabilities never enter Pages. This browser surface can act as a scoped BRSP controller or as a locally armed exploratory phone target using Web Audio and supported vibration; that phone-local mode is intentionally separate from the Designer orchestration boundary and is not publication-grade timing evidence. The page carries a fixed public data-only rendezvous beacon, but constructs no VDO client and opens no connection before explicit Browse/Advertise. Listings and pairing requests contain only bounded unverified metadata and no participant state or commands. After target-local approval, the `pps.beacon/1` acceptance sends a fresh private room/secret only over the exact requester-bound SCTP/DTLS peer channel; it is not broadcast, but it trusts VDO.Ninja signaling and the operator's unverified peer selection rather than providing durable identity. The controller must still explicitly connect, and BRSP mutual proof, scopes, revision checks, native owner fencing, and the target deadman remain the control authority. Out-of-band QR or an independently verified key fingerprint is required for a hostile-signaling threat model. GitHub Pages supplies static interface and beacon client files, not a WebSocket relay or authentication service. VDO.Ninja supplies external Internet signaling/ICE for this adapter, so it is neither an owned availability SLA nor an offline same-Wi-Fi guarantee. Automated contract tests cover browser-to-browser and browser-to-Tauri flows; physical phone/network lifecycle qualification remains open.
 
 The dashboard shell now has a sticky top tab-only bar with left-aligned `PPS Toolkit`, `Documentation`, and `Downloads` buttons. The Segment 0-6 experiment GUI lives under `PPS Toolkit`; global study state controls that used to sit in the sticky header, including active design, workflow/profile status, refresh, edit-as-new-study, and save/read-only actions, belong in Segment 0. `Documentation` and `Downloads` are static sibling pages in the same hosted/local shell and must not perform experiment actions without the local companion.
 
@@ -330,6 +330,32 @@ stale socket cannot mutate a rotated, replacement, or disabled authority. Once
 the operator has opted in, the process reuses the listener across
 disable/re-enable; disabled ingress remains fail-closed until app exit releases
 the socket.
+
+The hosted companion and bundled Tauri frontend also carry the pinned
+VDO.Ninja 1.5.5 data-only adapter. A fixed public rendezvous namespace is
+explicitly activated by Browse/Advertise. Listings and requests carry only
+bounded, unverified target metadata. Target-local approval generates a fresh
+private room and secret and sends them only to the exact requester-bound
+encrypted peer channel; the handoff trusts VDO signaling and selected-peer
+identity, and the controller still completes BRSP proof and scope negotiation.
+For an inbound website-to-Tauri private session, the
+WebView must claim, renew, dispatch, and revoke an exact native owner token;
+commands always enter the Rust remote reducer origin, and stale owners or a
+native five-second deadline cannot affect a replacement. Website-beacon-only
+activation does not bind the LAN listener. Conversely, the Tauri WebView can
+use the same public beacon as a controller for a browser phone target without
+gaining local native authority. The page is permanent static infrastructure,
+but VDO.Ninja Internet signaling/ICE is external and is not an offline LAN or
+availability guarantee.
+
+The hosted companion must fail closed when embedded: GitHub Pages does not
+supply a response-level `frame-ancestors` policy, so the runtime strips any
+invitation fragment, binds no controls/network producers, disables form
+controls, and requires direct top-level navigation. An owned host should add
+`Content-Security-Policy: frame-ancestors 'none'`. For desktop VDO targets,
+participant-bearing snapshot/state publication is also native-owner gated:
+initial state is withheld until Rust claim succeeds, requested snapshots await
+native renewal, and controller identity/expiry must still match the snapshot.
 
 The browser companion is deliberately no-install and supports both a controller
 role and an exploratory phone-owned experiment role. Browser Web Audio and

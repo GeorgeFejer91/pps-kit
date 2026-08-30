@@ -111,6 +111,28 @@ BRSP supplies the browser-side typed protocol and data-transport helpers. PPS
 Kit's Rust authority and wire profile live in `packages/pps-brsp/` and
 `packages/pps-contracts/`.
 
+### VDO.Ninja SDK 1.5.5
+
+- Project: VDO.Ninja SDK / NinjaSDK
+- Repository: https://github.com/steveseguin/ninjasdk
+- Version: `1.5.5`
+- License: Mozilla Public License 2.0
+- Local reviewed copy:
+  `apps/runner/frontend/public/vendor/vdoninja/1.5.5/`
+- Production runtime file: `vdoninja-sdk.min.js`, SHA-256
+  `390ea6c8b1a4e57bf7fa18ff2b394f25cc79e637130f97e4a29ca958a90fac77`
+- Corresponding readable source: `vdoninja-sdk.js`, SHA-256
+  `8097d5420d7ed2426623d7ff08f6abd45f03f89e6540a6cc4b86bcdc057d841e`
+- MPL text: `LICENSE-MPL-2.0.txt`, SHA-256
+  `3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04`
+
+The four files in that directory, including `NOTICE.md`, are copied without
+modification from the SDK snapshot carried by the pinned BRSP dependency. The
+same exact bytes are included in the bundled Runner frontend and the public
+Pages companion; no runtime CDN is used. VDO.Ninja supplies data-only WebRTC
+signaling and ICE support for this optional adapter. It does not receive PPS
+participant records or become the experiment authority.
+
 ## Browser companion JavaScript dependencies
 
 - `@noble/hashes` 1.7.1 — MIT — HMAC/SHA-256 in browser contexts where

@@ -61,7 +61,7 @@ async function normalizeFrameData(value) {
  * state is coalesced before entering the socket queue and receivers still use
  * an independent uint32 state sequence.
  */
-class BrspWebSocketTransport extends EventTarget {
+export class BrspWebSocketTransport extends EventTarget {
   constructor({ url, role, socketFactory }) {
     super();
     this.url = String(url);
@@ -200,9 +200,13 @@ class BrspWebSocketTransport extends EventTarget {
  * controller deadman are PPS profile rules rather than BRSP/1 wire fields.
  */
 class PpsBrspConnection extends BRSPConnection {
-  constructor({ onAcceptedControllerControl, ...options }) {
+  constructor({ onAcceptedControllerControl, canPublishTargetState = () => true, ...options }) {
     super(options);
+    if (typeof canPublishTargetState !== "function") {
+      throw new TypeError("canPublishTargetState must be a function.");
+    }
     this.onAcceptedControllerControl = onAcceptedControllerControl;
+    this.canPublishTargetState = canPublishTargetState;
   }
 
   hasReadScope() {
@@ -223,12 +227,12 @@ class PpsBrspConnection extends BRSPConnection {
   }
 
   publishSnapshot(...args) {
-    if (this.role === "target" && !this.hasReadScope()) return false;
+    if (this.role === "target" && (!this.hasReadScope() || !this.canPublishTargetState())) return false;
     return super.publishSnapshot(...args);
   }
 
   publishState(...args) {
-    if (this.role === "target" && !this.hasReadScope()) return false;
+    if (this.role === "target" && (!this.hasReadScope() || !this.canPublishTargetState())) return false;
     return super.publishState(...args);
   }
 
@@ -244,10 +248,24 @@ class PpsBrspConnection extends BRSPConnection {
     if (cached && cached.request !== canonicalStringify(command)) {
       throw new TypeError("A commandId was reused with a different command body.");
     }
-    if (this.onAcceptedControllerControl?.(envelope) === false) {
+    const accepted = this.onAcceptedControllerControl?.(envelope, {
+      cached: Boolean(cached),
+    });
+    if (accepted === false) {
       throw new TypeError("The target-owned controller lease expired.");
     }
-    return super.queueCommand(envelope);
+    this.commandApplyChain = this.commandApplyChain
+      .then(async () => {
+        if (await accepted === false) {
+          throw new TypeError("The target-owned controller lease expired.");
+        }
+        try {
+          await this.handleCommand(envelope);
+        } finally {
+          this.dispatchEvent(detailEvent("commandhandled", { command }));
+        }
+      })
+      .catch((error) => this.protocolError(error));
   }
 
   handleSnapshotRequest(envelope) {
@@ -255,8 +273,16 @@ class PpsBrspConnection extends BRSPConnection {
     // as a liveness signal. A target without session.read renews the peer lease
     // but deliberately publishes no snapshot.
     encodeControlMessage(envelope);
-    if (this.onAcceptedControllerControl?.(envelope) === false) {
+    const accepted = this.onAcceptedControllerControl?.(envelope);
+    if (accepted === false) {
       throw new TypeError("The target-owned controller lease expired.");
+    }
+    if (accepted && typeof accepted.then === "function") {
+      void accepted.then((result) => {
+        if (result === false) throw new TypeError("The target-owned controller lease expired.");
+        super.handleSnapshotRequest(envelope);
+      }).catch((error) => this.protocolError(error));
+      return;
     }
     return super.handleSnapshotRequest(envelope);
   }
@@ -296,6 +322,7 @@ class PpsBrspConnection extends BRSPConnection {
 class BrspSocketSession extends EventTarget {
   constructor({
     url,
+    transport,
     role,
     sessionId,
     secret,
@@ -306,11 +333,12 @@ class BrspSocketSession extends EventTarget {
     applyCommand,
     now,
     onAcceptedControllerControl,
+    canPublishTargetState,
   }) {
     super();
     installBrspProofCrypto();
     this.phase = "idle";
-    this.transport = new BrspWebSocketTransport({ url, role, socketFactory });
+    this.transport = transport ?? new BrspWebSocketTransport({ url, role, socketFactory });
     this.connection = new PpsBrspConnection({
       transport: this.transport,
       role,
@@ -324,8 +352,16 @@ class BrspSocketSession extends EventTarget {
       applyCommand,
       now,
       onAcceptedControllerControl,
+      canPublishTargetState,
     });
     this.transport.addEventListener("transportopen", () => this.setPhase("authenticating", "Transport open; completing BRSP hello, proof, and ready."));
+    this.transport.addEventListener("status", (event) => {
+      this.dispatchEvent(detailEvent("transportstatus", event.detail));
+      if (event.detail?.error && this.phase !== "ready") {
+        this.setPhase("error", event.detail.message || "The remote transport failed.");
+      }
+    });
+    this.transport.addEventListener("quality", (event) => this.dispatchEvent(detailEvent("quality", event.detail)));
     this.transport.addEventListener("relaypeer", (event) => this.dispatchEvent(detailEvent("relaypeer", event.detail)));
     this.transport.addEventListener("relayerror", (event) => this.dispatchEvent(detailEvent("remoteerror", event.detail)));
     this.transport.addEventListener("transporterror", (event) => this.dispatchEvent(detailEvent("protocolerror", event.detail)));
@@ -342,7 +378,21 @@ class BrspSocketSession extends EventTarget {
   connect() {
     if (!["idle", "closed", "error"].includes(this.phase)) throw new Error("The session is already active.");
     this.setPhase("connecting", "Opening the explicitly requested connection…");
-    this.transport.start();
+    try {
+      const started = this.transport.start();
+      if (started && typeof started.then === "function") {
+        void started.catch((error) => {
+          this.setPhase("error", error instanceof Error ? error.message : String(error));
+          this.dispatchEvent(detailEvent("protocolerror", {
+            message: error instanceof Error ? error.message : String(error),
+          }));
+        });
+      }
+      return started;
+    } catch (error) {
+      this.setPhase("error", error instanceof Error ? error.message : String(error));
+      throw error;
+    }
   }
 
   stop() {
@@ -358,6 +408,7 @@ class BrspSocketSession extends EventTarget {
 export class BrspControllerSession extends BrspSocketSession {
   constructor({
     url,
+    transport,
     secret,
     targetId,
     sessionId,
@@ -371,6 +422,7 @@ export class BrspControllerSession extends BrspSocketSession {
   }) {
     super({
       url,
+      transport,
       role: "controller",
       sessionId,
       secret,
@@ -509,6 +561,7 @@ function applicationErrorToken(reason) {
 export class BrspTargetSession extends BrspSocketSession {
   constructor({
     url,
+    transport,
     secret,
     targetId,
     sessionId,
@@ -516,6 +569,9 @@ export class BrspTargetSession extends BrspSocketSession {
     actions,
     getSnapshot,
     applyCommand,
+    applicationOwnsTransitionValidation = false,
+    canPublishTargetState,
+    onAcceptedControllerControl,
     onLeaseExpired,
     socketFactory,
     controllerLeaseMs = CONTROLLER_LEASE_MS,
@@ -556,7 +612,12 @@ export class BrspTargetSession extends BrspSocketSession {
       if (!isRemoteAction(command.action)) return rejectedCommand(command, "action_is_local_only", current);
       if (required !== command.scope) return rejectedCommand(command, "scope_action_mismatch", current);
       if (!advertisedActions.has(command.action)) return rejectedCommand(command, "action_not_advertised", current);
-      if (!current.allowed_actions.includes(command.action)) return rejectedCommand(command, "invalid_transition", current);
+      // The native desktop bridge can receive controls faster than its WebView
+      // snapshot refresh. In that profile Rust has already applied/rejected the
+      // ordered command, so only Rust may decide the dynamic transition.
+      if (!applicationOwnsTransitionValidation && !current.allowed_actions.includes(command.action)) {
+        return rejectedCommand(command, "invalid_transition", current);
+      }
       const outcome = await applyCommand({
         id: command.commandId,
         action: command.action,
@@ -581,6 +642,7 @@ export class BrspTargetSession extends BrspSocketSession {
     };
     super({
       url,
+      transport,
       role: "target",
       sessionId,
       secret,
@@ -590,7 +652,11 @@ export class BrspTargetSession extends BrspSocketSession {
       getState: validatedSnapshot,
       applyCommand: adaptCommand,
       now,
-      onAcceptedControllerControl: () => renewControllerLease(),
+      onAcceptedControllerControl: (envelope, context) => {
+        if (!renewControllerLease()) return false;
+        return onAcceptedControllerControl?.(envelope, context) ?? true;
+      },
+      canPublishTargetState,
     });
     this.targetId = targetId;
     this.actions = [...advertisedActions].sort();
@@ -617,6 +683,7 @@ export class BrspTargetSession extends BrspSocketSession {
       this.dispatchEvent(detailEvent("ready", this.status()));
     });
     this.connection.addEventListener("command", (event) => this.dispatchEvent(detailEvent("commandapplied", event.detail)));
+    this.connection.addEventListener("commandhandled", (event) => this.dispatchEvent(detailEvent("commandhandled", event.detail)));
     this.connection.addEventListener("peerclose", () => this.expireController({ reason: "controller_disconnected" }));
     this.connection.addEventListener("phasechange", (event) => {
       if (event.detail.phase !== "ready") this.stopStateHeartbeat();

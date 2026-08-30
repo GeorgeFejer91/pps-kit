@@ -1,12 +1,41 @@
+import {
+  ALL_ACTIONS,
+  DEFAULT_REMOTE_SCOPES,
+  SCOPES,
+  intersectScopes,
+  requiredScope,
+} from "./domain/runner-contract.js";
 import { selectRunnerAdapter } from "./api/runner-api.js";
+import { PpsPublicBeacon } from "./remote/vdo-beacon.js";
+import { PpsVdoTransport } from "./remote/vdo-transport.js";
+import {
+  BrspControllerSession,
+  BrspTargetSession,
+  remoteActionsForTarget,
+} from "./remote/websocket-session.js";
 import { renderQrCode } from "./ui/qr-code.js";
 
 const api = selectRunnerAdapter();
 const elements = Object.fromEntries([...document.querySelectorAll("[id]")].map((element) => [element.id, element]));
+const outboundActionButtons = [...document.querySelectorAll("[data-controller-action]")];
+const MAX_PENDING_NATIVE_COMMANDS = 32;
+
 let snapshot = null;
 let remoteStatus = null;
 let invitationUrl = "";
 let toastTimer = null;
+let pollTimer = null;
+
+let inboundBeacon = null;
+let pendingInboundRequest = null;
+let inboundPrivateTarget = null;
+let inboundBeaconOwnsActivation = false;
+
+let outboundBeacon = null;
+let outboundBeaconRequestId = "";
+let outboundSelectedStreamId = "";
+let outboundPrivateOffer = null;
+let outboundController = null;
 
 function text(id, value, fallback = "—") {
   const element = elements[id];
@@ -32,6 +61,61 @@ function showToast(message, { error = false } = {}) {
 
 function normalizedSnapshot(result) {
   return result?.snapshot ?? result;
+}
+
+function remoteSessionId(status = remoteStatus) {
+  return status?.sessionId ?? status?.session_id ?? "";
+}
+
+function remoteAllowAbort(status = remoteStatus) {
+  return Boolean(status?.allowAbort ?? status?.allow_abort);
+}
+
+function remoteEnabled(status = remoteStatus) {
+  return Boolean(status?.enabled);
+}
+
+function remoteControllerConnected(status = remoteStatus) {
+  return Boolean(status?.controllerConnected ?? status?.controller_connected);
+}
+
+function nativePublicationAuthorized(target) {
+  const expiry = snapshot?.safety?.lease_expires_at_unix_ms;
+  return Boolean(target?.nativeClaimReceipt)
+    && snapshot?.safety?.controller_lease_id === target.nativeClaimReceipt.controllerId
+    && Number.isSafeInteger(expiry)
+    && Date.now() < expiry;
+}
+
+function availableNativeScopes() {
+  const scopes = [...DEFAULT_REMOTE_SCOPES];
+  if (remoteAllowAbort()) scopes.push(SCOPES.ABORT);
+  return [...new Set(scopes)].sort();
+}
+
+function updateInboundPolicyUi() {
+  const armed = Boolean(snapshot?.safety?.local_armed);
+  const enabled = remoteEnabled();
+  const native = api.kind === "tauri-native";
+  const hasRequest = Boolean(pendingInboundRequest);
+  const connected = remoteControllerConnected();
+  const canApprove = native && enabled && armed && hasRequest && !connected && !inboundPrivateTarget;
+  elements["desktop-beacon-start"].disabled = !native || Boolean(inboundBeacon) || Boolean(inboundPrivateTarget);
+  elements["desktop-beacon-stop"].disabled = !inboundBeacon && !inboundPrivateTarget;
+  elements["desktop-request-approve"].disabled = !canApprove;
+  if (!native) {
+    text("desktop-request-policy", "Inbound native control is unavailable in ordinary-browser preview mode.");
+  } else if (!enabled) {
+    text("desktop-request-policy", "Advertise this runner can enable VDO-only authority without opening a LAN listener.");
+  } else if (!armed) {
+    text("desktop-request-policy", "Arm the target locally before approving a controller.");
+  } else if (connected) {
+    text("desktop-request-policy", "Another controller already owns the native target.");
+  } else if (inboundPrivateTarget) {
+    text("desktop-request-policy", "A private controller session already owns this target.");
+  } else {
+    text("desktop-request-policy", "Local remote-enable and arm policy is satisfied. Review scopes before approval.");
+  }
 }
 
 function renderSnapshot(next) {
@@ -81,6 +165,11 @@ function renderSnapshot(next) {
     token.textContent = action;
     return token;
   }));
+  updateInboundPolicyUi();
+
+  if (inboundPrivateTarget?.nativeClaimReceipt && !next.safety?.local_armed) {
+    void stopInboundNetworking("local_target_disarmed");
+  }
 }
 
 function readRemoteUrl(status) {
@@ -90,37 +179,41 @@ function readRemoteUrl(status) {
 async function renderRemote(next) {
   if (!next || typeof next !== "object") return;
   remoteStatus = next;
-  const enabled = Boolean(next.enabled);
+  const enabled = remoteEnabled(next);
   const serverAvailable = Boolean(next.server_available ?? next.serverAvailable);
   const serverError = next.server_error ?? next.serverError ?? "";
-  const connected = Boolean(next.controller_connected ?? next.controllerConnected);
+  const connected = remoteControllerConnected(next);
+  if (!enabled) inboundBeaconOwnsActivation = false;
   elements["remote-enabled"].checked = enabled;
-  elements["remote-allow-abort"].checked = Boolean(next.allow_abort ?? next.allowAbort);
-  text("remote-state-badge", connected ? "Controller ready" : enabled && !serverAvailable ? "Unavailable" : enabled ? "Waiting" : "Disabled");
+  elements["remote-allow-abort"].checked = remoteAllowAbort(next);
+  text("remote-state-badge", connected ? "Controller ready" : enabled ? "Enabled" : "Disabled");
   elements["remote-state-badge"].dataset.tone = connected ? "ready" : "";
   text(
     "remote-detail",
     serverError || next.status_message || next.message,
     enabled
-      ? serverAvailable
-        ? "Remote target enabled; waiting for explicit controller connection."
-        : "Remote target is enabled but the LAN companion server is unavailable."
-      : serverAvailable
-        ? "Remote control is disabled; the previously opted-in companion listener remains fail-closed until app exit."
-        : "Remote networking is inert until explicitly enabled.",
+      ? "Native remote authority is enabled. Public discovery remains off until Advertise this runner is pressed."
+      : "Remote networking and native remote authority are inert until explicitly enabled.",
   );
   text("remote-controller", next.controller_id ?? next.controllerId, "None");
   const scopes = next.granted_scopes ?? next.grantedScopes ?? [];
   text("remote-scopes", Array.isArray(scopes) && scopes.length ? scopes.join(", ") : "None");
-  text("remote-route", next.transport ?? next.route_label ?? next.bindAddress ?? next.bind_address ?? "Local Wi-Fi WebSocket");
+  text("remote-route", connected ? "Rust-owned remote reducer" : enabled ? "Enabled; no controller" : "Local-only");
 
   invitationUrl = readRemoteUrl(next);
   await renderQrCode(elements["pairing-qr"], invitationUrl);
   elements["pairing-placeholder"].hidden = Boolean(invitationUrl);
   elements["copy-invite"].disabled = !invitationUrl;
   text("pairing-summary", invitationUrl
-    ? `Fresh invitation for ${next.target_id ?? next.targetId ?? "this runner"}. The secret remains in the fragment.`
-    : "The secret is held in the URL fragment and is not sent in an HTTP request.");
+    ? `Fresh legacy LAN invitation for ${next.target_id ?? next.targetId ?? "this runner"}. The secret remains in the fragment.`
+    : serverAvailable
+      ? "Remote authority is disabled. No active invitation is exposed."
+      : "The website beacon below does not expose the app's local port or private pairing secret.");
+
+  if (inboundPrivateTarget && (!enabled || remoteSessionId(next) !== inboundPrivateTarget.sessionId)) {
+    void stopInboundPrivateTarget("remote_activation_changed");
+  }
+  updateInboundPolicyUi();
 }
 
 async function refreshSnapshot() {
@@ -134,20 +227,551 @@ async function refreshRemote() {
 async function dispatch(action, args = {}) {
   const result = await api.dispatch(action, args);
   renderSnapshot(normalizedSnapshot(result));
-  const status = result?.status;
-  if (status === "rejected") throw new Error(result.reason || `${action} was rejected.`);
+  if (result?.status === "rejected") throw new Error(result.reason || `${action} was rejected.`);
   showToast(`${action} applied by the native target.`);
   return result;
 }
 
-function argsForAction(action) {
+function argsForAction(action, sourceSnapshot = snapshot) {
   if (action === "part.start") {
-    return { part_number: snapshot?.part?.selected_part ?? snapshot?.part?.available_parts?.[0] ?? 1 };
+    return { part_number: sourceSnapshot?.part?.selected_part ?? sourceSnapshot?.part?.available_parts?.[0] ?? 1 };
   }
   if (action === "instruction.continue") {
-    return { gate_id: snapshot?.instruction_gate?.gate_id ?? "" };
+    return { gate_id: sourceSnapshot?.instruction_gate?.gate_id ?? "" };
   }
   return {};
+}
+
+function inboundVdoTransport({ room, secret, targetId }) {
+  return new PpsVdoTransport({
+    role: "target",
+    room,
+    sharedSecret: secret,
+    label: `PPS desktop target ${targetId.slice(-8)}`,
+  });
+}
+
+function queueNativeControl(target, operation) {
+  const queued = target.nativeControlTail.then(async () => {
+    if (target !== inboundPrivateTarget || target.stopping || target.failureHandled) {
+      throw new Error("The private controller no longer owns this target.");
+    }
+    const receipt = await target.claimPromise;
+    if (target !== inboundPrivateTarget || target.stopping || target.failureHandled) {
+      throw new Error("The private controller no longer owns this target.");
+    }
+    return operation(receipt);
+  });
+  target.nativeControlTail = queued;
+  return queued;
+}
+
+function takeCommandOperation(target, commandId) {
+  const queued = target.commandOperations.get(commandId) ?? [];
+  const operation = queued.shift();
+  if (queued.length) target.commandOperations.set(commandId, queued);
+  else target.commandOperations.delete(commandId);
+  if (!operation) throw new Error("The authenticated BRSP command operation is unavailable.");
+  target.pendingNativeCommandCount = Math.max(0, target.pendingNativeCommandCount - 1);
+  return operation;
+}
+
+function failInboundAuthority(target, error) {
+  if (target !== inboundPrivateTarget || target.stopping || target.failureHandled) return;
+  target.failureHandled = true;
+  text("desktop-beacon-status", "Authority error");
+  elements["desktop-beacon-status"].dataset.tone = "danger";
+  showToast(error instanceof Error ? error.message : String(error), { error: true });
+  void stopInboundNetworking("native_authority_failed");
+}
+
+function observeInboundRenewal(target, promise) {
+  void promise.then((receipt) => {
+    if (target !== inboundPrivateTarget || target.stopping) return;
+    target.nativeClaimReceipt = receipt;
+    renderSnapshot(receipt.snapshot);
+    text("desktop-private-lease", `Rust lease until ${new Date(receipt.leaseExpiresAtUnixMs).toLocaleTimeString()}`);
+    target.session.publishState(receipt.snapshot);
+  }).catch((error) => failInboundAuthority(target, error));
+}
+
+function acceptedInboundControl(target, envelope) {
+  if (target !== inboundPrivateTarget || target.stopping || !target.claimPromise) return false;
+  if (envelope.type === "command") {
+    if (target.pendingNativeCommandCount >= MAX_PENDING_NATIVE_COMMANDS) return false;
+    if (!target.actions.includes(envelope.body.action)
+      || requiredScope(envelope.body.action) !== envelope.body.scope) return false;
+    const commandId = envelope.body.commandId;
+    const operations = target.commandOperations.get(commandId) ?? [];
+    const operation = queueNativeControl(target, (receipt) => api.remoteSessionDispatch({
+      sessionId: target.sessionId,
+      ownerToken: receipt.ownerToken,
+      controlSequence: envelope.sequence,
+      command: envelope.body,
+    }));
+    operations.push(operation);
+    target.commandOperations.set(commandId, operations);
+    target.pendingNativeCommandCount += 1;
+    void operation.catch((error) => failInboundAuthority(target, error));
+    return operation;
+  }
+  if (envelope.type === "snapshot-request" || envelope.type === "error") {
+    const renewal = queueNativeControl(target, (receipt) => api.remoteSessionRenew({
+      sessionId: target.sessionId,
+      ownerToken: receipt.ownerToken,
+      controlSequence: envelope.sequence,
+    }));
+    observeInboundRenewal(target, renewal);
+    return renewal;
+  }
+  return true;
+}
+
+async function applyInboundCommand(target, request) {
+  const applied = await takeCommandOperation(target, request.id);
+  if (target !== inboundPrivateTarget || target.stopping) throw new Error("The private controller no longer owns this target.");
+  renderSnapshot(applied.snapshot);
+  return {
+    status: applied.status,
+    reason: applied.reason,
+    acceptedRevision: applied.accepted_revision,
+    resultingRevision: applied.resulting_revision,
+    snapshot: applied.snapshot,
+  };
+}
+
+function bindInboundPrivateSession(target) {
+  const { session } = target;
+  session.addEventListener("phasechange", (event) => {
+    if (target !== inboundPrivateTarget) return;
+    text("desktop-beacon-status", titleCase(event.detail.phase));
+    text("desktop-beacon-detail", event.detail.message, "Private BRSP session is changing state.");
+  });
+  session.addEventListener("ready", () => {
+    if (target !== inboundPrivateTarget || target.claimPromise) return;
+    if (Date.now() >= target.offerExpiresUnixMs) {
+      void stopInboundNetworking("private_offer_expired");
+      return;
+    }
+    const status = session.status();
+    target.claimPromise = api.remoteSessionClaim({
+      sessionId: target.sessionId,
+      controllerId: status.controllerId,
+      acceptedScopes: status.grantedScopes,
+      readySequence: session.connection.remoteControlSequence,
+    });
+    void target.claimPromise.then((receipt) => {
+      if (target !== inboundPrivateTarget || target.stopping) return;
+      if (target.offerExpiryTimer !== null) clearTimeout(target.offerExpiryTimer);
+      target.offerExpiryTimer = null;
+      target.nativeClaimReceipt = receipt;
+      renderSnapshot(receipt.snapshot);
+      text("desktop-beacon-status", "Private controller ready");
+      elements["desktop-beacon-status"].dataset.tone = "ready";
+      text("desktop-beacon-detail", `Authenticated controller ${receipt.controllerId} is bound to Rust authority.`);
+      text("desktop-private-lease", `Rust lease until ${new Date(receipt.leaseExpiresAtUnixMs).toLocaleTimeString()}`);
+      session.publishState(receipt.snapshot);
+      void stopInboundBeacon({ preserveStatus: true });
+    }).catch((error) => failInboundAuthority(target, error));
+  });
+  session.addEventListener("transportstatus", (event) => {
+    if (target === inboundPrivateTarget && event.detail?.message) text("desktop-private-route", `VDO data-only · ${event.detail.message}`);
+  });
+  session.addEventListener("quality", (event) => {
+    if (target !== inboundPrivateTarget) return;
+    const rtt = Number.isFinite(event.detail?.rttMs) ? ` · ${event.detail.rttMs} ms RTT` : "";
+    text("desktop-private-route", `VDO data-only · ${event.detail?.route ?? "unknown"}${rtt}`);
+  });
+  session.addEventListener("protocolerror", (event) => failInboundAuthority(target, new Error(event.detail?.message || "Private BRSP protocol error.")));
+  session.addEventListener("commandhandled", (event) => {
+    if (target !== inboundPrivateTarget) return;
+    const commandId = event.detail?.command?.commandId;
+    const unused = target.commandOperations.get(commandId) ?? [];
+    target.pendingNativeCommandCount = Math.max(0, target.pendingNativeCommandCount - unused.length);
+    target.commandOperations.delete(commandId);
+  });
+  session.addEventListener("leaseexpired", (event) => {
+    if (target === inboundPrivateTarget) void stopInboundNetworking(event.detail?.reason || "controller_lease_expired");
+  });
+}
+
+async function startInboundPrivateTarget(offer) {
+  await stopInboundPrivateTarget("private_target_replaced");
+  const target = {
+    sessionId: offer.sessionId,
+    commandOperations: new Map(),
+    pendingNativeCommandCount: 0,
+    nativeControlTail: Promise.resolve(),
+    offerExpiresUnixMs: offer.expiresUnixMs,
+    claimPromise: null,
+    nativeClaimReceipt: null,
+    failureHandled: false,
+    stopping: false,
+    offerExpiryTimer: null,
+    session: null,
+  };
+  const actions = remoteActionsForTarget(ALL_ACTIONS, offer.acceptedScopes);
+  target.actions = actions;
+  target.session = new BrspTargetSession({
+    transport: inboundVdoTransport({ room: offer.room, secret: offer.secret, targetId: offer.targetId }),
+    secret: offer.secret,
+    targetId: offer.targetId,
+    sessionId: offer.sessionId,
+    availableScopes: offer.acceptedScopes,
+    actions,
+    getSnapshot: () => snapshot,
+    applyCommand: (request) => applyInboundCommand(target, request),
+    applicationOwnsTransitionValidation: true,
+    canPublishTargetState: () => nativePublicationAuthorized(target),
+    onAcceptedControllerControl: (envelope) => acceptedInboundControl(target, envelope),
+    onLeaseExpired: ({ reason }) => {
+      if (target === inboundPrivateTarget) void stopInboundNetworking(reason);
+    },
+  });
+  inboundPrivateTarget = target;
+  bindInboundPrivateSession(target);
+  updateInboundPolicyUi();
+  text("desktop-private-route", "VDO data-only · starting private target");
+  const remainingOfferMs = Math.max(0, offer.expiresUnixMs - Date.now());
+  target.offerExpiryTimer = setTimeout(() => {
+    target.offerExpiryTimer = null;
+    if (target === inboundPrivateTarget && !target.nativeClaimReceipt) {
+      void stopInboundNetworking("private_offer_expired");
+    }
+  }, remainingOfferMs);
+  await Promise.resolve(target.session.connect());
+}
+
+async function stopInboundPrivateTarget(reason = "local_stop") {
+  const target = inboundPrivateTarget;
+  if (!target) return;
+  inboundPrivateTarget = null;
+  target.stopping = true;
+  if (target.offerExpiryTimer !== null) clearTimeout(target.offerExpiryTimer);
+  target.offerExpiryTimer = null;
+  target.commandOperations.clear();
+  target.pendingNativeCommandCount = 0;
+  target.session.stop();
+  text("desktop-private-route", "Not connected");
+  text("desktop-private-lease", "None");
+  updateInboundPolicyUi();
+  try {
+    const receipt = target.nativeClaimReceipt ?? await target.claimPromise;
+    if (receipt?.ownerToken) {
+      const revoked = await api.remoteSessionRevoke({ sessionId: target.sessionId, ownerToken: receipt.ownerToken });
+      renderSnapshot(revoked.snapshot);
+    }
+  } catch {
+    // Rotation, disable, lease expiry, or app teardown can invalidate this exact owner first.
+  }
+  if (reason !== "local_stop" && reason !== "private_target_replaced") {
+    text("desktop-beacon-detail", `Private controller stopped: ${titleCase(reason)}.`);
+  }
+}
+
+function renderPendingInboundRequest() {
+  const requests = inboundBeacon?.pendingPairingRequests() ?? [];
+  pendingInboundRequest = requests[0] ?? null;
+  elements["desktop-pairing-request"].hidden = !pendingInboundRequest;
+  if (pendingInboundRequest) {
+    text("desktop-request-label", pendingInboundRequest.label, "Browser controller");
+    text("desktop-request-scopes", pendingInboundRequest.requestedScopes.join(", "), "None");
+  }
+  updateInboundPolicyUi();
+}
+
+function bindInboundBeacon(beacon) {
+  beacon.addEventListener("status", (event) => {
+    if (beacon !== inboundBeacon) return;
+    text("desktop-beacon-status", event.detail.error ? "Beacon error" : titleCase(event.detail.phase));
+    elements["desktop-beacon-status"].dataset.tone = event.detail.error ? "danger" : "";
+    text("desktop-beacon-detail", event.detail.message);
+  });
+  beacon.addEventListener("pairingrequest", () => {
+    if (inboundPrivateTarget) {
+      for (const request of beacon.pendingPairingRequests()) beacon.rejectPairing(request.requestId, "target_busy");
+      return;
+    }
+    renderPendingInboundRequest();
+    showToast("A public controller requests private access. Review its label and scopes locally.");
+  });
+  beacon.addEventListener("pairingcancelled", renderPendingInboundRequest);
+  beacon.addEventListener("pairingrejected", renderPendingInboundRequest);
+  beacon.addEventListener("protocolerror", (event) => showToast(event.detail.message, { error: true }));
+}
+
+async function startInboundBeacon() {
+  if (api.kind !== "tauri-native") throw new Error("Inbound desktop control requires the native Tauri runner.");
+  await stopInboundBeacon();
+  if (!remoteEnabled()) {
+    const activated = await api.configureRemote({
+      enabled: true,
+      allowAbort: elements["remote-allow-abort"].checked,
+      lanListener: false,
+    });
+    inboundBeaconOwnsActivation = true;
+    await renderRemote(activated);
+  }
+  const beacon = new PpsPublicBeacon({ role: "target", label: "PPS desktop experiment runner" });
+  inboundBeacon = beacon;
+  bindInboundBeacon(beacon);
+  updateInboundPolicyUi();
+  await beacon.startAdvertising();
+}
+
+async function stopInboundBeacon({ preserveStatus = false } = {}) {
+  const beacon = inboundBeacon;
+  inboundBeacon = null;
+  pendingInboundRequest = null;
+  elements["desktop-pairing-request"].hidden = true;
+  updateInboundPolicyUi();
+  if (beacon) await beacon.stop();
+  if (!preserveStatus && !inboundPrivateTarget) {
+    text("desktop-beacon-status", "Beacon off");
+    text(
+      "desktop-beacon-detail",
+      remoteEnabled()
+        ? "Remote authority enabled; public discovery is off."
+        : "Press Advertise this runner to enable VDO-only authority without a LAN listener.",
+    );
+  }
+}
+
+async function stopInboundNetworking(reason = "local_stop", { disableOwnedActivation = true } = {}) {
+  const disableActivation = disableOwnedActivation && inboundBeaconOwnsActivation;
+  await Promise.allSettled([stopInboundBeacon(), stopInboundPrivateTarget(reason)]);
+  if (disableActivation) {
+    inboundBeaconOwnsActivation = false;
+    try {
+      await renderRemote(await api.configureRemote({ enabled: false, allowAbort: false, lanListener: false }));
+    } catch {
+      // Page teardown or an already-rotated activation can make best-effort disable unavailable.
+    }
+  }
+}
+
+function renderOutboundTargets(targets = []) {
+  const list = elements["desktop-controller-targets"];
+  list.replaceChildren();
+  if (!targets.length) {
+    const empty = document.createElement("p");
+    empty.className = "subtle";
+    empty.textContent = outboundBeacon ? "No public PPS targets are currently visible." : "Press Browse to list public PPS targets.";
+    list.append(empty);
+    return;
+  }
+  for (const target of targets) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "beacon-target-button";
+    button.dataset.streamId = target.streamId;
+    button.setAttribute("aria-pressed", String(target.streamId === outboundSelectedStreamId));
+    const name = document.createElement("strong");
+    name.textContent = target.label;
+    const identifier = document.createElement("span");
+    identifier.textContent = `Unverified public ID · ${target.streamId.slice(-12)}`;
+    button.append(name, identifier);
+    button.addEventListener("click", async () => {
+      try {
+        outboundSelectedStreamId = target.streamId;
+        renderOutboundTargets(targets);
+        await outboundBeacon?.selectTarget(target.streamId);
+      } catch (error) {
+        showToast(error.message, { error: true });
+      }
+    });
+    list.append(button);
+  }
+}
+
+function updateOutboundControls() {
+  const session = outboundController?.session;
+  const current = session?.snapshot;
+  const ready = session?.phase === "ready";
+  const pending = Number(session?.status().pendingCommands ?? 0) > 0;
+  const granted = new Set(session?.grantedScopes ?? []);
+  const allowed = new Set(current?.allowed_actions ?? []);
+  for (const button of outboundActionButtons) {
+    const action = button.dataset.controllerAction;
+    button.disabled = !ready || pending || !allowed.has(action) || !granted.has(requiredScope(action));
+  }
+  elements["desktop-controller-disconnect"].disabled = !outboundController;
+}
+
+function renderOutboundSnapshot(next) {
+  if (!next) return;
+  text("desktop-controller-target", next.package_label || next.target_id);
+  text("desktop-controller-revision", next.revision);
+  updateOutboundControls();
+}
+
+function bindOutboundSession(controller) {
+  const { session } = controller;
+  session.addEventListener("phasechange", (event) => {
+    if (controller !== outboundController) return;
+    text("desktop-controller-status", titleCase(event.detail.phase));
+    updateOutboundControls();
+  });
+  session.addEventListener("ready", () => {
+    if (controller !== outboundController) return;
+    text("desktop-controller-status", "Private controller ready");
+    elements["desktop-controller-status"].dataset.tone = "ready";
+    text("desktop-controller-selection", "Mutual BRSP proof complete. Controls follow target-returned state only.");
+    updateOutboundControls();
+  });
+  session.addEventListener("snapshot", (event) => {
+    if (controller === outboundController) renderOutboundSnapshot(event.detail.snapshot);
+  });
+  session.addEventListener("pendingchange", updateOutboundControls);
+  session.addEventListener("commandapplied", (event) => {
+    if (controller !== outboundController) return;
+    const rejected = event.detail.status === "rejected";
+    showToast(`${event.detail.action}: ${event.detail.reason}`, { error: rejected });
+    updateOutboundControls();
+  });
+  session.addEventListener("transportstatus", (event) => {
+    if (controller === outboundController && event.detail?.message) text("desktop-controller-route", `VDO data-only · ${event.detail.message}`);
+  });
+  session.addEventListener("quality", (event) => {
+    if (controller !== outboundController) return;
+    const rtt = Number.isFinite(event.detail?.rttMs) ? ` · ${event.detail.rttMs} ms RTT` : "";
+    text("desktop-controller-route", `VDO data-only · ${event.detail?.route ?? "unknown"}${rtt}`);
+  });
+  session.addEventListener("protocolerror", (event) => {
+    if (controller !== outboundController) return;
+    showToast(event.detail?.message || "Outbound BRSP protocol error.", { error: true });
+    void stopOutboundControllerSession();
+  });
+}
+
+async function connectOutboundController() {
+  const offer = outboundPrivateOffer;
+  if (!offer) throw new Error("Request and receive a private target offer first.");
+  if (offer.expiresUnixMs <= Date.now()) {
+    outboundPrivateOffer = null;
+    elements["desktop-controller-connect"].disabled = true;
+    throw new Error("The private target offer expired. Browse and request again.");
+  }
+  await stopOutboundControllerSession();
+  const controller = { offer, session: null };
+  controller.session = new BrspControllerSession({
+    transport: new PpsVdoTransport({
+      role: "controller",
+      room: offer.room,
+      sharedSecret: offer.secret,
+      label: "PPS desktop browser controller",
+    }),
+    secret: offer.secret,
+    targetId: offer.targetId,
+    sessionId: offer.sessionId,
+    requestedScopes: offer.acceptedScopes,
+  });
+  outboundController = controller;
+  bindOutboundSession(controller);
+  elements["desktop-controller-connect"].disabled = true;
+  elements["desktop-controller-disconnect"].disabled = false;
+  text("desktop-controller-route", "VDO data-only · connecting");
+  await Promise.resolve(controller.session.connect());
+}
+
+async function stopOutboundControllerSession() {
+  const controller = outboundController;
+  outboundController = null;
+  if (controller) controller.session.stop();
+  text("desktop-controller-route", "Not connected");
+  text("desktop-controller-revision", "—");
+  elements["desktop-controller-disconnect"].disabled = true;
+  elements["desktop-controller-connect"].disabled = !outboundPrivateOffer;
+  updateOutboundControls();
+}
+
+function bindOutboundBeacon(beacon) {
+  beacon.addEventListener("status", (event) => {
+    if (beacon !== outboundBeacon) return;
+    text("desktop-controller-status", event.detail.error ? "Beacon error" : titleCase(event.detail.phase));
+    elements["desktop-controller-status"].dataset.tone = event.detail.error ? "danger" : "";
+  });
+  beacon.addEventListener("targetschange", (event) => renderOutboundTargets(event.detail.targets));
+  beacon.addEventListener("targetselected", (event) => {
+    outboundSelectedStreamId = event.detail.streamId;
+    text("desktop-controller-selection", `${event.detail.label} selected. Waiting for its public request channel.`);
+  });
+  beacon.addEventListener("peeropen", () => {
+    elements["desktop-controller-request"].disabled = false;
+    text("desktop-controller-selection", "Public request channel ready. The target still must approve locally.");
+  });
+  beacon.addEventListener("peerclose", () => {
+    elements["desktop-controller-request"].disabled = true;
+    text("desktop-controller-selection", "The selected target left. Stop and browse again.");
+  });
+  beacon.addEventListener("pairingrequested", (event) => {
+    outboundBeaconRequestId = event.detail.requestId;
+    elements["desktop-controller-request"].disabled = true;
+    text("desktop-controller-selection", "Private access requested. Waiting for target-local approval.");
+  });
+  beacon.addEventListener("pairingoffer", (event) => {
+    if (event.detail.requestId !== outboundBeaconRequestId) return;
+    const offer = beacon.takePrivateOffer(event.detail.requestId);
+    outboundBeaconRequestId = "";
+    if (!offer) {
+      showToast("The approved private offer expired before it could be loaded.", { error: true });
+      return;
+    }
+    outboundPrivateOffer = offer;
+    text("desktop-controller-target", offer.targetId);
+    text("desktop-controller-status", "Private offer ready");
+    elements["desktop-controller-status"].dataset.tone = "ready";
+    text("desktop-controller-selection", "Target approved. Press Connect privately to perform mutual BRSP proof.");
+    elements["desktop-controller-connect"].disabled = false;
+    void stopOutboundBeacon({ preserveOffer: true, preserveStatus: true });
+  });
+  beacon.addEventListener("pairingrejected", (event) => {
+    outboundBeaconRequestId = "";
+    text("desktop-controller-selection", `Request not approved: ${titleCase(event.detail.reason)}.`);
+    showToast("The target did not approve private access.", { error: true });
+  });
+  beacon.addEventListener("protocolerror", (event) => showToast(event.detail.message, { error: true }));
+}
+
+async function startOutboundBeacon() {
+  await stopOutboundBeacon();
+  await stopOutboundControllerSession();
+  outboundPrivateOffer = null;
+  const beacon = new PpsPublicBeacon({ role: "controller", label: "PPS desktop controller" });
+  outboundBeacon = beacon;
+  bindOutboundBeacon(beacon);
+  elements["desktop-controller-browse"].disabled = true;
+  elements["desktop-controller-stop"].disabled = false;
+  renderOutboundTargets();
+  await beacon.startBrowsing();
+}
+
+async function stopOutboundBeacon({ preserveOffer = false, preserveStatus = false } = {}) {
+  const beacon = outboundBeacon;
+  outboundBeacon = null;
+  outboundBeaconRequestId = "";
+  outboundSelectedStreamId = "";
+  if (!preserveOffer) outboundPrivateOffer = null;
+  elements["desktop-controller-browse"].disabled = false;
+  elements["desktop-controller-stop"].disabled = true;
+  elements["desktop-controller-request"].disabled = true;
+  elements["desktop-controller-connect"].disabled = !outboundPrivateOffer || Boolean(outboundController);
+  renderOutboundTargets();
+  if (beacon) await beacon.stop();
+  if (!preserveStatus && !outboundController) {
+    text("desktop-controller-status", "Controller off");
+    text("desktop-controller-selection", "No public target selected.");
+  }
+}
+
+async function stopAllRemoteNetworking() {
+  if (pollTimer !== null) clearInterval(pollTimer);
+  pollTimer = null;
+  await Promise.allSettled([
+    stopInboundNetworking("page_or_app_closed"),
+    stopOutboundBeacon(),
+    stopOutboundControllerSession(),
+  ]);
 }
 
 function bindTabs() {
@@ -163,7 +787,7 @@ function bindTabs() {
   });
 }
 
-function bindActions() {
+function bindLocalActions() {
   document.querySelectorAll("[data-action]").forEach((button) => {
     button.addEventListener("click", async () => {
       const action = button.dataset.action;
@@ -194,21 +818,26 @@ function bindActions() {
       elements["session-note"].value = "";
     } catch (error) { showToast(error.message, { error: true }); }
   });
+}
 
+function bindNativeRemoteControls() {
   elements["remote-apply"].addEventListener("click", async () => {
+    const enabled = elements["remote-enabled"].checked;
+    const allowAbort = elements["remote-allow-abort"].checked;
     try {
-      await renderRemote(await api.configureRemote({
-        enabled: elements["remote-enabled"].checked,
-        allowAbort: elements["remote-allow-abort"].checked,
-      }));
-      showToast(elements["remote-enabled"].checked ? "Phone remote enabled." : "Phone remote disabled and active producers stopped.");
+      if (inboundBeaconOwnsActivation || !enabled || enabled !== remoteEnabled() || allowAbort !== remoteAllowAbort()) {
+        await stopInboundNetworking("remote_policy_changed", { disableOwnedActivation: true });
+      }
+      await renderRemote(await api.configureRemote({ enabled, allowAbort, lanListener: true }));
+      showToast(enabled ? "Native remote authority enabled. Public discovery remains off." : "Remote authority disabled and inbound producers stopped.");
     } catch (error) { showToast(error.message, { error: true }); }
   });
 
   elements["rotate-pairing"].addEventListener("click", async () => {
     try {
+      await stopInboundNetworking("pairing_rotated");
       await renderRemote(await api.rotatePairing());
-      showToast("Pairing material rotated; older invitations are invalid.");
+      showToast("Pairing material rotated; older invitations and private owners are invalid.");
     } catch (error) { showToast(error.message, { error: true }); }
   });
 
@@ -219,11 +848,93 @@ function bindActions() {
       showToast("Invitation copied. Treat it as a short-lived secret.");
     } catch { showToast("Clipboard access was denied by the system.", { error: true }); }
   });
+
+  elements["desktop-beacon-start"].addEventListener("click", () => {
+    void startInboundBeacon().catch(async (error) => {
+      showToast(error.message, { error: true });
+      await stopInboundNetworking("beacon_start_failed");
+    });
+  });
+  elements["desktop-beacon-stop"].addEventListener("click", () => {
+    void stopInboundNetworking("local_stop");
+  });
+  elements["desktop-request-deny"].addEventListener("click", () => {
+    if (!pendingInboundRequest || !inboundBeacon) return;
+    inboundBeacon.rejectPairing(pendingInboundRequest.requestId, "target_denied");
+    renderPendingInboundRequest();
+    showToast("Private access request denied.");
+  });
+  elements["desktop-request-approve"].addEventListener("click", async () => {
+    const request = pendingInboundRequest;
+    const beacon = inboundBeacon;
+    if (!request || !beacon) return;
+    try {
+      if (api.kind !== "tauri-native" || !remoteEnabled() || !snapshot?.safety?.local_armed) {
+        throw new Error("Remote authority must be enabled and the target locally armed before approval.");
+      }
+      if (remoteControllerConnected()) throw new Error("Another controller already owns the native target.");
+      const acceptedScopes = intersectScopes(request.requestedScopes, availableNativeScopes());
+      if (!acceptedScopes.length) throw new Error("The request contains no locally available scopes.");
+      const sessionId = remoteSessionId();
+      if (!sessionId) throw new Error("The current native remote activation has no session identifier.");
+      const offer = beacon.approvePairing(request.requestId, {
+        targetId: snapshot.target_id,
+        sessionId,
+        acceptedScopes,
+        expiresUnixMs: Date.now() + 90_000,
+      });
+      pendingInboundRequest = null;
+      elements["desktop-pairing-request"].hidden = true;
+      await startInboundPrivateTarget(offer);
+      text("desktop-beacon-detail", "Local approval sent. The private target is waiting for the controller's explicit Connect and BRSP proof.");
+      showToast("Private desktop target started after local approval.");
+    } catch (error) {
+      showToast(error.message, { error: true });
+      renderPendingInboundRequest();
+    }
+  });
+}
+
+function bindOutboundControllerControls() {
+  elements["desktop-controller-browse"].addEventListener("click", () => {
+    void startOutboundBeacon().catch(async (error) => {
+      showToast(error.message, { error: true });
+      await stopOutboundBeacon();
+    });
+  });
+  elements["desktop-controller-stop"].addEventListener("click", () => {
+    void stopOutboundBeacon();
+  });
+  elements["desktop-controller-request"].addEventListener("click", () => {
+    try {
+      outboundBeacon?.requestPairing({ requestedScopes: [...DEFAULT_REMOTE_SCOPES, SCOPES.ABORT].sort() });
+    } catch (error) { showToast(error.message, { error: true }); }
+  });
+  elements["desktop-controller-connect"].addEventListener("click", () => {
+    void connectOutboundController().catch((error) => showToast(error.message, { error: true }));
+  });
+  elements["desktop-controller-disconnect"].addEventListener("click", () => {
+    void stopOutboundControllerSession();
+  });
+  for (const button of outboundActionButtons) {
+    button.addEventListener("click", () => {
+      const session = outboundController?.session;
+      if (!session) return;
+      try {
+        session.sendCommand(button.dataset.controllerAction, argsForAction(button.dataset.controllerAction, session.snapshot));
+        updateOutboundControls();
+      } catch (error) { showToast(error.message, { error: true }); }
+    });
+  }
 }
 
 async function start() {
   bindTabs();
-  bindActions();
+  bindLocalActions();
+  bindNativeRemoteControls();
+  bindOutboundControllerControls();
+  renderOutboundTargets();
+  updateInboundPolicyUi();
   try {
     const [initialSnapshot, initialRemote] = await Promise.all([api.snapshot(), api.remoteStatus()]);
     renderSnapshot(normalizedSnapshot(initialSnapshot));
@@ -233,10 +944,14 @@ async function start() {
     showToast(error.message, { error: true });
   }
 
-  setInterval(() => {
+  pollTimer = setInterval(() => {
     if (document.visibilityState !== "visible") return;
     void Promise.all([refreshSnapshot(), refreshRemote()]).catch(() => {});
   }, 1_000);
 }
+
+window.addEventListener("pagehide", () => {
+  void stopAllRemoteNetworking();
+}, { once: true });
 
 void start();

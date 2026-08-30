@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-runner-snapshot"
+description = "Enables the runner_snapshot command without any pre-configured scope."
+commands.allow = ["runner_snapshot"]
+
+[[permission]]
+identifier = "deny-runner-snapshot"
+description = "Denies the runner_snapshot command without any pre-configured scope."
+commands.deny = ["runner_snapshot"]

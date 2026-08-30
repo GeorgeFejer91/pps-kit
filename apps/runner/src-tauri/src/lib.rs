@@ -4,7 +4,11 @@ mod runtime;
 use std::{path::PathBuf, str::FromStr};
 
 use pps_contracts::{Action, Applied, RunnerSnapshot};
-use runtime::{AppRuntime, RemoteStatus};
+use runtime::{
+    AppRuntime, RemoteSessionClaimRequest, RemoteSessionDispatchRequest, RemoteSessionError,
+    RemoteSessionLeaseReceipt, RemoteSessionOwnerRequest, RemoteSessionRenewRequest,
+    RemoteSessionRevocationReceipt, RemoteStatus,
+};
 use serde_json::Value;
 use tauri::Manager;
 
@@ -32,10 +36,11 @@ fn remote_status(state: tauri::State<'_, AppRuntime>) -> Result<RemoteStatus, St
 fn configure_remote(
     enabled: bool,
     allow_abort: bool,
+    lan_listener: bool,
     app: tauri::AppHandle,
     state: tauri::State<'_, AppRuntime>,
 ) -> Result<RemoteStatus, String> {
-    if enabled {
+    if enabled && lan_listener {
         remote::ensure_started(state.inner().clone(), companion_web_root(&app))?;
     }
     state.configure_remote(enabled, allow_abort)
@@ -44,6 +49,57 @@ fn configure_remote(
 #[tauri::command]
 fn rotate_pairing(state: tauri::State<'_, AppRuntime>) -> Result<RemoteStatus, String> {
     state.rotate_pairing()
+}
+
+fn require_main_window(window: &tauri::WebviewWindow) -> Result<(), RemoteSessionError> {
+    if window.label() == "main" {
+        Ok(())
+    } else {
+        Err(RemoteSessionError::new(
+            "window_not_allowed",
+            "Only the bundled main Runner window may bridge a browser remote session.",
+        ))
+    }
+}
+
+#[tauri::command]
+fn remote_session_claim(
+    request: RemoteSessionClaimRequest,
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<RemoteSessionLeaseReceipt, RemoteSessionError> {
+    require_main_window(&window)?;
+    state.claim_remote_session(request)
+}
+
+#[tauri::command]
+fn remote_session_renew(
+    request: RemoteSessionRenewRequest,
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<RemoteSessionLeaseReceipt, RemoteSessionError> {
+    require_main_window(&window)?;
+    state.renew_remote_session(request)
+}
+
+#[tauri::command]
+fn remote_session_dispatch(
+    request: RemoteSessionDispatchRequest,
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<Applied, RemoteSessionError> {
+    require_main_window(&window)?;
+    state.dispatch_remote_session(request)
+}
+
+#[tauri::command]
+fn remote_session_revoke(
+    request: RemoteSessionOwnerRequest,
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<RemoteSessionRevocationReceipt, RemoteSessionError> {
+    require_main_window(&window)?;
+    state.revoke_remote_session(request)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -56,7 +112,11 @@ pub fn run() {
             runner_dispatch,
             remote_status,
             configure_remote,
-            rotate_pairing
+            rotate_pairing,
+            remote_session_claim,
+            remote_session_renew,
+            remote_session_dispatch,
+            remote_session_revoke
         ])
         .run(tauri::generate_context!())
         .expect("error while running PPS Experiment Runner preview");

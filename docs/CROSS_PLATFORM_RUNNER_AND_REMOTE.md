@@ -95,10 +95,17 @@ the snapshot.
 ## Desktop preview
 
 The desktop app uses Tauri v2 and a plain Vite/ES-module frontend. Tauri exposes
-only five named commands: snapshot, dispatch, remote status, remote
-configuration, and pairing rotation. Its capability grants only Tauri core
-defaults; it has no shell, process, filesystem, HTTP, opener, or updater plugin.
-The privileged WebView loads bundled local assets.
+five local/configuration commands plus four remote-session commands: claim,
+renew, dispatch, and revoke. Those four commands are restricted to the bundled
+`main` WebView and preserve remote origin, negotiated scopes, the exact owner
+token, canonical control sequence, and the native five-second watchdog. VDO
+commands never enter the local dispatch path. Its capability grants only Tauri
+core defaults and these exact commands; it has no shell, process, filesystem,
+HTTP, opener, or updater plugin. The privileged WebView loads bundled assets.
+For a WebView-carried VDO session, negotiated `session.read` alone is not enough
+to publish desktop state: initial snapshot/state remain suppressed until the
+native claim succeeds, every requested snapshot awaits a fresh native renewal,
+and publication stops when the native controller ID/deadline no longer matches.
 
 Local-only startup does not bind a LAN socket. The first explicit **Enable
 phone remote** action reserves `0.0.0.0` and launches the companion server; a
@@ -109,6 +116,13 @@ socket cannot clear, pause, or relabel a newer session or overwrite the
 disabled `local_only` state. After that first opt-in, the process reuses its
 listener across disable/re-enable; while disabled, WebSocket/relay ingress stays
 fail-closed, and app exit releases the listener.
+
+The separate **Advertise this runner** website-beacon action enables the same
+Rust authority without starting the LAN listener. Its private VDO session is
+carried by the bundled WebView, while claim/renew/dispatch/revoke remain native;
+stopping that beacon revokes its exact owner and returns the authority to the
+disabled/local state when the beacon flow enabled it. This avoids an unrelated
+`0.0.0.0` bind or firewall prompt for a website-only route.
 
 From the repository root:
 
@@ -128,15 +142,23 @@ until their behavior has been ported behind supervised adapters and qualified.
 ## Browser companion
 
 The same frontend build emits `compiled/companion/index.html` and local bundled
-assets. No runtime CDN is required. Nothing connects automatically; the user
-must open a pairing invitation and press Connect.
+assets, including reviewed, hash-pinned VDO.Ninja 1.5.5 SDK bytes and their MPL
+notice. No runtime CDN is required. Loading the page constructs no SDK client
+and opens no network connection: a visitor must explicitly press **Browse
+public targets**, **Start public beacon**, or connect a private invitation.
+Because GitHub Pages cannot set a response-level `frame-ancestors` policy, the
+companion also fails closed at startup when it detects an embedded frame: it
+strips invitation material, binds no controls or networking, disables every
+form control, and asks the visitor to open the page directly. A deployment with
+owned response headers should additionally send
+`Content-Security-Policy: frame-ancestors 'none'`.
 
 The canonical public copy is
 `https://ppskit.qzz.io/experiment-runner/`, with
 `https://georgefejer91.github.io/pps-kit/experiment-runner/` as the project-Pages
-fallback. Pages assembly copies the compiled companion HTML and its browser-only
-assets byte-for-byte; it does not publish the Tauri desktop entry or native
-capabilities.
+fallback. Pages assembly copies the compiled companion HTML, browser-only
+assets, and pinned VDO.Ninja vendor files byte-for-byte; it does not publish
+the Tauri desktop entry or native capabilities.
 
 The browser has two modes:
 
@@ -144,23 +166,44 @@ The browser has two modes:
    only actions within the granted scopes.
 2. **Phone Experiment** is a browser-owned exploratory target. A local gesture
    arms Web Audio and vibration, another browser may control its semantic run
-   state, and a bounded JSON event log can be downloaded.
+   state, local participant taps are timestamped into a bounded event log, and
+   that JSON log can be downloaded.
 
 Browser audio and vibration are subject to foreground, user-activation,
 visibility, device, and operating-system scheduling rules. Phone Experiment
 mode is therefore labelled exploratory and must not be treated as physical
 onset or publication-grade timing evidence without device-specific measurement.
 
-The included lab relay uses authenticated BRSP records over a local WebSocket
-route. Cleartext LAN transport is a development preview: production browser
-deployment needs an owned WSS/WebRTC route and platform qualification. The
-VDO.Ninja transport remains a useful Internet-signalled data-only option, but
-it does not guarantee offline same-Wi-Fi operation. GitHub Pages hosts static
-interface files only and cannot provide WebSocket upgrades, so publishing the
-route does not by itself make hosted controller-to-target pairing operational.
-Phone Experiment mode can run locally on the hosted page; remote control awaits
-an implemented/configured browser adapter plus its separately deployed and
-qualified WSS/WebRTC endpoint.
+The hosted page carries a fixed public VDO.Ninja data-only rendezvous namespace.
+Any visitor may explicitly browse sanitized, unverified target labels and send
+a bounded pairing request. Listings and requests are limited to 2 KiB and never
+contain participant state or runner commands. A target must approve locally.
+Only after that approval does a `pps.beacon/1` acceptance record deliver a fresh
+private VDO room and 32-byte secret to the exact requester-bound WebRTC data
+channel. That channel is SCTP/DTLS encrypted and is not broadcast to other room
+peers, but the handoff is not durable identity: it trusts VDO.Ninja signaling
+and the operator's selection of the unverified requester. The controller still
+presses **Connect** and completes mutual BRSP proof and scope negotiation before
+any control. Stronger hostile-signaling resistance requires an out-of-band QR
+or independently verified key fingerprint; the manual invitation remains the
+fallback for that policy.
+
+The private VDO transport uses one reliable ordered BRSP control channel and
+one replaceable state channel, with bounded pre-open buffering because either
+data channel may arrive first. Automated tests exercise browser-to-browser and
+browser-to-Tauri contract flows. Physical phone/browser routes, background and
+sleep behavior, direct-versus-relayed ICE paths, and real network partitions
+remain attended qualification gates.
+
+The included LAN relay remains a cleartext laboratory/offline adapter. The
+public VDO route depends on VDO.Ninja Internet signaling and external ICE/TURN;
+it is not an offline same-Wi-Fi guarantee, an owned rendezvous service, or an
+availability SLA. WebRTC signaling/ICE can expose ordinary connection and IP
+metadata to the service and selected peer. Approved pairing credentials cross
+only the selected encrypted peer channel, while PPS application records stay
+on the fresh private data channels. GitHub Pages hosts the permanent static
+beacon interface and pinned client bytes, not a WebSocket server and not
+command authority.
 
 ## Optional Meta Quest application context
 

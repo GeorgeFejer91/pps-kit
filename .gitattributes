@@ -16,3 +16,7 @@ apps/runner/**/*.css text eol=lf
 apps/runner/**/*.html text eol=lf
 apps/runner/**/*.js text eol=lf
 apps/runner/**/*.json text eol=lf
+
+# Reviewed third-party bytes are hash-pinned and must never receive newline conversion.
+apps/runner/frontend/public/vendor/vdoninja/1.5.5/* -text whitespace=-trailing-space
+apps/runner/compiled/vendor/vdoninja/1.5.5/* -text whitespace=-trailing-space

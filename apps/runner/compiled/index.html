@@ -161,7 +161,7 @@
                 <div><p class="eyebrow">Explicit activation</p><h2>Phone Remote</h2></div>
                 <span id="remote-state-badge" class="badge">Disabled</span>
               </div>
-              <label class="switch-row"><span><strong>Enable browser remote</strong><small>Starts the local BRSP WebSocket target only after this gesture.</small></span><input id="remote-enabled" type="checkbox" role="switch"></label>
+              <label class="switch-row"><span><strong>Enable remote authority</strong><small>Allows a locally approved browser controller. Public discovery is a separate explicit action below.</small></span><input id="remote-enabled" type="checkbox" role="switch"></label>
               <label class="switch-row"><span><strong>Allow remote abort</strong><small>Grants the separate high-impact <code>session.abort</code> scope.</small></span><input id="remote-allow-abort" type="checkbox" role="switch"></label>
               <div class="inline-actions">
                 <button id="remote-apply" class="button button-primary" type="button">Apply remote settings</button>
@@ -171,7 +171,7 @@
               <dl class="summary-list">
                 <div><dt>Controller</dt><dd id="remote-controller">None</dd></div>
                 <div><dt>Granted scopes</dt><dd id="remote-scopes">None</dd></div>
-                <div><dt>Route</dt><dd id="remote-route">Local Wi-Fi WebSocket</dd></div>
+                <div><dt>Native authority</dt><dd id="remote-route">Local-only</dd></div>
               </dl>
             </section>
             <section class="panel pairing-panel stack">
@@ -182,11 +182,73 @@
               <p id="pairing-summary" class="subtle">The secret is held in the URL fragment and is not sent in an HTTP request.</p>
               <button id="copy-invite" class="button" type="button" disabled>Copy invitation link</button>
             </section>
+            <section class="panel stack remote-controller-panel" aria-labelledby="desktop-controller-heading">
+              <div class="section-heading">
+                <div><p class="eyebrow">Controller role · browser or phone target</p><h2 id="desktop-controller-heading">Control a Browser Experiment</h2></div>
+                <span id="desktop-controller-status" class="badge">Controller off</span>
+              </div>
+              <p class="safety-copy">Browsing reveals unverified public labels only. Select one target, request access, wait for its local approval, then press Connect to perform mutual BRSP proof in the fresh private room.</p>
+              <div class="inline-actions">
+                <button id="desktop-controller-browse" class="button button-primary" type="button">Browse public targets</button>
+                <button id="desktop-controller-stop" class="button" type="button" disabled>Stop browsing</button>
+                <button id="desktop-controller-request" class="button" type="button" disabled>Request private session</button>
+                <button id="desktop-controller-connect" class="button button-primary" type="button" disabled>Connect privately</button>
+                <button id="desktop-controller-disconnect" class="button" type="button" disabled>Disconnect controller</button>
+              </div>
+              <div id="desktop-controller-targets" class="beacon-target-list" aria-live="polite">
+                <p class="subtle">Press Browse to list public PPS targets.</p>
+              </div>
+              <p id="desktop-controller-selection" class="subtle">No public target selected.</p>
+              <div class="remote-controller-grid">
+                <dl class="summary-list">
+                  <div><dt>Target</dt><dd id="desktop-controller-target">None</dd></div>
+                  <div><dt>Private route</dt><dd id="desktop-controller-route">Not connected</dd></div>
+                  <div><dt>Confirmed revision</dt><dd id="desktop-controller-revision">—</dd></div>
+                </dl>
+                <div class="control-grid compact-controller-actions" aria-label="Browser experiment controls">
+                  <button class="button" type="button" data-controller-action="package.prepare_demo" disabled>Prepare demo</button>
+                  <button class="button button-primary" type="button" data-controller-action="part.start" disabled>Start part</button>
+                  <button class="button" type="button" data-controller-action="run.pause" disabled>Pause</button>
+                  <button class="button" type="button" data-controller-action="run.resume" disabled>Resume</button>
+                  <button class="button button-danger" type="button" data-controller-action="run.stop" disabled>Stop</button>
+                </div>
+              </div>
+            </section>
+            <section class="panel stack remote-beacon-panel" aria-labelledby="desktop-beacon-heading">
+              <div class="section-heading">
+                <div><p class="eyebrow">Public rendezvous · private control</p><h2 id="desktop-beacon-heading">Website Connection Beacon</h2></div>
+                <span id="desktop-beacon-status" class="badge">Beacon off</span>
+              </div>
+              <p class="safety-copy">Public listings expose only an unverified target label and bounded access requests. After local approval, fresh credentials go only to that exact requester over its encrypted peer data channel; VDO signaling and peer selection remain trusted. Control then moves to a fresh private room with mutual BRSP proof and Rust-owned scopes, revisions, and lease expiry.</p>
+              <div class="inline-actions">
+                <button id="desktop-beacon-start" class="button button-primary" type="button" disabled>Advertise this runner</button>
+                <button id="desktop-beacon-stop" class="button" type="button" disabled>Stop beacon and private session</button>
+              </div>
+              <dl class="summary-list">
+                <div><dt>Discovery</dt><dd id="desktop-beacon-detail">Advertising can enable VDO-only authority without opening a LAN listener.</dd></div>
+                <div><dt>Private transport</dt><dd id="desktop-private-route">Not connected</dd></div>
+                <div><dt>Controller lease</dt><dd id="desktop-private-lease">None</dd></div>
+              </dl>
+              <div id="desktop-pairing-request" class="beacon-request-card" hidden>
+                <div>
+                  <span>Unverified controller request</span>
+                  <strong id="desktop-request-label">Browser controller</strong>
+                </div>
+                <p>Requested scopes: <span id="desktop-request-scopes">None</span></p>
+                <p id="desktop-request-policy" class="subtle">Remote authority must be enabled and the target locally armed before approval.</p>
+                <div class="inline-actions">
+                  <button id="desktop-request-approve" class="button button-primary" type="button" disabled>Approve private control</button>
+                  <button id="desktop-request-deny" class="button" type="button">Deny request</button>
+                </div>
+              </div>
+            </section>
           </div>
         </section>
       </main>
     </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <!-- @vite-ignore: reviewed classic SDK bytes are copied unchanged from public/. -->
+    <script src="./vendor/vdoninja/1.5.5/vdoninja-sdk.min.js"></script>
   </body>
 </html>
