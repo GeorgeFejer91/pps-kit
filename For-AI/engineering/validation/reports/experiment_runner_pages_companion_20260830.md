@@ -2,9 +2,8 @@
 
 ## Outcome
 
-The canonical Runner browser companion is staged for publication at the real
-GitHub Pages subpage `/experiment-runner/`. The custom-domain and project-Pages
-URLs to verify after the first deployment are:
+The canonical Runner browser companion is live at the GitHub Pages subpage
+`/experiment-runner/`. The custom-domain and project-Pages URLs are:
 
 - `https://ppskit.qzz.io/experiment-runner/`
 - `https://georgefejer91.github.io/pps-kit/experiment-runner/`
@@ -38,6 +37,22 @@ companion allowlist, a changed CNAME, and private output roots.
 - Invitation cleanup rejects query-string secrets and now scrubs both fragment
   and forbidden query material from browser history.
 
+## Live deployment readback
+
+GitHub Actions Pages run
+[`33334483715`](https://github.com/GeorgeFejer91/pps-kit/actions/runs/33334483715)
+completed successfully for commit `97a7a5b76d61cdcd0b916c4d46f9b492baf51fa3`.
+
+- `https://ppskit.qzz.io/experiment-runner/` returned HTTP 200, 9,999 bytes,
+  and the canonical HTML SHA-256
+  `B8109871A85A25FF5760882F8A134D76080D255C61903395E2B937D1D98C47FB`.
+- The GitHub project fallback returned HTTP 301 to the same custom-domain route,
+  then HTTP 200 with the same bytes and hash.
+- Both asset routes returned the 69,474-byte `companion.js` with canonical
+  SHA-256 `09020A7E8C138C4394FC7FDCD813999A43DAE96F602CBEF7DD7C0401B3E038F1`.
+- An attended live-browser readback showed title `PPS Experiment Runner
+  Companion`, the BRSP controller view, and the visible `Phone Experiment` mode.
+
 ## Interactive browser verification
 
 The actual staged Pages artifact was served locally and exercised through
@@ -70,11 +85,11 @@ work rather than being silently mixed into this route change.
 
 ## Qualification boundary
 
-This validates static publication assembly, responsive browser interaction, and
-the exploratory phone-local demo. Public URL readback remains pending the first
-post-push Pages workflow. It does not validate an external relay, physical
-smartphone audio/vibration timing, background behavior, or publication-grade
-stimulus onset. GitHub Pages cannot host WebSocket upgrades; cross-device BRSP
-control remains blocked until a browser-side WSS/WebRTC adapter and endpoint are
-implemented/configured, deployed, and qualified together. Tauri invitations
-therefore remain local rather than being repointed to this public route.
+This validates static publication, live URL delivery, responsive browser
+interaction, and the exploratory phone-local demo. It does not validate an
+external relay, physical smartphone audio/vibration timing, background
+behavior, or publication-grade stimulus onset. GitHub Pages cannot host
+WebSocket upgrades; cross-device BRSP control remains blocked until a
+browser-side WSS/WebRTC adapter and endpoint are implemented/configured,
+deployed, and qualified together. Tauri invitations therefore remain local
+rather than being repointed to this public route.
