@@ -2391,7 +2391,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   per-stage p50/p95/p99/worst integer microseconds plus separate dropped whole-
   trace, dropped stage-update, interrupted, and unfinished counts without
   exposing raw traces or identifiers. Interrupted/unfinished traces do not
-  populate percentiles. `reducer-applied` currently means the candidate
+  populate percentiles. Schema `pps-runner-native-latency-summary.v2` adds
+  per-route authority queue wait computed only from admission/dequeue points on
+  the same completed trace, plus bounded atomic ordinary/safety mailbox
+  latest-observed depths, successful-admission depth percentiles, high-water marks,
+  and queue-full reject counts. The gauge is best-effort rather than a
+  linearizable concurrent snapshot; counters saturate and shutdown records
+  zero latest-observed depths, and pressure evidence cannot affect admission
+  or reducer semantics.
+  `reducer-applied` currently means the candidate
   transition was accepted by the reducer; it precedes ledger commit and effect
   initiation. No release/physical measurements exist yet, so selecting Rust
   still does not establish low latency. Add effect-initiation observations only

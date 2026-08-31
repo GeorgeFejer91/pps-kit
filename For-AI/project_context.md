@@ -406,8 +406,13 @@ that changes semantic state appends scientific evidence; rejected commands and
 accepted no-ops cannot exhaust that evidence budget. Ordinary work preserves a
 ledger reserve for safety, while pause/revoke remains fail-safe if evidence
 capacity is exhausted and latches `evidence_unavailable`. Internal request and
-dispatch observation rings are bounded, but user-facing p50/p95/p99/worst
-latency reporting and full receive-to-ack instrumentation remain open.
+dispatch observation rings are bounded. The local-only
+`pps-runner-native-latency-summary.v2` projection now reports per-route/stage
+p50/p95/p99/worst timing, same-trace authority queue wait, and bounded atomic
+ordinary/safety latest-observed mailbox depth, high-water, and queue-full
+evidence without raw traces or request data. Browser-to-native and physical
+effect timing remain separate open qualification boundaries; this is not a
+low-latency claim.
 
 The native operator snapshot and remote state are now separate contracts. LAN
 BRSP and bundled-WebView BRSP expose only the exact

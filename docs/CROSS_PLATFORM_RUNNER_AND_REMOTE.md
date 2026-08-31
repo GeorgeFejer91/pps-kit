@@ -167,11 +167,16 @@ reserve evidence capacity for safety; if even the safety reserve is exhausted,
 pause/revoke still applies fail-safe and latches the native
 `evidence_unavailable` condition. Native semantic-request diagnostics now use
 a separate 512-trace bounded store with schema
-`pps-runner-native-latency-summary.v1`. The no-argument summary is available
+`pps-runner-native-latency-summary.v2`. The no-argument summary is available
 only to the bundled `main` window and returns aggregate counts,
 dropped whole-trace, dropped stage-update, interrupted, and unfinished counts,
-and per-route/per-stage p50, p95, p99, and worst integer microseconds;
-individual traces never cross IPC. Evicted traces and traces that could not be
+per-route/per-stage p50, p95, p99, and worst integer microseconds, and a
+per-route `authorityQueueWait` population computed within each trace as
+authority dequeue minus that same trace's successful admission. It never
+subtracts independently aggregated stage percentiles. Traces missing either
+mailbox marker, work discarded at shutdown, or an invalid inverted marker pair
+do not enter this queue-wait population. Individual traces never cross IPC.
+Evicted traces and traces that could not be
 started because the store was contended count as dropped whole traces. A stage
 or terminal update lost to contention counts separately as a dropped stage
 update. Interrupted and unfinished traces are reported separately and excluded
@@ -186,6 +191,15 @@ transition was accepted by the reducer; it precedes authoritative ledger commit
 and effect initiation and is not evidence of either. Authority-path
 instrumentation uses a non-blocking diagnostics lock, so contention loses and
 counts the observation instead of delaying or changing a transition.
+The v2 summary also includes bounded atomic-only `authorityMailbox` pressure
+evidence. Ordinary and local-safety classes separately report latest-observed
+depth, high-water mark, queue-full rejects, successful admissions, and p50/p95/p99/
+worst class depth after a successful admission. The fixed depth histograms are
+bounded by the 56-entry ordinary limit and 64-entry total capacity, counters
+saturate rather than wrap, and shutdown atomically records both latest observed
+depths as zero without turning discarded work into queue-wait samples. This
+best-effort gauge is not a linearizable snapshot of a concurrently changing
+mailbox. These observations neither decide admission nor mutate runner state.
 For remote routes, `reply-ready` follows conversion to the sanitized public
 `RemoteApplied` acknowledgement (or bounded generic error), not merely the
 inner native reducer result.

@@ -163,7 +163,7 @@ fail-safe if evidence is exhausted while latching `evidence_unavailable`.
 Native semantic request evidence now lives in
 `apps/runner/src-tauri/src/latency_diagnostics.rs`: a 512-trace bounded,
 local-only store with opaque internal trace IDs and aggregate schema
-`pps-runner-native-latency-summary.v1`. It reports completed, dropped whole-
+`pps-runner-native-latency-summary.v2`. It reports completed, dropped whole-
 trace, dropped stage-update, interrupted, and unfinished counts plus per-route/
 stage p50/p95/p99/worst integer microseconds from one process monotonic clock;
 interrupted and unfinished traces do not populate route percentiles. Local
@@ -176,6 +176,16 @@ authorization, reducer validation, and an accepted reducer transition are
 distinct milestones. The
 accepted-transition milestone precedes ledger commit and effect initiation;
 diagnostic contention drops evidence without blocking or mutating authority.
+Each route also reports authority queue wait from admission/dequeue markers on
+the same completed trace; missing marker pairs are omitted rather than inferred
+from aggregate stage percentiles. A separate bounded atomic aggregate reports
+ordinary and safety latest-observed depths, successful-admission depth
+percentiles, high-water marks, and queue-full rejects. Counts saturate,
+shutdown records both latest-observed depths as zero, and pressure observations
+never participate in mailbox admission. The strict aggregate remains a
+no-argument, bundled-main-window-only
+diagnostic and contains no command IDs, arguments, errors, identities, paths,
+or secrets.
 No release-build or physical-route latency result is recorded yet. Verified
 real V1 packages remain schedule-inspection-only and non-executable until
 native audio/output and evidence boundaries are implemented and qualified.

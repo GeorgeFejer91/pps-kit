@@ -20,6 +20,7 @@ use tokio::sync::broadcast;
 
 use crate::execution_owner::{
     AuthorityView, ExecutionOwner, LanOwnerReceipt, OwnerSubmitError, RemoteOwnerIdentity,
+    MAILBOX_CAPACITY, NORMAL_MAILBOX_CAPACITY,
 };
 use crate::latency_diagnostics::{
     LatencyRoute, LatencyStage, LatencyTrace, LatencyTraceGuard, NativeIngress,
@@ -345,6 +346,10 @@ impl AppRuntime {
             secret: PairingSecret::generate(),
             session_id: format!("session_{}", &random_nonce()[..18]),
         };
+        let latency_diagnostics = NativeLatencyDiagnostics::with_mailbox_limits(
+            MAILBOX_CAPACITY,
+            NORMAL_MAILBOX_CAPACITY,
+        );
         let authority = ExecutionOwner::start(
             target_id,
             "desktop-tauri-preview",
@@ -352,11 +357,12 @@ impl AppRuntime {
             TimingTier::DesktopPreview,
             remote,
             state_tx.clone(),
+            latency_diagnostics.authority_mailbox(),
         )
         .expect("the Runner authority thread must start");
         let shared = RuntimeShared {
             authority,
-            latency_diagnostics: NativeLatencyDiagnostics::new(),
+            latency_diagnostics,
             prepared_session_selection_in_flight: AtomicBool::new(false),
             prepared_execution_inspection_in_flight: AtomicBool::new(false),
             prepared_audio_preparation_in_flight: AtomicBool::new(false),

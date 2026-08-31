@@ -24,7 +24,7 @@ use tokio::sync::{broadcast, oneshot};
 use std::path::PathBuf;
 
 use crate::{
-    latency_diagnostics::{LatencyStage, LatencyTrace},
+    latency_diagnostics::{AuthorityMailboxDiagnostics, LatencyStage, LatencyTrace},
     prepared_audio::{
         PreparedAudioCandidate, PreparedAudioLookup, PreparedAudioSource,
         PreparedAudioSourceReceipt, PreparedAudioSummary, MAXIMUM_CACHED_DECODED_BYTES,
@@ -93,21 +93,24 @@ struct MailboxState {
 struct Mailbox {
     state: Mutex<MailboxState>,
     wake: Condvar,
+    diagnostics: AuthorityMailboxDiagnostics,
 }
 
 impl Mailbox {
-    fn new() -> Self {
+    fn new(diagnostics: AuthorityMailboxDiagnostics) -> Self {
         Self {
             state: Mutex::new(MailboxState {
                 accepting: true,
                 ..MailboxState::default()
             }),
             wake: Condvar::new(),
+            diagnostics,
         }
     }
 
     fn push(&self, entry: MailboxEntry) -> Result<(), OwnerSubmitError> {
         let mut state = self.state.lock().unwrap_or_else(|error| error.into_inner());
+        let safety = entry.class == AdmissionClass::LocalSafety;
         if !state.accepting {
             return Err(OwnerSubmitError::Closed);
         }
@@ -115,17 +118,22 @@ impl Mailbox {
             || (entry.class == AdmissionClass::Normal
                 && state.normal_count == NORMAL_MAILBOX_CAPACITY)
         {
+            self.diagnostics.record_queue_full_reject(safety);
             return Err(OwnerSubmitError::Full);
         }
         if entry.class == AdmissionClass::Normal {
             state.normal_count += 1;
         }
-        if let Some(trace) = entry.trace.as_ref() {
-            // This happens after admission succeeds and before the actor can
-            // dequeue the entry. Diagnostics use a non-blocking internal lock.
+        state.queue.push_back(entry);
+        if let Some(trace) = state.queue.back().and_then(|entry| entry.trace.as_ref()) {
+            // The entry is now in the queue, while the mailbox lock prevents
+            // dequeue. Diagnostics use a non-blocking internal lock.
             trace.mark(LatencyStage::AuthorityAdmission);
         }
-        state.queue.push_back(entry);
+        let ordinary_depth = state.normal_count;
+        let safety_depth = state.queue.len().saturating_sub(state.normal_count);
+        self.diagnostics
+            .record_successful_admission(safety, ordinary_depth, safety_depth);
         drop(state);
         self.wake.notify_one();
         Ok(())
@@ -140,6 +148,10 @@ impl Mailbox {
         if entry.class == AdmissionClass::Normal {
             state.normal_count = state.normal_count.saturating_sub(1);
         }
+        self.diagnostics.record_latest_depths(
+            state.normal_count,
+            state.queue.len().saturating_sub(state.normal_count),
+        );
         Some(entry)
     }
 
@@ -176,7 +188,9 @@ impl Mailbox {
             state.accepting = false;
             state.shutdown_requested = true;
             state.normal_count = 0;
-            std::mem::take(&mut state.queue)
+            let queued = std::mem::take(&mut state.queue);
+            self.diagnostics.record_latest_depths(0, 0);
+            queued
         };
         // Dropping queued task closures closes their oneshot reply channels.
         // Do this outside the mailbox lock in case a captured value has a
@@ -1482,6 +1496,11 @@ pub(crate) struct ExecutionOwner {
     _alive: Arc<AtomicBool>,
 }
 
+struct OwnerStartConfiguration {
+    lease_duration: Duration,
+    mailbox_diagnostics: AuthorityMailboxDiagnostics,
+}
+
 impl ExecutionOwner {
     pub(crate) fn start(
         target_id: String,
@@ -1490,6 +1509,7 @@ impl ExecutionOwner {
         timing_tier: TimingTier,
         remote: RemoteConfig,
         state_tx: broadcast::Sender<RunnerSnapshot>,
+        mailbox_diagnostics: AuthorityMailboxDiagnostics,
     ) -> Result<Self, String> {
         Self::start_with_lease(
             target_id,
@@ -1498,7 +1518,10 @@ impl ExecutionOwner {
             timing_tier,
             remote,
             state_tx,
-            DEFAULT_REMOTE_LEASE,
+            OwnerStartConfiguration {
+                lease_duration: DEFAULT_REMOTE_LEASE,
+                mailbox_diagnostics,
+            },
         )
     }
 
@@ -1509,9 +1532,10 @@ impl ExecutionOwner {
         timing_tier: TimingTier,
         remote: RemoteConfig,
         state_tx: broadcast::Sender<RunnerSnapshot>,
-        lease_duration: Duration,
+        configuration: OwnerStartConfiguration,
     ) -> Result<Self, String> {
-        let mailbox = Arc::new(Mailbox::new());
+        let mailbox = Arc::new(Mailbox::new(configuration.mailbox_diagnostics));
+        let lease_duration = configuration.lease_duration;
         let alive = Arc::new(AtomicBool::new(false));
         let thread_mailbox = Arc::clone(&mailbox);
         let thread_alive = Arc::clone(&alive);
@@ -2252,6 +2276,10 @@ mod tests {
 
     fn owner(lease: Duration) -> ExecutionOwner {
         let (state_tx, _) = broadcast::channel(64);
+        let diagnostics = NativeLatencyDiagnostics::with_mailbox_limits(
+            MAILBOX_CAPACITY,
+            NORMAL_MAILBOX_CAPACITY,
+        );
         ExecutionOwner::start_with_lease(
             "owner-test-target".to_owned(),
             "desktop-tauri-preview",
@@ -2264,7 +2292,10 @@ mod tests {
                 session_id: "session_owner_test".to_owned(),
             },
             state_tx,
-            lease,
+            OwnerStartConfiguration {
+                lease_duration: lease,
+                mailbox_diagnostics: diagnostics.authority_mailbox(),
+            },
         )
         .unwrap()
     }
@@ -2273,6 +2304,10 @@ mod tests {
         lease: Duration,
     ) -> (ExecutionOwner, broadcast::Receiver<RunnerSnapshot>) {
         let (state_tx, state_rx) = broadcast::channel(64);
+        let diagnostics = NativeLatencyDiagnostics::with_mailbox_limits(
+            MAILBOX_CAPACITY,
+            NORMAL_MAILBOX_CAPACITY,
+        );
         let owner = ExecutionOwner::start_with_lease(
             "owner-test-target".to_owned(),
             "desktop-tauri-preview",
@@ -2285,7 +2320,10 @@ mod tests {
                 session_id: "session_owner_test".to_owned(),
             },
             state_tx,
-            lease,
+            OwnerStartConfiguration {
+                lease_duration: lease,
+                mailbox_diagnostics: diagnostics.authority_mailbox(),
+            },
         )
         .unwrap();
         (owner, state_rx)
@@ -2377,6 +2415,131 @@ mod tests {
             .unwrap();
         assert_eq!(started.status, AppliedStatus::Accepted);
         assert_eq!(started.snapshot.run.phase, RunnerPhase::Running);
+    }
+
+    fn empty_mailbox_entry(class: AdmissionClass) -> MailboxEntry {
+        MailboxEntry {
+            class,
+            trace: None,
+            task: Box::new(|_| {}),
+        }
+    }
+
+    #[test]
+    fn mailbox_pressure_tracks_class_interleaving_and_each_dequeue_once() {
+        let diagnostics = NativeLatencyDiagnostics::with_mailbox_limits(
+            MAILBOX_CAPACITY,
+            NORMAL_MAILBOX_CAPACITY,
+        );
+        let mailbox = Mailbox::new(diagnostics.authority_mailbox());
+        mailbox
+            .push(empty_mailbox_entry(AdmissionClass::Normal))
+            .unwrap();
+        mailbox
+            .push(empty_mailbox_entry(AdmissionClass::LocalSafety))
+            .unwrap();
+        mailbox
+            .push(empty_mailbox_entry(AdmissionClass::Normal))
+            .unwrap();
+
+        let admitted = diagnostics.summary().authority_mailbox;
+        assert_eq!(admitted.ordinary.latest_observed_depth, 2);
+        assert_eq!(admitted.safety.latest_observed_depth, 1);
+        assert_eq!(admitted.ordinary.high_water_mark, 2);
+        assert_eq!(admitted.safety.high_water_mark, 1);
+
+        assert_eq!(mailbox.pop().unwrap().class, AdmissionClass::Normal);
+        let after_first = diagnostics.summary().authority_mailbox;
+        assert_eq!(after_first.ordinary.latest_observed_depth, 1);
+        assert_eq!(after_first.safety.latest_observed_depth, 1);
+
+        assert_eq!(mailbox.pop().unwrap().class, AdmissionClass::LocalSafety);
+        let after_second = diagnostics.summary().authority_mailbox;
+        assert_eq!(after_second.ordinary.latest_observed_depth, 1);
+        assert_eq!(after_second.safety.latest_observed_depth, 0);
+
+        assert_eq!(mailbox.pop().unwrap().class, AdmissionClass::Normal);
+        assert!(mailbox.pop().is_none());
+        let empty = diagnostics.summary().authority_mailbox;
+        assert_eq!(empty.ordinary.latest_observed_depth, 0);
+        assert_eq!(empty.safety.latest_observed_depth, 0);
+        assert_eq!(empty.ordinary.successful_admission_count, 2);
+        assert_eq!(empty.safety.successful_admission_count, 1);
+    }
+
+    #[test]
+    fn mailbox_pressure_saturation_and_shutdown_are_bounded_and_exact() {
+        let diagnostics = NativeLatencyDiagnostics::with_mailbox_limits(
+            MAILBOX_CAPACITY,
+            NORMAL_MAILBOX_CAPACITY,
+        );
+        let mailbox = Mailbox::new(diagnostics.authority_mailbox());
+        for _ in 0..NORMAL_MAILBOX_CAPACITY {
+            mailbox
+                .push(empty_mailbox_entry(AdmissionClass::Normal))
+                .unwrap();
+        }
+        assert!(matches!(
+            mailbox.push(empty_mailbox_entry(AdmissionClass::Normal)),
+            Err(OwnerSubmitError::Full)
+        ));
+        for _ in 0..LOCAL_SAFETY_RESERVE {
+            mailbox
+                .push(empty_mailbox_entry(AdmissionClass::LocalSafety))
+                .unwrap();
+        }
+        assert!(matches!(
+            mailbox.push(empty_mailbox_entry(AdmissionClass::LocalSafety)),
+            Err(OwnerSubmitError::Full)
+        ));
+
+        let full = diagnostics.summary().authority_mailbox;
+        assert_eq!(
+            full.ordinary.latest_observed_depth,
+            NORMAL_MAILBOX_CAPACITY as u64
+        );
+        assert_eq!(
+            full.safety.latest_observed_depth,
+            LOCAL_SAFETY_RESERVE as u64
+        );
+        assert_eq!(
+            full.ordinary.high_water_mark,
+            NORMAL_MAILBOX_CAPACITY as u64
+        );
+        assert_eq!(full.safety.high_water_mark, LOCAL_SAFETY_RESERVE as u64);
+        assert_eq!(full.ordinary.queue_full_reject_count, 1);
+        assert_eq!(full.safety.queue_full_reject_count, 1);
+        assert_eq!(full.ordinary.depth_after_successful_admission.p50, 28);
+        assert_eq!(full.ordinary.depth_after_successful_admission.p95, 54);
+        assert_eq!(
+            full.ordinary.depth_after_successful_admission.worst,
+            NORMAL_MAILBOX_CAPACITY as u64
+        );
+        assert_eq!(full.safety.depth_after_successful_admission.p50, 4);
+        assert_eq!(
+            full.safety.depth_after_successful_admission.worst,
+            LOCAL_SAFETY_RESERVE as u64
+        );
+
+        mailbox.request_shutdown();
+        mailbox.request_shutdown();
+        assert!(matches!(
+            mailbox.push(empty_mailbox_entry(AdmissionClass::LocalSafety)),
+            Err(OwnerSubmitError::Closed)
+        ));
+        let shutdown = diagnostics.summary().authority_mailbox;
+        assert_eq!(shutdown.ordinary.latest_observed_depth, 0);
+        assert_eq!(shutdown.safety.latest_observed_depth, 0);
+        assert_eq!(
+            shutdown.ordinary.successful_admission_count,
+            NORMAL_MAILBOX_CAPACITY as u64
+        );
+        assert_eq!(
+            shutdown.safety.successful_admission_count,
+            LOCAL_SAFETY_RESERVE as u64
+        );
+        assert_eq!(shutdown.ordinary.queue_full_reject_count, 1);
+        assert_eq!(shutdown.safety.queue_full_reject_count, 1);
     }
 
     #[test]
