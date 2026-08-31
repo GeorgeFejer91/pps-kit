@@ -2317,9 +2317,10 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   primary response-marker paths.
 - Leave V1 component manifests and the current Go bootstrapper intact. A
   smaller installed Runner becomes real only as Python/PySide functionality is
-  removed or made optional after parity checks. The V2 target is a Python-free
-  default Runner; any transitional Python worker is supervised compatibility,
-  not the final authority. Platform promotion requires
+  removed after parity checks. The V2 release is Python-free: Python may remain
+  only as a temporary development/CI differential oracle, never a shipped
+  worker, sidecar, fallback authority, runtime dependency, or control/timing
+  path. Platform promotion requires
   host-native signing, installers/updater manifests, rollback, privacy/license
   inventories, and physical Windows/macOS/Linux/phone/Quest qualification.
 - The first real V1 package slice is now native Rust. A no-argument Tauri
@@ -2341,3 +2342,46 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   slice, bound manifest bytes/blocks/strings before allocation, add Python
   `expanduser` path differential cases, restore the retained path-free summary
   after WebView reload, and define a v2 content-addressed prepared-asset schema.
+- The clean-Windows V2 promotion gate must adopt and run a representative real
+  package, emit required evidence/artifacts, support local and browser control,
+  shut down/recover, and complete normal post-run review without Python,
+  PySide, PyInstaller, or a Python worker. Migration priority is native
+  authority/package verification; a bounded dedicated Rust execution owner and
+  monotonic command queue; native audio/output and response timestamp
+  boundaries; durable event/LSL/persistence/recovery; then required review and
+  analysis before compatibility packaging is removed.
+- Instrument remote receipt through proof, scope/revision checks, authority
+  enqueue, reducer application, effect start, and acknowledgement in one
+  process-monotonic domain where possible. Report p50, p95, p99, and worst
+  observed separately; selecting Rust does not itself establish low latency.
+- `pps-runner-execution` is the first scheduler compatibility slice. It compiles
+  V1 block CSVs into sorted sample events, preserves explicit-sample precedence,
+  ties-to-even seconds conversion, signed derived samples, and half-open cursor
+  behavior, and supplies a cumulatively bounded append-only native ledger. A
+  no-argument Tauri inspection reverifies and generation-fences the retained
+  package; only a path-free `schedule-only`, `unqualified`, non-executable
+  summary crosses IPC. Raw path-bearing events remain native. Curated
+  Python/Rust differential fixtures are CI evidence only; missing/ragged input
+  failures and missing WAV sample-rate probing remain explicit parity limits.
+  Bind each prepared CSV to its selection-time digest and compile from the same
+  bounded byte snapshot that was hashed; top-level manifests, block counts,
+  known strings/paths, metadata shape, and cumulative metadata must be bounded
+  before retention. This inspection does not bind WAV content: native audio
+  preload must do that before any real package becomes armable.
+- Treat the transport-independent BRSP application-target reference as a
+  qualification checklist for the existing Rust seam, not a replacement.
+  `RunnerCore` stays the single authority, transports remain adapters, grants
+  remain explicit, snapshots remain public projections, and package
+  replacement must revoke old owners. Add convergence/privacy/scope/revision/
+  redaction/replacement/deadman conformance tests before recording a durable
+  reference revision. Keep PPS reliable-command-only unless a real
+  complete-current-value intent control is introduced.
+- Use RustDesk only as a pinned architecture/reference review, currently at
+  `rustdesk/rustdesk@03a7fc5992069cc5bc9f7c36b872483dddf4f472`. Reimplement
+  compatible lessons independently: separate rendezvous from relay/direct data
+  paths, isolate platform adapters, timestamp receipt, fence each session,
+  expire stale owners, and clean up through owned lifecycles. Do not adopt raw
+  keyboard/mouse or “call every function” dispatch, do not copy its unbounded
+  channel choices into experiment authority, and do not copy/vendor AGPL-3.0
+  code into the MIT toolkit. BRSP/VDO remains the typed browser command layer;
+  one bounded Rust authority owner remains the only state transition path.

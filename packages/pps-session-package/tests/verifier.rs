@@ -5,8 +5,9 @@ use std::{
 };
 
 use pps_session_package::{
-    verify_prepared_session, VerificationErrorCode, VerificationRequest,
-    PARTICIPANT_BLOCK_WAVS_MODE, RUN_PACKAGE_SCHEMA, VERIFIED_MESSAGE,
+    verify_prepared_session, VerificationErrorCode, VerificationRequest, MAX_PREPARED_BLOCKS,
+    MAX_PREPARED_BLOCK_METADATA_BYTES, MAX_SESSION_MANIFEST_BYTES, PARTICIPANT_BLOCK_WAVS_MODE,
+    RUN_PACKAGE_SCHEMA, VERIFIED_MESSAGE,
 };
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
@@ -94,6 +95,10 @@ fn legacy_fixture(root: &TestDirectory) -> PathBuf {
                 "wav_path": "blocks/block.wav",
                 "trial_count": 1,
                 "duration_s": 1.25,
+                "metadata": {
+                    "sample_rate_hz": 48000,
+                    "native_provenance_path": "never/projected/to/browser"
+                },
                 "unknown_block_field_is_v1_compatible": true
             }]
         }),
@@ -201,6 +206,15 @@ fn legacy_package_returns_an_ordered_path_free_camel_case_summary() {
     assert_eq!(verified.summary().part_number, Some(2));
     assert_eq!(verified.manifest_sha256().len(), 64);
     assert_eq!(verified.blocks().len(), 1);
+    assert_eq!(
+        verified.blocks()[0].manifest_sha256(),
+        sha256(&root.join("session/blocks/block.csv"))
+    );
+    assert_eq!(verified.blocks()[0].metadata()["sample_rate_hz"], 48_000);
+    assert_eq!(
+        verified.blocks()[0].metadata()["native_provenance_path"],
+        "never/projected/to/browser"
+    );
 
     let serialized = serde_json::to_value(verified.summary()).expect("serialize safe summary");
     assert_eq!(serialized["sessionId"], "P001_fixture");
@@ -403,6 +417,64 @@ fn malformed_or_unknown_schema_is_never_accepted() {
     assert_eq!(
         error.public_message(),
         "Prepared session manifest is missing."
+    );
+}
+
+#[test]
+fn oversized_top_level_manifest_is_rejected_before_json_allocation() {
+    let root = TestDirectory::new();
+    let manifest = root.join("oversized/session_manifest.json");
+    write(&manifest, vec![b' '; MAX_SESSION_MANIFEST_BYTES + 1]);
+
+    let error = verify_prepared_session(VerificationRequest::new(&manifest))
+        .expect_err("oversized top-level bytes must fail before Serde parsing");
+    assert_eq!(error.kind(), VerificationErrorCode::ManifestTooLarge);
+    assert_eq!(error.code(), "manifest_too_large");
+    assert_eq!(
+        error.public_message(),
+        "Prepared session manifest is too large."
+    );
+    assert!(!error
+        .public_message()
+        .contains(&root.path.to_string_lossy().to_string()));
+}
+
+#[test]
+fn oversized_block_metadata_is_rejected_before_retention_or_cloning() {
+    let root = TestDirectory::new();
+    let manifest = legacy_fixture(&root);
+    let mut value: Value = serde_json::from_slice(&fs::read(&manifest).unwrap()).unwrap();
+    value["blocks"][0]["metadata"] = json!({
+        "oversized": "x".repeat(MAX_PREPARED_BLOCK_METADATA_BYTES)
+    });
+    write_json(&manifest, &value);
+
+    let error = verify_prepared_session(VerificationRequest::new(&manifest))
+        .expect_err("oversized metadata must fail before it is cloned into native receipts");
+    assert_eq!(error.kind(), VerificationErrorCode::ManifestResourceLimit);
+    assert_eq!(error.code(), "manifest_resource_limit");
+    assert_eq!(
+        error.public_message(),
+        "Prepared session manifest exceeds supported resource limits."
+    );
+}
+
+#[test]
+fn excessive_block_count_is_rejected_before_secondary_vector_allocation() {
+    let root = TestDirectory::new();
+    let manifest = legacy_fixture(&root);
+    let mut value: Value = serde_json::from_slice(&fs::read(&manifest).unwrap()).unwrap();
+    let block = value["blocks"][0].clone();
+    value["blocks"] = Value::Array(vec![block; MAX_PREPARED_BLOCKS + 1]);
+    write_json(&manifest, &value);
+
+    let error = verify_prepared_session(VerificationRequest::new(&manifest))
+        .expect_err("block-count limit must fail before retaining parsed blocks");
+    assert_eq!(error.kind(), VerificationErrorCode::ManifestResourceLimit);
+    assert_eq!(error.code(), "manifest_resource_limit");
+    assert_eq!(
+        error.public_message(),
+        "Prepared session manifest exceeds supported resource limits."
     );
 }
 

@@ -1,3 +1,4 @@
+mod prepared_execution;
 mod remote;
 mod runtime;
 
@@ -5,6 +6,9 @@ use std::{path::PathBuf, str::FromStr};
 
 use pps_contracts::{Action, Applied, RunnerSnapshot};
 use pps_session_package::{verify_prepared_session, PreparedSessionSummary, VerificationRequest};
+use prepared_execution::{
+    compile_prepared_execution, PreparedExecutionError, PreparedExecutionSummary,
+};
 use runtime::{
     AppRuntime, RemoteSessionClaimRequest, RemoteSessionDispatchRequest, RemoteSessionError,
     RemoteSessionLeaseReceipt, RemoteSessionOwnerRequest, RemoteSessionRenewRequest,
@@ -153,6 +157,58 @@ async fn select_prepared_session(
     })
 }
 
+#[tauri::command]
+async fn inspect_prepared_execution(
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<PreparedExecutionSummary, PreparedSessionCommandError> {
+    require_main_window(&window)
+        .map_err(|error| PreparedSessionCommandError::new(&error.code, &error.message))?;
+    let runtime = state.inner().clone();
+    let (inspection_guard, source) = runtime
+        .begin_prepared_execution_inspection()
+        .map_err(prepared_execution_runtime_error)?;
+
+    // Reverification and CSV schedule compilation are blocking native work.
+    // The WebView supplies no path or package identity and receives no raw
+    // events; those path-bearing schedules remain in managed Rust state.
+    let compiled = tauri::async_runtime::spawn_blocking(move || compile_prepared_execution(source))
+        .await
+        .map_err(|_| PreparedSessionCommandError::runtime())?
+        .map_err(prepared_execution_compile_error)?;
+    let summary = runtime
+        .cache_prepared_execution(compiled)
+        .map_err(prepared_execution_runtime_error)?;
+    drop(inspection_guard);
+    Ok(summary)
+}
+
+fn prepared_execution_compile_error(error: PreparedExecutionError) -> PreparedSessionCommandError {
+    PreparedSessionCommandError::new(error.code(), error.public_message())
+}
+
+fn prepared_execution_runtime_error(reason: &'static str) -> PreparedSessionCommandError {
+    match reason {
+        "prepared_execution_inspection_in_progress" => PreparedSessionCommandError::new(
+            reason,
+            "A native prepared-execution inspection is already in progress.",
+        ),
+        "prepared_session_missing" => PreparedSessionCommandError::new(
+            reason,
+            "Select and verify a prepared session before inspecting its schedules.",
+        ),
+        "prepared_package_replaced" => PreparedSessionCommandError::new(
+            reason,
+            "The selected prepared package was replaced during inspection; inspect it again.",
+        ),
+        "runtime_unavailable" => PreparedSessionCommandError::runtime(),
+        _ => PreparedSessionCommandError::new(
+            "prepared_execution_unavailable",
+            "The prepared execution schedules could not be inspected.",
+        ),
+    }
+}
+
 fn prepared_session_adoption_error(reason: &'static str) -> PreparedSessionCommandError {
     match reason {
         "cannot_replace_active_package" => PreparedSessionCommandError::new(
@@ -235,6 +291,7 @@ pub fn run() {
             configure_remote,
             rotate_pairing,
             select_prepared_session,
+            inspect_prepared_execution,
             remote_session_claim,
             remote_session_renew,
             remote_session_dispatch,

@@ -11,6 +11,7 @@
     "allow-configure-remote",
     "allow-rotate-pairing",
     "allow-select-prepared-session",
+    "allow-inspect-prepared-execution",
     "allow-remote-session-claim",
     "allow-remote-session-renew",
     "allow-remote-session-dispatch",

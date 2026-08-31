@@ -22,6 +22,7 @@ const MAX_PENDING_NATIVE_COMMANDS = 32;
 
 let snapshot = null;
 let preparedPlan = null;
+let preparedExecution = null;
 let remoteStatus = null;
 let invitationUrl = "";
 let toastTimer = null;
@@ -68,8 +69,41 @@ function planValue(plan, camelName, snakeName) {
   return plan?.[camelName] ?? plan?.[snakeName];
 }
 
+function renderPreparedExecution(nextInspection) {
+  const candidate = nextInspection && typeof nextInspection === "object" ? nextInspection : null;
+  const eventCount = Number(planValue(candidate, "eventCount", "event_count"));
+  const trialCount = Number(planValue(candidate, "trialRowCount", "trial_row_count"));
+  const blockCount = Number(planValue(candidate, "blockCount", "block_count"));
+  const encodedBytes = Number(planValue(candidate, "encodedBytes", "encoded_bytes"));
+  const scope = planValue(candidate, "inspectionScope", "inspection_scope");
+  const qualification = planValue(candidate, "timingQualification", "timing_qualification");
+  const blocks = candidate?.blocks;
+  const valid = Boolean(candidate)
+    && [eventCount, trialCount, blockCount, encodedBytes]
+      .every((value) => Number.isSafeInteger(value) && value >= 0)
+    && encodedBytes <= 32 * 1024 * 1024
+    && Array.isArray(blocks)
+    && blocks.length === blockCount
+    && scope === "schedule-only"
+    && qualification === "unqualified"
+    && candidate.executable === false;
+  preparedExecution = valid ? candidate : null;
+  text("execution-inspection-status", preparedExecution ? "Compiled · inspection only" : "Not compiled");
+  text("execution-event-count", preparedExecution && Number.isSafeInteger(eventCount) ? eventCount : null);
+  text(
+    "execution-inspection-detail",
+    preparedExecution
+      ? `${blockCount} block${blockCount === 1 ? "" : "s"}, ${trialCount} trial rows, and ${eventCount} sample-indexed events compiled in manifest order (${encodedBytes.toLocaleString()} encoded bytes retained natively). Scope: ${scope}; timing: ${qualification}; executable: no.`
+      : preparedPlan
+        ? "Compile the retained package with the Rust schedule oracle. This inspection does not arm outputs or authorize execution."
+        : "Schedule inspection is unavailable until a real prepared session is selected.",
+  );
+  return !candidate || valid;
+}
+
 function renderPreparedPlan(nextPlan) {
   preparedPlan = nextPlan && typeof nextPlan === "object" ? nextPlan : null;
+  renderPreparedExecution(null);
   const blocks = Array.isArray(preparedPlan?.blocks) ? preparedPlan.blocks : [];
   text("package-block-count", preparedPlan ? blocks.length : null);
   text("package-mode", preparedPlan ? planValue(preparedPlan, "executionMode", "execution_mode") : null);
@@ -201,6 +235,10 @@ function renderSnapshot(next) {
   elements["select-session-manifest"].title = api.kind === "tauri-native"
     ? "Select and verify a pps-run-session.v1 manifest locally"
     : "Prepared-session selection is available in the native Tauri app";
+  elements["inspect-prepared-execution"].disabled = api.kind !== "tauri-native" || !preparedPlan || active;
+  elements["inspect-prepared-execution"].title = api.kind === "tauri-native"
+    ? "Reverify the retained package and compile a path-free schedule inspection"
+    : "Rust schedule inspection is available in the native Tauri app";
   updateInboundPolicyUi();
 
   if (inboundPrivateTarget?.nativeClaimReceipt && !next.safety?.local_armed) {
@@ -848,6 +886,23 @@ function bindLocalActions() {
       await refreshRemote();
       showToast("Prepared session verified and adopted by the native Rust authority.");
     } catch (error) {
+      showToast(error.message, { error: true });
+    } finally {
+      if (snapshot) renderSnapshot(snapshot);
+    }
+  });
+
+  elements["inspect-prepared-execution"].addEventListener("click", async () => {
+    const button = elements["inspect-prepared-execution"];
+    button.disabled = true;
+    try {
+      const inspection = await api.inspectPreparedExecution();
+      if (!renderPreparedExecution(inspection)) {
+        throw new Error("The native runner returned an invalid schedule-inspection summary.");
+      }
+      showToast("Rust schedules compiled for inspection. Audio and execution remain disabled.");
+    } catch (error) {
+      renderPreparedExecution(null);
       showToast(error.message, { error: true });
     } finally {
       if (snapshot) renderSnapshot(snapshot);

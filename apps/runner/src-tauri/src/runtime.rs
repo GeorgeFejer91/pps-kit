@@ -20,6 +20,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tokio::sync::broadcast;
 
+use crate::prepared_execution::{
+    CompiledPreparedExecution, PreparedExecutionSource, PreparedExecutionSummary,
+};
+
 const WEBVIEW_REMOTE_LEASE: Duration = Duration::from_secs(5);
 const MAX_ACCEPTED_SCOPES: usize = 16;
 
@@ -182,8 +186,10 @@ pub struct RuntimeShared {
     pub remote: Mutex<RemoteConfig>,
     pub active_controller: Mutex<Option<ActiveController>>,
     webview_remote_session: Mutex<Option<WebviewRemoteSession>>,
-    prepared_session: Mutex<Option<Arc<VerifiedPreparedSession>>>,
+    prepared_session: Mutex<Option<RetainedPreparedSession>>,
+    compiled_prepared_execution: Mutex<Option<CompiledPreparedExecution>>,
     prepared_session_selection_in_flight: AtomicBool,
+    prepared_execution_inspection_in_flight: AtomicBool,
     pub clock: ClockSource,
     pub state_tx: broadcast::Sender<RunnerSnapshot>,
     pub remote_server: Mutex<RemoteServerState>,
@@ -197,10 +203,28 @@ pub struct PreparedSessionSelectionGuard {
     shared: Arc<RuntimeShared>,
 }
 
+#[derive(Debug)]
+struct RetainedPreparedSession {
+    generation: u64,
+    receipt: Arc<VerifiedPreparedSession>,
+}
+
+pub struct PreparedExecutionInspectionGuard {
+    shared: Arc<RuntimeShared>,
+}
+
 impl Drop for PreparedSessionSelectionGuard {
     fn drop(&mut self) {
         self.shared
             .prepared_session_selection_in_flight
+            .store(false, Ordering::Release);
+    }
+}
+
+impl Drop for PreparedExecutionInspectionGuard {
+    fn drop(&mut self) {
+        self.shared
+            .prepared_execution_inspection_in_flight
             .store(false, Ordering::Release);
     }
 }
@@ -253,7 +277,9 @@ impl AppRuntime {
             active_controller: Mutex::new(None),
             webview_remote_session: Mutex::new(None),
             prepared_session: Mutex::new(None),
+            compiled_prepared_execution: Mutex::new(None),
             prepared_session_selection_in_flight: AtomicBool::new(false),
+            prepared_execution_inspection_in_flight: AtomicBool::new(false),
             clock,
             state_tx,
             remote_server: Mutex::new(RemoteServerState::default()),
@@ -283,6 +309,64 @@ impl AppRuntime {
         Ok(PreparedSessionSelectionGuard {
             shared: Arc::clone(&self.0),
         })
+    }
+
+    /// Reserve one native schedule inspection and capture the retained package
+    /// generation under its authority lock. The caller holds the returned
+    /// guard across reverification and compilation.
+    pub fn begin_prepared_execution_inspection(
+        &self,
+    ) -> Result<(PreparedExecutionInspectionGuard, PreparedExecutionSource), &'static str> {
+        self.0
+            .prepared_execution_inspection_in_flight
+            .compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed)
+            .map_err(|_| "prepared_execution_inspection_in_progress")?;
+        let guard = PreparedExecutionInspectionGuard {
+            shared: Arc::clone(&self.0),
+        };
+        let retained = self
+            .0
+            .prepared_session
+            .lock()
+            .map_err(|_| "runtime_unavailable")?;
+        let retained = retained.as_ref().ok_or("prepared_session_missing")?;
+        let source = PreparedExecutionSource {
+            generation: retained.generation,
+            fingerprint: retained.receipt.manifest_sha256().to_owned(),
+            receipt: Arc::clone(&retained.receipt),
+        };
+        Ok((guard, source))
+    }
+
+    /// Cache a compiled schedule only if the selected package is still the
+    /// exact generation/fingerprint captured before native reverification.
+    pub fn cache_prepared_execution(
+        &self,
+        compiled: CompiledPreparedExecution,
+    ) -> Result<PreparedExecutionSummary, &'static str> {
+        let retained = self
+            .0
+            .prepared_session
+            .lock()
+            .map_err(|_| "runtime_unavailable")?;
+        let retained = retained.as_ref().ok_or("prepared_package_replaced")?;
+        if retained.generation != compiled.generation
+            || retained.receipt.manifest_sha256() != compiled.fingerprint
+        {
+            return Err("prepared_package_replaced");
+        }
+        if usize::try_from(compiled.summary().block_count).ok() != Some(compiled.schedules().len())
+        {
+            return Err("runtime_unavailable");
+        }
+        let mut cached = self
+            .0
+            .compiled_prepared_execution
+            .lock()
+            .map_err(|_| "runtime_unavailable")?;
+        let summary = compiled.summary().clone();
+        *cached = Some(compiled);
+        Ok(summary)
     }
 
     pub fn dispatch_local(&self, action: Action, args: Value) -> Result<Applied, String> {
@@ -327,7 +411,8 @@ impl AppRuntime {
         };
 
         // Keep the existing authority lock order: remote -> active controller
-        // -> WebView owner -> reducer -> retained package. Holding all five
+        // -> WebView owner -> reducer -> retained package -> compiled plan.
+        // Holding all six
         // prevents a controller from reclaiming the old epoch between package
         // adoption and authority rotation.
         let mut remote = self.0.remote.lock().map_err(|_| "runtime_unavailable")?;
@@ -347,6 +432,17 @@ impl AppRuntime {
             .prepared_session
             .lock()
             .map_err(|_| "runtime_unavailable")?;
+        let mut compiled = self
+            .0
+            .compiled_prepared_execution
+            .lock()
+            .map_err(|_| "runtime_unavailable")?;
+        let next_generation = retained
+            .as_ref()
+            .map(|session| session.generation)
+            .unwrap_or_default()
+            .checked_add(1)
+            .ok_or("runtime_unavailable")?;
 
         let now = self.0.clock.stamp();
         core.adopt_verified_package(package, now.clone())?;
@@ -365,8 +461,13 @@ impl AppRuntime {
         );
         *active = None;
         *webview = None;
-        *retained = Some(Arc::new(verified));
+        *retained = Some(RetainedPreparedSession {
+            generation: next_generation,
+            receipt: Arc::new(verified),
+        });
+        *compiled = None;
 
+        drop(compiled);
         drop(retained);
         drop(core);
         drop(webview);
@@ -1136,6 +1237,7 @@ impl RuntimeShared {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::prepared_execution::compile_prepared_execution;
     use pps_contracts::AppliedStatus;
     use pps_session_package::{verify_prepared_session, VerificationRequest};
     use std::fs;
@@ -1250,6 +1352,7 @@ mod tests {
                 .unwrap()
                 .as_ref()
                 .unwrap()
+                .receipt
                 .manifest_path(),
             expected_manifest
         );
@@ -1289,6 +1392,7 @@ mod tests {
                 .unwrap()
                 .as_ref()
                 .unwrap()
+                .receipt
                 .manifest_path(),
             expected_manifest
         );
@@ -1310,6 +1414,111 @@ mod tests {
         drop(first);
         let next = runtime.begin_prepared_session_selection().unwrap();
         drop(next);
+    }
+
+    #[test]
+    fn prepared_execution_inspection_requires_a_session_and_is_native_single_flight() {
+        let runtime = AppRuntime::new();
+        assert_eq!(
+            runtime.begin_prepared_execution_inspection().err().unwrap(),
+            "prepared_session_missing"
+        );
+        // A failed reservation must release the native single-flight flag.
+        assert_eq!(
+            runtime.begin_prepared_execution_inspection().err().unwrap(),
+            "prepared_session_missing"
+        );
+
+        let (fixture_root, verified) = verified_legacy_package("P001");
+        runtime.adopt_verified_session(verified).unwrap();
+        let (first_guard, first_source) = runtime.begin_prepared_execution_inspection().unwrap();
+        assert_eq!(first_source.generation, 1);
+        assert_eq!(
+            runtime.begin_prepared_execution_inspection().err().unwrap(),
+            "prepared_execution_inspection_in_progress"
+        );
+        drop(first_guard);
+        let (next_guard, _) = runtime.begin_prepared_execution_inspection().unwrap();
+        drop(next_guard);
+        fs::remove_dir_all(fixture_root).unwrap();
+    }
+
+    #[test]
+    fn adopting_a_new_package_clears_a_cached_schedule_only_plan() {
+        let runtime = AppRuntime::new();
+        let (first_root, first_verified) = verified_legacy_package("P001");
+        runtime.adopt_verified_session(first_verified).unwrap();
+        let authority_before_inspection = runtime.snapshot().unwrap();
+        let (guard, source) = runtime.begin_prepared_execution_inspection().unwrap();
+        let compiled = compile_prepared_execution(source).unwrap();
+        let summary = runtime.cache_prepared_execution(compiled).unwrap();
+        drop(guard);
+
+        assert_eq!(runtime.snapshot().unwrap(), authority_before_inspection);
+        assert_eq!(summary.inspection_scope, "schedule-only");
+        assert_eq!(summary.timing_qualification, "unqualified");
+        assert!(!summary.executable);
+        assert_eq!(
+            runtime
+                .0
+                .compiled_prepared_execution
+                .lock()
+                .unwrap()
+                .as_ref()
+                .unwrap()
+                .schedules()
+                .len(),
+            1
+        );
+
+        let (replacement_root, replacement) = verified_legacy_package("P001");
+        runtime.adopt_verified_session(replacement).unwrap();
+        assert!(runtime
+            .0
+            .compiled_prepared_execution
+            .lock()
+            .unwrap()
+            .is_none());
+        assert_eq!(
+            runtime
+                .0
+                .prepared_session
+                .lock()
+                .unwrap()
+                .as_ref()
+                .unwrap()
+                .generation,
+            2
+        );
+
+        fs::remove_dir_all(first_root).unwrap();
+        fs::remove_dir_all(replacement_root).unwrap();
+    }
+
+    #[test]
+    fn stale_compilation_cannot_cross_a_package_generation_fence() {
+        let runtime = AppRuntime::new();
+        let (first_root, first_verified) = verified_legacy_package("P001");
+        runtime.adopt_verified_session(first_verified).unwrap();
+        let (guard, source) = runtime.begin_prepared_execution_inspection().unwrap();
+        let stale_compilation = compile_prepared_execution(source).unwrap();
+
+        let (replacement_root, replacement) = verified_legacy_package("P001");
+        runtime.adopt_verified_session(replacement).unwrap();
+        assert_eq!(
+            runtime.cache_prepared_execution(stale_compilation),
+            Err("prepared_package_replaced")
+        );
+        assert!(runtime
+            .0
+            .compiled_prepared_execution
+            .lock()
+            .unwrap()
+            .is_none());
+        drop(guard);
+
+        fs::remove_dir_all(first_root).unwrap();
+        fs::remove_dir_all(replacement_root).unwrap();
     }
 
     #[test]

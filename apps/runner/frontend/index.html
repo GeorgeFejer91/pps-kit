@@ -90,8 +90,10 @@
                   <div class="section-heading"><div><p class="eyebrow">Package</p><h2>Session Package</h2></div><span id="package-badge" class="badge">Unverified</span></div>
                   <p id="package-label" class="subtle">No package loaded.</p>
                   <button id="select-session-manifest" class="button button-primary" type="button">Choose prepared session manifest</button>
+                  <button id="inspect-prepared-execution" class="button" type="button" disabled>Compile and inspect Rust schedule</button>
                   <button id="prepare-demo-button" class="button" type="button" data-action="package.prepare_demo">Prepare deterministic validation demo</button>
                   <p id="package-detail" class="safety-copy">The native verifier checks the V1 manifest, ordered block files, source hashes, and trial counts before adoption.</p>
+                  <p id="execution-inspection-detail" class="safety-copy">Schedule inspection is unavailable until a real prepared session is selected.</p>
                   <ol id="package-block-list" class="package-block-list" aria-label="Verified package blocks"></ol>
                   <div class="inline-actions">
                     <button class="button" type="button" data-action="target.arm">Arm local target</button>
@@ -126,6 +128,8 @@
                   <div><dt>Package part</dt><dd id="package-part">—</dd></div>
                   <div><dt>Prepared blocks</dt><dd id="package-block-count">—</dd></div>
                   <div><dt>Execution mode</dt><dd id="package-mode">—</dd></div>
+                  <div><dt>Rust schedule</dt><dd id="execution-inspection-status">Not compiled</dd></div>
+                  <div><dt>Scheduled events</dt><dd id="execution-event-count">—</dd></div>
                   <div><dt>Revision</dt><dd id="revision">0</dd></div>
                   <div><dt>Audit events</dt><dd id="audit-events">0</dd></div>
                 </dl>
@@ -140,7 +144,8 @@
             <section class="panel stack">
               <div class="section-heading"><div><p class="eyebrow">Acquisition</p><h2>Data Logging</h2></div><span class="badge">Target-owned</span></div>
               <div class="check-list read-only-list">
-                <label><input type="checkbox" checked disabled> Semantic runner event log</label>
+                <label><input type="checkbox" checked disabled> Bounded in-memory semantic audit preview</label>
+                <label><input type="checkbox" disabled> Durable scientific event log</label>
                 <label><input type="checkbox" disabled> Lab Streaming Layer mirror</label>
                 <label><input type="checkbox" disabled> Multichannel audio evidence</label>
                 <label><input type="checkbox" disabled> Physical capture evidence</label>

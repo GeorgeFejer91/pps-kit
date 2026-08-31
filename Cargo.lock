@@ -2578,6 +2578,7 @@ dependencies = [
  "pps-brsp",
  "pps-contracts",
  "pps-runner-core",
+ "pps-runner-execution",
  "pps-session-package",
  "serde",
  "serde_json",
@@ -2608,6 +2609,16 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 2.0.20",
+]
+
+[[package]]
+name = "pps-runner-execution"
+version = "0.1.0"
+dependencies = [
+ "csv",
+ "serde",
+ "serde_json",
+ "sha2",
 ]
 
 [[package]]

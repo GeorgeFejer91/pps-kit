@@ -43,9 +43,33 @@ The implementation is split into these boundaries:
   negotiation, safe epochs, and sequence guards.
 - `packages/pps-runner-core/`: pure target-authoritative state reducer with no
   Tauri, Android, UI, filesystem, network, or audio dependency.
+- `packages/pps-runner-execution/`: pure sample-schedule compiler, half-open
+  cursor, and cumulatively bounded native event ledger. It has no Tauri,
+  browser, network, or audio-device dependency.
 - `apps/runner/`: Tauri desktop preview and the shared multi-page browser UI.
 - `apps/quest-runner/`: native Kotlin/Meta Spatial SDK immersive shell with a
   Rust `cdylib` through JNI. Tauri is deliberately not the Quest renderer.
+
+### RustDesk reference boundary
+
+RustDesk is an architectural reference, not a PPS dependency or wire protocol.
+The reviewed source is pinned at
+[`03a7fc5992069cc5bc9f7c36b872483dddf4f472`](https://github.com/rustdesk/rustdesk/tree/03a7fc5992069cc5bc9f7c36b872483dddf4f472).
+Useful patterns are its separation of rendezvous, direct/relayed connections,
+per-session services, platform-specific input adapters, receipt timestamps,
+timeouts, and stale-session cleanup. PPS applies those ideas to a much smaller
+semantic-control surface: VDO/WebSocket remain transport adapters, one bounded
+native authority owner serializes commands, and platform output adapters stay
+behind Rust traits.
+
+RustDesk's raw keyboard/mouse protocol is deliberately not adopted. A browser
+cannot address every app function or inject generic input; it requests only
+closed BRSP actions that `RunnerCore` authorizes. RustDesk also uses unbounded
+channels in parts of its connection path, which are unsuitable for experiment
+authority. PPS requires bounded queues, explicit queue-full failure, generation
+fencing, target-local arming, expected revisions, and target-owned deadman
+leases. RustDesk is AGPL-3.0, so no source is copied or vendored into the MIT PPS
+Kit; only independently implemented architectural lessons and tests are used.
 
 ## Semantic remote-control contract
 
@@ -95,7 +119,7 @@ the snapshot.
 ## Desktop preview
 
 The desktop app uses Tauri v2 and a plain Vite/ES-module frontend. Tauri exposes
-six local/configuration commands plus four remote-session commands: claim,
+seven local/configuration/inspection commands plus four remote-session commands: claim,
 renew, dispatch, and revoke. Those four commands are restricted to the bundled
 `main` WebView and preserve remote origin, negotiated scopes, the exact owner
 token, canonical control sequence, and the native five-second watchdog. VDO
@@ -125,6 +149,25 @@ rooted spellings retain native Python behavior; reliable relocation requires a
 future versioned format.
 The retained receipt must be reverified at the future execution boundary to
 close the filesystem time-of-check/use gap.
+
+The native **Compile Rust schedule inspection** operation already performs that
+reverification and compiles the retained block CSVs in manifest order. It
+matches curated Python oracle fixtures for event order, explicit-sample versus
+seconds precedence, ties-to-even conversion, signed derived samples, and
+half-open buffer consumption. The native receipt binds every prepared CSV
+digest, and compilation hashes and parses the same bounded byte snapshot, so a
+file replacement between reverification and parsing fails closed. The package
+manifest, block count, known strings/paths, metadata shape, and cumulative
+metadata are bounded before retention. Per-block and package-wide schedules plus the
+append-only native ledger have cumulative encoded-byte budgets; exceeding a
+bound fails closed. Raw V1 event payloads can contain native paths and never
+cross Tauri IPC. The WebView receives only path-free counts and block summaries
+explicitly marked `schedule-only`, `unqualified`, and `executable = false`.
+This proves compatibility and resource bounds, not playback, response timing,
+or scientific execution readiness. WAV sample-rate probing remains a parity
+gate before this compiler can feed legacy execution. Prepared WAV content is
+deliberately not bound by this schedule-only operation; native audio preload
+must bind and decode those bytes before arming is possible.
 
 Local-only startup does not bind a LAN socket. The first explicit **Enable
 phone remote** action reserves `0.0.0.0` and launches the companion server; a
@@ -262,32 +305,61 @@ Runner platform.
 
 ## Release and migration policy
 
-The existing PyInstaller Runner and V1 component manifests remain unchanged.
+The existing PyInstaller Runner and V1 component manifests remain unchanged
+during migration.
 A Tauri shell by itself does not make the installation small while it still
 ships the Python/PySide compatibility engine. The current Go bootstrapper is
 already lightweight; the substantial size reduction comes only as validated
 Python functionality is replaced or moved behind optional compatibility
-components. The intended V2 end state is a Python-free default Runner; Python
-is retained during migration as the behavioral/scientific oracle and may exist
-temporarily as an optional supervised compatibility worker, not as the final
-authority.
+components. The V2 release is unconditionally Python-free. Python may remain
+only in development and CI as a golden/differential oracle while Rust parity is
+proved; it must not ship as a worker, sidecar, fallback authority, runtime
+dependency, PySide/PyInstaller payload, or control/timing path.
 
 The migration order is:
 
 1. Freeze versioned contracts and differential fixtures against the Python
    Runner.
 2. Port package verification and the session state machine. V1 prepared-package
-   verification/adoption is now native; execution scheduling is still open.
+   verification/adoption and non-executable schedule inspection are now native;
+   the bounded execution owner is still open.
    Before promotion, add early manifest/allocation bounds, legacy `~` path
    differential fixtures, summary recovery after WebView reload, and a v2
    content-addressed prepared-asset contract.
-3. Add a bounded supervised compatibility worker for still-Python behavior.
-4. Port logging and artifact writers with golden-output comparison.
-5. Port target-native audio, response, tactile, and acquisition backends.
-6. Qualify each Windows, macOS, Linux, phone, and Quest hardware route before
+3. Add one bounded native authority queue and dedicated monotonic Rust
+   execution owner for instruction/start/pause/resume/stop effects. Keep
+   network I/O async and keep deadline-sensitive work out of the WebView and
+   unbounded Tauri/Tokio queues.
+4. Port target-native audio/output routing, response timestamping, tactile, and
+   acquisition boundaries, then qualify them with physical timing evidence.
+5. Port durable event/LSL evidence, artifact writers, persistence/recovery, and
+   the normal post-run review/analysis required by the Runner, using golden
+   outputs only as temporary Python-oracle evidence.
+6. Instrument remote control in one process-monotonic domain where possible:
+   frame receipt, proof/scope/revision validation, authority enqueue, reducer
+   application, effect initiation, and acknowledgement emission. Report p50,
+   p95, p99, and worst observed independently; Rust alone is not latency
+   evidence.
+7. Qualify each Windows, macOS, Linux, phone, and Quest hardware route before
    making scientific timing claims.
-7. Add host-native signed installers, updater manifests, rollback policy, and
+8. Pass the Python-free Windows gate on a clean installation: adopt and run a
+   representative real package, emit required artifacts/evidence, support
+   local and browser control, shut down/recover, and complete normal review
+   without Python, PySide, PyInstaller, or a Python worker. Then remove the V1
+   compatibility packaging from the shipped Runner.
+9. Add host-native signed installers, updater manifests, rollback policy, and
    platform-specific release inventory before promoting the preview to V2.
+
+`RunnerCore` remains the native BRSP application-target authority. Local Tauri
+and authenticated remote commands must converge on its typed transition path
+after origin-specific authorization. VDO/WebSocket/BRSP layers remain adapters,
+`RunnerSnapshot` remains an explicit public projection, and package replacement
+must disarm, revoke/rotate authority, and make late owners inert. The PPS
+profile is command-only; do not add a latest-intent lane without a genuine
+complete-current-value control. A JavaScript application-target reference may
+be used as a conformance checklist, but it must not be copied into Tauri or
+become a second reducer. Record its revision only after the reference changes
+are committed.
 
 Compilation is not timing parity. macOS CoreAudio, Linux PipeWire/JACK/ALSA,
 Quest audio/controller haptics, and browser phone scheduling each require their

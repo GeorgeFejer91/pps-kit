@@ -41,6 +41,10 @@ test("ordinary-browser preview supports deterministic local clicks and fails rem
     () => adapter.selectPreparedSession(),
     /available only in the native Tauri runner/iu,
   );
+  await assert.rejects(
+    () => adapter.inspectPreparedExecution(),
+    /available only in the native Tauri runner/iu,
+  );
 });
 
 test("Tauri adapter sends exact remote-owner DTOs and keeps LAN activation explicit", async () => {
@@ -61,6 +65,7 @@ test("Tauri adapter sends exact remote-owner DTOs and keeps LAN activation expli
 
   await adapter.configureRemote({ enabled: true, allowAbort: false, lanListener: false });
   await adapter.selectPreparedSession();
+  await adapter.inspectPreparedExecution();
   await adapter.remoteSessionClaim({
     sessionId: "session_12345678",
     controllerId: "controller_12345678",
@@ -86,6 +91,7 @@ test("Tauri adapter sends exact remote-owner DTOs and keeps LAN activation expli
   assert.deepEqual(calls, [
     ["configure_remote", { enabled: true, allowAbort: false, lanListener: false }],
     ["select_prepared_session", undefined],
+    ["inspect_prepared_execution", undefined],
     ["remote_session_claim", { request: {
       sessionId: "session_12345678",
       controllerId: "controller_12345678",

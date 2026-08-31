@@ -29,6 +29,9 @@ export function createTauriRunnerAdapter({ invokeFn = invoke } = {}) {
     selectPreparedSession() {
       return call(invokeFn, "select_prepared_session");
     },
+    inspectPreparedExecution() {
+      return call(invokeFn, "inspect_prepared_execution");
+    },
     remoteStatus() {
       return call(invokeFn, "remote_status");
     },

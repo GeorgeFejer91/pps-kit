@@ -53,6 +53,9 @@ Candidate V2 boundaries coexist with, but do not replace, that V1 path:
   `packages/pps-session-package/`. Its native receipt owns resolved paths and
   digests but is deliberately non-serializable; only its path-free summary may
   cross Tauri IPC.
+- Pure schedule-compatibility and bounded-ledger layer:
+  `packages/pps-runner-execution/`. Raw sample events can retain V1 path-bearing
+  payloads and stay native; only path-free schedule summaries may cross IPC.
 - Optional experimental Quest/Spatial SDK application context and JNI adapter:
   `apps/quest-runner/`.
 
@@ -62,7 +65,10 @@ native calls. The browser phone experiment is itself a target and therefore
 owns a strict JavaScript reducer mirroring the closed action/state contract; it
 still needs Rust-to-JavaScript differential fixtures before promotion. The
 validated Python Runner remains the scientific compatibility oracle while
-functionality is migrated incrementally.
+functionality is migrated incrementally. Python is not part of the final V2
+module graph: no shipped worker, sidecar, fallback authority, timing path,
+PySide, PyInstaller, or interpreter is allowed after the Python-free release
+gate passes.
 
 The Tauri prepared-session chooser is a no-argument command restricted to the
 bundled main window. Rust owns the operating-system picker, verification, and
@@ -73,6 +79,15 @@ adapter is present. The Python/Rust differential status probe lives in
 as its own Windows/macOS/Linux Runner-preview CI matrix in addition to the Rust
 crate matrix. Picker/verification is native single-flight; a retained verified
 plan cannot be replaced by the demo action.
+
+The no-argument `inspect_prepared_execution` Tauri command reverifies that
+retained receipt, compiles every block in manifest order, and generation-fences
+the cached native schedules. The WebView sees only a bounded path-free summary
+marked `schedule-only`, `unqualified`, and non-executable. This is an
+inspection/conformance boundary, not an audio or experiment execution adapter.
+Each prepared CSV is compiled from the exact bounded bytes matched to its
+selection-time digest; WAV identity remains a future audio-preload boundary.
+Its Python differential probe remains CI-only while parity is being proven.
 
 Android/phone execution is not a V1 Runner module. The earlier Python/Kotlin
 phone source, bridges, tests, protocols, and CLIs remain under

@@ -301,6 +301,9 @@ and `packages/pps-runner-core/` provide the shared closed contracts,
 authentication primitives, and target-authoritative reducer. The current
 Python/PySide Focus Mode remains the production and scientific oracle until
 each migrated operation passes differential fixtures and hardware validation.
+It is temporary development evidence only for V2: the completed Runner must
+not ship a Python interpreter, Python worker/sidecar, PySide, PyInstaller
+payload, fallback authority, or Python control/timing path.
 
 The first real-package migration slice is `packages/pps-session-package/`, a
 pure Rust, read-only verifier for `pps-run-session.v1`. It mirrors the Python
@@ -322,6 +325,29 @@ scheduler/audio adapter exists, and the retained package must be reverified at
 that final use boundary. V1 absolute-path semantics remain source-host native;
 cross-OS relocation needs a future relative/content-addressed schema rather
 than silently reinterpreting V1 paths.
+
+The next native compatibility slice is `packages/pps-runner-execution/`. It
+compiles each retained prepared-block CSV into the V1-compatible sorted
+sample-event schedule, preserves Python's explicit-sample precedence,
+ties-to-even seconds conversion, signed derived samples, trigger ordering, and
+half-open buffer cursor behavior, and provides a bounded append-only native
+event ledger. Per-record bounds are supplemented by cumulative encoded-byte
+budgets so a formally valid input cannot multiply into unbounded retained
+memory. The selected native receipt records the digest of each bounded prepared
+CSV, and inspection hashes and parses the same single byte snapshot so an
+in-place replacement cannot inherit an old package identity. Top-level manifest
+bytes, block count, known strings/paths, metadata shape, and cumulative metadata
+are also bounded before retention. Raw schedule events intentionally remain native because their V1
+payloads can contain filesystem paths; Tauri exposes only a path-free,
+`schedule-only`, `unqualified`, `executable = false` inspection summary after
+reverifying the retained receipt and checking its package generation. The
+Python/Rust schedule oracle is a temporary CI conformance test, not a runtime
+dependency. Missing or ragged manifests fail closed in Rust even where legacy
+Python parsing was more permissive; those safety deviations and the curated
+oracle coverage must not be described as absolute parity. WAV sample-rate
+probing and content binding remain required at the future audio preload boundary
+before claiming legacy execution parity; this non-executable inspection does
+not claim to verify prepared WAV bytes.
 
 Remote control means an exhaustive registry of safe semantic outcomes, never
 arbitrary DOM events, native functions, Android intents, shell/file operations,
@@ -399,7 +425,14 @@ unchanged. A Tauri shell is not itself a small distribution while a full
 Python/PySide compatibility payload is still bundled. Cross-platform release
 promotion requires native signed installers, platform manifests, rollback and
 update ownership, and timing/acquisition evidence for each Windows, macOS,
-Linux, phone, and Quest backend.
+Linux, phone, and Quest backend. The desktop V2 release gate is explicitly
+Python-free: a clean Windows installation must adopt and run a representative
+real package, produce the required evidence/artifacts, accept local and browser
+companion control, recover cleanly, and complete normal post-run review without
+Python, PySide, PyInstaller, or a Python worker. Rust must own the bounded
+authority queue, monotonic scheduler, audio/output and response timestamp
+boundaries, instruction/run transitions, LSL/evidence/persistence, recovery,
+and required review/analysis before the compatibility package is retired.
 
 ## Privacy And Publication Boundary
 

@@ -4,6 +4,7 @@ members = [
     "packages/pps-contracts",
     "packages/pps-brsp",
     "packages/pps-runner-core",
+    "packages/pps-runner-execution",
     "packages/pps-session-package",
     "apps/runner/src-tauri",
     "apps/quest-runner/native/pps-quest-core",

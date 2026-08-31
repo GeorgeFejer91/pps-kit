@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-inspect-prepared-execution"
+description = "Enables the inspect_prepared_execution command without any pre-configured scope."
+commands.allow = ["inspect_prepared_execution"]
+
+[[permission]]
+identifier = "deny-inspect-prepared-execution"
+description = "Denies the inspect_prepared_execution command without any pre-configured scope."
+commands.deny = ["inspect_prepared_execution"]
