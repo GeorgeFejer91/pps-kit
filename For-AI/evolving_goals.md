@@ -2293,7 +2293,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   Only an exact Pong strictly before deadline is accepted, and every selected
   inbound frame is re-fenced before semantic work. Ping/Pong never renews the
   actor-owned five-second lease or enters command-latency samples. Desktop and
-  relay upgrades have independent eight/32 permit budgets held through bounded
+  relay sockets request `TCP_NODELAY = true` immediately after accept and
+  before Axum handling; failures are counted as a saturating transport
+  diagnostic without affecting authority. This is not evidence of lower
+  latency until a release-build A/B qualification records p50/p95/p99/worst.
+  Desktop and relay upgrades have independent eight/32 permit budgets held
+  through bounded
   close. Pong/write/EOF cleanup awaits an exact-owner revoke through the actor's
   safety reserve; Drop/deadman remain fallbacks. The desktop path adds no queue.
   The relay is bounded to 32 queued reliable frames, at most one writer-held
@@ -2463,6 +2468,21 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   callback records. Faults silence the current buffer. Final-frame submission
   is not device drain or physical onset, and no persistent platform stream,
   evidence adapter, or execution readiness exists yet.
+- The next reservation-only device slice is now isolated in
+  `packages/pps-runner-audio-cpal/`: exact CPAL 0.18.2, default features off,
+  one named owner for Host/Device/Stream, capped inventory, unforgeable
+  service-bound exact F32 selections, silence-only raw callbacks, bounded
+  two-phase reservation receipt transfer, fair safety admission, and explicit
+  release/shutdown. Callback/fixed-buffer work is capped at 4,096 frames and
+  selected channels at four. It compiles the WASAPI/CoreAudio/ALSA paths (CoreAudio
+  requires macOS 14.2; Linux CI installs `libasound2-dev`) but has no actor,
+  WebView, remote, media, arm, Start, or executable integration and no physical
+  device/timing evidence. Exact CPAL format/rate/channel/fixed-buffer requests
+  are not physical-path attestations, and driver calls remain synchronously
+  uncancellable (including backends that ignore CPAL's build timeout); a
+  killable helper process remains a hardware-soak-driven future decision. The
+  next actor handshake must stage against the checked next run generation and
+  retire final large PCM/plan Arcs off actor before executable output.
 - Treat the transport-independent BRSP application-target reference as a
   qualification checklist for the existing Rust seam, not a replacement.
   `RunnerCore` stays the single authority, transports remain adapters, grants

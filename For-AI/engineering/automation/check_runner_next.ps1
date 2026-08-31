@@ -11,11 +11,11 @@ try {
     if ($Mode -eq "Core") {
         cargo fmt --all -- --check
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        cargo check --locked -p pps-contracts -p pps-brsp -p pps-runner-core -p pps-runner-audio -p pps-runner-execution -p pps-session-package
+        cargo check --locked -p pps-contracts -p pps-brsp -p pps-runner-core -p pps-runner-audio -p pps-runner-audio-cpal -p pps-runner-execution -p pps-session-package
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        cargo clippy --locked -p pps-contracts -p pps-brsp -p pps-runner-core -p pps-runner-audio -p pps-runner-execution -p pps-session-package --all-targets -- -D warnings
+        cargo clippy --locked -p pps-contracts -p pps-brsp -p pps-runner-core -p pps-runner-audio -p pps-runner-audio-cpal -p pps-runner-execution -p pps-session-package --all-targets -- -D warnings
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        cargo test --locked -p pps-contracts -p pps-brsp -p pps-runner-core -p pps-runner-audio -p pps-runner-execution -p pps-session-package
+        cargo test --locked -p pps-contracts -p pps-brsp -p pps-runner-core -p pps-runner-audio -p pps-runner-audio-cpal -p pps-runner-execution -p pps-session-package
         exit $LASTEXITCODE
     }
 

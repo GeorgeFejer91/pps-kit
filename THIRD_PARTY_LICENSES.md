@@ -159,6 +159,20 @@ Hound parses the narrowly accepted PCM16 prepared-WAV format in the native
 Runner audio-preparation seam. It is resolved through `Cargo.lock`; its source
 is not vendored in this repository.
 
+## CPAL
+
+- Project: Cross-Platform Audio Library (CPAL)
+- Repository: https://github.com/RustAudio/cpal
+- Version: `0.18.2` (exactly pinned in the Rust workspace)
+- License: Apache License 2.0
+- Consumer: `packages/pps-runner-audio-cpal/`
+
+CPAL provides the reservation-only native output adapter for Windows WASAPI,
+macOS CoreAudio, and Linux ALSA. Workspace dependency defaults are disabled, so
+optional ASIO, JACK, PipeWire, PulseAudio, and realtime-priority features are
+not enabled. It is resolved through `Cargo.lock`; its source is not vendored in
+this repository.
+
 ## Tauri and Meta Spatial SDK build dependencies
 
 The candidate desktop application resolves Tauri v2 and its Rust dependencies

@@ -46,6 +46,10 @@ The implementation is split into these boundaries:
 - `packages/pps-runner-execution/`: pure sample-schedule compiler, half-open
   cursor, and cumulatively bounded native event ledger. It has no Tauri,
   browser, network, or audio-device dependency.
+- `packages/pps-runner-audio/`: verified PCM decode plus the device-independent
+  playback plan and callback renderer.
+- `packages/pps-runner-audio-cpal/`: reservation-only WASAPI/CoreAudio/ALSA
+  output owner; it is not connected to experiment media or authority yet.
 - `apps/runner/`: Tauri desktop preview and the shared multi-page browser UI.
 - `apps/quest-runner/`: native Kotlin/Meta Spatial SDK immersive shell with a
   Rust `cdylib` through JNI. Tauri is deliberately not the Quest renderer.
@@ -75,7 +79,12 @@ each handshake read has a 12-second deadline, every WebSocket write has a
 two-second deadline behind a 64 KiB maximum socket write buffer, graceful close
 has a one-second deadline, and a
 connection-local Ping every two seconds requires its exact eight-byte Pong
-within three seconds. These are transport-health limits, not BRSP messages or
+within three seconds. Every accepted companion TCP socket also requests
+`TCP_NODELAY = true` before Axum begins HTTP/WebSocket handling; failure only
+increments a saturating transport diagnostic and never changes admission or
+runner authority. This is an independently implemented transport hint, not a
+latency result: release-build A/B measurements are still required before
+claiming an improvement. These are transport-health limits, not BRSP messages or
 application-command samples, and they never renew the separate five-second
 target-owned controller lease. No RustDesk code, schema, raw-input surface, or
 AGPL implementation text was copied or translated.
@@ -282,9 +291,56 @@ inert. Preparation rejects more than 62 metadata events in any accepted
 an oversized/malformed callback, or an internal invariant fault silences the
 entire current buffer and latches a fault. `FinalFrameSubmitted` means only
 that the last source frame entered a software callback buffer—not device drain,
-DAC onset, physical audio arrival, or tactile onset. No platform stream or
-scientific timing qualification exists yet, and a future output owner must
-retire/drop the heap-backed engine away from the real-time callback thread.
+DAC onset, physical audio arrival, or tactile onset. No platform stream is
+connected to this renderer and no scientific timing qualification exists yet;
+a future executable adapter must retire/drop the heap-backed engine away from
+the real-time callback thread.
+
+`packages/pps-runner-audio-cpal/` is the separate reservation-only platform
+adapter. It pins CPAL 0.18.2 with default features disabled and keeps the CPAL
+host, selected device, and persistent stream on the named
+`pps-audio-output` owner thread. Its bounded native Rust API can enumerate a
+capped output inventory, derive an exact service-identity/generation-fenced F32
+selection, create and play silence, wait for a finite callback warm-up, report
+bounded status/fault state, and release or shut down. The inventory and
+selection are native-only capabilities rather than serializable DTOs. Failed
+inventory refresh invalidates old ordinals before the backend registry can
+change, and reservation receipt delivery uses a bounded two-phase transfer so
+a caller timeout cannot publish an unowned stream. A failed rollback remains
+internally fenced and faulted until shutdown confirms release.
+
+The raw CPAL callback only clears bytes and updates saturating atomics; it does
+not allocate, lock, log, format, or use CPAL's typed callback wrapper with its
+panic branch. Before accessing callback bytes it requires exact F32, one to
+four channels, a whole nonempty frame shape, and at most 4,096 frames; a
+mismatch leaves CPAL's prefilled silence untouched and atomically faults. The
+adapter requests an exact CPAL sample rate, channel count,
+F32 format, and optional fixed buffer size and performs no app-level
+resampling. Those requests are not proof of the achieved physical device
+buffer, rate, or channel path: an OS shared-mode mixer may still convert or
+mix downstream. There is no device mirroring, ASIO, JACK, PipeWire, PulseAudio,
+or realtime-priority feature. The compiled targets are
+Windows WASAPI, macOS CoreAudio, and Linux ALSA (`libasound2-dev` in CI). CPAL
+0.18.2's CoreAudio backend requires macOS 14.2 or newer.
+
+This adapter has no Tauri, WebView, BRSP, filesystem, Python, serialization,
+RunnerCore, experiment-media, Start, arm, or executable-output integration.
+No physical device smoke test, callback-to-DAC timing qualification, media
+playback, or scientific execution readiness is claimed. Host creation,
+enumeration, stream construction, `play`, and stream destruction are
+synchronous driver calls and cannot be cancelled in-process; bounded queues,
+reply deadlines, and warm-up deadlines therefore do not make a pathological
+driver call time-bounded. CPAL's stream-build timeout is not honored by every
+backend. Hardware soak testing must decide whether accepting
+that in-process device-owner risk is sufficient or whether a later killable
+Rust helper-process boundary is required.
+
+The next actor handshake must not play the current preflight plan directly:
+`PartStart` advances `run_generation` and invalidates that plan. Reservation
+must stage the plan under the checked next generation (or an equivalent
+reservation fence) and atomically commit the same generation before arm.
+Potentially large final PCM/plan `Arc` destruction must also move off the
+authority actor before an executable adapter can consume it.
 
 Local-only startup does not bind a LAN socket. The first explicit **Enable
 phone remote** action reserves `0.0.0.0` and launches the companion server; a

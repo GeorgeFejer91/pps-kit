@@ -12,6 +12,7 @@ on:
       - "packages/pps-contracts/**"
       - "packages/pps-runner-core/**"
       - "packages/pps-runner-audio/**"
+      - "packages/pps-runner-audio-cpal/**"
       - "packages/pps-runner-execution/**"
       - "packages/pps-session-package/**"
       - "packages/pps-resources/assets/app/pps_toolkit_icon.*"
@@ -32,6 +33,7 @@ on:
       - "packages/pps-contracts/**"
       - "packages/pps-runner-core/**"
       - "packages/pps-runner-audio/**"
+      - "packages/pps-runner-audio-cpal/**"
       - "packages/pps-runner-execution/**"
       - "packages/pps-session-package/**"
       - "packages/pps-resources/assets/app/pps_toolkit_icon.*"
@@ -58,6 +60,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.88.0
         with:
           components: rustfmt, clippy
+      - name: Install Linux native-audio prerequisites
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev
       - name: Check and test transport-neutral Rust crates
         shell: pwsh
         run: ./For-AI/engineering/automation/check_runner_next.ps1 -Mode Core

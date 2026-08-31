@@ -2,7 +2,10 @@ use std::{
     collections::{BTreeSet, HashMap},
     future::Future,
     path::PathBuf,
-    sync::Arc,
+    sync::{
+        atomic::{AtomicU64, Ordering},
+        Arc,
+    },
     time::{Duration, Instant},
 };
 
@@ -14,6 +17,7 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
     routing::get,
+    serve::ListenerExt,
     Router,
 };
 use futures_util::SinkExt;
@@ -52,6 +56,26 @@ const MAX_RELAY_MESSAGES_PER_SECOND: u32 = 120;
 const RELAY_CONTROL_QUEUE_CAPACITY: usize = 32;
 const MAX_CONCURRENT_DESKTOP_SESSIONS: usize = 8;
 const MAX_CONCURRENT_RELAY_SESSIONS: usize = MAX_RELAY_ROOMS * 2;
+
+/// Best-effort transport diagnostic only. Failing to set this performance hint
+/// must not change connection admission or semantic runner authority.
+static TCP_NODELAY_CONFIGURATION_FAILURES: AtomicU64 = AtomicU64::new(0);
+
+fn configure_accepted_tcp_stream(stream: &mut tokio::net::TcpStream) {
+    if stream.set_nodelay(true).is_err() {
+        let _ = TCP_NODELAY_CONFIGURATION_FAILURES.fetch_update(
+            Ordering::Relaxed,
+            Ordering::Relaxed,
+            |count| Some(count.saturating_add(1)),
+        );
+    }
+}
+
+fn configure_companion_listener(
+    listener: tokio::net::TcpListener,
+) -> impl axum::serve::Listener<Io = tokio::net::TcpStream, Addr = std::net::SocketAddr> {
+    listener.tap_io(configure_accepted_tcp_stream)
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum TransportDeadline {
@@ -270,6 +294,7 @@ pub async fn serve(
 ) -> Result<(), String> {
     let listener = tokio::net::TcpListener::from_std(listener)
         .map_err(|error| format!("could not start the companion server: {error}"))?;
+    let listener = configure_companion_listener(listener);
     let state = ServerState {
         runtime,
         relay: Arc::new(AsyncMutex::new(RelayRegistry::default())),
@@ -1630,6 +1655,39 @@ mod tests {
             runtime.snapshot_async().await.unwrap().run.phase,
             RunnerPhase::Running
         );
+    }
+
+    #[tokio::test]
+    async fn accepted_loopback_stream_enables_tcp_nodelay() {
+        let listener = tokio::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, 0))
+            .await
+            .unwrap();
+        let address = listener.local_addr().unwrap();
+        let client = tokio::spawn(tokio::net::TcpStream::connect(address));
+        let (mut accepted, _) = listener.accept().await.unwrap();
+        accepted.set_nodelay(false).unwrap();
+
+        configure_accepted_tcp_stream(&mut accepted);
+
+        assert!(accepted.nodelay().unwrap());
+        drop(client.await.unwrap().unwrap());
+    }
+
+    #[tokio::test]
+    async fn companion_listener_configures_every_accepted_stream() {
+        let listener = tokio::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, 0))
+            .await
+            .unwrap();
+        let address = listener.local_addr().unwrap();
+        let mut listener = configure_companion_listener(listener);
+
+        for _ in 0..2 {
+            let client = tokio::spawn(tokio::net::TcpStream::connect(address));
+            let (accepted, _) = axum::serve::Listener::accept(&mut listener).await;
+
+            assert!(accepted.nodelay().unwrap());
+            drop(client.await.unwrap().unwrap());
+        }
     }
 
     #[test]

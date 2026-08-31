@@ -106,7 +106,8 @@ hits without decoding, evicts a different block before another allocation,
 and exposes only a `pcm-and-output-plan-cache`, `outputPlanPrepared = true`,
 closed proposed route/event-count, `unqualified`, non-executable summary to the
 bundled main window. The local no-argument gesture is absent from remote actions
-and the companion page. No platform output backend or output arm is present, so
+and the companion page. No platform output backend or output arm is integrated
+with this actor, so
 real plans remain unarmable and unqualified. Before executable output,
 potentially large final PCM/plan releases must move off the authority actor;
 current invalidation can drop up to the bounded cache maximum there.
@@ -117,9 +118,21 @@ playback plan, closed 2/3/4-channel PPS routes, a generation-fenced render
 engine, caller-owned output/event buffers, 4,096-frame and 64-total-event
 callback ceilings, sample-zero and final-frame-submitted records, pause cursor
 freeze, tail zero-fill, and fail-closed callback faults. This is not a device
-backend: the future persistent stream owner must perform prepare/reserve/arm,
-timestamp mapping, evidence draining, and off-callback engine destruction.
+backend: a future executable adapter must connect the reservation owner and
+perform prepare/reserve/arm, timestamp mapping, evidence draining, and
+off-callback engine destruction.
 Its Python differential probe remains CI-only while parity is being proven.
+
+- Reservation-only native device adapter:
+  `packages/pps-runner-audio-cpal/`. CPAL 0.18.2 is pinned with default
+  features disabled. One named owner thread lazily owns Host/Device/Stream and
+  exposes capped inventory, service-bound exact F32 selection, silence warm-up,
+  status/fault, release, and shutdown through bounded native Rust queues. It
+  has no Tauri, BRSP, filesystem, serde, Python, RunnerCore, experiment-media,
+  arm, or executable-output dependency. Windows WASAPI, macOS CoreAudio
+  (minimum macOS 14.2), and Linux ALSA are the compiled backends; hardware
+  smoke/timing qualification and actor integration remain open. Selected
+  channels are capped at four and callbacks/fixed buffers at 4,096 frames.
 
 All desktop authority requests enter one bounded FIFO mailbox with capacity 64:
 ordinary work is capped at 56 so eight slots remain available to local safety
@@ -128,7 +141,9 @@ fencing; transport lifecycle threads do not own another semantic watchdog or
 reducer. `remote.rs` separately owns finite socket read/write/close deadlines,
 strict-before-deadline exact-payload Ping/Pong health, and independent
 pre-upgrade permit pools (eight desktop, 32 relay), with the underlying socket
-write buffer capped at 64 KiB. Inbound frames are deadline-fenced before
+write buffer capped at 64 KiB. Accepted TCP sockets request `TCP_NODELAY`
+before Axum handling; configuration failure is a saturating diagnostic only,
+and no latency benefit is claimed without release A/B evidence. Inbound frames are deadline-fenced before
 semantic work. Those transport frames cannot renew remote authority or enter
 command diagnostics. Post-claim exits await exact-owner safety-reserve cleanup.
 Desktop commands remain inline with no application queue; the laboratory relay

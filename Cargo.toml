@@ -5,6 +5,7 @@ members = [
     "packages/pps-brsp",
     "packages/pps-runner-core",
     "packages/pps-runner-audio",
+    "packages/pps-runner-audio-cpal",
     "packages/pps-runner-execution",
     "packages/pps-session-package",
     "apps/runner/src-tauri",
@@ -19,6 +20,7 @@ rust-version = "1.88"
 
 [workspace.dependencies]
 base64 = "0.22"
+cpal = { version = "=0.18.2", default-features = false }
 csv = "1"
 hmac = "0.12"
 hound = "=3.5.1"

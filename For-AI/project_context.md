@@ -357,8 +357,9 @@ main-window-only no-argument preload now decodes off the authority thread and
 lets that actor cache exactly one block only when package/run generations,
 fingerprint, ordinal, verified WAV receipt, and compiled sample rate still
 match. Exact cache hits do not decode again; a new block evicts the prior cache
-before another buffer allocation. The path-free result remains
-`pcm-cache-only`, `unqualified`, and non-executable. This seam does not
+before another buffer allocation. The accepted path-free result is
+`pcm-and-output-plan-cache`, reports a closed proposed route and scheduled-event
+count, and remains `unqualified` and non-executable. This seam does not
 implement resampling, device output, routing, arming, or scientific timing
 qualification, and it is not a remote/companion action.
 Legacy schedules with no sample rate in block metadata or CSV still require
@@ -369,8 +370,28 @@ source cursor, pause freeze, tail zero-fill, and caller-owned buffers. It caps
 accepted callbacks at 4,096 frames and 62 metadata events plus engine-owned
 sample-zero/final-frame records; over-density is rejected during preparation,
 and callback overflow/fault produces whole-buffer silence. The terminal record
-means software frame submission only, never physical drain or onset. There is
-still no platform stream, device qualification, or real-package arming.
+means software frame submission only, never physical drain or onset. No
+platform stream is connected to this renderer, and device qualification and
+real-package arming remain absent.
+
+The reservation-only `packages/pps-runner-audio-cpal/` adapter pins CPAL
+0.18.2 with default features disabled. A named persistent owner thread lazily
+owns the CPAL Host/Device/Stream and exposes only capped native inventory,
+service-identity/generation-fenced exact F32 selection, silence-only callback
+warm-up, bounded status/fault, release, and shutdown. Its raw callback only
+zero-fills and updates atomics after enforcing one to four channels, whole F32
+frames, and a 4,096-frame ceiling before byte access. It has no Tauri, BRSP,
+filesystem, serde, Python, RunnerCore, experiment-media, Start/arm, or
+executable-output path.
+The compiled platform backends are Windows WASAPI, macOS CoreAudio (minimum
+macOS 14.2), and Linux ALSA; no physical device or timing qualification has
+been run. Synchronous driver calls remain uncancellable in-process despite the
+bounded request/warm-up protocol, CPAL's stream-build timeout is not honored by
+every backend, and requested fixed/sample/channel values are not physical
+device attestations under an OS mixer. Future actor integration must stage the
+plan under the checked next `run_generation` before atomically committing
+Start, and must retire large final PCM/plan `Arc` values off the authority
+actor.
 
 The Tauri desktop now has one named Rust authority actor thread,
 `pps-runner-authority`. It exclusively owns `RunnerCore`, remote policy and the
