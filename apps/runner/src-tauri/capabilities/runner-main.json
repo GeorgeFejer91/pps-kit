@@ -17,6 +17,11 @@
     "allow-remote-session-renew",
     "allow-remote-session-dispatch",
     "allow-remote-session-revoke",
-    "allow-native-latency-diagnostics"
+    "allow-native-latency-diagnostics",
+    "allow-native-output-status",
+    "allow-native-output-enumerate",
+    "allow-native-output-reserve-silence",
+    "allow-native-output-release",
+    "allow-native-output-disable"
   ]
 }

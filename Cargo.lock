@@ -2760,6 +2760,7 @@ dependencies = [
  "pps-brsp",
  "pps-contracts",
  "pps-runner-audio",
+ "pps-runner-audio-cpal",
  "pps-runner-core",
  "pps-runner-execution",
  "pps-session-package",

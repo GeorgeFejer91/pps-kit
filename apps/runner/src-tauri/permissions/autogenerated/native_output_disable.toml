@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-native-output-disable"
+description = "Enables the native_output_disable command without any pre-configured scope."
+commands.allow = ["native_output_disable"]
+
+[[permission]]
+identifier = "deny-native-output-disable"
+description = "Denies the native_output_disable command without any pre-configured scope."
+commands.deny = ["native_output_disable"]

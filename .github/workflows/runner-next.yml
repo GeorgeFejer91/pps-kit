@@ -64,7 +64,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libasound2-dev
+          sudo apt-get install -y libasound2-dev pkg-config
       - name: Check and test transport-neutral Rust crates
         shell: pwsh
         run: ./For-AI/engineering/automation/check_runner_next.ps1 -Mode Core
@@ -85,7 +85,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf libasound2-dev pkg-config
       - name: Check and test the native desktop shell
         shell: pwsh
         run: ./For-AI/engineering/automation/check_runner_next.ps1 -Mode Desktop
@@ -173,6 +173,8 @@ jobs:
             file \
             libxdo-dev \
             libssl-dev \
+            libasound2-dev \
+            pkg-config \
             libayatana-appindicator3-dev \
             librsvg2-dev \
             patchelf \

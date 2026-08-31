@@ -1,5 +1,6 @@
 mod execution_owner;
 mod latency_diagnostics;
+mod native_output;
 mod prepared_audio;
 mod prepared_execution;
 mod remote;
@@ -8,6 +9,10 @@ mod runtime;
 use std::{path::PathBuf, str::FromStr};
 
 use latency_diagnostics::{LatencyRoute, LatencyStage, NativeLatencySummary, TraceOutcome};
+use native_output::{
+    NativeOutputCommandError, NativeOutputInventory, NativeOutputReleaseRequest,
+    NativeOutputReservation, NativeOutputReserveRequest, NativeOutputStatus,
+};
 use pps_contracts::{Action, Applied, AppliedStatus, RunnerSnapshot};
 use pps_session_package::{verify_prepared_session, PreparedSessionSummary, VerificationRequest};
 use prepared_audio::{prepare_verified_audio, PreparedAudioError, PreparedAudioSummary};
@@ -407,6 +412,70 @@ async fn native_latency_diagnostics(
     Ok(state.latency_summary())
 }
 
+fn require_native_output_main(
+    window: &tauri::WebviewWindow,
+) -> Result<(), NativeOutputCommandError> {
+    require_main_window(window)
+        .map_err(|error| NativeOutputCommandError::new(&error.code, &error.message))
+}
+
+#[tauri::command]
+async fn native_output_status(
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<NativeOutputStatus, NativeOutputCommandError> {
+    require_native_output_main(&window)?;
+    state.native_output_status().await
+}
+
+#[tauri::command]
+async fn native_output_enumerate(
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<NativeOutputInventory, NativeOutputCommandError> {
+    require_native_output_main(&window)?;
+    let receive = state.start_native_output_enumerate()?;
+    match tokio::time::timeout(AppRuntime::native_output_client_deadline(), receive).await {
+        Ok(Ok(result)) => result,
+        Ok(Err(_)) => Err(NativeOutputCommandError::runtime()),
+        Err(_) => Err(NativeOutputCommandError::timeout()),
+    }
+}
+
+#[tauri::command]
+async fn native_output_reserve_silence(
+    request: NativeOutputReserveRequest,
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<NativeOutputReservation, NativeOutputCommandError> {
+    require_native_output_main(&window)?;
+    let receive = state.start_native_output_reserve(request)?;
+    match tokio::time::timeout(AppRuntime::native_output_client_deadline(), receive).await {
+        Ok(Ok(result)) => result,
+        Ok(Err(_)) => Err(NativeOutputCommandError::runtime()),
+        Err(_) => Err(NativeOutputCommandError::timeout()),
+    }
+}
+
+#[tauri::command]
+async fn native_output_release(
+    request: NativeOutputReleaseRequest,
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<NativeOutputStatus, NativeOutputCommandError> {
+    require_native_output_main(&window)?;
+    state.release_native_output(request).await
+}
+
+#[tauri::command]
+async fn native_output_disable(
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<NativeOutputStatus, NativeOutputCommandError> {
+    require_native_output_main(&window)?;
+    state.disable_native_output().await
+}
+
 #[tauri::command]
 async fn remote_session_revoke(
     request: RemoteSessionOwnerRequest,
@@ -436,7 +505,12 @@ pub fn run() {
             remote_session_renew,
             remote_session_dispatch,
             remote_session_revoke,
-            native_latency_diagnostics
+            native_latency_diagnostics,
+            native_output_status,
+            native_output_enumerate,
+            native_output_reserve_silence,
+            native_output_release,
+            native_output_disable
         ])
         .run(tauri::generate_context!())
         .expect("error while running PPS Experiment Runner preview");

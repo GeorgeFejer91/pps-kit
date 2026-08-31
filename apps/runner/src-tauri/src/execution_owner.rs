@@ -25,6 +25,11 @@ use std::path::PathBuf;
 
 use crate::{
     latency_diagnostics::{AuthorityMailboxDiagnostics, LatencyStage, LatencyTrace},
+    native_output::{
+        NativeOutputAuthority, NativeOutputCleanupObservation, NativeOutputCommandError,
+        NativeOutputReleaseRequest, NativeOutputReserveRequest, NativeOutputSelection,
+        NativeOutputStatus, NativeOutputTicket,
+    },
     prepared_audio::{
         PreparedAudioCandidate, PreparedAudioLookup, PreparedAudioSource,
         PreparedAudioSourceReceipt, PreparedAudioSummary, MAXIMUM_CACHED_DECODED_BYTES,
@@ -306,6 +311,7 @@ struct OwnerState {
     prepared_audio_preparation_generation: u64,
     package_generation: u64,
     run_generation: u64,
+    native_output: NativeOutputAuthority,
     owner_generation: u64,
     ledger: EventLedger,
     evidence_unavailable: bool,
@@ -347,6 +353,7 @@ pub(crate) struct OwnerTestView {
     pub prepared_output_plan_run_generation: Option<u64>,
     pub compiled_schedule_strong_count: Option<usize>,
     pub retained_session_strong_count: Option<usize>,
+    pub native_output_status: NativeOutputStatus,
 }
 
 impl OwnerState {
@@ -525,6 +532,7 @@ impl OwnerState {
         // run, even when no remote owner was present.
         self.advance_run_generation_or_latch();
         self.invalidate_prepared_audio();
+        self.native_output.invalidate_for_runner_change();
         self.evidence_unavailable = true;
         let _ = self.state_tx.send(snapshot.clone());
         snapshot
@@ -548,6 +556,9 @@ impl OwnerState {
         trace: Option<&LatencyTrace>,
     ) -> Result<Applied, String> {
         let result = (|| {
+            if action == Action::PartStart && self.native_output.part_start_blocked() {
+                return Err("native_output_cleanup_pending".to_owned());
+            }
             let stamp = self.clock.stamp();
             let previous_revision = self.core.revision();
             let mut candidate = self.core.clone();
@@ -575,6 +586,9 @@ impl OwnerState {
                 if let Some(next) = next_run_generation {
                     self.run_generation = next;
                     self.invalidate_prepared_audio();
+                    self.native_output.invalidate_for_runner_change();
+                } else if applied.action == Action::TargetArm {
+                    self.native_output.invalidate_for_runner_change();
                 }
             } else {
                 // Rejections and accepted no-ops still retain reducer
@@ -606,6 +620,9 @@ impl OwnerState {
         trace: Option<&LatencyTrace>,
     ) -> Result<Applied, RemoteSessionError> {
         (|| {
+            if command.action == Action::PartStart && self.native_output.part_start_blocked() {
+                return Err(RemoteSessionError::unavailable());
+            }
             let stamp = self.clock.stamp();
             let previous_revision = self.core.revision();
             let mut candidate = self.core.clone();
@@ -632,6 +649,9 @@ impl OwnerState {
                 if let Some(next) = next_run_generation {
                     self.run_generation = next;
                     self.invalidate_prepared_audio();
+                    self.native_output.invalidate_for_runner_change();
+                } else if applied.action == Action::TargetArm {
+                    self.native_output.invalidate_for_runner_change();
                 }
             } else {
                 self.core = candidate;
@@ -918,6 +938,7 @@ impl OwnerState {
         });
         self.compiled_execution = None;
         self.invalidate_prepared_audio();
+        self.native_output.invalidate_for_runner_change();
         Ok(snapshot)
     }
 
@@ -1455,6 +1476,66 @@ impl OwnerState {
         }
         self.advance_run_generation_or_latch();
         self.invalidate_prepared_audio();
+        self.native_output.shutdown();
+    }
+
+    fn native_output_status(
+        &mut self,
+        observation: NativeOutputCleanupObservation,
+    ) -> NativeOutputStatus {
+        self.native_output.observe_cleanup(observation);
+        self.native_output.status()
+    }
+
+    fn begin_native_output_enumerate(
+        &mut self,
+        observation: NativeOutputCleanupObservation,
+    ) -> Result<NativeOutputTicket, NativeOutputCommandError> {
+        self.native_output.observe_cleanup(observation);
+        self.native_output.begin_enumerate(&self.core.snapshot())
+    }
+
+    fn begin_native_output_reserve(
+        &mut self,
+        observation: NativeOutputCleanupObservation,
+        request: NativeOutputReserveRequest,
+    ) -> Result<(NativeOutputTicket, NativeOutputSelection), NativeOutputCommandError> {
+        self.native_output.observe_cleanup(observation);
+        self.native_output
+            .begin_reserve(&self.core.snapshot(), &request)
+    }
+
+    fn complete_native_output_enumerate(
+        &mut self,
+        ticket: NativeOutputTicket,
+        result: Result<u64, NativeOutputCommandError>,
+    ) -> Result<NativeOutputStatus, NativeOutputCommandError> {
+        self.native_output.complete_enumerate(ticket, result)
+    }
+
+    fn complete_native_output_reserve(
+        &mut self,
+        ticket: NativeOutputTicket,
+        result: Result<u64, NativeOutputCommandError>,
+    ) -> Result<NativeOutputStatus, NativeOutputCommandError> {
+        self.native_output.complete_reserve(ticket, result)
+    }
+
+    fn release_native_output(
+        &mut self,
+        observation: NativeOutputCleanupObservation,
+        request: NativeOutputReleaseRequest,
+    ) -> Result<NativeOutputStatus, NativeOutputCommandError> {
+        self.native_output.observe_cleanup(observation);
+        self.native_output.release(&request)
+    }
+
+    fn disable_native_output(
+        &mut self,
+        observation: NativeOutputCleanupObservation,
+    ) -> Result<NativeOutputStatus, NativeOutputCommandError> {
+        self.native_output.observe_cleanup(observation);
+        self.native_output.disable()
     }
 }
 
@@ -1496,9 +1577,29 @@ pub(crate) struct ExecutionOwner {
     _alive: Arc<AtomicBool>,
 }
 
+#[derive(Clone)]
+pub(crate) struct NativeOutputNoticeIngress {
+    mailbox: Arc<Mailbox>,
+}
+
+impl NativeOutputNoticeIngress {
+    /// Queues only a compact observation refresh. The coordinator retains all
+    /// driver state and retries this bounded safety admission if it is full.
+    pub(crate) fn notify(&self) -> bool {
+        self.mailbox
+            .push(MailboxEntry {
+                class: AdmissionClass::LocalSafety,
+                trace: None,
+                task: Box::new(|state| state.native_output.refresh_from_invalidator()),
+            })
+            .is_ok()
+    }
+}
+
 struct OwnerStartConfiguration {
     lease_duration: Duration,
     mailbox_diagnostics: AuthorityMailboxDiagnostics,
+    native_output: NativeOutputAuthority,
 }
 
 impl ExecutionOwner {
@@ -1510,6 +1611,7 @@ impl ExecutionOwner {
         remote: RemoteConfig,
         state_tx: broadcast::Sender<RunnerSnapshot>,
         mailbox_diagnostics: AuthorityMailboxDiagnostics,
+        native_output: NativeOutputAuthority,
     ) -> Result<Self, String> {
         Self::start_with_lease(
             target_id,
@@ -1521,6 +1623,7 @@ impl ExecutionOwner {
             OwnerStartConfiguration {
                 lease_duration: DEFAULT_REMOTE_LEASE,
                 mailbox_diagnostics,
+                native_output,
             },
         )
     }
@@ -1536,6 +1639,7 @@ impl ExecutionOwner {
     ) -> Result<Self, String> {
         let mailbox = Arc::new(Mailbox::new(configuration.mailbox_diagnostics));
         let lease_duration = configuration.lease_duration;
+        let native_output = configuration.native_output;
         let alive = Arc::new(AtomicBool::new(false));
         let thread_mailbox = Arc::clone(&mailbox);
         let thread_alive = Arc::clone(&alive);
@@ -1559,6 +1663,7 @@ impl ExecutionOwner {
                     prepared_audio_preparation_generation: 0,
                     package_generation: 0,
                     run_generation: 0,
+                    native_output,
                     owner_generation: 0,
                     ledger,
                     evidence_unavailable: false,
@@ -1594,6 +1699,12 @@ impl ExecutionOwner {
         F: FnOnce(&mut OwnerState) -> T + Send + 'static,
     {
         self.submit_traced(class, label, None, operation)
+    }
+
+    pub(crate) fn native_output_notice_ingress(&self) -> NativeOutputNoticeIngress {
+        NativeOutputNoticeIngress {
+            mailbox: Arc::clone(&self.mailbox),
+        }
     }
 
     fn submit_traced<T, F>(
@@ -1687,9 +1798,130 @@ impl ExecutionOwner {
         self.blocking(AdmissionClass::Normal, "view", |state| state.view())
     }
 
+    #[cfg(test)]
+    pub(crate) fn hold_for_test(
+        &self,
+    ) -> Result<(Arc<std::sync::Barrier>, oneshot::Receiver<()>), OwnerSubmitError> {
+        let barrier = Arc::new(std::sync::Barrier::new(2));
+        let actor_barrier = Arc::clone(&barrier);
+        let receiver = self.submit(AdmissionClass::Normal, "test_hold", move |_| {
+            actor_barrier.wait();
+        })?;
+        while self.mailbox.queued_counts().0 != 0 {
+            thread::yield_now();
+        }
+        Ok((barrier, receiver))
+    }
+
+    #[cfg(test)]
+    pub(crate) fn fill_safety_lane_for_test(&self) -> usize {
+        let mut admitted = 0;
+        loop {
+            match self.mailbox.push(MailboxEntry {
+                class: AdmissionClass::LocalSafety,
+                trace: None,
+                task: Box::new(|_| {}),
+            }) {
+                Ok(()) => admitted += 1,
+                Err(OwnerSubmitError::Full | OwnerSubmitError::Closed) => return admitted,
+            }
+        }
+    }
+
     pub(crate) async fn view(&self) -> Result<AuthorityView, OwnerSubmitError> {
         self.asynchronous(AdmissionClass::Normal, "view", |state| state.view())
             .await
+    }
+
+    pub(crate) async fn native_output_status(
+        &self,
+        observation: NativeOutputCleanupObservation,
+    ) -> Result<NativeOutputStatus, OwnerSubmitError> {
+        self.asynchronous(
+            AdmissionClass::Normal,
+            "native_output_status",
+            move |state| state.native_output_status(observation),
+        )
+        .await
+    }
+
+    pub(crate) async fn begin_native_output_enumerate(
+        &self,
+        observation: NativeOutputCleanupObservation,
+    ) -> Result<Result<NativeOutputTicket, NativeOutputCommandError>, OwnerSubmitError> {
+        self.asynchronous(
+            AdmissionClass::Normal,
+            "native_output_begin_enumerate",
+            move |state| state.begin_native_output_enumerate(observation),
+        )
+        .await
+    }
+
+    pub(crate) async fn begin_native_output_reserve(
+        &self,
+        observation: NativeOutputCleanupObservation,
+        request: NativeOutputReserveRequest,
+    ) -> Result<
+        Result<(NativeOutputTicket, NativeOutputSelection), NativeOutputCommandError>,
+        OwnerSubmitError,
+    > {
+        self.asynchronous(
+            AdmissionClass::Normal,
+            "native_output_begin_reserve",
+            move |state| state.begin_native_output_reserve(observation, request),
+        )
+        .await
+    }
+
+    pub(crate) async fn complete_native_output_enumerate(
+        &self,
+        ticket: NativeOutputTicket,
+        result: Result<u64, NativeOutputCommandError>,
+    ) -> Result<Result<NativeOutputStatus, NativeOutputCommandError>, OwnerSubmitError> {
+        self.asynchronous(
+            AdmissionClass::LocalSafety,
+            "native_output_complete_enumerate",
+            move |state| state.complete_native_output_enumerate(ticket, result),
+        )
+        .await
+    }
+
+    pub(crate) async fn complete_native_output_reserve(
+        &self,
+        ticket: NativeOutputTicket,
+        result: Result<u64, NativeOutputCommandError>,
+    ) -> Result<Result<NativeOutputStatus, NativeOutputCommandError>, OwnerSubmitError> {
+        self.asynchronous(
+            AdmissionClass::LocalSafety,
+            "native_output_complete_reserve",
+            move |state| state.complete_native_output_reserve(ticket, result),
+        )
+        .await
+    }
+
+    pub(crate) async fn release_native_output(
+        &self,
+        observation: NativeOutputCleanupObservation,
+        request: NativeOutputReleaseRequest,
+    ) -> Result<Result<NativeOutputStatus, NativeOutputCommandError>, OwnerSubmitError> {
+        self.asynchronous(
+            AdmissionClass::LocalSafety,
+            "native_output_release",
+            move |state| state.release_native_output(observation, request),
+        )
+        .await
+    }
+
+    pub(crate) async fn disable_native_output(
+        &self,
+        observation: NativeOutputCleanupObservation,
+    ) -> Result<Result<NativeOutputStatus, NativeOutputCommandError>, OwnerSubmitError> {
+        self.asynchronous(
+            AdmissionClass::LocalSafety,
+            "native_output_disable",
+            move |state| state.disable_native_output(observation),
+        )
+        .await
     }
 
     #[cfg(test)]
@@ -2215,6 +2447,7 @@ impl ExecutionOwner {
                 .retained_session
                 .as_ref()
                 .map(|retained| Arc::strong_count(&retained.receipt)),
+            native_output_status: state.native_output.status(),
         })
         .expect("test authority remains available")
     }
@@ -2295,6 +2528,9 @@ mod tests {
             OwnerStartConfiguration {
                 lease_duration: lease,
                 mailbox_diagnostics: diagnostics.authority_mailbox(),
+                native_output: NativeOutputAuthority::new(
+                    crate::native_output::NativeOutputInvalidator::inert(),
+                ),
             },
         )
         .unwrap()
@@ -2323,6 +2559,9 @@ mod tests {
             OwnerStartConfiguration {
                 lease_duration: lease,
                 mailbox_diagnostics: diagnostics.authority_mailbox(),
+                native_output: NativeOutputAuthority::new(
+                    crate::native_output::NativeOutputInvalidator::inert(),
+                ),
             },
         )
         .unwrap();

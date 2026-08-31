@@ -14,6 +14,11 @@ fn main() {
             "remote_session_dispatch",
             "remote_session_revoke",
             "native_latency_diagnostics",
+            "native_output_status",
+            "native_output_enumerate",
+            "native_output_reserve_silence",
+            "native_output_release",
+            "native_output_disable",
         ]),
     ))
     .expect("failed to build the PPS Runner command manifest")

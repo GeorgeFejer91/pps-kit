@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-native-output-status"
+description = "Enables the native_output_status command without any pre-configured scope."
+commands.allow = ["native_output_status"]
+
+[[permission]]
+identifier = "deny-native-output-status"
+description = "Denies the native_output_status command without any pre-configured scope."
+commands.deny = ["native_output_status"]

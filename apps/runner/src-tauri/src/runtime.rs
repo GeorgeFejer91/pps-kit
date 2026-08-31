@@ -5,6 +5,7 @@ use std::{
         atomic::{AtomicBool, Ordering},
         Arc, Mutex,
     },
+    time::Duration,
 };
 
 use pps_brsp::{random_epoch, random_nonce, valid_peer_id, PairingSecret};
@@ -16,7 +17,7 @@ use pps_runner_core::VerifiedPackageSummary;
 use pps_session_package::VerifiedPreparedSession;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tokio::sync::broadcast;
+use tokio::sync::{broadcast, oneshot};
 
 use crate::execution_owner::{
     AuthorityView, ExecutionOwner, LanOwnerReceipt, OwnerSubmitError, RemoteOwnerIdentity,
@@ -26,6 +27,11 @@ use crate::latency_diagnostics::{
     LatencyRoute, LatencyStage, LatencyTrace, LatencyTraceGuard, NativeIngress,
     NativeLatencyDiagnostics, NativeLatencySummary,
 };
+use crate::native_output::{
+    CoordinatorReply, NativeOutputAuthority, NativeOutputCommandError, NativeOutputCoordinator,
+    NativeOutputInventory, NativeOutputReleaseRequest, NativeOutputReservation,
+    NativeOutputReserveRequest, NativeOutputStatus, NativeOutputTicket,
+};
 use crate::prepared_audio::{
     PreparedAudioCandidate, PreparedAudioLookup, PreparedAudioSource, PreparedAudioSummary,
 };
@@ -34,6 +40,8 @@ use crate::prepared_execution::{
 };
 
 const MAX_ACCEPTED_SCOPES: usize = 16;
+const NATIVE_OUTPUT_COMPLETION_RETRIES: usize = 8;
+const NATIVE_OUTPUT_COMPLETION_RETRY_DELAY: Duration = Duration::from_millis(2);
 
 #[derive(Debug, Clone)]
 pub struct RemoteConfig {
@@ -255,7 +263,9 @@ pub struct RemoteServerState {
 
 pub struct RuntimeShared {
     pub authority: ExecutionOwner,
+    native_output: NativeOutputCoordinator,
     latency_diagnostics: NativeLatencyDiagnostics,
+    native_output_operation_in_flight: AtomicBool,
     prepared_session_selection_in_flight: AtomicBool,
     prepared_execution_inspection_in_flight: AtomicBool,
     prepared_audio_preparation_in_flight: AtomicBool,
@@ -276,6 +286,10 @@ pub struct PreparedExecutionInspectionGuard {
 }
 
 pub struct PreparedAudioPreparationGuard {
+    shared: Arc<RuntimeShared>,
+}
+
+struct NativeOutputOperationGuard {
     shared: Arc<RuntimeShared>,
 }
 
@@ -311,6 +325,14 @@ impl Drop for PreparedAudioPreparationGuard {
     }
 }
 
+impl Drop for NativeOutputOperationGuard {
+    fn drop(&mut self) {
+        self.shared
+            .native_output_operation_in_flight
+            .store(false, Ordering::Release);
+    }
+}
+
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RemoteStatus {
@@ -333,6 +355,10 @@ pub struct RemoteStatus {
 
 impl AppRuntime {
     pub fn new() -> Self {
+        Self::with_native_output(NativeOutputCoordinator::start())
+    }
+
+    fn with_native_output(native_output: NativeOutputCoordinator) -> Self {
         let advertised_ip = local_ip_address::local_ip()
             .ok()
             .filter(|ip| !ip.is_loopback())
@@ -358,11 +384,16 @@ impl AppRuntime {
             remote,
             state_tx.clone(),
             latency_diagnostics.authority_mailbox(),
+            NativeOutputAuthority::new(native_output.invalidator()),
         )
         .expect("the Runner authority thread must start");
+        let native_output_notice = authority.native_output_notice_ingress();
+        native_output.attach_notice_sink(Arc::new(move || native_output_notice.notify()));
         let shared = RuntimeShared {
             authority,
+            native_output,
             latency_diagnostics,
+            native_output_operation_in_flight: AtomicBool::new(false),
             prepared_session_selection_in_flight: AtomicBool::new(false),
             prepared_execution_inspection_in_flight: AtomicBool::new(false),
             prepared_audio_preparation_in_flight: AtomicBool::new(false),
@@ -409,6 +440,251 @@ impl AppRuntime {
 
     pub(crate) fn latency_summary(&self) -> NativeLatencySummary {
         self.0.latency_diagnostics.summary()
+    }
+
+    pub(crate) async fn native_output_status(
+        &self,
+    ) -> Result<NativeOutputStatus, NativeOutputCommandError> {
+        self.0
+            .authority
+            .native_output_status(self.0.native_output.observation())
+            .await
+            .map_err(|_| NativeOutputCommandError::runtime())
+    }
+
+    /// Starts the complete native enumerate lifecycle before returning a
+    /// receiver to IPC. Dropping that receiver cannot cancel actor rollback or
+    /// leave an admitted ticket without coordinator work.
+    pub(crate) fn start_native_output_enumerate(
+        &self,
+    ) -> Result<
+        oneshot::Receiver<Result<NativeOutputInventory, NativeOutputCommandError>>,
+        NativeOutputCommandError,
+    > {
+        let guard = self.reserve_native_output_operation()?;
+        let runtime = self.clone();
+        let (reply, receive) = oneshot::channel();
+        tauri::async_runtime::spawn(async move {
+            let _guard = guard;
+            let result = runtime.run_native_output_enumerate().await;
+            let _ = reply.send(result);
+        });
+        Ok(receive)
+    }
+
+    pub(crate) fn start_native_output_reserve(
+        &self,
+        request: NativeOutputReserveRequest,
+    ) -> Result<
+        oneshot::Receiver<Result<NativeOutputReservation, NativeOutputCommandError>>,
+        NativeOutputCommandError,
+    > {
+        let guard = self.reserve_native_output_operation()?;
+        let runtime = self.clone();
+        let (reply, receive) = oneshot::channel();
+        tauri::async_runtime::spawn(async move {
+            let _guard = guard;
+            let result = runtime.run_native_output_reserve(request).await;
+            let _ = reply.send(result);
+        });
+        Ok(receive)
+    }
+
+    pub(crate) async fn release_native_output(
+        &self,
+        request: NativeOutputReleaseRequest,
+    ) -> Result<NativeOutputStatus, NativeOutputCommandError> {
+        self.0
+            .authority
+            .release_native_output(self.0.native_output.observation(), request)
+            .await
+            .map_err(|_| NativeOutputCommandError::runtime())?
+    }
+
+    pub(crate) async fn disable_native_output(
+        &self,
+    ) -> Result<NativeOutputStatus, NativeOutputCommandError> {
+        self.0
+            .authority
+            .disable_native_output(self.0.native_output.observation())
+            .await
+            .map_err(|_| NativeOutputCommandError::runtime())?
+    }
+
+    pub(crate) const fn native_output_client_deadline() -> Duration {
+        NativeOutputCoordinator::client_reply_deadline()
+    }
+
+    fn reserve_native_output_operation(
+        &self,
+    ) -> Result<NativeOutputOperationGuard, NativeOutputCommandError> {
+        self.0
+            .native_output_operation_in_flight
+            .compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed)
+            .map_err(|_| {
+                NativeOutputCommandError::new(
+                    "native_output_busy",
+                    "Another native output preflight operation is already in progress.",
+                )
+            })?;
+        Ok(NativeOutputOperationGuard {
+            shared: Arc::clone(&self.0),
+        })
+    }
+
+    async fn run_native_output_enumerate(
+        &self,
+    ) -> Result<NativeOutputInventory, NativeOutputCommandError> {
+        let ticket = self
+            .0
+            .authority
+            .begin_native_output_enumerate(self.0.native_output.observation())
+            .await
+            .map_err(|_| NativeOutputCommandError::runtime())??;
+        let receive = match self.0.native_output.enumerate(ticket) {
+            Ok(receive) => receive,
+            Err(error) => {
+                self.finish_failed_enumerate(ticket, error.clone()).await?;
+                return Err(error);
+            }
+        };
+        match receive
+            .await
+            .map_err(|_| NativeOutputCommandError::runtime())?
+        {
+            CoordinatorReply::Enumerated {
+                ticket: completed,
+                inventory_generation,
+                inventory,
+            } if completed == ticket => {
+                self.finish_enumerate(ticket, Ok(inventory_generation))
+                    .await?;
+                Ok(inventory)
+            }
+            CoordinatorReply::Failed {
+                ticket: completed,
+                error,
+            } if completed == ticket => {
+                self.finish_enumerate(ticket, Err(error.clone())).await?;
+                Err(error)
+            }
+            _ => {
+                self.0
+                    .native_output
+                    .invalidate_after_completion_failure(ticket);
+                Err(NativeOutputCommandError::new(
+                    "native_output_contract_failed",
+                    "The native output coordinator returned a mismatched completion.",
+                ))
+            }
+        }
+    }
+
+    async fn run_native_output_reserve(
+        &self,
+        request: NativeOutputReserveRequest,
+    ) -> Result<NativeOutputReservation, NativeOutputCommandError> {
+        let (ticket, selection) = self
+            .0
+            .authority
+            .begin_native_output_reserve(self.0.native_output.observation(), request)
+            .await
+            .map_err(|_| NativeOutputCommandError::runtime())??;
+        let receive = match self.0.native_output.reserve(ticket, selection) {
+            Ok(receive) => receive,
+            Err(error) => {
+                self.finish_reserve(ticket, Err(error.clone())).await?;
+                return Err(error);
+            }
+        };
+        match receive
+            .await
+            .map_err(|_| NativeOutputCommandError::runtime())?
+        {
+            CoordinatorReply::Reserved {
+                ticket: completed,
+                reservation_generation,
+                reservation,
+            } if completed == ticket => {
+                self.finish_reserve(ticket, Ok(reservation_generation))
+                    .await?;
+                Ok(reservation)
+            }
+            CoordinatorReply::Failed {
+                ticket: completed,
+                error,
+            } if completed == ticket => {
+                self.finish_reserve(ticket, Err(error.clone())).await?;
+                Err(error)
+            }
+            _ => {
+                self.0
+                    .native_output
+                    .invalidate_after_completion_failure(ticket);
+                Err(NativeOutputCommandError::new(
+                    "native_output_contract_failed",
+                    "The native output coordinator returned a mismatched completion.",
+                ))
+            }
+        }
+    }
+
+    async fn finish_failed_enumerate(
+        &self,
+        ticket: NativeOutputTicket,
+        error: NativeOutputCommandError,
+    ) -> Result<(), NativeOutputCommandError> {
+        self.finish_enumerate(ticket, Err(error)).await
+    }
+
+    async fn finish_enumerate(
+        &self,
+        ticket: NativeOutputTicket,
+        result: Result<u64, NativeOutputCommandError>,
+    ) -> Result<(), NativeOutputCommandError> {
+        for _ in 0..NATIVE_OUTPUT_COMPLETION_RETRIES {
+            match self
+                .0
+                .authority
+                .complete_native_output_enumerate(ticket, result.clone())
+                .await
+            {
+                Ok(Ok(_)) | Ok(Err(_)) => return Ok(()),
+                Err(OwnerSubmitError::Closed) => break,
+                Err(OwnerSubmitError::Full) => {
+                    tokio::time::sleep(NATIVE_OUTPUT_COMPLETION_RETRY_DELAY).await;
+                }
+            }
+        }
+        self.0
+            .native_output
+            .invalidate_after_completion_failure(ticket);
+        Err(NativeOutputCommandError::runtime())
+    }
+
+    async fn finish_reserve(
+        &self,
+        ticket: NativeOutputTicket,
+        result: Result<u64, NativeOutputCommandError>,
+    ) -> Result<(), NativeOutputCommandError> {
+        for _ in 0..NATIVE_OUTPUT_COMPLETION_RETRIES {
+            match self
+                .0
+                .authority
+                .complete_native_output_reserve(ticket, result.clone())
+                .await
+            {
+                Ok(Ok(_)) | Ok(Err(_)) => return Ok(()),
+                Err(OwnerSubmitError::Closed) => break,
+                Err(OwnerSubmitError::Full) => {
+                    tokio::time::sleep(NATIVE_OUTPUT_COMPLETION_RETRY_DELAY).await;
+                }
+            }
+        }
+        self.0
+            .native_output
+            .invalidate_after_completion_failure(ticket);
+        Err(NativeOutputCommandError::runtime())
     }
 
     /// Reserve the one native prepared-session picker/verification operation.
@@ -1172,6 +1448,10 @@ mod tests {
     use super::*;
     use crate::{
         latency_diagnostics::{LatencyStage, TraceOutcome},
+        native_output::{
+            tests::{fake_coordinator, FakeControl},
+            NativeOutputPhase,
+        },
         prepared_audio::{prepare_verified_audio, MAXIMUM_CACHED_DECODED_BYTES},
         prepared_execution::compile_prepared_execution,
     };
@@ -1183,6 +1463,50 @@ mod tests {
         thread,
         time::Duration,
     };
+
+    async fn wait_for_native_output_phase(
+        runtime: &AppRuntime,
+        expected: NativeOutputPhase,
+    ) -> NativeOutputStatus {
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(3);
+        loop {
+            let status = runtime.native_output_status().await.unwrap();
+            if status.phase == expected {
+                return status;
+            }
+            assert!(
+                tokio::time::Instant::now() < deadline,
+                "native output did not reach {expected:?}; last status: {status:?}"
+            );
+            tokio::time::sleep(Duration::from_millis(2)).await;
+        }
+    }
+
+    async fn enumerated_fake_runtime() -> (AppRuntime, Arc<FakeControl>, NativeOutputInventory) {
+        let control = Arc::new(FakeControl::default());
+        let runtime = AppRuntime::with_native_output(fake_coordinator(&control));
+        let inventory = runtime
+            .start_native_output_enumerate()
+            .unwrap()
+            .await
+            .unwrap()
+            .unwrap();
+        (runtime, control, inventory)
+    }
+
+    fn fake_reserve_request(inventory: &NativeOutputInventory) -> NativeOutputReserveRequest {
+        NativeOutputReserveRequest {
+            policy_generation: inventory.policy_generation.clone(),
+            service_generation: inventory.service_generation.clone(),
+            inventory_generation: inventory.inventory_generation.clone(),
+            device_ordinal: 0,
+            config_ordinal: 0,
+            channels: 2,
+            sample_rate_hz: 48_000,
+            buffer_frames: None,
+            warmup_timeout_ms: 50,
+        }
+    }
 
     fn verified_legacy_package(
         participant_id: &str,

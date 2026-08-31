@@ -2491,6 +2491,27 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   killable helper process remains a hardware-soak-driven future decision. The
   next actor handshake must stage against the checked next run generation and
   retire final large PCM/plan Arcs off actor before executable output.
+- A deliberately incomplete native-output-coordinator checkpoint is being
+  retained for handoff. It introduces the app-private coordinator/actor seam
+  and five bundled-main-window-only commands for status, explicit inventory,
+  silence reservation, release, and disable; it must not yet be described as
+  a qualified or complete application feature. Before the next integration
+  commit, finish and prove: cancellation-independent ownership of the entire
+  actor-begin -> bounded coordinator operation -> exact actor-finish chain;
+  reserved safety admission/fallback for every completion; `PartStart`
+  rejection while output is in flight, reserved, cleaning up, or quarantined;
+  automatic post-reservation callback-fault reconciliation; quarantine after
+  every ambiguous CPAL timeout or cleanup failure without service replacement;
+  checked generation exhaustion and stale-completion rejection; bounded
+  shutdown without joining a potentially blocked driver; and deterministic
+  cancellation, saturation, invalidation, cleanup, callback-fault, and
+  immediate-Start regressions. Then freeze the DTOs, add the explicit local
+  desktop controls and live-only status polling (never companion/remote or
+  automatic enumeration/open), validate strict decimal generation handling
+  and local-only device-name projection, run Rust 1.88/frontend/Pages gates,
+  and obtain an independent authority/privacy audit. This checkpoint does not
+  add media playback, arming, execution readiness, route qualification, or a
+  scientific timing claim.
 - Treat the transport-independent BRSP application-target reference as a
   qualification checklist for the existing Rust seam, not a replacement.
   `RunnerCore` stays the single authority, transports remain adapters, grants
