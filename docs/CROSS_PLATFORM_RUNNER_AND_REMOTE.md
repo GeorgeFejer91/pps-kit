@@ -147,9 +147,44 @@ ledger record. Rejected commands and accepted no-ops retain reducer
 dedupe/stamp behavior without consuming that ledger. Ordinary transitions
 reserve evidence capacity for safety; if even the safety reserve is exhausted,
 pause/revoke still applies fail-safe and latches the native
-`evidence_unavailable` condition. Bounded internal request/dispatch observation
-rings now exist for qualification, but a local diagnostic that reports p50,
-p95, p99, and worst observed end-to-end latency is still pending.
+`evidence_unavailable` condition. Native semantic-request diagnostics now use
+a separate 512-trace bounded store with schema
+`pps-runner-native-latency-summary.v1`. The no-argument summary is available
+only to the bundled `main` window and returns aggregate counts,
+dropped whole-trace, dropped stage-update, interrupted, and unfinished counts,
+and per-route/per-stage p50, p95, p99, and worst integer microseconds;
+individual traces never cross IPC. Evicted traces and traces that could not be
+started because the store was contended count as dropped whole traces. A stage
+or terminal update lost to contention counts separately as a dropped stage
+update. Interrupted and unfinished traces are reported separately and excluded
+from route populations and percentile samples. Routes are the closed
+`local-tauri`, `lan-websocket`, `webview-vdo`, and `unknown` set. The stages
+separate adapter validation, authority admission/dequeue, remote owner/
+sequence/scope authorization, and reducer validation. Local routes have no
+remote-authorization sample. `reducer-applied` is emitted only from an accepted
+reducer transition milestone, never for dedupe, stale revision, invalid
+arguments, or an application rejection. This milestone means the candidate
+transition was accepted by the reducer; it precedes authoritative ledger commit
+and effect initiation and is not evidence of either. Authority-path
+instrumentation uses a non-blocking diagnostics lock, so contention loses and
+counts the observation instead of delaying or changing a transition.
+For remote routes, `reply-ready` follows conversion to the sanitized public
+`RemoteApplied` acknowledgement (or bounded generic error), not merely the
+inner native reducer result.
+
+Every reported stage is cumulative from native ingress in one process
+monotonic clock. For LAN commands, ingress is captured immediately after Axum
+yields the complete text frame, while `send-completed` is recorded only after
+the corresponding socket `send(...).await` succeeds. This excludes browser,
+radio, kernel-to-client delivery, and controller rendering. For local Tauri
+commands and WebView-carried VDO commands, ingress begins at the Rust handler
+entry after Tauri has deserialized the request and ends at the handler's adapter
+handoff; it excludes the originating click, WebView IPC serialization before
+the handler, return delivery/rendering, VDO/WebRTC, and remote-host time. Those
+browser `performance.now()` and SDK/route RTT measurements remain separate
+clock-domain evidence and must never be subtracted from native timestamps.
+No release-build or physical-route latency result has yet been recorded, so
+this instrumentation is not a low-latency or real-time claim.
 
 The full operator `RunnerSnapshot` is not a remote wire object. Every native
 LAN or bundled-WebView remote receipt and publication uses the distinct exact
@@ -420,11 +455,14 @@ The migration order is:
 5. Port durable event/LSL evidence, artifact writers, persistence/recovery, and
    the normal post-run review/analysis required by the Runner, using golden
    outputs only as temporary Python-oracle evidence.
-6. Instrument remote control in one process-monotonic domain where possible:
-   frame receipt, proof/scope/revision validation, authority enqueue, reducer
-   application, effect initiation, and acknowledgement emission. Report p50,
-   p95, p99, and worst observed independently; Rust alone is not latency
-   evidence.
+6. Extend the landed native semantic-request diagnostics through effect
+   initiation once the output owner exists, then qualify it in release builds.
+   Current native observations cover adapter ingress/authorization, authority
+   admission/dequeue, reducer validation, accepted reducer transition, reply
+   readiness, adapter handoff, and—only for LAN WebSocket commands—successful
+   socket send completion. Browser performance and SDK RTT remain separate
+   clock domains. Report p50, p95, p99, and worst observed independently; Rust
+   alone is not latency evidence.
 7. Qualify each Windows, macOS, Linux, phone, and Quest hardware route before
    making scientific timing claims.
 8. Pass the Python-free Windows gate on a clean installation: adopt and run a

@@ -2352,10 +2352,23 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   audio/output and response timestamp boundaries, durable
   event/LSL/persistence/recovery, then required review and analysis before
   compatibility packaging is removed.
-- Instrument remote receipt through proof, scope/revision checks, authority
-  enqueue, reducer application, effect start, and acknowledgement in one
-  process-monotonic domain where possible. Report p50, p95, p99, and worst
-  observed separately; selecting Rust does not itself establish low latency.
+- Native semantic-request timing evidence is now implemented as a bounded,
+  local-only aggregate rather than a raw trace export. It distinguishes
+  adapter validation, authority admission/dequeue, remote owner/sequence/scope
+  authorization, reducer validation, an accepted reducer transition, reply
+  readiness, adapter handoff, and LAN socket-send completion. LAN ingress starts
+  when Axum yields
+  a complete command frame; WebView-VDO and local Tauri timing starts at Rust
+  handler entry and stops at handler handoff. Browser/SDK RTT and physical
+  effect timing stay separate clock domains. The summary reports per-route and
+  per-stage p50/p95/p99/worst integer microseconds plus separate dropped whole-
+  trace, dropped stage-update, interrupted, and unfinished counts without
+  exposing raw traces or identifiers. Interrupted/unfinished traces do not
+  populate percentiles. `reducer-applied` currently means the candidate
+  transition was accepted by the reducer; it precedes ledger commit and effect
+  initiation. No release/physical measurements exist yet, so selecting Rust
+  still does not establish low latency. Add effect-initiation observations only
+  when the native output owner can provide that real boundary.
 - The first dedicated native authority-owner slice is now implemented. One
   named `pps-runner-authority` actor exclusively owns `RunnerCore`, remote
   policy/current owner, the retained verified package and compiled
@@ -2366,9 +2379,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   dequeue and fences stale owner/run/package generations. Only accepted
   revision-changing dispatches consume scientific evidence; rejected commands
   and accepted no-ops do not. If even reserved safety evidence is unavailable,
-  pause/revoke still applies and latches `evidence_unavailable`. Internal
-  request/dispatch observation rings are bounded, but p50/p95/p99/worst
-  reporting and complete receive-to-ack instrumentation remain future work.
+  pause/revoke still applies and latches `evidence_unavailable`. Its correlated
+  native diagnostics are bounded and non-blocking on authority paths; they now
+  provide the local p50/p95/p99/worst projection described above. Effect onset,
+  WebRTC/controller RTT, and physical receive/presentation remain future,
+  separately qualified evidence rather than inferred receive-to-ack claims.
 - Native remote state is now an exact separate contract,
   `pps-runner-public-snapshot.v1`. It retains only operational target state and
   omits participant/session identity, demographics/sharing flags, package

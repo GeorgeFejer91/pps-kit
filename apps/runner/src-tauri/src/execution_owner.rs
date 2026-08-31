@@ -24,6 +24,7 @@ use tokio::sync::{broadcast, oneshot};
 use std::path::PathBuf;
 
 use crate::{
+    latency_diagnostics::{LatencyStage, LatencyTrace},
     prepared_audio::{
         PreparedAudioCandidate, PreparedAudioLookup, PreparedAudioSource, PreparedAudioSummary,
         MAXIMUM_CACHED_DECODED_BYTES,
@@ -45,7 +46,6 @@ pub(crate) const LOCAL_SAFETY_RESERVE: usize = MAILBOX_CAPACITY - NORMAL_MAILBOX
 const DEFAULT_REMOTE_LEASE: Duration = Duration::from_secs(5);
 const LEDGER_SAFETY_RECORD_RESERVE: usize = 8;
 const LEDGER_SAFETY_BYTE_RESERVE: usize = 64 * 1024;
-const LATENCY_RING_CAPACITY: usize = 256;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum AdmissionClass {
@@ -78,8 +78,7 @@ type AuthorityTask = Box<dyn FnOnce(&mut OwnerState) + Send + 'static>;
 
 struct MailboxEntry {
     class: AdmissionClass,
-    label: &'static str,
-    admitted_at: Instant,
+    trace: Option<LatencyTrace>,
     task: AuthorityTask,
 }
 
@@ -120,6 +119,11 @@ impl Mailbox {
         }
         if entry.class == AdmissionClass::Normal {
             state.normal_count += 1;
+        }
+        if let Some(trace) = entry.trace.as_ref() {
+            // This happens after admission succeeds and before the actor can
+            // dequeue the entry. Diagnostics use a non-blocking internal lock.
+            trace.mark(LatencyStage::AuthorityAdmission);
         }
         state.queue.push_back(entry);
         drop(state);
@@ -209,10 +213,7 @@ impl ProcessClock {
     }
 
     fn monotonic_ns(&self) -> u64 {
-        self.started
-            .elapsed()
-            .as_nanos()
-            .min(JSON_MAX_SAFE_INTEGER as u128) as u64
+        u64::try_from(self.started.elapsed().as_nanos()).unwrap_or(u64::MAX)
     }
 
     fn stamp(&self) -> ClockStamp {
@@ -223,7 +224,9 @@ impl ProcessClock {
             .min(JSON_MAX_SAFE_INTEGER);
         ClockStamp {
             unix_ms,
-            monotonic_ns: self.monotonic_ns(),
+            // ClockStamp is a browser-visible DTO. Preserve the raw u64 clock
+            // internally and clamp only at this serialization boundary.
+            monotonic_ns: self.monotonic_ns().min(JSON_MAX_SAFE_INTEGER),
         }
     }
 }
@@ -276,19 +279,6 @@ struct CachedPreparedAudio {
     summary: PreparedAudioSummary,
 }
 
-#[derive(Debug, Clone)]
-struct RequestLatency {
-    _label: &'static str,
-    _queue_wait_ns: u64,
-    _execution_ns: u64,
-}
-
-#[derive(Debug, Clone)]
-struct DispatchObservation {
-    _milestone: DispatchMilestone,
-    _monotonic_ns: u64,
-}
-
 struct OwnerState {
     core: RunnerCore,
     remote: RemoteConfig,
@@ -301,8 +291,6 @@ struct OwnerState {
     owner_generation: u64,
     ledger: EventLedger,
     evidence_unavailable: bool,
-    request_latency: VecDeque<RequestLatency>,
-    dispatch_observations: VecDeque<DispatchObservation>,
     clock: ProcessClock,
     lease_duration: Duration,
     state_tx: broadcast::Sender<RunnerSnapshot>,
@@ -515,124 +503,112 @@ impl OwnerState {
         snapshot
     }
 
-    fn record_request_latency(
-        &mut self,
-        label: &'static str,
-        admitted_at: Instant,
-        started_at: Instant,
-        completed_at: Instant,
-    ) {
-        push_ring(
-            &mut self.request_latency,
-            RequestLatency {
-                _label: label,
-                _queue_wait_ns: duration_ns(started_at.saturating_duration_since(admitted_at)),
-                _execution_ns: duration_ns(completed_at.saturating_duration_since(started_at)),
-            },
-            LATENCY_RING_CAPACITY,
-        );
-    }
-
-    fn record_dispatch_observations(&mut self, observations: Vec<DispatchObservation>) {
-        for observation in observations {
-            push_ring(
-                &mut self.dispatch_observations,
-                observation,
-                LATENCY_RING_CAPACITY,
-            );
-        }
-    }
-
+    #[cfg(test)]
     fn dispatch_local(
         &mut self,
         action: Action,
         args: Value,
         class: AdmissionClass,
     ) -> Result<Applied, String> {
-        let stamp = self.clock.stamp();
-        let previous_revision = self.core.revision();
-        let mut candidate = self.core.clone();
-        let mut observations = Vec::new();
-        let clock = &self.clock;
-        let applied = candidate.dispatch_local_observed(action, args, stamp.clone(), |milestone| {
-            observations.push(DispatchObservation {
-                _milestone: milestone,
-                _monotonic_ns: clock.monotonic_ns(),
-            });
-        });
-        if applied.resulting_revision != previous_revision {
-            let next_run_generation = self
-                .next_run_generation_for_dispatch(&applied, previous_revision)
-                .map_err(str::to_owned)?;
-            let mut event = Self::ledger_input("runner.dispatch", "local", &stamp);
-            event.command_id = Some(applied.id.clone());
-            self.commit_candidate(
-                candidate,
-                event,
-                if class == AdmissionClass::LocalSafety {
-                    CommitPolicy::SafetyFallback
-                } else {
-                    CommitPolicy::Ordinary
-                },
-                true,
-            )
-            .map_err(str::to_owned)?;
-            if let Some(next) = next_run_generation {
-                self.run_generation = next;
-                self.prepared_audio = None;
-            }
-        } else {
-            // Rejections and accepted no-ops still retain reducer dedupe/stamp
-            // semantics, but cannot consume the scientific evidence ledger.
-            self.core = candidate;
-        }
-        self.record_dispatch_observations(observations);
-        Ok(applied)
+        self.dispatch_local_traced(action, args, class, None)
     }
 
+    fn dispatch_local_traced(
+        &mut self,
+        action: Action,
+        args: Value,
+        class: AdmissionClass,
+        trace: Option<&LatencyTrace>,
+    ) -> Result<Applied, String> {
+        let result = (|| {
+            let stamp = self.clock.stamp();
+            let previous_revision = self.core.revision();
+            let mut candidate = self.core.clone();
+            let applied = candidate.dispatch_local_observed(action, args, stamp.clone(), |point| {
+                observe_reducer_milestone(trace, point);
+            });
+            if applied.resulting_revision != previous_revision {
+                let next_run_generation = self
+                    .next_run_generation_for_dispatch(&applied, previous_revision)
+                    .map_err(str::to_owned)?;
+                let mut event = Self::ledger_input("runner.dispatch", "local", &stamp);
+                event.command_id = Some(applied.id.clone());
+                self.commit_candidate(
+                    candidate,
+                    event,
+                    if class == AdmissionClass::LocalSafety {
+                        CommitPolicy::SafetyFallback
+                    } else {
+                        CommitPolicy::Ordinary
+                    },
+                    true,
+                )
+                .map_err(str::to_owned)?;
+                if let Some(next) = next_run_generation {
+                    self.run_generation = next;
+                    self.prepared_audio = None;
+                }
+            } else {
+                // Rejections and accepted no-ops still retain reducer
+                // dedupe/stamp semantics, but cannot consume the scientific
+                // evidence ledger.
+                self.core = candidate;
+            }
+            Ok(applied)
+        })();
+        if let Some(trace) = trace {
+            trace.mark(LatencyStage::ReplyReady);
+        }
+        result
+    }
+
+    #[cfg(test)]
     fn dispatch_remote(
         &mut self,
         owner: &RemoteOwner,
         command: CommandRequest,
     ) -> Result<Applied, RemoteSessionError> {
-        let stamp = self.clock.stamp();
-        let previous_revision = self.core.revision();
-        let mut candidate = self.core.clone();
-        let mut observations = Vec::new();
-        let clock = &self.clock;
-        let applied = candidate.dispatch_observed(
-            DispatchOrigin::Remote {
-                controller_id: owner.controller_id.clone(),
-                granted_scopes: owner.granted_scopes.clone(),
-                lease_valid: true,
-            },
-            command,
-            stamp.clone(),
-            |milestone| {
-                observations.push(DispatchObservation {
-                    _milestone: milestone,
-                    _monotonic_ns: clock.monotonic_ns(),
-                });
-            },
-        );
-        if applied.resulting_revision != previous_revision {
-            let next_run_generation = self
-                .next_run_generation_for_dispatch(&applied, previous_revision)
-                .map_err(|_| RemoteSessionError::unavailable())?;
-            let mut event = Self::ledger_input("runner.dispatch", "remote", &stamp);
-            event.authority_id = Some(owner.controller_id.clone());
-            event.command_id = Some(applied.id.clone());
-            self.commit_candidate(candidate, event, CommitPolicy::Ordinary, true)
-                .map_err(|_| RemoteSessionError::unavailable())?;
-            if let Some(next) = next_run_generation {
-                self.run_generation = next;
-                self.prepared_audio = None;
+        self.dispatch_remote_traced(owner, command, None)
+    }
+
+    fn dispatch_remote_traced(
+        &mut self,
+        owner: &RemoteOwner,
+        command: CommandRequest,
+        trace: Option<&LatencyTrace>,
+    ) -> Result<Applied, RemoteSessionError> {
+        (|| {
+            let stamp = self.clock.stamp();
+            let previous_revision = self.core.revision();
+            let mut candidate = self.core.clone();
+            let applied = candidate.dispatch_observed(
+                DispatchOrigin::Remote {
+                    controller_id: owner.controller_id.clone(),
+                    granted_scopes: owner.granted_scopes.clone(),
+                    lease_valid: true,
+                },
+                command,
+                stamp.clone(),
+                |point| observe_reducer_milestone(trace, point),
+            );
+            if applied.resulting_revision != previous_revision {
+                let next_run_generation = self
+                    .next_run_generation_for_dispatch(&applied, previous_revision)
+                    .map_err(|_| RemoteSessionError::unavailable())?;
+                let mut event = Self::ledger_input("runner.dispatch", "remote", &stamp);
+                event.authority_id = Some(owner.controller_id.clone());
+                event.command_id = Some(applied.id.clone());
+                self.commit_candidate(candidate, event, CommitPolicy::Ordinary, true)
+                    .map_err(|_| RemoteSessionError::unavailable())?;
+                if let Some(next) = next_run_generation {
+                    self.run_generation = next;
+                    self.prepared_audio = None;
+                }
+            } else {
+                self.core = candidate;
             }
-        } else {
-            self.core = candidate;
-        }
-        self.record_dispatch_observations(observations);
-        Ok(applied)
+            Ok(applied)
+        })()
     }
 
     fn inspection_source(&self) -> Result<PreparedExecutionSource, &'static str> {
@@ -1084,6 +1060,7 @@ impl OwnerState {
         })
     }
 
+    #[cfg(test)]
     fn dispatch_webview(
         &mut self,
         session_id: String,
@@ -1091,35 +1068,76 @@ impl OwnerState {
         control_sequence: u32,
         command: pps_contracts::CommandBody,
     ) -> Result<RemoteApplied, RemoteSessionError> {
-        let mut owner = self.webview_owner(&session_id, &owner_token)?.clone();
-        if !self.remote_is_current(&owner) {
-            self.expire_deadman_if_due();
-            return Err(RemoteSessionError::new(
-                "controller_lease_expired",
-                "The native remote-controller lease expired.",
-            ));
-        }
-        let previous = owner
-            .last_control_sequence
-            .expect("WebView owners always retain a sequence");
-        if !is_newer_sequence(control_sequence, previous) {
-            return Err(RemoteSessionError::new(
-                "replayed_sequence",
-                "The BRSP control sequence is duplicate, old, or ambiguous.",
-            ));
-        }
-        if !owner.granted_scopes.contains(&command.scope) {
-            return Err(RemoteSessionError::new(
-                "scope_not_granted",
-                "The command scope was not negotiated for this controller.",
-            ));
-        }
-        owner.last_control_sequence = Some(control_sequence);
-        owner.lease_deadline = Instant::now() + self.lease_duration;
-        let epoch = self.core.epoch();
-        self.refresh_owner(owner.clone())?;
-        self.dispatch_remote(&owner, command.into_request(epoch, control_sequence))
+        self.dispatch_webview_traced(session_id, owner_token, control_sequence, command, None)
+    }
+
+    fn dispatch_webview_traced(
+        &mut self,
+        session_id: String,
+        owner_token: String,
+        control_sequence: u32,
+        command: pps_contracts::CommandBody,
+        trace: Option<&LatencyTrace>,
+    ) -> Result<RemoteApplied, RemoteSessionError> {
+        let result = (|| {
+            let mut owner = match self.webview_owner(&session_id, &owner_token) {
+                Ok(owner) => owner.clone(),
+                Err(error) => {
+                    if let Some(trace) = trace {
+                        trace.mark(LatencyStage::AuthorityAuthorizationComplete);
+                    }
+                    return Err(error);
+                }
+            };
+            if !self.remote_is_current(&owner) {
+                self.expire_deadman_if_due();
+                if let Some(trace) = trace {
+                    trace.mark(LatencyStage::AuthorityAuthorizationComplete);
+                }
+                return Err(RemoteSessionError::new(
+                    "controller_lease_expired",
+                    "The native remote-controller lease expired.",
+                ));
+            }
+            let previous = owner
+                .last_control_sequence
+                .expect("WebView owners always retain a sequence");
+            if !is_newer_sequence(control_sequence, previous) {
+                if let Some(trace) = trace {
+                    trace.mark(LatencyStage::AuthorityAuthorizationComplete);
+                }
+                return Err(RemoteSessionError::new(
+                    "replayed_sequence",
+                    "The BRSP control sequence is duplicate, old, or ambiguous.",
+                ));
+            }
+            if !owner.granted_scopes.contains(&command.scope) {
+                if let Some(trace) = trace {
+                    trace.mark(LatencyStage::AuthorityAuthorizationComplete);
+                }
+                return Err(RemoteSessionError::new(
+                    "scope_not_granted",
+                    "The command scope was not negotiated for this controller.",
+                ));
+            }
+            if let Some(trace) = trace {
+                trace.mark(LatencyStage::AuthorityAuthorizationComplete);
+            }
+            owner.last_control_sequence = Some(control_sequence);
+            owner.lease_deadline = Instant::now() + self.lease_duration;
+            let epoch = self.core.epoch();
+            self.refresh_owner(owner.clone())?;
+            self.dispatch_remote_traced(
+                &owner,
+                command.into_request(epoch, control_sequence),
+                trace,
+            )
             .map(RemoteApplied::from_native)
+        })();
+        if let Some(trace) = trace {
+            trace.mark(LatencyStage::ReplyReady);
+        }
+        result
     }
 
     fn renew_lan(&mut self, identity: RemoteOwnerIdentity) -> Result<bool, String> {
@@ -1139,27 +1157,53 @@ impl OwnerState {
             .map_err(|error| error.code)
     }
 
-    fn dispatch_lan(
+    fn dispatch_lan_traced(
         &mut self,
         identity: RemoteOwnerIdentity,
         control_sequence: u32,
         command: pps_contracts::CommandBody,
+        trace: Option<&LatencyTrace>,
     ) -> Result<RemoteApplied, String> {
-        let mut owner = self
-            .owner_by_identity(&identity, RemoteTransport::Lan)
-            .cloned()
-            .ok_or_else(|| "controller authority changed".to_owned())?;
-        if !self.remote_is_current(&owner) {
-            self.expire_deadman_if_due();
-            return Err("controller lease expired".to_owned());
+        let result = (|| {
+            let mut owner = match self
+                .owner_by_identity(&identity, RemoteTransport::Lan)
+                .cloned()
+            {
+                Some(owner) => owner,
+                None => {
+                    if let Some(trace) = trace {
+                        trace.mark(LatencyStage::AuthorityAuthorizationComplete);
+                    }
+                    return Err("controller authority changed".to_owned());
+                }
+            };
+            if !self.remote_is_current(&owner) {
+                self.expire_deadman_if_due();
+                if let Some(trace) = trace {
+                    trace.mark(LatencyStage::AuthorityAuthorizationComplete);
+                }
+                return Err("controller lease expired".to_owned());
+            }
+            // Scope validation remains authoritative in RunnerCore so a
+            // rejected command still receives the same BRSP `applied`
+            // semantics. This read completes the actor-local owner/scope
+            // observation without changing that decision path.
+            let _scope_is_granted = owner.granted_scopes.contains(&command.scope);
+            if let Some(trace) = trace {
+                trace.mark(LatencyStage::AuthorityAuthorizationComplete);
+            }
+            owner.lease_deadline = Instant::now() + self.lease_duration;
+            self.refresh_owner(owner.clone())
+                .map_err(|error| error.code)?;
+            let request = command.into_request(self.core.epoch(), control_sequence);
+            self.dispatch_remote_traced(&owner, request, trace)
+                .map(RemoteApplied::from_native)
+                .map_err(|error| error.code)
+        })();
+        if let Some(trace) = trace {
+            trace.mark(LatencyStage::ReplyReady);
         }
-        owner.lease_deadline = Instant::now() + self.lease_duration;
-        self.refresh_owner(owner.clone())
-            .map_err(|error| error.code)?;
-        let request = command.into_request(self.core.epoch(), control_sequence);
-        self.dispatch_remote(&owner, request)
-            .map(RemoteApplied::from_native)
-            .map_err(|error| error.code)
+        result
     }
 
     fn revoke_owner_if_matches(
@@ -1337,22 +1381,29 @@ fn stale_owner_error() -> RemoteSessionError {
     )
 }
 
+fn observe_reducer_milestone(trace: Option<&LatencyTrace>, milestone: DispatchMilestone) {
+    let Some(trace) = trace else {
+        return;
+    };
+    match milestone {
+        DispatchMilestone::ValidationCompleted { .. } => {
+            trace.mark(LatencyStage::ReducerValidationComplete);
+        }
+        DispatchMilestone::TransitionEvaluated { accepted: true, .. } => {
+            trace.mark(LatencyStage::ReducerApplied);
+        }
+        DispatchMilestone::DedupeResolved { .. }
+        | DispatchMilestone::TransitionEvaluated {
+            accepted: false, ..
+        } => {}
+    }
+}
+
 fn lease_expiry_unix_ms(stamp: &ClockStamp, lease: Duration) -> u64 {
     stamp
         .unix_ms
         .saturating_add(lease.as_millis() as u64)
         .min(JSON_MAX_SAFE_INTEGER)
-}
-
-fn duration_ns(duration: Duration) -> u64 {
-    duration.as_nanos().min(JSON_MAX_SAFE_INTEGER as u128) as u64
-}
-
-fn push_ring<T>(ring: &mut VecDeque<T>, value: T, capacity: usize) {
-    if ring.len() == capacity {
-        ring.pop_front();
-    }
-    ring.push_back(value);
 }
 
 pub(crate) struct ExecutionOwner {
@@ -1415,8 +1466,6 @@ impl ExecutionOwner {
                     owner_generation: 0,
                     ledger,
                     evidence_unavailable: false,
-                    request_latency: VecDeque::with_capacity(LATENCY_RING_CAPACITY),
-                    dispatch_observations: VecDeque::with_capacity(LATENCY_RING_CAPACITY),
                     clock,
                     lease_duration,
                     state_tx,
@@ -1448,11 +1497,24 @@ impl ExecutionOwner {
         T: Send + 'static,
         F: FnOnce(&mut OwnerState) -> T + Send + 'static,
     {
+        self.submit_traced(class, label, None, operation)
+    }
+
+    fn submit_traced<T, F>(
+        &self,
+        class: AdmissionClass,
+        _label: &'static str,
+        trace: Option<LatencyTrace>,
+        operation: F,
+    ) -> Result<oneshot::Receiver<T>, OwnerSubmitError>
+    where
+        T: Send + 'static,
+        F: FnOnce(&mut OwnerState) -> T + Send + 'static,
+    {
         let (reply, receiver) = oneshot::channel();
         self.mailbox.push(MailboxEntry {
             class,
-            label,
-            admitted_at: Instant::now(),
+            trace,
             task: Box::new(move |state| {
                 let _ = reply.send(operation(state));
             }),
@@ -1476,6 +1538,23 @@ impl ExecutionOwner {
             .map_err(|_| OwnerSubmitError::Closed)
     }
 
+    #[cfg(test)]
+    fn blocking_traced<T, F>(
+        &self,
+        class: AdmissionClass,
+        label: &'static str,
+        trace: LatencyTrace,
+        operation: F,
+    ) -> Result<T, OwnerSubmitError>
+    where
+        T: Send + 'static,
+        F: FnOnce(&mut OwnerState) -> T + Send + 'static,
+    {
+        self.submit_traced(class, label, Some(trace), operation)?
+            .blocking_recv()
+            .map_err(|_| OwnerSubmitError::Closed)
+    }
+
     async fn asynchronous<T, F>(
         &self,
         class: AdmissionClass,
@@ -1487,6 +1566,22 @@ impl ExecutionOwner {
         F: FnOnce(&mut OwnerState) -> T + Send + 'static,
     {
         self.submit(class, label, operation)?
+            .await
+            .map_err(|_| OwnerSubmitError::Closed)
+    }
+
+    async fn asynchronous_traced<T, F>(
+        &self,
+        class: AdmissionClass,
+        label: &'static str,
+        trace: LatencyTrace,
+        operation: F,
+    ) -> Result<T, OwnerSubmitError>
+    where
+        T: Send + 'static,
+        F: FnOnce(&mut OwnerState) -> T + Send + 'static,
+    {
+        self.submit_traced(class, label, Some(trace), operation)?
             .await
             .map_err(|_| OwnerSubmitError::Closed)
     }
@@ -1513,6 +1608,7 @@ impl ExecutionOwner {
         })
     }
 
+    #[cfg(test)]
     pub(crate) async fn dispatch_local(
         &self,
         action: Action,
@@ -1523,6 +1619,34 @@ impl ExecutionOwner {
             state.dispatch_local(action, args, class)
         })
         .await
+    }
+
+    pub(crate) async fn dispatch_local_traced(
+        &self,
+        action: Action,
+        args: Value,
+        trace: LatencyTrace,
+    ) -> Result<Result<Applied, String>, OwnerSubmitError> {
+        let class = local_action_class(action);
+        let operation_trace = trace.clone();
+        self.asynchronous_traced(class, "dispatch_local", trace, move |state| {
+            state.dispatch_local_traced(action, args, class, Some(&operation_trace))
+        })
+        .await
+    }
+
+    #[cfg(test)]
+    fn dispatch_local_traced_blocking(
+        &self,
+        action: Action,
+        args: Value,
+        trace: LatencyTrace,
+    ) -> Result<Result<Applied, String>, OwnerSubmitError> {
+        let class = local_action_class(action);
+        let operation_trace = trace.clone();
+        self.blocking_traced(class, "dispatch_local", trace, move |state| {
+            state.dispatch_local_traced(action, args, class, Some(&operation_trace))
+        })
     }
 
     #[cfg(test)]
@@ -1736,16 +1860,29 @@ impl ExecutionOwner {
         })
     }
 
-    pub(crate) async fn dispatch_webview(
+    pub(crate) async fn dispatch_webview_traced(
         &self,
         session_id: String,
         owner_token: String,
         control_sequence: u32,
         command: pps_contracts::CommandBody,
+        trace: LatencyTrace,
     ) -> Result<Result<RemoteApplied, RemoteSessionError>, OwnerSubmitError> {
-        self.asynchronous(AdmissionClass::Normal, "dispatch_webview", move |state| {
-            state.dispatch_webview(session_id, owner_token, control_sequence, command)
-        })
+        let operation_trace = trace.clone();
+        self.asynchronous_traced(
+            AdmissionClass::Normal,
+            "dispatch_webview",
+            trace,
+            move |state| {
+                state.dispatch_webview_traced(
+                    session_id,
+                    owner_token,
+                    control_sequence,
+                    command,
+                    Some(&operation_trace),
+                )
+            },
+        )
         .await
     }
 
@@ -1806,15 +1943,27 @@ impl ExecutionOwner {
         .await
     }
 
-    pub(crate) async fn dispatch_lan(
+    pub(crate) async fn dispatch_lan_traced(
         &self,
         identity: RemoteOwnerIdentity,
         control_sequence: u32,
         command: pps_contracts::CommandBody,
+        trace: LatencyTrace,
     ) -> Result<Result<RemoteApplied, String>, OwnerSubmitError> {
-        self.asynchronous(AdmissionClass::Normal, "dispatch_lan", move |state| {
-            state.dispatch_lan(identity, control_sequence, command)
-        })
+        let operation_trace = trace.clone();
+        self.asynchronous_traced(
+            AdmissionClass::Normal,
+            "dispatch_lan",
+            trace,
+            move |state| {
+                state.dispatch_lan_traced(
+                    identity,
+                    control_sequence,
+                    command,
+                    Some(&operation_trace),
+                )
+            },
+        )
         .await
     }
 
@@ -1978,11 +2127,10 @@ fn authority_loop(mailbox: &Mailbox, state: &mut OwnerState) {
             break;
         }
         if let Some(entry) = mailbox.pop() {
-            let started_at = Instant::now();
-            let label = entry.label;
-            let admitted_at = entry.admitted_at;
+            if let Some(trace) = entry.trace.as_ref() {
+                trace.mark(LatencyStage::AuthorityDequeue);
+            }
             (entry.task)(state);
-            state.record_request_latency(label, admitted_at, started_at, Instant::now());
             continue;
         }
         mailbox.wait(state.next_deadman_delay());
@@ -2003,6 +2151,7 @@ fn local_action_class(action: Action) -> AdmissionClass {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::latency_diagnostics::{LatencyRoute, NativeLatencyDiagnostics, TraceOutcome};
     use pps_contracts::AppliedStatus;
     use std::sync::Barrier;
 
@@ -2929,20 +3078,25 @@ mod tests {
     }
 
     #[test]
-    fn latency_rings_are_bounded() {
+    fn diagnostics_contention_cannot_block_or_change_an_authority_transition() {
         let owner = owner(Duration::from_secs(5));
-        for _ in 0..(LATENCY_RING_CAPACITY + 32) {
-            owner.view_blocking().unwrap();
-        }
-        let lengths = owner
-            .blocking(AdmissionClass::Normal, "latency_lengths", |state| {
-                (
-                    state.request_latency.len(),
-                    state.dispatch_observations.len(),
+        let diagnostics = NativeLatencyDiagnostics::new();
+        diagnostics.while_store_locked_for_test(|| {
+            let mut trace = diagnostics.start_trace(LatencyRoute::LocalTauri);
+            let applied = owner
+                .dispatch_local_traced_blocking(
+                    Action::PackagePrepareDemo,
+                    serde_json::json!({}),
+                    trace.trace(),
                 )
-            })
-            .unwrap();
-        assert!(lengths.0 <= LATENCY_RING_CAPACITY);
-        assert!(lengths.1 <= LATENCY_RING_CAPACITY);
+                .unwrap()
+                .unwrap();
+            assert_eq!(applied.status, AppliedStatus::Accepted);
+            trace.finish(TraceOutcome::Applied);
+        });
+        let snapshot = owner.view_blocking().unwrap().snapshot;
+        assert!(snapshot.package_verified);
+        assert_eq!(diagnostics.summary().count, 0);
+        assert_eq!(diagnostics.summary().dropped_count, 1);
     }
 }

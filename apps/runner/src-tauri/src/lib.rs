@@ -1,4 +1,5 @@
 mod execution_owner;
+mod latency_diagnostics;
 mod prepared_audio;
 mod prepared_execution;
 mod remote;
@@ -6,7 +7,8 @@ mod runtime;
 
 use std::{path::PathBuf, str::FromStr};
 
-use pps_contracts::{Action, Applied, RunnerSnapshot};
+use latency_diagnostics::{LatencyRoute, LatencyStage, NativeLatencySummary, TraceOutcome};
+use pps_contracts::{Action, Applied, AppliedStatus, RunnerSnapshot};
 use pps_session_package::{verify_prepared_session, PreparedSessionSummary, VerificationRequest};
 use prepared_audio::{prepare_verified_audio, PreparedAudioError, PreparedAudioSummary};
 use prepared_execution::{
@@ -65,8 +67,24 @@ async fn runner_dispatch(
     args: Value,
     state: tauri::State<'_, AppRuntime>,
 ) -> Result<Applied, String> {
-    let action = Action::from_str(&action).map_err(|error| error.to_string())?;
-    state.dispatch_local_async(action, args).await
+    let mut trace = state.start_latency_trace(LatencyRoute::LocalTauri);
+    let parsed_action = Action::from_str(&action);
+    trace.mark(LatencyStage::AdapterValidationComplete);
+    let result = match parsed_action {
+        Ok(action) => {
+            state
+                .dispatch_local_traced_async(action, args, trace.trace())
+                .await
+        }
+        Err(error) => Err(error.to_string()),
+    };
+    trace.mark(LatencyStage::ReplyReady);
+    trace.mark(LatencyStage::AdapterHandoff);
+    trace.finish(match &result {
+        Ok(applied) if applied.status == AppliedStatus::Accepted => TraceOutcome::Applied,
+        Ok(_) | Err(_) => TraceOutcome::Rejected,
+    });
+    result
 }
 
 #[tauri::command]
@@ -356,8 +374,35 @@ async fn remote_session_dispatch(
     window: tauri::WebviewWindow,
     state: tauri::State<'_, AppRuntime>,
 ) -> Result<RemoteApplied, RemoteSessionError> {
+    let mut trace = state.start_latency_trace(LatencyRoute::WebViewVdo);
+    let window_validation = require_main_window(&window);
+    let result = match window_validation {
+        Ok(()) => {
+            state
+                .dispatch_remote_session_traced_async(request, trace.trace())
+                .await
+        }
+        Err(error) => {
+            trace.mark(LatencyStage::AdapterValidationComplete);
+            Err(error)
+        }
+    };
+    trace.mark(LatencyStage::ReplyReady);
+    trace.mark(LatencyStage::AdapterHandoff);
+    trace.finish(match &result {
+        Ok(applied) if applied.status == AppliedStatus::Accepted => TraceOutcome::Applied,
+        Ok(_) | Err(_) => TraceOutcome::Rejected,
+    });
+    result
+}
+
+#[tauri::command]
+async fn native_latency_diagnostics(
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<NativeLatencySummary, RemoteSessionError> {
     require_main_window(&window)?;
-    state.dispatch_remote_session_async(request).await
+    Ok(state.latency_summary())
 }
 
 #[tauri::command]
@@ -388,7 +433,8 @@ pub fn run() {
             remote_session_claim,
             remote_session_renew,
             remote_session_dispatch,
-            remote_session_revoke
+            remote_session_revoke,
+            native_latency_diagnostics
         ])
         .run(tauri::generate_context!())
         .expect("error while running PPS Experiment Runner preview");

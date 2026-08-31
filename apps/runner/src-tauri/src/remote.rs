@@ -29,6 +29,7 @@ use tower_http::services::ServeDir;
 
 use crate::{
     execution_owner::RemoteOwnerIdentity,
+    latency_diagnostics::{LatencyRoute, LatencyStage, LatencyTraceGuard, TraceOutcome},
     runtime::{AppRuntime, RemoteApplied, RemoteRunnerSnapshot},
 };
 
@@ -276,6 +277,10 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
                 let message = incoming.map_err(|error| error.to_string())?;
                 match message {
                     Message::Text(text) => {
+                        // This is the earliest native boundary after Axum has
+                        // yielded the complete frame. It does not include the
+                        // browser, radio, WebRTC, or remote-host clock.
+                        let ingress = runtime.capture_latency_ingress();
                         if Instant::now() >= lease_deadline {
                             controller_guard.revoke("remote_lease_expired").await?;
                             return Err("controller lease expired".to_owned());
@@ -285,25 +290,55 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
                         }
                         let wire: WireEnvelope = serde_json::from_str(&text)
                             .map_err(|_| "malformed BRSP control envelope".to_owned())?;
-                        validate_wire_identity(&wire, &controller_hello)?;
+                        let mut command_trace = (wire.message_type == "command").then(|| {
+                            runtime.start_latency_trace_from(LatencyRoute::LanWebSocket, ingress)
+                        });
+                        if let Err(error) = validate_wire_identity(&wire, &controller_hello) {
+                            if let Some(trace) = command_trace.as_mut() {
+                                trace.mark(LatencyStage::AdapterValidationComplete);
+                                trace.finish(TraceOutcome::Rejected);
+                            }
+                            return Err(error);
+                        }
                         if remote_control_sequence.accept(wire.sequence) != SequenceDecision::Fresh {
-                            send_protocol_error(
-                                socket,
+                            if let Some(trace) = command_trace.as_ref() {
+                                trace.mark(LatencyStage::AdapterValidationComplete);
+                            }
+                            let envelope = prepare_traced_protocol_error(
                                 &target_hello,
                                 &mut target_control_sequence,
                                 "replayed_sequence",
                                 "Control sequence is duplicate, old, or half-range ambiguous.",
-                            ).await?;
+                                command_trace.as_ref(),
+                            );
+                            let send_result = send_control(socket, &envelope).await;
+                            finish_rejected_protocol_trace(
+                                command_trace.as_mut(),
+                                send_result.is_ok(),
+                            );
+                            send_result?;
                             continue;
                         }
                         match wire.message_type.as_str() {
                             "command" => {
-                                let frame: CommandEnvelope = typed_from_wire(wire, "command")?;
+                                let mut trace = command_trace
+                                    .take()
+                                    .expect("a command frame creates one native trace");
+                                let frame: CommandEnvelope = match typed_from_wire(wire, "command") {
+                                    Ok(frame) => frame,
+                                    Err(error) => {
+                                        trace.mark(LatencyStage::AdapterValidationComplete);
+                                        trace.finish(TraceOutcome::Rejected);
+                                        return Err(error);
+                                    }
+                                };
+                                trace.mark(LatencyStage::AdapterValidationComplete);
                                 let applied = runtime
-                                    .dispatch_lan_controller(
+                                    .dispatch_lan_controller_traced(
                                         controller_guard.identity.clone(),
                                         frame.sequence,
                                         frame.body,
+                                        trace.trace(),
                                     )
                                     .await?;
                                 lease_deadline = Instant::now() + CONTROLLER_LEASE;
@@ -315,7 +350,19 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
                                     next_sequence(&mut target_control_sequence),
                                     remote_applied_body(&applied),
                                 );
-                                send_control(socket, &envelope).await?;
+                                trace.mark(LatencyStage::AdapterHandoff);
+                                let send_result = send_control(socket, &envelope).await;
+                                if send_result.is_ok() {
+                                    trace.mark(LatencyStage::SendCompleted);
+                                }
+                                trace.finish(if send_result.is_err() {
+                                    TraceOutcome::Failed
+                                } else if applied.status == AppliedStatus::Accepted {
+                                    TraceOutcome::Applied
+                                } else {
+                                    TraceOutcome::Rejected
+                                });
+                                send_result?;
                                 if can_read {
                                     pending_state = true;
                                 }
@@ -574,6 +621,44 @@ async fn send_protocol_error(
         ),
     )
     .await
+}
+
+fn prepare_traced_protocol_error(
+    target_hello: &HelloEnvelope,
+    control_sequence: &mut u32,
+    code: &str,
+    message: &str,
+    trace: Option<&LatencyTraceGuard>,
+) -> ErrorEnvelope {
+    let envelope = Envelope::new(
+        "error",
+        target_hello.session_id.clone(),
+        target_hello.sender_id.clone(),
+        target_hello.sender_epoch,
+        next_sequence(control_sequence),
+        ErrorBody {
+            code: code.to_owned(),
+            message: message.to_owned(),
+        },
+    );
+    if let Some(trace) = trace {
+        trace.mark(LatencyStage::ReplyReady);
+        trace.mark(LatencyStage::AdapterHandoff);
+    }
+    envelope
+}
+
+fn finish_rejected_protocol_trace(trace: Option<&mut LatencyTraceGuard>, send_succeeded: bool) {
+    if let Some(trace) = trace {
+        if send_succeeded {
+            trace.mark(LatencyStage::SendCompleted);
+        }
+        trace.finish(if send_succeeded {
+            TraceOutcome::Rejected
+        } else {
+            TraceOutcome::Failed
+        });
+    }
 }
 
 struct ActiveControllerGuard {
@@ -965,6 +1050,7 @@ async fn send_relay_text(socket: &mut WebSocket, text: String) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::latency_diagnostics::NativeLatencyDiagnostics;
     use pps_contracts::{Action, RunnerPhase};
 
     async fn active_guard(
@@ -995,6 +1081,80 @@ mod tests {
         assert!(valid_room_id("room-1234"));
         assert!(!valid_room_id("../escape"));
         assert!(!valid_room_id("tiny"));
+    }
+
+    #[test]
+    fn replay_error_trace_is_ready_before_handoff_and_never_enters_authority() {
+        let diagnostics = NativeLatencyDiagnostics::new();
+        let mut trace = diagnostics.start_trace(LatencyRoute::LanWebSocket);
+        trace.mark(LatencyStage::AdapterValidationComplete);
+        let target = Envelope::new(
+            "hello",
+            "session_1234",
+            "target_12345",
+            1,
+            0,
+            HelloBody {
+                role: BrspRole::Target,
+                nonce: "dGFyZ2V0LW5vbmNlLTEyMzQ1Ng".to_owned(),
+                capabilities: vec![],
+                requested_scopes: vec![],
+                granted_scopes: vec![],
+            },
+        );
+        let mut sequence = 0;
+        let _ = prepare_traced_protocol_error(
+            &target,
+            &mut sequence,
+            "replayed_sequence",
+            "A bounded public error.",
+            Some(&trace),
+        );
+        finish_rejected_protocol_trace(Some(&mut trace), true);
+
+        let summary = diagnostics.summary();
+        let route = summary
+            .routes
+            .iter()
+            .find(|route| route.route == LatencyRoute::LanWebSocket)
+            .unwrap();
+        for stage in [
+            LatencyStage::AdapterValidationComplete,
+            LatencyStage::ReplyReady,
+            LatencyStage::AdapterHandoff,
+            LatencyStage::SendCompleted,
+        ] {
+            assert_eq!(
+                route.stages[stage.index()]
+                    .elapsed_from_native_ingress
+                    .sample_count,
+                1
+            );
+        }
+        for stage in [
+            LatencyStage::AuthorityAdmission,
+            LatencyStage::AuthorityDequeue,
+            LatencyStage::AuthorityAuthorizationComplete,
+            LatencyStage::ReducerValidationComplete,
+            LatencyStage::ReducerApplied,
+        ] {
+            assert_eq!(
+                route.stages[stage.index()]
+                    .elapsed_from_native_ingress
+                    .sample_count,
+                0
+            );
+        }
+        let elapsed = |stage: LatencyStage| {
+            route.stages[stage.index()]
+                .elapsed_from_native_ingress
+                .p50_us
+        };
+        assert!(
+            elapsed(LatencyStage::AdapterValidationComplete) <= elapsed(LatencyStage::ReplyReady)
+        );
+        assert!(elapsed(LatencyStage::ReplyReady) <= elapsed(LatencyStage::AdapterHandoff));
+        assert!(elapsed(LatencyStage::AdapterHandoff) <= elapsed(LatencyStage::SendCompleted));
     }
 
     #[test]

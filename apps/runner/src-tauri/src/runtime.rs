@@ -21,6 +21,10 @@ use tokio::sync::broadcast;
 use crate::execution_owner::{
     AuthorityView, ExecutionOwner, LanOwnerReceipt, OwnerSubmitError, RemoteOwnerIdentity,
 };
+use crate::latency_diagnostics::{
+    LatencyRoute, LatencyStage, LatencyTrace, LatencyTraceGuard, NativeIngress,
+    NativeLatencyDiagnostics, NativeLatencySummary,
+};
 use crate::prepared_audio::{
     PreparedAudioCandidate, PreparedAudioLookup, PreparedAudioSource, PreparedAudioSummary,
 };
@@ -247,6 +251,7 @@ pub struct RemoteServerState {
 
 pub struct RuntimeShared {
     pub authority: ExecutionOwner,
+    latency_diagnostics: NativeLatencyDiagnostics,
     prepared_session_selection_in_flight: AtomicBool,
     prepared_execution_inspection_in_flight: AtomicBool,
     prepared_audio_preparation_in_flight: AtomicBool,
@@ -348,6 +353,7 @@ impl AppRuntime {
         .expect("the Runner authority thread must start");
         let shared = RuntimeShared {
             authority,
+            latency_diagnostics: NativeLatencyDiagnostics::new(),
             prepared_session_selection_in_flight: AtomicBool::new(false),
             prepared_execution_inspection_in_flight: AtomicBool::new(false),
             prepared_audio_preparation_in_flight: AtomicBool::new(false),
@@ -374,6 +380,26 @@ impl AppRuntime {
             .await
             .map(|view| view.snapshot)
             .map_err(owner_runtime_error)
+    }
+
+    pub(crate) fn start_latency_trace(&self, route: LatencyRoute) -> LatencyTraceGuard {
+        self.0.latency_diagnostics.start_trace(route)
+    }
+
+    pub(crate) fn capture_latency_ingress(&self) -> NativeIngress {
+        self.0.latency_diagnostics.capture_ingress()
+    }
+
+    pub(crate) fn start_latency_trace_from(
+        &self,
+        route: LatencyRoute,
+        ingress: NativeIngress,
+    ) -> LatencyTraceGuard {
+        self.0.latency_diagnostics.start_trace_from(route, ingress)
+    }
+
+    pub(crate) fn latency_summary(&self) -> NativeLatencySummary {
+        self.0.latency_diagnostics.summary()
     }
 
     /// Reserve the one native prepared-session picker/verification operation.
@@ -542,6 +568,7 @@ impl AppRuntime {
             .map_err(owner_runtime_error)?
     }
 
+    #[cfg(test)]
     pub async fn dispatch_local_async(
         &self,
         action: Action,
@@ -550,6 +577,19 @@ impl AppRuntime {
         self.0
             .authority
             .dispatch_local(action, args)
+            .await
+            .map_err(owner_runtime_error)?
+    }
+
+    pub async fn dispatch_local_traced_async(
+        &self,
+        action: Action,
+        args: Value,
+        trace: LatencyTrace,
+    ) -> Result<Applied, String> {
+        self.0
+            .authority
+            .dispatch_local_traced(action, args, trace)
             .await
             .map_err(owner_runtime_error)?
     }
@@ -691,18 +731,22 @@ impl AppRuntime {
             .map_err(owner_remote_error)?
     }
 
-    pub async fn dispatch_remote_session_async(
+    pub async fn dispatch_remote_session_traced_async(
         &self,
         request: RemoteSessionDispatchRequest,
+        trace: LatencyTrace,
     ) -> Result<RemoteApplied, RemoteSessionError> {
-        validate_owner_request(&request.session_id, &request.owner_token)?;
+        let adapter_validation = validate_owner_request(&request.session_id, &request.owner_token);
+        trace.mark(LatencyStage::AdapterValidationComplete);
+        adapter_validation?;
         self.0
             .authority
-            .dispatch_webview(
+            .dispatch_webview_traced(
                 request.session_id,
                 request.owner_token,
                 request.control_sequence,
                 request.command,
+                trace,
             )
             .await
             .map_err(owner_remote_error)?
@@ -938,15 +982,16 @@ impl AppRuntime {
             .map_err(owner_runtime_error)
     }
 
-    pub async fn dispatch_lan_controller(
+    pub async fn dispatch_lan_controller_traced(
         &self,
         identity: RemoteOwnerIdentity,
         control_sequence: u32,
         command: CommandBody,
+        trace: LatencyTrace,
     ) -> Result<RemoteApplied, String> {
         self.0
             .authority
-            .dispatch_lan(identity, control_sequence, command)
+            .dispatch_lan_traced(identity, control_sequence, command, trace)
             .await
             .map_err(owner_runtime_error)?
     }
@@ -1117,6 +1162,7 @@ fn validate_owner_request(session_id: &str, owner_token: &str) -> Result<(), Rem
 mod tests {
     use super::*;
     use crate::{
+        latency_diagnostics::{LatencyStage, TraceOutcome},
         prepared_audio::{prepare_verified_audio, MAXIMUM_CACHED_DECODED_BYTES},
         prepared_execution::compile_prepared_execution,
     };
@@ -2186,5 +2232,196 @@ mod tests {
             "surprise": true
         });
         assert!(serde_json::from_value::<RemoteSessionClaimRequest>(unknown_field).is_err());
+    }
+
+    #[tokio::test]
+    async fn malformed_webview_owner_trace_stops_before_authority_admission() {
+        let runtime = AppRuntime::new();
+        let mut trace = runtime.start_latency_trace(LatencyRoute::WebViewVdo);
+        let rejected = runtime
+            .dispatch_remote_session_traced_async(
+                RemoteSessionDispatchRequest {
+                    session_id: "session_1234".to_owned(),
+                    owner_token: "!".to_owned(),
+                    control_sequence: 1,
+                    command: CommandBody {
+                        command_id: "command-malformed-owner".to_owned(),
+                        scope: Scope::SessionTransport,
+                        action: Action::PartStart,
+                        args: serde_json::json!({"part_number": 1}),
+                        expected_revision: Some(0),
+                    },
+                },
+                trace.trace(),
+            )
+            .await;
+        assert_eq!(rejected.unwrap_err().code, "invalid_owner_token");
+        // These are the outer Tauri handler's bounded-error return points.
+        trace.mark(LatencyStage::ReplyReady);
+        trace.mark(LatencyStage::AdapterHandoff);
+        trace.finish(TraceOutcome::Rejected);
+
+        let summary = runtime.latency_summary();
+        let route = summary
+            .routes
+            .iter()
+            .find(|route| route.route == LatencyRoute::WebViewVdo)
+            .unwrap();
+        for stage in [
+            LatencyStage::AdapterValidationComplete,
+            LatencyStage::ReplyReady,
+            LatencyStage::AdapterHandoff,
+        ] {
+            assert_eq!(
+                route.stages[stage.index()]
+                    .elapsed_from_native_ingress
+                    .sample_count,
+                1
+            );
+        }
+        for stage in [
+            LatencyStage::AuthorityAdmission,
+            LatencyStage::AuthorityDequeue,
+            LatencyStage::AuthorityAuthorizationComplete,
+            LatencyStage::ReducerValidationComplete,
+            LatencyStage::ReducerApplied,
+        ] {
+            assert_eq!(
+                route.stages[stage.index()]
+                    .elapsed_from_native_ingress
+                    .sample_count,
+                0
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn native_webview_traces_cover_applied_reducer_rejection_and_old_owner_paths() {
+        let (runtime, old, current) = tokio::task::spawn_blocking(|| {
+            let runtime = locally_ready_runtime();
+            let old = claim_webview_controller(
+                &runtime,
+                "controller-trace-old",
+                Scope::DEFAULT_REMOTE.to_vec(),
+            );
+            runtime
+                .revoke_remote_session(RemoteSessionOwnerRequest {
+                    session_id: old.session_id.clone(),
+                    owner_token: old.owner_token.clone(),
+                })
+                .unwrap();
+            let current = claim_webview_controller(
+                &runtime,
+                "controller-trace-current",
+                Scope::DEFAULT_REMOTE.to_vec(),
+            );
+            (runtime, old, current)
+        })
+        .await
+        .unwrap();
+
+        let mut stale_trace = runtime.start_latency_trace(LatencyRoute::WebViewVdo);
+        let stale = runtime
+            .dispatch_remote_session_traced_async(
+                remote_command(
+                    &old,
+                    3,
+                    "trace-old-owner",
+                    Scope::SessionTransport,
+                    Action::PartStart,
+                    serde_json::json!({"part_number": 1}),
+                ),
+                stale_trace.trace(),
+            )
+            .await;
+        assert_eq!(stale.unwrap_err().code, "stale_owner");
+        stale_trace.mark(LatencyStage::AdapterHandoff);
+        stale_trace.finish(TraceOutcome::Rejected);
+
+        let mut rejected_trace = runtime.start_latency_trace(LatencyRoute::WebViewVdo);
+        let rejected = runtime
+            .dispatch_remote_session_traced_async(
+                remote_command(
+                    &current,
+                    3,
+                    "trace-reducer-rejection",
+                    Scope::SessionTransport,
+                    Action::PartStart,
+                    serde_json::json!({"part_number": 99}),
+                ),
+                rejected_trace.trace(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(rejected.status, AppliedStatus::Rejected);
+        rejected_trace.mark(LatencyStage::AdapterHandoff);
+        rejected_trace.finish(TraceOutcome::Rejected);
+
+        let mut applied_trace = runtime.start_latency_trace(LatencyRoute::WebViewVdo);
+        let applied = runtime
+            .dispatch_remote_session_traced_async(
+                remote_command(
+                    &current,
+                    4,
+                    "trace-applied",
+                    Scope::SessionTransport,
+                    Action::PartStart,
+                    serde_json::json!({"part_number": 1}),
+                ),
+                applied_trace.trace(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(applied.status, AppliedStatus::Accepted);
+        applied_trace.mark(LatencyStage::AdapterHandoff);
+        applied_trace.finish(TraceOutcome::Applied);
+
+        let summary = runtime.latency_summary();
+        let route = summary
+            .routes
+            .iter()
+            .find(|route| route.route == LatencyRoute::WebViewVdo)
+            .unwrap();
+        assert_eq!(summary.count, 3);
+        assert_eq!(summary.unfinished_count, 0);
+        assert_eq!(route.count, 3);
+        assert_eq!(
+            route.stages[LatencyStage::AuthorityAuthorizationComplete.index()]
+                .elapsed_from_native_ingress
+                .sample_count,
+            3
+        );
+        assert_eq!(
+            route.stages[LatencyStage::ReducerValidationComplete.index()]
+                .elapsed_from_native_ingress
+                .sample_count,
+            2
+        );
+        assert_eq!(
+            route.stages[LatencyStage::ReducerApplied.index()]
+                .elapsed_from_native_ingress
+                .sample_count,
+            1
+        );
+        assert_eq!(
+            route.stages[LatencyStage::ReplyReady.index()]
+                .elapsed_from_native_ingress
+                .sample_count,
+            3
+        );
+        assert!(
+            route.stages[LatencyStage::ReplyReady.index()]
+                .elapsed_from_native_ingress
+                .worst_us
+                >= route.stages[LatencyStage::ReducerApplied.index()]
+                    .elapsed_from_native_ingress
+                    .worst_us
+        );
+        assert_eq!(
+            route.stages[LatencyStage::SendCompleted.index()]
+                .elapsed_from_native_ingress
+                .sample_count,
+            0
+        );
     }
 }

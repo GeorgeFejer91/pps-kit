@@ -13,6 +13,7 @@ fn main() {
             "remote_session_renew",
             "remote_session_dispatch",
             "remote_session_revoke",
+            "native_latency_diagnostics",
         ]),
     ))
     .expect("failed to build the PPS Runner command manifest")

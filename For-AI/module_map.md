@@ -126,10 +126,25 @@ Only accepted dispatches that change semantic revision append to the scientific
 ledger. Rejected commands and accepted no-ops do not consume that capacity.
 Ordinary commits reserve evidence space for safety, and pause/revoke remains
 fail-safe if evidence is exhausted while latching `evidence_unavailable`.
-Bounded internal request/dispatch observation rings exist, but the local
-p50/p95/p99/worst diagnostic projection is not implemented. Verified real V1
-packages remain schedule-inspection-only and non-executable until native
-audio/output and evidence boundaries are implemented and qualified.
+Native semantic request evidence now lives in
+`apps/runner/src-tauri/src/latency_diagnostics.rs`: a 512-trace bounded,
+local-only store with opaque internal trace IDs and aggregate schema
+`pps-runner-native-latency-summary.v1`. It reports completed, dropped whole-
+trace, dropped stage-update, interrupted, and unfinished counts plus per-route/
+stage p50/p95/p99/worst integer microseconds from one process monotonic clock;
+interrupted and unfinished traces do not populate route percentiles. Local
+Tauri and WebView-VDO measurements stop at the Rust handler handoff; LAN command
+measurements begin when Axum yields a text frame and may end only after the
+reply socket send completes. Browser
+`performance.now()`, SDK RTT, WebRTC, remote-host, and physical effect timing
+are separate evidence domains. Adapter validation, remote authority
+authorization, reducer validation, and an accepted reducer transition are
+distinct milestones. The
+accepted-transition milestone precedes ledger commit and effect initiation;
+diagnostic contention drops evidence without blocking or mutating authority.
+No release-build or physical-route latency result is recorded yet. Verified
+real V1 packages remain schedule-inspection-only and non-executable until
+native audio/output and evidence boundaries are implemented and qualified.
 
 Remote state uses `runtime.rs`'s exact `RemoteRunnerSnapshot` projection with
 schema `pps-runner-public-snapshot.v1`, not the full operator

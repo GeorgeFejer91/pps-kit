@@ -16,6 +16,7 @@
     "allow-remote-session-claim",
     "allow-remote-session-renew",
     "allow-remote-session-dispatch",
-    "allow-remote-session-revoke"
+    "allow-remote-session-revoke",
+    "allow-native-latency-diagnostics"
   ]
 }
