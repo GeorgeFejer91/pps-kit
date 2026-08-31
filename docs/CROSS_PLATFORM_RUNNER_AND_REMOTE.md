@@ -197,9 +197,16 @@ cross Tauri IPC. The WebView receives only path-free counts and block summaries
 explicitly marked `schedule-only`, `unqualified`, and `executable = false`.
 This proves compatibility and resource bounds, not playback, response timing,
 or scientific execution readiness. WAV sample-rate probing remains a parity
-gate before this compiler can feed legacy execution. Prepared WAV content is
-deliberately not bound by this schedule-only operation; native audio preload
-must bind and decode those bytes before arming is possible.
+gate before this compiler can feed legacy execution. The package verifier now
+streams and hash-binds each prepared WAV into a native-only receipt, with a
+768 MiB per-file and 8 GiB per-package encoded-byte ceiling. The pure
+`pps-runner-audio` crate can then reopen one exact receipt, hash every byte
+(including trailing chunks), and decode only PCM16 legacy two-channel
+`[tactile, audio]` or canonical three-channel `[left, right, tactile]` data
+without resampling. It publishes decoded media only after byte-count and digest
+agreement. This is still preparation only: decoded blocks are not installed in
+the authority actor, no platform output device is opened, and real packages
+remain unarmable.
 
 Local-only startup does not bind a LAN socket. The first explicit **Enable
 phone remote** action reserves `0.0.0.0` and launches the companion server; a
@@ -372,6 +379,10 @@ The migration order is:
    Tauri/Tokio queues.
 4. Port target-native audio/output routing, response timestamping, tactile, and
    acquisition boundaries, then qualify them with physical timing evidence.
+   Native bounded WAV receipts and a pure content-bound PCM16 decoder have
+   landed; actor-owned media caching, persistent platform output streams,
+   callback scheduling/routing, response ingress, and physical qualification
+   remain.
 5. Port durable event/LSL evidence, artifact writers, persistence/recovery, and
    the normal post-run review/analysis required by the Runner, using golden
    outputs only as temporary Python-oracle evidence.

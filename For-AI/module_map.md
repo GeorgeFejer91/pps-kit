@@ -91,7 +91,14 @@ the cached native schedules. The WebView sees only a bounded path-free summary
 marked `schedule-only`, `unqualified`, and non-executable. This is an
 inspection/conformance boundary, not an audio or experiment execution adapter.
 Each prepared CSV is compiled from the exact bounded bytes matched to its
-selection-time digest; WAV identity remains a future audio-preload boundary.
+selection-time digest. `pps-session-package` now also retains a native-only
+path/SHA-256/encoded-byte receipt for every prepared WAV. The pure
+`packages/pps-runner-audio/` crate verifies that exact bounded byte stream and
+decodes only PCM16 legacy two-channel `[tactile, audio]` or canonical
+three-channel `[left, right, tactile]` data into a non-serializable immutable
+block. It has no Tauri, network, device, or experiment-state dependency.
+Decoded media is not yet cached by the authority actor or sent to a platform
+output backend, so real plans remain unarmable and unqualified.
 Its Python differential probe remains CI-only while parity is being proven.
 
 All desktop authority requests enter one bounded FIFO mailbox with capacity 64:

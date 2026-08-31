@@ -346,9 +346,15 @@ Python/Rust schedule oracle is a temporary CI conformance test, not a runtime
 dependency. Missing or ragged manifests fail closed in Rust even where legacy
 Python parsing was more permissive; those safety deviations and the curated
 oracle coverage must not be described as absolute parity. WAV sample-rate
-probing and content binding remain required at the future audio preload boundary
-before claiming legacy execution parity; this non-executable inspection does
-not claim to verify prepared WAV bytes.
+probing remains required before claiming legacy schedule parity. Package
+verification now also streams and hash-binds each prepared WAV into a
+native-only receipt, capped at 768 MiB per file and 8 GiB per package. The pure
+`pps-runner-audio` crate reopens one receipt, hashes the complete bounded stream,
+and decodes only PCM16 legacy two-channel `[tactile, audio]` or canonical
+three-channel `[left, right, tactile]` data at the declared sample rate. It
+publishes decoded media only after exact byte-count and digest agreement and
+does not implement resampling, device output, routing, actor caching, arming,
+or scientific timing qualification.
 
 The Tauri desktop now has one named Rust authority actor thread,
 `pps-runner-authority`. It exclusively owns `RunnerCore`, remote policy and the
@@ -459,8 +465,9 @@ Python-free: a clean Windows installation must adopt and run a representative
 real package, produce the required evidence/artifacts, accept local and browser
 companion control, recover cleanly, and complete normal post-run review without
 Python, PySide, PyInstaller, or a Python worker. Rust now owns the bounded
-authority queue and must still own the monotonic scheduler, audio/output and
-response timestamp boundaries, instruction/run transitions,
+authority queue, verified WAV identity, and pure PCM16 decode boundary, and
+must still own the monotonic scheduler, device output/routing and response
+timestamp boundaries, instruction/run transitions,
 LSL/evidence/persistence, recovery, and required review/analysis before the
 compatibility package is retired.
 

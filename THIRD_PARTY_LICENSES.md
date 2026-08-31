@@ -147,6 +147,18 @@ Exact resolved JavaScript packages and integrity hashes are recorded in
 `apps/runner/package-lock.json`. No companion runtime dependency is loaded from
 a CDN.
 
+## Hound
+
+- Project: Hound WAV encoding and decoding library
+- Repository: https://github.com/ruuda/hound
+- Version: `3.5.1` (exactly pinned in the Rust workspace)
+- License: Apache License 2.0
+- Consumer: `packages/pps-runner-audio/`
+
+Hound parses the narrowly accepted PCM16 prepared-WAV format in the native
+Runner audio-preparation seam. It is resolved through `Cargo.lock`; its source
+is not vendored in this repository.
+
 ## Tauri and Meta Spatial SDK build dependencies
 
 The candidate desktop application resolves Tauri v2 and its Rust dependencies

@@ -2396,8 +2396,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   Bind each prepared CSV to its selection-time digest and compile from the same
   bounded byte snapshot that was hashed; top-level manifests, block counts,
   known strings/paths, metadata shape, and cumulative metadata must be bounded
-  before retention. This inspection does not bind WAV content: native audio
-  preload must do that before any real package becomes armable.
+  before retention. Schedule inspection itself does not open audio. The next
+  landed seam adds bounded native WAV identity and decode: package verification
+  streams SHA-256 plus encoded byte count for every prepared WAV (768 MiB per
+  file, 8 GiB per package), and pure `pps-runner-audio` hashes the same complete
+  reopened stream before publishing a PCM16 legacy two-channel
+  `[tactile, audio]` or canonical three-channel `[left, right, tactile]`
+  immutable block. It performs no resampling, device I/O, routing, actor cache,
+  or execution readiness; real packages remain unarmable until those native
+  boundaries and physical qualification land.
 - Treat the transport-independent BRSP application-target reference as a
   qualification checklist for the existing Rust seam, not a replacement.
   `RunnerCore` stays the single authority, transports remain adapters, grants

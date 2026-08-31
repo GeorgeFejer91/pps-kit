@@ -25,6 +25,17 @@ pub const MAX_SESSION_MANIFEST_BYTES: usize = 8 * 1024 * 1024;
 pub const MAX_PREPARED_BLOCKS: usize = 1_024;
 pub const MAX_PREPARED_BLOCK_MANIFEST_BYTES: usize = 8 * 1024 * 1024;
 pub const MAX_PREPARED_BLOCK_METADATA_BYTES: usize = 64 * 1024;
+/// Maximum encoded size of one prepared block WAV.
+///
+/// The largest qualified local package observed during the Rust migration is
+/// approximately 453 MiB, so this leaves bounded headroom without accepting a
+/// multi-gigabyte single asset.
+pub const MAX_PREPARED_BLOCK_WAV_BYTES: u64 = 768 * 1024 * 1024;
+/// Maximum encoded WAV bytes hashed across one prepared-session package.
+///
+/// This supports multiple large blocks while bounding verification I/O even
+/// though the manifest format permits many small blocks.
+pub const MAX_TOTAL_PREPARED_BLOCK_WAV_BYTES: u64 = 8 * 1024 * 1024 * 1024;
 
 const MAX_TOTAL_BLOCK_METADATA_BYTES: usize = 4 * 1024 * 1024;
 const MAX_BLOCK_METADATA_FIELDS: usize = 256;
@@ -99,6 +110,36 @@ pub struct VerifiedNativeFile {
     sha256: String,
 }
 
+/// Native-only identity of the exact prepared WAV bytes seen by verification.
+///
+/// This type deliberately does not implement `Serialize`; paths and media
+/// digests are private native provenance, not browser or network state.
+///
+/// ```compile_fail
+/// fn require_serialize<T: serde::Serialize>() {}
+/// require_serialize::<pps_session_package::VerifiedPreparedWav>();
+/// ```
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VerifiedPreparedWav {
+    path: PathBuf,
+    sha256: String,
+    encoded_byte_count: u64,
+}
+
+impl VerifiedPreparedWav {
+    pub fn path(&self) -> &Path {
+        &self.path
+    }
+
+    pub fn sha256(&self) -> &str {
+        &self.sha256
+    }
+
+    pub const fn encoded_byte_count(&self) -> u64 {
+        self.encoded_byte_count
+    }
+}
+
 impl VerifiedNativeFile {
     pub fn path(&self) -> &Path {
         &self.path
@@ -114,7 +155,7 @@ impl VerifiedNativeFile {
 pub struct VerifiedPreparedBlock {
     manifest_path: PathBuf,
     manifest_sha256: String,
-    wav_path: PathBuf,
+    block_wav: VerifiedPreparedWav,
     metadata: Map<String, Value>,
     source_block_csv: Option<VerifiedNativeFile>,
     source_trial_wavs: Vec<VerifiedNativeFile>,
@@ -133,7 +174,11 @@ impl VerifiedPreparedBlock {
     }
 
     pub fn wav_path(&self) -> &Path {
-        &self.wav_path
+        self.block_wav.path()
+    }
+
+    pub fn block_wav(&self) -> &VerifiedPreparedWav {
+        &self.block_wav
     }
 
     /// Native-only block metadata retained for deterministic schedule
@@ -214,6 +259,9 @@ pub enum VerificationErrorCode {
     RunSetupMismatch,
     NoBlocks,
     BlockWavMissing,
+    BlockWavUnreadable,
+    BlockWavTooLarge,
+    PackageWavBytesTooLarge,
     BlockManifestMissing,
     BlockManifestTooLarge,
     SourceRunSetupMissing,
@@ -246,6 +294,9 @@ impl VerificationErrorCode {
             Self::RunSetupMismatch => "run_setup_mismatch",
             Self::NoBlocks => "no_blocks",
             Self::BlockWavMissing => "block_wav_missing",
+            Self::BlockWavUnreadable => "block_wav_unreadable",
+            Self::BlockWavTooLarge => "block_wav_too_large",
+            Self::PackageWavBytesTooLarge => "package_wav_bytes_too_large",
             Self::BlockManifestMissing => "block_manifest_missing",
             Self::BlockManifestTooLarge => "block_manifest_too_large",
             Self::SourceRunSetupMissing => "source_run_setup_missing",
@@ -321,6 +372,29 @@ struct ParsedBlock {
     manifest_path: PathBuf,
     wav_path: PathBuf,
     metadata: Map<String, Value>,
+}
+
+#[derive(Debug, Clone)]
+struct PendingPreparedBlock {
+    manifest_path: PathBuf,
+    manifest_sha256: String,
+    wav_path: PathBuf,
+    metadata: Map<String, Value>,
+    source_block_csv: Option<VerifiedNativeFile>,
+    source_trial_wavs: Vec<VerifiedNativeFile>,
+}
+
+impl PendingPreparedBlock {
+    fn bind_wav(self, block_wav: VerifiedPreparedWav) -> VerifiedPreparedBlock {
+        VerifiedPreparedBlock {
+            manifest_path: self.manifest_path,
+            manifest_sha256: self.manifest_sha256,
+            block_wav,
+            metadata: self.metadata,
+            source_block_csv: self.source_block_csv,
+            source_trial_wavs: self.source_trial_wavs,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -430,7 +504,7 @@ pub fn verify_prepared_session(
                 ),
             ));
         }
-        verified_blocks.push(VerifiedPreparedBlock {
+        verified_blocks.push(PendingPreparedBlock {
             manifest_path: absolute_native_path(&block_manifest_path),
             manifest_sha256: String::new(),
             wav_path: absolute_native_path(&wav_path),
@@ -507,19 +581,38 @@ pub fn verify_prepared_session(
         }
     }
 
+    let mut total_wav_bytes = 0_u64;
+    let mut bound_blocks = Vec::with_capacity(verified_blocks.len());
+    for verified_block in verified_blocks {
+        let block_wav = bind_prepared_block_wav(&verified_block.wav_path)?;
+        total_wav_bytes = total_wav_bytes
+            .checked_add(block_wav.encoded_byte_count())
+            .filter(|total| *total <= MAX_TOTAL_PREPARED_BLOCK_WAV_BYTES)
+            .ok_or_else(|| {
+                VerificationError::new(
+                    VerificationErrorCode::PackageWavBytesTooLarge,
+                    "Prepared block WAVs exceed the package byte limit.",
+                    format!(
+                        "Prepared block WAVs exceed the {MAX_TOTAL_PREPARED_BLOCK_WAV_BYTES}-byte cumulative limit"
+                    ),
+                )
+            })?;
+        bound_blocks.push(verified_block.bind_wav(block_wav));
+    }
+
     Ok(VerifiedPreparedSession {
         summary: parsed.summary,
         manifest_path: absolute_native_path(manifest_path),
         manifest_sha256: sha256_bytes(&manifest_bytes),
         session_dir: absolute_native_path(&parsed.session_dir),
         run_setup_manifest,
-        blocks: verified_blocks,
+        blocks: bound_blocks,
     })
 }
 
 fn verify_block_sources(
     block: &ParsedBlock,
-    verified_block: &mut VerifiedPreparedBlock,
+    verified_block: &mut PendingPreparedBlock,
     run_setup_manifest_path: &Path,
 ) -> Result<(), VerificationError> {
     let source_text = block
@@ -680,7 +773,7 @@ fn verify_block_sources(
 }
 
 fn bind_prepared_block_manifest(
-    verified_block: &mut VerifiedPreparedBlock,
+    verified_block: &mut PendingPreparedBlock,
 ) -> Result<(), VerificationError> {
     let bytes = read_bounded_bytes(
         &verified_block.manifest_path,
@@ -689,6 +782,30 @@ fn bind_prepared_block_manifest(
     .map_err(prepared_block_csv_read_error)?;
     verified_block.manifest_sha256 = sha256_bytes(&bytes);
     Ok(())
+}
+
+fn bind_prepared_block_wav(path: &Path) -> Result<VerifiedPreparedWav, VerificationError> {
+    let (sha256, encoded_byte_count) = sha256_file_bounded(path, MAX_PREPARED_BLOCK_WAV_BYTES)
+        .map_err(|error| match error {
+            BoundedReadError::TooLarge => VerificationError::new(
+                VerificationErrorCode::BlockWavTooLarge,
+                "A prepared block WAV is too large.",
+                format!(
+                    "Prepared block WAV exceeds the {MAX_PREPARED_BLOCK_WAV_BYTES}-byte limit: {}",
+                    path.display()
+                ),
+            ),
+            BoundedReadError::Io(error) => VerificationError::new(
+                VerificationErrorCode::BlockWavUnreadable,
+                "A prepared block WAV cannot be read.",
+                format!("Prepared block WAV cannot be read: {error}"),
+            ),
+        })?;
+    Ok(VerifiedPreparedWav {
+        path: absolute_native_path(path),
+        sha256,
+        encoded_byte_count,
+    })
 }
 
 fn parse_manifest(
@@ -1241,6 +1358,30 @@ fn sha256_file(path: &Path) -> Result<String, io::Error> {
 
 fn sha256_bytes(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
+}
+
+fn sha256_file_bounded(path: &Path, maximum_bytes: u64) -> Result<(String, u64), BoundedReadError> {
+    let mut file = fs::File::open(path).map_err(BoundedReadError::Io)?;
+    if file.metadata().map_err(BoundedReadError::Io)?.len() > maximum_bytes {
+        return Err(BoundedReadError::TooLarge);
+    }
+
+    let mut digest = Sha256::new();
+    let mut total = 0_u64;
+    let mut buffer = [0_u8; 64 * 1024];
+    loop {
+        let read = file.read(&mut buffer).map_err(BoundedReadError::Io)?;
+        if read == 0 {
+            break;
+        }
+        total = total
+            .checked_add(read as u64)
+            .filter(|count| *count <= maximum_bytes)
+            .ok_or(BoundedReadError::TooLarge)?;
+        digest.update(&buffer[..read]);
+    }
+    let digest = digest.finalize();
+    Ok((format!("{digest:x}"), total))
 }
 
 #[derive(Debug)]

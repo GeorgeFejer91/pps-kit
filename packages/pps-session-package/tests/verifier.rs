@@ -212,6 +212,16 @@ fn legacy_package_returns_an_ordered_path_free_camel_case_summary() {
     );
     assert_eq!(verified.blocks()[0].metadata()["sample_rate_hz"], 48_000);
     assert_eq!(
+        verified.blocks()[0].block_wav().sha256(),
+        sha256(&root.join("session/blocks/block.wav"))
+    );
+    assert_eq!(
+        verified.blocks()[0].block_wav().encoded_byte_count(),
+        fs::metadata(root.join("session/blocks/block.wav"))
+            .unwrap()
+            .len()
+    );
+    assert_eq!(
         verified.blocks()[0].metadata()["native_provenance_path"],
         "never/projected/to/browser"
     );
@@ -226,6 +236,34 @@ fn legacy_package_returns_an_ordered_path_free_camel_case_summary() {
     assert!(!wire.contains("wavPath"));
     assert!(!wire.contains("sha256"));
     assert!(!wire.contains(&root.path.to_string_lossy().to_string()));
+}
+
+#[test]
+fn prepared_wav_mutation_changes_the_native_receipt_but_not_public_projection() {
+    let root = TestDirectory::new();
+    let manifest = legacy_fixture(&root);
+    let first = verify_prepared_session(VerificationRequest::new(&manifest))
+        .expect("initial package verifies");
+    let first_summary = serde_json::to_value(first.summary()).expect("serialize public summary");
+
+    let wav = root.join("session/blocks/block.wav");
+    write(&wav, b"mutated WAV bytes!!");
+    let second = verify_prepared_session(VerificationRequest::new(&manifest))
+        .expect("legacy package reverifies with a new native receipt");
+
+    assert_ne!(first, second);
+    assert_ne!(
+        first.blocks()[0].block_wav().sha256(),
+        second.blocks()[0].block_wav().sha256()
+    );
+    assert_eq!(
+        first_summary,
+        serde_json::to_value(second.summary()).expect("serialize second public summary")
+    );
+    let public_wire = first_summary.to_string();
+    assert!(!public_wire.contains("sha256"));
+    assert!(!public_wire.contains("wavPath"));
+    assert!(!public_wire.contains(&root.path.to_string_lossy().to_string()));
 }
 
 #[test]
