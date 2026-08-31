@@ -13,6 +13,7 @@ on:
       - "packages/pps-runner-core/**"
       - "packages/pps-runner-execution/**"
       - "packages/pps-session-package/**"
+      - "packages/pps-resources/assets/app/pps_toolkit_icon.*"
       - "packages/pps-runtime/src/peripersonal_space_toolkit/**"
       - "For-AI/engineering/automation/check_runner_next.ps1"
       - "For-AI/engineering/tests/test_rust_session_package_differential.py"
@@ -31,6 +32,7 @@ on:
       - "packages/pps-runner-core/**"
       - "packages/pps-runner-execution/**"
       - "packages/pps-session-package/**"
+      - "packages/pps-resources/assets/app/pps_toolkit_icon.*"
       - "packages/pps-runtime/src/peripersonal_space_toolkit/**"
       - "For-AI/engineering/automation/check_runner_next.ps1"
       - "For-AI/engineering/tests/test_rust_session_package_differential.py"
@@ -115,6 +117,123 @@ jobs:
       - name: Test and build bundled browser frontend
         shell: pwsh
         run: ./For-AI/engineering/automation/check_runner_next.ps1 -Mode Browser
+
+  desktop-validation-bundle:
+    name: Validation bundle (${{ matrix.slug }})
+    needs: [desktop-shell, browser-companion]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            slug: windows-host-nsis
+            bundle: nsis
+            bundle_glob: target/release/bundle/nsis/*-setup.exe
+            signing: unsigned
+            no_sign: true
+          - os: macos-latest
+            slug: macos-host-dmg
+            bundle: dmg
+            bundle_glob: target/release/bundle/dmg/*.dmg
+            signing: ad-hoc-not-notarized
+            no_sign: false
+          - os: ubuntu-22.04
+            slug: linux-host-deb
+            bundle: deb
+            bundle_glob: target/release/bundle/deb/*.deb
+            signing: unsigned
+            no_sign: true
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/runner/package-lock.json
+      - uses: dtolnay/rust-toolchain@1.88.0
+      - name: Install Linux Tauri packaging prerequisites
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            xdg-utils
+      - name: Install locked frontend dependencies
+        working-directory: apps/runner
+        run: npm ci
+      - name: Build one host-native validation bundle
+        shell: pwsh
+        working-directory: apps/runner
+        run: |
+          $arguments = @(
+            "run", "tauri", "--", "build",
+            "--ci",
+            "--bundles", "${{ matrix.bundle }}",
+            "--config", "src-tauri/tauri.validation.conf.json"
+          )
+          if ("${{ matrix.no_sign }}" -eq "true") {
+            $arguments += "--no-sign"
+          }
+          & npm @arguments
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+      - name: Reject generated-source or lock drift
+        run: git diff --exit-code -- Cargo.lock apps/runner/compiled
+      - name: Stage validation-only artifact
+        shell: pwsh
+        run: |
+          $bundles = @(Get-ChildItem -Path "${{ matrix.bundle_glob }}" -File)
+          if ($bundles.Count -ne 1) {
+            throw "Expected exactly one ${{ matrix.bundle }} bundle, found $($bundles.Count)."
+          }
+
+          $unexpectedUpdaterFiles = @(
+            Get-ChildItem target/release/bundle -Recurse -File |
+              Where-Object { $_.Extension -eq ".sig" -or $_.Name -eq "latest.json" }
+          )
+          if ($unexpectedUpdaterFiles.Count -ne 0) {
+            throw "Validation builds must not create updater artifacts."
+          }
+
+          $stage = "dist/runner-validation/${{ matrix.slug }}"
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          $destination = Join-Path $stage $bundles[0].Name
+          Copy-Item -LiteralPath $bundles[0].FullName -Destination $destination
+
+          @(
+            "schema=pps-runner-packaging-validation.v1"
+            "commit=${{ github.sha }}"
+            "runner_os=${{ runner.os }}"
+            "runner_arch=${{ runner.arch }}"
+            "bundle=${{ matrix.bundle }}"
+            "signing=${{ matrix.signing }}"
+            "distribution_status=ci_validation_artifact_not_release"
+            "scientific_status=preview_only_real_packages_not_executable"
+            "use_for_data_collection=false"
+            "updater=false"
+          ) | Set-Content -Encoding utf8 (Join-Path $stage "VALIDATION_ONLY.txt")
+
+          $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $destination
+          "$($hash.Hash.ToLowerInvariant())  $($bundles[0].Name)" |
+            Set-Content -Encoding ascii (Join-Path $stage "SHA256SUMS.txt")
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pps-runner-preview-validation-${{ matrix.slug }}-${{ runner.arch }}-${{ github.sha }}
+          path: dist/runner-validation/${{ matrix.slug }}
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
 
   quest-apk:
     name: Optional native Quest APK

@@ -36,6 +36,7 @@
     },
     "icon": [
       "../../../packages/pps-resources/assets/app/pps_toolkit_icon.png",
+      "../../../packages/pps-resources/assets/app/pps_toolkit_icon.icns",
       "../../../packages/pps-resources/assets/app/pps_toolkit_icon.ico"
     ]
   }
