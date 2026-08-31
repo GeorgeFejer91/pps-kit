@@ -1,6 +1,7 @@
 export const PROTOCOL = "brsp";
 export const PROTOCOL_VERSION = 1;
 export const SNAPSHOT_SCHEMA = "pps-runner-authority-snapshot.v1";
+export const PUBLIC_SNAPSHOT_SCHEMA = "pps-runner-public-snapshot.v1";
 export const MAX_CONTROL_BYTES = 16 * 1024;
 
 export const SCOPES = Object.freeze({
@@ -250,15 +251,28 @@ function validateSafety(value) {
   ]) snapshotBoolean(safety[field], `snapshot.safety.${field}`);
 }
 
-/** Validate the complete versioned PPS authority snapshot before UI adoption. */
-export function validateRunnerSnapshot(value) {
-  const snapshot = exactObject(value, [
-    "schema", "protocol", "target_id", "target_kind", "epoch", "revision", "server_unix_ms",
-    "server_monotonic_ns", "connection_state", "timing_tier", "package_verified", "package_label",
-    "allowed_actions", "identity", "setup", "part", "run", "instruction_gate", "active_block",
-    "safety", "audit_event_count", "last_note",
-  ], "snapshot");
-  if (snapshot.schema !== SNAPSHOT_SCHEMA || snapshot.protocol !== PROTOCOL) {
+function validateRemoteSetup(value) {
+  const setup = exactObject(value, [
+    "submitted", "ready", "required_missing",
+  ], "snapshot.setup");
+  snapshotBoolean(setup.submitted, "snapshot.setup.submitted");
+  snapshotBoolean(setup.ready, "snapshot.setup.ready");
+  stringArray(setup.required_missing, "snapshot.setup.required_missing", 32);
+}
+
+function validateRemoteSafety(value) {
+  const safety = exactObject(value, [
+    "lease_expires_at_unix_ms", "local_override", "local_armed", "audio_route_ready",
+    "publication_ready", "lsl_ready", "capture_started",
+  ], "snapshot.safety");
+  nullable(safety.lease_expires_at_unix_ms, (entry) => snapshotUint(entry, "snapshot.safety.lease_expires_at_unix_ms"));
+  for (const field of [
+    "local_override", "local_armed", "audio_route_ready", "publication_ready", "lsl_ready", "capture_started",
+  ]) snapshotBoolean(safety[field], `snapshot.safety.${field}`);
+}
+
+function validateCommonSnapshot(snapshot, expectedSchema) {
+  if (snapshot.schema !== expectedSchema || snapshot.protocol !== PROTOCOL) {
     throw new TypeError("snapshot schema or protocol is unsupported.");
   }
   if (typeof snapshot.target_id !== "string" || !SNAPSHOT_TOKEN.test(snapshot.target_id)) {
@@ -272,20 +286,54 @@ export function validateRunnerSnapshot(value) {
   snapshotString(snapshot.connection_state, "snapshot.connection_state", 64);
   if (!TIMING_TIERS.has(snapshot.timing_tier)) throw new TypeError("snapshot.timing_tier is invalid.");
   snapshotBoolean(snapshot.package_verified, "snapshot.package_verified");
-  snapshotString(snapshot.package_label, "snapshot.package_label", 256);
   if (!Array.isArray(snapshot.allowed_actions) || snapshot.allowed_actions.length > ALL_ACTIONS.length
     || new Set(snapshot.allowed_actions).size !== snapshot.allowed_actions.length
     || snapshot.allowed_actions.some((action) => !isKnownAction(action))) {
     throw new TypeError("snapshot.allowed_actions is invalid.");
   }
-  validateIdentity(snapshot.identity);
-  validateSetup(snapshot.setup);
   validatePart(snapshot.part);
   validateRun(snapshot.run);
   validateInstructionGate(snapshot.instruction_gate);
   validateActiveBlock(snapshot.active_block);
+}
+
+/** Validate the complete versioned PPS authority snapshot before UI adoption. */
+export function validateRunnerSnapshot(value) {
+  const snapshot = exactObject(value, [
+    "schema", "protocol", "target_id", "target_kind", "epoch", "revision", "server_unix_ms",
+    "server_monotonic_ns", "connection_state", "timing_tier", "package_verified", "package_label",
+    "allowed_actions", "identity", "setup", "part", "run", "instruction_gate", "active_block",
+    "safety", "audit_event_count", "last_note",
+  ], "snapshot");
+  validateCommonSnapshot(snapshot, SNAPSHOT_SCHEMA);
+  snapshotString(snapshot.package_label, "snapshot.package_label", 256);
+  validateIdentity(snapshot.identity);
+  validateSetup(snapshot.setup);
   validateSafety(snapshot.safety);
   snapshotUint(snapshot.audit_event_count, "snapshot.audit_event_count");
   snapshotString(snapshot.last_note, "snapshot.last_note", 512);
   return snapshot;
+}
+
+/** Validate the exact PII-free state shape allowed across a remote boundary. */
+export function validatePublicRunnerSnapshot(value) {
+  const snapshot = exactObject(value, [
+    "schema", "protocol", "target_id", "target_kind", "epoch", "revision", "server_unix_ms",
+    "server_monotonic_ns", "connection_state", "timing_tier", "package_verified",
+    "allowed_actions", "setup", "part", "run", "instruction_gate", "active_block", "safety",
+  ], "snapshot");
+  validateCommonSnapshot(snapshot, PUBLIC_SNAPSHOT_SCHEMA);
+  validateRemoteSetup(snapshot.setup);
+  validateRemoteSafety(snapshot.safety);
+  return snapshot;
+}
+
+/** Browser/BRSP targets may publish either the native public projection or a
+ * full browser-owned experiment snapshot. Exact schema dispatch prevents the
+ * smaller projection from being mistaken for the operator-only shape. */
+export function validatePublishedRunnerSnapshot(value) {
+  const snapshot = plainObject(value, "snapshot");
+  return snapshot.schema === PUBLIC_SNAPSHOT_SCHEMA
+    ? validatePublicRunnerSnapshot(snapshot)
+    : validateRunnerSnapshot(snapshot);
 }

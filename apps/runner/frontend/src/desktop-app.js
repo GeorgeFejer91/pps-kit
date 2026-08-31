@@ -143,9 +143,9 @@ function remoteControllerConnected(status = remoteStatus) {
 }
 
 function nativePublicationAuthorized(target) {
-  const expiry = snapshot?.safety?.lease_expires_at_unix_ms;
+  const expiry = target?.remoteSnapshot?.safety?.lease_expires_at_unix_ms;
   return Boolean(target?.nativeClaimReceipt)
-    && snapshot?.safety?.controller_lease_id === target.nativeClaimReceipt.controllerId
+    && target?.remoteSnapshot?.schema === "pps-runner-public-snapshot.v1"
     && Number.isSafeInteger(expiry)
     && Date.now() < expiry;
 }
@@ -363,9 +363,10 @@ function observeInboundRenewal(target, promise) {
   void promise.then((receipt) => {
     if (target !== inboundPrivateTarget || target.stopping) return;
     target.nativeClaimReceipt = receipt;
-    renderSnapshot(receipt.snapshot);
+    target.remoteSnapshot = receipt.snapshot;
     text("desktop-private-lease", `Rust lease until ${new Date(receipt.leaseExpiresAtUnixMs).toLocaleTimeString()}`);
-    target.session.publishState(receipt.snapshot);
+    target.session.publishState(target.remoteSnapshot);
+    void refreshSnapshot().catch((error) => failInboundAuthority(target, error));
   }).catch((error) => failInboundAuthority(target, error));
 }
 
@@ -404,7 +405,8 @@ function acceptedInboundControl(target, envelope) {
 async function applyInboundCommand(target, request) {
   const applied = await takeCommandOperation(target, request.id);
   if (target !== inboundPrivateTarget || target.stopping) throw new Error("The private controller no longer owns this target.");
-  renderSnapshot(applied.snapshot);
+  target.remoteSnapshot = applied.snapshot;
+  void refreshSnapshot().catch((error) => failInboundAuthority(target, error));
   return {
     status: applied.status,
     reason: applied.reason,
@@ -439,12 +441,13 @@ function bindInboundPrivateSession(target) {
       if (target.offerExpiryTimer !== null) clearTimeout(target.offerExpiryTimer);
       target.offerExpiryTimer = null;
       target.nativeClaimReceipt = receipt;
-      renderSnapshot(receipt.snapshot);
+      target.remoteSnapshot = receipt.snapshot;
       text("desktop-beacon-status", "Private controller ready");
       elements["desktop-beacon-status"].dataset.tone = "ready";
       text("desktop-beacon-detail", `Authenticated controller ${receipt.controllerId} is bound to Rust authority.`);
       text("desktop-private-lease", `Rust lease until ${new Date(receipt.leaseExpiresAtUnixMs).toLocaleTimeString()}`);
-      session.publishState(receipt.snapshot);
+      session.publishState(target.remoteSnapshot);
+      void refreshSnapshot().catch((error) => failInboundAuthority(target, error));
       void stopInboundBeacon({ preserveStatus: true });
     }).catch((error) => failInboundAuthority(target, error));
   });
@@ -479,6 +482,7 @@ async function startInboundPrivateTarget(offer) {
     offerExpiresUnixMs: offer.expiresUnixMs,
     claimPromise: null,
     nativeClaimReceipt: null,
+    remoteSnapshot: null,
     failureHandled: false,
     stopping: false,
     offerExpiryTimer: null,
@@ -493,9 +497,13 @@ async function startInboundPrivateTarget(offer) {
     sessionId: offer.sessionId,
     availableScopes: offer.acceptedScopes,
     actions,
-    getSnapshot: () => snapshot,
+    // Before native claim, publication is closed. After claim, BRSP may only
+    // observe the Rust-projected public snapshot retained on this target; the
+    // full operator snapshot remains local to the Tauri UI.
+    getSnapshot: () => target.remoteSnapshot ?? snapshot,
     applyCommand: (request) => applyInboundCommand(target, request),
     applicationOwnsTransitionValidation: true,
+    stateHeartbeatEnabled: false,
     canPublishTargetState: () => nativePublicationAuthorized(target),
     onAcceptedControllerControl: (envelope) => acceptedInboundControl(target, envelope),
     onLeaseExpired: ({ reason }) => {
@@ -532,8 +540,8 @@ async function stopInboundPrivateTarget(reason = "local_stop") {
   try {
     const receipt = target.nativeClaimReceipt ?? await target.claimPromise;
     if (receipt?.ownerToken) {
-      const revoked = await api.remoteSessionRevoke({ sessionId: target.sessionId, ownerToken: receipt.ownerToken });
-      renderSnapshot(revoked.snapshot);
+      await api.remoteSessionRevoke({ sessionId: target.sessionId, ownerToken: receipt.ownerToken });
+      await refreshSnapshot();
     }
   } catch {
     // Rotation, disable, lease expiry, or app teardown can invalidate this exact owner first.

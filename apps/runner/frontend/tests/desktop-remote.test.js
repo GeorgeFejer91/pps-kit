@@ -41,8 +41,12 @@ test("desktop inbound path uses Rust owner APIs and never local runner dispatch"
   assert.match(source, /remoteSessionRevoke\(/u);
   assert.match(source, /envelope\.type === "snapshot-request" \|\| envelope\.type === "error"/u);
   assert.match(source, /applicationOwnsTransitionValidation:\s*true/u);
+  assert.match(source, /stateHeartbeatEnabled:\s*false/u);
   assert.match(source, /canPublishTargetState:\s*\(\) => nativePublicationAuthorized\(target\)/u);
-  assert.match(source, /controller_lease_id === target\.nativeClaimReceipt\.controllerId/u);
+  assert.match(source, /target\?\.remoteSnapshot\?\.schema === "pps-runner-public-snapshot\.v1"/u);
+  assert.match(source, /getSnapshot:\s*\(\) => target\.remoteSnapshot \?\? snapshot/u);
+  assert.match(source, /target\.remoteSnapshot = receipt\.snapshot/u);
+  assert.match(source, /target\.remoteSnapshot = applied\.snapshot/u);
   assert.match(source, /if \(remoteControllerConnected\(\)\) throw new Error/u);
   assert.match(source, /Date\.now\(\) >= target\.offerExpiresUnixMs[\s\S]+private_offer_expired/u);
 

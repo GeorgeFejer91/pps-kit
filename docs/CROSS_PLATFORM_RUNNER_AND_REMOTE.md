@@ -131,6 +131,38 @@ to publish desktop state: initial snapshot/state remain suppressed until the
 native claim succeeds, every requested snapshot awaits a fresh native renewal,
 and publication stops when the native controller ID/deadline no longer matches.
 
+Desktop authority is now serialized by one named native actor thread,
+`pps-runner-authority`. It is the sole owner of `RunnerCore`, remote owner and
+policy state, the retained verified package and compiled schedule-only plan,
+package/run/owner generations, and the bounded `EventLedger`. Async Tauri, LAN,
+and WebView/BRSP entrypoints are adapters into its bounded FIFO mailbox; they do
+not lock or mutate an independent reducer. The mailbox admits at most 64 queued
+requests, limits ordinary work to 56, and reserves the remaining eight slots
+for local safety operations. The actor checks the target-owned deadman while
+waiting and before dequeuing work, and generation-fences stale run, package, and
+remote-owner work.
+
+Only accepted actions that change the semantic revision append a scientific
+ledger record. Rejected commands and accepted no-ops retain reducer
+dedupe/stamp behavior without consuming that ledger. Ordinary transitions
+reserve evidence capacity for safety; if even the safety reserve is exhausted,
+pause/revoke still applies fail-safe and latches the native
+`evidence_unavailable` condition. Bounded internal request/dispatch observation
+rings now exist for qualification, but a local diagnostic that reports p50,
+p95, p99, and worst observed end-to-end latency is still pending.
+
+The full operator `RunnerSnapshot` is not a remote wire object. Every native
+LAN or bundled-WebView remote receipt and publication uses the distinct exact
+`pps-runner-public-snapshot.v1` projection. It retains target revision, phase,
+part/block progress, allowed actions, readiness, and lease deadline, while
+omitting participant/session identifiers, demographics and sharing flags,
+package labels, free-form notes, controller identifiers, audit records, pairing
+material, paths, and native verification receipts. The desktop WebView keeps
+that public projection separate from its full local display state. Native-backed
+BRSP targets do not emit an autonomous cached heartbeat: each requested read is
+checked against the exact actor-owned controller generation without renewing
+the native lease, and command/renewal results carry a freshly projected state.
+
 The sixth local command selects a real `pps-run-session.v1` manifest. It takes
 no path argument: the bundled main window asks Rust to open the native operating
 system file chooser, and `packages/pps-session-package/` verifies the chosen
@@ -202,6 +234,13 @@ not armable yet: only the deterministic compatibility demo has an execution
 adapter. The validated Python scheduler and acquisition stack remain the
 production Runner until their behavior has been ported behind supervised
 adapters and qualified.
+
+CI also produces one host-native packaging-validation artifact per desktop
+platform: an unsigned Windows NSIS installer, an ad-hoc/not-notarized macOS DMG,
+and an unsigned Linux DEB. They carry explicit validation-only notices and
+checksums, generate no updater payload, and are retained only briefly as CI
+artifacts. They prove current host packaging mechanics only; they are not signed
+production releases, updater channels, or data-collection-qualified installers.
 
 ## Browser companion
 
@@ -322,14 +361,15 @@ The migration order is:
    Runner.
 2. Port package verification and the session state machine. V1 prepared-package
    verification/adoption and non-executable schedule inspection are now native;
-   the bounded execution owner is still open.
+   one bounded native authority actor now owns the reducer, package/compiled
+   plan, controller, generations, and bounded ledger.
    Before promotion, add early manifest/allocation bounds, legacy `~` path
    differential fixtures, summary recovery after WebView reload, and a v2
    content-addressed prepared-asset contract.
-3. Add one bounded native authority queue and dedicated monotonic Rust
-   execution owner for instruction/start/pause/resume/stop effects. Keep
-   network I/O async and keep deadline-sensitive work out of the WebView and
-   unbounded Tauri/Tokio queues.
+3. Extend that landed bounded native authority owner into the deadline-sensitive
+   experiment engine for instruction/start/pause/resume/stop effects. Keep
+   network I/O async and keep timed effects out of the WebView and unbounded
+   Tauri/Tokio queues.
 4. Port target-native audio/output routing, response timestamping, tactile, and
    acquisition boundaries, then qualify them with physical timing evidence.
 5. Port durable event/LSL evidence, artifact writers, persistence/recovery, and
@@ -353,7 +393,7 @@ The migration order is:
 `RunnerCore` remains the native BRSP application-target authority. Local Tauri
 and authenticated remote commands must converge on its typed transition path
 after origin-specific authorization. VDO/WebSocket/BRSP layers remain adapters,
-`RunnerSnapshot` remains an explicit public projection, and package replacement
+`RemoteRunnerSnapshot` remains the explicit public projection, and package replacement
 must disarm, revoke/rotate authority, and make late owners inert. The PPS
 profile is command-only; do not add a latest-intent lane without a genuine
 complete-current-value control. A JavaScript application-target reference may

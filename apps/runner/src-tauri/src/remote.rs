@@ -19,16 +19,18 @@ use pps_brsp::{
     valid_peer_id, validate_common, validate_hello, SequenceDecision, SequenceGuard,
 };
 use pps_contracts::{
-    Action, AppliedBody, BrspRole, ClockStamp, CommandEnvelope, EmptyEnvelope, Envelope, ErrorBody,
+    AppliedBody, AppliedStatus, BrspRole, CommandEnvelope, EmptyEnvelope, Envelope, ErrorBody,
     ErrorEnvelope, HelloBody, HelloEnvelope, ProofEnvelope, ReadyBody, ReadyEnvelope, Scope,
-    SnapshotBody, SnapshotEnvelope, StateBody, StateEnvelope, WireEnvelope, JSON_MAX_SAFE_INTEGER,
-    MAX_CONTROL_BYTES, MAX_STATE_BYTES, PPS_REMOTE_CAPABILITIES,
+    WireEnvelope, MAX_CONTROL_BYTES, MAX_STATE_BYTES, PPS_REMOTE_CAPABILITIES,
 };
-use serde::de::DeserializeOwned;
+use serde::{de::DeserializeOwned, Serialize};
 use tokio::sync::{mpsc, watch, Mutex as AsyncMutex};
 use tower_http::services::ServeDir;
 
-use crate::runtime::{random_owner_token, ActiveController, AppRuntime};
+use crate::{
+    execution_owner::RemoteOwnerIdentity,
+    runtime::{AppRuntime, RemoteApplied, RemoteRunnerSnapshot},
+};
 
 const HANDSHAKE_TIMEOUT: Duration = Duration::from_secs(12);
 const STATE_HEARTBEAT: Duration = Duration::from_millis(250);
@@ -37,6 +39,44 @@ const CONTROLLER_LEASE: Duration = Duration::from_secs(5);
 const LEASE_CHECK: Duration = Duration::from_millis(100);
 const MAX_RELAY_ROOMS: usize = 16;
 const MAX_RELAY_MESSAGES_PER_SECOND: u32 = 120;
+
+#[derive(Debug, Serialize)]
+struct RemoteSnapshotBody {
+    revision: u64,
+    state: RemoteRunnerSnapshot,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct RemoteAppliedResult {
+    action: pps_contracts::Action,
+    status: AppliedStatus,
+    reason: &'static str,
+    accepted_revision: u64,
+    resulting_revision: u64,
+}
+
+fn remote_applied_body(applied: &RemoteApplied) -> AppliedBody {
+    let rejected = matches!(applied.status, AppliedStatus::Rejected);
+    let result = RemoteAppliedResult {
+        action: applied.action,
+        status: applied.status,
+        reason: if rejected {
+            "request_rejected"
+        } else {
+            "request_accepted"
+        },
+        accepted_revision: applied.accepted_revision,
+        resulting_revision: applied.resulting_revision,
+    };
+    AppliedBody {
+        command_id: applied.id.clone(),
+        ok: !rejected,
+        revision: applied.resulting_revision,
+        result: serde_json::to_value(result).ok(),
+        error: rejected.then(|| "request_rejected".to_owned()),
+    }
+}
 
 #[derive(Clone)]
 struct ServerState {
@@ -93,11 +133,11 @@ async fn desktop_upgrade(ws: WebSocketUpgrade, State(state): State<ServerState>)
 }
 
 async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result<(), String> {
-    let remote = runtime.0.remote_config()?;
+    let remote = runtime.remote_config_async().await?;
     if !remote.enabled {
         return Err("phone remote is disabled".to_owned());
     }
-    let mut available_scopes = runtime.available_scopes()?;
+    let mut available_scopes = runtime.available_scopes_async().await?;
     available_scopes.sort();
     let target_sender_id = format!("target_{}", &random_nonce()[..18]);
     let target_sender_epoch = random_epoch();
@@ -169,36 +209,22 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
     // `controllerConnected` means the complete mutual hello/proof/ready
     // exchange succeeded. Reserve the single-controller authority only now,
     // so a stalled or invalid ready cannot appear as an authenticated owner.
-    let owner_token = random_owner_token();
-    {
-        let current = runtime.0.remote_config()?;
-        if !current.enabled || current.session_id != remote.session_id {
-            return Err("remote activation changed during authentication".to_owned());
-        }
-        let mut active = runtime
-            .0
-            .active_controller
-            .lock()
-            .map_err(|_| "controller lock failed".to_owned())?;
-        if active.is_some() {
-            return Err("target already has an active controller".to_owned());
-        }
-        *active = Some(ActiveController {
-            id: controller_hello.sender_id.clone(),
-            session_id: remote.session_id.clone(),
-            owner_token: owner_token.clone(),
-            granted_scopes: negotiated.accepted_scopes.clone(),
-        });
+    let claim = runtime
+        .claim_lan_controller(
+            remote.session_id.clone(),
+            controller_hello.sender_id.clone(),
+            negotiated.accepted_scopes.iter().copied().collect(),
+        )
+        .await?;
+    if claim.snapshot.schema != "pps-runner-public-snapshot.v1" {
+        return Err("native public snapshot schema mismatch".to_owned());
     }
     let mut controller_guard = ActiveControllerGuard {
         runtime: runtime.clone(),
-        controller_id: controller_hello.sender_id.clone(),
-        session_id: remote.session_id.clone(),
-        owner_token,
+        identity: claim.identity,
         armed: true,
     };
 
-    let ready_snapshot = controller_guard.mark_connected()?;
     let mut lease_deadline = Instant::now() + CONTROLLER_LEASE;
     let mut target_control_sequence = 2_u32;
     let mut target_state_sequence = 0_u32;
@@ -209,25 +235,31 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
         .collect::<BTreeSet<_>>();
     let can_read = grants_state_read(&scope_set);
     if can_read {
-        send_snapshot(
+        if !send_snapshot(
             socket,
             &target_hello,
             &mut target_control_sequence,
-            ready_snapshot.clone(),
+            &controller_guard,
         )
-        .await?;
-        send_state(
+        .await?
+        {
+            return Ok(());
+        }
+        if !send_state(
             socket,
             &target_hello,
             &mut target_state_sequence,
-            ready_snapshot,
+            &controller_guard,
         )
-        .await?;
+        .await?
+        {
+            return Ok(());
+        }
     }
 
     let mut remote_control_sequence = SequenceGuard::after(controller_ready.sequence);
     let mut state_rx = runtime.0.state_tx.subscribe();
-    let mut pending_state = None;
+    let mut pending_state = false;
     let mut state_flush = tokio::time::interval(STATE_FLUSH);
     state_flush.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
     let mut heartbeat = tokio::time::interval(STATE_HEARTBEAT);
@@ -245,7 +277,7 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
                 match message {
                     Message::Text(text) => {
                         if Instant::now() >= lease_deadline {
-                            controller_guard.revoke("remote_lease_expired")?;
+                            controller_guard.revoke("remote_lease_expired").await?;
                             return Err("controller lease expired".to_owned());
                         }
                         if text.len() > MAX_CONTROL_BYTES {
@@ -267,44 +299,42 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
                         match wire.message_type.as_str() {
                             "command" => {
                                 let frame: CommandEnvelope = typed_from_wire(wire, "command")?;
-                                let lease_valid = controller_guard.refresh_lease()?;
-                                if !lease_valid {
-                                    break;
-                                }
+                                let applied = runtime
+                                    .dispatch_lan_controller(
+                                        controller_guard.identity.clone(),
+                                        frame.sequence,
+                                        frame.body,
+                                    )
+                                    .await?;
                                 lease_deadline = Instant::now() + CONTROLLER_LEASE;
-                                let command = frame.body.into_request(runtime.snapshot()?.epoch, frame.sequence);
-                                let applied = runtime.dispatch_remote(
-                                    controller_hello.sender_id.clone(),
-                                    scope_set.clone(),
-                                    lease_valid,
-                                    command,
-                                )?;
                                 let envelope = Envelope::new(
                                     "applied",
                                     target_hello.session_id.clone(),
                                     target_hello.sender_id.clone(),
                                     target_hello.sender_epoch,
                                     next_sequence(&mut target_control_sequence),
-                                    AppliedBody::from(&applied),
+                                    remote_applied_body(&applied),
                                 );
                                 send_control(socket, &envelope).await?;
                                 if can_read {
-                                    pending_state = Some(applied.snapshot);
+                                    pending_state = true;
                                 }
                             }
                             "snapshot-request" => {
                                 let _: EmptyEnvelope = typed_from_wire(wire, "snapshot-request")?;
-                                if !controller_guard.refresh_lease()? {
+                                if !controller_guard.refresh_lease().await? {
                                     break;
                                 }
                                 lease_deadline = Instant::now() + CONTROLLER_LEASE;
                                 if can_read {
-                                    send_snapshot(
+                                    if !send_snapshot(
                                         socket,
                                         &target_hello,
                                         &mut target_control_sequence,
-                                        runtime.snapshot()?,
-                                    ).await?;
+                                        &controller_guard,
+                                    ).await? {
+                                        break;
+                                    }
                                 } else {
                                     send_protocol_error(
                                         socket,
@@ -321,7 +351,7 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
                             }
                             "error" => {
                                 let _: ErrorEnvelope = typed_from_wire(wire, "error")?;
-                                if !controller_guard.refresh_lease()? {
+                                if !controller_guard.refresh_lease().await? {
                                     break;
                                 }
                                 lease_deadline = Instant::now() + CONTROLLER_LEASE;
@@ -346,28 +376,31 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
             }
             changed = state_rx.recv(), if can_read => {
                 match changed {
-                    Ok(changed) => {
-                        pending_state = Some(changed);
-                        while let Ok(newer) = state_rx.try_recv() {
-                            pending_state = Some(newer);
+                    Ok(_) => {
+                        pending_state = true;
+                        while state_rx.try_recv().is_ok() {
                         }
                     }
                     Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => {
-                        pending_state = Some(runtime.snapshot()?);
+                        pending_state = true;
                     }
                     Err(tokio::sync::broadcast::error::RecvError::Closed) => break,
                 }
             }
-            _ = state_flush.tick(), if can_read && pending_state.is_some() => {
-                let newest = pending_state.take().expect("guarded by select condition");
-                send_state(socket, &target_hello, &mut target_state_sequence, newest).await?;
+            _ = state_flush.tick(), if can_read && pending_state => {
+                pending_state = false;
+                if !send_state(socket, &target_hello, &mut target_state_sequence, &controller_guard).await? {
+                    break;
+                }
             }
             _ = heartbeat.tick(), if can_read => {
-                let current = pending_state.take().unwrap_or(runtime.snapshot()?);
-                send_state(socket, &target_hello, &mut target_state_sequence, current).await?;
+                pending_state = false;
+                if !send_state(socket, &target_hello, &mut target_state_sequence, &controller_guard).await? {
+                    break;
+                }
             }
             _ = config_check.tick() => {
-                let config = runtime.0.remote_config()?;
+                let config = runtime.remote_config_async().await?;
                 if !config.enabled || config.session_id != remote.session_id {
                     send_protocol_error(
                         socket,
@@ -381,7 +414,7 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
             }
             _ = lease_check.tick() => {
                 if Instant::now() >= lease_deadline {
-                    controller_guard.revoke("remote_lease_expired")?;
+                    controller_guard.revoke("remote_lease_expired").await?;
                     return Err("controller lease expired".to_owned());
                 }
             }
@@ -468,35 +501,42 @@ async fn send_snapshot(
     socket: &mut WebSocket,
     target_hello: &HelloEnvelope,
     control_sequence: &mut u32,
-    snapshot: pps_contracts::RunnerSnapshot,
-) -> Result<(), String> {
-    let envelope: SnapshotEnvelope = Envelope::new(
+    controller: &ActiveControllerGuard,
+) -> Result<bool, String> {
+    let Some(snapshot) = controller.current_snapshot().await? else {
+        return Ok(false);
+    };
+    let envelope = Envelope::new(
         "snapshot",
         target_hello.session_id.clone(),
         target_hello.sender_id.clone(),
         target_hello.sender_epoch,
         next_sequence(control_sequence),
-        SnapshotBody {
+        RemoteSnapshotBody {
             revision: snapshot.revision,
             state: snapshot,
         },
     );
-    send_control(socket, &envelope).await
+    send_control(socket, &envelope).await?;
+    Ok(true)
 }
 
 async fn send_state(
     socket: &mut WebSocket,
     target_hello: &HelloEnvelope,
     state_sequence: &mut u32,
-    snapshot: pps_contracts::RunnerSnapshot,
-) -> Result<(), String> {
-    let envelope: StateEnvelope = Envelope::new(
+    controller: &ActiveControllerGuard,
+) -> Result<bool, String> {
+    let Some(snapshot) = controller.current_snapshot().await? else {
+        return Ok(false);
+    };
+    let envelope = Envelope::new(
         "state",
         target_hello.session_id.clone(),
         target_hello.sender_id.clone(),
         target_hello.sender_epoch,
         next_sequence(state_sequence),
-        StateBody {
+        RemoteSnapshotBody {
             revision: snapshot.revision,
             state: snapshot,
         },
@@ -508,7 +548,8 @@ async fn send_state(
     socket
         .send(Message::Text(encoded.into()))
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| error.to_string())?;
+    Ok(true)
 }
 
 async fn send_protocol_error(
@@ -537,159 +578,44 @@ async fn send_protocol_error(
 
 struct ActiveControllerGuard {
     runtime: AppRuntime,
-    controller_id: String,
-    session_id: String,
-    owner_token: String,
+    identity: RemoteOwnerIdentity,
     armed: bool,
 }
 
 impl ActiveControllerGuard {
-    fn owns(&self, controller: &ActiveController) -> bool {
-        controller.id == self.controller_id
-            && controller.session_id == self.session_id
-            && controller.owner_token == self.owner_token
+    async fn refresh_lease(&self) -> Result<bool, String> {
+        self.runtime
+            .renew_lan_controller(self.identity.clone())
+            .await
     }
 
-    fn mark_connected(&self) -> Result<pps_contracts::RunnerSnapshot, String> {
-        let remote = self
-            .runtime
-            .0
-            .remote
-            .lock()
-            .map_err(|_| "remote configuration lock failed".to_owned())?;
-        if !remote.enabled || remote.session_id != self.session_id {
-            return Err("remote activation changed during authentication".to_owned());
-        }
-        let active = self
-            .runtime
-            .0
-            .active_controller
-            .lock()
-            .map_err(|_| "controller lock failed".to_owned())?;
-        if !active
-            .as_ref()
-            .is_some_and(|controller| self.owns(controller))
-        {
-            return Err("controller authority changed during authentication".to_owned());
-        }
-        let mut core = self
-            .runtime
-            .0
-            .authority
-            .lock()
-            .map_err(|_| "authority lock failed".to_owned())?;
-        let now = self.runtime.0.clock.stamp();
-        core.set_connection_state("remote_connected", now.clone());
-        let state = core.set_controller_lease(
-            Some(&self.controller_id),
-            Some(lease_expiry_unix_ms(&now)),
-            now,
-        );
-        let _ = self.runtime.0.state_tx.send(state.clone());
-        Ok(state)
+    async fn current_snapshot(&self) -> Result<Option<RemoteRunnerSnapshot>, String> {
+        self.runtime
+            .lan_publication_snapshot(self.identity.clone())
+            .await
     }
 
-    /// Refresh only while this socket still owns the exact active
-    /// controller/session reservation. The returned value is the reducer's
-    /// lease validity input; callers must not substitute a constant `true`.
-    fn refresh_lease(&self) -> Result<bool, String> {
-        let remote = self
-            .runtime
-            .0
-            .remote
-            .lock()
-            .map_err(|_| "remote configuration lock failed".to_owned())?;
-        if !remote.enabled || remote.session_id != self.session_id {
-            return Ok(false);
-        }
-        let active = self
-            .runtime
-            .0
-            .active_controller
-            .lock()
-            .map_err(|_| "controller lock failed".to_owned())?;
-        if !active
-            .as_ref()
-            .is_some_and(|controller| self.owns(controller))
-        {
-            return Ok(false);
-        }
-        let mut core = self
-            .runtime
-            .0
-            .authority
-            .lock()
-            .map_err(|_| "authority lock failed".to_owned())?;
-        let now = self.runtime.0.clock.stamp();
-        let state = core.set_controller_lease(
-            Some(&self.controller_id),
-            Some(lease_expiry_unix_ms(&now)),
-            now,
-        );
-        let _ = self.runtime.0.state_tx.send(state);
-        Ok(true)
-    }
-
-    /// Revoke and pause only if this guard still owns the active controller in
-    /// the same enabled session. Holding the remote/owner locks through the
-    /// authority update prevents an old socket racing a rotation or disable
-    /// from resetting a newer controller or overwriting `local_only` state.
-    fn revoke(&mut self, connection_state: &str) -> Result<bool, String> {
+    async fn revoke(&mut self, connection_state: &'static str) -> Result<bool, String> {
         if !self.armed {
             return Ok(false);
         }
-        let remote = self
+        let revoked = self
             .runtime
-            .0
-            .remote
-            .lock()
-            .map_err(|_| "remote configuration lock failed".to_owned())?;
-        if !remote.enabled || remote.session_id != self.session_id {
-            self.armed = false;
-            return Ok(false);
-        }
-        let mut active = self
-            .runtime
-            .0
-            .active_controller
-            .lock()
-            .map_err(|_| "controller lock failed".to_owned())?;
-        if !active
-            .as_ref()
-            .is_some_and(|controller| self.owns(controller))
-        {
-            self.armed = false;
-            return Ok(false);
-        }
-        let mut core = self
-            .runtime
-            .0
-            .authority
-            .lock()
-            .map_err(|_| "authority lock failed".to_owned())?;
-        *active = None;
-        let now = self.runtime.0.clock.stamp();
-        core.set_controller_lease(None, None, now.clone());
-        core.set_connection_state(connection_state, now.clone());
-        let paused = core.dispatch_local(Action::RunPause, serde_json::json!({}), now);
-        let _ = self.runtime.0.state_tx.send(paused.snapshot);
+            .revoke_lan_controller(self.identity.clone(), connection_state)
+            .await?;
         self.armed = false;
-        Ok(true)
+        Ok(revoked)
     }
 }
 
 impl Drop for ActiveControllerGuard {
     fn drop(&mut self) {
-        // Drop cannot surface lock failures. The ownership/session predicates
-        // inside `revoke` still guarantee stale guards are inert.
-        let _ = self.revoke("remote_waiting");
+        if self.armed {
+            self.runtime
+                .revoke_lan_controller_detached(self.identity.clone(), "remote_waiting");
+            self.armed = false;
+        }
     }
-}
-
-fn lease_expiry_unix_ms(now: &ClockStamp) -> u64 {
-    now.unix_ms
-        .saturating_add(CONTROLLER_LEASE.as_millis() as u64)
-        .min(JSON_MAX_SAFE_INTEGER)
 }
 
 fn grants_state_read(scopes: &BTreeSet<Scope>) -> bool {
@@ -788,8 +714,8 @@ async fn relay_socket(
 ) {
     let enabled = state
         .runtime
-        .0
-        .remote_config()
+        .remote_config_async()
+        .await
         .map(|config| config.enabled)
         .unwrap_or(false);
     if !enabled {
@@ -937,8 +863,8 @@ async fn relay_socket(
             _ = config_check.tick() => {
                 let enabled = state
                     .runtime
-                    .0
-                    .remote_config()
+                    .remote_config_async()
+                    .await
                     .map(|config| config.enabled)
                     .unwrap_or(false);
                 if !enabled {
@@ -1039,24 +965,29 @@ async fn send_relay_text(socket: &mut WebSocket, text: String) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pps_contracts::RunnerPhase;
+    use pps_contracts::{Action, RunnerPhase};
 
-    fn active_guard(runtime: &AppRuntime, controller_id: &str) -> ActiveControllerGuard {
-        let remote = runtime.0.remote_config().unwrap();
-        let owner_token = random_owner_token();
-        *runtime.0.active_controller.lock().unwrap() = Some(ActiveController {
-            id: controller_id.to_owned(),
-            session_id: remote.session_id.clone(),
-            owner_token: owner_token.clone(),
-            granted_scopes: vec![Scope::SessionRead, Scope::SessionTransport],
-        });
-        ActiveControllerGuard {
-            runtime: runtime.clone(),
-            controller_id: controller_id.to_owned(),
-            session_id: remote.session_id,
-            owner_token,
-            armed: true,
-        }
+    async fn active_guard(
+        runtime: &AppRuntime,
+        controller_id: &str,
+    ) -> (ActiveControllerGuard, RemoteRunnerSnapshot) {
+        let remote = runtime.remote_config_async().await.unwrap();
+        let claim = runtime
+            .claim_lan_controller(
+                remote.session_id,
+                controller_id.to_owned(),
+                BTreeSet::from([Scope::SessionRead, Scope::SessionTransport]),
+            )
+            .await
+            .unwrap();
+        (
+            ActiveControllerGuard {
+                runtime: runtime.clone(),
+                identity: claim.identity,
+                armed: true,
+            },
+            claim.snapshot,
+        )
     }
 
     #[test]
@@ -1120,19 +1051,41 @@ mod tests {
     }
 
     #[test]
-    fn deadman_revocation_clears_authority_and_pauses_a_running_target() {
+    fn lan_applied_body_redacts_reducer_rejection_details() {
+        let snapshot = AppRuntime::new().snapshot().unwrap().into();
+        let applied = RemoteApplied {
+            id: "command-redaction-0001".to_owned(),
+            action: Action::PartStart,
+            status: AppliedStatus::Rejected,
+            reason: "PRIVATE_PATH_C:\\participants\\P001\\manifest.json".to_owned(),
+            accepted_revision: 4,
+            resulting_revision: 4,
+            snapshot,
+        };
+        let body = remote_applied_body(&applied);
+        let encoded = serde_json::to_string(&body).unwrap();
+        assert!(!body.ok);
+        assert_eq!(body.error.as_deref(), Some("request_rejected"));
+        assert!(encoded.contains("request_rejected"));
+        assert!(!encoded.contains("PRIVATE_PATH"));
+        assert!(!encoded.contains("participants"));
+        assert!(!encoded.contains("snapshot"));
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn deadman_revocation_clears_authority_and_pauses_a_running_target() {
         let runtime = AppRuntime::new();
-        runtime.configure_remote(true, false).unwrap();
-        let mut guard = active_guard(&runtime, "controller_deadman");
-        let connected = guard.mark_connected().unwrap();
+        runtime.configure_remote_async(true, false).await.unwrap();
+        let (mut guard, connected) = active_guard(&runtime, "controller_deadman").await;
         assert_eq!(connected.connection_state, "remote_connected");
         assert!(connected.safety.lease_expires_at_unix_ms.is_some());
 
         runtime
-            .dispatch_local(Action::PackagePrepareDemo, serde_json::json!({}))
+            .dispatch_local_async(Action::PackagePrepareDemo, serde_json::json!({}))
+            .await
             .unwrap();
         runtime
-            .dispatch_local(
+            .dispatch_local_async(
                 Action::SetupSubmit,
                 serde_json::json!({
                     "participant_code": "P001",
@@ -1143,66 +1096,76 @@ mod tests {
                     "part_labels": {"1": "A", "2": "B"}
                 }),
             )
+            .await
             .unwrap();
         runtime
-            .dispatch_local(Action::TargetArm, serde_json::json!({}))
+            .dispatch_local_async(Action::TargetArm, serde_json::json!({}))
+            .await
             .unwrap();
         runtime
-            .dispatch_local(Action::PartStart, serde_json::json!({"part_number": 1}))
+            .dispatch_local_async(Action::PartStart, serde_json::json!({"part_number": 1}))
+            .await
             .unwrap();
-        assert_eq!(runtime.snapshot().unwrap().run.phase, RunnerPhase::Running);
+        assert_eq!(
+            runtime.snapshot_async().await.unwrap().run.phase,
+            RunnerPhase::Running
+        );
 
-        assert!(guard.revoke("remote_lease_expired").unwrap());
-        let expired = runtime.snapshot().unwrap();
+        assert!(guard.revoke("remote_lease_expired").await.unwrap());
+        let expired = runtime.snapshot_async().await.unwrap();
         assert_eq!(expired.run.phase, RunnerPhase::Paused);
         assert_eq!(expired.connection_state, "remote_lease_expired");
         assert!(expired.safety.controller_lease_id.is_empty());
         assert!(expired.safety.lease_expires_at_unix_ms.is_none());
-        assert!(runtime.0.active_controller.lock().unwrap().is_none());
     }
 
-    #[test]
-    fn stale_guard_cannot_reset_a_new_session_or_disabled_state() {
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn stale_guard_cannot_reset_a_new_session_or_disabled_state() {
         let runtime = AppRuntime::new();
-        runtime.configure_remote(true, false).unwrap();
-        let old_guard = active_guard(&runtime, "controller_old");
+        runtime.configure_remote_async(true, false).await.unwrap();
+        let (old_guard, _) = active_guard(&runtime, "controller_old").await;
+        runtime
+            .revoke_lan_controller(old_guard.identity.clone(), "remote_waiting")
+            .await
+            .unwrap();
 
-        let same_session_guard = active_guard(&runtime, "controller_replacement");
-        let before_old_drop = same_session_guard.mark_connected().unwrap();
+        let (same_session_guard, _) = active_guard(&runtime, "controller_replacement").await;
+        let before_old_drop = runtime.snapshot_async().await.unwrap();
         drop(old_guard);
-        assert_eq!(runtime.snapshot().unwrap(), before_old_drop);
+        assert_eq!(runtime.snapshot_async().await.unwrap(), before_old_drop);
         assert_eq!(
             runtime
-                .0
-                .active_controller
-                .lock()
+                .snapshot_async()
+                .await
                 .unwrap()
-                .as_ref()
-                .map(|controller| controller.id.as_str()),
-            Some("controller_replacement")
+                .safety
+                .controller_lease_id,
+            "controller_replacement"
         );
 
-        runtime.configure_remote(false, false).unwrap();
-        runtime.configure_remote(true, false).unwrap();
-        let new_guard = active_guard(&runtime, "controller_new");
-        let before_stale_session_drop = new_guard.mark_connected().unwrap();
+        runtime.configure_remote_async(false, false).await.unwrap();
+        runtime.configure_remote_async(true, false).await.unwrap();
+        let (new_guard, _) = active_guard(&runtime, "controller_new").await;
+        let before_stale_session_drop = runtime.snapshot_async().await.unwrap();
         drop(same_session_guard);
-        assert_eq!(runtime.snapshot().unwrap(), before_stale_session_drop);
+        assert_eq!(
+            runtime.snapshot_async().await.unwrap(),
+            before_stale_session_drop
+        );
         assert_eq!(
             runtime
-                .0
-                .active_controller
-                .lock()
+                .snapshot_async()
+                .await
                 .unwrap()
-                .as_ref()
-                .map(|controller| controller.id.as_str()),
-            Some("controller_new")
+                .safety
+                .controller_lease_id,
+            "controller_new"
         );
 
-        runtime.configure_remote(false, false).unwrap();
-        let disabled = runtime.snapshot().unwrap();
+        runtime.configure_remote_async(false, false).await.unwrap();
+        let disabled = runtime.snapshot_async().await.unwrap();
         assert_eq!(disabled.connection_state, "local_only");
         drop(new_guard);
-        assert_eq!(runtime.snapshot().unwrap(), disabled);
+        assert_eq!(runtime.snapshot_async().await.unwrap(), disabled);
     }
 }

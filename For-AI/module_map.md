@@ -43,9 +43,14 @@ Candidate V2 boundaries coexist with, but do not replace, that V1 path:
   `apps/runner/frontend/src/remote/beacon-contract.js`, `vdo-beacon.js`,
   `vdo-transport.js`, and `websocket-session.js`. Public beacon frames are not
   control authority; private BRSP sessions are.
-- Native WebView remote-owner boundary: the exact claim/renew/dispatch/revoke
-  DTOs and watchdog in `apps/runner/src-tauri/src/runtime.rs`, exposed only to
-  the bundled main window by the Tauri capability/command manifest.
+- Native single-owner authority actor:
+  `apps/runner/src-tauri/src/execution_owner.rs`. Its named
+  `pps-runner-authority` thread owns `RunnerCore`, remote policy/current owner,
+  the retained verified package and compiled plan, package/run/owner
+  generations, and the bounded `EventLedger`. `runtime.rs`, `remote.rs`, and
+  Tauri commands are async adapters; the exact WebView claim/renew/dispatch/
+  revoke DTOs remain exposed only to the bundled main window by the Tauri
+  capability/command manifest.
 - Versioned action/state/wire contracts: `packages/pps-contracts/`.
 - Transport-neutral BRSP/1 proof and sequence rules: `packages/pps-brsp/`.
 - Pure target-authoritative reducer: `packages/pps-runner-core/`.
@@ -88,6 +93,27 @@ inspection/conformance boundary, not an audio or experiment execution adapter.
 Each prepared CSV is compiled from the exact bounded bytes matched to its
 selection-time digest; WAV identity remains a future audio-preload boundary.
 Its Python differential probe remains CI-only while parity is being proven.
+
+All desktop authority requests enter one bounded FIFO mailbox with capacity 64:
+ordinary work is capped at 56 so eight slots remain available to local safety
+operations. The actor owns deadman expiry and stale-owner/package/run generation
+fencing; transport lifecycle threads do not own another watchdog or reducer.
+Only accepted dispatches that change semantic revision append to the scientific
+ledger. Rejected commands and accepted no-ops do not consume that capacity.
+Ordinary commits reserve evidence space for safety, and pause/revoke remains
+fail-safe if evidence is exhausted while latching `evidence_unavailable`.
+Bounded internal request/dispatch observation rings exist, but the local
+p50/p95/p99/worst diagnostic projection is not implemented. Verified real V1
+packages remain schedule-inspection-only and non-executable until native
+audio/output and evidence boundaries are implemented and qualified.
+
+Remote state uses `runtime.rs`'s exact `RemoteRunnerSnapshot` projection with
+schema `pps-runner-public-snapshot.v1`, not the full operator
+`RunnerSnapshot`. `remote.rs` may publish it only after an actor-linearized
+exact-owner/generation/read-scope check. The desktop BRSP target keeps the
+public snapshot separate from local UI state and disables autonomous cached
+heartbeats, so package/config revocation makes old readers inert before later
+state is serialized.
 
 Android/phone execution is not a V1 Runner module. The earlier Python/Kotlin
 phone source, bridges, tests, protocols, and CLIs remain under
@@ -176,8 +202,12 @@ The thin `.github/workflows/runner-next.yml` wrapper runs
 `check_runner_next.ps1`: transport-neutral Rust crates, including the V1
 prepared-session verifier, are checked on Windows, macOS, and Linux, while the
 canonical browser companion is tested and compiled
-on Node 22. These software gates do not constitute platform hardware/timing
-qualification or signed Tauri bundle evidence.
+on Node 22. The same workflow creates short-retention validation-only bundles:
+unsigned Windows NSIS and Linux DEB artifacts plus an ad-hoc/not-notarized macOS
+DMG, each with checksums and an explicit non-release notice and without updater
+artifacts. These software gates do not constitute platform hardware/timing
+qualification, production signing/notarization, an updater channel, or a
+Python-free V2 release.
 
 ## Internal Research
 

@@ -311,8 +311,9 @@ prepared-session status order, including legacy block existence and
 `participant_block_wavs` Segment 6/source-CSV/source-trial freshness checks. The
 Tauri main window invokes a no-argument native chooser; a browser or remote
 caller cannot submit a path. Native resolved paths and hashes stay in a
-non-serializable receipt retained by `AppRuntime`, while the WebView receives a
-path-free ordered-block summary. Adoption sets the real participant/session/
+non-serializable receipt retained by the native authority actor, while the
+WebView receives a path-free ordered-block summary. Adoption sets the real
+participant/session/
 part identity, disarms locally, clears remote ownership, and rotates pairing.
 The native selection/verification path is single-flight, and an adopted real
 plan cannot be replaced through `package.prepare_demo`; selecting another real
@@ -348,6 +349,34 @@ oracle coverage must not be described as absolute parity. WAV sample-rate
 probing and content binding remain required at the future audio preload boundary
 before claiming legacy execution parity; this non-executable inspection does
 not claim to verify prepared WAV bytes.
+
+The Tauri desktop now has one named Rust authority actor thread,
+`pps-runner-authority`. It exclusively owns `RunnerCore`, remote policy and the
+current remote owner, the retained verified package and compiled schedule-only
+plan, package/run/owner generations, and the bounded native `EventLedger`.
+Async local Tauri commands, authenticated LAN commands, and bundled-WebView
+BRSP commands all converge on this owner through a 64-entry FIFO mailbox: at
+most 56 ordinary requests may be queued so eight entries remain reserved for
+local safety work. The actor enforces its deadman while waiting and before each
+dequeue, and generation-fences late package, run, or controller work. A dispatch
+that changes semantic state appends scientific evidence; rejected commands and
+accepted no-ops cannot exhaust that evidence budget. Ordinary work preserves a
+ledger reserve for safety, while pause/revoke remains fail-safe if evidence
+capacity is exhausted and latches `evidence_unavailable`. Internal request and
+dispatch observation rings are bounded, but user-facing p50/p95/p99/worst
+latency reporting and full receive-to-ack instrumentation remain open.
+
+The native operator snapshot and remote state are now separate contracts. LAN
+BRSP and bundled-WebView BRSP expose only the exact
+`pps-runner-public-snapshot.v1` projection: operational revision, phase,
+part/block state, allowed actions, readiness, and lease deadline. Participant
+and session identifiers, setup demographics and name-sharing flags, package
+labels, free-form notes, controller identifiers, audit/evidence records, paths,
+pairing material, and retained verification receipts are absent by
+construction. The desktop frontend stores this projection separately from the
+full local operator state and disables autonomous cached state heartbeats for a
+native target; owner-fenced native reads and applied results are the publication
+sources.
 
 Remote control means an exhaustive registry of safe semantic outcomes, never
 arbitrary DOM events, native functions, Android intents, shell/file operations,
@@ -429,10 +458,18 @@ Linux, phone, and Quest backend. The desktop V2 release gate is explicitly
 Python-free: a clean Windows installation must adopt and run a representative
 real package, produce the required evidence/artifacts, accept local and browser
 companion control, recover cleanly, and complete normal post-run review without
-Python, PySide, PyInstaller, or a Python worker. Rust must own the bounded
-authority queue, monotonic scheduler, audio/output and response timestamp
-boundaries, instruction/run transitions, LSL/evidence/persistence, recovery,
-and required review/analysis before the compatibility package is retired.
+Python, PySide, PyInstaller, or a Python worker. Rust now owns the bounded
+authority queue and must still own the monotonic scheduler, audio/output and
+response timestamp boundaries, instruction/run transitions,
+LSL/evidence/persistence, recovery, and required review/analysis before the
+compatibility package is retired.
+
+The Runner-preview CI now also builds validation-only host artifacts: unsigned
+Windows NSIS and Linux DEB packages plus an ad-hoc/not-notarized macOS DMG.
+Those short-retention artifacts include checksums and an explicit non-release,
+non-data-collection notice, contain no updater payload, and do not satisfy the
+future production signing, notarization, updater, rollback, or Python-free
+release gates.
 
 ## Privacy And Publication Boundary
 

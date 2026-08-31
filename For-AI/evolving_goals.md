@@ -2326,7 +2326,8 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - The first real V1 package slice is now native Rust. A no-argument Tauri
   command opens the operating-system picker, `pps-session-package` checks the
   selected `pps-run-session.v1` in the Python oracle's first-failure order, and
-  the runtime retains its path-bearing non-serializable verification receipt.
+  the native authority actor retains its path-bearing non-serializable
+  verification receipt.
   Only a path-free ordered-block summary reaches the WebView. Adoption disarms
   and rotates remote authority. The picker/verifier is native single-flight;
   `package.prepare_demo` cannot replace a retained real receipt, and foreign-
@@ -2345,15 +2346,44 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - The clean-Windows V2 promotion gate must adopt and run a representative real
   package, emit required evidence/artifacts, support local and browser control,
   shut down/recover, and complete normal post-run review without Python,
-  PySide, PyInstaller, or a Python worker. Migration priority is native
-  authority/package verification; a bounded dedicated Rust execution owner and
-  monotonic command queue; native audio/output and response timestamp
-  boundaries; durable event/LSL/persistence/recovery; then required review and
-  analysis before compatibility packaging is removed.
+  PySide, PyInstaller, or a Python worker. Native authority/package verification
+  and the bounded dedicated Rust authority owner are now present; migration
+  priority continues with the monotonic experiment scheduler, native
+  audio/output and response timestamp boundaries, durable
+  event/LSL/persistence/recovery, then required review and analysis before
+  compatibility packaging is removed.
 - Instrument remote receipt through proof, scope/revision checks, authority
   enqueue, reducer application, effect start, and acknowledgement in one
   process-monotonic domain where possible. Report p50, p95, p99, and worst
   observed separately; selecting Rust does not itself establish low latency.
+- The first dedicated native authority-owner slice is now implemented. One
+  named `pps-runner-authority` actor exclusively owns `RunnerCore`, remote
+  policy/current owner, the retained verified package and compiled
+  schedule-only plan, package/run/owner generations, and the bounded native
+  `EventLedger`. Async Tauri, LAN, and bundled-WebView BRSP adapters converge on
+  its 64-entry FIFO; ordinary work is capped at 56 so eight entries remain for
+  local safety. The actor applies deadman expiry while waiting and before each
+  dequeue and fences stale owner/run/package generations. Only accepted
+  revision-changing dispatches consume scientific evidence; rejected commands
+  and accepted no-ops do not. If even reserved safety evidence is unavailable,
+  pause/revoke still applies and latches `evidence_unavailable`. Internal
+  request/dispatch observation rings are bounded, but p50/p95/p99/worst
+  reporting and complete receive-to-ack instrumentation remain future work.
+- Native remote state is now an exact separate contract,
+  `pps-runner-public-snapshot.v1`. It retains only operational target state and
+  omits participant/session identity, demographics/sharing flags, package
+  labels, notes, controller identifiers, audit/evidence data, paths, pairing
+  material, and private package receipts. LAN reads are actor-fenced to the
+  exact owner generation. The bundled desktop target stores the projection
+  separately from its full local state and has no autonomous cached state
+  heartbeat; native renewal/dispatch receipts are its publication sources.
+- Runner-preview CI now proves host packaging mechanics with validation-only
+  artifacts: unsigned Windows NSIS and Linux DEB packages and an
+  ad-hoc/not-notarized macOS DMG. Each carries a checksum and explicit
+  non-release/non-data-collection notice, creates no updater payload, and has
+  short retention. These artifacts are not production releases and do not
+  satisfy signing, notarization, updater/rollback, physical timing, real-package
+  execution, or the Python-free V2 release gate.
 - `pps-runner-execution` is the first scheduler compatibility slice. It compiles
   V1 block CSVs into sorted sample events, preserves explicit-sample precedence,
   ties-to-even seconds conversion, signed derived samples, and half-open cursor

@@ -1,3 +1,4 @@
+mod execution_owner;
 mod prepared_execution;
 mod remote;
 mod runtime;
@@ -10,9 +11,9 @@ use prepared_execution::{
     compile_prepared_execution, PreparedExecutionError, PreparedExecutionSummary,
 };
 use runtime::{
-    AppRuntime, RemoteSessionClaimRequest, RemoteSessionDispatchRequest, RemoteSessionError,
-    RemoteSessionLeaseReceipt, RemoteSessionOwnerRequest, RemoteSessionRenewRequest,
-    RemoteSessionRevocationReceipt, RemoteStatus,
+    AppRuntime, RemoteApplied, RemoteSessionClaimRequest, RemoteSessionDispatchRequest,
+    RemoteSessionError, RemoteSessionLeaseReceipt, RemoteSessionOwnerRequest,
+    RemoteSessionRenewRequest, RemoteSessionRevocationReceipt, RemoteStatus,
 };
 use serde::Serialize;
 use serde_json::Value;
@@ -51,27 +52,27 @@ struct PreparedSessionSelection {
 }
 
 #[tauri::command]
-fn runner_snapshot(state: tauri::State<'_, AppRuntime>) -> Result<RunnerSnapshot, String> {
-    state.snapshot()
+async fn runner_snapshot(state: tauri::State<'_, AppRuntime>) -> Result<RunnerSnapshot, String> {
+    state.snapshot_async().await
 }
 
 #[tauri::command]
-fn runner_dispatch(
+async fn runner_dispatch(
     action: String,
     args: Value,
     state: tauri::State<'_, AppRuntime>,
 ) -> Result<Applied, String> {
     let action = Action::from_str(&action).map_err(|error| error.to_string())?;
-    state.dispatch_local(action, args)
+    state.dispatch_local_async(action, args).await
 }
 
 #[tauri::command]
-fn remote_status(state: tauri::State<'_, AppRuntime>) -> Result<RemoteStatus, String> {
-    state.status()
+async fn remote_status(state: tauri::State<'_, AppRuntime>) -> Result<RemoteStatus, String> {
+    state.status_async().await
 }
 
 #[tauri::command]
-fn configure_remote(
+async fn configure_remote(
     enabled: bool,
     allow_abort: bool,
     lan_listener: bool,
@@ -81,12 +82,12 @@ fn configure_remote(
     if enabled && lan_listener {
         remote::ensure_started(state.inner().clone(), companion_web_root(&app))?;
     }
-    state.configure_remote(enabled, allow_abort)
+    state.configure_remote_async(enabled, allow_abort).await
 }
 
 #[tauri::command]
-fn rotate_pairing(state: tauri::State<'_, AppRuntime>) -> Result<RemoteStatus, String> {
-    state.rotate_pairing()
+async fn rotate_pairing(state: tauri::State<'_, AppRuntime>) -> Result<RemoteStatus, String> {
+    state.rotate_pairing_async().await
 }
 
 #[tauri::command]
@@ -128,7 +129,8 @@ async fn select_prepared_session(
             cancelled: true,
             summary: None,
             snapshot: runtime
-                .snapshot()
+                .snapshot_async()
+                .await
                 .map_err(|_| PreparedSessionCommandError::runtime())?,
         });
     };
@@ -147,7 +149,8 @@ async fn select_prepared_session(
     .map_err(|error| PreparedSessionCommandError::new(error.code(), error.public_message()))?;
     let summary = verified.summary().clone();
     let snapshot = runtime
-        .adopt_verified_session(verified)
+        .adopt_verified_session_async(verified)
+        .await
         .map_err(prepared_session_adoption_error)?;
 
     Ok(PreparedSessionSelection {
@@ -166,7 +169,8 @@ async fn inspect_prepared_execution(
         .map_err(|error| PreparedSessionCommandError::new(&error.code, &error.message))?;
     let runtime = state.inner().clone();
     let (inspection_guard, source) = runtime
-        .begin_prepared_execution_inspection()
+        .begin_prepared_execution_inspection_async()
+        .await
         .map_err(prepared_execution_runtime_error)?;
 
     // Reverification and CSV schedule compilation are blocking native work.
@@ -177,7 +181,8 @@ async fn inspect_prepared_execution(
         .map_err(|_| PreparedSessionCommandError::runtime())?
         .map_err(prepared_execution_compile_error)?;
     let summary = runtime
-        .cache_prepared_execution(compiled)
+        .cache_prepared_execution_async(compiled)
+        .await
         .map_err(prepared_execution_runtime_error)?;
     drop(inspection_guard);
     Ok(summary)
@@ -239,43 +244,43 @@ fn require_main_window(window: &tauri::WebviewWindow) -> Result<(), RemoteSessio
 }
 
 #[tauri::command]
-fn remote_session_claim(
+async fn remote_session_claim(
     request: RemoteSessionClaimRequest,
     window: tauri::WebviewWindow,
     state: tauri::State<'_, AppRuntime>,
 ) -> Result<RemoteSessionLeaseReceipt, RemoteSessionError> {
     require_main_window(&window)?;
-    state.claim_remote_session(request)
+    state.claim_remote_session_async(request).await
 }
 
 #[tauri::command]
-fn remote_session_renew(
+async fn remote_session_renew(
     request: RemoteSessionRenewRequest,
     window: tauri::WebviewWindow,
     state: tauri::State<'_, AppRuntime>,
 ) -> Result<RemoteSessionLeaseReceipt, RemoteSessionError> {
     require_main_window(&window)?;
-    state.renew_remote_session(request)
+    state.renew_remote_session_async(request).await
 }
 
 #[tauri::command]
-fn remote_session_dispatch(
+async fn remote_session_dispatch(
     request: RemoteSessionDispatchRequest,
     window: tauri::WebviewWindow,
     state: tauri::State<'_, AppRuntime>,
-) -> Result<Applied, RemoteSessionError> {
+) -> Result<RemoteApplied, RemoteSessionError> {
     require_main_window(&window)?;
-    state.dispatch_remote_session(request)
+    state.dispatch_remote_session_async(request).await
 }
 
 #[tauri::command]
-fn remote_session_revoke(
+async fn remote_session_revoke(
     request: RemoteSessionOwnerRequest,
     window: tauri::WebviewWindow,
     state: tauri::State<'_, AppRuntime>,
 ) -> Result<RemoteSessionRevocationReceipt, RemoteSessionError> {
     require_main_window(&window)?;
-    state.revoke_remote_session(request)
+    state.revoke_remote_session_async(request).await
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

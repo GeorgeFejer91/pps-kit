@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { createPhoneExperimentSnapshot } from "../src/domain/phone-experiment-reducer.js";
-import { validateRunnerSnapshot } from "../src/domain/runner-contract.js";
+import {
+  PUBLIC_SNAPSHOT_SCHEMA,
+  validatePublicRunnerSnapshot,
+  validatePublishedRunnerSnapshot,
+  validateRunnerSnapshot,
+} from "../src/domain/runner-contract.js";
 import {
   createVdoInvitation,
   parseInvitation,
@@ -145,6 +150,56 @@ test("PPS snapshots require the complete versioned application schema", () => {
   }), /finite/u);
 });
 
+test("native public snapshots have a distinct exact PII-free schema", () => {
+  const local = createPhoneExperimentSnapshot({
+    targetId: "target-alpha",
+    epoch: 7,
+    clock: () => ({ unixMs: 1_700_000_000_000, monotonicNs: 123_000 }),
+  });
+  const remote = {
+    schema: PUBLIC_SNAPSHOT_SCHEMA,
+    protocol: local.protocol,
+    target_id: local.target_id,
+    target_kind: local.target_kind,
+    epoch: local.epoch,
+    revision: local.revision,
+    server_unix_ms: local.server_unix_ms,
+    server_monotonic_ns: local.server_monotonic_ns,
+    connection_state: local.connection_state,
+    timing_tier: local.timing_tier,
+    package_verified: local.package_verified,
+    allowed_actions: local.allowed_actions,
+    setup: {
+      submitted: local.setup.submitted,
+      ready: local.setup.ready,
+      required_missing: local.setup.required_missing,
+    },
+    part: local.part,
+    run: local.run,
+    instruction_gate: local.instruction_gate,
+    active_block: local.active_block,
+    safety: {
+      lease_expires_at_unix_ms: local.safety.lease_expires_at_unix_ms,
+      local_override: local.safety.local_override,
+      local_armed: local.safety.local_armed,
+      audio_route_ready: local.safety.audio_route_ready,
+      publication_ready: local.safety.publication_ready,
+      lsl_ready: local.safety.lsl_ready,
+      capture_started: local.safety.capture_started,
+    },
+  };
+  assert.equal(validatePublicRunnerSnapshot(remote), remote);
+  assert.equal(validatePublishedRunnerSnapshot(remote), remote);
+  assert.equal(validatePublishedRunnerSnapshot(local), local);
+  for (const privateField of ["identity", "package_label", "last_note", "audit_event_count"]) {
+    assert.throws(() => validatePublicRunnerSnapshot({ ...remote, [privateField]: "private" }), /fields are invalid/u);
+  }
+  assert.throws(() => validatePublicRunnerSnapshot({
+    ...remote,
+    setup: { ...remote.setup, participant_code: "P001" },
+  }), /fields are invalid/u);
+});
+
 class LinkedSocket extends EventTarget {
   constructor() {
     super();
@@ -262,6 +317,42 @@ function phoneSnapshot({ allowedActions = [] } = {}) {
   };
 }
 
+function publicSnapshot({ allowedActions = [] } = {}) {
+  const local = phoneSnapshot({ allowedActions });
+  return {
+    schema: PUBLIC_SNAPSHOT_SCHEMA,
+    protocol: local.protocol,
+    target_id: local.target_id,
+    target_kind: local.target_kind,
+    epoch: local.epoch,
+    revision: local.revision,
+    server_unix_ms: local.server_unix_ms,
+    server_monotonic_ns: local.server_monotonic_ns,
+    connection_state: local.connection_state,
+    timing_tier: local.timing_tier,
+    package_verified: local.package_verified,
+    allowed_actions: local.allowed_actions,
+    setup: {
+      submitted: local.setup.submitted,
+      ready: local.setup.ready,
+      required_missing: local.setup.required_missing,
+    },
+    part: local.part,
+    run: local.run,
+    instruction_gate: local.instruction_gate,
+    active_block: local.active_block,
+    safety: {
+      lease_expires_at_unix_ms: local.safety.lease_expires_at_unix_ms,
+      local_override: local.safety.local_override,
+      local_armed: local.safety.local_armed,
+      audio_route_ready: local.safety.audio_route_ready,
+      publication_ready: local.safety.publication_ready,
+      lsl_ready: local.safety.lsl_ready,
+      capture_started: local.safety.capture_started,
+    },
+  };
+}
+
 async function connectSessions(controller, target, sockets) {
   const controllerReady = eventOnce(controller, "ready");
   const targetReady = eventOnce(target, "ready");
@@ -360,6 +451,46 @@ test("browser target deadman is renewed by canonical controller controls and exp
   assert.equal(target.controller, null);
   assert.equal(target.phase, "closed");
   assert.equal(targetIntervals.pending.size, 0);
+
+  controller.stop();
+  target.stop();
+});
+
+test("native-backed targets can disable autonomous state heartbeats", async () => {
+  const sockets = linkedSockets();
+  const controllerIntervals = new ManualIntervals();
+  const targetIntervals = new ManualIntervals();
+  const secret = Buffer.alloc(32, 19).toString("base64url");
+  const snapshot = publicSnapshot({ allowedActions: [] });
+  const controller = new BrspControllerSession({
+    url: "wss://lab.example/ws/native-no-heartbeat",
+    secret,
+    targetId: "target-alpha",
+    sessionId: "session-native-no-heartbeat",
+    requestedScopes: ["session.read"],
+    controllerId: "controller-native-no-heartbeat",
+    setIntervalFn: controllerIntervals.setInterval,
+    clearIntervalFn: controllerIntervals.clearInterval,
+    socketFactory: () => sockets.controller,
+  });
+  const target = new BrspTargetSession({
+    url: "wss://lab.example/ws/native-no-heartbeat",
+    secret,
+    targetId: "target-alpha",
+    sessionId: "session-native-no-heartbeat",
+    availableScopes: ["session.read"],
+    actions: [],
+    getSnapshot: () => snapshot,
+    applyCommand: async () => ({ status: "rejected", reason: "not_used", snapshot }),
+    stateHeartbeatEnabled: false,
+    setIntervalFn: targetIntervals.setInterval,
+    clearIntervalFn: targetIntervals.clearInterval,
+    socketFactory: () => sockets.target,
+  });
+
+  await connectSessions(controller, target, sockets);
+  assert.equal(controllerIntervals.pending.size, 1, "controller still requests owner-fenced snapshots");
+  assert.equal(targetIntervals.pending.size, 0, "target never publishes an unfenced periodic state");
 
   controller.stop();
   target.stop();

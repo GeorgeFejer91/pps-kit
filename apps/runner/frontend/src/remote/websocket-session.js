@@ -10,7 +10,7 @@ import {
   actionsForScopes,
   isRemoteAction,
   requiredScope,
-  validateRunnerSnapshot,
+  validatePublishedRunnerSnapshot,
 } from "../domain/runner-contract.js";
 import {
   createProtocolIdentity,
@@ -474,7 +474,7 @@ export class BrspControllerSession extends BrspSocketSession {
       if (!this.grantedScopes.includes(SCOPES.READ)) {
         throw new TypeError("session.read is required before adopting PPS target state.");
       }
-      validated = validateRunnerSnapshot(state);
+      validated = validatePublishedRunnerSnapshot(state);
       if (revision !== validated.revision) {
         throw new TypeError("BRSP state revision does not match its PPS snapshot revision.");
       }
@@ -576,6 +576,7 @@ export class BrspTargetSession extends BrspSocketSession {
     socketFactory,
     controllerLeaseMs = CONTROLLER_LEASE_MS,
     stateHeartbeatMs = STATE_HEARTBEAT_MS,
+    stateHeartbeatEnabled = true,
     now = () => performance.now(),
     setTimeoutFn = (handler, milliseconds) => setTimeout(handler, milliseconds),
     clearTimeoutFn = (timer) => clearTimeout(timer),
@@ -587,7 +588,7 @@ export class BrspTargetSession extends BrspSocketSession {
     let controllerLeaseIsValid = () => false;
     let renewControllerLease = () => false;
     const validatedSnapshot = () => {
-      const current = validateRunnerSnapshot(getSnapshot());
+      const current = validatePublishedRunnerSnapshot(getSnapshot());
       if (current.target_id !== targetId) {
         throw new TypeError("The browser target snapshot does not match its advertised target ID.");
       }
@@ -665,6 +666,10 @@ export class BrspTargetSession extends BrspSocketSession {
     this.now = now;
     this.controllerLeaseMs = boundedMilliseconds(controllerLeaseMs, "controllerLeaseMs", { minimum: 100 });
     this.stateHeartbeatMs = boundedMilliseconds(stateHeartbeatMs, "stateHeartbeatMs");
+    if (typeof stateHeartbeatEnabled !== "boolean") {
+      throw new TypeError("stateHeartbeatEnabled must be a boolean.");
+    }
+    this.stateHeartbeatEnabled = stateHeartbeatEnabled;
     this.setTimeoutFn = setTimeoutFn;
     this.clearTimeoutFn = clearTimeoutFn;
     this.setIntervalFn = setIntervalFn;
@@ -706,7 +711,7 @@ export class BrspTargetSession extends BrspSocketSession {
   }
 
   publishState(snapshot = this.getSnapshot()) {
-    const validated = validateRunnerSnapshot(snapshot);
+    const validated = validatePublishedRunnerSnapshot(snapshot);
     if (validated.target_id !== this.targetId) {
       throw new TypeError("The browser target cannot publish another target's snapshot.");
     }
@@ -746,7 +751,7 @@ export class BrspTargetSession extends BrspSocketSession {
 
   startStateHeartbeat() {
     this.stopStateHeartbeat();
-    if (!this.connection.acceptedScopes.includes(SCOPES.READ)) return;
+    if (!this.stateHeartbeatEnabled || !this.connection.acceptedScopes.includes(SCOPES.READ)) return;
     this.stateHeartbeat = this.setIntervalFn(() => {
       if (this.phase !== "ready") return;
       try {

@@ -5,26 +5,26 @@ use std::{
         atomic::{AtomicBool, Ordering},
         Arc, Mutex,
     },
-    thread,
-    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
-use pps_brsp::{is_newer_sequence, random_epoch, random_nonce, valid_peer_id, PairingSecret};
+use pps_brsp::{random_epoch, random_nonce, valid_peer_id, PairingSecret};
 use pps_contracts::{
-    Action, Applied, ClockStamp, CommandBody, RunnerPhase, RunnerSnapshot, Scope, TimingTier,
-    JSON_MAX_SAFE_INTEGER,
+    Action, ActiveBlockSnapshot, Applied, AppliedStatus, CommandBody, InstructionGateSnapshot,
+    PartSnapshot, RunSnapshot, RunnerSnapshot, Scope, TimingTier,
 };
-use pps_runner_core::{DispatchOrigin, RunnerCore, VerifiedPackageSummary};
+use pps_runner_core::VerifiedPackageSummary;
 use pps_session_package::VerifiedPreparedSession;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tokio::sync::broadcast;
 
+use crate::execution_owner::{
+    AuthorityView, ExecutionOwner, LanOwnerReceipt, OwnerSubmitError, RemoteOwnerIdentity,
+};
 use crate::prepared_execution::{
     CompiledPreparedExecution, PreparedExecutionSource, PreparedExecutionSummary,
 };
 
-const WEBVIEW_REMOTE_LEASE: Duration = Duration::from_secs(5);
 const MAX_ACCEPTED_SCOPES: usize = 16;
 
 #[derive(Debug, Clone)]
@@ -38,29 +38,7 @@ pub struct RemoteConfig {
 #[derive(Debug, Clone)]
 pub struct ActiveController {
     pub id: String,
-    pub session_id: String,
-    pub owner_token: String,
     pub granted_scopes: Vec<Scope>,
-}
-
-#[derive(Debug, Clone)]
-struct WebviewRemoteSession {
-    controller_id: String,
-    session_id: String,
-    owner_token: String,
-    accepted_scopes: BTreeSet<Scope>,
-    last_control_sequence: u32,
-    lease_deadline: Instant,
-}
-
-impl WebviewRemoteSession {
-    fn owns(&self, active: &ActiveController, session_id: &str, owner_token: &str) -> bool {
-        self.session_id == session_id
-            && self.owner_token == owner_token
-            && active.id == self.controller_id
-            && active.session_id == self.session_id
-            && active.owner_token == self.owner_token
-    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -78,7 +56,7 @@ impl RemoteSessionError {
         }
     }
 
-    fn unavailable() -> Self {
+    pub(crate) fn unavailable() -> Self {
         Self::new(
             "runtime_unavailable",
             "The native Runner authority is unavailable.",
@@ -127,6 +105,119 @@ pub struct RemoteSessionDispatchRequest {
     pub command: CommandBody,
 }
 
+/// Deliberately smaller state projection for every remote/native seam.
+///
+/// The local operator UI keeps the complete [`RunnerSnapshot`]. Remote peers
+/// receive only operational state needed to render and control the target;
+/// participant/session identity, demographics, package labels, notes, and
+/// evidence/private native state are absent by construction.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct RemoteRunnerSnapshot {
+    pub schema: String,
+    pub protocol: String,
+    pub target_id: String,
+    pub target_kind: String,
+    pub epoch: u64,
+    pub revision: u64,
+    pub server_unix_ms: u64,
+    pub server_monotonic_ns: u64,
+    pub connection_state: String,
+    pub timing_tier: TimingTier,
+    pub package_verified: bool,
+    pub allowed_actions: Vec<Action>,
+    pub setup: RemoteSetupSnapshot,
+    pub part: PartSnapshot,
+    pub run: RunSnapshot,
+    pub instruction_gate: InstructionGateSnapshot,
+    pub active_block: ActiveBlockSnapshot,
+    pub safety: RemoteSafetySnapshot,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct RemoteSetupSnapshot {
+    pub submitted: bool,
+    pub ready: bool,
+    pub required_missing: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct RemoteSafetySnapshot {
+    pub lease_expires_at_unix_ms: Option<u64>,
+    pub local_override: bool,
+    pub local_armed: bool,
+    pub audio_route_ready: bool,
+    pub publication_ready: bool,
+    pub lsl_ready: bool,
+    pub capture_started: bool,
+}
+
+impl From<RunnerSnapshot> for RemoteRunnerSnapshot {
+    fn from(snapshot: RunnerSnapshot) -> Self {
+        Self {
+            schema: "pps-runner-public-snapshot.v1".to_owned(),
+            protocol: snapshot.protocol,
+            target_id: snapshot.target_id,
+            target_kind: snapshot.target_kind,
+            epoch: snapshot.epoch,
+            revision: snapshot.revision,
+            server_unix_ms: snapshot.server_unix_ms,
+            server_monotonic_ns: snapshot.server_monotonic_ns,
+            connection_state: snapshot.connection_state,
+            timing_tier: snapshot.timing_tier,
+            package_verified: snapshot.package_verified,
+            allowed_actions: snapshot.allowed_actions,
+            setup: RemoteSetupSnapshot {
+                submitted: snapshot.setup.submitted,
+                ready: snapshot.setup.ready,
+                required_missing: snapshot.setup.required_missing,
+            },
+            part: snapshot.part,
+            run: snapshot.run,
+            instruction_gate: snapshot.instruction_gate,
+            active_block: snapshot.active_block,
+            safety: RemoteSafetySnapshot {
+                lease_expires_at_unix_ms: snapshot.safety.lease_expires_at_unix_ms,
+                local_override: snapshot.safety.local_override,
+                local_armed: snapshot.safety.local_armed,
+                audio_route_ready: snapshot.safety.audio_route_ready,
+                publication_ready: snapshot.safety.publication_ready,
+                lsl_ready: snapshot.safety.lsl_ready,
+                capture_started: snapshot.safety.capture_started,
+            },
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct RemoteApplied {
+    pub id: String,
+    pub action: Action,
+    pub status: AppliedStatus,
+    pub reason: String,
+    pub accepted_revision: u64,
+    pub resulting_revision: u64,
+    pub snapshot: RemoteRunnerSnapshot,
+}
+
+impl RemoteApplied {
+    pub(crate) fn from_native(applied: Applied) -> Self {
+        let reason = if matches!(applied.status, AppliedStatus::Rejected) {
+            "request_rejected"
+        } else {
+            "request_accepted"
+        };
+        Self {
+            id: applied.id,
+            action: applied.action,
+            status: applied.status,
+            reason: reason.to_owned(),
+            accepted_revision: applied.accepted_revision,
+            resulting_revision: applied.resulting_revision,
+            snapshot: applied.snapshot.into(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RemoteSessionLeaseReceipt {
@@ -135,14 +226,14 @@ pub struct RemoteSessionLeaseReceipt {
     pub owner_token: String,
     pub accepted_scopes: Vec<Scope>,
     pub lease_expires_at_unix_ms: u64,
-    pub snapshot: RunnerSnapshot,
+    pub snapshot: RemoteRunnerSnapshot,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RemoteSessionRevocationReceipt {
     pub revoked: bool,
-    pub snapshot: RunnerSnapshot,
+    pub snapshot: RemoteRunnerSnapshot,
 }
 
 #[derive(Debug, Default)]
@@ -151,46 +242,10 @@ pub struct RemoteServerState {
     pub last_error: Option<String>,
 }
 
-#[derive(Debug)]
-pub struct ClockSource {
-    started: Instant,
-}
-
-impl ClockSource {
-    fn new() -> Self {
-        Self {
-            started: Instant::now(),
-        }
-    }
-
-    pub fn stamp(&self) -> ClockStamp {
-        let unix_ms = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map(|duration| duration.as_millis() as u64)
-            .unwrap_or_default()
-            .min(JSON_MAX_SAFE_INTEGER);
-        let monotonic_ns = self
-            .started
-            .elapsed()
-            .as_nanos()
-            .min(JSON_MAX_SAFE_INTEGER as u128) as u64;
-        ClockStamp {
-            unix_ms,
-            monotonic_ns,
-        }
-    }
-}
-
 pub struct RuntimeShared {
-    pub authority: Mutex<RunnerCore>,
-    pub remote: Mutex<RemoteConfig>,
-    pub active_controller: Mutex<Option<ActiveController>>,
-    webview_remote_session: Mutex<Option<WebviewRemoteSession>>,
-    prepared_session: Mutex<Option<RetainedPreparedSession>>,
-    compiled_prepared_execution: Mutex<Option<CompiledPreparedExecution>>,
+    pub authority: ExecutionOwner,
     prepared_session_selection_in_flight: AtomicBool,
     prepared_execution_inspection_in_flight: AtomicBool,
-    pub clock: ClockSource,
     pub state_tx: broadcast::Sender<RunnerSnapshot>,
     pub remote_server: Mutex<RemoteServerState>,
     pub advertised_ip: IpAddr,
@@ -201,12 +256,6 @@ pub struct AppRuntime(pub Arc<RuntimeShared>);
 
 pub struct PreparedSessionSelectionGuard {
     shared: Arc<RuntimeShared>,
-}
-
-#[derive(Debug)]
-struct RetainedPreparedSession {
-    generation: u64,
-    receipt: Arc<VerifiedPreparedSession>,
 }
 
 pub struct PreparedExecutionInspectionGuard {
@@ -257,30 +306,26 @@ impl AppRuntime {
             .unwrap_or(IpAddr::V4(Ipv4Addr::LOCALHOST));
         let epoch = u64::from(random_epoch());
         let target_id = format!("pps-desktop-{}", &random_nonce()[..12]);
-        let clock = ClockSource::new();
-        let core = RunnerCore::new(
+        let (state_tx, _) = broadcast::channel(64);
+        let remote = RemoteConfig {
+            enabled: false,
+            allow_abort: false,
+            secret: PairingSecret::generate(),
+            session_id: format!("session_{}", &random_nonce()[..18]),
+        };
+        let authority = ExecutionOwner::start(
             target_id,
             "desktop-tauri-preview",
             epoch,
             TimingTier::DesktopPreview,
-            clock.stamp(),
-        );
-        let (state_tx, _) = broadcast::channel(64);
+            remote,
+            state_tx.clone(),
+        )
+        .expect("the Runner authority thread must start");
         let shared = RuntimeShared {
-            authority: Mutex::new(core),
-            remote: Mutex::new(RemoteConfig {
-                enabled: false,
-                allow_abort: false,
-                secret: PairingSecret::generate(),
-                session_id: format!("session_{}", &random_nonce()[..18]),
-            }),
-            active_controller: Mutex::new(None),
-            webview_remote_session: Mutex::new(None),
-            prepared_session: Mutex::new(None),
-            compiled_prepared_execution: Mutex::new(None),
+            authority,
             prepared_session_selection_in_flight: AtomicBool::new(false),
             prepared_execution_inspection_in_flight: AtomicBool::new(false),
-            clock,
             state_tx,
             remote_server: Mutex::new(RemoteServerState::default()),
             advertised_ip,
@@ -288,12 +333,22 @@ impl AppRuntime {
         Self(Arc::new(shared))
     }
 
+    #[cfg(test)]
     pub fn snapshot(&self) -> Result<RunnerSnapshot, String> {
         self.0
             .authority
-            .lock()
-            .map_err(|_| "runner authority lock is poisoned".to_owned())
-            .map(|core| core.snapshot())
+            .view_blocking()
+            .map(|view| view.snapshot)
+            .map_err(owner_runtime_error)
+    }
+
+    pub async fn snapshot_async(&self) -> Result<RunnerSnapshot, String> {
+        self.0
+            .authority
+            .view()
+            .await
+            .map(|view| view.snapshot)
+            .map_err(owner_runtime_error)
     }
 
     /// Reserve the one native prepared-session picker/verification operation.
@@ -314,6 +369,7 @@ impl AppRuntime {
     /// Reserve one native schedule inspection and capture the retained package
     /// generation under its authority lock. The caller holds the returned
     /// guard across reverification and compilation.
+    #[cfg(test)]
     pub fn begin_prepared_execution_inspection(
         &self,
     ) -> Result<(PreparedExecutionInspectionGuard, PreparedExecutionSource), &'static str> {
@@ -324,618 +380,273 @@ impl AppRuntime {
         let guard = PreparedExecutionInspectionGuard {
             shared: Arc::clone(&self.0),
         };
-        let retained = self
+        let source = self
             .0
-            .prepared_session
-            .lock()
-            .map_err(|_| "runtime_unavailable")?;
-        let retained = retained.as_ref().ok_or("prepared_session_missing")?;
-        let source = PreparedExecutionSource {
-            generation: retained.generation,
-            fingerprint: retained.receipt.manifest_sha256().to_owned(),
-            receipt: Arc::clone(&retained.receipt),
+            .authority
+            .inspection_source_blocking()
+            .map_err(|_| "runtime_unavailable")??;
+        Ok((guard, source))
+    }
+
+    pub async fn begin_prepared_execution_inspection_async(
+        &self,
+    ) -> Result<(PreparedExecutionInspectionGuard, PreparedExecutionSource), &'static str> {
+        self.0
+            .prepared_execution_inspection_in_flight
+            .compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed)
+            .map_err(|_| "prepared_execution_inspection_in_progress")?;
+        let guard = PreparedExecutionInspectionGuard {
+            shared: Arc::clone(&self.0),
         };
+        let source = self
+            .0
+            .authority
+            .inspection_source()
+            .await
+            .map_err(|_| "runtime_unavailable")??;
         Ok((guard, source))
     }
 
     /// Cache a compiled schedule only if the selected package is still the
     /// exact generation/fingerprint captured before native reverification.
+    #[cfg(test)]
     pub fn cache_prepared_execution(
         &self,
         compiled: CompiledPreparedExecution,
     ) -> Result<PreparedExecutionSummary, &'static str> {
-        let retained = self
-            .0
-            .prepared_session
-            .lock()
-            .map_err(|_| "runtime_unavailable")?;
-        let retained = retained.as_ref().ok_or("prepared_package_replaced")?;
-        if retained.generation != compiled.generation
-            || retained.receipt.manifest_sha256() != compiled.fingerprint
-        {
-            return Err("prepared_package_replaced");
-        }
-        if usize::try_from(compiled.summary().block_count).ok() != Some(compiled.schedules().len())
-        {
-            return Err("runtime_unavailable");
-        }
-        let mut cached = self
-            .0
-            .compiled_prepared_execution
-            .lock()
-            .map_err(|_| "runtime_unavailable")?;
-        let summary = compiled.summary().clone();
-        *cached = Some(compiled);
-        Ok(summary)
+        self.0
+            .authority
+            .cache_compiled_blocking(compiled)
+            .map_err(|_| "runtime_unavailable")?
     }
 
-    pub fn dispatch_local(&self, action: Action, args: Value) -> Result<Applied, String> {
-        let mut core = self
-            .0
+    pub async fn cache_prepared_execution_async(
+        &self,
+        compiled: CompiledPreparedExecution,
+    ) -> Result<PreparedExecutionSummary, &'static str> {
+        self.0
             .authority
-            .lock()
-            .map_err(|_| "runner authority lock is poisoned".to_owned())?;
-        let previous_revision = core.revision();
-        let applied = core.dispatch_local(action, args, self.0.clock.stamp());
-        if applied.resulting_revision != previous_revision {
-            let _ = self.0.state_tx.send(applied.snapshot.clone());
-        }
-        Ok(applied)
+            .cache_compiled(compiled)
+            .await
+            .map_err(|_| "runtime_unavailable")?
+    }
+
+    #[cfg(test)]
+    pub fn dispatch_local(&self, action: Action, args: Value) -> Result<Applied, String> {
+        self.0
+            .authority
+            .dispatch_local_blocking(action, args)
+            .map_err(owner_runtime_error)?
+    }
+
+    pub async fn dispatch_local_async(
+        &self,
+        action: Action,
+        args: Value,
+    ) -> Result<Applied, String> {
+        self.0
+            .authority
+            .dispatch_local(action, args)
+            .await
+            .map_err(owner_runtime_error)?
     }
 
     /// Adopt a path-bearing prepared-session receipt produced by the native
     /// verifier. Only a filesystem-free semantic projection reaches the pure
     /// reducer; the full receipt remains in Rust for the future execution
     /// adapter and must be reverified at that final use boundary.
+    #[cfg(test)]
     pub fn adopt_verified_session(
         &self,
         verified: VerifiedPreparedSession,
     ) -> Result<RunnerSnapshot, &'static str> {
-        let summary = verified.summary();
-        let part_number = summary
-            .part_number
-            .map(u8::try_from)
-            .transpose()
-            .map_err(|_| "invalid_verified_package")?;
-        let block_count =
-            u32::try_from(summary.blocks.len()).map_err(|_| "invalid_verified_package")?;
-        let package = VerifiedPackageSummary {
-            fingerprint: verified.manifest_sha256().to_owned(),
-            participant_id: summary.participant_id.clone(),
-            session_id: summary.session_id.clone(),
-            session_group_id: summary.session_group_id.clone(),
-            part_number,
-            part_session_id: summary.part_session_id.clone(),
-            execution_mode: summary.execution_mode.clone(),
-            block_count,
-        };
-
-        // Keep the existing authority lock order: remote -> active controller
-        // -> WebView owner -> reducer -> retained package -> compiled plan.
-        // Holding all six
-        // prevents a controller from reclaiming the old epoch between package
-        // adoption and authority rotation.
-        let mut remote = self.0.remote.lock().map_err(|_| "runtime_unavailable")?;
-        let mut active = self
-            .0
-            .active_controller
-            .lock()
-            .map_err(|_| "runtime_unavailable")?;
-        let mut webview = self
-            .0
-            .webview_remote_session
-            .lock()
-            .map_err(|_| "runtime_unavailable")?;
-        let mut core = self.0.authority.lock().map_err(|_| "runtime_unavailable")?;
-        let mut retained = self
-            .0
-            .prepared_session
-            .lock()
-            .map_err(|_| "runtime_unavailable")?;
-        let mut compiled = self
-            .0
-            .compiled_prepared_execution
-            .lock()
-            .map_err(|_| "runtime_unavailable")?;
-        let next_generation = retained
-            .as_ref()
-            .map(|session| session.generation)
-            .unwrap_or_default()
-            .checked_add(1)
-            .ok_or("runtime_unavailable")?;
-
-        let now = self.0.clock.stamp();
-        core.adopt_verified_package(package, now.clone())?;
-
-        remote.secret = PairingSecret::generate();
-        remote.session_id = format!("session_{}", &random_nonce()[..18]);
-        core.rotate_epoch(u64::from(random_epoch()), now.clone());
-        core.set_controller_lease(None, None, now.clone());
-        let snapshot = core.set_connection_state(
-            if remote.enabled {
-                "package_changed"
-            } else {
-                "local_only"
-            },
-            now,
-        );
-        *active = None;
-        *webview = None;
-        *retained = Some(RetainedPreparedSession {
-            generation: next_generation,
-            receipt: Arc::new(verified),
-        });
-        *compiled = None;
-
-        drop(compiled);
-        drop(retained);
-        drop(core);
-        drop(webview);
-        drop(active);
-        drop(remote);
-        let _ = self.0.state_tx.send(snapshot.clone());
-        Ok(snapshot)
+        let package = verified_package_projection(&verified)?;
+        self.0
+            .authority
+            .adopt_verified_session_blocking(
+                verified,
+                package,
+                PairingSecret::generate(),
+                format!("session_{}", &random_nonce()[..18]),
+                u64::from(random_epoch()),
+            )
+            .map_err(|_| "runtime_unavailable")?
     }
 
-    pub fn dispatch_remote(
+    pub async fn adopt_verified_session_async(
         &self,
-        controller_id: String,
-        scopes: BTreeSet<Scope>,
-        lease_valid: bool,
-        command: pps_contracts::CommandRequest,
-    ) -> Result<Applied, String> {
-        let mut core = self
-            .0
+        verified: VerifiedPreparedSession,
+    ) -> Result<RunnerSnapshot, &'static str> {
+        let package = verified_package_projection(&verified)?;
+        self.0
             .authority
-            .lock()
-            .map_err(|_| "runner authority lock is poisoned".to_owned())?;
-        let previous_revision = core.revision();
-        let applied = core.dispatch(
-            DispatchOrigin::Remote {
-                controller_id,
-                granted_scopes: scopes,
-                lease_valid,
-            },
-            command,
-            self.0.clock.stamp(),
-        );
-        if applied.resulting_revision != previous_revision {
-            let _ = self.0.state_tx.send(applied.snapshot.clone());
-        }
-        Ok(applied)
+            .adopt_verified_session(
+                verified,
+                package,
+                PairingSecret::generate(),
+                format!("session_{}", &random_nonce()[..18]),
+                u64::from(random_epoch()),
+            )
+            .await
+            .map_err(|_| "runtime_unavailable")?
     }
 
     /// Reserve the single native remote-controller authority for a WebView
     /// transport only after that transport has completed its own BRSP proof
     /// and scope negotiation. The returned owner token is fresh native bearer
     /// material and never enters the public Runner snapshot.
+    /// Renew the Rust-owned controller lease after the WebView adapter has
+    /// accepted a fresh authenticated BRSP control record. Sequence freshness
+    /// is checked again at the native boundary before the deadline moves.
+    /// Apply one already-authenticated WebView command through the same remote
+    /// reducer origin used by the LAN adapter. This method never falls back to
+    /// `dispatch_local` for the requested operation.
+    /// Revoke only the exact owner token returned by `claim_remote_session`.
+    /// A late pagehide/Stop from an old WebView cannot clear a replacement.
+    #[cfg(test)]
     pub fn claim_remote_session(
         &self,
         request: RemoteSessionClaimRequest,
     ) -> Result<RemoteSessionLeaseReceipt, RemoteSessionError> {
-        if !valid_peer_id(&request.session_id) {
-            return Err(RemoteSessionError::new(
-                "invalid_session_id",
-                "The remote session identifier is malformed.",
-            ));
-        }
-        if !valid_peer_id(&request.controller_id) {
-            return Err(RemoteSessionError::new(
-                "invalid_controller_id",
-                "The remote controller identifier is malformed.",
-            ));
-        }
-        let accepted_scopes = request
-            .accepted_scopes
-            .iter()
-            .copied()
-            .collect::<BTreeSet<_>>();
-        if accepted_scopes.is_empty()
-            || accepted_scopes.len() != request.accepted_scopes.len()
-            || accepted_scopes.len() > MAX_ACCEPTED_SCOPES
-        {
-            return Err(RemoteSessionError::new(
-                "invalid_scopes",
-                "Accepted scopes must be a non-empty, unique, bounded set.",
-            ));
-        }
-
-        let remote = self
-            .0
-            .remote
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        validate_remote_activation(&remote, &request.session_id)?;
-        let mut available_scopes = Scope::DEFAULT_REMOTE.into_iter().collect::<BTreeSet<_>>();
-        if remote.allow_abort {
-            available_scopes.insert(Scope::SessionAbort);
-        }
-        if !accepted_scopes.is_subset(&available_scopes) {
-            return Err(RemoteSessionError::new(
-                "scope_not_available",
-                "The WebView requested a scope that the local operator did not enable.",
-            ));
-        }
-
-        let mut active = self
-            .0
-            .active_controller
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        let mut webview = self
-            .0
-            .webview_remote_session
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        if active.is_some() || webview.is_some() {
-            return Err(RemoteSessionError::new(
-                "controller_busy",
-                "The Runner already has an active remote controller.",
-            ));
-        }
-        let mut core = self
-            .0
+        let accepted_scopes = validate_claim_request(&request)?;
+        self.0
             .authority
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-
-        let owner_token = random_owner_token();
-        let controller = ActiveController {
-            id: request.controller_id.clone(),
-            session_id: request.session_id.clone(),
-            owner_token: owner_token.clone(),
-            granted_scopes: accepted_scopes.iter().copied().collect(),
-        };
-        let lease = WebviewRemoteSession {
-            controller_id: request.controller_id,
-            session_id: request.session_id,
-            owner_token: owner_token.clone(),
-            accepted_scopes,
-            last_control_sequence: request.ready_sequence,
-            lease_deadline: Instant::now() + WEBVIEW_REMOTE_LEASE,
-        };
-        *active = Some(controller);
-        *webview = Some(lease.clone());
-
-        let now = self.0.clock.stamp();
-        core.set_connection_state("remote_connected", now.clone());
-        let lease_expires_at_unix_ms = remote_lease_expiry_unix_ms(&now);
-        let snapshot = core.set_controller_lease(
-            Some(&lease.controller_id),
-            Some(lease_expires_at_unix_ms),
-            now,
-        );
-        let _ = self.0.state_tx.send(snapshot.clone());
-        drop(core);
-        drop(webview);
-        drop(active);
-        drop(remote);
-
-        if let Err(error) = self.spawn_remote_session_watchdog(owner_token) {
-            let _ = self.revoke_remote_session(RemoteSessionOwnerRequest {
-                session_id: lease.session_id.clone(),
-                owner_token: lease.owner_token.clone(),
-            });
-            return Err(error);
-        }
-        Ok(remote_session_receipt(
-            &lease,
-            lease_expires_at_unix_ms,
-            snapshot,
-        ))
+            .claim_webview_blocking(
+                request.session_id,
+                request.controller_id,
+                random_owner_token(),
+                accepted_scopes,
+                request.ready_sequence,
+            )
+            .map_err(owner_remote_error)?
     }
 
-    /// Renew the Rust-owned controller lease after the WebView adapter has
-    /// accepted a fresh authenticated BRSP control record. Sequence freshness
-    /// is checked again at the native boundary before the deadline moves.
+    pub async fn claim_remote_session_async(
+        &self,
+        request: RemoteSessionClaimRequest,
+    ) -> Result<RemoteSessionLeaseReceipt, RemoteSessionError> {
+        let accepted_scopes = validate_claim_request(&request)?;
+        self.0
+            .authority
+            .claim_webview(
+                request.session_id,
+                request.controller_id,
+                random_owner_token(),
+                accepted_scopes,
+                request.ready_sequence,
+            )
+            .await
+            .map_err(owner_remote_error)?
+    }
+
+    #[cfg(test)]
     pub fn renew_remote_session(
         &self,
         request: RemoteSessionRenewRequest,
     ) -> Result<RemoteSessionLeaseReceipt, RemoteSessionError> {
         validate_owner_request(&request.session_id, &request.owner_token)?;
-        let remote = self
-            .0
-            .remote
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        validate_remote_activation(&remote, &request.session_id)?;
-        let active = self
-            .0
-            .active_controller
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        let mut webview = self
-            .0
-            .webview_remote_session
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        let lease = current_owned_lease(
-            active.as_ref(),
-            webview.as_ref(),
-            &request.session_id,
-            &request.owner_token,
-        )?;
-        if Instant::now() >= lease.lease_deadline {
-            drop(webview);
-            drop(active);
-            drop(remote);
-            let _ = self.expire_remote_session_if_due(&request.owner_token)?;
-            return Err(RemoteSessionError::new(
-                "controller_lease_expired",
-                "The native remote-controller lease expired.",
-            ));
-        }
-        if !is_newer_sequence(request.control_sequence, lease.last_control_sequence) {
-            return Err(RemoteSessionError::new(
-                "replayed_sequence",
-                "The BRSP control sequence is duplicate, old, or ambiguous.",
-            ));
-        }
-        let lease = webview.as_mut().expect("owned lease was checked above");
-        lease.last_control_sequence = request.control_sequence;
-        lease.lease_deadline = Instant::now() + WEBVIEW_REMOTE_LEASE;
-        let lease = lease.clone();
-        let mut core = self
-            .0
+        self.0
             .authority
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        let now = self.0.clock.stamp();
-        let lease_expires_at_unix_ms = remote_lease_expiry_unix_ms(&now);
-        let snapshot = core.set_controller_lease(
-            Some(&lease.controller_id),
-            Some(lease_expires_at_unix_ms),
-            now,
-        );
-        let _ = self.0.state_tx.send(snapshot.clone());
-        Ok(remote_session_receipt(
-            &lease,
-            lease_expires_at_unix_ms,
-            snapshot,
-        ))
+            .renew_webview_blocking(
+                request.session_id,
+                request.owner_token,
+                request.control_sequence,
+            )
+            .map_err(owner_remote_error)?
     }
 
-    /// Apply one already-authenticated WebView command through the same remote
-    /// reducer origin used by the LAN adapter. This method never falls back to
-    /// `dispatch_local` for the requested operation.
+    pub async fn renew_remote_session_async(
+        &self,
+        request: RemoteSessionRenewRequest,
+    ) -> Result<RemoteSessionLeaseReceipt, RemoteSessionError> {
+        validate_owner_request(&request.session_id, &request.owner_token)?;
+        self.0
+            .authority
+            .renew_webview(
+                request.session_id,
+                request.owner_token,
+                request.control_sequence,
+            )
+            .await
+            .map_err(owner_remote_error)?
+    }
+
+    #[cfg(test)]
     pub fn dispatch_remote_session(
         &self,
         request: RemoteSessionDispatchRequest,
-    ) -> Result<Applied, RemoteSessionError> {
+    ) -> Result<RemoteApplied, RemoteSessionError> {
         validate_owner_request(&request.session_id, &request.owner_token)?;
-        let remote = self
-            .0
-            .remote
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        validate_remote_activation(&remote, &request.session_id)?;
-        let active = self
-            .0
-            .active_controller
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        let mut webview = self
-            .0
-            .webview_remote_session
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        let lease = current_owned_lease(
-            active.as_ref(),
-            webview.as_ref(),
-            &request.session_id,
-            &request.owner_token,
-        )?;
-        if Instant::now() >= lease.lease_deadline {
-            drop(webview);
-            drop(active);
-            drop(remote);
-            let _ = self.expire_remote_session_if_due(&request.owner_token)?;
-            return Err(RemoteSessionError::new(
-                "controller_lease_expired",
-                "The native remote-controller lease expired.",
-            ));
-        }
-        if !is_newer_sequence(request.control_sequence, lease.last_control_sequence) {
-            return Err(RemoteSessionError::new(
-                "replayed_sequence",
-                "The BRSP control sequence is duplicate, old, or ambiguous.",
-            ));
-        }
-        if !lease.accepted_scopes.contains(&request.command.scope) {
-            return Err(RemoteSessionError::new(
-                "scope_not_granted",
-                "The command scope was not negotiated for this controller.",
-            ));
-        }
-
-        let lease = webview.as_mut().expect("owned lease was checked above");
-        lease.last_control_sequence = request.control_sequence;
-        lease.lease_deadline = Instant::now() + WEBVIEW_REMOTE_LEASE;
-        let controller_id = lease.controller_id.clone();
-        let accepted_scopes = lease.accepted_scopes.clone();
-        let mut core = self
-            .0
+        self.0
             .authority
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        let now = self.0.clock.stamp();
-        let lease_expires_at_unix_ms = remote_lease_expiry_unix_ms(&now);
-        let refreshed =
-            core.set_controller_lease(Some(&controller_id), Some(lease_expires_at_unix_ms), now);
-        let authority_epoch = core.epoch();
-        let _ = self.0.state_tx.send(refreshed);
-        drop(core);
-
-        let command = request
-            .command
-            .into_request(authority_epoch, request.control_sequence);
-        self.dispatch_remote(controller_id, accepted_scopes, true, command)
-            .map_err(|_| RemoteSessionError::unavailable())
+            .dispatch_webview_blocking(
+                request.session_id,
+                request.owner_token,
+                request.control_sequence,
+                request.command,
+            )
+            .map_err(owner_remote_error)?
     }
 
-    /// Revoke only the exact owner token returned by `claim_remote_session`.
-    /// A late pagehide/Stop from an old WebView cannot clear a replacement.
+    pub async fn dispatch_remote_session_async(
+        &self,
+        request: RemoteSessionDispatchRequest,
+    ) -> Result<RemoteApplied, RemoteSessionError> {
+        validate_owner_request(&request.session_id, &request.owner_token)?;
+        self.0
+            .authority
+            .dispatch_webview(
+                request.session_id,
+                request.owner_token,
+                request.control_sequence,
+                request.command,
+            )
+            .await
+            .map_err(owner_remote_error)?
+    }
+
+    #[cfg(test)]
     pub fn revoke_remote_session(
         &self,
         request: RemoteSessionOwnerRequest,
     ) -> Result<RemoteSessionRevocationReceipt, RemoteSessionError> {
         validate_owner_request(&request.session_id, &request.owner_token)?;
-        let remote = self
-            .0
-            .remote
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        validate_remote_activation(&remote, &request.session_id)?;
-        let mut active = self
-            .0
-            .active_controller
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        let mut webview = self
-            .0
-            .webview_remote_session
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        current_owned_lease(
-            active.as_ref(),
-            webview.as_ref(),
-            &request.session_id,
-            &request.owner_token,
-        )?;
-        let mut core = self
-            .0
+        self.0
             .authority
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        let snapshot = revoke_webview_owner(
-            &mut active,
-            &mut webview,
-            &mut core,
-            self.0.clock.stamp(),
-            "remote_waiting",
-        );
-        let _ = self.0.state_tx.send(snapshot.clone());
-        Ok(RemoteSessionRevocationReceipt {
-            revoked: true,
-            snapshot,
-        })
+            .revoke_webview_blocking(request.session_id, request.owner_token)
+            .map_err(owner_remote_error)?
     }
 
-    fn spawn_remote_session_watchdog(&self, owner_token: String) -> Result<(), RemoteSessionError> {
-        let runtime = self.clone();
-        thread::Builder::new()
-            .name("pps-remote-lease".to_owned())
-            .spawn(move || loop {
-                let delay = match runtime.remote_session_watchdog_delay(&owner_token) {
-                    Ok(Some(delay)) => delay,
-                    Ok(None) | Err(_) => return,
-                };
-                if !delay.is_zero() {
-                    thread::sleep(delay);
-                }
-                match runtime.expire_remote_session_if_due(&owner_token) {
-                    Ok(true) | Err(_) => return,
-                    Ok(false) => {}
-                }
-            })
-            .map(|_| ())
-            .map_err(|_| {
-                RemoteSessionError::new(
-                    "lease_watchdog_unavailable",
-                    "The native remote-session safety watchdog could not start.",
-                )
-            })
-    }
-
-    fn remote_session_watchdog_delay(
+    pub async fn revoke_remote_session_async(
         &self,
-        owner_token: &str,
-    ) -> Result<Option<Duration>, RemoteSessionError> {
-        let webview = self
-            .0
-            .webview_remote_session
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        Ok(webview
-            .as_ref()
-            .filter(|lease| lease.owner_token == owner_token)
-            .map(|lease| {
-                lease
-                    .lease_deadline
-                    .saturating_duration_since(Instant::now())
-            }))
+        request: RemoteSessionOwnerRequest,
+    ) -> Result<RemoteSessionRevocationReceipt, RemoteSessionError> {
+        validate_owner_request(&request.session_id, &request.owner_token)?;
+        self.0
+            .authority
+            .revoke_webview(request.session_id, request.owner_token)
+            .await
+            .map_err(owner_remote_error)?
     }
 
-    fn expire_remote_session_if_due(&self, owner_token: &str) -> Result<bool, RemoteSessionError> {
-        let remote = self
-            .0
-            .remote
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        let mut active = self
-            .0
-            .active_controller
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        let mut webview = self
-            .0
-            .webview_remote_session
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        let Some(lease) = webview
-            .as_ref()
-            .filter(|lease| lease.owner_token == owner_token)
-        else {
-            return Ok(true);
-        };
-        if !remote.enabled
-            || remote.session_id != lease.session_id
-            || !active
-                .as_ref()
-                .is_some_and(|controller| lease.owns(controller, &lease.session_id, owner_token))
-        {
-            *webview = None;
-            return Ok(true);
-        }
-        if Instant::now() < lease.lease_deadline {
-            return Ok(false);
-        }
-        let mut core = self
+    #[cfg(test)]
+    pub fn status(&self) -> Result<RemoteStatus, String> {
+        let view = self
             .0
             .authority
-            .lock()
-            .map_err(|_| RemoteSessionError::unavailable())?;
-        let snapshot = revoke_webview_owner(
-            &mut active,
-            &mut webview,
-            &mut core,
-            self.0.clock.stamp(),
-            "remote_lease_expired",
-        );
-        let _ = self.0.state_tx.send(snapshot);
-        Ok(true)
+            .view_blocking()
+            .map_err(owner_runtime_error)?;
+        self.status_from_view(view)
     }
 
-    pub fn available_scopes(&self) -> Result<Vec<Scope>, String> {
-        let remote = self
-            .0
-            .remote
-            .lock()
-            .map_err(|_| "remote configuration lock is poisoned".to_owned())?;
-        let mut scopes = Scope::DEFAULT_REMOTE.to_vec();
-        if remote.allow_abort {
-            scopes.push(Scope::SessionAbort);
-        }
-        Ok(scopes)
+    pub async fn status_async(&self) -> Result<RemoteStatus, String> {
+        let view = self.0.authority.view().await.map_err(owner_runtime_error)?;
+        self.status_from_view(view)
     }
 
-    pub fn status(&self) -> Result<RemoteStatus, String> {
-        let snapshot = self.snapshot()?;
-        let remote = self
-            .0
-            .remote
-            .lock()
-            .map_err(|_| "remote configuration lock is poisoned".to_owned())?;
+    fn status_from_view(&self, view: AuthorityView) -> Result<RemoteStatus, String> {
+        let snapshot = view.snapshot;
+        let remote = view.remote;
         let server = self
             .0
             .remote_server
@@ -952,12 +663,7 @@ impl AppRuntime {
         let server_available = server.bind_addr.is_some();
         let server_error = server.last_error.clone();
         drop(server);
-        let active = self
-            .0
-            .active_controller
-            .lock()
-            .map_err(|_| "controller lock is poisoned".to_owned())?
-            .clone();
+        let active = view.active_controller;
         let controller_url = if remote.enabled && server_available {
             let secret = remote.secret.expose_base64();
             let mut invitation_scopes = Scope::DEFAULT_REMOTE
@@ -999,83 +705,169 @@ impl AppRuntime {
         })
     }
 
+    #[cfg(test)]
     pub fn configure_remote(
         &self,
         enabled: bool,
         allow_abort: bool,
     ) -> Result<RemoteStatus, String> {
-        let changed = {
-            let mut remote = self
-                .0
-                .remote
-                .lock()
-                .map_err(|_| "remote configuration lock is poisoned".to_owned())?;
-            let changed = remote.enabled != enabled || remote.allow_abort != allow_abort;
-            remote.enabled = enabled;
-            remote.allow_abort = allow_abort;
-            if changed {
-                remote.secret = PairingSecret::generate();
-                remote.session_id = format!("session_{}", &random_nonce()[..18]);
-            }
-            changed
-        };
-        if changed {
-            self.invalidate_remote_epoch(if enabled {
-                "remote_enabled"
-            } else {
-                "local_only"
-            })?;
-        }
-        self.status()
-    }
-
-    pub fn rotate_pairing(&self) -> Result<RemoteStatus, String> {
-        {
-            let mut remote = self
-                .0
-                .remote
-                .lock()
-                .map_err(|_| "remote configuration lock is poisoned".to_owned())?;
-            remote.secret = PairingSecret::generate();
-            remote.session_id = format!("session_{}", &random_nonce()[..18]);
-        }
-        self.invalidate_remote_epoch("pairing_rotated")?;
-        self.status()
-    }
-
-    fn invalidate_remote_epoch(&self, connection_state: &str) -> Result<(), String> {
-        let mut active = self
-            .0
-            .active_controller
-            .lock()
-            .map_err(|_| "controller lock is poisoned".to_owned())?;
-        let displaced_active_owner = active.is_some();
-        let mut webview = self
-            .0
-            .webview_remote_session
-            .lock()
-            .map_err(|_| "webview remote-session lock is poisoned".to_owned())?;
-        let mut core = self
-            .0
+        self.0
             .authority
-            .lock()
-            .map_err(|_| "runner authority lock is poisoned".to_owned())?;
-        let now = self.0.clock.stamp();
-        core.rotate_epoch(u64::from(random_epoch()), now.clone());
-        core.set_controller_lease(None, None, now.clone());
-        let mut snapshot = core.set_connection_state(connection_state, now.clone());
-        if displaced_active_owner && snapshot.run.phase == RunnerPhase::Running {
-            snapshot = core
-                .dispatch_local(Action::RunPause, serde_json::json!({}), now)
-                .snapshot;
+            .configure_remote_blocking(
+                enabled,
+                allow_abort,
+                PairingSecret::generate(),
+                format!("session_{}", &random_nonce()[..18]),
+                u64::from(random_epoch()),
+            )
+            .map_err(owner_runtime_error)?
+            .map_err(str::to_owned)?;
+        self.status()
+    }
+
+    pub async fn configure_remote_async(
+        &self,
+        enabled: bool,
+        allow_abort: bool,
+    ) -> Result<RemoteStatus, String> {
+        self.0
+            .authority
+            .configure_remote(
+                enabled,
+                allow_abort,
+                PairingSecret::generate(),
+                format!("session_{}", &random_nonce()[..18]),
+                u64::from(random_epoch()),
+            )
+            .await
+            .map_err(owner_runtime_error)?
+            .map_err(str::to_owned)?;
+        self.status_async().await
+    }
+
+    #[cfg(test)]
+    pub fn rotate_pairing(&self) -> Result<RemoteStatus, String> {
+        self.0
+            .authority
+            .rotate_pairing_blocking(
+                PairingSecret::generate(),
+                format!("session_{}", &random_nonce()[..18]),
+                u64::from(random_epoch()),
+            )
+            .map_err(owner_runtime_error)?
+            .map_err(str::to_owned)?;
+        self.status()
+    }
+
+    pub async fn rotate_pairing_async(&self) -> Result<RemoteStatus, String> {
+        self.0
+            .authority
+            .rotate_pairing(
+                PairingSecret::generate(),
+                format!("session_{}", &random_nonce()[..18]),
+                u64::from(random_epoch()),
+            )
+            .await
+            .map_err(owner_runtime_error)?
+            .map_err(str::to_owned)?;
+        self.status_async().await
+    }
+
+    pub async fn remote_config_async(&self) -> Result<RemoteConfig, String> {
+        self.0
+            .authority
+            .view()
+            .await
+            .map(|view| view.remote)
+            .map_err(owner_runtime_error)
+    }
+
+    pub async fn available_scopes_async(&self) -> Result<Vec<Scope>, String> {
+        let remote = self.remote_config_async().await?;
+        let mut scopes = Scope::DEFAULT_REMOTE.to_vec();
+        if remote.allow_abort {
+            scopes.push(Scope::SessionAbort);
         }
-        *active = None;
-        *webview = None;
-        drop(core);
-        drop(webview);
-        drop(active);
-        let _ = self.0.state_tx.send(snapshot);
-        Ok(())
+        Ok(scopes)
+    }
+
+    pub async fn claim_lan_controller(
+        &self,
+        session_id: String,
+        controller_id: String,
+        accepted_scopes: BTreeSet<Scope>,
+    ) -> Result<LanOwnerReceipt, String> {
+        self.0
+            .authority
+            .claim_lan(
+                session_id,
+                controller_id,
+                random_owner_token(),
+                accepted_scopes,
+            )
+            .await
+            .map_err(owner_runtime_error)?
+            .map_err(|error| error.code)
+    }
+
+    pub async fn renew_lan_controller(
+        &self,
+        identity: RemoteOwnerIdentity,
+    ) -> Result<bool, String> {
+        self.0
+            .authority
+            .renew_lan(identity)
+            .await
+            .map_err(owner_runtime_error)?
+    }
+
+    /// Actor-serialized, non-renewing publication fence for the exact LAN
+    /// owner identity/generation. `None` means the socket must close without
+    /// publishing state.
+    pub(crate) async fn lan_publication_snapshot(
+        &self,
+        identity: RemoteOwnerIdentity,
+    ) -> Result<Option<RemoteRunnerSnapshot>, String> {
+        self.0
+            .authority
+            .lan_publication_snapshot(identity)
+            .await
+            .map_err(owner_runtime_error)
+    }
+
+    pub async fn dispatch_lan_controller(
+        &self,
+        identity: RemoteOwnerIdentity,
+        control_sequence: u32,
+        command: CommandBody,
+    ) -> Result<RemoteApplied, String> {
+        self.0
+            .authority
+            .dispatch_lan(identity, control_sequence, command)
+            .await
+            .map_err(owner_runtime_error)?
+    }
+
+    pub async fn revoke_lan_controller(
+        &self,
+        identity: RemoteOwnerIdentity,
+        connection_state: &'static str,
+    ) -> Result<bool, String> {
+        self.0
+            .authority
+            .revoke_lan(identity, connection_state)
+            .await
+            .map_err(owner_runtime_error)?
+    }
+
+    pub fn revoke_lan_controller_detached(
+        &self,
+        identity: RemoteOwnerIdentity,
+        connection_state: &'static str,
+    ) {
+        self.0
+            .authority
+            .revoke_lan_detached(identity, connection_state);
     }
 
     /// Reserve the LAN listener only after the user explicitly enables remote
@@ -1126,23 +918,73 @@ impl AppRuntime {
     }
 }
 
-fn validate_remote_activation(
-    remote: &RemoteConfig,
-    session_id: &str,
-) -> Result<(), RemoteSessionError> {
-    if !remote.enabled {
+fn owner_runtime_error(error: OwnerSubmitError) -> String {
+    error.as_runtime_message().to_owned()
+}
+
+fn owner_remote_error(error: OwnerSubmitError) -> RemoteSessionError {
+    match error {
+        OwnerSubmitError::Full => RemoteSessionError::new(
+            "runtime_busy",
+            "The native Runner authority queue is full; retry the request.",
+        ),
+        OwnerSubmitError::Closed => RemoteSessionError::unavailable(),
+    }
+}
+
+fn validate_claim_request(
+    request: &RemoteSessionClaimRequest,
+) -> Result<BTreeSet<Scope>, RemoteSessionError> {
+    if !valid_peer_id(&request.session_id) {
         return Err(RemoteSessionError::new(
-            "remote_disabled",
-            "Remote control is not enabled by the local operator.",
+            "invalid_session_id",
+            "The remote session identifier is malformed.",
         ));
     }
-    if remote.session_id != session_id {
+    if !valid_peer_id(&request.controller_id) {
         return Err(RemoteSessionError::new(
-            "session_mismatch",
-            "The remote activation changed; use a fresh invitation.",
+            "invalid_controller_id",
+            "The remote controller identifier is malformed.",
         ));
     }
-    Ok(())
+    let accepted_scopes = request
+        .accepted_scopes
+        .iter()
+        .copied()
+        .collect::<BTreeSet<_>>();
+    if accepted_scopes.is_empty()
+        || accepted_scopes.len() != request.accepted_scopes.len()
+        || accepted_scopes.len() > MAX_ACCEPTED_SCOPES
+    {
+        return Err(RemoteSessionError::new(
+            "invalid_scopes",
+            "Accepted scopes must be a non-empty, unique, bounded set.",
+        ));
+    }
+    Ok(accepted_scopes)
+}
+
+fn verified_package_projection(
+    verified: &VerifiedPreparedSession,
+) -> Result<VerifiedPackageSummary, &'static str> {
+    let summary = verified.summary();
+    let part_number = summary
+        .part_number
+        .map(u8::try_from)
+        .transpose()
+        .map_err(|_| "invalid_verified_package")?;
+    let block_count =
+        u32::try_from(summary.blocks.len()).map_err(|_| "invalid_verified_package")?;
+    Ok(VerifiedPackageSummary {
+        fingerprint: verified.manifest_sha256().to_owned(),
+        participant_id: summary.participant_id.clone(),
+        session_id: summary.session_id.clone(),
+        session_group_id: summary.session_group_id.clone(),
+        part_number,
+        part_session_id: summary.part_session_id.clone(),
+        execution_mode: summary.execution_mode.clone(),
+        block_count,
+    })
 }
 
 pub(crate) fn random_owner_token() -> String {
@@ -1168,79 +1010,13 @@ fn validate_owner_request(session_id: &str, owner_token: &str) -> Result<(), Rem
     Ok(())
 }
 
-fn current_owned_lease<'a>(
-    active: Option<&ActiveController>,
-    webview: Option<&'a WebviewRemoteSession>,
-    session_id: &str,
-    owner_token: &str,
-) -> Result<&'a WebviewRemoteSession, RemoteSessionError> {
-    let Some(lease) = webview else {
-        return Err(RemoteSessionError::new(
-            "stale_owner",
-            "The WebView no longer owns the native remote session.",
-        ));
-    };
-    if !active.is_some_and(|controller| lease.owns(controller, session_id, owner_token)) {
-        return Err(RemoteSessionError::new(
-            "stale_owner",
-            "The WebView no longer owns the native remote session.",
-        ));
-    }
-    Ok(lease)
-}
-
-fn remote_lease_expiry_unix_ms(now: &ClockStamp) -> u64 {
-    now.unix_ms
-        .saturating_add(WEBVIEW_REMOTE_LEASE.as_millis() as u64)
-        .min(JSON_MAX_SAFE_INTEGER)
-}
-
-fn remote_session_receipt(
-    lease: &WebviewRemoteSession,
-    lease_expires_at_unix_ms: u64,
-    snapshot: RunnerSnapshot,
-) -> RemoteSessionLeaseReceipt {
-    RemoteSessionLeaseReceipt {
-        session_id: lease.session_id.clone(),
-        controller_id: lease.controller_id.clone(),
-        owner_token: lease.owner_token.clone(),
-        accepted_scopes: lease.accepted_scopes.iter().copied().collect(),
-        lease_expires_at_unix_ms,
-        snapshot,
-    }
-}
-
-fn revoke_webview_owner(
-    active: &mut Option<ActiveController>,
-    webview: &mut Option<WebviewRemoteSession>,
-    core: &mut RunnerCore,
-    now: ClockStamp,
-    connection_state: &str,
-) -> RunnerSnapshot {
-    *active = None;
-    *webview = None;
-    core.set_controller_lease(None, None, now.clone());
-    core.set_connection_state(connection_state, now.clone());
-    core.dispatch_local(Action::RunPause, serde_json::json!({}), now)
-        .snapshot
-}
-
-impl RuntimeShared {
-    pub fn remote_config(&self) -> Result<RemoteConfig, String> {
-        self.remote
-            .lock()
-            .map_err(|_| "remote configuration lock is poisoned".to_owned())
-            .map(|config| config.clone())
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::prepared_execution::compile_prepared_execution;
-    use pps_contracts::AppliedStatus;
+    use pps_contracts::{AppliedStatus, RunnerPhase};
     use pps_session_package::{verify_prepared_session, VerificationRequest};
-    use std::fs;
+    use std::{fs, time::Duration};
 
     fn verified_legacy_package(
         participant_id: &str,
@@ -1320,6 +1096,94 @@ mod tests {
     }
 
     #[test]
+    fn public_remote_projection_omits_private_operator_and_participant_fields() {
+        let runtime = AppRuntime::new();
+        runtime.configure_remote(true, false).unwrap();
+        runtime
+            .dispatch_local(
+                Action::PackagePrepareDemo,
+                serde_json::json!({"label": "PRIVATE_PACKAGE_LABEL_7781"}),
+            )
+            .unwrap();
+        runtime
+            .dispatch_local(
+                Action::SetupSubmit,
+                serde_json::json!({
+                    "participant_code": "PRIVATE_CODE_7781",
+                    "participant_name": "Private Name 7781",
+                    "age": 47,
+                    "handedness": "left",
+                    "gender": "female",
+                    "name_sharing_opt_in": true,
+                    "part_labels": {"1": "PRIVATE_CONDITION_A", "2": "PRIVATE_CONDITION_B"}
+                }),
+            )
+            .unwrap();
+        runtime
+            .dispatch_local(
+                Action::SessionNote,
+                serde_json::json!({"text": "PRIVATE_NOTE_7781"}),
+            )
+            .unwrap();
+
+        let receipt = claim_webview_controller(
+            &runtime,
+            "controller_projection",
+            Scope::DEFAULT_REMOTE.to_vec(),
+        );
+        let public_value = serde_json::to_value(&receipt.snapshot).unwrap();
+        let public_json = serde_json::to_string(&public_value).unwrap();
+        assert_eq!(
+            public_value.get("schema").and_then(Value::as_str),
+            Some("pps-runner-public-snapshot.v1")
+        );
+        for required in ["protocol", "target_id", "epoch", "revision"] {
+            assert!(public_value.get(required).is_some(), "missing {required}");
+        }
+        for forbidden_key in [
+            "identity",
+            "package_label",
+            "audit_event_count",
+            "last_note",
+            "participant_code",
+            "participant_name_present",
+            "name_sharing_opt_in",
+            "age",
+            "handedness",
+            "gender",
+            "part_labels",
+            "part_label_options",
+            "part_label_controls_visible",
+            "controller_lease_id",
+        ] {
+            assert!(
+                !public_json.contains(&format!("\"{forbidden_key}\"")),
+                "public projection leaked key {forbidden_key}: {public_json}"
+            );
+        }
+        for private_value in [
+            "PRIVATE_PACKAGE_LABEL_7781",
+            "PRIVATE_CODE_7781",
+            "Private Name 7781",
+            "PRIVATE_CONDITION_A",
+            "PRIVATE_CONDITION_B",
+            "PRIVATE_NOTE_7781",
+            receipt.owner_token.as_str(),
+        ] {
+            assert!(
+                !public_json.contains(private_value),
+                "public projection leaked private value {private_value}"
+            );
+        }
+
+        let local = runtime.snapshot().unwrap();
+        assert_eq!(local.package_label, "PRIVATE_PACKAGE_LABEL_7781");
+        assert_eq!(local.identity.participant_id, "PRIVATE_CODE_7781");
+        assert_eq!(local.last_note, "PRIVATE_NOTE_7781");
+        assert_eq!(local.safety.controller_lease_id, "controller_projection");
+    }
+
+    #[test]
     fn adopting_a_verified_session_rotates_remote_authority_and_retains_native_paths() {
         let runtime = AppRuntime::new();
         runtime.configure_remote(true, false).unwrap();
@@ -1342,19 +1206,9 @@ mod tests {
         assert_ne!(new_status.session_id, old_status.session_id);
         assert_ne!(new_status.epoch, receipt.snapshot.epoch);
         assert!(!new_status.controller_connected);
-        assert!(runtime.0.active_controller.lock().unwrap().is_none());
-        assert!(runtime.0.webview_remote_session.lock().unwrap().is_none());
         assert_eq!(
-            runtime
-                .0
-                .prepared_session
-                .lock()
-                .unwrap()
-                .as_ref()
-                .unwrap()
-                .receipt
-                .manifest_path(),
-            expected_manifest
+            runtime.0.authority.test_view().manifest_path,
+            Some(expected_manifest.clone())
         );
 
         let adopted_status = runtime.status().unwrap();
@@ -1374,28 +1228,76 @@ mod tests {
             ))
             .unwrap();
         assert_eq!(replacement.status, AppliedStatus::Rejected);
-        assert_eq!(
-            replacement.reason,
-            "verified_package_replacement_requires_native_picker"
-        );
-        assert_eq!(replacement.snapshot.identity.participant_id, "P001");
+        assert_eq!(replacement.reason, "request_rejected");
+        assert_eq!(runtime.snapshot().unwrap().identity.participant_id, "P001");
         assert_eq!(
             runtime.status().unwrap().session_id,
             adopted_status.session_id
         );
         assert_eq!(runtime.status().unwrap().epoch, adopted_status.epoch);
         assert_eq!(
-            runtime
-                .0
-                .prepared_session
-                .lock()
-                .unwrap()
-                .as_ref()
-                .unwrap()
-                .receipt
-                .manifest_path(),
-            expected_manifest
+            runtime.0.authority.test_view().manifest_path,
+            Some(expected_manifest)
         );
+
+        fs::remove_dir_all(fixture_root).unwrap();
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn stale_lan_reader_cannot_publish_package_or_config_broadcasts() {
+        let runtime = AppRuntime::new();
+        runtime.configure_remote_async(true, false).await.unwrap();
+        let remote = runtime.remote_config_async().await.unwrap();
+        let old_package_owner = runtime
+            .claim_lan_controller(
+                remote.session_id,
+                "controller_before_package".to_owned(),
+                Scope::DEFAULT_REMOTE.into_iter().collect(),
+            )
+            .await
+            .unwrap();
+        let mut package_broadcast = runtime.0.state_tx.subscribe();
+        let (fixture_root, verified) = verified_legacy_package("PRIVATE_PACKAGE_PARTICIPANT");
+
+        runtime
+            .adopt_verified_session_async(verified)
+            .await
+            .unwrap();
+        let changed = tokio::time::timeout(Duration::from_secs(1), package_broadcast.recv())
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(
+            changed.identity.participant_id,
+            "PRIVATE_PACKAGE_PARTICIPANT"
+        );
+        assert!(runtime
+            .lan_publication_snapshot(old_package_owner.identity)
+            .await
+            .unwrap()
+            .is_none());
+
+        let remote = runtime.remote_config_async().await.unwrap();
+        let old_config_owner = runtime
+            .claim_lan_controller(
+                remote.session_id,
+                "controller_before_config".to_owned(),
+                Scope::DEFAULT_REMOTE.into_iter().collect(),
+            )
+            .await
+            .unwrap();
+        let mut config_broadcast = runtime.0.state_tx.subscribe();
+        runtime.configure_remote_async(false, false).await.unwrap();
+        let changed = tokio::time::timeout(Duration::from_secs(1), config_broadcast.recv())
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(changed.connection_state, "local_only");
+        assert!(runtime
+            .lan_publication_snapshot(old_config_owner.identity)
+            .await
+            .unwrap()
+            .is_none());
 
         fs::remove_dir_all(fixture_root).unwrap();
     }
@@ -1404,12 +1306,12 @@ mod tests {
     fn prepared_session_selection_is_native_single_flight() {
         let runtime = AppRuntime::new();
         let first = runtime.begin_prepared_session_selection().unwrap();
-        assert!(runtime.0.prepared_session.lock().unwrap().is_none());
+        assert!(runtime.0.authority.test_view().manifest_path.is_none());
         assert_eq!(
             runtime.begin_prepared_session_selection().err().unwrap(),
             "prepared_session_selection_in_progress"
         );
-        assert!(runtime.0.prepared_session.lock().unwrap().is_none());
+        assert!(runtime.0.authority.test_view().manifest_path.is_none());
 
         drop(first);
         let next = runtime.begin_prepared_session_selection().unwrap();
@@ -1459,37 +1361,15 @@ mod tests {
         assert_eq!(summary.timing_qualification, "unqualified");
         assert!(!summary.executable);
         assert_eq!(
-            runtime
-                .0
-                .compiled_prepared_execution
-                .lock()
-                .unwrap()
-                .as_ref()
-                .unwrap()
-                .schedules()
-                .len(),
-            1
+            runtime.0.authority.test_view().compiled_schedule_count,
+            Some(1)
         );
 
         let (replacement_root, replacement) = verified_legacy_package("P001");
         runtime.adopt_verified_session(replacement).unwrap();
-        assert!(runtime
-            .0
-            .compiled_prepared_execution
-            .lock()
-            .unwrap()
-            .is_none());
-        assert_eq!(
-            runtime
-                .0
-                .prepared_session
-                .lock()
-                .unwrap()
-                .as_ref()
-                .unwrap()
-                .generation,
-            2
-        );
+        let replacement_view = runtime.0.authority.test_view();
+        assert!(replacement_view.compiled_schedule_count.is_none());
+        assert_eq!(replacement_view.package_generation, 2);
 
         fs::remove_dir_all(first_root).unwrap();
         fs::remove_dir_all(replacement_root).unwrap();
@@ -1511,9 +1391,9 @@ mod tests {
         );
         assert!(runtime
             .0
-            .compiled_prepared_execution
-            .lock()
-            .unwrap()
+            .authority
+            .test_view()
+            .compiled_schedule_count
             .is_none());
         drop(guard);
 
@@ -1537,7 +1417,7 @@ mod tests {
         let unchanged = runtime.status().unwrap();
         assert_eq!(unchanged.session_id, old_status.session_id);
         assert_eq!(unchanged.epoch, old_status.epoch);
-        assert!(runtime.0.prepared_session.lock().unwrap().is_none());
+        assert!(runtime.0.authority.test_view().manifest_path.is_none());
 
         fs::remove_dir_all(fixture_root).unwrap();
     }
@@ -1567,24 +1447,11 @@ mod tests {
     fn remotely_owned_running_runtime() -> AppRuntime {
         let runtime = AppRuntime::new();
         runtime.configure_remote(true, false).unwrap();
-        let remote = runtime.0.remote_config().unwrap();
-        *runtime.0.active_controller.lock().unwrap() = Some(ActiveController {
-            id: "controller_active".to_owned(),
-            session_id: remote.session_id,
-            owner_token: random_owner_token(),
-            granted_scopes: Scope::DEFAULT_REMOTE.to_vec(),
-        });
-
-        let now = runtime.0.clock.stamp();
-        {
-            let mut core = runtime.0.authority.lock().unwrap();
-            core.set_connection_state("remote_connected", now.clone());
-            core.set_controller_lease(
-                Some("controller_active"),
-                Some(now.unix_ms.saturating_add(5_000)),
-                now,
-            );
-        }
+        let _owner = claim_webview_controller(
+            &runtime,
+            "controller_active",
+            Scope::DEFAULT_REMOTE.to_vec(),
+        );
         runtime
             .dispatch_local(Action::PackagePrepareDemo, serde_json::json!({}))
             .unwrap();
@@ -1617,7 +1484,7 @@ mod tests {
         assert_eq!(snapshot.connection_state, state);
         assert!(snapshot.safety.controller_lease_id.is_empty());
         assert!(snapshot.safety.lease_expires_at_unix_ms.is_none());
-        assert!(runtime.0.active_controller.lock().unwrap().is_none());
+        assert!(runtime.0.authority.test_view().active_controller.is_none());
     }
 
     #[test]
@@ -1690,8 +1557,7 @@ mod tests {
                 owner_token: old.owner_token.clone(),
             })
             .unwrap();
-        let replacement =
-            claim_webview_controller(&runtime, "controller-new", Scope::DEFAULT_REMOTE.to_vec());
+        claim_webview_controller(&runtime, "controller-new", Scope::DEFAULT_REMOTE.to_vec());
 
         let renew_error = runtime
             .renew_remote_session(RemoteSessionRenewRequest {
@@ -1709,9 +1575,8 @@ mod tests {
             .unwrap_err();
         assert_eq!(revoke_error.code, "stale_owner");
 
-        let active = runtime.0.active_controller.lock().unwrap().clone().unwrap();
+        let active = runtime.0.authority.test_view().active_controller.unwrap();
         assert_eq!(active.id, "controller-new");
-        assert_eq!(active.owner_token, replacement.owner_token);
         assert_eq!(
             runtime.snapshot().unwrap().safety.controller_lease_id,
             "controller-new"
@@ -1741,7 +1606,11 @@ mod tests {
             .unwrap();
         assert_eq!(renewed.controller_id, "controller-renew");
         assert_eq!(
-            renewed.snapshot.safety.controller_lease_id,
+            renewed.snapshot.safety.lease_expires_at_unix_ms,
+            Some(renewed.lease_expires_at_unix_ms)
+        );
+        assert_eq!(
+            runtime.snapshot().unwrap().safety.controller_lease_id,
             "controller-renew"
         );
 
@@ -1775,8 +1644,12 @@ mod tests {
         let applied = runtime.dispatch_remote_session(request).unwrap();
 
         assert_eq!(applied.status, AppliedStatus::Rejected);
-        assert_eq!(applied.reason, "action_is_local_only");
+        assert_eq!(applied.reason, "request_rejected");
         assert!(applied.snapshot.safety.local_armed);
+        let encoded = serde_json::to_string(&applied).unwrap();
+        assert!(!encoded.contains("action_is_local_only"));
+        assert!(!encoded.contains("controller_lease_id"));
+        assert!(!encoded.contains("participant_code"));
     }
 
     #[test]
@@ -1810,8 +1683,14 @@ mod tests {
         assert!(revoked.revoked);
         assert_eq!(revoked.snapshot.run.phase, RunnerPhase::Paused);
         assert_eq!(revoked.snapshot.connection_state, "remote_waiting");
-        assert!(revoked.snapshot.safety.controller_lease_id.is_empty());
-        assert!(runtime.0.active_controller.lock().unwrap().is_none());
+        assert!(revoked.snapshot.safety.lease_expires_at_unix_ms.is_none());
+        assert!(runtime
+            .snapshot()
+            .unwrap()
+            .safety
+            .controller_lease_id
+            .is_empty());
+        assert!(runtime.0.authority.test_view().active_controller.is_none());
     }
 
     #[test]
@@ -1833,24 +1712,13 @@ mod tests {
             ))
             .unwrap();
         assert_eq!(started.snapshot.run.phase, RunnerPhase::Running);
-        runtime
-            .0
-            .webview_remote_session
-            .lock()
-            .unwrap()
-            .as_mut()
-            .unwrap()
-            .lease_deadline = Instant::now() - Duration::from_millis(1);
-
-        assert!(runtime
-            .expire_remote_session_if_due(&receipt.owner_token)
-            .unwrap());
+        runtime.0.authority.force_owner_expiry();
 
         let snapshot = runtime.snapshot().unwrap();
         assert_eq!(snapshot.run.phase, RunnerPhase::Paused);
         assert_eq!(snapshot.connection_state, "remote_lease_expired");
         assert!(snapshot.safety.controller_lease_id.is_empty());
-        assert!(runtime.0.active_controller.lock().unwrap().is_none());
+        assert!(runtime.0.authority.test_view().active_controller.is_none());
     }
 
     #[test]
