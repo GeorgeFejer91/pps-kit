@@ -95,12 +95,13 @@ function renderControllerSnapshot(snapshot) {
 function updateControllerActions() {
   const status = controllerSession?.status();
   const ready = status?.phase === "ready";
+  const busy = status?.reliableCommandBusy === true;
   const granted = new Set(status?.grantedScopes || []);
   const allowed = new Set(status?.snapshot?.allowed_actions || []);
   document.querySelectorAll("[data-remote-action]").forEach((button) => {
     const action = button.dataset.remoteAction;
     const scope = requiredScope(action);
-    button.disabled = !(ready && scope && granted.has(scope) && allowed.has(action));
+    button.disabled = !(ready && !busy && scope && granted.has(scope) && allowed.has(action));
   });
   text("controller-scopes", status?.grantedScopes?.length ? status.grantedScopes.join(", ") : "None");
   text("controller-pending", status?.pendingCommands ?? 0);

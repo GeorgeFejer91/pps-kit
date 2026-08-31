@@ -13,6 +13,7 @@ use pps_contracts::{
     Action, Applied, ClockStamp, CommandRequest, RunnerPhase, RunnerSnapshot, Scope, TimingTier,
     JSON_MAX_SAFE_INTEGER,
 };
+use pps_runner_audio::AudioFence;
 use pps_runner_core::{DispatchMilestone, DispatchOrigin, RunnerCore, VerifiedPackageSummary};
 use pps_runner_execution::{EventLedger, LedgerEventInput, LedgerReserve, DEFAULT_LEDGER_CAPACITY};
 use pps_session_package::VerifiedPreparedSession;
@@ -23,6 +24,10 @@ use tokio::sync::{broadcast, oneshot};
 use std::path::PathBuf;
 
 use crate::{
+    prepared_audio::{
+        PreparedAudioCandidate, PreparedAudioLookup, PreparedAudioSource, PreparedAudioSummary,
+        MAXIMUM_CACHED_DECODED_BYTES,
+    },
     prepared_execution::{
         CompiledPreparedExecution, PreparedExecutionSource, PreparedExecutionSummary,
     },
@@ -263,6 +268,14 @@ struct RetainedPreparedSession {
     receipt: Arc<VerifiedPreparedSession>,
 }
 
+/// One-block native PCM cache. The underscore is intentional: later output
+/// adapters will borrow the immutable media, while this slice only proves
+/// bounded actor-owned retention and invalidation.
+struct CachedPreparedAudio {
+    _candidate: PreparedAudioCandidate,
+    summary: PreparedAudioSummary,
+}
+
 #[derive(Debug, Clone)]
 struct RequestLatency {
     _label: &'static str,
@@ -282,6 +295,7 @@ struct OwnerState {
     remote_owner: Option<RemoteOwner>,
     retained_session: Option<RetainedPreparedSession>,
     compiled_execution: Option<CompiledPreparedExecution>,
+    prepared_audio: Option<CachedPreparedAudio>,
     package_generation: u64,
     run_generation: u64,
     owner_generation: u64,
@@ -321,6 +335,8 @@ pub(crate) struct OwnerTestView {
     pub manifest_path: Option<PathBuf>,
     pub package_generation: u64,
     pub compiled_schedule_count: Option<usize>,
+    pub prepared_audio_block_ordinal: Option<u32>,
+    pub prepared_audio_decoded_bytes: Option<u64>,
 }
 
 impl OwnerState {
@@ -493,6 +509,7 @@ impl OwnerState {
         // Fail-stop invalidates every callback/effect captured for the former
         // run, even when no remote owner was present.
         self.advance_run_generation_or_latch();
+        self.prepared_audio = None;
         self.evidence_unavailable = true;
         let _ = self.state_tx.send(snapshot.clone());
         snapshot
@@ -562,6 +579,7 @@ impl OwnerState {
             .map_err(str::to_owned)?;
             if let Some(next) = next_run_generation {
                 self.run_generation = next;
+                self.prepared_audio = None;
             }
         } else {
             // Rejections and accepted no-ops still retain reducer dedupe/stamp
@@ -608,6 +626,7 @@ impl OwnerState {
                 .map_err(|_| RemoteSessionError::unavailable())?;
             if let Some(next) = next_run_generation {
                 self.run_generation = next;
+                self.prepared_audio = None;
             }
         } else {
             self.core = candidate;
@@ -647,6 +666,149 @@ impl OwnerState {
         }
         let summary = compiled.summary().clone();
         self.compiled_execution = Some(compiled);
+        self.prepared_audio = None;
+        Ok(summary)
+    }
+
+    fn prepared_audio_source(
+        &mut self,
+        block_ordinal: u32,
+    ) -> Result<PreparedAudioLookup, &'static str> {
+        if matches!(
+            self.core.snapshot().run.phase,
+            RunnerPhase::InstructionGate
+                | RunnerPhase::Running
+                | RunnerPhase::Paused
+                | RunnerPhase::Stopping
+        ) {
+            return Err("prepared_audio_active_run");
+        }
+        let retained = self
+            .retained_session
+            .as_ref()
+            .ok_or("prepared_session_missing")?;
+        let compiled = self
+            .compiled_execution
+            .as_ref()
+            .ok_or("prepared_execution_missing")?;
+        if retained.generation != compiled.generation
+            || retained.receipt.manifest_sha256() != compiled.fingerprint
+        {
+            return Err("prepared_package_replaced");
+        }
+        let ordinal = usize::try_from(block_ordinal).map_err(|_| "prepared_audio_block_missing")?;
+        let native_block = retained
+            .receipt
+            .blocks()
+            .get(ordinal)
+            .ok_or("prepared_audio_block_missing")?;
+        let schedule = compiled
+            .schedules()
+            .get(ordinal)
+            .ok_or("prepared_audio_block_missing")?;
+        let expected_sample_rate_hz = u32::try_from(schedule.summary().sample_rate_hz)
+            .ok()
+            .filter(|rate| *rate > 0)
+            .ok_or("prepared_audio_sample_rate_invalid")?;
+
+        if let Some(cached) = self.prepared_audio.as_ref() {
+            let candidate = &cached._candidate;
+            let fence = candidate.media().fence();
+            let cache_is_current = fence.block_ordinal() == block_ordinal
+                && fence.package_generation() == retained.generation
+                && fence.package_fingerprint() == retained.receipt.manifest_sha256()
+                && candidate.run_generation() == self.run_generation
+                && candidate.wav_receipt() == native_block.block_wav()
+                && candidate.media().identity().sha256() == native_block.block_wav().sha256()
+                && candidate.media().identity().encoded_byte_count()
+                    == native_block.block_wav().encoded_byte_count()
+                && candidate.media().sample_rate_hz() == expected_sample_rate_hz;
+            if cache_is_current {
+                return Ok(PreparedAudioLookup::Cached(cached.summary.clone()));
+            }
+        }
+        // A different or stale cached block is dropped before the worker may
+        // allocate another decoded buffer. Together with adapter single-flight
+        // this keeps the process to one Tauri-preload byte budget, not one old
+        // cache plus one equally large candidate.
+        self.prepared_audio = None;
+
+        Ok(PreparedAudioLookup::Decode(PreparedAudioSource::new(
+            AudioFence::new(
+                retained.generation,
+                retained.receipt.manifest_sha256(),
+                block_ordinal,
+            ),
+            self.run_generation,
+            native_block.block_wav().clone(),
+            expected_sample_rate_hz,
+        )))
+    }
+
+    fn cache_prepared_audio(
+        &mut self,
+        candidate: PreparedAudioCandidate,
+    ) -> Result<PreparedAudioSummary, &'static str> {
+        let retained = self
+            .retained_session
+            .as_ref()
+            .ok_or("prepared_package_replaced")?;
+        let fence = candidate.media().fence();
+        if retained.generation != fence.package_generation()
+            || retained.receipt.manifest_sha256() != fence.package_fingerprint()
+        {
+            return Err("prepared_package_replaced");
+        }
+        if candidate.run_generation() != self.run_generation {
+            return Err("prepared_audio_run_replaced");
+        }
+        let compiled = self
+            .compiled_execution
+            .as_ref()
+            .ok_or("prepared_execution_replaced")?;
+        if compiled.generation != retained.generation
+            || compiled.fingerprint != retained.receipt.manifest_sha256()
+        {
+            return Err("prepared_execution_replaced");
+        }
+        let ordinal =
+            usize::try_from(fence.block_ordinal()).map_err(|_| "prepared_audio_block_replaced")?;
+        let current_wav = retained
+            .receipt
+            .blocks()
+            .get(ordinal)
+            .map(|block| block.block_wav())
+            .ok_or("prepared_audio_block_replaced")?;
+        let schedule = compiled
+            .schedules()
+            .get(ordinal)
+            .ok_or("prepared_audio_block_replaced")?;
+        let expected_sample_rate_hz = u32::try_from(schedule.summary().sample_rate_hz)
+            .ok()
+            .filter(|rate| *rate > 0)
+            .ok_or("prepared_audio_sample_rate_invalid")?;
+        if current_wav != candidate.wav_receipt()
+            || current_wav.sha256() != candidate.media().identity().sha256()
+            || current_wav.encoded_byte_count() != candidate.media().identity().encoded_byte_count()
+            || candidate.media().sample_rate_hz() != expected_sample_rate_hz
+        {
+            return Err("prepared_audio_block_replaced");
+        }
+        let decoded_bytes = candidate
+            .decoded_bytes()
+            .map_err(|_| "prepared_audio_resource_limit")?;
+        if decoded_bytes > MAXIMUM_CACHED_DECODED_BYTES {
+            return Err("prepared_audio_resource_limit");
+        }
+        let summary = candidate
+            .summary()
+            .map_err(|_| "prepared_audio_resource_limit")?;
+        // Exactly one immutable block is retained. Replacing this Option drops
+        // the prior Arc-backed PCM before the authority processes more work.
+        self.prepared_audio = Some(CachedPreparedAudio {
+            _candidate: candidate,
+            summary: summary.clone(),
+        });
         Ok(summary)
     }
 
@@ -696,6 +858,7 @@ impl OwnerState {
             receipt: Arc::new(verified),
         });
         self.compiled_execution = None;
+        self.prepared_audio = None;
         Ok(snapshot)
     }
 
@@ -1163,6 +1326,7 @@ impl OwnerState {
             self.advance_owner_generation_or_latch();
         }
         self.advance_run_generation_or_latch();
+        self.prepared_audio = None;
     }
 }
 
@@ -1245,6 +1409,7 @@ impl ExecutionOwner {
                     remote_owner: None,
                     retained_session: None,
                     compiled_execution: None,
+                    prepared_audio: None,
                     package_generation: 0,
                     run_generation: 0,
                     owner_generation: 0,
@@ -1395,6 +1560,54 @@ impl ExecutionOwner {
         self.asynchronous(AdmissionClass::Normal, "cache_compiled", move |state| {
             state.cache_compiled(compiled)
         })
+        .await
+    }
+
+    #[cfg(test)]
+    pub(crate) fn prepared_audio_source_blocking(
+        &self,
+        block_ordinal: u32,
+    ) -> Result<Result<PreparedAudioLookup, &'static str>, OwnerSubmitError> {
+        self.blocking(
+            AdmissionClass::Normal,
+            "prepared_audio_source",
+            move |state| state.prepared_audio_source(block_ordinal),
+        )
+    }
+
+    pub(crate) async fn prepared_audio_source(
+        &self,
+        block_ordinal: u32,
+    ) -> Result<Result<PreparedAudioLookup, &'static str>, OwnerSubmitError> {
+        self.asynchronous(
+            AdmissionClass::Normal,
+            "prepared_audio_source",
+            move |state| state.prepared_audio_source(block_ordinal),
+        )
+        .await
+    }
+
+    #[cfg(test)]
+    pub(crate) fn cache_prepared_audio_blocking(
+        &self,
+        candidate: PreparedAudioCandidate,
+    ) -> Result<Result<PreparedAudioSummary, &'static str>, OwnerSubmitError> {
+        self.blocking(
+            AdmissionClass::Normal,
+            "cache_prepared_audio",
+            move |state| state.cache_prepared_audio(candidate),
+        )
+    }
+
+    pub(crate) async fn cache_prepared_audio(
+        &self,
+        candidate: PreparedAudioCandidate,
+    ) -> Result<Result<PreparedAudioSummary, &'static str>, OwnerSubmitError> {
+        self.asynchronous(
+            AdmissionClass::Normal,
+            "cache_prepared_audio",
+            move |state| state.cache_prepared_audio(candidate),
+        )
         .await
     }
 
@@ -1702,6 +1915,15 @@ impl ExecutionOwner {
     }
 
     #[cfg(test)]
+    pub(crate) fn advance_run_generation_for_test(&self) {
+        self.blocking(AdmissionClass::Normal, "advance_run_generation", |state| {
+            state.run_generation = state.run_generation.checked_add(1).unwrap();
+            state.prepared_audio = None;
+        })
+        .expect("test authority remains available");
+    }
+
+    #[cfg(test)]
     pub(crate) fn test_view(&self) -> OwnerTestView {
         self.blocking(AdmissionClass::Normal, "test_view", |state| OwnerTestView {
             active_controller: state
@@ -1717,6 +1939,14 @@ impl ExecutionOwner {
                 .compiled_execution
                 .as_ref()
                 .map(|compiled| compiled.schedules().len()),
+            prepared_audio_block_ordinal: state
+                .prepared_audio
+                .as_ref()
+                .map(|cached| cached._candidate.media().fence().block_ordinal()),
+            prepared_audio_decoded_bytes: state
+                .prepared_audio
+                .as_ref()
+                .and_then(|cached| cached._candidate.decoded_bytes().ok()),
         })
         .expect("test authority remains available")
     }

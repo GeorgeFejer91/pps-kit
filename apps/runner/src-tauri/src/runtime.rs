@@ -21,6 +21,9 @@ use tokio::sync::broadcast;
 use crate::execution_owner::{
     AuthorityView, ExecutionOwner, LanOwnerReceipt, OwnerSubmitError, RemoteOwnerIdentity,
 };
+use crate::prepared_audio::{
+    PreparedAudioCandidate, PreparedAudioLookup, PreparedAudioSource, PreparedAudioSummary,
+};
 use crate::prepared_execution::{
     CompiledPreparedExecution, PreparedExecutionSource, PreparedExecutionSummary,
 };
@@ -246,6 +249,7 @@ pub struct RuntimeShared {
     pub authority: ExecutionOwner,
     prepared_session_selection_in_flight: AtomicBool,
     prepared_execution_inspection_in_flight: AtomicBool,
+    prepared_audio_preparation_in_flight: AtomicBool,
     pub state_tx: broadcast::Sender<RunnerSnapshot>,
     pub remote_server: Mutex<RemoteServerState>,
     pub advertised_ip: IpAddr,
@@ -262,6 +266,18 @@ pub struct PreparedExecutionInspectionGuard {
     shared: Arc<RuntimeShared>,
 }
 
+pub struct PreparedAudioPreparationGuard {
+    shared: Arc<RuntimeShared>,
+}
+
+pub(crate) enum PreparedAudioPreparation {
+    Cached(PreparedAudioSummary),
+    Decode {
+        _guard: PreparedAudioPreparationGuard,
+        source: PreparedAudioSource,
+    },
+}
+
 impl Drop for PreparedSessionSelectionGuard {
     fn drop(&mut self) {
         self.shared
@@ -274,6 +290,14 @@ impl Drop for PreparedExecutionInspectionGuard {
     fn drop(&mut self) {
         self.shared
             .prepared_execution_inspection_in_flight
+            .store(false, Ordering::Release);
+    }
+}
+
+impl Drop for PreparedAudioPreparationGuard {
+    fn drop(&mut self) {
+        self.shared
+            .prepared_audio_preparation_in_flight
             .store(false, Ordering::Release);
     }
 }
@@ -326,6 +350,7 @@ impl AppRuntime {
             authority,
             prepared_session_selection_in_flight: AtomicBool::new(false),
             prepared_execution_inspection_in_flight: AtomicBool::new(false),
+            prepared_audio_preparation_in_flight: AtomicBool::new(false),
             state_tx,
             remote_server: Mutex::new(RemoteServerState::default()),
             advertised_ip,
@@ -427,6 +452,84 @@ impl AppRuntime {
         self.0
             .authority
             .cache_compiled(compiled)
+            .await
+            .map_err(|_| "runtime_unavailable")?
+    }
+
+    /// Reserve one blocking PCM preparation and capture the exact native
+    /// package/run fence from the authority actor. The atomic guard is only
+    /// adapter-side load shedding; the actor independently validates the
+    /// result before it can replace the one-block native cache.
+    #[cfg(test)]
+    pub fn begin_prepared_audio_preparation(
+        &self,
+        block_ordinal: u32,
+    ) -> Result<PreparedAudioPreparation, &'static str> {
+        self.0
+            .prepared_audio_preparation_in_flight
+            .compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed)
+            .map_err(|_| "prepared_audio_preparation_in_progress")?;
+        let guard = PreparedAudioPreparationGuard {
+            shared: Arc::clone(&self.0),
+        };
+        let source = self
+            .0
+            .authority
+            .prepared_audio_source_blocking(block_ordinal)
+            .map_err(|_| "runtime_unavailable")??;
+        Ok(match source {
+            PreparedAudioLookup::Cached(summary) => PreparedAudioPreparation::Cached(summary),
+            PreparedAudioLookup::Decode(source) => PreparedAudioPreparation::Decode {
+                _guard: guard,
+                source,
+            },
+        })
+    }
+
+    pub async fn begin_prepared_audio_preparation_async(
+        &self,
+        block_ordinal: u32,
+    ) -> Result<PreparedAudioPreparation, &'static str> {
+        self.0
+            .prepared_audio_preparation_in_flight
+            .compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed)
+            .map_err(|_| "prepared_audio_preparation_in_progress")?;
+        let guard = PreparedAudioPreparationGuard {
+            shared: Arc::clone(&self.0),
+        };
+        let source = self
+            .0
+            .authority
+            .prepared_audio_source(block_ordinal)
+            .await
+            .map_err(|_| "runtime_unavailable")??;
+        Ok(match source {
+            PreparedAudioLookup::Cached(summary) => PreparedAudioPreparation::Cached(summary),
+            PreparedAudioLookup::Decode(source) => PreparedAudioPreparation::Decode {
+                _guard: guard,
+                source,
+            },
+        })
+    }
+
+    #[cfg(test)]
+    pub fn cache_prepared_audio(
+        &self,
+        candidate: PreparedAudioCandidate,
+    ) -> Result<PreparedAudioSummary, &'static str> {
+        self.0
+            .authority
+            .cache_prepared_audio_blocking(candidate)
+            .map_err(|_| "runtime_unavailable")?
+    }
+
+    pub async fn cache_prepared_audio_async(
+        &self,
+        candidate: PreparedAudioCandidate,
+    ) -> Result<PreparedAudioSummary, &'static str> {
+        self.0
+            .authority
+            .cache_prepared_audio(candidate)
             .await
             .map_err(|_| "runtime_unavailable")?
     }
@@ -1013,10 +1116,18 @@ fn validate_owner_request(session_id: &str, owner_token: &str) -> Result<(), Rem
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prepared_execution::compile_prepared_execution;
+    use crate::{
+        prepared_audio::{prepare_verified_audio, MAXIMUM_CACHED_DECODED_BYTES},
+        prepared_execution::compile_prepared_execution,
+    };
     use pps_contracts::{AppliedStatus, RunnerPhase};
     use pps_session_package::{verify_prepared_session, VerificationRequest};
-    use std::{fs, time::Duration};
+    use std::{
+        fs,
+        sync::{mpsc, Arc, Barrier},
+        thread,
+        time::Duration,
+    };
 
     fn verified_legacy_package(
         participant_id: &str,
@@ -1052,6 +1163,104 @@ mod tests {
         .unwrap();
         let verified = verify_prepared_session(VerificationRequest::new(&manifest_path)).unwrap();
         (root, verified)
+    }
+
+    fn pcm16_wav_bytes(sample_rate_hz: u32, frames: u32, seed: i16) -> Vec<u8> {
+        let channels = 2_u16;
+        let sample_count = frames * u32::from(channels);
+        let data_bytes = sample_count * 2;
+        let mut bytes = Vec::with_capacity(44 + data_bytes as usize);
+        bytes.extend_from_slice(b"RIFF");
+        bytes.extend_from_slice(&(36 + data_bytes).to_le_bytes());
+        bytes.extend_from_slice(b"WAVEfmt ");
+        bytes.extend_from_slice(&16_u32.to_le_bytes());
+        bytes.extend_from_slice(&1_u16.to_le_bytes());
+        bytes.extend_from_slice(&channels.to_le_bytes());
+        bytes.extend_from_slice(&sample_rate_hz.to_le_bytes());
+        bytes.extend_from_slice(&(sample_rate_hz * u32::from(channels) * 2).to_le_bytes());
+        bytes.extend_from_slice(&(channels * 2).to_le_bytes());
+        bytes.extend_from_slice(&16_u16.to_le_bytes());
+        bytes.extend_from_slice(b"data");
+        bytes.extend_from_slice(&data_bytes.to_le_bytes());
+        for sample in 0..sample_count {
+            bytes.extend_from_slice(&seed.wrapping_add(sample as i16).to_le_bytes());
+        }
+        bytes
+    }
+
+    fn verified_audio_package(
+        participant_id: &str,
+        block_count: u32,
+    ) -> (std::path::PathBuf, VerifiedPreparedSession) {
+        let root = std::env::temp_dir().join(format!("pps-tauri-audio-{}", random_nonce()));
+        fs::create_dir_all(&root).unwrap();
+        let mut blocks = Vec::new();
+        for ordinal in 0..block_count {
+            let wav_name = format!("block-{ordinal}.wav");
+            let csv_name = format!("block-{ordinal}.csv");
+            fs::write(
+                root.join(&wav_name),
+                pcm16_wav_bytes(48_000, 4 + ordinal, ordinal as i16),
+            )
+            .unwrap();
+            fs::write(
+                root.join(&csv_name),
+                format!(
+                    "Trial_Number,Trial_UID,Trial_Type,Family,Sample_Rate_Hz,Trial_Start_Sample,Trial_End_Sample\n1,B{ordinal}_T1,Catch,catch,48000,0,4\n"
+                ),
+            )
+            .unwrap();
+            blocks.push(serde_json::json!({
+                "index": ordinal + 1,
+                "label": format!("Audio block {}", ordinal + 1),
+                "manifest_path": csv_name,
+                "wav_path": wav_name,
+                "trial_count": 1,
+                "duration_s": 1.0,
+                "metadata": {"sample_rate_hz": 48000}
+            }));
+        }
+        let manifest_path = root.join("run-session.json");
+        let manifest = serde_json::json!({
+            "schema": "pps-run-session.v1",
+            "participant_id": participant_id,
+            "session_id": format!("{participant_id}_audio_session_20260831"),
+            "session_group_id": format!("{participant_id}_audio_group_20260831"),
+            "part_number": 1,
+            "part_session_id": format!("{participant_id}_audio_part_01"),
+            "session_dir": root,
+            "execution_mode": "design_schedule_blocks",
+            "blocks": blocks
+        });
+        fs::write(
+            &manifest_path,
+            serde_json::to_vec_pretty(&manifest).unwrap(),
+        )
+        .unwrap();
+        let verified = verify_prepared_session(VerificationRequest::new(&manifest_path)).unwrap();
+        (root, verified)
+    }
+
+    fn compile_current_execution(runtime: &AppRuntime) {
+        let (guard, source) = runtime.begin_prepared_execution_inspection().unwrap();
+        let compiled = compile_prepared_execution(source).unwrap();
+        runtime.cache_prepared_execution(compiled).unwrap();
+        drop(guard);
+    }
+
+    fn begin_audio_decode(
+        runtime: &AppRuntime,
+        block_ordinal: u32,
+    ) -> (PreparedAudioPreparationGuard, PreparedAudioSource) {
+        match runtime
+            .begin_prepared_audio_preparation(block_ordinal)
+            .unwrap()
+        {
+            PreparedAudioPreparation::Decode { _guard, source } => (_guard, source),
+            PreparedAudioPreparation::Cached(_) => {
+                panic!("test expected a cache miss and a fenced decode source")
+            }
+        }
     }
 
     fn claim_webview_controller(
@@ -1399,6 +1608,199 @@ mod tests {
 
         fs::remove_dir_all(first_root).unwrap();
         fs::remove_dir_all(replacement_root).unwrap();
+    }
+
+    #[test]
+    fn prepared_audio_requires_a_compiled_plan_and_is_native_single_flight() {
+        let runtime = AppRuntime::new();
+        assert_eq!(
+            runtime.begin_prepared_audio_preparation(0).err().unwrap(),
+            "prepared_session_missing"
+        );
+        let (root, verified) = verified_audio_package("P001", 1);
+        runtime.adopt_verified_session(verified).unwrap();
+        assert_eq!(
+            runtime.begin_prepared_audio_preparation(0).err().unwrap(),
+            "prepared_execution_missing"
+        );
+        // The failed actor capture dropped the adapter-only load guard.
+        assert_eq!(
+            runtime.begin_prepared_audio_preparation(0).err().unwrap(),
+            "prepared_execution_missing"
+        );
+        compile_current_execution(&runtime);
+
+        let (guard, source) = begin_audio_decode(&runtime, 0);
+        let release = Arc::new(Barrier::new(2));
+        let worker_release = Arc::clone(&release);
+        let (entered_tx, entered_rx) = mpsc::sync_channel(1);
+        let worker = thread::spawn(move || {
+            entered_tx.send(()).unwrap();
+            worker_release.wait();
+            drop(source);
+            drop(guard);
+        });
+        entered_rx.recv().unwrap();
+        assert_eq!(
+            runtime.begin_prepared_audio_preparation(0).err().unwrap(),
+            "prepared_audio_preparation_in_progress"
+        );
+        release.wait();
+        worker.join().unwrap();
+        let (next_guard, _) = begin_audio_decode(&runtime, 0);
+        drop(next_guard);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn prepared_audio_capture_is_denied_while_a_demo_run_is_active() {
+        let runtime = locally_ready_runtime();
+        runtime
+            .dispatch_local(Action::PartStart, serde_json::json!({"part_number": 1}))
+            .unwrap();
+        assert_eq!(
+            runtime.begin_prepared_audio_preparation(0).err().unwrap(),
+            "prepared_audio_active_run"
+        );
+    }
+
+    #[test]
+    fn wav_mutation_after_source_capture_fails_before_actor_cache_admission() {
+        let runtime = AppRuntime::new();
+        let (root, verified) = verified_audio_package("P001", 1);
+        let wav_path = verified.blocks()[0].wav_path().to_path_buf();
+        runtime.adopt_verified_session(verified).unwrap();
+        compile_current_execution(&runtime);
+        let (guard, source) = begin_audio_decode(&runtime, 0);
+
+        let mut changed = fs::read(&wav_path).unwrap();
+        let final_byte = changed.last_mut().unwrap();
+        *final_byte ^= 0x7f;
+        fs::write(&wav_path, changed).unwrap();
+        let error = prepare_verified_audio(source).err().unwrap();
+        assert_eq!(error.code(), "prepared_audio_changed");
+        assert!(runtime
+            .0
+            .authority
+            .test_view()
+            .prepared_audio_block_ordinal
+            .is_none());
+        drop(guard);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn late_audio_result_is_inert_after_package_replacement() {
+        let runtime = AppRuntime::new();
+        let (first_root, first) = verified_audio_package("P001", 1);
+        runtime.adopt_verified_session(first).unwrap();
+        compile_current_execution(&runtime);
+        let (guard, source) = begin_audio_decode(&runtime, 0);
+        let stale_candidate = prepare_verified_audio(source).unwrap();
+
+        let (replacement_root, replacement) = verified_audio_package("P001", 1);
+        runtime.adopt_verified_session(replacement).unwrap();
+        assert_eq!(
+            runtime.cache_prepared_audio(stale_candidate),
+            Err("prepared_package_replaced")
+        );
+        assert!(runtime
+            .0
+            .authority
+            .test_view()
+            .prepared_audio_block_ordinal
+            .is_none());
+        drop(guard);
+        fs::remove_dir_all(first_root).unwrap();
+        fs::remove_dir_all(replacement_root).unwrap();
+    }
+
+    #[test]
+    fn late_audio_result_is_inert_after_run_generation_changes() {
+        let runtime = AppRuntime::new();
+        let (root, verified) = verified_audio_package("P001", 1);
+        runtime.adopt_verified_session(verified).unwrap();
+        compile_current_execution(&runtime);
+        let (guard, source) = begin_audio_decode(&runtime, 0);
+        let stale_candidate = prepare_verified_audio(source).unwrap();
+        runtime.0.authority.advance_run_generation_for_test();
+
+        assert_eq!(
+            runtime.cache_prepared_audio(stale_candidate),
+            Err("prepared_audio_run_replaced")
+        );
+        assert!(runtime
+            .0
+            .authority
+            .test_view()
+            .prepared_audio_block_ordinal
+            .is_none());
+        drop(guard);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn one_block_audio_cache_replaces_old_pcm_with_a_path_free_summary() {
+        let runtime = AppRuntime::new();
+        let (root, verified) = verified_audio_package("PRIVATE_AUDIO_PARTICIPANT", 2);
+        let private_path = verified.blocks()[0].wav_path().display().to_string();
+        let private_digest = verified.blocks()[0].block_wav().sha256().to_owned();
+        runtime.adopt_verified_session(verified).unwrap();
+        compile_current_execution(&runtime);
+
+        let (first_guard, first_source) = begin_audio_decode(&runtime, 0);
+        let first = runtime
+            .cache_prepared_audio(prepare_verified_audio(first_source).unwrap())
+            .unwrap();
+        drop(first_guard);
+        assert_eq!(first.cache_capacity_blocks, 1);
+        assert!(first.decoded_bytes <= MAXIMUM_CACHED_DECODED_BYTES);
+        assert_eq!(
+            runtime.0.authority.test_view().prepared_audio_block_ordinal,
+            Some(0)
+        );
+
+        match runtime.begin_prepared_audio_preparation(0).unwrap() {
+            PreparedAudioPreparation::Cached(cached) => assert_eq!(cached, first),
+            PreparedAudioPreparation::Decode { .. } => {
+                panic!("an exact sequential cache hit must not decode again")
+            }
+        }
+
+        let (second_guard, second_source) = begin_audio_decode(&runtime, 1);
+        assert!(runtime
+            .0
+            .authority
+            .test_view()
+            .prepared_audio_block_ordinal
+            .is_none());
+        let second = runtime
+            .cache_prepared_audio(prepare_verified_audio(second_source).unwrap())
+            .unwrap();
+        drop(second_guard);
+        let cache = runtime.0.authority.test_view();
+        assert_eq!(cache.prepared_audio_block_ordinal, Some(1));
+        assert_eq!(
+            cache.prepared_audio_decoded_bytes,
+            Some(second.decoded_bytes)
+        );
+        assert_ne!(first.decoded_bytes, second.decoded_bytes);
+
+        let summary_json = serde_json::to_string(&second).unwrap();
+        for forbidden in [
+            private_path.as_str(),
+            private_digest.as_str(),
+            "PRIVATE_AUDIO_PARTICIPANT",
+            "packageFingerprint",
+            "runGeneration",
+            "interleaved",
+        ] {
+            assert!(
+                !summary_json.contains(forbidden),
+                "prepared summary leaked {forbidden}: {summary_json}"
+            );
+        }
+        fs::remove_dir_all(root).unwrap();
     }
 
     #[test]

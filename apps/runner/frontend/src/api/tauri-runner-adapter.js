@@ -32,6 +32,9 @@ export function createTauriRunnerAdapter({ invokeFn = invoke } = {}) {
     inspectPreparedExecution() {
       return call(invokeFn, "inspect_prepared_execution");
     },
+    prepareFirstAudioBlock() {
+      return call(invokeFn, "prepare_first_audio_block");
+    },
     remoteStatus() {
       return call(invokeFn, "remote_status");
     },

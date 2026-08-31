@@ -47,7 +47,8 @@ Candidate V2 boundaries coexist with, but do not replace, that V1 path:
   `apps/runner/src-tauri/src/execution_owner.rs`. Its named
   `pps-runner-authority` thread owns `RunnerCore`, remote policy/current owner,
   the retained verified package and compiled plan, package/run/owner
-  generations, and the bounded `EventLedger`. `runtime.rs`, `remote.rs`, and
+  generations, the bounded prepared-PCM cache, and the bounded `EventLedger`.
+  `runtime.rs`, `remote.rs`, and
   Tauri commands are async adapters; the exact WebView claim/renew/dispatch/
   revoke DTOs remain exposed only to the bundled main window by the Tauri
   capability/command manifest.
@@ -97,8 +98,17 @@ path/SHA-256/encoded-byte receipt for every prepared WAV. The pure
 decodes only PCM16 legacy two-channel `[tactile, audio]` or canonical
 three-channel `[left, right, tactile]` data into a non-serializable immutable
 block. It has no Tauri, network, device, or experiment-state dependency.
-Decoded media is not yet cached by the authority actor or sent to a platform
-output backend, so real plans remain unarmable and unqualified.
+The Tauri actor captures a manifest-order block receipt plus package/run
+generation, performs decoding outside its mailbox, and accepts the immutable
+result only while fingerprint, generations, ordinal, receipt, and compiled
+sample rate still match. Its one-block/1,280 MiB cache returns exact sequential
+hits without decoding, evicts a different block before another allocation,
+and exposes only a `pcm-cache-only`, `unqualified`, non-executable summary to
+the bundled main window. The local no-argument gesture is absent from remote
+actions and the companion page. No platform output backend is present, so real
+plans remain unarmable and unqualified.
+Legacy schedules without a metadata/CSV sample rate still need the V1
+WAV-header fallback before this boundary may feed native execution.
 Its Python differential probe remains CI-only while parity is being proven.
 
 All desktop authority requests enter one bounded FIFO mailbox with capacity 64:

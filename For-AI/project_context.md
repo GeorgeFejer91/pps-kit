@@ -352,9 +352,17 @@ native-only receipt, capped at 768 MiB per file and 8 GiB per package. The pure
 `pps-runner-audio` crate reopens one receipt, hashes the complete bounded stream,
 and decodes only PCM16 legacy two-channel `[tactile, audio]` or canonical
 three-channel `[left, right, tactile]` data at the declared sample rate. It
-publishes decoded media only after exact byte-count and digest agreement and
-does not implement resampling, device output, routing, actor caching, arming,
-or scientific timing qualification.
+publishes decoded media only after exact byte-count and digest agreement. A
+main-window-only no-argument preload now decodes off the authority thread and
+lets that actor cache exactly one block only when package/run generations,
+fingerprint, ordinal, verified WAV receipt, and compiled sample rate still
+match. Exact cache hits do not decode again; a new block evicts the prior cache
+before another buffer allocation. The path-free result remains
+`pcm-cache-only`, `unqualified`, and non-executable. This seam does not
+implement resampling, device output, routing, arming, or scientific timing
+qualification, and it is not a remote/companion action.
+Legacy schedules with no sample rate in block metadata or CSV still require
+the V1 WAV-header fallback before the native plan can become executable.
 
 The Tauri desktop now has one named Rust authority actor thread,
 `pps-runner-authority`. It exclusively owns `RunnerCore`, remote policy and the
@@ -395,7 +403,12 @@ arming/disarming stays local-only. The initial transport has reliable ordered
 control and replaceable state semantics with bounded records, mutual
 role-bound HMAC-SHA256 proof over the complete canonical hello transcript,
 fragment-held secrets, uint32 half-range per-lane sequencing, short controller
-leases, replay protection, and local override. The preview currently exposes a
+leases, replay protection, and local override. Each browser controller session
+has a single outstanding reliable-command slot:
+busy presses fail before command-ID creation/send, while only `applied`, stop,
+or a terminal connection transition releases the slot. Non-terminal remote
+diagnostics keep it occupied so a late acknowledgement cannot overlap another
+mutation. The preview currently exposes a
 bounded audit-event counter; durable command audit records remain owned by the
 validated V1 runner until the V2 logging crate is implemented and qualified.
 
@@ -465,7 +478,8 @@ Python-free: a clean Windows installation must adopt and run a representative
 real package, produce the required evidence/artifacts, accept local and browser
 companion control, recover cleanly, and complete normal post-run review without
 Python, PySide, PyInstaller, or a Python worker. Rust now owns the bounded
-authority queue, verified WAV identity, and pure PCM16 decode boundary, and
+authority queue, verified WAV identity, pure PCM16 decode boundary, and
+generation-fenced one-block native preload cache, and
 must still own the monotonic scheduler, device output/routing and response
 timestamp boundaries, instruction/run transitions,
 LSL/evidence/persistence, recovery, and required review/analysis before the

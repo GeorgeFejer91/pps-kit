@@ -8,6 +8,7 @@ fn main() {
             "rotate_pairing",
             "select_prepared_session",
             "inspect_prepared_execution",
+            "prepare_first_audio_block",
             "remote_session_claim",
             "remote_session_renew",
             "remote_session_dispatch",

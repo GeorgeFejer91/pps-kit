@@ -2583,6 +2583,7 @@ dependencies = [
  "local-ip-address",
  "pps-brsp",
  "pps-contracts",
+ "pps-runner-audio",
  "pps-runner-core",
  "pps-runner-execution",
  "pps-session-package",

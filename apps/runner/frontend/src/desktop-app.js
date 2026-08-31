@@ -23,6 +23,7 @@ const MAX_PENDING_NATIVE_COMMANDS = 32;
 let snapshot = null;
 let preparedPlan = null;
 let preparedExecution = null;
+let preparedAudio = null;
 let remoteStatus = null;
 let invitationUrl = "";
 let toastTimer = null;
@@ -69,6 +70,46 @@ function planValue(plan, camelName, snakeName) {
   return plan?.[camelName] ?? plan?.[snakeName];
 }
 
+function renderPreparedAudio(nextPreparation) {
+  const candidate = nextPreparation && typeof nextPreparation === "object" ? nextPreparation : null;
+  const schema = candidate?.schema;
+  const scope = planValue(candidate, "preparationScope", "preparation_scope");
+  const qualification = planValue(candidate, "outputQualification", "output_qualification");
+  const blockOrdinal = Number(planValue(candidate, "blockOrdinal", "block_ordinal"));
+  const sampleRate = Number(planValue(candidate, "sampleRateHz", "sample_rate_hz"));
+  const channels = Number(planValue(candidate, "sourceChannels", "source_channels"));
+  const layout = planValue(candidate, "sourceChannelLayout", "source_channel_layout");
+  const frames = Number(candidate?.frames);
+  const decodedBytes = Number(planValue(candidate, "decodedBytes", "decoded_bytes"));
+  const capacity = Number(planValue(candidate, "cacheCapacityBlocks", "cache_capacity_blocks"));
+  const byteBudget = Number(planValue(candidate, "cacheByteBudget", "cache_byte_budget"));
+  const valid = Boolean(candidate)
+    && schema === "pps-runner-prepared-audio-summary.v1"
+    && scope === "pcm-cache-only"
+    && qualification === "unqualified"
+    && candidate.executable === false
+    && blockOrdinal === 0
+    && Number.isSafeInteger(sampleRate) && sampleRate > 0
+    && [2, 3].includes(channels)
+    && ["legacy-study5-tactile-audio", "binaural-left-right-tactile"].includes(layout)
+    && Number.isSafeInteger(frames) && frames >= 0
+    && Number.isSafeInteger(decodedBytes) && decodedBytes >= 0
+    && capacity === 1
+    && byteBudget === 1280 * 1024 * 1024
+    && decodedBytes <= byteBudget;
+  preparedAudio = valid ? candidate : null;
+  text("prepared-audio-status", preparedAudio ? "Prepared · output disabled" : "Not prepared");
+  text(
+    "prepared-audio-detail",
+    preparedAudio
+      ? `Block 1 is content-bound in the one-block native PCM cache: ${frames.toLocaleString()} frames at ${sampleRate.toLocaleString()} Hz, ${channels} source channels (${layout}), ${(decodedBytes / (1024 * 1024)).toFixed(2)} MiB. Output qualification: ${qualification}; executable: no.`
+      : preparedExecution
+        ? "Prepare the first verified WAV into the bounded native PCM cache. This does not open an output device, route channels, arm, or execute the experiment."
+        : "Native PCM preparation is unavailable until the first schedule is inspected.",
+  );
+  return !candidate || valid;
+}
+
 function renderPreparedExecution(nextInspection) {
   const candidate = nextInspection && typeof nextInspection === "object" ? nextInspection : null;
   const eventCount = Number(planValue(candidate, "eventCount", "event_count"));
@@ -88,6 +129,7 @@ function renderPreparedExecution(nextInspection) {
     && qualification === "unqualified"
     && candidate.executable === false;
   preparedExecution = valid ? candidate : null;
+  renderPreparedAudio(null);
   text("execution-inspection-status", preparedExecution ? "Compiled · inspection only" : "Not compiled");
   text("execution-event-count", preparedExecution && Number.isSafeInteger(eventCount) ? eventCount : null);
   text(
@@ -231,6 +273,11 @@ function renderSnapshot(next) {
     return token;
   }));
   const active = ["instruction_gate", "running", "paused", "stopping"].includes(phase);
+  const invalidatesPreparedAudio = active
+    || ["completed", "interrupted", "error"].includes(phase)
+    || !next.package_verified
+    || !preparedExecution;
+  if (preparedAudio && invalidatesPreparedAudio) renderPreparedAudio(null);
   elements["select-session-manifest"].disabled = api.kind !== "tauri-native" || active;
   elements["select-session-manifest"].title = api.kind === "tauri-native"
     ? "Select and verify a pps-run-session.v1 manifest locally"
@@ -239,6 +286,13 @@ function renderSnapshot(next) {
   elements["inspect-prepared-execution"].title = api.kind === "tauri-native"
     ? "Reverify the retained package and compile a path-free schedule inspection"
     : "Rust schedule inspection is available in the native Tauri app";
+  elements["prepare-first-audio-block"].disabled = api.kind !== "tauri-native"
+    || !preparedExecution
+    || active
+    || Boolean(preparedAudio);
+  elements["prepare-first-audio-block"].title = api.kind === "tauri-native"
+    ? "Content-bind and decode the first verified WAV into the one-block native PCM cache"
+    : "Native audio preparation is available in the Tauri app";
   updateInboundPolicyUi();
 
   if (inboundPrivateTarget?.nativeClaimReceipt && !next.safety?.local_armed) {
@@ -670,12 +724,12 @@ function updateOutboundControls() {
   const session = outboundController?.session;
   const current = session?.snapshot;
   const ready = session?.phase === "ready";
-  const pending = Number(session?.status().pendingCommands ?? 0) > 0;
+  const busy = session?.status().reliableCommandBusy === true;
   const granted = new Set(session?.grantedScopes ?? []);
   const allowed = new Set(current?.allowed_actions ?? []);
   for (const button of outboundActionButtons) {
     const action = button.dataset.controllerAction;
-    button.disabled = !ready || pending || !allowed.has(action) || !granted.has(requiredScope(action));
+    button.disabled = !ready || busy || !allowed.has(action) || !granted.has(requiredScope(action));
   }
   elements["desktop-controller-disconnect"].disabled = !outboundController;
 }
@@ -911,6 +965,23 @@ function bindLocalActions() {
       showToast("Rust schedules compiled for inspection. Audio and execution remain disabled.");
     } catch (error) {
       renderPreparedExecution(null);
+      showToast(error.message, { error: true });
+    } finally {
+      if (snapshot) renderSnapshot(snapshot);
+    }
+  });
+
+  elements["prepare-first-audio-block"].addEventListener("click", async () => {
+    const button = elements["prepare-first-audio-block"];
+    button.disabled = true;
+    try {
+      const prepared = await api.prepareFirstAudioBlock();
+      if (!renderPreparedAudio(prepared)) {
+        throw new Error("The native runner returned an invalid prepared-audio summary.");
+      }
+      showToast("First block content-bound in native PCM memory. Device output and execution remain disabled.");
+    } catch (error) {
+      renderPreparedAudio(null);
       showToast(error.message, { error: true });
     } finally {
       if (snapshot) renderSnapshot(snapshot);

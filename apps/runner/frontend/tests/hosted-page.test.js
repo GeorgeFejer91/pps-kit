@@ -50,6 +50,15 @@ test("approved phone credentials cannot authenticate after their offer deadline"
   assert.match(companionSource, /approved private offer expired before authentication completed/iu);
 });
 
+test("hosted controller disables every command button while the reliable slot is full", () => {
+  const controllerActions = companionSource.slice(
+    companionSource.indexOf("function updateControllerActions"),
+    companionSource.indexOf("function bindControllerSession"),
+  );
+  assert.match(controllerActions, /const busy = status\?\.reliableCommandBusy === true/u);
+  assert.match(controllerActions, /button\.disabled = !\(ready && !busy &&/u);
+});
+
 test("hosted approval and output controls fail closed inside an iframe", () => {
   assert.match(companionSource, /window\.top !== window\.self/u);
   assert.match(companionSource, /if \(isEmbeddedContext\(\)\)[\s\S]+blockEmbeddedContext\(\);[\s\S]+return;/u);

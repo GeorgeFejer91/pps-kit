@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-prepare-first-audio-block"
+description = "Enables the prepare_first_audio_block command without any pre-configured scope."
+commands.allow = ["prepare_first_audio_block"]
+
+[[permission]]
+identifier = "deny-prepare-first-audio-block"
+description = "Denies the prepare_first_audio_block command without any pre-configured scope."
+commands.deny = ["prepare_first_audio_block"]

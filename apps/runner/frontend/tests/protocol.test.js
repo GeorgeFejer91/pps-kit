@@ -14,7 +14,12 @@ import {
   sanitizedInvitationLocation,
 } from "../src/remote/invitation.js";
 import { encodeControlMessage, parseControlFrame } from "../src/remote/protocol.js";
-import { BrspControllerSession, BrspTargetSession } from "../src/remote/websocket-session.js";
+import {
+  BrspControllerSession,
+  BrspTargetSession,
+  PPS_RELIABLE_COMMAND_BUSY_CODE,
+  PPS_RELIABLE_COMMAND_LIMIT,
+} from "../src/remote/websocket-session.js";
 
 const hello = {
   protocol: "brsp",
@@ -549,6 +554,138 @@ test("target command handling awaits an asynchronous native authority gate", asy
 
   controller.stop();
   target.stop();
+});
+
+test("PPS controllers admit only one outstanding reliable command and recover after applied", async (context) => {
+  const sockets = linkedSockets();
+  const secret = Buffer.alloc(32, 23).toString("base64url");
+  const snapshot = phoneSnapshot({ allowedActions: ["run.pause"] });
+  let applyCount = 0;
+  let releaseFirst;
+  const accepted = () => ({
+    status: "accepted",
+    reason: "applied",
+    acceptedRevision: snapshot.revision,
+    resultingRevision: snapshot.revision,
+    snapshot,
+  });
+  const controller = new BrspControllerSession({
+    url: "wss://lab.example/ws/reliable-cap",
+    secret,
+    targetId: "target-alpha",
+    sessionId: "session-reliable-cap",
+    requestedScopes: ["session.read", "session.transport"],
+    controllerId: "controller-reliable-cap",
+    socketFactory: () => sockets.controller,
+  });
+  const target = new BrspTargetSession({
+    url: "wss://lab.example/ws/reliable-cap",
+    secret,
+    targetId: "target-alpha",
+    sessionId: "session-reliable-cap",
+    availableScopes: ["session.read", "session.transport"],
+    actions: ["run.pause"],
+    getSnapshot: () => snapshot,
+    applyCommand: () => {
+      applyCount += 1;
+      if (applyCount !== 1) return accepted();
+      return new Promise((resolve) => { releaseFirst = () => resolve(accepted()); });
+    },
+    socketFactory: () => sockets.target,
+  });
+  context.after(() => {
+    controller.stop();
+    target.stop();
+  });
+
+  await connectSessions(controller, target, sockets);
+  const firstApplied = eventOnce(controller, "commandapplied");
+  const firstId = controller.sendCommand("run.pause");
+  const admittedCommandFrames = sockets.controller.sent
+    .filter((frame) => parseControlFrame(frame).type === "command").length;
+
+  assert.match(firstId, /^cmd_/u);
+  assert.equal(controller.status().pendingCommands, 1);
+  assert.equal(controller.status().reliableCommandLimit, PPS_RELIABLE_COMMAND_LIMIT);
+  assert.equal(controller.status().reliableCommandBusy, true);
+  assert.equal(controller.connection.pendingCommands.size, 1);
+  assert.equal(controller.pendingActions.size, 1);
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    assert.throws(
+      () => controller.sendCommand("run.pause"),
+      (error) => error?.code === PPS_RELIABLE_COMMAND_BUSY_CODE
+        && error?.limit === PPS_RELIABLE_COMMAND_LIMIT,
+    );
+  }
+  assert.equal(controller.connection.pendingCommands.size, 1, "rejected sends cannot grow BRSP pending state");
+  assert.equal(controller.pendingActions.size, 1, "rejected sends cannot grow PPS action state");
+  assert.equal(
+    sockets.controller.sent.filter((frame) => parseControlFrame(frame).type === "command").length,
+    admittedCommandFrames,
+    "busy rejection occurs before command ID generation and transport send",
+  );
+
+  await settleMicrotasks();
+  assert.equal(typeof releaseFirst, "function");
+  releaseFirst();
+  assert.equal((await firstApplied).detail.status, "accepted");
+  assert.equal(controller.status().pendingCommands, 0);
+  assert.equal(controller.status().reliableCommandBusy, false);
+  assert.equal(controller.connection.pendingCommands.size, 0);
+  assert.equal(controller.pendingActions.size, 0);
+
+  const secondApplied = eventOnce(controller, "commandapplied");
+  controller.sendCommand("run.pause");
+  assert.equal((await secondApplied).detail.status, "accepted");
+  assert.equal(applyCount, 2);
+  assert.equal(controller.status().pendingCommands, 0);
+});
+
+test("controller pending state survives diagnostic remote errors and clears on terminal recovery", () => {
+  const socket = new LinkedSocket();
+  const controller = new BrspControllerSession({
+    url: "wss://lab.example/ws/pending-lifecycle",
+    secret: Buffer.alloc(32, 24).toString("base64url"),
+    targetId: "target-alpha",
+    sessionId: "session-pending-lifecycle",
+    requestedScopes: ["session.read", "session.transport"],
+    controllerId: "controller-pending-lifecycle",
+    socketFactory: () => socket,
+  });
+  let pendingChanges = 0;
+  controller.addEventListener("pendingchange", () => { pendingChanges += 1; });
+  const seedPending = (id) => {
+    controller.connection.pendingCommands.set(id, { action: "run.pause" });
+    controller.pendingActions.set(id, "run.pause");
+    assert.equal(controller.status().reliableCommandBusy, true);
+  };
+
+  seedPending("cmd_remote_error");
+  const remoteError = new Event("remoteerror");
+  Object.defineProperty(remoteError, "detail", { value: { message: "target error" } });
+  controller.connection.dispatchEvent(remoteError);
+  assert.equal(
+    controller.status().pendingCommands,
+    1,
+    "a non-terminal BRSP error cannot reopen the command slot before a late applied frame",
+  );
+  controller.setPhase("error", "Operator must reconnect after an unresolved remote error.");
+  assert.equal(controller.status().pendingCommands, 0);
+
+  seedPending("cmd_protocol_error");
+  controller.connection.protocolError(new Error("protocol failed"));
+  assert.equal(controller.status().pendingCommands, 0);
+
+  seedPending("cmd_reconnect");
+  controller.connect();
+  assert.equal(controller.status().pendingCommands, 0);
+
+  seedPending("cmd_stop");
+  controller.stop();
+  assert.equal(controller.status().pendingCommands, 0);
+  assert.equal(controller.connection.pendingCommands.size, 0);
+  assert.equal(controller.pendingActions.size, 0);
+  assert.equal(pendingChanges, 4, "every terminally abandoned pending command publishes a UI state change");
 });
 
 test("target publication stays private until application authority permits it", async () => {

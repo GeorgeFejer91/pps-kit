@@ -32,6 +32,18 @@ const CONTROLLER_HEARTBEAT_MS = 2_000;
 const CONTROLLER_LEASE_MS = 5_000;
 const STATE_HEARTBEAT_MS = 250;
 
+export const PPS_RELIABLE_COMMAND_LIMIT = 1;
+export const PPS_RELIABLE_COMMAND_BUSY_CODE = "reliable_command_busy";
+
+function reliableCommandBusyError(pendingCommands) {
+  const error = new Error("A reliable command is already awaiting target acknowledgement.");
+  error.name = "PpsReliableCommandBusyError";
+  error.code = PPS_RELIABLE_COMMAND_BUSY_CODE;
+  error.pendingCommands = pendingCommands;
+  error.limit = PPS_RELIABLE_COMMAND_LIMIT;
+  return error;
+}
+
 function boundedMilliseconds(value, label, { minimum = 50, maximum = 60_000 } = {}) {
   if (!Number.isFinite(value) || value < minimum || value > maximum) {
     throw new TypeError(`${label} must be between ${minimum} and ${maximum} milliseconds.`);
@@ -453,9 +465,14 @@ export class BrspControllerSession extends BrspSocketSession {
     this.connection.addEventListener("snapshot", (event) => this.acceptState(event.detail, "snapshot"));
     this.connection.addEventListener("state", (event) => this.acceptState(event.detail, "state"));
     this.connection.addEventListener("commandapplied", (event) => this.acceptApplied(event.detail));
+    this.addEventListener("phasechange", (event) => {
+      if (event.detail.phase !== "ready") this.clearPendingCommands();
+    });
+    this.addEventListener("protocolerror", () => this.clearPendingCommands());
   }
 
   status() {
+    const pendingCommands = this.pendingCommandCount();
     return {
       phase: this.phase,
       targetId: this.snapshot?.target_id ?? this.expectedTargetId,
@@ -463,9 +480,23 @@ export class BrspControllerSession extends BrspSocketSession {
       senderEpoch: this.connection.epoch,
       grantedScopes: [...this.grantedScopes],
       capabilities: [...this.connection.negotiatedCapabilities],
-      pendingCommands: this.connection.pendingCommands.size,
+      pendingCommands,
+      reliableCommandLimit: PPS_RELIABLE_COMMAND_LIMIT,
+      reliableCommandBusy: pendingCommands >= PPS_RELIABLE_COMMAND_LIMIT,
       snapshot: this.snapshot,
     };
+  }
+
+  pendingCommandCount() {
+    return Math.max(this.connection.pendingCommands.size, this.pendingActions.size);
+  }
+
+  clearPendingCommands() {
+    const pendingCommands = this.pendingCommandCount();
+    this.connection.pendingCommands.clear();
+    this.pendingActions.clear();
+    if (pendingCommands > 0) this.dispatchEvent(detailEvent("pendingchange", this.status()));
+    return pendingCommands;
   }
 
   acceptState({ revision, state }, source) {
@@ -520,6 +551,10 @@ export class BrspControllerSession extends BrspSocketSession {
 
   sendCommand(action, args = {}, { expectedRevision = this.snapshot?.revision ?? null } = {}) {
     if (this.phase !== "ready") throw new Error("Authenticate before sending commands.");
+    const pendingCommands = this.pendingCommandCount();
+    if (pendingCommands >= PPS_RELIABLE_COMMAND_LIMIT) {
+      throw reliableCommandBusyError(pendingCommands);
+    }
     const scope = requiredScope(action);
     if (!scope || !isRemoteAction(action)) throw new Error(`${action} is target-local and cannot be sent remotely.`);
     if (!this.grantedScopes.includes(scope)) throw new Error(`The target did not grant ${scope}.`);
@@ -549,7 +584,7 @@ export class BrspControllerSession extends BrspSocketSession {
 
   beforeStop() {
     this.stopSnapshotHeartbeat();
-    this.pendingActions.clear();
+    this.clearPendingCommands();
   }
 }
 

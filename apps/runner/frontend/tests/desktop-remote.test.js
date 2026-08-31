@@ -76,6 +76,8 @@ test("desktop outbound controller waits for approval and explicit private Connec
   assert.match(source, /desktop-controller-connect.+addEventListener\("click"/su);
   assert.match(source, /session\.sendCommand\(button\.dataset\.controllerAction/u);
   assert.match(source, /renderOutboundSnapshot\(event\.detail\.snapshot\)/u);
+  assert.match(source, /const busy = session\?\.status\(\)\.reliableCommandBusy === true/u);
+  assert.match(source, /button\.disabled = !ready \|\| busy \|\|/u);
 
   const outboundConnect = source.slice(
     source.indexOf("async function connectOutboundController"),

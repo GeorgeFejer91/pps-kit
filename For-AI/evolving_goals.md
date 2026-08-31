@@ -2402,9 +2402,18 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   file, 8 GiB per package), and pure `pps-runner-audio` hashes the same complete
   reopened stream before publishing a PCM16 legacy two-channel
   `[tactile, audio]` or canonical three-channel `[left, right, tactile]`
-  immutable block. It performs no resampling, device I/O, routing, actor cache,
-  or execution readiness; real packages remain unarmable until those native
-  boundaries and physical qualification land.
+  immutable block. The bundled main window now has one explicit no-argument
+  first-block preload: blocking decode stays outside the authority mailbox,
+  while actor admission rechecks package/run generations, fingerprint,
+  manifest-order ordinal, exact WAV receipt, and compiled sample rate. The
+  actor retains one block under a 1,280 MiB byte ceiling, reuses exact cache
+  hits without decoding, drops a different cached block before allocating its
+  replacement, rejects active-run preparation, and makes late results inert.
+  Only a path-free `pcm-cache-only`, `unqualified`, non-executable summary
+  reaches the local WebView; this is not a remote action and still performs no
+  resampling, device I/O, routing, arming, or execution readiness. Real
+  packages remain unarmable until those native boundaries and physical
+  qualification land.
 - Treat the transport-independent BRSP application-target reference as a
   qualification checklist for the existing Rust seam, not a replacement.
   `RunnerCore` stays the single authority, transports remain adapters, grants

@@ -196,17 +196,27 @@ bound fails closed. Raw V1 event payloads can contain native paths and never
 cross Tauri IPC. The WebView receives only path-free counts and block summaries
 explicitly marked `schedule-only`, `unqualified`, and `executable = false`.
 This proves compatibility and resource bounds, not playback, response timing,
-or scientific execution readiness. WAV sample-rate probing remains a parity
-gate before this compiler can feed legacy execution. The package verifier now
+or scientific execution readiness. Legacy schedules that omit sample rate from
+both block metadata and CSV still require the V1 WAV-header fallback before
+they can enter native execution. The package verifier now
 streams and hash-binds each prepared WAV into a native-only receipt, with a
 768 MiB per-file and 8 GiB per-package encoded-byte ceiling. The pure
 `pps-runner-audio` crate can then reopen one exact receipt, hash every byte
 (including trailing chunks), and decode only PCM16 legacy two-channel
 `[tactile, audio]` or canonical three-channel `[left, right, tactile]` data
 without resampling. It publishes decoded media only after byte-count and digest
-agreement. This is still preparation only: decoded blocks are not installed in
-the authority actor, no platform output device is opened, and real packages
-remain unarmable.
+agreement. The bundled main window can then explicitly prepare the first block
+through a no-argument native command. Decoding runs on a blocking worker, while
+the single authority actor alone captures and rechecks the exact package/run
+generation, manifest fingerprint, manifest-order block ordinal, verified WAV
+receipt, and compiled-schedule sample rate before replacing its one-block PCM
+cache. An exact sequential request returns the existing path-free summary
+without decoding again; a different block evicts the prior cache before the
+worker can allocate another buffer. The cache is capped at 1,280 MiB, active
+run phases deny new preparation, and package/schedule/run replacement makes a
+late result inert. This is still preparation only: the summary is explicitly
+`pcm-cache-only`, `unqualified`, and non-executable; no platform output device
+is opened, no remote action is added, and real packages remain unarmable.
 
 Local-only startup does not bind a LAN socket. The first explicit **Enable
 phone remote** action reserves `0.0.0.0` and launches the companion server; a
@@ -305,6 +315,12 @@ browser-to-Tauri contract flows. Physical phone/browser routes, background and
 sleep behavior, direct-versus-relayed ICE paths, and real network partitions
 remain attended qualification gates.
 
+Each PPS browser controller admits at most one unacknowledged reliable command.
+Additional button presses fail locally before command-ID creation or transport
+send, and controller buttons remain disabled until `applied` or a terminal
+session recovery. A non-terminal BRSP diagnostic does not reopen the slot, so
+a late acknowledgement cannot overlap a second mutation.
+
 The included LAN relay remains a cleartext laboratory/offline adapter. The
 public VDO route depends on VDO.Ninja Internet signaling and external ICE/TURN;
 it is not an offline same-Wi-Fi guarantee, an owned rendezvous service, or an
@@ -379,10 +395,10 @@ The migration order is:
    Tauri/Tokio queues.
 4. Port target-native audio/output routing, response timestamping, tactile, and
    acquisition boundaries, then qualify them with physical timing evidence.
-   Native bounded WAV receipts and a pure content-bound PCM16 decoder have
-   landed; actor-owned media caching, persistent platform output streams,
-   callback scheduling/routing, response ingress, and physical qualification
-   remain.
+   Native bounded WAV receipts, a pure content-bound PCM16 decoder, and a
+   generation/receipt-fenced one-block actor cache have landed; persistent
+   platform output streams, callback scheduling/routing, response ingress, and
+   physical qualification remain.
 5. Port durable event/LSL evidence, artifact writers, persistence/recovery, and
    the normal post-run review/analysis required by the Runner, using golden
    outputs only as temporary Python-oracle evidence.

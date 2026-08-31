@@ -93,9 +93,11 @@
                   <p id="package-label" class="subtle">No package loaded.</p>
                   <button id="select-session-manifest" class="button button-primary" type="button">Choose prepared session manifest</button>
                   <button id="inspect-prepared-execution" class="button" type="button" disabled>Compile and inspect Rust schedule</button>
+                  <button id="prepare-first-audio-block" class="button" type="button" disabled>Prepare first audio block</button>
                   <button id="prepare-demo-button" class="button" type="button" data-action="package.prepare_demo">Prepare deterministic validation demo</button>
                   <p id="package-detail" class="safety-copy">The native verifier checks the V1 manifest, ordered block files, source hashes, and trial counts before adoption.</p>
                   <p id="execution-inspection-detail" class="safety-copy">Schedule inspection is unavailable until a real prepared session is selected.</p>
+                  <p id="prepared-audio-detail" class="safety-copy">Native PCM preparation is unavailable until the first schedule is inspected.</p>
                   <ol id="package-block-list" class="package-block-list" aria-label="Verified package blocks"></ol>
                   <div class="inline-actions">
                     <button class="button" type="button" data-action="target.arm">Arm local target</button>
@@ -132,6 +134,7 @@
                   <div><dt>Execution mode</dt><dd id="package-mode">—</dd></div>
                   <div><dt>Rust schedule</dt><dd id="execution-inspection-status">Not compiled</dd></div>
                   <div><dt>Scheduled events</dt><dd id="execution-event-count">—</dd></div>
+                  <div><dt>Native PCM</dt><dd id="prepared-audio-status">Not prepared</dd></div>
                   <div><dt>Revision</dt><dd id="revision">0</dd></div>
                   <div><dt>Audit events</dt><dd id="audit-events">0</dd></div>
                 </dl>

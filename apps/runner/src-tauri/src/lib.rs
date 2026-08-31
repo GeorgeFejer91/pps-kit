@@ -1,4 +1,5 @@
 mod execution_owner;
+mod prepared_audio;
 mod prepared_execution;
 mod remote;
 mod runtime;
@@ -7,13 +8,15 @@ use std::{path::PathBuf, str::FromStr};
 
 use pps_contracts::{Action, Applied, RunnerSnapshot};
 use pps_session_package::{verify_prepared_session, PreparedSessionSummary, VerificationRequest};
+use prepared_audio::{prepare_verified_audio, PreparedAudioError, PreparedAudioSummary};
 use prepared_execution::{
     compile_prepared_execution, PreparedExecutionError, PreparedExecutionSummary,
 };
 use runtime::{
-    AppRuntime, RemoteApplied, RemoteSessionClaimRequest, RemoteSessionDispatchRequest,
-    RemoteSessionError, RemoteSessionLeaseReceipt, RemoteSessionOwnerRequest,
-    RemoteSessionRenewRequest, RemoteSessionRevocationReceipt, RemoteStatus,
+    AppRuntime, PreparedAudioPreparation, RemoteApplied, RemoteSessionClaimRequest,
+    RemoteSessionDispatchRequest, RemoteSessionError, RemoteSessionLeaseReceipt,
+    RemoteSessionOwnerRequest, RemoteSessionRenewRequest, RemoteSessionRevocationReceipt,
+    RemoteStatus,
 };
 use serde::Serialize;
 use serde_json::Value;
@@ -188,6 +191,90 @@ async fn inspect_prepared_execution(
     Ok(summary)
 }
 
+#[tauri::command]
+async fn prepare_first_audio_block(
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<PreparedAudioSummary, PreparedSessionCommandError> {
+    require_main_window(&window)
+        .map_err(|error| PreparedSessionCommandError::new(&error.code, &error.message))?;
+    let runtime = state.inner().clone();
+    let preparation = runtime
+        .begin_prepared_audio_preparation_async(0)
+        .await
+        .map_err(prepared_audio_runtime_error)?;
+    let (_preparation_guard, source) = match preparation {
+        PreparedAudioPreparation::Cached(summary) => return Ok(summary),
+        PreparedAudioPreparation::Decode { _guard, source } => (_guard, source),
+    };
+
+    // PCM hashing/decoding may be large and blocking. It runs outside the
+    // authority thread; the actor accepts the immutable result only if every
+    // captured package, run, block, schedule, and receipt fence still matches.
+    let (_preparation_guard, candidate) = tauri::async_runtime::spawn_blocking(move || {
+        (
+            _preparation_guard,
+            prepare_verified_audio(source).map_err(prepared_audio_preparation_error),
+        )
+    })
+    .await
+    .map_err(|_| PreparedSessionCommandError::runtime())?;
+    let candidate = candidate?;
+    runtime
+        .cache_prepared_audio_async(candidate)
+        .await
+        .map_err(prepared_audio_runtime_error)
+}
+
+fn prepared_audio_preparation_error(error: PreparedAudioError) -> PreparedSessionCommandError {
+    PreparedSessionCommandError::new(error.code(), error.public_message())
+}
+
+fn prepared_audio_runtime_error(reason: &'static str) -> PreparedSessionCommandError {
+    match reason {
+        "prepared_audio_preparation_in_progress" => PreparedSessionCommandError::new(
+            reason,
+            "A native audio preload is already in progress.",
+        ),
+        "prepared_audio_active_run" => PreparedSessionCommandError::new(
+            reason,
+            "Audio preloading is unavailable while a run is active.",
+        ),
+        "prepared_session_missing" => PreparedSessionCommandError::new(
+            reason,
+            "Select and verify a prepared session before loading its audio.",
+        ),
+        "prepared_execution_missing" => PreparedSessionCommandError::new(
+            reason,
+            "Inspect the prepared schedules before loading their audio.",
+        ),
+        "prepared_package_replaced"
+        | "prepared_execution_replaced"
+        | "prepared_audio_run_replaced"
+        | "prepared_audio_block_replaced" => PreparedSessionCommandError::new(
+            "prepared_audio_stale",
+            "The selected package changed during audio loading; load it again.",
+        ),
+        "prepared_audio_block_missing" => PreparedSessionCommandError::new(
+            reason,
+            "The verified package does not contain a first audio block.",
+        ),
+        "prepared_audio_sample_rate_invalid" => PreparedSessionCommandError::new(
+            reason,
+            "The prepared schedule does not provide a supported audio sample rate.",
+        ),
+        "prepared_audio_resource_limit" => PreparedSessionCommandError::new(
+            reason,
+            "The prepared audio exceeds the native preload resource limit.",
+        ),
+        "runtime_unavailable" => PreparedSessionCommandError::runtime(),
+        _ => PreparedSessionCommandError::new(
+            "prepared_audio_unavailable",
+            "The prepared audio could not be loaded by the native Runner.",
+        ),
+    }
+}
+
 fn prepared_execution_compile_error(error: PreparedExecutionError) -> PreparedSessionCommandError {
     PreparedSessionCommandError::new(error.code(), error.public_message())
 }
@@ -297,6 +384,7 @@ pub fn run() {
             rotate_pairing,
             select_prepared_session,
             inspect_prepared_execution,
+            prepare_first_audio_block,
             remote_session_claim,
             remote_session_renew,
             remote_session_dispatch,

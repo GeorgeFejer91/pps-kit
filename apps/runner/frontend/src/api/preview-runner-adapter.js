@@ -75,6 +75,9 @@ export function createPreviewRunnerAdapter() {
     async inspectPreparedExecution() {
       throw new Error("Rust schedule inspection is available only in the native Tauri runner.");
     },
+    async prepareFirstAudioBlock() {
+      throw new Error("Native audio preloading is available only in the Tauri runner.");
+    },
     async remoteStatus() {
       return remoteStatus();
     },
