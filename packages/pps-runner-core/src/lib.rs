@@ -49,6 +49,18 @@ pub enum DispatchOrigin {
     },
 }
 
+/// Inline observation points around one authoritative dispatch.
+///
+/// An execution owner can timestamp these milestones without duplicating
+/// reducer validation or transition rules. Observers run synchronously and
+/// must remain fast and non-panicking; they cannot alter the dispatch result.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DispatchMilestone {
+    DedupeResolved { duplicate: bool },
+    ValidationCompleted { accepted: bool },
+    TransitionEvaluated { accepted: bool, changed: bool },
+}
+
 impl DispatchOrigin {
     fn is_remote(&self) -> bool {
         matches!(self, Self::Remote { .. })
@@ -345,6 +357,19 @@ impl RunnerCore {
     }
 
     pub fn dispatch_local(&mut self, action: Action, args: Value, now: ClockStamp) -> Applied {
+        self.dispatch_local_observed(action, args, now, |_| {})
+    }
+
+    pub fn dispatch_local_observed<F>(
+        &mut self,
+        action: Action,
+        args: Value,
+        now: ClockStamp,
+        mut observer: F,
+    ) -> Applied
+    where
+        F: FnMut(DispatchMilestone),
+    {
         self.local_sequence = self.local_sequence.saturating_add(1);
         let command = CommandRequest {
             id: format!("local-{}-{}", self.snapshot.epoch, self.local_sequence),
@@ -355,7 +380,7 @@ impl RunnerCore {
             action,
             args,
         };
-        self.dispatch(DispatchOrigin::Local, command, now)
+        self.dispatch_observed(DispatchOrigin::Local, command, now, &mut observer)
     }
 
     pub fn dispatch(
@@ -364,6 +389,19 @@ impl RunnerCore {
         command: CommandRequest,
         now: ClockStamp,
     ) -> Applied {
+        self.dispatch_observed(origin, command, now, |_| {})
+    }
+
+    pub fn dispatch_observed<F>(
+        &mut self,
+        origin: DispatchOrigin,
+        command: CommandRequest,
+        now: ClockStamp,
+        mut observer: F,
+    ) -> Applied
+    where
+        F: FnMut(DispatchMilestone),
+    {
         self.stamp(&now);
         // BRSP retries keep the command body identical but wrap it in a fresh
         // control envelope sequence. Dedupe therefore binds commandId to the
@@ -384,6 +422,7 @@ impl RunnerCore {
             .iter()
             .find(|entry| entry.principal == principal && entry.command_id == command.id)
         {
+            observer(DispatchMilestone::DedupeResolved { duplicate: true });
             if previous.fingerprint != fingerprint {
                 return self.rejected(&command, "command_id_reused_with_different_payload");
             }
@@ -392,9 +431,13 @@ impl RunnerCore {
             // update its revision/snapshot) merely to annotate a duplicate.
             return previous.result.clone();
         }
+        observer(DispatchMilestone::DedupeResolved { duplicate: false });
 
         let accepted_revision = self.snapshot.revision;
         let rejection = self.validate_command(&origin, &command).err();
+        observer(DispatchMilestone::ValidationCompleted {
+            accepted: rejection.is_none(),
+        });
         let result = if let Some(reason) = rejection {
             self.rejected(&command, reason)
         } else {
@@ -407,6 +450,10 @@ impl RunnerCore {
                     } else {
                         self.refresh_derived();
                     }
+                    observer(DispatchMilestone::TransitionEvaluated {
+                        accepted: true,
+                        changed,
+                    });
                     Applied {
                         id: command.id.clone(),
                         action: command.action,
@@ -421,7 +468,13 @@ impl RunnerCore {
                         snapshot: self.snapshot(),
                     }
                 }
-                Err(reason) => self.rejected(&command, reason),
+                Err(reason) => {
+                    observer(DispatchMilestone::TransitionEvaluated {
+                        accepted: false,
+                        changed: false,
+                    });
+                    self.rejected(&command, reason)
+                }
             }
         };
         self.remember(principal, command.id, fingerprint, result.clone());
@@ -1657,5 +1710,166 @@ mod tests {
         );
         assert_eq!(result.status, AppliedStatus::Rejected);
         assert_eq!(result.reason, "scope_not_granted");
+    }
+
+    #[test]
+    fn observed_local_and_remote_dispatch_preserve_existing_results() {
+        let baseline = RunnerCore::new(
+            "target-test",
+            "desktop",
+            7,
+            TimingTier::DesktopPreview,
+            clock(0),
+        );
+        let mut ordinary_local = baseline.clone();
+        let mut observed_local = baseline;
+        let ordinary = ordinary_local.dispatch_local(
+            Action::PackagePrepareDemo,
+            json!({"label": "Equivalent"}),
+            clock(1),
+        );
+        let observed = observed_local.dispatch_local_observed(
+            Action::PackagePrepareDemo,
+            json!({"label": "Equivalent"}),
+            clock(1),
+            |_| {},
+        );
+        assert_eq!(observed, ordinary);
+        assert_eq!(observed_local.snapshot(), ordinary_local.snapshot());
+
+        let baseline = ready_core();
+        let mut ordinary_remote = baseline.clone();
+        let mut observed_remote = baseline;
+        let origin = DispatchOrigin::Remote {
+            controller_id: "controller-observed".to_owned(),
+            granted_scopes: BTreeSet::from([Scope::SessionRead]),
+            lease_valid: true,
+        };
+        let command = CommandRequest {
+            id: "observed-remote-command".to_owned(),
+            epoch: ordinary_remote.epoch(),
+            sequence: 1,
+            expected_revision: Some(ordinary_remote.revision()),
+            scope: Scope::SessionRead,
+            action: Action::SystemSnapshot,
+            args: json!({}),
+        };
+        let ordinary = ordinary_remote.dispatch(origin.clone(), command.clone(), clock(10));
+        let observed =
+            observed_remote.dispatch_observed(origin.clone(), command.clone(), clock(10), |_| {});
+        assert_eq!(observed, ordinary);
+        assert_eq!(observed_remote.snapshot(), ordinary_remote.snapshot());
+
+        let retry = CommandRequest {
+            sequence: 2,
+            ..command
+        };
+        let ordinary_retry = ordinary_remote.dispatch(origin.clone(), retry.clone(), clock(11));
+        let observed_retry = observed_remote.dispatch_observed(origin, retry, clock(11), |_| {});
+        assert_eq!(observed_retry, ordinary_retry);
+        assert_eq!(observed_remote.snapshot(), ordinary_remote.snapshot());
+    }
+
+    #[test]
+    fn dispatch_milestones_report_authoritative_order_and_outcomes() {
+        let mut core = RunnerCore::new(
+            "target-test",
+            "desktop",
+            7,
+            TimingTier::DesktopPreview,
+            clock(0),
+        );
+        let mut accepted = Vec::new();
+        let result = core.dispatch_local_observed(
+            Action::PackagePrepareDemo,
+            json!({"label": "Observed"}),
+            clock(1),
+            |milestone| accepted.push(milestone),
+        );
+        assert_eq!(result.status, AppliedStatus::Accepted);
+        assert_eq!(
+            accepted,
+            [
+                DispatchMilestone::DedupeResolved { duplicate: false },
+                DispatchMilestone::ValidationCompleted { accepted: true },
+                DispatchMilestone::TransitionEvaluated {
+                    accepted: true,
+                    changed: true,
+                },
+            ]
+        );
+
+        let origin = DispatchOrigin::Remote {
+            controller_id: "controller-observed".to_owned(),
+            granted_scopes: BTreeSet::from([Scope::SessionRead]),
+            lease_valid: true,
+        };
+        let mut validation_rejected = Vec::new();
+        let rejected = core.dispatch_observed(
+            origin.clone(),
+            CommandRequest {
+                id: "milestone-validation-reject".to_owned(),
+                epoch: 99,
+                sequence: 1,
+                expected_revision: None,
+                scope: Scope::SessionRead,
+                action: Action::SystemSnapshot,
+                args: json!({}),
+            },
+            clock(2),
+            |milestone| validation_rejected.push(milestone),
+        );
+        assert_eq!(rejected.status, AppliedStatus::Rejected);
+        assert_eq!(
+            validation_rejected,
+            [
+                DispatchMilestone::DedupeResolved { duplicate: false },
+                DispatchMilestone::ValidationCompleted { accepted: false },
+            ]
+        );
+
+        let mut transition_rejected = Vec::new();
+        let rejected =
+            core.dispatch_local_observed(Action::TargetArm, json!({}), clock(3), |milestone| {
+                transition_rejected.push(milestone)
+            });
+        assert_eq!(rejected.status, AppliedStatus::Rejected);
+        assert_eq!(
+            transition_rejected,
+            [
+                DispatchMilestone::DedupeResolved { duplicate: false },
+                DispatchMilestone::ValidationCompleted { accepted: true },
+                DispatchMilestone::TransitionEvaluated {
+                    accepted: false,
+                    changed: false,
+                },
+            ]
+        );
+
+        let command = CommandRequest {
+            id: "milestone-duplicate-command".to_owned(),
+            epoch: core.epoch(),
+            sequence: 2,
+            expected_revision: Some(core.revision()),
+            scope: Scope::SessionRead,
+            action: Action::SystemSnapshot,
+            args: json!({}),
+        };
+        let first = core.dispatch(origin.clone(), command.clone(), clock(4));
+        let mut duplicate = Vec::new();
+        let retried = core.dispatch_observed(
+            origin,
+            CommandRequest {
+                sequence: 3,
+                ..command
+            },
+            clock(5),
+            |milestone| duplicate.push(milestone),
+        );
+        assert_eq!(retried, first);
+        assert_eq!(
+            duplicate,
+            [DispatchMilestone::DedupeResolved { duplicate: true }]
+        );
     }
 }

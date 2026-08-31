@@ -81,6 +81,64 @@ pub struct EventLedgerSummary {
     pub last_monotonic_ns: Option<u64>,
 }
 
+/// Capacity kept unavailable to ordinary batches so a later safety batch can
+/// still record a fail-stop, revocation, or shutdown transition.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct LedgerReserve {
+    record_count: usize,
+    encoded_bytes: usize,
+}
+
+impl LedgerReserve {
+    pub const NONE: Self = Self::new(0, 0);
+
+    pub const fn new(record_count: usize, encoded_bytes: usize) -> Self {
+        Self {
+            record_count,
+            encoded_bytes,
+        }
+    }
+
+    pub const fn record_count(self) -> usize {
+        self.record_count
+    }
+
+    pub const fn encoded_bytes(self) -> usize {
+        self.encoded_bytes
+    }
+}
+
+/// Fully validated records bound to the exact append-only ledger tail against
+/// which they were prepared.
+///
+/// Preparation performs every fallible validation before the ledger mutates.
+/// Committing a batch after any intervening append fails as stale and does not
+/// partially append records.
+#[derive(Debug)]
+pub struct PreparedLedgerBatch {
+    expected_record_count: usize,
+    expected_encoded_bytes: usize,
+    expected_last_monotonic_ns: Option<u64>,
+    reserve: LedgerReserve,
+    records: Vec<ExecutionEventRecord>,
+    resulting_encoded_bytes: usize,
+}
+
+impl PreparedLedgerBatch {
+    pub fn len(&self) -> usize {
+        self.records.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.records.is_empty()
+    }
+
+    pub fn encoded_bytes(&self) -> usize {
+        self.resulting_encoded_bytes
+            .saturating_sub(self.expected_encoded_bytes)
+    }
+}
+
 /// Count-and-byte-bounded, append-only in-memory audit/event ledger.
 ///
 /// The ledger is not a ring buffer: once its record or cumulative encoded-byte
@@ -142,67 +200,167 @@ impl EventLedger {
         &mut self,
         input: LedgerEventInput,
     ) -> Result<&ExecutionEventRecord, ExecutionError> {
-        if self.records.len() == self.capacity {
-            return Err(error(
-                ExecutionErrorCode::LedgerFull,
-                "The event ledger is full; execution must stop safely.",
-                format!(
-                    "ledger reached its configured capacity of {} records",
-                    self.capacity
-                ),
-            ));
-        }
-        if self.encoded_bytes >= self.encoded_byte_capacity {
-            return Err(ledger_byte_budget_error(format!(
-                "ledger reached its {}-byte cumulative limit",
-                self.encoded_byte_capacity
-            )));
-        }
-        validate_input(&input)?;
-        if let Some(previous) = self.records.last() {
-            if input.monotonic_ns < previous.monotonic_ns {
-                return Err(error(
-                    ExecutionErrorCode::LedgerTimestampRegression,
-                    "The event timestamp moved backwards.",
-                    format!(
-                        "event monotonic timestamp {} precedes the last accepted timestamp {}",
-                        input.monotonic_ns, previous.monotonic_ns
-                    ),
-                ));
-            }
-        }
-        let sequence =
-            u64::try_from(self.records.len()).expect("bounded ledger length fits u64") + 1;
-        let record = ExecutionEventRecord {
-            sequence,
-            event_type: input.event_type,
-            source: input.source,
-            authority_id: input.authority_id,
-            command_id: input.command_id,
-            trigger_key: input.trigger_key,
-            monotonic_ns: input.monotonic_ns,
-            unix_ms: input.unix_ms,
-            payload: input.payload,
-        };
-        let record_bytes = encoded_len(&record).map_err(|cause| {
-            payload_invalid(format!("event record could not be measured: {cause}"))
-        })?;
-        let next_encoded_bytes = self
-            .encoded_bytes
-            .checked_add(record_bytes)
-            .ok_or_else(|| ledger_byte_budget_error("ledger byte count overflowed"))?;
-        if next_encoded_bytes > self.encoded_byte_capacity {
-            return Err(ledger_byte_budget_error(format!(
-                "encoded ledger would exceed its {}-byte cumulative limit",
-                self.encoded_byte_capacity
-            )));
-        }
-        self.records.push(record);
-        self.encoded_bytes = next_encoded_bytes;
+        let prepared = self.prepare_batch([input], LedgerReserve::NONE)?;
+        self.commit_prepared(prepared)?;
         Ok(self
             .records
             .last()
             .expect("record was appended immediately above"))
+    }
+
+    /// Validate and sequence a complete batch without mutating this ledger.
+    ///
+    /// `reserve` is subtracted from both remaining budgets. Ordinary authority
+    /// transactions can therefore preserve known capacity for a later local
+    /// safety transition, while that safety transition commits with
+    /// [`LedgerReserve::NONE`].
+    pub fn prepare_batch<I>(
+        &self,
+        inputs: I,
+        reserve: LedgerReserve,
+    ) -> Result<PreparedLedgerBatch, ExecutionError>
+    where
+        I: IntoIterator<Item = LedgerEventInput>,
+    {
+        if reserve.record_count > self.capacity
+            || reserve.encoded_bytes > self.encoded_byte_capacity
+        {
+            return Err(error(
+                ExecutionErrorCode::LedgerCapacityInvalid,
+                "The event ledger reserve is invalid.",
+                format!(
+                    "reserve requests {} records and {} bytes from a ledger bounded to {} records and {} bytes",
+                    reserve.record_count,
+                    reserve.encoded_bytes,
+                    self.capacity,
+                    self.encoded_byte_capacity
+                ),
+            ));
+        }
+
+        let maximum_resulting_records = self.capacity - reserve.record_count;
+        let maximum_resulting_bytes = self.encoded_byte_capacity - reserve.encoded_bytes;
+        if self.records.len() > maximum_resulting_records {
+            return Err(ledger_record_budget_error(format!(
+                "ledger already uses {} records, leaving fewer than the reserved {} records",
+                self.records.len(),
+                reserve.record_count
+            )));
+        }
+        if self.encoded_bytes > maximum_resulting_bytes {
+            return Err(ledger_byte_budget_error(format!(
+                "ledger already uses {} bytes, leaving fewer than the reserved {} bytes",
+                self.encoded_bytes, reserve.encoded_bytes
+            )));
+        }
+
+        let maximum_batch_records = maximum_resulting_records - self.records.len();
+        let iterator = inputs.into_iter();
+        let initial_capacity = iterator.size_hint().0.min(maximum_batch_records).min(4_096);
+        let mut records = Vec::with_capacity(initial_capacity);
+        let mut resulting_encoded_bytes = self.encoded_bytes;
+        let mut previous_monotonic_ns = self.records.last().map(|record| record.monotonic_ns);
+
+        for input in iterator {
+            if records.len() == maximum_batch_records {
+                return Err(ledger_record_budget_error(format!(
+                    "prepared batch would consume the {}-record safety reserve",
+                    reserve.record_count
+                )));
+            }
+            validate_input(&input)?;
+            if previous_monotonic_ns.is_some_and(|previous| input.monotonic_ns < previous) {
+                return Err(error(
+                    ExecutionErrorCode::LedgerTimestampRegression,
+                    "The event timestamp moved backwards.",
+                    format!(
+                        "event monotonic timestamp {} precedes the previous prepared timestamp {}",
+                        input.monotonic_ns,
+                        previous_monotonic_ns.expect("checked as present above")
+                    ),
+                ));
+            }
+            let sequence = u64::try_from(self.records.len() + records.len())
+                .expect("bounded ledger length fits u64")
+                + 1;
+            let record = ExecutionEventRecord {
+                sequence,
+                event_type: input.event_type,
+                source: input.source,
+                authority_id: input.authority_id,
+                command_id: input.command_id,
+                trigger_key: input.trigger_key,
+                monotonic_ns: input.monotonic_ns,
+                unix_ms: input.unix_ms,
+                payload: input.payload,
+            };
+            let record_bytes = encoded_len(&record).map_err(|cause| {
+                payload_invalid(format!("event record could not be measured: {cause}"))
+            })?;
+            resulting_encoded_bytes = resulting_encoded_bytes
+                .checked_add(record_bytes)
+                .ok_or_else(|| ledger_byte_budget_error("ledger byte count overflowed"))?;
+            if resulting_encoded_bytes > maximum_resulting_bytes {
+                return Err(ledger_byte_budget_error(format!(
+                    "prepared batch would consume the {}-byte safety reserve",
+                    reserve.encoded_bytes
+                )));
+            }
+            previous_monotonic_ns = Some(record.monotonic_ns);
+            records.push(record);
+        }
+
+        Ok(PreparedLedgerBatch {
+            expected_record_count: self.records.len(),
+            expected_encoded_bytes: self.encoded_bytes,
+            expected_last_monotonic_ns: self.records.last().map(|record| record.monotonic_ns),
+            reserve,
+            records,
+            resulting_encoded_bytes,
+        })
+    }
+
+    /// Commit a batch only if the ledger still has the exact tail against
+    /// which the batch was prepared.
+    pub fn commit_prepared(&mut self, prepared: PreparedLedgerBatch) -> Result<(), ExecutionError> {
+        if self.records.len() != prepared.expected_record_count
+            || self.encoded_bytes != prepared.expected_encoded_bytes
+            || self.records.last().map(|record| record.monotonic_ns)
+                != prepared.expected_last_monotonic_ns
+        {
+            return Err(error(
+                ExecutionErrorCode::LedgerBatchStale,
+                "The prepared event batch is stale.",
+                "the ledger tail changed after batch preparation",
+            ));
+        }
+
+        let resulting_record_count = self
+            .records
+            .len()
+            .checked_add(prepared.records.len())
+            .ok_or_else(|| ledger_record_budget_error("ledger record count overflowed"))?;
+        if resulting_record_count
+            .checked_add(prepared.reserve.record_count)
+            .is_none_or(|count| count > self.capacity)
+        {
+            return Err(ledger_record_budget_error(
+                "prepared batch no longer preserves its record reserve",
+            ));
+        }
+        if prepared
+            .resulting_encoded_bytes
+            .checked_add(prepared.reserve.encoded_bytes)
+            .is_none_or(|bytes| bytes > self.encoded_byte_capacity)
+        {
+            return Err(ledger_byte_budget_error(
+                "prepared batch no longer preserves its encoded-byte reserve",
+            ));
+        }
+
+        self.records.extend(prepared.records);
+        self.encoded_bytes = prepared.resulting_encoded_bytes;
+        Ok(())
     }
 
     pub fn summary(&self) -> EventLedgerSummary {
@@ -364,6 +522,14 @@ fn ledger_byte_budget_error(diagnostic: impl Into<String>) -> ExecutionError {
     )
 }
 
+fn ledger_record_budget_error(diagnostic: impl Into<String>) -> ExecutionError {
+    error(
+        ExecutionErrorCode::LedgerFull,
+        "The event ledger is full; execution must stop safely.",
+        diagnostic,
+    )
+}
+
 fn error(
     code: ExecutionErrorCode,
     public_message: &'static str,
@@ -447,6 +613,128 @@ mod tests {
         assert_eq!(ledger.records().len(), 1);
         assert_eq!(ledger.encoded_bytes(), accepted_bytes);
         assert_eq!(ledger.summary().encoded_bytes as usize, accepted_bytes);
+    }
+
+    #[test]
+    fn failed_batch_preparation_never_partially_mutates_the_ledger() {
+        let mut ledger = EventLedger::new(4).unwrap();
+        ledger.append(input("trial_start", 10)).unwrap();
+        let before_records = ledger.records().to_vec();
+        let before_summary = ledger.summary();
+
+        let failure = ledger
+            .prepare_batch(
+                [input("tactile_onset", 20), input("trial_end", 9)],
+                LedgerReserve::NONE,
+            )
+            .unwrap_err();
+
+        assert_eq!(
+            failure.kind(),
+            ExecutionErrorCode::LedgerTimestampRegression
+        );
+        assert_eq!(ledger.records(), before_records);
+        assert_eq!(ledger.summary(), before_summary);
+    }
+
+    #[test]
+    fn stale_batch_commit_fails_without_appending_any_of_its_records() {
+        let mut ledger = EventLedger::new(4).unwrap();
+        ledger.append(input("trial_start", 10)).unwrap();
+        let prepared = ledger
+            .prepare_batch(
+                [input("tactile_onset", 30), input("trial_end", 40)],
+                LedgerReserve::NONE,
+            )
+            .unwrap();
+        ledger.append(input("intervening_event", 20)).unwrap();
+        let before_records = ledger.records().to_vec();
+        let before_summary = ledger.summary();
+
+        let failure = ledger.commit_prepared(prepared).unwrap_err();
+
+        assert_eq!(failure.kind(), ExecutionErrorCode::LedgerBatchStale);
+        assert_eq!(ledger.records(), before_records);
+        assert_eq!(ledger.summary(), before_summary);
+    }
+
+    #[test]
+    fn ordinary_batches_preserve_capacity_for_a_local_safety_batch() {
+        let mut ledger = EventLedger::new(3).unwrap();
+        let local_safety_reserve = LedgerReserve::new(1, 0);
+        let ordinary = ledger
+            .prepare_batch(
+                [input("trial_start", 10), input("tactile_onset", 20)],
+                local_safety_reserve,
+            )
+            .unwrap();
+        assert_eq!(ordinary.len(), 2);
+        ledger.commit_prepared(ordinary).unwrap();
+
+        let blocked = ledger
+            .prepare_batch([input("ordinary_note", 30)], local_safety_reserve)
+            .unwrap_err();
+        assert_eq!(blocked.kind(), ExecutionErrorCode::LedgerFull);
+        assert_eq!(ledger.records().len(), 2);
+
+        let safety = ledger
+            .prepare_batch([input("authority_fail_stop", 30)], LedgerReserve::NONE)
+            .unwrap();
+        ledger.commit_prepared(safety).unwrap();
+        assert_eq!(ledger.records().len(), 3);
+        assert_eq!(ledger.records()[2].event_type, "authority_fail_stop");
+    }
+
+    #[test]
+    fn encoded_byte_reserve_remains_available_to_a_safety_batch() {
+        let ordinary_input = input("ordinary_event", 10);
+        let safety_input = input("authority_fail_stop", 20);
+        let ordinary_record = ExecutionEventRecord {
+            sequence: 1,
+            event_type: ordinary_input.event_type.clone(),
+            source: ordinary_input.source.clone(),
+            authority_id: ordinary_input.authority_id.clone(),
+            command_id: ordinary_input.command_id.clone(),
+            trigger_key: ordinary_input.trigger_key.clone(),
+            monotonic_ns: ordinary_input.monotonic_ns,
+            unix_ms: ordinary_input.unix_ms,
+            payload: ordinary_input.payload.clone(),
+        };
+        let safety_record = ExecutionEventRecord {
+            sequence: 2,
+            event_type: safety_input.event_type.clone(),
+            source: safety_input.source.clone(),
+            authority_id: safety_input.authority_id.clone(),
+            command_id: safety_input.command_id.clone(),
+            trigger_key: safety_input.trigger_key.clone(),
+            monotonic_ns: safety_input.monotonic_ns,
+            unix_ms: safety_input.unix_ms,
+            payload: safety_input.payload.clone(),
+        };
+        let ordinary_bytes = encoded_len(&ordinary_record).unwrap();
+        let safety_bytes = encoded_len(&safety_record).unwrap();
+        let mut ledger = EventLedger::with_encoded_byte_capacity(
+            3,
+            ordinary_bytes.checked_add(safety_bytes).unwrap(),
+        )
+        .unwrap();
+        let byte_reserve = LedgerReserve::new(0, safety_bytes);
+
+        let ordinary = ledger
+            .prepare_batch([ordinary_input], byte_reserve)
+            .unwrap();
+        ledger.commit_prepared(ordinary).unwrap();
+        let blocked = ledger
+            .prepare_batch([input("another_event", 20)], byte_reserve)
+            .unwrap_err();
+        assert_eq!(blocked.kind(), ExecutionErrorCode::LedgerFull);
+
+        let safety = ledger
+            .prepare_batch([safety_input], LedgerReserve::NONE)
+            .unwrap();
+        ledger.commit_prepared(safety).unwrap();
+        assert_eq!(ledger.encoded_bytes(), ordinary_bytes + safety_bytes);
+        assert_eq!(ledger.records()[1].event_type, "authority_fail_stop");
     }
 
     #[test]

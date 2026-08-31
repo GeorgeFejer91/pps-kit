@@ -12,9 +12,9 @@ mod schedule;
 
 pub use error::{ExecutionError, ExecutionErrorCode};
 pub use ledger::{
-    EventLedger, EventLedgerSummary, ExecutionEventRecord, LedgerEventInput,
-    DEFAULT_LEDGER_CAPACITY, MAX_LEDGER_CAPACITY, MAX_LEDGER_ENCODED_BYTES, MAX_LEDGER_JSON_DEPTH,
-    MAX_LEDGER_JSON_NODES, MAX_LEDGER_PAYLOAD_BYTES,
+    EventLedger, EventLedgerSummary, ExecutionEventRecord, LedgerEventInput, LedgerReserve,
+    PreparedLedgerBatch, DEFAULT_LEDGER_CAPACITY, MAX_LEDGER_CAPACITY, MAX_LEDGER_ENCODED_BYTES,
+    MAX_LEDGER_JSON_DEPTH, MAX_LEDGER_JSON_NODES, MAX_LEDGER_PAYLOAD_BYTES,
 };
 pub use schedule::{
     compile_block_schedule, compile_verified_block_schedule, BlockEventSchedule,
