@@ -70,6 +70,15 @@ authority. PPS requires bounded queues, explicit queue-full failure, generation
 fencing, target-local arming, expected revisions, and target-owned deadman
 leases. RustDesk is AGPL-3.0, so no source is copied or vendored into the MIT PPS
 Kit; only independently implemented architectural lessons and tests are used.
+The current native LAN slice independently applies the bounded-lifecycle lesson:
+each handshake read has a 12-second deadline, every WebSocket write has a
+two-second deadline behind a 64 KiB maximum socket write buffer, graceful close
+has a one-second deadline, and a
+connection-local Ping every two seconds requires its exact eight-byte Pong
+within three seconds. These are transport-health limits, not BRSP messages or
+application-command samples, and they never renew the separate five-second
+target-owned controller lease. No RustDesk code, schema, raw-input surface, or
+AGPL implementation text was copied or translated.
 
 ## Semantic remote-control contract
 
@@ -249,9 +258,15 @@ cache. An exact sequential request returns the existing path-free summary
 without decoding again; a different block evicts the prior cache before the
 worker can allocate another buffer. The cache is capped at 1,280 MiB, active
 run phases deny new preparation, and package/schedule/run replacement makes a
-late result inert. This is still preparation only: the summary is explicitly
-`pcm-cache-only`, `unqualified`, and non-executable; no platform output device
-is opened, no remote action is added, and real packages remain unarmable.
+late result inert. The retained candidate now binds both PCM and a
+renderer-neutral playback plan: the path-free summary reports
+`pcm-and-output-plan-cache`, `outputPlanPrepared = true`, one closed proposed
+route, and its scheduled event count. This remains `unqualified` and
+non-executable: no platform output device is opened, no remote action or output
+arm is added, and real packages remain unarmable. Before this cache can feed
+executable output, potentially large final PCM/plan releases must be retired
+away from the authority actor; ordinary preflight invalidation may currently
+drop up to the bounded cache maximum on that actor.
 
 The device-independent `pps-runner-audio::output` core is the next native
 boundary. It accepts only immutable prepared PCM, a full package/run fence, a
@@ -280,6 +295,26 @@ socket cannot clear, pause, or relabel a newer session or overwrite the
 disabled `local_only` state. After that first opt-in, the process reuses its
 listener across disable/re-enable; while disabled, WebSocket/relay ingress stays
 fail-closed, and app exit releases the listener.
+
+After mutual BRSP ready, native LAN Ping/Pong only detects a half-open or
+nonresponsive socket. Only the exact payload received strictly before its
+deadline clears the pending Pong; every desktop/relay inbound frame passes the
+same deadline gate before any command dispatch or forwarding, so a ready frame
+at or after expiry is inert. A missing Pong closes the socket and revokes only
+that socket's generation-fenced owner; the authority actor independently
+enforces the five-second semantic deadman and pauses active output. Every
+post-claim exit awaits that exact-owner revoke through the actor's reserved
+local-safety admission class; guard Drop and the deadman remain cancellation/
+crash fallbacks. Socket write failure cannot roll back a command that the
+reducer already applied: the connection is closed/revoked and an identical
+retry relies on the existing command-ID dedupe result. Dedupe mutation checks
+use the candidate's current revision, so a cached Applied after revoke/reclaim
+cannot append evidence or advance run/output generations again. The cached
+outcome retains its original result revision, while WebView publication is
+rebased onto the actor's current public projection so browser state cannot
+regress. `send-completed` latency evidence is still recorded only after the
+native socket send succeeds. Desktop control remains inline and
+one-command-at-a-time, so this hardening adds no hidden command queue.
 
 The separate **Advertise this runner** website-beacon action enables the same
 Rust authority without starting the LAN listener. Its private VDO session is
@@ -374,7 +409,26 @@ send, and controller buttons remain disabled until `applied` or a terminal
 session recovery. A non-terminal BRSP diagnostic does not reopen the slot, so
 a late acknowledgement cannot overlap a second mutation.
 
-The included LAN relay remains a cleartext laboratory/offline adapter. The
+The included LAN relay remains a cleartext laboratory/offline adapter. Desktop
+and relay upgrades have separate pre-upgrade admission budgets (eight desktop,
+32 relay), return HTTP 503 when full, and retain the permit through the bounded
+close attempt, so invalid or stalled relay traffic cannot create unlimited
+tasks or consume desktop capacity. The relay's reliable direction retains its
+fixed 32-message `try_send` queue plus at most one writer-held frame, while its
+state direction retains one replaceable `watch` slot. Per-route order stamps
+make the single writer send an earlier reliable Ready/Applied before a later
+state without letting newer reliable traffic starve that state. Reliable queue
+overflow is fail-closed: both endpoints are signaled and the forwarding fence
+makes every later frame inert rather than dropping one command and allowing an
+overtake. Fatal shutdown is observed before queued/pending output, and every
+post-registration diagnostic write failure enters the same exact-connection
+slot cleanup, so an initial or later failed writer cannot retain a room role.
+The PPS relay profile accepts no `intent`; only target `state` occupies the
+replaceable lane, while commands and all other control stay reliable. All relay
+socket writes/closes and its transport Ping/Pong use the same finite deadlines
+and 64 KiB write-buffer ceiling. This
+does not make the relay authenticated, encrypted, production-ready, or command
+authority. The
 public VDO route depends on VDO.Ninja Internet signaling and external ICE/TURN;
 it is not an offline same-Wi-Fi guarantee, an owned rendezvous service, or an
 availability SLA. WebRTC signaling/ICE can expose ordinary connection and IP

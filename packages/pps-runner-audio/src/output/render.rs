@@ -46,6 +46,9 @@ pub enum RenderIntegrityFault {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RtEventKind {
+    /// The authoritative callback-placement boundary for canonical audio-zero
+    /// evidence. A prepared schedule's metadata `audio_sample_zero` anchor is
+    /// validated but must not also be projected as a `Scheduled` event.
     SampleZero,
     Scheduled {
         event_index: u32,

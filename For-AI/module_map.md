@@ -103,10 +103,13 @@ generation, performs decoding outside its mailbox, and accepts the immutable
 result only while fingerprint, generations, ordinal, receipt, and compiled
 sample rate still match. Its one-block/1,280 MiB cache returns exact sequential
 hits without decoding, evicts a different block before another allocation,
-and exposes only a `pcm-cache-only`, `unqualified`, non-executable summary to
-the bundled main window. The local no-argument gesture is absent from remote
-actions and the companion page. No platform output backend is present, so real
-plans remain unarmable and unqualified.
+and exposes only a `pcm-and-output-plan-cache`, `outputPlanPrepared = true`,
+closed proposed route/event-count, `unqualified`, non-executable summary to the
+bundled main window. The local no-argument gesture is absent from remote actions
+and the companion page. No platform output backend or output arm is present, so
+real plans remain unarmable and unqualified. Before executable output,
+potentially large final PCM/plan releases must move off the authority actor;
+current invalidation can drop up to the bounded cache maximum there.
 Legacy schedules without a metadata/CSV sample rate still need the V1
 WAV-header fallback before this boundary may feed native execution.
 The crate's pure `output` module now provides a device-free, non-serializable
@@ -121,7 +124,23 @@ Its Python differential probe remains CI-only while parity is being proven.
 All desktop authority requests enter one bounded FIFO mailbox with capacity 64:
 ordinary work is capped at 56 so eight slots remain available to local safety
 operations. The actor owns deadman expiry and stale-owner/package/run generation
-fencing; transport lifecycle threads do not own another watchdog or reducer.
+fencing; transport lifecycle threads do not own another semantic watchdog or
+reducer. `remote.rs` separately owns finite socket read/write/close deadlines,
+strict-before-deadline exact-payload Ping/Pong health, and independent
+pre-upgrade permit pools (eight desktop, 32 relay), with the underlying socket
+write buffer capped at 64 KiB. Inbound frames are deadline-fenced before
+semantic work. Those transport frames cannot renew remote authority or enter
+command diagnostics. Post-claim exits await exact-owner safety-reserve cleanup.
+Desktop commands remain inline with no application queue; the laboratory relay
+owns a fixed 32-message reliable queue, at most one writer-held frame, and one
+replaceable latest-state slot. Per-route order stamps prevent cross-lane
+overtake, while reliable overflow closes both ends, preempts pending output,
+and fences later traffic. Post-registration write failure removes the exact
+role/room slot. The closed PPS profile rejects `intent`; only target `state`
+uses the replaceable lane.
+Remote dedupe after lost acknowledgement/reclaim tests candidate current
+revision, emits no duplicate evidence/run generation, and attaches the current
+actor public projection to the cached outcome.
 Only accepted dispatches that change semantic revision append to the scientific
 ledger. Rejected commands and accepted no-ops do not consume that capacity.
 Ordinary commits reserve evidence space for safety, and pause/revoke remains

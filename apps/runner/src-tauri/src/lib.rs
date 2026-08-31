@@ -226,9 +226,10 @@ async fn prepare_first_audio_block(
         PreparedAudioPreparation::Decode { _guard, source } => (_guard, source),
     };
 
-    // PCM hashing/decoding may be large and blocking. It runs outside the
-    // authority thread; the actor accepts the immutable result only if every
-    // captured package, run, block, schedule, and receipt fence still matches.
+    // PCM hashing/decoding plus compact output-plan construction may be large
+    // and blocking. It runs outside the authority thread; the actor accepts
+    // the immutable result only if every captured package, run, block,
+    // schedule, preparation, and receipt fence still matches.
     let (_preparation_guard, candidate) = tauri::async_runtime::spawn_blocking(move || {
         (
             _preparation_guard,
@@ -269,7 +270,8 @@ fn prepared_audio_runtime_error(reason: &'static str) -> PreparedSessionCommandE
         "prepared_package_replaced"
         | "prepared_execution_replaced"
         | "prepared_audio_run_replaced"
-        | "prepared_audio_block_replaced" => PreparedSessionCommandError::new(
+        | "prepared_audio_block_replaced"
+        | "prepared_audio_preparation_replaced" => PreparedSessionCommandError::new(
             "prepared_audio_stale",
             "The selected package changed during audio loading; load it again.",
         ),

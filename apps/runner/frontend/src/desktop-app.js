@@ -75,6 +75,11 @@ function renderPreparedAudio(nextPreparation) {
   const schema = candidate?.schema;
   const scope = planValue(candidate, "preparationScope", "preparation_scope");
   const qualification = planValue(candidate, "outputQualification", "output_qualification");
+  const outputPlanPrepared = planValue(candidate, "outputPlanPrepared", "output_plan_prepared");
+  const outputRoute = planValue(candidate, "outputRoute", "output_route");
+  const scheduledEventCount = Number(
+    planValue(candidate, "scheduledEventCount", "scheduled_event_count"),
+  );
   const blockOrdinal = Number(planValue(candidate, "blockOrdinal", "block_ordinal"));
   const sampleRate = Number(planValue(candidate, "sampleRateHz", "sample_rate_hz"));
   const channels = Number(planValue(candidate, "sourceChannels", "source_channels"));
@@ -85,13 +90,19 @@ function renderPreparedAudio(nextPreparation) {
   const byteBudget = Number(planValue(candidate, "cacheByteBudget", "cache_byte_budget"));
   const valid = Boolean(candidate)
     && schema === "pps-runner-prepared-audio-summary.v1"
-    && scope === "pcm-cache-only"
+    && scope === "pcm-and-output-plan-cache"
     && qualification === "unqualified"
     && candidate.executable === false
+    && outputPlanPrepared === true
     && blockOrdinal === 0
     && Number.isSafeInteger(sampleRate) && sampleRate > 0
     && [2, 3].includes(channels)
     && ["legacy-study5-tactile-audio", "binaural-left-right-tactile"].includes(layout)
+    && outputRoute === (layout === "legacy-study5-tactile-audio"
+      ? "legacy-stereo"
+      : "canonical-three")
+    && Number.isSafeInteger(scheduledEventCount) && scheduledEventCount >= 0
+    && scheduledEventCount <= 500_001
     && Number.isSafeInteger(frames) && frames >= 0
     && Number.isSafeInteger(decodedBytes) && decodedBytes >= 0
     && capacity === 1
@@ -102,10 +113,10 @@ function renderPreparedAudio(nextPreparation) {
   text(
     "prepared-audio-detail",
     preparedAudio
-      ? `Block 1 is content-bound in the one-block native PCM cache: ${frames.toLocaleString()} frames at ${sampleRate.toLocaleString()} Hz, ${channels} source channels (${layout}), ${(decodedBytes / (1024 * 1024)).toFixed(2)} MiB. Output qualification: ${qualification}; executable: no.`
+      ? `Block 1 is content-bound in the one-block native PCM and renderer-plan cache: ${frames.toLocaleString()} frames at ${sampleRate.toLocaleString()} Hz, ${channels} source channels (${layout}), ${(decodedBytes / (1024 * 1024)).toFixed(2)} MiB, ${scheduledEventCount.toLocaleString()} scheduled events, proposed route ${outputRoute}. Output qualification: ${qualification}; executable: no.`
       : preparedExecution
-        ? "Prepare the first verified WAV into the bounded native PCM cache. This does not open an output device, route channels, arm, or execute the experiment."
-        : "Native PCM preparation is unavailable until the first schedule is inspected.",
+        ? "Prepare the first verified WAV and renderer-neutral plan in the bounded native cache. This does not open an output device, qualify a route, arm, or execute the experiment."
+        : "Native PCM and output-plan preparation is unavailable until the first schedule is inspected.",
   );
   return !candidate || valid;
 }
@@ -291,7 +302,7 @@ function renderSnapshot(next) {
     || active
     || Boolean(preparedAudio);
   elements["prepare-first-audio-block"].title = api.kind === "tauri-native"
-    ? "Content-bind and decode the first verified WAV into the one-block native PCM cache"
+    ? "Content-bind the first verified WAV and renderer-neutral plan in the one-block native cache"
     : "Native audio preparation is available in the Tauri app";
   updateInboundPolicyUi();
 
@@ -979,7 +990,7 @@ function bindLocalActions() {
       if (!renderPreparedAudio(prepared)) {
         throw new Error("The native runner returned an invalid prepared-audio summary.");
       }
-      showToast("First block content-bound in native PCM memory. Device output and execution remain disabled.");
+      showToast("First block and renderer-neutral plan cached natively. Device output and execution remain disabled.");
     } catch (error) {
       renderPreparedAudio(null);
       showToast(error.message, { error: true });

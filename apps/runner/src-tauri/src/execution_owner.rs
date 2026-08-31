@@ -26,8 +26,8 @@ use std::path::PathBuf;
 use crate::{
     latency_diagnostics::{LatencyStage, LatencyTrace},
     prepared_audio::{
-        PreparedAudioCandidate, PreparedAudioLookup, PreparedAudioSource, PreparedAudioSummary,
-        MAXIMUM_CACHED_DECODED_BYTES,
+        PreparedAudioCandidate, PreparedAudioLookup, PreparedAudioSource,
+        PreparedAudioSourceReceipt, PreparedAudioSummary, MAXIMUM_CACHED_DECODED_BYTES,
     },
     prepared_execution::{
         CompiledPreparedExecution, PreparedExecutionSource, PreparedExecutionSummary,
@@ -271,11 +271,13 @@ struct RetainedPreparedSession {
     receipt: Arc<VerifiedPreparedSession>,
 }
 
-/// One-block native PCM cache. The underscore is intentional: later output
-/// adapters will borrow the immutable media, while this slice only proves
-/// bounded actor-owned retention and invalidation.
+/// One-block native PCM and renderer-neutral output-plan cache.
+///
+/// The candidate is native-only and retains both the exact actor-issued source
+/// receipt and its non-serializable playback plan. A later platform adapter
+/// must reserve it through the authority rather than reaching into this state.
 struct CachedPreparedAudio {
-    _candidate: PreparedAudioCandidate,
+    candidate: PreparedAudioCandidate,
     summary: PreparedAudioSummary,
 }
 
@@ -286,6 +288,8 @@ struct OwnerState {
     retained_session: Option<RetainedPreparedSession>,
     compiled_execution: Option<CompiledPreparedExecution>,
     prepared_audio: Option<CachedPreparedAudio>,
+    prepared_audio_reservation: Option<Arc<PreparedAudioSourceReceipt>>,
+    prepared_audio_preparation_generation: u64,
     package_generation: u64,
     run_generation: u64,
     owner_generation: u64,
@@ -325,9 +329,18 @@ pub(crate) struct OwnerTestView {
     pub compiled_schedule_count: Option<usize>,
     pub prepared_audio_block_ordinal: Option<u32>,
     pub prepared_audio_decoded_bytes: Option<u64>,
+    pub prepared_output_plan_event_count: Option<usize>,
+    pub prepared_output_plan_run_generation: Option<u64>,
+    pub compiled_schedule_strong_count: Option<usize>,
+    pub retained_session_strong_count: Option<usize>,
 }
 
 impl OwnerState {
+    fn invalidate_prepared_audio(&mut self) {
+        self.prepared_audio = None;
+        self.prepared_audio_reservation = None;
+    }
+
     fn view(&self) -> AuthorityView {
         AuthorityView {
             snapshot: self.core.snapshot(),
@@ -402,14 +415,14 @@ impl OwnerState {
 
     fn next_run_generation_for_dispatch(
         &mut self,
-        applied: &Applied,
-        previous_revision: u64,
+        action: Action,
+        changed: bool,
     ) -> Result<Option<u64>, &'static str> {
-        if applied.resulting_revision == previous_revision {
+        if !changed {
             return Ok(None);
         }
         if matches!(
-            applied.action,
+            action,
             Action::PartStart | Action::RunStop | Action::RunAbort | Action::RunCompleteDemo
         ) {
             let Some(next) = self.run_generation.checked_add(1) else {
@@ -497,7 +510,7 @@ impl OwnerState {
         // Fail-stop invalidates every callback/effect captured for the former
         // run, even when no remote owner was present.
         self.advance_run_generation_or_latch();
-        self.prepared_audio = None;
+        self.invalidate_prepared_audio();
         self.evidence_unavailable = true;
         let _ = self.state_tx.send(snapshot.clone());
         snapshot
@@ -527,9 +540,10 @@ impl OwnerState {
             let applied = candidate.dispatch_local_observed(action, args, stamp.clone(), |point| {
                 observe_reducer_milestone(trace, point);
             });
-            if applied.resulting_revision != previous_revision {
+            let changed = candidate.revision() != previous_revision;
+            if changed {
                 let next_run_generation = self
-                    .next_run_generation_for_dispatch(&applied, previous_revision)
+                    .next_run_generation_for_dispatch(applied.action, changed)
                     .map_err(str::to_owned)?;
                 let mut event = Self::ledger_input("runner.dispatch", "local", &stamp);
                 event.command_id = Some(applied.id.clone());
@@ -546,7 +560,7 @@ impl OwnerState {
                 .map_err(str::to_owned)?;
                 if let Some(next) = next_run_generation {
                     self.run_generation = next;
-                    self.prepared_audio = None;
+                    self.invalidate_prepared_audio();
                 }
             } else {
                 // Rejections and accepted no-ops still retain reducer
@@ -591,9 +605,10 @@ impl OwnerState {
                 stamp.clone(),
                 |point| observe_reducer_milestone(trace, point),
             );
-            if applied.resulting_revision != previous_revision {
+            let changed = candidate.revision() != previous_revision;
+            if changed {
                 let next_run_generation = self
-                    .next_run_generation_for_dispatch(&applied, previous_revision)
+                    .next_run_generation_for_dispatch(applied.action, changed)
                     .map_err(|_| RemoteSessionError::unavailable())?;
                 let mut event = Self::ledger_input("runner.dispatch", "remote", &stamp);
                 event.authority_id = Some(owner.controller_id.clone());
@@ -602,7 +617,7 @@ impl OwnerState {
                     .map_err(|_| RemoteSessionError::unavailable())?;
                 if let Some(next) = next_run_generation {
                     self.run_generation = next;
-                    self.prepared_audio = None;
+                    self.invalidate_prepared_audio();
                 }
             } else {
                 self.core = candidate;
@@ -642,7 +657,7 @@ impl OwnerState {
         }
         let summary = compiled.summary().clone();
         self.compiled_execution = Some(compiled);
-        self.prepared_audio = None;
+        self.invalidate_prepared_audio();
         Ok(summary)
     }
 
@@ -659,45 +674,69 @@ impl OwnerState {
         ) {
             return Err("prepared_audio_active_run");
         }
-        let retained = self
-            .retained_session
-            .as_ref()
-            .ok_or("prepared_session_missing")?;
-        let compiled = self
-            .compiled_execution
-            .as_ref()
-            .ok_or("prepared_execution_missing")?;
-        if retained.generation != compiled.generation
-            || retained.receipt.manifest_sha256() != compiled.fingerprint
-        {
-            return Err("prepared_package_replaced");
-        }
+        let (
+            package_generation,
+            package_fingerprint,
+            verified_session,
+            schedule,
+            expected_sample_rate_hz,
+        ) = {
+            let retained = self
+                .retained_session
+                .as_ref()
+                .ok_or("prepared_session_missing")?;
+            let compiled = self
+                .compiled_execution
+                .as_ref()
+                .ok_or("prepared_execution_missing")?;
+            if retained.generation != compiled.generation
+                || retained.receipt.manifest_sha256() != compiled.fingerprint
+            {
+                return Err("prepared_package_replaced");
+            }
+            let ordinal =
+                usize::try_from(block_ordinal).map_err(|_| "prepared_audio_block_missing")?;
+            retained
+                .receipt
+                .blocks()
+                .get(ordinal)
+                .ok_or("prepared_audio_block_missing")?;
+            let schedule = compiled
+                .schedules()
+                .get(ordinal)
+                .ok_or("prepared_audio_block_missing")?;
+            let expected_sample_rate_hz = u32::try_from(schedule.summary().sample_rate_hz)
+                .ok()
+                .filter(|rate| *rate > 0)
+                .ok_or("prepared_audio_sample_rate_invalid")?;
+            (
+                retained.generation,
+                retained.receipt.manifest_sha256().to_owned(),
+                Arc::clone(&retained.receipt),
+                Arc::clone(schedule),
+                expected_sample_rate_hz,
+            )
+        };
         let ordinal = usize::try_from(block_ordinal).map_err(|_| "prepared_audio_block_missing")?;
-        let native_block = retained
-            .receipt
+        let current_wav = verified_session
             .blocks()
             .get(ordinal)
+            .map(|block| block.block_wav())
             .ok_or("prepared_audio_block_missing")?;
-        let schedule = compiled
-            .schedules()
-            .get(ordinal)
-            .ok_or("prepared_audio_block_missing")?;
-        let expected_sample_rate_hz = u32::try_from(schedule.summary().sample_rate_hz)
-            .ok()
-            .filter(|rate| *rate > 0)
-            .ok_or("prepared_audio_sample_rate_invalid")?;
 
         if let Some(cached) = self.prepared_audio.as_ref() {
-            let candidate = &cached._candidate;
+            let candidate = &cached.candidate;
             let fence = candidate.media().fence();
             let cache_is_current = fence.block_ordinal() == block_ordinal
-                && fence.package_generation() == retained.generation
-                && fence.package_fingerprint() == retained.receipt.manifest_sha256()
+                && fence.package_generation() == package_generation
+                && fence.package_fingerprint() == package_fingerprint
                 && candidate.run_generation() == self.run_generation
-                && candidate.wav_receipt() == native_block.block_wav()
-                && candidate.media().identity().sha256() == native_block.block_wav().sha256()
+                && Arc::ptr_eq(candidate.verified_session(), &verified_session)
+                && candidate.wav_receipt() == Some(current_wav)
+                && Arc::ptr_eq(candidate.schedule(), &schedule)
+                && candidate.media().identity().sha256() == current_wav.sha256()
                 && candidate.media().identity().encoded_byte_count()
-                    == native_block.block_wav().encoded_byte_count()
+                    == current_wav.encoded_byte_count()
                 && candidate.media().sample_rate_hz() == expected_sample_rate_hz;
             if cache_is_current {
                 return Ok(PreparedAudioLookup::Cached(cached.summary.clone()));
@@ -707,17 +746,23 @@ impl OwnerState {
         // allocate another decoded buffer. Together with adapter single-flight
         // this keeps the process to one Tauri-preload byte budget, not one old
         // cache plus one equally large candidate.
-        self.prepared_audio = None;
+        let next_preparation_generation = self
+            .prepared_audio_preparation_generation
+            .checked_add(1)
+            .ok_or("runtime_unavailable")?;
+        self.prepared_audio_preparation_generation = next_preparation_generation;
+        self.invalidate_prepared_audio();
+        let receipt = Arc::new(PreparedAudioSourceReceipt::new(
+            next_preparation_generation,
+            AudioFence::new(package_generation, package_fingerprint, block_ordinal),
+            self.run_generation,
+            verified_session,
+            schedule,
+        ));
+        self.prepared_audio_reservation = Some(Arc::clone(&receipt));
 
         Ok(PreparedAudioLookup::Decode(PreparedAudioSource::new(
-            AudioFence::new(
-                retained.generation,
-                retained.receipt.manifest_sha256(),
-                block_ordinal,
-            ),
-            self.run_generation,
-            native_block.block_wav().clone(),
-            expected_sample_rate_hz,
+            receipt,
         )))
     }
 
@@ -729,9 +774,11 @@ impl OwnerState {
             .retained_session
             .as_ref()
             .ok_or("prepared_package_replaced")?;
-        let fence = candidate.media().fence();
+        let source_receipt = candidate.source_receipt();
+        let fence = source_receipt.fence();
         if retained.generation != fence.package_generation()
             || retained.receipt.manifest_sha256() != fence.package_fingerprint()
+            || !Arc::ptr_eq(candidate.verified_session(), &retained.receipt)
         {
             return Err("prepared_package_replaced");
         }
@@ -763,12 +810,33 @@ impl OwnerState {
             .ok()
             .filter(|rate| *rate > 0)
             .ok_or("prepared_audio_sample_rate_invalid")?;
-        if current_wav != candidate.wav_receipt()
+        if !Arc::ptr_eq(schedule, candidate.schedule()) {
+            return Err("prepared_execution_replaced");
+        }
+        let plan_fence = candidate.playback_plan().fence();
+        if plan_fence.audio() != fence
+            || plan_fence.run_generation() != candidate.run_generation()
+            || plan_fence.audio().block_ordinal() != fence.block_ordinal()
+        {
+            return Err("prepared_audio_block_replaced");
+        }
+        if candidate.wav_receipt() != Some(current_wav)
             || current_wav.sha256() != candidate.media().identity().sha256()
             || current_wav.encoded_byte_count() != candidate.media().identity().encoded_byte_count()
             || candidate.media().sample_rate_hz() != expected_sample_rate_hz
         {
             return Err("prepared_audio_block_replaced");
+        }
+        let reservation_is_current =
+            self.prepared_audio_reservation
+                .as_ref()
+                .is_some_and(|reservation| {
+                    Arc::ptr_eq(reservation, source_receipt)
+                        && reservation.preparation_generation()
+                            == source_receipt.preparation_generation()
+                });
+        if !reservation_is_current {
+            return Err("prepared_audio_preparation_replaced");
         }
         let decoded_bytes = candidate
             .decoded_bytes()
@@ -781,8 +849,9 @@ impl OwnerState {
             .map_err(|_| "prepared_audio_resource_limit")?;
         // Exactly one immutable block is retained. Replacing this Option drops
         // the prior Arc-backed PCM before the authority processes more work.
+        self.prepared_audio_reservation = None;
         self.prepared_audio = Some(CachedPreparedAudio {
-            _candidate: candidate,
+            candidate,
             summary: summary.clone(),
         });
         Ok(summary)
@@ -834,7 +903,7 @@ impl OwnerState {
             receipt: Arc::new(verified),
         });
         self.compiled_execution = None;
-        self.prepared_audio = None;
+        self.invalidate_prepared_audio();
         Ok(snapshot)
     }
 
@@ -1127,12 +1196,12 @@ impl OwnerState {
             owner.lease_deadline = Instant::now() + self.lease_duration;
             let epoch = self.core.epoch();
             self.refresh_owner(owner.clone())?;
-            self.dispatch_remote_traced(
+            let applied = self.dispatch_remote_traced(
                 &owner,
                 command.into_request(epoch, control_sequence),
                 trace,
-            )
-            .map(RemoteApplied::from_native)
+            )?;
+            Ok(RemoteApplied::from_native(applied, self.core.snapshot()))
         })();
         if let Some(trace) = trace {
             trace.mark(LatencyStage::ReplyReady);
@@ -1196,9 +1265,10 @@ impl OwnerState {
             self.refresh_owner(owner.clone())
                 .map_err(|error| error.code)?;
             let request = command.into_request(self.core.epoch(), control_sequence);
-            self.dispatch_remote_traced(&owner, request, trace)
-                .map(RemoteApplied::from_native)
-                .map_err(|error| error.code)
+            let applied = self
+                .dispatch_remote_traced(&owner, request, trace)
+                .map_err(|error| error.code)?;
+            Ok(RemoteApplied::from_native(applied, self.core.snapshot()))
         })();
         if let Some(trace) = trace {
             trace.mark(LatencyStage::ReplyReady);
@@ -1370,7 +1440,7 @@ impl OwnerState {
             self.advance_owner_generation_or_latch();
         }
         self.advance_run_generation_or_latch();
-        self.prepared_audio = None;
+        self.invalidate_prepared_audio();
     }
 }
 
@@ -1461,6 +1531,8 @@ impl ExecutionOwner {
                     retained_session: None,
                     compiled_execution: None,
                     prepared_audio: None,
+                    prepared_audio_reservation: None,
+                    prepared_audio_preparation_generation: 0,
                     package_generation: 0,
                     run_generation: 0,
                     owner_generation: 0,
@@ -1972,10 +2044,9 @@ impl ExecutionOwner {
         identity: RemoteOwnerIdentity,
         connection_state: &'static str,
     ) -> Result<Result<bool, String>, OwnerSubmitError> {
-        self.asynchronous(AdmissionClass::Normal, "revoke_lan", move |state| {
-            state.revoke_lan(identity, connection_state)
-        })
-        .await
+        self.submit_lan_revoke(identity, connection_state, "revoke_lan")?
+            .await
+            .map_err(|_| OwnerSubmitError::Closed)
     }
 
     pub(crate) fn revoke_lan_detached(
@@ -1983,11 +2054,18 @@ impl ExecutionOwner {
         identity: RemoteOwnerIdentity,
         connection_state: &'static str,
     ) {
-        let _ = self.submit(
-            AdmissionClass::Normal,
-            "revoke_lan_detached",
-            move |state| state.revoke_lan(identity, connection_state),
-        );
+        let _ = self.submit_lan_revoke(identity, connection_state, "revoke_lan_detached");
+    }
+
+    fn submit_lan_revoke(
+        &self,
+        identity: RemoteOwnerIdentity,
+        connection_state: &'static str,
+        label: &'static str,
+    ) -> Result<oneshot::Receiver<Result<bool, String>>, OwnerSubmitError> {
+        self.submit(AdmissionClass::LocalSafety, label, move |state| {
+            state.revoke_lan(identity, connection_state)
+        })
     }
 
     #[cfg(test)]
@@ -2067,7 +2145,7 @@ impl ExecutionOwner {
     pub(crate) fn advance_run_generation_for_test(&self) {
         self.blocking(AdmissionClass::Normal, "advance_run_generation", |state| {
             state.run_generation = state.run_generation.checked_add(1).unwrap();
-            state.prepared_audio = None;
+            state.invalidate_prepared_audio();
         })
         .expect("test authority remains available");
     }
@@ -2091,11 +2169,28 @@ impl ExecutionOwner {
             prepared_audio_block_ordinal: state
                 .prepared_audio
                 .as_ref()
-                .map(|cached| cached._candidate.media().fence().block_ordinal()),
+                .map(|cached| cached.candidate.media().fence().block_ordinal()),
             prepared_audio_decoded_bytes: state
                 .prepared_audio
                 .as_ref()
-                .and_then(|cached| cached._candidate.decoded_bytes().ok()),
+                .and_then(|cached| cached.candidate.decoded_bytes().ok()),
+            prepared_output_plan_event_count: state
+                .prepared_audio
+                .as_ref()
+                .map(|cached| cached.candidate.playback_plan().scheduled_events().len()),
+            prepared_output_plan_run_generation: state
+                .prepared_audio
+                .as_ref()
+                .map(|cached| cached.candidate.playback_plan().fence().run_generation()),
+            compiled_schedule_strong_count: state
+                .compiled_execution
+                .as_ref()
+                .and_then(|compiled| compiled.schedules().first())
+                .map(Arc::strong_count),
+            retained_session_strong_count: state
+                .retained_session
+                .as_ref()
+                .map(|retained| Arc::strong_count(&retained.receipt)),
         })
         .expect("test authority remains available")
     }
@@ -2321,6 +2416,68 @@ mod tests {
     }
 
     #[test]
+    fn normal_saturation_cannot_block_exact_lan_owner_cleanup_admission() {
+        let owner = owner(Duration::from_secs(5));
+        let claim = owner
+            .blocking(AdmissionClass::Normal, "claim_lan", |state| {
+                state.claim_lan(
+                    "session_owner_test".to_owned(),
+                    "controller_cleanup".to_owned(),
+                    "owner_cleanup_token".to_owned(),
+                    Scope::DEFAULT_REMOTE.into_iter().collect(),
+                )
+            })
+            .unwrap()
+            .unwrap();
+        owner
+            .blocking(AdmissionClass::Normal, "prepare_running", |state| {
+                prepare_running_demo(state);
+            })
+            .unwrap();
+
+        let (barrier, blocked) = block_authority(&owner);
+        let mut normal_replies = Vec::new();
+        for _ in 0..NORMAL_MAILBOX_CAPACITY {
+            normal_replies.push(
+                owner
+                    .submit(AdmissionClass::Normal, "normal", |_| ())
+                    .unwrap(),
+            );
+        }
+        assert!(matches!(
+            owner.submit(AdmissionClass::Normal, "overflow", |_| ()),
+            Err(OwnerSubmitError::Full)
+        ));
+
+        let cleanup = owner
+            .submit_lan_revoke(
+                claim.identity,
+                "remote_transport_unresponsive",
+                "test_lan_cleanup",
+            )
+            .expect("exact-owner cleanup uses the reserved local-safety admission class");
+        assert_eq!(
+            owner.mailbox.queued_counts(),
+            (NORMAL_MAILBOX_CAPACITY + 1, NORMAL_MAILBOX_CAPACITY)
+        );
+
+        barrier.wait();
+        blocked.blocking_recv().unwrap();
+        assert!(cleanup.blocking_recv().unwrap().unwrap());
+        for reply in normal_replies {
+            reply.blocking_recv().unwrap();
+        }
+
+        let view = owner.view_blocking().unwrap();
+        assert!(view.active_controller.is_none());
+        assert_eq!(view.snapshot.run.phase, RunnerPhase::Paused);
+        assert_eq!(
+            view.snapshot.connection_state,
+            "remote_transport_unresponsive"
+        );
+    }
+
+    #[test]
     fn administrative_saturation_cannot_block_emergency_admission_or_deadman() {
         let owner = owner(Duration::from_secs(5));
         owner
@@ -2487,6 +2644,96 @@ mod tests {
             retry.2.safety.controller_lease_id,
             first_snapshot.safety.controller_lease_id
         );
+    }
+
+    #[test]
+    fn ack_lost_revoke_reclaim_retry_keeps_current_projection_and_no_duplicate_evidence() {
+        let owner = owner(Duration::from_secs(5));
+        let (
+            first,
+            retry,
+            current,
+            ledger_before_retry,
+            ledger_after_retry,
+            run_generation_before_retry,
+            run_generation_after_retry,
+        ) = owner
+            .blocking(AdmissionClass::Normal, "ack_lost_retry", |state| {
+                state
+                    .claim_webview(
+                        "session_owner_test".to_owned(),
+                        "controller_ack_lost".to_owned(),
+                        "owner_ack_lost_first".to_owned(),
+                        Scope::DEFAULT_REMOTE.into_iter().collect(),
+                        2,
+                    )
+                    .unwrap();
+                prepare_ready_demo(state);
+                let command = pps_contracts::CommandBody {
+                    command_id: "ack-lost-part-start".to_owned(),
+                    scope: Scope::SessionTransport,
+                    action: Action::PartStart,
+                    args: serde_json::json!({"part_number": 1}),
+                    expected_revision: Some(state.core.revision()),
+                };
+                let first = state
+                    .dispatch_webview(
+                        "session_owner_test".to_owned(),
+                        "owner_ack_lost_first".to_owned(),
+                        3,
+                        command.clone(),
+                    )
+                    .unwrap();
+                assert_eq!(state.core.snapshot().run.phase, RunnerPhase::Running);
+
+                // The first Applied is intentionally not acknowledged. The
+                // transport cleanup pauses/revokes, and the same controller
+                // identity then reclaims with a fresh owner token.
+                state
+                    .revoke_webview(
+                        "session_owner_test".to_owned(),
+                        "owner_ack_lost_first".to_owned(),
+                    )
+                    .unwrap();
+                state
+                    .claim_webview(
+                        "session_owner_test".to_owned(),
+                        "controller_ack_lost".to_owned(),
+                        "owner_ack_lost_second".to_owned(),
+                        Scope::DEFAULT_REMOTE.into_iter().collect(),
+                        10,
+                    )
+                    .unwrap();
+                let ledger_before_retry = state.ledger.records().len();
+                let run_generation_before_retry = state.run_generation;
+                let retry = state
+                    .dispatch_webview(
+                        "session_owner_test".to_owned(),
+                        "owner_ack_lost_second".to_owned(),
+                        11,
+                        command,
+                    )
+                    .unwrap();
+                (
+                    first,
+                    retry,
+                    state.core.snapshot(),
+                    ledger_before_retry,
+                    state.ledger.records().len(),
+                    run_generation_before_retry,
+                    state.run_generation,
+                )
+            })
+            .unwrap();
+
+        assert_eq!(retry.status, AppliedStatus::Accepted);
+        assert_eq!(retry.resulting_revision, first.resulting_revision);
+        assert_eq!(current.run.phase, RunnerPhase::Paused);
+        assert_eq!(retry.snapshot.run.phase, RunnerPhase::Paused);
+        assert_eq!(retry.snapshot.revision, current.revision);
+        assert!(retry.snapshot.revision > retry.resulting_revision);
+        assert_eq!(ledger_after_retry, ledger_before_retry);
+        assert_eq!(run_generation_after_retry, run_generation_before_retry);
     }
 
     #[test]

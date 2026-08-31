@@ -1,5 +1,6 @@
 use std::{
     collections::{BTreeSet, HashMap},
+    future::Future,
     path::PathBuf,
     sync::Arc,
     time::{Duration, Instant},
@@ -10,10 +11,12 @@ use axum::{
         ws::{Message, WebSocket, WebSocketUpgrade},
         Path, State,
     },
-    response::Response,
+    http::StatusCode,
+    response::{IntoResponse, Response},
     routing::get,
     Router,
 };
+use futures_util::SinkExt;
 use pps_brsp::{
     create_proof_envelope, negotiate_session, random_epoch, random_nonce, ready_matches,
     valid_peer_id, validate_common, validate_hello, SequenceDecision, SequenceGuard,
@@ -24,7 +27,7 @@ use pps_contracts::{
     WireEnvelope, MAX_CONTROL_BYTES, MAX_STATE_BYTES, PPS_REMOTE_CAPABILITIES,
 };
 use serde::{de::DeserializeOwned, Serialize};
-use tokio::sync::{mpsc, watch, Mutex as AsyncMutex};
+use tokio::sync::{mpsc, watch, Mutex as AsyncMutex, OwnedSemaphorePermit, Semaphore};
 use tower_http::services::ServeDir;
 
 use crate::{
@@ -34,12 +37,149 @@ use crate::{
 };
 
 const HANDSHAKE_TIMEOUT: Duration = Duration::from_secs(12);
+const SOCKET_WRITE_TIMEOUT: Duration = Duration::from_secs(2);
+const SOCKET_CLOSE_TIMEOUT: Duration = Duration::from_secs(1);
+const TRANSPORT_PING_INTERVAL: Duration = Duration::from_secs(2);
+const TRANSPORT_PONG_TIMEOUT: Duration = Duration::from_secs(3);
+const SOCKET_WRITE_BUFFER_SIZE: usize = MAX_CONTROL_BYTES;
+const MAX_SOCKET_WRITE_BUFFER_SIZE: usize = MAX_CONTROL_BYTES * 4;
 const STATE_HEARTBEAT: Duration = Duration::from_millis(250);
 const STATE_FLUSH: Duration = Duration::from_millis(16);
 const CONTROLLER_LEASE: Duration = Duration::from_secs(5);
 const LEASE_CHECK: Duration = Duration::from_millis(100);
 const MAX_RELAY_ROOMS: usize = 16;
 const MAX_RELAY_MESSAGES_PER_SECOND: u32 = 120;
+const RELAY_CONTROL_QUEUE_CAPACITY: usize = 32;
+const MAX_CONCURRENT_DESKTOP_SESSIONS: usize = 8;
+const MAX_CONCURRENT_RELAY_SESSIONS: usize = MAX_RELAY_ROOMS * 2;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum TransportDeadline {
+    HandshakeRead,
+    SocketWrite,
+    SocketClose,
+    Pong,
+}
+
+impl TransportDeadline {
+    const fn code(self) -> &'static str {
+        match self {
+            Self::HandshakeRead => "handshake_read_timeout",
+            Self::SocketWrite => "socket_write_timeout",
+            Self::SocketClose => "socket_close_timeout",
+            Self::Pong => "transport_pong_timeout",
+        }
+    }
+
+    const fn message(self) -> &'static str {
+        match self {
+            Self::HandshakeRead => "BRSP handshake read timed out",
+            Self::SocketWrite => "WebSocket write timed out",
+            Self::SocketClose => "WebSocket close timed out",
+            Self::Pong => "WebSocket peer did not answer the transport ping",
+        }
+    }
+}
+
+fn transport_timeout_error(deadline: TransportDeadline) -> String {
+    format!("{} ({})", deadline.message(), deadline.code())
+}
+
+async fn with_transport_deadline<T, F>(
+    deadline: TransportDeadline,
+    duration: Duration,
+    future: F,
+) -> Result<T, String>
+where
+    F: Future<Output = Result<T, String>>,
+{
+    tokio::time::timeout(duration, future)
+        .await
+        .map_err(|_| transport_timeout_error(deadline))?
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct PendingPong {
+    payload: [u8; 8],
+    deadline: Instant,
+}
+
+/// Connection-level health only. This type deliberately has no access to the
+/// BRSP controller owner or its semantic lease, so a Ping/Pong can never renew
+/// command authority.
+#[derive(Debug)]
+struct TransportLiveness {
+    connection_nonce: u32,
+    next_sequence: u32,
+    pending_pong: Option<PendingPong>,
+}
+
+impl TransportLiveness {
+    fn new() -> Self {
+        Self::with_nonce(random_epoch())
+    }
+
+    fn with_nonce(connection_nonce: u32) -> Self {
+        Self {
+            connection_nonce,
+            next_sequence: 1,
+            pending_pong: None,
+        }
+    }
+
+    fn next_ping_payload(&self) -> Option<[u8; 8]> {
+        if self.pending_pong.is_some() {
+            return None;
+        }
+        let mut payload = [0_u8; 8];
+        payload[..4].copy_from_slice(&self.connection_nonce.to_be_bytes());
+        payload[4..].copy_from_slice(&self.next_sequence.to_be_bytes());
+        Some(payload)
+    }
+
+    fn ping_sent(&mut self, payload: [u8; 8], now: Instant) {
+        debug_assert!(self.pending_pong.is_none());
+        self.next_sequence = self.next_sequence.wrapping_add(1);
+        self.pending_pong = Some(PendingPong {
+            payload,
+            deadline: now + TRANSPORT_PONG_TIMEOUT,
+        });
+    }
+
+    fn accept_pong(&mut self, payload: &[u8], now: Instant) -> bool {
+        let matches = self
+            .pending_pong
+            .as_ref()
+            .is_some_and(|pending| payload == pending.payload && now < pending.deadline);
+        if matches {
+            self.pending_pong = None;
+        }
+        matches
+    }
+
+    fn has_pending_pong(&self) -> bool {
+        self.pending_pong.is_some()
+    }
+
+    fn pong_wait(&self, now: Instant) -> Duration {
+        self.pending_pong
+            .map(|pending| pending.deadline.saturating_duration_since(now))
+            .unwrap_or(TRANSPORT_PONG_TIMEOUT)
+    }
+
+    fn pong_timed_out(&self, now: Instant) -> bool {
+        self.pending_pong
+            .is_some_and(|pending| now >= pending.deadline)
+    }
+}
+
+fn require_live_transport(liveness: &TransportLiveness, now: Instant) -> Result<(), String> {
+    if liveness.pong_timed_out(now) {
+        Err(transport_timeout_error(TransportDeadline::Pong))
+    } else {
+        Ok(())
+    }
+}
 
 #[derive(Debug, Serialize)]
 struct RemoteSnapshotBody {
@@ -83,6 +223,28 @@ fn remote_applied_body(applied: &RemoteApplied) -> AppliedBody {
 struct ServerState {
     runtime: AppRuntime,
     relay: Arc<AsyncMutex<RelayRegistry>>,
+    desktop_admission: SocketAdmission,
+    relay_admission: SocketAdmission,
+}
+
+/// Bounds upgraded desktop tasks before any unauthenticated BRSP handshake
+/// read begins. The owned permit stays alive through handshake, session, and
+/// the bounded close attempt.
+#[derive(Clone)]
+struct SocketAdmission {
+    permits: Arc<Semaphore>,
+}
+
+impl SocketAdmission {
+    fn new(capacity: usize) -> Self {
+        Self {
+            permits: Arc::new(Semaphore::new(capacity)),
+        }
+    }
+
+    fn try_acquire(&self) -> Option<OwnedSemaphorePermit> {
+        Arc::clone(&self.permits).try_acquire_owned().ok()
+    }
 }
 
 /// Bind and launch the LAN server only after an explicit user activation.
@@ -111,6 +273,8 @@ pub async fn serve(
     let state = ServerState {
         runtime,
         relay: Arc::new(AsyncMutex::new(RelayRegistry::default())),
+        desktop_admission: SocketAdmission::new(MAX_CONCURRENT_DESKTOP_SESSIONS),
+        relay_admission: SocketAdmission::new(MAX_CONCURRENT_RELAY_SESSIONS),
     };
     let static_files = ServeDir::new(web_root).append_index_html_on_directories(true);
     let router = Router::new()
@@ -124,12 +288,23 @@ pub async fn serve(
 }
 
 async fn desktop_upgrade(ws: WebSocketUpgrade, State(state): State<ServerState>) -> Response {
+    let Some(admission_permit) = state.desktop_admission.try_acquire() else {
+        return (
+            StatusCode::SERVICE_UNAVAILABLE,
+            "Desktop remote capacity reached; retry after another session closes.",
+        )
+            .into_response();
+    };
     ws.max_message_size(MAX_CONTROL_BYTES)
         .max_frame_size(MAX_CONTROL_BYTES)
+        .write_buffer_size(SOCKET_WRITE_BUFFER_SIZE)
+        .max_write_buffer_size(MAX_SOCKET_WRITE_BUFFER_SIZE)
         .on_upgrade(move |mut socket| async move {
+            let _admission_permit = admission_permit;
             // Proof failures intentionally fail closed without returning details
             // useful for online secret guessing.
             let _ = desktop_session(&mut socket, &state.runtime).await;
+            let _ = close_socket(&mut socket).await;
         })
 }
 
@@ -217,16 +392,15 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
             negotiated.accepted_scopes.iter().copied().collect(),
         )
         .await?;
-    if claim.snapshot.schema != "pps-runner-public-snapshot.v1" {
-        return Err("native public snapshot schema mismatch".to_owned());
-    }
     let mut controller_guard = ActiveControllerGuard {
         runtime: runtime.clone(),
         identity: claim.identity,
         armed: true,
     };
+    require_claimed_public_schema(&mut controller_guard, &claim.snapshot.schema).await?;
 
-    let mut lease_deadline = Instant::now() + CONTROLLER_LEASE;
+    let session_result: Result<(), String> = async {
+        let mut lease_deadline = Instant::now() + CONTROLLER_LEASE;
     let mut target_control_sequence = 2_u32;
     let mut target_state_sequence = 0_u32;
     let scope_set = negotiated
@@ -269,12 +443,22 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
     config_check.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
     let mut lease_check = tokio::time::interval(LEASE_CHECK);
     lease_check.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+    let mut transport_ping = tokio::time::interval_at(
+        tokio::time::Instant::now() + TRANSPORT_PING_INTERVAL,
+        TRANSPORT_PING_INTERVAL,
+    );
+    transport_ping.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+    let mut transport_liveness = TransportLiveness::new();
 
     loop {
+        require_live_transport(&transport_liveness, Instant::now())?;
         tokio::select! {
             incoming = socket.recv() => {
-                let Some(incoming) = incoming else { break; };
-                let message = incoming.map_err(|error| error.to_string())?;
+                require_live_transport(&transport_liveness, Instant::now())?;
+                let Some(incoming) = incoming else {
+                    return Err("WebSocket connection closed".to_owned());
+                };
+                let message = incoming.map_err(|_| "WebSocket read failed".to_owned())?;
                 match message {
                     Message::Text(text) => {
                         // This is the earliest native boundary after Axum has
@@ -282,7 +466,6 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
                         // browser, radio, WebRTC, or remote-host clock.
                         let ingress = runtime.capture_latency_ingress();
                         if Instant::now() >= lease_deadline {
-                            controller_guard.revoke("remote_lease_expired").await?;
                             return Err("controller lease expired".to_owned());
                         }
                         if text.len() > MAX_CONTROL_BYTES {
@@ -415,8 +598,12 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
                             }
                         }
                     }
-                    Message::Ping(payload) => socket.send(Message::Pong(payload)).await.map_err(|error| error.to_string())?,
-                    Message::Pong(_) => {}
+                    Message::Ping(payload) => send_socket_message(socket, Message::Pong(payload)).await?,
+                    Message::Pong(payload) => {
+                        // Transport health is intentionally independent from
+                        // the actor-owned five-second semantic controller lease.
+                        transport_liveness.accept_pong(payload.as_ref(), Instant::now());
+                    }
                     Message::Close(_) => break,
                     Message::Binary(_) => return Err("BRSP/1 JSON envelopes must use text frames".to_owned()),
                 }
@@ -435,18 +622,21 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
                 }
             }
             _ = state_flush.tick(), if can_read && pending_state => {
+                require_live_transport(&transport_liveness, Instant::now())?;
                 pending_state = false;
                 if !send_state(socket, &target_hello, &mut target_state_sequence, &controller_guard).await? {
                     break;
                 }
             }
             _ = heartbeat.tick(), if can_read => {
+                require_live_transport(&transport_liveness, Instant::now())?;
                 pending_state = false;
                 if !send_state(socket, &target_hello, &mut target_state_sequence, &controller_guard).await? {
                     break;
                 }
             }
             _ = config_check.tick() => {
+                require_live_transport(&transport_liveness, Instant::now())?;
                 let config = runtime.remote_config_async().await?;
                 if !config.enabled || config.session_id != remote.session_id {
                     send_protocol_error(
@@ -460,14 +650,71 @@ async fn desktop_session(socket: &mut WebSocket, runtime: &AppRuntime) -> Result
                 }
             }
             _ = lease_check.tick() => {
+                require_live_transport(&transport_liveness, Instant::now())?;
                 if Instant::now() >= lease_deadline {
-                    controller_guard.revoke("remote_lease_expired").await?;
                     return Err("controller lease expired".to_owned());
+                }
+            }
+            _ = transport_ping.tick() => {
+                require_live_transport(&transport_liveness, Instant::now())?;
+                if let Some(payload) = transport_liveness.next_ping_payload() {
+                    send_socket_message(socket, Message::Ping(payload.to_vec().into())).await?;
+                    transport_liveness.ping_sent(payload, Instant::now());
+                }
+            }
+            _ = tokio::time::sleep(transport_liveness.pong_wait(Instant::now())), if transport_liveness.has_pending_pong() => {
+                if transport_liveness.pong_timed_out(Instant::now()) {
+                    return Err(transport_timeout_error(TransportDeadline::Pong));
                 }
             }
         }
     }
     Ok(())
+    }
+    .await;
+
+    finish_claimed_session(&mut controller_guard, session_result).await
+}
+
+async fn finish_claimed_session(
+    controller_guard: &mut ActiveControllerGuard,
+    session_result: Result<(), String>,
+) -> Result<(), String> {
+    let connection_state = claimed_session_connection_state(&session_result);
+    controller_guard.revoke(connection_state).await?;
+    session_result
+}
+
+async fn require_claimed_public_schema(
+    controller_guard: &mut ActiveControllerGuard,
+    schema: &str,
+) -> Result<(), String> {
+    if schema == "pps-runner-public-snapshot.v1" {
+        return Ok(());
+    }
+    finish_claimed_session(
+        controller_guard,
+        Err("native public snapshot schema mismatch".to_owned()),
+    )
+    .await
+}
+
+fn claimed_session_connection_state(result: &Result<(), String>) -> &'static str {
+    let Err(error) = result else {
+        return "remote_waiting";
+    };
+    if error == "controller lease expired" {
+        return "remote_lease_expired";
+    }
+    if matches!(
+        error.as_str(),
+        "WebSocket connection closed" | "WebSocket read failed" | "WebSocket write failed"
+    ) || error.ends_with("(socket_write_timeout)")
+        || error.ends_with("(transport_pong_timeout)")
+    {
+        return "remote_transport_unresponsive";
+    }
+    "remote_waiting"
 }
 
 fn next_sequence(sequence: &mut u32) -> u32 {
@@ -512,9 +759,12 @@ async fn receive_typed<T: DeserializeOwned>(
     expected_type: &str,
     timeout: Duration,
 ) -> Result<Envelope<T>, String> {
-    let text = tokio::time::timeout(timeout, receive_text(socket))
-        .await
-        .map_err(|_| format!("{expected_type} timed out"))??;
+    let text = with_transport_deadline(
+        TransportDeadline::HandshakeRead,
+        timeout,
+        receive_text(socket),
+    )
+    .await?;
     let envelope: Envelope<T> =
         serde_json::from_str(&text).map_err(|_| format!("malformed {expected_type} envelope"))?;
     validate_common(&envelope, expected_type).map_err(|error| error.to_string())?;
@@ -538,10 +788,34 @@ async fn send_control<T: serde::Serialize>(
     if encoded.len() > MAX_CONTROL_BYTES {
         return Err("serialized BRSP control exceeds 16 KiB".to_owned());
     }
-    socket
-        .send(Message::Text(encoded.into()))
-        .await
-        .map_err(|error| error.to_string())
+    send_socket_message(socket, Message::Text(encoded.into())).await
+}
+
+async fn send_socket_message(socket: &mut WebSocket, message: Message) -> Result<(), String> {
+    with_transport_deadline(
+        TransportDeadline::SocketWrite,
+        SOCKET_WRITE_TIMEOUT,
+        async {
+            socket
+                .send(message)
+                .await
+                .map_err(|_| "WebSocket write failed".to_owned())
+        },
+    )
+    .await
+}
+
+async fn close_socket(socket: &mut WebSocket) -> Result<(), String> {
+    with_transport_deadline(
+        TransportDeadline::SocketClose,
+        SOCKET_CLOSE_TIMEOUT,
+        async {
+            SinkExt::close(socket)
+                .await
+                .map_err(|_| "WebSocket close failed".to_owned())
+        },
+    )
+    .await
 }
 
 async fn send_snapshot(
@@ -592,10 +866,7 @@ async fn send_state(
     if encoded.len() > MAX_STATE_BYTES {
         return Err("serialized BRSP state exceeds 8 KiB".to_owned());
     }
-    socket
-        .send(Message::Text(encoded.into()))
-        .await
-        .map_err(|error| error.to_string())?;
+    send_socket_message(socket, Message::Text(encoded.into())).await?;
     Ok(true)
 }
 
@@ -714,6 +985,36 @@ struct RelayRegistry {
     rooms: HashMap<String, RelayRoom>,
 }
 
+impl RelayRegistry {
+    fn remove_exact(
+        &mut self,
+        room_id: &str,
+        role: RelayRole,
+        connection_id: &str,
+    ) -> Option<RelaySenders> {
+        let mut peer = None;
+        let mut remove_room = false;
+        if let Some(room) = self.rooms.get_mut(room_id) {
+            if room
+                .slot(role)
+                .as_ref()
+                .is_some_and(|slot| slot.connection_id == connection_id)
+            {
+                *room.slot_mut(role) = None;
+                peer = room
+                    .slot(role.opposite())
+                    .as_ref()
+                    .map(|slot| slot.senders.clone());
+            }
+            remove_room = room.empty();
+        }
+        if remove_room {
+            self.rooms.remove(room_id);
+        }
+        peer
+    }
+}
+
 #[derive(Default)]
 struct RelayRoom {
     target: Option<RelaySlot>,
@@ -722,8 +1023,146 @@ struct RelayRoom {
 
 #[derive(Clone)]
 struct RelaySenders {
-    control: mpsc::Sender<String>,
-    state: watch::Sender<Option<String>>,
+    control: mpsc::Sender<RelayOrderedText>,
+    state: watch::Sender<Option<RelayOrderedText>>,
+    shutdown: watch::Sender<Option<RelayShutdownReason>>,
+    next_order: Arc<std::sync::Mutex<u64>>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct RelayOrderedText {
+    order: u64,
+    text: String,
+}
+
+impl RelaySenders {
+    fn try_control(&self, text: String) -> Result<(), ()> {
+        let mut next_order = self
+            .next_order
+            .lock()
+            .unwrap_or_else(|error| error.into_inner());
+        let following_order = next_order.checked_add(1).ok_or(())?;
+        let message = RelayOrderedText {
+            order: *next_order,
+            text,
+        };
+        *next_order = following_order;
+        self.control.try_send(message).map_err(|_| ())
+    }
+
+    fn replace_state(&self, text: String) -> Result<(), ()> {
+        let mut next_order = self
+            .next_order
+            .lock()
+            .unwrap_or_else(|error| error.into_inner());
+        let following_order = next_order.checked_add(1).ok_or(())?;
+        let message = RelayOrderedText {
+            order: *next_order,
+            text,
+        };
+        *next_order = following_order;
+        self.state.send_replace(Some(message));
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum RelayShutdownReason {
+    ReliableBackpressure,
+    PeerDisconnected,
+}
+
+impl RelayShutdownReason {
+    const fn code(self) -> &'static str {
+        match self {
+            Self::ReliableBackpressure => "relay_backpressure",
+            Self::PeerDisconnected => "peer_disconnected",
+        }
+    }
+
+    const fn message(self) -> &'static str {
+        match self {
+            Self::ReliableBackpressure => {
+                "Reliable peer queue is full; the relay route was closed."
+            }
+            Self::PeerDisconnected => {
+                "Relay peer disconnected; create a fresh authenticated session."
+            }
+        }
+    }
+}
+
+fn signal_relay_shutdown(peer: &RelaySenders, reason: RelayShutdownReason) {
+    let unset = peer.shutdown.borrow().is_none();
+    if unset {
+        peer.shutdown.send_replace(Some(reason));
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum RelayForwardOutcome {
+    Delivered,
+    ReliableOverflow,
+    Closed,
+}
+
+/// Per-socket forwarding fence. Once a reliable control cannot be admitted,
+/// this route is permanently closed so a later control can never overtake the
+/// dropped frame even if queue capacity becomes available again.
+#[derive(Default)]
+struct RelayForwarder {
+    closed: bool,
+}
+
+impl RelayForwarder {
+    fn forward(
+        &mut self,
+        peer: &RelaySenders,
+        text: String,
+        replaceable: bool,
+    ) -> RelayForwardOutcome {
+        if self.closed {
+            return RelayForwardOutcome::Closed;
+        }
+        if replaceable {
+            if peer.replace_state(text).is_ok() {
+                return RelayForwardOutcome::Delivered;
+            }
+            self.closed = true;
+            signal_relay_shutdown(peer, RelayShutdownReason::ReliableBackpressure);
+            return RelayForwardOutcome::ReliableOverflow;
+        }
+        if peer.try_control(text).is_ok() {
+            return RelayForwardOutcome::Delivered;
+        }
+        self.closed = true;
+        signal_relay_shutdown(peer, RelayShutdownReason::ReliableBackpressure);
+        RelayForwardOutcome::ReliableOverflow
+    }
+}
+
+fn take_next_relay_outbound(
+    control: &mut Option<RelayOrderedText>,
+    state: &mut Option<RelayOrderedText>,
+    shutdown: Option<RelayShutdownReason>,
+) -> Option<RelayOrderedText> {
+    if shutdown.is_some() {
+        *control = None;
+        *state = None;
+        return None;
+    }
+    match (control.as_ref(), state.as_ref()) {
+        (Some(control_message), Some(state_message)) => {
+            if control_message.order <= state_message.order {
+                control.take()
+            } else {
+                state.take()
+            }
+        }
+        (Some(_), None) => control.take(),
+        (None, Some(_)) => state.take(),
+        (None, None) => None,
+    }
 }
 
 struct RelaySlot {
@@ -786,13 +1225,26 @@ async fn relay_upgrade(
     Path((room, role)): Path<(String, String)>,
     State(state): State<ServerState>,
 ) -> Response {
+    let Some(admission_permit) = state.relay_admission.try_acquire() else {
+        return (
+            StatusCode::SERVICE_UNAVAILABLE,
+            "LAN relay capacity reached; retry after another session closes.",
+        )
+            .into_response();
+    };
     ws.max_message_size(MAX_CONTROL_BYTES)
         .max_frame_size(MAX_CONTROL_BYTES)
-        .on_upgrade(move |socket| relay_socket(socket, state, room, role))
+        .write_buffer_size(SOCKET_WRITE_BUFFER_SIZE)
+        .max_write_buffer_size(MAX_SOCKET_WRITE_BUFFER_SIZE)
+        .on_upgrade(move |mut socket| async move {
+            let _admission_permit = admission_permit;
+            relay_socket(&mut socket, state, room, role).await;
+            let _ = close_socket(&mut socket).await;
+        })
 }
 
 async fn relay_socket(
-    mut socket: WebSocket,
+    socket: &mut WebSocket,
     state: ServerState,
     room_id: String,
     role_text: String,
@@ -804,8 +1256,8 @@ async fn relay_socket(
         .map(|config| config.enabled)
         .unwrap_or(false);
     if !enabled {
-        send_relay_text(
-            &mut socket,
+        let _ = send_relay_text(
+            socket,
             relay_error_message(
                 "remote_disabled",
                 "Enable phone remote on the desktop host first.",
@@ -815,16 +1267,16 @@ async fn relay_socket(
         return;
     }
     if !valid_room_id(&room_id) {
-        send_relay_text(
-            &mut socket,
+        let _ = send_relay_text(
+            socket,
             relay_error_message("invalid_room", "Relay room id is invalid."),
         )
         .await;
         return;
     }
     let Some(role) = RelayRole::parse(&role_text) else {
-        send_relay_text(
-            &mut socket,
+        let _ = send_relay_text(
+            socket,
             relay_error_message("invalid_role", "Relay role must be target or controller."),
         )
         .await;
@@ -832,18 +1284,22 @@ async fn relay_socket(
     };
 
     let connection_id = random_nonce();
-    let (control_tx, mut control_rx) = mpsc::channel::<String>(32);
-    let (state_tx, mut state_rx) = watch::channel::<Option<String>>(None);
+    let (control_tx, mut control_rx) =
+        mpsc::channel::<RelayOrderedText>(RELAY_CONTROL_QUEUE_CAPACITY);
+    let (state_tx, mut state_rx) = watch::channel::<Option<RelayOrderedText>>(None);
+    let (shutdown_tx, mut shutdown_rx) = watch::channel::<Option<RelayShutdownReason>>(None);
     let local_senders = RelaySenders {
-        control: control_tx.clone(),
+        control: control_tx,
         state: state_tx,
+        shutdown: shutdown_tx,
+        next_order: Arc::new(std::sync::Mutex::new(0)),
     };
     let peer = {
         let mut registry = state.relay.lock().await;
         if !registry.rooms.contains_key(&room_id) && registry.rooms.len() >= MAX_RELAY_ROOMS {
             drop(registry);
-            send_relay_text(
-                &mut socket,
+            let _ = send_relay_text(
+                socket,
                 relay_error_message(
                     "relay_capacity",
                     "The bounded lab relay has reached its room limit.",
@@ -855,8 +1311,8 @@ async fn relay_socket(
         let room = registry.rooms.entry(room_id.clone()).or_default();
         if room.slot(role).is_some() {
             drop(registry);
-            send_relay_text(
-                &mut socket,
+            let _ = send_relay_text(
+                socket,
                 relay_error_message("relay_role_busy", "This relay role is already occupied."),
             )
             .await;
@@ -872,139 +1328,209 @@ async fn relay_socket(
         });
         peer
     };
-    let _ = control_tx.try_send(relay_peer_message(role.opposite().label(), peer.is_some()));
-    if let Some(peer) = &peer {
-        let _ = peer
-            .control
-            .try_send(relay_peer_message(role.label(), true));
-    }
+    let initial_write_succeeded = send_socket_message(
+        socket,
+        Message::Text(relay_peer_message(role.opposite().label(), peer.is_some()).into()),
+    )
+    .await
+    .is_ok();
+    if initial_write_succeeded {
+        if let Some(peer) = &peer {
+            if peer
+                .try_control(relay_peer_message(role.label(), true))
+                .is_err()
+            {
+                signal_relay_shutdown(peer, RelayShutdownReason::ReliableBackpressure);
+            }
+        }
 
-    let mut rate_window = Instant::now();
-    let mut rate_count = 0_u32;
-    let mut config_check = tokio::time::interval(Duration::from_millis(500));
-    config_check.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
-    loop {
-        tokio::select! {
-            inbound = socket.recv() => {
-                let Some(Ok(inbound)) = inbound else { break; };
-                match inbound {
-                    Message::Text(text) if text.len() <= MAX_CONTROL_BYTES => {
-                        if rate_window.elapsed() >= Duration::from_secs(1) {
-                            rate_window = Instant::now();
-                            rate_count = 0;
-                        }
-                        rate_count = rate_count.saturating_add(1);
-                        if rate_count > MAX_RELAY_MESSAGES_PER_SECOND {
-                            let _ = control_tx.try_send(relay_error_message("relay_rate_limit", "Relay message rate exceeded the bounded lab limit."));
-                            break;
-                        }
-                        let classification = classify_relay_envelope(&text, role);
-                        let Ok(replaceable) = classification else {
-                            let _ = control_tx.try_send(relay_error_message("relay_direction_rejected", "Envelope is invalid for this BRSP role/lane."));
-                            continue;
-                        };
-                        let peer = {
-                            let registry = state.relay.lock().await;
-                            registry.rooms
-                                .get(&room_id)
-                                .and_then(|room| room.slot(role.opposite()).as_ref())
-                                .map(|slot| slot.senders.clone())
-                        };
-                        if let Some(peer) = peer {
-                            let delivered = if replaceable {
-                                peer.state.send_replace(Some(text.to_string()));
-                                true
-                            } else {
-                                peer.control.try_send(text.to_string()).is_ok()
-                            };
-                            if !delivered {
-                                let _ = control_tx.try_send(relay_error_message("relay_backpressure", "Reliable peer queue is full; reconnect."));
-                            }
-                        } else {
-                            let _ = control_tx.try_send(relay_error_message("peer_absent", "The other relay role is not connected yet."));
-                        }
-                    }
-                    Message::Ping(payload) => {
-                        if socket.send(Message::Pong(payload)).await.is_err() { break; }
-                    }
-                    Message::Pong(_) => {}
-                    Message::Close(_) => break,
-                    Message::Text(_) | Message::Binary(_) => {
-                        let _ = control_tx.try_send(relay_error_message("message_rejected", "Relay accepts bounded BRSP JSON text."));
-                    }
+        let mut rate_window = Instant::now();
+        let mut rate_count = 0_u32;
+        let mut config_check = tokio::time::interval(Duration::from_millis(500));
+        config_check.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+        let mut transport_ping = tokio::time::interval_at(
+            tokio::time::Instant::now() + TRANSPORT_PING_INTERVAL,
+            TRANSPORT_PING_INTERVAL,
+        );
+        transport_ping.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+        let mut transport_liveness = TransportLiveness::new();
+        let mut forwarder = RelayForwarder::default();
+        let mut pending_control = None;
+        let mut pending_state = None;
+        loop {
+            let shutdown_reason = *shutdown_rx.borrow();
+            if let Some(reason) = shutdown_reason {
+                let _ = take_next_relay_outbound(
+                    &mut pending_control,
+                    &mut pending_state,
+                    shutdown_reason,
+                );
+                let _ =
+                    send_relay_text(socket, relay_error_message(reason.code(), reason.message()))
+                        .await;
+                break;
+            }
+            if require_live_transport(&transport_liveness, Instant::now()).is_err() {
+                break;
+            }
+            if pending_control.is_none() {
+                match control_rx.try_recv() {
+                    Ok(message) => pending_control = Some(message),
+                    Err(mpsc::error::TryRecvError::Empty) => {}
+                    Err(mpsc::error::TryRecvError::Disconnected) => break,
                 }
             }
-            outgoing = control_rx.recv() => {
-                let Some(outgoing) = outgoing else { break; };
-                if socket.send(Message::Text(outgoing.into())).await.is_err() { break; }
+            match state_rx.has_changed() {
+                Ok(true) => pending_state = state_rx.borrow_and_update().clone(),
+                Ok(false) => {}
+                Err(_) => break,
             }
-            changed = state_rx.changed() => {
-                if changed.is_err() { break; }
-                let newest = state_rx.borrow_and_update().clone();
-                if let Some(newest) = newest {
-                    if socket.send(Message::Text(newest.into())).await.is_err() { break; }
-                }
-            }
-            _ = config_check.tick() => {
-                let enabled = state
-                    .runtime
-                    .remote_config_async()
+            if let Some(outgoing) =
+                take_next_relay_outbound(&mut pending_control, &mut pending_state, None)
+            {
+                if send_socket_message(socket, Message::Text(outgoing.text.into()))
                     .await
-                    .map(|config| config.enabled)
-                    .unwrap_or(false);
-                if !enabled {
-                    send_relay_text(
-                        &mut socket,
-                        relay_error_message(
-                            "remote_disabled",
-                            "Phone remote was disabled on the desktop host.",
-                        ),
-                    )
-                    .await;
+                    .is_err()
+                {
                     break;
                 }
+                continue;
+            }
+
+            tokio::select! {
+                biased;
+                changed = shutdown_rx.changed() => {
+                    if changed.is_err() { break; }
+                    let _ = *shutdown_rx.borrow_and_update();
+                    continue;
+                }
+                inbound = socket.recv() => {
+                    if require_live_transport(&transport_liveness, Instant::now()).is_err() {
+                        break;
+                    }
+                    let Some(Ok(inbound)) = inbound else { break; };
+                    match inbound {
+                        Message::Text(text) if text.len() <= MAX_CONTROL_BYTES => {
+                            if rate_window.elapsed() >= Duration::from_secs(1) {
+                                rate_window = Instant::now();
+                                rate_count = 0;
+                            }
+                            rate_count = rate_count.saturating_add(1);
+                            if rate_count > MAX_RELAY_MESSAGES_PER_SECOND {
+                                let _ = send_relay_text(socket, relay_error_message("relay_rate_limit", "Relay message rate exceeded the bounded lab limit.")).await;
+                                break;
+                            }
+                            let classification = classify_relay_envelope(&text, role);
+                            let Ok(replaceable) = classification else {
+                                if !relay_diagnostic_allows_continue(send_relay_text(socket, relay_error_message("relay_direction_rejected", "Envelope is invalid for this BRSP role/lane.")).await) {
+                                    break;
+                                }
+                                continue;
+                            };
+                            let peer = {
+                                let registry = state.relay.lock().await;
+                                registry.rooms
+                                    .get(&room_id)
+                                    .and_then(|room| room.slot(role.opposite()).as_ref())
+                                    .map(|slot| slot.senders.clone())
+                            };
+                            if let Some(peer) = peer {
+                                match forwarder.forward(&peer, text.to_string(), replaceable) {
+                                    RelayForwardOutcome::Delivered => {}
+                                    RelayForwardOutcome::ReliableOverflow | RelayForwardOutcome::Closed => {
+                                        let _ = send_relay_text(
+                                            socket,
+                                            relay_error_message(
+                                                RelayShutdownReason::ReliableBackpressure.code(),
+                                                RelayShutdownReason::ReliableBackpressure.message(),
+                                            ),
+                                        )
+                                        .await;
+                                        break;
+                                    }
+                                }
+                            } else if !relay_diagnostic_allows_continue(send_relay_text(socket, relay_error_message("peer_absent", "The other relay role is not connected yet.")).await) {
+                                break;
+                            }
+                        }
+                        Message::Ping(payload) => {
+                            if send_socket_message(socket, Message::Pong(payload)).await.is_err() { break; }
+                        }
+                        Message::Pong(payload) => {
+                            transport_liveness.accept_pong(payload.as_ref(), Instant::now());
+                        }
+                        Message::Close(_) => break,
+                        Message::Text(_) | Message::Binary(_) => {
+                            if !relay_diagnostic_allows_continue(send_relay_text(socket, relay_error_message("message_rejected", "Relay accepts bounded BRSP JSON text.")).await) {
+                                break;
+                            }
+                        }
+                    }
+                }
+                outgoing = control_rx.recv() => {
+                    let Some(outgoing) = outgoing else { break; };
+                    pending_control = Some(outgoing);
+                }
+                changed = state_rx.changed() => {
+                    if changed.is_err() { break; }
+                    pending_state = state_rx.borrow_and_update().clone();
+                }
+                _ = config_check.tick() => {
+                    if require_live_transport(&transport_liveness, Instant::now()).is_err() {
+                        break;
+                    }
+                    let enabled = state
+                        .runtime
+                        .remote_config_async()
+                        .await
+                        .map(|config| config.enabled)
+                        .unwrap_or(false);
+                    if !enabled {
+                        let _ = send_relay_text(
+                            socket,
+                            relay_error_message(
+                                "remote_disabled",
+                                "Phone remote was disabled on the desktop host.",
+                            ),
+                        )
+                        .await;
+                        break;
+                    }
+                }
+                _ = transport_ping.tick() => {
+                    if require_live_transport(&transport_liveness, Instant::now()).is_err() {
+                        break;
+                    }
+                    if let Some(payload) = transport_liveness.next_ping_payload() {
+                        if send_socket_message(socket, Message::Ping(payload.to_vec().into())).await.is_err() {
+                            break;
+                        }
+                        transport_liveness.ping_sent(payload, Instant::now());
+                    }
+                }
+                _ = tokio::time::sleep(transport_liveness.pong_wait(Instant::now())), if transport_liveness.has_pending_pong() => {
+                    if transport_liveness.pong_timed_out(Instant::now()) {
+                        break;
+                    }
+                }
             }
         }
     }
 
-    let peer = {
-        let mut registry = state.relay.lock().await;
-        let mut peer = None;
-        let mut remove_room = false;
-        if let Some(room) = registry.rooms.get_mut(&room_id) {
-            if room
-                .slot(role)
-                .as_ref()
-                .is_some_and(|slot| slot.connection_id == connection_id)
-            {
-                *room.slot_mut(role) = None;
-                peer = room
-                    .slot(role.opposite())
-                    .as_ref()
-                    .map(|slot| slot.senders.clone());
-            }
-            remove_room = room.empty();
-        }
-        if remove_room {
-            registry.rooms.remove(&room_id);
-        }
-        peer
-    };
+    let peer = state
+        .relay
+        .lock()
+        .await
+        .remove_exact(&room_id, role, &connection_id);
     if let Some(peer) = peer {
-        let _ = peer
-            .control
-            .try_send(relay_peer_message(role.label(), false));
-        let _ = peer.control.try_send(relay_error_message(
-            "peer_disconnected",
-            "Relay peer disconnected; create a fresh authenticated session.",
-        ));
+        signal_relay_shutdown(&peer, RelayShutdownReason::PeerDisconnected);
     }
 }
 
 fn classify_relay_envelope(text: &str, role: RelayRole) -> Result<bool, ()> {
     let envelope: WireEnvelope = serde_json::from_str(text).map_err(|_| ())?;
     validate_common(&envelope, &envelope.message_type).map_err(|_| ())?;
-    let replaceable = matches!(envelope.message_type.as_str(), "state" | "intent");
+    let replaceable = envelope.message_type == "state";
     if replaceable && text.len() > MAX_STATE_BYTES {
         return Err(());
     }
@@ -1015,14 +1541,7 @@ fn classify_relay_envelope(text: &str, role: RelayRole) -> Result<bool, ()> {
         ),
         RelayRole::Controller => matches!(
             envelope.message_type.as_str(),
-            "hello"
-                | "proof"
-                | "ready"
-                | "command"
-                | "snapshot-request"
-                | "intent"
-                | "error"
-                | "bye"
+            "hello" | "proof" | "ready" | "command" | "snapshot-request" | "error" | "bye"
         ),
     };
     allowed.then_some(replaceable).ok_or(())
@@ -1043,8 +1562,12 @@ fn relay_error_message(code: &str, message: &str) -> String {
     serde_json::json!({"kind": "relay.error", "code": code, "message": message}).to_string()
 }
 
-async fn send_relay_text(socket: &mut WebSocket, text: String) {
-    let _ = socket.send(Message::Text(text.into())).await;
+fn relay_diagnostic_allows_continue(result: Result<(), String>) -> bool {
+    result.is_ok()
+}
+
+async fn send_relay_text(socket: &mut WebSocket, text: String) -> Result<(), String> {
+    send_socket_message(socket, Message::Text(text.into())).await
 }
 
 #[cfg(test)]
@@ -1076,11 +1599,309 @@ mod tests {
         )
     }
 
+    async fn start_demo_run(runtime: &AppRuntime) {
+        runtime
+            .dispatch_local_async(Action::PackagePrepareDemo, serde_json::json!({}))
+            .await
+            .unwrap();
+        runtime
+            .dispatch_local_async(
+                Action::SetupSubmit,
+                serde_json::json!({
+                    "participant_code": "P001",
+                    "age": 30,
+                    "handedness": "right",
+                    "gender": "other",
+                    "name_sharing_opt_in": false,
+                    "part_labels": {"1": "A", "2": "B"}
+                }),
+            )
+            .await
+            .unwrap();
+        runtime
+            .dispatch_local_async(Action::TargetArm, serde_json::json!({}))
+            .await
+            .unwrap();
+        runtime
+            .dispatch_local_async(Action::PartStart, serde_json::json!({"part_number": 1}))
+            .await
+            .unwrap();
+        assert_eq!(
+            runtime.snapshot_async().await.unwrap().run.phase,
+            RunnerPhase::Running
+        );
+    }
+
     #[test]
     fn relay_ids_are_closed_tokens() {
         assert!(valid_room_id("room-1234"));
         assert!(!valid_room_id("../escape"));
         assert!(!valid_room_id("tiny"));
+    }
+
+    #[test]
+    fn exact_relay_cleanup_releases_registered_role_and_notifies_peer() {
+        let make_senders = || {
+            let (control, _control_rx) =
+                mpsc::channel::<RelayOrderedText>(RELAY_CONTROL_QUEUE_CAPACITY);
+            let (state, _state_rx) = watch::channel::<Option<RelayOrderedText>>(None);
+            let (shutdown, shutdown_rx) = watch::channel::<Option<RelayShutdownReason>>(None);
+            (
+                RelaySenders {
+                    control,
+                    state,
+                    shutdown,
+                    next_order: Arc::new(std::sync::Mutex::new(0)),
+                },
+                shutdown_rx,
+            )
+        };
+        let (target, _) = make_senders();
+        let (controller, mut controller_shutdown) = make_senders();
+        let mut registry = RelayRegistry::default();
+        registry.rooms.insert(
+            "room-1234".to_owned(),
+            RelayRoom {
+                target: Some(RelaySlot {
+                    connection_id: "target-old".to_owned(),
+                    senders: target,
+                }),
+                controller: Some(RelaySlot {
+                    connection_id: "controller-current".to_owned(),
+                    senders: controller,
+                }),
+            },
+        );
+
+        assert!(registry
+            .remove_exact("room-1234", RelayRole::Target, "target-stale")
+            .is_none());
+        let peer = registry
+            .remove_exact("room-1234", RelayRole::Target, "target-old")
+            .unwrap();
+        signal_relay_shutdown(&peer, RelayShutdownReason::PeerDisconnected);
+        assert_eq!(
+            *controller_shutdown.borrow_and_update(),
+            Some(RelayShutdownReason::PeerDisconnected)
+        );
+
+        let room = registry.rooms.get_mut("room-1234").unwrap();
+        assert!(room.target.is_none());
+        let (replacement, _) = make_senders();
+        *room.slot_mut(RelayRole::Target) = Some(RelaySlot {
+            connection_id: "target-replacement".to_owned(),
+            senders: replacement,
+        });
+        assert_eq!(
+            room.target.as_ref().unwrap().connection_id,
+            "target-replacement"
+        );
+    }
+
+    #[test]
+    fn transport_deadlines_have_distinct_stable_classifications() {
+        assert_eq!(
+            TransportDeadline::HandshakeRead.code(),
+            "handshake_read_timeout"
+        );
+        assert_eq!(
+            TransportDeadline::SocketWrite.code(),
+            "socket_write_timeout"
+        );
+        assert_eq!(
+            TransportDeadline::SocketClose.code(),
+            "socket_close_timeout"
+        );
+        assert_eq!(TransportDeadline::Pong.code(), "transport_pong_timeout");
+    }
+
+    #[tokio::test]
+    async fn stuck_handshake_write_and_close_futures_are_bounded() {
+        for deadline in [
+            TransportDeadline::HandshakeRead,
+            TransportDeadline::SocketWrite,
+            TransportDeadline::SocketClose,
+        ] {
+            let result = with_transport_deadline(
+                deadline,
+                Duration::from_millis(1),
+                std::future::pending::<Result<(), String>>(),
+            )
+            .await;
+            assert_eq!(result.unwrap_err(), transport_timeout_error(deadline));
+        }
+    }
+
+    #[test]
+    fn socket_admission_is_bounded_releases_and_keeps_routes_isolated() {
+        let admission = SocketAdmission::new(MAX_CONCURRENT_DESKTOP_SESSIONS);
+        let mut permits = Vec::new();
+        for _ in 0..MAX_CONCURRENT_DESKTOP_SESSIONS {
+            permits.push(admission.try_acquire().unwrap());
+        }
+        assert!(admission.try_acquire().is_none());
+
+        drop(permits.pop());
+        assert!(admission.try_acquire().is_some());
+
+        let desktop = SocketAdmission::new(1);
+        let relay = SocketAdmission::new(1);
+        let relay_permit = relay.try_acquire().unwrap();
+        assert!(relay.try_acquire().is_none());
+        assert!(desktop.try_acquire().is_some());
+        drop(relay_permit);
+        assert!(relay.try_acquire().is_some());
+    }
+
+    #[test]
+    fn transport_pong_requires_exact_payload_strictly_before_deadline() {
+        let now = Instant::now();
+        let mut liveness = TransportLiveness::with_nonce(0x1234_5678);
+        let first = liveness.next_ping_payload().unwrap();
+        assert_eq!(&first[..4], &0x1234_5678_u32.to_be_bytes());
+        liveness.ping_sent(first, now);
+        assert!(liveness.next_ping_payload().is_none());
+        let deadline = now + TRANSPORT_PONG_TIMEOUT;
+        assert!(!liveness.accept_pong(b"wrong", deadline - Duration::from_nanos(1)));
+        assert!(liveness.accept_pong(&first, deadline - Duration::from_nanos(1)));
+        assert!(!liveness.has_pending_pong());
+        assert_ne!(liveness.next_ping_payload().unwrap(), first);
+
+        let mut at_deadline = TransportLiveness::with_nonce(1);
+        let at_payload = at_deadline.next_ping_payload().unwrap();
+        at_deadline.ping_sent(at_payload, now);
+        assert!(!at_deadline.accept_pong(&at_payload, deadline));
+        assert!(at_deadline.pong_timed_out(deadline));
+
+        let mut after_deadline = TransportLiveness::with_nonce(2);
+        let after_payload = after_deadline.next_ping_payload().unwrap();
+        after_deadline.ping_sent(after_payload, now);
+        assert!(!after_deadline.accept_pong(&after_payload, deadline + Duration::from_nanos(1)));
+        assert!(after_deadline.pong_timed_out(deadline + Duration::from_nanos(1)));
+    }
+
+    #[test]
+    fn expired_transport_gate_prevents_ready_command_or_control_work() {
+        let now = Instant::now();
+        let deadline = now + TRANSPORT_PONG_TIMEOUT;
+        let mut liveness = TransportLiveness::with_nonce(3);
+        let payload = liveness.next_ping_payload().unwrap();
+        liveness.ping_sent(payload, now);
+
+        let mut forwarded = 0_u8;
+        for frame_time in [deadline, deadline + Duration::from_nanos(1)] {
+            if require_live_transport(&liveness, frame_time).is_ok() {
+                forwarded += 1;
+            }
+        }
+        assert_eq!(forwarded, 0);
+        assert_eq!(
+            require_live_transport(&liveness, deadline).unwrap_err(),
+            transport_timeout_error(TransportDeadline::Pong)
+        );
+    }
+
+    #[test]
+    fn relay_reliable_overflow_closes_route_and_later_control_cannot_overtake() {
+        let (control_tx, mut control_rx) =
+            mpsc::channel::<RelayOrderedText>(RELAY_CONTROL_QUEUE_CAPACITY);
+        let (state_tx, _) = watch::channel::<Option<RelayOrderedText>>(None);
+        let (shutdown_tx, mut shutdown_rx) = watch::channel::<Option<RelayShutdownReason>>(None);
+        let peer = RelaySenders {
+            control: control_tx,
+            state: state_tx,
+            shutdown: shutdown_tx,
+            next_order: Arc::new(std::sync::Mutex::new(0)),
+        };
+        for value in 0..RELAY_CONTROL_QUEUE_CAPACITY {
+            peer.try_control(format!("queued-{value}")).unwrap();
+        }
+        let mut forwarder = RelayForwarder::default();
+        assert_eq!(
+            forwarder.forward(&peer, "overflow".to_owned(), false),
+            RelayForwardOutcome::ReliableOverflow
+        );
+        assert_eq!(
+            *shutdown_rx.borrow_and_update(),
+            Some(RelayShutdownReason::ReliableBackpressure)
+        );
+
+        assert_eq!(control_rx.try_recv().unwrap().text, "queued-0");
+        assert_eq!(
+            forwarder.forward(&peer, "later".to_owned(), false),
+            RelayForwardOutcome::Closed
+        );
+        let remaining = std::iter::from_fn(|| control_rx.try_recv().ok()).collect::<Vec<_>>();
+        assert_eq!(remaining.len(), RELAY_CONTROL_QUEUE_CAPACITY - 1);
+        assert!(!remaining.iter().any(|message| message.text == "later"));
+    }
+
+    #[test]
+    fn relay_state_lane_is_one_replaceable_latest_value() {
+        let (state_tx, mut state_rx) = watch::channel::<Option<&'static str>>(None);
+        state_tx.send_replace(Some("A"));
+        state_tx.send_replace(Some("B"));
+        state_tx.send_replace(Some("C"));
+        assert_eq!(*state_rx.borrow_and_update(), Some("C"));
+    }
+
+    #[test]
+    fn relay_writer_preserves_ready_before_later_replaceable_state() {
+        let (control_tx, mut control_rx) =
+            mpsc::channel::<RelayOrderedText>(RELAY_CONTROL_QUEUE_CAPACITY);
+        let (state_tx, mut state_rx) = watch::channel::<Option<RelayOrderedText>>(None);
+        let (shutdown_tx, _) = watch::channel::<Option<RelayShutdownReason>>(None);
+        let peer = RelaySenders {
+            control: control_tx,
+            state: state_tx,
+            shutdown: shutdown_tx,
+            next_order: Arc::new(std::sync::Mutex::new(0)),
+        };
+        peer.try_control("ready".to_owned()).unwrap();
+        peer.replace_state("state".to_owned()).unwrap();
+
+        let mut pending_control = Some(control_rx.try_recv().unwrap());
+        let mut pending_state = state_rx.borrow_and_update().clone();
+        assert_eq!(
+            take_next_relay_outbound(&mut pending_control, &mut pending_state, None)
+                .unwrap()
+                .text,
+            "ready"
+        );
+        assert_eq!(
+            take_next_relay_outbound(&mut pending_control, &mut pending_state, None)
+                .unwrap()
+                .text,
+            "state"
+        );
+    }
+
+    #[test]
+    fn fatal_relay_shutdown_discards_pending_work_before_another_send() {
+        let mut pending_control = Some(RelayOrderedText {
+            order: 1,
+            text: "older-control".to_owned(),
+        });
+        let mut pending_state = Some(RelayOrderedText {
+            order: 2,
+            text: "latest-state".to_owned(),
+        });
+        assert!(take_next_relay_outbound(
+            &mut pending_control,
+            &mut pending_state,
+            Some(RelayShutdownReason::ReliableBackpressure),
+        )
+        .is_none());
+        assert!(pending_control.is_none());
+        assert!(pending_state.is_none());
+    }
+
+    #[test]
+    fn relay_diagnostic_write_failure_is_fatal_to_the_registered_session() {
+        assert!(relay_diagnostic_allows_continue(Ok(())));
+        assert!(!relay_diagnostic_allows_continue(Err(
+            transport_timeout_error(TransportDeadline::SocketWrite)
+        )));
     }
 
     #[test]
@@ -1158,6 +1979,56 @@ mod tests {
     }
 
     #[test]
+    fn failed_reply_write_never_records_send_completed() {
+        let diagnostics = NativeLatencyDiagnostics::new();
+        let mut trace = diagnostics.start_trace(LatencyRoute::LanWebSocket);
+        trace.mark(LatencyStage::AdapterValidationComplete);
+        let target = Envelope::new(
+            "hello",
+            "session_1234",
+            "target_12345",
+            1,
+            0,
+            HelloBody {
+                role: BrspRole::Target,
+                nonce: "dGFyZ2V0LW5vbmNlLTEyMzQ1Ng".to_owned(),
+                capabilities: vec![],
+                requested_scopes: vec![],
+                granted_scopes: vec![],
+            },
+        );
+        let mut sequence = 0;
+        let _ = prepare_traced_protocol_error(
+            &target,
+            &mut sequence,
+            "replayed_sequence",
+            "A bounded public error.",
+            Some(&trace),
+        );
+        finish_rejected_protocol_trace(Some(&mut trace), false);
+
+        let summary = diagnostics.summary();
+        let route = summary
+            .routes
+            .iter()
+            .find(|route| route.route == LatencyRoute::LanWebSocket)
+            .unwrap();
+        assert_eq!(route.count, 1);
+        assert_eq!(
+            route.stages[LatencyStage::AdapterHandoff.index()]
+                .elapsed_from_native_ingress
+                .sample_count,
+            1
+        );
+        assert_eq!(
+            route.stages[LatencyStage::SendCompleted.index()]
+                .elapsed_from_native_ingress
+                .sample_count,
+            0
+        );
+    }
+
+    #[test]
     fn relay_directions_use_canonical_envelope_type() {
         let target = Envelope::new(
             "hello",
@@ -1197,6 +2068,36 @@ mod tests {
             ),
             Ok(false)
         );
+        let state = Envelope::new(
+            "state",
+            "session_1234",
+            "target_12345",
+            1,
+            4,
+            serde_json::json!({"revision": 1}),
+        );
+        assert_eq!(
+            classify_relay_envelope(&serde_json::to_string(&state).unwrap(), RelayRole::Target),
+            Ok(true)
+        );
+        assert!(classify_relay_envelope(
+            &serde_json::to_string(&state).unwrap(),
+            RelayRole::Controller
+        )
+        .is_err());
+        let intent = Envelope::new(
+            "intent",
+            "session_1234",
+            "controller_1",
+            2,
+            5,
+            serde_json::json!({"value": 1}),
+        );
+        assert!(classify_relay_envelope(
+            &serde_json::to_string(&intent).unwrap(),
+            RelayRole::Controller
+        )
+        .is_err());
     }
 
     #[test]
@@ -1233,43 +2134,103 @@ mod tests {
     }
 
     #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn transport_ping_pong_does_not_renew_the_semantic_controller_lease() {
+        let runtime = AppRuntime::new();
+        runtime.configure_remote_async(true, false).await.unwrap();
+        let (guard, connected) = active_guard(&runtime, "controller_transport_ping").await;
+        let lease_before = connected.safety.lease_expires_at_unix_ms.unwrap();
+
+        let now = Instant::now();
+        let mut liveness = TransportLiveness::with_nonce(7);
+        let payload = liveness.next_ping_payload().unwrap();
+        liveness.ping_sent(payload, now);
+        assert!(liveness.accept_pong(&payload, now + Duration::from_millis(1)));
+
+        let after_pong = guard.current_snapshot().await.unwrap().unwrap();
+        assert_eq!(
+            after_pong.safety.lease_expires_at_unix_ms,
+            Some(lease_before)
+        );
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn transport_pong_timeout_revokes_exact_owner_and_pauses() {
+        let runtime = AppRuntime::new();
+        runtime.configure_remote_async(true, false).await.unwrap();
+        let (mut guard, _) = active_guard(&runtime, "controller_pong_timeout").await;
+        start_demo_run(&runtime).await;
+
+        let now = Instant::now();
+        let mut liveness = TransportLiveness::with_nonce(9);
+        let payload = liveness.next_ping_payload().unwrap();
+        liveness.ping_sent(payload, now);
+        assert!(liveness.pong_timed_out(now + TRANSPORT_PONG_TIMEOUT));
+        assert!(guard.revoke("remote_transport_unresponsive").await.unwrap());
+
+        let cleaned = runtime.snapshot_async().await.unwrap();
+        assert_eq!(cleaned.run.phase, RunnerPhase::Paused);
+        assert_eq!(cleaned.connection_state, "remote_transport_unresponsive");
+        assert!(cleaned.safety.controller_lease_id.is_empty());
+        assert!(cleaned.safety.lease_expires_at_unix_ms.is_none());
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn post_claim_schema_failure_awaits_exact_owner_revocation() {
+        let runtime = AppRuntime::new();
+        runtime.configure_remote_async(true, false).await.unwrap();
+        let (mut guard, _) = active_guard(&runtime, "controller_bad_schema").await;
+
+        assert_eq!(
+            require_claimed_public_schema(&mut guard, "unexpected-private-schema")
+                .await
+                .unwrap_err(),
+            "native public snapshot schema mismatch"
+        );
+        let cleaned = runtime.snapshot_async().await.unwrap();
+        assert_eq!(cleaned.connection_state, "remote_waiting");
+        assert!(cleaned.safety.controller_lease_id.is_empty());
+        assert!(cleaned.safety.lease_expires_at_unix_ms.is_none());
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn stuck_write_scope_exit_revokes_exact_owner_and_pauses() {
+        let runtime = AppRuntime::new();
+        runtime.configure_remote_async(true, false).await.unwrap();
+        let (mut guard, _) = active_guard(&runtime, "controller_stuck_write").await;
+        start_demo_run(&runtime).await;
+
+        let result = with_transport_deadline(
+            TransportDeadline::SocketWrite,
+            Duration::from_millis(1),
+            std::future::pending::<Result<(), String>>(),
+        )
+        .await;
+        let error = result.unwrap_err();
+        assert_eq!(
+            error,
+            transport_timeout_error(TransportDeadline::SocketWrite)
+        );
+        assert_eq!(
+            finish_claimed_session(&mut guard, Err(error.clone()))
+                .await
+                .unwrap_err(),
+            error
+        );
+        let cleaned = runtime.snapshot_async().await.unwrap();
+        assert_eq!(cleaned.run.phase, RunnerPhase::Paused);
+        assert_eq!(cleaned.connection_state, "remote_transport_unresponsive");
+        assert!(cleaned.safety.controller_lease_id.is_empty());
+        assert!(cleaned.safety.lease_expires_at_unix_ms.is_none());
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
     async fn deadman_revocation_clears_authority_and_pauses_a_running_target() {
         let runtime = AppRuntime::new();
         runtime.configure_remote_async(true, false).await.unwrap();
         let (mut guard, connected) = active_guard(&runtime, "controller_deadman").await;
         assert_eq!(connected.connection_state, "remote_connected");
         assert!(connected.safety.lease_expires_at_unix_ms.is_some());
-
-        runtime
-            .dispatch_local_async(Action::PackagePrepareDemo, serde_json::json!({}))
-            .await
-            .unwrap();
-        runtime
-            .dispatch_local_async(
-                Action::SetupSubmit,
-                serde_json::json!({
-                    "participant_code": "P001",
-                    "age": 30,
-                    "handedness": "right",
-                    "gender": "other",
-                    "name_sharing_opt_in": false,
-                    "part_labels": {"1": "A", "2": "B"}
-                }),
-            )
-            .await
-            .unwrap();
-        runtime
-            .dispatch_local_async(Action::TargetArm, serde_json::json!({}))
-            .await
-            .unwrap();
-        runtime
-            .dispatch_local_async(Action::PartStart, serde_json::json!({"part_number": 1}))
-            .await
-            .unwrap();
-        assert_eq!(
-            runtime.snapshot_async().await.unwrap().run.phase,
-            RunnerPhase::Running
-        );
+        start_demo_run(&runtime).await;
 
         assert!(guard.revoke("remote_lease_expired").await.unwrap());
         let expired = runtime.snapshot_async().await.unwrap();

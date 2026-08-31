@@ -207,7 +207,7 @@ pub struct RemoteApplied {
 }
 
 impl RemoteApplied {
-    pub(crate) fn from_native(applied: Applied) -> Self {
+    pub(crate) fn from_native(applied: Applied, current_snapshot: RunnerSnapshot) -> Self {
         let reason = if matches!(applied.status, AppliedStatus::Rejected) {
             "request_rejected"
         } else {
@@ -220,7 +220,10 @@ impl RemoteApplied {
             reason: reason.to_owned(),
             accepted_revision: applied.accepted_revision,
             resulting_revision: applied.resulting_revision,
-            snapshot: applied.snapshot.into(),
+            // The cached Applied outcome keeps its original accepted/resulting
+            // revisions, but publication must always project current actor
+            // state after owner revocation/reclaim and idempotent retry.
+            snapshot: current_snapshot.into(),
         }
     }
 }
@@ -1238,6 +1241,14 @@ mod tests {
         participant_id: &str,
         block_count: u32,
     ) -> (std::path::PathBuf, VerifiedPreparedSession) {
+        verified_audio_package_with_terminal_sample(participant_id, block_count, 4)
+    }
+
+    fn verified_audio_package_with_terminal_sample(
+        participant_id: &str,
+        block_count: u32,
+        terminal_sample: u64,
+    ) -> (std::path::PathBuf, VerifiedPreparedSession) {
         let root = std::env::temp_dir().join(format!("pps-tauri-audio-{}", random_nonce()));
         fs::create_dir_all(&root).unwrap();
         let mut blocks = Vec::new();
@@ -1252,7 +1263,7 @@ mod tests {
             fs::write(
                 root.join(&csv_name),
                 format!(
-                    "Trial_Number,Trial_UID,Trial_Type,Family,Sample_Rate_Hz,Trial_Start_Sample,Trial_End_Sample\n1,B{ordinal}_T1,Catch,catch,48000,0,4\n"
+                    "Trial_Number,Trial_UID,Trial_Type,Family,Sample_Rate_Hz,Trial_Start_Sample,Looming_Onset_Sample,Tactile_Onset_Sample,Response_Window_Onset_Sample,Trial_End_Sample\n1,B{ordinal}_T1,Catch,catch,48000,0,1,2,1,{terminal_sample}\n"
                 ),
             )
             .unwrap();
@@ -1675,8 +1686,22 @@ mod tests {
             "prepared_execution_missing"
         );
         compile_current_execution(&runtime);
+        let before_capture = runtime.0.authority.test_view();
+        assert_eq!(before_capture.compiled_schedule_strong_count, Some(1));
+        assert_eq!(before_capture.retained_session_strong_count, Some(1));
 
         let (guard, source) = begin_audio_decode(&runtime, 0);
+        let captured = runtime.0.authority.test_view();
+        assert_eq!(
+            captured.compiled_schedule_strong_count,
+            Some(2),
+            "capturing a worker source must clone only the immutable Arc schedule handle"
+        );
+        assert_eq!(
+            captured.retained_session_strong_count,
+            Some(2),
+            "capturing a worker source must clone only the verified-session Arc handle"
+        );
         let release = Arc::new(Barrier::new(2));
         let worker_release = Arc::clone(&release);
         let (entered_tx, entered_rx) = mpsc::sync_channel(1);
@@ -1732,6 +1757,26 @@ mod tests {
             .prepared_audio_block_ordinal
             .is_none());
         drop(guard);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn output_plan_worker_failure_cannot_publish_a_prepared_cache() {
+        let runtime = AppRuntime::new();
+        let (root, verified) = verified_audio_package_with_terminal_sample("P001", 1, 5);
+        runtime.adopt_verified_session(verified).unwrap();
+        compile_current_execution(&runtime);
+        let (guard, source) = begin_audio_decode(&runtime, 0);
+        let error = prepare_verified_audio(source).err().unwrap();
+        assert_eq!(error.code(), "prepared_audio_schedule_outside_media");
+        let view = runtime.0.authority.test_view();
+        assert!(view.prepared_audio_block_ordinal.is_none());
+        assert!(view.prepared_output_plan_event_count.is_none());
+        drop(guard);
+
+        let (retry_guard, retry_source) = begin_audio_decode(&runtime, 0);
+        drop(retry_source);
+        drop(retry_guard);
         fs::remove_dir_all(root).unwrap();
     }
 
@@ -1793,6 +1838,7 @@ mod tests {
         let private_digest = verified.blocks()[0].block_wav().sha256().to_owned();
         runtime.adopt_verified_session(verified).unwrap();
         compile_current_execution(&runtime);
+        let revision_before_preparation = runtime.snapshot().unwrap().revision;
 
         let (first_guard, first_source) = begin_audio_decode(&runtime, 0);
         let first = runtime
@@ -1831,6 +1877,19 @@ mod tests {
             Some(second.decoded_bytes)
         );
         assert_ne!(first.decoded_bytes, second.decoded_bytes);
+        assert!(second.output_plan_prepared);
+        assert_eq!(second.output_route, "legacy-stereo");
+        assert!(second.scheduled_event_count > 0);
+        assert_eq!(
+            cache.prepared_output_plan_event_count,
+            Some(second.scheduled_event_count as usize)
+        );
+        assert_eq!(cache.prepared_output_plan_run_generation, Some(1));
+        assert_eq!(
+            runtime.snapshot().unwrap().revision,
+            revision_before_preparation,
+            "native media/output-plan caching must not mutate RunnerCore"
+        );
 
         let summary_json = serde_json::to_string(&second).unwrap();
         for forbidden in [
@@ -1846,6 +1905,80 @@ mod tests {
                 "prepared summary leaked {forbidden}: {summary_json}"
             );
         }
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn late_audio_result_is_inert_after_compiled_plan_replacement() {
+        let runtime = AppRuntime::new();
+        let (root, verified) = verified_audio_package("P001", 1);
+        runtime.adopt_verified_session(verified).unwrap();
+        compile_current_execution(&runtime);
+        let (guard, source) = begin_audio_decode(&runtime, 0);
+        let stale_candidate = prepare_verified_audio(source).unwrap();
+
+        compile_current_execution(&runtime);
+        assert_eq!(
+            runtime.cache_prepared_audio(stale_candidate),
+            Err("prepared_execution_replaced")
+        );
+        assert!(runtime
+            .0
+            .authority
+            .test_view()
+            .prepared_audio_block_ordinal
+            .is_none());
+        drop(guard);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn newer_block_reservation_makes_an_older_ordinal_completion_inert() {
+        let runtime = AppRuntime::new();
+        let (root, verified) = verified_audio_package("P001", 2);
+        runtime.adopt_verified_session(verified).unwrap();
+        compile_current_execution(&runtime);
+        let (first_guard, first_source) = begin_audio_decode(&runtime, 0);
+        let stale_first = prepare_verified_audio(first_source).unwrap();
+        drop(first_guard);
+
+        let (second_guard, second_source) = begin_audio_decode(&runtime, 1);
+        let second = runtime
+            .cache_prepared_audio(prepare_verified_audio(second_source).unwrap())
+            .unwrap();
+        assert_eq!(second.block_ordinal, 1);
+        assert_eq!(
+            runtime.cache_prepared_audio(stale_first),
+            Err("prepared_audio_preparation_replaced")
+        );
+        assert_eq!(
+            runtime.0.authority.test_view().prepared_audio_block_ordinal,
+            Some(1)
+        );
+        drop(second_guard);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn newer_receipt_for_the_same_block_makes_an_older_completion_inert() {
+        let runtime = AppRuntime::new();
+        let (root, verified) = verified_audio_package("P001", 1);
+        runtime.adopt_verified_session(verified).unwrap();
+        compile_current_execution(&runtime);
+        let (first_guard, first_source) = begin_audio_decode(&runtime, 0);
+        let stale = prepare_verified_audio(first_source).unwrap();
+        drop(first_guard);
+
+        let (second_guard, second_source) = begin_audio_decode(&runtime, 0);
+        assert_eq!(
+            runtime.cache_prepared_audio(stale),
+            Err("prepared_audio_preparation_replaced")
+        );
+        let current = runtime
+            .cache_prepared_audio(prepare_verified_audio(second_source).unwrap())
+            .unwrap();
+        assert_eq!(current.block_ordinal, 0);
+        drop(second_guard);
         fs::remove_dir_all(root).unwrap();
     }
 

@@ -2285,6 +2285,28 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   binding the LAN listener; the bundled WebView transport still enters Rust
   only through owner-fenced claim/renew/dispatch/revoke and stopping it revokes
   that exact authority.
+- Native LAN transport supervision now has independently implemented finite
+  boundaries inspired only by RustDesk's session-lifecycle shape: 12 seconds
+  per handshake read, two seconds per socket write behind a 64 KiB maximum
+  socket write buffer, one second for graceful close, and an exact-payload
+  Ping/Pong deadline (two-second ping cadence, three-second response limit).
+  Only an exact Pong strictly before deadline is accepted, and every selected
+  inbound frame is re-fenced before semantic work. Ping/Pong never renews the
+  actor-owned five-second lease or enters command-latency samples. Desktop and
+  relay upgrades have independent eight/32 permit budgets held through bounded
+  close. Pong/write/EOF cleanup awaits an exact-owner revoke through the actor's
+  safety reserve; Drop/deadman remain fallbacks. The desktop path adds no queue.
+  The relay is bounded to 32 queued reliable frames, at most one writer-held
+  frame, and one replaceable latest state; per-route ordering prevents state
+  overtaking earlier Ready/Applied, and reliable overflow closes both ends so
+  later controls are inert. Fatal shutdown preempts pending output, every
+  post-registration diagnostic write failure enters exact slot cleanup, and
+  PPS rejects `intent` entirely (only target `state` is replaceable).
+  Applied-but-ack-lost retry after revoke/reclaim is
+  candidate-revision deduped: it adds no evidence/run generation, keeps the
+  cached outcome revision, and publishes the current actor projection rather
+  than stale cached state. No RustDesk AGPL code, schema, raw-input protocol,
+  or unbounded-channel pattern is copied, vendored, or translated.
 - Build the companion once as a multi-page browser frontend. It must not
   auto-connect, must keep pairing secrets in the URL fragment, and may act as a
   controller or an exploratory Web Audio/vibration phone target. Keep browser
@@ -2424,11 +2446,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   actor retains one block under a 1,280 MiB byte ceiling, reuses exact cache
   hits without decoding, drops a different cached block before allocating its
   replacement, rejects active-run preparation, and makes late results inert.
-  Only a path-free `pcm-cache-only`, `unqualified`, non-executable summary
-  reaches the local WebView; this is not a remote action and still performs no
-  resampling, device I/O, routing, arming, or execution readiness. Real
-  packages remain unarmable until those native boundaries and physical
-  qualification land.
+  The accepted candidate now binds PCM plus a renderer-neutral plan. Its
+  path-free summary reports `pcm-and-output-plan-cache`,
+  `outputPlanPrepared = true`, one closed proposed route, and scheduled event
+  count while remaining `unqualified` and non-executable. This is not a remote
+  action and still performs no resampling, device I/O, arming, or execution
+  readiness. Before executable output, potentially large final PCM/plan drops
+  must be retired off the authority actor; current preflight invalidation may
+  release up to the bounded cache maximum there. Real packages remain
+  unarmable until those native boundaries and physical qualification land.
 - The pure native audio boundary now includes a device-free output renderer:
   closed legacy/canonical routes, immutable package/run fences, caller-owned
   callback storage, one `u64` cursor, pause freeze, tail silence, and bounded

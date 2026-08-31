@@ -58,7 +58,7 @@ pub(crate) struct PreparedExecutionSource {
 pub(crate) struct CompiledPreparedExecution {
     pub generation: u64,
     pub fingerprint: String,
-    schedules: Vec<BlockEventSchedule>,
+    schedules: Vec<Arc<BlockEventSchedule>>,
     summary: PreparedExecutionSummary,
 }
 
@@ -67,7 +67,7 @@ impl CompiledPreparedExecution {
         &self.summary
     }
 
-    pub(crate) fn schedules(&self) -> &[BlockEventSchedule] {
+    pub(crate) fn schedules(&self) -> &[Arc<BlockEventSchedule>] {
         &self.schedules
     }
 }
@@ -235,7 +235,7 @@ fn compile_reverified_execution(
             executable: false,
             schedule: schedule.summary().clone(),
         });
-        schedules.push(schedule);
+        schedules.push(Arc::new(schedule));
     }
 
     let block_count =

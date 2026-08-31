@@ -61,9 +61,12 @@ test("native audio preparation is an explicit local no-argument non-executable p
   assert.match(audioPreparationPermission, /commands\.allow = \["prepare_first_audio_block"\]/u);
   assert.ok(mainCapability.permissions.includes("allow-prepare-first-audio-block"));
   assert.match(desktopSource, /schema === "pps-runner-prepared-audio-summary\.v1"/u);
-  assert.match(desktopSource, /scope === "pcm-cache-only"/u);
+  assert.match(desktopSource, /scope === "pcm-and-output-plan-cache"/u);
   assert.match(desktopSource, /qualification === "unqualified"/u);
   assert.match(desktopSource, /candidate\.executable === false/u);
+  assert.match(desktopSource, /outputPlanPrepared === true/u);
+  assert.match(desktopSource, /outputRoute === \(layout === "legacy-study5-tactile-audio"/u);
+  assert.match(desktopSource, /scheduledEventCount <= 500_001/u);
   assert.match(desktopSource, /!preparedExecution[\s\S]{0,100}\|\| active/u);
   assert.match(desktopSource, /const invalidatesPreparedAudio = active[\s\S]{0,180}!next\.package_verified[\s\S]{0,100}!preparedExecution/u);
   assert.match(desktopSource, /if \(preparedAudio && invalidatesPreparedAudio\) renderPreparedAudio\(null\)/u);
