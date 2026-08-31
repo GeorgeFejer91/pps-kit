@@ -7,6 +7,17 @@
 
 #![forbid(unsafe_code)]
 
+pub mod output;
+
+pub use output::{
+    resolve_output_route, ControlResult, MockOutput, OutputFence, OutputGains, OutputPlanError,
+    OutputRouteError, OutputRouteRequest, PreparedPlaybackPlan, RenderControl, RenderEngine,
+    RenderIntegrityFault, RenderOutcome, RenderState, ResolvedOutputRoute, ResolvedOutputRouteKind,
+    RtEvent, RtEventFence, RtEventKind, RtEventSink, RtScheduledEvent,
+    MAXIMUM_METADATA_EVENTS_PER_CALLBACK, MAXIMUM_OUTPUT_CALLBACK_FRAMES,
+    MAXIMUM_RT_EVENTS_PER_CALLBACK,
+};
+
 use std::{
     fmt,
     fs::File,

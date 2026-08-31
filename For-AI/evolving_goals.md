@@ -2414,6 +2414,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   resampling, device I/O, routing, arming, or execution readiness. Real
   packages remain unarmable until those native boundaries and physical
   qualification land.
+- The pure native audio boundary now includes a device-free output renderer:
+  closed legacy/canonical routes, immutable package/run fences, caller-owned
+  callback storage, one `u64` cursor, pause freeze, tail silence, and bounded
+  event work. Plans reject more than 62 metadata events in any accepted
+  4,096-frame window; `SampleZero` and `FinalFrameSubmitted` make 64 total
+  callback records. Faults silence the current buffer. Final-frame submission
+  is not device drain or physical onset, and no persistent platform stream,
+  evidence adapter, or execution readiness exists yet.
 - Treat the transport-independent BRSP application-target reference as a
   qualification checklist for the existing Rust seam, not a replacement.
   `RunnerCore` stays the single authority, transports remain adapters, grants

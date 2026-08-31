@@ -363,6 +363,14 @@ implement resampling, device output, routing, arming, or scientific timing
 qualification, and it is not a remote/companion action.
 Legacy schedules with no sample rate in block metadata or CSV still require
 the V1 WAV-header fallback before the native plan can become executable.
+The pure audio crate also has a device-independent callback renderer with
+closed legacy/canonical PPS routes, immutable package/run fences, a `u64`
+source cursor, pause freeze, tail zero-fill, and caller-owned buffers. It caps
+accepted callbacks at 4,096 frames and 62 metadata events plus engine-owned
+sample-zero/final-frame records; over-density is rejected during preparation,
+and callback overflow/fault produces whole-buffer silence. The terminal record
+means software frame submission only, never physical drain or onset. There is
+still no platform stream, device qualification, or real-package arming.
 
 The Tauri desktop now has one named Rust authority actor thread,
 `pps-runner-authority`. It exclusively owns `RunnerCore`, remote policy and the

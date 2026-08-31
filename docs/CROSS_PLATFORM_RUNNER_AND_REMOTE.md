@@ -218,6 +218,24 @@ late result inert. This is still preparation only: the summary is explicitly
 `pcm-cache-only`, `unqualified`, and non-executable; no platform output device
 is opened, no remote action is added, and real packages remain unarmable.
 
+The device-independent `pps-runner-audio::output` core is the next native
+boundary. It accepts only immutable prepared PCM, a full package/run fence, a
+closed PPS route, bounded gains, and compact sample-index events. The legacy
+source layout `[tactile, audio]` maps to physical `[audio, tactile]`; canonical
+three-channel data maps `[left, right, tactile]`, with an explicit four-channel
+tactile-mirror variant. Duplicate or ambiguous outputs fail closed. Rendering
+uses caller-owned buffers and event slots, advances one `u64` source cursor,
+freezes it while paused, zero-fills callback tails, and makes stale controls
+inert. Preparation rejects more than 62 metadata events in any accepted
+4,096-frame callback window; together with engine-owned `SampleZero` and
+`FinalFrameSubmitted`, this caps one callback at 64 event records. Overflow,
+an oversized/malformed callback, or an internal invariant fault silences the
+entire current buffer and latches a fault. `FinalFrameSubmitted` means only
+that the last source frame entered a software callback buffer—not device drain,
+DAC onset, physical audio arrival, or tactile onset. No platform stream or
+scientific timing qualification exists yet, and a future output owner must
+retire/drop the heap-backed engine away from the real-time callback thread.
+
 Local-only startup does not bind a LAN socket. The first explicit **Enable
 phone remote** action reserves `0.0.0.0` and launches the companion server; a
 bind failure is returned to the UI and cannot crash startup or trigger a

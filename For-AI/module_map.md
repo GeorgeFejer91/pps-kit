@@ -109,6 +109,13 @@ actions and the companion page. No platform output backend is present, so real
 plans remain unarmable and unqualified.
 Legacy schedules without a metadata/CSV sample rate still need the V1
 WAV-header fallback before this boundary may feed native execution.
+The crate's pure `output` module now provides a device-free, non-serializable
+playback plan, closed 2/3/4-channel PPS routes, a generation-fenced render
+engine, caller-owned output/event buffers, 4,096-frame and 64-total-event
+callback ceilings, sample-zero and final-frame-submitted records, pause cursor
+freeze, tail zero-fill, and fail-closed callback faults. This is not a device
+backend: the future persistent stream owner must perform prepare/reserve/arm,
+timestamp mapping, evidence draining, and off-callback engine destruction.
 Its Python differential probe remains CI-only while parity is being proven.
 
 All desktop authority requests enter one bounded FIFO mailbox with capacity 64:
