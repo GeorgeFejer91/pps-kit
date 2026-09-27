@@ -32,11 +32,14 @@ Each status applies to its stated surface, not to the whole product.
   Desktop checks on Windows, macOS and Linux: 23 shared-core and 140 desktop
   tests per host. The three validation installers were built, not installed here.
   Documentation-only synchronization does not change these product bytes.
-- Output-setup UI source: `efb6f2799c9b25210a7b32e2849fa747020ff518`.
-  [Its separate CI run](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36352863787)
-  passes the Browser job; native/oracle/package jobs are still running.
-  It changes frontend/validation files, preserving the verified
-  native backend. Local checks pass: 65 frontend checks, canonical build, two
+- Output-setup UI source: `97d69fd448b2a3bb92331f3a377e84a54bd006b9`.
+  [Its exact-source CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36353428304)
+  is running. The preceding UI candidate
+  [passed all 11 source/oracle/browser/optional-Quest jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36352863787).
+  The final repair clears the UI media summary when Rust retires its cache on
+  release/disable; the audit enforces fresh audio preparation before another
+  reservation. Native backend files remain unchanged from the verified controls.
+  Local checks pass: 65 frontend checks, canonical build, two
   Pages assembly checks, six output layouts/control cases, six participant
   layouts/input cases and 15 shared text/lifecycle cases. Both native UI audits
   use a mocked bridge. The output audit covers exact channel/rate selection,
@@ -49,13 +52,11 @@ Each status applies to its stated surface, not to the whole product.
   package assembly checks include direct/JSON equivalence, stale review/input,
   low-storage, failed renderer and cancel/publication race denials. Existing
   3DTI and the 3D viewer remain the stimulus owners; Python remains the oracle.
-- Prior synchronized source `a2b5121aa023478af572e2fafa69fcba523f9557`
-  [passed all 14 source/oracle/package jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36347825323).
-  Its Windows NSIS, macOS DMG and Linux deb validation packages were built,
-  but were not installed or physically qualified here.
-- Synchronized controls `517e155a813f97d35a6008eab1101da4da135cfb`
-  [passed all 14 jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36351705620)
-  and all 470 live/local Pages byte comparisons plus four main routes.
+- The native-controls synchronization `517e155a813f97d35a6008eab1101da4da135cfb`
+  [passed all 14 jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36351705620).
+  Its three validation installers were built, not installed here. The current
+  output UI [Pages deployment](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36353428303)
+  succeeded; fresh parity passes all 470 files and four main routes.
   Repeat hosted parity after each changed UI deployment.
   Pages uses the canonical compiled companion assets; text inputs use LF.
 
