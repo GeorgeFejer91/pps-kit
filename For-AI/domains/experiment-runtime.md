@@ -110,7 +110,16 @@ readiness follows callback confirmation. Main-window-only state broadcasts
 update the UI; older revisions and absent readiness cannot enable capture.
 The main window may listen/unlisten but cannot emit authority snapshots.
 
-Preparation and these source seams do not enable execution. Operator-facing
-native preparation/activation, whole profiles/multiple blocks, an installed
+The local output view uses the existing main-window-only native preflight
+commands. It lists configurations matching prepared channels/sample rate,
+requires an explicit choice, and preserves decimal generation fences. Silent
+preparation never enables Start. Disable remains available during a pending
+operation; stale replies cannot restore its UI. Suspension clears the view's
+inventory; resume reads fresh native state without replay. The Rust owner keeps
+the device/port authority. Desktop notifications remain in their owning panel
+and use the shared bounded-text helper.
+
+Preparation and these source seams do not enable execution. Native activation,
+whole profiles/multiple blocks, an installed
 complete experiment, calibration and physical qualification remain gates.
 Wire completion is denied for real packages; Stop preserves partial results.

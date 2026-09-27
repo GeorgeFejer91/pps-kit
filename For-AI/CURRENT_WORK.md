@@ -20,13 +20,17 @@ Updated: 2026-09-27. Replace at stage transitions; do not append command logs.
   snapshots and completion receipts cannot authorize another attempt.
   The participant response button calls local native IPC; main-window state
   updates enable it only after native confirmation. Partial or interrupted
-  evidence cannot certify completion. Preparation still does not enable Start.
+  evidence cannot certify completion. Local output setup uses the existing
+  native preflight commands, exact device/configuration fences and silent
+  preparation. Disabling pending preparation never restores a late result;
+  resumed UI needs fresh output state and an explicit device choice.
+  Desktop notifications stay in their owning panel. Preparation does not enable Start.
 - **Evidence:** the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md)
   identifies exact source and checks. Source, CI packages, installed behavior,
   physical timing, participant results and replication remain distinct gates.
   The installed compatibility Runner has not been rebuilt in this task.
-- **Next gate:** operator-facing native output preparation and one complete
-  native experiment; extend the same owner to full profiles/multiple blocks.
+- **Next gate:** native experiment activation and one complete installed
+  experiment; extend the same owner to full profiles/multiple blocks.
   The candidate remains non-executable/unqualified until its complete adapter
   is enabled. Qualification requires observed devices/routes and calibration;
   source tests cannot supply physical evidence.
