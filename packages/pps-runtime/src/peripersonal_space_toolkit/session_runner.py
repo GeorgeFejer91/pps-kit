@@ -22,7 +22,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
-from .design import StimulusDesign, design_to_dict, experiment_schedule_rows, export_protocol_csv, validate_design
+from .design import StimulusDesign, block_trial_rows, design_to_dict, experiment_schedule_rows, export_protocol_csv, validate_design
+from .resource_limits import audio_generation_preflight, read_csv_rows as read_plan_csv, require_plan_size
 from .loudness import (
     loudness_manifest_payload,
     loudness_policy_for_design,
@@ -1811,7 +1812,7 @@ def preflight_run_package(
     if not render_ready:
         messages.append("Rendered looming WAVs are missing.")
 
-    schedule_rows = experiment_schedule_rows(design)
+    schedule_rows = block_trial_rows(design)
     schedule_ready = bool(schedule_rows)
     if not schedule_ready:
         messages.append("No trial schedule rows are available.")
@@ -3205,7 +3206,7 @@ def prepare_segment_run_package(
         source_csv = _resolve_relative_path(order_row.get("block_csv_path", ""), order_csv_path.parent)
         if not _path_exists(source_csv):
             raise FileNotFoundError(f"Segment 6 references a missing Segment 5 block CSV: {source_csv}")
-        master_rows = _read_csv_rows(source_csv)
+        master_rows = read_plan_csv(_filesystem_path(source_csv))
         if not master_rows:
             raise ValueError(f"Segment 5 block CSV has no trial rows: {source_csv}")
 
@@ -3483,7 +3484,7 @@ def _prepare_split_segment_run_packages(
             source_csv = _resolve_relative_path(order_row.get("block_csv_path", ""), order_csv_path.parent)
             if not _path_exists(source_csv):
                 raise FileNotFoundError(f"Segment 6 references a missing Segment 5 block CSV: {source_csv}")
-            master_rows = _read_csv_rows(source_csv)
+            master_rows = read_plan_csv(_filesystem_path(source_csv))
             if not master_rows:
                 raise ValueError(f"Segment 5 block CSV has no trial rows: {source_csv}")
 
@@ -7181,7 +7182,7 @@ def _load_segment_run_setup(run_setup_manifest_path: Path) -> tuple[dict[str, An
     csv_path = _resolve_relative_path(manifest.get("csv_path", ""), manifest_path.parent)
     if not _path_exists(csv_path):
         raise FileNotFoundError(f"Segment 6 block-order CSV is missing: {csv_path}")
-    rows = _read_csv_rows(csv_path)
+    rows = read_plan_csv(_filesystem_path(csv_path))
     if not rows:
         raise ValueError("Segment 6 block-order CSV contains no rows.")
     expected = _as_int(manifest.get("total_block_runs"), default=len(rows))
@@ -7888,6 +7889,27 @@ def _materialize_segment_block_wav(
     frame_cursor = 0
     source_block_hash = _sha256_file(source_block_csv_path)
     ordered_rows = sorted(source_rows, key=lambda row: _as_int(row.get("block_trial_index"), default=len(trial_rows) + 1))
+    require_plan_size(len(ordered_rows), "Prepared block")
+    # Read headers and routing metadata before allocating any decoded audio.
+    duration_estimate = 0.0
+    info_cache = {}
+    for row in ordered_rows:
+        trial_path = _resolve_relative_path(_row_value(row, "trial_file_path", "Trial_File_Path", default=""), source_block_csv_path.parent)
+        info = info_cache.get(trial_path)
+        if info is None:
+            info = sf.info(_soundfile_path(trial_path))
+            info_cache[trial_path] = info
+        if sample_rate and info.samplerate != sample_rate:
+            raise ValueError(f"Segment 5 block contains mixed sample rates: {source_block_csv_path.name}")
+        sample_rate = int(info.samplerate)
+        duration = info.frames / sample_rate
+        duration_estimate += duration + max(0.0, _as_float(
+            _row_value(row, "iti_ms", "ITI_ms", "Intertrial_Interval_ms", default=""), default=0.0)) / 1000
+        switching = _speaker_switching_spec(row, duration_s=duration)
+        target_channels = max(target_channels, info.channels, max(switching["_channels"]) if switching else 0)
+    if ordered_rows:
+        audio_generation_preflight(output_path.parent, duration_s=duration_estimate,
+                                   sample_rate=sample_rate, channels=target_channels)
     for trial_index, row in enumerate(ordered_rows, start=1):
         trial_path = _resolve_relative_path(_row_value(row, "trial_file_path", "Trial_File_Path", default=""), source_block_csv_path.parent)
         if not _path_exists(trial_path):

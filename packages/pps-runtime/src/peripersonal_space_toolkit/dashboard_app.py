@@ -115,6 +115,7 @@ from .runtime_paths import designer_frontend_root, resource_root, writable_root
 from .subprocess_utils import windows_no_console_kwargs
 from .dashboard_backend.security import CompanionSecurity, TOKEN_HEADER
 from .dashboard_backend.jobs import DashboardJob, JobManager, JobProgress, JobSourceChanged
+from .resource_limits import MAX_BLOCKS, audio_generation_preflight, read_csv_rows, require_plan_size
 from .dashboard_backend.contracts import ApplicationError, application_error_from_exception
 from .designer_segments import (
     build_segment_lineage,
@@ -1435,6 +1436,8 @@ class DashboardController:
                 if _is_readonly_profile_design(previous_design) and mutates_readonly_design:
                     raise ValueError("Loaded study profiles are read-only. Use Edit As New Study before changing design settings.")
 
+                # Check the existing schedule owner before changing accepted state.
+                block_trial_rows(candidate)
                 changed_segments = _changed_design_segments(previous_design, candidate)
                 progress = _designer_progress(previous_design)
 
@@ -1610,6 +1613,10 @@ class DashboardController:
                 raise ValueError("Choose a local audio file before creating or updating the fixed clip.")
             target_duration_s = max(0.1, _float(audio_payload.get("target_duration_s"), 4.0))
             ingredient_dir = project.segment1_dir
+            source_info = _audio_file_info(source_path)
+            resource_estimate = audio_generation_preflight(ingredient_dir,
+                **{key: source_info[key] for key in ("duration_s", "sample_rate", "channels")},
+                source_bytes=source_path.stat().st_size)
 
             def _commit_fixed_audio(progress: JobProgress) -> dict[str, Any]:
                 progress(0, 1, "Checking imported audio")
@@ -1690,7 +1697,7 @@ class DashboardController:
                     "message": "Fixed audio clip was committed by the local companion backend.",
                 }
 
-            return self.jobs.start("stimulus_bake", _commit_fixed_audio, progress=True)
+            return self.jobs.start("stimulus_bake", _commit_fixed_audio, progress=True, resource_estimate=resource_estimate)
 
         if recipe_kind == "imported_audio" and original_entry is not None:
             original_audio = original_entry[1]
@@ -1761,6 +1768,9 @@ class DashboardController:
         source_payload["trajectory_snapshot"] = trajectory_snapshot
         seed = int(design.protocol.random_seed or 20250604)
         ingredient_dir = project.segment1_dir
+        resource_estimate = audio_generation_preflight(ingredient_dir,
+            duration_s=bake_design.trajectory.total_duration_s,
+            sample_rate=render_backend.DEFAULT_RENDER_SAMPLE_RATE, channels=2)
 
         def _bake(progress: JobProgress) -> dict[str, Any]:
             progress(0, 1, "Rendering stimulus")
@@ -1851,7 +1861,7 @@ class DashboardController:
                 "message": "Stimulus was baked by the local companion backend; no online upload was performed.",
             }
 
-        return self.jobs.start("stimulus_bake", _bake, progress=True)
+        return self.jobs.start("stimulus_bake", _bake, progress=True, resource_estimate=resource_estimate)
 
     def prepare_session(
         self,
@@ -4373,6 +4383,14 @@ def _build_trial_sequence_variants(design: StimulusDesign, render_dir: Path) -> 
             _ensure_dir(row_dir)
             silence_dir = row_dir / "_segments"
             factors = _trial_variant_factors(design, strip, render_dir)
+            variant_count = math.prod(map(len, factors)) if factors else 0
+            require_plan_size(variant_count, "Sequence variants")
+            duration_s = sum(max((float(choice.get("duration_ms") or choice.get("jitter_ms") or 0)
+                                for choice in factor), default=0) for factor in factors) / 1000
+            channels = max((int(choice.get("channels") or 2) for factor in factors for choice in factor), default=2)
+            sample_rate = max((int(choice.get("sample_rate") or 44100) for factor in factors for choice in factor), default=44100)
+            audio_generation_preflight(root, duration_s=duration_s, sample_rate=sample_rate,
+                                       channels=channels, file_count=variant_count)
             variants = list(itertools.product(*factors)) if factors else []
             row_count = 0
             for variant_index, variant in enumerate(variants, start=1):
@@ -7214,6 +7232,8 @@ def _build_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recip
     folder_summaries: dict[str, dict[str, Any]] = {}
     family_counts = {family: 0 for family in TRIAL_POOL_FAMILIES}
     trial_pool_index = 1
+    require_plan_size(sum(int(record["base_repetitions"]) + int(bool(record["fractional_extra"]))
+                          for record in records), "Trial repetition pool")
     for record in records:
         source = record["source"]
         folder_key = str(source.get("folder_key") or "")
@@ -7339,8 +7359,7 @@ def _build_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recip
 
 
 def _read_csv_dict_rows(path: Path) -> list[dict[str, str]]:
-    with open(_filesystem_path(path), newline="", encoding="utf-8") as handle:
-        return [dict(row) for row in csv.DictReader(handle)]
+    return read_csv_rows(_filesystem_path(path))
 
 
 def _stable_int(value: str) -> int:
@@ -7739,6 +7758,8 @@ def _build_block_csv_preview(
     if isinstance(recipe_repeat, str):
         recipe_repeat = recipe_repeat.strip().lower() in {"1", "true", "yes", "on"}
     repeat_trial_pool_per_block = bool(recipe_repeat or getattr(design.protocol, "repeat_trial_pool_per_block", False))
+    require_plan_size(block_count, "Blocks", limit=MAX_BLOCKS)
+    require_plan_size(len(pool_rows) * (block_count if repeat_trial_pool_per_block else 1), "Block schedule")
     soa_values: list[int] = []
     for row in pool_rows:
         try:

@@ -37,10 +37,14 @@ append command logs or machine-specific paths.
   pass the inspected 12-case planner audit and 13 rendered text cases. Runner's
   57 browser checks and canonical Pages assembly byte checks pass. Actual
   WebView accessibility qualification remains pending.
-- **Next gate:** add bounded resource preflight and connect native output execution.
+- **Next gate:** connect native output execution and phone lifecycle/roles.
   Source/cancellation publication fences pass owning checks, including stale
   rendering, cancelled rendering, renderer failure, segment rollback, and the
   cancellation/publication race. Four segment jobs share one completion handler.
+  Shared plan/CSV limits and audio memory/storage preflight pass 53 design/profile/
+  job checks and 15 actual Segment package assembly checks, including JSON input.
+  Low-storage denial occurs before decoded audio allocation. Live Pages matches
+  37 canonical files; viewer text newline handling is now explicit across platforms.
 
 Detailed run artifacts belong in ignored validation folders. Preserve the
 pre-sync Git bundle and dirty-file backup until reconciliation is verified.

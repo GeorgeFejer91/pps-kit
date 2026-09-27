@@ -48,3 +48,10 @@ publication. Segment jobs reuse one completion handler and the existing rebuild
 rollback owner. Cancellation after publication begins is reported as completion,
 not as an unpublished result. Use the existing renderer's `auto` selection and
 retain its explicit native/reference provenance.
+
+`resource_limits.py` owns bounded assembly CSV reads, plan-entry limits, and
+conservative PCM16/scratch/float32 estimates. Generation and block preparation
+check storage before decoding or publishing media. Oversized plans are rejected,
+never truncated. Keep analytical participant/event readers separate from these
+assembly-input limits. UI readiness checks inspect one participant's block plan
+rather than expanding every participant's schedule.

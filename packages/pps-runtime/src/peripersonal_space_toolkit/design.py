@@ -17,6 +17,7 @@ from typing import Any
 import numpy as np
 
 from .runtime_paths import resource_root
+from .resource_limits import MAX_BLOCKS, require_plan_size
 
 
 SUPPORTED_NOISE_TYPES = ("pink", "blue", "violet", "white", "brown")
@@ -884,6 +885,7 @@ def validate_design(design: StimulusDesign) -> list[str]:
 
 
 def effective_block_specs(protocol: ProtocolSpec) -> list[BlockSpec]:
+    require_plan_size(len(protocol.block_specs) or max(1, protocol.blocks), "Blocks", limit=MAX_BLOCKS)
     if protocol.block_specs:
         return [
             BlockSpec(
@@ -904,6 +906,7 @@ def effective_block_specs(protocol: ProtocolSpec) -> list[BlockSpec]:
 def protocol_factor_pairs(protocol: ProtocolSpec) -> list[tuple[int, float]]:
     if protocol.pair_spatial_values_with_soas:
         return list(zip(protocol.soa_values_ms, protocol.spatial_values_cm))
+    require_plan_size(len(protocol.soa_values_ms) * len(protocol.spatial_values_cm), "Factor combinations")
     return [
         (soa, spatial)
         for soa in protocol.soa_values_ms
@@ -979,6 +982,7 @@ def baseline_target_count(protocol: ProtocolSpec, reference_trial_count: int, ca
 def _select_baseline_rows(candidates: list[dict[str, Any]], target_count: int) -> list[dict[str, Any]]:
     if not candidates or target_count <= 0:
         return []
+    require_plan_size(target_count, "Baseline trials")
     selected: list[dict[str, Any]] = []
     for index in range(target_count):
         row = dict(candidates[index % len(candidates)])
@@ -1209,6 +1213,7 @@ def _strip_variant_choices(design: StimulusDesign, strip: TrialStripSpec) -> lis
         factors.append(choices)
     if not factors:
         return []
+    require_plan_size(math.prod(map(len, factors)), "Sequence variants")
     return [tuple(variant) for variant in itertools.product(*factors)]
 
 
@@ -1390,6 +1395,7 @@ def _filmstrip_condition_rows_for_strip(
     rows: list[dict[str, Any]] = []
     tactile_sites = protocol.tactile_sites or ["hand"]
 
+    require_plan_size(protocol.repetitions_per_condition * len(tactile_sites) * len(soa_values) * len(variants), "Audio-tactile trials")
     for repetition in range(1, protocol.repetitions_per_condition + 1):
         for tactile_site in tactile_sites:
             for soa_index, soa_ms in enumerate(soa_values):
@@ -1451,6 +1457,7 @@ def _filmstrip_baseline_rows_for_strip(
     rows: list[dict[str, Any]] = []
     tactile_sites = protocol.tactile_sites or ["hand"]
 
+    require_plan_size(protocol.repetitions_per_condition * len(tactile_sites) * len(baseline_pairs) * len(variants), "Baseline candidates")
     for repetition in range(1, protocol.repetitions_per_condition + 1):
         for tactile_site in tactile_sites:
             for soa_ms, spatial_cm in baseline_pairs:
@@ -1503,6 +1510,7 @@ def _filmstrip_baseline_rows_for_strip(
 def _filmstrip_catch_rows(rows: list[dict[str, Any]], protocol: ProtocolSpec, catch_count: int) -> list[dict[str, Any]]:
     if not rows or catch_count <= 0:
         return []
+    require_plan_size(catch_count, "Catch trials")
     template_rows = rows if protocol.catch_crosses_sequence_variants else rows[:1]
     catches: list[dict[str, Any]] = []
     for index in range(catch_count):
@@ -1525,6 +1533,7 @@ def _filmstrip_auditory_only_rows(
 ) -> list[dict[str, Any]]:
     if not rows or auditory_only_count <= 0:
         return []
+    require_plan_size(auditory_only_count, "Auditory-only trials")
     template_rows = rows if protocol.auditory_only_crosses_sequence_variants else rows[:1]
     auditory_rows: list[dict[str, Any]] = []
     for index in range(auditory_only_count):
@@ -1670,6 +1679,8 @@ def _filmstrip_rows_for_stimulus_types(
     for row in selected_baselines:
         baselines_by_strip.setdefault(int(row.get("trial_strip_index") or 0), []).append(row)
     combined: list[dict[str, Any]] = []
+    require_plan_size(sum(len(rows) for _, rows in rows_by_strip) + len(exact_catches)
+                      + len(exact_auditory_only) + len(selected_baselines), "Trial pool")
     for strip_index, rows in rows_by_strip:
         combined.extend(rows)
         combined.extend(catches_by_strip.get(strip_index, []))
@@ -1718,6 +1729,7 @@ def _filmstrip_distributed_block_trial_rows(design: StimulusDesign) -> list[dict
             protocol,
             seed=protocol.random_seed + block_index * 1009,
         )
+        require_plan_size(len(scheduled) + len(randomized), "Block schedule")
         for block_trial_index, row in enumerate(randomized, start=1):
             scheduled.append(
                 {
@@ -1824,6 +1836,7 @@ def _filmstrip_block_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
                 seed=protocol.random_seed + block_index * 1009 + strip_index * 917,
             )
             strip_queues.append(randomized)
+        require_plan_size(len(scheduled) + sum(map(len, strip_queues)), "Block schedule")
         block_trial_index = 1
         while any(strip_queues):
             for queue in strip_queues:
@@ -1849,6 +1862,9 @@ def protocol_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
     repetitions = range(1, protocol.repetitions_per_condition + 1)
     sound_sources = protocol_sound_sources(design)
 
+    require_plan_size(protocol.repetitions_per_condition * len(protocol.tactile_sites)
+        * len(protocol.auditory_motion_directions) * len(protocol.respiratory_phases)
+        * len(factor_pairs) * len(sound_sources), "Audio-tactile trials")
     for repetition in repetitions:
         for tactile_site in protocol.tactile_sites:
             for motion_direction in protocol.auditory_motion_directions:
@@ -1885,6 +1901,7 @@ def protocol_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
         phases = protocol.respiratory_phases or ["Any"]
         pairs = factor_pairs or [(0, 0.0)]
         motion_directions = protocol.auditory_motion_directions or ["looming"]
+        require_plan_size(len(rows) + max(0, auditory_only_count), "Trials with auditory-only targets")
         for i in range(max(0, auditory_only_count)):
             soa_ms, spatial_cm = pairs[i % len(pairs)]
             noise = noises[i % len(noises)]
@@ -1910,6 +1927,8 @@ def protocol_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
 
     if protocol.include_baseline_trials:
         baseline_pairs = baseline_factor_pairs(protocol, design.trajectory)
+        require_plan_size(protocol.repetitions_per_condition * len(protocol.tactile_sites)
+            * len(protocol.respiratory_phases) * len(baseline_pairs), "Baseline candidates")
         baseline_candidates: list[dict[str, Any]] = []
         for repetition in repetitions:
             for tactile_site in protocol.tactile_sites:
@@ -1937,6 +1956,7 @@ def protocol_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
         ))
 
     noncatch_count = len(rows)
+    require_plan_size(noncatch_count, "Trials with baselines")
     if protocol.catch_trials_exact is not None:
         catch_count = protocol.catch_trials_exact
     elif protocol.catch_trial_percentage > 0:
@@ -1949,6 +1969,7 @@ def protocol_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
     pairs = factor_pairs or [(0, 0.0)]
     tactile_sites = protocol.tactile_sites or ["body"]
     motion_directions = protocol.auditory_motion_directions or ["looming"]
+    require_plan_size(len(rows) + catch_count, "Trials with catches")
     for i in range(catch_count):
         soa_ms, spatial_cm = pairs[i % len(pairs)]
         noise = noises[i % len(noises)]
@@ -2042,6 +2063,7 @@ def _violates_trial_type_run(candidate: dict[str, Any], ordered: list[dict[str, 
 
 
 def _randomize_rows(rows: list[dict[str, Any]], protocol: ProtocolSpec, seed: int) -> list[dict[str, Any]]:
+    require_plan_size(len(rows), "Randomized block")
     if protocol.trial_randomization_strategy == "ordered":
         return list(rows)
 
@@ -2085,6 +2107,9 @@ def block_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
         rows_by_type.setdefault(str(row["trial_type"]), []).append(row)
 
     if protocol.repeat_trial_pool_per_block:
+        require_plan_size(sum(len(rows) for block in blocks for kind, rows in rows_by_type.items()
+                              if kind in block.stimulus_types), "Repeated block schedule")
+    if protocol.repeat_trial_pool_per_block:
         for block in blocks:
             for trial_type, rows in rows_by_type.items():
                 if trial_type not in block.stimulus_types:
@@ -2116,6 +2141,7 @@ def block_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
             protocol,
             seed=protocol.random_seed + block_index * 1009,
         )
+        require_plan_size(len(scheduled) + len(randomized), "Block schedule")
         for trial_index, row in enumerate(randomized, start=1):
             scheduled.append(
                 {
@@ -2135,6 +2161,7 @@ def participant_block_orders(design: StimulusDesign) -> dict[str, list[str]]:
     labels = [block.label for block in effective_block_specs(protocol)]
     if not labels:
         return {}
+    require_plan_size(protocol.participants * len(labels), "Participant block orders")
 
     orders: dict[str, list[str]] = {}
     for participant_index in range(1, protocol.participants + 1):
@@ -2151,6 +2178,7 @@ def participant_block_orders(design: StimulusDesign) -> dict[str, list[str]]:
 
 def experiment_schedule_rows(design: StimulusDesign) -> list[dict[str, Any]]:
     block_rows = block_trial_rows(design)
+    require_plan_size(len(block_rows) * design.protocol.participants, "Participant schedule")
     rows_by_block: dict[str, list[dict[str, Any]]] = {}
     for row in block_rows:
         rows_by_block.setdefault(str(row["block_label"]), []).append(row)

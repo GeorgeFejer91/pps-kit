@@ -6,18 +6,16 @@ their result; it does not introduce another scheduler or copy audio into JSON.
 
 from __future__ import annotations
 
-import csv
 import json
-from itertools import islice
 from pathlib import Path
 from typing import Any
 
 from .design import StimulusDesign, audio_file_summary, design_from_dict, design_to_dict
 from .designer_segments.registry import manifest_sha256
+from .resource_limits import MAX_DOCUMENT_BYTES, read_csv_rows
 
 PROFILE_SCHEMA = "pps-experiment-profile.v1"
-MAX_PROFILE_BYTES = 8 * 1024 * 1024
-MAX_PLAN_ROWS = 100_000
+MAX_PROFILE_BYTES = MAX_DOCUMENT_BYTES
 
 
 def _path(value: str | Path, base: Path) -> Path:
@@ -26,12 +24,9 @@ def _path(value: str | Path, base: Path) -> Path:
 
 
 def _read_csv(path: Path) -> list[dict[str, str]]:
-    if path.stat().st_size > MAX_PROFILE_BYTES:
-        raise ValueError("An assembly CSV exceeds the 8 MiB profile limit.")
-    with path.open(encoding="utf-8-sig", newline="") as handle:
-        rows = list(islice(csv.DictReader(handle), MAX_PLAN_ROWS + 1))
-    if not rows or len(rows) > MAX_PLAN_ROWS:
-        raise ValueError("An assembly CSV must contain 1–100,000 rows.")
+    rows = read_csv_rows(path)
+    if not rows:
+        raise ValueError("An assembly CSV must contain at least one row.")
     return rows
 
 

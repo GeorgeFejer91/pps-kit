@@ -26,6 +26,7 @@ class DashboardJob:
     status: str = "queued"
     message: str = ""
     result: dict[str, Any] | None = None
+    resource_estimate: dict[str, Any] | None = None
     error: str = ""
     error_code: str = ""
     retryable: bool = False
@@ -98,8 +99,12 @@ class JobManager:
         self._queue: queue.Queue[Callable[[], None]] = queue.Queue(maxsize=max(1, int(max_pending_jobs)))
         self._workers: list[threading.Thread] = []
 
-    def start(self, kind: str, func: Callable[..., dict[str, Any]], *, progress: bool = False) -> DashboardJob:
-        job = DashboardJob(job_id=uuid.uuid4().hex[:12], kind=str(kind or "job"))
+    def start(
+        self, kind: str, func: Callable[..., dict[str, Any]], *, progress: bool = False,
+        resource_estimate: dict[str, Any] | None = None,
+    ) -> DashboardJob:
+        job = DashboardJob(job_id=uuid.uuid4().hex[:12], kind=str(kind or "job"),
+                           resource_estimate=deepcopy(resource_estimate))
         cancel_event = threading.Event()
 
         _progress = JobProgress(self, job.job_id, cancel_event)
@@ -163,7 +168,7 @@ class JobManager:
                 self._jobs.pop(job.job_id, None)
                 self._cancel_events.pop(job.job_id, None)
                 raise RuntimeError("The Designer background-job queue is full. Try again after a job finishes.") from exc
-        return replace(job)
+        return _job_snapshot(job)
 
     def _ensure_workers_locked(self) -> None:
         if self._workers:
@@ -271,4 +276,4 @@ def _json_ready(value: Any) -> Any:
 
 
 def _job_snapshot(job: DashboardJob) -> DashboardJob:
-    return replace(job, result=deepcopy(job.result))
+    return replace(job, result=deepcopy(job.result), resource_estimate=deepcopy(job.resource_estimate))

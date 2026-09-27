@@ -49,6 +49,7 @@ from .loudness import (
 )
 from .runtime_paths import product_root, repo_root
 from .subprocess_utils import windows_no_console_kwargs
+from .resource_limits import audio_generation_preflight
 
 
 REPO_ROOT = repo_root()
@@ -1416,6 +1417,10 @@ def render_design_with_3dti(
     output_dir.mkdir(parents=True, exist_ok=True)
     backend = resolve_backend_executable(backend_executable)
     config = build_render_config(design, seed=seed, output_dir=output_dir, include_tactile=include_tactile)
+    if not dry_run:
+        audio_generation_preflight(output_dir, duration_s=float(config["trajectory"]["total_duration_s"]),
+            sample_rate=int(config["source"]["sample_rate"]), channels=3 if include_tactile else 2,
+            file_count=len(config["source"]["noises"]))
     config_path = output_dir / "render_config.3dti.json"
     manifest_path = output_dir / "render_manifest.json"
     qc_path = output_dir / "render_qc.csv"
