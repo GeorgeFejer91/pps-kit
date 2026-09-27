@@ -33,6 +33,7 @@ use crate::native_output::{
     NativeOutputInventory, NativeOutputReleaseRequest, NativeOutputReservation,
     NativeOutputReserveRequest, NativeOutputStatus, NativeOutputTicket,
 };
+use crate::native_playback::{NativePlaybackCompletion, NativePlaybackHandoff};
 use crate::prepared_audio::{
     PreparedAudioCandidate, PreparedAudioLookup, PreparedAudioSource, PreparedAudioSummary,
 };
@@ -595,16 +596,19 @@ impl AppRuntime {
         &self,
         request: NativeOutputReserveRequest,
     ) -> Result<NativeOutputReservation, NativeOutputCommandError> {
-        let (ticket, selection) = self
+        let preparation = self
             .0
             .authority
             .begin_native_output_reserve(self.0.native_output.observation(), request)
             .await
             .map_err(|_| NativeOutputCommandError::runtime())??;
-        let receive = match self.0.native_output.reserve(ticket, selection) {
+        let ticket = preparation.ticket;
+        let source = preparation.source;
+        let plan = source.as_ref().map(|source| Arc::clone(&source.plan));
+        let receive = match self.0.native_output.reserve(ticket, preparation.selection, plan) {
             Ok(receive) => receive,
             Err(error) => {
-                self.finish_reserve(ticket, Err(error.clone())).await?;
+                self.finish_reserve(ticket, Err(error.clone()), None).await?;
                 return Err(error);
             }
         };
@@ -616,16 +620,24 @@ impl AppRuntime {
                 ticket: completed,
                 reservation_generation,
                 reservation,
+                playback,
             } if completed == ticket => {
-                self.finish_reserve(ticket, Ok(reservation_generation))
-                    .await?;
+                let playback = match (source, playback) {
+                    (Some(source), Some(port)) => Some((source, NativePlaybackHandoff::new(port))),
+                    (None, None) => None,
+                    _ => {
+                        self.0.native_output.invalidate_after_completion_failure(ticket);
+                        return Err(NativeOutputCommandError::changed());
+                    }
+                };
+                self.finish_reserve(ticket, Ok(reservation_generation), playback).await?;
                 Ok(reservation)
             }
             CoordinatorReply::Failed {
                 ticket: completed,
                 error,
             } if completed == ticket => {
-                self.finish_reserve(ticket, Err(error.clone())).await?;
+                self.finish_reserve(ticket, Err(error.clone()), None).await?;
                 Err(error)
             }
             _ => {
@@ -677,15 +689,20 @@ impl AppRuntime {
         &self,
         ticket: NativeOutputTicket,
         result: Result<u64, NativeOutputCommandError>,
+        playback: Option<NativePlaybackCompletion>,
     ) -> Result<(), NativeOutputCommandError> {
         for _ in 0..NATIVE_OUTPUT_COMPLETION_RETRIES {
             match self
                 .0
                 .authority
-                .complete_native_output_reserve(ticket, result.clone())
+                .complete_native_output_reserve(ticket, result.clone(), playback.clone())
                 .await
             {
-                Ok(Ok(_)) | Ok(Err(_)) => return Ok(()),
+                Ok(Ok(_)) => return Ok(()),
+                Ok(Err(error)) => {
+                    self.0.native_output.invalidate_after_completion_failure(ticket);
+                    return Err(error);
+                }
                 Err(OwnerSubmitError::Closed) => break,
                 Err(OwnerSubmitError::Full) => {
                     tokio::time::sleep(NATIVE_OUTPUT_COMPLETION_RETRY_DELAY).await;

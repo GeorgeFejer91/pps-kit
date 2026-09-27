@@ -10,8 +10,9 @@ use std::{
 };
 
 use pps_contracts::{RunnerPhase, RunnerSnapshot};
+use pps_runner_audio::PreparedPlaybackPlan;
 use pps_runner_audio_cpal::{
-    CpalOutputService, ExactOutputSelection, OutputBufferSelection, OutputBufferSupport,
+    CpalOutputService, ExactOutputSelection, OutputBufferSelection, OutputBufferSupport, PlaybackPort,
     OutputDeviceInventory, OutputFaultKind, OutputReservationReceipt, OutputServiceError,
     OutputServiceErrorCode, OutputServicePhase, MAXIMUM_WARMUP_TIMEOUT,
 };
@@ -39,6 +40,7 @@ pub(crate) enum NativeOutputPhase {
     Enumerated,
     ReservingSilence,
     ReservedSilence,
+    ReservedMedia,
     CleanupPending,
     Disabled,
     Faulted,
@@ -414,7 +416,7 @@ impl NativeOutputAuthority {
             in_flight: self.in_flight.is_some(),
             cleanup_pending: self.cleanup_pending,
             silence_only: true,
-            media_connected: false,
+            media_connected: self.phase == NativeOutputPhase::ReservedMedia,
             armed: false,
             executable: false,
             qualified: false,
@@ -611,6 +613,14 @@ impl NativeOutputAuthority {
         }
     }
 
+    pub(crate) fn media_prepared(&self) -> bool {
+        self.phase == NativeOutputPhase::ReservedMedia
+    }
+
+    pub(crate) fn mark_media_prepared(&mut self) {
+        self.phase = NativeOutputPhase::ReservedMedia;
+    }
+
     pub(crate) fn release(
         &mut self,
         request: &NativeOutputReleaseRequest,
@@ -803,7 +813,7 @@ fn parse_generation(value: &str) -> Result<u64, NativeOutputCommandError> {
 
 enum CoordinatorOperation {
     Enumerate,
-    Reserve(NativeOutputSelection),
+    Reserve(NativeOutputSelection, Option<Arc<PreparedPlaybackPlan>>),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -830,6 +840,7 @@ pub(crate) enum CoordinatorReply {
         ticket: NativeOutputTicket,
         reservation_generation: u64,
         reservation: NativeOutputReservation,
+        playback: Option<PlaybackPort>,
     },
     Failed {
         ticket: NativeOutputTicket,
@@ -856,6 +867,13 @@ trait NativeOutputDriver: Send + 'static {
         &mut self,
         selection: Self::Selection,
     ) -> Result<Self::Receipt, NativeOutputCommandError>;
+    fn prepare_playback(
+        &mut self,
+        _receipt: &Self::Receipt,
+        _plan: Arc<PreparedPlaybackPlan>,
+    ) -> Result<PlaybackPort, NativeOutputCommandError> {
+        Err(NativeOutputCommandError::new("native_output_media_unavailable", "This native output driver cannot bind the prepared media."))
+    }
     fn reservation_generation(receipt: &Self::Receipt) -> u64;
     fn reservation_projection(
         receipt: &Self::Receipt,
@@ -975,6 +993,14 @@ impl NativeOutputDriver for CpalDriver {
             .map_err(map_service_error)
     }
 
+    fn prepare_playback(
+        &mut self,
+        receipt: &Self::Receipt,
+        plan: Arc<PreparedPlaybackPlan>,
+    ) -> Result<PlaybackPort, NativeOutputCommandError> {
+        self.service.prepare_playback(receipt, plan).map_err(map_service_error)
+    }
+
     fn reservation_generation(receipt: &Self::Receipt) -> u64 {
         receipt.reservation_generation()
     }
@@ -1012,7 +1038,7 @@ impl NativeOutputDriver for CpalDriver {
         receipt: &Self::Receipt,
     ) -> Result<ReservationHealth, NativeOutputCommandError> {
         let status = self.service.status().map_err(map_service_error)?;
-        if status.phase() == OutputServicePhase::ReservedSilence
+        if matches!(status.phase(), OutputServicePhase::ReservedSilence | OutputServicePhase::ReservedMedia)
             && status.reservation_generation() == Some(receipt.reservation_generation())
             && status.callback_fault_count() == 0
             && status.last_fault().is_none()
@@ -1031,7 +1057,25 @@ impl NativeOutputDriver for CpalDriver {
     }
 
     fn release(&mut self, receipt: &Self::Receipt) -> Result<(), NativeOutputCommandError> {
-        self.service.release(receipt).map_err(map_service_error)
+        match self.service.release(receipt) {
+            Ok(()) => Ok(()),
+            Err(error) if error.code() == OutputServiceErrorCode::StaleReservation => {
+                // Media warmup may already have released this stream. Accept
+                // only the service's confirmed fault cleanup, never uncertainty.
+                let status = self.service.status().map_err(map_service_error)?;
+                if status.phase() == OutputServicePhase::Faulted
+                    && status.reservation_generation().is_none()
+                    && status.last_fault().is_some_and(|fault| matches!(
+                        fault.kind(), OutputFaultKind::WarmupTimeout | OutputFaultKind::CallbackFault
+                    ))
+                {
+                    Ok(())
+                } else {
+                    Err(map_service_error(error))
+                }
+            }
+            Err(error) => Err(map_service_error(error)),
+        }
     }
 
     fn shutdown(&mut self) -> Result<(), NativeOutputCommandError> {
@@ -1269,7 +1313,7 @@ impl<D: NativeOutputDriver> CoordinatorState<D> {
                     }
                 }
             }
-            CoordinatorOperation::Reserve(selection) => {
+            CoordinatorOperation::Reserve(selection, plan) => {
                 let selected = self.inventory.as_ref().ok_or_else(|| {
                     NativeOutputCommandError::new(
                         "native_output_inventory_missing",
@@ -1290,6 +1334,21 @@ impl<D: NativeOutputDriver> CoordinatorState<D> {
                 });
                 match result {
                     Ok(receipt) => {
+                        let playback = match plan.map(|plan| self.driver.as_mut().ok_or_else(NativeOutputCommandError::quarantined).and_then(|driver| driver.prepare_playback(&receipt, plan))).transpose() {
+                            Ok(playback) => playback,
+                            Err(error) => {
+                                let released = self.driver.as_mut().is_some_and(|driver| driver.release(&receipt).is_ok());
+                                if !released {
+                                    self.receipt = Some(receipt);
+                                    self.inventory = None;
+                                    self.quarantined = true;
+                                    observation.record(request.ticket.policy_generation, true);
+                                    notice.mark_pending();
+                                }
+                                let _ = request.reply.send(CoordinatorReply::Failed { ticket: request.ticket, error: if self.quarantined { NativeOutputCommandError::quarantined() } else { error } });
+                                return;
+                            }
+                        };
                         let latest = latest_policy_generation.load(Ordering::Acquire);
                         if latest != request.ticket.policy_generation
                             || shutdown_requested.load(Ordering::Acquire)
@@ -1311,13 +1370,15 @@ impl<D: NativeOutputDriver> CoordinatorState<D> {
                             return;
                         }
                         let reservation_generation = D::reservation_generation(&receipt);
-                        let projection =
+                        let mut projection =
                             D::reservation_projection(&receipt, request.ticket.policy_generation);
+                        projection.media_connected = playback.is_some();
                         self.receipt = Some(receipt);
                         let _ = request.reply.send(CoordinatorReply::Reserved {
                             ticket: request.ticket,
                             reservation_generation,
                             reservation: projection,
+                            playback,
                         });
                     }
                     Err(error) => {
@@ -1475,13 +1536,14 @@ impl NativeOutputCoordinator {
         &self,
         ticket: NativeOutputTicket,
         selection: NativeOutputSelection,
+        plan: Option<Arc<PreparedPlaybackPlan>>,
     ) -> Result<oneshot::Receiver<CoordinatorReply>, NativeOutputCommandError> {
         let timeout = selection
             .warmup_timeout
             .checked_add(RESERVATION_DEADLINE_GRACE)
             .unwrap_or(CLIENT_REPLY_DEADLINE)
             .min(CLIENT_REPLY_DEADLINE);
-        self.submit(ticket, CoordinatorOperation::Reserve(selection), timeout)
+        self.submit(ticket, CoordinatorOperation::Reserve(selection, plan), timeout)
     }
 
     fn submit(
@@ -1904,6 +1966,7 @@ pub(crate) mod tests {
             .reserve(
                 ticket(NativeOutputOperationKind::ReserveSilence, 2),
                 selection(inventory.inventory_generation.parse().unwrap()),
+                None,
             )
             .unwrap();
         while control.reserve_calls.load(Ordering::Acquire) == 0 {
@@ -1941,6 +2004,7 @@ pub(crate) mod tests {
             .reserve(
                 ticket(NativeOutputOperationKind::ReserveSilence, 2),
                 selection(inventory.inventory_generation.parse().unwrap()),
+                None,
             )
             .unwrap()
             .await
@@ -1990,6 +2054,7 @@ pub(crate) mod tests {
             .reserve(
                 ticket(NativeOutputOperationKind::ReserveSilence, 2),
                 selection(inventory.inventory_generation.parse().unwrap()),
+                None,
             )
             .unwrap()
             .await
@@ -2107,5 +2172,21 @@ pub(crate) mod tests {
         assert!(encoded.contains("\"mediaConnected\":false"));
         assert!(encoded.contains("\"armed\":false"));
         assert!(encoded.contains("\"qualified\":false"));
+    }
+
+    #[test]
+    fn media_preparation_keeps_output_silent_and_execution_unavailable() {
+        let mut authority = authority_with_reservation();
+        assert!(!authority.media_prepared());
+        authority.mark_media_prepared();
+        let status = authority.status();
+        assert!(status.media_connected);
+        assert!(status.silence_only);
+        assert!(!status.armed);
+        assert!(!status.executable);
+        assert!(!status.qualified);
+        assert!(authority.part_start_blocked());
+        authority.invalidate_for_runner_change();
+        assert!(!authority.media_prepared());
     }
 }

@@ -96,7 +96,7 @@ impl PreparedAudioSource {
 /// fields. This type is native-only and intentionally non-serializable.
 pub(crate) struct PreparedAudioCandidate {
     receipt: Arc<PreparedAudioSourceReceipt>,
-    playback_plan: PreparedPlaybackPlan,
+    playback_plan: Arc<PreparedPlaybackPlan>,
 }
 
 impl PreparedAudioCandidate {
@@ -126,6 +126,10 @@ impl PreparedAudioCandidate {
 
     pub(crate) fn playback_plan(&self) -> &PreparedPlaybackPlan {
         &self.playback_plan
+    }
+
+    pub(crate) fn shared_playback_plan(&self) -> Arc<PreparedPlaybackPlan> {
+        Arc::clone(&self.playback_plan)
     }
 
     pub(crate) fn decoded_bytes(&self) -> Result<u64, PreparedAudioError> {
@@ -349,7 +353,7 @@ fn prepare_verified_audio_with_limits(
     .map_err(PreparedAudioError::from_output_plan)?;
     Ok(PreparedAudioCandidate {
         receipt,
-        playback_plan,
+        playback_plan: Arc::new(playback_plan),
     })
 }
 
@@ -792,5 +796,130 @@ mod tests {
             .public_message()
             .contains(density_root.to_string_lossy().as_ref()));
         fs::remove_dir_all(density_root).unwrap();
+    }
+
+    #[test]
+    fn native_source_retains_the_same_decoded_plan_without_copying_pcm() {
+        use crate::native_playback::NativePlaybackSource;
+        let (root, source) = source();
+        let candidate = prepare_verified_audio(source).unwrap();
+        let first = NativePlaybackSource::capture(&candidate);
+        let second = NativePlaybackSource::capture(&candidate);
+        assert!(first.matches(&candidate));
+        assert!(Arc::ptr_eq(&first.plan, &second.plan));
+        assert!(Arc::ptr_eq(&first.receipt, &second.receipt));
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    fn native_boundary_records(candidate: &PreparedAudioCandidate) -> Vec<pps_runner_audio_cpal::NativePlaybackRecord> {
+        use pps_runner_audio::{RenderControl, RenderEngine, RtEventSink};
+        use pps_runner_audio_cpal::{NativePlaybackRecord, PlaybackRecordKind};
+        let plan = candidate.shared_playback_plan();
+        let mut engine = RenderEngine::from_shared_plan(Arc::clone(&plan));
+        engine.apply_control(plan.fence(), RenderControl::Start);
+        let mut output = [0.0; 4];
+        let mut slots = [None; 64];
+        let mut events = RtEventSink::new(&mut slots);
+        engine.render(&mut output, &mut events);
+        events.events().iter().flatten().map(|event| NativePlaybackRecord {
+            fence: event.fence(),
+            host_received: std::time::Instant::now(),
+            device_timestamp: None,
+            kind: PlaybackRecordKind::Boundary(*event),
+        }).collect()
+    }
+
+    #[test]
+    fn native_boundaries_resolve_original_metadata_once_and_keep_submission_unqualified() {
+        use crate::native_playback::record_input;
+        let (root, source) = source();
+        let candidate = prepare_verified_audio(source).unwrap();
+        let stamp = pps_contracts::ClockStamp { unix_ms: 123, monotonic_ns: 1000 };
+        let records = native_boundary_records(&candidate);
+        let inputs: Vec<_> = records.into_iter().map(|record| {
+            record_input(candidate.schedule(), candidate.playback_plan().fence(), record, &stamp, 400)
+                .unwrap().unwrap()
+        }).collect();
+        assert_eq!(inputs.len(), candidate.playback_plan().scheduled_events().len() + 2);
+        assert_eq!(inputs.iter().filter(|input| input.event_type == "audio_sample_zero").count(), 1);
+        assert_eq!(inputs.iter().filter(|input| input.event_type == "audio.final-frame-submitted").count(), 1);
+        for input in &inputs {
+            assert_eq!(input.monotonic_ns, 1000);
+            assert_eq!(input.unix_ms, Some(123));
+            assert_eq!(input.payload["observedHostMonotonicNs"], 400);
+            assert_eq!(input.payload["timingQualification"], "unqualified");
+        }
+        for event in candidate.schedule().events().iter().filter(|event| event.sample_index >= 0) {
+            let input = inputs.iter().find(|input| input.event_type == event.event_type
+                && input.trigger_key.as_deref() == Some(event.trigger_key.as_str())).unwrap();
+            for (key, value) in event.payload.as_object().unwrap() {
+                assert_eq!(input.payload[key], *value);
+            }
+        }
+        assert!(!serde_json::to_string(&candidate.summary().unwrap()).unwrap().contains("manifest_path"));
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn native_boundary_rejects_stale_fences_and_inconsistent_metadata() {
+        use crate::native_playback::record_input;
+        use pps_runner_audio_cpal::PlaybackRecordKind;
+        let (root, source) = source();
+        let candidate = prepare_verified_audio(source).unwrap();
+        let stamp = pps_contracts::ClockStamp { unix_ms: 123, monotonic_ns: 1000 };
+        let record = native_boundary_records(&candidate).into_iter().find(|record| matches!(
+            record.kind, PlaybackRecordKind::Boundary(boundary)
+                if matches!(boundary.kind(), pps_runner_audio::RtEventKind::Scheduled { .. })
+        )).unwrap();
+        let other = pps_runner_audio::OutputFence::new(candidate.playback_plan().fence().audio(), 9);
+        assert!(record_input(candidate.schedule(), &other, record, &stamp, 400).is_err());
+        let mut events = candidate.schedule().events().to_vec();
+        let PlaybackRecordKind::Boundary(boundary) = record.kind else { unreachable!() };
+        let pps_runner_audio::RtEventKind::Scheduled { event_index } = boundary.kind() else { unreachable!() };
+        for event in &mut events {
+            event.sample_index += 1;
+        }
+        assert!(event_index < events.len() as u32);
+        let altered = BlockEventSchedule::new(events).unwrap();
+        assert!(record_input(&altered, candidate.playback_plan().fence(), record, &stamp, 400).is_err());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn native_control_and_terminal_records_do_not_claim_physical_completion() {
+        use crate::native_playback::record_input;
+        use pps_runner_audio::{ControlResult, RenderControl, RenderOutcome, RenderState};
+        use pps_runner_audio_cpal::{NativePlaybackRecord, PlaybackRecordKind};
+        let (root, source) = source();
+        let candidate = prepare_verified_audio(source).unwrap();
+        let stamp = pps_contracts::ClockStamp { unix_ms: 123, monotonic_ns: 1000 };
+        let record = |kind| NativePlaybackRecord {
+            fence: candidate.playback_plan().fence().rt_projection(),
+            host_received: std::time::Instant::now(),
+            device_timestamp: None,
+            kind,
+        };
+        let input = record_input(candidate.schedule(), candidate.playback_plan().fence(), record(
+            PlaybackRecordKind::Control {
+                sequence: u64::MAX, requested: RenderControl::Pause,
+                result: ControlResult::Applied, state: RenderState::Paused,
+            }
+        ), &stamp, 400).unwrap().unwrap();
+        assert_eq!(input.payload["controlSequence"], u64::MAX.to_string());
+        assert_eq!(input.payload["renderState"], "Paused");
+        let outcome = RenderOutcome {
+            state: RenderState::SourceExhausted, callback_sequence: 1, cursor_frames: 2,
+            requested_frames: 2, rendered_source_frames: 2, events_written: 0, fault: None,
+        };
+        let input = record_input(candidate.schedule(), candidate.playback_plan().fence(), record(
+            PlaybackRecordKind::Render(outcome)
+        ), &stamp, 400).unwrap().unwrap();
+        assert_eq!(input.payload["completion"], "source-submission-only");
+        assert_eq!(input.payload["timingQualification"], "unqualified");
+        let idle = RenderOutcome { state: RenderState::Playing, ..outcome };
+        assert!(record_input(candidate.schedule(), candidate.playback_plan().fence(), record(
+            PlaybackRecordKind::Render(idle)
+        ), &stamp, 400).unwrap().is_none());
+        fs::remove_dir_all(root).unwrap();
     }
 }

@@ -2,6 +2,7 @@ mod event_journal;
 mod execution_owner;
 mod latency_diagnostics;
 mod native_output;
+mod native_playback;
 mod prepared_audio;
 mod prepared_execution;
 mod remote;
