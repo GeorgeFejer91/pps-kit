@@ -1161,11 +1161,9 @@
     },
     {
       "audiotactile_task_family": "Canzoneri-style dynamic PPS task",
-      "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Canzoneri et al. (2013a)",
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "canzoneri_2013_tool_use_reshaping"
       ],
@@ -1179,100 +1177,95 @@
           "expected_effect_direction": "tool_use_extends_pps_along_tool_axis_and_elongates_body_representation",
           "passed": true,
           "source_basis": [
-            "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#canzoneri_2013_tool_use_reshaping",
-            "Consensus MCP 2026-07-15 query: Canzoneri 2013 amputation prosthesis peripersonal space audio tactile"
+            "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_reviews/canzoneri_2013_tool_use_reshaping.json",
+            "Consensus MCP 2026-07-16 query: exact title/DOI for Canzoneri 2013 tool-use PPS"
           ],
           "status": "structured_expected_outcome_extracted"
         },
         "observed_emulated_expected_match": {
           "evidence": "No observed emulated comparison exists for this record.",
           "evidence_boundary": "",
-          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+          "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
           "passed": false,
           "source_report": "",
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
-          "passed": false,
+          "evidence": "All current template IDs are finished profiles and source parameters are complete.",
+          "passed": true,
           "profile_completion_statuses": [
-            "unfinished_preload"
+            "finished_segment_6_launchable"
           ],
-          "status": "profile_scaffold_present_but_incomplete",
+          "status": "parsimonious_profile_complete",
           "template_ids": [
             "canzoneri_2013_tool_use_reshaping"
           ]
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
-          ],
-          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
-          "missing_parameters": [
-            "exact trial count and ITI table"
-          ],
+          "blockers": [],
+          "evidence": "Literature ledger marks the task as currently recreatable with no blocking constraints or missing publication parameters.",
+          "missing_parameters": [],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
             "extraction_status": "pending_pdf",
-            "manual_review_confidence_label": "",
-            "manual_review_profile_recreation_assessment": "",
-            "manual_review_status": "",
+            "manual_review_confidence_label": "high_confidence_extraction_with_protocol_lineage",
+            "manual_review_profile_recreation_assessment": "possible_with_caveats_dynamic_tool_use_assessment_profile",
+            "manual_review_status": "manual_review_completed_public_full_text_with_protocol_lineage",
             "metadata_confidence_label": "pending_source",
             "metadata_confidence_score": 0.0,
             "pdf_status": "needs_user_download",
             "supplement_status": "needs_user_download"
           },
-          "passed": false,
-          "status": "source_parameters_missing_or_unresolved"
+          "passed": true,
+          "status": "minimum_source_parameters_captured"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
-          ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
-          "passed": false,
+          "blocker_ids": [],
+          "evidence": "Profile status reports Segment 0-4 checks, Segment 1-6 materialization, and Segment 6 launch readiness.",
+          "passed": true,
           "profile_readiness": [
             {
-              "runner_readiness": "blocked_missing_parameters",
-              "segment_0_to_4_profile_checks_passed": false,
-              "segment_1_to_6_materializable": false,
-              "segment_6_launchable": false,
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
               "template_id": "canzoneri_2013_tool_use_reshaping"
             }
           ],
-          "status": "blocked_by_missing_profile_parameters"
+          "status": "segment_0_to_6_gui_toolkit_path_ready"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "template_present_but_blocked",
+          "runnable_status": "runnable_profile_parameters_ready",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
-      "known_parameter_validation_report": "",
-      "missing_publication_parameters": [
-        "exact trial count and ITI table"
-      ],
-      "next_required_action": "Extract or source the missing paper parameters: exact trial count and ITI table",
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_canzoneri_2013_tool_use_known_parameter_20260716/canzoneri_2013_tool_use_known_parameter_validation_report.json",
+      "missing_publication_parameters": [],
+      "next_required_action": "Validate the pre/post tool-use versus pointing-control contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved.",
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
         "extraction_status": "pending_pdf",
-        "manual_review_confidence_label": "",
-        "manual_review_profile_recreation_assessment": "",
-        "manual_review_status": "",
+        "manual_review_confidence_label": "high_confidence_extraction_with_protocol_lineage",
+        "manual_review_profile_recreation_assessment": "possible_with_caveats_dynamic_tool_use_assessment_profile",
+        "manual_review_status": "manual_review_completed_public_full_text_with_protocol_lineage",
         "metadata_confidence_label": "pending_source",
         "metadata_confidence_score": 0.0,
         "pdf_status": "needs_user_download",
         "supplement_status": "needs_user_download"
       },
-      "pipeline_status": "profile_present_but_source_parameters_missing",
+      "pipeline_status": "pipeline_incomplete",
       "record_id": "canzoneri_2013_tool_use_reshaping",
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "source_basis": [
         "holmes_2020_systematic_review",
-        "pubmed_audio_tactile_pps_2026_06_13"
+        "pubmed_audio_tactile_pps_2026_06_13",
+        "consensus_mcp_exact_title_doi_2026_07_16",
+        "public_full_text_protocol_lineage_review_2026_07_16",
+        "canzoneri_2013_tool_use_known_parameter_validation_2026_07_16"
       ]
     },
     {
@@ -7694,19 +7687,19 @@
       },
       "parsimonious_profile_saved": {
         "not_applicable_adjacent_record": 4,
-        "parsimonious_profile_complete": 17,
+        "parsimonious_profile_complete": 18,
         "profile_not_yet_created": 48,
-        "profile_scaffold_present_but_incomplete": 6
+        "profile_scaffold_present_but_incomplete": 5
       },
       "source_parameter_extraction": {
-        "minimum_source_parameters_captured": 17,
+        "minimum_source_parameters_captured": 18,
         "not_applicable_adjacent_record": 4,
-        "source_parameters_missing_or_unresolved": 54
+        "source_parameters_missing_or_unresolved": 53
       },
       "toolkit_gui_implementation": {
-        "blocked_by_missing_profile_parameters": 54,
+        "blocked_by_missing_profile_parameters": 53,
         "not_applicable_adjacent_record": 4,
-        "segment_0_to_6_gui_toolkit_path_ready": 17
+        "segment_0_to_6_gui_toolkit_path_ready": 18
       },
       "wav_generation_and_runner_execution": {
         "not_applicable_adjacent_record": 4,
@@ -7721,11 +7714,12 @@
     "pipeline_status_counts": {
       "adjacent_not_applicable": 4,
       "full_emulated_source_to_runner_pipeline_validated": 17,
-      "profile_present_but_source_parameters_missing": 6,
+      "pipeline_incomplete": 1,
+      "profile_present_but_source_parameters_missing": 5,
       "source_parameters_missing_before_profile_creation": 48
     },
     "primary_gap_counts": {
-      "profile_present_but_source_parameters_missing": 6,
+      "profile_present_but_source_parameters_missing": 5,
       "source_parameters_missing_before_profile_creation": 48,
       "toolkit_structure_or_response_contract_missing": 0
     }

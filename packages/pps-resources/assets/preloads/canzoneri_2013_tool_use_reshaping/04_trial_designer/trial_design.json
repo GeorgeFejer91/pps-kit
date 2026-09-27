@@ -21,12 +21,32 @@
     {
       "strip_id": "canzoneri-tool-use-dynamic-sound-row",
       "label": "Dynamic sound PPS trial",
-      "audio_tactile_percentage": 100.0,
-      "catch_percentage": 0.0,
-      "baseline_percentage": 0.0,
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
       "soa_values_ms": [],
       "spatial_values_cm": [],
-      "metadata": {},
+      "metadata": {
+        "expected_response": "respond",
+        "response_rule": "verbal_response_to_tactile_target_ignore_sound",
+        "target_role": "tactile_target",
+        "response_mode": "voice_key_mouse_click_proxy",
+        "response_capture_device": "microphone",
+        "voice_key_enabled": "true",
+        "tactile_stimulation_modality": "electrical",
+        "electrical_stimulator_model": "Digitimer DS7A or equivalent constant-current stimulator",
+        "electrical_electrode_site": "hairy surface of the right forearm",
+        "source_asset_equivalence": "procedural pink-noise proxy for unshared SoundForge files",
+        "renderer_equivalence_boundary": "binaural virtual trajectory proxy for physical near/far loudspeaker intensity motion",
+        "iti_policy": "fixed 1000 ms pre-sound and 1000 ms post-sound silence reported; runner uses source-timing metadata plus toolkit block spacing",
+        "pre_sound_silence_ms": "1000",
+        "post_sound_silence_ms": "1000",
+        "auditory_trajectory_family": "two_speaker_dynamic_intensity_in_out",
+        "auditory_trajectory_direction": "looming_receding",
+        "trajectory_start_distance_cm": "110",
+        "trajectory_end_distance_cm": "10",
+        "tool_condition": "tool_use_pps_assessment"
+      },
       "elements": [
         {
           "element_id": "canzoneri-tool-use-moving-sound",
@@ -44,5 +64,5 @@
     }
   ],
   "prestimulus_files": [],
-  "preview_trial_count": 320
+  "preview_trial_count": 188
 }

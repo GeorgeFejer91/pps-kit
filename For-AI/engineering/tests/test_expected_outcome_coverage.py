@@ -147,19 +147,20 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "structured_expected_outcome_record_count": 71,
         "pending_expected_outcome_record_count": 0,
         "adjacent_or_out_of_scope_record_count": 4,
-        "runnable_profile_parameter_record_count": 17,
+        "runnable_profile_parameter_record_count": 18,
         "observed_behavioral_comparison_record_count": 0,
         "mouse_click_simulated_participant_like_comparison_record_count": 17,
         "synthetic_profile_contrast_comparison_record_count": 17,
-        "parameter_run_evidence_only_record_count": 0,
-        "not_runnable_no_observed_comparison_record_count": 54,
+        "parameter_run_evidence_only_record_count": 1,
+        "not_runnable_no_observed_comparison_record_count": 53,
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 4,
             "not_yet_templated_missing_publication_parameters": 48,
             "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
-            "template_present_blocked_missing_publication_parameters": 6,
+            "template_present_blocked_missing_publication_parameters": 5,
+            "ready_profile_parameter_run_available_expected_contrast_unvalidated": 1,
         },
     }
 
@@ -249,7 +250,13 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         assert "Deterministic synthetic RT comparisons" in record["observed_profile_contrast_evidence"]["model_boundary"]
         assert record["required_next_evidence"].startswith("Collect participant data")
 
-    nonrunnable_structured = structured_ids - RUNNABLE_STRUCTURED_IDS
+    tool_use = records["canzoneri_2013_tool_use_reshaping"]
+    assert tool_use["runnable_status"] == "runnable_profile_parameters_ready"
+    assert tool_use["observed_vs_expected_status"] == "parameter_run_evidence_only_behavioral_effect_unobserved"
+    assert "observed_profile_contrast_evidence" not in tool_use
+    assert "observed_mouse_click_participant_like_evidence" not in tool_use
+    assert "response counts only" in tool_use["required_next_evidence"]
+    nonrunnable_structured = structured_ids - RUNNABLE_STRUCTURED_IDS - {"canzoneri_2013_tool_use_reshaping"}
     assert nonrunnable_structured
     for record_id in nonrunnable_structured:
         record = records[record_id]
@@ -371,7 +378,6 @@ def test_expected_outcome_blocked_and_adjacent_records_do_not_claim_observed_com
             assert record["required_next_evidence"].startswith("Extract a short structured expected outcome")
 
     for record_id in [
-        "canzoneri_2013_tool_use_reshaping",
         "serino_2007_blind_cane_users",
     ]:
         record = records[record_id]

@@ -48,7 +48,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     assert categorized == template_ids
     assert status["categories"]["gui_recreatable"]
     assert status["categories"]["missing_publication_parameters"]
-    assert len(status["categories"]["missing_publication_parameters"]) == 6
+    assert len(status["categories"]["missing_publication_parameters"]) == 5
     assert len(status["categories"]["toolkit_structural_gap"]) == 0
 
     allowed_statuses = {
@@ -107,7 +107,8 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert study5["segment_0_to_4_profile_checks_passed"] is True
     assert study5["missing_parameter_count"] == 0
     assert study5["unsupported_structure_count"] == 0
-    assert len(status["categories"]["gui_recreatable"]) == 24
+    assert len(status["categories"]["gui_recreatable"]) == 25
+    assert profiles["canzoneri_2013_tool_use_reshaping"]["profile_checks_passed"] is True
 
     study5_lateral = profiles[STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID]
     assert study5_lateral["primary_category"] == "gui_recreatable"
@@ -315,7 +316,8 @@ def test_protocol12_matrix_targets_ready_published_profiles_and_blocked_samples(
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID not in ready_published
     assert DEFAULT_STUDY_TEMPLATE_ID in ready_all
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID in ready_all
-    assert len(ready_published) == 22
+    assert len(ready_published) == 23
+    assert "canzoneri_2013_tool_use_reshaping" in ready_published
     assert set(ready_published) < set(ready_all)
     assert len(blocked_samples) == 1
 

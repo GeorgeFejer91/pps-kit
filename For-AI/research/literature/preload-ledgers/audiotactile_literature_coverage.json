@@ -238,6 +238,26 @@
       "relevance": "Paper-specific source-to-runner validation for Canzoneri et al. 2013 amputation/prosthesis PPS: open-access Scientific Reports/PDF parameters, Segments 0-6 GUI materialization, generated block WAVs, software wired-loopback sidecars, and mouse-click simulated responses to upper-arm tactile target rows with catch withholds. This is software evidence, not collected amputee/prosthesis behavior, physical loopback, or a scientific PPS-effect replication claim."
     },
     {
+      "id": "consensus_mcp_exact_title_doi_2026_07_16",
+      "kind": "consensus_mcp_exact_title_doi",
+      "query": "\"Tool-use reshapes the boundaries of body and peripersonal space representations\" 10.1007/s00221-013-3532-2 Canzoneri",
+      "date_run": "2026-07-16",
+      "relevance": "Consensus MCP exact-title/DOI lookup confirmed the Canzoneri et al. 2013 Experimental Brain Research paper identity and abstract-level expected outcome for tool-use PPS/body-representation extension. It was used as a literature-routing check, not as a substitute for methods extraction."
+    },
+    {
+      "id": "public_full_text_protocol_lineage_review_2026_07_16",
+      "kind": "manual_public_full_text_and_protocol_lineage_review",
+      "date_run": "2026-07-16",
+      "local_summary_file": "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_reviews/canzoneri_2013_tool_use_reshaping.json",
+      "relevance": "Manual source review for Canzoneri et al. 2013 tool-use PPS reshaping using Springer metadata, public author-uploaded full text, and Canzoneri et al. 2012 dynamic-sound protocol lineage. It recovers the minimum Segment 1-4 PPS assessment profile and leaves physical tool-use/pointing interventions as context."
+    },
+    {
+      "id": "canzoneri_2013_tool_use_known_parameter_validation_2026_07_16",
+      "kind": "validation_protocol",
+      "local_summary_file": "artifacts/validation_runs/current_goal_canzoneri_2013_tool_use_known_parameter_20260716/canzoneri_2013_tool_use_known_parameter_validation_report.json",
+      "relevance": "Paper-specific source-to-runner validation for Canzoneri et al. 2013 tool-use PPS reshaping: public full-text and Canzoneri 2012 protocol-lineage parameters, Segments 0-6 GUI materialization, generated block WAVs, software wired-loopback sidecars, and mouse-click simulated responses to right-forearm tactile target and baseline rows with catch withholds. This is software evidence, not collected participant behavior, physical loopback, physical tool-use intervention execution, or a scientific PPS-effect replication claim."
+    },
+    {
       "id": "serino_2015_toolless_known_parameter_validation_2026_07_15",
       "kind": "validation_protocol",
       "local_summary_file": "artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/serino_2015_toolless_known_parameter_validation_report.json",
@@ -247,8 +267,8 @@
   "coverage_summary": {
     "literature_record_count": 75,
     "literature_record_category_counts": {
-      "covered_runnable_profile": 17,
-      "covered_blocked_missing_publication_parameters": 6,
+      "covered_runnable_profile": 18,
+      "covered_blocked_missing_publication_parameters": 5,
       "covered_blocked_toolkit_structure": 0,
       "not_yet_templated_requires_toolkit_structure": 0,
       "not_yet_templated_missing_publication_parameters": 48,
@@ -256,10 +276,10 @@
       "adjacent_out_of_scope": 4
     },
     "current_template_count": 30,
-    "current_profile_check_pass_count": 24,
-    "published_profile_check_pass_count": 22,
+    "current_profile_check_pass_count": 25,
+    "published_profile_check_pass_count": 23,
     "local_unpublished_profile_check_pass_count": 2,
-    "current_templates_with_missing_publication_parameters": 6,
+    "current_templates_with_missing_publication_parameters": 5,
     "current_templates_with_toolkit_structural_gaps": 0,
     "holmes_2020_reported_articles": 23,
     "holmes_2020_reported_experiments": 46,
@@ -683,10 +703,10 @@
     {
       "template_id": "canzoneri_2013_tool_use_reshaping",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_canzoneri_2013_tool_use_known_parameter_20260716/canzoneri_2013_tool_use_known_parameter_validation_report.json",
+      "source_notes": "Public full-text and Canzoneri 2012 protocol-lineage review on 2026-07-16 recovered the PPS assessment parameters: 3000 ms IN/OUT pink-noise sounds, right-forearm tactile target context, T1-T5 delays 300/800/1500/2200/2700 ms, T0/T6 tactile-only baselines, 76 auditory-only catches, and the 188-row two-block assessment formula. The paper-specific validator materializes Segments 0-6 and runs the assessment with mouse-click simulated forearm-tactile responses while preserving physical tool-use/pointing training, SoundForge audio, loudspeaker transfer, electrical-current calibration, and voice-key limits as caveats."
     },
     {
       "template_id": "canzoneri_2012_dynamic_sounds",
@@ -1045,20 +1065,25 @@
       "doi": "10.1007/s00221-013-3532-2",
       "source_basis": [
         "holmes_2020_systematic_review",
-        "pubmed_audio_tactile_pps_2026_06_13"
+        "pubmed_audio_tactile_pps_2026_06_13",
+        "consensus_mcp_exact_title_doi_2026_07_16",
+        "public_full_text_protocol_lineage_review_2026_07_16",
+        "canzoneri_2013_tool_use_known_parameter_validation_2026_07_16"
       ],
       "current_template_ids": [
         "canzoneri_2013_tool_use_reshaping"
       ],
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "Canzoneri-style dynamic PPS task",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "recreation_caveats": [
+        "exact original SoundForge pink-noise/gain files and room transfer are not available",
+        "participant-level electrical tactile calibration and voice-key threshold/latency are represented as provenance and emulated by mouse-click response proxies",
+        "physical tool-use and pointing-control interventions are retained as context; the runnable profile validates the reusable PPS assessment task"
       ],
-      "missing_publication_parameters": [
-        "exact trial count and ITI table"
-      ]
+      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_canzoneri_2013_tool_use_known_parameter_20260716/canzoneri_2013_tool_use_known_parameter_validation_report.json"
     },
     {
       "record_id": "canzoneri_2013_amputation_prosthesis",

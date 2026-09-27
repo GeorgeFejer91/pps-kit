@@ -40,12 +40,13 @@ def test_static_dashboard_preview_parity_audit_targets_all_previewable_profiles(
     ready_ids = module._target_template_ids(inventory, status, profile_set="ready-all")
 
     assert len(all_ids) == 30
-    assert len(ready_ids) == 24
+    assert len(ready_ids) == 25
     assert ready_ids[0] == "study5_box_breathing_pps"
     assert {
         "study5_dynaspace_lateral_45_pps",
         "noel_2015_walking_full_body_action",
         "canzoneri_2013_amputation_prosthesis",
+        "canzoneri_2013_tool_use_reshaping",
         "serino_2015_toolless_sync_training",
     }.issubset(ready_ids)
     assert set(ready_ids).issubset(all_ids)

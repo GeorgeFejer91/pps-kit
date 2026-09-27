@@ -1,0 +1,297 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "canzoneri_2013_tool_use_reshaping",
+  "citation_short": "Canzoneri et al. (2013a)",
+  "review_date": "2026-07-16",
+  "manual_review_status": "manual_review_completed_public_full_text_with_protocol_lineage",
+  "confidence_score": 0.84,
+  "confidence_label": "high_confidence_extraction_with_protocol_lineage",
+  "confidence_basis": "Consensus confirmed the paper identity; Springer metadata, public author-uploaded full text, and the already reviewed Canzoneri et al. (2012) dynamic-sound protocol lineage were checked. The 2013 article directly reports the PPS assessment apparatus, 3000 ms IN/OUT pink-noise sounds, forearm tactile site, 60/40 tactile/catch ratio, T1-T5 timings, voice-key response, 1000 ms pre/post sound silence, training/control contexts, and expected outcome. Exact original SoundForge files, acoustic transfer, electrical threshold/current, voice-key latency, and physical intervention execution remain caveats.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats_dynamic_tool_use_assessment_profile",
+    "reason": "The audio-tactile PPS assessment can be recreated as the Canzoneri-family dynamic IN/OUT task. The 20-minute tool-use and pointing-control interventions are physical/context procedures rather than runner-controlled audio-tactile stimuli, so the parsimonious profile recreates the assessment block that is run before and after training."
+  },
+  "source_checks": [
+    {
+      "source_type": "consensus_mcp",
+      "source": "Consensus MCP exact-title/DOI search, 2026-07-16",
+      "status": "checked",
+      "scope": "Confirmed paper identity and abstract-level expected outcome: tool use extends PPS along the tool axis and changes body representation; pointing control does not."
+    },
+    {
+      "source_type": "publisher_html",
+      "source": "https://link.springer.com/article/10.1007/s00221-013-3532-2",
+      "status": "checked",
+      "scope": "Springer page checked for publication metadata, DOI, journal, date, and abstract."
+    },
+    {
+      "source_type": "public_full_text_route",
+      "source": "https://www.researchgate.net/publication/236614179_Tool-use_reshapes_the_boundaries_of_body_and_peripersonal_space_representations",
+      "status": "reviewed",
+      "scope": "Author-uploaded full text checked for Experiment 1A methods, tool-use training, results, Figure 3 caption, and Experiment 3 pointing-control text."
+    },
+    {
+      "source_type": "protocol_lineage_manual_review",
+      "source": "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_reviews/canzoneri_2012_dynamic_sounds.json",
+      "status": "reviewed",
+      "scope": "Used for the delegated dynamic-sound protocol details: T0/T6 baseline timings, 112 tactile-target rows, 76 auditory-only catches, two blocks, and C.I.R.O./SoundForge apparatus provenance."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "Consensus exact-title/DOI search",
+      "status": "completed",
+      "result": "Located the target Experimental Brain Research paper and confirmed the expected outcome at abstract level."
+    },
+    {
+      "strategy": "Public full-text method extraction",
+      "status": "completed",
+      "result": "Recovered 3000 ms pink-noise IN/OUT sounds, near/far loudspeakers separated by about 100 cm, right-forearm tactile target, voice-key response, 1000 ms pre/post silence, 60% tactile targets, 40% auditory-only catches, and T1-T5 timings."
+    },
+    {
+      "strategy": "Protocol lineage check",
+      "status": "completed",
+      "result": "Canzoneri et al. (2012) supplies the runnable count/block/baseline contract matching the 2013 paper's 60/40 target/catch ratio: 112 tactile-target rows, including 80 audio-tactile rows and 32 T0/T6 tactile-only baselines, plus 76 catches split into two blocks."
+    },
+    {
+      "strategy": "Expected-outcome extraction",
+      "status": "completed",
+      "result": "Figure/result text reports a post-tool-use PPS central-point shift toward far space and Experiment 3 reports no comparable shift after pointing control."
+    }
+  ],
+  "field_status_counts": {
+    "derived": 3,
+    "not_reported_after_review": 1,
+    "protocol_lineage_reported": 7,
+    "reported": 18
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Pink-noise sound presented for 3000 ms.",
+        "source_file": "public full text / Springer DOI route",
+        "page_or_section": "Experiment 1A, Audio-tactile interaction task",
+        "evidence_note": "The 2013 paper directly reports pink noise and 3000 ms duration."
+      },
+      "source_provenance": {
+        "status": "protocol_lineage_reported",
+        "value": "Dynamic sounds follow Canzoneri et al. (2012), where SoundForge 4.5 shaped two pink-noise samples; original source files are not supplied.",
+        "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
+        "page_or_section": "Segment 1 stimulus reconstruction",
+        "evidence_note": "The 2013 method says procedures were similar to Canzoneri et al. (2012)."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two auditory trajectories: IN/approaching and OUT/receding.",
+        "source_file": "public full text",
+        "page_or_section": "Experiment 1A, Audio-tactile interaction task",
+        "evidence_note": "The paper describes IN and OUT sounds."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Near loudspeaker on the table near the forearm; far loudspeaker on the floor about 100 cm from the near loudspeaker.",
+        "source_file": "public full text",
+        "page_or_section": "Experiment 1A, Audio-tactile interaction task; Fig. 1A",
+        "evidence_note": "Participant was blindfolded with right arm prone on a table beside them."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "3000 ms sound, preceded and followed by 1000 ms silence.",
+        "source_file": "public full text",
+        "page_or_section": "Experiment 1A, Audio-tactile interaction task",
+        "evidence_note": "The silence windows define the trial timing around the active sound."
+      },
+      "stimulus_speed": {
+        "status": "derived",
+        "value": "Approximate apparent path of 100 cm over 3000 ms, about 0.33 m/s.",
+        "source_file": "public full text plus protocol lineage",
+        "page_or_section": "Experiment 1A and Canzoneri 2012 lineage",
+        "evidence_note": "The original apparent motion is intensity/gain based; speed is a toolkit reconstruction convenience."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "IN/approaching and OUT/receding sounds.",
+        "source_file": "public full text",
+        "page_or_section": "Experiment 1A, Audio-tactile interaction task",
+        "evidence_note": "Both directions are analysed through D1-D5 perceived distance mapping."
+      },
+      "gain_envelope": {
+        "status": "protocol_lineage_reported",
+        "value": "Canzoneri 2012 reports mirrored exponential intensity manipulation; exact SoundForge envelope files are unavailable.",
+        "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
+        "page_or_section": "Segment 1 gain envelope",
+        "evidence_note": "Enough endpoint/gain-direction information exists for a toolkit proxy, not bit-identical author audio."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Two physical loudspeakers; toolkit recreates as a binaural virtual trajectory with apparatus provenance.",
+        "source_file": "public full text plus Canzoneri 2012 lineage",
+        "page_or_section": "Experiment 1A, Audio-tactile interaction task",
+        "evidence_note": "Exact loudspeaker model and room transfer are not reported."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "protocol_lineage_reported",
+        "value": "Audio-tactile target rows, T0/T6 tactile-only baseline rows, and auditory-only catch rows.",
+        "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
+        "page_or_section": "Segment 2 and Segment 3 lineage",
+        "evidence_note": "The 2013 paper directly reports T1-T5 targets and catches; T0/T6 baselines are inherited from the delegated 2012 protocol."
+      },
+      "condition_intermixing": {
+        "status": "protocol_lineage_reported",
+        "value": "Sound condition, tactile timing, and catches randomly combined/intermingled.",
+        "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
+        "page_or_section": "Segment 2 sequence and intermixing",
+        "evidence_note": "Exact randomization seed/order is not reported and remains a toolkit default."
+      },
+      "blocked_or_random_order": {
+        "status": "protocol_lineage_reported",
+        "value": "Assessment trials split into two paper blocks.",
+        "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
+        "page_or_section": "Segment 4 block count",
+        "evidence_note": "The 2013 design places the assessment before/after physical tool-use; the runnable profile recreates one assessment."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "Fixed 1000 ms silence before and after the sound; no separate variable ITI or hazard function reported.",
+        "source_file": "public full text",
+        "page_or_section": "Experiment 1A, Audio-tactile interaction task",
+        "evidence_note": "Toolkit uses source-timing metadata plus its default block spacing for unattended gaps."
+      },
+      "response_window": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "public full text; Canzoneri 2012 manual review",
+        "page_or_section": "Experiment 1A methods and lineage methods",
+        "evidence_note": "Vocal response/voice relay are reported, but no explicit timeout was found."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Participants respond vocally to tactile targets as soon as possible while trying to ignore the auditory stimulus.",
+        "source_file": "public full text",
+        "page_or_section": "Experiment 1A, Audio-tactile interaction task",
+        "evidence_note": "The runner emulates this with mouse-click response proxies to tactile rows and withheld clicks on catches."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "Tactile stimulus on the hairy surface of the right forearm.",
+        "source_file": "public full text",
+        "page_or_section": "Experiment 1A, Audio-tactile interaction task",
+        "evidence_note": "Electrical hardware/current calibration is inherited as apparatus provenance from the Canzoneri family but participant thresholds remain individual."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "T1 300 ms, T2 800 ms, T3 1500 ms, T4 2200 ms, T5 2700 ms after sound onset.",
+        "source_file": "public full text",
+        "page_or_section": "Experiment 1A, Audio-tactile interaction task",
+        "evidence_note": "The paper also gives trial-start equivalents after 1000 ms pre-sound silence."
+      },
+      "baseline_strategy": {
+        "status": "protocol_lineage_reported",
+        "value": "Tactile-only T0/T6 baselines during silence, inherited from Canzoneri et al. (2012).",
+        "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
+        "page_or_section": "Segment 3 tactile SOA baseline",
+        "evidence_note": "The 2013 paper does not restate T0/T6 in the short method paragraph but reports procedures similar to the 2012 protocol."
+      },
+      "baseline_timing": {
+        "status": "protocol_lineage_reported",
+        "value": "T0 at 300 ms from trial start (-700 ms relative to sound onset); T6 at 4600 ms from trial start (3600 ms after sound onset).",
+        "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
+        "page_or_section": "Segment 3 tactile SOA baseline",
+        "evidence_note": "These timing anchors produce 32 tactile-only baseline rows per assessment."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Auditory-only catch trials with no tactile stimulation.",
+        "source_file": "public full text",
+        "page_or_section": "Experiment 1A, Audio-tactile interaction task",
+        "evidence_note": "The 2013 paper reports the remaining 40% of trials were catches."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "protocol_lineage_reported",
+        "value": "Eight target trials for each T0-T6 timing for each IN/OUT direction.",
+        "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
+        "page_or_section": "Segment 4 counts",
+        "evidence_note": "For the audio-tactile PPS rows this yields 80 T1-T5 target rows per assessment."
+      },
+      "baseline_count": {
+        "status": "derived",
+        "value": "32 tactile-only T0/T6 baseline rows per assessment.",
+        "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
+        "page_or_section": "Segment 4 counts",
+        "evidence_note": "2 baseline timings x 2 IN/OUT trial contexts x 8 repetitions."
+      },
+      "catch_count": {
+        "status": "protocol_lineage_reported",
+        "value": "76 auditory-only catch rows per assessment.",
+        "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
+        "page_or_section": "Segment 4 counts",
+        "evidence_note": "This matches the 2013 paper's 40% catch description when paired with 112 tactile-target rows."
+      },
+      "block_count": {
+        "status": "protocol_lineage_reported",
+        "value": "Two assessment blocks.",
+        "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
+        "page_or_section": "Segment 4 counts",
+        "evidence_note": "The profile uses two balanced runner blocks for one pre/post assessment instance."
+      },
+      "total_trial_count": {
+        "status": "derived",
+        "value": "188 runnable rows per assessment: 80 audio-tactile targets, 32 tactile-only baselines, and 76 catches.",
+        "source_file": "public full text plus Canzoneri 2012 lineage",
+        "page_or_section": "Experiment 1A and Segment 4 lineage",
+        "evidence_note": "The profile can be run before and after physical tool-use to reproduce the paper's assessment schedule."
+      }
+    }
+  },
+  "expected_scientific_outcome": {
+    "primary_expected_effect": "Tool-use shifts the fitted PPS boundary toward farther auditory locations and changes forearm body-representation metrics; pointing control does not produce the same PPS/BR shift.",
+    "expected_effect_direction": "tool_use_extends_pps_along_tool_axis_and_elongates_body_representation",
+    "observable_metric": "tactile RT by D1-D5 perceived auditory distance, sigmoidal central point, tactile-distance P-Forearm, and body-landmark localization",
+    "condition_contrast": "pre versus post 20-minute tool-use training, with pointing-control comparison in Experiment 3"
+  },
+  "orientation_ledger": {
+    "participant_frame": "Blindfolded seated participant, right arm prone on a table beside the body during PPS task.",
+    "room_apparatus_frame": "Near loudspeaker on the table near the forearm; far loudspeaker on the floor about 100 cm from the near loudspeaker.",
+    "body_relative_mapping": "IN sound is perceived as approaching toward the forearm/body; OUT sound is perceived as receding away from the forearm/body.",
+    "tactile_anchor": "Hairy surface of the right forearm.",
+    "evidence_class": "text-reported with protocol-lineage count/baseline details"
+  },
+  "pps_visualization_review": {
+    "status": "confirmed_from_full_text",
+    "visual_forms": [
+      {
+        "pointer": "Figure 3A",
+        "form": "RT by perceived sound distance with fitted sigmoidal functions",
+        "x_axis": "D1 farthest to D5 closest perceived sound distance",
+        "y_axis": "tactile reaction time",
+        "metric": "sigmoid central point / PPS boundary proxy",
+        "uncertainty": "SEM on mean RTs",
+        "verification_note": "Caption reports central point shift after tool-use relative to before tool-use."
+      },
+      {
+        "pointer": "Figure 6A",
+        "form": "RT by perceived sound distance with fitted sigmoidal functions for pointing control",
+        "x_axis": "D1 farthest to D5 closest perceived sound distance",
+        "y_axis": "tactile reaction time",
+        "metric": "sigmoid central point / PPS boundary proxy",
+        "uncertainty": "SEM on mean RTs",
+        "verification_note": "Caption reports no comparable central-point shift after pointing."
+      }
+    ]
+  },
+  "critical_caveats": [
+    "Exact original SoundForge pink-noise samples and gain/envelope files are not available.",
+    "Exact loudspeaker model, room transfer, and physical SPL calibration route are not fully reported.",
+    "Participant-level tactile threshold/current calibration and detailed stimulator waveform are not sufficient for physical equivalence.",
+    "Voice-key response threshold and latency correction are not reported.",
+    "The toolkit profile recreates the audio-tactile PPS assessment; the 20-minute tool-use and pointing-control interventions remain physical/context procedures."
+  ],
+  "next_manual_action": "Run the paper-specific profile validator and update generated profile/coverage ledgers from the known-parameter profile."
+}

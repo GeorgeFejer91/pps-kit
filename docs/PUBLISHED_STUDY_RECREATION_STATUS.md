@@ -37,6 +37,7 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 | biggio_2017_no_racket | B | ready | All required current-GUI fields are present and materializable. |
 | biggio_2017_personal_racket | C | ready | All required current-GUI fields are present and materializable. |
 | canzoneri_2013_amputation_prosthesis | - | ready | All required current-GUI fields are present and materializable. |
+| canzoneri_2013_tool_use_reshaping | - | ready | All required current-GUI fields are present and materializable. |
 | tajadura_jimenez_2009_crossed_visual_deprivation | A | ready | All required current-GUI fields are present and materializable. |
 | tajadura_jimenez_2009_uncrossed_visual_deprivation | B | ready | All required current-GUI fields are present and materializable. |
 | canzoneri_2012_dynamic_sounds | - | ready | All required current-GUI fields are present and materializable. |
@@ -52,7 +53,6 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 
 | Profile | Variant | Status | Main reasons |
 |---|---|---|---|
-| canzoneri_2013_tool_use_reshaping | - | blocked_missing_parameters | exact trial count and ITI table from full paper |
 | ferri_2015_artificial_looming_valence | A | blocked_missing_parameters | exact auditory files; paper-specific gain envelope |
 | ferri_2015_ecological_looming_valence | B | blocked_missing_parameters | licensed ecological sounds; exact amplitude envelopes |
 | serino_2007_blind_cane_users | - | blocked_missing_parameters | exact white-noise source asset, seed, and spectral recipe; exact electrical tactile pulse duration, waveform, current, and electrode impedance calibration; exact ITI or jitter distribution and numeric response window |

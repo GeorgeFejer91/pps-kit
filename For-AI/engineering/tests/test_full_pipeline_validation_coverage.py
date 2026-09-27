@@ -50,21 +50,26 @@ def test_full_pipeline_validation_summary_is_conservative():
     assert summary["full_emulated_pipeline_validated_record_count"] == 17
     assert summary["human_behavioral_observed_record_count"] == 0
     assert summary["physical_loopback_observed_record_count"] == 0
+    tool_use = next(record for record in pipeline["records"] if record["record_id"] == "canzoneri_2013_tool_use_reshaping")
+    assert tool_use["full_emulated_pipeline_validated"] is False
+    assert tool_use["gates"]["toolkit_gui_implementation"]["passed"] is True
+    assert tool_use["gates"]["observed_emulated_expected_match"]["passed"] is False
     assert summary["pipeline_status_counts"] == {
         "adjacent_not_applicable": 4,
         "full_emulated_source_to_runner_pipeline_validated": 17,
-        "profile_present_but_source_parameters_missing": 6,
+        "pipeline_incomplete": 1,
+        "profile_present_but_source_parameters_missing": 5,
         "source_parameters_missing_before_profile_creation": 48,
     }
     assert summary["primary_gap_counts"] == {
-        "profile_present_but_source_parameters_missing": 6,
+        "profile_present_but_source_parameters_missing": 5,
         "source_parameters_missing_before_profile_creation": 48,
         "toolkit_structure_or_response_contract_missing": 0,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
-        "minimum_source_parameters_captured": 17,
+        "minimum_source_parameters_captured": 18,
         "not_applicable_adjacent_record": 4,
-        "source_parameters_missing_or_unresolved": 54,
+        "source_parameters_missing_or_unresolved": 53,
     }
     assert summary["gate_status_counts"]["observed_emulated_expected_match"] == {
         "emulated_observed_direction_matches_expected": 17,
@@ -72,9 +77,9 @@ def test_full_pipeline_validation_summary_is_conservative():
         "not_applicable_adjacent_record": 4,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
-        "blocked_by_missing_profile_parameters": 54,
+        "blocked_by_missing_profile_parameters": 53,
         "not_applicable_adjacent_record": 4,
-        "segment_0_to_6_gui_toolkit_path_ready": 17,
+        "segment_0_to_6_gui_toolkit_path_ready": 18,
     }
     assert "not collected participant evidence" in pipeline["scope"]["evidence_boundary"]
 

@@ -1,23 +1,31 @@
 # Current work
 
-Updated: 2026-09-27. Replace this record at a meaningful task/stage transition;
-do not append per-command logs or machine-specific paths.
+Updated: 2026-09-27. Replace at a meaningful task/stage transition; do not
+append command logs or machine-specific paths.
 
-- **Domain:** release operations / agent workflow.
-- **Outcome:** existing task-scoped guidance reviewed against the `for-ai`
-  standard; explicit skill nesting, conformity-review routing, and evidence
-  result vocabulary. Existing domains and scientific contracts are preserved.
-- **Stage:** verified documentation checkpoint; no UI, runtime, installer, or release
-  behavior is changed by this task.
-- **Baseline:** GitHub `main` at `b92ddfc`, including candidate Rust/Tauri native
-  output work. Existing WIP is not promoted to scientific/release readiness.
-- **Evidence:** prior cleanup passed archive/link/skill checks, eight existing
-  classification/release/inventory tests, and release/privacy audit. This
-  conformity checkpoint passed the same eight repository checks, release/privacy
-  audit, and whitespace check. Runtime/UI/package qualification was not run.
-- **Next gate:** select the next requested software task, its owning domain,
-  and whether the deliverable is a local preview, verified source, or package.
+- **Domain:** release operations, with scientific-evidence handoff.
+- **Outcome:** content reconciliation of the preserved local history and the
+  consolidated public history. The preserved committed tip is an ancestor of
+  the source snapshot recorded by consolidation commit `3471cfe`; no rewritten
+  history merge or force push is needed. Recover the 25-file unfinished
+  Canzoneri tool-use change through current path mappings and preserve later
+  upstream edits. Retain parameter/count rehearsal evidence without promoting
+  it to an expected-effect comparison or human replication claim.
+- **Stage:** verified source synchronization, followed by a requested critical
+  audit only. Audit recommendations require subsequent user selection.
+- **Baseline:** GitHub `main` at `8fccb62`; candidate native output work remains
+  unqualified and its existing Rust workflow is failing.
+- **Evidence:** recovered Canzoneri software validation passed; 29 affected
+  profile/coverage checks passed and one existing local-source check skipped.
+  Quick checks passed 30 tests plus JSON, compile, privacy, and whitespace
+  checks. Designer/Runner canonical builds reproduce tracked bytes; Runner
+  browser tests passed 57 checks; Pages assembly/parity passed. Designer
+  geometry audit passed 12 viewport cases; rendered evidence reviewed separately.
+  Full-suite and native checks have separate pre-existing/environment gaps;
+  record their final disposition in the audit. No installed or physical gate ran.
+- **Next gate:** complete branch/worktree/stash reconciliation and remote/Pages
+  verification, deliver numbered audit proposals, then await the user's selected
+  implementation scope. Packaging and scientific qualification remain separate.
 
-Future tasks record outcome, owned files/contracts, relevant skills, checks
-passed or missing, and next gate in these fields. Detailed run artifacts belong
-in ignored validation folders.
+Detailed run artifacts belong in ignored validation folders. Preserve the
+pre-sync Git bundle and dirty-file backup until reconciliation is verified.

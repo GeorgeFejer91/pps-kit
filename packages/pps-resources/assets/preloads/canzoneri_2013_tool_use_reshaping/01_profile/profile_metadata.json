@@ -6,29 +6,63 @@
   "doi": "10.1007/s00221-013-3532-2",
   "source_url": "https://cris.unibo.it/handle/11585/152096",
   "verification_status": "partial",
-  "notes": "Tool-use PPS plasticity profile. The publication reports an audio-tactile interaction task before and after use of a 1 m tool. This preload captures the canonical Canzoneri-style PPS measurement scaffold; tool-use versus control-training session structure remains metadata until the GUI supports ordered intervention phases.",
+  "notes": "Tool-use PPS plasticity profile. The publication reports an audio-tactile interaction task before and after use of a 1 m tool. This preload recreates the runnable PPS assessment task using the paper-reported method plus the delegated Canzoneri et al. (2012) protocol lineage: 3000 ms IN/OUT pink-noise sounds, T1-T5 tactile delays, T0/T6 tactile-only baselines, 76 auditory-only catches, and two paper blocks. The 20-minute physical tool-use and pointing-control interventions are retained as context rather than automated runner phases.",
   "reference_parameters": {
     "profile_type": "audio_tactile_tool_use_plasticity",
+    "publication_status": "published",
+    "profile_check_complete": true,
+    "sound_duration_ms": 3000,
+    "pre_sound_silence_ms": 1000,
+    "post_sound_silence_ms": 1000,
     "reported_intervention": "1 m tool-use training before/after PPS measurement",
     "trial_family_scaffold": "Canzoneri-style dynamic IN/OUT pink-noise task",
     "catch_subtype": "auditory-only no tactile target",
-    "baseline_subtype": "tactile-only timing controls during silence, exact table not verified from accessible source",
+    "baseline_subtype": "tactile-only T0/T6 timing controls during pre/post sound silence inherited from Canzoneri et al. (2012)",
+    "baseline_times_from_trial_start_ms": [
+      300,
+      4600
+    ],
+    "baseline_times_relative_to_sound_onset_ms": [
+      -700,
+      3600
+    ],
+    "target_trial_repetitions_reported_or_inherited": 8,
+    "reported_target_trials_per_assessment": 112,
+    "reported_audio_tactile_trials_per_assessment": 80,
+    "reported_baseline_trials_per_assessment": 32,
+    "reported_catch_trials_per_assessment": 76,
+    "reported_total_trials_per_assessment": 188,
+    "reported_assessment_block_count": 2,
     "response_rule": "speeded response to tactile target, ignore sound",
+    "analysis_outlier_rule": "trim RTs exceeding 2 SD from participant/condition mean",
+    "training_context": "Experiment 1A measured PPS before and after 20 minutes of blindfolded right-hand tool use with a 1 m wooden stick; Experiment 3 used a pointing-control training task and found no PPS/BR shift.",
+    "remaining_caveats": [
+      "exact original SoundForge pink-noise gain/envelope files and room transfer are not available",
+      "participant-level electrical tactile threshold calibration and voice-key threshold/latency are represented as provenance and emulated by mouse-click response proxies",
+      "the physical tool-use and pointing-control interventions are context tasks and are not automated as runner-controlled phases"
+    ],
     "implementation_gaps": [
       "pre/post intervention phase order",
       "tool-use versus pointing-control block factor",
-      "body-representation co-task metadata",
-      "exact trial count and ITI table from full paper"
+      "body-representation co-task metadata"
     ]
   },
   "provenance": [
     {
       "field": "study scope",
-      "source": "Repository/source abstract reports PPS measured with an audio-tactile interaction task before and after using a 1 m tool."
+      "source": "Experimental Brain Research article reports PPS measured with an audio-tactile interaction task before and after using a 1 m tool."
     },
     {
       "field": "task scaffold",
-      "source": "Profile inherits the Canzoneri-family dynamic sound timing pending full-method verification."
+      "source": "The 2013 article says procedures were similar to Canzoneri et al. (2012); the profile inherits the 2012 dynamic-sound count, baseline, catch, and block contract."
+    },
+    {
+      "field": "SOA and catch values",
+      "source": "2013 Methods report T1-T5 at 300, 800, 1500, 2200, and 2700 ms from sound onset, with tactile targets in 60% of trials and auditory-only catches in 40%."
+    },
+    {
+      "field": "expected outcome",
+      "source": "2013 Results/Figure 3 report a post-tool-use shift of the fitted PPS central point toward far space; Experiment 3 pointing control reports no comparable shift."
     }
   ]
 }

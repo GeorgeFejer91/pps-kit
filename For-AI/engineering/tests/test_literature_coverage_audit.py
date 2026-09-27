@@ -34,8 +34,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 17,
-        "covered_blocked_missing_publication_parameters": 6,
+        "covered_runnable_profile": 18,
+        "covered_blocked_missing_publication_parameters": 5,
         "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 0,
         "not_yet_templated_missing_publication_parameters": 48,
@@ -45,8 +45,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 30
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
-    ) == 24
-    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 22
+    ) == 25
+    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 23
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
     assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 0
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
@@ -284,6 +284,29 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         )
         for source in coverage["evidence_sources"]
     )
+    assert any(
+        source.get("id") == "consensus_mcp_exact_title_doi_2026_07_16"
+        and source.get("kind") == "consensus_mcp_exact_title_doi"
+        and "Tool-use reshapes" in source.get("query", "")
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "public_full_text_protocol_lineage_review_2026_07_16"
+        and source.get("kind") == "manual_public_full_text_and_protocol_lineage_review"
+        and source.get("local_summary_file")
+        == "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_reviews/canzoneri_2013_tool_use_reshaping.json"
+        for source in coverage["evidence_sources"]
+    )
+    assert any(
+        source.get("id") == "canzoneri_2013_tool_use_known_parameter_validation_2026_07_16"
+        and source.get("kind") == "validation_protocol"
+        and source.get("local_summary_file")
+        == (
+            "artifacts/validation_runs/current_goal_canzoneri_2013_tool_use_known_parameter_20260716/"
+            "canzoneri_2013_tool_use_known_parameter_validation_report.json"
+        )
+        for source in coverage["evidence_sources"]
+    )
 
     status_ids = {profile["template_id"] for profile in status["profiles"]}
     coverage_ids = {entry["template_id"] for entry in coverage["current_template_coverage"]}
@@ -302,6 +325,16 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "current_recreation_category": "gui_recreatable",
         "primary_constraint_ids": [],
     }
+    canzoneri_tool_use = by_template["canzoneri_2013_tool_use_reshaping"]
+    assert canzoneri_tool_use["template_id"] == "canzoneri_2013_tool_use_reshaping"
+    assert canzoneri_tool_use["published"] is True
+    assert canzoneri_tool_use["current_recreation_category"] == "gui_recreatable"
+    assert canzoneri_tool_use["primary_constraint_ids"] == []
+    assert canzoneri_tool_use["known_parameter_validation_report"] == (
+        "artifacts/validation_runs/current_goal_canzoneri_2013_tool_use_known_parameter_20260716/"
+        "canzoneri_2013_tool_use_known_parameter_validation_report.json"
+    )
+    assert "188-row two-block assessment formula" in canzoneri_tool_use["source_notes"]
     serino_toolless = by_template["serino_2015_toolless_sync_training"]
     assert serino_toolless["template_id"] == "serino_2015_toolless_sync_training"
     assert serino_toolless["published"] is True
@@ -385,7 +418,7 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for entry in coverage["current_template_coverage"]
         if entry["published"] and entry["current_recreation_category"] == "gui_recreatable"
     ]
-    assert len(published_ready) == 22
+    assert len(published_ready) == 23
 
 
 def test_literature_coverage_constraints_focus_on_task_execution():
@@ -772,6 +805,17 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["canzoneri_2012_dynamic_sounds"]["can_recreate_audiotactile_components_now"] is True
     assert records["canzoneri_2012_dynamic_sounds"]["blocking_constraint_ids"] == []
     assert records["canzoneri_2012_dynamic_sounds"]["missing_publication_parameters"] == []
+    assert records["canzoneri_2013_tool_use_reshaping"]["coverage_category"] == "covered_runnable_profile"
+    assert records["canzoneri_2013_tool_use_reshaping"]["current_template_ids"] == [
+        "canzoneri_2013_tool_use_reshaping"
+    ]
+    assert records["canzoneri_2013_tool_use_reshaping"]["can_recreate_audiotactile_components_now"] is True
+    assert records["canzoneri_2013_tool_use_reshaping"]["blocking_constraint_ids"] == []
+    assert records["canzoneri_2013_tool_use_reshaping"]["missing_publication_parameters"] == []
+    assert records["canzoneri_2013_tool_use_reshaping"]["known_parameter_validation_report"] == (
+        "artifacts/validation_runs/current_goal_canzoneri_2013_tool_use_known_parameter_20260716/"
+        "canzoneri_2013_tool_use_known_parameter_validation_report.json"
+    )
     assert records["tonelli_2019_echolocation"]["coverage_category"] == "covered_runnable_profile"
     assert records["tonelli_2019_echolocation"]["can_recreate_audiotactile_components_now"] is True
     assert records["tonelli_2019_echolocation"]["blocking_constraint_ids"] == []
