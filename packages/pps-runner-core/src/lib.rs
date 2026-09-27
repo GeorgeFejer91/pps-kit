@@ -181,6 +181,7 @@ impl RunnerCore {
                     event_label: "Waiting for setup".to_owned(),
                     thread_alive: false,
                     complete: false,
+                    participant_capture_ready: false,
                 },
                 instruction_gate: InstructionGateSnapshot {
                     waiting: false,
@@ -1209,6 +1210,10 @@ impl RunnerCore {
         self.snapshot.active_block.running = phase == RunnerPhase::Running;
         self.snapshot.active_block.paused = phase == RunnerPhase::Paused;
         self.snapshot.active_block.instruction_waiting = phase == RunnerPhase::InstructionGate;
+        self.snapshot.run.participant_capture_ready = phase == RunnerPhase::Running
+            && self.native_block.is_some()
+            && self.package_execution_ready
+            && self.native_control_pending.is_none();
         self.snapshot.allowed_actions = self.compute_allowed_actions();
     }
 
@@ -2129,6 +2134,7 @@ mod tests {
         );
         assert_eq!(started.snapshot.run.progress_label, "Block 3 / 6");
         assert_eq!(core.native_control_pending(), Some(Action::PartStart));
+        assert!(!started.snapshot.run.participant_capture_ready);
         assert_eq!(
             core.dispatch_local(Action::RunPause, json!({}), clock(10))
                 .reason,
@@ -2142,6 +2148,7 @@ mod tests {
             .is_err());
         core.confirm_native_control(Action::PartStart, clock(11))
             .unwrap();
+        assert!(core.snapshot().run.participant_capture_ready);
         assert_eq!(
             core.dispatch_local(Action::RunPause, json!({}), clock(12))
                 .status,

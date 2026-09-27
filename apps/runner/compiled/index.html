@@ -38,15 +38,13 @@
             <div class="workspace-main stack">
               <section class="hero-panel panel">
                 <div>
-                  <p class="eyebrow">Experiment running</p>
                   <h2 id="run-heading">Waiting for a prepared package</h2>
                   <p id="run-progress" class="subtle">The native target remains the timing and state authority.</p>
                 </div>
-                <div class="response-target" aria-hidden="true">
-                  <span></span>
-                  <small>Participant response target</small>
-                </div>
+                <button id="participant-response" class="response-target" type="button" disabled
+                  aria-describedby="participant-response-help" data-pretext>Respond</button>
               </section>
+              <p id="participant-response-help" class="subtle">Click or tap the response area. Space or Enter records a response without a position. Responses are enabled during native playback.</p>
 
               <section class="panel">
                 <div class="section-heading">
@@ -61,7 +59,7 @@
                   <button class="button action-button" type="button" data-action="instruction.continue">Continue instruction</button>
                   <button class="button action-button" type="button" data-action="run.pause">Pause</button>
                   <button class="button action-button" type="button" data-action="run.resume">Resume</button>
-                  <button class="button action-button" type="button" data-action="run.stop">Stop cleanly</button>
+                  <button class="button action-button" type="button" data-action="run.stop">Stop run</button>
                   <button class="button button-danger action-button" type="button" data-action="run.abort">Abort run</button>
                 </div>
                 <div class="timeline" aria-label="Active block progress">
@@ -112,10 +110,6 @@
               <section class="panel">
                 <p class="eyebrow">Output levels</p>
                 <h2>Output Summary</h2>
-                <div class="meter-list">
-                  <div><span>Output 1 / 2</span><div class="meter"><i style="width: 58%"></i></div><strong>Audio</strong></div>
-                  <div><span>Output 3 / 4</span><div class="meter"><i style="width: 34%"></i></div><strong>Tactile</strong></div>
-                </div>
                 <dl class="summary-list">
                   <div><dt>Audio route</dt><dd id="audio-route">Not ready</dd></div>
                   <div><dt>Local armed</dt><dd id="local-armed">No</dd></div>

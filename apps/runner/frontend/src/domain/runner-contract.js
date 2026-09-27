@@ -188,8 +188,11 @@ function validatePart(value) {
 }
 
 function validateRun(value) {
+  const captureField = Object.hasOwn(plainObject(value, "snapshot.run"), "participant_capture_ready")
+    ? ["participant_capture_ready"] : [];
   const run = exactObject(value, [
     "phase", "state_label", "progress_label", "event_label", "thread_alive", "complete",
+    ...captureField,
   ], "snapshot.run");
   if (!RUNNER_PHASES.has(run.phase)) throw new TypeError("snapshot.run.phase is invalid.");
   snapshotString(run.state_label, "snapshot.run.state_label");
@@ -197,6 +200,7 @@ function validateRun(value) {
   snapshotString(run.event_label, "snapshot.run.event_label");
   snapshotBoolean(run.thread_alive, "snapshot.run.thread_alive");
   snapshotBoolean(run.complete, "snapshot.run.complete");
+  if (captureField.length) snapshotBoolean(run.participant_capture_ready, "snapshot.run.participant_capture_ready");
 }
 
 function validateInstructionGate(value) {

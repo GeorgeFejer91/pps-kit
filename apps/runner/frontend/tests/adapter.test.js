@@ -49,6 +49,7 @@ test("ordinary-browser preview supports deterministic local clicks and fails rem
     () => adapter.prepareFirstAudioBlock(),
     /available only in the Tauri runner/iu,
   );
+  await assert.rejects(() => adapter.recordResponse(), /only in the native Tauri runner/iu);
 });
 
 test("Tauri adapter sends exact remote-owner DTOs and keeps LAN activation explicit", async () => {
@@ -130,4 +131,29 @@ test("Tauri adapter preserves sanitized native error codes", async () => {
     () => adapter.remoteSessionRevoke({ sessionId: "session_12345678", ownerToken: "owner_12345678" }),
     (error) => error instanceof Error && error.code === "stale_owner" && error.message === "The owner expired.",
   );
+});
+
+test("participant input sends only position and choice, never caller identity or timing", async () => {
+  const calls = [];
+  const adapter = createTauriRunnerAdapter({ invokeFn: async (...args) => { calls.push(args); return 7; } });
+  assert.equal(await adapter.recordResponse({ choice: "", x: 0.25, y: 0.75,
+    eventId: 999, monotonicNs: 123, blockNumber: 2 }), 7);
+  assert.deepEqual(calls, [["runner_record_response", { request: { choice: "", x: 0.25, y: 0.75 } }]]);
+});
+
+test("native state subscriptions target the local main window and retain cleanup", async () => {
+  let listener;
+  let stopped = false;
+  const adapter = createTauriRunnerAdapter({ listenFn: async (event, handler, options) => {
+    assert.equal(event, "runner-snapshot");
+    assert.deepEqual(options, { target: { kind: "WebviewWindow", label: "main" } });
+    listener = handler;
+    return () => { stopped = true; };
+  } });
+  let received;
+  const stop = await adapter.subscribeSnapshots((snapshot) => { received = snapshot; });
+  listener({ payload: { revision: 12 } });
+  assert.deepEqual(received, { revision: 12 });
+  stop();
+  assert.equal(stopped, true);
 });

@@ -139,6 +139,12 @@ test("PPS snapshots require the complete versioned application schema", () => {
     clock: () => ({ unixMs: 1_700_000_000_000, monotonicNs: 123_000 }),
   });
   assert.equal(validateRunnerSnapshot(snapshot), snapshot);
+  assert.equal(validateRunnerSnapshot({ ...snapshot,
+    run: { ...snapshot.run, participant_capture_ready: true },
+  }).run.participant_capture_ready, true);
+  assert.throws(() => validateRunnerSnapshot({ ...snapshot,
+    run: { ...snapshot.run, participant_capture_ready: "true" },
+  }), /participant_capture_ready.*boolean/u);
   assert.equal(validateRunnerSnapshot({
     ...snapshot,
     setup: { ...snapshot.setup, participant_code: "P".repeat(64) },

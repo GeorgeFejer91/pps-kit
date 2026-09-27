@@ -305,6 +305,9 @@ pub struct RunSnapshot {
     pub event_label: String,
     pub thread_alive: bool,
     pub complete: bool,
+    /// Native-only capture availability; absent on older snapshots means false.
+    #[serde(default)]
+    pub participant_capture_ready: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

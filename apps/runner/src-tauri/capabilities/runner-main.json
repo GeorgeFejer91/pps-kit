@@ -4,7 +4,8 @@
   "description": "Core and exact native Runner commands for the bundled main window.",
   "windows": ["main"],
   "permissions": [
-    "core:default",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
     "allow-runner-snapshot",
     "allow-runner-record-response",
     "allow-runner-dispatch",

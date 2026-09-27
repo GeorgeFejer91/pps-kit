@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 
 function messageFromError(error) {
   if (typeof error === "string") return error;
@@ -16,12 +17,17 @@ async function call(invokeFn, command, args) {
   }
 }
 
-export function createTauriRunnerAdapter({ invokeFn = invoke } = {}) {
+export function createTauriRunnerAdapter({ invokeFn = invoke, listenFn = listen } = {}) {
   if (typeof invokeFn !== "function") throw new TypeError("A Tauri invoke function is required.");
   return Object.freeze({
     kind: "tauri-native",
     snapshot() {
       return call(invokeFn, "runner_snapshot");
+    },
+    subscribeSnapshots(handler) {
+      return listenFn("runner-snapshot", (event) => handler(event.payload), {
+        target: { kind: "WebviewWindow", label: "main" },
+      });
     },
     dispatch(action, args = {}) {
       return call(invokeFn, "runner_dispatch", { action, args });
@@ -34,6 +40,9 @@ export function createTauriRunnerAdapter({ invokeFn = invoke } = {}) {
     },
     prepareFirstAudioBlock() {
       return call(invokeFn, "prepare_first_audio_block");
+    },
+    recordResponse({ choice = "", x = null, y = null } = {}) {
+      return call(invokeFn, "runner_record_response", { request: { choice, x, y } });
     },
     remoteStatus() {
       return call(invokeFn, "remote_status");

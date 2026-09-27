@@ -30,7 +30,7 @@ use runtime::{
 };
 use serde::Serialize;
 use serde_json::Value;
-use tauri::Manager;
+use tauri::{Emitter, EventTarget, Manager};
 use tauri_plugin_dialog::DialogExt;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -518,6 +518,35 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .manage(runtime)
+        .setup(|app| {
+            // Observe the existing authority; never run or time an experiment
+            // in a WebView. Private local snapshots go only to the main window.
+            let mut updates = app.state::<AppRuntime>().inner().0.state_tx.subscribe();
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                loop {
+                    match updates.recv().await {
+                        Ok(snapshot) => {
+                            if handle.get_webview_window("main").is_none()
+                                || handle
+                                    .emit_to(
+                                        EventTarget::webview_window("main"),
+                                        "runner-snapshot",
+                                        snapshot,
+                                    )
+                                    .is_err()
+                            {
+                                break;
+                            }
+                        }
+                        // Polling reconciles a lagged UI with current state.
+                        Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => continue,
+                        Err(tokio::sync::broadcast::error::RecvError::Closed) => break,
+                    }
+                }
+            });
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             runner_snapshot,
             runner_record_response,

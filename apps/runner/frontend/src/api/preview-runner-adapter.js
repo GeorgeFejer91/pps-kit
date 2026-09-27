@@ -78,6 +78,9 @@ export function createPreviewRunnerAdapter() {
     async prepareFirstAudioBlock() {
       throw new Error("Native audio preloading is available only in the Tauri runner.");
     },
+    async recordResponse() {
+      throw new Error("Participant acquisition is available only in the native Tauri runner.");
+    },
     async remoteStatus() {
       return remoteStatus();
     },

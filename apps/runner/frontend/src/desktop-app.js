@@ -15,12 +15,20 @@ import {
 } from "./remote/websocket-session.js";
 import { renderQrCode } from "./ui/qr-code.js";
 import { initializeTextLayout } from "./ui/text-layout.js";
+import { bindParticipantResponse } from "./ui/participant-response.js";
 import { installBrowserLifecycle } from "./remote/browser-lifecycle.js";
 
 initializeTextLayout();
 
 const api = selectRunnerAdapter();
+let nativeSnapshotSubscription = null;
+let nativeUpdatesReady = false;
 const elements = Object.fromEntries([...document.querySelectorAll("[id]")].map((element) => [element.id, element]));
+const participantResponse = bindParticipantResponse({
+  target: elements["participant-response"], api,
+  liveState: () => nativeUpdatesReady,
+  onError: (error) => showToast(error.message, { error: true }),
+});
 const outboundActionButtons = [...document.querySelectorAll("[data-controller-action]")];
 const MAX_PENDING_NATIVE_COMMANDS = 32;
 
@@ -240,7 +248,10 @@ function updateInboundPolicyUi() {
 
 function renderSnapshot(next) {
   if (!next || typeof next !== "object") return;
+  if (snapshot && (next.epoch < snapshot.epoch
+    || (next.epoch === snapshot.epoch && next.revision < snapshot.revision))) return;
   snapshot = next;
+  participantResponse.refresh(next);
   const phase = next.run?.phase ?? "unknown";
   const participant = next.setup?.participant_code || next.identity?.participant_id || "Not set";
   text("participant-chip", participant);
@@ -1148,6 +1159,7 @@ async function start() {
   renderOutboundTargets();
   updateInboundPolicyUi();
   try {
+    await subscribeNativeSnapshots();
     const [initialSnapshot, initialRemote] = await Promise.all([api.snapshot(), api.remoteStatus()]);
     renderSnapshot(normalizedSnapshot(initialSnapshot));
     await renderRemote(initialRemote);
@@ -1159,6 +1171,33 @@ async function start() {
   startPolling();
 }
 
+async function subscribeNativeSnapshots() {
+  if (api.kind !== "tauri-native") return;
+  if (!nativeSnapshotSubscription) {
+    const pending = api.subscribeSnapshots((next) => {
+      if (nativeSnapshotSubscription === pending) renderSnapshot(next);
+    });
+    nativeSnapshotSubscription = pending;
+    try {
+      await pending;
+      if (nativeSnapshotSubscription === pending) nativeUpdatesReady = true;
+    } catch (error) {
+      if (nativeSnapshotSubscription === pending) nativeSnapshotSubscription = null;
+      throw error;
+    }
+  } else {
+    await nativeSnapshotSubscription;
+  }
+}
+
+function stopNativeSnapshots() {
+  nativeUpdatesReady = false;
+  participantResponse.refresh();
+  const pending = nativeSnapshotSubscription;
+  nativeSnapshotSubscription = null;
+  void pending?.then((unlisten) => unlisten()).catch(() => {});
+}
+
 function startPolling() {
   if (pollTimer !== null) clearInterval(pollTimer);
   pollTimer = setInterval(() => {
@@ -1168,6 +1207,7 @@ function startPolling() {
 }
 
 window.addEventListener("pagehide", () => {
+  stopNativeSnapshots();
   void stopAllRemoteNetworking();
 });
 
@@ -1178,7 +1218,7 @@ installBrowserLifecycle({
     updateOutboundControls();
   },
   resume: () => {
-    void Promise.all([refreshSnapshot(), refreshRemote()])
+    void subscribeNativeSnapshots().then(() => Promise.all([refreshSnapshot(), refreshRemote()]))
       .then(startPolling).catch((error) => showToast(error.message, { error: true }));
   },
 });
