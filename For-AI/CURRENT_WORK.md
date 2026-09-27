@@ -16,12 +16,15 @@ Updated: 2026-09-27. Replace at task/stage transitions; do not append command lo
   flow is Pair → fresh state → permitted action; exploratory phone outputs stay
   separate. The native media bridge reuses the verified renderer and returns
   one command/event port after silent warm-up; no second scheduler was added.
+  Explicit audio preflight now installs a bounded native event journal using
+  the existing authority schema. Writer/admission failures interrupt and disarm
+  active state; partial files are retained and cannot certify a completed run.
 - **Evidence:** use the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md).
   Source, CI packages, installed behavior, physical timing, participant results,
   and published replication are distinct gates. The existing installed
   compatibility Runner has not been rebuilt in this task.
 - **Next gate:** adopt the verified media bridge in the native experiment
-  authority with response/event persistence, completion, and safe execution.
+  authority with real response capture, result CSVs, completion, and safe execution.
   The Tauri candidate remains non-executable/unqualified. Qualification requires
   observed devices and routes; software tests cannot supply physical evidence.
 - **Local constraint:** full native builds and the complete Standard tier need

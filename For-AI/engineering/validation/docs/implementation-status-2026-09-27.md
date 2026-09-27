@@ -17,7 +17,7 @@ Status applies to the stated surface, not to the whole product.
 | 9 | PARTIAL: existing renderer bound to exact CPAL output; silent preparation, sole native port, fenced controls and bounded callback records | Tauri authority adoption, response/durable results, actual installed experiment; current shell remains non-executable |
 | 10 | PARTIAL: shared contracts; actual JSON → existing compatibility assembler; sample/tactile/CSV oracle passes | Native assembly/execution capability |
 | 11 | PARTIAL: same typed authority, shared action fixture, fresh state, native scopes | Real-package execution commands |
-| 12 | PARTIAL: generation/principal/payload binding, expired-ID rejection, bounded tombstones, unknown acknowledgements | Durable result journal for actual native execution |
+| 12 | PARTIAL: retry fences plus one bounded native event journal, fsync-confirmed prefixes, retained partial files and fail-closed safety | Real response/results publication and complete native execution |
 | 13 | PARTIAL: secure hosted companion, explicit inert discovery, existing authenticated VDO route | Physical phone direct/relay/network-loss qualification |
 | 14 | PARTIAL: shared suspension/resume gate, no replay, stale callback denial, disarmed phone outputs | Physical Safari/Chrome screen lock and BFCache cases |
 | 15 | VERIFIED source policy: local setup, observer scope, participant-free public projections, fresh invitations | Physical expiry/revocation; remembered phones remain unselected |
@@ -58,6 +58,18 @@ Source and package evidence:
   JSON/CSV, website files, and Pages control files. This resolves byte/hash
   differences from Windows line-ending conversion while preserving Git content.
   Repeat hosted parity after each changed UI deploy.
+- Native authority journal **39ce52d7a0d3c08334057977631e0000b15e52e3**:
+  [Core, Desktop, Browser and Python/Rust oracle checks passed on all three hosts](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36337879731).
+  Nine new checks cover event-schema/sequence preservation, exclusive file creation,
+  bounded admission, missing sequences, I/O failure, package replacement,
+  late installation, active fail-stop and unavailable safety-Pause evidence.
+  Audio preflight uses the selected native package directory; selection and
+  inspection remain read-only. Local annotations retain their text in the private
+  journal, while public projections still omit it. A synced event prefix is
+  distinct from queue admission and from a completed experiment. Files remain
+  partial/unqualified: native media/response/result/completion integration and
+  physical timing evidence are still outstanding. CI validation bundles for
+  this source revision are separate from installed or physical qualification.
 
 No participant acquisition, scientific replication effect, physical onset,
 installed application behavior, or newly qualified route is claimed here.
