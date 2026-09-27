@@ -28,11 +28,12 @@ use crate::{
     latency_diagnostics::{AuthorityMailboxDiagnostics, LatencyStage, LatencyTrace},
     native_output::{
         NativeOutputAuthority, NativeOutputCleanupObservation, NativeOutputCommandError,
-        NativeOutputReleaseRequest, NativeOutputReserveRequest,
-        NativeOutputStatus, NativeOutputTicket,
+        NativeOutputReleaseRequest, NativeOutputReserveRequest, NativeOutputStatus,
+        NativeOutputTicket,
     },
     native_playback::{
-        NativeOutputPreparation, NativePlaybackCompletion, NativePlaybackSource, NativePreparedPlayback,
+        NativeOutputPreparation, NativePlaybackCompletion, NativePlaybackSource,
+        NativePreparedPlayback,
     },
     prepared_audio::{
         PreparedAudioCandidate, PreparedAudioLookup, PreparedAudioSource,
@@ -420,9 +421,15 @@ impl OwnerState {
     }
 
     fn native_journal_current(&self) -> bool {
-        !self.evidence_unavailable && self.event_journal.as_ref().is_some_and(|(generation, journal)| {
-            *generation == self.package_generation && !journal.failed() && !journal.retired()
-        })
+        !self.evidence_unavailable
+            && self
+                .event_journal
+                .as_ref()
+                .is_some_and(|(generation, journal)| {
+                    *generation == self.package_generation
+                        && !journal.failed()
+                        && !journal.retired()
+                })
     }
 
     fn poll_native_playback(&mut self) {
@@ -445,15 +452,22 @@ impl OwnerState {
         };
         let inputs = playback.drain(&stamp, |instant| {
             u64::try_from(instant.saturating_duration_since(started).as_nanos())
-                .unwrap_or(u64::MAX).min(JSON_MAX_SAFE_INTEGER)
+                .unwrap_or(u64::MAX)
+                .min(JSON_MAX_SAFE_INTEGER)
         });
         let status = playback.port.status();
         let reserve = LedgerReserve::new(LEDGER_SAFETY_RECORD_RESERVE, LEDGER_SAFETY_BYTE_RESERVE);
         match inputs {
             Ok(inputs) if inputs.is_empty() => {}
             Ok(inputs) => {
-                if self.commit_evidence_batch(inputs, reserve, CommitPolicy::Ordinary).is_err() {
-                    self.fail_stop_unavailable("native.media.evidence-unavailable", "evidence_unavailable");
+                if self
+                    .commit_evidence_batch(inputs, reserve, CommitPolicy::Ordinary)
+                    .is_err()
+                {
+                    self.fail_stop_unavailable(
+                        "native.media.evidence-unavailable",
+                        "evidence_unavailable",
+                    );
                     return;
                 }
             }
@@ -1651,7 +1665,9 @@ impl OwnerState {
         } else {
             None
         };
-        poll.map_or(lease, |poll| Some(lease.map_or(poll, |delay| delay.min(poll))))
+        poll.map_or(lease, |poll| {
+            Some(lease.map_or(poll, |delay| delay.min(poll)))
+        })
     }
 
     fn shutdown(&mut self) {
@@ -1705,9 +1721,14 @@ impl OwnerState {
         } else {
             None
         };
-        let (ticket, selection) = self.native_output
+        let (ticket, selection) = self
+            .native_output
             .begin_reserve(&self.core.snapshot(), &request)?;
-        Ok(NativeOutputPreparation { ticket, selection, source })
+        Ok(NativeOutputPreparation {
+            ticket,
+            selection,
+            source,
+        })
     }
 
     fn complete_native_output_enumerate(
@@ -1736,10 +1757,13 @@ impl OwnerState {
             self.native_output.invalidate_for_runner_change();
             return Err(NativeOutputCommandError::changed());
         }
-        let prepared = handoff.take()
+        let prepared = handoff
+            .take()
             .ok_or_else(NativeOutputCommandError::changed)
-            .and_then(|port| NativePreparedPlayback::new(source, port)
-                .map_err(|_| NativeOutputCommandError::changed()));
+            .and_then(|port| {
+                NativePreparedPlayback::new(source, port)
+                    .map_err(|_| NativeOutputCommandError::changed())
+            });
         let prepared = match prepared {
             Ok(prepared) => prepared,
             Err(error) => {
@@ -1757,10 +1781,12 @@ impl OwnerState {
             "executable": false,
         });
         self.commit_candidate(self.core.clone(), event, CommitPolicy::Ordinary, false)
-            .map_err(|_| NativeOutputCommandError::new(
-                "native_output_evidence_unavailable",
-                "Native media could not retain its preparation evidence.",
-            ))?;
+            .map_err(|_| {
+                NativeOutputCommandError::new(
+                    "native_output_evidence_unavailable",
+                    "Native media could not retain its preparation evidence.",
+                )
+            })?;
         self.native_playback = Some(prepared);
         self.native_output.mark_media_prepared();
         Ok(self.native_output.status())
@@ -2070,10 +2096,7 @@ impl ExecutionOwner {
         &self,
         observation: NativeOutputCleanupObservation,
         request: NativeOutputReserveRequest,
-    ) -> Result<
-        Result<NativeOutputPreparation, NativeOutputCommandError>,
-        OwnerSubmitError,
-    > {
+    ) -> Result<Result<NativeOutputPreparation, NativeOutputCommandError>, OwnerSubmitError> {
         self.asynchronous(
             AdmissionClass::Normal,
             "native_output_begin_reserve",

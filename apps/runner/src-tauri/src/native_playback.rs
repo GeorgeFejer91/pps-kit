@@ -1,7 +1,10 @@
 //! Native callback ownership and metadata resolution for the execution actor.
 //! No command policy, filesystem selection, or second scheduler lives here.
 
-use std::{sync::{Arc, Mutex}, time::Instant};
+use std::{
+    sync::{Arc, Mutex},
+    time::Instant,
+};
 
 use pps_contracts::{ClockStamp, JSON_MAX_SAFE_INTEGER};
 use pps_runner_audio::{OutputFence, PreparedPlaybackPlan, RenderState, RtEventKind};
@@ -52,7 +55,10 @@ impl NativePlaybackHandoff {
     }
 
     pub(crate) fn take(&self) -> Option<PlaybackPort> {
-        self.0.lock().unwrap_or_else(|error| error.into_inner()).take()
+        self.0
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .take()
     }
 }
 
@@ -62,9 +68,15 @@ pub(crate) struct NativePreparedPlayback {
 }
 
 impl NativePreparedPlayback {
-    pub(crate) fn new(source: NativePlaybackSource, port: PlaybackPort) -> Result<Self, &'static str> {
+    pub(crate) fn new(
+        source: NativePlaybackSource,
+        port: PlaybackPort,
+    ) -> Result<Self, &'static str> {
         let status = port.status();
-        if status.state != RenderState::Prepared || status.fault.is_some() || status.callback_retired {
+        if status.state != RenderState::Prepared
+            || status.fault.is_some()
+            || status.callback_retired
+        {
             return Err("native_playback_unavailable");
         }
         Ok(Self { source, port })
@@ -78,13 +90,29 @@ impl NativePreparedPlayback {
         let status = self.port.status();
         // Prepared callbacks emit no records. Avoid allocating a batch for
         // every idle authority poll, while still observing callback faults.
-        if status.state == RenderState::Prepared && status.last_control_sequence == 0 && status.fault.is_none() {
-            return if status.callback_retired { Err("native_playback_retired") } else { Ok(Vec::new()) };
+        if status.state == RenderState::Prepared
+            && status.last_control_sequence == 0
+            && status.fault.is_none()
+        {
+            return if status.callback_retired {
+                Err("native_playback_retired")
+            } else {
+                Ok(Vec::new())
+            };
         }
-        let records = self.port.drain(128).map_err(|_| "native_playback_unavailable")?;
+        let records = self
+            .port
+            .drain(128)
+            .map_err(|_| "native_playback_unavailable")?;
         let mut inputs = Vec::with_capacity(records.len());
         for record in records {
-            if let Some(input) = record_input(self.source.receipt.schedule(), self.source.plan.fence(), record, stamp, host_time(record.host_received))? {
+            if let Some(input) = record_input(
+                self.source.receipt.schedule(),
+                self.source.plan.fence(),
+                record,
+                stamp,
+                host_time(record.host_received),
+            )? {
                 inputs.push(input);
             }
         }
@@ -109,20 +137,38 @@ pub(crate) fn record_input(
             }
             let (event_type, trigger, payload) = match boundary.kind() {
                 RtEventKind::SampleZero => {
-                    let anchor = schedule.events().iter().find(|event| event.event_type == "audio_sample_zero")
+                    let anchor = schedule
+                        .events()
+                        .iter()
+                        .find(|event| event.event_type == "audio_sample_zero")
                         .ok_or("native_playback_metadata_missing")?;
-                    (anchor.event_type.clone(), Some(anchor.trigger_key.clone()), anchor.payload.clone())
+                    (
+                        anchor.event_type.clone(),
+                        Some(anchor.trigger_key.clone()),
+                        anchor.payload.clone(),
+                    )
                 }
                 RtEventKind::Scheduled { event_index } => {
-                    let event = usize::try_from(event_index).ok().and_then(|index| schedule.events().get(index))
+                    let event = usize::try_from(event_index)
+                        .ok()
+                        .and_then(|index| schedule.events().get(index))
                         .ok_or("native_playback_metadata_missing")?;
                     if event.event_type == "audio_sample_zero"
-                        || u64::try_from(event.sample_index).ok() != Some(boundary.sample_index()) {
+                        || u64::try_from(event.sample_index).ok() != Some(boundary.sample_index())
+                    {
                         return Err("native_playback_metadata_mismatch");
                     }
-                    (event.event_type.clone(), Some(event.trigger_key.clone()), event.payload.clone())
+                    (
+                        event.event_type.clone(),
+                        Some(event.trigger_key.clone()),
+                        event.payload.clone(),
+                    )
                 }
-                RtEventKind::FinalFrameSubmitted => ("audio.final-frame-submitted".to_owned(), None, serde_json::json!({})),
+                RtEventKind::FinalFrameSubmitted => (
+                    "audio.final-frame-submitted".to_owned(),
+                    None,
+                    serde_json::json!({}),
+                ),
             };
             let mut input = LedgerEventInput::new(event_type, "native-output", stamp.monotonic_ns);
             input.trigger_key = trigger;
@@ -130,13 +176,21 @@ pub(crate) fn record_input(
                 return Err("native_playback_metadata_mismatch");
             }
             input.payload = payload;
-            input.payload["callbackSequence"] = serde_json::json!(boundary.callback_sequence().to_string());
+            input.payload["callbackSequence"] =
+                serde_json::json!(boundary.callback_sequence().to_string());
             input.payload["sourceSampleIndex"] = serde_json::json!(boundary.sample_index());
-            input.payload["sampleOffsetInCallback"] = serde_json::json!(boundary.sample_offset_in_callback());
+            input.payload["sampleOffsetInCallback"] =
+                serde_json::json!(boundary.sample_offset_in_callback());
             input
         }
-        PlaybackRecordKind::Control { sequence, requested, result, state } => {
-            let mut input = LedgerEventInput::new("audio.control.applied", "native-output", stamp.monotonic_ns);
+        PlaybackRecordKind::Control {
+            sequence,
+            requested,
+            result,
+            state,
+        } => {
+            let mut input =
+                LedgerEventInput::new("audio.control.applied", "native-output", stamp.monotonic_ns);
             input.payload = serde_json::json!({
                 "controlSequence": sequence.to_string(),
                 "requested": format!("{requested:?}"),
@@ -148,10 +202,15 @@ pub(crate) fn record_input(
         PlaybackRecordKind::Render(outcome) => {
             // Per-buffer render counters belong in status, not an unbounded
             // scientific event trail. Retain terminal/fault evidence.
-            if matches!(outcome.state, RenderState::Playing | RenderState::Paused | RenderState::Prepared) && outcome.fault.is_none() {
+            if matches!(
+                outcome.state,
+                RenderState::Playing | RenderState::Paused | RenderState::Prepared
+            ) && outcome.fault.is_none()
+            {
                 return Ok(None);
             }
-            let mut input = LedgerEventInput::new("audio.render.state", "native-output", stamp.monotonic_ns);
+            let mut input =
+                LedgerEventInput::new("audio.render.state", "native-output", stamp.monotonic_ns);
             input.payload = serde_json::json!({
                 "renderState": format!("{:?}", outcome.state),
                 "sourceSubmittedFrames": outcome.cursor_frames,
@@ -162,13 +221,16 @@ pub(crate) fn record_input(
         }
     };
     input.unix_ms = Some(stamp.unix_ms);
-    input.payload["observedHostMonotonicNs"] = serde_json::json!(host_monotonic_ns.min(JSON_MAX_SAFE_INTEGER));
+    input.payload["observedHostMonotonicNs"] =
+        serde_json::json!(host_monotonic_ns.min(JSON_MAX_SAFE_INTEGER));
     input.payload["timingQualification"] = serde_json::json!("unqualified");
     input.payload["clockBasis"] = serde_json::json!("host-callback-observation");
-    input.payload["driverPredictionLeadNs"] = serde_json::json!(record.device_timestamp.and_then(|time| {
-        time.playback.duration_since(&time.callback)
-            .and_then(|duration| u64::try_from(duration.as_nanos()).ok())
-            .map(|value| value.min(JSON_MAX_SAFE_INTEGER))
-    }));
+    input.payload["driverPredictionLeadNs"] =
+        serde_json::json!(record.device_timestamp.and_then(|time| {
+            time.playback
+                .duration_since(&time.callback)
+                .and_then(|duration| u64::try_from(duration.as_nanos()).ok())
+                .map(|value| value.min(JSON_MAX_SAFE_INTEGER))
+        }));
     Ok(Some(input))
 }

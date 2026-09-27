@@ -605,10 +605,15 @@ impl AppRuntime {
         let ticket = preparation.ticket;
         let source = preparation.source;
         let plan = source.as_ref().map(|source| Arc::clone(&source.plan));
-        let receive = match self.0.native_output.reserve(ticket, preparation.selection, plan) {
+        let receive = match self
+            .0
+            .native_output
+            .reserve(ticket, preparation.selection, plan)
+        {
             Ok(receive) => receive,
             Err(error) => {
-                self.finish_reserve(ticket, Err(error.clone()), None).await?;
+                self.finish_reserve(ticket, Err(error.clone()), None)
+                    .await?;
                 return Err(error);
             }
         };
@@ -626,18 +631,22 @@ impl AppRuntime {
                     (Some(source), Some(port)) => Some((source, NativePlaybackHandoff::new(port))),
                     (None, None) => None,
                     _ => {
-                        self.0.native_output.invalidate_after_completion_failure(ticket);
+                        self.0
+                            .native_output
+                            .invalidate_after_completion_failure(ticket);
                         return Err(NativeOutputCommandError::changed());
                     }
                 };
-                self.finish_reserve(ticket, Ok(reservation_generation), playback).await?;
+                self.finish_reserve(ticket, Ok(reservation_generation), playback)
+                    .await?;
                 Ok(reservation)
             }
             CoordinatorReply::Failed {
                 ticket: completed,
                 error,
             } if completed == ticket => {
-                self.finish_reserve(ticket, Err(error.clone()), None).await?;
+                self.finish_reserve(ticket, Err(error.clone()), None)
+                    .await?;
                 Err(error)
             }
             _ => {
@@ -700,7 +709,9 @@ impl AppRuntime {
             {
                 Ok(Ok(_)) => return Ok(()),
                 Ok(Err(error)) => {
-                    self.0.native_output.invalidate_after_completion_failure(ticket);
+                    self.0
+                        .native_output
+                        .invalidate_after_completion_failure(ticket);
                     return Err(error);
                 }
                 Err(OwnerSubmitError::Closed) => break,

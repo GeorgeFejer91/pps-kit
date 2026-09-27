@@ -12,9 +12,9 @@ use std::{
 use pps_contracts::{RunnerPhase, RunnerSnapshot};
 use pps_runner_audio::PreparedPlaybackPlan;
 use pps_runner_audio_cpal::{
-    CpalOutputService, ExactOutputSelection, OutputBufferSelection, OutputBufferSupport, PlaybackPort,
+    CpalOutputService, ExactOutputSelection, OutputBufferSelection, OutputBufferSupport,
     OutputDeviceInventory, OutputFaultKind, OutputReservationReceipt, OutputServiceError,
-    OutputServiceErrorCode, OutputServicePhase, MAXIMUM_WARMUP_TIMEOUT,
+    OutputServiceErrorCode, OutputServicePhase, PlaybackPort, MAXIMUM_WARMUP_TIMEOUT,
 };
 use serde::{Deserialize, Serialize};
 use tokio::sync::oneshot;
@@ -872,7 +872,10 @@ trait NativeOutputDriver: Send + 'static {
         _receipt: &Self::Receipt,
         _plan: Arc<PreparedPlaybackPlan>,
     ) -> Result<PlaybackPort, NativeOutputCommandError> {
-        Err(NativeOutputCommandError::new("native_output_media_unavailable", "This native output driver cannot bind the prepared media."))
+        Err(NativeOutputCommandError::new(
+            "native_output_media_unavailable",
+            "This native output driver cannot bind the prepared media.",
+        ))
     }
     fn reservation_generation(receipt: &Self::Receipt) -> u64;
     fn reservation_projection(
@@ -998,7 +1001,9 @@ impl NativeOutputDriver for CpalDriver {
         receipt: &Self::Receipt,
         plan: Arc<PreparedPlaybackPlan>,
     ) -> Result<PlaybackPort, NativeOutputCommandError> {
-        self.service.prepare_playback(receipt, plan).map_err(map_service_error)
+        self.service
+            .prepare_playback(receipt, plan)
+            .map_err(map_service_error)
     }
 
     fn reservation_generation(receipt: &Self::Receipt) -> u64 {
@@ -1038,8 +1043,10 @@ impl NativeOutputDriver for CpalDriver {
         receipt: &Self::Receipt,
     ) -> Result<ReservationHealth, NativeOutputCommandError> {
         let status = self.service.status().map_err(map_service_error)?;
-        if matches!(status.phase(), OutputServicePhase::ReservedSilence | OutputServicePhase::ReservedMedia)
-            && status.reservation_generation() == Some(receipt.reservation_generation())
+        if matches!(
+            status.phase(),
+            OutputServicePhase::ReservedSilence | OutputServicePhase::ReservedMedia
+        ) && status.reservation_generation() == Some(receipt.reservation_generation())
             && status.callback_fault_count() == 0
             && status.last_fault().is_none()
         {
@@ -1065,9 +1072,12 @@ impl NativeOutputDriver for CpalDriver {
                 let status = self.service.status().map_err(map_service_error)?;
                 if status.phase() == OutputServicePhase::Faulted
                     && status.reservation_generation().is_none()
-                    && status.last_fault().is_some_and(|fault| matches!(
-                        fault.kind(), OutputFaultKind::WarmupTimeout | OutputFaultKind::CallbackFault
-                    ))
+                    && status.last_fault().is_some_and(|fault| {
+                        matches!(
+                            fault.kind(),
+                            OutputFaultKind::WarmupTimeout | OutputFaultKind::CallbackFault
+                        )
+                    })
                 {
                     Ok(())
                 } else {
@@ -1334,10 +1344,21 @@ impl<D: NativeOutputDriver> CoordinatorState<D> {
                 });
                 match result {
                     Ok(receipt) => {
-                        let playback = match plan.map(|plan| self.driver.as_mut().ok_or_else(NativeOutputCommandError::quarantined).and_then(|driver| driver.prepare_playback(&receipt, plan))).transpose() {
+                        let playback = match plan
+                            .map(|plan| {
+                                self.driver
+                                    .as_mut()
+                                    .ok_or_else(NativeOutputCommandError::quarantined)
+                                    .and_then(|driver| driver.prepare_playback(&receipt, plan))
+                            })
+                            .transpose()
+                        {
                             Ok(playback) => playback,
                             Err(error) => {
-                                let released = self.driver.as_mut().is_some_and(|driver| driver.release(&receipt).is_ok());
+                                let released = self
+                                    .driver
+                                    .as_mut()
+                                    .is_some_and(|driver| driver.release(&receipt).is_ok());
                                 if !released {
                                     self.receipt = Some(receipt);
                                     self.inventory = None;
@@ -1345,7 +1366,14 @@ impl<D: NativeOutputDriver> CoordinatorState<D> {
                                     observation.record(request.ticket.policy_generation, true);
                                     notice.mark_pending();
                                 }
-                                let _ = request.reply.send(CoordinatorReply::Failed { ticket: request.ticket, error: if self.quarantined { NativeOutputCommandError::quarantined() } else { error } });
+                                let _ = request.reply.send(CoordinatorReply::Failed {
+                                    ticket: request.ticket,
+                                    error: if self.quarantined {
+                                        NativeOutputCommandError::quarantined()
+                                    } else {
+                                        error
+                                    },
+                                });
                                 return;
                             }
                         };
@@ -1543,7 +1571,11 @@ impl NativeOutputCoordinator {
             .checked_add(RESERVATION_DEADLINE_GRACE)
             .unwrap_or(CLIENT_REPLY_DEADLINE)
             .min(CLIENT_REPLY_DEADLINE);
-        self.submit(ticket, CoordinatorOperation::Reserve(selection, plan), timeout)
+        self.submit(
+            ticket,
+            CoordinatorOperation::Reserve(selection, plan),
+            timeout,
+        )
     }
 
     fn submit(

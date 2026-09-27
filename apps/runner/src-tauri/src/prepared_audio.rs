@@ -811,7 +811,9 @@ mod tests {
         fs::remove_dir_all(root).unwrap();
     }
 
-    fn native_boundary_records(candidate: &PreparedAudioCandidate) -> Vec<pps_runner_audio_cpal::NativePlaybackRecord> {
+    fn native_boundary_records(
+        candidate: &PreparedAudioCandidate,
+    ) -> Vec<pps_runner_audio_cpal::NativePlaybackRecord> {
         use pps_runner_audio::{RenderControl, RenderEngine, RtEventSink};
         use pps_runner_audio_cpal::{NativePlaybackRecord, PlaybackRecordKind};
         let plan = candidate.shared_playback_plan();
@@ -821,12 +823,17 @@ mod tests {
         let mut slots = [None; 64];
         let mut events = RtEventSink::new(&mut slots);
         engine.render(&mut output, &mut events);
-        events.events().iter().flatten().map(|event| NativePlaybackRecord {
-            fence: event.fence(),
-            host_received: std::time::Instant::now(),
-            device_timestamp: None,
-            kind: PlaybackRecordKind::Boundary(*event),
-        }).collect()
+        events
+            .events()
+            .iter()
+            .flatten()
+            .map(|event| NativePlaybackRecord {
+                fence: event.fence(),
+                host_received: std::time::Instant::now(),
+                device_timestamp: None,
+                kind: PlaybackRecordKind::Boundary(*event),
+            })
+            .collect()
     }
 
     #[test]
@@ -834,29 +841,69 @@ mod tests {
         use crate::native_playback::record_input;
         let (root, source) = source();
         let candidate = prepare_verified_audio(source).unwrap();
-        let stamp = pps_contracts::ClockStamp { unix_ms: 123, monotonic_ns: 1000 };
+        let stamp = pps_contracts::ClockStamp {
+            unix_ms: 123,
+            monotonic_ns: 1000,
+        };
         let records = native_boundary_records(&candidate);
-        let inputs: Vec<_> = records.into_iter().map(|record| {
-            record_input(candidate.schedule(), candidate.playback_plan().fence(), record, &stamp, 400)
-                .unwrap().unwrap()
-        }).collect();
-        assert_eq!(inputs.len(), candidate.playback_plan().scheduled_events().len() + 2);
-        assert_eq!(inputs.iter().filter(|input| input.event_type == "audio_sample_zero").count(), 1);
-        assert_eq!(inputs.iter().filter(|input| input.event_type == "audio.final-frame-submitted").count(), 1);
+        let inputs: Vec<_> = records
+            .into_iter()
+            .map(|record| {
+                record_input(
+                    candidate.schedule(),
+                    candidate.playback_plan().fence(),
+                    record,
+                    &stamp,
+                    400,
+                )
+                .unwrap()
+                .unwrap()
+            })
+            .collect();
+        assert_eq!(
+            inputs.len(),
+            candidate.playback_plan().scheduled_events().len() + 2
+        );
+        assert_eq!(
+            inputs
+                .iter()
+                .filter(|input| input.event_type == "audio_sample_zero")
+                .count(),
+            1
+        );
+        assert_eq!(
+            inputs
+                .iter()
+                .filter(|input| input.event_type == "audio.final-frame-submitted")
+                .count(),
+            1
+        );
         for input in &inputs {
             assert_eq!(input.monotonic_ns, 1000);
             assert_eq!(input.unix_ms, Some(123));
             assert_eq!(input.payload["observedHostMonotonicNs"], 400);
             assert_eq!(input.payload["timingQualification"], "unqualified");
         }
-        for event in candidate.schedule().events().iter().filter(|event| event.sample_index >= 0) {
-            let input = inputs.iter().find(|input| input.event_type == event.event_type
-                && input.trigger_key.as_deref() == Some(event.trigger_key.as_str())).unwrap();
+        for event in candidate
+            .schedule()
+            .events()
+            .iter()
+            .filter(|event| event.sample_index >= 0)
+        {
+            let input = inputs
+                .iter()
+                .find(|input| {
+                    input.event_type == event.event_type
+                        && input.trigger_key.as_deref() == Some(event.trigger_key.as_str())
+                })
+                .unwrap();
             for (key, value) in event.payload.as_object().unwrap() {
                 assert_eq!(input.payload[key], *value);
             }
         }
-        assert!(!serde_json::to_string(&candidate.summary().unwrap()).unwrap().contains("manifest_path"));
+        assert!(!serde_json::to_string(&candidate.summary().unwrap())
+            .unwrap()
+            .contains("manifest_path"));
         fs::remove_dir_all(root).unwrap();
     }
 
@@ -866,22 +913,37 @@ mod tests {
         use pps_runner_audio_cpal::PlaybackRecordKind;
         let (root, source) = source();
         let candidate = prepare_verified_audio(source).unwrap();
-        let stamp = pps_contracts::ClockStamp { unix_ms: 123, monotonic_ns: 1000 };
+        let stamp = pps_contracts::ClockStamp {
+            unix_ms: 123,
+            monotonic_ns: 1000,
+        };
         let record = native_boundary_records(&candidate).into_iter().find(|record| matches!(
             record.kind, PlaybackRecordKind::Boundary(boundary)
                 if matches!(boundary.kind(), pps_runner_audio::RtEventKind::Scheduled { .. })
         )).unwrap();
-        let other = pps_runner_audio::OutputFence::new(candidate.playback_plan().fence().audio(), 9);
+        let other =
+            pps_runner_audio::OutputFence::new(candidate.playback_plan().fence().audio(), 9);
         assert!(record_input(candidate.schedule(), &other, record, &stamp, 400).is_err());
         let mut events = candidate.schedule().events().to_vec();
-        let PlaybackRecordKind::Boundary(boundary) = record.kind else { unreachable!() };
-        let pps_runner_audio::RtEventKind::Scheduled { event_index } = boundary.kind() else { unreachable!() };
+        let PlaybackRecordKind::Boundary(boundary) = record.kind else {
+            unreachable!()
+        };
+        let pps_runner_audio::RtEventKind::Scheduled { event_index } = boundary.kind() else {
+            unreachable!()
+        };
         for event in &mut events {
             event.sample_index += 1;
         }
         assert!(event_index < events.len() as u32);
         let altered = BlockEventSchedule::new(events).unwrap();
-        assert!(record_input(&altered, candidate.playback_plan().fence(), record, &stamp, 400).is_err());
+        assert!(record_input(
+            &altered,
+            candidate.playback_plan().fence(),
+            record,
+            &stamp,
+            400
+        )
+        .is_err());
         fs::remove_dir_all(root).unwrap();
     }
 
@@ -892,34 +954,65 @@ mod tests {
         use pps_runner_audio_cpal::{NativePlaybackRecord, PlaybackRecordKind};
         let (root, source) = source();
         let candidate = prepare_verified_audio(source).unwrap();
-        let stamp = pps_contracts::ClockStamp { unix_ms: 123, monotonic_ns: 1000 };
+        let stamp = pps_contracts::ClockStamp {
+            unix_ms: 123,
+            monotonic_ns: 1000,
+        };
         let record = |kind| NativePlaybackRecord {
             fence: candidate.playback_plan().fence().rt_projection(),
             host_received: std::time::Instant::now(),
             device_timestamp: None,
             kind,
         };
-        let input = record_input(candidate.schedule(), candidate.playback_plan().fence(), record(
-            PlaybackRecordKind::Control {
-                sequence: u64::MAX, requested: RenderControl::Pause,
-                result: ControlResult::Applied, state: RenderState::Paused,
-            }
-        ), &stamp, 400).unwrap().unwrap();
+        let input = record_input(
+            candidate.schedule(),
+            candidate.playback_plan().fence(),
+            record(PlaybackRecordKind::Control {
+                sequence: u64::MAX,
+                requested: RenderControl::Pause,
+                result: ControlResult::Applied,
+                state: RenderState::Paused,
+            }),
+            &stamp,
+            400,
+        )
+        .unwrap()
+        .unwrap();
         assert_eq!(input.payload["controlSequence"], u64::MAX.to_string());
         assert_eq!(input.payload["renderState"], "Paused");
         let outcome = RenderOutcome {
-            state: RenderState::SourceExhausted, callback_sequence: 1, cursor_frames: 2,
-            requested_frames: 2, rendered_source_frames: 2, events_written: 0, fault: None,
+            state: RenderState::SourceExhausted,
+            callback_sequence: 1,
+            cursor_frames: 2,
+            requested_frames: 2,
+            rendered_source_frames: 2,
+            events_written: 0,
+            fault: None,
         };
-        let input = record_input(candidate.schedule(), candidate.playback_plan().fence(), record(
-            PlaybackRecordKind::Render(outcome)
-        ), &stamp, 400).unwrap().unwrap();
+        let input = record_input(
+            candidate.schedule(),
+            candidate.playback_plan().fence(),
+            record(PlaybackRecordKind::Render(outcome)),
+            &stamp,
+            400,
+        )
+        .unwrap()
+        .unwrap();
         assert_eq!(input.payload["completion"], "source-submission-only");
         assert_eq!(input.payload["timingQualification"], "unqualified");
-        let idle = RenderOutcome { state: RenderState::Playing, ..outcome };
-        assert!(record_input(candidate.schedule(), candidate.playback_plan().fence(), record(
-            PlaybackRecordKind::Render(idle)
-        ), &stamp, 400).unwrap().is_none());
+        let idle = RenderOutcome {
+            state: RenderState::Playing,
+            ..outcome
+        };
+        assert!(record_input(
+            candidate.schedule(),
+            candidate.playback_plan().fence(),
+            record(PlaybackRecordKind::Render(idle)),
+            &stamp,
+            400
+        )
+        .unwrap()
+        .is_none());
         fs::remove_dir_all(root).unwrap();
     }
 }
