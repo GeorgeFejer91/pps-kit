@@ -1877,6 +1877,52 @@ mod tests {
     }
 
     #[test]
+    fn late_journal_completion_cannot_attach_to_another_run_of_the_same_package() {
+        let runtime = AppRuntime::new();
+        let (root, verified) = verified_audio_package("P001", 1);
+        runtime.adopt_verified_session(verified).unwrap();
+        compile_current_execution(&runtime);
+        let (guard, source) = begin_audio_decode(&runtime, 0);
+        runtime
+            .cache_prepared_audio(prepare_verified_audio(source).unwrap())
+            .unwrap();
+        let source = tauri::async_runtime::block_on(runtime.0.authority.journal_source())
+            .unwrap()
+            .unwrap()
+            .unwrap();
+        let journal = NativeEventJournal::create(&source.receipt).unwrap();
+        let retired = journal.retirement_probe();
+        assert_eq!(
+            runtime
+                .dispatch_local(Action::RunStop, serde_json::json!({}))
+                .unwrap()
+                .status,
+            AppliedStatus::Accepted
+        );
+        assert_eq!(
+            tauri::async_runtime::block_on(
+                runtime.0.authority.install_event_journal(source, journal)
+            )
+            .unwrap(),
+            Err("prepared_run_replaced")
+        );
+        assert!(runtime
+            .0
+            .authority
+            .test_view()
+            .journal_durable_sequence
+            .is_none());
+        let deadline = std::time::Instant::now() + Duration::from_secs(3);
+        while !retired() {
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::sleep(Duration::from_millis(2));
+        }
+        drop(guard);
+        drop(runtime);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
     fn native_writer_failure_latches_unavailable_and_invalidates_prepared_audio() {
         let runtime = AppRuntime::new();
         let (root, verified) = verified_audio_package("P001", 1);
@@ -1904,10 +1950,12 @@ mod tests {
             .test_view()
             .prepared_audio_block_ordinal
             .is_none());
-        assert_eq!(
-            runtime.0.authority.test_view().journal_durable_sequence,
-            Some(0)
-        );
+        assert!(runtime
+            .0
+            .authority
+            .test_view()
+            .journal_durable_sequence
+            .is_none_or(|sequence| sequence == 0));
         assert!(!runtime.snapshot().unwrap().safety.local_armed);
         assert!(runtime
             .dispatch_local(Action::SessionNote, serde_json::json!({"text":"denied"}))

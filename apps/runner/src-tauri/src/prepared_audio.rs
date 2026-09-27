@@ -808,6 +808,11 @@ mod tests {
         assert!(first.matches(&candidate));
         assert!(Arc::ptr_eq(&first.plan, &second.plan));
         assert!(Arc::ptr_eq(&first.receipt, &second.receipt));
+        let block = first.block_summary().unwrap();
+        assert_eq!(block.block_index, 1);
+        assert_eq!(block.block_ordinal, 0);
+        // The fixture manifest claims one second; decoded PCM is two frames.
+        assert_eq!(block.duration_ns, 41_666);
         fs::remove_dir_all(root).unwrap();
     }
 

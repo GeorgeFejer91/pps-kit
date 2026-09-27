@@ -40,6 +40,15 @@ pub struct VerifiedPackageSummary {
     pub block_count: u32,
 }
 
+/// Native-prepared media facts, not an IPC request or execution capability.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NativeBlockSummary {
+    pub block_index: u32,
+    pub block_ordinal: u32,
+    pub block_label: String,
+    pub duration_ns: u64,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DispatchOrigin {
     Local,
@@ -97,6 +106,9 @@ pub struct RunnerCore {
     local_sequence: u64,
     package_fingerprint: Option<String>,
     package_execution_ready: bool,
+    native_block: Option<NativeBlockSummary>,
+    package_block_count: u32,
+    native_control_pending: Option<Action>,
 }
 
 impl RunnerCore {
@@ -210,6 +222,9 @@ impl RunnerCore {
             local_sequence: 0,
             package_fingerprint: None,
             package_execution_ready: false,
+            native_block: None,
+            package_block_count: 0,
+            native_control_pending: None,
         };
         core.refresh_derived();
         core
@@ -255,7 +270,8 @@ impl RunnerCore {
         let already = self.package_fingerprint.as_deref() == Some(package.fingerprint.as_str())
             && self.snapshot.package_verified
             && self.snapshot.run.phase == RunnerPhase::Prepared
-            && !self.snapshot.safety.local_armed;
+            && !self.snapshot.safety.local_armed
+            && self.native_block.is_none();
         if already {
             self.stamp(&now);
             return Ok(self.snapshot());
@@ -307,9 +323,73 @@ impl RunnerCore {
         self.snapshot.safety.publication_ready = false;
         self.package_fingerprint = Some(package.fingerprint);
         self.package_execution_ready = false;
+        self.package_block_count = package.block_count;
+        self.native_block = None;
+        self.native_control_pending = None;
         self.snapshot.audit_event_count = self.snapshot.audit_event_count.saturating_add(1);
         self.bump_revision(&now);
         Ok(self.snapshot())
+    }
+
+    /// Staging the decoded block stays silent and does not enable the adapter.
+    pub fn prepare_native_block(
+        &mut self,
+        fingerprint: &str,
+        block: NativeBlockSummary,
+        now: ClockStamp,
+    ) -> Result<(), &'static str> {
+        if self.package_fingerprint.as_deref() != Some(fingerprint)
+            || !matches!(
+                self.snapshot.run.phase,
+                RunnerPhase::Prepared | RunnerPhase::Interrupted | RunnerPhase::Completed
+            )
+            || block.block_index == 0
+            || block.block_ordinal >= self.package_block_count
+            || block.block_label.len() > 1024
+            || block.duration_ns == 0
+            || block.duration_ns > JSON_MAX_SAFE_INTEGER
+        {
+            return Err("native_block_scope_invalid");
+        }
+        self.native_block = Some(block);
+        self.native_control_pending = None;
+        self.package_execution_ready = false;
+        self.snapshot.safety.local_armed = false;
+        self.bump_revision(&now);
+        Ok(())
+    }
+
+    pub fn native_block_prepared(&self) -> bool {
+        self.native_block.is_some()
+    }
+
+    pub fn native_control_pending(&self) -> Option<Action> {
+        self.native_control_pending
+    }
+
+    /// Confirm an existing native request after its matching callback record
+    /// was admitted to evidence. Wire commands cannot call this method.
+    pub fn confirm_native_control(
+        &mut self,
+        action: Action,
+        now: ClockStamp,
+    ) -> Result<(), &'static str> {
+        if self.native_control_pending != Some(action) {
+            return Err("native_control_scope_invalid");
+        }
+        self.native_control_pending = None;
+        self.bump_revision(&now);
+        Ok(())
+    }
+
+    /// Invalidation also retires the adapter's capability and any pending start.
+    pub fn invalidate_native_block(&mut self, now: &ClockStamp) {
+        if self.native_block.take().is_some() {
+            self.package_execution_ready = false;
+            self.native_control_pending = None;
+            self.snapshot.safety.local_armed = false;
+            self.bump_revision(now);
+        }
     }
 
     /// Native owner only: all media submission and response windows have
@@ -321,6 +401,7 @@ impl RunnerCore {
     ) -> Result<(), &'static str> {
         if self.package_fingerprint.as_deref() != Some(fingerprint)
             || !self.package_execution_ready
+            || self.native_control_pending.is_some()
             || self.snapshot.run.phase != RunnerPhase::Running
         {
             return Err("native_result_scope_invalid");
@@ -644,7 +725,15 @@ impl RunnerCore {
         if self.snapshot.run.phase == RunnerPhase::Stopping && *action != Action::SystemSnapshot {
             return Err("native_result_publication_in_progress");
         }
-        match action {
+        if self.native_control_pending.is_some()
+            && !matches!(
+                action,
+                Action::SystemSnapshot | Action::RunStop | Action::RunAbort | Action::TargetDisarm
+            )
+        {
+            return Err("native_control_in_progress");
+        }
+        let changed = match action {
             Action::SystemSnapshot => {
                 expect_empty_args(args)?;
                 Ok(false)
@@ -788,7 +877,19 @@ impl RunnerCore {
                 self.snapshot.last_note = text.to_owned();
                 Ok(true)
             }
+        }?;
+        if changed && self.native_block.is_some() {
+            match action {
+                Action::PartStart | Action::RunPause | Action::RunResume => {
+                    self.native_control_pending = Some(*action);
+                }
+                Action::RunStop | Action::RunAbort | Action::TargetDisarm => {
+                    self.invalidate_native_block(now);
+                }
+                _ => {}
+            }
         }
+        Ok(changed)
     }
 
     fn prepare_demo(&mut self, args: &Value) -> Result<bool, &'static str> {
@@ -942,20 +1043,34 @@ impl RunnerCore {
         self.snapshot.part.selected_part = Some(parsed.part_number);
         self.snapshot.part.current_package_part = Some(parsed.part_number);
         self.snapshot.part.pending_start_part = None;
-        self.snapshot.identity.part_session_id = format!(
-            "{}-part-{:02}",
-            self.snapshot.identity.session_id, parsed.part_number
-        );
+        if self.native_block.is_none() {
+            self.snapshot.identity.part_session_id = format!(
+                "{}-part-{:02}",
+                self.snapshot.identity.session_id, parsed.part_number
+            );
+        }
         self.snapshot.run.phase = RunnerPhase::Running;
         self.snapshot.run.complete = false;
         self.snapshot.run.thread_alive = true;
         self.snapshot.active_block.active = true;
         self.snapshot.active_block.part_number = Some(parsed.part_number);
-        self.snapshot.active_block.phase_label = "Demo block".to_owned();
-        self.snapshot.active_block.block_index = Some(1);
-        self.snapshot.active_block.display_block_index = Some(1);
-        self.snapshot.active_block.block_label = "Compatibility block 01".to_owned();
-        self.snapshot.active_block.duration_s = Some(3.0);
+        let (phase, index, ordinal, label, duration) =
+            if let Some(block) = self.native_block.as_ref() {
+                (
+                    "Prepared block",
+                    block.block_index,
+                    block.block_ordinal + 1,
+                    block.block_label.as_str(),
+                    block.duration_ns as f64 / 1e9,
+                )
+            } else {
+                ("Demo block", 1, 1, "Compatibility block 01", 3.0)
+            };
+        self.snapshot.active_block.phase_label = phase.to_owned();
+        self.snapshot.active_block.block_index = Some(index);
+        self.snapshot.active_block.display_block_index = Some(ordinal);
+        self.snapshot.active_block.block_label = label.to_owned();
+        self.snapshot.active_block.duration_s = Some(duration);
         self.snapshot.active_block.elapsed_s = Some(0.0);
         self.snapshot.active_block.last_anchor_server_monotonic_ns = Some(now.monotonic_ns);
         self.snapshot.active_block.running = true;
@@ -1075,6 +1190,22 @@ impl RunnerCore {
             _ => "Authoritative target state",
         }
         .to_owned();
+        if let Some(action) = self.native_control_pending {
+            self.snapshot.run.event_label = match action {
+                Action::PartStart => "Native Start pending",
+                Action::RunPause => "Native Pause pending",
+                Action::RunResume => "Native Resume pending",
+                _ => "Native control pending",
+            }
+            .to_owned();
+        }
+        if self.native_block.is_some() && phase == RunnerPhase::Running {
+            self.snapshot.run.progress_label = format!(
+                "Block {} / {}",
+                self.snapshot.active_block.display_block_index.unwrap_or(1),
+                self.package_block_count
+            );
+        }
         self.snapshot.active_block.running = phase == RunnerPhase::Running;
         self.snapshot.active_block.paused = phase == RunnerPhase::Paused;
         self.snapshot.active_block.instruction_waiting = phase == RunnerPhase::InstructionGate;
@@ -1085,6 +1216,10 @@ impl RunnerCore {
         let mut actions = vec![Action::SystemSnapshot];
         let phase = self.snapshot.run.phase;
         if phase == RunnerPhase::Stopping {
+            return actions;
+        }
+        if self.native_control_pending.is_some() {
+            actions.extend([Action::RunStop, Action::RunAbort]);
             return actions;
         }
         if !matches!(
@@ -1946,6 +2081,114 @@ mod tests {
         assert!(core
             .complete_native_finalization(&fingerprint, clock(11))
             .is_err());
+    }
+
+    #[test]
+    fn native_staging_stays_silent_and_start_uses_the_verified_block_without_demo_identity() {
+        let mut core = ready_core();
+        let package = verified_package("P001");
+        let fingerprint = package.fingerprint.clone();
+        core.adopt_verified_package(package, clock(4)).unwrap();
+        let block = NativeBlockSummary {
+            block_index: 17,
+            block_ordinal: 2,
+            block_label: "Actual looming block".to_owned(),
+            duration_ns: 2_250_000_000,
+        };
+        assert!(core
+            .prepare_native_block(&"b".repeat(64), block.clone(), clock(5))
+            .is_err());
+        core.prepare_native_block(&fingerprint, block, clock(6))
+            .unwrap();
+        assert_eq!(core.snapshot().run.phase, RunnerPhase::Prepared);
+        assert!(!core.snapshot().safety.local_armed);
+        assert_eq!(
+            core.dispatch_local(Action::TargetArm, json!({}), clock(7))
+                .reason,
+            "package_execution_adapter_not_ready"
+        );
+        // Reducer seam only: this does not qualify an adapter or device.
+        core.package_execution_ready = true;
+        assert_eq!(
+            core.dispatch_local(Action::TargetArm, json!({}), clock(8))
+                .status,
+            AppliedStatus::Accepted
+        );
+        let started = core.dispatch_local(Action::PartStart, json!({"part_number": 2}), clock(9));
+        assert_eq!(started.status, AppliedStatus::Accepted);
+        assert_eq!(
+            started.snapshot.identity.part_session_id,
+            "P001_session_20260831_part_02"
+        );
+        assert_eq!(started.snapshot.active_block.block_index, Some(17));
+        assert_eq!(started.snapshot.active_block.display_block_index, Some(3));
+        assert_eq!(started.snapshot.active_block.duration_s, Some(2.25));
+        assert_eq!(
+            started.snapshot.active_block.block_label,
+            "Actual looming block"
+        );
+        assert_eq!(started.snapshot.run.progress_label, "Block 3 / 6");
+        assert_eq!(core.native_control_pending(), Some(Action::PartStart));
+        assert_eq!(
+            core.dispatch_local(Action::RunPause, json!({}), clock(10))
+                .reason,
+            "native_control_in_progress"
+        );
+        assert!(core
+            .begin_native_finalization(&fingerprint, clock(10))
+            .is_err());
+        assert!(core
+            .confirm_native_control(Action::RunResume, clock(10))
+            .is_err());
+        core.confirm_native_control(Action::PartStart, clock(11))
+            .unwrap();
+        assert_eq!(
+            core.dispatch_local(Action::RunPause, json!({}), clock(12))
+                .status,
+            AppliedStatus::Accepted
+        );
+        core.confirm_native_control(Action::RunPause, clock(13))
+            .unwrap();
+        assert_eq!(
+            core.dispatch_local(Action::RunResume, json!({}), clock(14))
+                .status,
+            AppliedStatus::Accepted
+        );
+        assert_eq!(core.native_control_pending(), Some(Action::RunResume));
+        let stopped = core.dispatch_local(Action::RunStop, json!({}), clock(15));
+        assert_eq!(stopped.status, AppliedStatus::Accepted);
+        assert_eq!(stopped.snapshot.run.phase, RunnerPhase::Interrupted);
+        assert!(!stopped
+            .snapshot
+            .allowed_actions
+            .contains(&Action::TargetArm));
+        assert!(!core.native_block_prepared());
+        assert!(core.native_control_pending().is_none());
+        assert!(core
+            .confirm_native_control(Action::RunResume, clock(16))
+            .is_err());
+    }
+
+    #[test]
+    fn readopting_the_same_verified_package_clears_the_old_native_block() {
+        let mut core = ready_core();
+        let package = verified_package("P001");
+        core.adopt_verified_package(package.clone(), clock(4))
+            .unwrap();
+        core.prepare_native_block(
+            &package.fingerprint,
+            NativeBlockSummary {
+                block_index: 1,
+                block_ordinal: 0,
+                block_label: "First".to_owned(),
+                duration_ns: 1,
+            },
+            clock(5),
+        )
+        .unwrap();
+        core.adopt_verified_package(package, clock(6)).unwrap();
+        assert!(!core.native_block_prepared());
+        assert!(!core.snapshot().allowed_actions.contains(&Action::TargetArm));
     }
 
     #[test]

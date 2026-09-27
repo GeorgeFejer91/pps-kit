@@ -45,6 +45,7 @@ pub struct PreparedExecutionSummary {
 /// Native snapshot captured when one schedule inspection begins.
 pub(crate) struct PreparedExecutionSource {
     pub generation: u64,
+    pub run_generation: u64,
     pub fingerprint: String,
     pub receipt: Arc<VerifiedPreparedSession>,
 }
@@ -399,6 +400,7 @@ mod tests {
         );
         PreparedExecutionSource {
             generation,
+            run_generation: generation,
             fingerprint: receipt.manifest_sha256().to_owned(),
             receipt,
         }

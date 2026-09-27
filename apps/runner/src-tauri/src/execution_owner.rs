@@ -34,8 +34,8 @@ use crate::{
         NativeOutputTicket,
     },
     native_playback::{
-        NativeOutputPreparation, NativePlaybackCompletion, NativePlaybackSource,
-        NativePreparedPlayback,
+        NativeControlIntent, NativeOutputPreparation, NativePlaybackCompletion,
+        NativePlaybackSource, NativePreparedPlayback,
     },
     prepared_audio::{
         PreparedAudioCandidate, PreparedAudioLookup, PreparedAudioSource,
@@ -61,6 +61,7 @@ const LEDGER_SAFETY_RECORD_RESERVE: usize = 8;
 const LEDGER_SAFETY_BYTE_RESERVE: usize = 64 * 1024;
 const JOURNAL_HEALTH_POLL: Duration = Duration::from_millis(25);
 const PLAYBACK_EVIDENCE_POLL: Duration = Duration::from_millis(2);
+const NATIVE_CONTROL_DEADLINE: Duration = Duration::from_secs(6);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum AdmissionClass {
@@ -355,9 +356,10 @@ struct OwnerState {
     run_generation: u64,
     native_output: NativeOutputAuthority,
     native_playback: Option<NativePreparedPlayback>,
+    native_control: Option<NativeControlIntent>,
     owner_generation: u64,
     ledger: EventLedger,
-    event_journal: Option<(u64, NativeEventJournal)>,
+    event_journal: Option<(u64, u64, NativeEventJournal)>,
     native_finalization: Option<NativeFinalization>,
     evidence_unavailable: bool,
     clock: ProcessClock,
@@ -490,8 +492,12 @@ impl OwnerState {
         if self.prepared_audio.is_none() {
             return Err("prepared_audio_preparation_replaced");
         }
-        if let Some((generation, journal)) = self.event_journal.as_ref() {
-            return if *generation == self.package_generation && !journal.failed() {
+        if let Some((generation, run_generation, journal)) = self.event_journal.as_ref() {
+            return if *generation == self.package_generation
+                && *run_generation == self.run_generation
+                && !journal.failed()
+                && !journal.retired()
+            {
                 Ok(None)
             } else {
                 Err("native_journal_cleanup_pending")
@@ -515,17 +521,21 @@ impl OwnerState {
         {
             return Err("prepared_package_replaced");
         }
+        if source.run_generation != self.run_generation {
+            return Err("prepared_run_replaced");
+        }
         if self.evidence_unavailable || self.event_journal.is_some() || journal.failed() {
             return Err("native_journal_unavailable");
         }
         if self.prepared_audio.is_none() {
             return Err("prepared_audio_preparation_replaced");
         }
-        self.event_journal = Some((source.generation, journal));
+        self.event_journal = Some((source.generation, source.run_generation, journal));
         let stamp = self.clock.stamp();
         let mut event = Self::ledger_input("native.journal.prepared", "native", &stamp);
         event.payload = serde_json::json!({
             "packageGeneration": source.generation,
+            "runGeneration": source.run_generation,
             "packageManifestSha256": source.fingerprint,
             "timingQualification": "unqualified",
             "completion": "partial",
@@ -539,11 +549,27 @@ impl OwnerState {
             && self
                 .event_journal
                 .as_ref()
-                .is_some_and(|(generation, journal)| {
+                .is_some_and(|(generation, run_generation, journal)| {
                     *generation == self.package_generation
+                        && *run_generation == self.run_generation
                         && !journal.failed()
                         && !journal.retired()
                 })
+    }
+
+    fn native_start_ready(&self) -> bool {
+        self.core.native_block_prepared()
+            && self.native_journal_current()
+            && self.native_output.media_prepared()
+            && self.native_playback.as_ref().is_some_and(|playback| {
+                let status = playback.port.status();
+                playback.source.receipt.run_generation() == self.run_generation
+                    && playback.source.plan.fence().audio().package_generation()
+                        == self.package_generation
+                    && status.state == pps_runner_audio::RenderState::Prepared
+                    && status.fault.is_none()
+                    && !status.callback_retired
+            })
     }
 
     fn poll_native_playback(&mut self, pending_responses: &AtomicUsize) {
@@ -554,6 +580,10 @@ impl OwnerState {
         let reservation_available = self.native_output.media_prepared();
         if !self.native_journal_current() {
             self.fail_stop_unavailable("native.media.evidence-unavailable", "evidence_unavailable");
+            return;
+        }
+        if self.poll_native_control_admission().is_err() {
+            self.fail_stop_unavailable("native.control.unavailable", "evidence_unavailable");
             return;
         }
         let stamp = self.clock.stamp();
@@ -594,6 +624,23 @@ impl OwnerState {
             inputs
         });
         let status = playback.port.status();
+        let control_acknowledged = inputs.as_ref().map_err(|_| ()).and_then(|inputs| {
+            let Some(intent) = self.native_control.as_ref() else {
+                return Ok(false);
+            };
+            let mut applied = false;
+            for input in inputs {
+                applied |= intent.acknowledge(input).map_err(|_| ())?;
+            }
+            Ok(applied)
+        });
+        if control_acknowledged.is_err() {
+            self.fail_stop_unavailable(
+                "native.control.invalid-acknowledgement",
+                "evidence_unavailable",
+            );
+            return;
+        }
         // This first complete path is for a whole single-block package. Do
         // not certify one block of a larger prepared experiment as complete.
         let completion_ready = status.state == pps_runner_audio::RenderState::SourceExhausted
@@ -606,7 +653,8 @@ impl OwnerState {
                 .complete(playback.source.receipt.schedule().summary().trial_row_count)
             && playback.source.receipt.run_generation() == self.run_generation
             && snapshot.run.phase == RunnerPhase::Running
-            && pending_responses.load(Ordering::Acquire) == 0;
+            && pending_responses.load(Ordering::Acquire) == 0
+            && (self.native_control.is_none() || control_acknowledged == Ok(true));
         let expected_trials =
             u64::from(playback.source.receipt.schedule().summary().trial_row_count);
         let reserve = LedgerReserve::new(LEDGER_SAFETY_RECORD_RESERVE, LEDGER_SAFETY_BYTE_RESERVE);
@@ -629,11 +677,98 @@ impl OwnerState {
                 return;
             }
         }
+        if control_acknowledged == Ok(true) {
+            let intent = self
+                .native_control
+                .take()
+                .expect("acknowledged native intent");
+            let mut candidate = self.core.clone();
+            if candidate
+                .confirm_native_control(intent.action, stamp.clone())
+                .is_err()
+            {
+                self.fail_stop_unavailable("native.control.scope-invalid", "evidence_unavailable");
+                return;
+            }
+            let mut input = Self::ledger_input("native.control.confirmed", "native", &stamp);
+            input.payload = serde_json::json!({"action": intent.action, "callbackSequence": intent.callback_sequence,
+                "completion": "software-callback-application", "timingQualification": "unqualified"});
+            if self
+                .commit_candidate(candidate, input, CommitPolicy::Ordinary, true)
+                .is_err()
+            {
+                return;
+            }
+        }
         if !reservation_available || status.fault.is_some() || status.callback_retired {
             self.fail_stop_unavailable("native.media.callback-unavailable", "evidence_unavailable");
         } else if completion_ready {
             self.begin_native_finalization(expected_trials, stamp);
         }
+    }
+
+    fn poll_native_control_admission(&mut self) -> Result<(), &'static str> {
+        let Some(intent) = self.native_control.as_mut() else {
+            return Ok(());
+        };
+        if intent.requested_at.elapsed() >= NATIVE_CONTROL_DEADLINE {
+            return Err("native_control_deadline");
+        }
+        if intent.callback_sequence.is_some() {
+            return Ok(());
+        }
+        let journal = &self
+            .event_journal
+            .as_ref()
+            .ok_or("native_control_journal_missing")?
+            .2;
+        // Pause is a safety action: it must not wait for filesystem progress.
+        // Start/Resume cannot make media active before their intent is durable.
+        if !intent.can_submit(journal.durable_sequence()) {
+            return Ok(());
+        }
+        let playback = self
+            .native_playback
+            .as_mut()
+            .ok_or("native_control_media_missing")?;
+        let receipt = playback
+            .port
+            .control(playback.source.plan.fence(), intent.render_control()?)
+            .map_err(|_| "native_control_admission_failed")?;
+        intent.callback_sequence = Some(receipt.sequence);
+        Ok(())
+    }
+
+    /// Shared after-commit hook for local, phone, and native safety transitions.
+    fn apply_native_action(&mut self, action: Action) -> Result<(), &'static str> {
+        match action {
+            Action::PartStart | Action::RunPause | Action::RunResume => {
+                if self.native_playback.is_none() {
+                    return Ok(());
+                }
+                if self.native_control.is_some() {
+                    return Err("native_control_in_progress");
+                }
+                self.native_control = Some(NativeControlIntent::new(
+                    action,
+                    self.ledger
+                        .summary()
+                        .last_sequence
+                        .ok_or("native_control_intent_missing")?,
+                ));
+            }
+            Action::RunStop | Action::RunAbort | Action::TargetDisarm => {
+                // Dropping the sole port aborts irreversibly even when evidence
+                // admission failed. Safety never waits for the ordinary queue.
+                self.invalidate_prepared_audio();
+                self.native_output.invalidate_for_runner_change();
+                if let Some((_, _, journal)) = self.event_journal.as_mut() {
+                    journal.close();
+                }
+            }
+            _ => {}
+        }
+        Ok(())
     }
 
     fn begin_native_finalization(&mut self, expected_trials: u64, stamp: ClockStamp) {
@@ -669,7 +804,7 @@ impl OwnerState {
     }
 
     fn poll_event_journal(&mut self) {
-        let failed = self.event_journal.as_ref().is_some_and(|(_, journal)| {
+        let failed = self.event_journal.as_ref().is_some_and(|(_, _, journal)| {
             journal.failed()
                 || journal.durable_sequence() > self.ledger.summary().last_sequence.unwrap_or(0)
                 || journal.durable_dataset_rows() > journal.durable_sequence()
@@ -689,12 +824,14 @@ impl OwnerState {
             self.fail_stop_unavailable("native.journal.failed", "evidence_unavailable");
         }
         self.poll_native_finalization();
-        let retired_previous = self
-            .event_journal
-            .as_ref()
-            .is_some_and(|(generation, journal)| {
-                *generation != self.package_generation && journal.retired()
-            });
+        let retired_previous =
+            self.event_journal
+                .as_ref()
+                .is_some_and(|(generation, run_generation, journal)| {
+                    (*generation != self.package_generation
+                        || *run_generation != self.run_generation)
+                        && journal.retired()
+                });
         if retired_previous {
             self.event_journal = None;
         }
@@ -712,14 +849,14 @@ impl OwnerState {
             self.fail_stop_unavailable("native.results.scope-invalid", "evidence_unavailable");
             return;
         }
-        let Some((generation, journal)) = self.event_journal.as_mut() else {
+        let Some((generation, run_generation, journal)) = self.event_journal.as_mut() else {
             self.fail_stop_unavailable(
                 "native.results.journal-unavailable",
                 "evidence_unavailable",
             );
             return;
         };
-        if *generation != pending.package_generation {
+        if *generation != pending.package_generation || *run_generation != pending.run_generation {
             self.fail_stop_unavailable("native.results.scope-invalid", "evidence_unavailable");
             return;
         }
@@ -789,9 +926,10 @@ impl OwnerState {
         policy: CommitPolicy,
     ) -> Result<(), ()> {
         let prepared = self.ledger.prepare_batch(events, reserve).map_err(|_| ())?;
-        if let Some((generation, journal)) = self.event_journal.as_mut() {
+        if let Some((generation, run_generation, journal)) = self.event_journal.as_mut() {
             let sealed = self.native_finalization.is_some();
             if *generation == self.package_generation
+                && *run_generation == self.run_generation
                 && !sealed
                 && journal.admit(&prepared).is_err()
             {
@@ -809,6 +947,7 @@ impl OwnerState {
     fn invalidate_prepared_audio(&mut self) {
         // Dropping the sole native port irreversibly silences this callback.
         self.native_playback = None;
+        self.native_control = None;
         self.prepared_audio = None;
         self.prepared_audio_reservation = None;
     }
@@ -903,7 +1042,14 @@ impl OwnerState {
         if matches!(
             action,
             Action::PartStart | Action::RunStop | Action::RunAbort | Action::RunCompleteDemo
-        ) {
+        ) || (action == Action::TargetDisarm && self.native_playback.is_some())
+        {
+            if action == Action::PartStart
+                && self.native_playback.is_some()
+                && self.core.native_block_prepared()
+            {
+                return Ok(None);
+            }
             let Some(next) = self.run_generation.checked_add(1) else {
                 self.fail_stop_unavailable(
                     "authority.generation.exhausted",
@@ -914,6 +1060,30 @@ impl OwnerState {
             return Ok(Some(next));
         }
         Ok(None)
+    }
+
+    fn finish_dispatch(
+        &mut self,
+        action: Action,
+        next_run_generation: Option<u64>,
+    ) -> Result<(), &'static str> {
+        self.apply_native_action(action).map_err(|reason| {
+            self.fail_stop_unavailable("native.control.unavailable", "evidence_unavailable");
+            reason
+        })?;
+        if let Some(next) = next_run_generation {
+            self.run_generation = next;
+            self.invalidate_prepared_audio();
+            if !matches!(
+                action,
+                Action::RunStop | Action::RunAbort | Action::TargetDisarm
+            ) {
+                self.native_output.invalidate_for_runner_change();
+            }
+        } else if action == Action::TargetArm && self.native_playback.is_none() {
+            self.native_output.invalidate_for_runner_change();
+        }
+        Ok(())
     }
 
     fn safe_neutral_candidate(
@@ -939,6 +1109,7 @@ impl OwnerState {
         }
         candidate.set_controller_lease(None, None, stamp.clone());
         candidate.set_connection_state(connection_state, stamp.clone());
+        candidate.invalidate_native_block(stamp);
         candidate
     }
 
@@ -991,6 +1162,9 @@ impl OwnerState {
         self.native_output.invalidate_for_runner_change();
         self.evidence_unavailable = true;
         self.native_finalization = None;
+        if let Some((_, _, journal)) = self.event_journal.as_mut() {
+            journal.close();
+        }
         let _ = self.state_tx.send(snapshot.clone());
         snapshot
     }
@@ -1013,7 +1187,11 @@ impl OwnerState {
         trace: Option<&LatencyTrace>,
     ) -> Result<Applied, String> {
         let result = (|| {
-            if action == Action::PartStart && self.native_output.part_start_blocked() {
+            if action == Action::PartStart
+                && self.core.snapshot().run.phase == RunnerPhase::Ready
+                && self.native_output.part_start_blocked()
+                && !self.native_start_ready()
+            {
                 return Err("native_output_cleanup_pending".to_owned());
             }
             let stamp = self.clock.stamp();
@@ -1041,13 +1219,8 @@ impl OwnerState {
                     true,
                 )
                 .map_err(str::to_owned)?;
-                if let Some(next) = next_run_generation {
-                    self.run_generation = next;
-                    self.invalidate_prepared_audio();
-                    self.native_output.invalidate_for_runner_change();
-                } else if applied.action == Action::TargetArm {
-                    self.native_output.invalidate_for_runner_change();
-                }
+                self.finish_dispatch(applied.action, next_run_generation)
+                    .map_err(str::to_owned)?;
             } else {
                 // Rejections and accepted no-ops still retain reducer
                 // dedupe/stamp semantics, but cannot consume the scientific
@@ -1078,7 +1251,11 @@ impl OwnerState {
         trace: Option<&LatencyTrace>,
     ) -> Result<Applied, RemoteSessionError> {
         (|| {
-            if command.action == Action::PartStart && self.native_output.part_start_blocked() {
+            if command.action == Action::PartStart
+                && self.core.snapshot().run.phase == RunnerPhase::Ready
+                && self.native_output.part_start_blocked()
+                && !self.native_start_ready()
+            {
                 return Err(RemoteSessionError::unavailable());
             }
             let stamp = self.clock.stamp();
@@ -1105,13 +1282,8 @@ impl OwnerState {
                 event.payload = Self::dispatch_payload(&candidate, applied.action);
                 self.commit_candidate(candidate, event, CommitPolicy::Ordinary, true)
                     .map_err(|_| RemoteSessionError::unavailable())?;
-                if let Some(next) = next_run_generation {
-                    self.run_generation = next;
-                    self.invalidate_prepared_audio();
-                    self.native_output.invalidate_for_runner_change();
-                } else if applied.action == Action::TargetArm {
-                    self.native_output.invalidate_for_runner_change();
-                }
+                self.finish_dispatch(applied.action, next_run_generation)
+                    .map_err(|_| RemoteSessionError::unavailable())?;
             } else {
                 self.core = candidate;
             }
@@ -1126,6 +1298,7 @@ impl OwnerState {
             .ok_or("prepared_session_missing")?;
         Ok(PreparedExecutionSource {
             generation: retained.generation,
+            run_generation: self.run_generation,
             fingerprint: retained.receipt.manifest_sha256().to_owned(),
             receipt: Arc::clone(&retained.receipt),
         })
@@ -1391,7 +1564,7 @@ impl OwnerState {
         self.owner_generation = next_owner_generation;
         self.package_generation = next_generation;
         self.run_generation = next_run_generation;
-        if let Some((_, journal)) = self.event_journal.as_mut() {
+        if let Some((_, _, journal)) = self.event_journal.as_mut() {
             // Drain the former package's accepted prefix without blocking the
             // authority. A replacement writer cannot start until it retires.
             journal.close();
@@ -1790,16 +1963,50 @@ impl OwnerState {
         let mut candidate = self.core.clone();
         candidate.set_controller_lease(None, None, stamp.clone());
         candidate.set_connection_state(connection_state, stamp.clone());
-        if candidate.snapshot().run.phase == RunnerPhase::Running {
-            candidate.dispatch_local(Action::RunPause, serde_json::json!({}), stamp.clone());
-        }
+        let safety_action = self.remote_revocation_action(&mut candidate, &stamp);
         let mut event = Self::ledger_input("remote.owner.revoked", "local-safety", &stamp);
         event.authority_id = Some(owner.controller_id.clone());
-        let snapshot =
-            self.commit_candidate(candidate, event, CommitPolicy::SafetyFallback, true)?;
+        self.commit_candidate(candidate, event, CommitPolicy::SafetyFallback, true)?;
         self.remote_owner = None;
         self.advance_owner_generation_or_latch();
-        Ok(Some(snapshot))
+        Ok(Some(self.apply_remote_revocation(safety_action)))
+    }
+
+    fn remote_revocation_action(
+        &self,
+        candidate: &mut RunnerCore,
+        stamp: &ClockStamp,
+    ) -> Option<Action> {
+        if candidate.snapshot().run.phase != RunnerPhase::Running {
+            return None;
+        }
+        // Revocation must neutralize Start/Resume even while durable intent or
+        // callback application is pending. Dropping the port dominates Start.
+        let action = if self.native_control.is_some() {
+            Action::RunAbort
+        } else {
+            Action::RunPause
+        };
+        candidate.dispatch_local(action, serde_json::json!({}), stamp.clone());
+        Some(action)
+    }
+
+    fn apply_remote_revocation(&mut self, action: Option<Action>) -> RunnerSnapshot {
+        if let Some(action) = action {
+            let native = self.native_playback.is_some();
+            if self.apply_native_action(action).is_err()
+                || self.poll_native_control_admission().is_err()
+            {
+                return self.fail_stop_unavailable(
+                    "native.control.revocation-failed",
+                    "evidence_unavailable",
+                );
+            }
+            if native && action == Action::RunAbort {
+                self.advance_run_generation_or_latch();
+            }
+        }
+        self.core.snapshot()
     }
 
     fn revoke_webview(
@@ -1849,15 +2056,16 @@ impl OwnerState {
         candidate.rotate_epoch(next_epoch, stamp.clone());
         candidate.set_controller_lease(None, None, stamp.clone());
         candidate.set_connection_state(connection_state, stamp.clone());
-        if displaced && candidate.snapshot().run.phase == RunnerPhase::Running {
-            candidate.dispatch_local(Action::RunPause, serde_json::json!({}), stamp.clone());
-        }
+        let safety_action = if displaced {
+            self.remote_revocation_action(&mut candidate, &stamp)
+        } else {
+            None
+        };
         let event = Self::ledger_input("remote.configuration.changed", "local-safety", &stamp);
-        let snapshot =
-            self.commit_candidate(candidate, event, CommitPolicy::SafetyFallback, true)?;
+        self.commit_candidate(candidate, event, CommitPolicy::SafetyFallback, true)?;
         self.remote_owner = None;
         self.advance_owner_generation_or_latch();
-        Ok(snapshot)
+        Ok(self.apply_remote_revocation(safety_action))
     }
 
     fn configure_remote(
@@ -2040,6 +2248,18 @@ impl OwnerState {
             }
         };
         let stamp = self.clock.stamp();
+        let mut candidate = self.core.clone();
+        let prepare = prepared.source.block_summary().and_then(|block| {
+            candidate.prepare_native_block(
+                prepared.source.receipt.verified_session().manifest_sha256(),
+                block,
+                stamp.clone(),
+            )
+        });
+        if prepare.is_err() {
+            self.native_output.invalidate_for_runner_change();
+            return Err(NativeOutputCommandError::changed());
+        }
         let mut event = Self::ledger_input("native.media.prepared", "native", &stamp);
         event.payload = serde_json::json!({
             "blockOrdinal": prepared.source.plan.fence().audio().block_ordinal(),
@@ -2048,7 +2268,7 @@ impl OwnerState {
             "timingQualification": "unqualified",
             "executable": false,
         });
-        self.commit_candidate(self.core.clone(), event, CommitPolicy::Ordinary, false)
+        self.commit_candidate(candidate, event, CommitPolicy::Ordinary, true)
             .map_err(|_| {
                 NativeOutputCommandError::new(
                     "native_output_evidence_unavailable",
@@ -2067,7 +2287,7 @@ impl OwnerState {
     ) -> Result<NativeOutputStatus, NativeOutputCommandError> {
         self.native_output.observe_cleanup(observation);
         let status = self.native_output.release(&request)?;
-        self.native_playback = None;
+        self.retire_native_media();
         Ok(status)
     }
 
@@ -2077,8 +2297,27 @@ impl OwnerState {
     ) -> Result<NativeOutputStatus, NativeOutputCommandError> {
         self.native_output.observe_cleanup(observation);
         let status = self.native_output.disable()?;
-        self.native_playback = None;
+        self.retire_native_media();
         Ok(status)
+    }
+
+    fn retire_native_media(&mut self) {
+        if self.native_playback.is_none() {
+            return;
+        }
+        let stamp = self.clock.stamp();
+        let candidate = self.safe_neutral_candidate("local_only", &stamp);
+        let event = Self::ledger_input("native.media.retired", "local-safety", &stamp);
+        let _ = self.commit_candidate(candidate, event, CommitPolicy::SafetyFallback, true);
+        self.invalidate_prepared_audio();
+        self.advance_run_generation_or_latch();
+        if let Some((_, _, journal)) = self.event_journal.as_mut() {
+            journal.close();
+        }
+        self.native_finalization = None;
+        if self.remote_owner.take().is_some() {
+            self.advance_owner_generation_or_latch();
+        }
     }
 }
 
@@ -2230,6 +2469,7 @@ impl ExecutionOwner {
                     run_generation: 0,
                     native_output,
                     native_playback: None,
+                    native_control: None,
                     owner_generation: 0,
                     ledger,
                     event_journal: None,
@@ -3008,7 +3248,7 @@ impl ExecutionOwner {
             journal_durable_sequence: state
                 .event_journal
                 .as_ref()
-                .map(|(_, journal)| journal.durable_sequence()),
+                .map(|(_, _, journal)| journal.durable_sequence()),
             ledger_last_sequence: state.ledger.summary().last_sequence,
             evidence_unavailable: state.evidence_unavailable,
         })
@@ -3301,7 +3541,8 @@ mod tests {
                         // cannot leave an active authority armed after Pause.
                         journal.close();
                     }
-                    state.event_journal = Some((state.package_generation, journal));
+                    state.event_journal =
+                        Some((state.package_generation, state.run_generation, journal));
                     state
                         .dispatch_local(
                             if close_before_pause {
@@ -4152,6 +4393,44 @@ mod tests {
             .unwrap();
         assert_eq!(claim_error.code, "runtime_unavailable");
         assert!(owner.view_blocking().unwrap().active_controller.is_none());
+    }
+
+    #[test]
+    fn revocation_aborts_pending_activation_instead_of_leaving_start_or_resume_queued() {
+        for action in [Action::PartStart, Action::RunResume] {
+            let owner = owner(Duration::from_secs(5));
+            owner
+                .claim_webview_blocking(
+                    "session_owner_test".to_owned(),
+                    "controller_pending_control".to_owned(),
+                    "owner_pending_control_token".to_owned(),
+                    Scope::DEFAULT_REMOTE.into_iter().collect(),
+                    2,
+                )
+                .unwrap()
+                .unwrap();
+            let view = owner
+                .blocking(
+                    AdmissionClass::LocalSafety,
+                    "revoke_pending_native_intent",
+                    move |state| {
+                        prepare_running_demo(state);
+                        // Exercise the authority seam without constructing a device.
+                        state.native_control = Some(NativeControlIntent::new(action, u64::MAX));
+                        let snapshot = state
+                            .revoke_owner_if_matches(|_| true, "remote_waiting")
+                            .unwrap()
+                            .unwrap();
+                        assert_eq!(snapshot.run.phase, RunnerPhase::Interrupted);
+                        assert!(state.native_control.is_none());
+                        state.view()
+                    },
+                )
+                .unwrap();
+            assert!(view.active_controller.is_none());
+            assert!(!view.snapshot.safety.local_armed);
+            assert!(!view.snapshot.run.complete);
+        }
     }
 
     #[test]

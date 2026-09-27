@@ -6,9 +6,10 @@ use std::{
     time::Instant,
 };
 
-use pps_contracts::{ClockStamp, JSON_MAX_SAFE_INTEGER};
+use pps_contracts::{Action, ClockStamp, JSON_MAX_SAFE_INTEGER};
 use pps_runner_audio::{OutputFence, PreparedPlaybackPlan, RenderState, RtEventKind};
 use pps_runner_audio_cpal::{NativePlaybackRecord, PlaybackPort, PlaybackRecordKind};
+use pps_runner_core::NativeBlockSummary;
 use pps_runner_execution::{BlockEventSchedule, LedgerEventInput};
 
 use crate::{
@@ -43,6 +44,26 @@ impl NativePlaybackSource {
         Arc::ptr_eq(&self.receipt, candidate.source_receipt())
             && Arc::ptr_eq(&self.plan, &candidate.shared_playback_plan())
     }
+
+    pub(crate) fn block_summary(&self) -> Result<NativeBlockSummary, &'static str> {
+        let schedule = self.receipt.schedule().summary();
+        let media = self.plan.media();
+        let duration_ns = u128::from(media.frames())
+            .checked_mul(1_000_000_000)
+            .and_then(|ns| ns.checked_div(u128::from(media.sample_rate_hz())))
+            .and_then(|ns| u64::try_from(ns).ok())
+            .filter(|ns| *ns > 0 && *ns <= JSON_MAX_SAFE_INTEGER)
+            .ok_or("native_block_duration_invalid")?;
+        Ok(NativeBlockSummary {
+            block_index: u32::try_from(schedule.block_index)
+                .ok()
+                .filter(|index| *index > 0)
+                .ok_or("native_block_index_invalid")?,
+            block_ordinal: self.plan.fence().audio().block_ordinal(),
+            block_label: schedule.block_label.clone(),
+            duration_ns,
+        })
+    }
 }
 
 /// One non-cloneable port survives mailbox-admission retries. A rejected or
@@ -68,6 +89,64 @@ pub(crate) struct NativePreparedPlayback {
     pub port: PlaybackPort,
     pub capture: NativeTrialCapture,
     pub final_submission_estimate_ns: Option<u64>,
+}
+
+/// One native control waits for its durable intent and callback application.
+/// No second command queue or scheduler is introduced above the existing port.
+pub(crate) struct NativeControlIntent {
+    pub action: Action,
+    pub ledger_sequence: u64,
+    pub callback_sequence: Option<u64>,
+    pub requested_at: Instant,
+}
+
+impl NativeControlIntent {
+    pub(crate) fn new(action: Action, ledger_sequence: u64) -> Self {
+        Self {
+            action,
+            ledger_sequence,
+            callback_sequence: None,
+            requested_at: Instant::now(),
+        }
+    }
+
+    pub(crate) fn render_control(&self) -> Result<pps_runner_audio::RenderControl, &'static str> {
+        match self.action {
+            Action::PartStart => Ok(pps_runner_audio::RenderControl::Start),
+            Action::RunPause => Ok(pps_runner_audio::RenderControl::Pause),
+            Action::RunResume => Ok(pps_runner_audio::RenderControl::Resume),
+            _ => Err("native_control_invalid"),
+        }
+    }
+
+    pub(crate) fn can_submit(&self, durable_sequence: u64) -> bool {
+        self.action == Action::RunPause || durable_sequence >= self.ledger_sequence
+    }
+
+    pub(crate) fn acknowledge(&self, input: &LedgerEventInput) -> Result<bool, &'static str> {
+        if input.event_type != "audio.control.applied" {
+            return Ok(false);
+        }
+        let sequence = input.payload["controlSequence"]
+            .as_str()
+            .and_then(|value| value.parse::<u64>().ok())
+            .ok_or("native_control_record_invalid")?;
+        if Some(sequence) != self.callback_sequence {
+            return Err("native_control_record_stale");
+        }
+        let control = self.render_control()?;
+        let state = match self.action {
+            Action::RunPause => "Paused",
+            _ => "Playing",
+        };
+        if input.payload["requested"] != format!("{control:?}")
+            || input.payload["result"] != "Applied"
+            || input.payload["renderState"] != state
+        {
+            return Err("native_control_rejected");
+        }
+        Ok(true)
+    }
 }
 
 impl NativePreparedPlayback {
@@ -278,4 +357,49 @@ pub(crate) fn record_input(
             serde_json::json!("callback-observation-plus-driver-prediction-and-sample-offset");
     }
     Ok(Some(input))
+}
+
+#[cfg(test)]
+mod control_tests {
+    use super::*;
+
+    #[test]
+    fn start_resume_wait_for_durable_intent_but_pause_does_not() {
+        for action in [Action::PartStart, Action::RunResume] {
+            let intent = NativeControlIntent::new(action, 42);
+            assert!(!intent.can_submit(41));
+            assert!(intent.can_submit(42));
+        }
+        assert!(NativeControlIntent::new(Action::RunPause, 42).can_submit(0));
+        assert!(NativeControlIntent::new(Action::RunStop, 42)
+            .render_control()
+            .is_err());
+    }
+
+    #[test]
+    fn admission_is_not_application_and_only_the_matching_applied_callback_confirms() {
+        for (action, requested, state) in [
+            (Action::PartStart, "Start", "Playing"),
+            (Action::RunPause, "Pause", "Paused"),
+            (Action::RunResume, "Resume", "Playing"),
+        ] {
+            let mut intent = NativeControlIntent::new(action, 10);
+            let mut input = LedgerEventInput::new("audio.control.applied", "native-output", 11);
+            input.payload = serde_json::json!({"controlSequence": "5", "requested": requested,
+                "result": "Applied", "renderState": state});
+            assert_eq!(
+                intent.acknowledge(&input),
+                Err("native_control_record_stale")
+            );
+            intent.callback_sequence = Some(5);
+            assert_eq!(intent.acknowledge(&input), Ok(true));
+            input.payload["result"] = serde_json::json!("NoChange");
+            assert_eq!(intent.acknowledge(&input), Err("native_control_rejected"));
+            input.payload["result"] = serde_json::json!("Applied");
+            input.payload["renderState"] = serde_json::json!("Prepared");
+            assert_eq!(intent.acknowledge(&input), Err("native_control_rejected"));
+            input.event_type = "audio_sample_zero".to_owned();
+            assert_eq!(intent.acknowledge(&input), Ok(false));
+        }
+    }
 }
