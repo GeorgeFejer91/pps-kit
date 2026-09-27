@@ -2836,10 +2836,12 @@ mod tests {
         assert!(!snapshot.safety.capture_started);
         assert!(!snapshot.run.complete);
         assert_eq!(snapshot.connection_state, "evidence_unavailable");
-        assert!(owner
+        let resume = owner
             .dispatch_local_blocking(Action::RunResume, serde_json::json!({}))
             .unwrap()
-            .is_err());
+            .unwrap();
+        assert_eq!(resume.status, AppliedStatus::Rejected);
+        assert_eq!(resume.snapshot.run.phase, RunnerPhase::Interrupted);
         drop(owner);
         while !retired() {
             assert!(Instant::now() < deadline);
