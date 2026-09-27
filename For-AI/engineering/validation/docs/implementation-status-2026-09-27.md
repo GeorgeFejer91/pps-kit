@@ -59,7 +59,7 @@ Source and package evidence:
   differences from Windows line-ending conversion while preserving Git content.
   Repeat hosted parity after each changed UI deploy.
 - Native authority journal **39ce52d7a0d3c08334057977631e0000b15e52e3**:
-  [Core, Desktop, Browser and Python/Rust oracle checks passed on all three hosts](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36337879731).
+  [Cross-platform Core/Desktop/oracle checks and the Browser checks passed](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36337879731).
   Nine new checks cover event-schema/sequence preservation, exclusive file creation,
   bounded admission, missing sequences, I/O failure, package replacement,
   late installation, active fail-stop and unavailable safety-Pause evidence.
