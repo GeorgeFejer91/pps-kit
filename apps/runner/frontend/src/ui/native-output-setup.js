@@ -1,4 +1,4 @@
-const ACTIVE_PHASES = new Set(["ready", "instruction_gate", "running", "paused", "stopping"]);
+const QUIESCENT_PHASES = new Set(["idle", "prepared", "completed", "interrupted", "error"]);
 const PHASES = new Set(["idle", "enumerating", "enumerated", "reserving-silence", "reserved-silence",
   "reserved-media", "cleanup-pending", "disabled", "faulted", "quarantined"]);
 const generation = (value) => typeof value === "string" && /^(0|[1-9]\d{0,19})$/u.test(value)
@@ -16,8 +16,8 @@ export function bindNativeOutputSetup({ elements, api, onError }) {
   let snapshot = null, media = null, status = null, inventory = null, choices = [];
   let context = 0, busy = false, suspended = false, refreshing = null;
   const native = api.kind === "tauri-native";
-  const quiescent = () => snapshot && !snapshot.safety?.local_armed
-    && !ACTIVE_PHASES.has(snapshot.run?.phase);
+  const quiescent = () => snapshot?.safety?.local_armed === false
+    && QUIESCENT_PHASES.has(snapshot?.run?.phase);
   const currentInventory = () => inventory && status
     && inventory.policyGeneration === status.policyGeneration
     && inventory.serviceGeneration === status.serviceGeneration

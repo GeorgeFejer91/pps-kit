@@ -13,7 +13,7 @@ from run_runner_participant_ui_audit import BRIDGE
 OUTPUT_BRIDGE = """() => {
   const state = window.outputAudit = {requests:[], hold:false, reject:false, noMatch:false};
   const participant = window.participantAudit;
-  participant.snapshot.run.phase='package_verified';
+  participant.snapshot.run.phase='prepared';
   participant.snapshot.run.participant_capture_ready=false;
   participant.snapshot.safety.local_armed=false;
   participant.snapshot.safety.capture_started=false;
@@ -180,6 +180,17 @@ def main() -> int:
         page.evaluate("window.dispatchEvent(new PageTransitionEvent('pageshow', {persisted:true}))")
         page.wait_for_function("!document.querySelector('#native-output-list').disabled")
         assert prepare.is_disabled() and route.locator("option").count() == 1
+        page.evaluate("""() => {
+          const state = window.participantAudit;
+          state.snapshot.run.phase='unknown'; state.snapshot.revision++; state.emit(state.snapshot);
+        }""")
+        assert listing.is_disabled(), "Unknown phase must not authorize device setup"
+        page.evaluate("""() => {
+          const state = window.participantAudit;
+          state.snapshot.run.phase='prepared'; delete state.snapshot.safety.local_armed;
+          state.snapshot.revision++; state.emit(state.snapshot);
+        }""")
+        assert listing.is_disabled(), "Missing disarm evidence must not authorize device setup"
         browser.close()
     report = {"passed":True,"evidence":"compiled-browser-with-mocked-native-bridge",
               "installed_qualification":False,"physical_qualification":False,
@@ -187,6 +198,7 @@ def main() -> int:
               "decimal_generation_preserved":True,"disable_cancels_pending_view":True,
               "lost_ack_not_replayed":True,"changed_inventory_invalidates_choice":True,
               "resume_requires_fresh_inventory":True,
+              "unknown_phase_and_missing_disarm_disabled":True,
               "preparation_never_enables_acquisition":True}
     (output / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(f"Passed {len(cases)} rendered output layouts and native preflight control cases; {output}")
