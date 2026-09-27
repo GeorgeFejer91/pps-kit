@@ -2758,6 +2758,60 @@ mod tests {
         assert_eq!(started.snapshot.run.phase, RunnerPhase::Running);
     }
 
+    #[test]
+    fn journal_write_failure_aborts_an_active_authority_and_preserves_its_file() {
+        let path = std::env::temp_dir().join(format!(
+            "pps-owner-journal-{}.jsonl",
+            pps_brsp::random_nonce()
+        ));
+        std::fs::write(&path, "retained prefix\n").unwrap();
+        let journal = NativeEventJournal::failing_writer(&path);
+        let retired = journal.retirement_probe();
+        let owner = owner(Duration::from_secs(5));
+        owner
+            .blocking(
+                AdmissionClass::Normal,
+                "install-failing-test-journal",
+                move |state| {
+                    prepare_running_demo(state);
+                    state.event_journal = Some((state.package_generation, journal));
+                    state
+                        .dispatch_local(
+                            Action::SessionNote,
+                            serde_json::json!({"text": "fault probe"}),
+                            AdmissionClass::Normal,
+                        )
+                        .unwrap();
+                },
+            )
+            .unwrap();
+        let deadline = Instant::now() + Duration::from_secs(3);
+        while !owner.test_view().evidence_unavailable {
+            assert!(
+                Instant::now() < deadline,
+                "writer failure did not reach the authority"
+            );
+            thread::sleep(Duration::from_millis(2));
+        }
+        let snapshot = owner.view_blocking().unwrap().snapshot;
+        assert_eq!(snapshot.run.phase, RunnerPhase::Interrupted);
+        assert!(!snapshot.safety.local_armed);
+        assert!(!snapshot.safety.capture_started);
+        assert!(!snapshot.run.complete);
+        assert_eq!(snapshot.connection_state, "evidence_unavailable");
+        assert!(owner
+            .dispatch_local_blocking(Action::RunResume, serde_json::json!({}))
+            .unwrap()
+            .is_err());
+        drop(owner);
+        while !retired() {
+            assert!(Instant::now() < deadline);
+            thread::sleep(Duration::from_millis(2));
+        }
+        assert_eq!(std::fs::read_to_string(&path).unwrap(), "retained prefix\n");
+        std::fs::remove_file(path).unwrap();
+    }
+
     fn empty_mailbox_entry(class: AdmissionClass) -> MailboxEntry {
         MailboxEntry {
             class,
