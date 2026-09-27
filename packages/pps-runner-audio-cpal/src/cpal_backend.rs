@@ -3,7 +3,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use pps_runner_audio::{OutputFence, PreparedPlaybackPlan, RenderControl};
+use pps_runner_audio::{OutputFence, PreparedPlaybackPlan};
 
 use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
@@ -17,9 +17,8 @@ use crate::{
         BackendConfig, BackendDevice, BackendEnumeration, BackendFailure, CallbackSignals,
         OutputBackend, SelectionKey,
     },
-    NativePlaybackRecord, OutputServiceErrorCode, PlaybackCancellation, PlaybackControlReceipt,
-    PlaybackPort, PlaybackStatus, MAXIMUM_F32_CONFIGS_PER_DEVICE, MAXIMUM_OUTPUT_CHANNELS,
-    MAXIMUM_OUTPUT_DEVICES,
+    OutputServiceErrorCode, PlaybackPort, PlaybackStatus, MAXIMUM_F32_CONFIGS_PER_DEVICE,
+    MAXIMUM_OUTPUT_CHANNELS, MAXIMUM_OUTPUT_DEVICES,
 };
 
 const MAXIMUM_SCANNED_OUTPUT_DEVICES: usize = 128;
@@ -313,55 +312,6 @@ impl OutputBackend for CpalBackend {
 
     fn playback_status(&self) -> Option<PlaybackStatus> {
         self.playback.as_ref().map(PlaybackOwner::status)
-    }
-
-    fn playback_control(
-        &mut self,
-        fence: &OutputFence,
-        control: RenderControl,
-    ) -> Result<PlaybackControlReceipt, BackendFailure> {
-        self.playback
-            .as_mut()
-            .ok_or_else(BackendFailure::contract)?
-            .control(fence, control)
-            .map_err(|error| {
-                BackendFailure::new(
-                    OutputFaultKind::BackendContractViolation,
-                    match error {
-                        crate::PlaybackControlError::Busy => OutputServiceErrorCode::QueueFull,
-                        crate::PlaybackControlError::SequenceExhausted => {
-                            OutputServiceErrorCode::GenerationExhausted
-                        }
-                        _ => OutputServiceErrorCode::StaleReservation,
-                    },
-                    "The native playback control was not admitted.",
-                )
-            })
-    }
-
-    fn playback_cancellation(
-        &self,
-        fence: &OutputFence,
-    ) -> Result<PlaybackCancellation, BackendFailure> {
-        let playback = self
-            .playback
-            .as_ref()
-            .ok_or_else(BackendFailure::contract)?;
-        if playback.fence() != fence {
-            return Err(BackendFailure::contract());
-        }
-        Ok(playback.cancellation())
-    }
-
-    fn drain_playback(
-        &mut self,
-        maximum: usize,
-    ) -> Result<Vec<NativePlaybackRecord>, BackendFailure> {
-        self.playback
-            .as_mut()
-            .ok_or_else(BackendFailure::contract)?
-            .drain(maximum)
-            .map_err(|_| BackendFailure::contract())
     }
 
     fn take_playback_port(&mut self, fence: &OutputFence) -> Result<PlaybackPort, BackendFailure> {

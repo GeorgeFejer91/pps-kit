@@ -18,10 +18,9 @@ use crate::{
         MAXIMUM_F32_CONFIGS_PER_DEVICE, MAXIMUM_OUTPUT_CHANNELS, MAXIMUM_OUTPUT_DEVICES,
     },
     cpal_backend::CpalBackend,
-    NativePlaybackRecord, PlaybackCancellation, PlaybackControlReceipt, PlaybackPort,
-    PlaybackStatus,
+    PlaybackPort, PlaybackStatus,
 };
-use pps_runner_audio::{OutputFence, PreparedPlaybackPlan, RenderControl};
+use pps_runner_audio::{OutputFence, PreparedPlaybackPlan};
 
 const NORMAL_COMMAND_CAPACITY: usize = 8;
 const SAFETY_COMMAND_CAPACITY: usize = 4;
@@ -118,25 +117,6 @@ pub(crate) trait OutputBackend: 'static {
     }
     fn playback_status(&self) -> Option<PlaybackStatus> {
         None
-    }
-    fn playback_control(
-        &mut self,
-        _fence: &OutputFence,
-        _control: RenderControl,
-    ) -> Result<PlaybackControlReceipt, BackendFailure> {
-        Err(BackendFailure::contract())
-    }
-    fn playback_cancellation(
-        &self,
-        _fence: &OutputFence,
-    ) -> Result<PlaybackCancellation, BackendFailure> {
-        Err(BackendFailure::contract())
-    }
-    fn drain_playback(
-        &mut self,
-        _maximum: usize,
-    ) -> Result<Vec<NativePlaybackRecord>, BackendFailure> {
-        Err(BackendFailure::contract())
     }
 }
 
@@ -716,8 +696,20 @@ impl<B: OutputBackend> WorkerState<B> {
         generation: u64,
         plan: Arc<PreparedPlaybackPlan>,
         shutdown: &AtomicBool,
-    ) -> Result<PlaybackStatus, OutputServiceError> {
+    ) -> Result<PlaybackPort, OutputServiceError> {
         let timeout = self.require_reservation(generation)?.warmup_timeout;
+        if self
+            .backend
+            .as_ref()
+            .and_then(OutputBackend::playback_status)
+            .is_some()
+        {
+            return Err(error(
+                OutputServiceErrorCode::AlreadyReserved,
+                "Release prepared playback before binding a different plan.",
+            ));
+        }
+        let fence = plan.fence().clone();
         let signals = Arc::new(CallbackSignals::new());
         self.require_reservation(generation)?;
         if let Err(failure) = self.backend()?.prepare_playback(plan, Arc::clone(&signals)) {
@@ -745,8 +737,9 @@ impl<B: OutputBackend> WorkerState<B> {
             ) {
                 WarmupObservation::Ready(_) => {
                     return self
-                        .playback_status(generation)?
-                        .ok_or_else(stale_reservation)
+                        .backend()?
+                        .take_playback_port(&fence)
+                        .map_err(|failure| failure.error)
                 }
                 WarmupObservation::Pending => thread::sleep(OWNER_POLL_INTERVAL),
                 observed => {
@@ -770,62 +763,6 @@ impl<B: OutputBackend> WorkerState<B> {
                 }
             }
         }
-    }
-
-    fn playback_status(
-        &self,
-        generation: u64,
-    ) -> Result<Option<PlaybackStatus>, OutputServiceError> {
-        self.require_reservation(generation)?;
-        Ok(self
-            .backend
-            .as_ref()
-            .and_then(OutputBackend::playback_status))
-    }
-
-    fn playback_control(
-        &mut self,
-        generation: u64,
-        fence: &OutputFence,
-        control: RenderControl,
-    ) -> Result<PlaybackControlReceipt, OutputServiceError> {
-        self.require_reservation(generation)?;
-        self.backend()?
-            .playback_control(fence, control)
-            .map_err(|failure| failure.error)
-    }
-
-    fn playback_cancellation(
-        &mut self,
-        generation: u64,
-        fence: &OutputFence,
-    ) -> Result<PlaybackCancellation, OutputServiceError> {
-        self.require_reservation(generation)?;
-        self.backend()?
-            .playback_cancellation(fence)
-            .map_err(|failure| failure.error)
-    }
-
-    fn drain_playback(
-        &mut self,
-        generation: u64,
-        maximum: usize,
-    ) -> Result<Vec<NativePlaybackRecord>, OutputServiceError> {
-        self.require_reservation(generation)?;
-        self.backend()?
-            .drain_playback(maximum)
-            .map_err(|failure| failure.error)
-    }
-
-    fn take_playback_port(
-        &mut self,
-        generation: u64,
-        fence: &OutputFence,
-    ) -> Result<PlaybackPort, OutputServiceError> {
-        self.require_reservation(generation)?;
-        self.backend()?
-            .take_playback_port(fence)
-            .map_err(|failure| failure.error)
     }
 
     fn refresh_callback_fault(&mut self) {
@@ -943,11 +880,6 @@ impl<B: OutputBackend> WorkerState<B> {
 }
 
 enum Command {
-    TakePlaybackPort {
-        generation: u64,
-        fence: OutputFence,
-        reply: SyncSender<Result<PlaybackPort, OutputServiceError>>,
-    },
     Enumerate(SyncSender<Result<OutputDeviceInventory, OutputServiceError>>),
     Reserve {
         selection: ExactOutputSelection,
@@ -959,37 +891,11 @@ enum Command {
     PreparePlayback {
         generation: u64,
         plan: Arc<PreparedPlaybackPlan>,
-        reply: SyncSender<Result<PlaybackStatus, OutputServiceError>>,
-    },
-    PlaybackStatus {
-        generation: u64,
-        reply: SyncSender<Result<Option<PlaybackStatus>, OutputServiceError>>,
-    },
-    PlaybackControl {
-        generation: u64,
-        fence: OutputFence,
-        control: RenderControl,
-        reply: SyncSender<Result<PlaybackControlReceipt, OutputServiceError>>,
-    },
-    PlaybackCancellation {
-        generation: u64,
-        fence: OutputFence,
-        reply: SyncSender<Result<PlaybackCancellation, OutputServiceError>>,
-    },
-    DrainPlayback {
-        generation: u64,
-        maximum: usize,
-        reply: SyncSender<Result<Vec<NativePlaybackRecord>, OutputServiceError>>,
+        reply: SyncSender<Result<PlaybackPort, OutputServiceError>>,
     },
 }
 
 enum SafetyCommand {
-    PlaybackControl {
-        generation: u64,
-        fence: OutputFence,
-        control: RenderControl,
-        reply: SyncSender<Result<PlaybackControlReceipt, OutputServiceError>>,
-    },
     Release {
         reservation_generation: u64,
         reply: SyncSender<Result<(), OutputServiceError>>,
@@ -1205,29 +1111,14 @@ pub struct CpalOutputService {
 }
 
 impl CpalOutputService {
-    /// Transfers the sole command/evidence port to the native experiment
-    /// authority. Device-owned ring storage stays retained through retirement.
-    pub fn take_playback_port(
-        &self,
-        receipt: &OutputReservationReceipt,
-        fence: &OutputFence,
-    ) -> Result<PlaybackPort, OutputServiceError> {
-        let generation = self.client.receipt_generation(receipt)?;
-        let (reply, receive) = mpsc::sync_channel(1);
-        self.client.send_normal(Command::TakePlaybackPort {
-            generation,
-            fence: fence.clone(),
-            reply,
-        })?;
-        receive_reply(receive, ORDINARY_REPLY_TIMEOUT)
-    }
     /// Binds already verified PCM and schedule to an exact reservation and
-    /// warms it in silence. This never arms or starts an experiment.
+    /// warms it in silence, then hands the sole command/evidence port to the
+    /// caller. This never arms or starts an experiment.
     pub fn prepare_playback(
         &self,
         receipt: &OutputReservationReceipt,
         plan: Arc<PreparedPlaybackPlan>,
-    ) -> Result<PlaybackStatus, OutputServiceError> {
+    ) -> Result<PlaybackPort, OutputServiceError> {
         let generation = self.client.receipt_generation(receipt)?;
         let (reply, receive) = mpsc::sync_channel(1);
         self.client.send_normal(Command::PreparePlayback {
@@ -1238,74 +1129,6 @@ impl CpalOutputService {
         receive_reply(receive, ORDINARY_REPLY_TIMEOUT)
     }
 
-    pub fn playback_status(
-        &self,
-        receipt: &OutputReservationReceipt,
-    ) -> Result<Option<PlaybackStatus>, OutputServiceError> {
-        let generation = self.client.receipt_generation(receipt)?;
-        let (reply, receive) = mpsc::sync_channel(1);
-        self.client
-            .send_normal(Command::PlaybackStatus { generation, reply })?;
-        receive_reply(receive, ORDINARY_REPLY_TIMEOUT)
-    }
-
-    /// A receipt acknowledges admission. Only the drained Control record
-    /// confirms what the callback applied; caller timeout has unknown outcome.
-    pub fn playback_control(
-        &self,
-        receipt: &OutputReservationReceipt,
-        fence: &OutputFence,
-        control: RenderControl,
-    ) -> Result<PlaybackControlReceipt, OutputServiceError> {
-        let generation = self.client.receipt_generation(receipt)?;
-        let (reply, receive) = mpsc::sync_channel(1);
-        if matches!(control, RenderControl::Stop | RenderControl::Abort) {
-            self.client.send_safety(SafetyCommand::PlaybackControl {
-                generation,
-                fence: fence.clone(),
-                control,
-                reply,
-            })?;
-        } else {
-            self.client.send_normal(Command::PlaybackControl {
-                generation,
-                fence: fence.clone(),
-                control,
-                reply,
-            })?;
-        }
-        receive_reply(receive, ORDINARY_REPLY_TIMEOUT)
-    }
-
-    pub fn playback_cancellation(
-        &self,
-        receipt: &OutputReservationReceipt,
-        fence: &OutputFence,
-    ) -> Result<PlaybackCancellation, OutputServiceError> {
-        let generation = self.client.receipt_generation(receipt)?;
-        let (reply, receive) = mpsc::sync_channel(1);
-        self.client.send_normal(Command::PlaybackCancellation {
-            generation,
-            fence: fence.clone(),
-            reply,
-        })?;
-        receive_reply(receive, ORDINARY_REPLY_TIMEOUT)
-    }
-
-    pub fn drain_playback(
-        &self,
-        receipt: &OutputReservationReceipt,
-        maximum: usize,
-    ) -> Result<Vec<NativePlaybackRecord>, OutputServiceError> {
-        let generation = self.client.receipt_generation(receipt)?;
-        let (reply, receive) = mpsc::sync_channel(1);
-        self.client.send_normal(Command::DrainPlayback {
-            generation,
-            maximum,
-            reply,
-        })?;
-        receive_reply(receive, ORDINARY_REPLY_TIMEOUT)
-    }
     /// Starts only the inert named owner thread. CPAL host/device access remains
     /// lazy until [`enumerate_output_devices`](Self::enumerate_output_devices).
     pub fn new() -> Result<Self, OutputServiceError> {
@@ -1448,15 +1271,6 @@ fn handle_command<B: OutputBackend>(
     shutdown_requested: &AtomicBool,
 ) {
     match command {
-        Command::TakePlaybackPort {
-            generation,
-            fence,
-            reply,
-        } => {
-            // If the caller disappeared, dropping the unsent port aborts this
-            // immutable callback; it can never leave an orphan running.
-            let _ = reply.try_send(state.take_playback_port(generation, &fence));
-        }
         Command::Enumerate(reply) => {
             let _ = reply.try_send(state.enumerate(identity));
         }
@@ -1489,45 +1303,11 @@ fn handle_command<B: OutputBackend>(
                 let _ = state.release(generation);
             }
         }
-        Command::PlaybackStatus { generation, reply } => {
-            let _ = reply.try_send(state.playback_status(generation));
-        }
-        Command::PlaybackControl {
-            generation,
-            fence,
-            control,
-            reply,
-        } => {
-            let _ = reply.try_send(state.playback_control(generation, &fence, control));
-        }
-        Command::PlaybackCancellation {
-            generation,
-            fence,
-            reply,
-        } => {
-            let _ = reply.try_send(state.playback_cancellation(generation, &fence));
-        }
-        Command::DrainPlayback {
-            generation,
-            maximum,
-            reply,
-        } => {
-            let _ = reply.try_send(state.drain_playback(generation, maximum));
-        }
     }
 }
 
 fn handle_safety<B: OutputBackend>(command: SafetyCommand, state: &mut WorkerState<B>) -> bool {
     match command {
-        SafetyCommand::PlaybackControl {
-            generation,
-            fence,
-            control,
-            reply,
-        } => {
-            let _ = reply.try_send(state.playback_control(generation, &fence, control));
-            false
-        }
         SafetyCommand::Release {
             reservation_generation,
             reply,
@@ -1721,6 +1501,7 @@ const fn request_timeout() -> OutputServiceError {
 mod tests {
     use super::*;
     use crate::MAXIMUM_WARMUP_TIMEOUT;
+    use pps_runner_audio::RenderControl;
     use std::sync::{
         atomic::{AtomicBool, AtomicU8, AtomicUsize},
         Condvar,
@@ -1974,47 +1755,6 @@ mod tests {
             self.media.as_ref().map(|(_, owner)| owner.status())
         }
 
-        fn playback_control(
-            &mut self,
-            fence: &OutputFence,
-            control: RenderControl,
-        ) -> Result<PlaybackControlReceipt, BackendFailure> {
-            self.control.record_owner_thread();
-            self.media
-                .as_mut()
-                .ok_or_else(BackendFailure::contract)?
-                .1
-                .control(fence, control)
-                .map_err(|_| {
-                    BackendFailure::new(
-                        OutputFaultKind::BackendContractViolation,
-                        OutputServiceErrorCode::StaleReservation,
-                        "The fake playback fence changed.",
-                    )
-                })
-        }
-
-        fn playback_cancellation(
-            &self,
-            fence: &OutputFence,
-        ) -> Result<PlaybackCancellation, BackendFailure> {
-            let owner = &self.media.as_ref().ok_or_else(BackendFailure::contract)?.1;
-            if owner.fence() != fence {
-                return Err(BackendFailure::contract());
-            }
-            Ok(owner.cancellation())
-        }
-
-        fn drain_playback(
-            &mut self,
-            maximum: usize,
-        ) -> Result<Vec<NativePlaybackRecord>, BackendFailure> {
-            self.control.record_owner_thread();
-            let (callback, owner) = self.media.as_mut().ok_or_else(BackendFailure::contract)?;
-            callback.render(&mut [0.0; 2], Instant::now(), None);
-            owner.drain(maximum).map_err(|_| BackendFailure::contract())
-        }
-
         fn take_playback_port(
             &mut self,
             fence: &OutputFence,
@@ -2061,73 +1801,6 @@ mod tests {
     }
 
     #[test]
-    fn media_handoff_retains_service_and_reservation_fences_and_actual_control_evidence() {
-        let control = Arc::new(FakeControl::default());
-        let client = fake_service(&control);
-        let service = CpalOutputService {
-            client: Arc::clone(&client),
-        };
-        let inventory = service.enumerate_output_devices().unwrap();
-        let receipt = service
-            .reserve_silence(selection(
-                &inventory,
-                2,
-                48_000,
-                OutputBufferSelection::Default,
-                Duration::from_millis(100),
-            ))
-            .unwrap();
-        let plan = crate::playback::tests::plan(8);
-        let prepared = service
-            .prepare_playback(&receipt, Arc::clone(&plan))
-            .unwrap();
-        assert_eq!(prepared.state, pps_runner_audio::RenderState::Prepared);
-        assert_eq!(prepared.submitted_frames, 0);
-        assert_eq!(
-            service.status().unwrap().phase(),
-            OutputServicePhase::ReservedMedia
-        );
-        let cancel = service
-            .playback_cancellation(&receipt, plan.fence())
-            .unwrap();
-        let admitted = service
-            .playback_control(&receipt, plan.fence(), RenderControl::Start)
-            .unwrap();
-        assert_eq!(
-            service
-                .playback_status(&receipt)
-                .unwrap()
-                .unwrap()
-                .submitted_frames,
-            0
-        );
-        let records = service.drain_playback(&receipt, usize::MAX).unwrap();
-        assert!(records.iter().any(|record| matches!(record.kind, crate::PlaybackRecordKind::Control {
-            sequence, requested: RenderControl::Start, result: pps_runner_audio::ControlResult::Applied, ..
-        } if sequence == admitted.sequence)));
-        cancel.abort();
-        service.drain_playback(&receipt, 16).unwrap();
-        assert_eq!(
-            service.playback_status(&receipt).unwrap().unwrap().state,
-            pps_runner_audio::RenderState::Aborted
-        );
-        let other = CpalOutputService {
-            client: fake_service(&Arc::new(FakeControl::default())),
-        };
-        assert_eq!(
-            other.prepare_playback(&receipt, plan).unwrap_err().code(),
-            OutputServiceErrorCode::ReceiptMismatch
-        );
-        other.shutdown().unwrap();
-        service.release(&receipt).unwrap();
-        assert_eq!(
-            service.playback_status(&receipt).unwrap_err().code(),
-            OutputServiceErrorCode::StaleReservation
-        );
-        service.shutdown().unwrap();
-    }
-
-    #[test]
     fn prepared_port_can_only_be_transferred_once_to_its_native_authority() {
         let control = Arc::new(FakeControl::default());
         let service = CpalOutputService {
@@ -2144,15 +1817,27 @@ mod tests {
             ))
             .unwrap();
         let plan = crate::playback::tests::plan(12);
-        service
+        let mut port = service
             .prepare_playback(&receipt, Arc::clone(&plan))
             .unwrap();
-        let mut port = service.take_playback_port(&receipt, plan.fence()).unwrap();
-        assert!(service.take_playback_port(&receipt, plan.fence()).is_err());
-        assert!(service
-            .playback_control(&receipt, plan.fence(), RenderControl::Start)
-            .is_err());
+        assert!(
+            matches!(service.prepare_playback(&receipt, Arc::clone(&plan)),
+            Err(error) if error.code() == OutputServiceErrorCode::AlreadyReserved)
+        );
+        assert_eq!(port.status().state, pps_runner_audio::RenderState::Prepared);
+        assert_eq!(
+            service.status().unwrap().phase(),
+            OutputServicePhase::ReservedMedia
+        );
         assert_eq!(port.status().submitted_frames, 0);
+        let other = CpalOutputService {
+            client: fake_service(&Arc::new(FakeControl::default())),
+        };
+        assert!(
+            matches!(other.prepare_playback(&receipt, Arc::clone(&plan)),
+            Err(error) if error.code() == OutputServiceErrorCode::ReceiptMismatch)
+        );
+        other.shutdown().unwrap();
         port.control(plan.fence(), RenderControl::Start).unwrap();
         service.release(&receipt).unwrap();
         assert!(port.status().callback_retired);
@@ -2160,6 +1845,8 @@ mod tests {
             port.control(plan.fence(), RenderControl::Start),
             Err(crate::PlaybackControlError::CallbackUnavailable)
         );
+        assert!(matches!(service.prepare_playback(&receipt, plan),
+            Err(error) if error.code() == OutputServiceErrorCode::StaleReservation));
         service.shutdown().unwrap();
     }
 

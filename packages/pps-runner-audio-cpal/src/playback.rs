@@ -214,6 +214,7 @@ impl PlaybackOwner {
         self.plan.fence()
     }
 
+    #[cfg(test)]
     pub(crate) fn cancellation(&self) -> PlaybackCancellation {
         PlaybackCancellation(Arc::clone(&self.signals))
     }
@@ -235,6 +236,7 @@ impl PlaybackOwner {
         })
     }
 
+    #[cfg(test)]
     pub(crate) fn control(
         &mut self,
         fence: &OutputFence,
@@ -253,6 +255,7 @@ impl PlaybackOwner {
         status(&self.signals)
     }
 
+    #[cfg(test)]
     pub(crate) fn drain(
         &mut self,
         maximum: usize,
