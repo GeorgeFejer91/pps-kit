@@ -419,7 +419,18 @@ impl OwnerState {
             journal.failed()
                 || journal.durable_sequence() > self.ledger.summary().last_sequence.unwrap_or(0)
         });
-        if failed && !self.evidence_unavailable {
+        let unavailable_active = self.evidence_unavailable && self.event_journal.is_some() && {
+            let snapshot = self.core.snapshot();
+            snapshot.safety.local_armed
+                || matches!(
+                    snapshot.run.phase,
+                    RunnerPhase::Running
+                        | RunnerPhase::Paused
+                        | RunnerPhase::InstructionGate
+                        | RunnerPhase::Stopping
+                )
+        };
+        if (failed && !self.evidence_unavailable) || unavailable_active {
             self.fail_stop_unavailable("native.journal.failed", "evidence_unavailable");
         }
         let retired_previous = self
@@ -2760,12 +2771,21 @@ mod tests {
 
     #[test]
     fn journal_write_failure_aborts_an_active_authority_and_preserves_its_file() {
+        assert_journal_failure_aborts_active(false);
+    }
+
+    #[test]
+    fn unavailable_safety_pause_journal_still_neutralizes_and_disarms_the_authority() {
+        assert_journal_failure_aborts_active(true);
+    }
+
+    fn assert_journal_failure_aborts_active(close_before_pause: bool) {
         let path = std::env::temp_dir().join(format!(
             "pps-owner-journal-{}.jsonl",
             pps_brsp::random_nonce()
         ));
         std::fs::write(&path, "retained prefix\n").unwrap();
-        let journal = NativeEventJournal::failing_writer(&path);
+        let mut journal = NativeEventJournal::failing_writer(&path);
         let retired = journal.retirement_probe();
         let owner = owner(Duration::from_secs(5));
         owner
@@ -2774,12 +2794,29 @@ mod tests {
                 "install-failing-test-journal",
                 move |state| {
                     prepare_running_demo(state);
+                    if close_before_pause {
+                        // No writer fault is necessary: an unavailable queue
+                        // cannot leave an active authority armed after Pause.
+                        journal.close();
+                    }
                     state.event_journal = Some((state.package_generation, journal));
                     state
                         .dispatch_local(
-                            Action::SessionNote,
-                            serde_json::json!({"text": "fault probe"}),
-                            AdmissionClass::Normal,
+                            if close_before_pause {
+                                Action::RunPause
+                            } else {
+                                Action::SessionNote
+                            },
+                            if close_before_pause {
+                                serde_json::json!({})
+                            } else {
+                                serde_json::json!({"text": "fault probe"})
+                            },
+                            if close_before_pause {
+                                AdmissionClass::LocalSafety
+                            } else {
+                                AdmissionClass::Normal
+                            },
                         )
                         .unwrap();
                 },
