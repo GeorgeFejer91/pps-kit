@@ -69,69 +69,48 @@ hidden desktop window. Observer scope is read-only; remembered phone trust is
 unselected. Current bounds and evidence belong in the owning tests and the
 [implementation record](../engineering/validation/docs/implementation-status-2026-09-27.md).
 
-`pps-runner-audio-cpal` can bind the existing verified immutable output plan to
-an exact reserved stream. Silent warm-up returns one native command/event port;
-no IPC caller can reconstruct it. `native_playback.rs` hands that sole port to
-the existing execution actor, sharing its cached immutable plan and native
-metadata receipt. Completion rechecks the package/run/cache and healthy journal;
-stale or abandoned handoffs drop and abort the callback. The actor drains bounded
-callback records into the existing event ledger/journal, preserving original
-schedule payloads and retaining callback observation/prediction clocks separately.
-Ledger timestamps reflect recording order; callback observation is not physical
-onset. Preparation remains silent. Start, response collection, durable result
-publication, and completion must be implemented together before enabling native
-execution. No second scheduler or UI-owned playback authority is permitted. Device retirement retains callback storage off the render
-path. Raw CPAL playback timestamps are predictions in their own clock domain,
-not measured physical onset. The Tauri package is still non-executable until
-the complete experiment adapter adopts this seam; preparation does not promote
-readiness or qualification.
+Native execution has one actor, one existing callback scheduler, and one file
+worker. `pps-runner-audio-cpal` binds verified immutable PCM to an exact reserved
+stream; silent warm-up returns one native port. `native_playback.rs` retains the
+shared plan, native metadata, and decoded duration. Stale or abandoned handoffs
+drop and abort the port. Local and phone commands share `finish_dispatch` and
+`apply_native_action`: Start/Resume wait for durable intent, callback records
+confirm application, Pause does not wait for file durability, and Pause cancels
+pending activation as an interrupted attempt. Stop/Abort/disarm retire the port;
+revocation also cancels pending activation. Controls have a bounded deadline.
+No wire caller can reconstruct the port or qualify physical onset. Callback
+observations, driver predictions, and source submission remain unqualified.
 
-`event_journal.rs` is the native file owner for the existing authority event
-schema and minimal response CSV. Explicit first-block audio preflight creates
-paired `native_events_*.partial.jsonl` and `native_trials_*.partial.csv`
-in the verified session directory; choosing/inspecting a package remains read-only.
-Only native receipts choose that directory. The journal has eight bounded queue
-slots, 128 records/256 KiB per batch, and a 32 MiB total budget. Admission precedes
-authority commit; the same worker acknowledges a prefix only after syncing both
-files. Rich `trial.scored` events supply CSV rows through the shared execution
-crate's V1 projection; filler/debug trials stay in rich evidence and do not
-advance the minimal dataset counter. Write
-failure or backpressure prevents further ordinary transitions and neutralizes
-output; safety still proceeds. Package replacement closes the old writer before
-another can attach. A native finalization request freezes the exact admitted
-prefix. The same worker syncs both files, closes append handles, publishes
-exclusive final names, rechecks their hashes and publishes a completion manifest
-last. The actor accepts only a receipt matching its package/run/count/sequence
-fences. Writer failure retains partial evidence and interrupts finalization;
-wire commands cannot manufacture completion. A synced partial dataset is not
-evidence of experiment completion or physical timing. The shared reducer leaves verified
-package Stop interrupted/partial and rejects `RunCompleteDemo` for that package.
-Only the native result publication receipt may authorize real completion. This
-source seam currently recognizes a whole single-block package, all resolved
-trials, no interrupted trials, and an elapsed final software submission estimate.
-It does not enable Start. Controls, participant UI, whole-profile/multi-block
-execution, and an installed complete experiment remain required gates.
+`event_journal.rs` owns paired partial events and 18-column Data_min CSV in the
+verified session directory. Selection/inspection remain read-only. Package and
+run generations fence journal installation; ended attempts close their writer
+before another attaches. Preserve the existing eight-slot queue, batch and total
+byte bounds. Admission precedes authority commit; the worker acknowledges a
+prefix after syncing both files. Failure/backpressure neutralizes output while
+safety still proceeds. Finalization freezes a prefix, syncs/closes both files,
+exclusively publishes final names, checks hashes, and publishes the manifest
+last. Only a matching native package/run/count/sequence receipt can complete a
+whole single-block package after response windows and the final software estimate
+close. Missing/interrupted trials cannot complete. Unsupported hard-link
+filesystems fail closed; partial/pending/orphan files remain. Power loss,
+directory persistence, device drain and physical timing need separate evidence.
+Use `validation/scripts/validate_native_results.py` under `For-AI/engineering/`
+for read-only file/hash/prefix/V1-projection checks; synthetic files are not
+participant acquisition.
 
-Final publication uses standard-library exclusive hard links. Unsupported
-filesystems fail closed; partial names and pending/orphan artifacts are retained.
-File syncing and the commit manifest do not qualify sudden power-loss recovery,
-directory metadata persistence, device drain, or physical timing. Inspect an
-actual installed result with
-`python For-AI/engineering/validation/scripts/validate_native_results.py <manifest.results.json> --package-sha256 <verified-digest>`.
-That read-only audit checks file hashes, prefix/finalization evidence and the
-existing Python V1 CSV projection. Its report is file-contract evidence only;
-synthetic CI writer fixtures cannot stand in for participant acquisition.
+`pps-runner-execution::response` is the shared scoring/CSV owner; Python remains
+the oracle. `trial_capture.rs` consumes callback boundaries without another
+scheduler. Local `runner_record_response` accepts only bounded choice/normalized
+pointer content; native ingress supplies the clock/ID/block. Queued input stays
+pending through actor processing even if its UI wait is abandoned. Input loss
+fails closed; pauses through trials retain interrupted evidence. Filler/debug
+rows stay in rich events without advancing Data_min indices. The participant
+button uses this local IPC, never a phone command or replay. Native capture
+readiness follows callback confirmation. Main-window-only state broadcasts
+update the UI; older revisions and absent readiness cannot enable capture.
+The main window may listen/unlisten but cannot emit authority snapshots.
 
-`pps-runner-execution::response` owns response windows, selection, withholding,
-choice scoring, Data_min columns, and CSV encoding. Python remains the migration
-oracle. `trial_capture.rs` consumes existing native callback boundaries, not a
-second scheduler. Native input admission supplies the clock/ID/block; IPC accepts
-only bounded choice/normalized pointer content. `runner_record_response` is
-limited to the bundled local window and rejects inactive/native-unavailable
-capture. It is not a phone action or generic input forwarding. Pending input is
-registered before its timestamp and remains pending until actor processing even
-when the UI abandons its wait. Scoring uses the same selection deadline and
-waits for queued input; input loss fails closed. Pauses through a trial retain
-`trial.interrupted` evidence instead of scoring a reaction time. Start and final
-publication/completion remain gated; no installed or qualified acquisition is
-claimed by this source seam.
+Preparation and these source seams do not enable execution. Operator-facing
+native preparation/activation, whole profiles/multiple blocks, an installed
+complete experiment, calibration and physical qualification remain gates.
+Wire completion is denied for real packages; Stop preserves partial results.
