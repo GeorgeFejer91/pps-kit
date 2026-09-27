@@ -437,10 +437,7 @@ impl OwnerState {
             return;
         }
         self.native_output.refresh_from_invalidator();
-        if !self.native_output.media_prepared() {
-            self.native_playback = None;
-            return;
-        }
+        let reservation_available = self.native_output.media_prepared();
         if !self.native_journal_current() {
             self.fail_stop_unavailable("native.media.evidence-unavailable", "evidence_unavailable");
             return;
@@ -476,7 +473,7 @@ impl OwnerState {
                 return;
             }
         }
-        if status.fault.is_some() || status.callback_retired {
+        if !reservation_available || status.fault.is_some() || status.callback_retired {
             self.fail_stop_unavailable("native.media.callback-unavailable", "evidence_unavailable");
         }
     }

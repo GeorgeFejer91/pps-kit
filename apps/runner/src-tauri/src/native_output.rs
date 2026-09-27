@@ -176,7 +176,7 @@ impl NativeOutputCommandError {
         )
     }
 
-    fn changed() -> Self {
+    pub(crate) fn changed() -> Self {
         Self::new(
             "native_output_changed",
             "The native output policy changed while the request was in progress.",

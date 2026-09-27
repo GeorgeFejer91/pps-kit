@@ -228,7 +228,7 @@ pub(crate) fn record_input(
     input.payload["driverPredictionLeadNs"] =
         serde_json::json!(record.device_timestamp.and_then(|time| {
             time.playback
-                .duration_since(&time.callback)
+                .checked_duration_since(time.callback)
                 .and_then(|duration| u64::try_from(duration.as_nanos()).ok())
                 .map(|value| value.min(JSON_MAX_SAFE_INTEGER))
         }));
