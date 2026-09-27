@@ -729,7 +729,11 @@ impl RunnerCore {
         if self.native_control_pending.is_some()
             && !matches!(
                 action,
-                Action::SystemSnapshot | Action::RunStop | Action::RunAbort | Action::TargetDisarm
+                Action::SystemSnapshot
+                    | Action::RunPause
+                    | Action::RunStop
+                    | Action::RunAbort
+                    | Action::TargetDisarm
             )
         {
             return Err("native_control_in_progress");
@@ -788,6 +792,15 @@ impl RunnerCore {
             Action::InstructionContinue => self.continue_instruction(args),
             Action::RunPause => {
                 expect_empty_args(args)?;
+                if matches!(
+                    self.native_control_pending,
+                    Some(Action::PartStart | Action::RunResume)
+                ) {
+                    // Prevent a pending activation from starting later. This
+                    // attempt is interrupted; resuming needs fresh preparation.
+                    self.end_run(RunnerPhase::Interrupted, now);
+                    return Ok(true);
+                }
                 if self.snapshot.run.phase == RunnerPhase::Paused {
                     return Ok(false);
                 }
@@ -834,18 +847,14 @@ impl RunnerCore {
                 }
                 // Stop is a safety interruption for a real package. Only the
                 // compatibility demo may use its simulated completion path.
-                self.snapshot.run.phase = if demo {
-                    RunnerPhase::Completed
-                } else {
-                    RunnerPhase::Interrupted
-                };
-                self.snapshot.run.complete = demo;
-                self.snapshot.run.thread_alive = false;
-                self.snapshot.active_block.active = false;
-                self.snapshot.active_block.running = false;
-                self.snapshot.active_block.paused = false;
-                self.snapshot.safety.capture_started = false;
-                self.snapshot.safety.local_armed = false;
+                self.end_run(
+                    if demo {
+                        RunnerPhase::Completed
+                    } else {
+                        RunnerPhase::Interrupted
+                    },
+                    now,
+                );
                 Ok(true)
             }
             Action::RunAbort => {
@@ -856,14 +865,7 @@ impl RunnerCore {
                 ) {
                     return Ok(false);
                 }
-                self.snapshot.run.phase = RunnerPhase::Interrupted;
-                self.snapshot.run.complete = false;
-                self.snapshot.run.thread_alive = false;
-                self.snapshot.active_block.active = false;
-                self.snapshot.active_block.running = false;
-                self.snapshot.active_block.paused = false;
-                self.snapshot.safety.capture_started = false;
-                self.snapshot.safety.local_armed = false;
+                self.end_run(RunnerPhase::Interrupted, now);
                 Ok(true)
             }
             Action::SessionNote => {
@@ -891,6 +893,18 @@ impl RunnerCore {
             }
         }
         Ok(changed)
+    }
+
+    fn end_run(&mut self, phase: RunnerPhase, now: &ClockStamp) {
+        self.snapshot.run.phase = phase;
+        self.snapshot.run.complete = phase == RunnerPhase::Completed;
+        self.snapshot.run.thread_alive = false;
+        self.snapshot.active_block.active = false;
+        self.snapshot.active_block.running = false;
+        self.snapshot.active_block.paused = false;
+        self.snapshot.safety.capture_started = false;
+        self.snapshot.safety.local_armed = false;
+        self.invalidate_native_block(now);
     }
 
     fn prepare_demo(&mut self, args: &Value) -> Result<bool, &'static str> {
@@ -1225,6 +1239,12 @@ impl RunnerCore {
         }
         if self.native_control_pending.is_some() {
             actions.extend([Action::RunStop, Action::RunAbort]);
+            if matches!(
+                self.native_control_pending,
+                Some(Action::PartStart | Action::RunResume)
+            ) {
+                actions.push(Action::RunPause);
+            }
             return actions;
         }
         if !matches!(
@@ -2136,7 +2156,7 @@ mod tests {
         assert_eq!(core.native_control_pending(), Some(Action::PartStart));
         assert!(!started.snapshot.run.participant_capture_ready);
         assert_eq!(
-            core.dispatch_local(Action::RunPause, json!({}), clock(10))
+            core.dispatch_local(Action::RunResume, json!({}), clock(10))
                 .reason,
             "native_control_in_progress"
         );
@@ -2174,6 +2194,66 @@ mod tests {
         assert!(core
             .confirm_native_control(Action::RunResume, clock(16))
             .is_err());
+    }
+
+    #[test]
+    fn transport_pause_cancels_pending_native_activation_without_abort_scope() {
+        for pending in [Action::PartStart, Action::RunResume] {
+            let mut core = ready_core();
+            let package = verified_package("P001");
+            core.adopt_verified_package(package.clone(), clock(4))
+                .unwrap();
+            core.prepare_native_block(
+                &package.fingerprint,
+                NativeBlockSummary {
+                    block_index: 1,
+                    block_ordinal: 0,
+                    block_label: "Block".to_owned(),
+                    duration_ns: 1_000_000_000,
+                },
+                clock(5),
+            )
+            .unwrap();
+            // Pure authority seam; no device or acquisition qualification.
+            core.package_execution_ready = true;
+            core.dispatch_local(Action::TargetArm, json!({}), clock(6));
+            core.dispatch_local(Action::PartStart, json!({"part_number":2}), clock(7));
+            if pending == Action::RunResume {
+                core.confirm_native_control(Action::PartStart, clock(8))
+                    .unwrap();
+                core.dispatch_local(Action::RunPause, json!({}), clock(9));
+                core.confirm_native_control(Action::RunPause, clock(10))
+                    .unwrap();
+                core.dispatch_local(Action::RunResume, json!({}), clock(11));
+            }
+            assert_eq!(core.native_control_pending(), Some(pending));
+            assert!(core.snapshot().allowed_actions.contains(&Action::RunPause));
+            let command = CommandRequest {
+                id: "pending-pause-command".to_owned(),
+                epoch: core.epoch(),
+                expected_revision: Some(core.revision()),
+                scope: Scope::SessionTransport,
+                action: Action::RunPause,
+                args: json!({}),
+            };
+            let result = core.dispatch(
+                DispatchOrigin::Remote {
+                    controller_id: "pause-controller".to_owned(),
+                    granted_scopes: [Scope::SessionTransport].into_iter().collect(),
+                    lease_valid: true,
+                },
+                command,
+                clock(12),
+            );
+            assert_eq!(result.status, AppliedStatus::Accepted);
+            assert_eq!(result.snapshot.run.phase, RunnerPhase::Interrupted);
+            assert!(!result.snapshot.run.complete);
+            assert!(!result.snapshot.run.participant_capture_ready);
+            assert!(!result.snapshot.safety.local_armed);
+            assert!(!core.native_block_prepared());
+            assert!(core.native_control_pending().is_none());
+            assert!(core.confirm_native_control(pending, clock(13)).is_err());
+        }
     }
 
     #[test]

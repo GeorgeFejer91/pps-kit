@@ -741,7 +741,17 @@ impl OwnerState {
 
     /// Shared after-commit hook for local, phone, and native safety transitions.
     fn apply_native_action(&mut self, action: Action) -> Result<(), &'static str> {
-        match action {
+        let effect = if action == Action::RunPause
+            && self
+                .native_control
+                .as_ref()
+                .is_some_and(NativeControlIntent::activates_media)
+        {
+            Action::RunAbort
+        } else {
+            action
+        };
+        match effect {
             Action::PartStart | Action::RunPause | Action::RunResume => {
                 if self.native_playback.is_none() {
                     return Ok(());
@@ -1043,6 +1053,11 @@ impl OwnerState {
             action,
             Action::PartStart | Action::RunStop | Action::RunAbort | Action::RunCompleteDemo
         ) || (action == Action::TargetDisarm && self.native_playback.is_some())
+            || (action == Action::RunPause
+                && self
+                    .native_control
+                    .as_ref()
+                    .is_some_and(NativeControlIntent::activates_media))
         {
             if action == Action::PartStart
                 && self.native_playback.is_some()
@@ -1075,7 +1090,7 @@ impl OwnerState {
             self.invalidate_prepared_audio();
             if !matches!(
                 action,
-                Action::RunStop | Action::RunAbort | Action::TargetDisarm
+                Action::RunStop | Action::RunAbort | Action::TargetDisarm | Action::RunPause
             ) {
                 self.native_output.invalidate_for_runner_change();
             }

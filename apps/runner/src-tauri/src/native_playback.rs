@@ -123,6 +123,10 @@ impl NativeControlIntent {
         self.action == Action::RunPause || durable_sequence >= self.ledger_sequence
     }
 
+    pub(crate) fn activates_media(&self) -> bool {
+        matches!(self.action, Action::PartStart | Action::RunResume)
+    }
+
     pub(crate) fn acknowledge(&self, input: &LedgerEventInput) -> Result<bool, &'static str> {
         if input.event_type != "audio.control.applied" {
             return Ok(false);
@@ -367,10 +371,12 @@ mod control_tests {
     fn start_resume_wait_for_durable_intent_but_pause_does_not() {
         for action in [Action::PartStart, Action::RunResume] {
             let intent = NativeControlIntent::new(action, 42);
+            assert!(intent.activates_media());
             assert!(!intent.can_submit(41));
             assert!(intent.can_submit(42));
         }
         assert!(NativeControlIntent::new(Action::RunPause, 42).can_submit(0));
+        assert!(!NativeControlIntent::new(Action::RunPause, 42).activates_media());
         assert!(NativeControlIntent::new(Action::RunStop, 42)
             .render_control()
             .is_err());
