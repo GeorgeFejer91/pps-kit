@@ -1,5 +1,9 @@
 # Release operations
 
+Public Pages text inputs use the scoped LF rules in `.gitattributes`; copy
+canonical bytes rather than adding another text-conversion step. Rebuild the
+owned Pages artifact before comparing it with the live site.
+
 Own synchronization, checkpoints, test selection, Pages, component inventories,
 installers, and release claims. Read [WORKFLOW.md](../WORKFLOW.md) for stages and
 [agent_update_protocol.md](../agent_update_protocol.md) for memory/Git rules.

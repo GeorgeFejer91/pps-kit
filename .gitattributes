@@ -21,6 +21,23 @@ apps/runner/**/*.html text eol=lf
 apps/runner/**/*.js text eol=lf
 apps/runner/**/*.json text eol=lf
 
+# Pages copies these public text inputs directly; keep their bytes portable.
+website/.nojekyll text eol=lf
+website/CNAME text eol=lf
+website/**/*.css text eol=lf
+website/**/*.html text eol=lf
+website/**/*.js text eol=lf
+website/**/*.json text eol=lf
+website/**/*.md text eol=lf
+website/**/*.svg text eol=lf
+website/**/*.txt text eol=lf
+packages/pps-resources/study_templates/**/*.json text eol=lf
+packages/pps-resources/assets/preloads/**/*.json text eol=lf
+packages/pps-resources/assets/preloads/**/*.csv text eol=lf
+packages/pps-resources/assets/preloads/**/*.md text eol=lf
+packages/pps-resources/assets/preloads/**/*.svg text eol=lf
+packages/pps-resources/assets/preloads/**/*.txt text eol=lf
+
 # Reviewed third-party bytes are hash-pinned and must never receive newline conversion.
 apps/runner/frontend/public/vendor/vdoninja/1.5.5/* -text whitespace=-trailing-space
 apps/runner/compiled/vendor/vdoninja/1.5.5/* -text whitespace=-trailing-space

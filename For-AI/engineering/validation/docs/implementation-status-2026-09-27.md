@@ -42,7 +42,7 @@ Source and package evidence:
   assembly pass. Simulated suspension interrupts the local demo, leaves outputs
   disarmed, and does not replay a command. It is browser/source evidence only.
 - Native media bridge **8621038fe8c71d6c2497e1112b354699f8ba0111**:
-  [owning cross-platform CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36334120020).
+  [all 14 cross-platform source/oracle/validation-package CI jobs passed](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36334120020).
   Eleven new source checks cover decoded PCM fixtures, routing, metadata boundaries,
   silence during preparation/pause, cursor-preserving resume, stop/abort fences,
   event backpressure before unrecorded source submission, callback retirement,
@@ -52,8 +52,12 @@ Source and package evidence:
   application. CPAL timestamps are retained as driver predictions. No physical
   device, response file, durable run journal, or complete experiment was tested
   by these checks.
-- Local/public canonical bytes were compared for all 37 public files at the
-  preceding promoted build. Repeat hosted parity after each changed UI deploy.
+- The final full public-file check verifies all 470 rebuilt local Pages files
+  against the live site, with four main routes responding successfully.
+  Public text inputs use LF on every host, including study
+  JSON/CSV, website files, and Pages control files. This resolves byte/hash
+  differences from Windows line-ending conversion while preserving Git content.
+  Repeat hosted parity after each changed UI deploy.
 
 No participant acquisition, scientific replication effect, physical onset,
 installed application behavior, or newly qualified route is claimed here.
