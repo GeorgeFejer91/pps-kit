@@ -92,6 +92,7 @@ impl NativePreparedPlayback {
         &mut self,
         stamp: &ClockStamp,
         host_time: impl Fn(Instant) -> u64,
+        resolve_responses: bool,
     ) -> Result<Vec<LedgerEventInput>, &'static str> {
         let status = self.port.status();
         // Prepared callbacks emit no records. Avoid allocating a batch for
@@ -123,10 +124,12 @@ impl NativePreparedPlayback {
                 inputs.push(input);
             }
         }
-        inputs.extend(
-            self.capture
-                .resolve_ready(stamp.monotonic_ns, stamp.unix_ms)?,
-        );
+        if resolve_responses {
+            inputs.extend(
+                self.capture
+                    .resolve_ready(stamp.monotonic_ns, stamp.unix_ms)?,
+            );
+        }
         Ok(inputs)
     }
 }

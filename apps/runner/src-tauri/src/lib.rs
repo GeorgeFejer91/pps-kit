@@ -74,9 +74,8 @@ async fn runner_record_response(
     request: trial_capture::NativeResponseRequest,
     state: tauri::State<'_, AppRuntime>,
 ) -> Result<String, String> {
-    let observed = std::time::Instant::now();
     state
-        .record_native_response(observed, request)
+        .record_native_response(request)
         .await
         .map(|id| id.to_string())
         .map_err(str::to_owned)

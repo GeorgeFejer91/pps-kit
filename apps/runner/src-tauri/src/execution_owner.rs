@@ -1,7 +1,7 @@
 use std::{
     collections::{BTreeSet, VecDeque},
     sync::{
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicUsize, Ordering},
         mpsc, Arc, Condvar, Mutex,
     },
     thread::{self, JoinHandle},
@@ -110,6 +110,7 @@ struct Mailbox {
     wake: Condvar,
     diagnostics: AuthorityMailboxDiagnostics,
     response_lost: AtomicBool,
+    pending_responses: AtomicUsize,
 }
 
 impl Mailbox {
@@ -122,6 +123,7 @@ impl Mailbox {
             wake: Condvar::new(),
             diagnostics,
             response_lost: AtomicBool::new(false),
+            pending_responses: AtomicUsize::new(0),
         }
     }
 
@@ -228,6 +230,27 @@ impl Mailbox {
             .lock()
             .unwrap_or_else(|error| error.into_inner())
             .shutdown_requested
+    }
+}
+
+struct PendingResponse(Arc<Mailbox>);
+
+impl PendingResponse {
+    fn begin(mailbox: &Arc<Mailbox>) -> Result<Self, &'static str> {
+        mailbox
+            .pending_responses
+            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |count| {
+                count.checked_add(1)
+            })
+            .map_err(|_| "native_response_unavailable")?;
+        Ok(Self(Arc::clone(mailbox)))
+    }
+}
+
+impl Drop for PendingResponse {
+    fn drop(&mut self) {
+        self.0.pending_responses.fetch_sub(1, Ordering::AcqRel);
+        self.0.wake.notify_one();
     }
 }
 
@@ -515,7 +538,7 @@ impl OwnerState {
                 })
     }
 
-    fn poll_native_playback(&mut self) {
+    fn poll_native_playback(&mut self, pending_responses: &AtomicUsize) {
         if self.native_playback.is_none() {
             return;
         }
@@ -530,11 +553,15 @@ impl OwnerState {
         let Some(playback) = self.native_playback.as_mut() else {
             return;
         };
-        let inputs = playback.drain(&stamp, |instant| {
-            u64::try_from(instant.saturating_duration_since(started).as_nanos())
-                .unwrap_or(u64::MAX)
-                .min(JSON_MAX_SAFE_INTEGER)
-        });
+        let inputs = playback.drain(
+            &stamp,
+            |instant| {
+                u64::try_from(instant.saturating_duration_since(started).as_nanos())
+                    .unwrap_or(u64::MAX)
+                    .min(JSON_MAX_SAFE_INTEGER)
+            },
+            pending_responses.load(Ordering::Acquire) == 0,
+        );
         let package = playback.source.receipt.verified_session().summary();
         let snapshot = self.core.snapshot();
         let inputs = inputs.map(|mut inputs| {
@@ -1997,16 +2024,24 @@ impl OwnerStartConfiguration {
 impl ExecutionOwner {
     pub(crate) async fn record_native_response(
         &self,
-        observed: Instant,
         request: NativeResponseRequest,
     ) -> Result<u64, &'static str> {
         if !request.valid() {
             return Err("native_response_invalid");
         }
+        // Register before capturing the native clock. The actor stamps its
+        // resolution cutoff before checking this counter, so an input at or
+        // before that cutoff cannot be turned into a miss while queued.
+        let pending = PendingResponse::begin(&self.mailbox)?;
+        let observed = Instant::now();
         let receive = self.submit(
             AdmissionClass::Normal,
             "native_participant_response",
-            move |state| state.record_native_response(observed, request),
+            move |state| {
+                let result = state.record_native_response(observed, request);
+                drop(pending);
+                result
+            },
         );
         let receive = match receive {
             Ok(receive) => receive,
@@ -2872,7 +2907,7 @@ fn authority_loop(mailbox: &Mailbox, state: &mut OwnerState) {
             state.fail_stop_unavailable("native.response.lost", "evidence_unavailable");
         }
         state.poll_event_journal();
-        state.poll_native_playback();
+        state.poll_native_playback(&mailbox.pending_responses);
         if mailbox.should_stop() {
             break;
         }
@@ -2902,8 +2937,48 @@ fn local_action_class(action: Action) -> AdmissionClass {
 mod tests {
     use super::*;
     use crate::latency_diagnostics::{LatencyRoute, NativeLatencyDiagnostics, TraceOutcome};
+    use futures_util::FutureExt;
     use pps_contracts::AppliedStatus;
     use std::sync::Barrier;
+
+    #[tokio::test]
+    async fn cancelled_input_wait_retains_pending_fence_until_actor_and_full_queue_drops_it() {
+        let owner = owner(Duration::from_secs(10));
+        let (barrier, blocked) = block_owner(&owner);
+        let request = || NativeResponseRequest {
+            choice: String::new(),
+            x: Some(0.2),
+            y: Some(0.3),
+        };
+        // Poll once to admit input, then abandon the frontend response wait.
+        // The queued actor operation, rather than that wait, owns the fence.
+        assert!(owner
+            .record_native_response(request())
+            .now_or_never()
+            .is_none());
+        assert_eq!(owner.mailbox.pending_responses.load(Ordering::Acquire), 1);
+        let mut waits = Vec::new();
+        for _ in 1..NORMAL_MAILBOX_CAPACITY {
+            waits.push(
+                owner
+                    .submit(AdmissionClass::Normal, "fill_normal_queue", |_| ())
+                    .unwrap(),
+            );
+        }
+        assert_eq!(
+            owner.record_native_response(request()).await,
+            Err("native_response_unavailable")
+        );
+        assert_eq!(owner.mailbox.pending_responses.load(Ordering::Acquire), 1);
+        assert!(owner.mailbox.response_lost.load(Ordering::Acquire));
+        barrier.wait();
+        blocked.await.unwrap();
+        for wait in waits {
+            wait.await.unwrap();
+        }
+        assert_eq!(owner.mailbox.pending_responses.load(Ordering::Acquire), 0);
+        assert!(!owner.test_view().evidence_unavailable);
+    }
 
     fn owner(lease: Duration) -> ExecutionOwner {
         let (state_tx, _) = broadcast::channel(64);

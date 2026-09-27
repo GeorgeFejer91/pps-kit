@@ -366,13 +366,9 @@ pub struct RemoteStatus {
 impl AppRuntime {
     pub(crate) async fn record_native_response(
         &self,
-        observed: std::time::Instant,
         request: NativeResponseRequest,
     ) -> Result<u64, &'static str> {
-        self.0
-            .authority
-            .record_native_response(observed, request)
-            .await
+        self.0.authority.record_native_response(request).await
     }
     pub fn new() -> Self {
         Self::with_native_output(NativeOutputCoordinator::start())
