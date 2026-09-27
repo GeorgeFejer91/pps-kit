@@ -679,14 +679,24 @@ impl RunnerCore {
                 if *action == Action::RunCompleteDemo && origin.is_remote() {
                     return Err("action_is_local_only");
                 }
+                let demo = self.package_fingerprint.is_none();
+                if *action == Action::RunCompleteDemo && !demo {
+                    return Err("verified_package_completion_requires_native_results");
+                }
                 if matches!(
                     self.snapshot.run.phase,
                     RunnerPhase::Idle | RunnerPhase::Completed
-                ) {
+                ) || (!demo && self.snapshot.run.phase == RunnerPhase::Interrupted) {
                     return Ok(false);
                 }
-                self.snapshot.run.phase = RunnerPhase::Completed;
-                self.snapshot.run.complete = true;
+                // Stop is a safety interruption for a real package. Only the
+                // compatibility demo may use its simulated completion path.
+                self.snapshot.run.phase = if demo {
+                    RunnerPhase::Completed
+                } else {
+                    RunnerPhase::Interrupted
+                };
+                self.snapshot.run.complete = demo;
                 self.snapshot.run.thread_alive = false;
                 self.snapshot.active_block.active = false;
                 self.snapshot.active_block.running = false;
@@ -1747,6 +1757,55 @@ mod tests {
         );
         assert_eq!(start.status, AppliedStatus::Rejected);
         assert_eq!(start.reason, "target_not_locally_armed");
+    }
+
+    #[test]
+    fn verified_package_stop_keeps_partial_state_for_local_and_remote_commands() {
+        for remote in [false, true] {
+            let mut core = RunnerCore::new("target-test", "desktop", 7, TimingTier::DesktopPreview, clock(0));
+            core.adopt_verified_package(verified_package("P001"), clock(1)).unwrap();
+            let result = if remote {
+                core.dispatch(
+                    DispatchOrigin::Remote {
+                        controller_id: "controller".to_owned(),
+                        granted_scopes: BTreeSet::from([Scope::SessionAbort]),
+                        lease_valid: true,
+                    },
+                    CommandRequest {
+                        id: "cmd-native-stop".to_owned(), epoch: core.epoch(), sequence: 1,
+                        expected_revision: Some(core.revision()), scope: Scope::SessionAbort,
+                        action: Action::RunStop, args: json!({}),
+                    },
+                    clock(2),
+                )
+            } else {
+                core.dispatch_local(Action::RunStop, json!({}), clock(2))
+            };
+            assert_eq!(result.status, AppliedStatus::Accepted);
+            assert_eq!(result.snapshot.run.phase, RunnerPhase::Interrupted);
+            assert!(!result.snapshot.run.complete);
+            assert!(!result.snapshot.safety.local_armed);
+            assert!(!result.snapshot.safety.capture_started);
+            assert_eq!(result.snapshot.identity.part_session_id, "P001_session_20260831_part_02");
+            let revision = core.revision();
+            let repeated = core.dispatch_local(Action::RunStop, json!({}), clock(3));
+            assert_eq!(repeated.status, AppliedStatus::Accepted);
+            assert_eq!(core.revision(), revision);
+            assert!(!repeated.snapshot.run.complete);
+        }
+    }
+
+    #[test]
+    fn verified_package_rejects_the_demo_completion_command_without_changing_state() {
+        let mut core = RunnerCore::new("target-test", "desktop", 7, TimingTier::DesktopPreview, clock(0));
+        core.adopt_verified_package(verified_package("P001"), clock(1)).unwrap();
+        let revision = core.revision();
+        let result = core.dispatch_local(Action::RunCompleteDemo, json!({}), clock(2));
+        assert_eq!(result.status, AppliedStatus::Rejected);
+        assert_eq!(result.reason, "verified_package_completion_requires_native_results");
+        assert_eq!(core.revision(), revision);
+        assert_eq!(result.snapshot.run.phase, RunnerPhase::Prepared);
+        assert!(!result.snapshot.run.complete);
     }
 
     #[test]
