@@ -73,7 +73,7 @@ Source and package evidence:
 
 
 - Native playback authority source **77eedb19ed3588dc35b8a41268f78e1dffd78407**:
-  [Core/Desktop/oracle/browser checks passed on all three platforms](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36340927434).
+  [All 14 Core/Desktop/oracle/browser/package jobs passed](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36340927434).
   Each desktop suite passes 129 checks; five new checks cover shared PCM ownership,
   original metadata resolution, stale fences, silent preparation, and the
   distinction between source submission and physical completion. Two shared-core
@@ -86,9 +86,10 @@ Source and package evidence:
   completion. Verified package Stop remains interrupted/partial, including
   phone-issued Stop; the demo completion command is rejected for that package.
   The source is synchronized to this PC and local formatting/whitespace checks
-  pass. The CI validation installers are separate deliverables and were still
-  building at this source checkpoint. Full native build storage and installed
-  verification remain outstanding.
+  pass. Windows NSIS, macOS DMG, and Linux deb validation installers passed
+  for this exact source revision. They are separate deliverables and have not
+  been installed here. Full native build storage and installed verification
+  remain outstanding.
 
 No participant acquisition, scientific replication effect, physical onset,
 installed application behavior, or newly qualified route is claimed here.
