@@ -1,19 +1,26 @@
-# Agent Start Here
+# PPS Kit agent instructions
 
-Before working in this repository, read [For-AI/README.md](For-AI/README.md).
+Read [For-AI/README.md](For-AI/README.md) and
+[For-AI/CURRENT_WORK.md](For-AI/CURRENT_WORK.md), then select the task's domain.
+Do not load the entire memory archive. PPS Kit's primary purpose is creating
+and replicating research-grade peripersonal-space experiments.
 
-This repo uses `For-AI/` as tracked project memory for future AI agents. Keep it current when project goals, GUI behavior, data schemas, runner behavior, publication constraints, tests, or repo structure change.
+Use Ponytail/YAGNI: reuse existing code, add only what the task needs, and retain
+scientific validation, calibration, accessibility, privacy, and safety boundaries.
+[For-AI/SKILLS.md](For-AI/SKILLS.md) maps skills to actual tasks.
 
-Every completed repository change must be committed and pushed to GitHub before finalizing. Stage only the intended change set and do not bundle unrelated dirty worktree changes. If pushing is blocked, report the exact blocker and leave the work ready to push.
+Follow [For-AI/WORKFLOW.md](For-AI/WORKFLOW.md): local UI preview first, verified
+source promotion second, packaging and release as separate deliverables.
+Unsettled previews stay local or on a review branch. At UI source promotion,
+rebuild the canonical frontend and verify identical local/hosted-facing bytes.
+Do not claim the installed application changed until its package is rebuilt and tested.
 
-When changing the HTML dashboard, always keep the packaged local dashboard and the online/static GitHub Pages dashboard in sync in the same change set. Do not finalize a local HTML GUI update unless the online-facing HTML/CSS/JS assets are updated and verified too.
-If either the packaged local dashboard or the online/static GitHub Pages dashboard changes, update the other side in the same change set and push immediately so the website reflects the same GUI state.
-## Quest ADB Access
+Commit and push each completed, verified logical checkpoint and before final
+handoff, unless the user requests local-only work. Stage exact intended files;
+preserve unrelated edits. Never force-push or merge rewritten history automatically.
+If blocked, report the exact Git blocker and retain the local work.
 
-For headset work, use the workspace-stable ADB wrapper so every project shares the same RSA key and the Quest does not fall back to `unauthorized`:
-
-- Run `adb devices -l` from a new terminal; it should resolve to `D:\GithubVR\tools\adb.cmd`.
-- If PATH is stale, run `D:\GithubVR\tools\adb.cmd devices -l`.
-- Expected authorized headset: `2G0YC1ZG1002QL device product:eureka model:Quest_3`.
-- Do not rotate or delete the `adbkey` or `adbkey.pub` files in the `ADB_VENDOR_KEYS`-pinned `.android` key folder.
-- If the headset reports `unauthorized`, approve **Always allow from this computer** inside the headset and see `D:\GithubVR\QUEST_HEADSET_ACCESS.md`.
+Update only the owning domain/current decision under `For-AI/` when durable
+behavior changes. Keep participant data, credentials, generated outputs, and
+private paths out of tracked memory. Hardware/XR work is conditional on an
+explicitly relevant task; preserve the configured device key when it applies.

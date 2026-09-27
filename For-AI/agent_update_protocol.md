@@ -1,153 +1,64 @@
-# Agent Update Protocol
+# Agent maintenance and Git checkpoints
 
-`For-AI/` is tracked project memory. It is not a private scratchpad.
+## Start and scope
 
-## Required Session Loop
+Read `AGENTS.md`, [README.md](README.md), [CURRENT_WORK.md](CURRENT_WORK.md),
+and the matching domain. Load references by task, not the whole memory archive.
+State the requested outcome and stage before substantive work. Existing user
+authorization takes precedence; do not add redundant approval questions.
 
-Every AI agent working in this repository must:
+Inspect Git status and fetch the remote before editing. With a clean worktree,
+use fast-forward-only pull on the selected branch. Preserve unrelated edits
+before any synchronization that could affect them. If history diverged or was
+rewritten, do not reset, force-push, or merge it blindly; retain the prior
+branch/work in a recoverable checkout and establish the intended baseline.
 
-1. Read `AGENTS.md`.
-2. Read `For-AI/README.md`.
-3. Consult `project_context.md` and `evolving_goals.md` before planning or editing.
-4. If the work changes the HTML/dashboard web GUI, read `For-AI/skills/html-dashboard-orchestrator/SKILL.md` before editing.
-5. Do the requested work.
-6. If the work changes the HTML/dashboard web GUI, update the matching online website/static GitHub Pages version in the same change set before finalizing.
-7. Before finalizing, decide whether the work was substantive.
-8. If substantive, update the relevant `For-AI/` file.
-9. For any GUI or runner workflow claim, run or add an end-user mouse-click validation before finalizing. The accepted proof must emulate a user clicking visible controls through the workflow, not only call backend APIs or direct helper functions.
-10. For any visual, layout, sizing, placement, typography, or screen-adaptation decision, run a separate rendered UI or screenshot-based verification before finalizing. Treat visual proof as its own validation layer in addition to unit/backend tests and mouse-click workflow tests.
-11. Commit the completed change set and push it to GitHub before finalizing. Keep the commit scoped to the intended work and do not stage unrelated pre-existing worktree changes. If authentication, network, branch protection, or conflicts block the push, report the exact blocker and leave the work ready to push.
-12. In the final response, state whether `For-AI/` was updated and whether the change was pushed.
+## Stage and verify
 
-## What Counts As Substantive
+Follow [WORKFLOW.md](WORKFLOW.md). Local UI previews precede source promotion;
+packaging/release are explicit later stages. User-facing behavior requires
+real control interaction; visual changes also require inspected rendered
+screenshots/geometry. APIs, unit tests, mocks, and compiled artifacts alone do
+not establish usability, installed behavior, physical timing, or replication.
 
-Update `For-AI/` after changes to:
+At UI promotion, rebuild the canonical compiled frontend and assemble Pages
+from its identical allowlisted bytes. Keep relative assets and local/native
+orchestration boundaries. `website/` is a wrapper/input tree, not another UI.
+Live hosted verification follows a production UI push. Preserve public routes,
+CNAME, and origin-only CORS settings described in the release domain and
+architecture. Never publish desktop Tauri privileges or participant data.
 
-- project aims or scope
-- GUI behavior or user workflows
-- data schemas, saved settings, templates, or config contracts
-- experiment runner behavior
-- stimulus generation, decoding, analysis, or event capture
-- privacy/publication boundaries
-- tests, release checks, or repository structure
-- literature-derived goals or supported paradigms
+## Automatic agent checkpoints
 
-## Web GUI Website Sync
+After each completed, verified logical change or independent subtask, and
+before handing back the task:
 
-`apps/designer/frontend/compiled/` is the single offline/online Designer
-artifact. Every HTML/dashboard change must rebuild that artifact, validate it in
-the local package, assemble GitHub Pages from those exact compiled bytes, and
-verify the hosted routes in the same change set. Do not maintain or edit a
-second dashboard implementation under `website/`; that folder owns only public
-route wrappers, Pages metadata, and other hosted product inputs. Hosted mode
-must keep relative Designer/viewer assets. The Designer remains orchestration
-only and must not run timing-sensitive experiments in browser JavaScript. The
-separate canonical Runner companion may provide an explicitly exploratory,
-locally armed Web Audio/vibration phone target, but that is not native or
-publication-grade timing evidence.
+1. Update the owning guidance/decision only if a durable contract changed;
+   update current work at an actual stage transition.
+2. Inspect the diff and run the smallest relevant checks plus whitespace checks.
+3. Stage exact intended paths, inspect the staged diff, and commit a concise
+   problem/outcome message. Never bundle unrelated edits or use blanket staging.
+4. Push the task branch and verify the remote branch points to the local commit.
+   Use a review branch for verified but unsettled UI previews; promote to `main`
+   only after the stage's acceptance and parity gates pass.
 
-## Public Domain And Pages URL Rule
+These are agent execution rules, not a filesystem watcher, timer, commit hook,
+or background auto-push daemon. Do not commit each keystroke, knowingly broken
+work, secrets, or generated/private artifacts. A user request to hold commits,
+pushes, or work locally overrides the default. If Git blocks publication,
+report the exact error and retained local commit/staged state; do not force it.
 
-The canonical public dashboard URL is `https://ppskit.qzz.io/`. The GitHub Pages fallback URL is `https://georgefejer91.github.io/pps-kit/`, and the repository/code URL is `https://github.com/GeorgeFejer91/pps-kit`.
+## Keep memory small
 
-Public route ownership is part of the product contract:
+Replace superseded current guidance rather than appending session transcripts.
+Update only the owning domain, scientific contract, or current decision.
+[evolving_goals.md](evolving_goals.md) holds durable direction;
+[module_map.md](module_map.md) holds ownership; detailed evidence stays in its
+existing research/validation location. Archive superseded long-form memory
+with a source checkpoint instead of deleting useful scientific decisions.
+Never store credentials, raw papers/recordings, participant data, generated
+runs, machine-specific absolute paths, or unsupported scientific claims.
 
-- Toolkit/app route: `https://ppskit.qzz.io/`
-- Documentation route: `https://ppskit.qzz.io/documentation`
-- Download route: `https://ppskit.qzz.io/download`
-- Experiment Runner companion route: `https://ppskit.qzz.io/experiment-runner/`
-
-Keep the matching GitHub Pages fallback routes available at `https://georgefejer91.github.io/pps-kit/`, `https://georgefejer91.github.io/pps-kit/documentation`, `https://georgefejer91.github.io/pps-kit/download`, and `https://georgefejer91.github.io/pps-kit/experiment-runner/`. The visible tab label may say `Downloads`, but the public route should remain singular `/download` unless the user explicitly changes this contract.
-
-Do not reintroduce the old project Pages URL `https://georgefejer91.github.io/peripersonal-space-toolkit/` except as migration or historical context. The repository name controls the project Pages fallback path, so the GitHub repository should remain named `pps-kit` while this public URL contract is active.
-
-`website/CNAME` is the tracked Pages source. Pages assembly must copy it to root
-`CNAME` in the staged/deployed artifact. It contains only `ppskit.qzz.io`, with
-no protocol, path, or second domain. The DNS provider points the subdomain to
-`georgefejer91.github.io` without appending the repository name. If additional
-domains are needed, use DNS/provider redirects rather than multiple CNAME
-lines.
-
-For hosted companion access, CORS origins are origins only: keep `https://ppskit.qzz.io` and `https://georgefejer91.github.io` allowed, but do not include paths such as `/pps-kit/`, `/documentation`, `/download`, or `/experiment-runner/` in an origin. GitHub Pages serves the Runner companion interface but no WebSocket relay; do not claim or configure hosted remote operation without an owned WSS or qualified WebRTC BRSP transport. When changing public URLs or tab routes, update repository references, release-manifest URLs, dashboard links, preloaded asset URLs, human docs, CORS tests, static deep-link handling, and this `For-AI/` rule together.
-
-All external website links in the hosted/local HTML dashboard should open in a new browser tab with `rel="noopener noreferrer"`. Treat external HTTP(S) links as leaving the toolkit surface; internal route links, local companion calls, and repository-relative documentation links may remain in the same tab.
-
-## Required GitHub Publishing
-
-Every completed repository change must be committed and pushed to GitHub immediately after verification. Do not leave completed edits as local-only work. Stage only the intended change set; do not bundle unrelated dirty files or pre-existing user changes into the commit. If pushing is blocked by missing credentials, network failure, branch protection, or a non-fast-forward remote, report that blocker explicitly in the final response and describe the exact local commit or staged state that still needs to be pushed.
-
-## Local Browser Orchestration Boundary
-
-The HTML dashboard, whether launched locally or served from GitHub Pages, is only an orchestration surface. It must not upload stimulus files, participant data, generated WAVs, or experiment artifacts to an online service. Browser actions that select files, import audio, render stimuli, prepare sessions, stress audio, or launch Focus Mode must be executed by the local companion/backend on the research PC, with files stored in ignored local folders such as `local_data/` or `artifacts/`.
-
-## Required UI Click Validation
-
-Final validation for GUI/runner behavior must include user-style mouse-click emulation across the relevant visible controls. A workflow is not considered UI-ready merely because unit tests pass, manifests exist, or backend APIs can be called directly. The validation artifact should prove that the intended operator can complete the path by clicking buttons, selectors, and continuation controls in the UI. For Designer finished-profile claims, this means validating Segment 6 checklist/order preview/finalization/portable export. For Runner claims, independently validate finalized-profile discovery or import, participant session materialization, and the Focus Mode path. Hardware/audio-latency evidence can be separate, but UI usability proof by mouse-click emulation is mandatory.
-
-Prefer background/offscreen mouse-event validation for automated GUI checks unless the user explicitly asks for a visible OS-cursor test. Visible Win32/OS-click validations can steal focus and interrupt the research PC; treat them as opt-in diagnostic tests. Background validation is acceptable when it sends real Qt/browser mouse events to the same controls and writes an artifact proving selector/button clicks, Focus Mode start/continuation clicks, session completion, and event counts.
-
-## Required Visual Verification
-
-Visual and layout decisions require a separate rendered UI or screenshot-based
-verification. Unit tests, style diffs, geometry calculations, and backend
-assertions are not enough to finalize changes that affect what an operator sees.
-The verification should render the actual relevant UI state, save screenshots or
-an equivalent visual artifact under an ignored validation folder, and explicitly
-check for nonblank output, clipping, overlap, text visibility, panel placement,
-and adaptive behavior across the target screen sizes when screen size matters.
-For the HTML Experiment Designer, follow `interface_design_principles.md` and run
-`python For-AI/engineering/validation/scripts/run_designer_visual_layout_audit.py`. Inspect
-the screenshots/contact sheet, correct defects, rebuild, and rerun; collecting one
-set of screenshots without a documented inspection-and-correction pass is not
-visual approval.
-
-## Android Emulator Validation Rule
-
-Android emulator validation must treat the emulator as a fixed-size phone
-screen. Do not resize, enlarge, repeatedly reposition, or otherwise manipulate
-the emulator window to make the UI pass; smartphones have fixed viewports, and
-flicker/reflow from window manipulation invalidates the usability signal. Run
-ADB/uiautomator/button-press checks against the AVD's configured screen size,
-capture screenshots at that size, and treat scrolling, clipping, cramped
-controls, or hidden buttons as app/product findings to fix or document. Do not
-run validation automation that moves or resizes Android emulator windows; manual
-desktop arrangement by the human operator is outside the validation signal, and
-the target remains the phone viewport, not a stretched desktop pane. Do not run
-persistent desktop placement loops against Android emulator windows.
-`For-AI/experiments/android-companion/tooling/Set_Companion_Emulation_Layout.ps1` intentionally leaves emulator
-windows untouched and accepts old `-KeepForSeconds` arguments only as inert
-compatibility input.
-
-## Preload Catalog Storage Rule
-
-Preload profile storage should mirror the dashboard workflow instead of becoming
-a flat asset bucket. Repository source profiles live under
-`packages/pps-resources/assets/preloads/<template_id>/`; installed and serialized
-logical paths remain `assets/preloads/<template_id>/`. Keep the existing segment
-folders `01_profile/` through `05_run_setup/`. Research screening, expected
-outcome coverage, and full-pipeline evidence ledgers belong under
-`For-AI/research/literature/preload-ledgers/`, not in the product preload
-cabinet. Rebuild the approved catalogue with
-`For-AI/engineering/tooling/build_preload_catalog.py` whenever templates,
-source labels, trajectory metadata, or bundled WAVs change.
-
-## What To Update
-
-- Update `evolving_goals.md` for new decisions, changed priorities, or backlog changes.
-- Update `project_context.md` when the current architecture, scope, or product boundaries change.
-- Update this protocol if the maintenance rules themselves change.
-- Update `README.md` only when human-facing setup or repo navigation changes.
-
-## What Not To Store
-
-Do not store:
-
-- participant data
-- raw recordings
-- generated artifacts
-- secrets or credentials
-- private local paths
-- unsupported claims about published studies
-- long chat transcripts
-
-Keep entries concise and operational. The goal is to preserve current intent so future agents do not rediscover the same decisions from scratch.
+Final reports state the stage delivered, relevant verification/gaps, whether
+memory was updated, and the commit/push result. A local preview or source-only
+task may finish with packaging explicitly deferred.

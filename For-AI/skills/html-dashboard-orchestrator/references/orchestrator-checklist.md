@@ -1,6 +1,7 @@
 # HTML Orchestrator Checklist
 
-Use this checklist before finalizing an HTML dashboard change.
+Use only the relevant sections for the requested stage in
+[WORKFLOW.md](../../../WORKFLOW.md). A local preview does not require an installer.
 
 ## Contract
 
@@ -46,6 +47,8 @@ Use this checklist before finalizing an HTML dashboard change.
 - Run targeted API/schema tests.
 - Run relevant render/session tests when backend behavior changes.
 - Browser-smoke the local dashboard.
-- Verify the GitHub Pages/static version after push when dashboard files changed.
+- At verified-source promotion, check compiled local/Pages byte parity and
+  inspect the live hosted routes after a production push.
+- Keep unsettled previews on a review branch; defer installer work to packaging.
 - Run the Designer visual-layout audit for visual changes, inspect every generated viewport/segment image and the contact sheet, fix defects, then rerun until the report and inspection pass.
 - State any test that could not be run.

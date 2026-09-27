@@ -1,0 +1,38 @@
+# Design and UI
+
+Own Designer/Runner presentation, interaction, and the local preview. Keep
+generation, validity, privileged files, and native timing in the backend.
+Start with [the module map](../module_map.md) and the requested segment/screen;
+a spacing-only change does not require the experiment literature.
+
+## Read for the task
+
+- Designer behavior: relevant headings in
+  [dashboard_gui_behavior.md](../dashboard_gui_behavior.md) and
+  [segment_registry_contract.md](../segment_registry_contract.md).
+- Layout/typography: [interface principles](../interface_design_principles.md).
+- Designer orchestration: [the local skill](../skills/html-dashboard-orchestrator/SKILL.md).
+- Saved schema/native action: [runtime](experiment-runtime.md).
+- Promotion/Pages/installer: [WORKFLOW.md](../WORKFLOW.md).
+
+Use **Ponytail**, **Uncodixfy Pretext**, and the local orchestrator for Designer
+HTML work. Use browser automation for actual controls/rendered geometry.
+Load Tauri/Rust when changing that native boundary; add remote-control guidance
+for authorization, transport, or state sync. [SKILLS.md](../SKILLS.md) records
+sources and availability handling.
+
+## Scoped implementation and completion
+
+Trace the existing control/state/backend flow, then change one requested screen
+or segment. Preserve earlier completed segments and their ownership. Reuse
+the installed Pretext typography contract; measure touched bounded labels and
+inspect rendered DOM at relevant widths, zoom, and long-string states.
+
+Build canonical assets and exercise real controls locally. Save inspected
+screenshots under ignored `artifacts/`; check clipping, overlap, focus,
+disabled/read-only behavior, and relevant errors. Use silent isolated browser
+sessions unless a visible test is requested.
+
+For exploration, present the working local preview and remain at
+**local-preview** until accepted. Preview completion does not start packaging.
+At source promotion, check Pages uses identical allowlisted compiled bytes.

@@ -1,119 +1,45 @@
-# For-AI Project Memory
+# PPS Kit agent entry point
 
-This is the required starting point for AI agents working on PPS Kit. `For-AI/`
-is public, tracked development memory and orchestration; it is never part of an
-end-user package.
+PPS Kit creates, prepares, and replicates peripersonal-space experiments. Its
+priority is scientific contracts, reproducibility, native timing, and usable
+authoring. Voice cloning and XR/VR are not default work.
 
-## Repository Boundary
+Read this page and [CURRENT_WORK.md](CURRENT_WORK.md), choose a domain below,
+then load only its relevant references and skills. Do not read all of `For-AI/`,
+`project_context.md`, or the decision archive before every task.
 
-Use one classification rule:
+| Task | Start here |
+|---|---|
+| Designer controls, layout, segment interaction, browser previews | [Design and UI](domains/design-ui.md) |
+| Stimuli, schedules, schemas, execution, response/LSL evidence, Rust/Tauri | [Experiment runtime](domains/experiment-runtime.md) |
+| Published paradigms, paper audits, replication claims, analysis, manuscript | [Scientific evidence](domains/scientific-evidence.md) |
+| Git checkpoints, tests, Pages, component ownership, installers | [Release operations](domains/release-operations.md) |
 
-- Outside `For-AI/`: source, resources, specifications, documentation, and
-  declarative manifests that form or define a shipped application or public
-  website.
-- Inside `For-AI/`: build execution, testing, validation, diagnostics,
-  research, publication work, code generation, audits, migration records, and
-  unapproved experiments.
+For cross-domain work, select one owning domain and read the neighboring
+handoff contract. [SKILLS.md](SKILLS.md) maps skills to tasks;
+[WORKFLOW.md](WORKFLOW.md) separates preview, source, packaging, and release.
+[module_map.md](module_map.md) locates code without loading history.
 
-The public products are two independently shippable applications:
+## Shared boundaries
 
-- Designer: `apps/designer/`
-- Experiment Runner: `apps/runner/`
+- Product source lives in `apps/`, `packages/`, `distributions/`, `docs/`,
+  `third_party/`, and `website/`. `For-AI/` holds development execution,
+  validation, research, memory, and experiments; it never enters an installer.
+- Designer and Runner ship independently with exactly one compatible Shared
+  component. `.pps-profile`, prepared-experiment packages, Segment 0-6
+  manifests, and scientific schemas remain stable handoffs.
+- Qualified V1 Python/PySide and candidate V2 Rust/Tauri have different evidence
+  states. Compilation or demos cannot promote V2 to research acquisition.
+- Browser controls request native actions. Scientific timing, privileged
+  storage, and native participant execution stay with their native authority.
+- Keep participant data, recordings, credentials, downloaded papers, generated
+  sessions, and private paths out of tracked memory and public assets.
+- Designer `apps/designer/frontend/compiled/` and Runner
+  `apps/runner/compiled/` are canonical frontend artifacts. Pages consumes
+  those bytes; keep local and hosted-facing sources aligned at promotion.
+- Preserve `ppskit.qzz.io`, `/`, `/documentation`, `/download`,
+  `/experiment-runner/`, and the existing GitHub Pages fallback routes.
 
-V1 still ships those two validated products. The candidate V2 Runner source is
-also under `apps/runner/`, with shared Rust crates under `packages/`. An
-optional experimental Meta Quest application context lives separately at
-`apps/quest-runner/`; it is not the primary PPS Kit Runner target. Neither
-preview is present
-in V1 component manifests or allowed to weaken the validated Python/PySide
-Runner and Windows acquisition evidence.
-
-They share the Python runtime in `packages/pps-runtime/`, approved resources in
-`packages/pps-resources/`, and versioned component manifests in
-`distributions/manifests/`. The Full download composes Designer, Runner, and
-exactly one compatible Shared component. V1 has no central hub.
-
-`peripersonal_space_toolkit` remains the Python import name. `repo_root()` is a
-one-release compatibility alias; new code should use `product_root()`,
-`resource_root()`, `designer_frontend_root()`, and `writable_root()` from
-`runtime_paths.py`. Frozen applications continue to honor `PPS_TOOLKIT_ROOT`.
-
-## Read Next
-
-- [project_context.md](project_context.md): scientific scope, product behavior,
-  and current boundaries.
-- [evolving_goals.md](evolving_goals.md): dated decisions and ongoing work.
-- [module_map.md](module_map.md): code and resource ownership.
-- [download_package_inventory.md](download_package_inventory.md): component and
-  installer contract.
-- [segment_registry_contract.md](segment_registry_contract.md): preserved
-  Segment 0-6 manifests and handoff contracts.
-- [dashboard_gui_behavior.md](dashboard_gui_behavior.md): Designer UI behavior.
-- [agent_update_protocol.md](agent_update_protocol.md): memory update rules.
-- [engineering/migration/repository-layout.v1.json](engineering/migration/repository-layout.v1.json):
-  machine-readable migration ledger.
-- [engineering/migration/root-allowlist.v1.json](engineering/migration/root-allowlist.v1.json):
-  allowed repository-root entries.
-
-## Internal Layout
-
-```text
-For-AI/
-  engineering/
-    automation/     CI and Pages implementation called by thin GitHub wrappers
-    build/          executable build and environment setup
-    release/        component assembly, inventories, protocols, and audits
-    tooling/        generators and maintenance utilities
-    tests/          pytest and downloader tests
-    validation/     software, UI, audio, and hardware validation
-    diagnostics/    approved diagnostic tools and reference captures
-    migration/      compatibility ledgers and housekeeping records
-  research/
-    literature/     paper audits, citation sources, and screening ledgers
-    calibration/    exploratory loudness/calibration work
-    publication/    manuscript and legacy methods material
-    hardware/       research-only device investigations
-  experiments/
-    android-companion/  unapproved Android companion and PC-side experiments
-```
-
-The generated, approved publication-network projection may ship with the
-Designer; its broad source/audit graph remains under `For-AI/research/`.
-Android source, Android administration CLIs, phone bridges, tests, and visible
-controls under `For-AI/experiments/android-companion/` are development-only and
-excluded from V1 manifests. The separate `apps/quest-runner/` candidate is an
-optional application-context proof, not a primary PPS Kit product; its
-Gradle/device suites are not V1 release gates. The default pytest scope remains
-`For-AI/engineering/tests/`.
-
-## Product and Publication Contracts
-
-- The Designer compiled frontend is the single offline/online UI artifact.
-  Local packaging consumes `apps/designer/frontend/compiled/`; Pages assembly
-  copies those same bytes into ignored staging alongside approved catalogues.
-- The Runner companion is built once under `apps/runner/compiled/`. Pages
-  publishes its companion HTML and allowlisted browser assets byte-for-byte at
-  `/experiment-runner/`; never publish the Tauri desktop entry or capabilities.
-- `website/CNAME` is the tracked Pages source. The assembled Pages root must
-  contain `CNAME` with `ppskit.qzz.io`.
-- Preserve `/`, `/documentation`, `/download`, `/experiment-runner/`,
-  `https://georgefejer91.github.io/pps-kit/`, and the existing fallback routes.
-- Any Designer HTML change must rebuild the compiled frontend, assemble Pages,
-  and verify both local and hosted-facing copies in the same change.
-- Preserve `.pps-profile`, prepared-experiment, Segment 0-6, and existing
-  scientific schemas. Preserve `pps-designer`, generation/rendering CLIs, the
-  Runner executable, and `pps-dashboard` as a one-release Designer alias.
-
-## Agent Requirements
-
-1. Read this file before planning or editing.
-2. Keep product files out of `For-AI/` and development execution out of product
-   manifests.
-3. Update project memory when goals, GUI behavior, schemas, runner behavior,
-   publication boundaries, tests, or repository structure change.
-4. Never add secrets, participant data, generated runtime outputs, or private
-   absolute paths.
-5. Run the relevant structural, package-inventory, release/privacy, frontend,
-   and runtime tests.
-6. Commit and push every completed repository change. Stage only the intended
-   change set; report the exact blocker if pushing is not possible.
+Update only the owning domain/current decision when behavior changes. See
+[agent_update_protocol.md](agent_update_protocol.md). Detailed former memory is
+preserved in [archive/](archive/README.md) for targeted lookup.

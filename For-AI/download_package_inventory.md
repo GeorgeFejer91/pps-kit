@@ -103,6 +103,11 @@ is development-only for V1.
 
 ## Build and Acceptance Order
 
+Enter this stage only after the verified-source gate in
+[WORKFLOW.md](WORKFLOW.md). Local previews and source-only tasks may finish
+without rebuilding installers; installed-behavior claims still require
+packaged-path evidence.
+
 1. Run structural classification, ownership, release, privacy, and path audits.
 2. Build `PPSDesigner.exe` and `PPSExperimentRunner.exe`; verify the Runner's Qt
    plugin and ASIO preflight.
