@@ -2230,6 +2230,7 @@ mod tests {
             assert!(core.snapshot().allowed_actions.contains(&Action::RunPause));
             let command = CommandRequest {
                 id: "pending-pause-command".to_owned(),
+                sequence: 1,
                 epoch: core.epoch(),
                 expected_revision: Some(core.revision()),
                 scope: Scope::SessionTransport,
