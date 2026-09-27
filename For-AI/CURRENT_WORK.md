@@ -20,8 +20,11 @@ append command logs or machine-specific paths.
 - **Evidence:** prior synchronization and test evidence is retained in the audit.
   Centralized validator-source and owning coverage checks passed: 18 tests,
   with one existing unavailable-local-source skip. Rust formatting now passes;
-  compilation/Clippy remain pending storage availability. Pytest uses its native
-  successful-scratch cleanup and one failed-run retention instead of a new helper.
+  core and Python/Rust oracle checks passed on three CI platforms at `3e6eeb4`;
+  desktop checks remain in progress. Pytest uses native successful-scratch cleanup
+  and one failed-run retention instead of a new helper. Designer Vite 6.4.3 and
+  the transitive nanoid patch report zero npm vulnerabilities. Its canonical
+  build, 12-case inspected layout audit, and Pages assembly/parity passed.
 - **Next gate:** restore Rust checks, centralize validator source paths, fix the
   Designer development dependency chain, and complete reproducible validation.
   Then simplify the planner/profile flow and connect one native Runner path.
