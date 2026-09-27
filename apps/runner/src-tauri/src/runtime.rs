@@ -1722,25 +1722,25 @@ mod tests {
         }
     }
 
-    async fn wait_for_journal(
+    fn wait_for_journal(
         runtime: &AppRuntime,
         ready: impl Fn(&crate::execution_owner::OwnerTestView) -> bool,
     ) {
-        let deadline = tokio::time::Instant::now() + Duration::from_secs(3);
+        let deadline = std::time::Instant::now() + Duration::from_secs(3);
         loop {
             if ready(&runtime.0.authority.test_view()) {
                 return;
             }
             assert!(
-                tokio::time::Instant::now() < deadline,
+                std::time::Instant::now() < deadline,
                 "journal did not reach the expected authority state"
             );
-            tokio::time::sleep(Duration::from_millis(2)).await;
+            std::thread::sleep(Duration::from_millis(2));
         }
     }
 
-    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-    async fn audio_preflight_installs_one_durable_journal_and_replacement_closes_it() {
+    #[test]
+    fn audio_preflight_installs_one_durable_journal_and_replacement_closes_it() {
         let runtime = AppRuntime::new();
         let (root, verified) = verified_audio_package("P001", 1);
         runtime.adopt_verified_session(verified).unwrap();
@@ -1749,8 +1749,8 @@ mod tests {
         runtime
             .cache_prepared_audio(prepare_verified_audio(source).unwrap())
             .unwrap();
-        runtime.ensure_execution_journal().await.unwrap();
-        runtime.ensure_execution_journal().await.unwrap();
+        tauri::async_runtime::block_on(runtime.ensure_execution_journal()).unwrap();
+        tauri::async_runtime::block_on(runtime.ensure_execution_journal()).unwrap();
         let applied = runtime
             .dispatch_local(
                 Action::SessionNote,
@@ -1760,8 +1760,7 @@ mod tests {
         assert_eq!(applied.status, AppliedStatus::Accepted);
         wait_for_journal(&runtime, |view| {
             view.journal_durable_sequence == view.ledger_last_sequence
-        })
-        .await;
+        });
         assert!(!runtime.0.authority.test_view().evidence_unavailable);
         let files: Vec<_> = fs::read_dir(&root)
             .unwrap()
@@ -1791,7 +1790,7 @@ mod tests {
         drop(guard);
         let (replacement_root, replacement) = verified_legacy_package("P001");
         runtime.adopt_verified_session(replacement).unwrap();
-        wait_for_journal(&runtime, |view| view.journal_durable_sequence.is_none()).await;
+        wait_for_journal(&runtime, |view| view.journal_durable_sequence.is_none());
         assert!(fs::read_to_string(&files[0])
             .unwrap()
             .contains("package.adopted"));
@@ -1800,8 +1799,8 @@ mod tests {
         fs::remove_dir_all(replacement_root).unwrap();
     }
 
-    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-    async fn stale_journal_completion_cannot_attach_to_a_replacement_package() {
+    #[test]
+    fn stale_journal_completion_cannot_attach_to_a_replacement_package() {
         let runtime = AppRuntime::new();
         let (root, verified) = verified_audio_package("P001", 1);
         runtime.adopt_verified_session(verified).unwrap();
@@ -1810,11 +1809,7 @@ mod tests {
         runtime
             .cache_prepared_audio(prepare_verified_audio(source).unwrap())
             .unwrap();
-        let source = runtime
-            .0
-            .authority
-            .journal_source()
-            .await
+        let source = tauri::async_runtime::block_on(runtime.0.authority.journal_source())
             .unwrap()
             .unwrap()
             .unwrap();
@@ -1823,12 +1818,10 @@ mod tests {
         let (replacement_root, replacement) = verified_legacy_package("P001");
         runtime.adopt_verified_session(replacement).unwrap();
         assert_eq!(
-            runtime
-                .0
-                .authority
-                .install_event_journal(source, journal)
-                .await
-                .unwrap(),
+            tauri::async_runtime::block_on(
+                runtime.0.authority.install_event_journal(source, journal)
+            )
+            .unwrap(),
             Err("prepared_package_replaced")
         );
         assert!(runtime
@@ -1837,10 +1830,10 @@ mod tests {
             .test_view()
             .journal_durable_sequence
             .is_none());
-        let deadline = tokio::time::Instant::now() + Duration::from_secs(3);
+        let deadline = std::time::Instant::now() + Duration::from_secs(3);
         while !retired() {
-            assert!(tokio::time::Instant::now() < deadline);
-            tokio::time::sleep(Duration::from_millis(2)).await;
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::sleep(Duration::from_millis(2));
         }
         drop(guard);
         drop(runtime);
@@ -1848,8 +1841,8 @@ mod tests {
         fs::remove_dir_all(replacement_root).unwrap();
     }
 
-    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-    async fn native_writer_failure_latches_unavailable_and_invalidates_prepared_audio() {
+    #[test]
+    fn native_writer_failure_latches_unavailable_and_invalidates_prepared_audio() {
         let runtime = AppRuntime::new();
         let (root, verified) = verified_audio_package("P001", 1);
         runtime.adopt_verified_session(verified).unwrap();
@@ -1858,11 +1851,7 @@ mod tests {
         runtime
             .cache_prepared_audio(prepare_verified_audio(source).unwrap())
             .unwrap();
-        let source = runtime
-            .0
-            .authority
-            .journal_source()
-            .await
+        let source = tauri::async_runtime::block_on(runtime.0.authority.journal_source())
             .unwrap()
             .unwrap()
             .unwrap();
@@ -1870,14 +1859,10 @@ mod tests {
         fs::write(&path, "retained prefix\n").unwrap();
         let journal = NativeEventJournal::failing_writer(&path);
         let retired = journal.retirement_probe();
-        runtime
-            .0
-            .authority
-            .install_event_journal(source, journal)
-            .await
+        tauri::async_runtime::block_on(runtime.0.authority.install_event_journal(source, journal))
             .unwrap()
             .unwrap();
-        wait_for_journal(&runtime, |view| view.evidence_unavailable).await;
+        wait_for_journal(&runtime, |view| view.evidence_unavailable);
         assert!(runtime
             .0
             .authority
@@ -1892,10 +1877,10 @@ mod tests {
         assert!(runtime
             .dispatch_local(Action::SessionNote, serde_json::json!({"text":"denied"}))
             .is_err());
-        let deadline = tokio::time::Instant::now() + Duration::from_secs(3);
+        let deadline = std::time::Instant::now() + Duration::from_secs(3);
         while !retired() {
-            assert!(tokio::time::Instant::now() < deadline);
-            tokio::time::sleep(Duration::from_millis(2)).await;
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::sleep(Duration::from_millis(2));
         }
         assert_eq!(fs::read_to_string(path).unwrap(), "retained prefix\n");
         drop(guard);
