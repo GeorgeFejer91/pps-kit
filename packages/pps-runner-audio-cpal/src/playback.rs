@@ -33,6 +33,9 @@ pub enum PlaybackControlError {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Admission only. A matching Control record confirms callback application.
+/// A newer pending stop/abort can supersede an earlier safety receipt; abort
+/// stays irreversible. Never treat receipt issuance as device execution.
 pub struct PlaybackControlReceipt {
     pub sequence: u64,
 }

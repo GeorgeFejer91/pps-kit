@@ -56,30 +56,25 @@ never truncated. Keep analytical participant/event readers separate from these
 assembly-input limits. UI readiness checks inspect one participant's block plan
 rather than expanding every participant's schedule.
 
-Remote participant setup is target-local. Shared action permissions are checked
-against `pps-contracts/fixtures/remote-actions.v1.json` in Rust and browser tests;
-public native snapshots contain only remotely eligible actions. The reducer keeps
-256 outcomes and up to 4096 retired command IDs for one authority generation.
-Evicted IDs return `command_outcome_expired`; a full history denies new mutations
-until deliberate authority rotation while retaining reads and safe stop/disarm.
-Current epoch, scope, and lease checks also apply to cached outcomes. This is an
-in-memory guarantee; durable execution must retain its own result/journal evidence.
+Remote participant setup is target-local; public snapshots omit identity and
+private paths. Rust/browser permissions share
+`pps-contracts/fixtures/remote-actions.v1.json`. The same side-effect owner must
+check scope, epoch, lease, payload, and retired command IDs before execution.
+Native-backed BRSP delegates retry decisions to Rust; in-memory history never
+replaces a durable result journal. Controllers share one fresh-state gate and
+one reliable command slot. Unknown acknowledgements never trigger automatic
+replay. Phone suspension disarms exploratory outputs; resume authenticates and
+fetches state before controls become available. Native authority survives a
+hidden desktop window. Observer scope is read-only; remembered phone trust is
+unselected. Current bounds and evidence belong in the owning tests and the
+[implementation record](../engineering/validation/docs/implementation-status-2026-09-27.md).
 
-Both browser controller surfaces use the same BRSP fresh-state gate and one
-reliable command slot. Pairing has a 10-second timeout; state expires after
-5 seconds; acknowledgements time out after 10 seconds using the existing
-heartbeat. Interrupted commands become explicitly unknown and are never
-automatically resent. Phone suspension stops transport and disarms exploratory
-outputs; resume makes at most one authentication/snapshot attempt and replays no
-experiment action. Old session callbacks cannot update a replacement session.
-The desktop native authority stays alive when its window is hidden; actual page
-closure stops its WebView producers, and resume restores native polling.
-Observer access requests only session.read. Phone targets publish the same
-participant-free public schema as native targets. Remembered device trust is
-not enabled; fresh high-entropy invitations and native grant/revocation remain
-the selected pairing policy.
-
-Exploratory browser targets also retain up to 4096 evicted protocol command IDs;
-eviction cannot reapply an old action. Native-backed BRSP targets delegate this
-decision to the Rust reducer rather than denying after native dispatch. Keep
-each authority's history and side-effect decision in the same owner.
+`pps-runner-audio-cpal` can bind the existing verified immutable output plan to
+an exact reserved stream. Silent warm-up returns one native command/event port;
+no IPC caller can reconstruct it. The experiment authority must drain bounded
+evidence, distinguish admission from callback application, and own response and
+durable-result policy. Device retirement retains callback storage off the render
+path. Raw CPAL playback timestamps are predictions in their own clock domain,
+not measured physical onset. The Tauri package is still non-executable until
+the complete experiment adapter adopts this seam; preparation does not promote
+readiness or qualification.

@@ -14,7 +14,7 @@ Status applies to the stated surface, not to the whole product.
 | 6 | PARTIAL: actual Pretext, explicit no-fit, complete labels, narrow/enlarged text and spacing | Actual WebViews and full accessibility qualification |
 | 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full planner scheduling UI and native profile assembly |
 | 8 | VERIFIED: plan/resource preflight; staged stimulus/source/cancel fences; segment rollback | Qualify additional generation routes if selected |
-| 9 | NOT RUN: real-package Rust media playback/response/results | Native output remains silence-only, non-executable |
+| 9 | PARTIAL: existing renderer bound to exact CPAL output; silent preparation, sole native port, fenced controls and bounded callback records | Tauri authority adoption, response/durable results, actual installed experiment; current shell remains non-executable |
 | 10 | PARTIAL: shared contracts; actual JSON → existing compatibility assembler; sample/tactile/CSV oracle passes | Native assembly/execution capability |
 | 11 | PARTIAL: same typed authority, shared action fixture, fresh state, native scopes | Real-package execution commands |
 | 12 | PARTIAL: generation/principal/payload binding, expired-ID rejection, bounded tombstones, unknown acknowledgements | Durable result journal for actual native execution |
@@ -41,6 +41,17 @@ Source and package evidence:
   locked canonical build, 15 rendered text/interaction cases, and guarded Pages
   assembly pass. Simulated suspension interrupts the local demo, leaves outputs
   disarmed, and does not replay a command. It is browser/source evidence only.
+- Native media bridge **8621038fe8c71d6c2497e1112b354699f8ba0111**:
+  [owning cross-platform CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36334120020).
+  Eleven new source checks cover decoded PCM fixtures, routing, metadata boundaries,
+  silence during preparation/pause, cursor-preserving resume, stop/abort fences,
+  event backpressure before unrecorded source submission, callback retirement,
+  exclusive port/storage ownership, new-stream warm-up, and abandoned replies.
+  One silent prepare handshake replaces the additional service control/event
+  routes. Native commands acknowledge admission; callback records confirm
+  application. CPAL timestamps are retained as driver predictions. No physical
+  device, response file, durable run journal, or complete experiment was tested
+  by these checks.
 - Local/public canonical bytes were compared for all 37 public files at the
   preceding promoted build. Repeat hosted parity after each changed UI deploy.
 

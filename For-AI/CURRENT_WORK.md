@@ -14,14 +14,15 @@ Updated: 2026-09-27. Replace at task/stage transitions; do not append command lo
   publication, shared Pretext, dependency patches, local setup permissions,
   retry fences, and phone suspension/recovery are implemented. The main phone
   flow is Pair → fresh state → permitted action; exploratory phone outputs stay
-  separate. One main branch and one registered worktree remain.
+  separate. The native media bridge reuses the verified renderer and returns
+  one command/event port after silent warm-up; no second scheduler was added.
 - **Evidence:** use the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md).
   Source, CI packages, installed behavior, physical timing, participant results,
   and published replication are distinct gates. The existing installed
   compatibility Runner has not been rebuilt in this task.
-- **Next gate:** connect one real prepared package to Rust media output,
-  response/event persistence, and safe execution. Candidate native output still
-  reserves silence and is non-executable/unqualified. Qualification requires
+- **Next gate:** adopt the verified media bridge in the native experiment
+  authority with response/event persistence, completion, and safe execution.
+  The Tauri candidate remains non-executable/unqualified. Qualification requires
   observed devices and routes; software tests cannot supply physical evidence.
 - **Local constraint:** full native builds and the complete Standard tier need
   additional storage (documented working allowance: 15 GiB). Source checks and
