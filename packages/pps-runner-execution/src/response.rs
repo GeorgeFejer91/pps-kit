@@ -57,6 +57,37 @@ pub struct TrialResponseWindow {
     pub trial_end_ns: u64,
 }
 
+impl TrialResponseWindow {
+    /// The native collector waits through the exact same selection interval
+    /// used by the scorer, including auditory windows after a short trial.
+    pub fn selection_end_ns(self) -> Result<u64, ExecutionError> {
+        self.bounds().map(|(_, end, _)| end)
+    }
+
+    fn bounds(self) -> Result<(u64, u64, u64), ExecutionError> {
+        let mut start = self.response_window_ns;
+        let mut end = if self.trial_end_ns > start {
+            self.trial_end_ns
+        } else {
+            start
+                .checked_add(RESPONSE_MAX_RT_NS)
+                .ok_or_else(|| response_error(ExecutionErrorCode::ResponseWindowInvalid))?
+        };
+        if let Some(onset) = self.tactile_onset_ns {
+            start = start.min(onset);
+            end = end.max(
+                onset
+                    .checked_add(RESPONSE_MAX_RT_NS)
+                    .ok_or_else(|| response_error(ExecutionErrorCode::ResponseWindowInvalid))?,
+            );
+        }
+        if start < self.trial_start_ns || end < start {
+            return Err(response_error(ExecutionErrorCode::ResponseWindowInvalid));
+        }
+        Ok((start, end, self.tactile_onset_ns.unwrap_or(start)))
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct TrialResponseScore {
     pub response_event_id: Option<u64>,
@@ -127,28 +158,7 @@ pub fn score_trial_response(
     let required = response_required(row, &trial_type, &family, catch, tactile, auditory);
     let choice = ChoicePolicy::from_row(row);
     let choice_required = choice.required();
-    let mut start = window.response_window_ns;
-    let mut end = if window.trial_end_ns > start {
-        window.trial_end_ns
-    } else {
-        start
-            .checked_add(RESPONSE_MAX_RT_NS)
-            .ok_or_else(|| response_error(ExecutionErrorCode::ResponseWindowInvalid))?
-    };
-    if tactile {
-        if let Some(onset) = window.tactile_onset_ns {
-            start = start.min(onset);
-            end = end.max(
-                onset
-                    .checked_add(RESPONSE_MAX_RT_NS)
-                    .ok_or_else(|| response_error(ExecutionErrorCode::ResponseWindowInvalid))?,
-            );
-        }
-    }
-    if start < window.trial_start_ns || end < start {
-        return Err(response_error(ExecutionErrorCode::ResponseWindowInvalid));
-    }
-    let anchor = window.tactile_onset_ns.filter(|_| tactile).unwrap_or(start);
+    let (start, end, anchor) = window.bounds()?;
     let valid_start = anchor
         .checked_add(RESPONSE_MIN_RT_NS)
         .ok_or_else(|| response_error(ExecutionErrorCode::ResponseWindowInvalid))?;

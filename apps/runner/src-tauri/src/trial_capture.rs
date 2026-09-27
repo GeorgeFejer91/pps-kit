@@ -4,7 +4,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use pps_runner_execution::{
     score_trial_response, LedgerEventInput, ParticipantResponse, TrialResponseWindow,
-    MAX_BLOCK_ROWS, MAX_LEDGER_PAYLOAD_BYTES, MAX_TRIAL_RESPONSES, RESPONSE_MAX_RT_NS,
+    MAX_BLOCK_ROWS, MAX_LEDGER_PAYLOAD_BYTES, MAX_TRIAL_RESPONSES,
 };
 use serde::Deserialize;
 use serde_json::{Map, Value};
@@ -37,6 +37,21 @@ struct Trial {
     // Start, looming, tactile, response-window, end; no duplicated schedule.
     times: [Option<u64>; 5],
     interrupted: bool,
+}
+
+impl Trial {
+    fn window(&self) -> Result<TrialResponseWindow, &'static str> {
+        let start = self.times[0].ok_or("native_trial_start_missing")?;
+        Ok(TrialResponseWindow {
+            trial_start_ns: start,
+            response_window_ns: self.times[3]
+                .or(self.times[1])
+                .or(self.times[2])
+                .unwrap_or(start),
+            tactile_onset_ns: self.times[2],
+            trial_end_ns: self.times[4].ok_or("native_trial_end_missing")?,
+        })
+    }
 }
 
 #[derive(Default)]
@@ -129,14 +144,10 @@ impl NativeTrialCapture {
             let Some(end) = trial.times[4] else {
                 continue;
             };
-            let deadline = match trial.times[2] {
-                Some(tactile) => end.max(
-                    tactile
-                        .checked_add(RESPONSE_MAX_RT_NS)
-                        .ok_or("native_trial_clock_invalid")?,
-                ),
-                None => end,
-            };
+            let deadline = trial
+                .window()?
+                .selection_end_ns()
+                .map_err(|_| "native_trial_clock_invalid")?;
             if deadline <= now {
                 ready.push((
                     trial.times[0].ok_or("native_trial_start_missing")?,
@@ -157,11 +168,9 @@ impl NativeTrialCapture {
                 .active
                 .remove(&key)
                 .ok_or("native_trial_state_invalid")?;
-            let start = trial.times[0].ok_or("native_trial_start_missing")?;
-            let response_window = trial.times[3]
-                .or(trial.times[1])
-                .or(trial.times[2])
-                .unwrap_or(start);
+            let window = trial.window()?;
+            let start = window.trial_start_ns;
+            let response_window = window.response_window_ns;
             let mut input = LedgerEventInput::new(
                 if trial.interrupted {
                     "trial.interrupted"
@@ -173,18 +182,8 @@ impl NativeTrialCapture {
             );
             input.unix_ms = Some(unix_ms);
             if !trial.interrupted {
-                let score = score_trial_response(
-                    &trial.row,
-                    TrialResponseWindow {
-                        trial_start_ns: start,
-                        response_window_ns: response_window,
-                        tactile_onset_ns: trial.times[2],
-                        trial_end_ns: trial.times[4].ok_or("native_trial_end_missing")?,
-                    },
-                    &self.responses,
-                    &self.used,
-                )
-                .map_err(|_| "native_trial_scoring_invalid")?;
+                let score = score_trial_response(&trial.row, window, &self.responses, &self.used)
+                    .map_err(|_| "native_trial_scoring_invalid")?;
                 if let Some(id) = score.response_event_id {
                     self.used.insert(id);
                     trial.row.insert(
@@ -322,6 +321,35 @@ mod tests {
             y: None
         }
         .valid());
+        let mut capture = NativeTrialCapture::default();
+        for (kind, ns) in [
+            ("trial_start", 1_000_000_000),
+            ("response_window_onset", 2_000_000_000),
+            ("trial_end", 2_000_000_000),
+        ] {
+            let mut input = boundary(kind, ns);
+            input.payload["trial_type"] = "Auditory-Only".into();
+            capture.observe(&input).unwrap();
+        }
+        assert!(capture
+            .resolve_ready(3_299_999_999, 100)
+            .unwrap()
+            .is_empty());
+        capture
+            .record_response(ParticipantResponse {
+                event_id: 1,
+                monotonic_ns: 3_300_000_000,
+                block_number: "1".into(),
+                in_target: true,
+                during_playback: true,
+                choice: String::new(),
+                x: None,
+                y: None,
+            })
+            .unwrap();
+        let rows = capture.resolve_ready(3_300_000_000, 100).unwrap();
+        assert_eq!(rows[0].payload["outcome"], "Hit");
+        assert_eq!(rows[0].payload["rt_ms"], "1300.000");
         assert!(serde_json::from_value::<NativeResponseRequest>(
             json!({"choice": "left", "monotonicNs": 123})
         )
