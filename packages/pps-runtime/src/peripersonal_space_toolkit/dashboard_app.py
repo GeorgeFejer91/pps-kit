@@ -99,6 +99,7 @@ from .profile_memory import (
     update_runner_settings as update_profile_runner_settings,
 )
 from .profile_bundle import read_profile_bundle, write_profile_bundle
+from .experiment_profile import create_experiment_profile, experiment_profile_bytes
 
 
 from .templates import (
@@ -2954,6 +2955,27 @@ def create_app(
                 media_type="application/vnd.pps-profile+zip",
                 headers={"Content-Disposition": f'attachment; filename="{_safe_filename(profile_id)}.pps-profile"'},
             )
+        except Exception as exc:
+            raise api_error(exc) from exc
+
+    @app.post("/api/profiles/export-json")
+    def api_export_experiment_profile(payload: dict[str, Any] = Body(default_factory=dict)) -> Any:
+        try:
+            with controller._workflow_lock, controller._lock:
+                design = _copy_design(controller.design)
+                revision = _designer_progress(design)["revision"]
+                if payload.get("expected_revision") != revision:
+                    raise ValueError("The profile changed. Refresh before exporting.")
+                _require_designer_review_complete(design)
+                project = controller._ensure_project_context(design)
+                run_setup_path = _run_setup_manifest_path(project.project_dir)
+                errors = _validate_run_setup_manifest(_load_json(run_setup_path), project_dir=project.project_dir, design=design)
+                if errors:
+                    raise ValueError(errors[0])
+                content = experiment_profile_bytes(create_experiment_profile(design, run_setup_path, source_revision=revision))
+            return Response(content=content, media_type="application/json", headers={
+                "Content-Disposition": f'attachment; filename="{_safe_filename(design.name or "experiment")}.json"',
+            })
         except Exception as exc:
             raise api_error(exc) from exc
 

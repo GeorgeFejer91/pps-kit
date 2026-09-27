@@ -34,3 +34,10 @@ differential fixtures during migration. Run owning Python, frontend, or Rust
 checks. [WORKFLOW.md](../WORKFLOW.md) separates source, installed, and physical
 evidence: deferred packaging cannot support an installed-behavior claim.
 Quest/Android is conditional, not a default PPS gate.
+
+`experiment_profile.py` owns the local `pps-experiment-profile.v1` JSON handoff.
+It freezes approved Segment 5/6 rows and hashes local ingredients; it must not
+choose a second trial order. Designer export checks the current review revision
+and existing lineage gates. The compatibility Runner accepts
+`--experiment-profile <json> --participant-id <id>` and uses the existing session
+assembler after verifying the inventory. Remote projections never carry paths.

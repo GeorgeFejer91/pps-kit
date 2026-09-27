@@ -168,6 +168,16 @@ def _wait_job(client: TestClient, job_id: str) -> dict:
     raise AssertionError(f"Job did not finish: {job_id}")
 
 
+def test_experiment_json_export_requires_current_revision_and_completed_review(tmp_path: Path):
+    with _client(tmp_path) as client:
+        stale = client.post("/api/profiles/export-json", json={"expected_revision": -1})
+        assert stale.status_code == 400
+        assert "Refresh" in stale.json()["detail"]
+        incomplete = client.post("/api/profiles/export-json", json={"expected_revision": 0})
+        assert incomplete.status_code == 400
+        assert "review is incomplete" in incomplete.json()["detail"]
+
+
 def _read_json_file(path: str | Path) -> dict:
     return json.loads(dashboard_app._read_text_file(path, encoding="utf-8"))
 

@@ -740,6 +740,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--latest-dashboard-setup", action="store_true", help="Bypass the gate, prepare, and open the newest prepared dashboard Segment 6 setup.")
     parser.add_argument("--launcher", action="store_true", help="Open the resume/data-collection environment gate explicitly. This is also the no-argument default.")
     parser.add_argument("--profile", default="", help="Load a finished study/profile preload directly in the runner, for example study5_box_breathing_pps.")
+    parser.add_argument("--experiment-profile", type=Path, help="Read a local Designer experiment JSON and verify its ingredients before preparing a participant session.")
     parser.add_argument("--participant-id", default="", help="Participant ID to materialize when using --latest-dashboard-setup.")
     parser.add_argument("--manual-start", action="store_true", help="Open the runner window but wait for Start Run before playback.")
     parser.add_argument("--no-lsl", action="store_true", help="Do not create live LSL marker outlets for this run.")
@@ -16393,9 +16394,16 @@ def main(argv: list[str] | None = None) -> int:
                 auto_close_ms=args.validation_auto_close_ms,
                 screenshot_path=args.validation_screenshot,
             )
-        if args.profile:
+        if args.profile or args.experiment_profile:
             try:
-                manifest = prepare_profile_focus_session(args.profile, args.participant_id)
+                if args.experiment_profile:
+                    from .experiment_profile import prepare_experiment_profile
+
+                    if not args.participant_id:
+                        raise ValueError("Choose a participant ID for the experiment JSON.")
+                    manifest = prepare_experiment_profile(args.experiment_profile, args.participant_id).manifest_path
+                else:
+                    manifest = prepare_profile_focus_session(args.profile, args.participant_id)
             except Exception as exc:
                 return run_launcher_window(
                     capture_options=options,

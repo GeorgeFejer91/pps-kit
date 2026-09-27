@@ -9,28 +9,32 @@ append command logs or machine-specific paths.
   spatial stimuli and exports JSON ingredients/file/assembly profiles; Runner
   reads them, executes experiments, and records data. The existing 3DTI adapter,
   3D viewer, schemas, and profile pipeline are the starting point.
-- **Stage:** baseline repair, followed by independently verified implementation
+- **Stage:** planner JSON handoff, followed by independently verified implementation
   checkpoints, local UI previews, source promotion, packaged candidates, and
   measured qualification. The audit is approved; do not ask again to implement
   its scoped proposals. Physical evidence cannot be replaced by software tests.
 - **Baseline:** source is synchronized at `8daf723`; one local/public branch and
   one registered worktree remain. Candidate native output is non-executable and
-  unqualified. Existing native gates fail; full-suite testing exceeded local
+  unqualified. Native source gates are restored; full-suite testing exceeded local
   storage. An alternate build/test location or additional free space is requested.
 - **Evidence:** prior synchronization and test evidence is retained in the audit.
   Centralized validator-source and owning coverage checks passed: 18 tests,
   with one existing unavailable-local-source skip. Rust formatting now passes;
   core and Python/Rust oracle checks passed on three CI platforms at `3e6eeb4`;
-  desktop checks exposed three remaining unused test helpers. They now exercise
-  the shared output reserve/disable lifecycle and stale-policy rejection; the
-  operation guard is released before its completion reply. The optional Android
-  CI setup requests only the supported platform-tools package. Pytest uses native successful-scratch cleanup
+  desktop, core, browser, Python/Rust oracle, and optional Android checks passed
+  at `9290bea`. Packaging validation remains separate. Native output completion
+  releases its operation guard before replying and has a reserve/disable/stale
+  policy integration check. Pytest uses native successful-scratch cleanup
   and one failed-run retention instead of a new helper. Designer Vite 6.4.3 and
   the transitive nanoid patch report zero npm vulnerabilities. Its canonical
   build, 12-case inspected layout audit, and Pages assembly/parity passed.
-- **Next gate:** restore Rust checks, centralize validator source paths, fix the
-  Designer development dependency chain, and complete reproducible validation.
-  Then simplify the planner/profile flow and connect one native Runner path.
+  The new local experiment JSON freezes the already approved Segment 5/6 plan
+  and verifies its file inventory before compatibility Runner assembly. Both
+  direct and JSON preparation pass the existing sample/tactile/CSV contract;
+  changed-ingredient and stale/incomplete export denial checks pass.
+- **Next gate:** add the explicit JSON action to the simplified planner UI,
+  centralize measured text layout, fence background generation to its source
+  revision, add bounded resource preflight, and connect native output execution.
 
 Detailed run artifacts belong in ignored validation folders. Preserve the
 pre-sync Git bundle and dirty-file backup until reconciliation is verified.

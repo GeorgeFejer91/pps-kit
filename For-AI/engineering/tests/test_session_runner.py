@@ -357,13 +357,28 @@ def test_prepare_run_package_writes_manifest_protocol_and_blocks(tmp_path: Path)
     assert rows[0]["Trial_Type"] == "Audio-Tactile"
 
 
-def test_prepare_segment_run_package_uses_segment5_and_segment6_csvs(tmp_path: Path):
+@pytest.mark.parametrize("use_json_profile", [False, True])
+def test_prepare_segment_run_package_uses_segment5_and_segment6_csvs(tmp_path: Path, use_json_profile):
     run_manifest = _segment_run_setup_fixture(tmp_path)
 
     assert segment_run_setup_participants(run_manifest) == ["P001", "P002"]
 
-    package = prepare_segment_run_package(
-        run_manifest,
+    prepare = prepare_segment_run_package
+    input_path = run_manifest
+    if use_json_profile:
+        from peripersonal_space_toolkit.experiment_profile import (
+            create_experiment_profile, experiment_profile_bytes, prepare_experiment_profile,
+        )
+
+        profile_path = tmp_path / "experiment.json"
+        profile_path.write_bytes(experiment_profile_bytes(
+            create_experiment_profile(_compact_design(), run_manifest, source_revision=1)
+        ))
+        input_path = profile_path
+        prepare = prepare_experiment_profile
+
+    package = prepare(
+        input_path,
         "P001",
         session_root=tmp_path / "sessions",
         created_at=datetime(2026, 1, 2, 3, 4, 5),
