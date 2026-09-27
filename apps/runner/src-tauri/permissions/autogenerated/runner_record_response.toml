@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-runner-record-response"
+description = "Enables the runner_record_response command without any pre-configured scope."
+commands.allow = ["runner_record_response"]
+
+[[permission]]
+identifier = "deny-runner-record-response"
+description = "Denies the runner_record_response command without any pre-configured scope."
+commands.deny = ["runner_record_response"]

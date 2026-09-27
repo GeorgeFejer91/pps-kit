@@ -1,6 +1,8 @@
 """Candidate native scoring must preserve the qualified V1 analysis contract."""
 from __future__ import annotations
 
+import csv
+import io
 import json
 import os
 import shutil
@@ -90,6 +92,7 @@ def test_native_response_scoring_and_minimal_csv_match_python() -> None:
     add("explicit-choice", [response(1, 102_500_000_000, choice=" LEFT SIDE ")],
         row={"Choice_Set": "left side/right side", "Correct_Choice": "left-side", "Choice_Mode": "2afc"})
     add("one-choice", [response(1, 102_500_000_000)], row={"Choice_Set": "yes", "Correct_Choice": "yes"})
+    add("one-choice-no-response", [], row={"Choice_Set": "yes", "Correct_Choice": "yes"})
     add("late-after-short-trial", [response(1, 103_600_000_000)], times={"trial_end_ns": 102_350_000_000})
     add("no-tactile-event-kind-fallback", [response(1, 102_100_000_000)], times={"tactile_onset_ns": None})
     add("topup", [response(1, 102_500_000_000)], row={"Topup_Role": "filler"})
@@ -105,6 +108,10 @@ def test_native_response_scoring_and_minimal_csv_match_python() -> None:
                                text=True, capture_output=True, timeout=120, env={**os.environ, "CARGO_TERM_COLOR": "never"}, check=False)
     assert completed.returncode == 0, completed.stderr
     actual = json.loads(completed.stdout)
-    expected = {"cases": [_python_case(case) for case in cases],
-                "projections": [_minimal(entry["row"], entry["global_index"]) for entry in projections]}
+    projected = [_minimal(entry["row"], entry["global_index"]) for entry in projections]
+    csv_text = io.StringIO(newline="")
+    writer = csv.DictWriter(csv_text, fieldnames=oracle.DATA_MIN_FIELDNAMES)
+    writer.writeheader()
+    writer.writerows(row for row in projected if row is not None)
+    expected = {"cases": [_python_case(case) for case in cases], "projections": projected, "csv": csv_text.getvalue()}
     assert actual == expected

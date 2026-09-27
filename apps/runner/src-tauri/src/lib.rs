@@ -7,6 +7,7 @@ mod prepared_audio;
 mod prepared_execution;
 mod remote;
 mod runtime;
+mod trial_capture;
 
 use std::{path::PathBuf, str::FromStr};
 
@@ -66,6 +67,19 @@ struct PreparedSessionSelection {
 #[tauri::command]
 async fn runner_snapshot(state: tauri::State<'_, AppRuntime>) -> Result<RunnerSnapshot, String> {
     state.snapshot_async().await
+}
+
+#[tauri::command]
+async fn runner_record_response(
+    request: trial_capture::NativeResponseRequest,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<String, String> {
+    let observed = std::time::Instant::now();
+    state
+        .record_native_response(observed, request)
+        .await
+        .map(|id| id.to_string())
+        .map_err(str::to_owned)
 }
 
 #[tauri::command]
@@ -507,6 +521,7 @@ pub fn run() {
         .manage(runtime)
         .invoke_handler(tauri::generate_handler![
             runner_snapshot,
+            runner_record_response,
             runner_dispatch,
             remote_status,
             configure_remote,

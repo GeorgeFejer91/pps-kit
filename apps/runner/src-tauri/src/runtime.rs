@@ -40,6 +40,7 @@ use crate::prepared_audio::{
 use crate::prepared_execution::{
     CompiledPreparedExecution, PreparedExecutionSource, PreparedExecutionSummary,
 };
+use crate::trial_capture::NativeResponseRequest;
 
 const MAX_ACCEPTED_SCOPES: usize = 16;
 const NATIVE_OUTPUT_COMPLETION_RETRIES: usize = 8;
@@ -363,6 +364,16 @@ pub struct RemoteStatus {
 }
 
 impl AppRuntime {
+    pub(crate) async fn record_native_response(
+        &self,
+        observed: std::time::Instant,
+        request: NativeResponseRequest,
+    ) -> Result<u64, &'static str> {
+        self.0
+            .authority
+            .record_native_response(observed, request)
+            .await
+    }
     pub fn new() -> Self {
         Self::with_native_output(NativeOutputCoordinator::start())
     }

@@ -14,6 +14,7 @@ use pps_runner_execution::{BlockEventSchedule, LedgerEventInput};
 use crate::{
     native_output::{NativeOutputSelection, NativeOutputTicket},
     prepared_audio::{PreparedAudioCandidate, PreparedAudioSourceReceipt},
+    trial_capture::NativeTrialCapture,
 };
 
 pub(crate) struct NativeOutputPreparation {
@@ -65,6 +66,7 @@ impl NativePlaybackHandoff {
 pub(crate) struct NativePreparedPlayback {
     pub source: NativePlaybackSource,
     pub port: PlaybackPort,
+    pub capture: NativeTrialCapture,
 }
 
 impl NativePreparedPlayback {
@@ -79,7 +81,11 @@ impl NativePreparedPlayback {
         {
             return Err("native_playback_unavailable");
         }
-        Ok(Self { source, port })
+        Ok(Self {
+            source,
+            port,
+            capture: NativeTrialCapture::default(),
+        })
     }
 
     pub(crate) fn drain(
@@ -102,7 +108,7 @@ impl NativePreparedPlayback {
         }
         let records = self
             .port
-            .drain(128)
+            .drain(126)
             .map_err(|_| "native_playback_unavailable")?;
         let mut inputs = Vec::with_capacity(records.len());
         for record in records {
@@ -113,9 +119,14 @@ impl NativePreparedPlayback {
                 stamp,
                 host_time(record.host_received),
             )? {
+                self.capture.observe(&input)?;
                 inputs.push(input);
             }
         }
+        inputs.extend(
+            self.capture
+                .resolve_ready(stamp.monotonic_ns, stamp.unix_ms)?,
+        );
         Ok(inputs)
     }
 }
@@ -232,5 +243,27 @@ pub(crate) fn record_input(
                 .and_then(|duration| u64::try_from(duration.as_nanos()).ok())
                 .map(|value| value.min(JSON_MAX_SAFE_INTEGER))
         }));
+    if let PlaybackRecordKind::Boundary(boundary) = record.kind {
+        let rate = u64::try_from(schedule.summary().sample_rate_hz)
+            .ok()
+            .filter(|rate| *rate > 0)
+            .ok_or("native_playback_sample_rate_invalid")?;
+        let offset_ns = u64::try_from(
+            u128::from(boundary.sample_offset_in_callback()) * 1_000_000_000 / u128::from(rate),
+        )
+        .map_err(|_| "native_playback_clock_invalid")?;
+        let estimate = host_monotonic_ns
+            .checked_add(
+                input.payload["driverPredictionLeadNs"]
+                    .as_u64()
+                    .unwrap_or(0),
+            )
+            .and_then(|ns| ns.checked_add(offset_ns))
+            .filter(|ns| *ns <= JSON_MAX_SAFE_INTEGER)
+            .ok_or("native_playback_clock_invalid")?;
+        input.payload["estimatedEventHostMonotonicNs"] = serde_json::json!(estimate);
+        input.payload["eventClockBasis"] =
+            serde_json::json!("callback-observation-plus-driver-prediction-and-sample-offset");
+    }
     Ok(Some(input))
 }

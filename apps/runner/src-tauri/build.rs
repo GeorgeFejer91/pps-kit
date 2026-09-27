@@ -2,6 +2,7 @@ fn main() {
     tauri_build::try_build(tauri_build::Attributes::new().app_manifest(
         tauri_build::AppManifest::new().commands(&[
             "runner_snapshot",
+            "runner_record_response",
             "runner_dispatch",
             "remote_status",
             "configure_remote",

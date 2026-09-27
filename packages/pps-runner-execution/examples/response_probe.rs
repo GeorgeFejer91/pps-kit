@@ -2,8 +2,8 @@
 use std::{collections::BTreeSet, error::Error, io::Read};
 
 use pps_runner_execution::{
-    data_min_row, score_trial_response, ParticipantResponse, TrialResponseWindow,
-    DATA_MIN_FIELDNAMES,
+    data_min_row, encode_data_min_csv, score_trial_response, ParticipantResponse,
+    TrialResponseWindow, DATA_MIN_FIELDNAMES,
 };
 use serde::Deserialize;
 use serde_json::{json, Map, Value};
@@ -95,9 +95,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         .iter()
         .map(|entry| projection(&entry.row, entry.global_index))
         .collect();
+    let csv_rows: Vec<_> = input
+        .projections
+        .iter()
+        .filter_map(|entry| data_min_row(&entry.row, entry.global_index))
+        .collect();
+    let csv = String::from_utf8(encode_data_min_csv(&csv_rows, true)?)?;
     serde_json::to_writer(
         std::io::stdout(),
-        &json!({"cases": cases, "projections": projections}),
+        &json!({"cases": cases, "projections": projections, "csv": csv}),
     )?;
     Ok(())
 }

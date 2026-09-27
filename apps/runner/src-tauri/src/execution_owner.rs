@@ -15,7 +15,9 @@ use pps_contracts::{
 };
 use pps_runner_audio::AudioFence;
 use pps_runner_core::{DispatchMilestone, DispatchOrigin, RunnerCore, VerifiedPackageSummary};
-use pps_runner_execution::{EventLedger, LedgerEventInput, LedgerReserve, DEFAULT_LEDGER_CAPACITY};
+use pps_runner_execution::{
+    EventLedger, LedgerEventInput, LedgerReserve, ParticipantResponse, DEFAULT_LEDGER_CAPACITY,
+};
 use pps_session_package::VerifiedPreparedSession;
 use serde_json::Value;
 use tokio::sync::{broadcast, oneshot};
@@ -46,6 +48,7 @@ use crate::{
         ActiveController, RemoteApplied, RemoteConfig, RemoteRunnerSnapshot, RemoteSessionError,
         RemoteSessionLeaseReceipt, RemoteSessionRevocationReceipt,
     },
+    trial_capture::NativeResponseRequest,
 };
 
 pub(crate) const MAILBOX_CAPACITY: usize = 64;
@@ -106,6 +109,7 @@ struct Mailbox {
     state: Mutex<MailboxState>,
     wake: Condvar,
     diagnostics: AuthorityMailboxDiagnostics,
+    response_lost: AtomicBool,
 }
 
 impl Mailbox {
@@ -117,6 +121,7 @@ impl Mailbox {
             }),
             wake: Condvar::new(),
             diagnostics,
+            response_lost: AtomicBool::new(false),
         }
     }
 
@@ -368,6 +373,84 @@ pub(crate) struct OwnerTestView {
 }
 
 impl OwnerState {
+    fn record_native_response(
+        &mut self,
+        observed: Instant,
+        request: NativeResponseRequest,
+    ) -> Result<u64, &'static str> {
+        if !request.valid() {
+            return Err("native_response_invalid");
+        }
+        if self.core.snapshot().run.phase != RunnerPhase::Running || !self.native_journal_current()
+        {
+            return Err("native_participant_capture_inactive");
+        }
+        let stamp = self.clock.stamp();
+        let response_id = self
+            .ledger
+            .summary()
+            .last_sequence
+            .unwrap_or(0)
+            .checked_add(1)
+            .ok_or("native_response_capacity_invalid")?;
+        let observed_ns = u64::try_from(
+            observed
+                .checked_duration_since(self.clock.started)
+                .ok_or("native_response_clock_invalid")?
+                .as_nanos(),
+        )
+        .ok()
+        .filter(|ns| *ns <= stamp.monotonic_ns)
+        .ok_or("native_response_clock_invalid")?;
+        let playback = self
+            .native_playback
+            .as_mut()
+            .ok_or("native_participant_capture_inactive")?;
+        let status = playback.port.status();
+        if !matches!(
+            status.state,
+            pps_runner_audio::RenderState::Playing | pps_runner_audio::RenderState::SourceExhausted
+        ) || status.fault.is_some()
+            || status.callback_retired
+        {
+            return Err("native_participant_capture_inactive");
+        }
+        let response = ParticipantResponse {
+            event_id: response_id,
+            monotonic_ns: observed_ns,
+            block_number: playback
+                .source
+                .receipt
+                .schedule()
+                .summary()
+                .block_index
+                .to_string(),
+            in_target: true,
+            during_playback: true,
+            choice: request.choice,
+            x: request.x,
+            y: request.y,
+        };
+        let mut input = Self::ledger_input("response.observed", "local-participant", &stamp);
+        input.payload = serde_json::json!({"response_event_id": response_id, "observedHostMonotonicNs": observed_ns,
+            "block_number": response.block_number, "response_choice": response.choice, "x": response.x, "y": response.y,
+            "in_target": true, "during_playback": true, "inputRoute": "local-webview-native-ingress", "timingQualification": "unqualified"});
+        if playback.capture.record_response(response).is_err() {
+            self.fail_stop_unavailable("native.response.lost", "evidence_unavailable");
+            return Err("native_response_unavailable");
+        }
+        self.commit_evidence(
+            input,
+            LedgerReserve::new(LEDGER_SAFETY_RECORD_RESERVE, LEDGER_SAFETY_BYTE_RESERVE),
+            CommitPolicy::Ordinary,
+        )
+        .map_err(|_| {
+            self.fail_stop_unavailable("native.response.lost", "evidence_unavailable");
+            "native_response_unavailable"
+        })?;
+        Ok(response_id)
+    }
+
     fn journal_source(&mut self) -> Result<Option<PreparedExecutionSource>, &'static str> {
         self.poll_event_journal();
         if self.evidence_unavailable {
@@ -452,6 +535,29 @@ impl OwnerState {
                 .unwrap_or(u64::MAX)
                 .min(JSON_MAX_SAFE_INTEGER)
         });
+        let package = playback.source.receipt.verified_session().summary();
+        let snapshot = self.core.snapshot();
+        let inputs = inputs.map(|mut inputs| {
+            for input in inputs.iter_mut().filter(|input| {
+                matches!(
+                    input.event_type.as_str(),
+                    "trial.scored" | "trial.interrupted"
+                )
+            }) {
+                input.payload["part_session_id"] = serde_json::json!(package.part_session_id);
+                let part = snapshot
+                    .part
+                    .selected_part
+                    .map(i64::from)
+                    .or(package.part_number);
+                input.payload["part_number"] = serde_json::json!(part);
+                input.payload["part_label"] = serde_json::json!(part
+                    .and_then(|part| snapshot.setup.part_labels.get(&part.to_string()))
+                    .cloned()
+                    .unwrap_or_default());
+            }
+            inputs
+        });
         let status = playback.port.status();
         let reserve = LedgerReserve::new(LEDGER_SAFETY_RECORD_RESERVE, LEDGER_SAFETY_BYTE_RESERVE);
         match inputs {
@@ -482,6 +588,7 @@ impl OwnerState {
         let failed = self.event_journal.as_ref().is_some_and(|(_, journal)| {
             journal.failed()
                 || journal.durable_sequence() > self.ledger.summary().last_sequence.unwrap_or(0)
+                || journal.durable_dataset_rows() > journal.durable_sequence()
         });
         let unavailable_active = self.evidence_unavailable && self.event_journal.is_some() && {
             let snapshot = self.core.snapshot();
@@ -1888,6 +1995,32 @@ impl OwnerStartConfiguration {
 }
 
 impl ExecutionOwner {
+    pub(crate) async fn record_native_response(
+        &self,
+        observed: Instant,
+        request: NativeResponseRequest,
+    ) -> Result<u64, &'static str> {
+        if !request.valid() {
+            return Err("native_response_invalid");
+        }
+        let receive = self.submit(
+            AdmissionClass::Normal,
+            "native_participant_response",
+            move |state| state.record_native_response(observed, request),
+        );
+        let receive = match receive {
+            Ok(receive) => receive,
+            Err(_) => {
+                // An actual input loss must interrupt acquisition even when
+                // all ordinary and reserved mailbox slots are occupied.
+                self.mailbox.response_lost.store(true, Ordering::Release);
+                self.mailbox.wake.notify_one();
+                return Err("native_response_unavailable");
+            }
+        };
+        receive.await.map_err(|_| "native_response_unavailable")?
+    }
+
     pub(crate) fn start(
         target_id: String,
         target_kind: &'static str,
@@ -2732,6 +2865,12 @@ fn authority_loop(mailbox: &Mailbox, state: &mut OwnerState) {
         // Deadman processing is deliberately ahead of every dequeue, including
         // when ordinary traffic keeps the mailbox continuously non-empty.
         state.expire_deadman_if_due();
+        if mailbox.response_lost.swap(false, Ordering::AcqRel)
+            && state.native_playback.is_some()
+            && state.core.snapshot().run.phase == RunnerPhase::Running
+        {
+            state.fail_stop_unavailable("native.response.lost", "evidence_unavailable");
+        }
         state.poll_event_journal();
         state.poll_native_playback();
         if mailbox.should_stop() {

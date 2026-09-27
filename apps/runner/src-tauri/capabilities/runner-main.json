@@ -6,6 +6,7 @@
   "permissions": [
     "core:default",
     "allow-runner-snapshot",
+    "allow-runner-record-response",
     "allow-runner-dispatch",
     "allow-remote-status",
     "allow-configure-remote",

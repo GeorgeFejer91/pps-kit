@@ -175,9 +175,7 @@ pub fn score_trial_response(
     };
     let selected = valid.or(first);
     let given = selected.is_some();
-    let observed = selected
-        .map(|response| choice.observed(response))
-        .unwrap_or_default();
+    let observed = choice.observed(selected);
     let correct = if token(&choice.correct).is_empty() {
         None
     } else {
@@ -448,8 +446,8 @@ impl ChoicePolicy {
             .any(|allowed| mode == *allowed || mode.split('_').any(|part| part == *allowed))
     }
 
-    fn observed(&self, response: &ParticipantResponse) -> String {
-        if !response.choice.trim().is_empty() {
+    fn observed(&self, response: Option<&ParticipantResponse>) -> String {
+        if let Some(response) = response.filter(|response| !response.choice.trim().is_empty()) {
             return response.choice.trim().into();
         }
         let choices: Vec<_> = self
@@ -468,7 +466,9 @@ impl ChoicePolicy {
         if policy.contains("mouse_quadrant")
             || (policy.contains("quadrant") && policy.contains("mouse"))
         {
-            let Some((left, upper)) = axis_low(response.x).zip(axis_low(response.y)) else {
+            let Some((left, upper)) = axis_low(response.and_then(|response| response.x))
+                .zip(axis_low(response.and_then(|response| response.y)))
+            else {
                 return String::new();
             };
             let (side, index) = match (left, upper) {
@@ -485,7 +485,9 @@ impl ChoicePolicy {
         }
         let vertical = policy.contains("mouse_y_split")
             || (policy.contains("vertical") && policy.contains("mouse"));
-        let Some(low) = axis_low(if vertical { response.y } else { response.x }) else {
+        let Some(low) =
+            axis_low(response.and_then(|response| if vertical { response.y } else { response.x }))
+        else {
             return String::new();
         };
         let side = match (vertical, low) {
@@ -563,6 +565,42 @@ impl DataMinRow {
     pub fn fields(&self) -> &[String; 18] {
         &self.fields
     }
+}
+
+/// Use the existing CSV encoder, including V1 CRLF records and quoting. Disk
+/// writes remain the native adapter's responsibility.
+pub fn encode_data_min_csv(
+    rows: &[DataMinRow],
+    include_header: bool,
+) -> Result<Vec<u8>, ExecutionError> {
+    let mut writer = csv::WriterBuilder::new()
+        .terminator(csv::Terminator::CRLF)
+        .from_writer(Vec::new());
+    if include_header {
+        writer.write_record(DATA_MIN_FIELDNAMES).map_err(|error| {
+            ExecutionError::new(
+                ExecutionErrorCode::CsvInvalid,
+                "The result CSV cannot be encoded.",
+                error.to_string(),
+            )
+        })?;
+    }
+    for row in rows {
+        writer.write_record(row.fields()).map_err(|error| {
+            ExecutionError::new(
+                ExecutionErrorCode::CsvInvalid,
+                "The result CSV cannot be encoded.",
+                error.to_string(),
+            )
+        })?;
+    }
+    writer.into_inner().map_err(|error| {
+        ExecutionError::new(
+            ExecutionErrorCode::CsvInvalid,
+            "The result CSV cannot be encoded.",
+            error.to_string(),
+        )
+    })
 }
 
 /// Filler/debug trials do not enter Data_min or advance its global counter.

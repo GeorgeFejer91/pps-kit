@@ -18,9 +18,9 @@ pub use ledger::{
     MAX_LEDGER_JSON_DEPTH, MAX_LEDGER_JSON_NODES, MAX_LEDGER_PAYLOAD_BYTES,
 };
 pub use response::{
-    data_min_row, score_trial_response, DataMinRow, ParticipantResponse, TrialResponseScore,
-    TrialResponseWindow, DATA_MIN_FIELDNAMES, MAX_TRIAL_RESPONSES, RESPONSE_MAX_RT_NS,
-    RESPONSE_MIN_RT_NS,
+    data_min_row, encode_data_min_csv, score_trial_response, DataMinRow, ParticipantResponse,
+    TrialResponseScore, TrialResponseWindow, DATA_MIN_FIELDNAMES, MAX_TRIAL_RESPONSES,
+    RESPONSE_MAX_RT_NS, RESPONSE_MIN_RT_NS,
 };
 pub use schedule::{
     compile_block_schedule, compile_verified_block_schedule, BlockEventSchedule,
