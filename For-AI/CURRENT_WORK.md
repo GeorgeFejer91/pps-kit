@@ -19,7 +19,7 @@ Updated: 2026-09-27. Replace at task/stage transitions; do not append command lo
   Explicit audio preflight now installs a bounded native event journal using
   the existing authority schema. Writer/admission failures interrupt and disarm
   active state; partial files are retained and cannot certify a completed run.
-  The review branch also binds cached media through that authority: immutable
+  The native authority also binds cached media: immutable
   PCM is shared, stale handoffs abort, and callback metadata enters the same
   journal. Preparation remains silent, non-executable, and unqualified.
   Stop interrupts a verified package and the demo completion command rejects
@@ -34,9 +34,10 @@ Updated: 2026-09-27. Replace at task/stage transitions; do not append command lo
   observed devices and routes; software tests cannot supply physical evidence.
 - **Local constraint:** full native builds and the complete Standard tier need
   additional storage (documented working allowance: 15 GiB). Source checks and
-  CI continue; an alternate location or free space has been requested. C: is
-  currently full. Native authority integration stays on
-  `review/native-playback-authority` until local synchronization is possible.
+  CI continue; an alternate location or free space has been requested. About
+  309 MiB became available, allowing source synchronization and local formatting
+  checks. Native source gates now pass on Windows, macOS, and Linux; full build
+  storage and installed verification are still missing.
 
 Detailed run artifacts stay in ignored validation folders. Preserve the pre-sync
 Git bundle and dirty-file backup until reconciliation is verified.

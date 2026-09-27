@@ -14,7 +14,7 @@ Status applies to the stated surface, not to the whole product.
 | 6 | PARTIAL: actual Pretext, explicit no-fit, complete labels, narrow/enlarged text and spacing | Actual WebViews and full accessibility qualification |
 | 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full planner scheduling UI and native profile assembly |
 | 8 | VERIFIED: plan/resource preflight; staged stimulus/source/cancel fences; segment rollback | Qualify additional generation routes if selected |
-| 9 | PARTIAL: existing renderer bound to exact CPAL output; silent preparation, sole native port, fenced controls; review branch attaches the port to the execution actor and journals bounded callback records | Native start/response/durable results/completion, local synchronization and actual installed experiment; current shell remains non-executable |
+| 9 | PARTIAL: existing renderer bound to exact CPAL output; silent preparation, sole native port, fenced controls; execution actor owns the port and journals bounded callback records | Native start/response/durable results/completion and actual installed experiment; current shell remains non-executable |
 | 10 | PARTIAL: shared contracts; actual JSON → existing compatibility assembler; sample/tactile/CSV oracle passes | Native assembly/execution capability |
 | 11 | PARTIAL: same typed authority, shared action fixture, fresh state, native scopes | Real-package execution commands |
 | 12 | PARTIAL: retry fences plus one bounded native event journal, fsync-confirmed prefixes, retained partial files, callback metadata resolution and fail-closed safety | Real response/results publication and complete native execution |
@@ -72,8 +72,12 @@ Source and package evidence:
   this source revision are separate from installed or physical qualification.
 
 
-- Native playback authority integration is staged on
-  [`review/native-playback-authority`](https://github.com/GeorgeFejer91/pps-kit/tree/review/native-playback-authority).
+- Native playback authority source **77eedb19ed3588dc35b8a41268f78e1dffd78407**:
+  [Core/Desktop/oracle/browser checks passed on all three platforms](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36340927434).
+  Each desktop suite passes 129 checks; five new checks cover shared PCM ownership,
+  original metadata resolution, stale fences, silent preparation, and the
+  distinction between source submission and physical completion. Two shared-core
+  checks cover local/remote Stop and rejected demo completion for real packages.
   It reuses the decoded plan without a PCM copy, keeps one native playback port
   across bounded mailbox retries, validates the current cache/run/journal before
   accepting it, and aborts stale or abandoned ports. Callback schedule metadata
@@ -81,9 +85,10 @@ Source and package evidence:
   explicitly unqualified. Silent preparation does not enable Start or certify
   completion. Verified package Stop remains interrupted/partial, including
   phone-issued Stop; the demo completion command is rejected for that package.
-  Cross-platform validation must pass before source promotion.
-  The local main checkout remains at `60b8f664`: C: has no free storage, so this
-  review branch is not yet synchronized to the PC or installed.
+  The source is synchronized to this PC and local formatting/whitespace checks
+  pass. The CI validation installers are separate deliverables and were still
+  building at this source checkpoint. Full native build storage and installed
+  verification remain outstanding.
 
 No participant acquisition, scientific replication effect, physical onset,
 installed application behavior, or newly qualified route is claimed here.
