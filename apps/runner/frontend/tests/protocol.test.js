@@ -688,6 +688,95 @@ test("controller pending state survives diagnostic remote errors and clears on t
   assert.equal(pendingChanges, 4, "every terminally abandoned pending command publishes a UI state change");
 });
 
+test("authenticated control waits for fresh state and a lost acknowledgement becomes unknown without replay", async (context) => {
+  const sockets = linkedSockets();
+  const timers = new ManualTimeouts();
+  const intervals = new ManualIntervals();
+  const secret = Buffer.alloc(32, 29).toString("base64url");
+  const snapshot = publicSnapshot({ allowedActions: ["run.pause"] });
+  let publicationAllowed = false;
+  let appliedCount = 0;
+  let finishCommand;
+  const controller = new BrspControllerSession({
+    url: "wss://lab.example/ws/lifecycle", secret, targetId: "target-alpha",
+    sessionId: "session-lifecycle", requestedScopes: ["session.read", "session.transport"],
+    socketFactory: () => sockets.controller, now: timers.now,
+    setIntervalFn: intervals.setInterval, clearIntervalFn: intervals.clearInterval,
+  });
+  const target = new BrspTargetSession({
+    url: "wss://lab.example/ws/lifecycle", secret, targetId: "target-alpha",
+    sessionId: "session-lifecycle", availableScopes: ["session.read", "session.transport"],
+    actions: ["run.pause"], getSnapshot: () => snapshot,
+    canPublishTargetState: () => publicationAllowed,
+    stateHeartbeatEnabled: false, socketFactory: () => sockets.target,
+    applyCommand: () => {
+      appliedCount += 1;
+      return new Promise((resolve) => { finishCommand = resolve; });
+    },
+  });
+  context.after(() => {
+    finishCommand?.({ status: "accepted", snapshot });
+    controller.stop(); target.stop();
+  });
+  await connectSessions(controller, target, sockets);
+  assert.equal(controller.phase, "ready");
+  assert.equal(controller.status().controlReady, false);
+  assert.throws(() => controller.sendCommand("run.pause"), /fresh target snapshot/u);
+  publicationAllowed = true;
+  const fresh = eventOnce(controller, "snapshot");
+  controller.requestSnapshot();
+  await fresh;
+  assert.equal(controller.status().controlReady, true);
+  const unknown = eventOnce(controller, "commandunknown");
+  const commandId = controller.sendCommand("run.pause");
+  await settleMicrotasks();
+  assert.equal(appliedCount, 1);
+  for (let step = 0; step < 5; step += 1) {
+    timers.advance(2_000); intervals.tickAll(); await settleMicrotasks();
+  }
+  assert.deepEqual((await unknown).detail, { id: commandId, action: "run.pause", reason: "ack_timeout" });
+  assert.equal(controller.status().controlReady, false);
+  assert.equal(controller.status().pendingCommands, 0);
+  assert.equal(appliedCount, 1, "a timed-out click is never resent with a new command ID");
+  assert.equal(sockets.controller.sent.filter((frame) => parseControlFrame(frame).type === "command").length, 1);
+  assert.throws(() => controller.sendCommand("run.pause"));
+});
+
+test("browser target rejects an evicted command ID instead of reapplying its side effect", async (context) => {
+  const sockets = linkedSockets();
+  const secret = Buffer.alloc(32, 31).toString("base64url");
+  const snapshot = publicSnapshot({ allowedActions: ["session.note"] });
+  let appliedCount = 0;
+  const controller = new BrspControllerSession({
+    url: "wss://lab.example/ws/eviction", secret, targetId: "target-alpha",
+    sessionId: "session-eviction", requestedScopes: ["session.read", "session.annotate"],
+    socketFactory: () => sockets.controller,
+  });
+  const target = new BrspTargetSession({
+    url: "wss://lab.example/ws/eviction", secret, targetId: "target-alpha",
+    sessionId: "session-eviction", availableScopes: ["session.read", "session.annotate"],
+    actions: ["session.note"], getSnapshot: () => snapshot,
+    socketFactory: () => sockets.target,
+    applyCommand: () => { appliedCount += 1; return { status: "accepted", snapshot }; },
+  });
+  context.after(() => { controller.stop(); target.stop(); });
+  await connectSessions(controller, target, sockets);
+  let firstFrame;
+  for (let index = 0; index < 130; index += 1) {
+    const applied = eventOnce(controller, "commandapplied");
+    controller.sendCommand("session.note", { text: `note ${index}` });
+    if (index === 0) firstFrame = JSON.parse(sockets.controller.sent.at(-1));
+    assert.equal((await applied).detail.status, "accepted");
+  }
+  assert.equal(appliedCount, 130);
+  assert.equal(target.connection.commandResults.size, 128);
+  const expired = eventOnce(controller, "commandapplied");
+  firstFrame.sequence = controller.connection.nextControlSequence();
+  controller.connection.sendControlEnvelope(firstFrame);
+  assert.equal((await expired).detail.reason, "command_outcome_expired");
+  assert.equal(appliedCount, 130, "an evicted command cannot repeat its effect");
+});
+
 test("target publication stays private until application authority permits it", async () => {
   const sockets = linkedSockets();
   const secret = Buffer.alloc(32, 14).toString("base64url");

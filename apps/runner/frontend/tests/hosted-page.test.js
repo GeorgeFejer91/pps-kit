@@ -32,6 +32,9 @@ test("hosted companion declares a restrictive browser-only document policy", () 
   assert.match(companionHtml, /id="phone-response"[^>]*disabled>Tap response/u);
   assert.match(companionHtml, /id="embedding-warning"[^>]*role="alert"[^>]*hidden/u);
   assert.match(companionHtml, /After target-local approval, fresh credentials go only to that exact requester/u);
+  const controllerHtml = companionHtml.slice(companionHtml.indexOf('id="controller-mode"'), companionHtml.indexOf('id="target-mode"'));
+  assert.doesNotMatch(controllerHtml, /remote-participant|setup\.submit|Exploratory browser timing/u);
+  assert.match(controllerHtml, /value="observer">Observe only/u);
   assert.match(companionHtml, /\.\.\/vendor\/vdoninja\/1\.5\.5\/vdoninja-sdk\.min\.js/u);
   assert(
     companionHtml.indexOf("vdoninja-sdk.min.js") < companionHtml.indexOf('type="module"'),

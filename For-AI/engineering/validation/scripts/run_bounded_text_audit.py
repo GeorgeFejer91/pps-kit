@@ -95,6 +95,55 @@ def main() -> int:
                     page.locator(selector).scroll_into_view_if_needed()
                 page.screenshot(path=str(output / f"{app}-{width}.png"))
                 results.append({"app": app, **state})
+        page.set_viewport_size({"width": 320, "height": 900})
+        page.goto(f"{base}/apps/runner/compiled/companion/index.html", wait_until="networkidle")
+        page.locator('[data-mode="target"]').click()
+        page.locator("#create-phone-target").click()
+        page.locator("#phone-prepare").click()
+        page.locator("#phone-setup").click()
+        page.locator("#phone-audio-enabled").uncheck()
+        page.locator("#phone-vibration-enabled").uncheck()
+        page.locator("#arm-phone").click()
+        page.locator("#phone-start").click()
+        page.wait_for_function("document.querySelector('#phone-run-state').textContent === 'Running'")
+        page.evaluate('''() => {
+          Object.defineProperty(document, 'visibilityState', {configurable:true, get:()=>'hidden'});
+          document.dispatchEvent(new Event('visibilitychange'));
+          document.dispatchEvent(new Event('freeze'));
+          window.dispatchEvent(new Event('pagehide'));
+        }''')
+        page.wait_for_function("document.querySelector('#phone-start').disabled && document.querySelector('#disarm-phone').disabled")
+        page.evaluate('''() => {
+          Object.defineProperty(document, 'visibilityState', {configurable:true, get:()=>'visible'});
+          window.dispatchEvent(new Event('pageshow'));
+          document.dispatchEvent(new Event('resume'));
+        }''')
+        assert page.locator("#phone-run-state").inner_text() == "Interrupted"
+        assert page.locator("#phone-start").is_disabled()
+        assert page.locator("#disarm-phone").is_disabled()
+        page.locator("#phone-run-state").scroll_into_view_if_needed()
+        page.screenshot(path=str(output / "phone-suspended-output.png"))
+        results.append({"app": "phone", "suspension": "outputs_disarmed_no_replay", "physical_qualification": False})
+        page.evaluate('''() => {
+          document.documentElement.style.fontSize = '32px';
+          for (const node of document.querySelectorAll('*')) {
+            node.style.letterSpacing = '0.12em'; node.style.wordSpacing = '0.16em';
+          }
+        }''')
+        page.wait_for_timeout(150)
+        page.locator("#phone-run-state").scroll_into_view_if_needed()
+        enlarged = page.evaluate('''() => ({width:document.documentElement.clientWidth,
+          scroll:document.documentElement.scrollWidth})''')
+        if enlarged["scroll"] > enlarged["width"] + 1:
+            enlarged["overflow"] = page.evaluate('''() => [...document.querySelectorAll('body *')]
+              .filter(node=>node.getBoundingClientRect().right>321 || node.scrollWidth>node.clientWidth+1)
+              .map(node=>({tag:node.tagName,id:node.id,cls:node.className,
+                right:node.getBoundingClientRect().right, width:node.clientWidth, scroll:node.scrollWidth,
+                text:node.textContent.slice(0,70)})).slice(0,16)''')
+            page.screenshot(path=str(output / "phone-target-enlarged-failure.png"))
+        assert enlarged["scroll"] <= enlarged["width"] + 1, enlarged
+        page.screenshot(path=str(output / "phone-target-enlarged-spacing.png"))
+        results.append({"app": "phone", "enlarged_text_and_spacing": True, **enlarged})
         browser.close()
     (output / "report.json").write_text(json.dumps({"passed": True, "cases": results}, indent=2), encoding="utf-8")
     print(f"Passed {len(results)} rendered cases; screenshots: {output}")

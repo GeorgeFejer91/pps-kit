@@ -1,54 +1,31 @@
 # Current work
 
-Updated: 2026-09-27. Replace at a meaningful task/stage transition; do not
-append command logs or machine-specific paths.
+Updated: 2026-09-27. Replace at task/stage transitions; do not append command logs.
 
-- **Domain:** experiment runtime, with design/UI and release handoffs.
-- **Outcome:** implement all 17 approved [audit items](engineering/validation/docs/unification-and-critical-audit-2026-09-27.md)
-  using Ponytail and existing centralized owners. Designer creates/previews
-  spatial stimuli and exports JSON ingredients/file/assembly profiles; Runner
-  reads them, executes experiments, and records data. The existing 3DTI adapter,
-  3D viewer, schemas, and profile pipeline are the starting point.
-- **Stage:** planner JSON handoff and shared text measurement, followed by independently verified implementation
-  checkpoints, local UI previews, source promotion, packaged candidates, and
-  measured qualification. The audit is approved; do not ask again to implement
-  its scoped proposals. Physical evidence cannot be replaced by software tests.
-- **Baseline:** source is synchronized at `8daf723`; one local/public branch and
-  one registered worktree remain. Candidate native output is non-executable and
-  unqualified. Native source gates are restored; full-suite testing exceeded local
-  storage. An alternate build/test location or additional free space is requested.
-- **Evidence:** prior synchronization and test evidence is retained in the audit.
-  Centralized validator-source and owning coverage checks passed: 18 tests,
-  with one existing unavailable-local-source skip. Rust formatting now passes;
-  core and Python/Rust oracle checks passed on three CI platforms at `3e6eeb4`;
-  desktop, core, browser, Python/Rust oracle, and optional Android checks passed
-  at `9290bea`, including validation package builds on three platforms. Installed
-  and physical qualification remain separate. Native output completion
-  releases its operation guard before replying and has a reserve/disable/stale
-  policy integration check. Pytest uses native successful-scratch cleanup
-  and one failed-run retention instead of a new helper. Designer Vite 6.4.3 and
-  the transitive nanoid patch report zero npm vulnerabilities. Its canonical
-  build, 12-case inspected layout audit, and Pages assembly/parity passed.
-  The new local experiment JSON freezes the already approved Segment 5/6 plan
-  and verifies its file inventory before compatibility Runner assembly. Both
-  direct and JSON preparation pass the existing sample/tactile/CSV contract;
-  changed-ingredient and stale/incomplete export denial checks pass.
-  The JSON action, planner disclosures, and shared Designer/Runner Pretext owner
-  pass the inspected 12-case planner audit and 13 rendered text cases. Runner's
-  57 browser checks and canonical Pages assembly byte checks pass. Actual
-  WebView accessibility qualification remains pending.
-- **Next gate:** connect native output execution and phone lifecycle/roles.
-  Source/cancellation publication fences pass owning checks, including stale
-  rendering, cancelled rendering, renderer failure, segment rollback, and the
-  cancellation/publication race. Four segment jobs share one completion handler.
-  Shared plan/CSV limits and audio memory/storage preflight pass 53 design/profile/
-  job checks and 15 actual Segment package assembly checks, including JSON input.
-  Low-storage denial occurs before decoded audio allocation. Live Pages matches
-  37 canonical files; viewer text newline handling is now explicit across platforms.
-  Closed local/remote action permissions and generation-scoped retry fences pass
-  22 Rust contract/core tests, Clippy, and 58 browser checks. Tombstones prevent
-  eviction replay; authorization is rechecked for cached outcomes. Participant
-  setup stays local and is omitted from offered public actions.
+- **Approved goal:** implement all 17 [audit items](engineering/validation/docs/unification-and-critical-audit-2026-09-27.md).
+  Use Ponytail and existing owners. Planner creates/previews looming stimuli
+  and exports JSON ingredients/file/assembly profiles; Runner consumes them,
+  executes experiments, and records the specified data. Do not ask again for
+  approval of the scoped proposals.
+- **Domain:** [experiment runtime](domains/experiment-runtime.md), with design/UI
+  and release handoffs. Reuse 3DTI, the 3D viewer, Segment 0–6, existing schemas,
+  bounded jobs, native execution ownership, and Python/Rust oracle fixtures.
+- **Source stage:** JSON export/compatibility assembly, bounded generation and
+  publication, shared Pretext, dependency patches, local setup permissions,
+  retry fences, and phone suspension/recovery are implemented. The main phone
+  flow is Pair → fresh state → permitted action; exploratory phone outputs stay
+  separate. One main branch and one registered worktree remain.
+- **Evidence:** use the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md).
+  Source, CI packages, installed behavior, physical timing, participant results,
+  and published replication are distinct gates. The existing installed
+  compatibility Runner has not been rebuilt in this task.
+- **Next gate:** connect one real prepared package to Rust media output,
+  response/event persistence, and safe execution. Candidate native output still
+  reserves silence and is non-executable/unqualified. Qualification requires
+  observed devices and routes; software tests cannot supply physical evidence.
+- **Local constraint:** full native builds and the complete Standard tier need
+  additional storage (documented working allowance: 15 GiB). Source checks and
+  CI continue; an alternate location or free space has been requested.
 
-Detailed run artifacts belong in ignored validation folders. Preserve the
-pre-sync Git bundle and dirty-file backup until reconciliation is verified.
+Detailed run artifacts stay in ignored validation folders. Preserve the pre-sync
+Git bundle and dirty-file backup until reconciliation is verified.

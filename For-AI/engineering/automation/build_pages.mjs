@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /** Assemble the ignored GitHub Pages artifact from canonical product inputs. */
 
-import { cp, mkdir, readFile, rm, stat } from "node:fs/promises";
+import { cp, lstat, mkdir, readFile, rm, stat } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -26,6 +26,34 @@ const companionResources = [
   ...companionAssets.map((asset) => `../assets/${asset}`),
   "../vendor/vdoninja/1.5.5/vdoninja-sdk.min.js",
 ].sort();
+const canonicalOutput = join(root, "dist", "pages");
+
+async function prepareOutput(output) {
+  const resolved = resolve(output);
+  const existing = await lstat(resolved).catch((error) => {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  });
+  if (existing && resolved !== canonicalOutput) {
+    throw new Error("A custom Pages output must be a new directory; existing files are preserved.");
+  }
+  // Windows junctions are symbolic links to Node. Check every ancestor before
+  // replacing the one owned artifact directory or writing a fresh custom one.
+  for (let path = resolved; ; path = dirname(path)) {
+    const details = await lstat(path).catch((error) => {
+      if (error.code === "ENOENT") return null;
+      throw error;
+    });
+    if (details?.isSymbolicLink()) throw new Error("Pages output cannot traverse a symbolic link or junction.");
+    if (dirname(path) === path) break;
+  }
+  if (existing) {
+    if (!existing.isDirectory()) throw new Error("The canonical Pages output must be a directory.");
+    await rm(resolved, { recursive: true });
+  }
+  await mkdir(resolved, { recursive: true });
+  return resolved;
+}
 
 async function requireFile(path, label) {
   const details = await stat(path).catch(() => null);
@@ -54,7 +82,7 @@ function referencedCompanionResources(html) {
   return [...scripts, ...links].sort();
 }
 
-export async function assemblePages(output = join(root, "dist", "pages")) {
+export async function assemblePages(output = canonicalOutput) {
   const resolvedOutput = resolve(output);
   const companionIndex = join(runnerCompiled, "companion", "index.html");
 
@@ -79,8 +107,7 @@ export async function assemblePages(output = join(root, "dist", "pages")) {
     );
   }
 
-  await rm(resolvedOutput, { recursive: true, force: true });
-  await mkdir(resolvedOutput, { recursive: true });
+  await prepareOutput(resolvedOutput);
   await cp(website, resolvedOutput, { recursive: true });
   await cp(designerCompiled, join(resolvedOutput, "app"), { recursive: true });
   await cp(join(designerFrontend, "pps_toolkit_icon.png"), join(resolvedOutput, "app", "pps_toolkit_icon.png"));

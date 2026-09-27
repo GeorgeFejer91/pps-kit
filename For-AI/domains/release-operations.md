@@ -39,3 +39,9 @@ public routes, and exclusion of `For-AI/` from every distribution.
 Report each relevant gate as **VERIFIED**, **PARTIAL**, **BLOCKED**, or
 **NOT RUN**, with the observed surface and missing evidence. A guidance review
 does not qualify runtime code, installed packages, or scientific performance.
+
+Pages assembly replaces only its owned dist/pages artifact directory after
+checking every ancestor for symlinks/junctions. Custom outputs must be new;
+existing contents are preserved. Canonical public inputs are compared byte for
+byte during staging. The current task's compact evidence/remaining-gate record
+is [implementation status](../engineering/validation/docs/implementation-status-2026-09-27.md).

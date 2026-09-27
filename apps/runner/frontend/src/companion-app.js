@@ -3,6 +3,7 @@ import {
   DEFAULT_REMOTE_SCOPES,
   SCOPES,
   requiredScope,
+  publicRunnerSnapshot,
 } from "./domain/runner-contract.js";
 import {
   allowedPhoneActions,
@@ -22,6 +23,7 @@ import { createPairingSecret, createProtocolEpoch, createProtocolIdentity } from
 import { PpsVdoTransport, generateVdoRoomId } from "./remote/vdo-transport.js";
 import { PpsPublicBeacon } from "./remote/vdo-beacon.js";
 import { BrspControllerSession, BrspTargetSession } from "./remote/websocket-session.js";
+import { installBrowserLifecycle } from "./remote/browser-lifecycle.js";
 import { renderQrCode } from "./ui/qr-code.js";
 import { initializeTextLayout } from "./ui/text-layout.js";
 
@@ -40,6 +42,8 @@ let phoneSnapshot = null;
 let targetInvitationUrl = "";
 let eventLog = [];
 let toastTimer = null;
+let browserActive = true;
+let resumeController = false;
 
 function clock() {
   return {
@@ -97,7 +101,7 @@ function renderControllerSnapshot(snapshot) {
 
 function updateControllerActions() {
   const status = controllerSession?.status();
-  const ready = status?.phase === "ready";
+  const ready = browserActive && status?.controlReady === true;
   const busy = status?.reliableCommandBusy === true;
   const granted = new Set(status?.grantedScopes || []);
   const allowed = new Set(status?.snapshot?.allowed_actions || []);
@@ -108,37 +112,63 @@ function updateControllerActions() {
   });
   text("controller-scopes", status?.grantedScopes?.length ? status.grantedScopes.join(", ") : "None");
   text("controller-pending", status?.pendingCommands ?? 0);
+  elements["controller-session-panel"].hidden = !ready;
+  elements["controller-role"].disabled = Boolean(status && !["idle", "closed", "error", "disconnected"].includes(status.phase));
+  let next = controllerInvitation ? "Invitation ready. Press Connect." : "Scan the runner's QR code to begin.";
+  if (!browserActive) next = "Control suspended while this page is hidden or offline.";
+  else if (status?.phase === "ready" && !ready) next = "Authenticated. Waiting for fresh target state…";
+  else if (ready) {
+    const current = status.snapshot;
+    next = !granted.has(SCOPES.TRANSPORT) ? "Observe only. State comes from the target."
+      : busy ? "Command sent. Waiting for the target's acknowledgement…"
+        : !current.setup?.ready ? "Complete participant setup on the computer."
+          : !current.safety?.local_armed ? "Arm outputs on the computer."
+            : current.run?.phase === "running" ? "Running. Pause or stop when needed."
+              : current.run?.phase === "paused" ? "Paused. Review the target, then resume when ready."
+                : "Ready. Choose the next permitted action below.";
+  } else if (["connecting", "authenticating"].includes(status?.phase)) next = "Connecting to the target…";
+  else if (["closed", "error", "disconnected"].includes(status?.phase)) next = "Connection lost. Press Connect to fetch fresh target state.";
+  text("controller-next-step", next);
+  if (ready) setConnectionStatus("ready", granted.has(SCOPES.TRANSPORT) ? "Controls ready" : "Observe only");
 }
 
 function bindControllerSession(session) {
-  session.addEventListener("phasechange", (event) => {
-    setConnectionStatus(event.detail.phase, event.detail.message);
-    elements["controller-connect"].disabled = !["idle", "closed", "error"].includes(event.detail.phase);
+  const on = (type, handler) => session.addEventListener(type, (event) => {
+    if (controllerSession === session) handler(event);
+  });
+  on("phasechange", (event) => {
+    setConnectionStatus(event.detail.phase, titleCase(event.detail.phase));
+    elements["controller-connect"].disabled = !browserActive || !["idle", "closed", "error", "disconnected"].includes(event.detail.phase);
     elements["controller-stop"].disabled = ["idle", "closed"].includes(event.detail.phase);
     updateControllerActions();
   });
-  session.addEventListener("ready", (event) => {
+  on("ready", (event) => {
     text("controller-scopes", event.detail.grantedScopes.join(", "));
-    showToast("Mutual proof verified. Controls reflect target-returned state.");
+    showToast("Pairing verified. Waiting for fresh target state.");
     updateControllerActions();
   });
-  session.addEventListener("snapshot", (event) => renderControllerSnapshot(event.detail.snapshot));
-  session.addEventListener("pendingchange", updateControllerActions);
-  session.addEventListener("commandapplied", (event) => {
+  on("snapshot", (event) => renderControllerSnapshot(event.detail.snapshot));
+  on("pendingchange", updateControllerActions);
+  on("commandunknown", (event) => {
+    elements["controller-outcome"].hidden = false;
+    text("controller-outcome", `${titleCase(event.detail.action)} outcome unknown. Reconnect and check the target before issuing another action. No command was retried.`);
+    updateControllerActions();
+  });
+  on("commandapplied", (event) => {
     const accepted = event.detail.status !== "rejected";
     showToast(`${event.detail.action}: ${event.detail.reason}`, { error: !accepted });
     updateControllerActions();
   });
-  session.addEventListener("protocolerror", (event) => showToast(event.detail.message, { error: true }));
-  session.addEventListener("remoteerror", (event) => showToast(event.detail.message, { error: true }));
-  session.addEventListener("relaypeer", (event) => {
+  on("protocolerror", (event) => { showToast(event.detail.message, { error: true }); updateControllerActions(); });
+  on("remoteerror", (event) => showToast(event.detail.message, { error: true }));
+  on("relaypeer", (event) => {
     const message = event.detail.message || "Relay peer state changed.";
     showToast(message);
   });
-  session.addEventListener("transportstatus", (event) => {
+  on("transportstatus", (event) => {
     if (event.detail?.message) text("controller-transport", `VDO data-only · ${event.detail.message}`);
   });
-  session.addEventListener("quality", (event) => {
+  on("quality", (event) => {
     const route = event.detail?.route || "unknown";
     const rtt = Number.isFinite(event.detail?.rttMs) ? ` · ${event.detail.rttMs} ms RTT` : "";
     text("controller-transport", `VDO data-only · ${route}${rtt}`);
@@ -155,6 +185,7 @@ function vdoTransport({ role, room, secret, targetId }) {
 }
 
 function requestedControllerScopes() {
+  if (elements["controller-role"].value === "observer") return [SCOPES.READ];
   return [...DEFAULT_REMOTE_SCOPES, SCOPES.ANNOTATE, SCOPES.ABORT].sort();
 }
 
@@ -332,10 +363,10 @@ function initializeInvitation() {
   }
 }
 
-function bindControllerControls() {
-  elements["controller-connect"].addEventListener("click", () => {
+function connectController() {
     if (!controllerInvitation) return;
     try {
+      if (!browserActive) throw new Error("Return to this page while online before connecting.");
       if (controllerInvitation.expiresUnixMs && controllerInvitation.expiresUnixMs <= Date.now()) {
         controllerInvitation = null;
         elements["controller-connect"].disabled = true;
@@ -362,29 +393,28 @@ function bindControllerControls() {
         secret: controllerInvitation.secret,
         targetId: controllerInvitation.targetId,
         sessionId: controllerInvitation.sessionId,
-        requestedScopes: controllerInvitation.requestedScopes,
+        requestedScopes: elements["controller-role"].value === "observer"
+          ? controllerInvitation.requestedScopes.filter((scope) => scope === SCOPES.READ)
+          : controllerInvitation.requestedScopes,
       });
       bindControllerSession(controllerSession);
       controllerSession.connect();
     } catch (error) { showToast(error.message, { error: true }); }
+}
+
+function bindControllerControls() {
+  elements["controller-connect"].addEventListener("click", connectController);
+  elements["controller-stop"].addEventListener("click", () => {
+    resumeController = false;
+    controllerSession?.stop();
   });
-  elements["controller-stop"].addEventListener("click", () => controllerSession?.stop());
+  elements["controller-role"].addEventListener("change", updateControllerActions);
 
   document.querySelectorAll("[data-remote-action]").forEach((button) => {
     button.addEventListener("click", () => {
       const action = button.dataset.remoteAction;
       let args = {};
-      if (action === "setup.submit") {
-        args = {
-          participant_code: elements["remote-participant-code"].value,
-          participant_name: "",
-          name_sharing_opt_in: false,
-          age: Number(elements["remote-participant-age"].value),
-          handedness: elements["remote-participant-handedness"].value,
-          gender: elements["remote-participant-gender"].value,
-          part_labels: controllerSession.snapshot?.setup?.part_labels ?? { "1": "Part 1", "2": "Part 2" },
-        };
-      } else if (action === "session.note") {
+      if (action === "session.note") {
         args = { text: elements["remote-note"].value };
       } else if (action === "part.start") {
         args = { part_number: controllerSession.snapshot?.part?.selected_part ?? controllerSession.snapshot?.part?.available_parts?.[0] ?? 1 };
@@ -458,7 +488,7 @@ function applyPhone(action, args = {}, { source = "local", expectedRevision = nu
   appendEvent(outcome.event, source);
   if (outcome.status === "accepted") applyEffects(outcome.effects);
   renderPhoneSnapshot();
-  if (publish && phoneTarget?.session?.phase === "ready") phoneTarget.session.publishState(phoneSnapshot);
+  if (publish && phoneTarget?.session?.phase === "ready") phoneTarget.session.publishState(publicRunnerSnapshot(phoneSnapshot));
   return outcome;
 }
 
@@ -481,7 +511,10 @@ function expirePhoneControllerLease() {
 }
 
 function bindTargetSession(session) {
-  session.addEventListener("phasechange", (event) => {
+  const on = (type, handler) => session.addEventListener(type, (event) => {
+    if (phoneTarget?.session === session) handler(event);
+  });
+  on("phasechange", (event) => {
     setConnectionStatus(event.detail.phase, event.detail.message);
     if (phoneSnapshot) {
       phoneSnapshot = setPhoneConnectionMetadata(phoneSnapshot, {
@@ -495,7 +528,7 @@ function bindTargetSession(session) {
     elements["target-connect"].disabled = !["idle", "closed", "error"].includes(event.detail.phase);
     elements["target-disconnect"].disabled = ["idle", "closed"].includes(event.detail.phase);
   });
-  session.addEventListener("ready", () => {
+  on("ready", () => {
     if (phoneTarget?.session === session && phoneTarget.offerExpiresUnixMs
       && Date.now() >= phoneTarget.offerExpiresUnixMs) {
       if (phoneTarget.offerTimer) clearTimeout(phoneTarget.offerTimer);
@@ -515,11 +548,11 @@ function bindTargetSession(session) {
       clock,
     });
     renderPhoneSnapshot();
-    session.publishState(phoneSnapshot);
+    session.publishState(publicRunnerSnapshot(phoneSnapshot));
     appendEvent({ action: "remote.ready", revision: phoneSnapshot.revision, unix_ms: Date.now() }, "target");
     showToast("Controller authenticated. Local phone target remains authoritative.");
   });
-  session.addEventListener("leaserenewed", (event) => {
+  on("leaserenewed", (event) => {
     if (!phoneSnapshot) return;
     phoneSnapshot = setPhoneConnectionMetadata(phoneSnapshot, {
       connectionState: "ready",
@@ -529,14 +562,14 @@ function bindTargetSession(session) {
     });
     renderPhoneSnapshot();
   });
-  session.addEventListener("leaseexpired", (event) => {
+  on("leaseexpired", (event) => {
     showToast(event.detail.reason === "controller_lease_expired"
       ? "Controller heartbeat expired. The phone target paused and revoked remote authority."
       : "Controller disconnected. The phone target revoked remote authority.");
   });
-  session.addEventListener("protocolerror", (event) => showToast(event.detail.message, { error: true }));
-  session.addEventListener("remoteerror", (event) => showToast(event.detail.message, { error: true }));
-  session.addEventListener("relaypeer", (event) => showToast(event.detail.message || "Relay peer state changed."));
+  on("protocolerror", (event) => showToast(event.detail.message, { error: true }));
+  on("remoteerror", (event) => showToast(event.detail.message, { error: true }));
+  on("relaypeer", (event) => showToast(event.detail.message || "Relay peer state changed."));
 }
 
 async function createPhoneTarget({ pairing = null, autoConnect = false } = {}) {
@@ -575,7 +608,7 @@ async function createPhoneTarget({ pairing = null, autoConnect = false } = {}) {
       epoch,
       availableScopes,
       actions,
-      getSnapshot: () => phoneSnapshot,
+      getSnapshot: () => publicRunnerSnapshot(phoneSnapshot),
       applyCommand: targetCommandOutcome,
       onLeaseExpired: expirePhoneControllerLease,
     }),
@@ -778,14 +811,35 @@ function start() {
   bindPhoneTargetControls();
   updateControllerActions();
   setConnectionStatus("idle", "Not connected");
-  addEventListener("pagehide", () => {
-    controllerSession?.stop();
-    if (phoneTarget?.offerTimer) clearTimeout(phoneTarget.offerTimer);
-    phoneTarget?.session.stop();
-    void controllerBeacon?.stop();
-    void targetBeacon?.stop();
-    outputEngine.disarm();
-  }, { once: true });
+  installBrowserLifecycle({
+    suspend: () => {
+      browserActive = false;
+      clearTimeout(toastTimer);
+      elements["companion-toast"].classList.remove("is-visible");
+      resumeController = Boolean(controllerSession && ["connecting", "authenticating", "ready"].includes(controllerSession.phase));
+      controllerSession?.stop();
+      if (phoneTarget?.offerTimer) clearTimeout(phoneTarget.offerTimer);
+      phoneTarget?.session.stop();
+      if (phoneSnapshot) applyPhone("target.disarm", {}, { source: "browser-suspended" });
+      outputEngine.disarm();
+      void stopControllerBeacon();
+      void stopTargetBeacon();
+      elements["controller-connect"].disabled = true;
+      setConnectionStatus("suspended", "Suspended");
+      updateControllerActions();
+    },
+    resume: () => {
+      browserActive = true;
+      const reconnect = resumeController;
+      resumeController = false;
+      elements["controller-connect"].disabled = !controllerInvitation;
+      setConnectionStatus("idle", "Reconnecting");
+      updateControllerActions();
+      // One transport attempt. No experiment action or phone output is replayed.
+      if (reconnect) connectController();
+      else setConnectionStatus("idle", "Not connected");
+    },
+  });
 }
 
 start();

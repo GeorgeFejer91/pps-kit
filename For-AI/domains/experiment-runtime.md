@@ -64,3 +64,22 @@ Evicted IDs return `command_outcome_expired`; a full history denies new mutation
 until deliberate authority rotation while retaining reads and safe stop/disarm.
 Current epoch, scope, and lease checks also apply to cached outcomes. This is an
 in-memory guarantee; durable execution must retain its own result/journal evidence.
+
+Both browser controller surfaces use the same BRSP fresh-state gate and one
+reliable command slot. Pairing has a 10-second timeout; state expires after
+5 seconds; acknowledgements time out after 10 seconds using the existing
+heartbeat. Interrupted commands become explicitly unknown and are never
+automatically resent. Phone suspension stops transport and disarms exploratory
+outputs; resume makes at most one authentication/snapshot attempt and replays no
+experiment action. Old session callbacks cannot update a replacement session.
+The desktop native authority stays alive when its window is hidden; actual page
+closure stops its WebView producers, and resume restores native polling.
+Observer access requests only session.read. Phone targets publish the same
+participant-free public schema as native targets. Remembered device trust is
+not enabled; fresh high-entropy invitations and native grant/revocation remain
+the selected pairing policy.
+
+Exploratory browser targets also retain up to 4096 evicted protocol command IDs;
+eviction cannot reapply an old action. Native-backed BRSP targets delegate this
+decision to the Rust reducer rather than denying after native dispatch. Keep
+each authority's history and side-effect decision in the same owner.

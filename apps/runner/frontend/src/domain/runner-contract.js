@@ -328,6 +328,30 @@ export function validatePublicRunnerSnapshot(value) {
   return snapshot;
 }
 
+/** Phone output is exploratory; its participant setup still stays target-local. */
+export function publicRunnerSnapshot(value) {
+  const current = validateRunnerSnapshot(value);
+  const projection = {};
+  for (const field of [
+    "protocol", "target_id", "target_kind", "epoch", "revision", "server_unix_ms",
+    "server_monotonic_ns", "connection_state", "timing_tier", "package_verified",
+    "part", "run", "instruction_gate", "active_block",
+  ]) projection[field] = current[field];
+  projection.schema = PUBLIC_SNAPSHOT_SCHEMA;
+  projection.allowed_actions = current.allowed_actions.filter(isRemoteAction);
+  projection.setup = {
+    submitted: current.setup.submitted,
+    ready: current.setup.ready,
+    required_missing: current.setup.required_missing,
+  };
+  projection.safety = {};
+  for (const field of [
+    "lease_expires_at_unix_ms", "local_override", "local_armed", "audio_route_ready",
+    "publication_ready", "lsl_ready", "capture_started",
+  ]) projection.safety[field] = current.safety[field];
+  return validatePublicRunnerSnapshot(structuredClone(projection));
+}
+
 /** Browser/BRSP targets may publish either the native public projection or a
  * full browser-owned experiment snapshot. Exact schema dispatch prevents the
  * smaller projection from being mistaken for the operator-only shape. */

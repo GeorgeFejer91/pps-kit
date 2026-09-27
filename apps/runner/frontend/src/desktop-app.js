@@ -15,6 +15,7 @@ import {
 } from "./remote/websocket-session.js";
 import { renderQrCode } from "./ui/qr-code.js";
 import { initializeTextLayout } from "./ui/text-layout.js";
+import { installBrowserLifecycle } from "./remote/browser-lifecycle.js";
 
 initializeTextLayout();
 
@@ -737,7 +738,7 @@ function renderOutboundTargets(targets = []) {
 function updateOutboundControls() {
   const session = outboundController?.session;
   const current = session?.snapshot;
-  const ready = session?.phase === "ready";
+  const ready = session?.status().controlReady === true;
   const busy = session?.status().reliableCommandBusy === true;
   const granted = new Set(session?.grantedScopes ?? []);
   const allowed = new Set(current?.allowed_actions ?? []);
@@ -752,6 +753,8 @@ function renderOutboundSnapshot(next) {
   if (!next) return;
   text("desktop-controller-target", next.package_label || next.target_id);
   text("desktop-controller-revision", next.revision);
+  text("desktop-controller-status", "Target state current");
+  elements["desktop-controller-status"].dataset.tone = "ready";
   updateOutboundControls();
 }
 
@@ -764,15 +767,20 @@ function bindOutboundSession(controller) {
   });
   session.addEventListener("ready", () => {
     if (controller !== outboundController) return;
-    text("desktop-controller-status", "Private controller ready");
-    elements["desktop-controller-status"].dataset.tone = "ready";
-    text("desktop-controller-selection", "Mutual BRSP proof complete. Controls follow target-returned state only.");
+    text("desktop-controller-status", "Waiting for target state");
+    elements["desktop-controller-status"].dataset.tone = "";
+    text("desktop-controller-selection", "Pairing verified. Controls wait for fresh target state.");
     updateOutboundControls();
   });
   session.addEventListener("snapshot", (event) => {
     if (controller === outboundController) renderOutboundSnapshot(event.detail.snapshot);
   });
   session.addEventListener("pendingchange", updateOutboundControls);
+  session.addEventListener("commandunknown", (event) => {
+    if (controller !== outboundController) return;
+    text("desktop-controller-selection", `${titleCase(event.detail.action)} outcome unknown. Reconnect and check target state before another action.`);
+    updateOutboundControls();
+  });
   session.addEventListener("commandapplied", (event) => {
     if (controller !== outboundController) return;
     const rejected = event.detail.status === "rejected";
@@ -1148,6 +1156,11 @@ async function start() {
     showToast(error.message, { error: true });
   }
 
+  startPolling();
+}
+
+function startPolling() {
+  if (pollTimer !== null) clearInterval(pollTimer);
   pollTimer = setInterval(() => {
     if (document.visibilityState !== "visible") return;
     void Promise.all([refreshSnapshot(), refreshRemote()]).catch(() => {});
@@ -1156,6 +1169,18 @@ async function start() {
 
 window.addEventListener("pagehide", () => {
   void stopAllRemoteNetworking();
-}, { once: true });
+});
+
+installBrowserLifecycle({
+  suspend: () => {
+    // The native authority and inbound peer continue while the desktop window is hidden.
+    outboundController?.session.stop();
+    updateOutboundControls();
+  },
+  resume: () => {
+    void Promise.all([refreshSnapshot(), refreshRemote()])
+      .then(startPolling).catch((error) => showToast(error.message, { error: true }));
+  },
+});
 
 void start();

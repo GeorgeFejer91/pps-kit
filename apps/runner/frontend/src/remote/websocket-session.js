@@ -29,8 +29,11 @@ const CAPABILITIES = Object.freeze([
 const PEER_KEY = "websocket-peer";
 const CONTROL_QUEUE_MAX_BYTES = 262_144;
 const CONTROLLER_HEARTBEAT_MS = 2_000;
+const CONTROLLER_STATE_MAX_AGE_MS = 5_000;
+const COMMAND_ACK_TIMEOUT_MS = 10_000;
 const CONTROLLER_LEASE_MS = 5_000;
 const STATE_HEARTBEAT_MS = 250;
+const RETIRED_COMMAND_LIMIT = 4_096;
 
 export const PPS_RELIABLE_COMMAND_LIMIT = 1;
 export const PPS_RELIABLE_COMMAND_BUSY_CODE = "reliable_command_busy";
@@ -212,13 +215,15 @@ export class BrspWebSocketTransport extends EventTarget {
  * controller deadman are PPS profile rules rather than BRSP/1 wire fields.
  */
 class PpsBrspConnection extends BRSPConnection {
-  constructor({ onAcceptedControllerControl, canPublishTargetState = () => true, ...options }) {
+  constructor({ onAcceptedControllerControl, canPublishTargetState = () => true, applicationOwnsCommandHistory = false, ...options }) {
     super(options);
     if (typeof canPublishTargetState !== "function") {
       throw new TypeError("canPublishTargetState must be a function.");
     }
     this.onAcceptedControllerControl = onAcceptedControllerControl;
     this.canPublishTargetState = canPublishTargetState;
+    this.retiredCommandIds = new Set();
+    this.applicationOwnsCommandHistory = applicationOwnsCommandHistory;
   }
 
   hasReadScope() {
@@ -278,6 +283,38 @@ class PpsBrspConnection extends BRSPConnection {
         }
       })
       .catch((error) => this.protocolError(error));
+  }
+
+  async handleCommand(envelope) {
+    // The native bridge can already have dispatched while renewing its lease;
+    // its generation-aware Rust reducer owns denial and retained outcomes.
+    if (this.applicationOwnsCommandHistory) return super.handleCommand(envelope);
+    const command = envelope.body;
+    const full = this.retiredCommandIds.size >= RETIRED_COMMAND_LIMIT;
+    const reason = this.retiredCommandIds.has(command.commandId) ? "command_outcome_expired"
+      : full && !this.commandResults.has(command.commandId)
+        && !["system.snapshot", "run.stop", "run.abort"].includes(command.action) ? "command_history_full" : null;
+    if (reason) {
+      const revision = this.getState().revision;
+      this.sendControlEnvelope(makeEnvelope({
+        type: "applied", sessionId: this.sessionId, senderId: this.peerId,
+        senderEpoch: this.epoch, sequence: this.nextControlSequence(),
+        body: {
+          commandId: command.commandId, ok: false, revision, error: reason,
+          result: { action: command.action, status: "rejected", reason,
+            acceptedRevision: revision, resultingRevision: revision },
+        },
+      }));
+      return;
+    }
+    // Keep the pinned protocol's outcomes; remember its evictions for this one
+    // authenticated connection. A full history still admits safe stop/abort,
+    // without growing or evicting more remembered IDs.
+    const retained = full ? new Map(this.commandResults) : null;
+    const oldest = this.commandResults.keys().next().value;
+    await super.handleCommand(envelope);
+    if (retained) this.commandResults = retained;
+    else if (oldest !== undefined && !this.commandResults.has(oldest)) this.retiredCommandIds.add(oldest);
   }
 
   handleSnapshotRequest(envelope) {
@@ -346,10 +383,12 @@ class BrspSocketSession extends EventTarget {
     now,
     onAcceptedControllerControl,
     canPublishTargetState,
+    applicationOwnsCommandHistory,
   }) {
     super();
     installBrspProofCrypto();
     this.phase = "idle";
+    this.connectTimer = null;
     this.transport = transport ?? new BrspWebSocketTransport({ url, role, socketFactory });
     this.connection = new PpsBrspConnection({
       transport: this.transport,
@@ -365,6 +404,7 @@ class BrspSocketSession extends EventTarget {
       now,
       onAcceptedControllerControl,
       canPublishTargetState,
+      applicationOwnsCommandHistory,
     });
     this.transport.addEventListener("transportopen", () => this.setPhase("authenticating", "Transport open; completing BRSP hello, proof, and ready."));
     this.transport.addEventListener("status", (event) => {
@@ -384,12 +424,20 @@ class BrspSocketSession extends EventTarget {
 
   setPhase(phase, message) {
     this.phase = phase;
+    if (["ready", "closed", "error", "disconnected"].includes(phase)) {
+      clearTimeout(this.connectTimer);
+      this.connectTimer = null;
+    }
     this.dispatchEvent(detailEvent("phasechange", { phase, message }));
   }
 
   connect() {
     if (!["idle", "closed", "error"].includes(this.phase)) throw new Error("The session is already active.");
     this.setPhase("connecting", "Opening the explicitly requested connection…");
+    this.connectTimer = setTimeout(() => {
+      this.stop();
+      this.setPhase("error", "Pairing timed out. Check the target and reconnect.");
+    }, 10_000);
     try {
       const started = this.transport.start();
       if (started && typeof started.then === "function") {
@@ -408,6 +456,8 @@ class BrspSocketSession extends EventTarget {
   }
 
   stop() {
+    clearTimeout(this.connectTimer);
+    this.connectTimer = null;
     this.beforeStop();
     void this.connection.close().catch((error) => {
       this.dispatchEvent(detailEvent("protocolerror", { message: error.message }));
@@ -447,6 +497,9 @@ export class BrspControllerSession extends BrspSocketSession {
     this.controllerId = controllerId;
     this.grantedScopes = [];
     this.snapshot = null;
+    this.snapshotFresh = false;
+    this.lastSnapshotAt = null;
+    this.unknownCommand = null;
     this.pendingActions = new Map();
     this.controllerHeartbeatMs = boundedMilliseconds(controllerHeartbeatMs, "controllerHeartbeatMs");
     this.setIntervalFn = setIntervalFn;
@@ -466,9 +519,15 @@ export class BrspControllerSession extends BrspSocketSession {
     this.connection.addEventListener("state", (event) => this.acceptState(event.detail, "state"));
     this.connection.addEventListener("commandapplied", (event) => this.acceptApplied(event.detail));
     this.addEventListener("phasechange", (event) => {
-      if (event.detail.phase !== "ready") this.clearPendingCommands();
+      if (event.detail.phase !== "ready") {
+        this.snapshotFresh = false;
+        this.clearPendingCommands("connection_lost");
+      }
     });
-    this.addEventListener("protocolerror", () => this.clearPendingCommands());
+    this.addEventListener("protocolerror", () => {
+      this.snapshotFresh = false;
+      this.clearPendingCommands("protocol_error");
+    });
   }
 
   status() {
@@ -483,6 +542,10 @@ export class BrspControllerSession extends BrspSocketSession {
       pendingCommands,
       reliableCommandLimit: PPS_RELIABLE_COMMAND_LIMIT,
       reliableCommandBusy: pendingCommands >= PPS_RELIABLE_COMMAND_LIMIT,
+      controlReady: this.phase === "ready" && this.snapshotFresh
+        && this.lastSnapshotAt !== null
+        && this.connection.now() - this.lastSnapshotAt < CONTROLLER_STATE_MAX_AGE_MS,
+      unknownCommand: this.unknownCommand,
       snapshot: this.snapshot,
     };
   }
@@ -491,8 +554,12 @@ export class BrspControllerSession extends BrspSocketSession {
     return Math.max(this.connection.pendingCommands.size, this.pendingActions.size);
   }
 
-  clearPendingCommands() {
+  clearPendingCommands(reason = "connection_closed") {
     const pendingCommands = this.pendingCommandCount();
+    for (const [id, action] of this.pendingActions) {
+      this.unknownCommand = { id, action, reason };
+      this.dispatchEvent(detailEvent("commandunknown", this.unknownCommand));
+    }
     this.connection.pendingCommands.clear();
     this.pendingActions.clear();
     if (pendingCommands > 0) this.dispatchEvent(detailEvent("pendingchange", this.status()));
@@ -500,6 +567,7 @@ export class BrspControllerSession extends BrspSocketSession {
   }
 
   acceptState({ revision, state }, source) {
+    if (this.phase !== "ready") return;
     let validated;
     try {
       if (!this.grantedScopes.includes(SCOPES.READ)) {
@@ -518,6 +586,8 @@ export class BrspControllerSession extends BrspSocketSession {
     }
     if (this.snapshot && revision < this.snapshot.revision) return;
     this.snapshot = validated;
+    this.snapshotFresh = true;
+    this.lastSnapshotAt = this.connection.now();
     this.dispatchEvent(detailEvent("snapshot", { revision, snapshot: validated, source }));
   }
 
@@ -535,6 +605,21 @@ export class BrspControllerSession extends BrspSocketSession {
     this.snapshotHeartbeat = this.setIntervalFn(() => {
       if (this.phase !== "ready") return;
       try {
+        const at = this.connection.now();
+        const baseline = this.lastSnapshotAt ?? this.connection.readyAt;
+        const overdueCommand = [...this.connection.pendingCommands.values()]
+          .some((command) => at - command.sentAt >= COMMAND_ACK_TIMEOUT_MS);
+        if (overdueCommand || (Number.isFinite(baseline) && at - baseline >= CONTROLLER_STATE_MAX_AGE_MS)) {
+          this.snapshotFresh = false;
+          this.clearPendingCommands(overdueCommand ? "ack_timeout" : "state_timeout");
+          this.stop();
+          this.dispatchEvent(detailEvent("protocolerror", {
+            message: overdueCommand
+              ? "Command outcome unknown. Reconnect and inspect target state before another action."
+              : "Target state is stale. Reconnect to receive a fresh snapshot.",
+          }));
+          return;
+        }
         this.connection.requestSnapshot();
       } catch (error) {
         this.stopSnapshotHeartbeat();
@@ -551,6 +636,7 @@ export class BrspControllerSession extends BrspSocketSession {
 
   sendCommand(action, args = {}, { expectedRevision = this.snapshot?.revision ?? null } = {}) {
     if (this.phase !== "ready") throw new Error("Authenticate before sending commands.");
+    if (!this.status().controlReady) throw new Error("Receive a fresh target snapshot before sending commands.");
     const pendingCommands = this.pendingCommandCount();
     if (pendingCommands >= PPS_RELIABLE_COMMAND_LIMIT) {
       throw reliableCommandBusyError(pendingCommands);
@@ -583,6 +669,7 @@ export class BrspControllerSession extends BrspSocketSession {
   }
 
   beforeStop() {
+    this.snapshotFresh = false;
     this.stopSnapshotHeartbeat();
     this.clearPendingCommands();
   }
@@ -693,6 +780,7 @@ export class BrspTargetSession extends BrspSocketSession {
         return onAcceptedControllerControl?.(envelope, context) ?? true;
       },
       canPublishTargetState,
+      applicationOwnsCommandHistory: applicationOwnsTransitionValidation,
     });
     this.targetId = targetId;
     this.actions = [...advertisedActions].sort();

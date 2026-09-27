@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, stat, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import test from "node:test";
@@ -23,6 +23,23 @@ const companionVendorHashes = new Map([
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
 }
+
+test("Pages assembly preserves existing custom outputs and rejects junction traversal", async () => {
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "pps-pages-guard-"));
+  try {
+    const existing = join(temporaryRoot, "existing");
+    await mkdir(existing);
+    await writeFile(join(existing, "sentinel.txt"), "preserve me");
+    await assert.rejects(assemblePages(existing), /existing files are preserved/u);
+    assert.equal(await readFile(join(existing, "sentinel.txt"), "utf8"), "preserve me");
+    const alias = join(temporaryRoot, "alias");
+    await symlink(existing, alias, process.platform === "win32" ? "junction" : "dir");
+    await assert.rejects(assemblePages(join(alias, "new-pages")), /symbolic link or junction/u);
+    assert.equal(await exists(join(existing, "new-pages")), false);
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  }
+});
 
 async function exists(path) {
   return Boolean(await stat(path).catch(() => null));
