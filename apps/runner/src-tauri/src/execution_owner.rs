@@ -597,7 +597,9 @@ impl OwnerState {
         // This first complete path is for a whole single-block package. Do
         // not certify one block of a larger prepared experiment as complete.
         let completion_ready = status.state == pps_runner_audio::RenderState::SourceExhausted
-            && playback.final_frame_submitted
+            && playback
+                .final_submission_estimate_ns
+                .is_some_and(|end| end <= stamp.monotonic_ns)
             && playback.source.receipt.verified_session().blocks().len() == 1
             && playback
                 .capture
@@ -1924,7 +1926,7 @@ impl OwnerState {
                 .lease_deadline
                 .saturating_duration_since(Instant::now())
         });
-        let poll = if self.native_playback.is_some() {
+        let poll = if self.native_playback.is_some() && self.native_finalization.is_none() {
             Some(PLAYBACK_EVIDENCE_POLL)
         } else if self.event_journal.is_some() && !self.evidence_unavailable {
             Some(JOURNAL_HEALTH_POLL)

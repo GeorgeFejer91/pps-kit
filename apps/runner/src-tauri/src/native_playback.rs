@@ -67,7 +67,7 @@ pub(crate) struct NativePreparedPlayback {
     pub source: NativePlaybackSource,
     pub port: PlaybackPort,
     pub capture: NativeTrialCapture,
-    pub final_frame_submitted: bool,
+    pub final_submission_estimate_ns: Option<u64>,
 }
 
 impl NativePreparedPlayback {
@@ -86,7 +86,7 @@ impl NativePreparedPlayback {
             source,
             port,
             capture: NativeTrialCapture::default(),
-            final_frame_submitted: false,
+            final_submission_estimate_ns: None,
         })
     }
 
@@ -122,7 +122,13 @@ impl NativePreparedPlayback {
                 stamp,
                 host_time(record.host_received),
             )? {
-                self.final_frame_submitted |= input.event_type == "audio.final-frame-submitted";
+                if input.event_type == "audio.final-frame-submitted" {
+                    self.final_submission_estimate_ns = Some(
+                        input.payload["estimatedEventHostMonotonicNs"]
+                            .as_u64()
+                            .ok_or("native_playback_clock_invalid")?,
+                    );
+                }
                 self.capture.observe(&input)?;
                 inputs.push(input);
             }
