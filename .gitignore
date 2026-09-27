@@ -28,6 +28,7 @@ Example-configs/
 *.apk
 *.xdf
 *.wav.tmp
+native_events_*.partial.jsonl
 *_recording.wav
 LoopbackRecordings/
 private_not_for_public*/

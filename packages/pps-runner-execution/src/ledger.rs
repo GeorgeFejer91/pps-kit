@@ -125,6 +125,13 @@ pub struct PreparedLedgerBatch {
 }
 
 impl PreparedLedgerBatch {
+    /// The validated, sequence-assigned records, before authority commit.
+    /// Native persistence can admit this exact batch without inventing a second
+    /// event schema or assigning different sequence numbers.
+    pub fn records(&self) -> &[ExecutionEventRecord] {
+        &self.records
+    }
+
     pub fn len(&self) -> usize {
         self.records.len()
     }

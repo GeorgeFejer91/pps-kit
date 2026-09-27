@@ -24,6 +24,7 @@ use tokio::sync::{broadcast, oneshot};
 use std::path::PathBuf;
 
 use crate::{
+    event_journal::NativeEventJournal,
     latency_diagnostics::{AuthorityMailboxDiagnostics, LatencyStage, LatencyTrace},
     native_output::{
         NativeOutputAuthority, NativeOutputCleanupObservation, NativeOutputCommandError,
@@ -51,6 +52,7 @@ pub(crate) const LOCAL_SAFETY_RESERVE: usize = MAILBOX_CAPACITY - NORMAL_MAILBOX
 const DEFAULT_REMOTE_LEASE: Duration = Duration::from_secs(5);
 const LEDGER_SAFETY_RECORD_RESERVE: usize = 8;
 const LEDGER_SAFETY_BYTE_RESERVE: usize = 64 * 1024;
+const JOURNAL_HEALTH_POLL: Duration = Duration::from_millis(25);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum AdmissionClass {
@@ -314,6 +316,7 @@ struct OwnerState {
     native_output: NativeOutputAuthority,
     owner_generation: u64,
     ledger: EventLedger,
+    event_journal: Option<(u64, NativeEventJournal)>,
     evidence_unavailable: bool,
     clock: ProcessClock,
     lease_duration: Duration,
@@ -353,9 +356,106 @@ pub(crate) struct OwnerTestView {
     pub prepared_output_plan_run_generation: Option<u64>,
     pub compiled_schedule_strong_count: Option<usize>,
     pub retained_session_strong_count: Option<usize>,
+    pub journal_durable_sequence: Option<u64>,
+    pub ledger_last_sequence: Option<u64>,
+    pub evidence_unavailable: bool,
 }
 
 impl OwnerState {
+    fn journal_source(&mut self) -> Result<Option<PreparedExecutionSource>, &'static str> {
+        self.poll_event_journal();
+        if self.evidence_unavailable {
+            return Err("native_journal_unavailable");
+        }
+        if self.prepared_audio.is_none() {
+            return Err("prepared_audio_preparation_replaced");
+        }
+        if let Some((generation, journal)) = self.event_journal.as_ref() {
+            return if *generation == self.package_generation && !journal.failed() {
+                Ok(None)
+            } else {
+                Err("native_journal_cleanup_pending")
+            };
+        }
+        self.inspection_source().map(Some)
+    }
+
+    fn install_event_journal(
+        &mut self,
+        source: PreparedExecutionSource,
+        journal: NativeEventJournal,
+    ) -> Result<(), &'static str> {
+        let retained = self
+            .retained_session
+            .as_ref()
+            .ok_or("prepared_package_replaced")?;
+        if retained.generation != source.generation
+            || retained.receipt.manifest_sha256() != source.fingerprint
+            || !Arc::ptr_eq(&retained.receipt, &source.receipt)
+        {
+            return Err("prepared_package_replaced");
+        }
+        if self.evidence_unavailable || self.event_journal.is_some() || journal.failed() {
+            return Err("native_journal_unavailable");
+        }
+        if self.prepared_audio.is_none() {
+            return Err("prepared_audio_preparation_replaced");
+        }
+        self.event_journal = Some((source.generation, journal));
+        let stamp = self.clock.stamp();
+        let mut event = Self::ledger_input("native.journal.prepared", "native", &stamp);
+        event.payload = serde_json::json!({
+            "packageGeneration": source.generation,
+            "packageManifestSha256": source.fingerprint,
+            "timingQualification": "unqualified",
+            "completion": "partial",
+        });
+        self.commit_candidate(self.core.clone(), event, CommitPolicy::Ordinary, false)
+            .map(|_| ())
+    }
+
+    fn poll_event_journal(&mut self) {
+        let failed = self.event_journal.as_ref().is_some_and(|(_, journal)| {
+            journal.failed()
+                || journal.durable_sequence() > self.ledger.summary().last_sequence.unwrap_or(0)
+        });
+        if failed && !self.evidence_unavailable {
+            self.fail_stop_unavailable("native.journal.failed", "evidence_unavailable");
+        }
+        let retired_previous = self
+            .event_journal
+            .as_ref()
+            .is_some_and(|(generation, journal)| {
+                *generation != self.package_generation && journal.retired()
+            });
+        if retired_previous {
+            self.event_journal = None;
+        }
+    }
+
+    fn commit_evidence(
+        &mut self,
+        event: LedgerEventInput,
+        reserve: LedgerReserve,
+        policy: CommitPolicy,
+    ) -> Result<(), ()> {
+        let prepared = self
+            .ledger
+            .prepare_batch([event], reserve)
+            .map_err(|_| ())?;
+        if let Some((generation, journal)) = self.event_journal.as_mut() {
+            if *generation == self.package_generation && journal.admit(&prepared).is_err() {
+                if policy == CommitPolicy::Ordinary {
+                    return Err(());
+                }
+                // Safety still neutralizes the target when its journal cannot
+                // accept evidence. The run becomes unavailable, never complete.
+                self.evidence_unavailable = true;
+            }
+        }
+        self.ledger.commit_prepared(prepared).map_err(|_| ())
+    }
+
     fn invalidate_prepared_audio(&mut self) {
         self.prepared_audio = None;
         self.prepared_audio_reservation = None;
@@ -395,6 +495,16 @@ impl OwnerState {
         event
     }
 
+    fn dispatch_payload(candidate: &RunnerCore, action: Action) -> Value {
+        let mut payload = serde_json::json!({ "action": action, "revision": candidate.revision() });
+        if action == Action::SessionNote {
+            // The local journal retains annotations. The public remote
+            // snapshot separately omits private participant/note data.
+            payload["text"] = Value::String(candidate.snapshot().last_note);
+        }
+        payload
+    }
+
     fn commit_candidate(
         &mut self,
         candidate: RunnerCore,
@@ -411,10 +521,7 @@ impl OwnerState {
             }
             CommitPolicy::SafetyFallback => LedgerReserve::NONE,
         };
-        let evidence_result = self
-            .ledger
-            .prepare_batch([event], reserve)
-            .and_then(|prepared| self.ledger.commit_prepared(prepared));
+        let evidence_result = self.commit_evidence(event, reserve, policy);
         if evidence_result.is_err() {
             if policy == CommitPolicy::Ordinary {
                 self.fail_stop_unavailable(
@@ -516,10 +623,7 @@ impl OwnerState {
             .map(|owner| owner.controller_id.clone());
         // Ordinary writers preserve this capacity. The fail-stop consumes at
         // most one bounded record; safety itself never depends on that append.
-        let _ = self
-            .ledger
-            .prepare_batch([event], LedgerReserve::NONE)
-            .and_then(|prepared| self.ledger.commit_prepared(prepared));
+        let _ = self.commit_evidence(event, LedgerReserve::NONE, CommitPolicy::SafetyFallback);
 
         let candidate = self.safe_neutral_candidate(connection_state, &stamp);
         let snapshot = candidate.snapshot();
@@ -571,6 +675,7 @@ impl OwnerState {
                     .map_err(str::to_owned)?;
                 let mut event = Self::ledger_input("runner.dispatch", "local", &stamp);
                 event.command_id = Some(applied.id.clone());
+                event.payload = Self::dispatch_payload(&candidate, applied.action);
                 self.commit_candidate(
                     candidate,
                     event,
@@ -643,6 +748,7 @@ impl OwnerState {
                 let mut event = Self::ledger_input("runner.dispatch", "remote", &stamp);
                 event.authority_id = Some(owner.controller_id.clone());
                 event.command_id = Some(applied.id.clone());
+                event.payload = Self::dispatch_payload(&candidate, applied.action);
                 self.commit_candidate(candidate, event, CommitPolicy::Ordinary, true)
                     .map_err(|_| RemoteSessionError::unavailable())?;
                 if let Some(next) = next_run_generation {
@@ -931,6 +1037,11 @@ impl OwnerState {
         self.owner_generation = next_owner_generation;
         self.package_generation = next_generation;
         self.run_generation = next_run_generation;
+        if let Some((_, journal)) = self.event_journal.as_mut() {
+            // Drain the former package's accepted prefix without blocking the
+            // authority. A replacement writer cannot start until it retires.
+            journal.close();
+        }
         self.retained_session = Some(RetainedPreparedSession {
             generation: next_generation,
             receipt: Arc::new(verified),
@@ -1456,11 +1567,16 @@ impl OwnerState {
     }
 
     fn next_deadman_delay(&self) -> Option<Duration> {
-        self.remote_owner.as_ref().map(|owner| {
+        let lease = self.remote_owner.as_ref().map(|owner| {
             owner
                 .lease_deadline
                 .saturating_duration_since(Instant::now())
-        })
+        });
+        if self.event_journal.is_some() && !self.evidence_unavailable {
+            Some(lease.map_or(JOURNAL_HEALTH_POLL, |delay| delay.min(JOURNAL_HEALTH_POLL)))
+        } else {
+            lease
+        }
     }
 
     fn shutdown(&mut self) {
@@ -1653,6 +1769,7 @@ impl ExecutionOwner {
                     native_output,
                     owner_generation: 0,
                     ledger,
+                    event_journal: None,
                     evidence_unavailable: false,
                     clock,
                     lease_duration,
@@ -2068,6 +2185,28 @@ impl ExecutionOwner {
         .await
     }
 
+    pub(crate) async fn journal_source(
+        &self,
+    ) -> Result<Result<Option<PreparedExecutionSource>, &'static str>, OwnerSubmitError> {
+        self.asynchronous(AdmissionClass::Normal, "journal_source", |state| {
+            state.journal_source()
+        })
+        .await
+    }
+
+    pub(crate) async fn install_event_journal(
+        &self,
+        source: PreparedExecutionSource,
+        journal: NativeEventJournal,
+    ) -> Result<Result<(), &'static str>, OwnerSubmitError> {
+        self.asynchronous(
+            AdmissionClass::Normal,
+            "install_event_journal",
+            move |state| state.install_event_journal(source, journal),
+        )
+        .await
+    }
+
     #[cfg(test)]
     pub(crate) fn claim_webview_blocking(
         &self,
@@ -2404,6 +2543,12 @@ impl ExecutionOwner {
                 .retained_session
                 .as_ref()
                 .map(|retained| Arc::strong_count(&retained.receipt)),
+            journal_durable_sequence: state
+                .event_journal
+                .as_ref()
+                .map(|(_, journal)| journal.durable_sequence()),
+            ledger_last_sequence: state.ledger.summary().last_sequence,
+            evidence_unavailable: state.evidence_unavailable,
         })
         .expect("test authority remains available")
     }
@@ -2431,6 +2576,7 @@ fn authority_loop(mailbox: &Mailbox, state: &mut OwnerState) {
         // Deadman processing is deliberately ahead of every dequeue, including
         // when ordinary traffic keeps the mailbox continuously non-empty.
         state.expire_deadman_if_due();
+        state.poll_event_journal();
         if mailbox.should_stop() {
             break;
         }

@@ -78,3 +78,15 @@ path. Raw CPAL playback timestamps are predictions in their own clock domain,
 not measured physical onset. The Tauri package is still non-executable until
 the complete experiment adapter adopts this seam; preparation does not promote
 readiness or qualification.
+
+`event_journal.rs` is the native file owner for the existing authority event
+schema. Explicit first-block audio preflight creates one `native_events_*.partial.jsonl`
+in the verified session directory; choosing/inspecting a package remains read-only.
+Only native receipts choose that directory. The journal has eight bounded queue
+slots, 128 records/256 KiB per batch, and a 32 MiB total budget. Admission precedes
+authority commit; the worker acknowledges a prefix only after syncing it. Write
+failure or backpressure prevents further ordinary transitions and neutralizes
+output; safety still proceeds. Package replacement closes the old writer before
+another can attach. Keep files partial until real media, responses, dataset
+publication, and completion are implemented. An event journal is not a response
+CSV or evidence of physical timing.

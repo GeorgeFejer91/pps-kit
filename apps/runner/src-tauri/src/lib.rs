@@ -1,3 +1,4 @@
+mod event_journal;
 mod execution_owner;
 mod latency_diagnostics;
 mod native_output;
@@ -226,28 +227,31 @@ async fn prepare_first_audio_block(
         .begin_prepared_audio_preparation_async(0)
         .await
         .map_err(prepared_audio_runtime_error)?;
-    let (_preparation_guard, source) = match preparation {
-        PreparedAudioPreparation::Cached(summary) => return Ok(summary),
-        PreparedAudioPreparation::Decode { _guard, source } => (_guard, source),
+    let (_preparation_guard, summary) = match preparation {
+        PreparedAudioPreparation::Cached { _guard, summary } => (_guard, summary),
+        PreparedAudioPreparation::Decode { _guard, source } => {
+            // Hash/decode outside the actor. Its completion must still match
+            // every package/run/block/schedule/preparation/receipt fence.
+            let (_guard, candidate) = tauri::async_runtime::spawn_blocking(move || {
+                (
+                    _guard,
+                    prepare_verified_audio(source).map_err(prepared_audio_preparation_error),
+                )
+            })
+            .await
+            .map_err(|_| PreparedSessionCommandError::runtime())?;
+            let summary = runtime
+                .cache_prepared_audio_async(candidate?)
+                .await
+                .map_err(prepared_audio_runtime_error)?;
+            (_guard, summary)
+        }
     };
-
-    // PCM hashing/decoding plus compact output-plan construction may be large
-    // and blocking. It runs outside the authority thread; the actor accepts
-    // the immutable result only if every captured package, run, block,
-    // schedule, preparation, and receipt fence still matches.
-    let (_preparation_guard, candidate) = tauri::async_runtime::spawn_blocking(move || {
-        (
-            _preparation_guard,
-            prepare_verified_audio(source).map_err(prepared_audio_preparation_error),
-        )
-    })
-    .await
-    .map_err(|_| PreparedSessionCommandError::runtime())?;
-    let candidate = candidate?;
     runtime
-        .cache_prepared_audio_async(candidate)
+        .ensure_execution_journal()
         .await
-        .map_err(prepared_audio_runtime_error)
+        .map_err(prepared_audio_runtime_error)?;
+    Ok(summary)
 }
 
 fn prepared_audio_preparation_error(error: PreparedAudioError) -> PreparedSessionCommandError {
@@ -291,6 +295,14 @@ fn prepared_audio_runtime_error(reason: &'static str) -> PreparedSessionCommandE
         "prepared_audio_resource_limit" => PreparedSessionCommandError::new(
             reason,
             "The prepared audio exceeds the native preload resource limit.",
+        ),
+        "native_journal_unavailable" => PreparedSessionCommandError::new(
+            reason,
+            "The native event journal could not be prepared; audio remains disabled. Check available storage and the selected session folder.",
+        ),
+        "native_journal_cleanup_pending" => PreparedSessionCommandError::new(
+            reason,
+            "The previous package's event journal is still closing; wait before preloading again.",
         ),
         "runtime_unavailable" => PreparedSessionCommandError::runtime(),
         _ => PreparedSessionCommandError::new(

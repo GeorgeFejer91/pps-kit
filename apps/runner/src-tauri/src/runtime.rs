@@ -19,6 +19,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tokio::sync::{broadcast, oneshot};
 
+use crate::event_journal::NativeEventJournal;
 use crate::execution_owner::{
     AuthorityView, ExecutionOwner, LanOwnerReceipt, OwnerStartConfiguration, OwnerSubmitError,
     RemoteOwnerIdentity, MAILBOX_CAPACITY, NORMAL_MAILBOX_CAPACITY,
@@ -298,7 +299,10 @@ struct NativeOutputOperationGuard {
 }
 
 pub(crate) enum PreparedAudioPreparation {
-    Cached(PreparedAudioSummary),
+    Cached {
+        _guard: PreparedAudioPreparationGuard,
+        summary: PreparedAudioSummary,
+    },
     Decode {
         _guard: PreparedAudioPreparationGuard,
         source: PreparedAudioSource,
@@ -796,7 +800,10 @@ impl AppRuntime {
             .prepared_audio_source_blocking(block_ordinal)
             .map_err(|_| "runtime_unavailable")??;
         Ok(match source {
-            PreparedAudioLookup::Cached(summary) => PreparedAudioPreparation::Cached(summary),
+            PreparedAudioLookup::Cached(summary) => PreparedAudioPreparation::Cached {
+                _guard: guard,
+                summary,
+            },
             PreparedAudioLookup::Decode(source) => PreparedAudioPreparation::Decode {
                 _guard: guard,
                 source,
@@ -822,7 +829,10 @@ impl AppRuntime {
             .await
             .map_err(|_| "runtime_unavailable")??;
         Ok(match source {
-            PreparedAudioLookup::Cached(summary) => PreparedAudioPreparation::Cached(summary),
+            PreparedAudioLookup::Cached(summary) => PreparedAudioPreparation::Cached {
+                _guard: guard,
+                summary,
+            },
             PreparedAudioLookup::Decode(source) => PreparedAudioPreparation::Decode {
                 _guard: guard,
                 source,
@@ -848,6 +858,33 @@ impl AppRuntime {
         self.0
             .authority
             .cache_prepared_audio(candidate)
+            .await
+            .map_err(|_| "runtime_unavailable")?
+    }
+
+    /// The audio-preflight guard also covers journal creation/installation.
+    /// The file worker uses the same retained verified package as the actor;
+    /// a late completion cannot attach its writer to a replacement package.
+    pub(crate) async fn ensure_execution_journal(&self) -> Result<(), &'static str> {
+        let Some(source) = self
+            .0
+            .authority
+            .journal_source()
+            .await
+            .map_err(|_| "runtime_unavailable")??
+        else {
+            return Ok(());
+        };
+        let (source, journal) = tauri::async_runtime::spawn_blocking(move || {
+            let journal = NativeEventJournal::create(&source.receipt);
+            (source, journal)
+        })
+        .await
+        .map_err(|_| "native_journal_unavailable")?;
+        let journal = journal.map_err(|_| "native_journal_unavailable")?;
+        self.0
+            .authority
+            .install_event_journal(source, journal)
             .await
             .map_err(|_| "runtime_unavailable")?
     }
@@ -1679,10 +1716,191 @@ mod tests {
             .unwrap()
         {
             PreparedAudioPreparation::Decode { _guard, source } => (_guard, source),
-            PreparedAudioPreparation::Cached(_) => {
+            PreparedAudioPreparation::Cached { .. } => {
                 panic!("test expected a cache miss and a fenced decode source")
             }
         }
+    }
+
+    async fn wait_for_journal(
+        runtime: &AppRuntime,
+        ready: impl Fn(&crate::execution_owner::OwnerTestView) -> bool,
+    ) {
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(3);
+        loop {
+            if ready(&runtime.0.authority.test_view()) {
+                return;
+            }
+            assert!(
+                tokio::time::Instant::now() < deadline,
+                "journal did not reach the expected authority state"
+            );
+            tokio::time::sleep(Duration::from_millis(2)).await;
+        }
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn audio_preflight_installs_one_durable_journal_and_replacement_closes_it() {
+        let runtime = AppRuntime::new();
+        let (root, verified) = verified_audio_package("P001", 1);
+        runtime.adopt_verified_session(verified).unwrap();
+        compile_current_execution(&runtime);
+        let (guard, source) = begin_audio_decode(&runtime, 0);
+        runtime
+            .cache_prepared_audio(prepare_verified_audio(source).unwrap())
+            .unwrap();
+        runtime.ensure_execution_journal().await.unwrap();
+        runtime.ensure_execution_journal().await.unwrap();
+        let applied = runtime
+            .dispatch_local(
+                Action::SessionNote,
+                serde_json::json!({"text": "test note"}),
+            )
+            .unwrap();
+        assert_eq!(applied.status, AppliedStatus::Accepted);
+        wait_for_journal(&runtime, |view| {
+            view.journal_durable_sequence == view.ledger_last_sequence
+        })
+        .await;
+        assert!(!runtime.0.authority.test_view().evidence_unavailable);
+        let files: Vec<_> = fs::read_dir(&root)
+            .unwrap()
+            .filter_map(|entry| {
+                let path = entry.unwrap().path();
+                path.file_name()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .starts_with("native_events_")
+                    .then_some(path)
+            })
+            .collect();
+        assert_eq!(files.len(), 1);
+        let text = fs::read_to_string(&files[0]).unwrap();
+        let records: Vec<Value> = text
+            .lines()
+            .map(|line| serde_json::from_str(line).unwrap())
+            .collect();
+        assert_eq!(records[0]["completion"], "partial");
+        assert_eq!(records[0]["timingQualification"], "unqualified");
+        assert_eq!(records[1]["eventType"], "native.journal.prepared");
+        assert_eq!(records[2]["payload"]["action"], "session.note");
+        assert_eq!(records[2]["payload"]["text"], "test note");
+        assert!(!runtime.snapshot().unwrap().safety.local_armed);
+        assert_eq!(runtime.snapshot().unwrap().run.phase, RunnerPhase::Prepared);
+        drop(guard);
+        let (replacement_root, replacement) = verified_legacy_package("P001");
+        runtime.adopt_verified_session(replacement).unwrap();
+        wait_for_journal(&runtime, |view| view.journal_durable_sequence.is_none()).await;
+        assert!(fs::read_to_string(&files[0])
+            .unwrap()
+            .contains("package.adopted"));
+        drop(runtime);
+        fs::remove_dir_all(root).unwrap();
+        fs::remove_dir_all(replacement_root).unwrap();
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn stale_journal_completion_cannot_attach_to_a_replacement_package() {
+        let runtime = AppRuntime::new();
+        let (root, verified) = verified_audio_package("P001", 1);
+        runtime.adopt_verified_session(verified).unwrap();
+        compile_current_execution(&runtime);
+        let (guard, source) = begin_audio_decode(&runtime, 0);
+        runtime
+            .cache_prepared_audio(prepare_verified_audio(source).unwrap())
+            .unwrap();
+        let source = runtime
+            .0
+            .authority
+            .journal_source()
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap();
+        let journal = NativeEventJournal::create(&source.receipt).unwrap();
+        let retired = journal.retirement_probe();
+        let (replacement_root, replacement) = verified_legacy_package("P001");
+        runtime.adopt_verified_session(replacement).unwrap();
+        assert_eq!(
+            runtime
+                .0
+                .authority
+                .install_event_journal(source, journal)
+                .await
+                .unwrap(),
+            Err("prepared_package_replaced")
+        );
+        assert!(runtime
+            .0
+            .authority
+            .test_view()
+            .journal_durable_sequence
+            .is_none());
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(3);
+        while !retired() {
+            assert!(tokio::time::Instant::now() < deadline);
+            tokio::time::sleep(Duration::from_millis(2)).await;
+        }
+        drop(guard);
+        drop(runtime);
+        fs::remove_dir_all(root).unwrap();
+        fs::remove_dir_all(replacement_root).unwrap();
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn native_writer_failure_latches_unavailable_and_invalidates_prepared_audio() {
+        let runtime = AppRuntime::new();
+        let (root, verified) = verified_audio_package("P001", 1);
+        runtime.adopt_verified_session(verified).unwrap();
+        compile_current_execution(&runtime);
+        let (guard, source) = begin_audio_decode(&runtime, 0);
+        runtime
+            .cache_prepared_audio(prepare_verified_audio(source).unwrap())
+            .unwrap();
+        let source = runtime
+            .0
+            .authority
+            .journal_source()
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap();
+        let path = root.join("fault-fixture.partial.jsonl");
+        fs::write(&path, "retained prefix\n").unwrap();
+        let journal = NativeEventJournal::failing_writer(&path);
+        let retired = journal.retirement_probe();
+        runtime
+            .0
+            .authority
+            .install_event_journal(source, journal)
+            .await
+            .unwrap()
+            .unwrap();
+        wait_for_journal(&runtime, |view| view.evidence_unavailable).await;
+        assert!(runtime
+            .0
+            .authority
+            .test_view()
+            .prepared_audio_block_ordinal
+            .is_none());
+        assert_eq!(
+            runtime.0.authority.test_view().journal_durable_sequence,
+            Some(0)
+        );
+        assert!(!runtime.snapshot().unwrap().safety.local_armed);
+        assert!(runtime
+            .dispatch_local(Action::SessionNote, serde_json::json!({"text":"denied"}))
+            .is_err());
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(3);
+        while !retired() {
+            assert!(tokio::time::Instant::now() < deadline);
+            tokio::time::sleep(Duration::from_millis(2)).await;
+        }
+        assert_eq!(fs::read_to_string(path).unwrap(), "retained prefix\n");
+        drop(guard);
+        drop(runtime);
+        fs::remove_dir_all(root).unwrap();
     }
 
     fn claim_webview_controller(
@@ -2226,7 +2444,9 @@ mod tests {
         );
 
         match runtime.begin_prepared_audio_preparation(0).unwrap() {
-            PreparedAudioPreparation::Cached(cached) => assert_eq!(cached, first),
+            PreparedAudioPreparation::Cached {
+                summary: cached, ..
+            } => assert_eq!(cached, first),
             PreparedAudioPreparation::Decode { .. } => {
                 panic!("an exact sequential cache hit must not decode again")
             }
