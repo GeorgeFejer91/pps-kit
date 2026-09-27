@@ -206,3 +206,47 @@ fn owner_retains_storage_until_callback_retires_and_old_cancellation_is_fenced()
     callback.render(&mut output, Instant::now(), None);
     assert_eq!(output, [-0.25, 0.5]);
 }
+
+#[test]
+fn stalled_evidence_consumer_cannot_advance_unrecorded_audio() {
+    let plan = plan(9);
+    let (mut owner, mut callback) =
+        PlaybackOwner::with_capacity(Arc::clone(&plan), RECORDS_PER_CALLBACK);
+    owner.control(plan.fence(), RenderControl::Start).unwrap();
+    let mut output = [9.0; 2];
+    assert!(!callback.render(&mut output, Instant::now(), None));
+    assert_eq!(output, [-0.25, 0.5]);
+    assert_eq!(owner.status().submitted_frames, 1);
+    assert!(callback.render(&mut output, Instant::now(), None));
+    assert_eq!(output, [0.0; 2]);
+    assert_eq!(owner.status().submitted_frames, 1);
+    let records = owner.drain(PLAYBACK_EVENT_CAPACITY);
+    assert_eq!(
+        records
+            .iter()
+            .filter(|record| matches!(record.kind, PlaybackRecordKind::Boundary(_)))
+            .count(),
+        1
+    );
+    assert_eq!(owner.status().fault, Some(PlaybackFault::EvidenceQueueFull));
+    assert!(callback.render(&mut output, Instant::now(), None));
+    assert_eq!(owner.status().submitted_frames, 1);
+}
+
+#[test]
+fn stopped_callback_cannot_restart_or_resume_its_source() {
+    let plan = plan(10);
+    let (mut owner, mut callback) = PlaybackOwner::new(Arc::clone(&plan));
+    let mut output = [9.0; 2];
+    owner.control(plan.fence(), RenderControl::Start).unwrap();
+    callback.render(&mut output, Instant::now(), None);
+    owner.control(plan.fence(), RenderControl::Stop).unwrap();
+    callback.render(&mut output, Instant::now(), None);
+    for action in [RenderControl::Start, RenderControl::Resume] {
+        owner.control(plan.fence(), action).unwrap();
+        callback.render(&mut output, Instant::now(), None);
+        assert_eq!(output, [0.0; 2]);
+        assert_eq!(owner.status().state, RenderState::Stopped);
+        assert_eq!(owner.status().submitted_frames, 1);
+    }
+}

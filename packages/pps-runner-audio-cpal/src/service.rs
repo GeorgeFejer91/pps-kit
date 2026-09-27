@@ -1800,6 +1800,10 @@ mod tests {
 
     struct FakeBackend {
         control: Arc<FakeControl>,
+        media: Option<(
+            crate::playback::PlaybackCallback,
+            crate::playback::PlaybackOwner,
+        )>,
     }
 
     impl OutputBackend for FakeBackend {
@@ -1900,7 +1904,70 @@ mod tests {
                 ));
             }
             *self.control.signals.lock().unwrap() = None;
+            self.media = None;
             Ok(())
+        }
+
+        fn prepare_playback(
+            &mut self,
+            plan: Arc<PreparedPlaybackPlan>,
+            signals: Arc<CallbackSignals>,
+        ) -> Result<PlaybackStatus, BackendFailure> {
+            self.control.record_owner_thread();
+            let (owner, mut callback) = crate::playback::PlaybackOwner::new(plan);
+            let mut output = [1.0; 2];
+            assert!(!callback.render(&mut output, Instant::now(), None));
+            assert_eq!(output, [0.0; 2]);
+            signals.record_callback();
+            *self.control.signals.lock().unwrap() = Some(signals);
+            let status = owner.status();
+            self.media = Some((callback, owner));
+            Ok(status)
+        }
+
+        fn playback_status(&self) -> Option<PlaybackStatus> {
+            self.media.as_ref().map(|(_, owner)| owner.status())
+        }
+
+        fn playback_control(
+            &mut self,
+            fence: &OutputFence,
+            control: RenderControl,
+        ) -> Result<PlaybackControlReceipt, BackendFailure> {
+            self.control.record_owner_thread();
+            self.media
+                .as_mut()
+                .ok_or_else(BackendFailure::contract)?
+                .1
+                .control(fence, control)
+                .map_err(|_| {
+                    BackendFailure::new(
+                        OutputFaultKind::BackendContractViolation,
+                        OutputServiceErrorCode::StaleReservation,
+                        "The fake playback fence changed.",
+                    )
+                })
+        }
+
+        fn playback_cancellation(
+            &self,
+            fence: &OutputFence,
+        ) -> Result<PlaybackCancellation, BackendFailure> {
+            let owner = &self.media.as_ref().ok_or_else(BackendFailure::contract)?.1;
+            if owner.fence() != fence {
+                return Err(BackendFailure::contract());
+            }
+            Ok(owner.cancellation())
+        }
+
+        fn drain_playback(
+            &mut self,
+            maximum: usize,
+        ) -> Result<Vec<NativePlaybackRecord>, BackendFailure> {
+            self.control.record_owner_thread();
+            let (callback, owner) = self.media.as_mut().ok_or_else(BackendFailure::contract)?;
+            callback.render(&mut [0.0; 2], Instant::now(), None);
+            Ok(owner.drain(maximum))
         }
     }
 
@@ -1918,6 +1985,7 @@ mod tests {
             factory_control.record_owner_thread();
             Ok(FakeBackend {
                 control: factory_control,
+                media: None,
             })
         })
         .unwrap()
@@ -1933,6 +2001,73 @@ mod tests {
         inventory
             .select_exact(0, 0, channels, sample_rate_hz, buffer, warmup_timeout)
             .unwrap()
+    }
+
+    #[test]
+    fn media_handoff_retains_service_and_reservation_fences_and_actual_control_evidence() {
+        let control = Arc::new(FakeControl::default());
+        let client = fake_service(&control);
+        let service = CpalOutputService {
+            client: Arc::clone(&client),
+        };
+        let inventory = service.enumerate_output_devices().unwrap();
+        let receipt = service
+            .reserve_silence(selection(
+                &inventory,
+                2,
+                48_000,
+                OutputBufferSelection::Default,
+                Duration::from_millis(100),
+            ))
+            .unwrap();
+        let plan = crate::playback::tests::plan(8);
+        let prepared = service
+            .prepare_playback(&receipt, Arc::clone(&plan))
+            .unwrap();
+        assert_eq!(prepared.state, pps_runner_audio::RenderState::Prepared);
+        assert_eq!(prepared.submitted_frames, 0);
+        assert_eq!(
+            service.status().unwrap().phase(),
+            OutputServicePhase::ReservedMedia
+        );
+        let cancel = service
+            .playback_cancellation(&receipt, plan.fence())
+            .unwrap();
+        let admitted = service
+            .playback_control(&receipt, plan.fence(), RenderControl::Start)
+            .unwrap();
+        assert_eq!(
+            service
+                .playback_status(&receipt)
+                .unwrap()
+                .unwrap()
+                .submitted_frames,
+            0
+        );
+        let records = service.drain_playback(&receipt, usize::MAX).unwrap();
+        assert!(records.iter().any(|record| matches!(record.kind, crate::PlaybackRecordKind::Control {
+            sequence, requested: RenderControl::Start, result: pps_runner_audio::ControlResult::Applied, ..
+        } if sequence == admitted.sequence)));
+        cancel.abort();
+        service.drain_playback(&receipt, 16).unwrap();
+        assert_eq!(
+            service.playback_status(&receipt).unwrap().unwrap().state,
+            pps_runner_audio::RenderState::Aborted
+        );
+        let other = CpalOutputService {
+            client: fake_service(&Arc::new(FakeControl::default())),
+        };
+        assert_eq!(
+            other.prepare_playback(&receipt, plan).unwrap_err().code(),
+            OutputServiceErrorCode::ReceiptMismatch
+        );
+        other.shutdown().unwrap();
+        service.release(&receipt).unwrap();
+        assert_eq!(
+            service.playback_status(&receipt).unwrap_err().code(),
+            OutputServiceErrorCode::StaleReservation
+        );
+        service.shutdown().unwrap();
     }
 
     #[test]

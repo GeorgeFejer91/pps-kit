@@ -162,10 +162,9 @@ pub struct RenderOutcome {
 /// `render` performs no allocation, deallocation, locking, I/O, logging, JSON
 /// work, or formatting. The caller owns both output and event storage.
 ///
-/// The engine owns an immutable plan containing heap-backed PCM and event
-/// storage. A future platform output owner must quiesce the callback, move the
-/// engine away from that callback, and drop it on the non-real-time owner
-/// thread so reference-count or allocation teardown never runs in the callback.
+/// The engine retains an immutable plan containing heap-backed PCM and events.
+/// Platform callers use `from_shared_plan` and retain another strong reference
+/// until callback quiescence, then retire that storage on their output owner.
 pub struct RenderEngine {
     plan: Arc<PreparedPlaybackPlan>,
     state: RenderState,
