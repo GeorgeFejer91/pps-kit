@@ -19,17 +19,24 @@ Updated: 2026-09-27. Replace at task/stage transitions; do not append command lo
   Explicit audio preflight now installs a bounded native event journal using
   the existing authority schema. Writer/admission failures interrupt and disarm
   active state; partial files are retained and cannot certify a completed run.
+  The review branch also binds cached media through that authority: immutable
+  PCM is shared, stale handoffs abort, and callback metadata enters the same
+  journal. Preparation remains silent, non-executable, and unqualified.
+  Stop interrupts a verified package and the demo completion command rejects
+  it; native results must authorize real completion.
 - **Evidence:** use the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md).
   Source, CI packages, installed behavior, physical timing, participant results,
   and published replication are distinct gates. The existing installed
   compatibility Runner has not been rebuilt in this task.
-- **Next gate:** adopt the verified media bridge in the native experiment
-  authority with real response capture, result CSVs, completion, and safe execution.
+- **Next gate:** finish the native experiment authority with real response
+  capture, result CSVs, completion, and safe execution.
   The Tauri candidate remains non-executable/unqualified. Qualification requires
   observed devices and routes; software tests cannot supply physical evidence.
 - **Local constraint:** full native builds and the complete Standard tier need
   additional storage (documented working allowance: 15 GiB). Source checks and
-  CI continue; an alternate location or free space has been requested.
+  CI continue; an alternate location or free space has been requested. C: is
+  currently full. Native authority integration stays on
+  `review/native-playback-authority` until local synchronization is possible.
 
 Detailed run artifacts stay in ignored validation folders. Preserve the pre-sync
 Git bundle and dirty-file backup until reconciliation is verified.

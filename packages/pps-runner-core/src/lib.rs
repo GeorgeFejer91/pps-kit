@@ -686,7 +686,8 @@ impl RunnerCore {
                 if matches!(
                     self.snapshot.run.phase,
                     RunnerPhase::Idle | RunnerPhase::Completed
-                ) || (!demo && self.snapshot.run.phase == RunnerPhase::Interrupted) {
+                ) || (!demo && self.snapshot.run.phase == RunnerPhase::Interrupted)
+                {
                     return Ok(false);
                 }
                 // Stop is a safety interruption for a real package. Only the
@@ -1762,8 +1763,15 @@ mod tests {
     #[test]
     fn verified_package_stop_keeps_partial_state_for_local_and_remote_commands() {
         for remote in [false, true] {
-            let mut core = RunnerCore::new("target-test", "desktop", 7, TimingTier::DesktopPreview, clock(0));
-            core.adopt_verified_package(verified_package("P001"), clock(1)).unwrap();
+            let mut core = RunnerCore::new(
+                "target-test",
+                "desktop",
+                7,
+                TimingTier::DesktopPreview,
+                clock(0),
+            );
+            core.adopt_verified_package(verified_package("P001"), clock(1))
+                .unwrap();
             let result = if remote {
                 core.dispatch(
                     DispatchOrigin::Remote {
@@ -1772,9 +1780,13 @@ mod tests {
                         lease_valid: true,
                     },
                     CommandRequest {
-                        id: "cmd-native-stop".to_owned(), epoch: core.epoch(), sequence: 1,
-                        expected_revision: Some(core.revision()), scope: Scope::SessionAbort,
-                        action: Action::RunStop, args: json!({}),
+                        id: "cmd-native-stop".to_owned(),
+                        epoch: core.epoch(),
+                        sequence: 1,
+                        expected_revision: Some(core.revision()),
+                        scope: Scope::SessionAbort,
+                        action: Action::RunStop,
+                        args: json!({}),
                     },
                     clock(2),
                 )
@@ -1786,7 +1798,10 @@ mod tests {
             assert!(!result.snapshot.run.complete);
             assert!(!result.snapshot.safety.local_armed);
             assert!(!result.snapshot.safety.capture_started);
-            assert_eq!(result.snapshot.identity.part_session_id, "P001_session_20260831_part_02");
+            assert_eq!(
+                result.snapshot.identity.part_session_id,
+                "P001_session_20260831_part_02"
+            );
             let revision = core.revision();
             let repeated = core.dispatch_local(Action::RunStop, json!({}), clock(3));
             assert_eq!(repeated.status, AppliedStatus::Accepted);
@@ -1797,12 +1812,22 @@ mod tests {
 
     #[test]
     fn verified_package_rejects_the_demo_completion_command_without_changing_state() {
-        let mut core = RunnerCore::new("target-test", "desktop", 7, TimingTier::DesktopPreview, clock(0));
-        core.adopt_verified_package(verified_package("P001"), clock(1)).unwrap();
+        let mut core = RunnerCore::new(
+            "target-test",
+            "desktop",
+            7,
+            TimingTier::DesktopPreview,
+            clock(0),
+        );
+        core.adopt_verified_package(verified_package("P001"), clock(1))
+            .unwrap();
         let revision = core.revision();
         let result = core.dispatch_local(Action::RunCompleteDemo, json!({}), clock(2));
         assert_eq!(result.status, AppliedStatus::Rejected);
-        assert_eq!(result.reason, "verified_package_completion_requires_native_results");
+        assert_eq!(
+            result.reason,
+            "verified_package_completion_requires_native_results"
+        );
         assert_eq!(core.revision(), revision);
         assert_eq!(result.snapshot.run.phase, RunnerPhase::Prepared);
         assert!(!result.snapshot.run.complete);

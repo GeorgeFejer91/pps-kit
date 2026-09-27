@@ -71,9 +71,16 @@ unselected. Current bounds and evidence belong in the owning tests and the
 
 `pps-runner-audio-cpal` can bind the existing verified immutable output plan to
 an exact reserved stream. Silent warm-up returns one native command/event port;
-no IPC caller can reconstruct it. The experiment authority must drain bounded
-evidence, distinguish admission from callback application, and own response and
-durable-result policy. Device retirement retains callback storage off the render
+no IPC caller can reconstruct it. `native_playback.rs` hands that sole port to
+the existing execution actor, sharing its cached immutable plan and native
+metadata receipt. Completion rechecks the package/run/cache and healthy journal;
+stale or abandoned handoffs drop and abort the callback. The actor drains bounded
+callback records into the existing event ledger/journal, preserving original
+schedule payloads and retaining callback observation/prediction clocks separately.
+Ledger timestamps reflect recording order; callback observation is not physical
+onset. Preparation remains silent. Start, response collection, durable result
+publication, and completion must be implemented together before enabling native
+execution. No second scheduler or UI-owned playback authority is permitted. Device retirement retains callback storage off the render
 path. Raw CPAL playback timestamps are predictions in their own clock domain,
 not measured physical onset. The Tauri package is still non-executable until
 the complete experiment adapter adopts this seam; preparation does not promote
@@ -89,4 +96,6 @@ failure or backpressure prevents further ordinary transitions and neutralizes
 output; safety still proceeds. Package replacement closes the old writer before
 another can attach. Keep files partial until real media, responses, dataset
 publication, and completion are implemented. An event journal is not a response
-CSV or evidence of physical timing.
+CSV or evidence of physical timing. The shared reducer leaves verified
+package Stop interrupted/partial and rejects `RunCompleteDemo` for that package.
+Only a future native result publication receipt may authorize real completion.
