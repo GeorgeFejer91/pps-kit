@@ -60,6 +60,8 @@ input, select, textarea {
 }
 
 textarea { resize: vertical; }
+#native-output-route { min-width: 0; max-width: 100%; }
+#native-output-selection { overflow-wrap: anywhere; }
 input:focus, select:focus, textarea:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(36, 107, 85, 0.13);
@@ -315,6 +317,11 @@ input[type="checkbox"] {
 }
 .toast.is-visible { transform: translateY(0); opacity: 1; }
 .toast.is-error { border-color: #deb8b5; background: var(--danger-soft); color: var(--danger); }
+.desktop-page .toast {
+  display: none; position: static; max-width: 100%; margin: 0;
+  transform: none; box-shadow: none; overflow-wrap: anywhere;
+}
+.desktop-page .toast.is-visible { display: block; }
 
 .companion-page { padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem max(1rem, env(safe-area-inset-bottom)); }
 .phone-shell { width: min(100%, 640px); margin: 0 auto; }

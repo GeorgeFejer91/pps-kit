@@ -41,6 +41,28 @@ export function createTauriRunnerAdapter({ invokeFn = invoke, listenFn = listen 
     prepareFirstAudioBlock() {
       return call(invokeFn, "prepare_first_audio_block");
     },
+    nativeOutputStatus() {
+      return call(invokeFn, "native_output_status");
+    },
+    enumerateNativeOutput() {
+      return call(invokeFn, "native_output_enumerate");
+    },
+    reserveNativeOutput({ policyGeneration, serviceGeneration, inventoryGeneration,
+      deviceOrdinal, configOrdinal, channels, sampleRateHz }) {
+      return call(invokeFn, "native_output_reserve_silence", { request: {
+        policyGeneration, serviceGeneration, inventoryGeneration,
+        deviceOrdinal, configOrdinal, channels, sampleRateHz,
+        bufferFrames: null, warmupTimeoutMs: 3000,
+      } });
+    },
+    releaseNativeOutput({ policyGeneration, serviceGeneration, reservationGeneration }) {
+      return call(invokeFn, "native_output_release", { request: {
+        policyGeneration, serviceGeneration, reservationGeneration,
+      } });
+    },
+    disableNativeOutput() {
+      return call(invokeFn, "native_output_disable");
+    },
     recordResponse({ choice = "", x = null, y = null } = {}) {
       return call(invokeFn, "runner_record_response", { request: { choice, x, y } });
     },

@@ -16,6 +16,7 @@ import {
 import { renderQrCode } from "./ui/qr-code.js";
 import { initializeTextLayout } from "./ui/text-layout.js";
 import { bindParticipantResponse } from "./ui/participant-response.js";
+import { bindNativeOutputSetup } from "./ui/native-output-setup.js";
 import { installBrowserLifecycle } from "./remote/browser-lifecycle.js";
 
 initializeTextLayout();
@@ -27,6 +28,9 @@ const elements = Object.fromEntries([...document.querySelectorAll("[id]")].map((
 const participantResponse = bindParticipantResponse({
   target: elements["participant-response"], api,
   liveState: () => nativeUpdatesReady,
+  onError: (error) => showToast(error.message, { error: true }),
+});
+const nativeOutputSetup = bindNativeOutputSetup({ elements, api,
   onError: (error) => showToast(error.message, { error: true }),
 });
 const outboundActionButtons = [...document.querySelectorAll("[data-controller-action]")];
@@ -68,6 +72,9 @@ function formatDuration(seconds) {
 
 function showToast(message, { error = false } = {}) {
   clearTimeout(toastTimer);
+  const owner = document.activeElement?.closest(".panel")
+    ?? document.querySelector(".tab-panel.is-active .panel");
+  owner?.append(elements.toast);
   elements.toast.textContent = message;
   elements.toast.classList.toggle("is-error", error);
   elements.toast.classList.add("is-visible");
@@ -121,6 +128,7 @@ function renderPreparedAudio(nextPreparation) {
     && byteBudget === 1280 * 1024 * 1024
     && decodedBytes <= byteBudget;
   preparedAudio = valid ? candidate : null;
+  nativeOutputSetup.update(snapshot, preparedAudio);
   text("prepared-audio-status", preparedAudio ? "Prepared · output disabled" : "Not prepared");
   text(
     "prepared-audio-detail",
@@ -319,6 +327,7 @@ function renderSnapshot(next) {
   elements["prepare-first-audio-block"].title = api.kind === "tauri-native"
     ? "Content-bind the first verified WAV and renderer-neutral plan in the one-block native cache"
     : "Native audio preparation is available in the Tauri app";
+  nativeOutputSetup.update(next, preparedAudio);
   updateInboundPolicyUi();
 
   if (inboundPrivateTarget?.nativeClaimReceipt && !next.safety?.local_armed) {
@@ -1012,7 +1021,7 @@ function bindLocalActions() {
       if (!renderPreparedAudio(prepared)) {
         throw new Error("The native runner returned an invalid prepared-audio summary.");
       }
-      showToast("First block and renderer-neutral plan cached natively. Device output and execution remain disabled.");
+      showToast("Audio block prepared. Choose its output device next.");
     } catch (error) {
       renderPreparedAudio(null);
       showToast(error.message, { error: true });
@@ -1163,6 +1172,7 @@ async function start() {
     const [initialSnapshot, initialRemote] = await Promise.all([api.snapshot(), api.remoteStatus()]);
     renderSnapshot(normalizedSnapshot(initialSnapshot));
     await renderRemote(initialRemote);
+    await nativeOutputSetup.refresh().catch(() => {});
   } catch (error) {
     text("state-chip", "Native bridge unavailable");
     showToast(error.message, { error: true });
@@ -1202,12 +1212,13 @@ function startPolling() {
   if (pollTimer !== null) clearInterval(pollTimer);
   pollTimer = setInterval(() => {
     if (document.visibilityState !== "visible") return;
-    void Promise.all([refreshSnapshot(), refreshRemote()]).catch(() => {});
+    void Promise.all([refreshSnapshot(), refreshRemote(), nativeOutputSetup.refresh()]).catch(() => {});
   }, 1_000);
 }
 
 window.addEventListener("pagehide", () => {
   stopNativeSnapshots();
+  nativeOutputSetup.suspend();
   void stopAllRemoteNetworking();
 });
 
@@ -1215,10 +1226,12 @@ installBrowserLifecycle({
   suspend: () => {
     // The native authority and inbound peer continue while the desktop window is hidden.
     outboundController?.session.stop();
+    nativeOutputSetup.suspend();
     updateOutboundControls();
   },
   resume: () => {
     void subscribeNativeSnapshots().then(() => Promise.all([refreshSnapshot(), refreshRemote()]))
+      .then(() => nativeOutputSetup.resume())
       .then(startPolling).catch((error) => showToast(error.message, { error: true }));
   },
 });

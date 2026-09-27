@@ -107,6 +107,20 @@
             </div>
 
             <aside class="workspace-side stack">
+              <section class="panel stack compact-stack" aria-labelledby="native-output-heading">
+                <h2 id="native-output-heading">Prepare audio output</h2>
+                <p id="native-output-detail" class="safety-copy" role="status">Prepare the first audio block before choosing an output device.</p>
+                <button id="native-output-list" class="button" type="button" disabled>List output devices</button>
+                <label>Output device<select id="native-output-route" aria-describedby="native-output-selection" disabled>
+                  <option value="">Choose output device…</option>
+                </select></label>
+                <p id="native-output-selection" class="subtle">Choose a device configuration matching the prepared block.</p>
+                <button id="native-output-prepare" class="button" type="button" disabled>Prepare silent output</button>
+                <div class="inline-actions">
+                  <button id="native-output-release" class="button" type="button" disabled>Release output</button>
+                  <button id="native-output-disable" class="button button-quiet" type="button" disabled>Disable output</button>
+                </div>
+              </section>
               <section class="panel">
                 <p class="eyebrow">Output levels</p>
                 <h2>Output Summary</h2>
@@ -254,7 +268,7 @@
       </main>
     </div>
 
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite" data-pretext></div>
     <!-- @vite-ignore: reviewed classic SDK bytes are copied unchanged from public/. -->
     <script src="./vendor/vdoninja/1.5.5/vdoninja-sdk.min.js"></script>
   </body>
