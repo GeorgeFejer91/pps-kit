@@ -1067,9 +1067,8 @@ impl OwnerState {
         action: Action,
         next_run_generation: Option<u64>,
     ) -> Result<(), &'static str> {
-        self.apply_native_action(action).map_err(|reason| {
+        self.apply_native_action(action).inspect_err(|_| {
             self.fail_stop_unavailable("native.control.unavailable", "evidence_unavailable");
-            reason
         })?;
         if let Some(next) = next_run_generation {
             self.run_generation = next;
