@@ -3,6 +3,8 @@
 Public Pages text inputs use the scoped LF rules in `.gitattributes`; copy
 canonical bytes rather than adding another text-conversion step. Rebuild the
 owned Pages artifact before comparing it with the live site.
+Run `python For-AI/engineering/validation/scripts/run_public_pages_byte_audit.py`
+for the complete public file and main-route comparison.
 
 Own synchronization, checkpoints, test selection, Pages, component inventories,
 installers, and release claims. Read [WORKFLOW.md](../WORKFLOW.md) for stages and
