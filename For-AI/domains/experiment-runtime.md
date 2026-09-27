@@ -98,11 +98,29 @@ crate's V1 projection; filler/debug trials stay in rich evidence and do not
 advance the minimal dataset counter. Write
 failure or backpressure prevents further ordinary transitions and neutralizes
 output; safety still proceeds. Package replacement closes the old writer before
-another can attach. Keep files partial until real media, responses, dataset
-publication, and completion are implemented. A synced partial dataset is not
+another can attach. A native finalization request freezes the exact admitted
+prefix. The same worker syncs both files, closes append handles, publishes
+exclusive final names, rechecks their hashes and publishes a completion manifest
+last. The actor accepts only a receipt matching its package/run/count/sequence
+fences. Writer failure retains partial evidence and interrupts finalization;
+wire commands cannot manufacture completion. A synced partial dataset is not
 evidence of experiment completion or physical timing. The shared reducer leaves verified
 package Stop interrupted/partial and rejects `RunCompleteDemo` for that package.
-Only a future native result publication receipt may authorize real completion.
+Only the native result publication receipt may authorize real completion. This
+source seam currently recognizes a whole single-block package, all resolved
+trials, no interrupted trials, and an elapsed final software submission estimate.
+It does not enable Start. Controls, participant UI, whole-profile/multi-block
+execution, and an installed complete experiment remain required gates.
+
+Final publication uses standard-library exclusive hard links. Unsupported
+filesystems fail closed; partial names and pending/orphan artifacts are retained.
+File syncing and the commit manifest do not qualify sudden power-loss recovery,
+directory metadata persistence, device drain, or physical timing. Inspect an
+actual installed result with
+`python For-AI/engineering/validation/scripts/validate_native_results.py <manifest.results.json> --package-sha256 <verified-digest>`.
+That read-only audit checks file hashes, prefix/finalization evidence and the
+existing Python V1 CSV projection. Its report is file-contract evidence only;
+synthetic CI writer fixtures cannot stand in for participant acquisition.
 
 `pps-runner-execution::response` owns response windows, selection, withholding,
 choice scoring, Data_min columns, and CSV encoding. Python remains the migration

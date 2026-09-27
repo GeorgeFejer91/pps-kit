@@ -29,12 +29,19 @@ Updated: 2026-09-27. Replace at task/stage transitions; do not append command lo
   and 18-column Data_min contract. Queued input fences prevent premature
   scoring; pauses through a trial retain interrupted evidence. Native clock
   observations and driver predictions remain explicitly unqualified.
+  The result worker now supports a frozen event/CSV prefix, exclusive final
+  publication, byte hashes, and a native receipt matched before completion.
+  The first closure gate covers a whole single-block package and waits for all
+  response windows and the final software submission estimate. Independent
+  Python file auditing uses the existing V1 projection. All three hosts pass
+  the native source and independent writer-file checks; source is promoted to
+  main. These changes do not enable Start or claim an installed experiment.
 - **Evidence:** use the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md).
   Source, CI packages, installed behavior, physical timing, participant results,
   and published replication are distinct gates. The existing installed
   compatibility Runner has not been rebuilt in this task.
-- **Next gate:** connect native Start/controls, the participant input surface,
-  final result publication, and completion into one complete experiment path.
+- **Next gate:** connect native Start/controls and the participant input surface into one complete experiment
+  path; extend through the same owner to full profiles/multiple blocks.
   The Tauri candidate remains non-executable/unqualified. Qualification requires
   observed devices and routes; software tests cannot supply physical evidence.
 - **Local constraint:** full native builds and the complete Standard tier need

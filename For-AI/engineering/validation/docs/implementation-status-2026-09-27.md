@@ -14,10 +14,10 @@ Status applies to the stated surface, not to the whole product.
 | 6 | PARTIAL: actual Pretext, explicit no-fit, complete labels, narrow/enlarged text and spacing | Actual WebViews and full accessibility qualification |
 | 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full planner scheduling UI and native profile assembly |
 | 8 | VERIFIED: plan/resource preflight; staged stimulus/source/cancel fences; segment rollback | Qualify additional generation routes if selected |
-| 9 | PARTIAL: exact CPAL port, bounded callback evidence, shared V1 response scorer, native input admission and partial CSVs through the existing actor/worker | Native Start/controls, participant surface, final publication/completion and actual installed experiment; shell remains non-executable |
+| 9 | PARTIAL: exact CPAL port, bounded callback evidence, shared V1 scorer/input/CSV, sealed result publication and receipt-gated completion through the existing actor/worker | Native Start/controls, participant surface, full-profile execution and actual installed experiment; shell remains non-executable |
 | 10 | PARTIAL: shared contracts; JSON → existing compatibility assembler; sample/tactile/response/CSV oracle comparisons pass | Native assembly and complete execution capability |
 | 11 | PARTIAL: same typed authority, shared action fixture, fresh state, native scopes | Real-package execution commands |
-| 12 | PARTIAL: retry/input fences; one bounded worker acknowledges event/CSV prefixes after both sync; partial retention, callback metadata and fail-closed safety | Final results publication and complete native execution |
+| 12 | PARTIAL: retry/input fences; one bounded worker syncs event/CSV prefixes and seals/publishes hashed results without overwrite; native receipt/count/run fences and partial retention | Complete native execution, installed filesystems and recovery qualification |
 | 13 | PARTIAL: secure hosted companion, explicit inert discovery, existing authenticated VDO route | Physical phone direct/relay/network-loss qualification |
 | 14 | PARTIAL: shared suspension/resume gate, no replay, stale callback denial, disarmed phone outputs | Physical Safari/Chrome screen lock and BFCache cases |
 | 15 | VERIFIED source policy: local setup, observer scope, participant-free public projections, fresh invitations | Physical expiry/revocation; remembered phones remain unselected |
@@ -107,9 +107,39 @@ Source and package evidence:
   existing worker, with no separate file authority or scheduler. Preparation
   does not enable Start: participant UI binding, actual controls, final result
   publication/completion and an installed complete experiment remain pending.
-  Windows NSIS, macOS DMG and Linux deb validation packages for this exact
-  revision are still building; no installed/physical claim follows from them.
+  [The synchronized `73980f38` checkpoint passed all 14 source and validation-package jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36345187288).
+  Its product source matches this response revision; its additional changes
+  update the current/domain/implementation records. Windows NSIS, macOS DMG
+  and Linux deb packages were built; none was installed or physically qualified.
   The fresh public audit passes all 470 files and all four routes.
+
+- Native result publication source **f2e5edfba61a40680ff1dddf04fdb06664be177a**:
+  [All 11 Core/Desktop/oracle/browser/optional-Quest source jobs passed](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36347316326).
+  Each desktop suite passes 136 tests; the shared core passes 20. Source is
+  promoted to main after those gates. Its three validation installers are
+  still building and remain separate from installed evidence.
+  The existing bounded worker freezes one event/CSV prefix, syncs both files,
+  closes append handles, exclusively publishes final names, independently
+  rechecks their hashes, and publishes a completion manifest last. Native
+  generation/sequence/count/package fences match the receipt before the reducer
+  completes. Missing or interrupted trials and write/publication failures cannot
+  certify completion. The first closure gate covers a whole single-block package,
+  closed response windows and an elapsed final software submission estimate;
+  neither source exhaustion nor a driver prediction is physical timing evidence.
+  New checks cover result hashes/counts, exclusive publication, retained faults,
+  immutable queue retries, stale receipts, native-only finalization and V1 CSV
+  projection. The independent Python file audit rejects partial/substituted/
+  malformed prefixes and changed CSVs, even with recomputed hashes. CI additionally
+  feeds actual synthetic Rust worker files into that audit on each host.
+  Local formatting, locked metadata, whitespace checks and all three Python
+  audit checks pass. The local audit reads the tiny synthetic macOS worker
+  artifact from this exact revision; all three hosts independently audit their
+  own generated worker files in CI. None is an installed experiment.
+  This is a staged source seam: Start/controls, the participant surface, whole
+  profiles/multiple blocks and an installed complete experiment remain pending.
+  Hard-link-incompatible filesystems fail closed, and power-loss recovery and
+  directory metadata durability require separate qualification. No final data
+  are overwritten or automatically removed.
 
 No participant acquisition, scientific replication effect, physical onset,
 installed application behavior, or newly qualified route is claimed here.
