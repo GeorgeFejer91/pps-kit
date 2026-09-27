@@ -1741,10 +1741,17 @@ mod tests {
         ) -> Result<PlaybackStatus, BackendFailure> {
             self.control.record_owner_thread();
             let (owner, mut callback) = crate::playback::PlaybackOwner::new(plan);
-            let mut output = [1.0; 2];
-            assert!(!callback.render(&mut output, Instant::now(), None));
-            assert_eq!(output, [0.0; 2]);
-            signals.record_callback();
+            match self.control.warmup.load(Ordering::Acquire) {
+                WARMUP_CALLBACK => {
+                    let mut output = [1.0; 2];
+                    assert!(!callback.render(&mut output, Instant::now(), None));
+                    assert_eq!(output, [0.0; 2]);
+                    signals.record_callback();
+                }
+                WARMUP_NONE => {}
+                WARMUP_FAULT => signals.record_callback_fault(),
+                other => panic!("unexpected fake media warmup mode {other}"),
+            }
             *self.control.signals.lock().unwrap() = Some(signals);
             let status = owner.status();
             self.media = Some((callback, owner));
@@ -1847,6 +1854,70 @@ mod tests {
         );
         assert!(matches!(service.prepare_playback(&receipt, plan),
             Err(error) if error.code() == OutputServiceErrorCode::StaleReservation));
+        service.shutdown().unwrap();
+    }
+
+    #[test]
+    fn prepared_stream_requires_its_own_silent_callback_and_faults_fail_closed() {
+        for (warmup, expected) in [
+            (WARMUP_NONE, OutputServiceErrorCode::WarmupTimeout),
+            (WARMUP_FAULT, OutputServiceErrorCode::CallbackFault),
+        ] {
+            let control = Arc::new(FakeControl::default());
+            let service = CpalOutputService {
+                client: fake_service(&control),
+            };
+            let inventory = service.enumerate_output_devices().unwrap();
+            let receipt = service
+                .reserve_silence(selection(
+                    &inventory,
+                    2,
+                    48_000,
+                    OutputBufferSelection::Default,
+                    Duration::from_millis(30),
+                ))
+                .unwrap();
+            assert!(service.status().unwrap().callback_count() > 0);
+            control.warmup.store(warmup, Ordering::Release);
+            assert!(
+                matches!(service.prepare_playback(&receipt, crate::playback::tests::plan(13)),
+                Err(error) if error.code() == expected)
+            );
+            let status = service.status().unwrap();
+            assert_eq!(status.phase(), OutputServicePhase::Faulted);
+            assert_eq!(status.reservation_generation(), None);
+            assert_eq!(control.release_calls.load(Ordering::Acquire), 1);
+            service.shutdown().unwrap();
+        }
+    }
+
+    #[test]
+    fn abandoned_media_prepare_reply_releases_the_silent_reservation() {
+        let control = Arc::new(FakeControl::default());
+        let service = fake_service(&control);
+        let inventory = service.enumerate().unwrap();
+        let receipt = service
+            .reserve(selection(
+                &inventory,
+                2,
+                48_000,
+                OutputBufferSelection::Default,
+                Duration::from_millis(100),
+            ))
+            .unwrap();
+        let (reply, receive) = mpsc::sync_channel(1);
+        drop(receive);
+        service
+            .send_normal(Command::PreparePlayback {
+                generation: receipt.reservation_generation(),
+                plan: crate::playback::tests::plan(14),
+                reply,
+            })
+            .unwrap();
+        let status = service.status().unwrap();
+        assert_eq!(status.phase(), OutputServicePhase::Enumerated);
+        assert_eq!(status.reservation_generation(), None);
+        assert_eq!(control.release_calls.load(Ordering::Acquire), 1);
         service.shutdown().unwrap();
     }
 
