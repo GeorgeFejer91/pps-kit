@@ -1,0 +1,19 @@
+{
+  "protocol": "brsp",
+  "version": 1,
+  "actions": {
+    "system.snapshot": "session.read",
+    "package.prepare_demo": "session.prepare",
+    "setup.submit": null,
+    "target.arm": null,
+    "target.disarm": null,
+    "part.start": "session.transport",
+    "instruction.continue": "session.transport",
+    "run.pause": "session.transport",
+    "run.resume": "session.transport",
+    "run.stop": "session.abort",
+    "run.abort": "session.abort",
+    "run.complete_demo": null,
+    "session.note": "session.annotate"
+  }
+}

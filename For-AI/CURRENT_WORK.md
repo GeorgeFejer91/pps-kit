@@ -45,6 +45,10 @@ append command logs or machine-specific paths.
   job checks and 15 actual Segment package assembly checks, including JSON input.
   Low-storage denial occurs before decoded audio allocation. Live Pages matches
   37 canonical files; viewer text newline handling is now explicit across platforms.
+  Closed local/remote action permissions and generation-scoped retry fences pass
+  22 Rust contract/core tests, Clippy, and 58 browser checks. Tombstones prevent
+  eviction replay; authorization is rechecked for cached outcomes. Participant
+  setup stays local and is omitted from offered public actions.
 
 Detailed run artifacts belong in ignored validation folders. Preserve the
 pre-sync Git bundle and dirty-file backup until reconciliation is verified.

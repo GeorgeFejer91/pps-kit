@@ -181,7 +181,11 @@ impl From<RunnerSnapshot> for RemoteRunnerSnapshot {
             connection_state: snapshot.connection_state,
             timing_tier: snapshot.timing_tier,
             package_verified: snapshot.package_verified,
-            allowed_actions: snapshot.allowed_actions,
+            allowed_actions: snapshot
+                .allowed_actions
+                .into_iter()
+                .filter(|action| action.remotely_eligible())
+                .collect(),
             setup: RemoteSetupSnapshot {
                 submitted: snapshot.setup.submitted,
                 ready: snapshot.setup.ready,
@@ -1759,6 +1763,14 @@ mod tests {
             Scope::DEFAULT_REMOTE.to_vec(),
         );
         let public_value = serde_json::to_value(&receipt.snapshot).unwrap();
+        assert!(!receipt
+            .snapshot
+            .allowed_actions
+            .contains(&Action::SetupSubmit));
+        assert!(!receipt
+            .snapshot
+            .allowed_actions
+            .contains(&Action::TargetArm));
         let public_json = serde_json::to_string(&public_value).unwrap();
         assert_eq!(
             public_value.get("schema").and_then(Value::as_str),

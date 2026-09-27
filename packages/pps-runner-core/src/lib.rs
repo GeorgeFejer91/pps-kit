@@ -16,6 +16,7 @@ use serde::Deserialize;
 use serde_json::Value;
 
 const DEDUPE_LIMIT: usize = 256;
+const RETIRED_COMMAND_LIMIT: usize = 4096;
 const MIN_COMMAND_ID_BYTES: usize = 8;
 const MAX_COMMAND_ID_BYTES: usize = 96;
 const MAX_NOTE_BYTES: usize = 512;
@@ -74,7 +75,7 @@ impl DispatchOrigin {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 enum DedupePrincipal {
     Local,
     Remote(String),
@@ -92,6 +93,7 @@ struct DedupeEntry {
 pub struct RunnerCore {
     snapshot: RunnerSnapshot,
     dedupe: VecDeque<DedupeEntry>,
+    retired_commands: BTreeSet<(DedupePrincipal, String)>,
     local_sequence: u64,
     package_fingerprint: Option<String>,
     package_execution_ready: bool,
@@ -204,6 +206,7 @@ impl RunnerCore {
                 last_note: String::new(),
             },
             dedupe: VecDeque::new(),
+            retired_commands: BTreeSet::new(),
             local_sequence: 0,
             package_fingerprint: None,
             package_execution_ready: false,
@@ -349,6 +352,7 @@ impl RunnerCore {
         if self.snapshot.epoch != new_epoch {
             self.snapshot.epoch = new_epoch;
             self.dedupe.clear();
+            self.retired_commands.clear();
             self.bump_revision(&now);
         } else {
             self.stamp(&now);
@@ -403,6 +407,13 @@ impl RunnerCore {
         F: FnMut(DispatchMilestone),
     {
         self.stamp(&now);
+        // Reauthentication, current scopes, and authority generation apply even
+        // when the caller is retrieving a remembered outcome.
+        if let Err(reason) = self.validate_origin(&origin, &command) {
+            observer(DispatchMilestone::DedupeResolved { duplicate: false });
+            observer(DispatchMilestone::ValidationCompleted { accepted: false });
+            return self.rejected(&command, reason);
+        }
         // BRSP retries keep the command body identical but wrap it in a fresh
         // control envelope sequence. Dedupe therefore binds commandId to the
         // application command body and authenticated authority principal, not
@@ -410,6 +421,13 @@ impl RunnerCore {
         // never share a namespace: otherwise a controller could pre-seed a
         // predictable local command ID and suppress a later operator action.
         let principal = origin.dedupe_principal();
+        if self
+            .retired_commands
+            .contains(&(principal.clone(), command.id.clone()))
+        {
+            observer(DispatchMilestone::DedupeResolved { duplicate: true });
+            return self.rejected(&command, "command_outcome_expired");
+        }
         let fingerprint = serde_json::to_vec(&serde_json::json!({
             "scope": command.scope,
             "action": command.action,
@@ -432,6 +450,15 @@ impl RunnerCore {
             return previous.result.clone();
         }
         observer(DispatchMilestone::DedupeResolved { duplicate: false });
+        let history_full = self.dedupe.len() >= DEDUPE_LIMIT
+            && self.retired_commands.len() >= RETIRED_COMMAND_LIMIT;
+        let safety_action = matches!(
+            command.action,
+            Action::RunStop | Action::RunAbort | Action::TargetDisarm
+        );
+        if history_full && command.action.mutates_state() && !safety_action {
+            return self.rejected(&command, "command_history_full");
+        }
 
         let accepted_revision = self.snapshot.revision;
         let rejection = self.validate_command(&origin, &command).err();
@@ -477,8 +504,43 @@ impl RunnerCore {
                 }
             }
         };
-        self.remember(principal, command.id, fingerprint, result.clone());
+        // At the hard history boundary reads and idempotent safety actions do
+        // not need more retained results; another run cannot start.
+        if !history_full {
+            self.remember(principal, command.id, fingerprint, result.clone());
+        }
         result
+    }
+
+    fn validate_origin(
+        &self,
+        origin: &DispatchOrigin,
+        command: &CommandRequest,
+    ) -> Result<(), &'static str> {
+        if command.epoch != self.snapshot.epoch {
+            return Err("stale_epoch");
+        }
+        if let DispatchOrigin::Remote {
+            granted_scopes,
+            lease_valid,
+            ..
+        } = origin
+        {
+            let required = command
+                .action
+                .required_scope()
+                .ok_or("action_is_local_only")?;
+            if required != command.scope {
+                return Err("scope_action_mismatch");
+            }
+            if !granted_scopes.contains(&required) {
+                return Err("scope_not_granted");
+            }
+            if command.action.mutates_state() && !lease_valid {
+                return Err("controller_lease_expired");
+            }
+        }
+        Ok(())
     }
 
     fn validate_command(
@@ -490,9 +552,6 @@ impl RunnerCore {
             || !is_safe_command_id(&command.id)
         {
             return Err("invalid_command_id");
-        }
-        if command.epoch != self.snapshot.epoch {
-            return Err("stale_epoch");
         }
         let invalid_sequence = match origin {
             DispatchOrigin::Local => {
@@ -523,26 +582,6 @@ impl RunnerCore {
             return Err("args_too_large_or_invalid");
         }
         validate_json_shape(&command.args, 0)?;
-        if let DispatchOrigin::Remote {
-            granted_scopes,
-            lease_valid,
-            ..
-        } = origin
-        {
-            let required = command
-                .action
-                .required_scope()
-                .ok_or("action_is_local_only")?;
-            if required != command.scope {
-                return Err("scope_action_mismatch");
-            }
-            if !granted_scopes.contains(&required) {
-                return Err("scope_not_granted");
-            }
-            if command.action.mutates_state() && !lease_valid {
-                return Err("controller_lease_expired");
-            }
-        }
         Ok(())
     }
 
@@ -906,7 +945,10 @@ impl RunnerCore {
             result,
         });
         while self.dedupe.len() > DEDUPE_LIMIT {
-            self.dedupe.pop_front();
+            if let Some(retired) = self.dedupe.pop_front() {
+                self.retired_commands
+                    .insert((retired.principal, retired.command_id));
+            }
         }
     }
 
@@ -1464,6 +1506,135 @@ mod tests {
         );
         assert_eq!(outside_wire_range.status, AppliedStatus::Rejected);
         assert_eq!(outside_wire_range.reason, "json_integer_out_of_range");
+    }
+
+    #[test]
+    fn evicted_outcome_cannot_replay_an_earlier_start() {
+        let mut core = ready_core();
+        let origin = DispatchOrigin::Remote {
+            controller_id: "controller".to_owned(),
+            granted_scopes: BTreeSet::from([Scope::SessionTransport]),
+            lease_valid: true,
+        };
+        let start = CommandRequest {
+            id: "evicted-start".to_owned(),
+            epoch: core.epoch(),
+            sequence: 1,
+            expected_revision: Some(core.revision()),
+            scope: Scope::SessionTransport,
+            action: Action::PartStart,
+            args: json!({"part_number": 1}),
+        };
+        assert_eq!(
+            core.dispatch(origin.clone(), start.clone(), clock(10))
+                .status,
+            AppliedStatus::Accepted
+        );
+        for index in 0..DEDUPE_LIMIT {
+            assert_eq!(
+                core.dispatch_local(
+                    Action::SessionNote,
+                    json!({"text": format!("note-{index}")}),
+                    clock(20 + index as u64)
+                )
+                .status,
+                AppliedStatus::Accepted
+            );
+        }
+        let revision = core.revision();
+        let expired = core.dispatch(origin, start.clone(), clock(400));
+        assert_eq!(expired.reason, "command_outcome_expired");
+        assert_eq!(core.revision(), revision);
+        core.rotate_epoch(8, clock(401));
+        assert_eq!(
+            core.dispatch(DispatchOrigin::Local, start, clock(402))
+                .reason,
+            "stale_epoch"
+        );
+    }
+
+    #[test]
+    fn bounded_history_retains_safety_access_and_requires_a_new_authority() {
+        let mut core = ready_core();
+        for index in 0..(DEDUPE_LIMIT + RETIRED_COMMAND_LIMIT) {
+            core.dispatch_local(
+                Action::SessionNote,
+                json!({"text": format!("note-{index}")}),
+                clock(index as u64 + 10),
+            );
+        }
+        assert_eq!(core.dedupe.len(), DEDUPE_LIMIT);
+        assert_eq!(core.retired_commands.len(), RETIRED_COMMAND_LIMIT);
+        assert_eq!(
+            core.dispatch_local(Action::PartStart, json!({"part_number": 1}), clock(5000))
+                .reason,
+            "command_history_full"
+        );
+        assert_eq!(
+            core.dispatch_local(Action::TargetDisarm, json!({}), clock(5001))
+                .status,
+            AppliedStatus::Accepted
+        );
+        assert_eq!(core.retired_commands.len(), RETIRED_COMMAND_LIMIT);
+        core.rotate_epoch(8, clock(5002));
+        assert_eq!(
+            core.dispatch_local(
+                Action::SessionNote,
+                json!({"text": "new authority"}),
+                clock(5003)
+            )
+            .status,
+            AppliedStatus::Accepted
+        );
+    }
+
+    #[test]
+    fn observer_cannot_submit_setup_and_revocation_also_blocks_cached_outcomes() {
+        let mut core = ready_core();
+        let origin = DispatchOrigin::Remote {
+            controller_id: "observer".to_owned(),
+            granted_scopes: BTreeSet::from([
+                Scope::SessionRead,
+                Scope::SessionAnnotate,
+                Scope::SessionPrepare,
+            ]),
+            lease_valid: true,
+        };
+        let setup = CommandRequest {
+            id: "remote-setup".to_owned(),
+            epoch: core.epoch(),
+            sequence: 1,
+            expected_revision: Some(core.revision()),
+            scope: Scope::SessionPrepare,
+            action: Action::SetupSubmit,
+            args: json!({"participant_code": "P002", "age": 40}),
+        };
+        assert_eq!(
+            core.dispatch(origin.clone(), setup, clock(10)).reason,
+            "action_is_local_only"
+        );
+        let note = CommandRequest {
+            id: "remote-note".to_owned(),
+            epoch: core.epoch(),
+            sequence: 2,
+            expected_revision: Some(core.revision()),
+            scope: Scope::SessionAnnotate,
+            action: Action::SessionNote,
+            args: json!({"text": "operator note"}),
+        };
+        assert_eq!(
+            core.dispatch(origin, note.clone(), clock(11)).status,
+            AppliedStatus::Accepted
+        );
+        let revoked = DispatchOrigin::Remote {
+            controller_id: "observer".to_owned(),
+            granted_scopes: BTreeSet::from([Scope::SessionRead]),
+            lease_valid: true,
+        };
+        assert_eq!(
+            core.dispatch(revoked, note, clock(12)).reason,
+            "scope_not_granted"
+        );
     }
 
     #[test]

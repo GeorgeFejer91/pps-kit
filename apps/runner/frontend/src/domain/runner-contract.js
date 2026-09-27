@@ -21,7 +21,6 @@ export const DEFAULT_REMOTE_SCOPES = Object.freeze([
 export const ACTION_SCOPE = Object.freeze({
   "system.snapshot": SCOPES.READ,
   "package.prepare_demo": SCOPES.PREPARE,
-  "setup.submit": SCOPES.PREPARE,
   "part.start": SCOPES.TRANSPORT,
   "instruction.continue": SCOPES.TRANSPORT,
   "run.pause": SCOPES.TRANSPORT,
@@ -32,6 +31,7 @@ export const ACTION_SCOPE = Object.freeze({
 });
 
 export const LOCAL_ONLY_ACTIONS = Object.freeze([
+  "setup.submit",
   "target.arm",
   "target.disarm",
   "run.complete_demo",

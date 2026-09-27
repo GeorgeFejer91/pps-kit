@@ -55,3 +55,12 @@ check storage before decoding or publishing media. Oversized plans are rejected,
 never truncated. Keep analytical participant/event readers separate from these
 assembly-input limits. UI readiness checks inspect one participant's block plan
 rather than expanding every participant's schedule.
+
+Remote participant setup is target-local. Shared action permissions are checked
+against `pps-contracts/fixtures/remote-actions.v1.json` in Rust and browser tests;
+public native snapshots contain only remotely eligible actions. The reducer keeps
+256 outcomes and up to 4096 retired command IDs for one authority generation.
+Evicted IDs return `command_outcome_expired`; a full history denies new mutations
+until deliberate authority rotation while retaining reads and safe stop/disarm.
+Current epoch, scope, and lease checks also apply to cached outcomes. This is an
+in-memory guarantee; durable execution must retain its own result/journal evidence.

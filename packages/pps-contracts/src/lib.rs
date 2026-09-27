@@ -158,13 +158,15 @@ impl Action {
     pub const fn required_scope(self) -> Option<Scope> {
         match self {
             Self::SystemSnapshot => Some(Scope::SessionRead),
-            Self::PackagePrepareDemo | Self::SetupSubmit => Some(Scope::SessionPrepare),
+            Self::PackagePrepareDemo => Some(Scope::SessionPrepare),
             Self::PartStart | Self::InstructionContinue | Self::RunPause | Self::RunResume => {
                 Some(Scope::SessionTransport)
             }
             Self::RunStop | Self::RunAbort => Some(Scope::SessionAbort),
             Self::SessionNote => Some(Scope::SessionAnnotate),
-            Self::TargetArm | Self::TargetDisarm | Self::RunCompleteDemo => None,
+            Self::SetupSubmit | Self::TargetArm | Self::TargetDisarm | Self::RunCompleteDemo => {
+                None
+            }
         }
     }
 
@@ -628,6 +630,24 @@ mod tests {
             "surprise": true
         });
         assert!(serde_json::from_value::<CommandRequest>(value).is_err());
+    }
+
+    #[test]
+    fn remote_permissions_match_the_shared_browser_fixture() {
+        let fixture: Value =
+            serde_json::from_str(include_str!("../fixtures/remote-actions.v1.json")).unwrap();
+        assert_eq!(fixture["protocol"], BRSP_PROTOCOL);
+        assert_eq!(fixture["version"], BRSP_VERSION);
+        assert_eq!(
+            fixture["actions"].as_object().unwrap().len(),
+            Action::ALL.len()
+        );
+        for action in Action::ALL {
+            assert_eq!(
+                fixture["actions"][action.as_str()],
+                serde_json::to_value(action.required_scope()).unwrap()
+            );
+        }
     }
 
     #[test]
