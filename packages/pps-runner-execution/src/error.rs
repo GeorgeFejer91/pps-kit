@@ -20,6 +20,8 @@ pub enum ExecutionErrorCode {
     LedgerTimestampRegression,
     LedgerEventInvalid,
     LedgerPayloadInvalid,
+    ResponseWindowInvalid,
+    ResponseCapacityExceeded,
 }
 
 impl ExecutionErrorCode {
@@ -42,6 +44,8 @@ impl ExecutionErrorCode {
             Self::LedgerTimestampRegression => "ledger_timestamp_regression",
             Self::LedgerEventInvalid => "ledger_event_invalid",
             Self::LedgerPayloadInvalid => "ledger_payload_invalid",
+            Self::ResponseWindowInvalid => "response_window_invalid",
+            Self::ResponseCapacityExceeded => "response_capacity_exceeded",
         }
     }
 }

@@ -20,6 +20,7 @@ on:
       - "For-AI/engineering/automation/check_runner_next.ps1"
       - "For-AI/engineering/tests/test_rust_session_package_differential.py"
       - "For-AI/engineering/tests/test_rust_timing_schedule_differential.py"
+      - "For-AI/engineering/tests/test_rust_response_differential.py"
       - ".github/workflows/runner-next.yml"
   push:
     branches: [main]
@@ -41,6 +42,7 @@ on:
       - "For-AI/engineering/automation/check_runner_next.ps1"
       - "For-AI/engineering/tests/test_rust_session_package_differential.py"
       - "For-AI/engineering/tests/test_rust_timing_schedule_differential.py"
+      - "For-AI/engineering/tests/test_rust_response_differential.py"
       - ".github/workflows/runner-next.yml"
   workflow_dispatch:
 
@@ -112,6 +114,7 @@ jobs:
           python -m pytest -q
           For-AI/engineering/tests/test_rust_session_package_differential.py
           For-AI/engineering/tests/test_rust_timing_schedule_differential.py
+          For-AI/engineering/tests/test_rust_response_differential.py
 
   browser-companion:
     name: Browser companion
