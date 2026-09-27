@@ -467,8 +467,9 @@ impl AppRuntime {
         let runtime = self.clone();
         let (reply, receive) = oneshot::channel();
         tauri::async_runtime::spawn(async move {
-            let _guard = guard;
             let result = runtime.run_native_output_enumerate().await;
+            // Completion permits the next operation, even on another executor thread.
+            drop(guard);
             let _ = reply.send(result);
         });
         Ok(receive)
@@ -485,8 +486,8 @@ impl AppRuntime {
         let runtime = self.clone();
         let (reply, receive) = oneshot::channel();
         tauri::async_runtime::spawn(async move {
-            let _guard = guard;
             let result = runtime.run_native_output_reserve(request).await;
+            drop(guard);
             let _ = reply.send(result);
         });
         Ok(receive)
@@ -1473,7 +1474,7 @@ mod tests {
         let deadline = tokio::time::Instant::now() + Duration::from_secs(3);
         loop {
             let status = runtime.native_output_status().await.unwrap();
-            if status.phase == expected {
+            if status.phase == expected && !status.cleanup_pending {
                 return status;
             }
             assert!(
@@ -1508,6 +1509,34 @@ mod tests {
             buffer_frames: None,
             warmup_timeout_ms: 50,
         }
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn native_output_completion_allows_next_request_and_disable_invalidates_it() {
+        let (runtime, control, inventory) = enumerated_fake_runtime().await;
+        let request = fake_reserve_request(&inventory);
+        let reservation = runtime
+            .start_native_output_reserve(request.clone())
+            .unwrap()
+            .await
+            .unwrap()
+            .unwrap();
+        assert!(reservation.silence_only);
+        assert!(!reservation.media_connected);
+        assert!(!reservation.executable);
+
+        runtime.disable_native_output().await.unwrap();
+        let status = wait_for_native_output_phase(&runtime, NativeOutputPhase::Disabled).await;
+        assert!(!status.cleanup_pending);
+        assert!(!status.executable);
+        assert_eq!(control.release_calls(), 1);
+        let rejected = runtime
+            .start_native_output_reserve(request)
+            .unwrap()
+            .await
+            .unwrap()
+            .unwrap_err();
+        assert_eq!(rejected.code, "native_output_changed");
     }
 
     fn verified_legacy_package(

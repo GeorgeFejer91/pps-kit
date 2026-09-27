@@ -21,7 +21,10 @@ append command logs or machine-specific paths.
   Centralized validator-source and owning coverage checks passed: 18 tests,
   with one existing unavailable-local-source skip. Rust formatting now passes;
   core and Python/Rust oracle checks passed on three CI platforms at `3e6eeb4`;
-  desktop checks remain in progress. Pytest uses native successful-scratch cleanup
+  desktop checks exposed three remaining unused test helpers. They now exercise
+  the shared output reserve/disable lifecycle and stale-policy rejection; the
+  operation guard is released before its completion reply. The optional Android
+  CI setup requests only the supported platform-tools package. Pytest uses native successful-scratch cleanup
   and one failed-run retention instead of a new helper. Designer Vite 6.4.3 and
   the transitive nanoid patch report zero npm vulnerabilities. Its canonical
   build, 12-case inspected layout audit, and Pages assembly/parity passed.
