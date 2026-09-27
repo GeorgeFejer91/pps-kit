@@ -291,6 +291,9 @@ mod tests {
         assert_eq!(rows[0].payload["outcome"], "Hit");
         assert_eq!(rows[0].payload["rt_ms"], "1300.000");
         assert_eq!(rows[0].payload["timingQualification"], "unqualified");
+        assert!(capture.complete(1));
+        assert!(!capture.complete(0));
+        assert!(!capture.complete(2));
         assert!(capture
             .observe(&boundary("trial_start", 4_000_000_000))
             .is_err());
@@ -319,6 +322,7 @@ mod tests {
             .unwrap();
         let rows = capture.resolve_ready(2_000_000_000, 100).unwrap();
         assert_eq!(rows[0].event_type, "trial.interrupted");
+        assert!(!capture.complete(1));
         assert!(rows[0].payload.get("outcome").is_none());
         assert!(capture
             .resolve_ready(3_000_000_000, 100)

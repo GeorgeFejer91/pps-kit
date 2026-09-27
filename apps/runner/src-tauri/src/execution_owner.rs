@@ -598,7 +598,7 @@ impl OwnerState {
         // not certify one block of a larger prepared experiment as complete.
         let completion_ready = status.state == pps_runner_audio::RenderState::SourceExhausted
             && playback.final_frame_submitted
-            && package.block_count == 1
+            && playback.source.receipt.verified_session().blocks().len() == 1
             && playback
                 .capture
                 .complete(playback.source.receipt.schedule().summary().trial_row_count)

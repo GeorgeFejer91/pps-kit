@@ -236,8 +236,9 @@ fn dataset_write_failure_never_acknowledges_events_or_rows_and_retains_both_file
 fn publishable_journal(root: &Path) -> NativeEventJournal {
     let events = root.join("events.partial.jsonl");
     let dataset = root.join("trials.partial.csv");
-    let header =
-        serde_json::json!({"packageManifestSha256": "a".repeat(64), "completion": "partial"});
+    let header = serde_json::json!({"schema": "pps.native-event-journal.v1", "packageManifestSha256": "a".repeat(64),
+        "participantId": "fixture", "sessionId": "S1", "partSessionId": "S1P2", "partNumber": 2,
+        "executionMode": "participant_block_wavs", "completion": "partial", "timingQualification": "unqualified"});
     let publication = Publication {
         events: events.clone(),
         dataset: dataset.clone(),
@@ -264,7 +265,22 @@ fn scored_prefix(journal: &mut NativeEventJournal) -> EventLedger {
             "response_given": kind == "Audio-Tactile", "outcome": "Hit", "rt_ms": "100.000"});
             input
         });
-    let batch = ledger.prepare_batch(inputs, LedgerReserve::NONE).unwrap();
+    let mut tail = LedgerEventInput::new("native.results.finalization-requested", "native", 4);
+    tail.payload =
+        serde_json::json!({"packageGeneration": 4, "runGeneration": 9, "expectedScoredTrials": 3});
+    let batch = ledger
+        .prepare_batch(
+            [LedgerEventInput::new(
+                "audio.final-frame-submitted",
+                "native-output",
+                0,
+            )]
+            .into_iter()
+            .chain(inputs)
+            .chain([tail]),
+            LedgerReserve::NONE,
+        )
+        .unwrap();
     journal.admit(&batch).unwrap();
     ledger.commit_prepared(batch).unwrap();
     ledger
@@ -296,7 +312,7 @@ fn completed_result_publishes_exact_synced_hashes_counts_and_an_exclusive_commit
             receipt.scored_trial_count,
             receipt.dataset_row_count
         ),
-        (3, 3, 2)
+        (5, 3, 2)
     );
     let events = fs::read(root.join("events.jsonl")).unwrap();
     let dataset = fs::read(root.join("trials.csv")).unwrap();
@@ -318,6 +334,15 @@ fn completed_result_publishes_exact_synced_hashes_counts_and_an_exclusive_commit
     assert_eq!(manifest["datasetFile"], "trials.csv");
     assert_eq!(manifest["receipt"], serde_json::to_value(&receipt).unwrap());
     assert_eq!(journal.finish(4, 9, 3), Err(JournalError::Unavailable));
+    // Only synthetic worker-test files may be retained for an independent
+    // Python contract audit. This hook is absent from the production binary.
+    if let Some(directory) = std::env::var_os("PPS_NATIVE_RESULT_FIXTURE_DIR") {
+        let directory = PathBuf::from(directory);
+        fs::create_dir_all(&directory).unwrap();
+        for name in ["events.results.json", "events.jsonl", "trials.csv"] {
+            fs::copy(root.join(name), directory.join(name)).unwrap();
+        }
+    }
     drop(journal);
     fs::remove_dir_all(root).unwrap();
 }
