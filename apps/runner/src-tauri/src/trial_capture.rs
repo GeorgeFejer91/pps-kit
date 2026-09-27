@@ -61,6 +61,7 @@ pub(crate) struct NativeTrialCapture {
     responses: Vec<ParticipantResponse>,
     used: BTreeSet<u64>,
     last_response_id: u64,
+    interrupted: bool,
 }
 
 impl NativeTrialCapture {
@@ -69,6 +70,7 @@ impl NativeTrialCapture {
             // A pause through a trial cannot create a valid reaction time.
             for trial in self.active.values_mut() {
                 trial.interrupted = true;
+                self.interrupted = true;
             }
             return Ok(());
         }
@@ -226,6 +228,13 @@ impl NativeTrialCapture {
             inputs.push(input);
         }
         Ok(inputs)
+    }
+
+    pub(crate) fn complete(&self, expected_trials: u32) -> bool {
+        expected_trials > 0
+            && !self.interrupted
+            && self.active.is_empty()
+            && self.finished.len() == expected_trials as usize
     }
 }
 

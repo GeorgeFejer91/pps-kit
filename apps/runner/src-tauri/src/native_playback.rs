@@ -67,6 +67,7 @@ pub(crate) struct NativePreparedPlayback {
     pub source: NativePlaybackSource,
     pub port: PlaybackPort,
     pub capture: NativeTrialCapture,
+    pub final_frame_submitted: bool,
 }
 
 impl NativePreparedPlayback {
@@ -85,6 +86,7 @@ impl NativePreparedPlayback {
             source,
             port,
             capture: NativeTrialCapture::default(),
+            final_frame_submitted: false,
         })
     }
 
@@ -120,6 +122,7 @@ impl NativePreparedPlayback {
                 stamp,
                 host_time(record.host_received),
             )? {
+                self.final_frame_submitted |= input.event_type == "audio.final-frame-submitted";
                 self.capture.observe(&input)?;
                 inputs.push(input);
             }

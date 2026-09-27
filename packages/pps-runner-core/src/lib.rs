@@ -312,6 +312,55 @@ impl RunnerCore {
         Ok(self.snapshot())
     }
 
+    /// Native owner only: all media submission and response windows have
+    /// resolved. This begins file publication; it does not certify completion.
+    pub fn begin_native_finalization(
+        &mut self,
+        fingerprint: &str,
+        now: ClockStamp,
+    ) -> Result<(), &'static str> {
+        if self.package_fingerprint.as_deref() != Some(fingerprint)
+            || !self.package_execution_ready
+            || self.snapshot.run.phase != RunnerPhase::Running
+        {
+            return Err("native_result_scope_invalid");
+        }
+        self.snapshot.run.phase = RunnerPhase::Stopping;
+        self.snapshot.active_block.active = false;
+        self.snapshot.safety.capture_started = false;
+        self.snapshot.safety.local_armed = false;
+        self.package_execution_ready = false;
+        self.bump_revision(&now);
+        Ok(())
+    }
+
+    /// The native owner calls this only after matching the worker's published
+    /// receipt to its package/run/prefix. No wire action can invoke completion.
+    pub fn complete_native_finalization(
+        &mut self,
+        fingerprint: &str,
+        now: ClockStamp,
+    ) -> Result<(), &'static str> {
+        if self.package_fingerprint.as_deref() != Some(fingerprint)
+            || self.snapshot.run.phase != RunnerPhase::Stopping
+        {
+            return Err("native_result_scope_invalid");
+        }
+        self.snapshot.run.phase = RunnerPhase::Completed;
+        self.bump_revision(&now);
+        Ok(())
+    }
+
+    pub fn interrupt_native_finalization(&mut self, now: ClockStamp) {
+        if self.snapshot.run.phase == RunnerPhase::Stopping && self.package_fingerprint.is_some() {
+            self.snapshot.run.phase = RunnerPhase::Interrupted;
+            self.snapshot.safety.local_armed = false;
+            self.snapshot.safety.capture_started = false;
+            self.package_execution_ready = false;
+            self.bump_revision(&now);
+        }
+    }
+
     pub fn set_connection_state(&mut self, state: &str, now: ClockStamp) -> RunnerSnapshot {
         let normalized = if state.len() <= 48 && state.chars().all(is_safe_token_char) {
             state
@@ -592,6 +641,9 @@ impl RunnerCore {
         args: &Value,
         now: &ClockStamp,
     ) -> Result<bool, &'static str> {
+        if self.snapshot.run.phase == RunnerPhase::Stopping && *action != Action::SystemSnapshot {
+            return Err("native_result_publication_in_progress");
+        }
         match action {
             Action::SystemSnapshot => {
                 expect_empty_args(args)?;
@@ -1032,6 +1084,9 @@ impl RunnerCore {
     fn compute_allowed_actions(&self) -> Vec<Action> {
         let mut actions = vec![Action::SystemSnapshot];
         let phase = self.snapshot.run.phase;
+        if phase == RunnerPhase::Stopping {
+            return actions;
+        }
         if !matches!(
             phase,
             RunnerPhase::Running | RunnerPhase::Paused | RunnerPhase::InstructionGate
@@ -1831,6 +1886,66 @@ mod tests {
         assert_eq!(core.revision(), revision);
         assert_eq!(result.snapshot.run.phase, RunnerPhase::Prepared);
         assert!(!result.snapshot.run.complete);
+    }
+
+    #[test]
+    fn native_finalization_requires_the_current_run_and_receipt_while_wire_actions_cannot_complete_it(
+    ) {
+        let mut core = ready_core();
+        let package = verified_package("P001");
+        let fingerprint = package.fingerprint.clone();
+        core.adopt_verified_package(package, clock(4)).unwrap();
+        assert!(core
+            .complete_native_finalization(&fingerprint, clock(5))
+            .is_err());
+        assert!(core
+            .begin_native_finalization(&fingerprint, clock(5))
+            .is_err());
+        // This exercises the reducer seam, not an executable adapter or device.
+        core.package_execution_ready = true;
+        core.snapshot.run.phase = RunnerPhase::Running;
+        core.snapshot.safety.local_armed = true;
+        core.snapshot.safety.capture_started = true;
+        assert!(core
+            .begin_native_finalization(&"b".repeat(64), clock(6))
+            .is_err());
+        core.begin_native_finalization(&fingerprint, clock(7))
+            .unwrap();
+        let pending = core.snapshot();
+        assert_eq!(pending.run.phase, RunnerPhase::Stopping);
+        assert!(!pending.run.complete);
+        assert!(!pending.safety.local_armed);
+        assert!(!pending.safety.capture_started);
+        assert_eq!(pending.allowed_actions, [Action::SystemSnapshot]);
+        for action in [
+            Action::RunCompleteDemo,
+            Action::RunStop,
+            Action::RunAbort,
+            Action::TargetArm,
+            Action::SessionNote,
+        ] {
+            assert_eq!(
+                core.dispatch_local(action, json!({}), clock(8)).reason,
+                "native_result_publication_in_progress"
+            );
+        }
+        assert!(core
+            .complete_native_finalization(&"b".repeat(64), clock(9))
+            .is_err());
+        let mut failed = core.clone();
+        failed.interrupt_native_finalization(clock(10));
+        assert_eq!(failed.snapshot().run.phase, RunnerPhase::Interrupted);
+        assert!(failed
+            .complete_native_finalization(&fingerprint, clock(11))
+            .is_err());
+        core.complete_native_finalization(&fingerprint, clock(10))
+            .unwrap();
+        assert!(core.snapshot().run.complete);
+        assert_eq!(core.snapshot().timing_tier, TimingTier::DesktopPreview);
+        assert!(!core.snapshot().safety.publication_ready);
+        assert!(core
+            .complete_native_finalization(&fingerprint, clock(11))
+            .is_err());
     }
 
     #[test]

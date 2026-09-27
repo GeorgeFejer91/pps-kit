@@ -2,17 +2,18 @@
 //!
 //! Opening and syncing files belongs to a worker, never the authority or audio
 //! callback. Queue admission is not a durability acknowledgement. Files retain
-//! their `.partial.jsonl` suffix: this journal alone cannot certify a completed
-//! experiment, response dataset, or physical timing qualification.
+//! partial names until the native owner seals a complete event/dataset prefix.
+//! An exclusively published manifest is the result commit point. Neither that
+//! receipt nor submitted software frames qualify physical experiment timing.
 
 use std::{
-    fs::{File, OpenOptions},
-    io::Write,
-    path::Path,
+    fs::{self, File, OpenOptions},
+    io::{Read, Write},
+    path::{Path, PathBuf},
     sync::{
         atomic::{AtomicBool, AtomicU64, Ordering},
         mpsc::{self, SyncSender, TrySendError},
-        Arc,
+        Arc, Mutex,
     },
     thread,
 };
@@ -22,6 +23,8 @@ use pps_runner_execution::{
     data_min_row, encode_data_min_csv, PreparedLedgerBatch, MAX_LEDGER_ENCODED_BYTES,
 };
 use pps_session_package::VerifiedPreparedSession;
+use serde::Serialize;
+use sha2::{Digest, Sha256};
 
 const QUEUE_CAPACITY: usize = 8;
 const MAX_BATCH_RECORDS: usize = 128;
@@ -42,6 +45,45 @@ struct Progress {
     durable_dataset_rows: AtomicU64,
     failed: AtomicBool,
     retired: AtomicBool,
+    completion: Mutex<Option<NativeResultReceipt>>,
+}
+
+/// Native-only acknowledgement of the exact published prefix, never a browser
+/// completion request. The manifest contains relative names; no path crosses IPC.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct NativeResultReceipt {
+    pub package_manifest_sha256: String,
+    pub package_generation: u64,
+    pub run_generation: u64,
+    pub first_event_sequence: u64,
+    pub last_event_sequence: u64,
+    pub event_record_count: u64,
+    pub scored_trial_count: u64,
+    pub dataset_row_count: u64,
+    pub events_sha256: String,
+    pub dataset_sha256: String,
+}
+
+struct Publication {
+    events: PathBuf,
+    dataset: PathBuf,
+    header: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct NativeResultSeal {
+    package_generation: u64,
+    run_generation: u64,
+    first_sequence: u64,
+    last_sequence: u64,
+    scored_trials: u64,
+    dataset_rows: u64,
+}
+
+enum Message {
+    Append(Batch),
+    Finish(NativeResultSeal),
 }
 
 struct Batch {
@@ -49,17 +91,23 @@ struct Batch {
     bytes: Vec<u8>,
     dataset_bytes: Vec<u8>,
     dataset_rows: u64,
+    scored_trials: u64,
 }
 
 /// A single authority's non-cloneable admission port. No filesystem path or
 /// file handle can cross IPC through this type.
 pub(crate) struct NativeEventJournal {
-    sender: Option<SyncSender<Batch>>,
+    sender: Option<SyncSender<Message>>,
     progress: Arc<Progress>,
     last_enqueued_sequence: Option<u64>,
     admitted_bytes: usize,
     dataset_enabled: bool,
     admitted_dataset_rows: u64,
+    first_enqueued_sequence: Option<u64>,
+    admitted_scored_trials: u64,
+    interrupted: bool,
+    publication_enabled: bool,
+    pending_seal: Option<NativeResultSeal>,
 }
 
 impl NativeEventJournal {
@@ -80,15 +128,16 @@ impl NativeEventJournal {
             "completion": "partial",
         }))
         .map_err(|_| JournalError::Unavailable)?;
-        Self::open_bundle(
-            &verified.session_dir().join(filename),
-            Some(
-                &verified
-                    .session_dir()
-                    .join(format!("native_trials_{nonce}.partial.csv")),
-            ),
-            header,
-        )
+        let events = verified.session_dir().join(filename);
+        let dataset = verified
+            .session_dir()
+            .join(format!("native_trials_{nonce}.partial.csv"));
+        let publication = Publication {
+            events: events.clone(),
+            dataset: dataset.clone(),
+            header: serde_json::from_slice(&header).map_err(|_| JournalError::Unavailable)?,
+        };
+        Self::open_files(&events, Some(&dataset), header, Some(publication))
     }
 
     #[cfg(test)]
@@ -96,10 +145,20 @@ impl NativeEventJournal {
         Self::open_bundle(path, None, header)
     }
 
+    #[cfg(test)]
     fn open_bundle(
         path: &Path,
         dataset_path: Option<&Path>,
+        header: Vec<u8>,
+    ) -> Result<Self, JournalError> {
+        Self::open_files(path, dataset_path, header, None)
+    }
+
+    fn open_files(
+        path: &Path,
+        dataset_path: Option<&Path>,
         mut header: Vec<u8>,
+        publication: Option<Publication>,
     ) -> Result<Self, JournalError> {
         if header.len() >= MAX_BATCH_BYTES {
             return Err(JournalError::ResourceLimit);
@@ -115,6 +174,9 @@ impl NativeEventJournal {
             .and_then(|()| file.sync_all())
             .map_err(|_| JournalError::Unavailable)?;
         let mut admitted_bytes = header.len();
+        let mut event_digest = Sha256::new();
+        event_digest.update(&header);
+        let mut dataset_digest = Sha256::new();
         let dataset = if let Some(path) = dataset_path {
             let bytes = encode_data_min_csv(&[], true).map_err(|_| JournalError::Unavailable)?;
             let mut dataset = OpenOptions::new()
@@ -127,26 +189,62 @@ impl NativeEventJournal {
                 .and_then(|()| dataset.sync_all())
                 .map_err(|_| JournalError::Unavailable)?;
             admitted_bytes += bytes.len();
+            dataset_digest.update(&bytes);
             Some(dataset)
         } else {
             None
         };
-        Self::start_writer(file, dataset, admitted_bytes)
+        Self::start_writer_with_publication(
+            file,
+            dataset,
+            admitted_bytes,
+            publication,
+            event_digest,
+            dataset_digest,
+        )
     }
 
+    #[cfg(test)]
     fn start_writer(
         file: File,
         dataset: Option<File>,
         admitted_bytes: usize,
     ) -> Result<Self, JournalError> {
+        Self::start_writer_with_publication(
+            file,
+            dataset,
+            admitted_bytes,
+            None,
+            Sha256::new(),
+            Sha256::new(),
+        )
+    }
+
+    fn start_writer_with_publication(
+        file: File,
+        dataset: Option<File>,
+        admitted_bytes: usize,
+        publication: Option<Publication>,
+        event_digest: Sha256,
+        dataset_digest: Sha256,
+    ) -> Result<Self, JournalError> {
         let (sender, receive) = mpsc::sync_channel(QUEUE_CAPACITY);
         let progress = Arc::new(Progress::default());
         let worker_progress = Arc::clone(&progress);
         let dataset_enabled = dataset.is_some();
+        let publication_enabled = publication.is_some() && dataset_enabled;
         thread::Builder::new()
             .name("pps-native-event-journal".to_owned())
             .spawn(move || {
-                write_batches(file, dataset, receive, &worker_progress);
+                write_batches(
+                    file,
+                    dataset,
+                    receive,
+                    &worker_progress,
+                    publication,
+                    event_digest,
+                    dataset_digest,
+                );
                 worker_progress.retired.store(true, Ordering::Release);
             })
             .map_err(|_| JournalError::Unavailable)?;
@@ -157,13 +255,21 @@ impl NativeEventJournal {
             admitted_bytes,
             dataset_enabled,
             admitted_dataset_rows: 0,
+            first_enqueued_sequence: None,
+            admitted_scored_trials: 0,
+            interrupted: false,
+            publication_enabled,
+            pending_seal: None,
         })
     }
 
     /// Admit the same validated batch the authority will commit. Serialization
     /// is bounded; all disk work and fsync acknowledgements remain off actor.
     pub(crate) fn admit(&mut self, prepared: &PreparedLedgerBatch) -> Result<(), JournalError> {
-        if self.failed() || self.progress.retired.load(Ordering::Acquire) {
+        if self.failed()
+            || self.progress.retired.load(Ordering::Acquire)
+            || self.pending_seal.is_some()
+        {
             return Err(JournalError::Unavailable);
         }
         let records = prepared.records();
@@ -221,6 +327,15 @@ impl NativeEventJournal {
             .admitted_dataset_rows
             .checked_add(rows.len() as u64)
             .ok_or(JournalError::ResourceLimit)?;
+        let scored_trials = self
+            .admitted_scored_trials
+            .checked_add(
+                records
+                    .iter()
+                    .filter(|record| record.event_type == "trial.scored")
+                    .count() as u64,
+            )
+            .ok_or(JournalError::ResourceLimit)?;
         let batch_bytes = bytes
             .len()
             .checked_add(dataset_bytes.len())
@@ -229,19 +344,33 @@ impl NativeEventJournal {
         let admitted_bytes = self
             .admitted_bytes
             .checked_add(batch_bytes)
-            .filter(|total| *total <= MAX_FILE_BYTES)
+            .filter(|total| {
+                total
+                    .checked_add(if self.publication_enabled {
+                        MAX_BATCH_BYTES
+                    } else {
+                        0
+                    })
+                    .is_some_and(|total| total <= MAX_FILE_BYTES)
+            })
             .ok_or(JournalError::ResourceLimit)?;
         let sender = self.sender.as_ref().ok_or(JournalError::Unavailable)?;
-        match sender.try_send(Batch {
+        match sender.try_send(Message::Append(Batch {
             last_sequence: last,
             bytes,
             dataset_bytes,
             dataset_rows,
-        }) {
+            scored_trials,
+        })) {
             Ok(()) => {
                 self.last_enqueued_sequence = Some(last);
                 self.admitted_bytes = admitted_bytes;
                 self.admitted_dataset_rows = dataset_rows;
+                self.first_enqueued_sequence.get_or_insert(first);
+                self.admitted_scored_trials = scored_trials;
+                self.interrupted |= records
+                    .iter()
+                    .any(|record| record.event_type == "trial.interrupted");
                 Ok(())
             }
             Err(TrySendError::Full(_)) => Err(JournalError::QueueFull),
@@ -255,6 +384,62 @@ impl NativeEventJournal {
 
     pub(crate) fn close(&mut self) {
         self.sender = None;
+    }
+
+    /// Seal only the already admitted complete prefix. Disconnecting without
+    /// this native request leaves partial evidence. No more appends may follow.
+    pub(crate) fn finish(
+        &mut self,
+        package_generation: u64,
+        run_generation: u64,
+        expected_trials: u64,
+    ) -> Result<NativeResultSeal, JournalError> {
+        if self.failed()
+            || self.retired()
+            || !self.publication_enabled
+            || self.interrupted
+            || expected_trials == 0
+            || self.admitted_scored_trials != expected_trials
+        {
+            return Err(JournalError::Unavailable);
+        }
+        let seal = NativeResultSeal {
+            package_generation,
+            run_generation,
+            first_sequence: self
+                .first_enqueued_sequence
+                .ok_or(JournalError::SequenceGap)?,
+            last_sequence: self
+                .last_enqueued_sequence
+                .ok_or(JournalError::SequenceGap)?,
+            scored_trials: expected_trials,
+            dataset_rows: self.admitted_dataset_rows,
+        };
+        if self.pending_seal.is_some_and(|pending| pending != seal) {
+            return Err(JournalError::Unavailable);
+        }
+        self.pending_seal = Some(seal);
+        match self
+            .sender
+            .as_ref()
+            .ok_or(JournalError::Unavailable)?
+            .try_send(Message::Finish(seal))
+        {
+            Ok(()) => {
+                self.sender = None;
+                Ok(seal)
+            }
+            Err(TrySendError::Full(_)) => Err(JournalError::QueueFull),
+            Err(TrySendError::Disconnected(_)) => Err(JournalError::Unavailable),
+        }
+    }
+
+    pub(crate) fn completion_receipt(&self) -> Option<NativeResultReceipt> {
+        self.progress
+            .completion
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .clone()
     }
 
     pub(crate) fn retired(&self) -> bool {
@@ -286,10 +471,66 @@ impl NativeEventJournal {
 fn write_batches(
     mut file: File,
     mut dataset: Option<File>,
-    receive: mpsc::Receiver<Batch>,
+    receive: mpsc::Receiver<Message>,
     progress: &Progress,
+    publication: Option<Publication>,
+    mut event_digest: Sha256,
+    mut dataset_digest: Sha256,
 ) {
-    while let Ok(batch) = receive.recv() {
+    let mut scored_trials = 0;
+    while let Ok(message) = receive.recv() {
+        let batch = match message {
+            Message::Append(batch) => batch,
+            Message::Finish(seal) => {
+                let result = (|| {
+                    if progress.durable_sequence.load(Ordering::Acquire) != seal.last_sequence
+                        || progress.durable_dataset_rows.load(Ordering::Acquire)
+                            != seal.dataset_rows
+                        || scored_trials != seal.scored_trials
+                        || seal.first_sequence > seal.last_sequence
+                    {
+                        return Err(std::io::Error::other("result prefix mismatch"));
+                    }
+                    file.sync_all()?;
+                    dataset
+                        .as_ref()
+                        .ok_or_else(|| std::io::Error::other("dataset unavailable"))?
+                        .sync_all()?;
+                    let publication = publication
+                        .as_ref()
+                        .ok_or_else(|| std::io::Error::other("publication unavailable"))?;
+                    let receipt = NativeResultReceipt {
+                        package_manifest_sha256: publication.header["packageManifestSha256"]
+                            .as_str()
+                            .ok_or_else(|| std::io::Error::other("package identity unavailable"))?
+                            .to_owned(),
+                        package_generation: seal.package_generation,
+                        run_generation: seal.run_generation,
+                        first_event_sequence: seal.first_sequence,
+                        last_event_sequence: seal.last_sequence,
+                        event_record_count: seal.last_sequence - seal.first_sequence + 1,
+                        scored_trial_count: seal.scored_trials,
+                        dataset_row_count: seal.dataset_rows,
+                        events_sha256: format!("{:x}", event_digest.finalize()),
+                        dataset_sha256: format!("{:x}", dataset_digest.finalize()),
+                    };
+                    // Close the sole append handles before publishing the sealed
+                    // bytes. Retained partial names remain recovery evidence.
+                    drop(file);
+                    drop(dataset);
+                    publication.publish(&receipt)?;
+                    *progress
+                        .completion
+                        .lock()
+                        .unwrap_or_else(|error| error.into_inner()) = Some(receipt);
+                    Ok::<_, std::io::Error>(())
+                })();
+                if result.is_err() {
+                    progress.failed.store(true, Ordering::Release);
+                }
+                return;
+            }
+        };
         let write = (|| {
             file.write_all(&batch.bytes)?;
             if let Some(dataset) = dataset.as_mut() {
@@ -302,6 +543,9 @@ fn write_batches(
             progress.failed.store(true, Ordering::Release);
             return;
         }
+        event_digest.update(&batch.bytes);
+        dataset_digest.update(&batch.dataset_bytes);
+        scored_trials = batch.scored_trials;
         progress
             .durable_sequence
             .store(batch.last_sequence, Ordering::Release);
@@ -311,6 +555,90 @@ fn write_batches(
     }
     // Every accepted batch was synced before its acknowledgement. Disconnect
     // simply closes the partial file, including after package replacement.
+}
+
+impl NativeResultReceipt {
+    pub(crate) fn matches(&self, seal: NativeResultSeal) -> bool {
+        self.package_generation == seal.package_generation
+            && self.run_generation == seal.run_generation
+            && self.first_event_sequence == seal.first_sequence
+            && self.last_event_sequence == seal.last_sequence
+            && self.scored_trial_count == seal.scored_trials
+            && self.dataset_row_count == seal.dataset_rows
+            && seal
+                .last_sequence
+                .checked_sub(seal.first_sequence)
+                .and_then(|count| count.checked_add(1))
+                == Some(self.event_record_count)
+    }
+}
+
+impl Publication {
+    fn publish(&self, receipt: &NativeResultReceipt) -> std::io::Result<()> {
+        fn final_path(partial: &Path, suffix: &str, replacement: &str) -> std::io::Result<PathBuf> {
+            let name = partial
+                .file_name()
+                .and_then(|name| name.to_str())
+                .and_then(|name| name.strip_suffix(suffix))
+                .ok_or_else(|| std::io::Error::other("invalid result filename"))?;
+            Ok(partial.with_file_name(format!("{name}{replacement}")))
+        }
+        let events = final_path(&self.events, ".partial.jsonl", ".jsonl")?;
+        let dataset = final_path(&self.dataset, ".partial.csv", ".csv")?;
+        let pending = final_path(&self.events, ".partial.jsonl", ".results.pending.json")?;
+        let manifest = final_path(&self.events, ".partial.jsonl", ".results.json")?;
+        let bytes = serde_json::to_vec(&serde_json::json!({
+            "schema": "pps.native-results.v1", "completion": "complete", "timingQualification": "unqualified",
+            "audioEvidence": "software-frame-submission", "identity": {
+                "participantId": self.header["participantId"], "sessionId": self.header["sessionId"],
+                "partSessionId": self.header["partSessionId"], "partNumber": self.header["partNumber"],
+                "executionMode": self.header["executionMode"],
+            },
+            "receipt": receipt, "eventsFile": events.file_name().and_then(|name| name.to_str()),
+            "datasetFile": dataset.file_name().and_then(|name| name.to_str()),
+        }))?;
+        if bytes.len() > MAX_BATCH_BYTES {
+            return Err(std::io::Error::other("result manifest limit"));
+        }
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&pending)?;
+        file.write_all(&bytes)?;
+        file.sync_all()?;
+        drop(file);
+        // Stdlib hard_link is atomic and refuses an existing target on every
+        // supported host. Unsupported filesystems fail closed. The manifest
+        // appears last; two data files without it are not a completed result.
+        fs::hard_link(&self.events, &events)?;
+        fs::hard_link(&self.dataset, &dataset)?;
+        // Re-read the published names on the worker: replacing a partial name
+        // while its append handle was open must not certify different bytes.
+        for (path, expected) in [
+            (&events, &receipt.events_sha256),
+            (&dataset, &receipt.dataset_sha256),
+        ] {
+            let mut file = File::open(path)?;
+            let mut digest = Sha256::new();
+            let mut bytes = [0; 8192];
+            let mut count = 0usize;
+            loop {
+                let read = file.read(&mut bytes)?;
+                if read == 0 {
+                    break;
+                }
+                count = count
+                    .checked_add(read)
+                    .filter(|count| *count <= MAX_FILE_BYTES)
+                    .ok_or_else(|| std::io::Error::other("result file limit"))?;
+                digest.update(&bytes[..read]);
+            }
+            if format!("{:x}", digest.finalize()) != *expected {
+                return Err(std::io::Error::other("published bytes changed"));
+            }
+        }
+        fs::hard_link(&pending, &manifest)
+    }
 }
 
 #[cfg(test)]

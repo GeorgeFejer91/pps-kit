@@ -75,6 +75,11 @@ fn queue_full_and_sequence_gaps_do_not_advance_admission_or_claim_durability() {
         admitted_bytes: 0,
         dataset_enabled: false,
         admitted_dataset_rows: 0,
+        first_enqueued_sequence: None,
+        admitted_scored_trials: 0,
+        interrupted: false,
+        publication_enabled: false,
+        pending_seal: None,
     };
     let mut ledger = EventLedger::default();
     let first = prepared(&ledger, 1);
@@ -101,6 +106,11 @@ fn file_budget_and_large_batches_are_rejected_before_queue_admission() {
         admitted_bytes: MAX_FILE_BYTES,
         dataset_enabled: false,
         admitted_dataset_rows: 0,
+        first_enqueued_sequence: None,
+        admitted_scored_trials: 0,
+        interrupted: false,
+        publication_enabled: false,
+        pending_seal: None,
     };
     let ledger = EventLedger::default();
     assert_eq!(
@@ -221,4 +231,164 @@ fn dataset_write_failure_never_acknowledges_events_or_rows_and_retains_both_file
     assert_eq!(fs::read(&dataset).unwrap(), b"retained dataset\n");
     fs::remove_file(events).unwrap();
     fs::remove_file(dataset).unwrap();
+}
+
+fn publishable_journal(root: &Path) -> NativeEventJournal {
+    let events = root.join("events.partial.jsonl");
+    let dataset = root.join("trials.partial.csv");
+    let header =
+        serde_json::json!({"packageManifestSha256": "a".repeat(64), "completion": "partial"});
+    let publication = Publication {
+        events: events.clone(),
+        dataset: dataset.clone(),
+        header: header.clone(),
+    };
+    NativeEventJournal::open_files(
+        &events,
+        Some(&dataset),
+        serde_json::to_vec(&header).unwrap(),
+        Some(publication),
+    )
+    .unwrap()
+}
+
+fn scored_prefix(journal: &mut NativeEventJournal) -> EventLedger {
+    let mut ledger = EventLedger::default();
+    let inputs = ["Audio-Tactile", "Filler", "Catch"]
+        .into_iter()
+        .enumerate()
+        .map(|(index, kind)| {
+            let mut input =
+                LedgerEventInput::new("trial.scored", "native-participant", index as u64);
+            input.payload = serde_json::json!({"trial_number": index + 1, "trial_type": kind,
+            "response_given": kind == "Audio-Tactile", "outcome": "Hit", "rt_ms": "100.000"});
+            input
+        });
+    let batch = ledger.prepare_batch(inputs, LedgerReserve::NONE).unwrap();
+    journal.admit(&batch).unwrap();
+    ledger.commit_prepared(batch).unwrap();
+    ledger
+}
+
+#[test]
+fn completed_result_publishes_exact_synced_hashes_counts_and_an_exclusive_commit_manifest() {
+    let root = std::env::temp_dir().join(format!("pps-publication-{}", random_nonce()));
+    fs::create_dir(&root).unwrap();
+    let mut journal = publishable_journal(&root);
+    let ledger = scored_prefix(&mut journal);
+    assert_eq!(journal.finish(4, 9, 2), Err(JournalError::Unavailable));
+    assert!(journal.completion_receipt().is_none());
+    let seal = journal.finish(4, 9, 3).unwrap();
+    assert_eq!(
+        journal.admit(&prepared(&ledger, 4)),
+        Err(JournalError::Unavailable)
+    );
+    wait_until(|| journal.retired());
+    assert!(!journal.failed());
+    let receipt = journal.completion_receipt().unwrap();
+    assert!(receipt.matches(seal));
+    let mut stale = seal;
+    stale.run_generation += 1;
+    assert!(!receipt.matches(stale));
+    assert_eq!(
+        (
+            receipt.event_record_count,
+            receipt.scored_trial_count,
+            receipt.dataset_row_count
+        ),
+        (3, 3, 2)
+    );
+    let events = fs::read(root.join("events.jsonl")).unwrap();
+    let dataset = fs::read(root.join("trials.csv")).unwrap();
+    assert_eq!(events, fs::read(root.join("events.partial.jsonl")).unwrap());
+    assert_eq!(dataset, fs::read(root.join("trials.partial.csv")).unwrap());
+    assert_eq!(
+        receipt.events_sha256,
+        format!("{:x}", Sha256::digest(&events))
+    );
+    assert_eq!(
+        receipt.dataset_sha256,
+        format!("{:x}", Sha256::digest(&dataset))
+    );
+    let manifest: serde_json::Value =
+        serde_json::from_slice(&fs::read(root.join("events.results.json")).unwrap()).unwrap();
+    assert_eq!(manifest["completion"], "complete");
+    assert_eq!(manifest["timingQualification"], "unqualified");
+    assert_eq!(manifest["eventsFile"], "events.jsonl");
+    assert_eq!(manifest["datasetFile"], "trials.csv");
+    assert_eq!(manifest["receipt"], serde_json::to_value(&receipt).unwrap());
+    assert_eq!(journal.finish(4, 9, 3), Err(JournalError::Unavailable));
+    drop(journal);
+    fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn publication_collision_or_interruption_retains_partial_evidence_without_completing() {
+    for collision in ["trials.csv", "events.results.json", "interrupted"] {
+        let root = std::env::temp_dir().join(format!("pps-publication-fault-{}", random_nonce()));
+        fs::create_dir(&root).unwrap();
+        let mut journal = publishable_journal(&root);
+        let mut ledger = scored_prefix(&mut journal);
+        if collision == "interrupted" {
+            let batch = ledger
+                .prepare_batch(
+                    [LedgerEventInput::new(
+                        "trial.interrupted",
+                        "native-participant",
+                        4,
+                    )],
+                    LedgerReserve::NONE,
+                )
+                .unwrap();
+            journal.admit(&batch).unwrap();
+            ledger.commit_prepared(batch).unwrap();
+            assert_eq!(journal.finish(4, 9, 3), Err(JournalError::Unavailable));
+            journal.close();
+        } else {
+            fs::write(root.join(collision), b"existing bytes").unwrap();
+            journal.finish(4, 9, 3).unwrap();
+        }
+        wait_until(|| journal.retired());
+        assert!(journal.completion_receipt().is_none());
+        assert!(root.join("events.partial.jsonl").is_file());
+        assert!(root.join("trials.partial.csv").is_file());
+        if collision != "interrupted" {
+            assert!(journal.failed());
+            assert_eq!(fs::read(root.join(collision)).unwrap(), b"existing bytes");
+        }
+        if collision != "events.results.json" {
+            assert!(!root.join("events.results.json").exists());
+        }
+        drop(journal);
+        fs::remove_dir_all(root).unwrap();
+    }
+}
+
+#[test]
+fn full_finish_queue_keeps_the_same_tail_retryable_without_accepting_more_records() {
+    let (sender, receive) = mpsc::sync_channel(1);
+    let mut journal = NativeEventJournal {
+        sender: Some(sender),
+        progress: Arc::new(Progress::default()),
+        last_enqueued_sequence: None,
+        admitted_bytes: 0,
+        dataset_enabled: true,
+        admitted_dataset_rows: 0,
+        first_enqueued_sequence: None,
+        admitted_scored_trials: 0,
+        interrupted: false,
+        publication_enabled: true,
+        pending_seal: None,
+    };
+    let ledger = scored_prefix(&mut journal);
+    assert_eq!(journal.finish(4, 9, 3), Err(JournalError::QueueFull));
+    assert_eq!(
+        journal.admit(&prepared(&ledger, 4)),
+        Err(JournalError::Unavailable)
+    );
+    assert!(matches!(receive.recv().unwrap(), Message::Append(_)));
+    let seal = journal.finish(4, 9, 3).unwrap();
+    assert!(matches!(receive.recv().unwrap(), Message::Finish(value) if value == seal));
+    assert!(journal.sender.is_none());
+    assert!(journal.completion_receipt().is_none());
 }

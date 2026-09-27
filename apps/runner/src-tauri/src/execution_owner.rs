@@ -26,7 +26,7 @@ use tokio::sync::{broadcast, oneshot};
 use std::path::PathBuf;
 
 use crate::{
-    event_journal::NativeEventJournal,
+    event_journal::{JournalError, NativeEventJournal, NativeResultSeal},
     latency_diagnostics::{AuthorityMailboxDiagnostics, LatencyStage, LatencyTrace},
     native_output::{
         NativeOutputAuthority, NativeOutputCleanupObservation, NativeOutputCommandError,
@@ -335,6 +335,13 @@ struct CachedPreparedAudio {
     summary: PreparedAudioSummary,
 }
 
+struct NativeFinalization {
+    package_generation: u64,
+    run_generation: u64,
+    expected_trials: u64,
+    seal: Option<NativeResultSeal>,
+}
+
 struct OwnerState {
     core: RunnerCore,
     remote: RemoteConfig,
@@ -351,6 +358,7 @@ struct OwnerState {
     owner_generation: u64,
     ledger: EventLedger,
     event_journal: Option<(u64, NativeEventJournal)>,
+    native_finalization: Option<NativeFinalization>,
     evidence_unavailable: bool,
     clock: ProcessClock,
     lease_duration: Duration,
@@ -539,7 +547,7 @@ impl OwnerState {
     }
 
     fn poll_native_playback(&mut self, pending_responses: &AtomicUsize) {
-        if self.native_playback.is_none() {
+        if self.native_playback.is_none() || self.native_finalization.is_some() {
             return;
         }
         self.native_output.refresh_from_invalidator();
@@ -586,6 +594,19 @@ impl OwnerState {
             inputs
         });
         let status = playback.port.status();
+        // This first complete path is for a whole single-block package. Do
+        // not certify one block of a larger prepared experiment as complete.
+        let completion_ready = status.state == pps_runner_audio::RenderState::SourceExhausted
+            && playback.final_frame_submitted
+            && package.block_count == 1
+            && playback
+                .capture
+                .complete(playback.source.receipt.schedule().summary().trial_row_count)
+            && playback.source.receipt.run_generation() == self.run_generation
+            && snapshot.run.phase == RunnerPhase::Running
+            && pending_responses.load(Ordering::Acquire) == 0;
+        let expected_trials =
+            u64::from(playback.source.receipt.schedule().summary().trial_row_count);
         let reserve = LedgerReserve::new(LEDGER_SAFETY_RECORD_RESERVE, LEDGER_SAFETY_BYTE_RESERVE);
         match inputs {
             Ok(inputs) if inputs.is_empty() => {}
@@ -608,7 +629,41 @@ impl OwnerState {
         }
         if !reservation_available || status.fault.is_some() || status.callback_retired {
             self.fail_stop_unavailable("native.media.callback-unavailable", "evidence_unavailable");
+        } else if completion_ready {
+            self.begin_native_finalization(expected_trials, stamp);
         }
+    }
+
+    fn begin_native_finalization(&mut self, expected_trials: u64, stamp: ClockStamp) {
+        let Some(retained) = self.retained_session.as_ref() else {
+            self.fail_stop_unavailable("native.results.scope-invalid", "evidence_unavailable");
+            return;
+        };
+        let mut candidate = self.core.clone();
+        if candidate
+            .begin_native_finalization(retained.receipt.manifest_sha256(), stamp.clone())
+            .is_err()
+        {
+            self.fail_stop_unavailable("native.results.scope-invalid", "evidence_unavailable");
+            return;
+        }
+        let mut input =
+            Self::ledger_input("native.results.finalization-requested", "native", &stamp);
+        input.payload = serde_json::json!({"packageGeneration": self.package_generation,
+            "runGeneration": self.run_generation, "expectedScoredTrials": expected_trials,
+            "audioEvidence": "software-frame-submission", "timingQualification": "unqualified"});
+        if self
+            .commit_candidate(candidate, input, CommitPolicy::Ordinary, true)
+            .is_err()
+        {
+            return;
+        }
+        self.native_finalization = Some(NativeFinalization {
+            package_generation: self.package_generation,
+            run_generation: self.run_generation,
+            expected_trials,
+            seal: None,
+        });
     }
 
     fn poll_event_journal(&mut self) {
@@ -631,6 +686,7 @@ impl OwnerState {
         if (failed && !self.evidence_unavailable) || unavailable_active {
             self.fail_stop_unavailable("native.journal.failed", "evidence_unavailable");
         }
+        self.poll_native_finalization();
         let retired_previous = self
             .event_journal
             .as_ref()
@@ -640,6 +696,79 @@ impl OwnerState {
         if retired_previous {
             self.event_journal = None;
         }
+    }
+
+    fn poll_native_finalization(&mut self) {
+        let Some(pending) = self.native_finalization.as_mut() else {
+            return;
+        };
+        if self.evidence_unavailable
+            || pending.package_generation != self.package_generation
+            || pending.run_generation != self.run_generation
+            || self.core.snapshot().run.phase != RunnerPhase::Stopping
+        {
+            self.fail_stop_unavailable("native.results.scope-invalid", "evidence_unavailable");
+            return;
+        }
+        let Some((generation, journal)) = self.event_journal.as_mut() else {
+            self.fail_stop_unavailable(
+                "native.results.journal-unavailable",
+                "evidence_unavailable",
+            );
+            return;
+        };
+        if *generation != pending.package_generation {
+            self.fail_stop_unavailable("native.results.scope-invalid", "evidence_unavailable");
+            return;
+        }
+        if pending.seal.is_none() {
+            match journal.finish(
+                pending.package_generation,
+                pending.run_generation,
+                pending.expected_trials,
+            ) {
+                Ok(seal) => pending.seal = Some(seal),
+                Err(JournalError::QueueFull) => return, // retry the same frozen prefix, never spin or block
+                Err(_) => {
+                    self.fail_stop_unavailable(
+                        "native.results.publication-unavailable",
+                        "evidence_unavailable",
+                    );
+                    return;
+                }
+            }
+        }
+        let Some(receipt) = journal.completion_receipt().filter(|_| journal.retired()) else {
+            return;
+        };
+        let current = self.retained_session.as_ref().is_some_and(|retained| {
+            retained.generation == pending.package_generation
+                && retained.receipt.manifest_sha256() == receipt.package_manifest_sha256
+        });
+        if !current || !receipt.matches(pending.seal.expect("admitted native seal")) {
+            self.fail_stop_unavailable("native.results.receipt-invalid", "evidence_unavailable");
+            return;
+        }
+        let stamp = self.clock.stamp();
+        let mut candidate = self.core.clone();
+        if candidate
+            .complete_native_finalization(&receipt.package_manifest_sha256, stamp.clone())
+            .is_err()
+        {
+            self.fail_stop_unavailable("native.results.receipt-invalid", "evidence_unavailable");
+            return;
+        }
+        // The sealed file prefix ends with the finalization request; its
+        // exclusively published manifest is the durable acknowledgement.
+        // Subsequent authority/connection records belong outside that prefix.
+        self.event_journal = None;
+        self.native_finalization = None;
+        self.invalidate_prepared_audio();
+        self.native_output.invalidate_for_runner_change();
+        let mut input = Self::ledger_input("native.results.published", "native", &stamp);
+        input.payload =
+            serde_json::json!({"receipt": receipt, "timingQualification": "unqualified"});
+        let _ = self.commit_candidate(candidate, input, CommitPolicy::Ordinary, true);
     }
 
     fn commit_evidence(
@@ -659,7 +788,11 @@ impl OwnerState {
     ) -> Result<(), ()> {
         let prepared = self.ledger.prepare_batch(events, reserve).map_err(|_| ())?;
         if let Some((generation, journal)) = self.event_journal.as_mut() {
-            if *generation == self.package_generation && journal.admit(&prepared).is_err() {
+            let sealed = self.native_finalization.is_some();
+            if *generation == self.package_generation
+                && !sealed
+                && journal.admit(&prepared).is_err()
+            {
                 if policy == CommitPolicy::Ordinary {
                     return Err(());
                 }
@@ -788,6 +921,7 @@ impl OwnerState {
     ) -> RunnerCore {
         let mut candidate = self.core.clone();
         let snapshot = candidate.snapshot();
+        candidate.interrupt_native_finalization(stamp.clone());
         let active = matches!(
             snapshot.run.phase,
             RunnerPhase::Running | RunnerPhase::Paused | RunnerPhase::InstructionGate
@@ -854,6 +988,7 @@ impl OwnerState {
         self.invalidate_prepared_audio();
         self.native_output.invalidate_for_runner_change();
         self.evidence_unavailable = true;
+        self.native_finalization = None;
         let _ = self.state_tx.send(snapshot.clone());
         snapshot
     }
@@ -2096,6 +2231,7 @@ impl ExecutionOwner {
                     owner_generation: 0,
                     ledger,
                     event_journal: None,
+                    native_finalization: None,
                     evidence_unavailable: false,
                     clock,
                     lease_duration,
