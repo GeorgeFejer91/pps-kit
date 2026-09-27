@@ -2944,7 +2944,7 @@ mod tests {
     #[tokio::test]
     async fn cancelled_input_wait_retains_pending_fence_until_actor_and_full_queue_drops_it() {
         let owner = owner(Duration::from_secs(10));
-        let (barrier, blocked) = block_owner(&owner);
+        let (barrier, blocked) = block_authority(&owner);
         let request = || NativeResponseRequest {
             choice: String::new(),
             x: Some(0.2),
@@ -2977,7 +2977,11 @@ mod tests {
             wait.await.unwrap();
         }
         assert_eq!(owner.mailbox.pending_responses.load(Ordering::Acquire), 0);
-        assert!(!owner.test_view().evidence_unavailable);
+        assert!(!owner
+            .asynchronous(AdmissionClass::Normal, "input_latch_check", |state| state
+                .evidence_unavailable)
+            .await
+            .unwrap());
     }
 
     fn owner(lease: Duration) -> ExecutionOwner {

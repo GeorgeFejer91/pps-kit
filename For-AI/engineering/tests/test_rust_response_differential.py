@@ -28,7 +28,7 @@ def _python_case(case: dict[str, Any]) -> dict[str, Any]:
     required = oracle._trial_requires_response(row, trial_type=trial_type, family=family, tactile_present=tactile, catch_trial=catch)
     # Use the real selector without creating any participant file.
     writer = object.__new__(oracle.ParticipantTrialCsvWriter)
-    writer.min_rt_s, writer.max_rt_s = 0.1, 1.3
+    writer.min_rt_s, writer.max_rt_s = oracle.TACTILE_RESPONSE_MIN_RT_S, oracle.TACTILE_RESPONSE_MAX_RT_S
     writer._used_click_ids = set(case["used"])
     writer._clicks = [{**response, "unix_time": response["monotonic_ns"] / 1e9, "response_choice": response["choice"]} for response in case["responses"]]
     selected, valid, given = writer._select_response(
