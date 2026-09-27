@@ -3,6 +3,12 @@
 Select skills by the task below. Read the selected `SKILL.md` completely and
 only its relevant references. Do not load every skill on every task.
 
+Load in order: foundation (`ponytail` for code/tooling), task domain,
+implementation surface, then verification. Routes below are conditional on
+their task; `ponytail` and the named project contracts are required for code
+work. Missing external skills use the disclosed existing-tooling fallback
+below, never an invented claim that a skill ran.
+
 | Task | Skills | Scope |
 |---|---|---|
 | Implementation, refactoring, dependency/tooling decisions | [ponytail](https://github.com/DietrichGebert/ponytail/tree/main/skills/ponytail) | Smallest complete change; reuse before adding. Scientific safeguards remain mandatory. |
@@ -15,6 +21,7 @@ only its relevant references. Do not load every skill on every task.
 | Current technical documentation and primary-source lookup | multi-source-web-search | Load current sources when needed; ordinary code edits do not require a literature review. |
 | Scientific manuscript/argument work | [academic-writing-style](https://github.com/GeorgeFejer91/academic-writing-style) | Evidence-calibrated scholarly writing, conditional on access to the private skill. |
 | Maintaining project skills / installing missing skills | skill-creator / skill-installer | Environment/guidance setup, not a product runtime dependency. |
+| Explicit agent-guidance conformity review / starting a separate repository | [for-ai](https://github.com/GeorgeFejer91/for-ai-skill) | Apply progressive loading, product/control-plane boundaries, evidence gates, and safe Git rules. Preserve PPS's existing `For-AI/` names and domain owners; bootstrap only fresh repositories. |
 | PDF, Word, spreadsheet artifact work | matching pdf/documents/spreadsheets skill | Only for the requested artifact format. |
 
 ## Availability and provenance
@@ -35,6 +42,7 @@ PC setup on 2026-09-27 installed these source snapshots:
 | uncodixfy-pretext | `a02725f87f281d3dc597478c8aa74517a2ebf320` |
 | tauri-rust-developer | `4190cdb58899be1138e891f3b5be29da5d92515b` |
 | tauri-browser-remote-control | `f7825df1d1bc2c0bae4b9fc4ea602c7ab97ff7ee` |
+| for-ai | `30dd44472d5c7053a6da8994352cca1a99d80265` |
 
 This is reproducible setup provenance, not a claim that every future machine
 has these skills. Do not upgrade application dependencies merely to match an

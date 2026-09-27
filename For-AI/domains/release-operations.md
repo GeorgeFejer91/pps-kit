@@ -35,3 +35,7 @@ environment setup, not end-user runtime dependencies.
 
 Preserve exactly one Shared, V1 Qt/ASIO requirements, scientific handoffs,
 public routes, and exclusion of `For-AI/` from every distribution.
+
+Report each relevant gate as **VERIFIED**, **PARTIAL**, **BLOCKED**, or
+**NOT RUN**, with the observed surface and missing evidence. A guidance review
+does not qualify runtime code, installed packages, or scientific performance.
