@@ -353,7 +353,6 @@ pub(crate) struct OwnerTestView {
     pub prepared_output_plan_run_generation: Option<u64>,
     pub compiled_schedule_strong_count: Option<usize>,
     pub retained_session_strong_count: Option<usize>,
-    pub native_output_status: NativeOutputStatus,
 }
 
 impl OwnerState {
@@ -1596,39 +1595,27 @@ impl NativeOutputNoticeIngress {
     }
 }
 
-struct OwnerStartConfiguration {
+pub(crate) struct OwnerStartConfiguration {
     lease_duration: Duration,
     mailbox_diagnostics: AuthorityMailboxDiagnostics,
     native_output: NativeOutputAuthority,
 }
 
-impl ExecutionOwner {
-    pub(crate) fn start(
-        target_id: String,
-        target_kind: &'static str,
-        epoch: u64,
-        timing_tier: TimingTier,
-        remote: RemoteConfig,
-        state_tx: broadcast::Sender<RunnerSnapshot>,
+impl OwnerStartConfiguration {
+    pub(crate) fn new(
         mailbox_diagnostics: AuthorityMailboxDiagnostics,
         native_output: NativeOutputAuthority,
-    ) -> Result<Self, String> {
-        Self::start_with_lease(
-            target_id,
-            target_kind,
-            epoch,
-            timing_tier,
-            remote,
-            state_tx,
-            OwnerStartConfiguration {
-                lease_duration: DEFAULT_REMOTE_LEASE,
-                mailbox_diagnostics,
-                native_output,
-            },
-        )
+    ) -> Self {
+        Self {
+            lease_duration: DEFAULT_REMOTE_LEASE,
+            mailbox_diagnostics,
+            native_output,
+        }
     }
+}
 
-    fn start_with_lease(
+impl ExecutionOwner {
+    pub(crate) fn start(
         target_id: String,
         target_kind: &'static str,
         epoch: u64,
@@ -1796,36 +1783,6 @@ impl ExecutionOwner {
     #[cfg(test)]
     pub(crate) fn view_blocking(&self) -> Result<AuthorityView, OwnerSubmitError> {
         self.blocking(AdmissionClass::Normal, "view", |state| state.view())
-    }
-
-    #[cfg(test)]
-    pub(crate) fn hold_for_test(
-        &self,
-    ) -> Result<(Arc<std::sync::Barrier>, oneshot::Receiver<()>), OwnerSubmitError> {
-        let barrier = Arc::new(std::sync::Barrier::new(2));
-        let actor_barrier = Arc::clone(&barrier);
-        let receiver = self.submit(AdmissionClass::Normal, "test_hold", move |_| {
-            actor_barrier.wait();
-        })?;
-        while self.mailbox.queued_counts().0 != 0 {
-            thread::yield_now();
-        }
-        Ok((barrier, receiver))
-    }
-
-    #[cfg(test)]
-    pub(crate) fn fill_safety_lane_for_test(&self) -> usize {
-        let mut admitted = 0;
-        loop {
-            match self.mailbox.push(MailboxEntry {
-                class: AdmissionClass::LocalSafety,
-                trace: None,
-                task: Box::new(|_| {}),
-            }) {
-                Ok(()) => admitted += 1,
-                Err(OwnerSubmitError::Full | OwnerSubmitError::Closed) => return admitted,
-            }
-        }
     }
 
     pub(crate) async fn view(&self) -> Result<AuthorityView, OwnerSubmitError> {
@@ -2447,7 +2404,6 @@ impl ExecutionOwner {
                 .retained_session
                 .as_ref()
                 .map(|retained| Arc::strong_count(&retained.receipt)),
-            native_output_status: state.native_output.status(),
         })
         .expect("test authority remains available")
     }
@@ -2513,7 +2469,7 @@ mod tests {
             MAILBOX_CAPACITY,
             NORMAL_MAILBOX_CAPACITY,
         );
-        ExecutionOwner::start_with_lease(
+        ExecutionOwner::start(
             "owner-test-target".to_owned(),
             "desktop-tauri-preview",
             7,
@@ -2544,7 +2500,7 @@ mod tests {
             MAILBOX_CAPACITY,
             NORMAL_MAILBOX_CAPACITY,
         );
-        let owner = ExecutionOwner::start_with_lease(
+        let owner = ExecutionOwner::start(
             "owner-test-target".to_owned(),
             "desktop-tauri-preview",
             7,

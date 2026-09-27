@@ -51,18 +51,13 @@ from peripersonal_space_toolkit.session_runner import (  # noqa: E402
 )
 
 
+from peripersonal_space_toolkit.paper_audit import audit_paths  # noqa: E402
+
+
 SCHEMA = "pps-canzoneri-2013-tool-use-known-parameter-validation.v1"
 RECORD_ID = "canzoneri_2013_tool_use_reshaping"
 TEMPLATE_ID = "canzoneri_2013_tool_use_reshaping"
-MANUAL_REVIEW = (
-    REPO_ROOT
-    / "For-AI"
-    / "research"
-    / "literature"
-    / "audiotactile-paper-metadata-audit"
-    / "manual_reviews"
-    / f"{RECORD_ID}.json"
-)
+MANUAL_REVIEW = audit_paths(REPO_ROOT).audit_dir / "manual_reviews" / f'{RECORD_ID}.json'
 DEFAULT_OUTPUT_DIR = (
     REPO_ROOT
     / "artifacts"

@@ -52,16 +52,13 @@ from peripersonal_space_toolkit.session_runner import (  # noqa: E402
 )
 
 
+from peripersonal_space_toolkit.paper_audit import audit_paths  # noqa: E402
+
+
 SCHEMA = "pps-noel-2015-known-parameter-validation.v1"
 RECORD_ID = "noel_2015_walking"
 TEMPLATE_ID = "noel_2015_walking_full_body_action"
-MANUAL_REVIEW = (
-    REPO_ROOT
-    / "For-AI"
-    / "audiotactile-paper-metadata-audit"
-    / "manual_reviews"
-    / f"{RECORD_ID}.json"
-)
+MANUAL_REVIEW = audit_paths(REPO_ROOT).audit_dir / "manual_reviews" / f'{RECORD_ID}.json'
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "artifacts" / "validation_runs" / "current_goal_noel_2015_known_parameter_20260715"
 EVIDENCE_BOUNDARY = (
     "This validates the software-known parameter contract for Noel et al. "

@@ -59,3 +59,5 @@ where = ["packages/pps-runtime/src"]
 
 [tool.pytest.ini_options]
 testpaths = ["For-AI/engineering/tests"]
+tmp_path_retention_policy = "failed"
+tmp_path_retention_count = 1

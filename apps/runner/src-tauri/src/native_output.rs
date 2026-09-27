@@ -222,14 +222,6 @@ impl NativeOutputTicket {
     pub(crate) const fn policy_generation(self) -> u64 {
         self.policy_generation
     }
-
-    const fn service_generation(self) -> u64 {
-        self.service_generation
-    }
-
-    pub(crate) const fn operation_generation(self) -> u64 {
-        self.operation_generation
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1154,9 +1146,7 @@ impl<D: NativeOutputDriver> CoordinatorState<D> {
             .ok_or_else(NativeOutputCommandError::quarantined)
             .and_then(|driver| driver.reservation_health(receipt));
         let latest = latest_policy_generation.load(Ordering::Acquire);
-        if latest != self.observed_policy_generation
-            || shutdown_requested.load(Ordering::Acquire)
-        {
+        if latest != self.observed_policy_generation || shutdown_requested.load(Ordering::Acquire) {
             self.reconcile(latest, observation, notice);
             return;
         }
@@ -1636,47 +1626,6 @@ pub(crate) mod tests {
     }
 
     impl FakeControl {
-        pub(crate) fn block_enumerate(&self, blocked: bool) {
-            *self.block_enumerate.0.lock().unwrap() = blocked;
-            if !blocked {
-                self.block_enumerate.1.notify_all();
-            }
-        }
-
-        pub(crate) fn block_reserve(&self, blocked: bool) {
-            *self.block_reserve.0.lock().unwrap() = blocked;
-            if !blocked {
-                self.block_reserve.1.notify_all();
-            }
-        }
-
-        pub(crate) fn block_release(&self, blocked: bool) {
-            *self.block_release.0.lock().unwrap() = blocked;
-            if !blocked {
-                self.block_release.1.notify_all();
-            }
-        }
-
-        pub(crate) fn fail_release(&self, fail: bool) {
-            self.fail_release.store(fail, Ordering::Release);
-        }
-
-        pub(crate) fn enumerate_calls(&self) -> u64 {
-            self.enumerate_calls.load(Ordering::Acquire)
-        }
-
-        pub(crate) fn enumerate_finished(&self) -> u64 {
-            self.enumerate_finished.load(Ordering::Acquire)
-        }
-
-        pub(crate) fn reserve_calls(&self) -> u64 {
-            self.reserve_calls.load(Ordering::Acquire)
-        }
-
-        pub(crate) fn reserve_finished(&self) -> u64 {
-            self.reserve_finished.load(Ordering::Acquire)
-        }
-
         pub(crate) fn release_calls(&self) -> u64 {
             self.release_calls.load(Ordering::Acquire)
         }
@@ -1690,12 +1639,10 @@ pub(crate) mod tests {
         }
 
         fn record_driver_thread(&self) {
-            self.driver_threads.lock().unwrap().push(
-                thread::current()
-                    .name()
-                    .unwrap_or("unnamed")
-                    .to_owned(),
-            );
+            self.driver_threads
+                .lock()
+                .unwrap()
+                .push(thread::current().name().unwrap_or("unnamed").to_owned());
         }
     }
 
@@ -1936,6 +1883,7 @@ pub(crate) mod tests {
         };
         assert_eq!(inventory.service_generation, "1");
         assert_eq!(inventory.inventory_generation, "1");
+        assert_eq!(control.driver_threads(), [OUTPUT_COORDINATOR_THREAD]);
         drop(coordinator);
     }
 
@@ -2062,7 +2010,10 @@ pub(crate) mod tests {
                 assert!(!observation.quarantined);
                 break;
             }
-            assert!(Instant::now() < deadline, "callback fault was not reconciled");
+            assert!(
+                Instant::now() < deadline,
+                "callback fault was not reconciled"
+            );
             thread::sleep(Duration::from_millis(2));
         }
         assert_eq!(control.release_calls(), 0);

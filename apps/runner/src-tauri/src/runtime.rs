@@ -20,8 +20,8 @@ use serde_json::Value;
 use tokio::sync::{broadcast, oneshot};
 
 use crate::execution_owner::{
-    AuthorityView, ExecutionOwner, LanOwnerReceipt, OwnerSubmitError, RemoteOwnerIdentity,
-    MAILBOX_CAPACITY, NORMAL_MAILBOX_CAPACITY,
+    AuthorityView, ExecutionOwner, LanOwnerReceipt, OwnerStartConfiguration, OwnerSubmitError,
+    RemoteOwnerIdentity, MAILBOX_CAPACITY, NORMAL_MAILBOX_CAPACITY,
 };
 use crate::latency_diagnostics::{
     LatencyRoute, LatencyStage, LatencyTrace, LatencyTraceGuard, NativeIngress,
@@ -383,8 +383,10 @@ impl AppRuntime {
             TimingTier::DesktopPreview,
             remote,
             state_tx.clone(),
-            latency_diagnostics.authority_mailbox(),
-            NativeOutputAuthority::new(native_output.invalidator()),
+            OwnerStartConfiguration::new(
+                latency_diagnostics.authority_mailbox(),
+                NativeOutputAuthority::new(native_output.invalidator()),
+            ),
         )
         .expect("the Runner authority thread must start");
         let native_output_notice = authority.native_output_notice_ingress();

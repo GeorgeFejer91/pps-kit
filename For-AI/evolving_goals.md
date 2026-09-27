@@ -9,11 +9,18 @@ Prior decisions remain searchable in [the historical ledger](archive/evolving_go
 - PPS Kit creates and replicates PPS experiments. Scientific contracts,
   reproducibility, native timing, and usable authoring govern scope.
   Voice cloning and XR/VR are not routine project dependencies.
+- Designer has two responsibilities: create/preview controllable spatial stimuli
+  using the existing renderer and 3D view; export a JSON experiment profile with
+  ingredients, file locations, and assembly rules. Runner reads that profile,
+  assembles the experiment, owns native execution, and records specified data.
+  This is the scope test for simplification and new modules.
 - Start with the short entry page/current work record; route to design/UI,
   experiment runtime, scientific evidence, or release operations. Load only
   relevant references and skills. Detailed history is preserved.
-- Use Ponytail's smallest-working-change ladder. Reuse existing code and gates;
-  add modules only when a concrete ownership seam helps the requested change.
+- Use Ponytail's smallest-working-change ladder in product code and guidance.
+  Reuse existing modules and gates; centralize repeated decisions in their
+  current owner. Delete duplicate paths and unused helpers before adding layers.
+  Preserve calibration, input validation, accessibility, and evidence boundaries.
 - Stage UI work as local preview, verified source promotion, packaging, and
   release. A preview can be complete without an installer. Unsettled designs
   remain on a review branch until the concrete preview is accepted.

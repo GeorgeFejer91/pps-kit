@@ -4,6 +4,13 @@ PPS Kit creates, prepares, and replicates peripersonal-space experiments. Its
 priority is scientific contracts, reproducibility, native timing, and usable
 authoring. Voice cloning and XR/VR are not default work.
 
+The product has one central flow: Designer creates and previews spatial stimuli
+through the existing 3DTI/SOFA renderer and 3D viewer, then exports a JSON
+experiment profile describing its ingredients, file locations, and assembly
+rules. Runner consumes that profile, assembles and executes the experiment,
+and records responses and results. Reuse the existing profile, segment, render,
+schedule, and execution owners; add no competing planner or command authority.
+
 Read this page and [CURRENT_WORK.md](CURRENT_WORK.md), choose a domain below,
 then load only its relevant references and skills. Do not read all of `For-AI/`,
 `project_context.md`, or the decision archive before every task.

@@ -44,19 +44,16 @@ from peripersonal_space_toolkit.session_runner import (  # noqa: E402
 )
 
 
+from peripersonal_space_toolkit.paper_audit import audit_paths  # noqa: E402
+
+
 SCHEMA = "pps-tajadura-2009-known-parameter-validation.v1"
 RECORD_ID = "tajadura_jimenez_2009_visual_deprivation"
 TEMPLATE_IDS = [
     "tajadura_jimenez_2009_uncrossed_visual_deprivation",
     "tajadura_jimenez_2009_crossed_visual_deprivation",
 ]
-MANUAL_REVIEW = (
-    REPO_ROOT
-    / "For-AI"
-    / "audiotactile-paper-metadata-audit"
-    / "manual_reviews"
-    / f"{RECORD_ID}.json"
-)
+MANUAL_REVIEW = audit_paths(REPO_ROOT).audit_dir / "manual_reviews" / f'{RECORD_ID}.json'
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "artifacts" / "validation_runs" / "current_goal_tajadura_2009_known_parameter_20260715"
 EVIDENCE_BOUNDARY = (
     "This validates the software-known parameter contract for Collignon et al. "

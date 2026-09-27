@@ -2,6 +2,11 @@
 
 Use `For-AI/engineering/automation/check_all.ps1` as the repo-local validation entrypoint.
 
+Create or refresh the editable installation after a fresh checkout or source
+layout move with `python -m pip install -e ".[dev]"` in the chosen environment.
+Use that environment's interpreter for the checks. Do not retain an editable
+installation pointing at an earlier source layout.
+
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File For-AI\engineering\automation\check_all.ps1 -Tier Quick
 powershell -NoProfile -ExecutionPolicy Bypass -File For-AI\engineering\automation\check_all.ps1 -Tier Standard
@@ -36,6 +41,13 @@ Standard runs Quick plus the full V1 engineering pytest suite selected by
 `pyproject.toml`. Experiment-local suites under `For-AI/experiments/` are not
 included. Standard may take longer than five minutes on this Windows
 workstation and should be used before structural merges or releases.
+
+Pytest's native temporary-path retention keeps failed-test evidence for one run
+and removes successful test scratch files. This bounds accumulation without a
+custom cleanup fixture. Allow several GB for the largest audio fixture and
+additional space for native build caches; full Python plus Rust validation
+should start with approximately 15 GB free. An alternate temporary location can
+be selected through the platform `TEMP`/`TMP` environment variables.
 
 ## Deep
 

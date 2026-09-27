@@ -44,6 +44,9 @@ from peripersonal_space_toolkit.session_runner import (  # noqa: E402
 )
 
 
+from peripersonal_space_toolkit.paper_audit import audit_paths  # noqa: E402
+
+
 SCHEMA = "pps-biggio-2017-known-parameter-validation.v1"
 RECORD_ID = "biggio_2017_racket_tool_use"
 TEMPLATE_CONTEXTS = {
@@ -52,13 +55,7 @@ TEMPLATE_CONTEXTS = {
     "biggio_2017_personal_racket": "personal_racket",
 }
 TEMPLATE_IDS = list(TEMPLATE_CONTEXTS)
-MANUAL_REVIEW = (
-    REPO_ROOT
-    / "For-AI"
-    / "audiotactile-paper-metadata-audit"
-    / "manual_reviews"
-    / f"{RECORD_ID}.json"
-)
+MANUAL_REVIEW = audit_paths(REPO_ROOT).audit_dir / "manual_reviews" / f'{RECORD_ID}.json'
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "artifacts" / "validation_runs" / "current_goal_biggio_2017_known_parameter_20260715"
 EVIDENCE_BOUNDARY = (
     "This validates the software-known parameter contract for Biggio et al. "

@@ -53,16 +53,13 @@ from peripersonal_space_toolkit.session_runner import (  # noqa: E402
 )
 
 
+from peripersonal_space_toolkit.paper_audit import audit_paths  # noqa: E402
+
+
 SCHEMA = "pps-serino-2015-toolless-known-parameter-validation.v1"
 RECORD_ID = "serino_2015_toolless_sync_training"
 TEMPLATE_ID = "serino_2015_toolless_sync_training"
-MANUAL_REVIEW = (
-    REPO_ROOT
-    / "For-AI"
-    / "audiotactile-paper-metadata-audit"
-    / "manual_reviews"
-    / f"{RECORD_ID}.json"
-)
+MANUAL_REVIEW = audit_paths(REPO_ROOT).audit_dir / "manual_reviews" / f'{RECORD_ID}.json'
 DEFAULT_OUTPUT_DIR = (
     REPO_ROOT
     / "artifacts"

@@ -43,9 +43,12 @@ from peripersonal_space_toolkit.session_runner import (  # noqa: E402
 )
 
 
+from peripersonal_space_toolkit.paper_audit import audit_paths  # noqa: E402
+
+
 SCHEMA = "pps-serino-2007-known-parameter-validation.v1"
 TEMPLATE_ID = "serino_2007_blind_cane_users"
-MANUAL_REVIEW = REPO_ROOT / "For-AI" / "audiotactile-paper-metadata-audit" / "manual_reviews" / f"{TEMPLATE_ID}.json"
+MANUAL_REVIEW = audit_paths(REPO_ROOT).audit_dir / "manual_reviews" / f'{TEMPLATE_ID}.json'
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "artifacts" / "validation_runs" / "current_goal_serino_2007_known_parameter_20260715"
 EVIDENCE_BOUNDARY = (
     "This validates the software-known parameter contract for Serino 2007: "
