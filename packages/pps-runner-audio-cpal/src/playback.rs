@@ -3,7 +3,7 @@
 
 use std::sync::{
     atomic::{AtomicBool, AtomicU64, AtomicU8, Ordering},
-    Arc,
+    Arc, Mutex,
 };
 use std::time::Instant;
 
@@ -116,10 +116,63 @@ struct Control {
 /// callback: plan and ring storage are retired here after stream quiescence.
 pub(crate) struct PlaybackOwner {
     plan: Arc<PreparedPlaybackPlan>,
+    port: Arc<Mutex<PlaybackPortState>>,
+    signals: Arc<Signals>,
+    port_taken: bool,
+}
+
+struct PlaybackPortState {
+    fence: OutputFence,
     controls: Producer<Control>,
     events: Consumer<NativePlaybackRecord>,
     signals: Arc<Signals>,
     next_sequence: u64,
+}
+
+/// One native authority owns this non-cloneable command/evidence port. The
+/// device owner retains its queue storage until callback retirement. No mutex
+/// is acquired by the callback; port access uses only a bounded try-lock.
+pub struct PlaybackPort {
+    state: Arc<Mutex<PlaybackPortState>>,
+    signals: Arc<Signals>,
+}
+
+impl PlaybackPort {
+    pub fn control(
+        &mut self,
+        fence: &OutputFence,
+        action: RenderControl,
+    ) -> Result<PlaybackControlReceipt, PlaybackControlError> {
+        self.state
+            .try_lock()
+            .map_err(|_| PlaybackControlError::Busy)?
+            .control(fence, action)
+    }
+
+    pub fn drain(
+        &mut self,
+        maximum: usize,
+    ) -> Result<Vec<NativePlaybackRecord>, PlaybackControlError> {
+        Ok(self
+            .state
+            .try_lock()
+            .map_err(|_| PlaybackControlError::Busy)?
+            .drain(maximum))
+    }
+
+    pub fn status(&self) -> PlaybackStatus {
+        status(&self.signals)
+    }
+
+    pub fn cancellation(&self) -> PlaybackCancellation {
+        PlaybackCancellation(Arc::clone(&self.signals))
+    }
+}
+
+impl Drop for PlaybackPort {
+    fn drop(&mut self) {
+        self.signals.abort.store(true, Ordering::Release);
+    }
 }
 
 impl PlaybackOwner {
@@ -142,11 +195,16 @@ impl PlaybackOwner {
         };
         (
             Self {
+                port: Arc::new(Mutex::new(PlaybackPortState {
+                    fence: plan.fence().clone(),
+                    controls: commands,
+                    events: event_rx,
+                    signals: Arc::clone(&signals),
+                    next_sequence: 1,
+                })),
                 plan,
-                controls: commands,
-                events: event_rx,
                 signals,
-                next_sequence: 1,
+                port_taken: false,
             },
             callback,
         )
@@ -160,15 +218,71 @@ impl PlaybackOwner {
         PlaybackCancellation(Arc::clone(&self.signals))
     }
 
+    pub(crate) fn take_port(
+        &mut self,
+        fence: &OutputFence,
+    ) -> Result<PlaybackPort, PlaybackControlError> {
+        if fence != self.fence() {
+            return Err(PlaybackControlError::StaleFence);
+        }
+        if self.port_taken || self.signals.retired.load(Ordering::Acquire) {
+            return Err(PlaybackControlError::CallbackUnavailable);
+        }
+        self.port_taken = true;
+        Ok(PlaybackPort {
+            state: Arc::clone(&self.port),
+            signals: Arc::clone(&self.signals),
+        })
+    }
+
     pub(crate) fn control(
         &mut self,
         fence: &OutputFence,
         action: RenderControl,
     ) -> Result<PlaybackControlReceipt, PlaybackControlError> {
-        if fence != self.fence() {
+        if self.port_taken {
+            return Err(PlaybackControlError::CallbackUnavailable);
+        }
+        self.port
+            .try_lock()
+            .map_err(|_| PlaybackControlError::Busy)?
+            .control(fence, action)
+    }
+
+    pub(crate) fn status(&self) -> PlaybackStatus {
+        status(&self.signals)
+    }
+
+    pub(crate) fn drain(
+        &mut self,
+        maximum: usize,
+    ) -> Result<Vec<NativePlaybackRecord>, PlaybackControlError> {
+        if self.port_taken {
+            return Err(PlaybackControlError::CallbackUnavailable);
+        }
+        Ok(self
+            .port
+            .try_lock()
+            .map_err(|_| PlaybackControlError::Busy)?
+            .drain(maximum))
+    }
+}
+
+impl PlaybackPortState {
+    fn control(
+        &mut self,
+        fence: &OutputFence,
+        action: RenderControl,
+    ) -> Result<PlaybackControlReceipt, PlaybackControlError> {
+        if fence != &self.fence {
             return Err(PlaybackControlError::StaleFence);
         }
         if self.signals.retired.load(Ordering::Acquire) {
+            return Err(PlaybackControlError::CallbackUnavailable);
+        }
+        if self.signals.fault.load(Ordering::Acquire) != 0
+            && !matches!(action, RenderControl::Stop | RenderControl::Abort)
+        {
             return Err(PlaybackControlError::CallbackUnavailable);
         }
         if self.next_sequence > u64::MAX >> 3 {
@@ -198,22 +312,7 @@ impl PlaybackOwner {
         Ok(PlaybackControlReceipt { sequence })
     }
 
-    pub(crate) fn status(&self) -> PlaybackStatus {
-        PlaybackStatus {
-            state: decode_state(self.signals.state.load(Ordering::Acquire)),
-            submitted_frames: self.signals.frames.load(Ordering::Acquire),
-            callbacks: self.signals.callbacks.load(Ordering::Acquire),
-            last_control_sequence: self.signals.applied_control.load(Ordering::Acquire),
-            fault: match self.signals.fault.load(Ordering::Acquire) {
-                0 => None,
-                1 => Some(PlaybackFault::EvidenceQueueFull),
-                _ => Some(PlaybackFault::RendererIntegrity),
-            },
-            callback_retired: self.signals.retired.load(Ordering::Acquire),
-        }
-    }
-
-    pub(crate) fn drain(&mut self, maximum: usize) -> Vec<NativePlaybackRecord> {
+    fn drain(&mut self, maximum: usize) -> Vec<NativePlaybackRecord> {
         let mut records = Vec::with_capacity(maximum.min(PLAYBACK_EVENT_CAPACITY));
         for _ in 0..maximum.min(PLAYBACK_EVENT_CAPACITY) {
             match self.events.pop() {
@@ -222,6 +321,21 @@ impl PlaybackOwner {
             }
         }
         records
+    }
+}
+
+fn status(signals: &Signals) -> PlaybackStatus {
+    PlaybackStatus {
+        state: decode_state(signals.state.load(Ordering::Acquire)),
+        submitted_frames: signals.frames.load(Ordering::Acquire),
+        callbacks: signals.callbacks.load(Ordering::Acquire),
+        last_control_sequence: signals.applied_control.load(Ordering::Acquire),
+        fault: match signals.fault.load(Ordering::Acquire) {
+            0 => None,
+            1 => Some(PlaybackFault::EvidenceQueueFull),
+            _ => Some(PlaybackFault::RendererIntegrity),
+        },
+        callback_retired: signals.retired.load(Ordering::Acquire),
     }
 }
 

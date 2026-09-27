@@ -18,7 +18,7 @@ use crate::{
         OutputBackend, SelectionKey,
     },
     NativePlaybackRecord, OutputServiceErrorCode, PlaybackCancellation, PlaybackControlReceipt,
-    PlaybackStatus, MAXIMUM_F32_CONFIGS_PER_DEVICE, MAXIMUM_OUTPUT_CHANNELS,
+    PlaybackPort, PlaybackStatus, MAXIMUM_F32_CONFIGS_PER_DEVICE, MAXIMUM_OUTPUT_CHANNELS,
     MAXIMUM_OUTPUT_DEVICES,
 };
 
@@ -357,11 +357,19 @@ impl OutputBackend for CpalBackend {
         &mut self,
         maximum: usize,
     ) -> Result<Vec<NativePlaybackRecord>, BackendFailure> {
-        Ok(self
-            .playback
+        self.playback
             .as_mut()
             .ok_or_else(BackendFailure::contract)?
-            .drain(maximum))
+            .drain(maximum)
+            .map_err(|_| BackendFailure::contract())
+    }
+
+    fn take_playback_port(&mut self, fence: &OutputFence) -> Result<PlaybackPort, BackendFailure> {
+        self.playback
+            .as_mut()
+            .ok_or_else(BackendFailure::contract)?
+            .take_port(fence)
+            .map_err(|_| BackendFailure::contract())
     }
 }
 

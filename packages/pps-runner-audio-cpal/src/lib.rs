@@ -21,6 +21,6 @@ pub use contract::{
 };
 pub use playback::{
     NativePlaybackRecord, PlaybackCancellation, PlaybackControlError, PlaybackControlReceipt,
-    PlaybackFault, PlaybackRecordKind, PlaybackStatus, PLAYBACK_EVENT_CAPACITY,
+    PlaybackFault, PlaybackPort, PlaybackRecordKind, PlaybackStatus, PLAYBACK_EVENT_CAPACITY,
 };
 pub use service::CpalOutputService;

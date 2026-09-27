@@ -85,7 +85,7 @@ fn preparation_stays_silent_without_filling_evidence_until_exact_pcm_submission(
         assert_eq!(output, [0.0; 2]);
     }
     assert_eq!(owner.status().submitted_frames, 0);
-    assert!(owner.drain(PLAYBACK_EVENT_CAPACITY).is_empty());
+    assert!(owner.drain(PLAYBACK_EVENT_CAPACITY).unwrap().is_empty());
     let receipt = owner.control(plan.fence(), RenderControl::Start).unwrap();
     assert_eq!(owner.status().last_control_sequence, 0);
     assert!(!callback.render(&mut output, Instant::now(), None));
@@ -95,7 +95,7 @@ fn preparation_stays_silent_without_filling_evidence_until_exact_pcm_submission(
     assert_eq!(output, [0.5, 0.25]);
     callback.render(&mut output, Instant::now(), None);
     assert_eq!(owner.status().state, RenderState::SourceExhausted);
-    let records = owner.drain(PLAYBACK_EVENT_CAPACITY);
+    let records = owner.drain(PLAYBACK_EVENT_CAPACITY).unwrap();
     assert!(records
         .iter()
         .all(|record| record.fence == plan.fence().rt_projection()));
@@ -165,6 +165,7 @@ fn safety_controls_dominate_a_full_normal_queue_and_reject_stale_fences() {
     assert_eq!(owner.status().submitted_frames, 0);
     assert!(!owner
         .drain(PLAYBACK_EVENT_CAPACITY)
+        .unwrap()
         .iter()
         .any(|record| matches!(record.kind, PlaybackRecordKind::Boundary(_))));
 }
@@ -181,7 +182,7 @@ fn evidence_capacity_is_checked_before_source_samples_and_controls() {
     assert_eq!(owner.status().submitted_frames, 0);
     assert_eq!(owner.status().last_control_sequence, 0);
     assert_eq!(owner.status().fault, Some(PlaybackFault::EvidenceQueueFull));
-    assert!(owner.drain(PLAYBACK_EVENT_CAPACITY).is_empty());
+    assert!(owner.drain(PLAYBACK_EVENT_CAPACITY).unwrap().is_empty());
 }
 
 #[test]
@@ -220,7 +221,7 @@ fn stalled_evidence_consumer_cannot_advance_unrecorded_audio() {
     assert!(callback.render(&mut output, Instant::now(), None));
     assert_eq!(output, [0.0; 2]);
     assert_eq!(owner.status().submitted_frames, 1);
-    let records = owner.drain(PLAYBACK_EVENT_CAPACITY);
+    let records = owner.drain(PLAYBACK_EVENT_CAPACITY).unwrap();
     assert_eq!(
         records
             .iter()
@@ -249,4 +250,46 @@ fn stopped_callback_cannot_restart_or_resume_its_source() {
         assert_eq!(owner.status().state, RenderState::Stopped);
         assert_eq!(owner.status().submitted_frames, 1);
     }
+}
+
+#[test]
+fn exclusive_port_keeps_callback_lock_free_and_retains_storage_on_owner() {
+    let plan = plan(11);
+    let (mut owner, mut callback) = PlaybackOwner::new(Arc::clone(&plan));
+    let retained_storage = Arc::downgrade(&owner.port);
+    let mut port = owner.take_port(plan.fence()).unwrap();
+    assert!(matches!(
+        owner.take_port(plan.fence()),
+        Err(PlaybackControlError::CallbackUnavailable)
+    ));
+    assert_eq!(
+        owner.control(plan.fence(), RenderControl::Start),
+        Err(PlaybackControlError::CallbackUnavailable)
+    );
+    assert!(matches!(
+        owner.drain(1),
+        Err(PlaybackControlError::CallbackUnavailable)
+    ));
+    port.control(plan.fence(), RenderControl::Start).unwrap();
+    let storage = Arc::clone(&port.state);
+    let guard = storage.lock().unwrap();
+    assert_eq!(
+        port.control(plan.fence(), RenderControl::Pause),
+        Err(PlaybackControlError::Busy)
+    );
+    let mut output = [9.0; 2];
+    assert!(!callback.render(&mut output, Instant::now(), None));
+    assert_eq!(output, [-0.25, 0.5]);
+    drop(guard);
+    drop(storage);
+    assert!(!port.drain(32).unwrap().is_empty());
+    drop(port);
+    assert!(retained_storage.upgrade().is_some());
+    callback.render(&mut output, Instant::now(), None);
+    assert_eq!(output, [0.0; 2]);
+    assert_eq!(owner.status().state, RenderState::Aborted);
+    drop(callback);
+    assert!(owner.status().callback_retired);
+    drop(owner);
+    assert!(retained_storage.upgrade().is_none());
 }

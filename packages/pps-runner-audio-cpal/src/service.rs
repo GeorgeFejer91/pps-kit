@@ -18,7 +18,8 @@ use crate::{
         MAXIMUM_F32_CONFIGS_PER_DEVICE, MAXIMUM_OUTPUT_CHANNELS, MAXIMUM_OUTPUT_DEVICES,
     },
     cpal_backend::CpalBackend,
-    NativePlaybackRecord, PlaybackCancellation, PlaybackControlReceipt, PlaybackStatus,
+    NativePlaybackRecord, PlaybackCancellation, PlaybackControlReceipt, PlaybackPort,
+    PlaybackStatus,
 };
 use pps_runner_audio::{OutputFence, PreparedPlaybackPlan, RenderControl};
 
@@ -89,6 +90,9 @@ impl BackendFailure {
 }
 
 pub(crate) trait OutputBackend: 'static {
+    fn take_playback_port(&mut self, _fence: &OutputFence) -> Result<PlaybackPort, BackendFailure> {
+        Err(BackendFailure::contract())
+    }
     type Key: SelectionKey;
 
     fn enumerate(&mut self) -> Result<BackendEnumeration<Self::Key>, BackendFailure>;
@@ -813,6 +817,17 @@ impl<B: OutputBackend> WorkerState<B> {
             .map_err(|failure| failure.error)
     }
 
+    fn take_playback_port(
+        &mut self,
+        generation: u64,
+        fence: &OutputFence,
+    ) -> Result<PlaybackPort, OutputServiceError> {
+        self.require_reservation(generation)?;
+        self.backend()?
+            .take_playback_port(fence)
+            .map_err(|failure| failure.error)
+    }
+
     fn refresh_callback_fault(&mut self) {
         let Some(active) = self.reservation.as_ref() else {
             return;
@@ -928,6 +943,11 @@ impl<B: OutputBackend> WorkerState<B> {
 }
 
 enum Command {
+    TakePlaybackPort {
+        generation: u64,
+        fence: OutputFence,
+        reply: SyncSender<Result<PlaybackPort, OutputServiceError>>,
+    },
     Enumerate(SyncSender<Result<OutputDeviceInventory, OutputServiceError>>),
     Reserve {
         selection: ExactOutputSelection,
@@ -1185,6 +1205,22 @@ pub struct CpalOutputService {
 }
 
 impl CpalOutputService {
+    /// Transfers the sole command/evidence port to the native experiment
+    /// authority. Device-owned ring storage stays retained through retirement.
+    pub fn take_playback_port(
+        &self,
+        receipt: &OutputReservationReceipt,
+        fence: &OutputFence,
+    ) -> Result<PlaybackPort, OutputServiceError> {
+        let generation = self.client.receipt_generation(receipt)?;
+        let (reply, receive) = mpsc::sync_channel(1);
+        self.client.send_normal(Command::TakePlaybackPort {
+            generation,
+            fence: fence.clone(),
+            reply,
+        })?;
+        receive_reply(receive, ORDINARY_REPLY_TIMEOUT)
+    }
     /// Binds already verified PCM and schedule to an exact reservation and
     /// warms it in silence. This never arms or starts an experiment.
     pub fn prepare_playback(
@@ -1412,6 +1448,15 @@ fn handle_command<B: OutputBackend>(
     shutdown_requested: &AtomicBool,
 ) {
     match command {
+        Command::TakePlaybackPort {
+            generation,
+            fence,
+            reply,
+        } => {
+            // If the caller disappeared, dropping the unsent port aborts this
+            // immutable callback; it can never leave an orphan running.
+            let _ = reply.try_send(state.take_playback_port(generation, &fence));
+        }
         Command::Enumerate(reply) => {
             let _ = reply.try_send(state.enumerate(identity));
         }
@@ -1967,7 +2012,19 @@ mod tests {
             self.control.record_owner_thread();
             let (callback, owner) = self.media.as_mut().ok_or_else(BackendFailure::contract)?;
             callback.render(&mut [0.0; 2], Instant::now(), None);
-            Ok(owner.drain(maximum))
+            owner.drain(maximum).map_err(|_| BackendFailure::contract())
+        }
+
+        fn take_playback_port(
+            &mut self,
+            fence: &OutputFence,
+        ) -> Result<PlaybackPort, BackendFailure> {
+            self.media
+                .as_mut()
+                .ok_or_else(BackendFailure::contract)?
+                .1
+                .take_port(fence)
+                .map_err(|_| BackendFailure::contract())
         }
     }
 
@@ -2066,6 +2123,42 @@ mod tests {
         assert_eq!(
             service.playback_status(&receipt).unwrap_err().code(),
             OutputServiceErrorCode::StaleReservation
+        );
+        service.shutdown().unwrap();
+    }
+
+    #[test]
+    fn prepared_port_can_only_be_transferred_once_to_its_native_authority() {
+        let control = Arc::new(FakeControl::default());
+        let service = CpalOutputService {
+            client: fake_service(&control),
+        };
+        let inventory = service.enumerate_output_devices().unwrap();
+        let receipt = service
+            .reserve_silence(selection(
+                &inventory,
+                2,
+                48_000,
+                OutputBufferSelection::Default,
+                Duration::from_millis(100),
+            ))
+            .unwrap();
+        let plan = crate::playback::tests::plan(12);
+        service
+            .prepare_playback(&receipt, Arc::clone(&plan))
+            .unwrap();
+        let mut port = service.take_playback_port(&receipt, plan.fence()).unwrap();
+        assert!(service.take_playback_port(&receipt, plan.fence()).is_err());
+        assert!(service
+            .playback_control(&receipt, plan.fence(), RenderControl::Start)
+            .is_err());
+        assert_eq!(port.status().submitted_frames, 0);
+        port.control(plan.fence(), RenderControl::Start).unwrap();
+        service.release(&receipt).unwrap();
+        assert!(port.status().callback_retired);
+        assert_eq!(
+            port.control(plan.fence(), RenderControl::Start),
+            Err(crate::PlaybackControlError::CallbackUnavailable)
         );
         service.shutdown().unwrap();
     }
