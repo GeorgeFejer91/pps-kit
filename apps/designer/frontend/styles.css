@@ -5926,6 +5926,49 @@ a:focus-visible,
   margin-top: 12px;
 }
 
+/* Measured labels grow or wrap; text size remains the user's CSS size. */
+:is(#schedule-segment, #run-segment) :is(button, .status-label) {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: break-word;
+  height: auto;
+}
+
+:is(#schedule-segment, #run-segment) .status-label {
+  min-width: 0;
+  min-height: var(--pretext-min-height, 0px);
+}
+
+:is(#schedule-segment, #run-segment) button {
+  min-width: 24px;
+  min-height: max(2.5rem, var(--pretext-min-height, 0px));
+}
+
+@media (max-width: 760px) {
+  :is(#schedule-segment, #run-segment) :is(button, summary) {
+    min-width: 44px;
+    min-height: max(44px, var(--pretext-min-height, 0px));
+  }
+}
+
+:is(.profile-validation-panel, .run-instructions-panel, .block-file-details) > summary {
+  padding: 8px 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.block-file-details code {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.profile-validation-panel:not([open]) { margin-bottom: 8px; }
+
+.block-preview-table td[data-label="WAV"] {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
 .profile-validation-panel {
   margin-bottom: 14px;
 }
@@ -8154,4 +8197,9 @@ body.desktop-applet .segment-heading {
   .source-mode-widget:has(input:focus-visible) .source-mode-widget-body {
     outline-color: Highlight;
   }
+}
+.decision-segment [data-pretext-result="no-fit"] {
+  overflow-wrap: anywhere;
+  white-space: normal;
+  height: auto;
 }

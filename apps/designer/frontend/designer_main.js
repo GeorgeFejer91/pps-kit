@@ -140,32 +140,28 @@ async function exportBundle(snapshot) {
     files: inventory,
   };
   files.unshift({ name: "manifest.json", bytes: encoder.encode(`${JSON.stringify(manifest, null, 2)}\n`) });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(zipStored(files));
-  link.download = `${profileId}.pps-profile`;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(link.href), 2000);
+  await saveProfileDownload(zipStored(files), `${profileId}.pps-profile`);
 }
 
-async function exportDesktopBundle(snapshot) {
-  const response = await fetch("/api/profiles/export-bundle", {
-    method: "POST",
-    credentials: "same-origin",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ design: snapshot.design, display_name: snapshot.design?.name }),
-  });
-  if (!response.ok) throw new Error((await response.json().catch(() => ({}))).detail || "Profile export failed.");
+async function exportDesktopProfile(format) {
+  const response = await window.PPSDesignerApp.exportProfile(format);
   const blob = await response.blob();
   const disposition = response.headers.get("Content-Disposition") || "";
-  const filename = disposition.match(/filename="([^"]+)"/)?.[1] || "custom_profile.pps-profile";
-  if (window.pywebview?.api?.save_profile_bundle) {
+  const filename = disposition.match(/filename="([^"]+)"/)?.[1] || `experiment.${format === "json" ? "json" : "pps-profile"}`;
+  await saveProfileDownload(blob, filename);
+}
+
+async function saveProfileDownload(blob, filename) {
+  const shell = window.pywebview?.api;
+  const nativeSave = shell?.save_profile || (filename.endsWith(".pps-profile") ? shell?.save_profile_bundle : null);
+  if (nativeSave) {
     const reader = new FileReader();
     const content = await new Promise((resolve, reject) => {
       reader.onload = () => resolve(String(reader.result).split(",")[1]);
       reader.onerror = () => reject(reader.error);
       reader.readAsDataURL(blob);
     });
-    await window.pywebview.api.save_profile_bundle(content, filename);
+    await nativeSave(content, filename);
     return;
   }
   const link = document.createElement("a");
@@ -206,8 +202,12 @@ function initializeChrome() {
   document.getElementById("export-profile-bundle")?.addEventListener("click", async () => {
     try {
       const snapshot = window.PPSDesignerApp.getState();
-      if (desktop) await exportDesktopBundle(snapshot); else await exportBundle(snapshot);
+      if (!window.PPSDesignerApp.isHosted()) await exportDesktopProfile("bundle"); else await exportBundle(snapshot);
     } catch (error) { alert(error.message || String(error)); }
+  });
+  document.getElementById("export-experiment-json")?.addEventListener("click", async () => {
+    try { await exportDesktopProfile("json"); }
+    catch (error) { alert(error.message || String(error)); }
   });
   for (const segment of document.querySelectorAll(".decision-segment")) {
     const heading = segment.querySelector(":scope > .segment-heading");

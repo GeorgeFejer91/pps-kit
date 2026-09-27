@@ -36,3 +36,10 @@ sessions unless a visible test is requested.
 For exploration, present the working local preview and remain at
 **local-preview** until accepted. Preview completion does not start packaging.
 At source promotion, check Pages uses identical allowlisted compiled bytes.
+
+The final planner action exports the verified local experiment JSON; the portable
+audio bundle remains a separate action. Keep review evidence, instruction audio,
+and long source filenames in disclosures so the approved plan remains readable.
+Designer and Runner share `pps-resources/assets/ui/bounded-text.mjs` for Pretext
+measurement. CSS owns wrapping and text size; user zoom is never reduced to fit.
+Unsupported text layout is marked for DOM verification rather than claimed to fit.

@@ -14,6 +14,9 @@ import {
   remoteActionsForTarget,
 } from "./remote/websocket-session.js";
 import { renderQrCode } from "./ui/qr-code.js";
+import { initializeTextLayout } from "./ui/text-layout.js";
+
+initializeTextLayout();
 
 const api = selectRunnerAdapter();
 const elements = Object.fromEntries([...document.querySelectorAll("[id]")].map((element) => [element.id, element]));

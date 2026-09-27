@@ -677,7 +677,7 @@ const PAGE_ROUTE_SEGMENTS = {
 };
 
 async function api(path, options = {}) {
-  const { skipStaticGuard = false, ...fetchOptions } = options;
+  const { skipStaticGuard = false, rawResponse = false, ...fetchOptions } = options;
   if (staticModeActive && !skipStaticGuard) {
     throw new Error(STATIC_COMPANION_REQUIRED_MESSAGE);
   }
@@ -714,7 +714,7 @@ async function api(path, options = {}) {
     });
   }
   setConnectionStatus(true);
-  return response.json();
+  return rawResponse ? response : response.json();
 }
 
 const designerApi = createDesignerApi(api);
@@ -1090,6 +1090,7 @@ function profileReadonlyControlAllowed(control) {
       || control.id === "download-block-randomization"
       || control.id === "save-study-profile"
       || control.id === "export-profile-bundle"
+      || control.id === "export-experiment-json"
     )
   );
 }
@@ -1101,7 +1102,7 @@ function viewModeControlAllowed(control) {
   if (control.id === "download-block-randomization") return true;
   return Boolean(
     isProfileFinalized()
-    && control.id === "export-profile-bundle"
+    && ["export-profile-bundle", "export-experiment-json"].includes(control.id)
   );
 }
 
@@ -4250,12 +4251,12 @@ function renderBlockPreviewCard(block, index = 0) {
       <summary>
         <div>
           <strong>${escapeHtml(block.block_label || `Block ${block.block_index || ""}`)}</strong>
-          <span>${escapeHtml(csvName)}</span>
         </div>
         <div class="block-distribution">${distribution}</div>
         <span>${total} trials / ${escapeHtml(formatDurationMs(block.duration_ms || 0))}</span>
       </summary>
       <div class="block-preview-body">
+        <details class="block-file-details"><summary>Source file</summary><code>${escapeHtml(csvName)}</code></details>
         <div class="block-preview-meta">${meta}</div>
         <div class="scroll-table compact">
           <table id="${tableId}" class="data-table compact block-preview-table mobile-card-table">
@@ -4306,7 +4307,7 @@ function renderBlockPreviewRow(row) {
       ${coloredPreviewCell(row.noise_type || "", row.noise_color_hex, "Noise")}
       <td data-label="Sequence">${escapeHtml(row.sequence_labels || row.sequence_variant_key || "")}</td>
       <td data-label="Duration">${escapeHtml(formatDurationMs(row.duration_ms || 0))}</td>
-      <td data-label="WAV">${escapeHtml(row.source_file_name || "")}</td>
+      <td data-label="WAV"><details class="block-file-details"><summary>Audio file</summary><code>${escapeHtml(row.source_file_name || "")}</code></details></td>
     </tr>
   `;
 }
@@ -6270,6 +6271,13 @@ function renderRun() {
     bundleButton.title = finalized ? "Export this locked profile as a portable bundle." : "Lock the validated profile before exporting it.";
   }
   const summary = $("run-sequence-summary");
+  const jsonButton = $("export-experiment-json");
+  if (jsonButton) {
+    jsonButton.hidden = !finalized;
+    jsonButton.disabled = !finalized || staticModeActive;
+    jsonButton.title = staticModeActive ? "Use the installed Designer to verify local audio files and export an experiment JSON."
+      : "Export the approved schedule and verified local ingredients for the Runner.";
+  }
   if (summary) {
     const exampleCount = Number(setup.participant_count || state.design.protocol?.participants || 0);
     const visibleCount = Number(setup.rows?.length || 0);
@@ -9502,6 +9510,11 @@ initializeLazySurfaces();
 initializePublicationNetworkSurface();
 window.PPSDesignerApp = Object.freeze({
   getState: () => clone(state),
+  exportProfile: (format) => {
+    if (!["json", "bundle"].includes(format)) throw new Error("Unsupported profile export.");
+    return api(`/api/profiles/export-${format}`, { method: "POST", rawResponse: true,
+      body: JSON.stringify({ expected_revision: normalizedDesignerProgress().revision }) });
+  },
   isHosted: () => staticModeActive,
   restoreHostedDraft: (snapshot) => {
     if (!snapshot?.design) return false;

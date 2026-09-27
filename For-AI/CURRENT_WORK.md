@@ -9,7 +9,7 @@ append command logs or machine-specific paths.
   spatial stimuli and exports JSON ingredients/file/assembly profiles; Runner
   reads them, executes experiments, and records data. The existing 3DTI adapter,
   3D viewer, schemas, and profile pipeline are the starting point.
-- **Stage:** planner JSON handoff, followed by independently verified implementation
+- **Stage:** planner JSON handoff and shared text measurement, followed by independently verified implementation
   checkpoints, local UI previews, source promotion, packaged candidates, and
   measured qualification. The audit is approved; do not ask again to implement
   its scoped proposals. Physical evidence cannot be replaced by software tests.
@@ -22,7 +22,8 @@ append command logs or machine-specific paths.
   with one existing unavailable-local-source skip. Rust formatting now passes;
   core and Python/Rust oracle checks passed on three CI platforms at `3e6eeb4`;
   desktop, core, browser, Python/Rust oracle, and optional Android checks passed
-  at `9290bea`. Packaging validation remains separate. Native output completion
+  at `9290bea`, including validation package builds on three platforms. Installed
+  and physical qualification remain separate. Native output completion
   releases its operation guard before replying and has a reserve/disable/stale
   policy integration check. Pytest uses native successful-scratch cleanup
   and one failed-run retention instead of a new helper. Designer Vite 6.4.3 and
@@ -32,8 +33,11 @@ append command logs or machine-specific paths.
   and verifies its file inventory before compatibility Runner assembly. Both
   direct and JSON preparation pass the existing sample/tactile/CSV contract;
   changed-ingredient and stale/incomplete export denial checks pass.
-- **Next gate:** add the explicit JSON action to the simplified planner UI,
-  centralize measured text layout, fence background generation to its source
+  The JSON action, planner disclosures, and shared Designer/Runner Pretext owner
+  pass the inspected 12-case planner audit and 13 rendered text cases. Runner's
+  57 browser checks and canonical Pages assembly byte checks pass. Actual
+  WebView accessibility qualification remains pending.
+- **Next gate:** fence background generation to its source
   revision, add bounded resource preflight, and connect native output execution.
 
 Detailed run artifacts belong in ignored validation folders. Preserve the

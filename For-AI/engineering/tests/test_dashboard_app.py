@@ -346,7 +346,8 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="start-new-custom-design"' in html
     assert "Start New Custom Design" in html
     assert "Done — Lock Profile" in html
-    assert "Export .pps-profile" in html
+    assert "Portable audio bundle" in html
+    assert 'id="export-experiment-json"' in html
     assert "/api/profiles/save-prepared" in designer_api_js
     assert "/api/run-sequence/export-bridge" in designer_api_js
     assert 'id="edit-profile-rail"' not in html

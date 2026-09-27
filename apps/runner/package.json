@@ -11,6 +11,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@chenglou/pretext": "0.0.8",
     "@noble/hashes": "1.7.1",
     "@tauri-apps/api": "^2.0.0",
     "browser-remote-sync-protocol": "https://github.com/GeorgeFejer91/browser-remote-sync-protocol/archive/62ff66c6df724847c1e54161feabb470b67b1192.tar.gz",

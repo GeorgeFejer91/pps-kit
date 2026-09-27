@@ -23,6 +23,9 @@ import { PpsVdoTransport, generateVdoRoomId } from "./remote/vdo-transport.js";
 import { PpsPublicBeacon } from "./remote/vdo-beacon.js";
 import { BrspControllerSession, BrspTargetSession } from "./remote/websocket-session.js";
 import { renderQrCode } from "./ui/qr-code.js";
+import { initializeTextLayout } from "./ui/text-layout.js";
+
+initializeTextLayout();
 
 const elements = Object.fromEntries([...document.querySelectorAll("[id]")].map((element) => [element.id, element]));
 const outputEngine = new BrowserOutputEngine();

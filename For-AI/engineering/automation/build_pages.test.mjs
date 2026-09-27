@@ -12,7 +12,7 @@ import { assemblePages } from "./build_pages.mjs";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const root = resolve(scriptDir, "../../..");
 const runnerCompiled = join(root, "apps", "runner", "compiled");
-const companionAssets = ["companion.js", "qr-code.js", "style.css"];
+const companionAssets = ["companion.js", "text-layout.js", "style.css"];
 const companionVendorHashes = new Map([
   ["LICENSE-MPL-2.0.txt", "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04"],
   ["NOTICE.md", "e9a94c863d79032c0371bb2a207f2ecbc5d78108c0191d2484d8c2f58626aacb"],

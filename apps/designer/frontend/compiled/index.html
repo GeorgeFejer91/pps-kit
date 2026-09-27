@@ -14,8 +14,8 @@
       }
     }
   </script>
-  <script type="module" crossorigin src="./assets/index-DSIaqWx2.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-Dnz4UQUK.css">
+  <script type="module" crossorigin src="./assets/index-C_Rdfloz.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DwguwD-4.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -638,13 +638,14 @@
               <div class="panel-title">Profile Completion <span class="step-badge" data-step-badge="run"></span></div>
               <span id="run-sequence-status" class="status-label">checking</span>
             </div>
-            <section class="profile-validation-panel" aria-label="Profile validation checklist">
+            <details class="profile-validation-panel" aria-label="Profile validation checklist">
+              <summary>Review details</summary>
               <div class="run-preview-toolbar">
                 <div class="panel-subtitle">Validation Checklist</div>
                 <span id="profile-validation-summary" class="status-label">checking</span>
               </div>
               <div id="profile-validation-checklist" class="profile-validation-checklist"></div>
-            </section>
+            </details>
             <div class="run-decision-grid" aria-label="Experiment-level parameters">
               <div class="field-row">
                 <label for="participants">Example orders to preview</label>
@@ -664,13 +665,14 @@
                 </div>
               </div>
             </div>
-            <section class="run-instructions-panel" aria-label="Preload instruction audio clips">
+            <details class="run-instructions-panel" aria-label="Preload instruction audio clips">
+              <summary>Instruction audio</summary>
               <div class="run-preview-toolbar">
                 <div class="panel-subtitle">Preload Instruction Audio Clips</div>
                 <span id="run-instructions-summary" class="status-label">checking</span>
               </div>
               <div id="run-instruction-slots" class="run-instruction-slots"></div>
-            </section>
+            </details>
             <div class="run-preview-toolbar">
               <div class="panel-subtitle">Block Permutation Preview</div>
               <span id="run-sequence-summary" class="status-label">waiting</span>
@@ -691,7 +693,8 @@
             <div class="step-footer run-sequence-actions">
               <button id="regenerate-run-sequence" type="button">Refresh Order Preview</button>
               <button id="save-study-profile" type="button" class="primary">Done — Lock Profile</button>
-              <button id="export-profile-bundle" type="button">Export .pps-profile</button>
+              <button id="export-experiment-json" type="button" class="primary">Export experiment JSON</button>
+              <button id="export-profile-bundle" type="button">Portable audio bundle</button>
               <button id="export-output-folder" type="button" class="state-only" hidden aria-hidden="true" tabindex="-1">Legacy: Prepare Session</button>
               <button id="prepare-experiment" type="button" class="state-only" hidden aria-hidden="true" tabindex="-1">Legacy: Save and Open Runner</button>
             </div>

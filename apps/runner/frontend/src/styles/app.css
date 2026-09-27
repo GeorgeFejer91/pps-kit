@@ -362,3 +362,17 @@ input[type="checkbox"] {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
+.button {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: break-word;
+  height: auto;
+  min-height: max(2.75rem, var(--pretext-min-height, 0px));
+}
+
+[data-pretext-result="no-fit"] {
+  overflow-wrap: anywhere;
+  white-space: normal;
+  height: auto;
+}

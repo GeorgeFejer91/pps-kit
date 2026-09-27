@@ -155,12 +155,15 @@ class ShellApi:
         return bool(webbrowser.open(url, new=2))
 
     def save_profile_bundle(self, content_base64: str, suggested_name: str) -> bool:
+        return self.save_profile(content_base64, suggested_name)
+
+    def save_profile(self, content_base64: str, suggested_name: str) -> bool:
         if self.window is None:
             return False
         import webview
 
         name = Path(str(suggested_name)).name
-        if not name.endswith(".pps-profile"):
+        if not name.endswith((".json", ".pps-profile")):
             name += ".pps-profile"
         selected = self.window.create_file_dialog(webview.SAVE_DIALOG, save_filename=name)
         if not selected:
