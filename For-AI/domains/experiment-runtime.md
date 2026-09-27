@@ -41,3 +41,10 @@ choose a second trial order. Designer export checks the current review revision
 and existing lineage gates. The compatibility Runner accepts
 `--experiment-profile <json> --participant-id <id>` and uses the existing session
 assembler after verifying the inventory. Remote projections never carry paths.
+
+Designer generation jobs bind to the captured design signature. Ingredient media
+stays in staging until the source and cooperative cancellation checks admit
+publication. Segment jobs reuse one completion handler and the existing rebuild
+rollback owner. Cancellation after publication begins is reported as completion,
+not as an unpublished result. Use the existing renderer's `auto` selection and
+retain its explicit native/reference provenance.

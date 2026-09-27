@@ -108,3 +108,24 @@ def test_successful_segment_rebuild_replaces_previous_output(tmp_path: Path) -> 
     assert not (root / "old.csv").exists()
     assert (root / "new.csv").read_text(encoding="utf-8") == "new"
     assert not list(tmp_path.glob(".5_block_csv_preview.pps-backup-*"))
+
+
+def test_cancelled_publication_restores_completed_segment(tmp_path: Path) -> None:
+    from peripersonal_space_toolkit.dashboard_backend.jobs import JobCancelled
+
+    root = tmp_path / "segment"
+    root.mkdir()
+    (root / "accepted.csv").write_text("approved", encoding="utf-8")
+
+    def build():
+        root.mkdir()
+        (root / "new.csv").write_text("new", encoding="utf-8")
+        return {"status": "baked"}
+
+    def publish():
+        raise JobCancelled("Cancelled before publication")
+
+    with pytest.raises(JobCancelled):
+        dashboard_app._transactional_segment_rebuild(root, build, publish=publish)
+    assert (root / "accepted.csv").read_text(encoding="utf-8") == "approved"
+    assert not (root / "new.csv").exists()

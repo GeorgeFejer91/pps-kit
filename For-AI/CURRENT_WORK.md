@@ -37,8 +37,10 @@ append command logs or machine-specific paths.
   pass the inspected 12-case planner audit and 13 rendered text cases. Runner's
   57 browser checks and canonical Pages assembly byte checks pass. Actual
   WebView accessibility qualification remains pending.
-- **Next gate:** fence background generation to its source
-  revision, add bounded resource preflight, and connect native output execution.
+- **Next gate:** add bounded resource preflight and connect native output execution.
+  Source/cancellation publication fences pass owning checks, including stale
+  rendering, cancelled rendering, renderer failure, segment rollback, and the
+  cancellation/publication race. Four segment jobs share one completion handler.
 
 Detailed run artifacts belong in ignored validation folders. Preserve the
 pre-sync Git bundle and dirty-file backup until reconciliation is verified.

@@ -7,6 +7,7 @@ import queue
 import threading
 import time
 import uuid
+from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import dataclass, field, replace
 from pathlib import Path
@@ -29,6 +30,7 @@ class DashboardJob:
     error_code: str = ""
     retryable: bool = False
     cancel_requested: bool = False
+    commit_started: bool = False
     progress_current: int = 0
     progress_total: int = 0
     progress_percent: float = 0.0
@@ -39,6 +41,40 @@ class DashboardJob:
 
 class JobCancelled(RuntimeError):
     pass
+
+
+class JobSourceChanged(RuntimeError):
+    code = "job_source_changed"
+    retryable = True
+
+
+class JobProgress:
+    """Cooperative checkpoints and one uncancellable output publication."""
+
+    def __init__(self, manager: JobManager, job_id: str, cancel: threading.Event) -> None:
+        self.manager, self.job_id, self.cancel = manager, job_id, cancel
+
+    def __call__(self, current: int, total: int, label: str = "") -> None:
+        if self.cancel.is_set():
+            raise JobCancelled("Background job cancelled.")
+        total = max(0, int(total or 0))
+        current = max(0, min(int(current or 0), total if total else int(current or 0)))
+        self.manager._update(self.job_id, progress_current=current, progress_total=total,
+            progress_percent=round(current / total * 100, 1) if total else 0.0,
+            progress_label=label, message=label or "Background job running")
+
+    @contextmanager
+    def commit(self):
+        # Cancellation and publication admission share the existing job lock.
+        # The actual publication does not hold it, so status remains responsive.
+        with self.manager._lock:
+            if self.cancel.is_set() or self.manager._closing:
+                raise JobCancelled("Background job cancelled before publication.")
+            job = self.manager._jobs[self.job_id]
+            job.commit_started = True
+            job.message = "Publishing verified outputs"
+            job.updated_at = time.time()
+        yield
 
 
 class JobManager:
@@ -66,20 +102,7 @@ class JobManager:
         job = DashboardJob(job_id=uuid.uuid4().hex[:12], kind=str(kind or "job"))
         cancel_event = threading.Event()
 
-        def _progress(current: int, total: int, label: str = "") -> None:
-            if cancel_event.is_set():
-                raise JobCancelled("Background job cancelled.")
-            total_value = max(0, int(total or 0))
-            current_value = max(0, min(int(current or 0), total_value if total_value else int(current or 0)))
-            percent = round((current_value / total_value) * 100.0, 1) if total_value else 0.0
-            self._update(
-                job.job_id,
-                progress_current=current_value,
-                progress_total=total_value,
-                progress_percent=percent,
-                progress_label=label,
-                message=label or f"{job.kind} running",
-            )
+        _progress = JobProgress(self, job.job_id, cancel_event)
 
         def _run() -> None:
             try:
@@ -181,7 +204,7 @@ class JobManager:
             job = self._jobs.get(job_id)
             if job is None:
                 return None
-            if job.status in TERMINAL_STATES:
+            if job.status in TERMINAL_STATES or job.commit_started:
                 return _job_snapshot(job)
             event = self._cancel_events[job_id]
             event.set()
@@ -193,7 +216,7 @@ class JobManager:
     def shutdown(self, *, timeout: float = 5.0) -> None:
         with self._lock:
             self._closing = True
-            events = list(self._cancel_events.values())
+            events = [event for job_id, event in self._cancel_events.items() if not self._jobs[job_id].commit_started]
             workers = list(self._workers)
         for event in events:
             event.set()

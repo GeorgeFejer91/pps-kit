@@ -82,3 +82,27 @@ def test_job_manager_bounds_pending_work() -> None:
     finally:
         release.set()
         manager.shutdown(timeout=1.0)
+
+
+def test_cancellation_cannot_relabel_published_outputs_as_cancelled() -> None:
+    manager = JobManager(max_concurrent=1)
+    committing, release = threading.Event(), threading.Event()
+
+    def publish(progress):
+        progress(1, 2, "prepared")
+        with progress.commit():
+            committing.set()
+            assert release.wait(2.0)
+            return {"published": True}
+
+    try:
+        job = manager.start("publish", publish, progress=True)
+        assert committing.wait(1.0)
+        cancelled = manager.cancel(job.job_id)
+        assert cancelled.commit_started and not cancelled.cancel_requested
+        release.set()
+        finished = _wait_for_terminal(manager, job.job_id)
+        assert finished.status == "succeeded" and finished.result == {"published": True}
+    finally:
+        release.set()
+        manager.shutdown(timeout=1.0)

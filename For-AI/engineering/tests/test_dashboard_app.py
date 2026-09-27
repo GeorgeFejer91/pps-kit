@@ -6,6 +6,7 @@ import json
 import math
 import os
 import subprocess
+import threading
 import time
 from collections import Counter
 from pathlib import Path
@@ -162,7 +163,7 @@ def _client(tmp_path: Path) -> TestClient:
 def _wait_job(client: TestClient, job_id: str) -> dict:
     for _ in range(1000):
         data = client.get(f"/api/jobs/{job_id}").json()
-        if data["status"] in {"succeeded", "failed"}:
+        if data["status"] in {"succeeded", "failed", "cancelled"}:
             return data
         time.sleep(0.05)
     raise AssertionError(f"Job did not finish: {job_id}")
@@ -2681,7 +2682,7 @@ def test_dashboard_bake_stimulus_job_adds_source_after_render(tmp_path: Path, mo
             == "trajectory_movement_duration"
         )
         assert seed == custom["design"]["protocol"]["random_seed"]
-        assert engine == "python-sofa-reference"
+        assert engine == "auto"
         assert include_tactile is False
         assert design_data["trajectory"]["start_x_m"] == pytest.approx(expected_start["x_m"])
         assert design_data["trajectory"]["start_y_m"] == pytest.approx(expected_start["y_m"])
@@ -2737,6 +2738,51 @@ def test_dashboard_bake_stimulus_job_adds_source_after_render(tmp_path: Path, mo
     assert state["custom_workflow"]["ready_to_render"] is False
     assert state["custom_workflow"]["current_step"] == "trials"
     assert "Bake Segment 2 trial sequences." in state["custom_workflow"]["missing"]
+
+
+@pytest.mark.parametrize("reason", ["design_changed", "cancelled", "renderer_failed"])
+def test_render_completion_never_publishes_stale_cancelled_or_failed_ingredients(tmp_path: Path, monkeypatch, reason):
+    entered, release = threading.Event(), threading.Event()
+    staging_paths = []
+
+    def blocked_render(design_path, output_dir, **_kwargs):
+        staging_paths.append(Path(output_dir))
+        entered.set()
+        assert release.wait(10)
+        wav = Path(output_dir) / "partial.wav"
+        sf.write(wav, np.zeros((441, 2), dtype=np.float32), 44100)
+        manifest, qc = Path(output_dir) / "render_manifest.json", Path(output_dir) / "render_qc.csv"
+        manifest.write_text(json.dumps({"wav_outputs": [{"path": str(wav)}]}), encoding="utf-8")
+        qc.write_text("", encoding="utf-8")
+        return RenderResult("backend_failed" if reason == "renderer_failed" else "rendered_reference",
+            1 if reason == "renderer_failed" else 0, Path(output_dir), Path(design_path), manifest, qc, wav_paths=(wav,))
+
+    monkeypatch.setattr(dashboard_app.render_backend, "render_design_with_3dti", blocked_render)
+    with _client(tmp_path) as client:
+        custom = client.post("/api/templates/__custom__/load").json()
+        job = client.post("/api/stimulus/bake", json={
+            "design": custom["design"],
+            "bake_recipe": {"kind": "generated_noise", "noise_type": "blue", "label": "Never publish"},
+        }).json()
+        try:
+            assert entered.wait(3)
+            if reason == "design_changed":
+                current = client.get("/api/state").json()["design"]
+                current["name"] = "Newer planner settings"
+                assert client.post("/api/design", json={"design": current}).status_code == 200
+            elif reason == "cancelled":
+                assert client.delete(f"/api/jobs/{job['job_id']}").json()["cancel_requested"]
+        finally:
+            release.set()
+        finished = _wait_job(client, job["job_id"])
+        state = client.get("/api/state").json()
+        assert finished["status"] == ("cancelled" if reason == "cancelled" else "failed")
+        if reason == "design_changed":
+            assert finished["error_code"] == "job_source_changed" and finished["retryable"]
+            assert state["design"]["name"] == "Newer planner settings"
+        assert not any(source["label"] == "Never publish" for source in state["design"]["noises"])
+        assert not staging_paths[0].exists()
+        assert not list(staging_paths[0].parent.parent.glob("*.wav"))
 
 
 def test_dashboard_failed_generated_remake_preserves_original_and_downstream(tmp_path: Path, monkeypatch):
@@ -2848,7 +2894,7 @@ def test_dashboard_bake_generated_noise_can_use_continuous_source_mode(tmp_path:
         assert design_data["noises"][0]["source_profile"] == "continuous_noise"
         assert design_data["noises"][0]["source_profile_parameters"] == {}
         assert seed == custom["design"]["protocol"]["random_seed"]
-        assert engine == "python-sofa-reference"
+        assert engine == "auto"
         assert include_tactile is False
         return RenderResult(
             "rendered_reference",

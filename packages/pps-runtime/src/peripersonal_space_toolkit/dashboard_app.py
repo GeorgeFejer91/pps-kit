@@ -114,7 +114,7 @@ from .preload_inventory import ensure_preload_assets, load_preload_inventory, pr
 from .runtime_paths import designer_frontend_root, resource_root, writable_root
 from .subprocess_utils import windows_no_console_kwargs
 from .dashboard_backend.security import CompanionSecurity, TOKEN_HEADER
-from .dashboard_backend.jobs import DashboardJob, JobManager
+from .dashboard_backend.jobs import DashboardJob, JobManager, JobProgress, JobSourceChanged
 from .dashboard_backend.contracts import ApplicationError, application_error_from_exception
 from .designer_segments import (
     build_segment_lineage,
@@ -1527,6 +1527,12 @@ class DashboardController:
             project = self._ensure_project_context(self.design)
             saved_design = _copy_design(self.design)
             design = _candidate_design_from_payload(saved_design, design_payload) if ingredient_recipe else saved_design
+            source_signature = _stable_json_hash(design_to_dict(saved_design))
+
+        def require_current_source() -> None:
+            if _stable_json_hash(design_to_dict(self.design)) != source_signature:
+                raise JobSourceChanged("Planner settings changed during generation. Review the current settings and retry.")
+
         self._append_dashboard_diary_event(
             "dashboard_bake_requested",
             design=design,
@@ -1535,94 +1541,50 @@ class DashboardController:
         )
         if recipe_kind != "block_csv_preview":
             _raise_if_current_block_csvs_accepted(project.project_dir, design)
-        if recipe_kind == "trial_sequence_batch":
-            render_dir = project.project_dir
+        segment_jobs = {
+            "trial_sequence_batch": (2, _bake_trial_sequence_variants),
+            "audiotactile_trial_batch": (3, _bake_audio_tactile_trial_files),
+            "trial_repetition_pool": (4, _bake_trial_repetition_pool),
+            "block_csv_preview": (5, _bake_block_csv_preview),
+        }
+        if recipe_kind in segment_jobs:
+            from_segment, build = segment_jobs[recipe_kind]
 
-            def _batch_bake() -> dict[str, Any]:
-                _ensure_dir(render_dir)
+            def _segment_bake(progress: JobProgress) -> dict[str, Any]:
+                progress(0, 1, "Preparing segment outputs")
+                # Existing segment builders share one rollback owner. Holding the
+                # design lock keeps incomplete folders out of dashboard snapshots.
                 with self._lock:
-                    active_project = self._ensure_project_context(self.design)
-                    result = _bake_trial_sequence_variants(self.design, active_project.project_dir)
-                    _clear_downstream_segment_outputs(active_project, from_segment=2)
-                    report = _write_segment_validation_report(active_project, self.design)
-                    self.current_run_package = None
-                    save_design(self.design, self.design_path)
+                    require_current_source()
+                    report_path = ""
+
+                    def publish() -> None:
+                        nonlocal report_path
+                        require_current_source()
+                        with progress.commit():
+                            _clear_downstream_segment_outputs(project, from_segment=from_segment)
+                            report_path = str(_write_segment_validation_report(project, self.design))
+                            self.current_run_package = None
+                            save_design(self.design, self.design_path)
+
+                    options: dict[str, Any] = {"publish": publish}
+                    if recipe_kind == "block_csv_preview":
+                        _raise_if_current_block_csvs_accepted(project.project_dir, saved_design)
+                        options["progress"] = progress
+                    args = (saved_design, project.project_dir)
+                    if recipe_kind in {"trial_repetition_pool", "block_csv_preview"}:
+                        args += (recipe,)
+                    result = build(*args, **options)
                 return {
                     **result,
-                    "source_kind": "trial_sequence_batch",
-                    "validation_report_path": str(report),
+                    "source_kind": recipe_kind,
+                    "validation_report_path": report_path,
                     "local_only": True,
-                    "message": "Trial-sequence variants were baked by the local companion backend; no online upload was performed.",
+                    "message": "Segment outputs were verified and published by the local backend.",
                 }
 
-            return self.jobs.start("stimulus_bake", _batch_bake)
-        if recipe_kind == "audiotactile_trial_batch":
-            render_dir = project.project_dir
-
-            def _trial_file_bake() -> dict[str, Any]:
-                _ensure_dir(render_dir)
-                with self._lock:
-                    active_project = self._ensure_project_context(self.design)
-                    result = _bake_audio_tactile_trial_files(self.design, active_project.project_dir)
-                    _clear_downstream_segment_outputs(active_project, from_segment=3)
-                    report = _write_segment_validation_report(active_project, self.design)
-                    self.current_run_package = None
-                    save_design(self.design, self.design_path)
-                return {
-                    **result,
-                    "source_kind": "audiotactile_trial_batch",
-                    "validation_report_path": str(report),
-                    "local_only": True,
-                    "message": "Audio-tactile and baseline trial files were baked by the local companion backend; no online upload was performed.",
-                }
-
-            return self.jobs.start("stimulus_bake", _trial_file_bake)
-        if recipe_kind == "trial_repetition_pool":
-            render_dir = project.project_dir
-
-            def _trial_pool_bake() -> dict[str, Any]:
-                _ensure_dir(render_dir)
-                with self._lock:
-                    active_project = self._ensure_project_context(self.design)
-                    result = _bake_trial_repetition_pool(self.design, active_project.project_dir, recipe)
-                    _clear_downstream_segment_outputs(active_project, from_segment=4)
-                    report = _write_segment_validation_report(active_project, self.design)
-                    self.current_run_package = None
-                    save_design(self.design, self.design_path)
-                return {
-                    **result,
-                    "source_kind": "trial_repetition_pool",
-                    "validation_report_path": str(report),
-                    "local_only": True,
-                    "message": "Trial repetition pool CSV was written by the local companion backend; no WAV files were duplicated.",
-                }
-
-            return self.jobs.start("stimulus_bake", _trial_pool_bake)
-        if recipe_kind == "block_csv_preview":
-            _raise_if_current_block_csvs_accepted(project.project_dir, design)
-            render_dir = project.project_dir
-
-            def _block_csv_bake(progress: Callable[[int, int, str], None]) -> dict[str, Any]:
-                _ensure_dir(render_dir)
-                with self._lock:
-                    active_project = self._ensure_project_context(self.design)
-                    active_design = _copy_design(self.design)
-                    _raise_if_current_block_csvs_accepted(active_project.project_dir, active_design)
-                result = _bake_block_csv_preview(active_design, active_project.project_dir, recipe, progress=progress)
-                with self._lock:
-                    _clear_downstream_segment_outputs(active_project, from_segment=5)
-                    report = _write_segment_validation_report(active_project, self.design)
-                    self.current_run_package = None
-                    save_design(self.design, self.design_path)
-                return {
-                    **result,
-                    "source_kind": "block_csv_preview",
-                    "validation_report_path": str(report),
-                    "local_only": True,
-                    "message": "Block CSV preview files were written by the local companion backend.",
-                }
-
-            return self.jobs.start("block_csv_preview", _block_csv_bake, progress=True)
+            job_kind = "block_csv_preview" if recipe_kind == "block_csv_preview" else "stimulus_bake"
+            return self.jobs.start(job_kind, _segment_bake, progress=True)
         action = str(recipe.get("action") or "create").strip().lower()
         if action not in {"create", "remake"}:
             raise ValueError(f"Unsupported Segment 1 action: {action}")
@@ -1649,7 +1611,8 @@ class DashboardController:
             target_duration_s = max(0.1, _float(audio_payload.get("target_duration_s"), 4.0))
             ingredient_dir = project.segment1_dir
 
-            def _commit_fixed_audio() -> dict[str, Any]:
+            def _commit_fixed_audio(progress: JobProgress) -> dict[str, Any]:
+                progress(0, 1, "Checking imported audio")
                 _ensure_dir(ingredient_dir)
                 staging_dir = ingredient_dir / ".staging" / uuid.uuid4().hex
                 _ensure_dir(staging_dir)
@@ -1663,56 +1626,58 @@ class DashboardController:
                     info = _audio_file_info(candidate_copy)
                     if int(info.get("duration_ms") or 0) <= 0:
                         raise RuntimeError(f"Imported fixed clip is not a valid audio file: {label}")
-                    staged_copy = _materialize_ingredient_audio_file(
-                        candidate_copy,
-                        ingredient_dir,
-                        label,
-                        motion_mode="stationary",
-                    )
+                    with self._lock:
+                        require_current_source()
+                        with progress.commit():
+                            staged_copy = _materialize_ingredient_audio_file(
+                                candidate_copy,
+                                ingredient_dir,
+                                label,
+                                motion_mode="stationary",
+                            )
+                            source = AudioFileSpec(
+                                label=label,
+                                path=str(staged_copy),
+                                target_duration_s=target_duration_s or float(info["duration_s"]),
+                                render_mode="preserve",
+                                tone_type=str(audio_payload.get("tone_type") or CUSTOM_AUDIO_NOISE_TYPE),
+                                gain=max(0.01, _float(audio_payload.get("gain"), 1.0)),
+                                placement=str(audio_payload.get("placement") or "before"),
+                                target_source_label=str(audio_payload.get("target_source_label") or ""),
+                                phase=str(audio_payload.get("phase") or ""),
+                                gap_s=max(0.0, _float(audio_payload.get("gap_s"), 0.0)),
+                                motion_mode="stationary",
+                                trajectory_snapshot={},
+                                display_color_hex=display_color_hex or _source_color_hex(audio_payload.get("tone_type") or "prestimulus"),
+                                source_input_path=str(source_path),
+                            )
+                            commit_design = _copy_design(design)
+                            commit_design.trajectory = _copy_design(saved_design).trajectory
+                            _replace_stimulus_source(commit_design, source, "fixed_audio", original_label=original_label if action == "remake" else "")
+                            _propagate_source_label_rename(commit_design, original_label, label)
+                            active_project = self._ensure_project_context(self.design)
+                            _record_ingredient_file(
+                                active_project,
+                                staged_copy,
+                                label=label,
+                                source_kind="fixed_audio",
+                                trajectory_snapshot={},
+                                motion_mode="stationary",
+                                provenance={
+                                    "display_color_hex": source.display_color_hex,
+                                    "source_input_path": source.source_input_path,
+                                    "action": action,
+                                    "original_label": original_label,
+                                },
+                                replace_label=original_label if action == "remake" else "",
+                            )
+                            self.design = commit_design
+                            _clear_downstream_segment_outputs(active_project, from_segment=1)
+                            report = _write_segment_validation_report(active_project, self.design)
+                            self.current_run_package = None
+                            save_design(self.design, self.design_path)
                 finally:
                     _remove_tree(staging_dir)
-                source = AudioFileSpec(
-                    label=label,
-                    path=str(staged_copy),
-                    target_duration_s=target_duration_s or float(info["duration_s"]),
-                    render_mode="preserve",
-                    tone_type=str(audio_payload.get("tone_type") or CUSTOM_AUDIO_NOISE_TYPE),
-                    gain=max(0.01, _float(audio_payload.get("gain"), 1.0)),
-                    placement=str(audio_payload.get("placement") or "before"),
-                    target_source_label=str(audio_payload.get("target_source_label") or ""),
-                    phase=str(audio_payload.get("phase") or ""),
-                    gap_s=max(0.0, _float(audio_payload.get("gap_s"), 0.0)),
-                    motion_mode="stationary",
-                    trajectory_snapshot={},
-                    display_color_hex=display_color_hex or _source_color_hex(audio_payload.get("tone_type") or "prestimulus"),
-                    source_input_path=str(source_path),
-                )
-                commit_design = _copy_design(design)
-                commit_design.trajectory = _copy_design(saved_design).trajectory
-                _replace_stimulus_source(commit_design, source, "fixed_audio", original_label=original_label if action == "remake" else "")
-                _propagate_source_label_rename(commit_design, original_label, label)
-                with self._lock:
-                    active_project = self._ensure_project_context(self.design)
-                    _record_ingredient_file(
-                        active_project,
-                        staged_copy,
-                        label=label,
-                        source_kind="fixed_audio",
-                        trajectory_snapshot={},
-                        motion_mode="stationary",
-                        provenance={
-                            "display_color_hex": source.display_color_hex,
-                            "source_input_path": source.source_input_path,
-                            "action": action,
-                            "original_label": original_label,
-                        },
-                        replace_label=original_label if action == "remake" else "",
-                    )
-                    self.design = commit_design
-                    _clear_downstream_segment_outputs(active_project, from_segment=1)
-                    report = _write_segment_validation_report(active_project, self.design)
-                    self.current_run_package = None
-                    save_design(self.design, self.design_path)
                 _remove_replaced_ingredient_file(original_entry, staged_copy, active_project.segment1_dir, keep_paths={source_path})
                 return {
                     "status": "baked",
@@ -1725,7 +1690,7 @@ class DashboardController:
                     "message": "Fixed audio clip was committed by the local companion backend.",
                 }
 
-            return self.jobs.start("stimulus_bake", _commit_fixed_audio)
+            return self.jobs.start("stimulus_bake", _commit_fixed_audio, progress=True)
 
         if recipe_kind == "imported_audio" and original_entry is not None:
             original_audio = original_entry[1]
@@ -1741,7 +1706,7 @@ class DashboardController:
                 if not _trajectory_snapshots_equivalent(getattr(original_audio, "trajectory_snapshot", {}), proposed_snapshot):
                     raise ValueError("This legacy looming import has no retained dry source. Re-upload the source audio before changing trajectory or acoustic settings.")
 
-                def _metadata_only_remake() -> dict[str, Any]:
+                def _metadata_only_remake(progress: JobProgress) -> dict[str, Any]:
                     source = AudioFileSpec(**asdict(original_audio))
                     source.label = label
                     source.display_color_hex = display_color_hex or _source_color_hex(source.tone_type)
@@ -1749,28 +1714,30 @@ class DashboardController:
                     _replace_stimulus_source(commit_design, source, "imported_audio", original_label=original_label)
                     _propagate_source_label_rename(commit_design, original_label, label)
                     with self._lock:
-                        active_project = self._ensure_project_context(self.design)
-                        _record_ingredient_file(
-                            active_project,
-                            Path(source.path),
-                            label=label,
-                            source_kind="imported_audio",
-                            trajectory_snapshot=source.trajectory_snapshot,
-                            motion_mode="looming",
-                            provenance={
-                                "display_color_hex": source.display_color_hex,
-                                "source_input_path": "",
-                                "action": "remake",
-                                "original_label": original_label,
-                                "metadata_only": True,
-                            },
-                            replace_label=original_label,
-                        )
-                        self.design = commit_design
-                        _clear_downstream_segment_outputs(active_project, from_segment=1)
-                        report = _write_segment_validation_report(active_project, self.design)
-                        self.current_run_package = None
-                        save_design(self.design, self.design_path)
+                        require_current_source()
+                        with progress.commit():
+                            active_project = self._ensure_project_context(self.design)
+                            _record_ingredient_file(
+                                active_project,
+                                Path(source.path),
+                                label=label,
+                                source_kind="imported_audio",
+                                trajectory_snapshot=source.trajectory_snapshot,
+                                motion_mode="looming",
+                                provenance={
+                                    "display_color_hex": source.display_color_hex,
+                                    "source_input_path": "",
+                                    "action": "remake",
+                                    "original_label": original_label,
+                                    "metadata_only": True,
+                                },
+                                replace_label=original_label,
+                            )
+                            self.design = commit_design
+                            _clear_downstream_segment_outputs(active_project, from_segment=1)
+                            report = _write_segment_validation_report(active_project, self.design)
+                            self.current_run_package = None
+                            save_design(self.design, self.design_path)
                     return {
                         "status": "baked",
                         "source_kind": "imported_audio",
@@ -1782,7 +1749,7 @@ class DashboardController:
                         "metadata_only": True,
                     }
 
-                return self.jobs.start("stimulus_bake", _metadata_only_remake)
+                return self.jobs.start("stimulus_bake", _metadata_only_remake, progress=True)
 
         bake_design, source_kind, source_payload = _design_for_bake_recipe(design, recipe, label)
         trajectory_snapshot = _stimulus_trajectory_snapshot(
@@ -1795,7 +1762,8 @@ class DashboardController:
         seed = int(design.protocol.random_seed or 20250604)
         ingredient_dir = project.segment1_dir
 
-        def _bake() -> dict[str, Any]:
+        def _bake(progress: JobProgress) -> dict[str, Any]:
+            progress(0, 1, "Rendering stimulus")
             _ensure_dir(ingredient_dir)
             staging_dir = ingredient_dir / ".staging" / uuid.uuid4().hex
             _ensure_dir(staging_dir)
@@ -1806,63 +1774,66 @@ class DashboardController:
                     Path(_filesystem_path(design_path)),
                     Path(_filesystem_path(staging_dir)),
                     seed=seed,
-                    engine="python-sofa-reference",
+                    engine="auto",
                     include_tactile=False,
                 )
+                if result.exit_code != 0:
+                    raise RuntimeError(f"Renderer failed for {label}; no outputs were published.")
                 raw_wav_path = _baked_wav_path(result, label)
                 if raw_wav_path is None or not _path_exists(raw_wav_path):
                     raise RuntimeError(f"Bake did not create a WAV for {label}.")
-                wav_path = _materialize_ingredient_audio_file(raw_wav_path, ingredient_dir, label, motion_mode="looming")
-                manifest_path = _copy_bake_sidecar(result.manifest_path, ingredient_dir, label, "render_manifest")
-                qc_path = _copy_bake_sidecar(result.qc_path, ingredient_dir, label, "render_qc")
-                _rewrite_render_manifest_wav_path(manifest_path, old_path=raw_wav_path, new_path=wav_path)
+                with self._lock:
+                    require_current_source()
+                    with progress.commit():
+                        wav_path = _materialize_ingredient_audio_file(raw_wav_path, ingredient_dir, label, motion_mode="looming")
+                        manifest_path = _copy_bake_sidecar(result.manifest_path, ingredient_dir, label, "render_manifest")
+                        qc_path = _copy_bake_sidecar(result.qc_path, ingredient_dir, label, "render_qc")
+                        _rewrite_render_manifest_wav_path(manifest_path, old_path=raw_wav_path, new_path=wav_path)
+                        commit_design = _copy_design(design)
+                        active_project = self._ensure_project_context(self.design)
+                        _record_ingredient_file(
+                            active_project,
+                            wav_path,
+                            label=label,
+                            source_kind=source_kind,
+                            trajectory_snapshot=trajectory_snapshot,
+                            motion_mode="looming",
+                            provenance={
+                                "loudness_policy": loudness_policy_for_design(bake_design),
+                                "display_color_hex": display_color_hex,
+                                "source_input_path": str(source_payload.get("source_input_path") or ""),
+                                "action": action,
+                                "original_label": original_label,
+                            },
+                            replace_label=original_label if action == "remake" else "",
+                        )
+                        if source_kind == "generated_noise":
+                            source_payload["prebaked_path"] = str(wav_path)
+                            source = NoiseDefinition(**source_payload)
+                            saved_source = asdict(source)
+                        else:
+                            source = AudioFileSpec(
+                                label=label,
+                                path=str(wav_path),
+                                target_duration_s=float(source_payload.get("target_duration_s", design.trajectory.total_duration_s)),
+                                render_mode="spatialize",
+                                tone_type=str(source_payload.get("tone_type") or CUSTOM_AUDIO_NOISE_TYPE),
+                                gain=1.0,
+                                motion_mode="looming",
+                                trajectory_snapshot=trajectory_snapshot,
+                                display_color_hex=display_color_hex or _source_color_hex(source_payload.get("tone_type") or CUSTOM_AUDIO_NOISE_TYPE),
+                                source_input_path=str(source_payload.get("source_input_path") or ""),
+                            )
+                            saved_source = asdict(source)
+                        _replace_stimulus_source(commit_design, source, source_kind, original_label=original_label if action == "remake" else "")
+                        _propagate_source_label_rename(commit_design, original_label, label)
+                        self.design = commit_design
+                        _clear_downstream_segment_outputs(active_project, from_segment=1)
+                        report = _write_segment_validation_report(active_project, self.design)
+                        self.current_run_package = None
+                        save_design(self.design, self.design_path)
             finally:
                 _remove_tree(staging_dir)
-
-            commit_design = _copy_design(design)
-            with self._lock:
-                active_project = self._ensure_project_context(self.design)
-                _record_ingredient_file(
-                    active_project,
-                    wav_path,
-                    label=label,
-                    source_kind=source_kind,
-                    trajectory_snapshot=trajectory_snapshot,
-                    motion_mode="looming",
-                    provenance={
-                        "loudness_policy": loudness_policy_for_design(bake_design),
-                        "display_color_hex": display_color_hex,
-                        "source_input_path": str(source_payload.get("source_input_path") or ""),
-                        "action": action,
-                        "original_label": original_label,
-                    },
-                    replace_label=original_label if action == "remake" else "",
-                )
-                if source_kind == "generated_noise":
-                    source_payload["prebaked_path"] = str(wav_path)
-                    source = NoiseDefinition(**source_payload)
-                    saved_source = asdict(source)
-                else:
-                    source = AudioFileSpec(
-                        label=label,
-                        path=str(wav_path),
-                        target_duration_s=float(source_payload.get("target_duration_s", design.trajectory.total_duration_s)),
-                        render_mode="spatialize",
-                        tone_type=str(source_payload.get("tone_type") or CUSTOM_AUDIO_NOISE_TYPE),
-                        gain=1.0,
-                        motion_mode="looming",
-                        trajectory_snapshot=trajectory_snapshot,
-                        display_color_hex=display_color_hex or _source_color_hex(source_payload.get("tone_type") or CUSTOM_AUDIO_NOISE_TYPE),
-                        source_input_path=str(source_payload.get("source_input_path") or ""),
-                    )
-                    saved_source = asdict(source)
-                _replace_stimulus_source(commit_design, source, source_kind, original_label=original_label if action == "remake" else "")
-                _propagate_source_label_rename(commit_design, original_label, label)
-                self.design = commit_design
-                _clear_downstream_segment_outputs(active_project, from_segment=1)
-                report = _write_segment_validation_report(active_project, self.design)
-                self.current_run_package = None
-                save_design(self.design, self.design_path)
             _remove_replaced_ingredient_file(original_entry, wav_path, active_project.segment1_dir, keep_paths={Path(str(source_payload.get("source_input_path") or "."))})
 
             return {
@@ -1880,7 +1851,7 @@ class DashboardController:
                 "message": "Stimulus was baked by the local companion backend; no online upload was performed.",
             }
 
-        return self.jobs.start("stimulus_bake", _bake)
+        return self.jobs.start("stimulus_bake", _bake, progress=True)
 
     def prepare_session(
         self,
@@ -3675,7 +3646,9 @@ def _segment_rebuild_lock(root: Path) -> threading.Lock:
         return _SEGMENT_REBUILD_LOCKS.setdefault(key, threading.Lock())
 
 
-def _transactional_segment_rebuild(root: Path, build: Callable[[], dict[str, Any]]) -> dict[str, Any]:
+def _transactional_segment_rebuild(
+    root: Path, build: Callable[[], dict[str, Any]], *, publish: Callable[[], None] | None = None,
+) -> dict[str, Any]:
     """Restore the last complete segment folder when a rebuild does not publish."""
 
     root = Path(root)
@@ -3687,6 +3660,8 @@ def _transactional_segment_rebuild(root: Path, build: Callable[[], dict[str, Any
             os.replace(_filesystem_path(root), _filesystem_path(backup_root))
         try:
             result = build()
+            if publish is not None:
+                publish()
         except BaseException:
             _remove_tree(root)
             if had_previous and _path_exists(backup_root):
@@ -4373,9 +4348,11 @@ def _write_variant_wav_lossless(path: Path, chunks: list[dict[str, Any]], silenc
     return float(combined.shape[0] / sample_rate) if sample_rate else 0.0
 
 
-def _bake_trial_sequence_variants(design: StimulusDesign, render_dir: Path) -> dict[str, Any]:
+def _bake_trial_sequence_variants(
+    design: StimulusDesign, render_dir: Path, *, publish: Callable[[], None] | None = None,
+) -> dict[str, Any]:
     root = _trial_sequence_bake_root(render_dir)
-    return _transactional_segment_rebuild(root, lambda: _build_trial_sequence_variants(design, render_dir))
+    return _transactional_segment_rebuild(root, lambda: _build_trial_sequence_variants(design, render_dir), publish=publish)
 
 
 def _build_trial_sequence_variants(design: StimulusDesign, render_dir: Path) -> dict[str, Any]:
@@ -6415,9 +6392,11 @@ def _validate_trial_sequence_variant(variant: dict[str, Any]) -> None:
             raise ValueError(f"Segment 2 variant duration changed after it was registered: {source_path.name}")
 
 
-def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -> dict[str, Any]:
+def _bake_audio_tactile_trial_files(
+    design: StimulusDesign, render_dir: Path, *, publish: Callable[[], None] | None = None,
+) -> dict[str, Any]:
     root = _baseline_tactile_bake_root(render_dir)
-    return _transactional_segment_rebuild(root, lambda: _build_audio_tactile_trial_files(design, render_dir))
+    return _transactional_segment_rebuild(root, lambda: _build_audio_tactile_trial_files(design, render_dir), publish=publish)
 
 
 def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -> dict[str, Any]:
@@ -7173,9 +7152,11 @@ def _trial_pool_row_from_record(
     }
 
 
-def _bake_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recipe: dict[str, Any]) -> dict[str, Any]:
+def _bake_trial_repetition_pool(
+    design: StimulusDesign, render_dir: Path, recipe: dict[str, Any], *, publish: Callable[[], None] | None = None,
+) -> dict[str, Any]:
     root = _trial_pool_root(render_dir)
-    return _transactional_segment_rebuild(root, lambda: _build_trial_repetition_pool(design, render_dir, recipe))
+    return _transactional_segment_rebuild(root, lambda: _build_trial_repetition_pool(design, render_dir, recipe), publish=publish)
 
 
 def _build_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recipe: dict[str, Any]) -> dict[str, Any]:
@@ -7724,11 +7705,13 @@ def _bake_block_csv_preview(
     recipe: dict[str, Any],
     *,
     progress: Callable[[int, int, str], None] | None = None,
+    publish: Callable[[], None] | None = None,
 ) -> dict[str, Any]:
     root = _block_csv_preview_root(render_dir)
     return _transactional_segment_rebuild(
         root,
         lambda: _build_block_csv_preview(design, render_dir, recipe, progress=progress),
+        publish=publish,
     )
 
 
