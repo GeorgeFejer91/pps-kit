@@ -1,12 +1,14 @@
 //! Platform output reservation for the native PPS Runner.
 //!
-//! This crate owns CPAL objects on one named thread and can only open a
-//! persistent, F32, silence-producing output stream. It deliberately has no
-//! experiment-media, arming, Runner-state, Tauri, transport, filesystem, or
-//! serialization surface.
+//! This crate owns CPAL objects on one named thread. Output is reserved in
+//! silence; native callers can then bind a validated immutable PPS playback
+//! plan. Preparing media never starts it. The experiment authority still owns
+//! arming, state, response/results, paths, and qualification; none is inferred
+//! from an open device or a submitted software frame.
 
 mod contract;
 mod cpal_backend;
+mod playback;
 mod service;
 
 pub use contract::{
@@ -16,5 +18,9 @@ pub use contract::{
     OutputServicePhase, OutputServiceStatus, MAXIMUM_CALLBACK_FRAMES, MAXIMUM_DEVICE_NAME_BYTES,
     MAXIMUM_F32_CONFIGS_PER_DEVICE, MAXIMUM_OUTPUT_CHANNELS, MAXIMUM_OUTPUT_DEVICES,
     MAXIMUM_WARMUP_TIMEOUT,
+};
+pub use playback::{
+    NativePlaybackRecord, PlaybackCancellation, PlaybackControlError, PlaybackControlReceipt,
+    PlaybackFault, PlaybackRecordKind, PlaybackStatus, PLAYBACK_EVENT_CAPACITY,
 };
 pub use service::CpalOutputService;

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use super::{
     OutputFence, PreparedPlaybackPlan, ResolvedOutputRouteKind, RtEventFence, RtScheduledEvent,
     MAXIMUM_METADATA_EVENTS_PER_CALLBACK, MAXIMUM_OUTPUT_CALLBACK_FRAMES,
@@ -165,7 +167,7 @@ pub struct RenderOutcome {
 /// engine away from that callback, and drop it on the non-real-time owner
 /// thread so reference-count or allocation teardown never runs in the callback.
 pub struct RenderEngine {
-    plan: PreparedPlaybackPlan,
+    plan: Arc<PreparedPlaybackPlan>,
     state: RenderState,
     fault: Option<RenderIntegrityFault>,
     cursor_frames: u64,
@@ -177,6 +179,12 @@ pub struct RenderEngine {
 
 impl RenderEngine {
     pub fn new(plan: PreparedPlaybackPlan) -> Self {
+        Self::from_shared_plan(Arc::new(plan))
+    }
+
+    /// The platform owner retains another reference until the callback is
+    /// quiescent, so retiring a callback cannot free its media or schedule.
+    pub fn from_shared_plan(plan: Arc<PreparedPlaybackPlan>) -> Self {
         Self {
             plan,
             state: RenderState::Prepared,

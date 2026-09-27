@@ -8,3 +8,9 @@ rust-version.workspace = true
 
 [dependencies]
 cpal.workspace = true
+pps-runner-audio = { path = "../pps-runner-audio" }
+rtrb = "=0.4.0"
+
+[dev-dependencies]
+hound.workspace = true
+sha2.workspace = true

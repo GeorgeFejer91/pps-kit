@@ -1,4 +1,9 @@
-use std::{sync::Arc, time::Duration};
+use std::{
+    sync::Arc,
+    time::{Duration, Instant},
+};
+
+use pps_runner_audio::{OutputFence, PreparedPlaybackPlan, RenderControl};
 
 use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
@@ -7,11 +12,13 @@ use cpal::{
 
 use crate::{
     contract::{OutputBufferSelection, OutputBufferSupport, OutputFaultKind},
+    playback::PlaybackOwner,
     service::{
         BackendConfig, BackendDevice, BackendEnumeration, BackendFailure, CallbackSignals,
         OutputBackend, SelectionKey,
     },
-    OutputServiceErrorCode, MAXIMUM_F32_CONFIGS_PER_DEVICE, MAXIMUM_OUTPUT_CHANNELS,
+    NativePlaybackRecord, OutputServiceErrorCode, PlaybackCancellation, PlaybackControlReceipt,
+    PlaybackStatus, MAXIMUM_F32_CONFIGS_PER_DEVICE, MAXIMUM_OUTPUT_CHANNELS,
     MAXIMUM_OUTPUT_DEVICES,
 };
 
@@ -35,6 +42,8 @@ pub(crate) struct CpalBackend {
     host: cpal::Host,
     devices: Vec<RetainedCpalDevice>,
     stream: Option<cpal::Stream>,
+    selection: Option<(CpalSelectionKey, crate::ExactOutputSelection)>,
+    playback: Option<PlaybackOwner>,
 }
 
 impl CpalBackend {
@@ -43,6 +52,8 @@ impl CpalBackend {
             host: cpal::default_host(),
             devices: Vec::new(),
             stream: None,
+            selection: None,
+            playback: None,
         })
     }
 }
@@ -196,6 +207,7 @@ impl OutputBackend for CpalBackend {
                 )
             })?;
         self.stream = Some(stream);
+        self.selection = Some((*key, selection.clone()));
         Ok(())
     }
 
@@ -215,7 +227,153 @@ impl OutputBackend for CpalBackend {
 
     fn release(&mut self) -> Result<(), BackendFailure> {
         self.stream = None;
+        if self
+            .playback
+            .as_ref()
+            .is_some_and(|playback| !playback.status().callback_retired)
+        {
+            return Err(BackendFailure::new(
+                OutputFaultKind::StreamReleaseFailed,
+                OutputServiceErrorCode::StreamReleaseFailed,
+                "The native playback callback has not retired.",
+            ));
+        }
+        self.playback = None;
+        self.selection = None;
         Ok(())
+    }
+
+    fn prepare_playback(
+        &mut self,
+        plan: Arc<PreparedPlaybackPlan>,
+        signals: Arc<CallbackSignals>,
+    ) -> Result<PlaybackStatus, BackendFailure> {
+        let (key, selection) = self
+            .selection
+            .clone()
+            .ok_or_else(BackendFailure::contract)?;
+        if self.playback.is_some() {
+            return Err(BackendFailure::new(
+                OutputFaultKind::BackendContractViolation,
+                OutputServiceErrorCode::AlreadyReserved,
+                "Release prepared playback before binding a different plan.",
+            ));
+        }
+        if plan.route().output_channels() != selection.channels()
+            || plan.media().sample_rate_hz() != selection.sample_rate_hz()
+        {
+            return Err(BackendFailure::new(
+                OutputFaultKind::BackendContractViolation,
+                OutputServiceErrorCode::ExactConfigMismatch,
+                "Prepared media must match the exact reserved output rate and channel route.",
+            ));
+        }
+        self.release()?;
+        let device = &self
+            .devices
+            .get(key.device_index)
+            .ok_or_else(BackendFailure::contract)?
+            .device;
+        let config = StreamConfig {
+            channels: selection.channels(),
+            sample_rate: selection.sample_rate_hz(),
+            buffer_size: match selection.buffer() {
+                OutputBufferSelection::Default => BufferSize::Default,
+                OutputBufferSelection::Fixed(frames) => BufferSize::Fixed(frames),
+            },
+        };
+        let (owner, mut callback) = PlaybackOwner::new(plan);
+        let callback_signals = Arc::clone(&signals);
+        let stream = device.build_output_stream(
+            config,
+            move |samples: &mut [f32], info: &cpal::OutputCallbackInfo| {
+                let observed_at = Instant::now();
+                if callback.render(samples, observed_at, Some(info.timestamp())) {
+                    callback_signals.record_callback_fault();
+                }
+                callback_signals.record_callback();
+            },
+            move |_| signals.record_callback_fault(),
+            Some(Duration::from_secs(2)),
+        );
+        // Retain the plan and queue storage even if a driver returns an error.
+        // Stream retirement is checked before the owner releases these values.
+        self.playback = Some(owner);
+        self.selection = Some((key, selection));
+        self.stream = Some(stream.map_err(|_| {
+            BackendFailure::new(
+                OutputFaultKind::StreamBuildFailed,
+                OutputServiceErrorCode::StreamBuildFailed,
+                "The native prepared-media stream could not be created.",
+            )
+        })?);
+        self.play_silence()?;
+        self.playback_status().ok_or_else(BackendFailure::contract)
+    }
+
+    fn playback_status(&self) -> Option<PlaybackStatus> {
+        self.playback.as_ref().map(PlaybackOwner::status)
+    }
+
+    fn playback_control(
+        &mut self,
+        fence: &OutputFence,
+        control: RenderControl,
+    ) -> Result<PlaybackControlReceipt, BackendFailure> {
+        self.playback
+            .as_mut()
+            .ok_or_else(BackendFailure::contract)?
+            .control(fence, control)
+            .map_err(|error| {
+                BackendFailure::new(
+                    OutputFaultKind::BackendContractViolation,
+                    match error {
+                        crate::PlaybackControlError::Busy => OutputServiceErrorCode::QueueFull,
+                        crate::PlaybackControlError::SequenceExhausted => {
+                            OutputServiceErrorCode::GenerationExhausted
+                        }
+                        _ => OutputServiceErrorCode::StaleReservation,
+                    },
+                    "The native playback control was not admitted.",
+                )
+            })
+    }
+
+    fn playback_cancellation(
+        &self,
+        fence: &OutputFence,
+    ) -> Result<PlaybackCancellation, BackendFailure> {
+        let playback = self
+            .playback
+            .as_ref()
+            .ok_or_else(BackendFailure::contract)?;
+        if playback.fence() != fence {
+            return Err(BackendFailure::contract());
+        }
+        Ok(playback.cancellation())
+    }
+
+    fn drain_playback(
+        &mut self,
+        maximum: usize,
+    ) -> Result<Vec<NativePlaybackRecord>, BackendFailure> {
+        Ok(self
+            .playback
+            .as_mut()
+            .ok_or_else(BackendFailure::contract)?
+            .drain(maximum))
+    }
+}
+
+impl Drop for CpalBackend {
+    fn drop(&mut self) {
+        if self.release().is_err() {
+            // One bounded retained plan/ring per quarantined output service.
+            // A nonconforming driver must not free its callback storage on RT.
+            if let Some(playback) = self.playback.take() {
+                std::mem::forget(playback);
+            }
+        }
     }
 }
 

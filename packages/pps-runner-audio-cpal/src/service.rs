@@ -18,7 +18,9 @@ use crate::{
         MAXIMUM_F32_CONFIGS_PER_DEVICE, MAXIMUM_OUTPUT_CHANNELS, MAXIMUM_OUTPUT_DEVICES,
     },
     cpal_backend::CpalBackend,
+    NativePlaybackRecord, PlaybackCancellation, PlaybackControlReceipt, PlaybackStatus,
 };
+use pps_runner_audio::{OutputFence, PreparedPlaybackPlan, RenderControl};
 
 const NORMAL_COMMAND_CAPACITY: usize = 8;
 const SAFETY_COMMAND_CAPACITY: usize = 4;
@@ -102,6 +104,36 @@ pub(crate) trait OutputBackend: 'static {
     fn play_silence(&mut self) -> Result<(), BackendFailure>;
 
     fn release(&mut self) -> Result<(), BackendFailure>;
+
+    fn prepare_playback(
+        &mut self,
+        _plan: Arc<PreparedPlaybackPlan>,
+        _signals: Arc<CallbackSignals>,
+    ) -> Result<PlaybackStatus, BackendFailure> {
+        Err(BackendFailure::contract())
+    }
+    fn playback_status(&self) -> Option<PlaybackStatus> {
+        None
+    }
+    fn playback_control(
+        &mut self,
+        _fence: &OutputFence,
+        _control: RenderControl,
+    ) -> Result<PlaybackControlReceipt, BackendFailure> {
+        Err(BackendFailure::contract())
+    }
+    fn playback_cancellation(
+        &self,
+        _fence: &OutputFence,
+    ) -> Result<PlaybackCancellation, BackendFailure> {
+        Err(BackendFailure::contract())
+    }
+    fn drain_playback(
+        &mut self,
+        _maximum: usize,
+    ) -> Result<Vec<NativePlaybackRecord>, BackendFailure> {
+        Err(BackendFailure::contract())
+    }
 }
 
 pub(crate) struct CallbackSignals {
@@ -110,6 +142,9 @@ pub(crate) struct CallbackSignals {
 }
 
 impl CallbackSignals {
+    pub(crate) fn record_callback(&self) {
+        saturating_increment(&self.callback_count);
+    }
     fn new() -> Self {
         Self {
             callback_count: AtomicU32::new(0),
@@ -198,6 +233,7 @@ struct ActiveReservation {
     generation: u64,
     signals: Arc<CallbackSignals>,
     published: bool,
+    warmup_timeout: Duration,
 }
 
 struct ReservationTransfer {
@@ -470,6 +506,7 @@ impl<B: OutputBackend> WorkerState<B> {
             generation: next_generation,
             signals: Arc::clone(&signals),
             published: false,
+            warmup_timeout: selection.warmup_timeout(),
         };
         if transfer.is_cancelled_or_expired(Instant::now()) {
             let _ = self.discard_candidate(candidate);
@@ -660,6 +697,122 @@ impl<B: OutputBackend> WorkerState<B> {
         Ok(())
     }
 
+    fn require_reservation(
+        &self,
+        generation: u64,
+    ) -> Result<&ActiveReservation, OutputServiceError> {
+        self.reservation
+            .as_ref()
+            .filter(|active| active.published && active.generation == generation)
+            .ok_or_else(stale_reservation)
+    }
+
+    fn prepare_playback(
+        &mut self,
+        generation: u64,
+        plan: Arc<PreparedPlaybackPlan>,
+        shutdown: &AtomicBool,
+    ) -> Result<PlaybackStatus, OutputServiceError> {
+        let timeout = self.require_reservation(generation)?.warmup_timeout;
+        let signals = Arc::new(CallbackSignals::new());
+        self.require_reservation(generation)?;
+        if let Err(failure) = self.backend()?.prepare_playback(plan, Arc::clone(&signals)) {
+            if let Some(active) = self.reservation.as_mut() {
+                active.signals = signals;
+            }
+            self.record_fault(failure.fault_kind);
+            return Err(failure.error);
+        }
+        self.reservation
+            .as_mut()
+            .ok_or_else(stale_reservation)?
+            .signals = Arc::clone(&signals);
+        let deadline = Instant::now() + timeout;
+        loop {
+            if shutdown.load(Ordering::Acquire) {
+                let _ = self.release(generation);
+                return Err(service_shutting_down());
+            }
+            match classify_warmup_observation(
+                signals.callback_fault_count(),
+                signals.callback_count(),
+                Instant::now(),
+                deadline,
+            ) {
+                WarmupObservation::Ready(_) => {
+                    return self
+                        .playback_status(generation)?
+                        .ok_or_else(stale_reservation)
+                }
+                WarmupObservation::Pending => thread::sleep(OWNER_POLL_INTERVAL),
+                observed => {
+                    let _ = self.release(generation);
+                    let (kind, code) = if observed == WarmupObservation::Faulted {
+                        (
+                            OutputFaultKind::CallbackFault,
+                            OutputServiceErrorCode::CallbackFault,
+                        )
+                    } else {
+                        (
+                            OutputFaultKind::WarmupTimeout,
+                            OutputServiceErrorCode::WarmupTimeout,
+                        )
+                    };
+                    self.record_fault(kind);
+                    return Err(error(
+                        code,
+                        "The prepared-media stream did not warm up silently.",
+                    ));
+                }
+            }
+        }
+    }
+
+    fn playback_status(
+        &self,
+        generation: u64,
+    ) -> Result<Option<PlaybackStatus>, OutputServiceError> {
+        self.require_reservation(generation)?;
+        Ok(self
+            .backend
+            .as_ref()
+            .and_then(OutputBackend::playback_status))
+    }
+
+    fn playback_control(
+        &mut self,
+        generation: u64,
+        fence: &OutputFence,
+        control: RenderControl,
+    ) -> Result<PlaybackControlReceipt, OutputServiceError> {
+        self.require_reservation(generation)?;
+        self.backend()?
+            .playback_control(fence, control)
+            .map_err(|failure| failure.error)
+    }
+
+    fn playback_cancellation(
+        &mut self,
+        generation: u64,
+        fence: &OutputFence,
+    ) -> Result<PlaybackCancellation, OutputServiceError> {
+        self.require_reservation(generation)?;
+        self.backend()?
+            .playback_cancellation(fence)
+            .map_err(|failure| failure.error)
+    }
+
+    fn drain_playback(
+        &mut self,
+        generation: u64,
+        maximum: usize,
+    ) -> Result<Vec<NativePlaybackRecord>, OutputServiceError> {
+        self.require_reservation(generation)?;
+        self.backend()?
+            .drain_playback(maximum)
+            .map_err(|failure| failure.error)
+    }
+
     fn refresh_callback_fault(&mut self) {
         let Some(active) = self.reservation.as_ref() else {
             return;
@@ -676,6 +829,19 @@ impl<B: OutputBackend> WorkerState<B> {
             return;
         }
         if active.signals.callback_fault_count() == 0 {
+            return;
+        }
+        if self
+            .backend
+            .as_ref()
+            .and_then(OutputBackend::playback_status)
+            .is_some()
+        {
+            // Keep bounded evidence available to its owner until explicit
+            // release. The media callback already fails closed to silence.
+            if self.last_fault.is_none() {
+                self.record_fault(OutputFaultKind::CallbackFault);
+            }
             return;
         }
         let callback_count = active.signals.callback_count();
@@ -728,7 +894,16 @@ impl<B: OutputBackend> WorkerState<B> {
         } else if self.last_fault.is_some() {
             OutputServicePhase::Faulted
         } else if self.reservation.is_some() {
-            OutputServicePhase::ReservedSilence
+            if self
+                .backend
+                .as_ref()
+                .and_then(OutputBackend::playback_status)
+                .is_some()
+            {
+                OutputServicePhase::ReservedMedia
+            } else {
+                OutputServicePhase::ReservedSilence
+            }
         } else if self.inventory.is_some() {
             OutputServicePhase::Enumerated
         } else {
@@ -761,9 +936,40 @@ enum Command {
     },
     Status(SyncSender<Result<OutputServiceStatus, OutputServiceError>>),
     Fault(SyncSender<Result<Option<OutputFault>, OutputServiceError>>),
+    PreparePlayback {
+        generation: u64,
+        plan: Arc<PreparedPlaybackPlan>,
+        reply: SyncSender<Result<PlaybackStatus, OutputServiceError>>,
+    },
+    PlaybackStatus {
+        generation: u64,
+        reply: SyncSender<Result<Option<PlaybackStatus>, OutputServiceError>>,
+    },
+    PlaybackControl {
+        generation: u64,
+        fence: OutputFence,
+        control: RenderControl,
+        reply: SyncSender<Result<PlaybackControlReceipt, OutputServiceError>>,
+    },
+    PlaybackCancellation {
+        generation: u64,
+        fence: OutputFence,
+        reply: SyncSender<Result<PlaybackCancellation, OutputServiceError>>,
+    },
+    DrainPlayback {
+        generation: u64,
+        maximum: usize,
+        reply: SyncSender<Result<Vec<NativePlaybackRecord>, OutputServiceError>>,
+    },
 }
 
 enum SafetyCommand {
+    PlaybackControl {
+        generation: u64,
+        fence: OutputFence,
+        control: RenderControl,
+        reply: SyncSender<Result<PlaybackControlReceipt, OutputServiceError>>,
+    },
     Release {
         reservation_generation: u64,
         reply: SyncSender<Result<(), OutputServiceError>>,
@@ -782,6 +988,20 @@ struct ServiceClient {
 }
 
 impl ServiceClient {
+    fn receipt_generation(
+        &self,
+        receipt: &OutputReservationReceipt,
+    ) -> Result<u64, OutputServiceError> {
+        if !Arc::ptr_eq(&self.identity, &receipt.service_identity)
+            || self.identity.id != receipt.service_identity.id
+        {
+            return Err(error(
+                OutputServiceErrorCode::ReceiptMismatch,
+                "The output reservation belongs to a different native output service.",
+            ));
+        }
+        Ok(receipt.reservation_generation())
+    }
     fn spawn<B: OutputBackend>(
         factory: impl FnOnce() -> Result<B, BackendFailure> + Send + 'static,
     ) -> Result<Arc<Self>, OutputServiceError> {
@@ -904,17 +1124,10 @@ impl ServiceClient {
     }
 
     fn release(&self, receipt: &OutputReservationReceipt) -> Result<(), OutputServiceError> {
-        if !Arc::ptr_eq(&self.identity, &receipt.service_identity)
-            || self.identity.id != receipt.service_identity.id
-        {
-            return Err(error(
-                OutputServiceErrorCode::ReceiptMismatch,
-                "The silence reservation belongs to a different output service.",
-            ));
-        }
+        let generation = self.receipt_generation(receipt)?;
         let (reply, receive) = mpsc::sync_channel(1);
         self.send_safety(SafetyCommand::Release {
-            reservation_generation: receipt.reservation_generation(),
+            reservation_generation: generation,
             reply,
         })?;
         receive_reply(receive, ORDINARY_REPLY_TIMEOUT)
@@ -966,12 +1179,97 @@ impl ServiceClient {
     }
 }
 
-/// Local, non-Tauri owner for a persistent CPAL silence stream.
+/// Local, non-Tauri owner for one exact CPAL output stream.
 pub struct CpalOutputService {
     client: Arc<ServiceClient>,
 }
 
 impl CpalOutputService {
+    /// Binds already verified PCM and schedule to an exact reservation and
+    /// warms it in silence. This never arms or starts an experiment.
+    pub fn prepare_playback(
+        &self,
+        receipt: &OutputReservationReceipt,
+        plan: Arc<PreparedPlaybackPlan>,
+    ) -> Result<PlaybackStatus, OutputServiceError> {
+        let generation = self.client.receipt_generation(receipt)?;
+        let (reply, receive) = mpsc::sync_channel(1);
+        self.client.send_normal(Command::PreparePlayback {
+            generation,
+            plan,
+            reply,
+        })?;
+        receive_reply(receive, ORDINARY_REPLY_TIMEOUT)
+    }
+
+    pub fn playback_status(
+        &self,
+        receipt: &OutputReservationReceipt,
+    ) -> Result<Option<PlaybackStatus>, OutputServiceError> {
+        let generation = self.client.receipt_generation(receipt)?;
+        let (reply, receive) = mpsc::sync_channel(1);
+        self.client
+            .send_normal(Command::PlaybackStatus { generation, reply })?;
+        receive_reply(receive, ORDINARY_REPLY_TIMEOUT)
+    }
+
+    /// A receipt acknowledges admission. Only the drained Control record
+    /// confirms what the callback applied; caller timeout has unknown outcome.
+    pub fn playback_control(
+        &self,
+        receipt: &OutputReservationReceipt,
+        fence: &OutputFence,
+        control: RenderControl,
+    ) -> Result<PlaybackControlReceipt, OutputServiceError> {
+        let generation = self.client.receipt_generation(receipt)?;
+        let (reply, receive) = mpsc::sync_channel(1);
+        if matches!(control, RenderControl::Stop | RenderControl::Abort) {
+            self.client.send_safety(SafetyCommand::PlaybackControl {
+                generation,
+                fence: fence.clone(),
+                control,
+                reply,
+            })?;
+        } else {
+            self.client.send_normal(Command::PlaybackControl {
+                generation,
+                fence: fence.clone(),
+                control,
+                reply,
+            })?;
+        }
+        receive_reply(receive, ORDINARY_REPLY_TIMEOUT)
+    }
+
+    pub fn playback_cancellation(
+        &self,
+        receipt: &OutputReservationReceipt,
+        fence: &OutputFence,
+    ) -> Result<PlaybackCancellation, OutputServiceError> {
+        let generation = self.client.receipt_generation(receipt)?;
+        let (reply, receive) = mpsc::sync_channel(1);
+        self.client.send_normal(Command::PlaybackCancellation {
+            generation,
+            fence: fence.clone(),
+            reply,
+        })?;
+        receive_reply(receive, ORDINARY_REPLY_TIMEOUT)
+    }
+
+    pub fn drain_playback(
+        &self,
+        receipt: &OutputReservationReceipt,
+        maximum: usize,
+    ) -> Result<Vec<NativePlaybackRecord>, OutputServiceError> {
+        let generation = self.client.receipt_generation(receipt)?;
+        let (reply, receive) = mpsc::sync_channel(1);
+        self.client.send_normal(Command::DrainPlayback {
+            generation,
+            maximum,
+            reply,
+        })?;
+        receive_reply(receive, ORDINARY_REPLY_TIMEOUT)
+    }
     /// Starts only the inert named owner thread. CPAL host/device access remains
     /// lazy until [`enumerate_output_devices`](Self::enumerate_output_devices).
     pub fn new() -> Result<Self, OutputServiceError> {
@@ -1136,11 +1434,55 @@ fn handle_command<B: OutputBackend>(
         Command::Fault(reply) => {
             let _ = reply.try_send(Ok(state.last_fault));
         }
+        Command::PreparePlayback {
+            generation,
+            plan,
+            reply,
+        } => {
+            let result = state.prepare_playback(generation, plan, shutdown_requested);
+            if reply.try_send(result).is_err() {
+                let _ = state.release(generation);
+            }
+        }
+        Command::PlaybackStatus { generation, reply } => {
+            let _ = reply.try_send(state.playback_status(generation));
+        }
+        Command::PlaybackControl {
+            generation,
+            fence,
+            control,
+            reply,
+        } => {
+            let _ = reply.try_send(state.playback_control(generation, &fence, control));
+        }
+        Command::PlaybackCancellation {
+            generation,
+            fence,
+            reply,
+        } => {
+            let _ = reply.try_send(state.playback_cancellation(generation, &fence));
+        }
+        Command::DrainPlayback {
+            generation,
+            maximum,
+            reply,
+        } => {
+            let _ = reply.try_send(state.drain_playback(generation, maximum));
+        }
     }
 }
 
 fn handle_safety<B: OutputBackend>(command: SafetyCommand, state: &mut WorkerState<B>) -> bool {
     match command {
+        SafetyCommand::PlaybackControl {
+            generation,
+            fence,
+            control,
+            reply,
+        } => {
+            let _ = reply.try_send(state.playback_control(generation, &fence, control));
+            false
+        }
         SafetyCommand::Release {
             reservation_generation,
             reply,

@@ -306,6 +306,7 @@ pub enum OutputServicePhase {
     Idle,
     Enumerated,
     ReservedSilence,
+    ReservedMedia,
     Faulted,
     ShuttingDown,
 }
