@@ -11,7 +11,7 @@ from run_runner_participant_ui_audit import BRIDGE
 
 
 OUTPUT_BRIDGE = """() => {
-  const state = window.outputAudit = {requests:[], hold:false, reject:false, noMatch:false};
+  const state = window.outputAudit = {requests:[], hold:false, reject:false, noMatch:false,mediaPrepared:false};
   const participant = window.participantAudit;
   participant.snapshot.run.phase='prepared';
   participant.snapshot.run.participant_capture_ready=false;
@@ -31,11 +31,11 @@ OUTPUT_BRIDGE = """() => {
     if (command === 'inspect_prepared_execution') return {inspectionScope:'schedule-only',
       timingQualification:'unqualified',executable:false,blockCount:1,trialRowCount:1,
       eventCount:2,encodedBytes:500,blocks:[{}]};
-    if (command === 'prepare_first_audio_block') return {schema:'pps-runner-prepared-audio-summary.v1',
+    if (command === 'prepare_first_audio_block') {state.mediaPrepared=true; return {schema:'pps-runner-prepared-audio-summary.v1',
       preparationScope:'pcm-and-output-plan-cache',outputQualification:'unqualified',
       executable:false,outputPlanPrepared:true,outputRoute:'canonical-three',scheduledEventCount:2,
       blockOrdinal:0,sampleRateHz:48000,sourceChannels:3,sourceChannelLayout:'binaural-left-right-tactile',
-      frames:48000,decodedBytes:576000,cacheCapacityBlocks:1,cacheByteBudget:1280*1024*1024};
+      frames:48000,decodedBytes:576000,cacheCapacityBlocks:1,cacheByteBudget:1280*1024*1024};}
     if (command === 'native_output_status') return clone(state.status);
     if (command === 'native_output_enumerate') {
       state.requests.push({command});
@@ -50,6 +50,7 @@ OUTPUT_BRIDGE = """() => {
             {configOrdinal:2,channels:state.noMatch ? 2 : 3,sampleFormat:'f32',minimumSampleRateHz:48000,maximumSampleRateHz:96000}]}]};
     }
     if (command === 'native_output_reserve_silence') {
+      if (!state.mediaPrepared) throw new Error('Synthetic native cache has been retired');
       state.requests.push({command,request:clone(args.request)});
       state.status.phase='reserved-media'; state.status.operationGeneration='2';
       state.status.reservationGeneration='7'; state.status.mediaConnected=true;
@@ -64,6 +65,7 @@ OUTPUT_BRIDGE = """() => {
       state.status.phase=command === 'native_output_disable' ? 'disabled' : 'idle';
       state.status.inventoryGeneration=null; state.status.reservationGeneration=null;
       state.status.mediaConnected=false;
+      state.mediaPrepared=false;
       return clone(state.status);
     }
     return invoke(command,args);
@@ -135,6 +137,8 @@ def main() -> int:
         assert page.locator("#participant-response").is_disabled()
         page.locator("#native-output-release").click()
         page.wait_for_function("document.querySelector('#native-output-route').options.length === 1")
+        assert listing.is_disabled(), "Release must retire the cached media summary"
+        page.locator("#prepare-first-audio-block").click()
         page.wait_for_function("!document.querySelector('#native-output-list').disabled")
         listing.click()
         page.wait_for_function("document.querySelector('#native-output-route').options.length === 2")
@@ -149,6 +153,9 @@ def main() -> int:
         page.wait_for_timeout(1200)
         assert not detail.inner_text().startswith("Prepared and silent"), "Late reservation must not restore disabled output"
         assert prepare.is_disabled() and page.locator("#native-output-release").is_disabled()
+        assert listing.is_disabled(), "Disable must require fresh media preparation"
+        page.locator("#prepare-first-audio-block").click()
+        page.wait_for_function("!document.querySelector('#native-output-list').disabled")
         page.evaluate("window.outputAudit.noMatch = true")
         listing.click()
         page.wait_for_function("document.querySelector('#native-output-detail').textContent.startsWith('No listed configuration')")
@@ -165,6 +172,7 @@ def main() -> int:
         assert sum(request["command"] == "native_output_reserve_silence" for request in requests) == 3
         assert page.locator("#participant-response").is_disabled()
         page.locator("#native-output-release").click()
+        page.locator("#prepare-first-audio-block").click()
         page.wait_for_function("!document.querySelector('#native-output-list').disabled")
         listing.click()
         page.wait_for_function("document.querySelector('#native-output-route').options.length === 2")
@@ -199,6 +207,7 @@ def main() -> int:
               "lost_ack_not_replayed":True,"changed_inventory_invalidates_choice":True,
               "resume_requires_fresh_inventory":True,
               "unknown_phase_and_missing_disarm_disabled":True,
+              "release_and_disable_retire_media_summary":True,
               "preparation_never_enables_acquisition":True}
     (output / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(f"Passed {len(cases)} rendered output layouts and native preflight control cases; {output}")

@@ -24,6 +24,7 @@ Updated: 2026-09-27. Replace at stage transitions; do not append command logs.
   native preflight commands, exact device/configuration fences and silent
   preparation. Disabling pending preparation never restores a late result;
   resumed UI needs fresh output state and an explicit device choice.
+  Release/disable retires the displayed media cache and requires audio preparation again.
   Desktop notifications stay in their owning panel. Preparation does not enable Start.
 - **Evidence:** the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md)
   identifies exact source and checks. Source, CI packages, installed behavior,

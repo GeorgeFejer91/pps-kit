@@ -116,7 +116,9 @@ requires an explicit choice, and preserves decimal generation fences. Silent
 preparation never enables Start. Disable remains available during a pending
 operation; stale replies cannot restore its UI. Suspension clears the view's
 inventory; resume reads fresh native state without replay. The Rust owner keeps
-the device/port authority. Desktop notifications remain in their owning panel
+the device/port authority. Release/disable clears the displayed media summary
+as the Rust owner retires its cache; audio preparation is required again.
+Desktop notifications remain in their owning panel
 and use the shared bounded-text helper.
 
 Preparation and these source seams do not enable execution. Native activation,

@@ -32,6 +32,10 @@ const participantResponse = bindParticipantResponse({
 });
 const nativeOutputSetup = bindNativeOutputSetup({ elements, api,
   onError: (error) => showToast(error.message, { error: true }),
+  onRetireMedia: () => {
+    renderPreparedAudio(null);
+    if (snapshot) renderSnapshot(snapshot);
+  },
 });
 const outboundActionButtons = [...document.querySelectorAll("[data-controller-action]")];
 const MAX_PENDING_NATIVE_COMMANDS = 32;

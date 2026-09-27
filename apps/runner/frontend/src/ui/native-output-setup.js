@@ -5,7 +5,7 @@ const generation = (value) => typeof value === "string" && /^(0|[1-9]\d{0,19})$/
   && BigInt(value) <= 18446744073709551615n;
 
 // One local view of the existing native preflight owner. It never enables playback.
-export function bindNativeOutputSetup({ elements, api, onError }) {
+export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia }) {
   const list = elements["native-output-list"];
   const route = elements["native-output-route"];
   const prepare = elements["native-output-prepare"];
@@ -139,14 +139,17 @@ export function bindNativeOutputSetup({ elements, api, onError }) {
     context++;
     busy = false;
     clearInventory();
+    onRetireMedia();
     void operate(() => api.releaseNativeOutput(request));
   });
   disable.addEventListener("click", async () => {
     if (disable.disabled) return;
-    const token = ++context;
+    context++;
     busy = false;
     status = null;
     clearInventory();
+    onRetireMedia();
+    const token = ++context;
     render();
     try {
       const result = await api.disableNativeOutput();
