@@ -24,18 +24,23 @@ Updated: 2026-09-27. Replace at task/stage transitions; do not append command lo
   journal. Preparation remains silent, non-executable, and unqualified.
   Stop interrupts a verified package and the demo completion command rejects
   it; native results must authorize real completion.
+  Native input and partial CSVs now reuse that same actor and journal worker.
+  The shared Rust scorer preserves the V1 response/choice/withholding rules
+  and 18-column Data_min contract. Queued input fences prevent premature
+  scoring; pauses through a trial retain interrupted evidence. Native clock
+  observations and driver predictions remain explicitly unqualified.
 - **Evidence:** use the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md).
   Source, CI packages, installed behavior, physical timing, participant results,
   and published replication are distinct gates. The existing installed
   compatibility Runner has not been rebuilt in this task.
-- **Next gate:** finish the native experiment authority with real response
-  capture, result CSVs, completion, and safe execution.
+- **Next gate:** connect native Start/controls, the participant input surface,
+  final result publication, and completion into one complete experiment path.
   The Tauri candidate remains non-executable/unqualified. Qualification requires
   observed devices and routes; software tests cannot supply physical evidence.
 - **Local constraint:** full native builds and the complete Standard tier need
   additional storage (documented working allowance: 15 GiB). Source checks and
-  CI continue; an alternate location or free space has been requested. About
-  309 MiB became available, allowing source synchronization and local formatting
+  CI continue; an alternate location or free space has been requested. Limited
+  space became available, allowing source synchronization and local formatting
   checks. Native source gates now pass on Windows, macOS, and Linux; full build
   storage and installed verification are still missing.
 

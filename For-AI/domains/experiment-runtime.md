@@ -87,15 +87,33 @@ the complete experiment adapter adopts this seam; preparation does not promote
 readiness or qualification.
 
 `event_journal.rs` is the native file owner for the existing authority event
-schema. Explicit first-block audio preflight creates one `native_events_*.partial.jsonl`
+schema and minimal response CSV. Explicit first-block audio preflight creates
+paired `native_events_*.partial.jsonl` and `native_trials_*.partial.csv`
 in the verified session directory; choosing/inspecting a package remains read-only.
 Only native receipts choose that directory. The journal has eight bounded queue
 slots, 128 records/256 KiB per batch, and a 32 MiB total budget. Admission precedes
-authority commit; the worker acknowledges a prefix only after syncing it. Write
+authority commit; the same worker acknowledges a prefix only after syncing both
+files. Rich `trial.scored` events supply CSV rows through the shared execution
+crate's V1 projection; filler/debug trials stay in rich evidence and do not
+advance the minimal dataset counter. Write
 failure or backpressure prevents further ordinary transitions and neutralizes
 output; safety still proceeds. Package replacement closes the old writer before
 another can attach. Keep files partial until real media, responses, dataset
-publication, and completion are implemented. An event journal is not a response
-CSV or evidence of physical timing. The shared reducer leaves verified
+publication, and completion are implemented. A synced partial dataset is not
+evidence of experiment completion or physical timing. The shared reducer leaves verified
 package Stop interrupted/partial and rejects `RunCompleteDemo` for that package.
 Only a future native result publication receipt may authorize real completion.
+
+`pps-runner-execution::response` owns response windows, selection, withholding,
+choice scoring, Data_min columns, and CSV encoding. Python remains the migration
+oracle. `trial_capture.rs` consumes existing native callback boundaries, not a
+second scheduler. Native input admission supplies the clock/ID/block; IPC accepts
+only bounded choice/normalized pointer content. `runner_record_response` is
+limited to the bundled local window and rejects inactive/native-unavailable
+capture. It is not a phone action or generic input forwarding. Pending input is
+registered before its timestamp and remains pending until actor processing even
+when the UI abandons its wait. Scoring uses the same selection deadline and
+waits for queued input; input loss fails closed. Pauses through a trial retain
+`trial.interrupted` evidence instead of scoring a reaction time. Start and final
+publication/completion remain gated; no installed or qualified acquisition is
+claimed by this source seam.

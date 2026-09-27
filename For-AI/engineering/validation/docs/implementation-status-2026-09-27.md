@@ -9,15 +9,15 @@ Status applies to the stated surface, not to the whole product.
 | 1 | VERIFIED: locked Core/Desktop fmt, Clippy, tests on three CI platforms | Retain gates through native execution work |
 | 2 | PARTIAL: migrated validators, fresh editable setup, native pytest scratch retention | Complete Standard tier needs additional storage |
 | 3 | PARTIAL: this compact source/package/capability record; readiness remains conservative | New native execution and measured evidence |
-| 4 | VERIFIED: centralized profile/limits/text owners; four segment jobs share completion; concise For-AI routing | Extract only seams changed by further work |
+| 4 | VERIFIED: centralized profile/limits/response/text owners; four segment jobs share completion; concise For-AI routing | Extract only seams changed by further work |
 | 5 | VERIFIED: inspected planner disclosures/JSON action and phone Pair/state/action flow | Installed UI inspection |
 | 6 | PARTIAL: actual Pretext, explicit no-fit, complete labels, narrow/enlarged text and spacing | Actual WebViews and full accessibility qualification |
 | 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full planner scheduling UI and native profile assembly |
 | 8 | VERIFIED: plan/resource preflight; staged stimulus/source/cancel fences; segment rollback | Qualify additional generation routes if selected |
-| 9 | PARTIAL: existing renderer bound to exact CPAL output; silent preparation, sole native port, fenced controls; execution actor owns the port and journals bounded callback records | Native start/response/durable results/completion and actual installed experiment; current shell remains non-executable |
-| 10 | PARTIAL: shared contracts; actual JSON → existing compatibility assembler; sample/tactile/CSV oracle passes | Native assembly/execution capability |
+| 9 | PARTIAL: exact CPAL port, bounded callback evidence, shared V1 response scorer, native input admission and partial CSVs through the existing actor/worker | Native Start/controls, participant surface, final publication/completion and actual installed experiment; shell remains non-executable |
+| 10 | PARTIAL: shared contracts; JSON → existing compatibility assembler; sample/tactile/response/CSV oracle comparisons pass | Native assembly and complete execution capability |
 | 11 | PARTIAL: same typed authority, shared action fixture, fresh state, native scopes | Real-package execution commands |
-| 12 | PARTIAL: retry fences plus one bounded native event journal, fsync-confirmed prefixes, retained partial files, callback metadata resolution and fail-closed safety | Real response/results publication and complete native execution |
+| 12 | PARTIAL: retry/input fences; one bounded worker acknowledges event/CSV prefixes after both sync; partial retention, callback metadata and fail-closed safety | Final results publication and complete native execution |
 | 13 | PARTIAL: secure hosted companion, explicit inert discovery, existing authenticated VDO route | Physical phone direct/relay/network-loss qualification |
 | 14 | PARTIAL: shared suspension/resume gate, no replay, stale callback denial, disarmed phone outputs | Physical Safari/Chrome screen lock and BFCache cases |
 | 15 | VERIFIED source policy: local setup, observer scope, participant-free public projections, fresh invitations | Physical expiry/revocation; remembered phones remain unselected |
@@ -90,6 +90,26 @@ Source and package evidence:
   for this exact source revision. They are separate deliverables and have not
   been installed here. Full native build storage and installed verification
   remain outstanding.
+
+- Native response/results source **67a32054e1d4bc85da30e391c982377921326901**:
+  [All 11 Core/Desktop/oracle/browser/optional-Quest source jobs passed](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36344673467).
+  Each desktop suite passes 133 checks. The shared scorer preserves V1's
+  inclusive 100–1300 ms policy, valid-click selection, catch/no-go withholding,
+  auditory/choice rules, metadata aliases and strict 18-column CSV encoding;
+  comparisons use the live Python policy on all three hosts. Four new desktop
+  checks cover event/CSV durable prefixes, quoting and filler indices, CSV write
+  failure, input cancellation/full-queue fences, delayed response-window
+  resolution, and interrupted trials. Native input captures its timestamp
+  after registration, before queued actor execution; client timestamps and
+  remote participant input are not accepted. Original metadata and estimated
+  callback/driver/sample clocks remain in private unqualified evidence.
+  Existing audio preflight creates paired partial event/CSV files using the
+  existing worker, with no separate file authority or scheduler. Preparation
+  does not enable Start: participant UI binding, actual controls, final result
+  publication/completion and an installed complete experiment remain pending.
+  Windows NSIS, macOS DMG and Linux deb validation packages for this exact
+  revision are still building; no installed/physical claim follows from them.
+  The fresh public audit passes all 470 files and all four routes.
 
 No participant acquisition, scientific replication effect, physical onset,
 installed application behavior, or newly qualified route is claimed here.
