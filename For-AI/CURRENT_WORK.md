@@ -1,6 +1,6 @@
 # Current work
 
-Updated: 2026-09-27. Replace at stage transitions; do not append command logs.
+Updated: 2026-09-28. Replace at stage transitions; do not append command logs.
 
 - **Approved goal:** implement the 17 [audit items](engineering/validation/docs/unification-and-critical-audit-2026-09-27.md).
   Use Ponytail and existing owners. Planner creates/previews looming stimuli
@@ -29,16 +29,17 @@ Updated: 2026-09-27. Replace at stage transitions; do not append command logs.
 - **Evidence:** the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md)
   identifies exact source and checks. Source, CI packages, installed behavior,
   physical timing, participant results and replication remain distinct gates.
-  The installed compatibility Runner has not been rebuilt in this task.
+  A local V1 Designer/compatibility Runner Full Windows package was rebuilt on
+  2026-09-28 and both installed entrypoints opened in a clean-folder smoke.
+  It is an unpublished packaging candidate, not V2 or physical qualification.
 - **Next gate:** native experiment activation and one complete installed
   experiment; extend the same owner to full profiles/multiple blocks.
   The candidate remains non-executable/unqualified until its complete adapter
   is enabled. Qualification requires observed devices/routes and calibration;
   source tests cannot supply physical evidence.
-- **Local constraint:** full native builds, installed verification and the
-  complete Standard tier need more storage (working allowance: 15 GiB).
-  Additional space or another location has been requested. Small local source,
-  rendered-browser and metadata checks continue; CI supplies native builds.
+- **Local constraint:** complete native V2 builds and the Standard tier remain
+  unrun under the 15 GiB working allowance. Local V1 packaging and installed
+  smoke succeeded with current free space; CI supplies native V2 builds.
 
 Detailed run artifacts stay in ignored validation folders. Preserve the pre-sync
 Git bundle and dirty-file backup until reconciliation is verified.
