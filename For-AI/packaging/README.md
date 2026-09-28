@@ -7,15 +7,16 @@ staging trees stay under ignored `dist/`. Nothing under `For-AI/` is installed.
 
 ## Target product
 
-- Install Designer and Runner as separate launchable Tauri/Rust applications.
-  Each application bundles its own local HTML/CSS/JavaScript GUI. Ordinary
-  authoring, execution, and result review work without GitHub Pages or a
-  Pages-hosted client connecting to a PC backend.
+- Install **Experiment Planner** (the current Designer code) and **Experiment
+  Runner** as separate launchable Tauri/Rust applications from one Full
+  installer. Each application bundles its own local HTML/CSS/JavaScript GUI.
+  Ordinary authoring, execution, and result review work without GitHub Pages
+  or a Pages-hosted client connecting to a PC backend.
 - The WebView displays state and requests typed, narrowly authorized commands.
   Rust owns privileged file operations, profile validation, generation and
   experiment execution, audio/response timing, and durable results. Retain the
   existing `.pps-profile`/prepared-experiment handoff and scientific contracts.
-- The Full installer provides both entrypoints/shortcuts and exactly one
+- The Full installer provides both named entrypoints/shortcuts and exactly one
   compatible Shared resource set. If separate app installers remain available,
   they must check the Shared version and inventory hash before reuse.
 - Pages remains a separate public information/browser surface. Optional phone
@@ -40,6 +41,9 @@ tools where their component ownership and inventory checks still apply.
 ## Stage boundary
 
 The [workflow](../WORKFLOW.md) keeps source, package, and release claims
-separate. A source build or Pages preview is not installer evidence. Do not
-replace the V1 compatibility package or advertise V2 research acquisition
-until its installed workflow, device calibration, and scientific checks pass.
+separate. A source build or Pages preview is not installer evidence. Once the
+Full installer passes a clean-path test, use that installer to reinstall both
+apps on this PC and verify both launch and the profile handoff from their
+installed paths. Preserve existing user and participant data during replacement.
+Do not advertise V2 research acquisition until its installed workflow, device
+calibration, and scientific checks pass.

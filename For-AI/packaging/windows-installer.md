@@ -7,8 +7,8 @@ plan, not a claim that the installer or Designer Tauri shell exists today.
 
 | Input | Product owner | Installer treatment |
 |---|---|---|
-| Designer Rust executable and bundled HTML | `apps/designer/` | One local application and shortcut; no remote UI dependency. |
-| Runner Rust executable and bundled HTML | `apps/runner/` | One local application and shortcut; no remote UI dependency. |
+| Planner Rust executable and bundled HTML | `apps/designer/` | Install as **Experiment Planner** with its own shortcut; no remote UI dependency. |
+| Runner Rust executable and bundled HTML | `apps/runner/` | Install as **Experiment Runner** with its own shortcut; no remote UI dependency. |
 | Shared templates, assets, configs, sample data, reviewed third-party material, docs, licenses | `packages/pps-resources/`, `third_party/`, `docs/` and root licenses | Install once under a versioned Shared layout; keep logical `assets/...` and `study_templates/...` resolution. |
 | Component definitions | `distributions/manifests/` | Extend or version the manifests for the Tauri layout; one file owner and an exact Full composition. |
 | Build and inventory logic | `For-AI/engineering/build/`, `For-AI/engineering/release/` | Reuse and adapt existing scripts instead of creating a second manifest or audit implementation. |
@@ -27,16 +27,21 @@ plan, not a claim that the installer or Designer Tauri shell exists today.
    dependencies, licenses, hashes, and installed paths. Keep private files,
    generated sessions, and all of `For-AI/` out of the payload.
 4. Build one Full Windows installer over that audited composition. It must
-   provide two separate shortcuts, support uninstall/repair without corrupting
-   Shared ownership, and reject an incompatible pre-existing Shared component.
+   provide separate **Experiment Planner** and **Experiment Runner** shortcuts,
+   support uninstall/repair without corrupting Shared ownership, and reject an
+   incompatible pre-existing Shared component.
    Record source revision, versions, component hashes, and installer hash.
 5. Test from a clean Windows install path: launch both apps; create/export a
    profile in Designer; import/prepare it in Runner; inspect local resources,
    controls, permissions, output preflight, results, and error paths. Inspect
    representative bounded text at widths, zoom, long/localized labels, and
    text-spacing overrides in the actual installed WebViews. Test offline
-   operation, then a second install/upgrade and uninstall.
-6. Treat device routes, physical timing, calibration, participant evidence,
+   operation, then a second install/upgrade and uninstall in a clean test path.
+6. Use the verified Full installer to reinstall both apps on this PC. Inspect
+   the existing installation and preserve user/participant data before any
+   replacement. Confirm the installed version and hash, both shortcuts and
+   windows, offline launch, and the Planner-to-Runner profile handoff.
+7. Treat device routes, physical timing, calibration, participant evidence,
    and published-effect replication as additional qualification gates. Only
    publish installer assets after the [release workflow](../WORKFLOW.md) and
    matching protocol are satisfied.

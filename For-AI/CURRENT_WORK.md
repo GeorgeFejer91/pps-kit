@@ -8,7 +8,9 @@ Updated: 2026-09-28. Replace at stage transitions; do not append command logs.
   them, executes experiments and records the specified data; phone controls
   use the same native authority. Scoped proposals already have approval. The
   desktop packaging target is two standalone Tauri/Rust apps with bundled HTML
-  and one Full installer; GitHub Pages does not provide their PC-connected GUI.
+  and one Full installer that adds Experiment Planner and Experiment Runner.
+  After clean-path verification, use it to reinstall both apps on this PC.
+  GitHub Pages does not provide their PC-connected GUI.
   See [the packaging plan](packaging/README.md).
 - **Domain:** [experiment runtime](domains/experiment-runtime.md), with UI and
   release handoffs. Reuse 3DTI, the 3D viewer, Segment 0–6, current schemas,
