@@ -1,6 +1,6 @@
 # PPS Interface Design Principles
 
-This is the visual and interaction-design contract for PPS desktop applets and their hosted mirrors. It converts general HCI guidance into testable rules for a dense research-software interface. It supplements, rather than replaces, the segment ownership rules in `dashboard_gui_behavior.md` and `segment_registry_contract.md`.
+This is the visual and interaction-design contract for PPS desktop applets and any intentionally shared hosted browser surfaces. It converts general HCI guidance into testable rules for a dense research-software interface. It supplements, rather than replaces, the segment ownership rules in `dashboard_gui_behavior.md` and `segment_registry_contract.md`. The installed apps bundle local HTML; the public site is not their backend connection.
 
 ## Evidence Boundary
 
@@ -27,6 +27,7 @@ The PPS implementation uses a 4 px base unit and an 8 px primary rhythm. This is
 | Consistency | Same meaning uses the same component, label pattern, size, color, and placement. | Shared tokens define control height, panel padding, radius, spacing, focus, and status styles across all applets. | No local component override without a documented semantic reason. |
 | Selection controls | A menu should preserve the spatial context of the field that opened it. | Visible single-choice selectors use the shared bounded combobox: its listbox is anchored to and exactly as wide as its trigger, with a viewport-bounded height. Native selects remain the form-state source underneath. | Opened listbox width and leading edge differ from the trigger by no more than 1 CSS px and never create viewport overflow. |
 | Typography and scanability | Reading order and text hierarchy should be obvious. | Left-align researcher forms and long text; keep labels close to controls; constrain prose widths; use stable title/label/metadata levels. | No clipped labels, ambiguous association, excessive line length, or centered body copy. |
+| Bounded text | Fit text inside the usable content box after the layout assigns outer geometry. | Grid/Flex establishes the control box; subtract padding, borders, icons, and gaps; use Pretext with the loaded font to evaluate candidate readable sizes, then let the DOM wrap or the box grow/reflow. | Long/localized labels and text-spacing overrides remain readable at relevant widths and zoom in the rendered DOM and installed Tauri WebView. |
 | Color and contrast | Do not use color alone; preserve readable contrast in all themes. | Status combines text and color; focus is visible; light/dark themes use the same semantic hierarchy. | WCAG-AA automated checks where machine-testable, plus manual light/dark review. |
 | Targets and control geometry | Controls must be large enough and separated enough to operate reliably. | Visible interactive targets are at least 24 x 24 CSS px; ordinary PPS form controls share the standard height; compact exceptions remain at least 28 px. | Browser geometry audit reports no undersized visible target or overlap. |
 | Feedback and state | Keep system status visible and local to the action. | Saved/unsaved, capability, draft/finalized, validation, and progress states appear consistently without adding generic dashboard clutter. | Mutations provide immediate visible feedback and actionable errors. |
@@ -54,13 +55,14 @@ The PPS implementation uses a 4 px base unit and an 8 px primary rhythm. This is
 Every visual/layout change must repeat this loop until the criteria pass:
 
 1. State the affected components and measurable criteria before editing.
-2. Build the deterministic shared frontend used by both the desktop package and hosted site.
+2. Build the canonical desktop frontend. When publishing a shared hosted surface, assemble it from the same allowlisted bytes and check parity.
 3. Run `python For-AI/engineering/validation/scripts/run_designer_visual_layout_audit.py` from the repository root. The audit clicks the visible workflow rail and captures every Segment 0-6 stage at multiple viewports, light/dark states, plus the Segment 0/About views; it also records DOM geometry invariants.
 4. Inspect the clean screenshots and generated contact sheet, not only the numeric report. Check hierarchy, balance, grouping, clipping, overlap, whitespace, text wrapping, and whether the intended action dominates appropriately.
 5. Correct every hard failure and any material visual defect, rebuild, and rerun the audit.
 6. Repeat visual inspection after the correction. A first-pass screenshot is evidence collection, not approval.
 7. Run functional mouse-click tests and backend/unit tests separately; visual evidence does not replace interaction or scientific validation.
 8. Keep generated screenshots and reports under ignored `artifacts/`; do not treat them as participant or scientific evidence.
+9. Before claiming packaged desktop usability, inspect the same bounded controls in the installed Tauri WebView; browser screenshots alone cannot establish installed behavior.
 
 Hard audit failures include horizontal page overflow, overlapping controls, clipped primary labels, visible targets below 24 x 24 CSS px, Segment 0 paired-control height/center mismatch above 1 px, common-meridian mismatch above 1 px, missing screenshots, or browser console/page errors.
 

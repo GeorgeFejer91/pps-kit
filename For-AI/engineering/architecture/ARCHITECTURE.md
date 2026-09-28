@@ -47,13 +47,16 @@ files exactly once.
 
 ## Frontend and Pages
 
-`apps/designer/frontend/compiled/` is the only compiled Designer UI, and
-`apps/runner/compiled/` is the canonical Tauri/companion web output. Native
-packaging consumes those product-owned bytes directly. Pages assembly copies
-the Designer plus the allowlisted Runner companion bytes into ignored staging,
-publishing the latter at `/experiment-runner/` with `website/CNAME` and never
-publishing the Tauri desktop entry. `website/` contains route wrappers and Pages
-inputs, not a second dashboard or companion source.
+`apps/designer/frontend/compiled/` is the canonical Designer UI, and
+`apps/runner/compiled/` is the canonical Runner web output. The Windows V2
+target bundles each UI in its own Tauri application with Rust native authority;
+Designer has not yet completed that migration. The installed workflow must
+operate offline and must not use GitHub Pages as a frontend to a PC backend.
+Pages is a separate public browser surface. When it intentionally mirrors UI,
+assembly copies only allowlisted product-owned bytes into ignored staging and
+never publishes Tauri desktop entrypoints, native capabilities, or private data.
+`website/` contains route wrappers and Pages inputs, not a second dashboard.
+Preserve existing public routes until a separately approved public-site change.
 
 ## Internal Boundaries
 
@@ -61,6 +64,7 @@ inputs, not a second dashboard or companion source.
 |---|---|
 | `engineering/build/` | executable build/setup |
 | `engineering/release/` | component assembly, inventories, protocols, audits |
+| `packaging/` | Windows installer composition plan and installed-path evidence gates |
 | `engineering/tests/` | automated tests, including structural/ownership tests |
 | `engineering/validation/` | software/UI/audio/hardware evidence |
 | `engineering/tooling/` | generators and maintenance utilities |

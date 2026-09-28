@@ -16,6 +16,7 @@ below, never an invented claim that a skill ran.
 | HTML/CSS controls, layout, responsive/localized text | [uncodixfy-pretext](https://github.com/GeorgeFejer91/uncodixfy-pretext) | Existing product identity, actual bounded-text measurement, rendered verification. |
 | Real browser controls/screenshots | playwright when available; otherwise existing Playwright validation tooling | Actual interaction and visual proof, not API-only checks. |
 | Candidate Rust/Tauri core, IPC, persistence, native integration | [tauri-rust-developer](https://github.com/GeorgeFejer91/tauri-rust-developer-skill) | Existing V2 code; does not authorize a broader framework migration. |
+| Standalone Windows HTML apps and installer packaging | ponytail + tauri-rust-developer + uncodixfy-pretext | Bundle the local UI; use narrow typed Rust IPC; size text inside established boxes; verify the installed WebView and package inventory. See [packaging](packaging/README.md). |
 | Remote Runner commands/authentication/state/transport | [tauri-browser-remote-control](https://github.com/GeorgeFejer91/tauri-browser-remote-control) | Typed actions through one native authority; keep routing, authorization, and timing evidence distinct. |
 | Papers, scientific methods, evidence or replication claims | consensus-mcp | Discover the configured Consensus tools first; follow its fallback/citation rules. |
 | Current technical documentation and primary-source lookup | multi-source-web-search | Load current sources when needed; ordinary code edits do not require a literature review. |
@@ -47,6 +48,12 @@ PC setup on 2026-09-27 installed these source snapshots:
 This is reproducible setup provenance, not a claim that every future machine
 has these skills. Do not upgrade application dependencies merely to match an
 upstream skill. Use pinned project versions and current primary docs.
+
+For desktop HTML work, apply both Tauri and Uncodixfy Pretext guidance. Tauri
+defines the local native/WebView trust boundary; Pretext measures bounded text
+after responsive boxes, padding, icons, and gaps are known. A Pages-hosted
+client-to-PC backend is not the desktop packaging architecture. Load the remote
+skill only for a separately scoped remote-control feature.
 
 Voice-cloning, game-development, XR, and Quest skills are not default PPS work.
 Load them only for an explicitly relevant task. `for-ai` targets new projects;

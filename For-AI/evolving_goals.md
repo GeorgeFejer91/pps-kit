@@ -31,6 +31,26 @@ Prior decisions remain searchable in [the historical ledger](archive/evolving_go
   scientific/release evidence is required before retiring compatibility paths
   or describing the candidate as acquisition-ready.
 
+## 2026-09-28 — standalone Windows desktop target
+
+- Package Designer and Runner as locally installed Tauri/Rust applications,
+  each with its own bundled HTML/CSS/JavaScript GUI. A Full Windows installer
+  installs both entrypoints and one compatible Shared resource set. The V1
+  Python packages remain compatibility candidates until the replacement meets
+  the installed and scientific gates.
+- Rust owns privileged files, experiment state, validation, timing, and native
+  integration; the WebViews use narrow typed IPC. The installed workflow runs
+  without GitHub Pages or a Pages-hosted frontend connecting to a PC backend.
+  Pages remains a separate public information/browser surface, not the
+  installed application's UI or backend transport.
+- Lay out bounded controls from the available box inward. Establish responsive
+  box geometry first, then use Pretext with the rendered font to measure text
+  within the inner content box. Prefer wrap, growth, or reflow over shrinking;
+  keep readable approved font sizes and user zoom. Verify final DOM geometry
+  and the actual Tauri WebView.
+- [Packaging guidance](packaging/README.md) owns the installer plan and evidence;
+  product assets and generated packages remain outside `For-AI/`.
+
 ## Next-work selection
 
 [CURRENT_WORK.md](CURRENT_WORK.md) records the active domain, requested outcome,

@@ -20,7 +20,7 @@ then load only its relevant references and skills. Do not read all of `For-AI/`,
 | Designer controls, layout, segment interaction, browser previews | [Design and UI](domains/design-ui.md) |
 | Stimuli, schedules, schemas, execution, response/LSL evidence, Rust/Tauri | [Experiment runtime](domains/experiment-runtime.md) |
 | Published paradigms, paper audits, replication claims, analysis, manuscript | [Scientific evidence](domains/scientific-evidence.md) |
-| Git checkpoints, tests, Pages, component ownership, installers | [Release operations](domains/release-operations.md) |
+| Git checkpoints, tests, Pages, component ownership, installers | [Release operations](domains/release-operations.md) and [packaging](packaging/README.md) |
 
 For cross-domain work, select one owning domain and read the neighboring
 handoff contract. [SKILLS.md](SKILLS.md) maps skills to tasks;
@@ -37,13 +37,18 @@ handoff contract. [SKILLS.md](SKILLS.md) maps skills to tasks;
   manifests, and scientific schemas remain stable handoffs.
 - Qualified V1 Python/PySide and candidate V2 Rust/Tauri have different evidence
   states. Compilation or demos cannot promote V2 to research acquisition.
-- Browser controls request native actions. Scientific timing, privileged
+- The V2 Windows target is two standalone Tauri applications with bundled local
+  HTML interfaces and Rust native authority. Their ordinary workflows must not
+  need GitHub Pages or a Pages-to-PC backend connection. The existing V1
+  package remains the compatibility path while this target is built and tested.
+- WebView controls request narrow native actions. Scientific timing, privileged
   storage, and native participant execution stay with their native authority.
 - Keep participant data, recordings, credentials, downloaded papers, generated
   sessions, and private paths out of tracked memory and public assets.
 - Designer `apps/designer/frontend/compiled/` and Runner
-  `apps/runner/compiled/` are canonical frontend artifacts. Pages consumes
-  those bytes; keep local and hosted-facing sources aligned at promotion.
+  `apps/runner/compiled/` are canonical frontend artifacts. Desktop packages
+  bundle their own local bytes. When a public Pages surface intentionally shares
+  UI, assemble it from the same allowlisted bytes and verify parity separately.
 - Preserve `ppskit.qzz.io`, `/`, `/documentation`, `/download`,
   `/experiment-runner/`, and the existing GitHub Pages fallback routes.
 

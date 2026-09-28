@@ -21,12 +21,13 @@ real control interaction; visual changes also require inspected rendered
 screenshots/geometry. APIs, unit tests, mocks, and compiled artifacts alone do
 not establish usability, installed behavior, physical timing, or replication.
 
-At UI promotion, rebuild the canonical compiled frontend and assemble Pages
-from its identical allowlisted bytes. Keep relative assets and local/native
-orchestration boundaries. `website/` is a wrapper/input tree, not another UI.
-Live hosted verification follows a production UI push. Preserve public routes,
-CNAME, and origin-only CORS settings described in the release domain and
-architecture. Never publish desktop Tauri privileges or participant data.
+At UI promotion, rebuild the canonical compiled frontend. Assemble Pages from
+identical allowlisted bytes when publishing a shared public UI; keep relative
+assets and local/native orchestration boundaries. `website/` is a wrapper/input
+tree, not another UI. Live hosted verification follows a production Pages push.
+Preserve public routes, CNAME, and origin-only CORS settings described in the
+release domain and architecture. Never publish desktop Tauri privileges or
+participant data. Installed desktop operation must not depend on Pages.
 
 ## Automatic agent checkpoints
 

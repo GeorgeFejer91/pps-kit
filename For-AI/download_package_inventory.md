@@ -1,7 +1,8 @@
 # Download and Component Inventory
 
 This file records the V1 Windows distribution boundary future agents must
-preserve.
+preserve. The target two-app Tauri installer has its own
+[packaging plan](packaging/README.md); it has not replaced this inventory.
 
 ## Published Downloads
 

@@ -6,7 +6,10 @@ Updated: 2026-09-28. Replace at stage transitions; do not append command logs.
   Use Ponytail and existing owners. Planner creates/previews looming stimuli
   and exports JSON ingredients/file/assembly profiles. Rust/HTML Runner consumes
   them, executes experiments and records the specified data; phone controls
-  use the same native authority. Scoped proposals already have approval.
+  use the same native authority. Scoped proposals already have approval. The
+  desktop packaging target is two standalone Tauri/Rust apps with bundled HTML
+  and one Full installer; GitHub Pages does not provide their PC-connected GUI.
+  See [the packaging plan](packaging/README.md).
 - **Domain:** [experiment runtime](domains/experiment-runtime.md), with UI and
   release handoffs. Reuse 3DTI, the 3D viewer, Segment 0–6, current schemas,
   bounded jobs, native ownership and Python/Rust oracle fixtures.
