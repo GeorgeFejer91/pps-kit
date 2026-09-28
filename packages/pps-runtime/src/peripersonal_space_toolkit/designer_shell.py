@@ -113,7 +113,7 @@ def _start_server(port: int, token: str) -> object:
 
 class ShellApi:
     def __init__(self) -> None:
-        self.window: object | None = None
+        self._window: object | None = None
 
     def open_external(self, url: str) -> bool:
         parsed = urllib.parse.urlparse(str(url))
@@ -158,14 +158,14 @@ class ShellApi:
         return self.save_profile(content_base64, suggested_name)
 
     def save_profile(self, content_base64: str, suggested_name: str) -> bool:
-        if self.window is None:
+        if self._window is None:
             return False
         import webview
 
         name = Path(str(suggested_name)).name
         if not name.endswith((".json", ".pps-profile")):
             name += ".pps-profile"
-        selected = self.window.create_file_dialog(webview.SAVE_DIALOG, save_filename=name)
+        selected = self._window.create_file_dialog(webview.SAVE_DIALOG, save_filename=name)
         if not selected:
             return False
         destination = Path(selected if isinstance(selected, str) else selected[0])
@@ -192,7 +192,7 @@ def _open_native(url: str) -> int:
         text_select=True,
         js_api=shell_api,
     )
-    shell_api.window = window
+    shell_api._window = window
 
     def remember() -> None:
         try:

@@ -21,6 +21,12 @@ Load Tauri/Rust when changing that native boundary; add remote-control guidance
 for authorization, transport, or state sync. [SKILLS.md](../SKILLS.md) records
 sources and availability handling.
 
+The native Designer's `ShellApi` exposes methods to pywebview; keep its window
+reference private because pywebview recursively inspects public API fields.
+For packaged checks, open the installed `PPSDesigner.exe` window and confirm
+its local health endpoint responds. The windowed launcher writes startup errors
+to the user's Designer state directory.
+
 ## Scoped implementation and completion
 
 Trace the existing control/state/backend flow, then change one requested screen
