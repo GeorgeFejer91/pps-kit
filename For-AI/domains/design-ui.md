@@ -35,6 +35,11 @@ or segment. Preserve earlier completed segments and their ownership. Reuse
 the installed Pretext typography contract; measure touched bounded labels and
 inspect rendered DOM at relevant widths, zoom, and long-string states.
 
+In desktop HTML, Designer Segment 0–6 bodies stretch open and closed independently
+so View mode can retain the complete overview. Runner's Control, Logging, and
+Remote sections use one open body at a time, with Control open initially. Closed
+bodies are inert; reduced-motion preferences make the change immediate.
+
 Build canonical assets and exercise real controls locally. Save inspected
 screenshots under ignored `artifacts/`; check clipping, overlap, focus,
 disabled/read-only behavior, and relevant errors. Use silent isolated browser

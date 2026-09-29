@@ -1,3 +1,5 @@
+import { bindStretchAccordion } from "../../../packages/pps-resources/assets/ui/stretch-accordion.mjs";
+
 const DATABASE_NAME = "pps-designer";
 const DATABASE_VERSION = 1;
 const DRAFT_STORE = "drafts";
@@ -231,16 +233,7 @@ function initializeChrome() {
       </span>
     `;
     button.setAttribute("aria-controls", segment.id);
-    button.setAttribute("aria-expanded", "true");
-    button.setAttribute("aria-label", `Collapse ${kicker}: ${title}`);
-    button.title = `Collapse ${kicker}: ${title}`;
-    button.addEventListener("click", () => {
-      segment.classList.toggle("collapsed");
-      const collapsed = segment.classList.contains("collapsed");
-      button.setAttribute("aria-expanded", String(!collapsed));
-      button.setAttribute("aria-label", `${collapsed ? "Expand" : "Collapse"} ${kicker}: ${title}`);
-      button.title = `${collapsed ? "Expand" : "Collapse"} ${kicker}: ${title}`;
-    });
+    bindStretchAccordion(segment, heading, button, `${kicker}: ${title}`);
     heading.appendChild(button);
   }
   if (!desktop) {

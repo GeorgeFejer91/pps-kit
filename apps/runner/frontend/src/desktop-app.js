@@ -15,6 +15,7 @@ import {
 } from "./remote/websocket-session.js";
 import { renderQrCode } from "./ui/qr-code.js";
 import { initializeTextLayout } from "./ui/text-layout.js";
+import { bindStretchAccordion } from "../../../../packages/pps-resources/assets/ui/stretch-accordion.mjs";
 import { bindParticipantResponse } from "./ui/participant-response.js";
 import { bindNativeOutputSetup } from "./ui/native-output-setup.js";
 import { installBrowserLifecycle } from "./remote/browser-lifecycle.js";
@@ -957,16 +958,18 @@ async function stopAllRemoteNetworking() {
 }
 
 function bindTabs() {
-  document.querySelectorAll(".tab-button").forEach((button) => {
+  const sections = [...document.querySelectorAll(".tab-panel")];
+  for (const section of sections) {
+    const button = section.querySelector(":scope > .tab-button");
+    bindStretchAccordion(section, button, button, button.textContent.trim());
     button.addEventListener("click", () => {
-      document.querySelectorAll(".tab-button").forEach((candidate) => {
-        const active = candidate === button;
-        candidate.classList.toggle("is-active", active);
-        candidate.setAttribute("aria-selected", String(active));
-      });
-      document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === button.dataset.tab));
+      if (button.getAttribute("aria-expanded") !== "true") return;
+      for (const other of sections) {
+        const otherButton = other.querySelector(":scope > .tab-button");
+        if (otherButton !== button && otherButton.getAttribute("aria-expanded") === "true") otherButton.click();
+      }
     });
-  });
+  }
 }
 
 function bindLocalActions() {

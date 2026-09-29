@@ -24,15 +24,10 @@
         </div>
       </header>
 
-      <nav class="tabbar" aria-label="Runner sections">
-        <button class="tab-button is-active" type="button" data-tab="control" aria-selected="true">Experiment Control</button>
-        <button class="tab-button" type="button" data-tab="logging" aria-selected="false">Data Logging</button>
-        <button class="tab-button" type="button" data-tab="remote" aria-selected="false">Phone Remote</button>
-      </nav>
-
       <main>
-        <section class="tab-panel is-active" data-panel="control">
-          <div class="workspace-grid">
+        <section id="runner-control" class="tab-panel" data-panel="control" aria-labelledby="runner-control-toggle">
+          <button id="runner-control-toggle" class="tab-button" type="button" data-tab="control" aria-controls="runner-control-content" aria-expanded="true">Experiment Control</button>
+          <div id="runner-control-content" class="workspace-grid">
             <div class="workspace-main stack">
               <section class="hero-panel panel">
                 <div>
@@ -150,8 +145,9 @@
           </div>
         </section>
 
-        <section class="tab-panel" data-panel="logging">
-          <div class="workspace-grid balanced-grid">
+        <section id="runner-logging" class="tab-panel collapsed" data-panel="logging" aria-labelledby="runner-logging-toggle">
+          <button id="runner-logging-toggle" class="tab-button" type="button" data-tab="logging" aria-controls="runner-logging-content" aria-expanded="false">Data Logging</button>
+          <div id="runner-logging-content" class="workspace-grid balanced-grid">
             <section class="panel stack">
               <div class="section-heading"><div><p class="eyebrow">Acquisition</p><h2>Data Logging</h2></div><span class="badge">Target-owned</span></div>
               <div class="check-list read-only-list">
@@ -173,8 +169,9 @@
           </div>
         </section>
 
-        <section class="tab-panel" data-panel="remote">
-          <div class="workspace-grid balanced-grid">
+        <section id="runner-remote" class="tab-panel collapsed" data-panel="remote" aria-labelledby="runner-remote-toggle">
+          <button id="runner-remote-toggle" class="tab-button" type="button" data-tab="remote" aria-controls="runner-remote-content" aria-expanded="false">Phone Remote</button>
+          <div id="runner-remote-content" class="workspace-grid balanced-grid">
             <section class="panel stack">
               <div class="section-heading">
                 <div><p class="eyebrow">Explicit activation</p><h2>Phone Remote</h2></div>

@@ -48,8 +48,10 @@ def _read_compiled() -> tuple[str, str, str]:
 def _at_rule_blocks(css: str, header: str) -> list[str]:
     blocks: list[str] = []
     cursor = 0
-    while (start := css.find(header, cursor)) >= 0:
-        opening = css.find("{", start + len(header))
+    header_pattern = r"\s*".join(re.escape(part) for part in header.split())
+    while match := re.search(header_pattern, css[cursor:]):
+        start = cursor + match.start()
+        opening = css.find("{", cursor + match.end())
         assert opening >= 0
         depth = 0
         for index in range(opening, len(css)):
@@ -433,6 +435,7 @@ def test_segment_2_about_explains_all_five_noise_spectra_with_evidence_bounds() 
 def test_collapse_and_noise_choice_states_are_exposed_to_assistive_technology() -> None:
     _html, _styles, app_js, designer_main = _read_sources()
     _compiled_html, _compiled_css, compiled_js = _read_compiled()
+    accordion = (ROOT / "packages" / "pps-resources" / "assets" / "ui" / "stretch-accordion.mjs").read_text(encoding="utf-8")
 
     for contract in (
         'button.className = "segment-collapse-button"',
@@ -440,11 +443,15 @@ def test_collapse_and_noise_choice_states_are_exposed_to_assistive_technology() 
         'class="segment-collapse-arrow-accent"',
         'class="segment-collapse-arrow-main"',
         'button.setAttribute("aria-controls", segment.id)',
-        'button.setAttribute("aria-expanded", "true")',
-        'button.setAttribute("aria-expanded", String(!collapsed))',
-        'button.setAttribute("aria-label", `${collapsed ? "Expand" : "Collapse"} ${kicker}: ${title}`)',
+        'bindStretchAccordion(segment, heading, button, `${kicker}: ${title}`)',
     ):
         assert contract in designer_main
+    for contract in (
+        'button.setAttribute("aria-expanded", String(expanded))',
+        'button.setAttribute("aria-label", `${expanded ? "Collapse" : "Expand"} ${label}`)',
+        'child.inert = !expanded',
+    ):
+        assert contract in accordion
     for contract in (
         'button.setAttribute("aria-pressed", String(active))',
         'button.classList.toggle("active", active)',
@@ -467,9 +474,9 @@ def test_collapse_and_noise_choice_states_are_exposed_to_assistive_technology() 
         ".segment-collapse-button{",
         ".segment-collapse-icon{",
         ".decision-segment.collapsed .segment-collapse-icon{transform:rotate(180deg)}",
-        "@media (prefers-reduced-motion: reduce)",
     ):
         assert contract in _compiled_css
+    assert re.search(r"@media\s*\(prefers-reduced-motion:\s*reduce\)", _compiled_css)
 
 
 def test_compiled_dashboard_and_public_wrappers_share_one_cache_token() -> None:
