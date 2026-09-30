@@ -1577,6 +1577,26 @@ pub(crate) struct ExecutionOwner {
     _alive: Arc<AtomicBool>,
 }
 
+pub(crate) struct ExecutionOwnerResources {
+    state_tx: broadcast::Sender<RunnerSnapshot>,
+    mailbox_diagnostics: AuthorityMailboxDiagnostics,
+    native_output: NativeOutputAuthority,
+}
+
+impl ExecutionOwnerResources {
+    pub(crate) fn new(
+        state_tx: broadcast::Sender<RunnerSnapshot>,
+        mailbox_diagnostics: AuthorityMailboxDiagnostics,
+        native_output: NativeOutputAuthority,
+    ) -> Self {
+        Self {
+            state_tx,
+            mailbox_diagnostics,
+            native_output,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub(crate) struct NativeOutputNoticeIngress {
     mailbox: Arc<Mailbox>,
@@ -1609,9 +1629,7 @@ impl ExecutionOwner {
         epoch: u64,
         timing_tier: TimingTier,
         remote: RemoteConfig,
-        state_tx: broadcast::Sender<RunnerSnapshot>,
-        mailbox_diagnostics: AuthorityMailboxDiagnostics,
-        native_output: NativeOutputAuthority,
+        resources: ExecutionOwnerResources,
     ) -> Result<Self, String> {
         Self::start_with_lease(
             target_id,
@@ -1619,11 +1637,11 @@ impl ExecutionOwner {
             epoch,
             timing_tier,
             remote,
-            state_tx,
+            resources.state_tx,
             OwnerStartConfiguration {
                 lease_duration: DEFAULT_REMOTE_LEASE,
-                mailbox_diagnostics,
-                native_output,
+                mailbox_diagnostics: resources.mailbox_diagnostics,
+                native_output: resources.native_output,
             },
         )
     }
