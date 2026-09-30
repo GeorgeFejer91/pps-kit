@@ -20,8 +20,8 @@ use serde_json::Value;
 use tokio::sync::{broadcast, oneshot};
 
 use crate::execution_owner::{
-    AuthorityView, ExecutionOwner, LanOwnerReceipt, OwnerSubmitError, RemoteOwnerIdentity,
-    MAILBOX_CAPACITY, NORMAL_MAILBOX_CAPACITY,
+    AuthorityView, ExecutionOwner, ExecutionOwnerResources, LanOwnerReceipt, OwnerSubmitError,
+    RemoteOwnerIdentity, MAILBOX_CAPACITY, NORMAL_MAILBOX_CAPACITY,
 };
 use crate::latency_diagnostics::{
     LatencyRoute, LatencyStage, LatencyTrace, LatencyTraceGuard, NativeIngress,
@@ -382,9 +382,11 @@ impl AppRuntime {
             epoch,
             TimingTier::DesktopPreview,
             remote,
-            state_tx.clone(),
-            latency_diagnostics.authority_mailbox(),
-            NativeOutputAuthority::new(native_output.invalidator()),
+            ExecutionOwnerResources::new(
+                state_tx.clone(),
+                latency_diagnostics.authority_mailbox(),
+                NativeOutputAuthority::new(native_output.invalidator()),
+            ),
         )
         .expect("the Runner authority thread must start");
         let native_output_notice = authority.native_output_notice_ingress();
@@ -1482,18 +1484,6 @@ mod tests {
         }
     }
 
-    async fn enumerated_fake_runtime() -> (AppRuntime, Arc<FakeControl>, NativeOutputInventory) {
-        let control = Arc::new(FakeControl::default());
-        let runtime = AppRuntime::with_native_output(fake_coordinator(&control));
-        let inventory = runtime
-            .start_native_output_enumerate()
-            .unwrap()
-            .await
-            .unwrap()
-            .unwrap();
-        (runtime, control, inventory)
-    }
-
     fn fake_reserve_request(inventory: &NativeOutputInventory) -> NativeOutputReserveRequest {
         NativeOutputReserveRequest {
             policy_generation: inventory.policy_generation.clone(),
@@ -1506,6 +1496,199 @@ mod tests {
             buffer_frames: None,
             warmup_timeout_ms: 50,
         }
+    }
+
+    async fn wait_for_counter(label: &str, value: impl Fn() -> u64, expected: u64) {
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(3);
+        while value() < expected {
+            assert!(
+                tokio::time::Instant::now() < deadline,
+                "{label} did not reach {expected}; last value: {}",
+                value()
+            );
+            tokio::time::sleep(Duration::from_millis(2)).await;
+        }
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn native_output_operation_outlives_caller_cancellation_at_each_async_boundary() {
+        // Cancellation before the actor processes begin cannot strand the
+        // adapter-side single-flight guard or an actor ticket.
+        let control = Arc::new(FakeControl::default());
+        let runtime = AppRuntime::with_native_output(fake_coordinator(&control));
+        let (actor_barrier, held) = runtime.0.authority.hold_for_test().unwrap();
+        let receive = runtime.start_native_output_enumerate().unwrap();
+        drop(receive);
+        actor_barrier.wait();
+        held.await.unwrap();
+        let status = wait_for_native_output_phase(&runtime, NativeOutputPhase::Enumerated).await;
+        assert!(!status.in_flight);
+        assert!(!runtime
+            .0
+            .native_output_operation_in_flight
+            .load(Ordering::Acquire));
+
+        // Cancellation while the coordinator owns the operation still lets
+        // the detached driver finish and commit the exact actor ticket.
+        control.block_enumerate(true);
+        let receive = runtime.start_native_output_enumerate().unwrap();
+        wait_for_counter("enumerate calls", || control.enumerate_calls(), 2).await;
+        drop(receive);
+        control.block_enumerate(false);
+        wait_for_counter("enumerate completions", || control.enumerate_finished(), 2).await;
+        let status = wait_for_native_output_phase(&runtime, NativeOutputPhase::Enumerated).await;
+        assert!(!status.in_flight);
+
+        // Cancellation after native completion but before actor commit is
+        // likewise inert: the actor is deliberately held while reserve ends.
+        let inventory = runtime
+            .start_native_output_enumerate()
+            .unwrap()
+            .await
+            .unwrap()
+            .unwrap();
+        control.block_reserve(true);
+        let receive = runtime
+            .start_native_output_reserve(fake_reserve_request(&inventory))
+            .unwrap();
+        wait_for_counter("reserve calls", || control.reserve_calls(), 1).await;
+        let (actor_barrier, held) = runtime.0.authority.hold_for_test().unwrap();
+        control.block_reserve(false);
+        wait_for_counter("reserve completions", || control.reserve_finished(), 1).await;
+        drop(receive);
+        actor_barrier.wait();
+        held.await.unwrap();
+        let status =
+            wait_for_native_output_phase(&runtime, NativeOutputPhase::ReservedSilence).await;
+        assert!(!status.in_flight);
+        assert!(control
+            .driver_threads()
+            .iter()
+            .all(|name| name == "pps-native-output-coordinator"));
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn native_output_completion_saturation_invalidates_instead_of_stranding_ticket() {
+        let control = Arc::new(FakeControl::default());
+        let runtime = AppRuntime::with_native_output(fake_coordinator(&control));
+        control.block_enumerate(true);
+        let receive = runtime.start_native_output_enumerate().unwrap();
+        wait_for_counter("enumerate calls", || control.enumerate_calls(), 1).await;
+
+        let (actor_barrier, held) = runtime.0.authority.hold_for_test().unwrap();
+        let safety_entries = runtime.0.authority.fill_safety_lane_for_test();
+        assert!(safety_entries > 0);
+        control.block_enumerate(false);
+        wait_for_counter("enumerate completions", || control.enumerate_finished(), 1).await;
+        let fallback_deadline = tokio::time::Instant::now() + Duration::from_secs(3);
+        while runtime.0.native_output.observation().policy_generation == 1 {
+            assert!(
+                tokio::time::Instant::now() < fallback_deadline,
+                "completion retry exhaustion did not invalidate the coordinator"
+            );
+            tokio::time::sleep(Duration::from_millis(2)).await;
+        }
+        actor_barrier.wait();
+        held.await.unwrap();
+
+        let error = receive.await.unwrap().unwrap_err();
+        assert_eq!(error.code, "runtime_unavailable");
+        let status = wait_for_native_output_phase(&runtime, NativeOutputPhase::Idle).await;
+        assert!(!status.in_flight);
+        assert!(!status.cleanup_pending);
+        let actor_runtime = runtime.clone();
+        let actor_status = tauri::async_runtime::spawn_blocking(move || {
+            actor_runtime.0.authority.test_view().native_output_status
+        })
+        .await
+        .unwrap();
+        assert_eq!(actor_status.policy_generation, status.policy_generation);
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn part_start_is_inert_until_silence_cleanup_finishes_and_after_cleanup_failure() {
+        async fn ready_reserved_runtime(
+            fail_release: bool,
+        ) -> (AppRuntime, Arc<FakeControl>, NativeOutputReservation) {
+            let control = Arc::new(FakeControl::default());
+            let runtime = AppRuntime::with_native_output(fake_coordinator(&control));
+            runtime
+                .dispatch_local_async(Action::PackagePrepareDemo, serde_json::json!({}))
+                .await
+                .unwrap();
+            runtime
+                .dispatch_local_async(
+                    Action::SetupSubmit,
+                    serde_json::json!({
+                        "participant_code": "P001",
+                        "age": 30,
+                        "handedness": "right",
+                        "gender": "other",
+                        "name_sharing_opt_in": false,
+                        "part_labels": {"1": "A", "2": "B"}
+                    }),
+                )
+                .await
+                .unwrap();
+            let inventory = runtime
+                .start_native_output_enumerate()
+                .unwrap()
+                .await
+                .unwrap()
+                .unwrap();
+            let reservation = runtime
+                .start_native_output_reserve(fake_reserve_request(&inventory))
+                .unwrap()
+                .await
+                .unwrap()
+                .unwrap();
+            control.fail_release(fail_release);
+            control.block_release(true);
+            (runtime, control, reservation)
+        }
+
+        let (runtime, control, _) = ready_reserved_runtime(false).await;
+        runtime
+            .dispatch_local_async(Action::TargetArm, serde_json::json!({}))
+            .await
+            .unwrap();
+        let blocked = runtime
+            .dispatch_local_async(Action::PartStart, serde_json::json!({"part_number": 1}))
+            .await
+            .unwrap_err();
+        assert_eq!(blocked, "native_output_cleanup_pending");
+        assert_ne!(
+            runtime.snapshot_async().await.unwrap().run.phase,
+            RunnerPhase::Running
+        );
+        control.block_release(false);
+        wait_for_counter("release calls", || control.release_calls(), 1).await;
+        wait_for_native_output_phase(&runtime, NativeOutputPhase::Idle).await;
+        runtime
+            .dispatch_local_async(Action::PartStart, serde_json::json!({"part_number": 1}))
+            .await
+            .unwrap();
+        assert_eq!(
+            runtime.snapshot_async().await.unwrap().run.phase,
+            RunnerPhase::Running
+        );
+
+        let (runtime, control, _) = ready_reserved_runtime(true).await;
+        runtime
+            .dispatch_local_async(Action::TargetArm, serde_json::json!({}))
+            .await
+            .unwrap();
+        control.block_release(false);
+        wait_for_native_output_phase(&runtime, NativeOutputPhase::Quarantined).await;
+        let blocked = runtime
+            .dispatch_local_async(Action::PartStart, serde_json::json!({"part_number": 1}))
+            .await
+            .unwrap_err();
+        assert_eq!(blocked, "native_output_cleanup_pending");
+        assert_ne!(
+            runtime.snapshot_async().await.unwrap().run.phase,
+            RunnerPhase::Running
+        );
     }
 
     fn verified_legacy_package(
