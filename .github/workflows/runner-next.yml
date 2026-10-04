@@ -475,3 +475,98 @@ jobs:
       - name: Test, build, and lint the native Quest preview
         working-directory: apps/quest-runner
         run: ./gradlew testDebugUnitTest assembleDebug lintDebug --no-daemon
+
+  planner-windows-validation:
+    if: github.event_name != 'workflow_dispatch' || inputs.installed_artifact_run_id == ''
+    name: Planner Windows validation bundle
+    needs: [desktop-shell, browser-companion]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/designer/frontend/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - uses: dtolnay/rust-toolchain@1.88.0
+      - name: Install locked Planner frontend dependencies
+        run: npm --prefix apps/designer/frontend ci
+      - name: Build the private Python Planner worker
+        shell: pwsh
+        run: ./For-AI/engineering/build/windows/Build_PPS_Planner_Worker.ps1
+      - name: Build one host-native Planner validation installer
+        shell: pwsh
+        working-directory: apps/designer
+        run: |
+          & ./frontend/node_modules/.bin/tauri.cmd build --ci --bundles nsis `
+            --config src-tauri/tauri.planner-bundle.conf.json --no-sign
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Reject generated-source or lock drift
+        run: git diff --exit-code -- Cargo.lock apps/designer/frontend/compiled
+      - name: Stage and install the Planner validation bundle
+        shell: pwsh
+        run: |
+          $bundles = @(Get-ChildItem -LiteralPath target/release/bundle/nsis -Filter '*-setup.exe' -File)
+          if ($bundles.Count -ne 1) { throw "Expected one Planner NSIS bundle, found $($bundles.Count)." }
+          $stage = 'dist/planner-validation/windows-host-nsis'
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          $installer = Join-Path $stage $bundles[0].Name
+          Copy-Item -LiteralPath $bundles[0].FullName -Destination $installer
+          $installRoot = Join-Path $env:RUNNER_TEMP "pps-planner-install-${{ github.run_id }}-${{ github.run_attempt }}"
+          if (Test-Path -LiteralPath $installRoot) { throw 'Planner install directory is not fresh.' }
+          $process = Start-Process -FilePath $installer -ArgumentList @('/S', "/D=$installRoot") `
+            -WindowStyle Hidden -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "Planner NSIS install failed: $($process.ExitCode)." }
+          $binary = Join-Path $installRoot 'pps-experiment-planner.exe'
+          $worker = Join-Path $installRoot 'planner-worker/PPSPlannerWorker.exe'
+          foreach ($item in @($binary, $worker)) {
+            if (-not (Test-Path -LiteralPath $item -PathType Leaf)) { throw "Installed Planner file missing: $item" }
+          }
+          @(
+            'schema=pps-planner-packaging-validation.v1'
+            "commit=${{ github.sha }}"
+            'distribution_status=ci_validation_artifact_not_release'
+            'use_for_data_collection=false'
+            'signing=unsigned'
+          ) | Set-Content -Encoding ascii (Join-Path $stage 'VALIDATION_ONLY.txt')
+          "$((Get-FileHash -Algorithm SHA256 -LiteralPath $installer).Hash.ToLowerInvariant())  $($bundles[0].Name)" |
+            Set-Content -Encoding ascii (Join-Path $stage 'SHA256SUMS.txt')
+          @(
+            'schema=pps-planner-installed-inventory.v1'
+            "commit=${{ github.sha }}"
+            "binary_sha256=$((Get-FileHash -Algorithm SHA256 -LiteralPath $binary).Hash.ToLowerInvariant())"
+            "worker_sha256=$((Get-FileHash -Algorithm SHA256 -LiteralPath $worker).Hash.ToLowerInvariant())"
+            "frontend_html_sha256=$((Get-FileHash -Algorithm SHA256 -LiteralPath 'apps/designer/frontend/compiled/index.html').Hash.ToLowerInvariant())"
+          ) | Set-Content -Encoding ascii (Join-Path $stage 'INSTALL_INVENTORY.txt')
+          "PPS_INSTALLED_PLANNER=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Install pinned installed-UI audit drivers
+        run: python -m pip install --disable-pip-version-check playwright==1.61.0 pywinauto==0.6.9
+      - name: Exercise installed Planner and all seven segment shells
+        shell: pwsh
+        run: |
+          python For-AI/engineering/validation/scripts/run_installed_planner_webview_audit.py `
+            --binary $env:PPS_INSTALLED_PLANNER `
+            --output-dir artifacts/planner-installed-webview-audit `
+            --commit '${{ github.sha }}' --elevated-policy
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Retain installed Planner audit evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: planner-installed-webview-${{ github.sha }}
+          path: artifacts/planner-installed-webview-audit
+          if-no-files-found: warn
+      - name: Retain Planner validation installer and inventory
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pps-planner-validation-windows-X64-${{ github.sha }}
+          path: dist/planner-validation/windows-host-nsis
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
