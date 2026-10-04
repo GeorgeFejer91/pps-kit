@@ -374,9 +374,12 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             page.locator("#prepare-experiment-profile").click()
             choose_path_in_native_dialog(process.pid, profile_path)
             choose_path_in_native_dialog(process.pid, output_parent, folder=True)
-            expect(page.locator("#package-badge")).to_have_text("Verified", timeout=60_000)
+            expect(page.locator("#prepare-experiment-profile")).to_be_enabled(timeout=60_000)
             generated = list(output_parent.glob("CI_SYNTHETIC_*"))
-            assert len(generated) == 1 and generated[0].is_dir(), generated
+            assert len(generated) == 1 and generated[0].is_dir(), (
+                generated, page.evaluate("window.installedAuditToasts || []"),
+            )
+            expect(page.locator("#package-badge")).to_have_text("Verified", timeout=10_000)
             generated_manifest = generated[0] / "session_manifest.json"
             generated_wav = generated[0] / "blocks" / "Block_01.wav"
             generated_csv = generated[0] / "blocks" / "Block_01.csv"
