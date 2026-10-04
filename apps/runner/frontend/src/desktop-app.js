@@ -36,6 +36,7 @@ const nativeOutputSetup = bindNativeOutputSetup({ elements, api,
     renderPreparedAudio(null);
     if (snapshot) renderSnapshot(snapshot);
   },
+  onActivated: (next) => renderSnapshot(normalizedSnapshot(next)),
 });
 const outboundActionButtons = [...document.querySelectorAll("[data-controller-action]")];
 const MAX_PENDING_NATIVE_COMMANDS = 32;
@@ -132,12 +133,12 @@ function renderPreparedAudio(nextPreparation) {
     && byteBudget === 1280 * 1024 * 1024
     && decodedBytes <= byteBudget;
   preparedAudio = valid ? candidate : null;
-  nativeOutputSetup.update(snapshot, preparedAudio);
-  text("prepared-audio-status", preparedAudio ? "Prepared · output disabled" : "Not prepared");
+  nativeOutputSetup.update(snapshot, preparedAudio, preparedPlan?.blocks?.length);
+  text("prepared-audio-status", preparedAudio ? "Prepared · output not reserved" : "Not prepared");
   text(
     "prepared-audio-detail",
     preparedAudio
-      ? `Block 1 is content-bound in the one-block native PCM and renderer-plan cache: ${frames.toLocaleString()} frames at ${sampleRate.toLocaleString()} Hz, ${channels} source channels (${layout}), ${(decodedBytes / (1024 * 1024)).toFixed(2)} MiB, ${scheduledEventCount.toLocaleString()} scheduled events, proposed route ${outputRoute}. Output qualification: ${qualification}; executable: no.`
+      ? `Block 1 is content-bound in the one-block native PCM and renderer-plan cache: ${frames.toLocaleString()} frames at ${sampleRate.toLocaleString()} Hz, ${channels} source channels (${layout}), ${(decodedBytes / (1024 * 1024)).toFixed(2)} MiB, ${scheduledEventCount.toLocaleString()} scheduled events, proposed route ${outputRoute}. Output qualification: ${qualification}; preparation alone does not enable a run.`
       : preparedExecution
         ? "Prepare the first verified WAV and renderer-neutral plan in the bounded native cache. This does not open an output device, qualify a route, arm, or execute the experiment."
         : "Native PCM and output-plan preparation is unavailable until the first schedule is inspected.",
@@ -170,7 +171,7 @@ function renderPreparedExecution(nextInspection) {
   text(
     "execution-inspection-detail",
     preparedExecution
-      ? `${blockCount} block${blockCount === 1 ? "" : "s"}, ${trialCount} trial rows, and ${eventCount} sample-indexed events compiled in manifest order (${encodedBytes.toLocaleString()} encoded bytes retained natively). Scope: ${scope}; timing: ${qualification}; executable: no.`
+      ? `${blockCount} block${blockCount === 1 ? "" : "s"}, ${trialCount} trial rows, and ${eventCount} sample-indexed events compiled in manifest order (${encodedBytes.toLocaleString()} encoded bytes retained natively). Scope: ${scope}; timing: ${qualification}; inspection alone does not enable a run.`
       : preparedPlan
         ? "Compile the retained package with the Rust schedule oracle. This inspection does not arm outputs or authorize execution."
         : "Schedule inspection is unavailable until a real prepared session is selected.",
@@ -331,7 +332,7 @@ function renderSnapshot(next) {
   elements["prepare-first-audio-block"].title = api.kind === "tauri-native"
     ? "Content-bind the first verified WAV and renderer-neutral plan in the one-block native cache"
     : "Native audio preparation is available in the Tauri app";
-  nativeOutputSetup.update(next, preparedAudio);
+  nativeOutputSetup.update(next, preparedAudio, preparedPlan?.blocks?.length);
   updateInboundPolicyUi();
 
   if (inboundPrivateTarget?.nativeClaimReceipt && !next.safety?.local_armed) {

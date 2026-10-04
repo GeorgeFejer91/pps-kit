@@ -21,6 +21,7 @@
     "allow-remote-session-revoke",
     "allow-native-latency-diagnostics",
     "allow-native-output-status",
+    "allow-activate-native-execution",
     "allow-native-output-enumerate",
     "allow-native-output-reserve-silence",
     "allow-native-output-release",

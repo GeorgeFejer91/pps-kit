@@ -29,9 +29,9 @@ use crate::{
     event_journal::{JournalError, NativeEventJournal, NativeResultSeal},
     latency_diagnostics::{AuthorityMailboxDiagnostics, LatencyStage, LatencyTrace},
     native_output::{
-        NativeOutputAuthority, NativeOutputCleanupObservation, NativeOutputCommandError,
-        NativeOutputReleaseRequest, NativeOutputReserveRequest, NativeOutputStatus,
-        NativeOutputTicket,
+        NativeExecutionActivationRequest, NativeOutputAuthority, NativeOutputCleanupObservation,
+        NativeOutputCommandError, NativeOutputReleaseRequest, NativeOutputReserveRequest,
+        NativeOutputStatus, NativeOutputTicket,
     },
     native_playback::{
         NativeControlIntent, NativeOutputPreparation, NativePlaybackCompletion,
@@ -570,6 +570,11 @@ impl OwnerState {
                     && status.fault.is_none()
                     && !status.callback_retired
             })
+    }
+
+    fn native_part_start_blocked(&mut self) -> bool {
+        let output_blocked = self.native_output.part_start_blocked();
+        !self.native_start_ready() && (self.core.native_execution_ready() || output_blocked)
     }
 
     fn poll_native_playback(&mut self, pending_responses: &AtomicUsize) {
@@ -1203,8 +1208,7 @@ impl OwnerState {
         let result = (|| {
             if action == Action::PartStart
                 && self.core.snapshot().run.phase == RunnerPhase::Ready
-                && self.native_output.part_start_blocked()
-                && !self.native_start_ready()
+                && self.native_part_start_blocked()
             {
                 return Err("native_output_cleanup_pending".to_owned());
             }
@@ -1267,8 +1271,7 @@ impl OwnerState {
         (|| {
             if command.action == Action::PartStart
                 && self.core.snapshot().run.phase == RunnerPhase::Ready
-                && self.native_output.part_start_blocked()
-                && !self.native_start_ready()
+                && self.native_part_start_blocked()
             {
                 return Err(RemoteSessionError::unavailable());
             }
@@ -2180,7 +2183,65 @@ impl OwnerState {
         observation: NativeOutputCleanupObservation,
     ) -> NativeOutputStatus {
         self.native_output.observe_cleanup(observation);
-        self.native_output.status()
+        let mut status = self.native_output.status();
+        status.executable = self.core.native_execution_ready();
+        status.armed = status.executable && self.core.snapshot().safety.local_armed;
+        status.silence_only = self.native_playback.as_ref().is_none_or(|playback| {
+            playback.port.status().state != pps_runner_audio::RenderState::Playing
+        });
+        status
+    }
+
+    fn activate_native_execution(
+        &mut self,
+        observation: NativeOutputCleanupObservation,
+        request: NativeExecutionActivationRequest,
+    ) -> Result<RunnerSnapshot, NativeOutputCommandError> {
+        self.native_output.observe_cleanup(observation);
+        self.poll_event_journal();
+        self.native_output
+            .require_reservation(&request.reservation)?;
+        if !request.acknowledge_unqualified {
+            return Err(NativeOutputCommandError::new(
+                "native_execution_acknowledgement_required",
+                "Acknowledge the unqualified native run before enabling it.",
+            ));
+        }
+        if !self.native_start_ready()
+            || self.native_control.is_some()
+            || self.native_finalization.is_some()
+        {
+            return Err(NativeOutputCommandError::new("native_execution_not_prepared",
+                "Prepare the current package, native output and result journal before enabling the run."));
+        }
+        let playback = self
+            .native_playback
+            .as_ref()
+            .expect("checked native preparation");
+        if playback.source.receipt.verified_session().blocks().len() != 1 {
+            return Err(NativeOutputCommandError::new(
+                "native_execution_package_unsupported",
+                "This native adapter currently requires a complete single-block package.",
+            ));
+        }
+        let fingerprint = playback.source.receipt.verified_session().manifest_sha256();
+        let stamp = self.clock.stamp();
+        let mut candidate = self.core.clone();
+        let changed = candidate.activate_native_execution(fingerprint, stamp.clone())
+            .map_err(|_| NativeOutputCommandError::new("native_execution_scope_invalid",
+                "Submit matching participant setup and prepare the current package before enabling the run."))?;
+        if !changed {
+            return Ok(self.core.snapshot());
+        }
+        let mut event = Self::ledger_input("native.execution.activated", "local", &stamp);
+        event.payload = serde_json::json!({"packageManifestSha256": fingerprint,
+            "runGeneration": self.run_generation.to_string(), "timingQualification": "unqualified",
+            "armed": false, "playbackStarted": false});
+        self.commit_candidate(candidate, event, CommitPolicy::Ordinary, true)
+            .map_err(|_| {
+                NativeOutputCommandError::new("native_output_evidence_unavailable",
+                "Native activation could not retain its evidence; execution remains unavailable.")
+            })
     }
 
     fn begin_native_output_enumerate(
@@ -2645,6 +2706,19 @@ impl ExecutionOwner {
             AdmissionClass::Normal,
             "native_output_begin_enumerate",
             move |state| state.begin_native_output_enumerate(observation),
+        )
+        .await
+    }
+
+    pub(crate) async fn activate_native_execution(
+        &self,
+        observation: NativeOutputCleanupObservation,
+        request: NativeExecutionActivationRequest,
+    ) -> Result<Result<RunnerSnapshot, NativeOutputCommandError>, OwnerSubmitError> {
+        self.asynchronous(
+            AdmissionClass::Normal,
+            "native_execution_activate",
+            move |state| state.activate_native_execution(observation, request),
         )
         .await
     }

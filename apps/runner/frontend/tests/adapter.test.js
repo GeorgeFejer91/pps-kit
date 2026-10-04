@@ -158,7 +158,7 @@ test("native state subscriptions target the local main window and retain cleanup
   assert.equal(stopped, true);
 });
 
-test("local output preflight sends exact native fences and cannot set execution flags", async () => {
+test("local output preflight and activation send exact native fences", async () => {
   const calls = [];
   const adapter = createTauriRunnerAdapter({ invokeFn: async (...args) => { calls.push(args); } });
   await adapter.nativeOutputStatus();
@@ -169,6 +169,9 @@ test("local output preflight sends exact native fences and cannot set execution 
   await adapter.releaseNativeOutput({ policyGeneration: "8", serviceGeneration: "1", reservationGeneration: "5",
     executable: true, path: "private" });
   await adapter.disableNativeOutput();
+  await adapter.activateNativeExecution({ policyGeneration: "8", serviceGeneration: "1",
+    reservationGeneration: "9007199254740993", acknowledgeUnqualified: true,
+    qualified: true, path: "private" });
   assert.deepEqual(calls, [
     ["native_output_status", undefined],
     ["native_output_enumerate", undefined],
@@ -176,5 +179,7 @@ test("local output preflight sends exact native fences and cannot set execution 
       deviceOrdinal: 0, configOrdinal: 1, channels: 3, sampleRateHz: 48000, bufferFrames: null, warmupTimeoutMs: 3000 } }],
     ["native_output_release", { request: { policyGeneration: "8", serviceGeneration: "1", reservationGeneration: "5" } }],
     ["native_output_disable", undefined],
+    ["activate_native_execution", { request: { reservation: { policyGeneration: "8", serviceGeneration: "1",
+      reservationGeneration: "9007199254740993" }, acknowledgeUnqualified: true } }],
   ]);
 });

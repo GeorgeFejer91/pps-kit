@@ -245,8 +245,8 @@ impl RunnerCore {
 
     /// Adopt an already verified V1 prepared-session plan without importing
     /// filesystem authority into the reducer. Adoption is local/native policy,
-    /// disarms the target, and remains non-runnable until a qualified execution
-    /// adapter explicitly owns the real block scheduler and media outputs.
+    /// disarms the target, and remains non-runnable until a complete execution
+    /// adapter explicitly owns the real scheduler, media, input and result path.
     pub fn adopt_verified_package(
         &mut self,
         package: VerifiedPackageSummary,
@@ -322,6 +322,7 @@ impl RunnerCore {
         self.snapshot.safety.local_armed = false;
         self.snapshot.safety.capture_started = false;
         self.snapshot.safety.publication_ready = false;
+        self.snapshot.safety.audio_route_ready = false;
         self.package_fingerprint = Some(package.fingerprint);
         self.package_execution_ready = false;
         self.package_block_count = package.block_count;
@@ -356,12 +357,53 @@ impl RunnerCore {
         self.native_control_pending = None;
         self.package_execution_ready = false;
         self.snapshot.safety.local_armed = false;
+        self.snapshot.safety.audio_route_ready = false;
         self.bump_revision(&now);
         Ok(())
     }
 
     pub fn native_block_prepared(&self) -> bool {
         self.native_block.is_some()
+    }
+
+    /// Native owner only, after checking its current port and result journal.
+    /// Activation enables the complete single-block adapter without qualifying
+    /// physical onset, response timing or calibration. It never arms or starts.
+    pub fn activate_native_execution(
+        &mut self,
+        fingerprint: &str,
+        now: ClockStamp,
+    ) -> Result<bool, &'static str> {
+        if self.package_fingerprint.as_deref() != Some(fingerprint)
+            || self.package_block_count != 1
+            || self
+                .native_block
+                .as_ref()
+                .is_none_or(|block| block.block_ordinal != 0)
+            || !matches!(
+                self.snapshot.run.phase,
+                RunnerPhase::Prepared | RunnerPhase::Completed | RunnerPhase::Interrupted
+            )
+            || self.snapshot.safety.local_armed
+            || !self.snapshot.setup.ready
+            || self.native_control_pending.is_some()
+        {
+            return Err("native_execution_scope_invalid");
+        }
+        if self.native_execution_ready() {
+            return Ok(false);
+        }
+        self.package_execution_ready = true;
+        self.snapshot.run.phase = RunnerPhase::Prepared;
+        self.snapshot.safety.audio_route_ready = true;
+        self.snapshot.safety.publication_ready = false;
+        self.snapshot.timing_tier = TimingTier::NativeDesktopUnqualified;
+        self.bump_revision(&now);
+        Ok(true)
+    }
+
+    pub fn native_execution_ready(&self) -> bool {
+        self.package_execution_ready && self.native_block.is_some()
     }
 
     pub fn native_control_pending(&self) -> Option<Action> {
@@ -389,6 +431,7 @@ impl RunnerCore {
             self.package_execution_ready = false;
             self.native_control_pending = None;
             self.snapshot.safety.local_armed = false;
+            self.snapshot.safety.audio_route_ready = false;
             self.bump_revision(now);
         }
     }
@@ -1510,6 +1553,95 @@ mod tests {
             part_session_id: "P001_session_20260831_part_02".to_owned(),
             execution_mode: "participant_block_wavs".to_owned(),
             block_count: 6,
+        }
+    }
+
+    #[test]
+    fn native_activation_requires_the_whole_prepared_package_and_stays_unqualified() {
+        for count in [1, 2] {
+            let mut core = ready_core();
+            let mut package = verified_package("P001");
+            package.block_count = count;
+            let fingerprint = package.fingerprint.clone();
+            core.adopt_verified_package(package, clock(4)).unwrap();
+            assert!(core
+                .activate_native_execution(&fingerprint, clock(5))
+                .is_err());
+            core.prepare_native_block(
+                &fingerprint,
+                NativeBlockSummary {
+                    block_index: 19,
+                    block_ordinal: 0,
+                    block_label: "Prepared".into(),
+                    duration_ns: 2_000_000_000,
+                },
+                clock(6),
+            )
+            .unwrap();
+            assert!(core
+                .activate_native_execution(&"b".repeat(64), clock(7))
+                .is_err());
+            if count != 1 {
+                assert!(core
+                    .activate_native_execution(&fingerprint, clock(8))
+                    .is_err());
+                assert!(!core.native_execution_ready());
+                continue;
+            }
+            assert!(core
+                .activate_native_execution(&fingerprint, clock(8))
+                .unwrap());
+            let activated = core.snapshot();
+            assert!(core.native_execution_ready());
+            assert_eq!(activated.timing_tier, TimingTier::NativeDesktopUnqualified);
+            assert_eq!(activated.run.phase, RunnerPhase::Prepared);
+            assert!(!activated.safety.local_armed);
+            assert!(!activated.run.participant_capture_ready);
+            assert!(activated.allowed_actions.contains(&Action::TargetArm));
+            let revision = activated.revision;
+            assert!(!core
+                .activate_native_execution(&fingerprint, clock(9))
+                .unwrap());
+            assert_eq!(core.snapshot().revision, revision);
+            assert_eq!(
+                core.dispatch_local(Action::TargetArm, json!({}), clock(10))
+                    .status,
+                AppliedStatus::Accepted
+            );
+            let remote = core.dispatch(
+                DispatchOrigin::Remote {
+                    controller_id: "controller".into(),
+                    granted_scopes: [Scope::SessionTransport].into_iter().collect(),
+                    lease_valid: true,
+                },
+                CommandRequest {
+                    id: "native_start_1".into(),
+                    scope: Scope::SessionTransport,
+                    action: Action::PartStart,
+                    args: json!({"part_number":2}),
+                    expected_revision: None,
+                    epoch: 7,
+                    sequence: 1,
+                },
+                clock(11),
+            );
+            assert_eq!(remote.status, AppliedStatus::Accepted);
+            assert_eq!(core.native_control_pending(), Some(Action::PartStart));
+            assert!(!remote.snapshot.run.participant_capture_ready);
+            core.confirm_native_control(Action::PartStart, clock(12))
+                .unwrap();
+            assert!(core.snapshot().run.participant_capture_ready);
+            let stopped = core.dispatch_local(Action::RunStop, json!({}), clock(13));
+            assert_eq!(stopped.snapshot.run.phase, RunnerPhase::Interrupted);
+            assert!(!core.native_execution_ready());
+            assert!(!stopped.snapshot.safety.audio_route_ready);
+            assert!(!stopped
+                .snapshot
+                .allowed_actions
+                .contains(&Action::TargetArm));
+            assert!(core
+                .activate_native_execution(&fingerprint, clock(14))
+                .is_err());
         }
     }
 

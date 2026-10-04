@@ -126,6 +126,13 @@ pub(crate) struct NativeOutputReleaseRequest {
     pub reservation_generation: String,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(crate) struct NativeExecutionActivationRequest {
+    pub reservation: NativeOutputReleaseRequest,
+    pub acknowledge_unqualified: bool,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct NativeOutputReservation {
@@ -625,6 +632,15 @@ impl NativeOutputAuthority {
         &mut self,
         request: &NativeOutputReleaseRequest,
     ) -> Result<NativeOutputStatus, NativeOutputCommandError> {
+        self.require_reservation(request)?;
+        self.invalidate(false)?;
+        Ok(self.status())
+    }
+
+    pub(crate) fn require_reservation(
+        &self,
+        request: &NativeOutputReleaseRequest,
+    ) -> Result<(), NativeOutputCommandError> {
         let policy_generation = parse_generation(&request.policy_generation)?;
         let service_generation = parse_generation(&request.service_generation)?;
         let reservation_generation = parse_generation(&request.reservation_generation)?;
@@ -634,8 +650,7 @@ impl NativeOutputAuthority {
         {
             return Err(NativeOutputCommandError::changed());
         }
-        self.invalidate(false)?;
-        Ok(self.status())
+        Ok(())
     }
 
     pub(crate) fn disable(&mut self) -> Result<NativeOutputStatus, NativeOutputCommandError> {

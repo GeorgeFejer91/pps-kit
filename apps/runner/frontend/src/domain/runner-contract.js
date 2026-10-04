@@ -83,7 +83,7 @@ const RUNNER_PHASES = new Set([
   "stopping", "completed", "interrupted", "error",
 ]);
 const TIMING_TIERS = new Set([
-  "desktop_preview", "browser_exploratory", "native_quest_unqualified", "native_qualified",
+  "desktop_preview", "browser_exploratory", "native_desktop_unqualified", "native_quest_unqualified", "native_qualified",
 ]);
 const SNAPSHOT_TOKEN = /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,95}$/u;
 

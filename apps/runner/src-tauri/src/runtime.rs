@@ -29,9 +29,10 @@ use crate::latency_diagnostics::{
     NativeLatencyDiagnostics, NativeLatencySummary,
 };
 use crate::native_output::{
-    CoordinatorReply, NativeOutputAuthority, NativeOutputCommandError, NativeOutputCoordinator,
-    NativeOutputInventory, NativeOutputReleaseRequest, NativeOutputReservation,
-    NativeOutputReserveRequest, NativeOutputStatus, NativeOutputTicket,
+    CoordinatorReply, NativeExecutionActivationRequest, NativeOutputAuthority,
+    NativeOutputCommandError, NativeOutputCoordinator, NativeOutputInventory,
+    NativeOutputReleaseRequest, NativeOutputReservation, NativeOutputReserveRequest,
+    NativeOutputStatus, NativeOutputTicket,
 };
 use crate::native_playback::{NativePlaybackCompletion, NativePlaybackHandoff};
 use crate::prepared_audio::{
@@ -468,6 +469,17 @@ impl AppRuntime {
             .native_output_status(self.0.native_output.observation())
             .await
             .map_err(|_| NativeOutputCommandError::runtime())
+    }
+
+    pub(crate) async fn activate_native_execution(
+        &self,
+        request: NativeExecutionActivationRequest,
+    ) -> Result<RunnerSnapshot, NativeOutputCommandError> {
+        self.0
+            .authority
+            .activate_native_execution(self.0.native_output.observation(), request)
+            .await
+            .map_err(|_| NativeOutputCommandError::runtime())?
     }
 
     /// Starts the complete native enumerate lifecycle before returning a

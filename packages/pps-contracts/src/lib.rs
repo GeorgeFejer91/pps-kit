@@ -216,6 +216,7 @@ pub enum RunnerPhase {
 pub enum TimingTier {
     DesktopPreview,
     BrowserExploratory,
+    NativeDesktopUnqualified,
     NativeQuestUnqualified,
     NativeQualified,
 }

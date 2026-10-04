@@ -63,6 +63,13 @@ export function createTauriRunnerAdapter({ invokeFn = invoke, listenFn = listen 
     disableNativeOutput() {
       return call(invokeFn, "native_output_disable");
     },
+    activateNativeExecution({ policyGeneration, serviceGeneration, reservationGeneration,
+      acknowledgeUnqualified }) {
+      return call(invokeFn, "activate_native_execution", { request: {
+        reservation: { policyGeneration, serviceGeneration, reservationGeneration },
+        acknowledgeUnqualified: acknowledgeUnqualified === true,
+      } });
+    },
     recordResponse({ choice = "", x = null, y = null } = {}) {
       return call(invokeFn, "runner_record_response", { request: { choice, x, y } });
     },

@@ -13,8 +13,9 @@ use std::{path::PathBuf, str::FromStr};
 
 use latency_diagnostics::{LatencyRoute, LatencyStage, NativeLatencySummary, TraceOutcome};
 use native_output::{
-    NativeOutputCommandError, NativeOutputInventory, NativeOutputReleaseRequest,
-    NativeOutputReservation, NativeOutputReserveRequest, NativeOutputStatus,
+    NativeExecutionActivationRequest, NativeOutputCommandError, NativeOutputInventory,
+    NativeOutputReleaseRequest, NativeOutputReservation, NativeOutputReserveRequest,
+    NativeOutputStatus,
 };
 use pps_contracts::{Action, Applied, AppliedStatus, RunnerSnapshot};
 use pps_session_package::{verify_prepared_session, PreparedSessionSummary, VerificationRequest};
@@ -469,6 +470,16 @@ async fn native_output_enumerate(
 }
 
 #[tauri::command]
+async fn activate_native_execution(
+    request: NativeExecutionActivationRequest,
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<RunnerSnapshot, NativeOutputCommandError> {
+    require_native_output_main(&window)?;
+    state.activate_native_execution(request).await
+}
+
+#[tauri::command]
 async fn native_output_reserve_silence(
     request: NativeOutputReserveRequest,
     window: tauri::WebviewWindow,
@@ -563,6 +574,7 @@ pub fn run() {
             remote_session_revoke,
             native_latency_diagnostics,
             native_output_status,
+            activate_native_execution,
             native_output_enumerate,
             native_output_reserve_silence,
             native_output_release,

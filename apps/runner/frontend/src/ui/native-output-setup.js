@@ -4,8 +4,8 @@ const PHASES = new Set(["idle", "enumerating", "enumerated", "reserving-silence"
 const generation = (value) => typeof value === "string" && /^(0|[1-9]\d{0,19})$/u.test(value)
   && BigInt(value) <= 18446744073709551615n;
 
-// One local view of the existing native preflight owner. It never enables playback.
-export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia }) {
+// One local view of the native output/activation owner. Arming and Start stay separate.
+export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia, onActivated }) {
   const list = elements["native-output-list"];
   const route = elements["native-output-route"];
   const prepare = elements["native-output-prepare"];
@@ -13,8 +13,11 @@ export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia })
   const disable = elements["native-output-disable"];
   const detail = elements["native-output-detail"];
   const selection = elements["native-output-selection"];
+  const activate = elements["native-execution-activate"];
+  const acknowledgement = elements["native-execution-acknowledgement"];
   let snapshot = null, media = null, status = null, inventory = null, choices = [];
   let context = 0, busy = false, suspended = false, refreshing = null;
+  let singleBlock = false;
   const native = api.kind === "tauri-native";
   const quiescent = () => snapshot?.safety?.local_armed === false
     && QUIESCENT_PHASES.has(snapshot?.run?.phase);
@@ -33,16 +36,28 @@ export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia })
     prepare.disabled = route.disabled || !choices[Number(route.value)] || route.value === "";
     release.disabled = !native || !reserved;
     disable.disabled = !native;
+    const canActivate = native && !suspended && !busy && quiescent() && media && singleBlock
+      && snapshot?.setup?.ready === true && status?.phase === "reserved-media"
+      && status?.executable === false && status?.armed === false
+      && !status?.inFlight && !status?.cleanupPending;
+    acknowledgement.disabled = !canActivate;
+    activate.disabled = !canActivate || !acknowledgement.checked;
+    if (media) elements["prepared-audio-status"].textContent = status?.executable
+      ? "Prepared · native run enabled"
+      : status?.phase === "reserved-media" ? "Prepared · output reserved" : "Prepared · output not reserved";
     selection.textContent = choices[Number(route.value)] && route.value !== ""
       ? choices[Number(route.value)].label : "Choose a device configuration matching the prepared block.";
     detail.textContent = !native ? "Output preparation is available in the native Runner."
-      : busy ? "Preparing native output. No experiment playback is enabled."
+      : busy ? "Native output request pending. Playback remains controlled by the local target."
       : !status ? "Native output status is unavailable."
-      : status.phase === "reserved-media" ? "Prepared and silent. Experiment activation is still unavailable; this device route is unqualified."
+      : !quiescent() ? "The run is armed or active. Its controls and response capture stay with the native target. This route remains unqualified."
+      : status.executable ? "Native run enabled. Arm locally, then start on this target or its permitted phone controller. Timing and calibration remain unqualified."
+      : status.phase === "reserved-media" ? (singleBlock
+        ? "Prepared and silent. Check the device route and levels, then enable the unqualified native run."
+        : "Prepared and silent. This native adapter requires a complete single-block package.")
       : status.phase === "reserved-silence" ? "Silent device reserved without media. Release it before preparing the current block."
       : status.phase === "cleanup-pending" ? "Releasing native output. Wait for cleanup before preparing another device."
       : ["faulted", "quarantined"].includes(status.phase) ? "Native output failed. Disable output and inspect the device before preparing again."
-      : !quiescent() ? "Disarm and stop the run before changing the output device."
       : !media ? "Prepare the first audio block before listing compatible output devices."
       : currentInventory() && !choices.length ? "No listed configuration matches this block's channels and sample rate. Check the device, then list again."
       : "List devices, choose a matching configuration, then prepare silent output. Playback and route qualification remain separate.";
@@ -60,8 +75,8 @@ export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia })
       || ![candidate.policyGeneration, candidate.serviceGeneration, candidate.operationGeneration].every(generation)
       || ![candidate.inventoryGeneration, candidate.reservationGeneration].every(value => value === null || generation(value))
       || typeof candidate.inFlight !== "boolean" || typeof candidate.cleanupPending !== "boolean"
-      || candidate.silenceOnly !== true || candidate.executable !== false
-      || candidate.armed !== false || candidate.qualified !== false) {
+      || typeof candidate.silenceOnly !== "boolean" || typeof candidate.executable !== "boolean"
+      || typeof candidate.armed !== "boolean" || candidate.qualified !== false) {
       throw new Error("The native Runner returned an invalid output-preparation status.");
     }
     status = candidate;
@@ -126,6 +141,16 @@ export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia })
     });
   });
   route.addEventListener("change", render);
+  acknowledgement.addEventListener("change", render);
+  activate.addEventListener("click", () => {
+    if (activate.disabled) return;
+    const request = { policyGeneration: status.policyGeneration, serviceGeneration: status.serviceGeneration,
+      reservationGeneration: status.reservationGeneration, acknowledgeUnqualified: acknowledgement.checked };
+    void operate(() => api.activateNativeExecution(request), result => {
+      acknowledgement.checked = false;
+      onActivated(result);
+    });
+  });
   prepare.addEventListener("click", () => {
     if (prepare.disabled || !currentInventory()) return;
     const choice = choices[Number(route.value)];
@@ -147,6 +172,7 @@ export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia })
     context++;
     busy = false;
     status = null;
+    acknowledgement.checked = false;
     clearInventory();
     onRetireMedia();
     const token = ++context;
@@ -167,21 +193,24 @@ export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia })
     context++;
     busy = false;
     status = null;
+    acknowledgement.checked = false;
     clearInventory();
     render();
   }, async resume() {
     suspended = false;
     if (refreshing) await refreshing.catch(() => {});
     await refresh();
-  }, update(nextSnapshot, nextMedia) {
+  }, update(nextSnapshot, nextMedia, blockCount) {
     if (nextMedia !== media || snapshot?.epoch !== nextSnapshot?.epoch
       || snapshot?.identity?.session_id !== nextSnapshot?.identity?.session_id) {
       context++;
       busy = false;
+      acknowledgement.checked = false;
       clearInventory();
     }
     snapshot = nextSnapshot;
     media = nextMedia;
+    singleBlock = blockCount === 1;
     render();
   } };
 }

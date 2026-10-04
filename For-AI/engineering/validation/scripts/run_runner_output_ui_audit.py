@@ -17,6 +17,7 @@ OUTPUT_BRIDGE = """() => {
   participant.snapshot.run.participant_capture_ready=false;
   participant.snapshot.safety.local_armed=false;
   participant.snapshot.safety.capture_started=false;
+  participant.snapshot.setup.ready=true;
   participant.snapshot.allowed_actions=['system.snapshot','target.disarm'];
   state.status = {schema:'pps-runner-native-output-preflight.v1',phase:'idle',
     policyGeneration:'1',serviceGeneration:'1',operationGeneration:'0',
@@ -59,12 +60,27 @@ OUTPUT_BRIDGE = """() => {
       if (state.reject) {state.reject=false; throw {code:'native_output_timeout',message:'Synthetic lost preparation acknowledgement'};}
       return result;
     }
+    if (command === 'activate_native_execution') {
+      state.requests.push({command,request:clone(args.request)});
+      if (state.status.phase !== 'reserved-media' || state.status.executable
+          || args.request.acknowledgeUnqualified !== true) {
+        throw {code:'native_execution_scope_invalid',message:'Synthetic activation denied'};
+      }
+      state.status.executable=true;
+      participant.snapshot.safety.audio_route_ready=true;
+      participant.snapshot.timing_tier='native_desktop_unqualified';
+      participant.snapshot.allowed_actions.push('target.arm');
+      participant.snapshot.revision++;
+      participant.emit(participant.snapshot);
+      return clone(participant.snapshot);
+    }
     if (command === 'native_output_release' || command === 'native_output_disable') {
       state.requests.push({command,...(args ? {request:clone(args.request)} : {})});
       state.status.policyGeneration=String(BigInt(state.status.policyGeneration)+1n);
       state.status.phase=command === 'native_output_disable' ? 'disabled' : 'idle';
       state.status.inventoryGeneration=null; state.status.reservationGeneration=null;
       state.status.mediaConnected=false;
+      state.status.executable=false;
       state.mediaPrepared=false;
       return clone(state.status);
     }
@@ -85,6 +101,8 @@ def main() -> int:
         preview.goto(f"{base}/apps/runner/compiled/index.html", wait_until="networkidle")
         for name in ("list", "route", "prepare", "release", "disable"):
             assert preview.locator(f"#native-output-{name}").is_disabled()
+        assert preview.locator("#native-execution-activate").is_disabled()
+        assert preview.locator("#native-execution-acknowledgement").is_disabled()
         preview.close()
         page = browser.new_page()
         page.add_init_script(script=f"({BRIDGE})(); ({OUTPUT_BRIDGE})()")
@@ -92,6 +110,8 @@ def main() -> int:
         listing = page.locator("#native-output-list")
         route = page.locator("#native-output-route")
         prepare = page.locator("#native-output-prepare")
+        activate = page.locator("#native-execution-activate")
+        acknowledgement = page.locator("#native-execution-acknowledgement")
         detail = page.locator("#native-output-detail")
         assert listing.is_disabled()
         page.locator("#select-session-manifest").click()
@@ -123,6 +143,12 @@ def main() -> int:
             assert geometry["scroll"] <= geometry["width"] + 1, geometry
             assert geometry["scrollHeight"] <= geometry["height"] + 1, geometry
             assert geometry["pageScroll"] <= geometry["pageWidth"] + 1, geometry
+            label = page.locator(".check-row > span[data-pretext]")
+            label_geometry = label.evaluate("""node => ({width:node.clientWidth,scroll:node.scrollWidth,
+              height:node.clientHeight,scrollHeight:node.scrollHeight,measured:node.dataset.pretextResult})""")
+            assert label_geometry["measured"] not in {None,"unavailable","no-fit"}, label_geometry
+            assert label_geometry["scroll"] <= label_geometry["width"] + 1, label_geometry
+            assert label_geometry["scrollHeight"] <= label_geometry["height"] + 1, label_geometry
             assert page.locator("#toast").evaluate("node => getComputedStyle(node).position === 'static'")
             page.screenshot(path=str(output / f"output-{width}-{'enlarged' if enlarged else height}.png"))
             cases.append({"viewport":[width,height],"enlarged":enlarged,**geometry})
@@ -134,7 +160,19 @@ def main() -> int:
         assert request == {"policyGeneration":"1","serviceGeneration":"1","inventoryGeneration":"9007199254740993",
                            "deviceOrdinal":0,"configOrdinal":2,"channels":3,"sampleRateHz":48000,
                            "bufferFrames":None,"warmupTimeoutMs":3000}, request
+        assert page.locator("#prepared-audio-status").inner_text() == "Prepared · output reserved"
+        assert acknowledgement.is_enabled() and activate.is_disabled()
+        acknowledgement.check()
+        assert activate.is_enabled()
+        activate.click()
+        page.wait_for_function("document.querySelector('#native-output-detail').textContent.startsWith('Native run enabled')")
+        activation = page.evaluate("window.outputAudit.requests.find(r => r.command==='activate_native_execution').request")
+        assert activation == {"reservation":{"policyGeneration":"1","serviceGeneration":"1",
+                       "reservationGeneration":"7"},"acknowledgeUnqualified":True}, activation
+        assert not acknowledgement.is_checked() and activate.is_disabled()
+        assert page.locator("#prepared-audio-status").inner_text() == "Prepared · native run enabled"
         assert page.locator("#participant-response").is_disabled()
+        page.screenshot(path=str(output / "activated-320-enlarged.png"))
         page.locator("#native-output-release").click()
         page.wait_for_function("document.querySelector('#native-output-route').options.length === 1")
         assert listing.is_disabled(), "Release must retire the cached media summary"
@@ -208,7 +246,8 @@ def main() -> int:
               "resume_requires_fresh_inventory":True,
               "unknown_phase_and_missing_disarm_disabled":True,
               "release_and_disable_retire_media_summary":True,
-              "preparation_never_enables_acquisition":True}
+              "preparation_never_enables_acquisition":True,
+              "explicit_native_activation_fenced_and_unqualified":True}
     (output / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(f"Passed {len(cases)} rendered output layouts and native preflight control cases; {output}")
     return 0

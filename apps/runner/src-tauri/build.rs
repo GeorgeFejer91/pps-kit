@@ -16,6 +16,7 @@ fn main() {
             "remote_session_revoke",
             "native_latency_diagnostics",
             "native_output_status",
+            "activate_native_execution",
             "native_output_enumerate",
             "native_output_reserve_silence",
             "native_output_release",
