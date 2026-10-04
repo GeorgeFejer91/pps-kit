@@ -1542,8 +1542,7 @@ class DashboardController:
             project=project,
             payload={"recipe_kind": recipe_kind, "recipe_label": str(recipe.get("label") or "")},
         )
-        if recipe_kind != "block_csv_preview":
-            _raise_if_current_block_csvs_accepted(project.project_dir, design)
+        _raise_if_current_block_csvs_accepted(project.project_dir, design)
         segment_jobs = {
             "trial_sequence_batch": (2, _bake_trial_sequence_variants),
             "audiotactile_trial_batch": (3, _bake_audio_tactile_trial_files),
