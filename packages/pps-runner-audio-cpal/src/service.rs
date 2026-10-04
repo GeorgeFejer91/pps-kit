@@ -2015,7 +2015,7 @@ mod tests {
                 devices_truncated: false,
             },
         )
-        .unwrap();
+        .unwrap_or_else(|_| panic!("ASIO-like inventory fixture must be valid"));
         assert!(inventory.public.devices()[0]
             .output_configs()
             .iter()
