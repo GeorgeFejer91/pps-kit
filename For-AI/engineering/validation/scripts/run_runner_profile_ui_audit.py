@@ -25,9 +25,27 @@ PROFILE_BRIDGE = """() => {
   state.snapshot.active_block.active = false;
   state.snapshot.identity.session_id = '';
   state.profileCalls = [];
+  state.audioCalls = [];
   state.cancelNextProfile = true;
   const invoke = window.__TAURI_INTERNALS__.invoke;
   window.__TAURI_INTERNALS__.invoke = async (command, args) => {
+    if (command === 'inspect_prepared_execution') return {
+      inspectionScope: 'schedule-only', timingQualification: 'unqualified', executable: false,
+      blockCount: 8, trialRowCount: 64, eventCount: 128, encodedBytes: 1024,
+      blocks: Array.from({length: 8}, () => ({}))
+    };
+    if (command === 'prepare_current_audio_block') {
+      state.audioCalls.push({command, args: args ?? null});
+      return {
+        schema: 'pps-runner-prepared-audio-summary.v1',
+        preparationScope: 'pcm-and-output-plan-cache', outputQualification: 'unqualified',
+        executable: false, outputPlanPrepared: true, outputRoute: 'direct-multichannel',
+        scheduledEventCount: 16, blockOrdinal: 1, sampleRateHz: 48000,
+        sourceChannels: 4, sourceChannelLayout: 'direct-multichannel',
+        frames: 48000, decodedBytes: 768000, cacheCapacityBlocks: 1,
+        cacheByteBudget: 1280 * 1024 * 1024
+      };
+    }
     if (command !== 'prepare_experiment_profile') return invoke(command, args);
     state.profileCalls.push({command, args: args ?? null});
     if (state.cancelNextProfile) {
@@ -82,6 +100,13 @@ def main() -> int:
         assert page.evaluate("window.participantAudit.profileCalls") == [
             {"command": "prepare_experiment_profile", "args": {}},
             {"command": "prepare_experiment_profile", "args": {}},
+        ]
+        page.locator("#inspect-prepared-execution").click()
+        page.wait_for_function("document.querySelector('#execution-inspection-status')?.textContent?.includes('Compiled')")
+        next_audio.click()
+        page.wait_for_function("document.querySelector('#prepared-audio-detail')?.textContent?.includes('Block 2 is content-bound')")
+        assert page.evaluate("window.participantAudit.audioCalls") == [
+            {"command": "prepare_current_audio_block", "args": None}
         ]
 
         for width, height, enlarged in [
@@ -143,7 +168,9 @@ def main() -> int:
         browser.close()
     report = {"passed": True, "evidence": "compiled-browser-with-mocked-native-bridge",
               "installed_qualification": False, "physical_qualification": False,
-              "profile_calls_without_paths": 2, "cases": cases}
+              "profile_calls_without_paths": 2, "audio_preparation_calls_without_paths": 1,
+              "prepared_audio_block_ordinal": 1, "prepared_audio_source_channels": 4,
+              "cases": cases}
     (output / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(f"Passed {len(cases)} rendered Runner profile layouts and native-bridge interactions; {output}")
     return 0

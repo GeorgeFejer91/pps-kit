@@ -113,6 +113,12 @@ function renderPreparedAudio(nextPreparation) {
   const decodedBytes = Number(planValue(candidate, "decodedBytes", "decoded_bytes"));
   const capacity = Number(planValue(candidate, "cacheCapacityBlocks", "cache_capacity_blocks"));
   const byteBudget = Number(planValue(candidate, "cacheByteBudget", "cache_byte_budget"));
+  const closedRoute = (channels === 2 && layout === "legacy-study5-tactile-audio"
+    && outputRoute === "legacy-stereo")
+    || (channels === 3 && layout === "binaural-left-right-tactile"
+      && outputRoute === "canonical-three")
+    || (channels >= 4 && channels <= 18 && layout === "direct-multichannel"
+      && outputRoute === "direct-multichannel");
   const valid = Boolean(candidate)
     && schema === "pps-runner-prepared-audio-summary.v1"
     && scope === "pcm-and-output-plan-cache"
@@ -122,11 +128,7 @@ function renderPreparedAudio(nextPreparation) {
     && Number.isSafeInteger(blockOrdinal) && blockOrdinal >= 0
     && blockOrdinal < Number(planValue(preparedExecution, "blockCount", "block_count"))
     && Number.isSafeInteger(sampleRate) && sampleRate > 0
-    && [2, 3].includes(channels)
-    && ["legacy-study5-tactile-audio", "binaural-left-right-tactile"].includes(layout)
-    && outputRoute === (layout === "legacy-study5-tactile-audio"
-      ? "legacy-stereo"
-      : "canonical-three")
+    && closedRoute
     && Number.isSafeInteger(scheduledEventCount) && scheduledEventCount >= 0
     && scheduledEventCount <= 500_001
     && Number.isSafeInteger(frames) && frames >= 0

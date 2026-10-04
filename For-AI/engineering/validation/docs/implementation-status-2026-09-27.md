@@ -14,7 +14,7 @@ Each status applies to its stated surface, not to the whole product.
 | 6 | PARTIAL: actual Pretext, explicit no-fit, complete labels, keyboard input, narrow/enlarged text and spacing; installed Windows Runner WebView tab screenshots and horizontal geometry | Planner/companion installed WebViews and full accessibility qualification |
 | 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full scheduling UI and native profile assembly |
 | 8 | VERIFIED: plan/resource preflight, source/cancel/publication fences, shared job completion and rollback | Qualify additional generation routes if selected |
-| 9 | PARTIAL: exact CPAL port, fenced single-block activation in source, local output preflight, closed unity-gain direct route for 4–18-channel WAVs, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Compatible calibrated hardware route, installed playback/results, full-profile execution and qualification |
+| 9 | PARTIAL: exact CPAL port, fenced sequential block activation in source, one run journal and package-total result count, local output preflight, closed unity-gain direct route for 4–18-channel WAVs, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Compatible calibrated hardware route, installed multi-block playback/results, full-profile execution and qualification |
 | 10 | PARTIAL: shared Rust/browser contracts; JSON to existing compatibility assembler; Rust JSON inventory and participant block/trial selection; content-bound PCM16 trial decoding, bounded 3–18-channel block assembly, four tactile waveform shapes and speaker switching, and V1 prepared CSV/manifest; native main-window profile/folder selection, predecode storage preflight and existing Runner package adoption; Python PCM/row comparison and sample/tactile/response/CSV oracle checks | Installed adoption, complete profile execution and qualified physical routes |
 | 11 | PARTIAL: authenticated local/phone commands use one dispatch/control owner, shared scope fixture and fresh-state gate | Complete real-package execution |
 | 12 | PARTIAL: retry/input fences, durable intent versus callback confirmation, bounded deadlines, per-run journal and exclusive hashed result publication | Installed filesystems, recovery and complete execution |
@@ -312,17 +312,20 @@ The same bounded worker freezes and syncs events/18-column Data_min CSV,
 exclusively publishes final names, checks hashes and writes the result manifest
 last. The native receipt must match the frozen package/run/count/sequence before
 completion. Independent Python validation checks actual synthetic Rust worker
-files, event/CSV projection and substituted or malformed evidence. First closure
-covers a whole single-block package, closed response windows and an elapsed final
-software submission estimate. Interrupted/missing trials cannot complete.
+files, event/CSV projection and substituted or malformed evidence. The native
+source candidate advances verified blocks in order, retaining one run journal
+and requiring a fresh silent output reservation and local acknowledgement for
+each block. Final publication uses the compiled package's total trial count,
+closed response windows and an elapsed final software submission estimate.
+Interrupted/missing trials cannot complete.
 
 Unsupported hard-link filesystems fail closed. Partial/pending/orphan files remain;
 no final data are overwritten or automatically removed. Power-loss recovery,
 directory durability, device drain and physical onset require separate evidence.
 Callback observations, sample positions and CPAL driver predictions are explicitly
 unqualified. Preparation does not enable execution or qualify a device route.
-Fenced single-block activation is present in source. Whole profiles/multiple
-blocks, a complete installed experiment, more local build storage and calibrated
-physical acquisition remain outstanding. The installed preview changed only an
+Sequential activation is present in source. A complete installed multi-block
+experiment, more local build storage and calibrated physical acquisition remain
+outstanding. The installed preview changed only an
 isolated validation path. No participant acquisition, scientific replication,
 physical onset or newly qualified route is claimed by this record.

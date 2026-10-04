@@ -80,7 +80,9 @@ test("native audio preparation is an explicit local no-argument non-executable p
   assert.match(desktopSource, /qualification === "unqualified"/u);
   assert.match(desktopSource, /candidate\.executable === false/u);
   assert.match(desktopSource, /outputPlanPrepared === true/u);
-  assert.match(desktopSource, /outputRoute === \(layout === "legacy-study5-tactile-audio"/u);
+  assert.match(desktopSource, /channels === 2 && layout === "legacy-study5-tactile-audio"/u);
+  assert.match(desktopSource, /channels === 3 && layout === "binaural-left-right-tactile"/u);
+  assert.match(desktopSource, /channels >= 4 && channels <= 18 && layout === "direct-multichannel"/u);
   assert.match(desktopSource, /scheduledEventCount <= 500_001/u);
   assert.match(desktopSource, /!preparedExecution[\s\S]{0,100}\|\| phase !== "prepared"/u);
   assert.match(desktopSource, /const invalidatesPreparedAudio = active[\s\S]{0,180}!next\.package_verified[\s\S]{0,100}!preparedExecution/u);
