@@ -7,6 +7,7 @@ use std::{
 use hound::{SampleFormat, WavReader, WavSpec, WavWriter};
 use pps_experiment_media::bind_profile_trial_wav;
 use pps_experiment_media::block::assemble_standard_profile_block;
+use pps_experiment_media::package::prepare_standard_profile_package;
 use pps_runner_audio::{AudioFence, AudioLoadLimits};
 use pps_session_package::{
     experiment_plan::select_profile_participant,
@@ -169,6 +170,21 @@ fn trial_decode_rejects_media_changed_after_plan_selection() {
             .code(),
         "profile_block_output_exists"
     );
+    let package_dir = root.join("P001_native_fixture");
+    let session = prepare_standard_profile_package(&profile, "P001", &package_dir, 2).unwrap();
+    assert_eq!(session.summary().participant_id, "P001");
+    assert_eq!(session.summary().execution_mode, "participant_block_wavs");
+    assert_eq!(session.summary().blocks.len(), 1);
+    assert_eq!(session.blocks()[0].source_trial_wavs().len(), 1);
+    assert!(package_dir.join("session_manifest.json").is_file());
+    assert!(package_dir.join("blocks/Block_01.csv").is_file());
+    assert!(package_dir.join("blocks/Block_01.wav").is_file());
+    assert_eq!(
+        prepare_standard_profile_package(&profile, "P001", &package_dir, 2)
+            .unwrap_err()
+            .code(),
+        "profile_package_output_exists"
+    );
     let mut changed = fs::read(&wav).unwrap();
     let last = changed.last_mut().unwrap();
     *last ^= 1;
@@ -183,4 +199,12 @@ fn trial_decode_rejects_media_changed_after_plan_selection() {
         "profile_block_media_changed"
     );
     assert!(!rejected.exists());
+    let rejected_package = root.join("P001_rejected_fixture");
+    assert_eq!(
+        prepare_standard_profile_package(&profile, "P001", &rejected_package, 3)
+            .unwrap_err()
+            .code(),
+        "profile_block_media_changed"
+    );
+    assert!(!rejected_package.exists());
 }

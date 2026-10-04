@@ -2754,8 +2754,10 @@ dependencies = [
 name = "pps-experiment-media"
 version = "0.1.0"
 dependencies = [
+ "csv",
  "hound",
  "pps-runner-audio",
+ "pps-runner-execution",
  "pps-session-package",
  "serde",
  "serde_json",

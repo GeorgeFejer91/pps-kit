@@ -71,6 +71,8 @@ pub struct TrialFrameSpan {
     pub end: u64,
     pub source_frames: u64,
     pub iti_frames: u64,
+    pub tactile_shift_frames: u64,
+    pub tactile_compensation_note: &'static str,
 }
 
 /// Content-bound on-disk PCM16 block. Path/hash never serialize to WebView.
@@ -121,7 +123,10 @@ impl Drop for PendingWav {
     }
 }
 
-fn row_value<'a>(fields: &'a BTreeMap<String, String>, names: &[&str]) -> Option<&'a str> {
+pub(crate) fn row_value<'a>(
+    fields: &'a BTreeMap<String, String>,
+    names: &[&str],
+) -> Option<&'a str> {
     names.iter().find_map(|name| {
         fields
             .get(*name)
@@ -137,7 +142,7 @@ fn number(value: Option<&str>, default: f64) -> f64 {
         .unwrap_or(default)
 }
 
-fn family(fields: &BTreeMap<String, String>) -> &'static str {
+pub(crate) fn family(fields: &BTreeMap<String, String>) -> &'static str {
     let declared = row_value(fields, &["family", "Family"])
         .unwrap_or("")
         .trim()
@@ -270,21 +275,25 @@ fn looming_from_filename(fields: &BTreeMap<String, String>) -> f64 {
     total_ms as f64 / 1000.0
 }
 
-fn tactile_onset_s(fields: &BTreeMap<String, String>, trial_family: &str) -> f64 {
+pub(crate) fn looming_onset_s(fields: &BTreeMap<String, String>) -> f64 {
+    row_value(fields, &["looming_segment_onset_s", "Looming_Onset_S"])
+        .map(|value| number(Some(value), 0.0).max(0.0))
+        .unwrap_or_else(|| looming_from_filename(fields))
+}
+
+pub(crate) fn tactile_onset_s(fields: &BTreeMap<String, String>, trial_family: &str) -> f64 {
     if let Some(explicit) = row_value(fields, &["tactile_onset_s", "Tactile_Onset_S"]) {
         return number(Some(explicit), 0.0).max(0.0);
     }
     if matches!(trial_family, "catch" | "auditory_only") {
         return 0.0;
     }
-    let looming = row_value(fields, &["looming_segment_onset_s", "Looming_Onset_S"])
-        .map(|value| number(Some(value), 0.0).max(0.0))
-        .unwrap_or_else(|| looming_from_filename(fields));
+    let looming = looming_onset_s(fields);
     let soa_ms = number(row_value(fields, &["soa_ms", "SOA_ms"]), 0.0);
     ((looming + soa_ms / 1000.0).max(0.0) * 1_000_000.0).round_ties_even() / 1_000_000.0
 }
 
-fn compensation_ms() -> f64 {
+pub(crate) fn compensation_ms() -> f64 {
     env::var("PPS_WOOJER_TACTILE_COMPENSATION_MS")
         .ok()
         .and_then(|value| value.trim().parse::<f64>().ok())
@@ -300,34 +309,41 @@ fn tactile_shift(
     sample_rate_hz: u32,
     onset_s: f64,
     trial_family: &str,
-) -> usize {
-    if !matches!(trial_family, "audio_tactile" | "baseline") || channels < 3 {
-        return 0;
+) -> (usize, &'static str) {
+    if !matches!(trial_family, "audio_tactile" | "baseline") {
+        return (0, "no_tactile_trial");
     }
     let compensation = compensation_ms();
     if compensation <= 0.0 {
-        return 0;
+        return (0, "compensation_disabled");
+    }
+    if channels < 3 {
+        return (0, "no_tactile_channel_available");
     }
     let nominal = (onset_s * f64::from(sample_rate_hz))
         .round_ties_even()
         .max(0.0) as usize;
-    if nominal >= frames {
-        return 0;
-    }
     let drive_s = (onset_s - compensation / 1000.0).max(0.0);
     let drive = (drive_s * f64::from(sample_rate_hz))
         .round_ties_even()
         .max(0.0) as usize;
     if drive >= nominal {
-        return 0;
+        return (0, "no_advance_after_clamp");
+    }
+    if nominal >= frames {
+        return (0, "nominal_onset_outside_trial_audio");
     }
     let last_active = (0..frames)
         .rev()
         .find(|frame| samples[frame * channels + 2].abs() > 1.0e-7);
     if last_active.is_none_or(|last| last < nominal) {
-        return 0;
+        return if last_active.is_none() {
+            (0, "empty_tactile_channel")
+        } else {
+            (0, "tactile_signal_before_nominal_onset")
+        };
     }
-    nominal - drive
+    (nominal - drive, "tactile_channel_shifted_earlier")
 }
 
 fn output_sample(value: f32) -> i16 {
@@ -473,7 +489,7 @@ pub fn assemble_standard_profile_block(
             .map_err(|_| BlockMediaError(BlockMediaErrorCode::ResourceLimit))?;
         let samples = media.interleaved_f32();
         let trial_family = family(trial.fields());
-        let shift = tactile_shift(
+        let (shift, tactile_compensation_note) = tactile_shift(
             samples,
             channels,
             frames,
@@ -515,6 +531,8 @@ pub fn assemble_standard_profile_block(
             end,
             source_frames: media.frames(),
             iti_frames: iti,
+            tactile_shift_frames: shift as u64,
+            tactile_compensation_note,
         });
         cursor = end;
     }

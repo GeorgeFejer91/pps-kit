@@ -24,12 +24,12 @@
     {
       "id": "pps-experiment-profile.v1",
       "owner": "packages/pps-runtime/src/peripersonal_space_toolkit/experiment_profile.py",
-      "boundary": "Path-bearing local Planner JSON handoff to Python compatibility assembly and Rust inventory, participant-plan, and standard-media preflight"
+      "boundary": "Path-bearing local Planner JSON handoff to Python compatibility assembly and Rust inventory, participant-plan, and standard-route V1 package preparation"
     },
     {
       "id": "pps-run-session.v1",
       "owner": "packages/pps-runtime/src/peripersonal_space_toolkit/session_runner.py",
-      "boundary": "Prepared participant package verified by the Rust Runner"
+      "boundary": "Prepared participant package produced by the Python compatibility path or standard-route Rust media crate and verified by the Rust Runner"
     },
     {
       "id": "pps-runner-authority-snapshot.v1",

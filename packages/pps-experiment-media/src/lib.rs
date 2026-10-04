@@ -7,6 +7,7 @@
 #![forbid(unsafe_code)]
 
 pub mod block;
+pub mod package;
 
 use std::fmt;
 

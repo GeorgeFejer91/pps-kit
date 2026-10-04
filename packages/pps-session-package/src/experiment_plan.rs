@@ -91,6 +91,7 @@ impl ProfileTrialSource {
 pub struct ProfileBlockSource {
     order_fields: BTreeMap<String, String>,
     source_csv_path: PathBuf,
+    source_csv_sha256: String,
     trials: Vec<ProfileTrialSource>,
 }
 
@@ -101,6 +102,10 @@ impl ProfileBlockSource {
 
     pub fn source_csv_path(&self) -> &Path {
         &self.source_csv_path
+    }
+
+    pub fn source_csv_sha256(&self) -> &str {
+        &self.source_csv_sha256
     }
 
     pub fn trials(&self) -> &[ProfileTrialSource] {
@@ -118,6 +123,8 @@ impl ProfileBlockSource {
 pub struct ProfileParticipantPlan {
     participant_id: String,
     profile_sha256: String,
+    run_setup_path: PathBuf,
+    run_setup_sha256: String,
     blocks: Vec<ProfileBlockSource>,
 }
 
@@ -128,6 +135,13 @@ impl ProfileParticipantPlan {
 
     pub fn profile_sha256(&self) -> &str {
         &self.profile_sha256
+    }
+
+    pub fn run_setup_path(&self) -> &Path {
+        &self.run_setup_path
+    }
+    pub fn run_setup_sha256(&self) -> &str {
+        &self.run_setup_sha256
     }
 
     pub fn blocks(&self) -> &[ProfileBlockSource] {
@@ -288,6 +302,11 @@ pub fn select_profile_participant(
     let run_setup_path = fs::canonicalize(profile.run_setup_path())
         .map_err(|_| PlanError(PlanErrorCode::SourceChanged))?;
     let run_setup_bytes = read_inventoried_document(&run_setup_path, &files)?;
+    let run_setup_sha256 = files
+        .get(&run_setup_path)
+        .ok_or(PlanError(PlanErrorCode::IngredientNotListed))?
+        .sha256()
+        .to_owned();
     let run_setup: Value = serde_json::from_slice(
         run_setup_bytes
             .strip_prefix(&[0xef, 0xbb, 0xbf])
@@ -386,6 +405,11 @@ pub fn select_profile_participant(
             order_base,
         )?;
         let csv_bytes = read_inventoried_document(&source_csv_path, &files)?;
+        let source_csv_sha256 = files
+            .get(&source_csv_path)
+            .ok_or(PlanError(PlanErrorCode::IngredientNotListed))?
+            .sha256()
+            .to_owned();
         let mut trial_rows = csv_rows(&csv_bytes)?;
         trial_count = trial_count
             .checked_add(trial_rows.len())
@@ -420,12 +444,15 @@ pub fn select_profile_participant(
         blocks.push(ProfileBlockSource {
             order_fields,
             source_csv_path,
+            source_csv_sha256,
             trials,
         });
     }
     Ok(ProfileParticipantPlan {
         participant_id,
         profile_sha256: profile.profile_sha256().to_owned(),
+        run_setup_path,
+        run_setup_sha256,
         blocks,
     })
 }

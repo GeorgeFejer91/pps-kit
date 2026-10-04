@@ -25,7 +25,8 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
   release handoffs. Reuse 3DTI, the 3D viewer, Segment 0–6, current schemas,
   bounded jobs, native ownership and Python/Rust oracle fixtures.
 - **Source stage:** JSON export/compatibility assembly, native inventory,
-  approved participant order selection, standard-route block PCM assembly,
+  approved participant order selection, standard-route block PCM assembly and
+  V1-compatible prepared CSV/manifest publication in the media crate,
   bounded generation, shared Pretext,
   locked dependency patches and phone recovery are implemented.
   Native execution has one actor, one callback scheduler and one journal worker.
@@ -68,11 +69,13 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
   Runner-only validation artifact has the exact-commit marker and matching
   SHA-256 `c966496f70ef45b3f9e350812fc8fb10b96d320b9e7d6e512b79fe7d1fd17af4`.
   It has not been installed, and the new media crate is not wired into that
-  Runner executable. Full media transforms, prepared-session publication, and
-  native execution from the JSON profile remain incomplete.
-- **Next gate:** publish a V1-compatible prepared block CSV and session manifest
-  from the verified JSON profile, then adopt them through the existing Runner
-  verifier. Complete an installed native single-block run with a checked,
+  Runner executable. The later standard-route package source candidate passes
+  local Rust and Python-oracle checks but has not yet passed exact-SHA CI, been
+  linked into Runner, or been installed. Advanced media transforms and native
+  execution from the JSON profile remain incomplete.
+- **Next gate:** link the verified standard-route package producer to Runner's
+  existing package adoption path without adding another schema or scheduler.
+  Complete an installed native single-block run with a checked,
   compatible and calibrated output route, then validate its event/CSV files and
   recording. Extend the same owner to full profiles/multiple blocks. The native
   activation path exists in source but remains unqualified; no participant run or

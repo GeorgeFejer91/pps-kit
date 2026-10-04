@@ -313,3 +313,76 @@ def test_standard_native_block_rejects_unimplemented_tactile_transform(tmp_path:
     )
     assert json.loads(completed.stdout)["code"] == "profile_block_transform_unsupported"
     assert not native_wav.exists()
+
+
+def test_standard_native_package_matches_v1_trial_schedule_rows(tmp_path: Path, monkeypatch) -> None:
+    from peripersonal_space_toolkit.session_runner import _materialize_segment_block_wav
+
+    monkeypatch.setenv("PPS_WOOJER_TACTILE_COMPENSATION_MS", "23")
+    profile_path = _standard_block_profile(tmp_path / "package-source")
+    source_block = read_experiment_profile(profile_path)["assembly"]["blocks"][0]
+    python_wav = tmp_path / "python-package-block.wav"
+    _, _, _, python_rows, _ = _materialize_segment_block_wav(
+        python_wav, source_block["rows"], participant_id="P001", session_id="P001_fixture",
+        part_number=1, phase="single", phase_label="Single", output_block_index=1,
+        participant_block_position=1, source_block_index=1, source_block_label="First",
+        source_block_csv_path=Path(source_block["source_csv_path"]),
+    )
+    native_dir = tmp_path / "P001_fixture"
+    completed = subprocess.run(
+        ["cargo", "run", "--quiet", "--locked", "-p", "pps-experiment-media", "--example", "profile_package_probe"],
+        cwd=ROOT, input=json.dumps({
+            "profile_path": str(profile_path), "participant_id": "P001", "output_dir": str(native_dir),
+        }), env={**os.environ, "CARGO_INCREMENTAL": "0"}, text=True, capture_output=True, check=True,
+    )
+    assert json.loads(completed.stdout) == {
+        "accepted": True, "code": "package_prepared", "block_count": 1, "trial_counts": [2],
+    }
+    with (native_dir / "blocks" / "Block_01.csv").open(newline="", encoding="utf-8") as source:
+        native_rows = list(csv.DictReader(source))
+    assert len(native_rows) == len(python_rows) == 2
+    compared = (
+        "Trial_UID", "Trial_Type", "Family", "SOA_ms", "Source_SHA256", "Trial_File_Path",
+        "Source_Block_CSV_SHA256", "Duration_ms", "Trial_Duration_S", "Sample_Rate_Hz", "Channels",
+        "Trial_Start_Sample", "Looming_Onset_Sample", "Tactile_Onset_Sample",
+        "Tactile_Drive_Onset_Sample", "Response_Window_Onset_Sample", "Trial_End_Sample",
+        "Tactile_Latency_Compensation_Requested_ms", "Tactile_Latency_Compensation_Applied_ms",
+        "Tactile_Latency_Compensation_Status", "Tactile_Latency_Compensation_Applied",
+        "Tactile_Latency_Compensation_Note",
+    )
+    for native, expected in zip(native_rows, python_rows):
+        assert {key: native[key] for key in compared} == {key: str(expected[key]) for key in compared}
+        assert Path(native["Source_Block_CSV_Path"]).samefile(expected["Source_Block_CSV_Path"])
+        assert {
+            key: native.get(key, "") for key, value in expected.items()
+            if value not in ("", None) and key != "Source_Block_CSV_Path"
+        } == {
+            key: str(value) for key, value in expected.items()
+            if value not in ("", None) and key != "Source_Block_CSV_Path"
+        }
+    manifest = json.loads((native_dir / "session_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["schema"] == "pps-run-session.v1"
+    assert manifest["execution_mode"] == "participant_block_wavs"
+    assert manifest["source_run_setup_sha256"] == manifest_sha256(profile_path.parent / "setup.json")
+    with wave.open(str(python_wav), "rb") as output:
+        python_pcm = output.readframes(output.getnframes())
+    with wave.open(str(native_dir / "blocks" / "Block_01.wav"), "rb") as output:
+        assert output.readframes(output.getnframes()) == python_pcm
+
+
+def test_standard_native_package_keeps_approved_multiple_block_order(tmp_path: Path) -> None:
+    profile_path = _participant_profile(tmp_path / "source")
+    output_dir = tmp_path / "P001_ordered"
+    completed = subprocess.run(
+        ["cargo", "run", "--quiet", "--locked", "-p", "pps-experiment-media", "--example", "profile_package_probe"],
+        cwd=ROOT, input=json.dumps({
+            "profile_path": str(profile_path), "participant_id": "P001", "output_dir": str(output_dir),
+        }), env={**os.environ, "CARGO_INCREMENTAL": "0"}, text=True, capture_output=True, check=True,
+    )
+    assert json.loads(completed.stdout) == {
+        "accepted": True, "code": "package_prepared", "block_count": 2, "trial_counts": [1, 2],
+    }
+    manifest = json.loads((output_dir / "session_manifest.json").read_text(encoding="utf-8"))
+    assert [block["label"] for block in manifest["blocks"]] == ["First", "Second"]
+    with (output_dir / "blocks" / "Block_02.csv").open(newline="", encoding="utf-8") as source:
+        assert [row["block_trial_index"] for row in csv.DictReader(source)] == ["1", "2"]

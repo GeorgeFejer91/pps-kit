@@ -54,9 +54,15 @@ hint after decoding. Its standard-route assembler stages one three-channel
 PCM16 block in approved trial order, with ITI silence and the provisional
 Woojer drive advance. It rejects speaker switching and active tactile waveform
 synthesis until their Python behavior is reproduced. The block has a bounded
-size and is published without overwriting an existing file. It is not yet a
-prepared session package, native execution input, or physical timing proof.
-Path-bearing receipts stay native-only, outside WebView and phone projections.
+size and is published without overwriting an existing file. The same crate now
+materializes a standard-route `pps-run-session.v1` CSV/manifest package for one
+approved participant's single-phase block order. It rechecks the JSON/source
+inventory, verifies the staged and published package with the existing V1
+verifier, compiles every block schedule, and publishes the canonical manifest
+last without overwriting an existing package. The source-only producer still
+needs a bounded storage preflight, Runner IPC integration, advanced media
+transforms, installed execution, and physical timing qualification. Path-bearing
+receipts stay native-only, outside WebView and phone projections.
 
 Designer generation jobs bind to the captured design signature. Ingredient media
 stays in staging until the source and cooperative cancellation checks admit

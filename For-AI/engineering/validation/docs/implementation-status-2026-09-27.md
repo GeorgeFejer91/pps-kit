@@ -15,7 +15,7 @@ Each status applies to its stated surface, not to the whole product.
 | 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full scheduling UI and native profile assembly |
 | 8 | VERIFIED: plan/resource preflight, source/cancel/publication fences, shared job completion and rollback | Qualify additional generation routes if selected |
 | 9 | PARTIAL: exact CPAL port, fenced single-block activation in source, local output preflight, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Compatible checked route, installed playback/results, full-profile execution and qualification |
-| 10 | PARTIAL: shared Rust/browser contracts; JSON to existing compatibility assembler; Rust JSON inventory and participant block/trial selection; content-bound PCM16 trial decoding and standard three-channel block assembly with Python PCM comparison; sample/tactile/response/CSV oracle checks | Advanced media transforms, V1 prepared CSV/manifest, and complete native profile execution |
+| 10 | PARTIAL: shared Rust/browser contracts; JSON to existing compatibility assembler; Rust JSON inventory and participant block/trial selection; content-bound PCM16 trial decoding, standard three-channel block assembly and V1 prepared CSV/manifest source with Python PCM/row comparison; sample/tactile/response/CSV oracle checks | Advanced media transforms, Runner adoption of the native package producer, and complete profile execution |
 | 11 | PARTIAL: authenticated local/phone commands use one dispatch/control owner, shared scope fixture and fresh-state gate | Complete real-package execution |
 | 12 | PARTIAL: retry/input fences, durable intent versus callback confirmation, bounded deadlines, per-run journal and exclusive hashed result publication | Installed filesystems, recovery and complete execution |
 | 13 | PARTIAL: secure hosted companion, inert discovery, existing authenticated VDO route | Physical phone direct/relay/network-loss qualification |
@@ -26,6 +26,14 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
+- Standard-route native package source now writes all of one approved
+  participant's single-phase blocks as V1 CSV/WAV files and publishes the
+  canonical manifest after staged and final verification/schedule compilation.
+  Local `pps-experiment-media` Clippy/check/tests, `pps-session-package` tests,
+  and seven Python/Rust differential tests pass, including populated V1 row
+  fields, byte-identical PCM, and a two-block order fixture. This source is
+  not linked into the Runner executable. Exact-SHA CI, installed adoption,
+  compatible output selection, recording, and physical qualification remain.
 - Native standard-route profile media source checkpoint:
   `ceb12d02f1ad3d6bc66c24b01bc37931abd7bd47`.
   [Its exact-SHA CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37173235934)
