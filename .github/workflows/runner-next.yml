@@ -299,7 +299,7 @@ jobs:
             "bundle=${{ matrix.bundle }}"
             "signing=${{ matrix.signing }}"
             "distribution_status=ci_validation_artifact_not_release"
-            "scientific_status=single_block_native_candidate_unqualified"
+            "scientific_status=sequential_native_blocks_candidate_unqualified"
             "use_for_data_collection=false"
             "updater=false"
           ) | Set-Content -Encoding utf8 (Join-Path $stage "VALIDATION_ONLY.txt")

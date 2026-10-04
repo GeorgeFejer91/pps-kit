@@ -171,7 +171,17 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             assert snapshot["safety"]["local_armed"] is False
             assert page.locator("#participant-response").is_disabled()
             assert page.locator("#package-badge").inner_text().strip() == "Unverified"
+            next_audio = page.locator("#prepare-current-audio-block")
+            assert next_audio.is_visible() and next_audio.is_disabled()
+            assert next_audio.inner_text().strip() == "Prepare next audio block"
+            next_audio_geometry = next_audio.evaluate("""node => ({
+                width: node.clientWidth, scrollWidth: node.scrollWidth,
+                height: node.clientHeight, scrollHeight: node.scrollHeight
+            })""")
+            assert next_audio_geometry["scrollWidth"] <= next_audio_geometry["width"] + 1
+            assert next_audio_geometry["scrollHeight"] <= next_audio_geometry["height"] + 1
             report["webview_launched"] = True
+            report["next_audio_control_visible"] = True
             report["app_url"] = page.url
             report["native_snapshot_schema"] = snapshot["schema"]
             report["initial_run_phase"] = snapshot["run"]["phase"]

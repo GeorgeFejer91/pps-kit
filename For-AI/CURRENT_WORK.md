@@ -32,8 +32,10 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   closed unity-gain, channel-for-channel route for 4–18-channel WAVs.
   Local/phone control shares one actor,
   callback scheduler, and result journal. Source activation and result
-  publication remain unqualified for participant use. Failed in-process native
-  profile-package publication now rolls back newly linked destination files.
+  publication remain unqualified for participant use. The candidate now advances
+  verified blocks in order, retaining one result journal and requiring a fresh
+  output reservation and acknowledgement for each block. Failed in-process
+  native profile-package publication rolls back newly linked destination files.
 - **Latest completed evidence:** local media tests (5), Clippy, and one-block
   and two-block Python/Rust package differentials passed for the publication
   rollback. All 14 normal
@@ -51,10 +53,10 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   No participant execution, physical output, recording, or Full installer was
   verified by this UI audit.
 - **Next gates:** qualify each larger-array hardware route and its levels,
-  then run the installed native
-  single-block workflow on a compatible calibrated device; validate event/CSV
-  files and recording; extend to full profiles and multiple blocks; then build
-  and verify the exact two-app Full installer. Installed operation, physical
+  then run the installed native single-block and multi-block workflows on a
+  compatible calibrated device; validate event/CSV files and recording; finish
+  full-profile media routes; then build and verify the exact two-app Full
+  installer. Installed operation, physical
   timing, participant results, and replication each need their own evidence.
 - **Local constraint:** complete native V2 builds and the Standard tier remain
   unrun under the 15 GiB working allowance. CI supplies native builds while

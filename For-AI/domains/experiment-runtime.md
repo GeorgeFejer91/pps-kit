@@ -129,9 +129,11 @@ byte bounds. Admission precedes authority commit; the worker acknowledges a
 prefix after syncing both files. Failure/backpressure neutralizes output while
 safety still proceeds. Finalization freezes a prefix, syncs/closes both files,
 exclusively publishes final names, checks hashes, and publishes the manifest
-last. Only a matching native package/run/count/sequence receipt can complete a
-whole single-block package after response windows and the final software estimate
-close. Missing/interrupted trials cannot complete. Unsupported hard-link
+last. Sequential native blocks keep one run journal; each block must drain and
+close its response windows before the next is prepared and locally armed. Only
+the final block may request publication, using the compiled package's total
+trial count and a matching native package/run/count/sequence receipt.
+Missing/interrupted trials cannot complete. Unsupported hard-link
 filesystems fail closed; partial/pending/orphan files remain. Power loss,
 directory persistence, device drain and physical timing need separate evidence.
 Use `validation/scripts/validate_native_results.py` under `For-AI/engineering/`
@@ -161,14 +163,16 @@ as the Rust owner retires its cache; audio preparation is required again.
 Desktop notifications remain in their owning panel
 and use the shared bounded-text helper.
 
-The current native source candidate enables a fenced, explicitly acknowledged
-single-block activation only after verified package, compiled schedule, prepared
-PCM and a matching silent output reservation. Start/Resume still wait for durable
-intent and callback confirmation. It is unqualified and requires a checked local
-route and levels; preparation alone does not enable execution. Exact-SHA CI and
-an isolated Windows NSIS install verified package adoption, schedule compilation
-and PCM preparation. The synthetic three-channel block had no matching local
-output configuration, so no installed run, physical playback, recording or result
-publication was tested. Whole profiles/multiple blocks, calibration and physical
-qualification remain gates. Wire completion remains denied for real packages;
-Stop preserves partial results.
+The current native source candidate enables fenced sequential blocks after a
+verified package, compiled schedules, the current block's PCM and a matching
+silent output reservation. The native owner chooses the next block; the WebView
+cannot supply its ordinal. A drained non-final block disarms and releases its
+port while retaining the run journal. Each next block needs a new local route
+check and acknowledgement. Start/Resume still wait for durable intent and
+callback confirmation. This remains unqualified for participant use. Earlier
+exact-SHA CI and an isolated Windows NSIS install verified package adoption,
+schedule compilation and PCM preparation only. The synthetic three-channel
+block had no matching local output configuration, so no installed run, physical
+playback, recording or result publication was tested. Complete installed
+multi-block operation, calibration and physical qualification remain gates.
+Wire completion remains denied for real packages; Stop preserves partial results.

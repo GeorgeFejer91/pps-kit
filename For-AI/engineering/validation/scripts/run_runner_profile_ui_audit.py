@@ -68,7 +68,9 @@ def main() -> int:
         page.goto(f"{base}/apps/runner/compiled/index.html", wait_until="networkidle")
         prepare = page.locator("#prepare-experiment-profile")
         manifest = page.locator("#select-session-manifest")
+        next_audio = page.locator("#prepare-current-audio-block")
         assert prepare.is_enabled() and manifest.is_enabled()
+        assert next_audio.is_visible() and next_audio.is_disabled()
         prepare.click()
         page.wait_for_function("window.participantAudit.profileCalls.length === 1")
         page.wait_for_function("!document.querySelector('#prepare-experiment-profile').disabled")
@@ -105,6 +107,7 @@ def main() -> int:
               const buttons = [...actions.querySelectorAll('button')];
               const heading = panel.querySelector('.section-heading');
               const list = panel.querySelector('#package-block-list');
+              const nextAudio = panel.querySelector('#prepare-current-audio-block');
               const box = node => {
                 const rect = node.getBoundingClientRect();
                 return {left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom,
@@ -113,6 +116,7 @@ def main() -> int:
                   measured: node.dataset.pretextResult ?? null};
               };
               return {panel: box(panel), heading: box(heading), actions: box(actions),
+                nextAudio: box(nextAudio),
                 buttons: buttons.map(box), list: box(list), listOverflow: getComputedStyle(list).overflowY,
                 pageWidth: document.documentElement.clientWidth,
                 pageScrollWidth: document.documentElement.scrollWidth};
@@ -131,6 +135,10 @@ def main() -> int:
                 assert button["measured"] not in {None, "unavailable", "no-fit"}, geometry
                 assert button["scrollWidth"] <= button["width"] + 1, geometry
                 assert button["scrollHeight"] <= button["height"] + 1, geometry
+            next_geometry = geometry["nextAudio"]
+            assert next_geometry["measured"] not in {None, "unavailable", "no-fit"}, geometry
+            assert next_geometry["scrollWidth"] <= next_geometry["width"] + 1, geometry
+            assert next_geometry["scrollHeight"] <= next_geometry["height"] + 1, geometry
             cases.append({"viewport": [width, height], "enlarged": enlarged, **geometry})
         browser.close()
     report = {"passed": True, "evidence": "compiled-browser-with-mocked-native-bridge",
