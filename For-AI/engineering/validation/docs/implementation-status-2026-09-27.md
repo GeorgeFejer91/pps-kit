@@ -26,10 +26,10 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
-- Full candidate `6844ac86beb00b6b982ef01aa42204d1037f800f` passed all
-  16 non-skipped [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37230324305).
-  The [single Full validation installer](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37230324305/artifacts/11314111693)
-  has SHA-256 `2802cbd9bb0adf593860c6fd0dc6e63ec09120040bbd48f6c752c793f0ade633`,
+- Full candidate `3a84b1bb1c93709e0457f96ff52795865868a251` passed all
+  16 non-skipped [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37233421923).
+  The [single Full validation installer](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37233421923/artifacts/11315461950)
+  has SHA-256 `13660c54edad608c80a24887d79f267640fb9d85a4c59b25ab3252f7328ce783`,
   independently checked from the artifact archive against `SHA256SUMS.txt`.
   Its installed Planner rendered 3DTI media and exported a two-block JSON
   profile with six inventoried source files; its installed Runner prepared the
@@ -43,7 +43,13 @@ Each status applies to its stated surface, not to the whole product.
   tested. A separate downloaded Windows synthetic native-result fixture passed
   the independent Python file audit with a complete manifest, five event
   records, three scored trials, and two dataset rows; its timing remains
-  unqualified and it is not installed-participant evidence.
+  unqualified and it is not installed-participant evidence. A downloaded Windows
+  two-part fixture from the actual Rust writer passed the independent group
+  audit: both sealed results matched their adjacent package hashes, shared
+  setup identity and prepared trial counts, totaling 10 event records, six
+  scored trials and four Data_min rows. Python/Rust oracle jobs passed this
+  same check on Windows, Linux and macOS. It does not establish installed
+  split-part participant completion or recording.
 
 - Two-part Planner-profile source candidate: the native producer follows the
   existing Python `pps-runner-part-split.v1` and `pps-run-session-group.v1`

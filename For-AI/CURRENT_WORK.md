@@ -44,17 +44,19 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   part packages linked by a group manifest and returns Part 1. The Runner admits
   Part 2 only when the adjacent Part 1 package and its sealed
   native result reverify from disk, including after a Runner restart. Installed
-  part transition and grouped result completion remain open.
-- **Latest completed evidence:** exact source `6844ac86beb00b6b982ef01aa42204d1037f800f`
+  part transition and grouped participant result completion remain open. The
+  independent file audit now derives a two-part aggregate from both sealed
+  results, exact package hashes, shared setup identity and prepared trial counts.
+- **Latest completed evidence:** exact source `3a84b1bb1c93709e0457f96ff52795865868a251`
   passed all 16 non-skipped
-  [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37230324305),
+  [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37233421923),
   including three-platform Rust Core/Desktop and Python/Rust package oracles,
   rendered Runner output/participant and Planner segment audits, standalone
   validation bundles, and the Full two-app
   Windows install. The Full validation installer is retained as a downloadable
-  [workflow artifact](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37230324305/artifacts/11314111693)
+  [workflow artifact](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37233421923/artifacts/11315461950)
   through 2026-10-11. Its SHA-256 is
-  `2802cbd9bb0adf593860c6fd0dc6e63ec09120040bbd48f6c752c793f0ade633`,
+  `13660c54edad608c80a24887d79f267640fb9d85a4c59b25ab3252f7328ce783`,
   independently checked against the artifact's `SHA256SUMS.txt`.
   It is unsigned and marked validation-only, not a participant-use release.
 - **Installed two-app evidence:** the exact Full installer had zero missing or
@@ -74,7 +76,10 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   acquisition. A separate three-platform synthetic native-result
   fixture reached a complete result manifest; the independent Python validator
   passed its event/CSV hashes and V1 projection on the downloaded Windows
-  fixture. This is file-contract evidence, not an installed recording.
+  fixture. A Rust-produced two-part Windows fixture also passed the new group
+  audit with 10 event records, six scored trials and four Data_min rows; each
+  result matched its prepared package trial count. These are file-contract
+  evidence, not installed recordings.
 - **Next gates:** select the stable Runner bundle identifier and ASIO SDK
   distribution license path, qualify the
   physical 3-channel route and levels, then exercise the installed native
