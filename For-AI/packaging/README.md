@@ -25,25 +25,27 @@ staging trees stay under ignored `dist/`. Nothing under `For-AI/` is installed.
 
 ## Existing package versus target
 
-The current [V1 inventory](../download_package_inventory.md) and
+The [V1 inventory](../download_package_inventory.md) and
 [`Build_PPS_Distribution.ps1`](../engineering/build/windows/Build_PPS_Distribution.ps1)
 build Python/PyWebView Designer, Python/PySide Runner, ZIP payloads, and Go
-downloaders. A local Full candidate has only a clean-folder launch smoke. It
-does not establish a Tauri Full installer or native V2 acquisition readiness.
+downloaders. They remain the compatibility path.
 
-Runner and Planner now have candidate Tauri shells at `apps/runner/src-tauri/`
-and `apps/designer/src-tauri/`. A Full NSIS validation configuration composes
-their two local WebViews and one Shared resource tree. Its exact-build installed
-and media audits are in progress; it is not yet a qualified release. Follow the
-[Windows installer plan](windows-installer.md) for the remaining installed-path
-and acquisition gates. Reuse the existing build/release tools where their
-component ownership and inventory checks still apply.
-The Runner-only Windows validation installer has a fresh-path silent CI install
-inventory for its executable and canonical HTML/CSS bytes. The
-[exact-source Windows audit](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37190366500)
-also launched its bundled WebView, read the Rust idle snapshot, and exercised
-the control, logging, and remote tabs. This validation artifact is not the
-two-app Full composition or an installed participant run.
+Runner and Planner have candidate Tauri shells at `apps/runner/src-tauri/` and
+`apps/designer/src-tauri/`. The Full NSIS configuration composes their bundled
+WebViews with one Shared resource tree. Exact source
+`74ebd6d88ac9d7898a6149e4e011e6422896889a` passed the
+[two-app installed CI audit](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37220850990):
+21 inventory items matched source, both installed apps launched, Planner
+generated 3DTI audio and exported a JSON profile, and Runner prepared that
+actual profile into a verified package with PCM and a partial event journal.
+Fresh install, reinstall, uninstall, and incompatible-Shared rejection passed.
+The [single Full validation installer](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37220850990/artifacts/11310537053)
+has SHA-256
+`2ae3a0a1ba8dbf8d63eed32101246a9907ef8278715ce050b8b9eb38bd2d1f2b`
+and is retained through 2026-10-11. It is unsigned and marked validation-only;
+physical output, finalized participant recording, local-PC reinstall, and
+release qualification remain open. Follow the
+[Windows installer plan](windows-installer.md) for those gates.
 
 ## Stage boundary
 

@@ -10,21 +10,33 @@ Each status applies to its stated surface, not to the whole product.
 | 2 | PARTIAL: migrated validators, fresh editable setup, bounded fixtures and retained scratch evidence | Complete Standard tier needs more storage |
 | 3 | PARTIAL: one compact source/package/capability record; conservative readiness | Complete native adapter and measured evidence |
 | 4 | VERIFIED: shared profile/limits/scoring/text/job owners; concise For-AI routing; one native actor/scheduler/file worker | Extract only seams changed by further work |
-| 5 | VERIFIED browser source: planner disclosures/JSON action, phone Pair/state/action flow, participant response, local output picker and inline notifications; native Runner installed UI opened and its control, logging and remote panels were inspected | Full V2 Planner install and complete installed flows |
-| 6 | PARTIAL: actual Pretext, explicit no-fit, complete labels, keyboard input, narrow/enlarged text and spacing; installed Windows Runner WebView tab screenshots and horizontal geometry | Planner/companion installed WebViews and full accessibility qualification |
+| 5 | PARTIAL: browser controls plus installed Full Planner seven-segment/3D-viewer audit and Runner control/logging/remote WebViews; installed Planner JSON handoff to Runner passed | Complete installed participant and phone-control flows |
+| 6 | PARTIAL: actual Pretext, explicit no-fit, complete labels, keyboard input, narrow/enlarged text and spacing; installed Planner and Runner screenshots and horizontal geometry | Companion device and full accessibility qualification |
 | 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full scheduling UI and native profile assembly |
 | 8 | VERIFIED: plan/resource preflight, source/cancel/publication fences, shared job completion and rollback | Qualify additional generation routes if selected |
 | 9 | PARTIAL: exact CPAL port, fenced sequential block activation in source, one run journal and package-total result count, local output preflight, closed unity-gain direct route for 4–18-channel WAVs, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Compatible calibrated hardware route, installed multi-block playback/results, full-profile execution and qualification |
-| 10 | PARTIAL: shared Rust/browser contracts; JSON to existing compatibility assembler; Rust JSON inventory and participant block/trial selection; content-bound PCM16 trial decoding, bounded 3–18-channel block assembly, four tactile waveform shapes and speaker switching, and V1 prepared CSV/manifest; native main-window profile/folder selection, predecode storage preflight and existing Runner package adoption; Python PCM/row comparison and sample/tactile/response/CSV oracle checks | Installed adoption, complete profile execution and qualified physical routes |
+| 10 | PARTIAL: shared Rust/browser contracts; Rust JSON inventory and participant block/trial selection; bounded 3–18-channel PCM16 assembly, four tactile waveform shapes and speaker switching, V1 CSV/manifest, and Python PCM/row oracle checks; installed Runner adopted the actual installed Planner JSON profile and prepared native PCM | Complete profile execution and qualified physical routes |
 | 11 | PARTIAL: authenticated local/phone commands use one dispatch/control owner, shared scope fixture and fresh-state gate | Complete real-package execution |
 | 12 | PARTIAL: retry/input fences, durable intent versus callback confirmation, bounded deadlines, per-run journal and exclusive hashed result publication | Installed filesystems, recovery and complete execution |
 | 13 | PARTIAL: secure hosted companion, inert discovery, existing authenticated VDO route | Physical phone direct/relay/network-loss qualification |
 | 14 | PARTIAL: suspension/resume, no replay, stale-state denial, disarmed phone outputs and pending-activation cancellation | Physical Safari/Chrome lock and BFCache cases |
 | 15 | VERIFIED source policy: local setup, observer scope, participant-free public projection and fresh invitations | Physical expiry/revocation; remembered phones remain unselected |
 | 16 | VERIFIED: locked Designer Vite 6.4.3/nanoid patch; both npm audits report zero advisories | Retain locked byte checks |
-| 17 | PARTIAL: exact-revision CI validation packages; isolated Windows NSIS Runner install and package/schedule/PCM preparation; fresh install inventory, frontend resource hashes, and real installed Runner WebView/native snapshot/tab audit; source/Pages checks | Two-app Full installer, installed complete run, measured output/response/calibration and supported routes |
+| 17 | PARTIAL: exact-revision two-app Full NSIS validation installer; 21-item source/installed inventory; both installed WebViews, 3DTI audio, Planner JSON to Runner package/schedule/PCM/partial journal handoff; clean install, reinstall, uninstall and Shared incompatibility rejection | Installed complete run, finalized recording, measured output/response/calibration, supported routes and signed release |
 
 ## Current source evidence
+
+- Full candidate `74ebd6d88ac9d7898a6149e4e011e6422896889a` passed all
+  16 non-skipped [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37220850990).
+  The [single Full validation installer](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37220850990/artifacts/11310537053)
+  has SHA-256 `2ae3a0a1ba8dbf8d63eed32101246a9907ef8278715ce050b8b9eb38bd2d1f2b`.
+  Its installed Planner rendered 3DTI media and exported a five-source JSON
+  profile; its installed Runner prepared the matching `P001` one-block package
+  (3 channels, 44.1 kHz, 7,938 frames), compiled the schedule, prepared PCM,
+  and wrote a durable partial journal and 18-column CSV. The 21-item Full
+  inventory and reinstall inventory had zero missing/mismatched entries;
+  uninstall and incompatible-Shared rejection passed. No physical output,
+  participant playback, complete recording, or local-PC reinstall was tested.
 
 - Two-part Planner-profile source candidate: the native producer follows the
   existing Python `pps-runner-part-split.v1` and `pps-run-session-group.v1`
