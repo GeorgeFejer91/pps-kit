@@ -32,27 +32,24 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   closed unity-gain, channel-for-channel route for 4–18-channel WAVs.
   Local/phone control shares one actor,
   callback scheduler, and result journal. Source activation and result
-  publication remain unqualified for participant use.
-- **Latest completed evidence:** bounded multichannel assembly source `00bd77d3`
-  passed local Rust audio/CPAL/media tests, Clippy, formatting, eleven
-  Python/Rust differential tests, and all 14
-  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37184677260).
-  Its Runner-only NSIS package passed a fresh Windows CI install inventory.
-  The downloaded validation marker matches the commit and its SHA-256 matches
-  the artifact manifest. Installed executable and HTML/CSS hashes were recorded.
-  That package was not launched; physical output was not tested.
-- **Installed Runner UI evidence:** all 14 normal
-  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37188235590)
-  passed for source `bcfc444e`. The separate Runner-only NSIS validation
-  artifact has installer SHA-256
-  `4da4b70f175791a668af02e53f4c8d5ed7bde5ddf58ead68c9183e3c3d83bdd3`,
-  matching its manifest. Fresh Windows CI installation matched the installed
-  HTML/CSS to the canonical compiled files and launched the real WebView/Rust
-  bridge. The control, logging and remote tabs passed interaction and horizontal
-  overflow checks; their screenshots were inspected. The retained report and
-  inventory agree on the installed binary hash and document an idle, unverified,
-  disarmed state. No participant execution, physical output, recording, or Full
-  installer was verified by this UI audit.
+  publication remain unqualified for participant use. Failed in-process native
+  profile-package publication now rolls back newly linked destination files.
+- **Latest completed evidence:** local media tests (5), Clippy, and one-block
+  and two-block Python/Rust package differentials passed for the publication
+  rollback. All 14 normal
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37190366500)
+  passed for source `7591525c`, including three-platform Core/Desktop and
+  Python/Rust oracles plus Windows/macOS/Linux validation bundles.
+- **Installed Runner UI evidence:** the Runner-only NSIS validation installer
+  from that exact run has SHA-256
+  `7d88a8db9e52dc6dd1ecf296f450552b607681de959324af825722fc10edba45`,
+  matching its manifest and commit marker. Fresh Windows CI installation
+  matched bundled HTML/CSS to canonical source and launched the real WebView.
+  The idle Rust snapshot and control, logging, and remote tab checks passed;
+  all three screenshots were inspected. Inventory and report agree on installed
+  binary SHA-256 `d521696bd91a3d1f17ad798fce7cf507b08e011db201d821d45c8b0723e1808b`.
+  No participant execution, physical output, recording, or Full installer was
+  verified by this UI audit.
 - **Next gates:** qualify each larger-array hardware route and its levels,
   then run the installed native
   single-block workflow on a compatible calibrated device; validate event/CSV
