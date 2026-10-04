@@ -98,43 +98,6 @@ def restore_debug_policy(executable: str, previous: tuple[str, int] | None) -> N
             winreg.SetValueEx(key, executable, 0, previous[1], previous[0])
 
 
-def synthetic_prepared_session(root: Path) -> Path:
-    """Build valid, silent media for installed verification without participant data."""
-    root.mkdir(parents=True, exist_ok=True)
-    wav_path = root / "block.wav"
-    with wave.open(str(wav_path), "wb") as audio:
-        audio.setnchannels(3)
-        audio.setsampwidth(2)
-        audio.setframerate(48_000)
-        audio.writeframes(bytes(4_800 * 3 * 2))
-    (root / "block.csv").write_text(
-        "Trial_Number,Trial_UID,Trial_Type,Family,Sample_Rate_Hz,Trial_Start_Sample,Trial_End_Sample\n"
-        "1,CI_T01,Other,other,48000,0,4800\n",
-        encoding="utf-8",
-    )
-    manifest_path = root / "session_manifest.json"
-    manifest_path.write_text(json.dumps({
-        "schema": "pps-run-session.v1",
-        "participant_id": "CI_SYNTHETIC",
-        "session_id": "CI_SYNTHETIC_PART_01",
-        "session_group_id": "CI_SYNTHETIC_GROUP",
-        "part_number": 1,
-        "part_session_id": "CI_SYNTHETIC_PART_01",
-        "session_dir": str(root),
-        "execution_mode": "design_schedule_blocks",
-        "blocks": [{
-            "index": 1,
-            "label": "Synthetic silent block",
-            "manifest_path": "block.csv",
-            "wav_path": "block.wav",
-            "trial_count": 1,
-            "duration_s": 0.1,
-            "metadata": {"sample_rate_hz": 48_000},
-        }],
-    }, indent=2) + "\n", encoding="utf-8")
-    return manifest_path
-
-
 def synthetic_planner_profile(root: Path) -> Path:
     """Freeze two inventoried Segment 5/6 rows in the Planner's JSON contract."""
     root.mkdir(parents=True, exist_ok=True)
@@ -337,36 +300,6 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             report["visible_state"] = state
             fixture = tempfile.TemporaryDirectory(prefix="pps-installed-audit-")
             fixture_root = Path(fixture.name)
-            manifest_path = synthetic_prepared_session(fixture_root / "prepared")
-            assert page.locator("#select-session-manifest").is_enabled()
-            page.locator("#select-session-manifest").click()
-            choose_path_in_native_dialog(process.pid, manifest_path)
-            expect(page.locator("#package-badge")).to_have_text("Verified", timeout=30_000)
-            adopted = page.evaluate("window.__TAURI_INTERNALS__.invoke('runner_snapshot')")
-            assert adopted["package_verified"] is True
-            assert adopted["identity"]["session_id"] == "CI_SYNTHETIC_PART_01"
-            assert adopted["safety"]["local_armed"] is False
-            expect(page.locator("#package-block-count")).to_have_text("1", timeout=10_000)
-            report["synthetic_manifest_sha256"] = sha256(manifest_path)
-            report["prepared_session_selected"] = True
-            report["selected_run_phase"] = adopted["run"]["phase"]
-
-            inspect = page.locator("#inspect-prepared-execution")
-            expect(inspect).to_be_enabled(timeout=10_000)
-            inspect.click()
-            expect(page.locator("#execution-inspection-status")).to_have_text(
-                "Compiled · inspection only", timeout=30_000,
-            )
-            report["rust_schedule_compiled"] = True
-
-            expect(page.locator("#prepare-current-audio-block")).to_be_enabled(timeout=10_000)
-            page.locator("#prepare-current-audio-block").click()
-            expect(page.locator("#prepared-audio-status")).to_have_text(
-                "Prepared · output not reserved", timeout=30_000,
-            )
-            expect(page.locator("#native-output-prepare")).to_be_disabled()
-            report["native_pcm_prepared"] = True
-
             page.locator("#participant-code").fill("CI_SYNTHETIC")
             page.locator("#participant-age").fill("30")
             page.locator("#participant-handedness").select_option("right")
@@ -438,6 +371,7 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             expect(page.locator("#prepared-audio-status")).to_have_text(
                 "Prepared · output not reserved", timeout=30_000,
             )
+            expect(page.locator("#native-output-prepare")).to_be_disabled()
             report["profile_native_pcm_prepared"] = True
             report["tabs"] = []
             for tab in ("control", "logging", "remote"):

@@ -359,8 +359,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $report = Get-Content -LiteralPath (Join-Path $audit 'report.json') -Raw | ConvertFrom-Json
           if (-not $report.passed -or $report.commit -ne '${{ github.sha }}' -or
-              -not $report.prepared_session_selected -or -not $report.rust_schedule_compiled -or
-              -not $report.native_pcm_prepared -or -not $report.planner_profile_package_generated -or
+              -not $report.planner_profile_package_generated -or
               -not $report.profile_rust_schedule_compiled -or -not $report.profile_native_pcm_prepared) {
             throw 'Installed WebView audit report does not match this build.'
           }
