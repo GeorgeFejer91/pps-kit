@@ -95,3 +95,6 @@ verified, then **Ready** when the package and setup are both ready.
 After native Planner profile preparation or manifest selection, Runner refreshes
 its authority snapshot before reporting success so the package badge reflects
 the adopted package even if an earlier subscription event was delayed.
+Native epoch IDs are random generations, not ordered numbers. The desktop view
+accepts each new generation and rejects later events from retired generations;
+within one generation, its displayed revision never regresses.

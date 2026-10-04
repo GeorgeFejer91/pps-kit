@@ -17,6 +17,7 @@ import { renderQrCode } from "./ui/qr-code.js";
 import { initializeTextLayout } from "./ui/text-layout.js";
 import { bindParticipantResponse } from "./ui/participant-response.js";
 import { bindNativeOutputSetup } from "./ui/native-output-setup.js";
+import { createNativeSnapshotOrder } from "./ui/native-snapshot-order.js";
 import { installBrowserLifecycle } from "./remote/browser-lifecycle.js";
 
 initializeTextLayout();
@@ -42,6 +43,7 @@ const outboundActionButtons = [...document.querySelectorAll("[data-controller-ac
 const MAX_PENDING_NATIVE_COMMANDS = 32;
 
 let snapshot = null;
+const acceptNativeSnapshot = createNativeSnapshotOrder();
 let preparedPlan = null;
 let preparedExecution = null;
 let preparedAudio = null;
@@ -264,9 +266,7 @@ function updateInboundPolicyUi() {
 }
 
 function renderSnapshot(next) {
-  if (!next || typeof next !== "object") return;
-  if (snapshot && (next.epoch < snapshot.epoch
-    || (next.epoch === snapshot.epoch && next.revision < snapshot.revision))) return;
+  if (!acceptNativeSnapshot(next)) return;
   snapshot = next;
   participantResponse.refresh(next);
   const phase = next.run?.phase ?? "unknown";
