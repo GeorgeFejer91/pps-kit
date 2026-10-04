@@ -47,6 +47,11 @@
       "boundary": "Native PCM and exact 2-18-channel renderer-plan preparation reported to the desktop WebView"
     },
     {
+      "id": "pps-runner-native-latency-summary.v2",
+      "owner": "apps/runner/src-tauri/src/latency_diagnostics.rs",
+      "boundary": "Aggregate native command and mailbox latency diagnostics reported to the desktop WebView"
+    },
+    {
       "id": "pps-runner-native-output-preflight.v1",
       "owner": "apps/runner/src-tauri/src/native_output.rs",
       "boundary": "Local output readiness reported to the desktop WebView"
