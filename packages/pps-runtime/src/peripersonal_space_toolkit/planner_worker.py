@@ -54,7 +54,8 @@ async def _serve() -> None:
 
     wire = sys.stdout.buffer
     sys.stdout = sys.stderr
-    app = create_app(DashboardController(), web_origins=[], require_mutation_token=False)
+    app = create_app(DashboardController(), web_origins=[], require_mutation_token=False,
+                     mount_frontend=False)
     transport = httpx.ASGITransport(app=app)
     async with app.router.lifespan_context(app):
         async with httpx.AsyncClient(transport=transport, base_url="http://planner.local") as client:

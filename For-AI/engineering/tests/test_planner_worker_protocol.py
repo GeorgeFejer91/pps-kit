@@ -9,6 +9,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+from fastapi.testclient import TestClient
+from peripersonal_space_toolkit import dashboard_app
+
 
 def test_planner_worker_accepts_api_and_rejects_other_paths(tmp_path):
     requests = [
@@ -52,3 +55,12 @@ def test_planner_worker_accepts_api_and_rejects_other_paths(tmp_path):
     assert all("body_base64" not in reply for reply in replies[2:4])
     custom = json.loads(base64.b64decode(replies[4]["body_base64"]))
     assert custom["design"]["name"] == "Worker smoke study"
+
+
+def test_private_planner_api_starts_without_a_second_frontend(tmp_path, monkeypatch):
+    monkeypatch.setenv("PPS_TOOLKIT_DATA_ROOT", str(tmp_path))
+    monkeypatch.setattr(dashboard_app, "designer_frontend_root", lambda: tmp_path / "absent-frontend")
+    with TestClient(dashboard_app.create_app(web_origins=[], require_mutation_token=False,
+                                             mount_frontend=False)) as client:
+        assert client.get("/api/health").status_code == 200
+        assert not any(route.path == "/dashboard" for route in client.app.routes)

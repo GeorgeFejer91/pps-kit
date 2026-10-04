@@ -323,6 +323,12 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
             try:
                 expect(page.locator("#package-badge")).to_have_text("Verified", timeout=30_000)
             except AssertionError:
+                report["package_preparation_ui_on_failure"] = {
+                    "badge": page.locator("#package-badge").inner_text(),
+                    "label": page.locator("#package-label").inner_text(),
+                    "revision": page.locator("#revision").inner_text(),
+                    "phase": page.locator("#state-chip").inner_text(),
+                }
                 report["package_preparation_files_on_failure"] = [
                     {"path": str(path.relative_to(generated[0])), "size": path.stat().st_size}
                     for path in sorted(generated[0].rglob("*")) if path.is_file()

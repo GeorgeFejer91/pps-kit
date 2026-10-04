@@ -16,6 +16,10 @@ The user selected the stable Planner bundle identifier
 | Component definitions | `distributions/manifests/` | Extend or version the manifests for the Tauri layout; one file owner and an exact Full composition. |
 | Build and inventory logic | `For-AI/engineering/build/`, `For-AI/engineering/release/` | Reuse and adapt existing scripts instead of creating a second manifest or audit implementation. |
 
+The Full Planner worker serves only private `/api/*` calls through stdio;
+its dashboard factory skips static frontend mounting. Tauri embeds the Planner
+HTML, and Full installs the Shared resources once outside the worker.
+
 ## Build sequence
 
 1. Select a verified source revision. Complete both local Tauri shells, their

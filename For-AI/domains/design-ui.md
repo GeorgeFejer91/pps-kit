@@ -92,3 +92,6 @@ native package selection, schedule inspection, and PCM preparation. Installed
 zoom, long-label, and text-spacing cases remain open.
 The participant badge shows **Submitted** after valid setup before a package is
 verified, then **Ready** when the package and setup are both ready.
+After native Planner profile preparation or manifest selection, Runner refreshes
+its authority snapshot before reporting success so the package badge reflects
+the adopted package even if an earlier subscription event was delayed.

@@ -2741,6 +2741,7 @@ def create_app(
     web_origins: list[str] | tuple[str, ...] | None = None,
     companion_token: str | None = None,
     require_mutation_token: bool | None = None,
+    mount_frontend: bool = True,
 ) -> Any:
     try:
         from fastapi import Body, FastAPI, HTTPException, Request
@@ -2805,12 +2806,13 @@ def create_app(
             allow_headers=["Content-Type", TOKEN_HEADER],
             allow_credentials=False,
         )
-    dashboard_dir = designer_frontend_root()
-    viewer_dir = dashboard_dir / "compiled" / "viewer"
-    if not (dashboard_dir / "compiled" / "index.html").is_file():
-        raise RuntimeError(f"Designer frontend was not found: {dashboard_dir}")
-    if not (viewer_dir / "index.html").is_file():
-        raise RuntimeError(f"Trajectory viewer was not found: {viewer_dir}")
+    if mount_frontend:
+        dashboard_dir = designer_frontend_root()
+        viewer_dir = dashboard_dir / "compiled" / "viewer"
+        if not (dashboard_dir / "compiled" / "index.html").is_file():
+            raise RuntimeError(f"Designer frontend was not found: {dashboard_dir}")
+        if not (viewer_dir / "index.html").is_file():
+            raise RuntimeError(f"Trajectory viewer was not found: {viewer_dir}")
 
     @app.get("/")
     def index() -> Any:
@@ -2831,8 +2833,9 @@ def create_app(
         )
         return response
 
-    app.mount("/dashboard", StaticFiles(directory=str(dashboard_dir)), name="dashboard")
-    app.mount("/viewer", StaticFiles(directory=str(viewer_dir)), name="viewer")
+    if mount_frontend:
+        app.mount("/dashboard", StaticFiles(directory=str(dashboard_dir)), name="dashboard")
+        app.mount("/viewer", StaticFiles(directory=str(viewer_dir)), name="viewer")
     public_assets_dir = REPO_ROOT / "assets"
     if _path_exists(public_assets_dir):
         app.mount("/assets", StaticFiles(directory=str(public_assets_dir)), name="public_assets")

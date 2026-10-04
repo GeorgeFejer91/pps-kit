@@ -1007,6 +1007,7 @@ function bindLocalActions() {
         return;
       }
       renderPreparedPlan(selection?.summary);
+      await refreshSnapshot();
       await refreshRemote();
       showToast("Planner JSON profile prepared and adopted by the native Runner.");
     } catch (error) {
@@ -1030,6 +1031,7 @@ function bindLocalActions() {
         return;
       }
       renderPreparedPlan(selection?.summary);
+      await refreshSnapshot();
       await refreshRemote();
       showToast("Prepared session verified and adopted by the native Rust authority.");
     } catch (error) {
