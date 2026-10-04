@@ -619,10 +619,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm --prefix apps/runner ci
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          npm --prefix apps/runner run build
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          cargo build --locked --release -p pps-experiment-runner
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Push-Location apps/runner
+          try {
+            & ./node_modules/.bin/tauri.cmd build --ci --no-bundle --no-sign
+            if ($LASTEXITCODE -ne 0) { throw "Runner production build failed: $LASTEXITCODE" }
+          }
+          finally {
+            Pop-Location
+          }
       - name: Build Planner worker against the single external Shared tree
         shell: pwsh
         run: |

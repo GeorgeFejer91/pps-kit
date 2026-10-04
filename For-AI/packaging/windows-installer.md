@@ -31,6 +31,8 @@ tree.
    revision. Confirm each installed WebView loads its bundled HTML without a
    network connection or Pages route. Do not include development URLs,
    localhost servers, or desktop privileges in public Pages assets.
+   Build Runner for the Full package with `tauri build --no-bundle`; direct
+   `cargo build --release` retains its development URL in the WebView.
 3. Update the component manifests for the actual Tauri file layout. Assemble
    Designer, Runner, and one Shared tree; audit ownership, exclusions, runtime
    dependencies, licenses, hashes, and installed paths. Keep private files,
