@@ -59,6 +59,39 @@ def _python_accepts(path: Path) -> bool:
     return True
 
 
+def _participant_profile(folder: Path) -> Path:
+    profile_path = _profile(folder)
+    profile = json.loads(profile_path.read_text(encoding="utf-8"))
+    setup_path = Path(profile["run_setup_path"])
+    setup = json.loads(setup_path.read_text(encoding="utf-8"))
+    order_path = Path(setup["csv_path"])
+    first_block = folder / "block.csv"
+    second_block = folder / "second.csv"
+    with second_block.open("w", encoding="utf-8", newline="") as output:
+        writer = csv.DictWriter(output, fieldnames=["trial_file_path"])
+        writer.writeheader()
+        writer.writerows([{"trial_file_path": str(folder / "ingredient.wav")}] * 2)
+    with order_path.open("w", encoding="utf-8", newline="") as output:
+        writer = csv.DictWriter(output, fieldnames=[
+            "participant_id", "phase_index", "participant_block_position", "block_csv_path", "block_label",
+        ])
+        writer.writeheader()
+        writer.writerows([
+            {"participant_id": "P002", "phase_index": 1, "participant_block_position": 1,
+             "block_csv_path": str(first_block), "block_label": "Other"},
+            {"participant_id": "P001", "phase_index": 1, "participant_block_position": 2,
+             "block_csv_path": str(second_block), "block_label": "Second"},
+            {"participant_id": "P001", "phase_index": 1, "participant_block_position": 1,
+             "block_csv_path": str(first_block), "block_label": "First"},
+        ])
+    setup["total_block_runs"] = 3
+    setup_path.write_text(json.dumps(setup), encoding="utf-8")
+    profile_path.write_bytes(experiment_profile_bytes(
+        create_experiment_profile(default_design(), setup_path, source_revision=9)
+    ))
+    return profile_path
+
+
 def test_rust_profile_inventory_matches_python_for_export_and_stale_sources(tmp_path: Path) -> None:
     valid = _profile(tmp_path / "valid")
     bom = valid.with_name("experiment-bom.json")
@@ -96,3 +129,45 @@ def test_rust_profile_inventory_matches_python_for_export_and_stale_sources(tmp_
     assert rust[5]["code"] == "profile_run_setup_missing"
     assert rust[6]["code"] == "profile_ingredient_invalid"
     assert rust[7]["code"] == "profile_schema_unsupported"
+
+
+def test_rust_selects_existing_participant_block_order_and_rejects_profile_divergence(tmp_path: Path) -> None:
+    valid = _participant_profile(tmp_path / "valid")
+    tampered = valid.with_name("experiment-tampered.json")
+    value = json.loads(valid.read_text(encoding="utf-8"))
+    value["assembly"]["blocks"][0]["rows"][0]["trial_file_path"] = "different.wav"
+    tampered.write_text(json.dumps(value), encoding="utf-8")
+    unlisted = valid.with_name("experiment-unlisted.json")
+    value = json.loads(valid.read_text(encoding="utf-8"))
+    value["files"] = [item for item in value["files"] if Path(item["path"]).name != "ingredient.wav"]
+    unlisted.write_text(json.dumps(value), encoding="utf-8")
+    count_mismatch = _participant_profile(tmp_path / "count-mismatch")
+    count_setup_path = Path(json.loads(count_mismatch.read_text(encoding="utf-8"))["run_setup_path"])
+    count_setup = json.loads(count_setup_path.read_text(encoding="utf-8"))
+    count_setup["total_block_runs"] = 99
+    count_setup_path.write_text(json.dumps(count_setup), encoding="utf-8")
+    count_mismatch.write_bytes(experiment_profile_bytes(
+        create_experiment_profile(default_design(), count_setup_path, source_revision=10)
+    ))
+    cases = [
+        {"profile_path": str(valid), "participant_id": "P001"},
+        {"profile_path": str(valid), "participant_id": "P002"},
+        {"profile_path": str(valid), "participant_id": "P999"},
+        {"profile_path": str(tampered), "participant_id": "P001"},
+        {"profile_path": str(unlisted), "participant_id": "P001"},
+        {"profile_path": str(count_mismatch), "participant_id": "P001"},
+    ]
+    completed = subprocess.run(
+        ["cargo", "run", "--quiet", "--locked", "-p", "pps-session-package", "--example", "experiment_plan_probe"],
+        cwd=ROOT, input=json.dumps({"cases": cases}),
+        text=True, capture_output=True, check=True,
+    )
+    rust = json.loads(completed.stdout)
+    assert rust[:3] == [
+        {"accepted": True, "code": "selected", "block_labels": ["First", "Second"], "trial_counts": [1, 2]},
+        {"accepted": True, "code": "selected", "block_labels": ["Other"], "trial_counts": [1]},
+        {"accepted": False, "code": "profile_participant_missing", "block_labels": [], "trial_counts": []},
+    ]
+    assert [row["code"] for row in rust[3:]] == [
+        "profile_plan_invalid", "profile_plan_ingredient_not_listed", "profile_plan_invalid",
+    ]

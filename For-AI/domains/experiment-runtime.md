@@ -43,9 +43,12 @@ and existing lineage gates. The compatibility Runner accepts
 assembler after verifying the inventory. Remote projections never carry paths.
 `pps-session-package::experiment_profile` now verifies that same JSON's bounded
 local ingredient inventory in pure Rust and retains a native-only path/hash
-receipt. It is read-only preflight, not native assembly or execution. Recheck
-the ingredient bytes when the native assembler consumes them; never turn this
-receipt into a WebView or phone projection.
+receipt. `pps-session-package::experiment_plan` then selects one participant's
+existing Segment 6 block order and Segment 5 trial audio references. It
+rechecks the profile, run setup, source manifest and consumed CSV bytes against
+the exported inventory and frozen rows; it does not schedule, bake media or
+authorize execution. Recheck audio bytes when the native assembler consumes
+them. Neither path-bearing receipt may become a WebView or phone projection.
 
 Designer generation jobs bind to the captured design signature. Ingredient media
 stays in staging until the source and cooperative cancellation checks admit

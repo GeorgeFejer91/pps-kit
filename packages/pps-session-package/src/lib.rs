@@ -6,6 +6,7 @@
 //! no filesystem paths or hashes; resolved paths and digests remain in the
 //! Rust-only [`VerifiedPreparedSession`] receipt.
 
+pub mod experiment_plan;
 pub mod experiment_profile;
 
 use std::{

@@ -5,7 +5,9 @@ use std::{
 };
 
 use pps_session_package::{
-    verify_prepared_session, VerificationErrorCode, VerificationRequest, MAX_PREPARED_BLOCKS,
+    experiment_plan::select_profile_participant,
+    experiment_profile::verify_experiment_profile_inventory, verify_prepared_session,
+    VerificationErrorCode, VerificationRequest, MAX_PREPARED_BLOCKS,
     MAX_PREPARED_BLOCK_METADATA_BYTES, MAX_SESSION_MANIFEST_BYTES, PARTICIPANT_BLOCK_WAVS_MODE,
     RUN_PACKAGE_SCHEMA, VERIFIED_MESSAGE,
 };
@@ -67,6 +69,89 @@ fn sha256(path: &Path) -> String {
         "{:x}",
         Sha256::digest(fs::read(path).expect("read hash fixture"))
     )
+}
+
+#[test]
+fn planner_profile_selection_rechecks_profile_and_csv_after_inventory_verification() {
+    let root = TestDirectory::new();
+    let accepted = root.join("accepted.json");
+    let audio = root.join("trial.wav");
+    let block = root.join("block.csv");
+    let order = root.join("order.csv");
+    let setup = root.join("setup.json");
+    let profile = root.join("experiment.json");
+    write(&accepted, br#"{"accepted":true}"#);
+    write(&audio, b"test audio ingredient");
+    write(&block, format!("trial_file_path\n{}\n", audio.display()));
+    write(
+        &order,
+        format!(
+            "participant_id,phase_index,participant_block_position,block_csv_path,block_label\nP001,1,1,{},First\n",
+            block.display()
+        ),
+    );
+    let run_setup = json!({
+        "schema": "pps-experiment-run-setup.v1",
+        "prepared": true,
+        "source_segment5_manifest": accepted,
+        "source_segment5_manifest_sha256": sha256(&accepted),
+        "csv_path": order,
+        "total_block_runs": 1,
+    });
+    write_json(&setup, &run_setup);
+    let files: Vec<Value> = [&accepted, &order, &block, &audio, &setup]
+        .into_iter()
+        .map(|path| {
+            json!({
+                "path": path,
+                "bytes": fs::metadata(path).expect("ingredient metadata").len(),
+                "sha256": sha256(path),
+            })
+        })
+        .collect();
+    write_json(
+        &profile,
+        &json!({
+            "schema": "pps-experiment-profile.v1",
+            "profile_id": "",
+            "display_name": "Synthetic",
+            "source_revision": 1,
+            "design": {},
+            "run_setup_path": setup,
+            "assembly": {
+                "run_setup": run_setup,
+                "block_order": [{
+                    "participant_id": "P001", "phase_index": "1", "participant_block_position": "1",
+                    "block_csv_path": block, "block_label": "First"
+                }],
+                "blocks": [{
+                    "source_csv_path": block, "label": "First",
+                    "rows": [{"trial_file_path": audio}]
+                }],
+            },
+            "files": files,
+        }),
+    );
+    let verified =
+        verify_experiment_profile_inventory(&profile).expect("verify exported inventory");
+    let selected =
+        select_profile_participant(&verified, "P001").expect("select approved participant");
+    assert_eq!(selected.blocks().len(), 1);
+    assert_eq!(selected.blocks()[0].trials().len(), 1);
+    write(&order, b"participant_id,phase_index,participant_block_position,block_csv_path,block_label\nP002,1,1,changed,Other\n");
+    assert_eq!(
+        select_profile_participant(&verified, "P001")
+            .unwrap_err()
+            .code(),
+        "profile_plan_source_changed"
+    );
+    write(&profile, b"{}");
+    assert_eq!(
+        select_profile_participant(&verified, "P001")
+            .unwrap_err()
+            .code(),
+        "profile_changed"
+    );
 }
 
 fn legacy_fixture(root: &TestDirectory) -> PathBuf {
