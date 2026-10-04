@@ -26,6 +26,16 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
+- Two-part Planner-profile source candidate: the native producer follows the
+  existing Python `pps-runner-part-split.v1` and `pps-run-session-group.v1`
+  boundaries for approved pre/post plans. It returns Part 1 for Runner adoption,
+  keeps Part 2 as a separate verified package, and rolls back a failed Part 2
+  publication without touching unrelated files. The Python/Rust differential
+  compares both parts' PCM bytes and prepared row identities; Python can load
+  both manifests. Local media/session-package tests, Clippy, and catalog checks
+  passed. Installed part transition, result-group completion, hardware output,
+  recording and the two-app Full installer are not established by this source
+  evidence.
 - Sequential native-block and next-block UI source checkpoint
   `af15af80315dabab67333cede047bd7469813f75` passed all 14 normal
   [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37193395931):

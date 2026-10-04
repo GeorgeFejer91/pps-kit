@@ -101,6 +101,34 @@ impl Drop for PublishedDirectory {
     }
 }
 
+#[derive(Clone, Copy)]
+struct SplitPart<'a> {
+    group_id: &'a str,
+    session_id: &'a str,
+    folder: &'static str,
+    sibling_manifest: &'a Path,
+}
+
+struct PublishedGroup {
+    path: PathBuf,
+    retained: bool,
+}
+
+impl PublishedGroup {
+    fn retain(&mut self) {
+        self.retained = true;
+    }
+}
+
+impl Drop for PublishedGroup {
+    fn drop(&mut self) {
+        if !self.retained {
+            let _ = fs::remove_file(self.path.join("session_group_manifest.json"));
+            let _ = fs::remove_dir(&self.path);
+        }
+    }
+}
+
 fn path_text(path: &Path) -> Result<&str, ProfilePackageError> {
     path.to_str()
         .ok_or(package_error("profile_package_path_unsupported"))
@@ -870,11 +898,12 @@ fn prepared_csv(
     assembled: &AssembledBlockWav,
     ordinal: usize,
     session_id: &str,
+    split: Option<(&str, usize)>,
 ) -> Result<Vec<u8>, ProfilePackageError> {
     let mut rows = Vec::with_capacity(block.trials().len());
     let mut columns = BTreeSet::new();
     for (index, span) in assembled.spans().iter().enumerate() {
-        let row = prepared_row(
+        let mut row = prepared_row(
             plan,
             block,
             span,
@@ -883,6 +912,12 @@ fn prepared_csv(
             session_id,
             assembled.sample_rate_hz(),
         )?;
+        if let Some((group_id, global_ordinal)) = split {
+            set(&mut row, "Session_Group_ID", group_id);
+            set(&mut row, "Part_Session_ID", session_id);
+            set(&mut row, "Global_Block_Index", global_ordinal);
+            set(&mut row, "Part_Block_Number", ordinal);
+        }
         columns.extend(row.keys().cloned());
         rows.push(row);
     }
@@ -996,48 +1031,36 @@ fn publish_staged_package(
     Ok(published)
 }
 
-/// Materialize all blocks of one single-phase participant profile and return
-/// Runner's existing native V1 verification receipt. No existing path is overwritten.
-pub fn prepare_standard_profile_package(
+fn prepare_one_profile_part(
     profile: &VerifiedExperimentProfile,
-    participant_id: &str,
-    requested_dir: &Path,
+    plan: &ProfileParticipantPlan,
+    output_dir: &Path,
+    selected_indices: &[usize],
+    selected_phase: &str,
+    split: Option<SplitPart<'_>>,
     generation: u64,
-) -> Result<VerifiedPreparedSession, ProfilePackageError> {
-    let plan = select_profile_participant(profile, participant_id)
-        .map_err(|error| package_error(error.code()))?;
-    let parent = requested_dir
+) -> Result<(VerifiedPreparedSession, PublishedDirectory), ProfilePackageError> {
+    let session_id = if let Some(part) = split {
+        part.session_id
+    } else {
+        output_dir
+            .file_name()
+            .and_then(|name| name.to_str())
+            .ok_or(package_error("profile_package_path_unsupported"))?
+    };
+    let parent = output_dir
         .parent()
         .ok_or(package_error("profile_package_path_unsupported"))?;
-    let parent =
-        fs::canonicalize(parent).map_err(|_| package_error("profile_package_output_failed"))?;
-    let session_id = requested_dir
-        .file_name()
-        .and_then(|name| name.to_str())
-        .filter(|name| {
-            !name.is_empty()
-                && name.len() <= 128
-                && name.chars().all(|character| {
-                    character.is_ascii_alphanumeric() || matches!(character, '_' | '-')
-                })
-        })
-        .ok_or(package_error("profile_package_path_unsupported"))?;
-    if !session_id.starts_with(plan.participant_id()) {
-        return Err(package_error("profile_package_identity_invalid"));
-    }
-    let output_dir = parent.join(session_id);
     if output_dir.exists() {
         return Err(package_error("profile_package_output_exists"));
     }
-    let selected_phase = phase(
-        plan.blocks()
-            .first()
-            .ok_or(package_error("profile_package_plan_invalid"))?,
-    )?;
-    if plan
-        .blocks()
-        .iter()
-        .any(|block| phase(block).ok() != Some(selected_phase))
+    if selected_indices.is_empty()
+        || selected_indices.iter().any(|index| {
+            plan.blocks()
+                .get(*index)
+                .and_then(|block| phase(block).ok())
+                != Some(selected_phase)
+        })
     {
         return Err(package_error("profile_package_phase_unsupported"));
     }
@@ -1061,17 +1084,18 @@ pub fn prepare_standard_profile_package(
     let pending = pending.ok_or(package_error("profile_package_output_failed"))?;
     let stage_blocks = pending.0.join("blocks");
     fs::create_dir(&stage_blocks).map_err(|_| package_error("profile_package_output_failed"))?;
-    let mut blocks = Vec::with_capacity(plan.blocks().len());
-    let mut assembled = Vec::with_capacity(plan.blocks().len());
+    let mut blocks = Vec::with_capacity(selected_indices.len());
+    let mut assembled = Vec::with_capacity(selected_indices.len());
     let mut total_wav_bytes = 0_u64;
-    for (index, block) in plan.blocks().iter().enumerate() {
+    for (index, global_index) in selected_indices.iter().enumerate() {
         let ordinal = index + 1;
+        let block = &plan.blocks()[*global_index];
         let stem = format!("Block_{ordinal:02}");
         let wav_name = format!("{stem}.wav");
         let csv_name = format!("{stem}.csv");
         let media = assemble_standard_profile_block(
-            &plan,
-            ordinal,
+            plan,
+            *global_index + 1,
             &stage_blocks.join(&wav_name),
             generation,
         )
@@ -1080,7 +1104,14 @@ pub fn prepare_standard_profile_package(
             .checked_add(media.bytes())
             .filter(|bytes| *bytes <= MAX_TOTAL_PREPARED_BLOCK_WAV_BYTES)
             .ok_or(package_error("profile_package_limit"))?;
-        let csv = prepared_csv(&plan, block, &media, ordinal, session_id)?;
+        let csv = prepared_csv(
+            plan,
+            block,
+            &media,
+            ordinal,
+            session_id,
+            split.map(|part| (part.group_id, *global_index + 1)),
+        )?;
         write_sync(&stage_blocks.join(&csv_name), &csv)?;
         let label = field(block.order_fields(), &["block_label"]);
         let label = if label.is_empty() {
@@ -1088,27 +1119,35 @@ pub fn prepare_standard_profile_package(
         } else {
             label.to_owned()
         };
-        blocks.push(json!({
+        let phase_label = field(block.order_fields(), &["phase_label"]);
+        let mut entry = json!({
             "index": ordinal, "label": label, "manifest_path": format!("blocks/{csv_name}"),
             "wav_path": format!("blocks/{wav_name}"), "trial_count": block.trials().len(),
             "duration_s": media.frames() as f64 / f64::from(media.sample_rate_hz()),
             "metadata": {
                 "execution_mode": PARTICIPANT_BLOCK_WAVS_MODE,
                 "phase": selected_phase,
-                "phase_label": display_phase(selected_phase),
+                "phase_label": if phase_label.is_empty() { display_phase(selected_phase) } else { phase_label },
                 "part_number": part_number,
                 "source_block_csv_path": path_text(block.source_csv_path())?,
                 "source_block_csv_sha256": block.source_csv_sha256(),
                 "sample_rate_hz": media.sample_rate_hz(),
                 "channels": media.channels(),
             }
-        }));
+        });
+        if let Some(part) = split {
+            entry["metadata"]["session_group_id"] = json!(part.group_id);
+            entry["metadata"]["part_session_id"] = json!(session_id);
+            entry["metadata"]["part_block_number"] = json!(ordinal);
+            entry["metadata"]["global_block_index"] = json!(*global_index + 1);
+        }
+        blocks.push(entry);
         assembled.push(media);
     }
-    select_profile_participant(profile, participant_id)
+    select_profile_participant(profile, plan.participant_id())
         .map_err(|error| package_error(error.code()))?;
     let stage_manifest = pending.0.join("session_manifest.json");
-    let manifest = json!({
+    let mut manifest = json!({
         "schema": RUN_PACKAGE_SCHEMA,
         "participant_id": plan.participant_id(),
         "session_id": session_id,
@@ -1119,25 +1158,180 @@ pub fn prepare_standard_profile_package(
         "source_run_setup_sha256": plan.run_setup_sha256(),
         "blocks": blocks,
     });
+    if let Some(part) = split {
+        manifest["session_group_id"] = json!(part.group_id);
+        manifest["part_split_schema"] = json!("pps-runner-part-split.v1");
+        manifest["part_folder_name"] = json!(part.folder);
+        manifest["session_group_manifest_path"] =
+            json!(path_text(&parent.join("session_group_manifest.json"))?);
+        manifest["sibling_part_manifest_paths"] = json!([path_text(part.sibling_manifest)?]);
+    }
     let manifest_bytes = serde_json::to_vec_pretty(&manifest)
         .map_err(|_| package_error("profile_package_manifest_failed"))?;
     write_sync(&stage_manifest, &manifest_bytes)?;
-    let _ = verify_and_compile(&stage_manifest, &plan, &assembled)?;
+    let _ = verify_and_compile(&stage_manifest, plan, &assembled)?;
     let mut published = publish_staged_package(
         &stage_blocks,
         &stage_manifest,
-        &output_dir,
-        plan.blocks().len(),
+        output_dir,
+        selected_indices.len(),
     )?;
     let pending_manifest = output_dir.join(".session_manifest.pending.json");
-    let _ = verify_and_compile(&pending_manifest, &plan, &assembled)?;
+    let _ = verify_and_compile(&pending_manifest, plan, &assembled)?;
     let final_manifest = output_dir.join("session_manifest.json");
     published.link(&pending_manifest, final_manifest.clone())?;
     fs::remove_file(&pending_manifest)
         .map_err(|_| package_error("profile_package_output_failed"))?;
-    let receipt = verify_and_compile(&final_manifest, &plan, &assembled)?;
-    published.retain();
-    Ok(receipt)
+    let receipt = verify_and_compile(&final_manifest, plan, &assembled)?;
+    Ok((receipt, published))
+}
+
+/// Materialize the approved participant's V1 package. A two-part Segment 6
+/// profile publishes separate pre/post packages under one group and returns
+/// Part 1 for the existing Runner adoption path. No existing path is overwritten.
+pub fn prepare_standard_profile_package(
+    profile: &VerifiedExperimentProfile,
+    participant_id: &str,
+    requested_dir: &Path,
+    generation: u64,
+) -> Result<VerifiedPreparedSession, ProfilePackageError> {
+    let plan = select_profile_participant(profile, participant_id)
+        .map_err(|error| package_error(error.code()))?;
+    let parent = requested_dir
+        .parent()
+        .ok_or(package_error("profile_package_path_unsupported"))?;
+    let parent =
+        fs::canonicalize(parent).map_err(|_| package_error("profile_package_output_failed"))?;
+    let group_id = requested_dir
+        .file_name()
+        .and_then(|name| name.to_str())
+        .filter(|name| {
+            !name.is_empty()
+                && name.len() <= 128
+                && name.chars().all(|character| {
+                    character.is_ascii_alphanumeric() || matches!(character, '_' | '-')
+                })
+        })
+        .ok_or(package_error("profile_package_path_unsupported"))?;
+    if !group_id.starts_with(plan.participant_id()) {
+        return Err(package_error("profile_package_identity_invalid"));
+    }
+    let output_dir = parent.join(group_id);
+    if output_dir.exists() {
+        return Err(package_error("profile_package_output_exists"));
+    }
+    let phases = plan
+        .blocks()
+        .iter()
+        .map(phase)
+        .collect::<Result<Vec<_>, _>>()?;
+    if phases.is_empty() {
+        return Err(package_error("profile_package_plan_invalid"));
+    }
+    if plan.parts_per_participant() == 1 {
+        let selected_phase = phases[0];
+        if phases.iter().any(|phase| *phase != selected_phase) {
+            return Err(package_error("profile_package_phase_unsupported"));
+        }
+        let selected: Vec<_> = (0..plan.blocks().len()).collect();
+        let (receipt, mut published) = prepare_one_profile_part(
+            profile,
+            &plan,
+            &output_dir,
+            &selected,
+            selected_phase,
+            None,
+            generation,
+        )?;
+        published.retain();
+        return Ok(receipt);
+    }
+
+    let pre: Vec<_> = phases
+        .iter()
+        .enumerate()
+        .filter_map(|(index, phase)| (*phase == "pre").then_some(index))
+        .collect();
+    let post: Vec<_> = phases
+        .iter()
+        .enumerate()
+        .filter_map(|(index, phase)| (*phase == "post").then_some(index))
+        .collect();
+    if pre.is_empty() || post.is_empty() || pre.len() + post.len() != phases.len() {
+        return Err(package_error("profile_package_phase_unsupported"));
+    }
+    let part1_id = format!("{group_id}_part_01");
+    let part2_id = format!("{group_id}_part_02");
+    if part2_id.len() > 128 {
+        return Err(package_error("profile_package_identity_invalid"));
+    }
+    fs::create_dir(&output_dir).map_err(|error| {
+        if error.kind() == std::io::ErrorKind::AlreadyExists {
+            package_error("profile_package_output_exists")
+        } else {
+            package_error("profile_package_output_failed")
+        }
+    })?;
+    let mut group = PublishedGroup {
+        path: output_dir.clone(),
+        retained: false,
+    };
+    let part1_dir = output_dir.join("part_01");
+    let part2_dir = output_dir.join("part_02");
+    let part1_manifest = part1_dir.join("session_manifest.json");
+    let part2_manifest = part2_dir.join("session_manifest.json");
+    let (first, mut first_publication) = prepare_one_profile_part(
+        profile,
+        &plan,
+        &part1_dir,
+        &pre,
+        "pre",
+        Some(SplitPart {
+            group_id,
+            session_id: &part1_id,
+            folder: "part_01",
+            sibling_manifest: &part2_manifest,
+        }),
+        generation,
+    )?;
+    let (_, mut second_publication) = prepare_one_profile_part(
+        profile,
+        &plan,
+        &part2_dir,
+        &post,
+        "post",
+        Some(SplitPart {
+            group_id,
+            session_id: &part2_id,
+            folder: "part_02",
+            sibling_manifest: &part1_manifest,
+        }),
+        generation,
+    )?;
+    let group_manifest = json!({
+        "schema": "pps-run-session-group.v1",
+        "part_split_schema": "pps-runner-part-split.v1",
+        "session_group_id": group_id,
+        "participant_id": plan.participant_id(),
+        "source_run_setup_manifest_path": path_text(plan.run_setup_path())?,
+        "source_run_setup_sha256": plan.run_setup_sha256(),
+        "parts_per_participant": 2,
+        "parts": [
+            {"part_number": 1, "part_session_id": part1_id,
+             "part_folder_name": "part_01", "session_manifest_path": path_text(&part1_manifest)?,
+             "session_dir": path_text(&part1_dir)?, "block_count": pre.len(), "completed": false},
+            {"part_number": 2, "part_session_id": part2_id,
+             "part_folder_name": "part_02", "session_manifest_path": path_text(&part2_manifest)?,
+             "session_dir": path_text(&part2_dir)?, "block_count": post.len(), "completed": false}
+        ]
+    });
+    let bytes = serde_json::to_vec_pretty(&group_manifest)
+        .map_err(|_| package_error("profile_package_manifest_failed"))?;
+    write_sync(&output_dir.join("session_group_manifest.json"), &bytes)?;
+    second_publication.retain();
+    first_publication.retain();
+    group.retain();
+    Ok(first)
 }
 
 #[cfg(test)]

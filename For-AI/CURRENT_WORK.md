@@ -36,6 +36,10 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   verified blocks in order, retaining one result journal and requiring a fresh
   output reservation and acknowledgement for each block. Failed in-process
   native profile-package publication rolls back newly linked destination files.
+  The bounded producer now stages approved pre/post plans as two verified V1
+  part packages linked by a group manifest and returns Part 1. This is source
+  behavior only; the installed Part 1-to-Part 2 transition and grouped results
+  remain open.
 - **Latest completed evidence:** `af15af80315dabab67333cede047bd7469813f75`
   passed all 14 normal
   [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37193395931),

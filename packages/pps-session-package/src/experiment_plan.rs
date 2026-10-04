@@ -125,6 +125,7 @@ pub struct ProfileParticipantPlan {
     profile_sha256: String,
     run_setup_path: PathBuf,
     run_setup_sha256: String,
+    parts_per_participant: u8,
     blocks: Vec<ProfileBlockSource>,
 }
 
@@ -142,6 +143,10 @@ impl ProfileParticipantPlan {
     }
     pub fn run_setup_sha256(&self) -> &str {
         &self.run_setup_sha256
+    }
+
+    pub const fn parts_per_participant(&self) -> u8 {
+        self.parts_per_participant
     }
 
     pub fn blocks(&self) -> &[ProfileBlockSource] {
@@ -319,6 +324,9 @@ pub fn select_profile_participant(
     {
         return Err(PlanError(PlanErrorCode::PlanInvalid));
     }
+    let parts_per_participant = plan_int_value(&run_setup["parts_per_participant"], 1)
+        .filter(|parts| matches!(parts, 1 | 2))
+        .ok_or(PlanError(PlanErrorCode::PlanInvalid))? as u8;
     let base = run_setup_path
         .parent()
         .ok_or(PlanError(PlanErrorCode::PlanInvalid))?;
@@ -453,6 +461,7 @@ pub fn select_profile_participant(
         profile_sha256: profile.profile_sha256().to_owned(),
         run_setup_path,
         run_setup_sha256,
+        parts_per_participant,
         blocks,
     })
 }

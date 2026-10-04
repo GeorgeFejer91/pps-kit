@@ -29,7 +29,17 @@
     {
       "id": "pps-run-session.v1",
       "owner": "packages/pps-runtime/src/peripersonal_space_toolkit/session_runner.py",
-      "boundary": "Prepared participant package produced by the Python compatibility path or bounded multichannel Rust media crate and verified by the Rust Runner"
+      "boundary": "Prepared participant or split-part package produced by the Python compatibility path or bounded multichannel Rust media crate and verified by the Rust Runner"
+    },
+    {
+      "id": "pps-run-session-group.v1",
+      "owner": "packages/pps-runtime/src/peripersonal_space_toolkit/session_runner.py",
+      "boundary": "Pre/post participant part-package links for the Planner-to-Runner handoff and result grouping"
+    },
+    {
+      "id": "pps-runner-part-split.v1",
+      "owner": "packages/pps-runtime/src/peripersonal_space_toolkit/session_runner.py",
+      "boundary": "Versioned split-part identity carried by both part manifests and their group"
     },
     {
       "id": "pps-runner-authority-snapshot.v1",

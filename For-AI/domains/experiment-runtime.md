@@ -65,7 +65,11 @@ route requires unity gains; study-specific channel roles, calibration, and
 physical verification remain open. The block has a
 bounded size and is published without overwriting an existing file. The same crate now
 materializes a standard-route `pps-run-session.v1` CSV/manifest package for one
-approved participant's single-phase block order. It rechecks the JSON/source
+approved participant's block order. For an approved two-part pre/post plan it
+publishes separate verified part packages under one `pps-run-session-group.v1`
+manifest and returns Part 1 for native adoption. Part 2 remains an explicit
+prepared-manifest selection; installed transition and grouped results are not
+qualified. It rechecks the JSON/source
 inventory, verifies the staged and published package with the existing V1
 verifier, compiles every block schedule, and publishes the canonical manifest
 last without overwriting an existing package. In-process publication errors

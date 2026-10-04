@@ -97,6 +97,30 @@ def _participant_profile(folder: Path) -> Path:
     return profile_path
 
 
+def _split_part_profile(folder: Path) -> Path:
+    profile_path = _participant_profile(folder)
+    setup_path = Path(json.loads(profile_path.read_text(encoding="utf-8"))["run_setup_path"])
+    setup = json.loads(setup_path.read_text(encoding="utf-8"))
+    order_path = Path(setup["csv_path"])
+    with order_path.open(newline="", encoding="utf-8") as source:
+        rows = [row for row in csv.DictReader(source) if row["participant_id"] == "P001"]
+    rows.sort(key=lambda row: int(row["participant_block_position"]))
+    for phase_index, (row, phase) in enumerate(zip(rows, ("pre", "post")), start=1):
+        row["phase"] = phase
+        row["phase_index"] = str(phase_index)
+    with order_path.open("w", newline="", encoding="utf-8") as output:
+        writer = csv.DictWriter(output, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    setup["parts_per_participant"] = 2
+    setup["total_block_runs"] = 2
+    setup_path.write_text(json.dumps(setup), encoding="utf-8")
+    profile_path.write_bytes(experiment_profile_bytes(
+        create_experiment_profile(default_design(), setup_path, source_revision=10)
+    ))
+    return profile_path
+
+
 def test_rust_profile_inventory_matches_python_for_export_and_stale_sources(tmp_path: Path) -> None:
     valid = _profile(tmp_path / "valid")
     bom = valid.with_name("experiment-bom.json")
@@ -548,3 +572,98 @@ def test_standard_native_package_keeps_approved_multiple_block_order(tmp_path: P
     assert [block["label"] for block in manifest["blocks"]] == ["First", "Second"]
     with (output_dir / "blocks" / "Block_02.csv").open(newline="", encoding="utf-8") as source:
         assert [row["block_trial_index"] for row in csv.DictReader(source)] == ["1", "2"]
+
+
+def test_native_package_splits_approved_pre_post_parts_and_keeps_the_group(tmp_path: Path) -> None:
+    from peripersonal_space_toolkit.session_runner import _materialize_segment_block_wav, load_run_package
+
+    profile_path = _split_part_profile(tmp_path / "source")
+    profile = read_experiment_profile(profile_path)
+    output_dir = tmp_path / "P001_split"
+    completed = subprocess.run(
+        ["cargo", "run", "--quiet", "--locked", "-p", "pps-experiment-media", "--example", "profile_package_probe"],
+        cwd=ROOT, input=json.dumps({
+            "profile_path": str(profile_path), "participant_id": "P001", "output_dir": str(output_dir),
+        }), env={**os.environ, "CARGO_INCREMENTAL": "0"}, text=True, capture_output=True, check=True,
+    )
+    assert json.loads(completed.stdout) == {
+        "accepted": True, "code": "package_prepared", "block_count": 1, "trial_counts": [1],
+    }
+    group = json.loads((output_dir / "session_group_manifest.json").read_text(encoding="utf-8"))
+    assert group["schema"] == "pps-run-session-group.v1"
+    assert group["part_split_schema"] == "pps-runner-part-split.v1"
+    assert [entry["part_number"] for entry in group["parts"]] == [1, 2]
+    for number, expected_count in ((1, 1), (2, 2)):
+        part_dir = output_dir / f"part_{number:02}"
+        manifest = json.loads((part_dir / "session_manifest.json").read_text(encoding="utf-8"))
+        assert load_run_package(part_dir / "session_manifest.json").part_number == number
+        assert manifest["part_number"] == number
+        assert manifest["session_group_id"] == output_dir.name
+        assert manifest["part_split_schema"] == "pps-runner-part-split.v1"
+        assert Path(manifest["session_group_manifest_path"]).samefile(output_dir / "session_group_manifest.json")
+        assert manifest["blocks"][0]["trial_count"] == expected_count
+        assert Path(manifest["sibling_part_manifest_paths"][0]).is_file()
+        with (part_dir / "blocks" / "Block_01.csv").open(newline="", encoding="utf-8") as source:
+            rows = list(csv.DictReader(source))
+        assert len(rows) == expected_count
+        assert {row["Session_Group_ID"] for row in rows} == {output_dir.name}
+        assert {row["Part_Session_ID"] for row in rows} == {manifest["session_id"]}
+        assert {row["Global_Block_Index"] for row in rows} == {str(number)}
+        assert {row["Part_Block_Number"] for row in rows} == {"1"}
+        source_path = Path(manifest["blocks"][0]["metadata"]["source_block_csv_path"])
+        source_block = next(
+            block for block in profile["assembly"]["blocks"]
+            if Path(block["source_csv_path"]).samefile(source_path)
+        )
+        python_wav = tmp_path / f"python-part-{number}.wav"
+        _, _, _, python_rows, _ = _materialize_segment_block_wav(
+            python_wav, source_block["rows"], participant_id="P001",
+            session_id=manifest["session_id"], part_number=number,
+            phase="pre" if number == 1 else "post",
+            phase_label="Pre" if number == 1 else "Post",
+            output_block_index=1, participant_block_position=number,
+            source_block_index=number, source_block_label=manifest["blocks"][0]["label"],
+            source_block_csv_path=source_path,
+        )
+        with wave.open(str(python_wav), "rb") as source:
+            expected_pcm = source.readframes(source.getnframes())
+        with wave.open(str(part_dir / "blocks" / "Block_01.wav"), "rb") as source:
+            assert source.readframes(source.getnframes()) == expected_pcm
+        for native, expected in zip(rows, python_rows):
+            assert {key: native[key] for key in (
+                "Trial_UID", "Session_ID", "Part_Number", "Phase", "Block_Number",
+                "Trial_Start_Sample", "Trial_End_Sample",
+            )} == {key: str(expected[key]) for key in (
+                "Trial_UID", "Session_ID", "Part_Number", "Phase", "Block_Number",
+                "Trial_Start_Sample", "Trial_End_Sample",
+            )}
+
+
+def test_split_package_failure_leaves_no_partial_group(tmp_path: Path) -> None:
+    profile_path = _split_part_profile(tmp_path / "source")
+    second_block = profile_path.parent / "second.csv"
+    with second_block.open(newline="", encoding="utf-8") as source:
+        rows = list(csv.DictReader(source))
+    for row in rows:
+        row["speaker_switch_channels"] = "19"
+        row["speaker_switch_times_ms"] = "0"
+    with second_block.open("w", newline="", encoding="utf-8") as output:
+        writer = csv.DictWriter(output, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    setup_path = Path(json.loads(profile_path.read_text(encoding="utf-8"))["run_setup_path"])
+    profile_path.write_bytes(experiment_profile_bytes(
+        create_experiment_profile(default_design(), setup_path, source_revision=11)
+    ))
+    retained = tmp_path / "unrelated.txt"
+    retained.write_text("retain", encoding="utf-8")
+    output_dir = tmp_path / "P001_failed_split"
+    completed = subprocess.run(
+        ["cargo", "run", "--quiet", "--locked", "-p", "pps-experiment-media", "--example", "profile_package_probe"],
+        cwd=ROOT, input=json.dumps({
+            "profile_path": str(profile_path), "participant_id": "P001", "output_dir": str(output_dir),
+        }), env={**os.environ, "CARGO_INCREMENTAL": "0"}, text=True, capture_output=True, check=True,
+    )
+    assert json.loads(completed.stdout)["code"] == "profile_block_transform_unsupported"
+    assert not output_dir.exists()
+    assert retained.read_text(encoding="utf-8") == "retain"
