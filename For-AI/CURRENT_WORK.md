@@ -33,7 +33,9 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   output discovery now includes ASIO before WASAPI and admits F32/I32 stream
   formats. Its bounded 256-config inventory retains the three-channel 44.1 kHz
   route even after lower ASIO rates on an 18-output device; physical route
-  calibration remains open.
+  calibration remains open. Windows validation CI pins the official Steinberg
+  ASIO SDK 2.3.4 archive by SHA-256 and records that build input in the Full
+  artifact; the SDK's distribution license path is still undecided.
   Local/phone control shares one actor,
   callback scheduler, and result journal. Source activation and result
   publication remain unqualified for participant use. The candidate now advances
@@ -47,18 +49,19 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   part transition and grouped participant result completion remain open. The
   independent file audit now derives a two-part aggregate from both sealed
   results, exact package hashes, shared setup identity and prepared trial counts.
-- **Latest completed evidence:** exact source `3a84b1bb1c93709e0457f96ff52795865868a251`
+- **Latest completed evidence:** exact source `d816ff3c678fa1933dee4041441693b92076bb1a`
   passed all 16 non-skipped
-  [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37233421923),
+  [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37236874645),
   including three-platform Rust Core/Desktop and Python/Rust package oracles,
   rendered Runner output/participant and Planner segment audits, standalone
   validation bundles, and the Full two-app
   Windows install. The Full validation installer is retained as a downloadable
-  [workflow artifact](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37233421923/artifacts/11315461950)
-  through 2026-10-11. Its SHA-256 is
-  `13660c54edad608c80a24887d79f267640fb9d85a4c59b25ab3252f7328ce783`,
+  [workflow artifact](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37236874645/artifacts/11316800011)
+  through 2026-10-11 22:02 UTC. Its SHA-256 is
+  `404f1c950e47550d54a7d75307b39c7214bc1708ecbc69f71b8aa2d5b731bbfa`,
   independently checked against the artifact's `SHA256SUMS.txt`.
-  It is unsigned and marked validation-only, not a participant-use release.
+  Its `ASIO_SDK_PROVENANCE.txt` matches the pinned archive hash. It is unsigned
+  and marked validation-only, not a participant-use release.
 - **Installed two-app evidence:** the exact Full installer had zero missing or
   mismatched entries across 21 component inventory items, one compatible
   Shared tree, both shortcuts, and successful clean install, reinstall,
