@@ -11,7 +11,7 @@ Each status applies to its stated surface, not to the whole product.
 | 3 | PARTIAL: one compact source/package/capability record; conservative readiness | Complete native adapter and measured evidence |
 | 4 | VERIFIED: shared profile/limits/scoring/text/job owners; concise For-AI routing; one native actor/scheduler/file worker | Extract only seams changed by further work |
 | 5 | VERIFIED browser source: planner disclosures/JSON action, phone Pair/state/action flow, participant response, local output picker and inline notifications; native Runner installed UI opened and its control, logging and remote panels were inspected | Full V2 Planner install and complete installed flows |
-| 6 | PARTIAL: actual Pretext, explicit no-fit, complete labels, keyboard input, narrow/enlarged text and spacing | Actual WebViews and full accessibility qualification |
+| 6 | PARTIAL: actual Pretext, explicit no-fit, complete labels, keyboard input, narrow/enlarged text and spacing; installed Windows Runner WebView tab screenshots and horizontal geometry | Planner/companion installed WebViews and full accessibility qualification |
 | 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full scheduling UI and native profile assembly |
 | 8 | VERIFIED: plan/resource preflight, source/cancel/publication fences, shared job completion and rollback | Qualify additional generation routes if selected |
 | 9 | PARTIAL: exact CPAL port, fenced single-block activation in source, local output preflight, closed unity-gain direct route for 4–18-channel WAVs, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Compatible calibrated hardware route, installed playback/results, full-profile execution and qualification |
@@ -22,10 +22,32 @@ Each status applies to its stated surface, not to the whole product.
 | 14 | PARTIAL: suspension/resume, no replay, stale-state denial, disarmed phone outputs and pending-activation cancellation | Physical Safari/Chrome lock and BFCache cases |
 | 15 | VERIFIED source policy: local setup, observer scope, participant-free public projection and fresh invitations | Physical expiry/revocation; remembered phones remain unselected |
 | 16 | VERIFIED: locked Designer Vite 6.4.3/nanoid patch; both npm audits report zero advisories | Retain locked byte checks |
-| 17 | PARTIAL: exact-revision CI validation packages; isolated Windows NSIS Runner install and package/schedule/PCM preparation; later fresh CI install inventory and frontend resource hash checks; source/Pages checks | Two-app Full installer, installed complete run, measured output/response/calibration and supported routes |
+| 17 | PARTIAL: exact-revision CI validation packages; isolated Windows NSIS Runner install and package/schedule/PCM preparation; fresh install inventory, frontend resource hashes, and real installed Runner WebView/native snapshot/tab audit; source/Pages checks | Two-app Full installer, installed complete run, measured output/response/calibration and supported routes |
 
 ## Current source evidence
 
+- Installed Runner-only WebView checkpoint: the Windows NSIS validation artifact
+  from `893ada652716f0159fc0b301d28902653bb6b1ec` has a matching
+  `VALIDATION_ONLY.txt` marker and measured installer SHA-256
+  `23ed5a86c121de8513d1c9f9020a329c6ff1b7e7320e91b32a66b6b7bf7ce80e`,
+  equal to its manifest. Windows CI installed it fresh, recorded installed
+  binary/HTML/CSS hashes, and matched frontend bytes to the canonical build.
+  The first [full CI attempt](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37187006243)
+  passed the build and inventory but failed the WebView audit because
+  Playwright reported `about:blank` while the CDP target had the Tauri origin.
+  An [audit-only retry](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37188087715)
+  used the same installer and audit script `9f7aefd4`. It verified the real
+  `pps-runner-authority-snapshot.v1` Rust bridge in idle state, an unverified
+  package, disarmed local output and disabled response. Playwright clicked the
+  Experiment Control, Data Logging and Phone Remote tabs in the installed
+  WebView; retained screenshots were inspected and document no horizontal page
+  overflow at 1028 CSS px. The control and remote views use host document
+  scrolling for longer content. The installed executable SHA-256 was
+  `1e1c523b5475b4a5ee4d52d91f99ee58d6ad6fc23a407aa66f2b637d7bdb28d3`.
+  The audit used an app-specific, temporary HKLM WebView2 debugging policy on
+  the elevated ephemeral Windows runner and restored it after execution.
+  Neither this UI audit nor the original installer inventory executed a
+  participant run, physical output, recording, or the two-app Full installer.
 - Bounded multichannel native source checkpoint
   `00bd77d30b13f0a84f45649640e9201093bd07c3` resolves the closed
   unity-gain 4–18-channel output route, then assembles 3–18-channel block WAVs

@@ -40,7 +40,19 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   Its Runner-only NSIS package passed a fresh Windows CI install inventory.
   The downloaded validation marker matches the commit and its SHA-256 matches
   the artifact manifest. Installed executable and HTML/CSS hashes were recorded.
-  Neither an installed WebView nor physical output was tested from this package.
+  That package was not launched; physical output was not tested.
+- **Installed Runner UI evidence:** the separate Runner-only NSIS validation
+  artifact from source `893ada65` has installer SHA-256
+  `23ed5a86c121de8513d1c9f9020a329c6ff1b7e7320e91b32a66b6b7bf7ce80e`.
+  Its fresh Windows CI inventory matched the installed HTML/CSS to the canonical
+  compiled files. An [audit-only retry](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37188087715)
+  used that exact installer with audit script `9f7aefd4`: the installed WebView
+  exposed the real Rust snapshot, rendered all three tabs, and passed tab and
+  horizontal-overflow checks. The retained report and screenshots document an
+  idle, unverified, disarmed state. The initial full workflow's WebView step
+  failed on Playwright target discovery; the retry resolved that audit issue.
+  No participant execution, physical output, recording, or Full installer was
+  verified by this UI audit.
 - **Next gates:** qualify each larger-array hardware route and its levels,
   then run the installed native
   single-block workflow on a compatible calibrated device; validate event/CSV
