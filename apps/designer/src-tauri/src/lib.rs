@@ -42,6 +42,15 @@ struct Worker {
 
 impl Worker {
     fn spawn(app: &tauri::AppHandle) -> Result<Self, String> {
+        let data_root = match std::env::var_os("PPS_TOOLKIT_DATA_ROOT") {
+            Some(path) => std::path::PathBuf::from(path),
+            None => app
+                .path()
+                .app_local_data_dir()
+                .map_err(|_| "Planner data directory is unavailable.")?,
+        };
+        std::fs::create_dir_all(&data_root)
+            .map_err(|_| "Planner data directory could not be created.")?;
         #[cfg(debug_assertions)]
         let mut command = {
             let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -65,8 +74,16 @@ impl Worker {
             Command::new(executable)
         };
 
-        #[cfg(debug_assertions)]
-        let _ = app;
+        command.env("PPS_TOOLKIT_DATA_ROOT", data_root);
+        #[cfg(not(debug_assertions))]
+        if let Ok(shared) = app
+            .path()
+            .resolve("shared", tauri::path::BaseDirectory::Resource)
+        {
+            if shared.join("study_templates").is_dir() {
+                command.env("PPS_TOOLKIT_ROOT", shared);
+            }
+        }
 
         #[cfg(windows)]
         {

@@ -1,0 +1,27 @@
+{
+  "schema": "pps-component-manifest.v2",
+  "component_id": "shared",
+  "version": "0.1.0",
+  "platform": "windows-x64",
+  "dependencies": [],
+  "source_to_install": [
+    {"source": "packages/pps-resources/assets", "install": "shared/assets", "kind": "tree"},
+    {"source": "packages/pps-resources/study_templates", "install": "shared/study_templates", "kind": "tree"},
+    {"source": "packages/pps-resources/configs", "install": "shared/configs", "kind": "tree"},
+    {"source": "packages/pps-resources/data/sample", "install": "shared/data/sample", "kind": "tree"},
+    {"source": "third_party/3dti_renderer/bin/pps-3dti-renderer.exe", "install": "shared/third_party/3dti_renderer/bin/pps-3dti-renderer.exe", "kind": "file"},
+    {"source": "third_party/3dti_renderer/bin/hdf5.dll", "install": "shared/third_party/3dti_renderer/bin/hdf5.dll", "kind": "file"},
+    {"source": "third_party/3dti_renderer/bin/hdf5_hl.dll", "install": "shared/third_party/3dti_renderer/bin/hdf5_hl.dll", "kind": "file"},
+    {"source": "third_party/3dti_renderer/bin/libcurl.dll", "install": "shared/third_party/3dti_renderer/bin/libcurl.dll", "kind": "file"},
+    {"source": "third_party/3dti_renderer/bin/netcdf.dll", "install": "shared/third_party/3dti_renderer/bin/netcdf.dll", "kind": "file"},
+    {"source": "third_party/3dti_renderer/bin/zlib1.dll", "install": "shared/third_party/3dti_renderer/bin/zlib1.dll", "kind": "file"},
+    {"source": "third_party/3dti_AudioToolkit/3DTI_AUDIOTOOLKIT_LICENSE", "install": "shared/third_party/3dti_AudioToolkit/3DTI_AUDIOTOOLKIT_LICENSE", "kind": "file"},
+    {"source": "third_party/3dti_AudioToolkit/LICENSE", "install": "shared/third_party/3dti_AudioToolkit/LICENSE", "kind": "file"},
+    {"source": "docs", "install": "shared/docs", "kind": "tree"},
+    {"source": "LICENSE", "install": "shared/LICENSE", "kind": "file"},
+    {"source": "THIRD_PARTY_LICENSES.md", "install": "shared/THIRD_PARTY_LICENSES.md", "kind": "file"},
+    {"source": "CITATION.cff", "install": "shared/CITATION.cff", "kind": "file"}
+  ],
+  "entrypoints": [],
+  "exclusions": ["For-AI/**", "**/participant_data/**", "**/generated_outputs/**", "**/*.apk"]
+}

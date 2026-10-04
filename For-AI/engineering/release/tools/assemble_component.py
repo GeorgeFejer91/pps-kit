@@ -43,9 +43,9 @@ def _copy(source: Path, destination: Path) -> None:
         shutil.copy2(_filesystem_path(source), _filesystem_path(destination))
 
 
-def assemble(component_id: str, output: Path) -> dict:
+def assemble(component_id: str, output: Path, manifest_version: str = "v1") -> dict:
     module = _inventory_module()
-    manifests = module.load_manifests()
+    manifests = module.load_manifests(manifest_version=manifest_version)
     components = module.resolve_components(component_id, manifests)
     output = output.resolve()
     if output.exists():
@@ -67,7 +67,7 @@ def assemble(component_id: str, output: Path) -> dict:
                 raise FileNotFoundError(f"Missing {manifest['component_id']} input: {source_text}")
             _copy(source, output / destination_text)
 
-    inventory = module.build_inventory(output, component_id)
+    inventory = module.build_inventory(output, component_id, manifest_version)
     if inventory["missing_required"]:
         raise RuntimeError(f"Incomplete component inventory: {inventory['missing_required']}")
     inventory_path = output / "pps_package_inventory.v1.json"
@@ -80,10 +80,11 @@ def assemble(component_id: str, output: Path) -> dict:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--component", choices=("shared", "designer", "runner", "full"), required=True)
+    parser.add_argument("--component", choices=("shared", "designer", "planner", "runner", "full"), required=True)
+    parser.add_argument("--manifest-version", choices=("v1", "v2"), default="v1")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
-    inventory = assemble(args.component, args.output)
+    inventory = assemble(args.component, args.output, args.manifest_version)
     print(json.dumps(inventory["summary"], sort_keys=True))
     return 0
 

@@ -1,0 +1,15 @@
+{
+  "schema": "pps-component-manifest.v2",
+  "component_id": "runner",
+  "version": "0.1.0",
+  "platform": "windows-x64",
+  "dependencies": [{"component_id": "shared", "version": "0.1.0"}],
+  "source_to_install": [
+    {"source": "target/release/pps-experiment-runner.exe", "install": "runner/pps-experiment-runner.exe", "kind": "generated_file"},
+    {"source": "apps/runner/compiled", "install": "runner/web", "kind": "tree"}
+  ],
+  "entrypoints": [
+    {"id": "pps-experiment-runner", "path": "runner/pps-experiment-runner.exe", "shortcut": "PPS Experiment Runner"}
+  ],
+  "exclusions": ["For-AI/**", "**/participant_data/**", "**/generated_outputs/**"]
+}

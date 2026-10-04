@@ -171,7 +171,8 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
                     browser.close()
     finally:
         if process is not None and process.poll() is None:
-            process.terminate()
+            subprocess.run(["taskkill", "/T", "/F", "/PID", str(process.pid)],
+                           check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             try:
                 process.wait(timeout=10)
             except subprocess.TimeoutExpired:

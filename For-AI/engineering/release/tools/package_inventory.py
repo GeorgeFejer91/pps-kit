@@ -14,8 +14,8 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 MANIFEST_DIR = REPO_ROOT / "distributions" / "manifests"
-COMPONENT_SCHEMA = "pps-component-manifest.v1"
-INVENTORY_SCHEMA = "pps-resolved-component-inventory.v1"
+COMPONENT_SCHEMA = "pps-component-manifest."
+INVENTORY_SCHEMA = "pps-resolved-component-inventory."
 
 
 def _filesystem_path(path: Path) -> Path:
@@ -35,11 +35,22 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def load_manifests(manifest_dir: Path = MANIFEST_DIR) -> dict[str, dict[str, Any]]:
+def sha256_tree(path: Path) -> str:
+    digest = hashlib.sha256()
+    root = _filesystem_path(path)
+    for item in sorted((item for item in root.rglob("*") if item.is_file()), key=lambda item: item.relative_to(root).as_posix()):
+        digest.update(item.relative_to(root).as_posix().encode("utf-8") + b"\0")
+        digest.update(sha256_file(item).encode("ascii") + b"\n")
+    return digest.hexdigest()
+
+
+def load_manifests(manifest_dir: Path = MANIFEST_DIR, manifest_version: str = "v1") -> dict[str, dict[str, Any]]:
+    if manifest_version not in {"v1", "v2"}:
+        raise ValueError(f"unsupported component manifest version: {manifest_version}")
     manifests: dict[str, dict[str, Any]] = {}
-    for path in sorted(manifest_dir.glob("*.v1.json")):
+    for path in sorted(manifest_dir.glob(f"*.{manifest_version}.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
-        if data.get("schema") != COMPONENT_SCHEMA:
+        if data.get("schema") != COMPONENT_SCHEMA + manifest_version:
             continue
         component_id = str(data["component_id"])
         if component_id in manifests:
@@ -82,12 +93,13 @@ def resolve_components(component_id: str, manifests: dict[str, dict[str, Any]]) 
     return resolved
 
 
-def build_inventory(stage_root: Path | None = None, component_id: str = "full") -> dict[str, Any]:
-    manifests = load_manifests()
+def build_inventory(stage_root: Path | None = None, component_id: str = "full", manifest_version: str = "v1") -> dict[str, Any]:
+    manifests = load_manifests(manifest_version=manifest_version)
     components = resolve_components(component_id, manifests)
     root = stage_root.resolve() if stage_root else None
     items: list[dict[str, Any]] = []
     missing_required: list[str] = []
+    mismatched: list[str] = []
     install_owners: dict[str, str] = {}
 
     for manifest in components:
@@ -116,11 +128,22 @@ def build_inventory(stage_root: Path | None = None, component_id: str = "full") 
                 elif target.is_file():
                     entry["size_bytes"] = target.stat().st_size
                     entry["sha256"] = sha256_file(target)
+                    if manifest_version == "v2":
+                        source_path = REPO_ROOT / source
+                        entry["source_sha256"] = sha256_file(source_path) if source_path.is_file() else ""
+                        if entry["sha256"] != entry["source_sha256"]:
+                            mismatched.append(install)
                 else:
                     filesystem_target = _filesystem_path(target)
                     files = [path for path in filesystem_target.rglob("*") if path.is_file()]
                     entry["file_count"] = len(files)
                     entry["size_bytes"] = sum(path.stat().st_size for path in files)
+                    if manifest_version == "v2":
+                        source_path = REPO_ROOT / source
+                        entry["tree_sha256"] = sha256_tree(target)
+                        entry["source_tree_sha256"] = sha256_tree(source_path) if source_path.is_dir() else ""
+                        if entry["tree_sha256"] != entry["source_tree_sha256"]:
+                            mismatched.append(install)
             items.append(entry)
 
     component_hashes = {
@@ -128,7 +151,7 @@ def build_inventory(stage_root: Path | None = None, component_id: str = "full") 
         for manifest in components
     }
     return {
-        "schema": INVENTORY_SCHEMA,
+        "schema": INVENTORY_SCHEMA + manifest_version,
         "component_id": component_id,
         "version": str(manifests[component_id]["version"]),
         "stage_root": str(root) if root is not None else "",
@@ -139,8 +162,10 @@ def build_inventory(stage_root: Path | None = None, component_id: str = "full") 
             "item_count": len(items),
             "required_item_count": len(items),
             "missing_required_count": len(missing_required),
+            "mismatched_count": len(mismatched),
         },
         "missing_required": missing_required,
+        "mismatched": mismatched,
         "items": items,
     }
 
@@ -152,15 +177,16 @@ def write_inventory(inventory: dict[str, Any], output: Path) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--component", choices=("shared", "designer", "runner", "full"), default="full")
+    parser.add_argument("--component", choices=("shared", "designer", "planner", "runner", "full"), default="full")
+    parser.add_argument("--manifest-version", choices=("v1", "v2"), default="v1")
     parser.add_argument("--stage-root", type=Path, default=None, help="Installed product root to validate.")
     parser.add_argument("--output", type=Path, default=REPO_ROOT / "dist" / "pps-component-inventory.v1.json")
     parser.add_argument("--strict", action="store_true", help="Fail if a required installed path is missing.")
     args = parser.parse_args(argv)
-    inventory = build_inventory(args.stage_root, args.component)
+    inventory = build_inventory(args.stage_root, args.component, args.manifest_version)
     write_inventory(inventory, args.output)
     print(f"Wrote {args.output}")
-    if args.strict and inventory["missing_required"]:
+    if args.strict and (inventory["missing_required"] or inventory["mismatched"]):
         return 1
     return 0
 

@@ -7,6 +7,11 @@
       "boundary": "Shared, Designer, Runner and Full install composition"
     },
     {
+      "id": "pps-component-manifest.v2",
+      "owner": "distributions/manifests/full.v2.json",
+      "boundary": "One Shared tree, Planner and Rust Runner file ownership in the two-app Windows installer"
+    },
+    {
       "id": "pps-planner-worker-stdio.v1",
       "owner": "packages/pps-runtime/src/peripersonal_space_toolkit/planner_worker.py",
       "boundary": "Private framed Planner API exchange between its Tauri Rust authority and bundled Python renderer worker"

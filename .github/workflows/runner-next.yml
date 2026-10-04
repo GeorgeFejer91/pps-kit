@@ -576,3 +576,151 @@ jobs:
           if-no-files-found: error
           retention-days: 7
           compression-level: 0
+
+  full-windows-validation:
+    if: github.event_name != 'workflow_dispatch' || inputs.installed_artifact_run_id == ''
+    name: Full two-app Windows validation bundle
+    needs: [desktop-shell, browser-companion]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - uses: dtolnay/rust-toolchain@1.88.0
+      - name: Build both canonical web interfaces and the Runner binary
+        shell: pwsh
+        run: |
+          npm --prefix apps/designer/frontend ci
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix apps/runner ci
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix apps/runner run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release -p pps-experiment-runner
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Build Planner worker against the single external Shared tree
+        shell: pwsh
+        run: |
+          $env:PPS_PLANNER_EXTERNAL_SHARED = '1'
+          ./For-AI/engineering/build/windows/Build_PPS_Planner_Worker.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Build one Full NSIS installer
+        shell: pwsh
+        working-directory: apps/designer
+        run: |
+          & ./frontend/node_modules/.bin/tauri.cmd build --ci --bundles nsis `
+            --config src-tauri/tauri.full-validation.conf.json --no-sign
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Reject canonical frontend or lock drift
+        run: git diff --exit-code -- Cargo.lock apps/designer/frontend/compiled apps/runner/compiled
+      - name: Install and inventory the exact two-app package
+        shell: pwsh
+        run: |
+          $bundles = @(Get-ChildItem -LiteralPath target/release/bundle/nsis -Filter '*-setup.exe' -File)
+          if ($bundles.Count -ne 1) { throw "Expected one Full NSIS bundle, found $($bundles.Count)." }
+          $stage = 'dist/full-validation/windows-host-nsis'
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          $installer = Join-Path $stage "PPS-Research-Full-0.1.0-Windows-X64-Validation.exe"
+          Copy-Item -LiteralPath $bundles[0].FullName -Destination $installer
+          $installRoot = Join-Path $env:RUNNER_TEMP "pps-full-install-${{ github.run_id }}-${{ github.run_attempt }}"
+          if (Test-Path -LiteralPath $installRoot) { throw 'Full install directory is not fresh.' }
+          $process = Start-Process -FilePath $installer -ArgumentList @('/S', "/D=$installRoot") `
+            -WindowStyle Hidden -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "Full NSIS install failed: $($process.ExitCode)." }
+          python For-AI/engineering/release/tools/package_inventory.py --manifest-version v2 `
+            --component full --stage-root $installRoot --strict `
+            --output (Join-Path $stage 'INSTALLED_COMPONENT_INVENTORY.json')
+          if ($LASTEXITCODE -ne 0) { throw 'Installed Full component bytes do not match source.' }
+          foreach ($path in @('planner-worker/_internal/assets',
+                              'planner-worker/_internal/study_templates',
+                              'planner-worker/_internal/third_party')) {
+            if (Test-Path -LiteralPath (Join-Path $installRoot $path)) {
+              throw "Shared resource was duplicated in the Planner worker: $path"
+            }
+          }
+          $shortcut = @(
+            (Join-Path $env:APPDATA 'Microsoft/Windows/Start Menu/Programs/PPS Experiment Runner.lnk'),
+            (Join-Path $env:ProgramData 'Microsoft/Windows/Start Menu/Programs/PPS Experiment Runner.lnk')
+          ) | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+          if (-not $shortcut) { throw 'Full installer did not create the Runner shortcut.' }
+          $target = (New-Object -ComObject WScript.Shell).CreateShortcut($shortcut).TargetPath
+          if ($target -ne (Join-Path $installRoot 'runner/pps-experiment-runner.exe')) {
+            throw "Runner shortcut points to the wrong executable: $target"
+          }
+          @(
+            'schema=pps-full-packaging-validation.v2'
+            "commit=${{ github.sha }}"
+            'distribution_status=ci_validation_artifact_not_release'
+            'use_for_data_collection=false'
+            'signing=unsigned'
+          ) | Set-Content -Encoding ascii (Join-Path $stage 'VALIDATION_ONLY.txt')
+          "$((Get-FileHash -Algorithm SHA256 -LiteralPath $installer).Hash.ToLowerInvariant())  $([IO.Path]::GetFileName($installer))" |
+            Set-Content -Encoding ascii (Join-Path $stage 'SHA256SUMS.txt')
+          "PPS_FULL_INSTALLED_PLANNER=$(Join-Path $installRoot 'pps-experiment-planner.exe')" |
+            Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "PPS_FULL_INSTALLED_RUNNER=$(Join-Path $installRoot 'runner/pps-experiment-runner.exe')" |
+            Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Install pinned installed-UI audit drivers
+        run: python -m pip install --disable-pip-version-check playwright==1.61.0 pywinauto==0.6.9
+      - name: Exercise both installed WebViews and native media paths
+        shell: pwsh
+        run: |
+          python For-AI/engineering/validation/scripts/run_installed_planner_webview_audit.py `
+            --binary $env:PPS_FULL_INSTALLED_PLANNER `
+            --output-dir artifacts/full-planner-installed-webview-audit `
+            --commit '${{ github.sha }}' --elevated-policy
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python For-AI/engineering/validation/scripts/run_installed_runner_webview_audit.py `
+            --binary $env:PPS_FULL_INSTALLED_RUNNER `
+            --output-dir artifacts/full-runner-installed-webview-audit `
+            --commit '${{ github.sha }}' --elevated-policy
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify Full reinstall and uninstall ownership
+        shell: pwsh
+        run: |
+          $installRoot = Split-Path -Parent $env:PPS_FULL_INSTALLED_PLANNER
+          $installer = 'dist/full-validation/windows-host-nsis/PPS-Research-Full-0.1.0-Windows-X64-Validation.exe'
+          $process = Start-Process -FilePath $installer -ArgumentList @('/S', "/D=$installRoot") `
+            -WindowStyle Hidden -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "Full reinstall failed: $($process.ExitCode)." }
+          python For-AI/engineering/release/tools/package_inventory.py --manifest-version v2 `
+            --component full --stage-root $installRoot --strict `
+            --output 'dist/full-validation/windows-host-nsis/REINSTALLED_COMPONENT_INVENTORY.json'
+          if ($LASTEXITCODE -ne 0) { throw 'Reinstalled Full component bytes differ from source.' }
+          $uninstaller = @(Get-ChildItem -LiteralPath $installRoot -Filter '*uninstall*.exe' -File)
+          if ($uninstaller.Count -ne 1) { throw "Expected one Full uninstaller, found $($uninstaller.Count)." }
+          $process = Start-Process -FilePath $uninstaller[0].FullName -ArgumentList '/S' `
+            -WindowStyle Hidden -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "Full uninstall failed: $($process.ExitCode)." }
+          foreach ($path in @('pps-experiment-planner.exe', 'runner/pps-experiment-runner.exe', 'shared/assets')) {
+            if (Test-Path -LiteralPath (Join-Path $installRoot $path)) {
+              throw "Full uninstall retained owned component: $path"
+            }
+          }
+          @('schema=pps-full-install-lifecycle.v1', "commit=${{ github.sha }}",
+            'fresh_install=true', 'reinstall=true', 'uninstall=true') |
+            Set-Content -Encoding ascii 'dist/full-validation/windows-host-nsis/INSTALL_LIFECYCLE.txt'
+      - name: Retain both installed WebView audits
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: full-installed-webviews-${{ github.sha }}
+          path: |
+            artifacts/full-planner-installed-webview-audit
+            artifacts/full-runner-installed-webview-audit
+          if-no-files-found: warn
+      - name: Retain the single Full validation installer
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pps-research-full-validation-windows-X64-${{ github.sha }}
+          path: dist/full-validation/windows-host-nsis
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0

@@ -31,12 +31,13 @@ build Python/PyWebView Designer, Python/PySide Runner, ZIP payloads, and Go
 downloaders. A local Full candidate has only a clean-folder launch smoke. It
 does not establish a Tauri Full installer or native V2 acquisition readiness.
 
-Runner has a candidate Tauri shell at `apps/runner/src-tauri/`; its production
-configuration points at local `apps/runner/compiled/` bytes. Designer still
-needs its Tauri/Rust shell and native boundary before a two-app Tauri installer
-can be built. Follow the [Windows installer plan](windows-installer.md) for
-that migration and installed-path gates. Reuse the existing build/release
-tools where their component ownership and inventory checks still apply.
+Runner and Planner now have candidate Tauri shells at `apps/runner/src-tauri/`
+and `apps/designer/src-tauri/`. A Full NSIS validation configuration composes
+their two local WebViews and one Shared resource tree. Its exact-build installed
+and media audits are in progress; it is not yet a qualified release. Follow the
+[Windows installer plan](windows-installer.md) for the remaining installed-path
+and acquisition gates. Reuse the existing build/release tools where their
+component ownership and inventory checks still apply.
 The Runner-only Windows validation installer has a fresh-path silent CI install
 inventory for its executable and canonical HTML/CSS bytes. The
 [exact-source Windows audit](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37190366500)

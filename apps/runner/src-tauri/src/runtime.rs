@@ -1739,13 +1739,12 @@ mod tests {
         journal.admit(&batch).unwrap();
         ledger.commit_prepared(batch).unwrap();
         journal.finish(1, 1, 1).unwrap();
-        for _ in 0..100 {
-            if journal.retired() {
-                break;
-            }
+        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        while !journal.retired() && std::time::Instant::now() < deadline {
             thread::sleep(Duration::from_millis(5));
         }
-        assert!(journal.retired() && !journal.failed());
+        assert!(journal.retired(), "native result writer did not retire");
+        assert!(!journal.failed(), "native result writer failed");
     }
 
     #[test]

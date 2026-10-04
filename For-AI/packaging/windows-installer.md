@@ -1,7 +1,8 @@
 # Full Windows installer plan
 
-This is the execution contract for the target two-app Tauri package. It is a
-plan, not a claim that the installer or Designer Tauri shell exists today.
+This is the execution contract for the target two-app Tauri package. Its Full
+validation configuration and V2 component catalog are source candidates;
+installed and acquisition claims require the gates below.
 The user selected the stable Planner bundle identifier
 `org.peripersonalspace.planner` on 2026-10-04.
 
@@ -49,6 +50,6 @@ The user selected the stable Planner bundle identifier
    matching protocol are satisfied.
 
 Do not label the existing V1 ZIP/downloader route as this Full Tauri installer.
-Until step 1 is complete, the V1 scripts and
-[inventory](../download_package_inventory.md) remain the reproducible Windows
-packaging path.
+Until the installed Full package and acquisition gates pass, the V1 scripts and
+[inventory](../download_package_inventory.md) remain the qualified compatibility
+path.

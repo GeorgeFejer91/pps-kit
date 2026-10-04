@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 
@@ -47,3 +48,23 @@ def test_package_inventory_reports_missing_required_items(tmp_path: Path):
 
     assert inventory["summary"]["missing_required_count"] > 0
     assert "apps/PPSExperimentRunner" in inventory["missing_required"]
+
+
+def test_full_v2_catalog_matches_tauri_resource_map():
+    module = _load_module()
+    inventory = module.build_inventory(component_id="full", manifest_version="v2")
+    assert inventory["schema"] == "pps-resolved-component-inventory.v2"
+    assert inventory["resolved_components"] == ["shared", "planner", "runner", "full"]
+    assert inventory["resolved_components"].count("shared") == 1
+    expected = {
+        (REPO_ROOT / item["source"]).resolve().relative_to(REPO_ROOT).as_posix(): item["path"].rstrip("/")
+        for item in inventory["items"]
+        if item["path"] != "pps-experiment-planner.exe"
+    }
+    config_dir = REPO_ROOT / "apps" / "designer" / "src-tauri"
+    config = json.loads((config_dir / "tauri.full-validation.conf.json").read_text(encoding="utf-8"))
+    actual = {
+        (config_dir / source).resolve().relative_to(REPO_ROOT).as_posix(): destination.rstrip("/")
+        for source, destination in config["bundle"]["resources"].items()
+    }
+    assert actual == expected
