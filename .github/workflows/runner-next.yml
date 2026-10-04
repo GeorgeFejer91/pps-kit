@@ -19,6 +19,7 @@ on:
       - "packages/pps-runtime/src/peripersonal_space_toolkit/**"
       - "For-AI/engineering/automation/check_runner_next.ps1"
       - "For-AI/engineering/tests/test_rust_session_package_differential.py"
+      - "For-AI/engineering/tests/test_rust_experiment_profile_differential.py"
       - "For-AI/engineering/tests/test_rust_timing_schedule_differential.py"
       - "For-AI/engineering/tests/test_rust_response_differential.py"
       - "For-AI/engineering/tests/test_native_result_file_audit.py"
@@ -43,6 +44,7 @@ on:
       - "packages/pps-runtime/src/peripersonal_space_toolkit/**"
       - "For-AI/engineering/automation/check_runner_next.ps1"
       - "For-AI/engineering/tests/test_rust_session_package_differential.py"
+      - "For-AI/engineering/tests/test_rust_experiment_profile_differential.py"
       - "For-AI/engineering/tests/test_rust_timing_schedule_differential.py"
       - "For-AI/engineering/tests/test_rust_response_differential.py"
       - "For-AI/engineering/tests/test_native_result_file_audit.py"
@@ -133,6 +135,7 @@ jobs:
         run: >-
           python -m pytest -q
           For-AI/engineering/tests/test_rust_session_package_differential.py
+          For-AI/engineering/tests/test_rust_experiment_profile_differential.py
           For-AI/engineering/tests/test_rust_timing_schedule_differential.py
           For-AI/engineering/tests/test_rust_response_differential.py
           For-AI/engineering/tests/test_native_result_file_audit.py

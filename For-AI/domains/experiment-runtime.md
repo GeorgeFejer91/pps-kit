@@ -41,6 +41,11 @@ choose a second trial order. Designer export checks the current review revision
 and existing lineage gates. The compatibility Runner accepts
 `--experiment-profile <json> --participant-id <id>` and uses the existing session
 assembler after verifying the inventory. Remote projections never carry paths.
+`pps-session-package::experiment_profile` now verifies that same JSON's bounded
+local ingredient inventory in pure Rust and retains a native-only path/hash
+receipt. It is read-only preflight, not native assembly or execution. Recheck
+the ingredient bytes when the native assembler consumes them; never turn this
+receipt into a WebView or phone projection.
 
 Designer generation jobs bind to the captured design signature. Ingredient media
 stays in staging until the source and cooperative cancellation checks admit
