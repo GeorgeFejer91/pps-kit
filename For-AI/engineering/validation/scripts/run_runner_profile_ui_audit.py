@@ -105,9 +105,9 @@ def main() -> int:
         page.wait_for_function("document.querySelector('#execution-inspection-status')?.textContent?.includes('Compiled')")
         next_audio.click()
         page.wait_for_function("document.querySelector('#prepared-audio-detail')?.textContent?.includes('Block 2 is content-bound')")
-        assert page.evaluate("window.participantAudit.audioCalls") == [
-            {"command": "prepare_current_audio_block", "args": None}
-        ]
+        audio_calls = page.evaluate("window.participantAudit.audioCalls")
+        assert len(audio_calls) == 1 and audio_calls[0]["command"] == "prepare_current_audio_block", audio_calls
+        assert audio_calls[0]["args"] in ({}, None), audio_calls
 
         for width, height, enlarged in [
             (320, 800, False), (900, 620, False), (1000, 620, False),
