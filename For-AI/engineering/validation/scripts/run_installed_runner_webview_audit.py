@@ -20,6 +20,7 @@ import winreg
 
 from playwright.sync_api import expect, sync_playwright
 from pywinauto import Desktop
+from pywinauto.keyboard import send_keys
 
 
 def local_debug_port() -> int:
@@ -202,16 +203,27 @@ def synthetic_planner_profile(root: Path) -> Path:
     return profile
 
 
-def choose_path_in_native_dialog(process_id: int, path: Path) -> None:
+def choose_path_in_native_dialog(process_id: int, path: Path, *, folder: bool = False) -> None:
     """Exercise the app-owned Windows chooser; the WebView never supplies a path."""
     dialog = Desktop(backend="uia").window(process=process_id, class_name="#32770")
     dialog.wait("visible", timeout=30)
-    file_name = dialog.child_window(auto_id="1148", control_type="ComboBox").child_window(
-        control_type="Edit"
-    )
-    file_name.wait("visible", timeout=10)
-    file_name.set_edit_text(str(path))
-    dialog.child_window(auto_id="1", control_type="Button").click()
+    if folder:
+        # Windows folder mode has no file-name editor. Navigate the dialog's
+        # address bar, then confirm the current folder with its native button.
+        dialog.set_focus()
+        send_keys("%d")
+        send_keys("^a")
+        send_keys(str(path), with_spaces=True)
+        send_keys("{ENTER}")
+        time.sleep(0.4)
+        dialog.child_window(auto_id="1", control_type="Button").click()
+    else:
+        file_name = dialog.child_window(auto_id="1148", control_type="ComboBox").child_window(
+            control_type="Edit"
+        )
+        file_name.wait("visible", timeout=10)
+        file_name.set_edit_text(str(path))
+        dialog.child_window(auto_id="1", control_type="Button").click()
     dialog.wait_not("visible", timeout=15)
 
 
@@ -352,7 +364,7 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             expect(page.locator("#prepare-experiment-profile")).to_be_enabled(timeout=10_000)
             page.locator("#prepare-experiment-profile").click()
             choose_path_in_native_dialog(process.pid, profile_path)
-            choose_path_in_native_dialog(process.pid, output_parent)
+            choose_path_in_native_dialog(process.pid, output_parent, folder=True)
             expect(page.locator("#package-badge")).to_have_text("Verified", timeout=60_000)
             generated = list(output_parent.glob("CI_SYNTHETIC_*"))
             assert len(generated) == 1 and generated[0].is_dir(), generated
