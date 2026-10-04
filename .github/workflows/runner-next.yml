@@ -26,6 +26,7 @@ on:
       - "For-AI/engineering/tests/test_native_result_file_audit.py"
       - "For-AI/engineering/validation/scripts/validate_native_results.py"
       - "For-AI/engineering/validation/scripts/run_runner_profile_ui_audit.py"
+      - "For-AI/engineering/validation/scripts/run_installed_runner_webview_audit.py"
       - ".github/workflows/runner-next.yml"
   push:
     branches: [main]
@@ -53,6 +54,7 @@ on:
       - "For-AI/engineering/tests/test_native_result_file_audit.py"
       - "For-AI/engineering/validation/scripts/validate_native_results.py"
       - "For-AI/engineering/validation/scripts/run_runner_profile_ui_audit.py"
+      - "For-AI/engineering/validation/scripts/run_installed_runner_webview_audit.py"
       - ".github/workflows/runner-next.yml"
   workflow_dispatch:
 
@@ -207,6 +209,10 @@ jobs:
           node-version: "22"
           cache: npm
           cache-dependency-path: apps/runner/package-lock.json
+      - uses: actions/setup-python@v5
+        if: matrix.slug == 'windows-host-nsis'
+        with:
+          python-version: "3.12"
       - uses: dtolnay/rust-toolchain@1.88.0
       - name: Install Linux Tauri packaging prerequisites
         if: runner.os == 'Linux'
@@ -323,6 +329,38 @@ jobs:
             'webview_launched=false'
             'physical_output_qualified=false'
           ) | Set-Content -Encoding ascii (Join-Path $stage 'INSTALL_INVENTORY.txt')
+          "PPS_INSTALLED_RUNNER=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Install pinned WebView audit driver
+        if: matrix.slug == 'windows-host-nsis'
+        run: python -m pip install --disable-pip-version-check playwright==1.61.0
+      - name: Exercise the installed Runner WebView and native snapshot
+        if: matrix.slug == 'windows-host-nsis'
+        shell: pwsh
+        run: |
+          $audit = 'artifacts/runner-installed-webview-audit'
+          python For-AI/engineering/validation/scripts/run_installed_runner_webview_audit.py `
+            --binary $env:PPS_INSTALLED_RUNNER --output-dir $audit --commit '${{ github.sha }}'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $report = Get-Content -LiteralPath (Join-Path $audit 'report.json') -Raw | ConvertFrom-Json
+          if (-not $report.passed -or $report.commit -ne '${{ github.sha }}') {
+            throw 'Installed WebView audit report does not match this build.'
+          }
+          $stage = 'dist/runner-validation/windows-host-nsis'
+          Copy-Item -LiteralPath (Join-Path $audit 'report.json') -Destination (Join-Path $stage 'WEBVIEW_AUDIT.json')
+          $inventory = Join-Path $stage 'INSTALL_INVENTORY.txt'
+          (Get-Content -LiteralPath $inventory) `
+            -replace 'scope=ci_silent_install_inventory_only', 'scope=ci_silent_install_and_webview_audit' `
+            -replace 'webview_launched=false', 'webview_launched=true' |
+            Set-Content -Encoding ascii -LiteralPath $inventory
+          "webview_audit_sha256=$((Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $stage 'WEBVIEW_AUDIT.json')).Hash.ToLowerInvariant())" |
+            Add-Content -Encoding ascii -LiteralPath $inventory
+      - name: Retain installed WebView screenshots and failure report
+        if: always() && matrix.slug == 'windows-host-nsis'
+        uses: actions/upload-artifact@v7
+        with:
+          name: runner-installed-webview-${{ github.sha }}
+          path: artifacts/runner-installed-webview-audit
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v7
         with:
           name: pps-runner-preview-validation-${{ matrix.slug }}-${{ runner.arch }}-${{ github.sha }}
