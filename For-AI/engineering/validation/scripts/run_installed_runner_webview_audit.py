@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import os
@@ -11,6 +12,7 @@ import socket
 import subprocess
 import tempfile
 import time
+import struct
 from urllib.parse import urlparse
 from urllib.request import ProxyHandler, build_opener
 import wave
@@ -132,7 +134,75 @@ def synthetic_prepared_session(root: Path) -> Path:
     return manifest_path
 
 
-def choose_manifest_in_native_dialog(process_id: int, manifest_path: Path) -> None:
+def synthetic_planner_profile(root: Path) -> Path:
+    """Freeze two inventoried Segment 5/6 rows in the Planner's JSON contract."""
+    root.mkdir(parents=True, exist_ok=True)
+    target = root / "target.wav"
+    catch = root / "catch.wav"
+    with wave.open(str(target), "wb") as audio:
+        audio.setparams((3, 2, 44_100, 0, "NONE", "not compressed"))
+        audio.writeframes(bytes(4_000 * 3 * 2))
+    with wave.open(str(catch), "wb") as audio:
+        audio.setparams((2, 2, 44_100, 0, "NONE", "not compressed"))
+        audio.writeframes(bytes(1_000 * 2 * 2))
+
+    block = root / "block.csv"
+    fields = ["block_trial_index", "family", "trial_file_path", "source_sha256",
+              "looming_segment_onset_s", "tactile_onset_s", "soa_ms", "iti_ms",
+              "tactile_waveform_shape", "tactile_frequency_hz", "tactile_duration_ms",
+              "tactile_channel"]
+    with block.open("w", newline="", encoding="utf-8") as destination:
+        writer = csv.DictWriter(destination, fieldnames=fields)
+        writer.writeheader()
+        writer.writerow({"block_trial_index": 1, "family": "audio_tactile",
+                         "trial_file_path": str(target), "source_sha256": sha256(target),
+                         "soa_ms": 50, "iti_ms": 10, "tactile_waveform_shape": "square",
+                         "tactile_frequency_hz": 100, "tactile_duration_ms": 10,
+                         "tactile_channel": 3})
+        writer.writerow({"block_trial_index": 2, "family": "catch",
+                         "trial_file_path": str(catch), "source_sha256": sha256(catch),
+                         "looming_segment_onset_s": 0, "soa_ms": 0, "iti_ms": 0})
+    order = root / "order.csv"
+    with order.open("w", newline="", encoding="utf-8") as destination:
+        writer = csv.DictWriter(destination, fieldnames=["participant_id", "block_csv_path", "block_label"])
+        writer.writeheader()
+        writer.writerow({"participant_id": "CI_SYNTHETIC", "block_csv_path": str(block),
+                         "block_label": "Synthetic profile block"})
+    accepted = root / "accepted.json"
+    accepted.write_text('{"accepted": true}', encoding="utf-8")
+    setup = root / "setup.json"
+    run_setup = {"schema": "pps-experiment-run-setup.v1", "prepared": True,
+                 "source_segment5_manifest": str(accepted),
+                 "source_segment5_manifest_sha256": sha256(accepted), "csv_path": str(order),
+                 "total_block_runs": 1}
+    setup.write_text(json.dumps(run_setup), encoding="utf-8")
+
+    def rows(path: Path) -> list[dict[str, str]]:
+        with path.open(newline="", encoding="utf-8") as source:
+            return list(csv.DictReader(source))
+
+    inventory = []
+    for path in (setup, accepted, order, block, target, catch):
+        item = {"path": str(path), "bytes": path.stat().st_size, "sha256": sha256(path)}
+        if path.suffix == ".wav":
+            with wave.open(str(path), "rb") as audio:
+                item["audio"] = {"frames": audio.getnframes(), "sample_rate": audio.getframerate(),
+                                 "channels": audio.getnchannels(), "format": "WAV"}
+        inventory.append(item)
+    profile = root / "experiment.json"
+    profile.write_text(json.dumps({
+        "schema": "pps-experiment-profile.v1", "profile_id": "ci-synthetic",
+        "display_name": "Installed synthetic profile", "source_revision": 1, "design": {},
+        "run_setup_path": str(setup),
+        "assembly": {"run_setup": run_setup, "block_order": rows(order),
+                     "blocks": [{"source_csv_path": str(block), "label": "Synthetic profile block",
+                                 "rows": rows(block)}]},
+        "files": inventory,
+    }, indent=2) + "\n", encoding="utf-8")
+    return profile
+
+
+def choose_path_in_native_dialog(process_id: int, path: Path) -> None:
     """Exercise the app-owned Windows chooser; the WebView never supplies a path."""
     dialog = Desktop(backend="uia").window(process=process_id, class_name="#32770")
     dialog.wait("visible", timeout=30)
@@ -140,8 +210,9 @@ def choose_manifest_in_native_dialog(process_id: int, manifest_path: Path) -> No
         control_type="Edit"
     )
     file_name.wait("visible", timeout=10)
-    file_name.set_edit_text(str(manifest_path))
+    file_name.set_edit_text(str(path))
     dialog.child_window(auto_id="1", control_type="Button").click()
+    dialog.wait_not("visible", timeout=15)
 
 
 def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> None:
@@ -153,7 +224,7 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
         "commit": commit,
         "installed_binary_sha256": sha256(binary),
         "platform": platform.platform(),
-        "scope": "ci_installed_webview_native_package_schedule_and_pcm",
+        "scope": "ci_installed_webview_native_profile_media_package_schedule_and_pcm",
         "physical_output_qualified": False,
         "participant_execution": False,
         "elevated_host_debug_policy": elevated_policy,
@@ -237,10 +308,11 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             report["initial_run_phase"] = snapshot["run"]["phase"]
             report["visible_state"] = state
             fixture = tempfile.TemporaryDirectory(prefix="pps-installed-audit-")
-            manifest_path = synthetic_prepared_session(Path(fixture.name))
+            fixture_root = Path(fixture.name)
+            manifest_path = synthetic_prepared_session(fixture_root / "prepared")
             assert page.locator("#select-session-manifest").is_enabled()
             page.locator("#select-session-manifest").click()
-            choose_manifest_in_native_dialog(process.pid, manifest_path)
+            choose_path_in_native_dialog(process.pid, manifest_path)
             expect(page.locator("#package-badge")).to_have_text("Verified", timeout=30_000)
             adopted = page.evaluate("window.__TAURI_INTERNALS__.invoke('runner_snapshot')")
             assert adopted["package_verified"] is True
@@ -266,6 +338,68 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             )
             expect(page.locator("#native-output-prepare")).to_be_disabled()
             report["native_pcm_prepared"] = True
+
+            page.locator("#participant-code").fill("CI_SYNTHETIC")
+            page.locator("#participant-age").fill("30")
+            page.locator("#participant-handedness").select_option("right")
+            page.locator("#participant-gender").select_option("prefer_not_to_say")
+            page.locator("#setup-form button[type=submit]").click()
+            expect(page.locator("#setup-badge")).to_have_text("Ready", timeout=10_000)
+
+            profile_path = synthetic_planner_profile(fixture_root / "profile")
+            output_parent = fixture_root / "generated"
+            output_parent.mkdir()
+            expect(page.locator("#prepare-experiment-profile")).to_be_enabled(timeout=10_000)
+            page.locator("#prepare-experiment-profile").click()
+            choose_path_in_native_dialog(process.pid, profile_path)
+            choose_path_in_native_dialog(process.pid, output_parent)
+            expect(page.locator("#package-badge")).to_have_text("Verified", timeout=60_000)
+            generated = list(output_parent.glob("CI_SYNTHETIC_*"))
+            assert len(generated) == 1 and generated[0].is_dir(), generated
+            generated_manifest = generated[0] / "session_manifest.json"
+            generated_wav = generated[0] / "blocks" / "Block_01.wav"
+            generated_csv = generated[0] / "blocks" / "Block_01.csv"
+            assert all(path.is_file() for path in (generated_manifest, generated_wav, generated_csv))
+            manifest = json.loads(generated_manifest.read_text(encoding="utf-8"))
+            assert manifest["schema"] == "pps-run-session.v1"
+            assert manifest["participant_id"] == "CI_SYNTHETIC"
+            assert len(manifest["blocks"]) == 1 and manifest["blocks"][0]["trial_count"] == 2
+            with generated_csv.open(newline="", encoding="utf-8") as source:
+                generated_rows = list(csv.DictReader(source))
+            assert [row["Family"] for row in generated_rows] == ["audio_tactile", "catch"]
+            assert generated_rows[0]["Tactile_Waveform_Generated"] == "true"
+            with wave.open(str(generated_wav), "rb") as audio:
+                assert (audio.getnchannels(), audio.getsampwidth(), audio.getframerate()) == (3, 2, 44_100)
+                assert audio.getnframes() == 5_441
+                pcm = audio.readframes(audio.getnframes())
+            samples = struct.unpack(f"<{len(pcm) // 2}h", pcm)
+            assert all(samples[index] == 0 for index in range(0, len(samples), 3))
+            assert all(samples[index] == 0 for index in range(1, len(samples), 3))
+            assert any(samples[index] != 0 for index in range(2, 4_000 * 3, 3))
+            assert all(samples[index] == 0 for index in range(4_441 * 3, len(samples)))
+            profile_snapshot = page.evaluate("window.__TAURI_INTERNALS__.invoke('runner_snapshot')")
+            assert profile_snapshot["package_verified"] is True
+            assert profile_snapshot["identity"]["session_id"] == generated[0].name
+            assert profile_snapshot["safety"]["local_armed"] is False
+            report["planner_profile_sha256"] = sha256(profile_path)
+            report["generated_manifest_sha256"] = sha256(generated_manifest)
+            report["generated_wav_sha256"] = sha256(generated_wav)
+            report["generated_csv_sha256"] = sha256(generated_csv)
+            report["generated_wav_frames"] = 5_441
+            report["planner_profile_package_generated"] = True
+
+            expect(page.locator("#inspect-prepared-execution")).to_be_enabled(timeout=10_000)
+            page.locator("#inspect-prepared-execution").click()
+            expect(page.locator("#execution-inspection-status")).to_have_text(
+                "Compiled · inspection only", timeout=30_000,
+            )
+            report["profile_rust_schedule_compiled"] = True
+            expect(page.locator("#prepare-current-audio-block")).to_be_enabled(timeout=10_000)
+            page.locator("#prepare-current-audio-block").click()
+            expect(page.locator("#prepared-audio-status")).to_have_text(
+                "Prepared · output not reserved", timeout=30_000,
+            )
+            report["profile_native_pcm_prepared"] = True
             report["tabs"] = []
             for tab in ("control", "logging", "remote"):
                 button = page.locator(f'.tab-button[data-tab="{tab}"]')

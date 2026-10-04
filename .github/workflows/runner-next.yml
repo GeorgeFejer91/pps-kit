@@ -349,7 +349,7 @@ jobs:
       - name: Install pinned installed-UI audit drivers
         if: matrix.slug == 'windows-host-nsis'
         run: python -m pip install --disable-pip-version-check playwright==1.61.0 pywinauto==0.6.9
-      - name: Exercise installed Runner package, schedule, and PCM preparation
+      - name: Exercise installed Runner profile, generated media, schedule, and PCM preparation
         if: matrix.slug == 'windows-host-nsis'
         shell: pwsh
         run: |
@@ -360,14 +360,15 @@ jobs:
           $report = Get-Content -LiteralPath (Join-Path $audit 'report.json') -Raw | ConvertFrom-Json
           if (-not $report.passed -or $report.commit -ne '${{ github.sha }}' -or
               -not $report.prepared_session_selected -or -not $report.rust_schedule_compiled -or
-              -not $report.native_pcm_prepared) {
+              -not $report.native_pcm_prepared -or -not $report.planner_profile_package_generated -or
+              -not $report.profile_rust_schedule_compiled -or -not $report.profile_native_pcm_prepared) {
             throw 'Installed WebView audit report does not match this build.'
           }
           $stage = 'dist/runner-validation/windows-host-nsis'
           Copy-Item -LiteralPath (Join-Path $audit 'report.json') -Destination (Join-Path $stage 'WEBVIEW_AUDIT.json')
           $inventory = Join-Path $stage 'INSTALL_INVENTORY.txt'
           (Get-Content -LiteralPath $inventory) `
-            -replace 'scope=ci_silent_install_inventory_only', 'scope=ci_silent_install_package_schedule_pcm_audit' `
+            -replace 'scope=ci_silent_install_inventory_only', 'scope=ci_silent_install_profile_media_package_schedule_pcm_audit' `
             -replace 'webview_launched=false', 'webview_launched=true' |
             Set-Content -Encoding ascii -LiteralPath $inventory
           "webview_audit_sha256=$((Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $stage 'WEBVIEW_AUDIT.json')).Hash.ToLowerInvariant())" |
@@ -429,7 +430,7 @@ jobs:
           "PPS_INSTALLED_RUNNER=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: Install pinned installed-UI audit drivers
         run: python -m pip install --disable-pip-version-check playwright==1.61.0 pywinauto==0.6.9
-      - name: Exercise installed Runner package, schedule, and PCM preparation
+      - name: Exercise installed Runner profile, generated media, schedule, and PCM preparation
         shell: pwsh
         env:
           SOURCE_COMMIT: ${{ inputs.installed_artifact_commit }}
