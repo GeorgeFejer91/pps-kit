@@ -397,6 +397,16 @@ fn f32_to_i32(sample: f32) -> i32 {
     (sample.clamp(-1.0, 1.0) * 2_147_483_648.0) as i32
 }
 
+const fn supported_buffer(value: SupportedBufferSize) -> OutputBufferSupport {
+    match value {
+        SupportedBufferSize::Range { min, max } => OutputBufferSupport::Range {
+            minimum_frames: min,
+            maximum_frames: max,
+        },
+        SupportedBufferSize::Unknown => OutputBufferSupport::Unknown,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::f32_to_i32;
@@ -407,15 +417,5 @@ mod tests {
         assert_eq!(f32_to_i32(0.0), 0);
         assert_eq!(f32_to_i32(1.0), i32::MAX);
         assert_eq!(f32_to_i32(f32::NAN), 0);
-    }
-}
-
-const fn supported_buffer(value: SupportedBufferSize) -> OutputBufferSupport {
-    match value {
-        SupportedBufferSize::Range { min, max } => OutputBufferSupport::Range {
-            minimum_frames: min,
-            maximum_frames: max,
-        },
-        SupportedBufferSize::Unknown => OutputBufferSupport::Unknown,
     }
 }
