@@ -136,6 +136,24 @@ fn set_alias(
     set(row, name, field(source, aliases));
 }
 
+fn six_significant(value: f64) -> String {
+    let scientific = format!("{value:.5e}");
+    let (mantissa, exponent) = scientific.split_once('e').unwrap_or(("0", "0"));
+    let exponent = exponent.parse::<i32>().unwrap_or(0);
+    fn trim(text: &str) -> &str {
+        if text.contains('.') {
+            text.trim_end_matches('0').trim_end_matches('.')
+        } else {
+            text
+        }
+    }
+    if (-4..6).contains(&exponent) {
+        trim(&format!("{:.*}", (5 - exponent) as usize, value)).to_owned()
+    } else {
+        format!("{}e{exponent:+03}", trim(mantissa))
+    }
+}
+
 fn sample_at(start: u64, relative_s: f64, rate: u32) -> u64 {
     (((start as f64 / f64::from(rate)) + relative_s) * f64::from(rate))
         .round_ties_even()
@@ -423,14 +441,101 @@ fn prepared_row(
     );
     set(&mut row, "Trial_Duration_S", format!("{duration_s:.9}"));
     set(&mut row, "Sample_Rate_Hz", rate);
+    set(&mut row, "Channels", span.prepared_channels);
+    let waveform = span.tactile_waveform;
     set(
         &mut row,
-        "Channels",
-        trial
-            .ingredient()
-            .audio()
-            .ok_or(package_error("profile_package_audio_hint_missing"))?
-            .channels(),
+        "Tactile_Channel",
+        if field(source, &["tactile_channel", "Tactile_Channel"]).is_empty() {
+            waveform
+                .map(|value| value.channel.to_string())
+                .unwrap_or_default()
+        } else {
+            field(source, &["tactile_channel", "Tactile_Channel"]).to_owned()
+        },
+    );
+    set(
+        &mut row,
+        "Tactile_Waveform_Shape",
+        waveform.map_or_else(
+            || {
+                field(
+                    source,
+                    &["tactile_waveform_shape", "Tactile_Waveform_Shape"],
+                )
+                .to_owned()
+            },
+            |value| value.shape.as_str().to_owned(),
+        ),
+    );
+    set(
+        &mut row,
+        "Tactile_Frequency_Hz",
+        waveform.map_or_else(
+            || {
+                field(
+                    source,
+                    &[
+                        "tactile_frequency_hz",
+                        "Tactile_Frequency_Hz",
+                        "tactile_waveform_frequency_hz",
+                        "Tactile_Waveform_Frequency_Hz",
+                    ],
+                )
+                .to_owned()
+            },
+            |value| six_significant(value.frequency_hz),
+        ),
+    );
+    set(
+        &mut row,
+        "Tactile_Duration_ms",
+        waveform.map_or_else(
+            || {
+                field(
+                    source,
+                    &[
+                        "tactile_duration_ms",
+                        "Tactile_Duration_ms",
+                        "tactile_waveform_duration_ms",
+                        "Tactile_Waveform_Duration_ms",
+                    ],
+                )
+                .to_owned()
+            },
+            |value| six_significant(value.duration_ms),
+        ),
+    );
+    set(
+        &mut row,
+        "Tactile_Amplitude",
+        waveform.map_or_else(
+            || {
+                field(
+                    source,
+                    &[
+                        "tactile_amplitude",
+                        "Tactile_Amplitude",
+                        "tactile_waveform_amplitude",
+                    ],
+                )
+                .to_owned()
+            },
+            |value| six_significant(f64::from(value.amplitude)),
+        ),
+    );
+    set_alias(
+        &mut row,
+        source,
+        "Tactile_Pulse_Duration_ms",
+        &[
+            "tactile_pulse_duration_ms",
+            "Tactile_Pulse_Duration_ms",
+            "electrical_pulse_duration_ms",
+            "Electrical_Pulse_Duration_ms",
+            "pulse_duration_ms",
+            "Pulse_Duration_ms",
+        ],
     );
     set(
         &mut row,
@@ -533,7 +638,15 @@ fn prepared_row(
     set(
         &mut row,
         "Tactile_Waveform_Generated",
-        if has_tactile { "false" } else { "" },
+        if has_tactile {
+            if waveform.is_some() {
+                "true"
+            } else {
+                "false"
+            }
+        } else {
+            ""
+        },
     );
     set(
         &mut row,
@@ -844,5 +957,18 @@ pub fn prepare_standard_profile_package(
             let _ = fs::remove_file(&final_manifest);
             Err(error)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::six_significant;
+
+    #[test]
+    fn prepared_tactile_numbers_use_six_significant_digits() {
+        assert_eq!(six_significant(0.2), "0.2");
+        assert_eq!(six_significant(100_000.0), "100000");
+        assert_eq!(six_significant(1_000_000.0), "1e+06");
+        assert_eq!(six_significant(0.00001), "1e-05");
     }
 }

@@ -70,7 +70,7 @@ impl fmt::Display for BlockMediaError {
 
 impl std::error::Error for BlockMediaError {}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy)]
 pub struct TrialFrameSpan {
     pub start: u64,
     pub end: u64,
@@ -78,6 +78,8 @@ pub struct TrialFrameSpan {
     pub iti_frames: u64,
     pub tactile_shift_frames: u64,
     pub tactile_compensation_note: &'static str,
+    pub(crate) prepared_channels: u16,
+    pub(crate) tactile_waveform: Option<TactileWaveform>,
 }
 
 /// Content-bound on-disk PCM16 block. Path/hash never serialize to WebView.
@@ -147,6 +149,16 @@ fn number(value: Option<&str>, default: f64) -> f64 {
         .unwrap_or(default)
 }
 
+fn tactile_number(value: Option<&str>, default: f64) -> Result<f64, BlockMediaError> {
+    if value
+        .and_then(|text| text.trim().parse::<f64>().ok())
+        .is_some_and(|parsed| !parsed.is_finite())
+    {
+        return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
+    }
+    Ok(number(value, default))
+}
+
 pub(crate) fn family(fields: &BTreeMap<String, String>) -> &'static str {
     let declared = row_value(fields, &["family", "Family"])
         .unwrap_or("")
@@ -177,8 +189,8 @@ pub(crate) fn family(fields: &BTreeMap<String, String>) -> &'static str {
     }
 }
 
-fn has_unsupported_transform(fields: &BTreeMap<String, String>, trial_family: &str) -> bool {
-    let switching = row_value(
+fn has_speaker_switching(fields: &BTreeMap<String, String>) -> bool {
+    row_value(
         fields,
         &[
             "speaker_switch_channels",
@@ -191,26 +203,232 @@ fn has_unsupported_transform(fields: &BTreeMap<String, String>, trial_family: &s
             "Speaker_Switch_Boundaries_ms",
         ],
     )
-    .is_some();
-    let tactile = matches!(trial_family, "audio_tactile" | "baseline")
-        && (row_value(
+    .is_some()
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum TactileShape {
+    Sawtooth,
+    Sine,
+    Square,
+    BiphasicSquarePulseTrain,
+}
+
+impl TactileShape {
+    pub(crate) const fn as_str(self) -> &'static str {
+        match self {
+            Self::Sawtooth => "sawtooth",
+            Self::Sine => "sine",
+            Self::Square => "square",
+            Self::BiphasicSquarePulseTrain => "biphasic_square_pulse_train",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct TactileWaveform {
+    pub(crate) shape: TactileShape,
+    pub(crate) frequency_hz: f64,
+    pub(crate) duration_ms: f64,
+    pub(crate) amplitude: f32,
+    pub(crate) channel: u16,
+    start: u64,
+    frames: u64,
+    period_frames: u64,
+    pulse_frames: u64,
+    pulse_count: u64,
+}
+
+impl TactileWaveform {
+    fn stop(self) -> u64 {
+        self.start + self.frames
+    }
+
+    fn sample(self, relative_frame: u64, sample_rate_hz: u32) -> f32 {
+        let value = match self.shape {
+            TactileShape::BiphasicSquarePulseTrain => {
+                let pulse = (relative_frame / self.period_frames).min(self.pulse_count - 1);
+                let position = relative_frame - pulse * self.period_frames;
+                if position >= self.pulse_frames {
+                    0.0
+                } else if position < (self.pulse_frames / 2).max(1) {
+                    1.0
+                } else {
+                    -1.0
+                }
+            }
+            shape => {
+                let time = relative_frame as f32 / sample_rate_hz as f32;
+                let cycles = time * self.frequency_hz as f32;
+                let phase = cycles.fract();
+                match shape {
+                    TactileShape::Sawtooth => 2.0 * phase - 1.0,
+                    TactileShape::Square => {
+                        if phase < 0.5 {
+                            1.0
+                        } else {
+                            -1.0
+                        }
+                    }
+                    TactileShape::Sine => {
+                        ((std::f64::consts::TAU * self.frequency_hz) as f32 * time).sin()
+                    }
+                    TactileShape::BiphasicSquarePulseTrain => unreachable!(),
+                }
+            }
+        };
+        value * self.amplitude
+    }
+}
+
+fn bounded_frames(value: f64) -> Result<u64, BlockMediaError> {
+    let value = value.round_ties_even();
+    if !value.is_finite() || value < 0.0 || value > u64::MAX as f64 {
+        return Err(BlockMediaError(BlockMediaErrorCode::ResourceLimit));
+    }
+    Ok(value as u64)
+}
+
+fn tactile_waveform(
+    fields: &BTreeMap<String, String>,
+    trial_family: &str,
+    sample_rate_hz: u32,
+) -> Result<Option<TactileWaveform>, BlockMediaError> {
+    if !matches!(trial_family, "audio_tactile" | "baseline") {
+        return Ok(None);
+    }
+    let raw_shape = row_value(
+        fields,
+        &["tactile_waveform_shape", "Tactile_Waveform_Shape"],
+    )
+    .unwrap_or("")
+    .trim();
+    let frequency_hz = tactile_number(
+        row_value(
             fields,
-            &["tactile_waveform_shape", "Tactile_Waveform_Shape"],
-        )
-        .is_some()
-            || number(
-                row_value(
-                    fields,
-                    &[
-                        "tactile_frequency_hz",
-                        "Tactile_Frequency_Hz",
-                        "tactile_waveform_frequency_hz",
-                        "Tactile_Waveform_Frequency_Hz",
-                    ],
-                ),
-                0.0,
-            ) > 0.0);
-    switching || tactile
+            &[
+                "tactile_frequency_hz",
+                "Tactile_Frequency_Hz",
+                "tactile_waveform_frequency_hz",
+                "Tactile_Waveform_Frequency_Hz",
+            ],
+        ),
+        0.0,
+    )?;
+    if raw_shape.is_empty() && frequency_hz <= 0.0 {
+        return Ok(None);
+    }
+    let token = raw_shape
+        .to_ascii_lowercase()
+        .split(|character: char| !character.is_ascii_alphanumeric())
+        .filter(|part| !part.is_empty())
+        .collect::<Vec<_>>()
+        .join("_");
+    let shape = match token.as_str() {
+        "saw" | "saw_tooth" | "sawtooth" | "ramp" => TactileShape::Sawtooth,
+        "sine" | "sin" | "sinusoid" | "sinusoidal" => TactileShape::Sine,
+        "square" | "pulse" => TactileShape::Square,
+        "pulse_train"
+        | "square_pulse_train"
+        | "biphasic_pulse"
+        | "biphasic_square_pulse"
+        | "biphasic_square_pulse_train" => TactileShape::BiphasicSquarePulseTrain,
+        _ => return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported)),
+    };
+    let duration_ms = tactile_number(
+        row_value(
+            fields,
+            &[
+                "tactile_duration_ms",
+                "Tactile_Duration_ms",
+                "tactile_waveform_duration_ms",
+                "Tactile_Waveform_Duration_ms",
+            ],
+        ),
+        0.0,
+    )?;
+    if frequency_hz <= 0.0 || duration_ms <= 0.0 {
+        return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
+    }
+    let pulse_duration_ms = tactile_number(
+        row_value(
+            fields,
+            &[
+                "tactile_pulse_duration_ms",
+                "Tactile_Pulse_Duration_ms",
+                "tactile_waveform_pulse_duration_ms",
+                "Tactile_Waveform_Pulse_Duration_ms",
+            ],
+        ),
+        0.0,
+    )?;
+    if shape == TactileShape::BiphasicSquarePulseTrain && pulse_duration_ms <= 0.0 {
+        return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
+    }
+    let channel = number(
+        row_value(fields, &["tactile_channel", "Tactile_Channel"]),
+        3.0,
+    )
+    .trunc()
+    .max(1.0);
+    if channel > f64::from(OUTPUT_CHANNELS) {
+        return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
+    }
+    let start = bounded_frames(tactile_onset_s(fields, trial_family) * f64::from(sample_rate_hz))?;
+    let mut frames = bounded_frames(duration_ms / 1000.0 * f64::from(sample_rate_hz))?.max(1);
+    let mut period_frames = 1;
+    let mut pulse_frames = 2;
+    let mut pulse_count = 1;
+    if shape == TactileShape::BiphasicSquarePulseTrain {
+        period_frames = bounded_frames(f64::from(sample_rate_hz) / frequency_hz)?.max(1);
+        pulse_frames =
+            bounded_frames(pulse_duration_ms / 1000.0 * f64::from(sample_rate_hz))?.max(2);
+        let count = (duration_ms / 1000.0 * frequency_hz + 1.0e-9).floor();
+        if !count.is_finite() || count > u64::MAX as f64 - 1.0 {
+            return Err(BlockMediaError(BlockMediaErrorCode::ResourceLimit));
+        }
+        pulse_count = (count.max(1.0) as u64)
+            .checked_add(1)
+            .ok_or(BlockMediaError(BlockMediaErrorCode::ResourceLimit))?;
+        frames = frames.max(
+            (pulse_count - 1)
+                .checked_mul(period_frames)
+                .and_then(|value| value.checked_add(pulse_frames))
+                .ok_or(BlockMediaError(BlockMediaErrorCode::ResourceLimit))?,
+        );
+    }
+    start
+        .checked_add(frames)
+        .filter(|stop| *stop <= MAX_OUTPUT_WAV_BYTES / (u64::from(OUTPUT_CHANNELS) * 2))
+        .ok_or(BlockMediaError(BlockMediaErrorCode::ResourceLimit))?;
+    if std::f64::consts::TAU * frequency_hz * frames as f64 / f64::from(sample_rate_hz)
+        > f64::from(f32::MAX)
+    {
+        return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
+    }
+    Ok(Some(TactileWaveform {
+        shape,
+        frequency_hz,
+        duration_ms,
+        amplitude: tactile_number(
+            row_value(
+                fields,
+                &[
+                    "tactile_amplitude",
+                    "Tactile_Amplitude",
+                    "tactile_waveform_amplitude",
+                ],
+            ),
+            0.2,
+        )?
+        .clamp(0.0, 1.0) as f32,
+        channel: channel as u16,
+        start,
+        frames,
+        period_frames,
+        pulse_frames,
+        pulse_count,
+    }))
 }
 
 fn iti_frames(
@@ -308,8 +526,8 @@ pub(crate) fn compensation_ms() -> f64 {
 }
 
 fn tactile_shift(
-    samples: &[f32],
-    channels: usize,
+    tactile_sample: impl Fn(usize) -> f32,
+    channels: u16,
     frames: usize,
     sample_rate_hz: u32,
     onset_s: f64,
@@ -340,7 +558,7 @@ fn tactile_shift(
     }
     let last_active = (0..frames)
         .rev()
-        .find(|frame| samples[frame * channels + 2].abs() > 1.0e-7);
+        .find(|frame| tactile_sample(*frame).abs() > 1.0e-7);
     if last_active.is_none_or(|last| last < nominal) {
         return if last_active.is_none() {
             (0, "empty_tactile_channel")
@@ -351,9 +569,35 @@ fn tactile_shift(
     (nominal - drive, "tactile_channel_shifted_earlier")
 }
 
+fn trial_sample(
+    samples: &[f32],
+    source_channels: usize,
+    source_frames: usize,
+    waveform: Option<TactileWaveform>,
+    frame: usize,
+    channel: usize,
+    sample_rate_hz: u32,
+) -> f32 {
+    if let Some(waveform) = waveform {
+        let frame = frame as u64;
+        if usize::from(waveform.channel) == channel + 1
+            && frame >= waveform.start
+            && frame < waveform.stop()
+        {
+            return waveform.sample(frame - waveform.start, sample_rate_hz);
+        }
+    }
+    if frame < source_frames && channel < source_channels {
+        samples[frame * source_channels + channel]
+    } else {
+        0.0
+    }
+}
+
 fn output_sample(value: f32) -> i16 {
+    // Match libsndfile's float32-to-PCM16 conversion used by the Python oracle.
     (value.clamp(-1.0, 1.0) * 32768.0)
-        .round()
+        .floor()
         .clamp(-32768.0, 32767.0) as i16
 }
 
@@ -390,9 +634,9 @@ fn require_storage(estimated_bytes: u64, available_bytes: u64) -> Result<(), Blo
     Ok(())
 }
 
-/// Assemble one standard 2/3-channel PCM16 block in approved trial order.
-/// Advanced tactile synthesis and speaker switching reject explicitly until
-/// their Python oracle behavior is reproduced. Publication never overwrites.
+/// Assemble one 2/3-channel-source PCM16 block in approved trial order.
+/// Speaker-array switching remains unsupported until its native output route
+/// exists. Publication never overwrites.
 pub fn assemble_standard_profile_block(
     plan: &ProfileParticipantPlan,
     block_ordinal: usize,
@@ -429,11 +673,13 @@ pub fn assemble_standard_profile_block(
         if hint.format() != "WAV" || !matches!(hint.channels(), 2 | 3) {
             return Err(BlockMediaError(BlockMediaErrorCode::SourceUnsupported));
         }
-        if has_unsupported_transform(trial.fields(), family(trial.fields())) {
+        if has_speaker_switching(trial.fields()) {
             return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
         }
+        let waveform = tactile_waveform(trial.fields(), family(trial.fields()), sample_rate_hz)?;
+        let trial_frames = hint.frames().max(waveform.map_or(0, TactileWaveform::stop));
         estimated_frames = estimated_frames
-            .checked_add(hint.frames())
+            .checked_add(trial_frames)
             .and_then(|frames| frames.checked_add(iti_frames(trial.fields(), sample_rate_hz).ok()?))
             .ok_or(BlockMediaError(BlockMediaErrorCode::ResourceLimit))?;
         if 44_u64
@@ -510,13 +756,33 @@ pub fn assemble_standard_profile_block(
             return Err(BlockMediaError(BlockMediaErrorCode::MixedSampleRates));
         }
         let channels = usize::from(media.channels());
-        let frames = usize::try_from(media.frames())
+        let source_frames = usize::try_from(media.frames())
             .map_err(|_| BlockMediaError(BlockMediaErrorCode::ResourceLimit))?;
         let samples = media.interleaved_f32();
         let trial_family = family(trial.fields());
+        let waveform = tactile_waveform(trial.fields(), trial_family, sample_rate_hz)?;
+        let frames = usize::try_from(
+            media
+                .frames()
+                .max(waveform.map_or(0, TactileWaveform::stop)),
+        )
+        .map_err(|_| BlockMediaError(BlockMediaErrorCode::ResourceLimit))?;
+        let prepared_channels = media
+            .channels()
+            .max(waveform.map_or(0, |value| value.channel));
         let (shift, tactile_compensation_note) = tactile_shift(
-            samples,
-            channels,
+            |frame| {
+                trial_sample(
+                    samples,
+                    channels,
+                    source_frames,
+                    waveform,
+                    frame,
+                    2,
+                    sample_rate_hz,
+                )
+            },
+            prepared_channels,
             frames,
             sample_rate_hz,
             tactile_onset_s(trial.fields(), trial_family),
@@ -524,15 +790,31 @@ pub fn assemble_standard_profile_block(
         );
         for frame in 0..frames {
             for channel in 0..usize::from(OUTPUT_CHANNELS) {
-                let value = if channel >= channels {
-                    0.0
-                } else if channel == 2 && shift > 0 {
+                let value = if channel == 2 && shift > 0 {
                     frame
                         .checked_add(shift)
                         .filter(|source| *source < frames)
-                        .map_or(0.0, |source| samples[source * channels + channel])
+                        .map_or(0.0, |source| {
+                            trial_sample(
+                                samples,
+                                channels,
+                                source_frames,
+                                waveform,
+                                source,
+                                channel,
+                                sample_rate_hz,
+                            )
+                        })
                 } else {
-                    samples[frame * channels + channel]
+                    trial_sample(
+                        samples,
+                        channels,
+                        source_frames,
+                        waveform,
+                        frame,
+                        channel,
+                        sample_rate_hz,
+                    )
                 };
                 writer
                     .write_sample(output_sample(value))
@@ -548,7 +830,7 @@ pub fn assemble_standard_profile_block(
             }
         }
         let end = cursor
-            .checked_add(media.frames())
+            .checked_add(frames as u64)
             .and_then(|value| value.checked_add(iti))
             .ok_or(BlockMediaError(BlockMediaErrorCode::ResourceLimit))?;
         spans.push(TrialFrameSpan {
@@ -558,6 +840,8 @@ pub fn assemble_standard_profile_block(
             iti_frames: iti,
             tactile_shift_frames: shift as u64,
             tactile_compensation_note,
+            prepared_channels,
+            tactile_waveform: waveform,
         });
         cursor = end;
     }
@@ -595,7 +879,9 @@ pub fn assemble_standard_profile_block(
 
 #[cfg(test)]
 mod tests {
-    use super::{require_storage, BlockMediaErrorCode, STORAGE_RESERVE_BYTES};
+    use std::collections::BTreeMap;
+
+    use super::{require_storage, tactile_waveform, BlockMediaErrorCode, STORAGE_RESERVE_BYTES};
 
     #[test]
     fn storage_preflight_keeps_three_output_copies_and_a_reserve() {
@@ -608,6 +894,30 @@ mod tests {
         assert_eq!(
             require_storage(u64::MAX, u64::MAX).unwrap_err().0,
             BlockMediaErrorCode::ResourceLimit
+        );
+    }
+
+    #[test]
+    fn tactile_profile_rejects_nonfinite_or_unroutable_values() {
+        let mut fields = BTreeMap::from([
+            ("tactile_waveform_shape".to_owned(), "square".to_owned()),
+            ("tactile_frequency_hz".to_owned(), "100".to_owned()),
+            ("tactile_duration_ms".to_owned(), "10".to_owned()),
+        ]);
+        fields.insert("tactile_frequency_hz".to_owned(), "NaN".to_owned());
+        assert_eq!(
+            tactile_waveform(&fields, "audio_tactile", 44_100)
+                .unwrap_err()
+                .0,
+            BlockMediaErrorCode::TransformUnsupported
+        );
+        fields.insert("tactile_frequency_hz".to_owned(), "100".to_owned());
+        fields.insert("tactile_channel".to_owned(), "4".to_owned());
+        assert_eq!(
+            tactile_waveform(&fields, "audio_tactile", 44_100)
+                .unwrap_err()
+                .0,
+            BlockMediaErrorCode::TransformUnsupported
         );
     }
 }

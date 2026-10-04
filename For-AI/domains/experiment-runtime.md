@@ -52,9 +52,11 @@ them. `pps-experiment-media` binds each inventoried PCM16 trial WAV to its exact
 decoded bytes through the existing native decoder and checks the exported audio
 hint after decoding. Its standard-route assembler stages one three-channel
 PCM16 block in approved trial order, with ITI silence and the provisional
-Woojer drive advance. It rejects speaker switching and active tactile waveform
-synthesis until their Python behavior is reproduced. The block has a bounded
-size and is published without overwriting an existing file. The same crate now
+Woojer drive advance. It synthesizes the Python-compatible sawtooth, sine,
+square, and biphasic square pulse-train tactile waveforms on channels 1–3,
+including trial extension and prepared CSV metadata. Speaker switching and
+tactile output channels above three still reject explicitly. The block has a
+bounded size and is published without overwriting an existing file. The same crate now
 materializes a standard-route `pps-run-session.v1` CSV/manifest package for one
 approved participant's single-phase block order. It rechecks the JSON/source
 inventory, verifies the staged and published package with the existing V1

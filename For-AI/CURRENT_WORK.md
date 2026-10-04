@@ -26,9 +26,10 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
   bounded jobs, native ownership and Python/Rust oracle fixtures.
 - **Source stage:** JSON export/compatibility assembly, native inventory,
   approved participant order selection, standard-route block PCM assembly and
+  Python-compatible tactile waveform synthesis on channels 1–3,
   V1-compatible prepared CSV/manifest publication in the media crate,
-  bounded generation, shared Pretext,
-  locked dependency patches and phone recovery are implemented.
+  bounded generation, shared Pretext, locked dependency patches, and phone
+  recovery are implemented.
   The Runner main window now selects a local Planner JSON profile and output
   folder through native dialogs, prepares a standard-route V1 package on a
   blocking Rust worker, and adopts it through the existing verified-package
@@ -102,12 +103,13 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
   the installed executable and canonical HTML/CSS resource hashes were checked.
   The downloaded installer matches its commit marker and SHA-256
   `2e06ec20be240bfc185bb07aae6a425ecadadf74eeaac06610518f852946243f`.
-  No installed WebView was launched in that CI check. Advanced media transforms
-  and installed native execution from the JSON profile remain incomplete.
-- **Next gate:** extend native media assembly to the approved advanced routes
-  through the Python oracle, then complete an installed native single-block
-  run with a checked,
-  compatible and calibrated output route, then validate its event/CSV files and
+  No installed WebView was launched in that CI check. Speaker switching,
+  output routes beyond three channels, and installed native execution from the
+  JSON profile remain incomplete.
+- **Next gate:** extend native media assembly to speaker switching and
+  approved output routes beyond three channels through the Python oracle, then
+  complete an installed native single-block run with a checked, compatible,
+  calibrated output route, then validate its event/CSV files and
   recording. Extend the same owner to full profiles/multiple blocks. The native
   activation path exists in source but remains unqualified; no participant run or
   physical timing evidence is claimed. Build the two-app V2 Full installer and
