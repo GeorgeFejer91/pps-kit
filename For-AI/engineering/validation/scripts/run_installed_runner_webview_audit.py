@@ -203,11 +203,16 @@ def synthetic_planner_profile(root: Path) -> Path:
     return profile
 
 
-def choose_path_in_native_dialog(process_id: int, path: Path, *, folder: bool = False) -> None:
+def choose_path_in_native_dialog(process_id: int, path: Path, *, folder: bool = False) -> list[dict] | None:
     """Exercise the app-owned Windows chooser; the WebView never supplies a path."""
     dialog = Desktop(backend="uia").window(process=process_id, class_name="#32770")
     dialog.wait("visible", timeout=30)
     if folder:
+        controls = [
+            {"name": control.element_info.name, "id": control.element_info.automation_id,
+             "type": control.element_info.control_type}
+            for control in dialog.descendants()[:100]
+        ]
         # Windows folder mode has no file-name editor. Navigate the dialog's
         # address bar, then confirm the current folder with its native button.
         dialog.set_focus()
@@ -218,6 +223,7 @@ def choose_path_in_native_dialog(process_id: int, path: Path, *, folder: bool = 
         time.sleep(0.4)
         dialog.child_window(auto_id="1", control_type="Button").click()
         dialog.wait_not("visible", timeout=15)
+        return controls
     else:
         file_name = dialog.child_window(auto_id="1148", control_type="ComboBox").child_window(
             control_type="Edit"
@@ -225,6 +231,7 @@ def choose_path_in_native_dialog(process_id: int, path: Path, *, folder: bool = 
         file_name.wait("visible", timeout=10)
         file_name.set_edit_text(str(path))
         dialog.child_window(auto_id="1", control_type="Button").click()
+    return None
 
 
 def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> None:
@@ -373,9 +380,17 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             expect(page.locator("#prepare-experiment-profile")).to_be_enabled(timeout=10_000)
             page.locator("#prepare-experiment-profile").click()
             choose_path_in_native_dialog(process.pid, profile_path)
-            choose_path_in_native_dialog(process.pid, output_parent, folder=True)
+            report["folder_dialog_controls"] = choose_path_in_native_dialog(
+                process.pid, output_parent, folder=True,
+            )
             expect(page.locator("#prepare-experiment-profile")).to_be_enabled(timeout=60_000)
             generated = list(output_parent.glob("CI_SYNTHETIC_*"))
+            report["fixture_generated_locations"] = [
+                str(path.relative_to(fixture_root)) for path in fixture_root.rglob("CI_SYNTHETIC_*")
+            ]
+            report["profile_session_id"] = page.evaluate(
+                "window.__TAURI_INTERNALS__.invoke('runner_snapshot')"
+            )["identity"]["session_id"]
             assert len(generated) == 1 and generated[0].is_dir(), (
                 generated, page.evaluate("window.installedAuditToasts || []"),
             )
