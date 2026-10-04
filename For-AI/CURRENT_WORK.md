@@ -87,6 +87,11 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   distribution license path, qualify the
   physical 3-channel route and levels, then exercise the installed native
   single-block and multi-block workflows on compatible calibrated hardware.
+  The Rust output callback has no digital audio evidence writer or input capture
+  stream yet; the disabled Data Logging audio controls accurately reflect that
+  source gap. V1 Python has separate optional digital-output WAV and wired
+  loopback paths. Implement and verify those distinct evidence routes without
+  treating prepared PCM as a recording or a loopback as measured tactile onset.
   Verify finalized event/CSV results and recording, measured output/response
   timing, full-profile media routes, and any claimed replication. Reinstalling
   the candidate on this PC and public signed release promotion are separate
