@@ -9,12 +9,15 @@ from pathlib import Path
 import platform
 import socket
 import subprocess
+import tempfile
 import time
 from urllib.parse import urlparse
 from urllib.request import ProxyHandler, build_opener
+import wave
 import winreg
 
 from playwright.sync_api import sync_playwright
+from pywinauto import Desktop
 
 
 def local_debug_port() -> int:
@@ -92,6 +95,55 @@ def restore_debug_policy(executable: str, previous: tuple[str, int] | None) -> N
             winreg.SetValueEx(key, executable, 0, previous[1], previous[0])
 
 
+def synthetic_prepared_session(root: Path) -> Path:
+    """Build valid, silent media for installed verification without participant data."""
+    root.mkdir(parents=True)
+    wav_path = root / "block.wav"
+    with wave.open(str(wav_path), "wb") as audio:
+        audio.setnchannels(3)
+        audio.setsampwidth(2)
+        audio.setframerate(48_000)
+        audio.writeframes(bytes(4_800 * 3 * 2))
+    (root / "block.csv").write_text(
+        "Trial_Number,Trial_UID,Trial_Type,Family,Sample_Rate_Hz,Trial_Start_Sample,Trial_End_Sample\n"
+        "1,CI_T01,Other,other,48000,0,4800\n",
+        encoding="utf-8",
+    )
+    manifest_path = root / "session_manifest.json"
+    manifest_path.write_text(json.dumps({
+        "schema": "pps-run-session.v1",
+        "participant_id": "CI_SYNTHETIC",
+        "session_id": "CI_SYNTHETIC_PART_01",
+        "session_group_id": "CI_SYNTHETIC_GROUP",
+        "part_number": 1,
+        "part_session_id": "CI_SYNTHETIC_PART_01",
+        "session_dir": str(root),
+        "execution_mode": "design_schedule_blocks",
+        "blocks": [{
+            "index": 1,
+            "label": "Synthetic silent block",
+            "manifest_path": "block.csv",
+            "wav_path": "block.wav",
+            "trial_count": 1,
+            "duration_s": 0.1,
+            "metadata": {"sample_rate_hz": 48_000},
+        }],
+    }, indent=2) + "\n", encoding="utf-8")
+    return manifest_path
+
+
+def choose_manifest_in_native_dialog(process_id: int, manifest_path: Path) -> None:
+    """Exercise the app-owned Windows chooser; the WebView never supplies a path."""
+    dialog = Desktop(backend="uia").window(process=process_id, class_name="#32770")
+    dialog.wait("visible", timeout=30)
+    file_name = dialog.child_window(auto_id="1148", control_type="ComboBox").child_window(
+        control_type="Edit"
+    )
+    file_name.wait("visible", timeout=10)
+    file_name.set_edit_text(str(manifest_path))
+    dialog.child_window(auto_id="1", control_type="Button").click()
+
+
 def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> None:
     assert os.name == "nt", "Installed WebView audit requires Windows"
     assert binary.is_file(), f"Installed executable missing: {binary}"
@@ -101,7 +153,7 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
         "commit": commit,
         "installed_binary_sha256": sha256(binary),
         "platform": platform.platform(),
-        "scope": "ci_installed_webview_and_native_snapshot",
+        "scope": "ci_installed_webview_native_package_schedule_and_pcm",
         "physical_output_qualified": False,
         "participant_execution": False,
         "elevated_host_debug_policy": elevated_policy,
@@ -112,6 +164,7 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
     page = None
     previous_policy = None
     policy_set = False
+    fixture = None
     try:
         port = local_debug_port()
         if elevated_policy:
@@ -186,6 +239,52 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             report["native_snapshot_schema"] = snapshot["schema"]
             report["initial_run_phase"] = snapshot["run"]["phase"]
             report["visible_state"] = state
+            fixture = tempfile.TemporaryDirectory(prefix="pps-installed-audit-")
+            manifest_path = synthetic_prepared_session(Path(fixture.name))
+            assert page.locator("#select-session-manifest").is_enabled()
+            page.locator("#select-session-manifest").click()
+            choose_manifest_in_native_dialog(process.pid, manifest_path)
+            page.wait_for_function(
+                "document.querySelector('#package-badge')?.textContent?.trim() === 'Verified'",
+                timeout=30_000,
+            )
+            adopted = page.evaluate("window.__TAURI_INTERNALS__.invoke('runner_snapshot')")
+            assert adopted["package_verified"] is True
+            assert adopted["identity"]["session_id"] == "CI_SYNTHETIC_PART_01"
+            assert adopted["safety"]["local_armed"] is False
+            page.wait_for_function(
+                "document.querySelector('#package-block-count')?.textContent?.trim() === '1'",
+                timeout=10_000,
+            )
+            assert page.locator("#package-block-count").inner_text().strip() == "1"
+            report["synthetic_manifest_sha256"] = sha256(manifest_path)
+            report["prepared_session_selected"] = True
+            report["selected_run_phase"] = adopted["run"]["phase"]
+
+            inspect = page.locator("#inspect-prepared-execution")
+            inspect.wait_for(state="visible", timeout=10_000)
+            page.wait_for_function(
+                "!document.querySelector('#inspect-prepared-execution')?.disabled",
+                timeout=10_000,
+            )
+            inspect.click()
+            page.wait_for_function(
+                "document.querySelector('#execution-inspection-status')?.textContent?.trim() === 'Compiled · inspection only'",
+                timeout=30_000,
+            )
+            report["rust_schedule_compiled"] = True
+
+            page.wait_for_function(
+                "!document.querySelector('#prepare-current-audio-block')?.disabled",
+                timeout=10_000,
+            )
+            page.locator("#prepare-current-audio-block").click()
+            page.wait_for_function(
+                "document.querySelector('#prepared-audio-status')?.textContent?.trim() === 'Prepared · output not reserved'",
+                timeout=30_000,
+            )
+            assert page.locator("#native-output-prepare").is_disabled()
+            report["native_pcm_prepared"] = True
             report["tabs"] = []
             for tab in ("control", "logging", "remote"):
                 button = page.locator(f'.tab-button[data-tab="{tab}"]')
@@ -232,6 +331,8 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             except subprocess.TimeoutExpired:
                 process.kill()
                 process.wait(timeout=10)
+        if fixture is not None:
+            fixture.cleanup()
         restore_error = None
         if policy_set:
             try:
