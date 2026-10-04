@@ -41,12 +41,13 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   Part 2 only when the adjacent Part 1 package and its sealed
   native result reverify from disk, including after a Runner restart. Installed
   part transition and grouped result completion remain open.
-- **Latest completed evidence:** `bc0665cfe4c0c5513b69debb97533ca09660b3d5`
+- **Latest completed evidence:** `c3e42d1200684b7db62a1506dce4dcfe5509ddf6`
   passed all 14 non-skipped
-  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37196339005),
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37198305035),
   including three-platform Core/Desktop and Python/Rust package oracles plus
-  Windows/macOS/Linux validation bundles. Local Runner Core tests (25),
-  frontend tests (66), formatting, and the canonical frontend build passed.
+  Windows/macOS/Linux validation bundles. The product-source checkpoint
+  `bc0665cf` also passed local Runner Core tests (25), frontend tests (66),
+  formatting, and the canonical frontend build.
   The Python/Rust differential covered both pre/post packages and PCM bytes;
   the native Part 2 result-proof test covered rejection, a completed Part 1
   after process restart, and changed published event bytes.
@@ -54,12 +55,11 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   execution. Local Runner library tests (141) and the focused publish/resume/
   tamper test passed; CI rebuilt and tested the exact proof revision.
 - **Installed Runner UI evidence:** the Runner-only NSIS validation installer
-  from `bc0665cf` has SHA-256
-  `4ac75e4ab13e69869f8c59d16e8688f73658f8a23187baee99faaac0314591db`,
+  from `c3e42d12` has SHA-256
+  `ade21c6e70066994a8563a4b8226a99c20bdb402c83f4f51cf0dcb0e37df8c4d`,
   matching its manifest and commit marker. Fresh Windows CI installation
   matched bundled HTML/CSS to canonical source and launched the real WebView.
-  The [installed retry](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37198222783)
-  using the `c3e42d12` audit selected a synthetic, silent three-channel
+  The exact-build installed audit selected a synthetic, silent three-channel
   prepared package through the native Windows file chooser, adopted its Rust
   verification receipt, compiled its schedule, and decoded its PCM into the
   bounded native cache. The output device remained unselected and unreserved.
@@ -67,10 +67,11 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   and remote tabs passed; all three prepared-state screenshots were inspected
   at 1028 px without horizontal overflow. Inventory and report agree on
   installed binary SHA-256
-  `6bfa867a9f8a4750ebdf69dedde26ab45fbcde74aaf2b8aa5916b294ea453a34`.
-  This retry reused the `bc0665cf` installer; it does not establish a new
-  application build. No participant execution, physical output, recording, or
-  Full installer was verified by this UI audit.
+  `f953d00fcf8f474c0075c911fc4d17fba955c69721bd3fcf71c300e7dcc09f6d`.
+  The three exact-build screenshots are byte-identical to the inspected
+  [installed retry](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37198222783)
+  images. No participant execution, physical output, recording, or Full
+  installer was verified by this UI audit.
 - **Next gates:** qualify each larger-array hardware route and its levels,
   then run the installed native single-block and multi-block workflows on a
   compatible calibrated device; validate event/CSV files and recording; finish
