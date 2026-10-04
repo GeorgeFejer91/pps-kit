@@ -1228,7 +1228,7 @@ impl RunnerCore {
             RunnerPhase::Prepared
                 if self.snapshot.package_verified && !self.package_execution_ready =>
             {
-                "Verified plan loaded — Rust playback adapter pending"
+                "Verified plan loaded — inspect schedule and prepare native output"
             }
             RunnerPhase::Prepared => "Submit setup and arm on this target",
             RunnerPhase::Ready => "Start Part 01 or Part 02",
@@ -2433,7 +2433,7 @@ mod tests {
         assert_eq!(adopted.run.phase, RunnerPhase::Prepared);
         assert_eq!(
             adopted.run.progress_label,
-            "Verified plan loaded — Rust playback adapter pending"
+            "Verified plan loaded — inspect schedule and prepare native output"
         );
         assert!(!adopted
             .allowed_actions

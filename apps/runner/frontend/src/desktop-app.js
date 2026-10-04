@@ -199,7 +199,7 @@ function renderPreparedPlan(nextPlan) {
   text(
     "package-detail",
     preparedPlan
-      ? `${blocks.length} ordered block${blocks.length === 1 ? "" : "s"} passed native V1 provenance checks. Playback remains disabled until the Rust execution adapter is ready.`
+      ? `${blocks.length} ordered block${blocks.length === 1 ? "" : "s"} passed native V1 provenance checks. Inspect the Rust schedule and prepare audio. Native execution requires a complete single-block package, compatible output, and explicit acknowledgement.`
       : "The native verifier checks the V1 manifest, ordered block files, source hashes, and trial counts before adoption.",
   );
 }

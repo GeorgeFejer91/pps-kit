@@ -220,6 +220,7 @@ input[type="checkbox"] {
   border-left: 3px solid #c8d8ce;
   color: var(--muted);
   padding-left: 0.75rem;
+  overflow-wrap: anywhere;
   font-size: 0.77rem;
   line-height: 1.5;
 }
