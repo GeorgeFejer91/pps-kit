@@ -26,6 +26,23 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
+- Runner profile-control rendered checkpoint
+  `2326fe7073b4dd1dcd88ee4bf96adbbf8b9ee11d` added a remote browser
+  audit of the canonical compiled HTML and fixed verified block-row wrapping
+  at narrow widths. The audit exercised native-dialog cancellation and a
+  path-free eight-block summary with a mocked Tauri bridge, then captured six
+  narrow, desktop, and 32 px enlarged-text screenshots. Its retained report
+  confirms no panel/button or page horizontal overflow and no nested block-list
+  scrollbar in those cases. Local 66 frontend tests and canonical build passed.
+  [Exact-SHA CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37179265515)
+  passed all 14 jobs, including the rendered audit, three-platform Rust and
+  Python/Rust oracles, and Windows/macOS/Linux validation bundles. The
+  downloaded Windows NSIS Runner-only artifact has a matching commit marker;
+  its measured SHA-256 matches the manifest:
+  `f19b22d80c13bf77a226e5da2a75dfa290b3fe8c8401b96942cc0088bd610cb1`.
+  Browser screenshots use a mocked native boundary. This artifact has not been
+  installed, and neither installed WebView operation nor physical output or
+  recording is qualified.
 - Native block storage preflight checkpoint
   `d0b2ebc56c8da93f242a634f45f68eefb8e3e1ef` checks the selected
   filesystem's available bytes before decoding a trial or creating its WAV.

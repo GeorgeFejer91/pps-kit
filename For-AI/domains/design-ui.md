@@ -74,4 +74,7 @@ heading and label. Their grid track fills available width, vertical separation
 grows only when room permits, and preferred type grows only with both width and
 height. Shared Pretext measures both full labels and raises each button's
 minimum height for wrapping; the document can scroll when content exceeds the
-window. Rendered and installed-WebView geometry checks are still required.
+window. In the 320 px rendered stress case, each verified block row stacks its
+label and metadata so enlarged text stays inside the panel. Exact-source remote
+browser screenshots verify this compiled layout with a mocked native boundary;
+installed-WebView geometry checks are still required.

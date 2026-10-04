@@ -87,6 +87,14 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
   [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37177890540).
   Its Windows NSIS Runner-only artifact has the exact-commit marker and matching
   SHA-256 `34b1b95eb7dfb0c08289fddcf530fd6341c2bed37bcc13e2424da7776f143bf4`.
+  It has not been installed. The later Runner profile layout checkpoint
+  `2326fe70` passed all 14
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37179265515).
+  Its remote compiled-browser audit captured six narrow, desktop and enlarged
+  text cases with a mocked native bridge; both local profile actions used
+  path-free IPC. The downloaded Windows NSIS Runner-only artifact has the
+  matching commit marker and SHA-256
+  `f19b22d80c13bf77a226e5da2a75dfa290b3fe8c8401b96942cc0088bd610cb1`.
   It has not been installed. Advanced media transforms and installed native
   execution from the JSON profile remain incomplete.
 - **Next gate:** extend native media assembly to the approved advanced routes
