@@ -21,7 +21,7 @@ FORBIDDEN_DISTRIBUTION_PARTS = {
 
 def _tracked_paths() -> list[str]:
     completed = subprocess.run(
-        ["git", "ls-files", "--cached", "--others", "--exclude-standard"],
+        ["git", "ls-files", "--cached"],
         cwd=ROOT,
         check=True,
         capture_output=True,
