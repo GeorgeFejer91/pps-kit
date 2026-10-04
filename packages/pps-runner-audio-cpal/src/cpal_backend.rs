@@ -22,7 +22,7 @@ use crate::{
 };
 
 const MAXIMUM_SCANNED_OUTPUT_DEVICES: usize = 128;
-const MAXIMUM_SCANNED_CONFIG_RANGES_PER_DEVICE: usize = 256;
+const MAXIMUM_SCANNED_CONFIG_RANGES_PER_DEVICE: usize = MAXIMUM_OUTPUT_CONFIGS_PER_DEVICE;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) struct CpalSelectionKey {

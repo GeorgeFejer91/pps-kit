@@ -1982,6 +1982,49 @@ mod tests {
     }
 
     #[test]
+    fn inventory_retains_three_channel_44k_route_after_asio_low_rates() {
+        // CPAL's ASIO host lists every channel count for each supported rate.
+        // An 18-output device reaches 44.1 kHz only after 8 * 18 entries.
+        let configs = (0..=8)
+            .flat_map(|rate_index| {
+                (1..=18).map(move |channels| BackendConfig {
+                    key: FakeKey {
+                        device: 0,
+                        config: rate_index * 18 + channels - 1,
+                    },
+                    channels: channels as u16,
+                    minimum_sample_rate_hz: if rate_index == 8 { 44_100 } else { 8_000 },
+                    maximum_sample_rate_hz: if rate_index == 8 { 44_100 } else { 8_000 },
+                    sample_format: OutputSampleFormat::I32,
+                    buffer_support: OutputBufferSupport::Range {
+                        minimum_frames: 64,
+                        maximum_frames: 1_024,
+                    },
+                })
+            })
+            .collect();
+        let inventory = bound_inventory(
+            Arc::new(ServiceIdentity { id: 1 }),
+            1,
+            BackendEnumeration {
+                devices: vec![BackendDevice {
+                    display_name: "ASIO · multichannel fixture".to_owned(),
+                    configs,
+                    configs_truncated: false,
+                }],
+                devices_truncated: false,
+            },
+        )
+        .unwrap();
+        assert!(inventory.public.devices()[0]
+            .output_configs()
+            .iter()
+            .any(|config| config.channels() == 3
+                && config.minimum_sample_rate_hz() == 44_100
+                && config.maximum_sample_rate_hz() == 44_100));
+    }
+
+    #[test]
     fn exact_selection_rejects_stale_or_mismatched_requests_without_opening_a_stream() {
         let control = Arc::new(FakeControl::default());
         let service = fake_service(&control);

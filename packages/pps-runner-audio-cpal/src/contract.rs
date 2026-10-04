@@ -1,7 +1,7 @@
 use std::{error::Error, fmt, sync::Arc, time::Duration};
 
 pub const MAXIMUM_OUTPUT_DEVICES: usize = 32;
-pub const MAXIMUM_OUTPUT_CONFIGS_PER_DEVICE: usize = 64;
+pub const MAXIMUM_OUTPUT_CONFIGS_PER_DEVICE: usize = 256;
 pub const MAXIMUM_DEVICE_NAME_BYTES: usize = 256;
 pub const MAXIMUM_OUTPUT_CHANNELS: u16 = pps_runner_audio::MAXIMUM_DIRECT_OUTPUT_CHANNELS;
 pub const MAXIMUM_CALLBACK_FRAMES: usize = 4_096;
