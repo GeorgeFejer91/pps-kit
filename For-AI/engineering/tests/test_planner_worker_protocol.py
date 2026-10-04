@@ -12,16 +12,18 @@ from pathlib import Path
 
 def test_planner_worker_accepts_api_and_rejects_other_paths(tmp_path):
     requests = [
-        {"id": 1, "method": "GET", "path": "/api/health"},
-        {"id": 2, "method": "GET", "path": "/api/capabilities"},
-        {"id": 3, "method": "GET", "path": "http://elsewhere.example/api/health"},
-        {"id": 4, "method": "GET", "path": "/api/../dashboard/compiled/index.html"},
+        {"schema": "pps-planner-worker-stdio.v1", "id": 1, "method": "GET", "path": "/api/health"},
+        {"schema": "pps-planner-worker-stdio.v1", "id": 2, "method": "GET", "path": "/api/capabilities"},
+        {"schema": "pps-planner-worker-stdio.v1", "id": 3, "method": "GET", "path": "http://elsewhere.example/api/health"},
+        {"schema": "pps-planner-worker-stdio.v1", "id": 4, "method": "GET", "path": "/api/../dashboard/compiled/index.html"},
         {
+            "schema": "pps-planner-worker-stdio.v1",
             "id": 5,
             "method": "POST",
             "path": "/api/project/new-custom",
             "body_base64": base64.b64encode(b'{"name":"Worker smoke study"}').decode("ascii"),
         },
+        {"schema": "unsupported", "id": 6, "method": "GET", "path": "/api/health"},
     ]
     payload = "".join(json.dumps(request) + "\n" for request in requests)
     source_root = Path(__file__).resolve().parents[3] / "packages" / "pps-runtime" / "src"
@@ -40,8 +42,9 @@ def test_planner_worker_accepts_api_and_rejects_other_paths(tmp_path):
         check=True,
     )
     replies = [json.loads(line) for line in process.stdout.splitlines()]
-    assert [reply["id"] for reply in replies] == [1, 2, 3, 4, 5]
-    assert [reply["status"] for reply in replies] == [200, 200, 400, 400, 200]
+    assert all(reply["schema"] == "pps-planner-worker-stdio.v1" for reply in replies)
+    assert [reply["id"] for reply in replies] == [1, 2, 3, 4, 5, 6]
+    assert [reply["status"] for reply in replies] == [200, 200, 400, 400, 200, 400]
     health = json.loads(base64.b64decode(replies[0]["body_base64"]))
     capabilities = json.loads(base64.b64decode(replies[1]["body_base64"]))
     assert health["status"] == "ok"

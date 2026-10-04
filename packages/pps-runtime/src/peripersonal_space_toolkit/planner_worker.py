@@ -14,11 +14,14 @@ from .dashboard_app import DashboardController, create_app
 MAX_REQUEST_LINE = 4 * 1024 * 1024
 MAX_RESPONSE_BODY = 64 * 1024 * 1024
 ALLOWED_METHODS = {"GET", "POST", "DELETE"}
+WIRE_SCHEMA = "pps-planner-worker-stdio.v1"
 
 
 def _request_parts(frame: object) -> tuple[int, str, str, bytes]:
     if not isinstance(frame, dict):
         raise ValueError("Request must be an object.")
+    if frame.get("schema") != WIRE_SCHEMA:
+        raise ValueError("Planner worker protocol version is unsupported.")
     request_id = frame.get("id")
     method = frame.get("method")
     path = frame.get("path")
@@ -68,6 +71,7 @@ async def _serve() -> None:
                     if len(response.content) > MAX_RESPONSE_BODY:
                         raise ValueError("Planner response is too large.")
                     result = {
+                        "schema": WIRE_SCHEMA,
                         "id": request_id,
                         "status": response.status_code,
                         "content_type": response.headers.get("content-type", "application/octet-stream"),
@@ -75,9 +79,9 @@ async def _serve() -> None:
                         "body_base64": base64.b64encode(response.content).decode("ascii"),
                     }
                 except (ValueError, TypeError, json.JSONDecodeError):
-                    result = {"id": request_id, "status": 400, "error": "invalid_planner_request"}
+                    result = {"schema": WIRE_SCHEMA, "id": request_id, "status": 400, "error": "invalid_planner_request"}
                 except Exception:
-                    result = {"id": request_id, "status": 500, "error": "planner_worker_failed"}
+                    result = {"schema": WIRE_SCHEMA, "id": request_id, "status": 500, "error": "planner_worker_failed"}
                 wire.write(json.dumps(result, separators=(",", ":")).encode("utf-8") + b"\n")
                 wire.flush()
 

@@ -8,6 +8,7 @@ use std::{
 use tauri::Manager;
 
 const MAX_BODY_BYTES: usize = 2_800_000;
+const WIRE_SCHEMA: &str = "pps-planner-worker-stdio.v1";
 
 #[derive(Deserialize)]
 struct PlannerRequest {
@@ -19,6 +20,7 @@ struct PlannerRequest {
 
 #[derive(Deserialize, Serialize)]
 struct PlannerReply {
+    schema: String,
     id: Option<u64>,
     status: u16,
     #[serde(default)]
@@ -100,6 +102,7 @@ impl Worker {
             .checked_add(1)
             .ok_or("Planner request count exceeded.")?;
         let frame = serde_json::json!({
+            "schema": WIRE_SCHEMA,
             "id": self.next_id,
             "method": request.method,
             "path": request.path,
@@ -117,7 +120,7 @@ impl Worker {
             .map_err(|_| "Planner worker did not respond.")?;
         let reply: PlannerReply =
             serde_json::from_str(&line).map_err(|_| "Planner worker response is invalid.")?;
-        if reply.id != Some(self.next_id) {
+        if reply.schema != WIRE_SCHEMA || reply.id != Some(self.next_id) {
             return Err("Planner worker response order is invalid.".into());
         }
         Ok(reply)
