@@ -103,6 +103,9 @@ fn profile_preparation_error(code: &str) -> PreparedSessionCommandError {
         | "profile_plan_source_changed" => {
             "A Planner ingredient changed. Export a fresh JSON profile before preparing it."
         }
+        "profile_participant_missing" => {
+            "This participant code has no assigned blocks in the selected Planner profile."
+        }
         "profile_package_output_exists" => {
             "A package with this session name already exists in the selected folder. Try again."
         }
