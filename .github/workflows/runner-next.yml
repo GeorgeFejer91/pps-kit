@@ -30,6 +30,7 @@ on:
       - "For-AI/engineering/validation/scripts/run_runner_profile_ui_audit.py"
       - "For-AI/engineering/validation/scripts/run_installed_runner_webview_audit.py"
       - "For-AI/engineering/validation/scripts/run_installed_planner_webview_audit.py"
+      - "For-AI/engineering/validation/scripts/run_designer_visual_layout_audit.py"
       - "For-AI/engineering/release/tools/package_inventory.py"
       - ".github/workflows/runner-next.yml"
   push:
@@ -62,6 +63,7 @@ on:
       - "For-AI/engineering/validation/scripts/run_runner_profile_ui_audit.py"
       - "For-AI/engineering/validation/scripts/run_installed_runner_webview_audit.py"
       - "For-AI/engineering/validation/scripts/run_installed_planner_webview_audit.py"
+      - "For-AI/engineering/validation/scripts/run_designer_visual_layout_audit.py"
       - "For-AI/engineering/release/tools/package_inventory.py"
       - ".github/workflows/runner-next.yml"
   workflow_dispatch:
@@ -170,7 +172,7 @@ jobs:
 
   browser-companion:
     if: github.event_name != 'workflow_dispatch' || inputs.installed_artifact_run_id == ''
-    name: Browser companion
+    name: Browser interfaces
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -191,12 +193,25 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Audit rendered Runner profile controls
         run: python For-AI/engineering/validation/scripts/run_runner_profile_ui_audit.py
+      - name: Audit rendered Planner segments at twelve viewport sizes
+        run: |
+          npm --prefix apps/designer/frontend ci
+          npm --prefix apps/designer/frontend run build
+          git diff --exit-code -- apps/designer/frontend/compiled
+          python For-AI/engineering/validation/scripts/run_designer_visual_layout_audit.py
       - name: Retain rendered Runner profile evidence
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: runner-profile-ui-${{ github.sha }}
           path: artifacts/runner-profile-ui-audit
+          if-no-files-found: warn
+      - name: Retain rendered Planner segment evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: planner-visual-${{ github.sha }}
+          path: artifacts/designer_visual_layout_audit
           if-no-files-found: warn
 
   desktop-validation-bundle:

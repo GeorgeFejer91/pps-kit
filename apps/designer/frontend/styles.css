@@ -3089,7 +3089,6 @@ body.resizing-panel * {
   font-weight: 700;
   max-width: 40ch;
   white-space: normal;
-  overflow-wrap: anywhere;
   line-height: 1.25;
 }
 

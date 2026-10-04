@@ -379,6 +379,21 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
             )
             expect(page.locator("#native-output-prepare")).to_be_disabled()
             report["profile_native_pcm_prepared"] = True
+            journals = list(generated[0].glob("native_events_*.partial.jsonl"))
+            assert len(journals) == 1, journals
+            nonce = journals[0].name.removeprefix("native_events_").removesuffix(".partial.jsonl")
+            dataset = generated[0] / f"native_trials_{nonce}.partial.csv"
+            assert dataset.is_file()
+            with journals[0].open(encoding="utf-8") as source:
+                header = json.loads(source.readline())
+            assert header["schema"] == "pps.native-event-journal.v1"
+            assert header["packageManifestSha256"] == sha256(generated_manifest)
+            assert header["completion"] == "partial"
+            with dataset.open(newline="", encoding="utf-8") as source:
+                assert len(next(csv.reader(source))) == 18
+            report["installed_partial_journal_sha256"] = sha256(journals[0])
+            report["installed_partial_dataset_sha256"] = sha256(dataset)
+            report["installed_recording_scope"] = "durable_partial_preflight_only"
             report["tabs"] = []
             for tab in ("control", "logging", "remote"):
                 button = page.locator(f'.tab-button[data-tab="{tab}"]')

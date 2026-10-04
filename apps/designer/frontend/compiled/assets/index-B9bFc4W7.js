@@ -358,4 +358,4 @@
         </svg>
       </span>
     `,r.setAttribute("aria-controls",n.id),r.setAttribute("aria-expanded","true"),r.setAttribute("aria-label",`Collapse ${a}: ${i}`),r.title=`Collapse ${a}: ${i}`,r.addEventListener("click",()=>{n.classList.toggle("collapsed");const s=n.classList.contains("collapsed");r.setAttribute("aria-expanded",String(!s)),r.setAttribute("aria-label",`${s?"Expand":"Collapse"} ${a}: ${i}`),r.title=`${s?"Expand":"Collapse"} ${a}: ${i}`}),o.appendChild(r)}if(!e){const n=async()=>{const o=await Ii.load().catch(()=>null);o?.custom_workflow?.is_custom&&window.PPSDesignerApp?.restoreHostedDraft(o)};window.setTimeout(n,900)}}window.PPSDesigner=Object.freeze({drafts:Ii,exportBundle:Cs});Pp();
-//# sourceMappingURL=index-DXjy3n_i.js.map
+//# sourceMappingURL=index-B9bFc4W7.js.map

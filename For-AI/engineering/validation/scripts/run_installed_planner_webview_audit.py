@@ -239,12 +239,13 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
                     report["incomplete_profile_not_ready_to_lock"] = True
                     page.wait_for_function("""() => [...document.querySelectorAll('.step-badge')]
                       .filter(node => node.getClientRects().length && getComputedStyle(node).display !== 'none')
-                      .every(node => ['fit', 'reflow'].includes(node.dataset.pretextResult))""", timeout=30_000)
+                      .every(node => Boolean(node.dataset.pretextResult))""", timeout=30_000)
                     badge_fit = page.locator(".step-badge:visible").evaluate_all("""nodes => nodes.map(node => ({
                       text: node.textContent.trim(), width: node.clientWidth, scrollWidth: node.scrollWidth,
                       height: node.clientHeight, scrollHeight: node.scrollHeight,
                       pretext: node.dataset.pretextResult
                     }))""")
+                    assert all(item["pretext"] in ("fit", "reflow") for item in badge_fit), badge_fit
                     assert all(item["scrollWidth"] <= item["width"] + 1 and
                                item["scrollHeight"] <= item["height"] + 1 for item in badge_fit), badge_fit
                     report["badge_fit_count"] = len(badge_fit)
@@ -261,6 +262,7 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
                         filename = f"segment-{segment}.png"
                         page.screenshot(path=str(output / filename))
                         report["segments"].append({"name": segment, "screenshot": filename, "geometry": geometry})
+                    page.locator("#trajectory-frame").scroll_into_view_if_needed()
                     expect(page.frame_locator("#trajectory-frame").locator("#viewer")).to_have_attribute(
                         "data-viewer-ready", "true", timeout=30_000)
                     report["trajectory_viewer_ready"] = True
