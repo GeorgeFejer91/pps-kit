@@ -63,7 +63,10 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   and 18-column CSV. A separate synthetic profile audit also passed. The
   installed screenshots cover the Planner segments and Runner control, logging,
   and remote tabs; neither installed audit reserved physical output or completed
-  participant acquisition.
+  participant acquisition. A separate three-platform synthetic native-result
+  fixture reached a complete result manifest; the independent Python validator
+  passed its event/CSV hashes and V1 projection on the downloaded Windows
+  fixture. This is file-contract evidence, not an installed recording.
 - **Next gates:** select the stable Runner bundle identifier, qualify the
   physical 3-channel route and levels, then exercise the installed native
   single-block and multi-block workflows on compatible calibrated hardware.

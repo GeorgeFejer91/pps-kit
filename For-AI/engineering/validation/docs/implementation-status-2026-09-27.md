@@ -36,7 +36,11 @@ Each status applies to its stated surface, not to the whole product.
   and wrote a durable partial journal and 18-column CSV. The 21-item Full
   inventory and reinstall inventory had zero missing/mismatched entries;
   uninstall and incompatible-Shared rejection passed. No physical output,
-  participant playback, complete recording, or local-PC reinstall was tested.
+  participant playback, complete installed recording, or local-PC reinstall was
+  tested. A separate downloaded Windows synthetic native-result fixture passed
+  the independent Python file audit with a complete manifest, five event
+  records, three scored trials, and two Part 2 dataset rows; its timing remains
+  unqualified and it is not installed-participant evidence.
 
 - Two-part Planner-profile source candidate: the native producer follows the
   existing Python `pps-runner-part-split.v1` and `pps-run-session-group.v1`
