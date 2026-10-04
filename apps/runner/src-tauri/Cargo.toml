@@ -24,6 +24,7 @@ futures-util = "0.3"
 local-ip-address = "0.6"
 pps-brsp = { path = "../../../packages/pps-brsp" }
 pps-contracts = { path = "../../../packages/pps-contracts" }
+pps-experiment-media = { path = "../../../packages/pps-experiment-media" }
 pps-runner-audio = { path = "../../../packages/pps-runner-audio" }
 pps-runner-audio-cpal = { path = "../../../packages/pps-runner-audio-cpal" }
 pps-runner-core = { path = "../../../packages/pps-runner-core" }

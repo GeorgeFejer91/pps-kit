@@ -13,6 +13,7 @@
     "allow-configure-remote",
     "allow-rotate-pairing",
     "allow-select-prepared-session",
+    "allow-prepare-experiment-profile",
     "allow-inspect-prepared-execution",
     "allow-prepare-first-audio-block",
     "allow-remote-session-claim",

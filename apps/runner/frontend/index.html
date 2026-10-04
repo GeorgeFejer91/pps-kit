@@ -84,10 +84,13 @@
                   <button class="button button-primary" type="submit">Submit participant setup</button>
                 </form>
 
-                <div class="stack compact-stack split-border">
+                <div class="stack compact-stack split-border package-panel">
                   <div class="section-heading"><div><p class="eyebrow">Package</p><h2>Session Package</h2></div><span id="package-badge" class="badge">Unverified</span></div>
                   <p id="package-label" class="subtle">No package loaded.</p>
-                  <button id="select-session-manifest" class="button button-primary" type="button">Choose prepared session manifest</button>
+                  <div class="package-actions">
+                    <button id="prepare-experiment-profile" class="button button-primary" type="button" disabled>Prepare Planner JSON profile</button>
+                    <button id="select-session-manifest" class="button" type="button">Choose prepared session manifest</button>
+                  </div>
                   <button id="inspect-prepared-execution" class="button" type="button" disabled>Compile and inspect Rust schedule</button>
                   <button id="prepare-first-audio-block" class="button" type="button" disabled>Prepare first audio block</button>
                   <button id="prepare-demo-button" class="button" type="button" data-action="package.prepare_demo">Prepare deterministic validation demo</button>

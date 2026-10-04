@@ -208,6 +208,18 @@ input[type="checkbox"] {
 .timeline-event { margin: 0; color: #3f4d44; font-size: 0.79rem; }
 .two-column-panel { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 1.25rem; }
 .split-border { border-left: 1px solid var(--border); padding-left: 1.25rem; }
+.package-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: space-between;
+  min-block-size: clamp(6.5rem, 14vh, 9rem);
+  gap: clamp(0.5rem, min(1.2vw, 1.2vh), 0.9rem);
+  min-inline-size: 0;
+}
+.package-actions .button { min-block-size: max(2.75rem, var(--pretext-min-height, 0px)); white-space: normal; }
+@media (min-width: 1200px) and (min-height: 800px) {
+  .package-actions .button { font-size: 0.84rem; }
+}
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.72rem; }
 .form-span { grid-column: 1 / -1; }
 .hint { color: var(--muted); font-size: 0.72rem; font-weight: 500; }
@@ -249,7 +261,7 @@ input[type="checkbox"] {
 .summary-list dd { margin: 0; max-width: 65%; overflow-wrap: anywhere; text-align: right; font-size: 0.73rem; font-weight: 750; }
 .token-list { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.75rem; }
 .token-list span { border-radius: 6px; background: var(--surface-soft); color: var(--muted); padding: 0.25rem 0.4rem; font-family: ui-monospace, monospace; font-size: 0.62rem; }
-.package-block-list { display: grid; gap: 0.4rem; max-height: 12rem; margin: 0; padding: 0; overflow: auto; list-style: none; }
+.package-block-list { display: grid; gap: 0.4rem; margin: 0; padding: 0; list-style: none; }
 .package-block-list:empty { display: none; }
 .package-block-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-soft); padding: 0.55rem 0.65rem; }
 .package-block-list strong { overflow-wrap: anywhere; font-size: 0.72rem; }

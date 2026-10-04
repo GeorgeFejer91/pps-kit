@@ -45,6 +45,7 @@ let snapshot = null;
 let preparedPlan = null;
 let preparedExecution = null;
 let preparedAudio = null;
+let packageSelectionPending = false;
 let remoteStatus = null;
 let invitationUrl = "";
 let toastTimer = null;
@@ -317,7 +318,16 @@ function renderSnapshot(next) {
     || !next.package_verified
     || !preparedExecution;
   if (preparedAudio && invalidatesPreparedAudio) renderPreparedAudio(null);
-  elements["select-session-manifest"].disabled = api.kind !== "tauri-native" || active;
+  elements["prepare-experiment-profile"].disabled = api.kind !== "tauri-native" || active
+    || packageSelectionPending
+    || !next.setup?.submitted;
+  elements["prepare-experiment-profile"].title = api.kind !== "tauri-native"
+    ? "Planner JSON preparation is available in the native Tauri app"
+    : !next.setup?.submitted
+      ? "Submit participant setup before preparing a Planner JSON profile"
+      : "Choose a Planner JSON profile and an output folder to prepare and adopt it locally";
+  elements["select-session-manifest"].disabled = api.kind !== "tauri-native" || active
+    || packageSelectionPending;
   elements["select-session-manifest"].title = api.kind === "tauri-native"
     ? "Select and verify a pps-run-session.v1 manifest locally"
     : "Prepared-session selection is available in the native Tauri app";
@@ -981,9 +991,34 @@ function bindLocalActions() {
     });
   });
 
+  elements["prepare-experiment-profile"].addEventListener("click", async () => {
+    const button = elements["prepare-experiment-profile"];
+    packageSelectionPending = true;
+    button.disabled = true;
+    elements["select-session-manifest"].disabled = true;
+    try {
+      const selection = await api.prepareExperimentProfile();
+      renderSnapshot(normalizedSnapshot(selection));
+      if (selection?.cancelled) {
+        showToast("Planner JSON preparation cancelled.");
+        return;
+      }
+      renderPreparedPlan(selection?.summary);
+      await refreshRemote();
+      showToast("Planner JSON profile prepared and adopted by the native Runner.");
+    } catch (error) {
+      showToast(error.message, { error: true });
+    } finally {
+      packageSelectionPending = false;
+      if (snapshot) renderSnapshot(snapshot);
+    }
+  });
+
   elements["select-session-manifest"].addEventListener("click", async () => {
     const button = elements["select-session-manifest"];
+    packageSelectionPending = true;
     button.disabled = true;
+    elements["prepare-experiment-profile"].disabled = true;
     try {
       const selection = await api.selectPreparedSession();
       renderSnapshot(normalizedSnapshot(selection));
@@ -997,6 +1032,7 @@ function bindLocalActions() {
     } catch (error) {
       showToast(error.message, { error: true });
     } finally {
+      packageSelectionPending = false;
       if (snapshot) renderSnapshot(snapshot);
     }
   });

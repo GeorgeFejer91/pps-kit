@@ -65,3 +65,13 @@ or reflow the box when text cannot fit without making it hard to read. Never
 silently clip critical controls or reduce user zoom. Confirm the final rendered
 DOM at relevant widths, zoom, long/localized text and spacing overrides, then
 check the actual Tauri WebView for a desktop packaging claim.
+
+Runner Experiment Control package panel: the desktop shell supports at least
+900×620. The package panel remains in host document flow because the ordered
+block list can grow; it has no panel scrollbar. Its profile-preparation and
+manifest-selection actions form one bounded vertical group below the package
+heading and label. Their grid track fills available width, vertical separation
+grows only when room permits, and preferred type grows only with both width and
+height. Shared Pretext measures both full labels and raises each button's
+minimum height for wrapping; the document can scroll when content exceeds the
+window. Rendered and installed-WebView geometry checks are still required.

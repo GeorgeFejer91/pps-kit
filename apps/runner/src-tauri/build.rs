@@ -8,6 +8,7 @@ fn main() {
             "configure_remote",
             "rotate_pairing",
             "select_prepared_session",
+            "prepare_experiment_profile",
             "inspect_prepared_execution",
             "prepare_first_audio_block",
             "remote_session_claim",

@@ -9,7 +9,11 @@ mod remote;
 mod runtime;
 mod trial_capture;
 
-use std::{path::PathBuf, str::FromStr};
+use std::{
+    path::PathBuf,
+    str::FromStr,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 use latency_diagnostics::{LatencyRoute, LatencyStage, NativeLatencySummary, TraceOutcome};
 use native_output::{
@@ -18,6 +22,8 @@ use native_output::{
     NativeOutputStatus,
 };
 use pps_contracts::{Action, Applied, AppliedStatus, RunnerSnapshot};
+use pps_experiment_media::package::prepare_standard_profile_package;
+use pps_session_package::experiment_profile::verify_experiment_profile_inventory;
 use pps_session_package::{verify_prepared_session, PreparedSessionSummary, VerificationRequest};
 use prepared_audio::{prepare_verified_audio, PreparedAudioError, PreparedAudioSummary};
 use prepared_execution::{
@@ -63,6 +69,43 @@ struct PreparedSessionSelection {
     cancelled: bool,
     summary: Option<PreparedSessionSummary>,
     snapshot: RunnerSnapshot,
+}
+
+async fn cancelled_prepared_selection(
+    runtime: &AppRuntime,
+) -> Result<PreparedSessionSelection, PreparedSessionCommandError> {
+    Ok(PreparedSessionSelection {
+        cancelled: true,
+        summary: None,
+        snapshot: runtime
+            .snapshot_async()
+            .await
+            .map_err(|_| PreparedSessionCommandError::runtime())?,
+    })
+}
+
+fn profile_preparation_error(code: &str) -> PreparedSessionCommandError {
+    let message = match code {
+        "profile_block_transform_unsupported" => {
+            "This profile requires a media transform that the native Runner cannot prepare yet."
+        }
+        "profile_block_resource_limit" | "profile_package_limit" => {
+            "This profile exceeds the native package preparation limit."
+        }
+        "profile_ingredient_changed"
+        | "profile_block_media_changed"
+        | "profile_plan_source_changed" => {
+            "A Planner ingredient changed. Export a fresh JSON profile before preparing it."
+        }
+        "profile_package_output_exists" => {
+            "A package with this session name already exists in the selected folder. Try again."
+        }
+        "profile_package_output_failed" => {
+            "The package could not be written. Check the selected folder and available storage."
+        }
+        _ => "The selected Planner JSON profile could not be prepared by the native Runner.",
+    };
+    PreparedSessionCommandError::new(code, message)
 }
 
 #[tauri::command]
@@ -167,14 +210,7 @@ async fn select_prepared_session(
     })?;
 
     let Some(selection) = selection else {
-        return Ok(PreparedSessionSelection {
-            cancelled: true,
-            summary: None,
-            snapshot: runtime
-                .snapshot_async()
-                .await
-                .map_err(|_| PreparedSessionCommandError::runtime())?,
-        });
+        return cancelled_prepared_selection(&runtime).await;
     };
     let manifest_path = selection.into_path().map_err(|_| {
         PreparedSessionCommandError::new(
@@ -195,6 +231,108 @@ async fn select_prepared_session(
         .await
         .map_err(prepared_session_adoption_error)?;
 
+    Ok(PreparedSessionSelection {
+        cancelled: false,
+        summary: Some(summary),
+        snapshot,
+    })
+}
+
+#[tauri::command]
+async fn prepare_experiment_profile(
+    app: tauri::AppHandle,
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<PreparedSessionSelection, PreparedSessionCommandError> {
+    require_main_window(&window)
+        .map_err(|error| PreparedSessionCommandError::new(&error.code, &error.message))?;
+    let runtime = state.inner().clone();
+    let _selection_guard = runtime
+        .begin_prepared_session_selection()
+        .map_err(|reason| {
+            PreparedSessionCommandError::new(
+                reason,
+                "A native package selection or preparation is already in progress.",
+            )
+        })?;
+    let initial = runtime
+        .snapshot_async()
+        .await
+        .map_err(|_| PreparedSessionCommandError::runtime())?;
+    if !initial.setup.submitted || initial.setup.participant_code.is_empty() {
+        return Err(PreparedSessionCommandError::new(
+            "participant_setup_required",
+            "Submit participant setup before preparing a Planner JSON profile.",
+        ));
+    }
+    let participant_id = initial.setup.participant_code;
+
+    // Both paths come from native dialogs. The WebView sends no path or
+    // participant identity and receives only the existing path-free summary.
+    let (sender, receiver) = tokio::sync::oneshot::channel();
+    app.dialog()
+        .file()
+        .add_filter("PPS Planner JSON profile", &["json"])
+        .pick_file(move |selection| {
+            let _ = sender.send(selection);
+        });
+    let selection = receiver.await.map_err(|_| {
+        PreparedSessionCommandError::new(
+            "dialog_unavailable",
+            "The native profile chooser could not complete.",
+        )
+    })?;
+    let Some(selection) = selection else {
+        return cancelled_prepared_selection(&runtime).await;
+    };
+    let profile_path = selection.into_path().map_err(|_| {
+        PreparedSessionCommandError::new(
+            "invalid_local_path",
+            "The selected profile is not a local JSON file.",
+        )
+    })?;
+    let profile = tauri::async_runtime::spawn_blocking(move || {
+        verify_experiment_profile_inventory(&profile_path)
+    })
+    .await
+    .map_err(|_| PreparedSessionCommandError::runtime())?
+    .map_err(|error| profile_preparation_error(error.code()))?;
+
+    let (sender, receiver) = tokio::sync::oneshot::channel();
+    app.dialog().file().pick_folder(move |selection| {
+        let _ = sender.send(selection);
+    });
+    let selection = receiver.await.map_err(|_| {
+        PreparedSessionCommandError::new(
+            "dialog_unavailable",
+            "The native output-folder chooser could not complete.",
+        )
+    })?;
+    let Some(selection) = selection else {
+        return cancelled_prepared_selection(&runtime).await;
+    };
+    let output_parent = selection.into_path().map_err(|_| {
+        PreparedSessionCommandError::new(
+            "invalid_local_path",
+            "The selected output folder is not a local directory.",
+        )
+    })?;
+    let timestamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_err(|_| PreparedSessionCommandError::runtime())?
+        .as_nanos();
+    let output_dir = output_parent.join(format!("{participant_id}_{timestamp}"));
+    let verified = tauri::async_runtime::spawn_blocking(move || {
+        prepare_standard_profile_package(&profile, &participant_id, &output_dir, initial.revision)
+    })
+    .await
+    .map_err(|_| PreparedSessionCommandError::runtime())?
+    .map_err(|error| profile_preparation_error(error.code()))?;
+    let summary = verified.summary().clone();
+    let snapshot = runtime
+        .adopt_verified_session_async(verified)
+        .await
+        .map_err(prepared_session_adoption_error)?;
     Ok(PreparedSessionSelection {
         cancelled: false,
         summary: Some(summary),
@@ -566,6 +704,7 @@ pub fn run() {
             configure_remote,
             rotate_pairing,
             select_prepared_session,
+            prepare_experiment_profile,
             inspect_prepared_execution,
             prepare_first_audio_block,
             remote_session_claim,

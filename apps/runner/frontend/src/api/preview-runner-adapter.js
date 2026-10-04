@@ -72,6 +72,9 @@ export function createPreviewRunnerAdapter() {
     async selectPreparedSession() {
       throw new Error("Prepared-session selection is available only in the native Tauri runner.");
     },
+    async prepareExperimentProfile() {
+      throw new Error("Planner JSON preparation is available only in the native Tauri runner.");
+    },
     async inspectPreparedExecution() {
       throw new Error("Rust schedule inspection is available only in the native Tauri runner.");
     },

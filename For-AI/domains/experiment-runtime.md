@@ -59,10 +59,12 @@ materializes a standard-route `pps-run-session.v1` CSV/manifest package for one
 approved participant's single-phase block order. It rechecks the JSON/source
 inventory, verifies the staged and published package with the existing V1
 verifier, compiles every block schedule, and publishes the canonical manifest
-last without overwriting an existing package. The source-only producer still
-needs a bounded storage preflight, Runner IPC integration, advanced media
-transforms, installed execution, and physical timing qualification. Path-bearing
-receipts stay native-only, outside WebView and phone projections.
+last without overwriting an existing package. The Runner main window selects the
+profile and output folder through native dialogs, calls this producer on a
+blocking worker, and adopts its existing V1 verification receipt. No path enters
+WebView or phone IPC. This candidate still needs a bounded storage preflight,
+advanced media transforms, installed execution, and physical timing
+qualification. Path-bearing receipts stay native-only.
 
 Designer generation jobs bind to the captured design signature. Ingredient media
 stays in staging until the source and cooperative cancellation checks admit

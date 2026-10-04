@@ -35,6 +35,9 @@ export function createTauriRunnerAdapter({ invokeFn = invoke, listenFn = listen 
     selectPreparedSession() {
       return call(invokeFn, "select_prepared_session");
     },
+    prepareExperimentProfile() {
+      return call(invokeFn, "prepare_experiment_profile");
+    },
     inspectPreparedExecution() {
       return call(invokeFn, "inspect_prepared_execution");
     },

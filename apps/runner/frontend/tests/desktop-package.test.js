@@ -37,6 +37,7 @@ const audioPreparationPermission = await readFile(
 );
 
 test("desktop package selection is a local native operation with a bounded plan projection", () => {
+  assert.match(desktopHtml, /id="prepare-experiment-profile"/u);
   assert.match(desktopHtml, /id="select-session-manifest"/u);
   assert.match(desktopHtml, /id="package-block-list"/u);
   assert.match(desktopHtml, /id="package-block-count"/u);
@@ -47,12 +48,26 @@ test("desktop package selection is a local native operation with a bounded plan 
   assert.match(desktopHtml, /id="prepared-audio-detail"/u);
   assert.match(desktopHtml, /id="prepared-audio-status"/u);
   assert.match(desktopHtml, /id="execution-event-count"/u);
+  assert.match(desktopSource, /await api\.prepareExperimentProfile\(\)/u);
   assert.match(desktopSource, /await api\.selectPreparedSession\(\)/u);
   assert.match(desktopSource, /await api\.inspectPreparedExecution\(\)/u);
   assert.match(desktopSource, /await api\.prepareFirstAudioBlock\(\)/u);
   assert.match(desktopSource, /native V1 provenance checks/u);
   assert.match(desktopSource, /document\.createElement\("li"\)/u);
   assert.doesNotMatch(desktopSource, /package-block-list[\s\S]{0,200}innerHTML/u);
+});
+
+test("native Planner JSON preparation selects both paths locally and adopts a path-free summary", () => {
+  assert.match(nativeSource, /async fn prepare_experiment_profile\(\s*app: tauri::AppHandle,\s*window: tauri::WebviewWindow,\s*state: tauri::State<'_, AppRuntime>,\s*\)/u);
+  assert.match(nativeSource, /prepare_experiment_profile[\s\S]+require_main_window\(&window\)/u);
+  assert.match(nativeSource, /\.pick_file\([\s\S]+\.pick_folder\(/u);
+  assert.match(nativeSource, /prepare_standard_profile_package\(&profile, &participant_id, &output_dir, initial\.revision\)/u);
+  assert.match(nativeSource, /\.adopt_verified_session_async\(verified\)/u);
+  assert.ok(mainCapability.permissions.includes("allow-prepare-experiment-profile"));
+  assert.ok(!mainCapability.permissions.some((permission) => permission.startsWith("dialog:")));
+  assert.match(desktopSource, /!next\.setup\?\.submitted/u);
+  assert.doesNotMatch(companionHtml, /prepare-experiment-profile/u);
+  assert.doesNotMatch(companionSource, /prepareExperimentProfile|prepare_experiment_profile/u);
 });
 
 test("native audio preparation is an explicit local no-argument non-executable preload", () => {
