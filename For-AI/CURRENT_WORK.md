@@ -41,37 +41,33 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   Part 2 only when the adjacent Part 1 package and its sealed
   native result reverify from disk, including after a Runner restart. Installed
   part transition and grouped result completion remain open.
-- **Latest completed evidence:** `c3e42d1200684b7db62a1506dce4dcfe5509ddf6`
+- **Latest completed evidence:** `8a37ea42e5d0d3a6b1f7116fca489eed183e0625`
   passed all 14 non-skipped
-  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37198305035),
-  including three-platform Core/Desktop and Python/Rust package oracles plus
-  Windows/macOS/Linux validation bundles. The product-source checkpoint
-  `bc0665cf` also passed local Runner Core tests (25), frontend tests (66),
-  formatting, and the canonical frontend build.
-  The Python/Rust differential covered both pre/post packages and PCM bytes;
-  the native Part 2 result-proof test covered rejection, a completed Part 1
-  after process restart, and changed published event bytes.
-  The rendered browser audit used a mocked native bridge, not installed
-  execution. Local Runner library tests (141) and the focused publish/resume/
-  tamper test passed; CI rebuilt and tested the exact proof revision.
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37201160311),
+  including three-platform Core/Desktop and Python/Rust package oracles,
+  rendered browser UI, and Windows/macOS/Linux validation bundles. Local
+  Runner frontend tests (66), canonical build, repository structure tests (5),
+  and diff checks also passed. The Python/Rust differential covered both
+  pre/post packages and PCM bytes; native Part 2 proof tests covered restart
+  admission and tampered result rejection. Rendered browser tests use a mocked
+  native bridge; installed execution is audited separately below.
 - **Installed Runner UI evidence:** the Runner-only NSIS validation installer
-  from `c3e42d12` has SHA-256
-  `ade21c6e70066994a8563a4b8226a99c20bdb402c83f4f51cf0dcb0e37df8c4d`,
+  from that same revision has SHA-256
+  `8c9be2828a24a19076e6ef966d0811721cc6853335ad60e3a4373cc859576ae5`,
   matching its manifest and commit marker. Fresh Windows CI installation
-  matched bundled HTML/CSS to canonical source and launched the real WebView.
-  The exact-build installed audit selected a synthetic, silent three-channel
-  prepared package through the native Windows file chooser, adopted its Rust
-  verification receipt, compiled its schedule, and decoded its PCM into the
-  bounded native cache. The output device remained unselected and unreserved.
-  The idle and prepared Rust states, next-block control, and control, logging,
-  and remote tabs passed; all three prepared-state screenshots were inspected
-  at 1028 px without horizontal overflow. Inventory and report agree on
-  installed binary SHA-256
-  `f953d00fcf8f474c0075c911fc4d17fba955c69721bd3fcf71c300e7dcc09f6d`.
-  The three exact-build screenshots are byte-identical to the inspected
-  [installed retry](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37198222783)
-  images. No participant execution, physical output, recording, or Full
-  installer was verified by this UI audit.
+  matched bundled HTML/CSS to canonical source and launched the real WebView;
+  inventory and audit agree on installed binary SHA-256
+  `85abb506840c29f6864ae37c1bdabf357f31b85aa100795b3ebfd31609ff4364`.
+  The [exact-build installed audit](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37201160311)
+  submitted participant setup, selected a synthetic Planner JSON profile
+  through the native Windows chooser, generated and verified a V1 package,
+  compiled the Rust schedule, and prepared native PCM. Its generated 44.1 kHz,
+  three-channel WAV had 5,441 frames with tactile samples in the target and
+  silence in the other channels and catch/ITI; it reserved no output device.
+  The intermediate **Submitted** setup badge and final **Ready** state passed.
+  Control, logging, and remote screenshots were inspected at 1028 px with no
+  horizontal overflow. This audit did not execute a participant run, physical
+  output, recording, or the two-app Full installer.
 - **Next gates:** qualify each larger-array hardware route and its levels,
   then run the installed native single-block and multi-block workflows on a
   compatible calibrated device; validate event/CSV files and recording; finish
