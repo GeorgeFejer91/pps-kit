@@ -10,6 +10,7 @@ import platform
 import subprocess
 import tempfile
 import time
+import wave
 
 from playwright.sync_api import expect, sync_playwright
 
@@ -26,6 +27,63 @@ from run_installed_runner_webview_audit import (
 
 
 SEGMENTS = ("study", "stimulus", "trials", "baseline", "block", "schedule", "run")
+
+
+def native_request(page, method: str, path: str, body: dict | None = None) -> dict:
+    response = page.evaluate("""async ({method, path, body}) => {
+      const reply = await window.__TAURI_INTERNALS__.invoke('planner_request', {
+        request: {method, path, body: body === null ? '' : JSON.stringify(body)}
+      });
+      if (reply.error) throw new Error(reply.error);
+      const bytes = Uint8Array.from(atob(reply.body_base64), char => char.charCodeAt(0));
+      return {status: reply.status, data: JSON.parse(new TextDecoder().decode(bytes))};
+    }""", {"method": method, "path": path, "body": body})
+    assert response["status"] == 200, (path, response)
+    return response["data"]
+
+
+def prove_native_media(page) -> dict:
+    custom = native_request(page, "POST", "/api/templates/__custom__/load", {})
+    controls = {
+        "start_distance_cm": 95.0,
+        "end_distance_cm": 15.0,
+        "start_rotation_deg": 270.0,
+        "end_rotation_deg": 45.0,
+        "movement_duration_s": 0.18,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+    }
+    job = native_request(page, "POST", "/api/stimulus/bake", {
+        "participant_id": "",
+        "design": custom["design"],
+        "trajectory_controls": controls,
+        "bake_recipe": {"kind": "generated_noise", "noise_type": "blue", "label": "CI native loom", "gain": 0.7},
+    })
+    deadline = time.monotonic() + 120
+    while time.monotonic() < deadline:
+        status = native_request(page, "GET", f"/api/jobs/{job['job_id']}")
+        if status["status"] in {"succeeded", "failed", "cancelled"}:
+            break
+        time.sleep(0.25)
+    else:
+        raise TimeoutError("Installed Planner media job did not finish")
+    assert status["status"] == "succeeded", status
+    result = status["result"]
+    assert result["status"] == "rendered_3dti", result
+    assert result["source_kind"] == "generated_noise"
+    wav = Path(result["wav_path"])
+    manifest = json.loads(Path(result["manifest_path"]).read_text(encoding="utf-8"))
+    assert manifest["render_engine"] == "native-3dti"
+    with wave.open(str(wav), "rb") as audio:
+        channels = audio.getnchannels()
+        sample_rate = audio.getframerate()
+        frames = audio.getnframes()
+        samples = audio.readframes(frames)
+    assert channels == 2 and sample_rate == 44_100 and frames > 0
+    assert any(samples), "Installed 3DTI render produced silent PCM"
+    return {"status": result["status"], "wav_sha256": sha256(wav),
+            "channels": channels, "sample_rate": sample_rate, "frames": frames,
+            "manifest_sha256": sha256(Path(result["manifest_path"]))}
 
 
 def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> None:
@@ -105,6 +163,7 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
                         filename = f"segment-{segment}.png"
                         page.screenshot(path=str(output / filename))
                         report["segments"].append({"name": segment, "screenshot": filename, "geometry": geometry})
+                    report["native_3dti_media"] = prove_native_media(page)
                     assert not errors, errors
                     report["app_url"] = page.evaluate("location.href")
                     report["passed"] = True

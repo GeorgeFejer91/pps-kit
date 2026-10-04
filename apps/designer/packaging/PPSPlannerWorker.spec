@@ -19,6 +19,13 @@ for source, destination in (
 ):
     if source.exists():
         datas.append((str(source), destination))
+renderer_dir = root / "third_party" / "3dti_renderer" / "bin"
+for binary in (*renderer_dir.glob("*.exe"), *renderer_dir.glob("*.dll")):
+    datas.append((str(binary), "third_party/3dti_renderer/bin"))
+for name in ("3DTI_AUDIOTOOLKIT_LICENSE", "LICENSE"):
+    license_file = root / "third_party" / "3dti_AudioToolkit" / name
+    if license_file.is_file():
+        datas.append((str(license_file), "third_party/3dti_AudioToolkit"))
 
 a = Analysis(
     [str(root / "apps" / "designer" / "launchers" / "planner_worker_entry.py")],
