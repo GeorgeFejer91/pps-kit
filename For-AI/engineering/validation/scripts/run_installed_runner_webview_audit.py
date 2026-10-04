@@ -165,6 +165,15 @@ def synthetic_planner_profile(root: Path) -> Path:
     return profile
 
 
+def profile_participant_id(path: Path) -> str:
+    profile = json.loads(path.read_text(encoding="utf-8"))
+    assert profile["schema"] == "pps-experiment-profile.v1"
+    participants = {str(row.get("participant_id", "")).strip()
+                    for row in profile["assembly"]["block_order"]}
+    assert len(participants) == 1 and "" not in participants, participants
+    return participants.pop()
+
+
 def choose_path_in_native_dialog(process_id: int, path: Path, *, folder: bool = False) -> None:
     """Exercise the app-owned Windows chooser; the WebView never supplies a path."""
     dialog = Desktop(backend="uia").window(process=process_id, class_name="#32770")
@@ -289,7 +298,9 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
             report["visible_state"] = state
             fixture = tempfile.TemporaryDirectory(prefix="pps-installed-audit-")
             fixture_root = Path(fixture.name)
-            participant_id = "CI_PLANNER" if planner_profile is not None else "CI_SYNTHETIC"
+            profile_path = planner_profile or synthetic_planner_profile(fixture_root / "profile")
+            assert profile_path.is_file(), f"Planner profile is missing: {profile_path}"
+            participant_id = profile_participant_id(profile_path)
             page.locator("#participant-code").fill(participant_id)
             page.locator("#participant-age").fill("30")
             page.locator("#participant-handedness").select_option("right")
@@ -301,8 +312,6 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
             expect(page.locator("#setup-badge")).to_have_text("Submitted")
             report["participant_setup_submitted"] = True
 
-            profile_path = planner_profile or synthetic_planner_profile(fixture_root / "profile")
-            assert profile_path.is_file(), f"Planner profile is missing: {profile_path}"
             output_parent = fixture_root / "generated"
             output_parent.mkdir()
             expect(page.locator("#prepare-experiment-profile")).to_be_enabled(timeout=10_000)
