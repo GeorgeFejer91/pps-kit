@@ -68,7 +68,10 @@ materializes a standard-route `pps-run-session.v1` CSV/manifest package for one
 approved participant's single-phase block order. It rechecks the JSON/source
 inventory, verifies the staged and published package with the existing V1
 verifier, compiles every block schedule, and publishes the canonical manifest
-last without overwriting an existing package. The Runner main window selects the
+last without overwriting an existing package. In-process publication errors
+roll back the files this attempt linked into its new destination. A process
+crash or failed filesystem cleanup can still leave an orphan requiring manual
+inspection. The Runner main window selects the
 profile and output folder through native dialogs, calls this producer on a
 blocking worker, and adopts its existing V1 verification receipt. No path enters
 WebView or phone IPC. Before decoding or creating each block WAV, the native

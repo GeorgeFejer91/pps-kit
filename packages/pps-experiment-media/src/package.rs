@@ -62,6 +62,45 @@ impl Drop for PendingDirectory {
     }
 }
 
+struct PublishedDirectory {
+    path: PathBuf,
+    linked: Vec<PathBuf>,
+    retained: bool,
+}
+
+impl PublishedDirectory {
+    fn new(path: PathBuf) -> Self {
+        Self {
+            path,
+            linked: Vec::new(),
+            retained: false,
+        }
+    }
+
+    fn link(&mut self, source: &Path, target: PathBuf) -> Result<(), ProfilePackageError> {
+        fs::hard_link(source, &target)
+            .map_err(|_| package_error("profile_package_output_failed"))?;
+        self.linked.push(target);
+        Ok(())
+    }
+
+    fn retain(&mut self) {
+        self.retained = true;
+    }
+}
+
+impl Drop for PublishedDirectory {
+    fn drop(&mut self) {
+        if !self.retained {
+            for path in self.linked.iter().rev() {
+                let _ = fs::remove_file(path);
+            }
+            let _ = fs::remove_dir(self.path.join("blocks"));
+            let _ = fs::remove_dir(&self.path);
+        }
+    }
+}
+
 fn path_text(path: &Path) -> Result<&str, ProfilePackageError> {
     path.to_str()
         .ok_or(package_error("profile_package_path_unsupported"))
@@ -926,6 +965,37 @@ fn verify_and_compile(
     Ok(receipt)
 }
 
+/// Link staged files into a new output directory; dropping the returned guard
+/// removes a failed publication, including any already linked files.
+fn publish_staged_package(
+    stage_blocks: &Path,
+    stage_manifest: &Path,
+    output_dir: &Path,
+    block_count: usize,
+) -> Result<PublishedDirectory, ProfilePackageError> {
+    fs::create_dir(output_dir).map_err(|error| {
+        if error.kind() == std::io::ErrorKind::AlreadyExists {
+            package_error("profile_package_output_exists")
+        } else {
+            package_error("profile_package_output_failed")
+        }
+    })?;
+    let mut published = PublishedDirectory::new(output_dir.to_path_buf());
+    let final_blocks = output_dir.join("blocks");
+    fs::create_dir(&final_blocks).map_err(|_| package_error("profile_package_output_failed"))?;
+    for ordinal in 1..=block_count {
+        for extension in ["wav", "csv"] {
+            let name = format!("Block_{ordinal:02}.{extension}");
+            published.link(&stage_blocks.join(&name), final_blocks.join(&name))?;
+        }
+    }
+    published.link(
+        stage_manifest,
+        output_dir.join(".session_manifest.pending.json"),
+    )?;
+    Ok(published)
+}
+
 /// Materialize all blocks of one single-phase participant profile and return
 /// Runner's existing native V1 verification receipt. No existing path is overwritten.
 pub fn prepare_standard_profile_package(
@@ -1053,42 +1123,28 @@ pub fn prepare_standard_profile_package(
         .map_err(|_| package_error("profile_package_manifest_failed"))?;
     write_sync(&stage_manifest, &manifest_bytes)?;
     let _ = verify_and_compile(&stage_manifest, &plan, &assembled)?;
-    fs::create_dir(&output_dir).map_err(|error| {
-        if error.kind() == std::io::ErrorKind::AlreadyExists {
-            package_error("profile_package_output_exists")
-        } else {
-            package_error("profile_package_output_failed")
-        }
-    })?;
-    let final_blocks = output_dir.join("blocks");
-    fs::create_dir(&final_blocks).map_err(|_| package_error("profile_package_output_failed"))?;
-    for ordinal in 1..=plan.blocks().len() {
-        for extension in ["wav", "csv"] {
-            let name = format!("Block_{ordinal:02}.{extension}");
-            fs::hard_link(stage_blocks.join(&name), final_blocks.join(&name))
-                .map_err(|_| package_error("profile_package_output_failed"))?;
-        }
-    }
+    let mut published = publish_staged_package(
+        &stage_blocks,
+        &stage_manifest,
+        &output_dir,
+        plan.blocks().len(),
+    )?;
     let pending_manifest = output_dir.join(".session_manifest.pending.json");
-    fs::hard_link(&stage_manifest, &pending_manifest)
-        .map_err(|_| package_error("profile_package_output_failed"))?;
     let _ = verify_and_compile(&pending_manifest, &plan, &assembled)?;
     let final_manifest = output_dir.join("session_manifest.json");
-    fs::hard_link(&pending_manifest, &final_manifest)
+    published.link(&pending_manifest, final_manifest.clone())?;
+    fs::remove_file(&pending_manifest)
         .map_err(|_| package_error("profile_package_output_failed"))?;
-    let _ = fs::remove_file(&pending_manifest);
-    match verify_and_compile(&final_manifest, &plan, &assembled) {
-        Ok(receipt) => Ok(receipt),
-        Err(error) => {
-            let _ = fs::remove_file(&final_manifest);
-            Err(error)
-        }
-    }
+    let receipt = verify_and_compile(&final_manifest, &plan, &assembled)?;
+    published.retain();
+    Ok(receipt)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::six_significant;
+    use std::{fs, time::SystemTime};
+
+    use super::{publish_staged_package, six_significant, PendingDirectory};
 
     #[test]
     fn prepared_tactile_numbers_use_six_significant_digits() {
@@ -1096,5 +1152,57 @@ mod tests {
         assert_eq!(six_significant(100_000.0), "100000");
         assert_eq!(six_significant(1_000_000.0), "1e+06");
         assert_eq!(six_significant(0.00001), "1e-05");
+    }
+
+    #[test]
+    fn failed_package_publication_cleans_partial_directory_without_overwriting() {
+        let nonce = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let root = std::env::temp_dir().join(format!(
+            "pps-package-publication-test-{}-{nonce}",
+            std::process::id()
+        ));
+        fs::create_dir(&root).unwrap();
+        let cleanup = PendingDirectory(root.clone());
+        let stage_blocks = root.join("stage-blocks");
+        fs::create_dir(&stage_blocks).unwrap();
+        fs::write(stage_blocks.join("Block_01.wav"), b"wav").unwrap();
+        let stage_manifest = root.join("staged-manifest.json");
+        fs::write(&stage_manifest, b"manifest").unwrap();
+        let output = root.join("P001_session");
+
+        let failed = publish_staged_package(&stage_blocks, &stage_manifest, &output, 1);
+        assert!(failed.is_err());
+        assert_eq!(
+            failed.err().unwrap().code(),
+            "profile_package_output_failed"
+        );
+        assert!(!output.exists());
+
+        fs::write(stage_blocks.join("Block_01.csv"), b"csv").unwrap();
+        let published = publish_staged_package(&stage_blocks, &stage_manifest, &output, 1).unwrap();
+        assert!(output.join("blocks/Block_01.csv").exists());
+        let unrelated = output.join("unrelated.txt");
+        fs::write(&unrelated, b"preserve").unwrap();
+        drop(published);
+        assert_eq!(fs::read(&unrelated).unwrap(), b"preserve");
+        assert!(!output.join("blocks/Block_01.csv").exists());
+        fs::remove_file(unrelated).unwrap();
+        fs::remove_dir(&output).unwrap();
+
+        let mut published =
+            publish_staged_package(&stage_blocks, &stage_manifest, &output, 1).unwrap();
+        published.retain();
+        drop(published);
+        assert!(output.join(".session_manifest.pending.json").exists());
+        let exists = publish_staged_package(&stage_blocks, &stage_manifest, &output, 1);
+        assert_eq!(
+            exists.err().unwrap().code(),
+            "profile_package_output_exists"
+        );
+        assert!(output.join("blocks/Block_01.wav").exists());
+        drop(cleanup);
     }
 }
