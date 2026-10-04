@@ -217,6 +217,7 @@ def choose_path_in_native_dialog(process_id: int, path: Path, *, folder: bool = 
         send_keys("{ENTER}")
         time.sleep(0.4)
         dialog.child_window(auto_id="1", control_type="Button").click()
+        dialog.wait_not("visible", timeout=15)
     else:
         file_name = dialog.child_window(auto_id="1148", control_type="ComboBox").child_window(
             control_type="Edit"
@@ -224,7 +225,6 @@ def choose_path_in_native_dialog(process_id: int, path: Path, *, folder: bool = 
         file_name.wait("visible", timeout=10)
         file_name.set_edit_text(str(path))
         dialog.child_window(auto_id="1", control_type="Button").click()
-    dialog.wait_not("visible", timeout=15)
 
 
 def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> None:
@@ -294,6 +294,15 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             errors = []
             page.on("pageerror", lambda error: errors.append(str(error)))
             page.locator("#participant-code").wait_for(timeout=30_000)
+            page.evaluate("""() => {
+                window.installedAuditToasts = [];
+                new MutationObserver(() => {
+                    const message = document.querySelector('#toast')?.textContent?.trim();
+                    if (message && window.installedAuditToasts.at(-1) !== message) {
+                        window.installedAuditToasts.push(message);
+                    }
+                }).observe(document.querySelector('#toast'), {childList: true, characterData: true, subtree: true});
+            }""")
             expect(page.locator("#state-chip")).not_to_have_text("Connecting", timeout=30_000)
             state = page.locator("#state-chip").inner_text().strip()
             assert state != "Native bridge unavailable", state
@@ -444,8 +453,19 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
                     report["debug_port_accepting_connections"] = True
             except OSError:
                 report["debug_port_accepting_connections"] = False
+            try:
+                dialog = Desktop(backend="uia").window(process=process.pid, class_name="#32770")
+                if dialog.exists(timeout=1):
+                    report["native_dialog_on_failure"] = [
+                        {"name": control.element_info.name, "id": control.element_info.automation_id,
+                         "type": control.element_info.control_type}
+                        for control in dialog.descendants()[:80]
+                    ]
+            except Exception:
+                pass
         if page is not None:
             try:
+                report["ui_messages_on_failure"] = page.evaluate("window.installedAuditToasts || []")
                 page.screenshot(path=str(output / "failure.png"), full_page=True)
             except Exception:
                 pass
