@@ -1,8 +1,12 @@
 # Current work
 
-Updated: 2026-09-28. Replace at stage transitions; do not append command logs.
+Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
 
-- **Approved goal:** implement the 17 [audit items](engineering/validation/docs/unification-and-critical-audit-2026-09-27.md).
+- **Approved goal:** deliver the complete pps Research Planner/Runner suite,
+  a maintained compartment and JSON contract catalog, one Full Windows installer, and
+  end-to-end visual, installed, media, audio, recording, and workflow evidence
+  against the exact release candidate. Continue the 17 approved
+  [audit items](engineering/validation/docs/unification-and-critical-audit-2026-09-27.md).
   Use Ponytail and existing owners. Planner creates/previews looming stimuli
   and exports JSON ingredients/file/assembly profiles. Rust/HTML Runner consumes
   them, executes experiments and records the specified data; phone controls
@@ -12,6 +16,11 @@ Updated: 2026-09-28. Replace at stage transitions; do not append command logs.
   After clean-path verification, use it to reinstall both apps on this PC.
   GitHub Pages does not provide their PC-connected GUI.
   See [the packaging plan](packaging/README.md).
+- **Implementation method:** use the [skill inventory](SKILLS.md) and
+  Ponytail/YAGNI. The GitHub-sourced Tauri Rust developer skill governs both
+  native apps; Uncodixfy Pretext's accordion stretch mode is reviewed for each
+  Planner Segment 0–6 and Runner/companion UI segment, with readable no-fit
+  behavior and rendered/WebView checks.
 - **Domain:** [experiment runtime](domains/experiment-runtime.md), with UI and
   release handoffs. Reuse 3DTI, the 3D viewer, Segment 0–6, current schemas,
   bounded jobs, native ownership and Python/Rust oracle fixtures.

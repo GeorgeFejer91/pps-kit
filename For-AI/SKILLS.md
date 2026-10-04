@@ -1,4 +1,4 @@
-# Task-to-skill routing
+# Skill inventory and task routing
 
 Select skills by the task below. Read the selected `SKILL.md` completely and
 only its relevant references. Do not load every skill on every task.
@@ -9,14 +9,22 @@ their task; `ponytail` and the named project contracts are required for code
 work. Missing external skills use the disclosed existing-tooling fallback
 below, never an invented claim that a skill ran.
 
+This table is the maintained skill inventory. At each task boundary, select
+only applicable rows, confirm that each selected skill is available, read its
+`SKILL.md` and only the references needed for the change, then record any
+unavailable skill and the fallback used. Apply Ponytail/YAGNI after tracing the
+existing owner: reuse source, contracts, and checks before adding code,
+dependencies, guidance files, or parallel UI implementations. Never trim
+validation, calibration, accessibility, privacy, or safety to satisfy YAGNI.
+
 | Task | Skills | Scope |
 |---|---|---|
 | Implementation, refactoring, dependency/tooling decisions | [ponytail](https://github.com/DietrichGebert/ponytail/tree/main/skills/ponytail) | Smallest complete change; reuse before adding. Scientific safeguards remain mandatory. |
 | Designer HTML orchestration | [html-dashboard-orchestrator](skills/html-dashboard-orchestrator/SKILL.md) | PPS segment/backend/handoff contracts and local-first UI workflow. |
-| HTML/CSS controls, layout, responsive/localized text | [uncodixfy-pretext](https://github.com/GeorgeFejer91/uncodixfy-pretext) | Existing product identity, actual bounded-text measurement, rendered verification. |
+| Planner, Runner, and companion HTML/CSS controls and text | [uncodixfy-pretext](https://github.com/GeorgeFejer91/uncodixfy-pretext) | Existing product identity; box-first geometry, actual Pretext measurement, rendered verification, and installed-WebView checks for desktop surfaces. Read `references/accordion-stretch.md` for every UI and segment layout. |
 | Real browser controls/screenshots | playwright when available; otherwise existing Playwright validation tooling | Actual interaction and visual proof, not API-only checks. |
-| Candidate Rust/Tauri core, IPC, persistence, native integration | [tauri-rust-developer](https://github.com/GeorgeFejer91/tauri-rust-developer-skill) | Existing V2 code; does not authorize a broader framework migration. |
-| Standalone Windows HTML apps and installer packaging | ponytail + tauri-rust-developer + uncodixfy-pretext | Bundle the local UI; use narrow typed Rust IPC; size text inside established boxes; verify the installed WebView and package inventory. See [packaging](packaging/README.md). |
+| Planner and Runner Rust/Tauri core, IPC, persistence, native integration | [tauri-rust-developer](https://github.com/GeorgeFejer91/tauri-rust-developer-skill) | Primary GitHub-sourced Tauri skill for both V2 apps; read the relevant security, desktop, persistence, latency, verification, and release references. No broader framework migration. |
+| Standalone Windows HTML apps and installer packaging | ponytail + tauri-rust-developer + uncodixfy-pretext | Bundle the local UI; use narrow typed Rust IPC; apply accordion stretch to each bounded UI/segment; verify Pretext, installed WebViews, and package inventory. See [packaging](packaging/README.md). |
 | Remote Runner commands/authentication/state/transport | [tauri-browser-remote-control](https://github.com/GeorgeFejer91/tauri-browser-remote-control) | Typed actions through one native authority; keep routing, authorization, and timing evidence distinct. |
 | Papers, scientific methods, evidence or replication claims | consensus-mcp | Discover the configured Consensus tools first; follow its fallback/citation rules. |
 | Current technical documentation and primary-source lookup | multi-source-web-search | Load current sources when needed; ordinary code edits do not require a literature review. |
@@ -54,6 +62,14 @@ defines the local native/WebView trust boundary; Pretext measures bounded text
 after responsive boxes, padding, icons, and gaps are known. A Pages-hosted
 client-to-PC backend is not the desktop packaging architecture. Load the remote
 skill only for a separately scoped remote-control feature.
+
+For every Planner Segment 0–6 and each Runner or companion UI segment, inspect
+its actual content and bounded panels using Uncodixfy Pretext's accordion
+stretch reference. Give each bounded, resizable segment a definite minimum,
+ordered anchors and groups, width/height-aware spacing, and a full-text no-fit
+path. Content that cannot fit at its readable minimum must reflow or use an
+explicit host/detail scroll policy; never hide it to claim a no-scroll panel.
+Implement and verify one owning segment at a time, then check the full UI.
 
 Voice-cloning, game-development, XR, and Quest skills are not default PPS work.
 Load them only for an explicitly relevant task. `for-ai` targets new projects;

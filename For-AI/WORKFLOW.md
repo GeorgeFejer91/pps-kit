@@ -15,9 +15,12 @@ Documentation/tooling-only work goes straight to its relevant source checks.
 
 Use existing source/build paths. Run previews locally with real controls and
 representative states, widths, long labels, accessibility, and error cases.
-For Tauri HTML screens, establish responsive boxes first, measure bounded text
-with Pretext inside the resulting content boxes, then inspect the final DOM and
-the installed WebView. The user zoom level and critical text remain readable.
+For every Planner, Runner, and companion UI segment, apply the accordion stretch decision
+in [SKILLS.md](SKILLS.md): establish responsive bounded boxes and both-dimension
+spacing first, measure bounded text with Pretext inside the content boxes, then
+inspect the final DOM and installed WebView. Test minimum/expanded width and
+height independently, long labels, zoom and text spacing. The user zoom level
+and critical text remain readable.
 Designer uses `npm --prefix apps/designer/frontend run build`; Runner frontend
 uses `npm --prefix apps/runner run check`. Serve/test the compiled artifact
 through the actual relevant local application path.

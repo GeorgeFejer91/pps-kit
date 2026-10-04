@@ -23,7 +23,8 @@ then load only its relevant references and skills. Do not read all of `For-AI/`,
 | Git checkpoints, tests, Pages, component ownership, installers | [Release operations](domains/release-operations.md) and [packaging](packaging/README.md) |
 
 For cross-domain work, select one owning domain and read the neighboring
-handoff contract. [SKILLS.md](SKILLS.md) maps skills to tasks;
+handoff contract. Apply Ponytail/YAGNI and use the maintained
+[skill inventory](SKILLS.md) for the chosen task;
 [WORKFLOW.md](WORKFLOW.md) separates preview, source, packaging, and release.
 [module_map.md](module_map.md) locates code without loading history.
 

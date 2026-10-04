@@ -16,8 +16,14 @@ a spacing-only change does not require the experiment literature.
 - Promotion/Pages/installer: [WORKFLOW.md](../WORKFLOW.md) and
   [packaging](../packaging/README.md).
 
-Use **Ponytail**, **Uncodixfy Pretext**, and the local orchestrator for Designer
-HTML work. Use browser automation for actual controls/rendered geometry.
+Use **Ponytail**, **Uncodixfy Pretext** (including its
+`references/accordion-stretch.md` mode), and the local orchestrator for Planner
+HTML work. Apply the stretch layout review to every Planner Segment 0–6 and
+every Runner/companion UI segment: define the bounded panel, anchors, minimum
+width and height, and ordered control groups before fitting text. Keep labels
+with inputs. A segment that cannot hold its real content at the readable
+minimum must reflow or use an explicit host/detail scroll policy; never conceal
+controls behind overflow. Use browser automation for actual controls/rendered geometry.
 Load Tauri/Rust when changing that native boundary; add remote-control guidance
 for authorization, transport, or state sync. [SKILLS.md](../SKILLS.md) records
 sources and availability handling.
@@ -31,7 +37,8 @@ to the user's Designer state directory.
 ## Scoped implementation and completion
 
 Trace the existing control/state/backend flow, then change one requested screen
-or segment. Preserve earlier completed segments and their ownership. Reuse
+or segment. Preserve earlier completed segments and their ownership. Do not
+rewrite unrelated panels just to introduce a layout wrapper. Reuse
 the installed Pretext typography contract; measure touched bounded labels and
 inspect rendered DOM at relevant widths, zoom, and long-string states.
 
