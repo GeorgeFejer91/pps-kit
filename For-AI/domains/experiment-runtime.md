@@ -62,7 +62,11 @@ switching and tactile synthesis can place samples on higher output channels.
 The native decoder and CPAL adapter accept exact 4–18-channel PCM16 blocks and
 preserve each source channel at the same physical output index. This direct
 route requires unity gains; study-specific channel roles, calibration, and
-physical verification remain open. The block has a
+physical verification remain open. Windows builds now enumerate CPAL's ASIO
+host before WASAPI and admit F32 or I32 output configurations; I32 callbacks
+convert the bounded F32 render buffer without allocation. CI compilation does
+not establish the Komplete Audio 6 three-channel route or measured timing.
+The block has a
 bounded size and is published without overwriting an existing file. The same crate now
 materializes a standard-route `pps-run-session.v1` CSV/manifest package for one
 approved participant's block order. For an approved two-part pre/post plan it

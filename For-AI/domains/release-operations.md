@@ -43,6 +43,9 @@ environment setup, not end-user runtime dependencies.
 
 Preserve exactly one Shared, V1 Qt/ASIO requirements, scientific handoffs,
 public routes, and exclusion of `For-AI/` from every distribution.
+Windows Tauri builds with CPAL ASIO acquire the Steinberg SDK during build;
+review its license choice and required distribution notices before public
+release of the ASIO-enabled installer.
 
 Report each relevant gate as **VERIFIED**, **PARTIAL**, **BLOCKED**, or
 **NOT RUN**, with the observed surface and missing evidence. A guidance review

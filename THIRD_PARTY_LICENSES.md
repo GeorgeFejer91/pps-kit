@@ -167,11 +167,13 @@ is not vendored in this repository.
 - License: Apache License 2.0
 - Consumer: `packages/pps-runner-audio-cpal/`
 
-CPAL provides the reservation-only native output adapter for Windows WASAPI,
-macOS CoreAudio, and Linux ALSA. Workspace dependency defaults are disabled, so
-optional ASIO, JACK, PipeWire, PulseAudio, and realtime-priority features are
-not enabled. It is resolved through `Cargo.lock`; its source is not vendored in
-this repository.
+CPAL provides the native output adapter for Windows ASIO and WASAPI, macOS
+CoreAudio, and Linux ALSA. The Windows target enables CPAL's `asio` feature;
+JACK, PipeWire, PulseAudio, and realtime-priority features remain disabled.
+`asio-sys` 0.4.0 supplies the Windows ASIO bindings under Apache License 2.0.
+The Steinberg ASIO SDK is acquired during the Windows build and is not vendored
+in this repository. Release review must confirm its distribution terms and
+notices. The Rust dependencies are resolved through `Cargo.lock`.
 
 ## Tauri and Meta Spatial SDK build dependencies
 

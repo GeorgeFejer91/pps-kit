@@ -436,6 +436,21 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
             )
             expect(page.locator("#native-output-prepare")).to_be_disabled()
             report["profile_native_pcm_prepared"] = True
+            try:
+                inventory = page.evaluate(
+                    "window.__TAURI_INTERNALS__.invoke('native_output_enumerate')"
+                )
+                assert inventory["schema"] == "pps-runner-native-output-inventory.v2"
+                report["native_output_devices"] = [
+                    {"name": device["displayName"],
+                     "configurations": len(device["outputConfigs"]),
+                     "formats": sorted({config["sampleFormat"] for config in device["outputConfigs"]})}
+                    for device in inventory["devices"]
+                ]
+            except Exception as output_error:
+                report["native_output_inventory_error"] = (
+                    f"{type(output_error).__name__}: {output_error}"
+                )
             journals = list(generated[0].glob("native_events_*.partial.jsonl"))
             assert len(journals) == 1, journals
             nonce = journals[0].name.removeprefix("native_events_").removesuffix(".partial.jsonl")
