@@ -95,8 +95,15 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
   path-free IPC. The downloaded Windows NSIS Runner-only artifact has the
   matching commit marker and SHA-256
   `f19b22d80c13bf77a226e5da2a75dfa290b3fe8c8401b96942cc0088bd610cb1`.
-  It has not been installed. Advanced media transforms and installed native
-  execution from the JSON profile remain incomplete.
+  It has not been installed on this PC. The later installer-inventory checkpoint
+  `0f22443c` passed all 14
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37180140321).
+  Its Runner-only NSIS package installed silently into a fresh Windows CI path;
+  the installed executable and canonical HTML/CSS resource hashes were checked.
+  The downloaded installer matches its commit marker and SHA-256
+  `2e06ec20be240bfc185bb07aae6a425ecadadf74eeaac06610518f852946243f`.
+  No installed WebView was launched in that CI check. Advanced media transforms
+  and installed native execution from the JSON profile remain incomplete.
 - **Next gate:** extend native media assembly to the approved advanced routes
   through the Python oracle, then complete an installed native single-block
   run with a checked,

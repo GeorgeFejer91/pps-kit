@@ -37,6 +37,9 @@ needs its Tauri/Rust shell and native boundary before a two-app Tauri installer
 can be built. Follow the [Windows installer plan](windows-installer.md) for
 that migration and installed-path gates. Reuse the existing build/release
 tools where their component ownership and inventory checks still apply.
+The Runner-only Windows validation installer now has a fresh-path silent CI
+install check for its executable and canonical HTML/CSS resource hashes. That
+check does not launch the WebView or establish the two-app Full composition.
 
 ## Stage boundary
 

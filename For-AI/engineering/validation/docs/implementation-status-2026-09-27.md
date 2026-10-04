@@ -22,10 +22,23 @@ Each status applies to its stated surface, not to the whole product.
 | 14 | PARTIAL: suspension/resume, no replay, stale-state denial, disarmed phone outputs and pending-activation cancellation | Physical Safari/Chrome lock and BFCache cases |
 | 15 | VERIFIED source policy: local setup, observer scope, participant-free public projection and fresh invitations | Physical expiry/revocation; remembered phones remain unselected |
 | 16 | VERIFIED: locked Designer Vite 6.4.3/nanoid patch; both npm audits report zero advisories | Retain locked byte checks |
-| 17 | PARTIAL: exact-revision CI validation packages; isolated Windows NSIS Runner install and package/schedule/PCM preparation; source/Pages checks | Two-app Full installer, installed complete run, measured output/response/calibration and supported routes |
+| 17 | PARTIAL: exact-revision CI validation packages; isolated Windows NSIS Runner install and package/schedule/PCM preparation; later fresh CI install inventory and frontend resource hash checks; source/Pages checks | Two-app Full installer, installed complete run, measured output/response/calibration and supported routes |
 
 ## Current source evidence
 
+- Windows Runner-only installed-inventory CI checkpoint
+  `0f22443cb356567c34e6c1ce3703a46950784fa2` passed all 14
+  [exact-SHA jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37180140321).
+  Its NSIS validation installer ran silently in a fresh Windows CI directory.
+  The installed `pps-experiment-runner.exe` existed, and the installed
+  `web/index.html` and `web/assets/style.css` SHA-256 values matched the
+  canonical compiled source files. The retained `INSTALL_INVENTORY.txt` records
+  these hashes and explicitly states that no WebView was launched or physical
+  output qualified. The downloaded NSIS artifact has the exact commit marker
+  and a measured hash matching its SHA-256 manifest:
+  `2e06ec20be240bfc185bb07aae6a425ecadadf74eeaac06610518f852946243f`.
+  This is a Runner-only CI install check, not the two-app Full installer or an
+  installed workflow on this PC. Native profile execution and results remain.
 - Runner profile-control rendered checkpoint
   `2326fe7073b4dd1dcd88ee4bf96adbbf8b9ee11d` added a remote browser
   audit of the canonical compiled HTML and fixed verified block-row wrapping
