@@ -305,6 +305,11 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
             page.locator("#participant-age").fill("30")
             page.locator("#participant-handedness").select_option("right")
             page.locator("#participant-gender").select_option("prefer_not_to_say")
+            time.sleep(1.2)
+            assert page.locator("#participant-code").input_value() == participant_id
+            assert page.locator("#participant-age").input_value() == "30"
+            assert page.locator("#participant-handedness").input_value() == "right"
+            assert page.locator("#participant-gender").input_value() == "prefer_not_to_say"
             page.locator("#setup-form button[type=submit]").click()
             expect(page.locator("#prepare-experiment-profile")).to_be_enabled(timeout=10_000)
             setup_snapshot = page.evaluate("window.__TAURI_INTERNALS__.invoke('runner_snapshot')")

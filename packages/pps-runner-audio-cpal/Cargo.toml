@@ -7,9 +7,14 @@ repository.workspace = true
 rust-version.workspace = true
 
 [dependencies]
-cpal.workspace = true
 pps-runner-audio = { path = "../pps-runner-audio" }
 rtrb = "=0.4.0"
+
+[target.'cfg(not(windows))'.dependencies]
+cpal.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+cpal = { workspace = true, features = ["asio"] }
 
 [dev-dependencies]
 hound.workspace = true

@@ -42,13 +42,13 @@ OUTPUT_BRIDGE = """() => {
       state.requests.push({command});
       state.status.phase='enumerated'; state.status.operationGeneration='1';
       state.status.inventoryGeneration='9007199254740993';
-      return {schema:'pps-runner-native-output-inventory.v1',
+      return {schema:'pps-runner-native-output-inventory.v2',
         policyGeneration:state.status.policyGeneration,serviceGeneration:'1',
         inventoryGeneration:state.status.inventoryGeneration,executable:false,qualified:false,armed:false,
         devices:[{deviceOrdinal:0,displayName:'Laborgerät für Audio und Taktile Ausgabe '+ 'LangerGerätename'.repeat(7),
-          f32Configs:[{configOrdinal:0,channels:2,sampleFormat:'f32',minimumSampleRateHz:44100,maximumSampleRateHz:48000},
-            {configOrdinal:1,channels:3,sampleFormat:'f32',minimumSampleRateHz:44100,maximumSampleRateHz:44100},
-            {configOrdinal:2,channels:state.noMatch ? 2 : 3,sampleFormat:'f32',minimumSampleRateHz:48000,maximumSampleRateHz:96000}]}]};
+          outputConfigs:[{configOrdinal:0,channels:2,sampleFormat:'f32',minimumSampleRateHz:44100,maximumSampleRateHz:48000},
+            {configOrdinal:1,channels:3,sampleFormat:'i32',minimumSampleRateHz:44100,maximumSampleRateHz:44100},
+            {configOrdinal:2,channels:state.noMatch ? 2 : 3,sampleFormat:'i32',minimumSampleRateHz:48000,maximumSampleRateHz:96000}]}]};
     }
     if (command === 'native_output_reserve_silence') {
       if (!state.mediaPrepared) throw new Error('Synthetic native cache has been retired');

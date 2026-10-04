@@ -119,7 +119,7 @@ export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia, o
   list.addEventListener("click", () => {
     if (list.disabled) return;
     void operate(() => api.enumerateNativeOutput(), candidate => {
-      if (candidate?.schema !== "pps-runner-native-output-inventory.v1" || !Array.isArray(candidate.devices)
+      if (candidate?.schema !== "pps-runner-native-output-inventory.v2" || !Array.isArray(candidate.devices)
         || ![candidate.policyGeneration, candidate.serviceGeneration, candidate.inventoryGeneration].every(generation)
         || candidate.executable !== false || candidate.qualified !== false || candidate.armed !== false) {
         throw new Error("The native Runner returned an invalid output-device inventory.");
@@ -128,10 +128,10 @@ export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia, o
       inventory = candidate;
       const sampleRate = media.sampleRateHz ?? media.sample_rate_hz;
       const channels = media.sourceChannels ?? media.source_channels;
-      for (const device of candidate.devices) for (const config of device.f32Configs ?? []) {
-        if (config.sampleFormat !== "f32" || config.channels !== channels
+      for (const device of candidate.devices) for (const config of device.outputConfigs ?? []) {
+        if (!["f32", "i32"].includes(config.sampleFormat) || config.channels !== channels
           || sampleRate < config.minimumSampleRateHz || sampleRate > config.maximumSampleRateHz) continue;
-        const label = `${device.displayName} · ${channels} channels · ${sampleRate.toLocaleString()} Hz`;
+        const label = `${device.displayName} · ${channels} channels · ${sampleRate.toLocaleString()} Hz · ${config.sampleFormat}`;
         choices.push({ label, deviceOrdinal: device.deviceOrdinal, configOrdinal: config.configOrdinal,
           channels, sampleRateHz: sampleRate });
         route.add(new Option(label, String(choices.length - 1)));

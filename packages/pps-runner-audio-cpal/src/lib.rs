@@ -16,7 +16,7 @@ pub use contract::{
     OutputDeviceDescriptor, OutputDeviceInventory, OutputFault, OutputFaultKind,
     OutputReservationReceipt, OutputSampleFormat, OutputServiceError, OutputServiceErrorCode,
     OutputServicePhase, OutputServiceStatus, MAXIMUM_CALLBACK_FRAMES, MAXIMUM_DEVICE_NAME_BYTES,
-    MAXIMUM_F32_CONFIGS_PER_DEVICE, MAXIMUM_OUTPUT_CHANNELS, MAXIMUM_OUTPUT_DEVICES,
+    MAXIMUM_OUTPUT_CHANNELS, MAXIMUM_OUTPUT_CONFIGS_PER_DEVICE, MAXIMUM_OUTPUT_DEVICES,
     MAXIMUM_WARMUP_TIMEOUT,
 };
 pub use playback::{

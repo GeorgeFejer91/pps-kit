@@ -13,9 +13,10 @@ use crate::{
     contract::{
         ExactOutputSelection, OutputBufferSelection, OutputBufferSupport, OutputConfigDescriptor,
         OutputDeviceDescriptor, OutputDeviceInventory, OutputFault, OutputFaultKind,
-        OutputReservationReceipt, OutputServiceError, OutputServiceErrorCode, OutputServicePhase,
-        OutputServiceStatus, ServiceIdentity, MAXIMUM_CALLBACK_FRAMES, MAXIMUM_DEVICE_NAME_BYTES,
-        MAXIMUM_F32_CONFIGS_PER_DEVICE, MAXIMUM_OUTPUT_CHANNELS, MAXIMUM_OUTPUT_DEVICES,
+        OutputReservationReceipt, OutputSampleFormat, OutputServiceError, OutputServiceErrorCode,
+        OutputServicePhase, OutputServiceStatus, ServiceIdentity, MAXIMUM_CALLBACK_FRAMES,
+        MAXIMUM_DEVICE_NAME_BYTES, MAXIMUM_OUTPUT_CHANNELS, MAXIMUM_OUTPUT_CONFIGS_PER_DEVICE,
+        MAXIMUM_OUTPUT_DEVICES,
     },
     cpal_backend::CpalBackend,
     PlaybackPort, PlaybackStatus,
@@ -48,6 +49,7 @@ pub(crate) struct BackendConfig<K> {
     pub channels: u16,
     pub minimum_sample_rate_hz: u32,
     pub maximum_sample_rate_hz: u32,
+    pub sample_format: OutputSampleFormat,
     pub buffer_support: OutputBufferSupport,
 }
 
@@ -1340,13 +1342,17 @@ fn bound_inventory<K: SelectionKey>(
     {
         let device_ordinal = u16::try_from(device_index).map_err(|_| BackendFailure::contract())?;
         let configs_truncated = raw_device.configs_truncated
-            || raw_device.configs.len() > MAXIMUM_F32_CONFIGS_PER_DEVICE;
-        let mut internal_configs =
-            Vec::with_capacity(raw_device.configs.len().min(MAXIMUM_F32_CONFIGS_PER_DEVICE));
+            || raw_device.configs.len() > MAXIMUM_OUTPUT_CONFIGS_PER_DEVICE;
+        let mut internal_configs = Vec::with_capacity(
+            raw_device
+                .configs
+                .len()
+                .min(MAXIMUM_OUTPUT_CONFIGS_PER_DEVICE),
+        );
         for (config_index, raw_config) in raw_device
             .configs
             .into_iter()
-            .take(MAXIMUM_F32_CONFIGS_PER_DEVICE)
+            .take(MAXIMUM_OUTPUT_CONFIGS_PER_DEVICE)
             .enumerate()
         {
             if raw_config.channels == 0
@@ -1378,6 +1384,7 @@ fn bound_inventory<K: SelectionKey>(
                     raw_config.channels,
                     raw_config.minimum_sample_rate_hz,
                     raw_config.maximum_sample_rate_hz,
+                    raw_config.sample_format,
                     raw_config.buffer_support,
                 ),
                 key: raw_config.key,
@@ -1658,6 +1665,7 @@ mod tests {
                         channels: if malformed { 0 } else { 2 },
                         minimum_sample_rate_hz: 44_100,
                         maximum_sample_rate_hz: 48_000,
+                        sample_format: OutputSampleFormat::F32,
                         buffer_support: OutputBufferSupport::Range {
                             minimum_frames: 64,
                             maximum_frames: 1_024,
@@ -1951,7 +1959,7 @@ mod tests {
             .store(MAXIMUM_OUTPUT_DEVICES + 2, Ordering::Release);
         control
             .config_count
-            .store(MAXIMUM_F32_CONFIGS_PER_DEVICE + 2, Ordering::Release);
+            .store(MAXIMUM_OUTPUT_CONFIGS_PER_DEVICE + 2, Ordering::Release);
         control.long_names.store(true, Ordering::Release);
         let service = fake_service(&control);
         let inventory = service.enumerate().unwrap();
@@ -1964,7 +1972,10 @@ mod tests {
             assert!(device
                 .display_name()
                 .is_char_boundary(device.display_name().len()));
-            assert_eq!(device.f32_configs().len(), MAXIMUM_F32_CONFIGS_PER_DEVICE);
+            assert_eq!(
+                device.output_configs().len(),
+                MAXIMUM_OUTPUT_CONFIGS_PER_DEVICE
+            );
             assert!(device.configs_truncated());
         }
         service.shutdown().unwrap();

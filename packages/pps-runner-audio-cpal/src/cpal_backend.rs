@@ -11,14 +11,14 @@ use cpal::{
 };
 
 use crate::{
-    contract::{OutputBufferSelection, OutputBufferSupport, OutputFaultKind},
+    contract::{OutputBufferSelection, OutputBufferSupport, OutputFaultKind, OutputSampleFormat},
     playback::PlaybackOwner,
     service::{
         BackendConfig, BackendDevice, BackendEnumeration, BackendFailure, CallbackSignals,
         OutputBackend, SelectionKey,
     },
-    OutputServiceErrorCode, PlaybackPort, PlaybackStatus, MAXIMUM_F32_CONFIGS_PER_DEVICE,
-    MAXIMUM_OUTPUT_CHANNELS, MAXIMUM_OUTPUT_DEVICES,
+    OutputServiceErrorCode, PlaybackPort, PlaybackStatus, MAXIMUM_CALLBACK_FRAMES,
+    MAXIMUM_OUTPUT_CHANNELS, MAXIMUM_OUTPUT_CONFIGS_PER_DEVICE, MAXIMUM_OUTPUT_DEVICES,
 };
 
 const MAXIMUM_SCANNED_OUTPUT_DEVICES: usize = 128;
@@ -38,7 +38,7 @@ struct RetainedCpalDevice {
 }
 
 pub(crate) struct CpalBackend {
-    host: cpal::Host,
+    hosts: Vec<(&'static str, cpal::Host)>,
     devices: Vec<RetainedCpalDevice>,
     stream: Option<cpal::Stream>,
     selection: Option<(CpalSelectionKey, crate::ExactOutputSelection)>,
@@ -47,8 +47,18 @@ pub(crate) struct CpalBackend {
 
 impl CpalBackend {
     pub(crate) fn open() -> Result<Self, BackendFailure> {
+        let mut hosts = Vec::new();
+        #[cfg(windows)]
+        if let Ok(asio) = cpal::host_from_id(cpal::HostId::Asio) {
+            hosts.push(("ASIO", asio));
+        }
+        #[cfg(windows)]
+        let system_host = "WASAPI";
+        #[cfg(not(windows))]
+        let system_host = "System";
+        hosts.push((system_host, cpal::default_host()));
         Ok(Self {
-            host: cpal::default_host(),
+            hosts,
             devices: Vec::new(),
             stream: None,
             selection: None,
@@ -62,73 +72,80 @@ impl OutputBackend for CpalBackend {
 
     fn enumerate(&mut self) -> Result<BackendEnumeration<Self::Key>, BackendFailure> {
         self.devices.clear();
-        let devices = self.host.output_devices().map_err(|_| {
-            BackendFailure::new(
+        let mut public_devices = Vec::new();
+        let mut devices_truncated = false;
+        let mut enumerated_host = false;
+        'hosts: for (host_name, host) in &self.hosts {
+            let Ok(devices) = host.output_devices() else {
+                continue;
+            };
+            enumerated_host = true;
+            for (scanned_device_index, device) in devices.enumerate() {
+                if scanned_device_index >= MAXIMUM_SCANNED_OUTPUT_DEVICES {
+                    devices_truncated = true;
+                    break;
+                }
+                if self.devices.len() >= MAXIMUM_OUTPUT_DEVICES {
+                    devices_truncated = true;
+                    break 'hosts;
+                }
+                let display_name = format!("{host_name} · {device}");
+                let supported = match device.supported_output_configs() {
+                    Ok(configs) => configs,
+                    Err(_) => continue,
+                };
+                let mut retained_configs = Vec::new();
+                let mut public_configs = Vec::new();
+                let mut configs_truncated = false;
+                for (scanned_config_index, range) in supported.enumerate() {
+                    if scanned_config_index >= MAXIMUM_SCANNED_CONFIG_RANGES_PER_DEVICE {
+                        configs_truncated = true;
+                        break;
+                    }
+                    let Some(sample_format) = supported_format(range.sample_format()) else {
+                        continue;
+                    };
+                    if range.channels() == 0 || range.channels() > MAXIMUM_OUTPUT_CHANNELS {
+                        continue;
+                    }
+                    if retained_configs.len() >= MAXIMUM_OUTPUT_CONFIGS_PER_DEVICE {
+                        configs_truncated = true;
+                        break;
+                    }
+                    let config_index = retained_configs.len();
+                    public_configs.push(BackendConfig {
+                        key: CpalSelectionKey {
+                            device_index: self.devices.len(),
+                            config_index,
+                        },
+                        channels: range.channels(),
+                        minimum_sample_rate_hz: range.min_sample_rate(),
+                        maximum_sample_rate_hz: range.max_sample_rate(),
+                        sample_format,
+                        buffer_support: supported_buffer(*range.buffer_size()),
+                    });
+                    retained_configs.push(range);
+                }
+                if public_configs.is_empty() {
+                    continue;
+                }
+                public_devices.push(BackendDevice {
+                    display_name,
+                    configs: public_configs,
+                    configs_truncated,
+                });
+                self.devices.push(RetainedCpalDevice {
+                    device,
+                    configs: retained_configs,
+                });
+            }
+        }
+        if !enumerated_host {
+            return Err(BackendFailure::new(
                 OutputFaultKind::EnumerationFailed,
                 OutputServiceErrorCode::EnumerationFailed,
                 "Native output-device enumeration failed.",
-            )
-        })?;
-
-        let mut public_devices = Vec::new();
-        let mut devices_truncated = false;
-        for (scanned_device_index, device) in devices.enumerate() {
-            if scanned_device_index >= MAXIMUM_SCANNED_OUTPUT_DEVICES {
-                devices_truncated = true;
-                break;
-            }
-            let display_name = device.to_string();
-            let supported = match device.supported_output_configs() {
-                Ok(configs) => configs,
-                Err(_) => continue,
-            };
-            let mut retained_configs = Vec::new();
-            let mut public_configs = Vec::new();
-            let mut configs_truncated = false;
-            for (scanned_config_index, range) in supported.enumerate() {
-                if scanned_config_index >= MAXIMUM_SCANNED_CONFIG_RANGES_PER_DEVICE {
-                    configs_truncated = true;
-                    break;
-                }
-                if range.sample_format() != SampleFormat::F32 {
-                    continue;
-                }
-                if range.channels() == 0 || range.channels() > MAXIMUM_OUTPUT_CHANNELS {
-                    continue;
-                }
-                if retained_configs.len() >= MAXIMUM_F32_CONFIGS_PER_DEVICE {
-                    configs_truncated = true;
-                    break;
-                }
-                let config_index = retained_configs.len();
-                public_configs.push(BackendConfig {
-                    key: CpalSelectionKey {
-                        device_index: self.devices.len(),
-                        config_index,
-                    },
-                    channels: range.channels(),
-                    minimum_sample_rate_hz: range.min_sample_rate(),
-                    maximum_sample_rate_hz: range.max_sample_rate(),
-                    buffer_support: supported_buffer(*range.buffer_size()),
-                });
-                retained_configs.push(range);
-            }
-            if public_configs.is_empty() {
-                continue;
-            }
-            if self.devices.len() >= MAXIMUM_OUTPUT_DEVICES {
-                devices_truncated = true;
-                break;
-            }
-            public_devices.push(BackendDevice {
-                display_name,
-                configs: public_configs,
-                configs_truncated,
-            });
-            self.devices.push(RetainedCpalDevice {
-                device,
-                configs: retained_configs,
-            });
+            ));
         }
         Ok(BackendEnumeration {
             devices: public_devices,
@@ -151,7 +168,7 @@ impl OutputBackend for CpalBackend {
             .configs
             .get(key.config_index)
             .ok_or_else(BackendFailure::contract)?;
-        if range.sample_format() != SampleFormat::F32
+        if supported_format(range.sample_format()).is_none()
             || range.channels() != selection.channels()
             || !range.contains_rate(selection.sample_rate_hz())
         {
@@ -169,6 +186,7 @@ impl OutputBackend for CpalBackend {
         let callback_signals = Arc::clone(&signals);
         let error_signals = signals;
         let callback_channels = selection.channels();
+        let sample_format = range.sample_format();
         if self.stream.is_some() {
             return Err(BackendFailure::contract());
         }
@@ -176,12 +194,12 @@ impl OutputBackend for CpalBackend {
             .device
             .build_output_stream_raw(
                 config,
-                SampleFormat::F32,
+                sample_format,
                 move |data, _| {
-                    let exact_f32 = data.sample_format() == SampleFormat::F32;
+                    let exact_format = data.sample_format() == sample_format;
                     let sample_count = data.len();
                     if !crate::service::raw_callback_shape_is_bounded(
-                        exact_f32,
+                        exact_format,
                         callback_channels,
                         sample_count,
                     ) {
@@ -189,7 +207,7 @@ impl OutputBackend for CpalBackend {
                         return;
                     }
                     callback_signals.write_raw_silence(
-                        exact_f32,
+                        exact_format,
                         callback_channels,
                         sample_count,
                         data.bytes_mut(),
@@ -268,11 +286,16 @@ impl OutputBackend for CpalBackend {
             ));
         }
         self.release()?;
-        let device = &self
+        let retained = self
             .devices
             .get(key.device_index)
+            .ok_or_else(BackendFailure::contract)?;
+        let device = &retained.device;
+        let sample_format = retained
+            .configs
+            .get(key.config_index)
             .ok_or_else(BackendFailure::contract)?
-            .device;
+            .sample_format();
         let config = StreamConfig {
             channels: selection.channels(),
             sample_rate: selection.sample_rate_hz(),
@@ -283,18 +306,45 @@ impl OutputBackend for CpalBackend {
         };
         let (owner, mut callback) = PlaybackOwner::new(plan);
         let callback_signals = Arc::clone(&signals);
-        let stream = device.build_output_stream(
-            config,
-            move |samples: &mut [f32], info: &cpal::OutputCallbackInfo| {
-                let observed_at = Instant::now();
-                if callback.render(samples, observed_at, Some(info.timestamp())) {
-                    callback_signals.record_callback_fault();
-                }
-                callback_signals.record_callback();
-            },
-            move |_| signals.record_callback_fault(),
-            Some(Duration::from_secs(2)),
-        );
+        let stream = match sample_format {
+            SampleFormat::F32 => device.build_output_stream(
+                config,
+                move |samples: &mut [f32], info: &cpal::OutputCallbackInfo| {
+                    let observed_at = Instant::now();
+                    if callback.render(samples, observed_at, Some(info.timestamp())) {
+                        callback_signals.record_callback_fault();
+                    }
+                    callback_signals.record_callback();
+                },
+                move |_| signals.record_callback_fault(),
+                Some(Duration::from_secs(2)),
+            ),
+            SampleFormat::I32 => {
+                let mut scratch =
+                    vec![0.0_f32; MAXIMUM_CALLBACK_FRAMES * usize::from(MAXIMUM_OUTPUT_CHANNELS)];
+                device.build_output_stream(
+                    config,
+                    move |samples: &mut [i32], info: &cpal::OutputCallbackInfo| {
+                        if samples.len() > scratch.len() {
+                            samples.fill(0);
+                            callback_signals.record_callback_fault();
+                            return;
+                        }
+                        let rendered = &mut scratch[..samples.len()];
+                        if callback.render(rendered, Instant::now(), Some(info.timestamp())) {
+                            callback_signals.record_callback_fault();
+                        }
+                        for (destination, source) in samples.iter_mut().zip(rendered) {
+                            *destination = f32_to_i32(*source);
+                        }
+                        callback_signals.record_callback();
+                    },
+                    move |_| signals.record_callback_fault(),
+                    Some(Duration::from_secs(2)),
+                )
+            }
+            _ => return Err(BackendFailure::contract()),
+        };
         // Retain the plan and queue storage even if a driver returns an error.
         // Stream retirement is checked before the owner releases these values.
         self.playback = Some(owner);
@@ -332,6 +382,31 @@ impl Drop for CpalBackend {
                 std::mem::forget(playback);
             }
         }
+    }
+}
+
+const fn supported_format(value: SampleFormat) -> Option<OutputSampleFormat> {
+    match value {
+        SampleFormat::F32 => Some(OutputSampleFormat::F32),
+        SampleFormat::I32 => Some(OutputSampleFormat::I32),
+        _ => None,
+    }
+}
+
+fn f32_to_i32(sample: f32) -> i32 {
+    (sample.clamp(-1.0, 1.0) * 2_147_483_648.0) as i32
+}
+
+#[cfg(test)]
+mod tests {
+    use super::f32_to_i32;
+
+    #[test]
+    fn converts_float_pcm_to_signed_32_bit_endpoints() {
+        assert_eq!(f32_to_i32(-1.0), i32::MIN);
+        assert_eq!(f32_to_i32(0.0), 0);
+        assert_eq!(f32_to_i32(1.0), i32::MAX);
+        assert_eq!(f32_to_i32(f32::NAN), 0);
     }
 }
 

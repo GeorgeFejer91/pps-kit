@@ -77,9 +77,9 @@
       "boundary": "Local output readiness reported to the desktop WebView"
     },
     {
-      "id": "pps-runner-native-output-inventory.v1",
+      "id": "pps-runner-native-output-inventory.v2",
       "owner": "apps/runner/src-tauri/src/native_output.rs",
-      "boundary": "Enumerated output devices and configurations for local selection"
+      "boundary": "Enumerated host-labelled output devices and F32/I32 configurations for local selection"
     },
     {
       "id": "pps-runner-native-output-reservation.v1",

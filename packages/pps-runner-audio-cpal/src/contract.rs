@@ -1,7 +1,7 @@
 use std::{error::Error, fmt, sync::Arc, time::Duration};
 
 pub const MAXIMUM_OUTPUT_DEVICES: usize = 32;
-pub const MAXIMUM_F32_CONFIGS_PER_DEVICE: usize = 64;
+pub const MAXIMUM_OUTPUT_CONFIGS_PER_DEVICE: usize = 64;
 pub const MAXIMUM_DEVICE_NAME_BYTES: usize = 256;
 pub const MAXIMUM_OUTPUT_CHANNELS: u16 = pps_runner_audio::MAXIMUM_DIRECT_OUTPUT_CHANNELS;
 pub const MAXIMUM_CALLBACK_FRAMES: usize = 4_096;
@@ -11,6 +11,7 @@ pub(crate) const MINIMUM_WARMUP_TIMEOUT: Duration = Duration::from_millis(1);
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OutputSampleFormat {
     F32,
+    I32,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -44,6 +45,7 @@ impl OutputConfigDescriptor {
         channels: u16,
         minimum_sample_rate_hz: u32,
         maximum_sample_rate_hz: u32,
+        sample_format: OutputSampleFormat,
         buffer_support: OutputBufferSupport,
     ) -> Self {
         Self {
@@ -51,7 +53,7 @@ impl OutputConfigDescriptor {
             channels,
             minimum_sample_rate_hz,
             maximum_sample_rate_hz,
-            sample_format: OutputSampleFormat::F32,
+            sample_format,
             buffer_support,
         }
     }
@@ -85,7 +87,7 @@ impl OutputConfigDescriptor {
 pub struct OutputDeviceDescriptor {
     device_ordinal: u16,
     display_name: String,
-    f32_configs: Box<[OutputConfigDescriptor]>,
+    output_configs: Box<[OutputConfigDescriptor]>,
     configs_truncated: bool,
 }
 
@@ -93,13 +95,13 @@ impl OutputDeviceDescriptor {
     pub(crate) fn new(
         device_ordinal: u16,
         display_name: String,
-        f32_configs: Box<[OutputConfigDescriptor]>,
+        output_configs: Box<[OutputConfigDescriptor]>,
         configs_truncated: bool,
     ) -> Self {
         Self {
             device_ordinal,
             display_name,
-            f32_configs,
+            output_configs,
             configs_truncated,
         }
     }
@@ -112,8 +114,8 @@ impl OutputDeviceDescriptor {
         &self.display_name
     }
 
-    pub fn f32_configs(&self) -> &[OutputConfigDescriptor] {
-        &self.f32_configs
+    pub fn output_configs(&self) -> &[OutputConfigDescriptor] {
+        &self.output_configs
     }
 
     pub const fn configs_truncated(&self) -> bool {

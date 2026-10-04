@@ -48,6 +48,7 @@ let preparedPlan = null;
 let preparedExecution = null;
 let preparedAudio = null;
 let packageSelectionPending = false;
+let setupEditing = false;
 let remoteStatus = null;
 let invitationUrl = "";
 let toastTimer = null;
@@ -285,11 +286,13 @@ function renderSnapshot(next) {
 
   text("setup-badge", next.setup?.ready ? "Ready" : next.setup?.submitted ? "Submitted" : "Not submitted");
   elements["setup-badge"].dataset.tone = next.setup?.ready ? "ready" : "";
-  if (document.activeElement !== elements["participant-code"]) elements["participant-code"].value = next.setup?.participant_code || "";
-  if (document.activeElement !== elements["participant-age"]) elements["participant-age"].value = next.setup?.age ?? "";
-  if (document.activeElement !== elements["participant-handedness"]) elements["participant-handedness"].value = next.setup?.handedness === "unspecified" ? "" : (next.setup?.handedness || "");
-  if (document.activeElement !== elements["participant-gender"]) elements["participant-gender"].value = next.setup?.gender === "unspecified" ? "" : (next.setup?.gender || "");
-  elements["name-sharing"].checked = Boolean(next.setup?.name_sharing_opt_in);
+  if (!setupEditing) {
+    elements["participant-code"].value = next.setup?.participant_code || "";
+    elements["participant-age"].value = next.setup?.age ?? "";
+    elements["participant-handedness"].value = next.setup?.handedness === "unspecified" ? "" : (next.setup?.handedness || "");
+    elements["participant-gender"].value = next.setup?.gender === "unspecified" ? "" : (next.setup?.gender || "");
+    elements["name-sharing"].checked = Boolean(next.setup?.name_sharing_opt_in);
+  }
 
   text("package-badge", next.package_verified ? "Verified" : "Unverified");
   elements["package-badge"].dataset.tone = next.package_verified ? "ready" : "";
@@ -1076,6 +1079,8 @@ function bindLocalActions() {
     }
   });
 
+  elements["setup-form"].addEventListener("input", () => { setupEditing = true; });
+  elements["setup-form"].addEventListener("change", () => { setupEditing = true; });
   elements["setup-form"].addEventListener("submit", async (event) => {
     event.preventDefault();
     const args = {
@@ -1087,7 +1092,10 @@ function bindLocalActions() {
       gender: elements["participant-gender"].value,
       part_labels: snapshot?.setup?.part_labels ?? { "1": "Part 1", "2": "Part 2" },
     };
-    try { await dispatch("setup.submit", args); } catch (error) { showToast(error.message, { error: true }); }
+    try {
+      await dispatch("setup.submit", args);
+      setupEditing = false;
+    } catch (error) { showToast(error.message, { error: true }); }
   });
 
   elements["note-button"].addEventListener("click", async () => {

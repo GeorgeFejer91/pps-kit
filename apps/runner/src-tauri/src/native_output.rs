@@ -28,7 +28,7 @@ const ENUMERATION_DEADLINE: Duration = Duration::from_secs(6);
 const RESERVATION_DEADLINE_GRACE: Duration = Duration::from_secs(3);
 const CLIENT_REPLY_DEADLINE: Duration = Duration::from_secs(9);
 const OUTPUT_SCHEMA: &str = "pps-runner-native-output-preflight.v1";
-const INVENTORY_SCHEMA: &str = "pps-runner-native-output-inventory.v1";
+const INVENTORY_SCHEMA: &str = "pps-runner-native-output-inventory.v2";
 const RESERVATION_SCHEMA: &str = "pps-runner-native-output-reservation.v1";
 const SERVICE_GENERATION: u64 = 1;
 
@@ -88,7 +88,7 @@ pub(crate) struct NativeOutputInventory {
 pub(crate) struct NativeOutputDevice {
     pub device_ordinal: u16,
     pub display_name: String,
-    pub f32_configs: Vec<NativeOutputConfig>,
+    pub output_configs: Vec<NativeOutputConfig>,
     pub configs_truncated: bool,
 }
 
@@ -947,8 +947,8 @@ impl NativeOutputDriver for CpalDriver {
                 .map(|device| NativeOutputDevice {
                     device_ordinal: device.device_ordinal(),
                     display_name: device.display_name().to_owned(),
-                    f32_configs: device
-                        .f32_configs()
+                    output_configs: device
+                        .output_configs()
                         .iter()
                         .map(|config| {
                             let (minimum_buffer_frames, maximum_buffer_frames) =
@@ -964,7 +964,10 @@ impl NativeOutputDriver for CpalDriver {
                                 channels: config.channels(),
                                 minimum_sample_rate_hz: config.minimum_sample_rate_hz(),
                                 maximum_sample_rate_hz: config.maximum_sample_rate_hz(),
-                                sample_format: "f32",
+                                sample_format: match config.sample_format() {
+                                    pps_runner_audio_cpal::OutputSampleFormat::F32 => "f32",
+                                    pps_runner_audio_cpal::OutputSampleFormat::I32 => "i32",
+                                },
                                 minimum_buffer_frames,
                                 maximum_buffer_frames,
                             }
