@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import base64
+from contextlib import nullcontext
 import json
 import os
 from pathlib import Path
@@ -43,8 +45,34 @@ def native_request(page, method: str, path: str, body: dict | None = None) -> di
     return response["data"]
 
 
-def prove_native_media(page) -> dict:
+def wait_native_job(page, job_id: str) -> dict:
+    deadline = time.monotonic() + 120
+    while time.monotonic() < deadline:
+        status = native_request(page, "GET", f"/api/jobs/{job_id}")
+        if status["status"] in {"succeeded", "failed", "cancelled"}:
+            assert status["status"] == "succeeded", status
+            return status["result"]
+        time.sleep(0.25)
+    raise TimeoutError(f"Installed Planner job did not finish: {job_id}")
+
+
+def prove_native_media(page, *, full_profile: bool) -> dict:
     custom = native_request(page, "POST", "/api/templates/__custom__/load", {})
+    if full_profile:
+        design = custom["design"]
+        protocol = design["protocol"]
+        design["name"] = "CI installed Planner to Runner"
+        protocol.update({
+            "soa_values_ms": [10], "spatial_values_cm": [100.0],
+            "include_baseline_trials": False, "baseline_strategy": "none",
+            "baseline_trial_percentage": 0.0, "include_catch_trials": False,
+            "blocks": 1, "participants": 1, "repetitions_per_condition": 1,
+            "trial_strips": [{"strip_id": "ci-row", "label": "CI native loom row",
+                              "elements": [{"element_id": "ci-loom", "kind": "looming_stimulus",
+                                            "label": "Looming Stimulus",
+                                            "source_labels": ["CI native loom"], "randomized": True}]}],
+        })
+        custom = native_request(page, "POST", "/api/design", {"design": design})
     controls = {
         "start_distance_cm": 95.0,
         "end_distance_cm": 15.0,
@@ -60,16 +88,7 @@ def prove_native_media(page) -> dict:
         "trajectory_controls": controls,
         "bake_recipe": {"kind": "generated_noise", "noise_type": "blue", "label": "CI native loom", "gain": 0.7},
     })
-    deadline = time.monotonic() + 120
-    while time.monotonic() < deadline:
-        status = native_request(page, "GET", f"/api/jobs/{job['job_id']}")
-        if status["status"] in {"succeeded", "failed", "cancelled"}:
-            break
-        time.sleep(0.25)
-    else:
-        raise TimeoutError("Installed Planner media job did not finish")
-    assert status["status"] == "succeeded", status
-    result = status["result"]
+    result = wait_native_job(page, job["job_id"])
     assert result["status"] == "rendered_3dti", result
     assert result["source_kind"] == "generated_noise"
     wav = Path(result["wav_path"])
@@ -77,14 +96,76 @@ def prove_native_media(page) -> dict:
     assert manifest["render_engine"] == "native-3dti"
     samples, sample_rate = sf.read(wav, dtype="float32", always_2d=True)
     frames, channels = samples.shape
-    assert channels == 2 and sample_rate == 44_100 and frames > 0
-    assert float(abs(samples).max()) > 0, "Installed 3DTI render produced silent PCM"
+    assert channels in (2, 3) and sample_rate == 44_100 and frames > 0
+    assert float(abs(samples[:, :2]).max()) > 0, "Installed 3DTI render produced silent audio"
+    if channels == 3:
+        assert float(abs(samples[:, 2]).max()) == 0, "Auditory ingredient contains tactile output"
     return {"status": result["status"], "wav_sha256": sha256(wav),
             "channels": channels, "sample_rate": sample_rate, "frames": frames,
             "manifest_sha256": sha256(Path(result["manifest_path"]))}
 
 
-def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> None:
+def prove_native_profile(page, profile_path: Path) -> dict:
+    stages = (
+        ("trial_sequence_batch", "2_trial_sequence_designs", {}),
+        ("audiotactile_trial_batch", "3_tactile_and_baseline_trials", {}),
+        ("trial_repetition_pool", "4_trial_repetition_pool", {"default_repetitions": 1}),
+        ("block_csv_preview", "5_block_csv_preview", {"block_count": 1}),
+    )
+    results = []
+    for kind, label, options in stages:
+        design = native_request(page, "GET", "/api/state")["design"]
+        job = native_request(page, "POST", "/api/stimulus/bake", {
+            "participant_id": "", "design": design,
+            "bake_recipe": {"kind": kind, "label": label, **options},
+        })
+        result = wait_native_job(page, job["job_id"])
+        results.append({"stage": kind, "manifest_sha256": sha256(Path(result["manifest_path"]))})
+    accepted = native_request(page, "POST", "/api/block-csv/accept", {})
+    assert accepted["block_csv_preview"]["accepted"] is True
+    prepared = native_request(page, "POST", "/api/run-sequence/prepare", {
+        "design": accepted["design"], "run_setup": {"experiment_structure": "single"},
+    })
+    assert prepared["project_segments"]["6_experiment_run_setup"]["status"] == "ready"
+    state = prepared
+    for step in ("stimulus", "trials", "baseline", "block", "schedule"):
+        revision = state["custom_workflow"]["review_revision"]
+        state = native_request(page, "POST", "/api/design", {
+            "workflow_action": {"type": "save_and_continue", "step_id": step,
+                                "expected_revision": revision},
+        })
+        assert state["workflow_action_result"]["advanced"] is True, (step, state)
+    assert state["custom_workflow"]["edit_step"] == "run"
+    reply = page.evaluate("""async revision => {
+      const response = await window.__TAURI_INTERNALS__.invoke('planner_request', {
+        request: {method: 'POST', path: '/api/profiles/export-json',
+                  body: JSON.stringify({expected_revision: revision})}
+      });
+      if (response.error) throw new Error(response.error);
+      return response;
+    }""", state["custom_workflow"]["review_revision"])
+    assert reply["status"] == 200, reply
+    profile_path.parent.mkdir(parents=True, exist_ok=True)
+    profile_path.write_bytes(base64.b64decode(reply["body_base64"], validate=True))
+    profile = json.loads(profile_path.read_text(encoding="utf-8"))
+    assert profile["schema"] == "pps-experiment-profile.v1"
+    assert profile["assembly"]["blocks"] and profile["files"]
+    for item in profile["files"]:
+        path = Path(item["path"])
+        assert path.is_file() and path.stat().st_size == item["bytes"]
+        assert sha256(path) == item["sha256"]
+    trial_audio = [Path(item["path"]) for item in profile["files"]
+                   if item["path"].lower().endswith(".wav")
+                   and sf.info(item["path"]).channels >= 3
+                   and sf.info(item["path"]).subtype == "PCM_16"]
+    assert trial_audio, "Exported Planner profile has no multichannel trial WAV"
+    return {"profile_sha256": sha256(profile_path), "profile_schema": profile["schema"],
+            "source_files_verified": len(profile["files"]), "multichannel_pcm16_wavs": len(trial_audio),
+            "block_count": len(profile["assembly"]["blocks"]), "stages": results}
+
+
+def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
+          persistent_data_root: Path | None = None, export_profile_path: Path | None = None) -> None:
     assert os.name == "nt", "Installed Planner audit requires Windows"
     assert binary.is_file(), f"Installed Planner executable is missing: {binary}"
     output.mkdir(parents=True, exist_ok=True)
@@ -101,7 +182,13 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
     policy_set = False
     process = None
     try:
-        with tempfile.TemporaryDirectory(prefix="pps-planner-installed-audit-") as state_dir:
+        if export_profile_path is not None:
+            assert persistent_data_root is not None, "The exported profile needs persistent source media"
+        if persistent_data_root is not None:
+            persistent_data_root.mkdir(parents=True, exist_ok=False)
+        state_context = (nullcontext(str(persistent_data_root)) if persistent_data_root is not None
+                         else tempfile.TemporaryDirectory(prefix="pps-planner-installed-audit-"))
+        with state_context as state_dir:
             port = local_debug_port()
             if elevated_policy:
                 previous_policy = set_debug_policy(binary.name, port)
@@ -161,7 +248,10 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
                         filename = f"segment-{segment}.png"
                         page.screenshot(path=str(output / filename))
                         report["segments"].append({"name": segment, "screenshot": filename, "geometry": geometry})
-                    report["native_3dti_media"] = prove_native_media(page)
+                    report["native_3dti_media"] = prove_native_media(
+                        page, full_profile=export_profile_path is not None)
+                    if export_profile_path is not None:
+                        report["native_profile"] = prove_native_profile(page, export_profile_path)
                     assert not errors, errors
                     report["app_url"] = page.evaluate("location.href")
                     report["passed"] = True
@@ -187,8 +277,11 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--commit", required=True)
     parser.add_argument("--elevated-policy", action="store_true")
+    parser.add_argument("--persistent-data-root", type=Path)
+    parser.add_argument("--export-profile-path", type=Path)
     args = parser.parse_args()
-    audit(args.binary.resolve(), args.output_dir, args.commit, args.elevated_policy)
+    audit(args.binary.resolve(), args.output_dir, args.commit, args.elevated_policy,
+          args.persistent_data_root, args.export_profile_path)
     print(f"Installed Planner WebView passed: {args.output_dir}")
     return 0
 

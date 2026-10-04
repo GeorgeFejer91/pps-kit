@@ -184,7 +184,8 @@ def choose_path_in_native_dialog(process_id: int, path: Path, *, folder: bool = 
         dialog.child_window(auto_id="1", control_type="Button").click()
 
 
-def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> None:
+def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
+          planner_profile: Path | None = None) -> None:
     assert os.name == "nt", "Installed WebView audit requires Windows"
     assert binary.is_file(), f"Installed executable missing: {binary}"
     output.mkdir(parents=True, exist_ok=True)
@@ -198,6 +199,7 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
         "participant_execution": False,
         "elevated_host_debug_policy": elevated_policy,
         "passed": False,
+        "profile_origin": "installed_planner" if planner_profile is not None else "synthetic_fixture",
     }
     process = None
     browser = None
@@ -287,7 +289,8 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             report["visible_state"] = state
             fixture = tempfile.TemporaryDirectory(prefix="pps-installed-audit-")
             fixture_root = Path(fixture.name)
-            page.locator("#participant-code").fill("CI_SYNTHETIC")
+            participant_id = "CI_PLANNER" if planner_profile is not None else "CI_SYNTHETIC"
+            page.locator("#participant-code").fill(participant_id)
             page.locator("#participant-age").fill("30")
             page.locator("#participant-handedness").select_option("right")
             page.locator("#participant-gender").select_option("prefer_not_to_say")
@@ -298,7 +301,8 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             expect(page.locator("#setup-badge")).to_have_text("Submitted")
             report["participant_setup_submitted"] = True
 
-            profile_path = synthetic_planner_profile(fixture_root / "profile")
+            profile_path = planner_profile or synthetic_planner_profile(fixture_root / "profile")
+            assert profile_path.is_file(), f"Planner profile is missing: {profile_path}"
             output_parent = fixture_root / "generated"
             output_parent.mkdir()
             expect(page.locator("#prepare-experiment-profile")).to_be_enabled(timeout=10_000)
@@ -306,9 +310,9 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             choose_path_in_native_dialog(process.pid, profile_path)
             choose_path_in_native_dialog(process.pid, output_parent, folder=True)
             expect(page.locator("#prepare-experiment-profile")).to_be_enabled(timeout=60_000)
-            generated = list(output_parent.glob("CI_SYNTHETIC_*"))
+            generated = list(output_parent.glob(f"{participant_id}_*"))
             report["fixture_generated_locations"] = [
-                str(path.relative_to(fixture_root)) for path in fixture_root.rglob("CI_SYNTHETIC_*")
+                str(path.relative_to(fixture_root)) for path in fixture_root.rglob(f"{participant_id}_*")
             ]
             report["profile_session_id"] = page.evaluate(
                 "window.__TAURI_INTERNALS__.invoke('runner_snapshot')"
@@ -323,21 +327,34 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             assert all(path.is_file() for path in (generated_manifest, generated_wav, generated_csv))
             manifest = json.loads(generated_manifest.read_text(encoding="utf-8"))
             assert manifest["schema"] == "pps-run-session.v1"
-            assert manifest["participant_id"] == "CI_SYNTHETIC"
-            assert len(manifest["blocks"]) == 1 and manifest["blocks"][0]["trial_count"] == 2
+            assert manifest["participant_id"] == participant_id
+            assert len(manifest["blocks"]) == 1
             with generated_csv.open(newline="", encoding="utf-8") as source:
                 generated_rows = list(csv.DictReader(source))
-            assert [row["Family"] for row in generated_rows] == ["audio_tactile", "catch"]
-            assert generated_rows[0]["Tactile_Waveform_Generated"] == "true"
+            if planner_profile is None:
+                assert manifest["blocks"][0]["trial_count"] == 2
+                assert [row["Family"] for row in generated_rows] == ["audio_tactile", "catch"]
+                assert generated_rows[0]["Tactile_Waveform_Generated"] == "true"
+            else:
+                source_profile = json.loads(profile_path.read_text(encoding="utf-8"))
+                assert source_profile["schema"] == "pps-experiment-profile.v1"
+                assert manifest["blocks"][0]["trial_count"] == len(source_profile["assembly"]["blocks"][0]["rows"])
+                assert len(generated_rows) == manifest["blocks"][0]["trial_count"]
+                assert any(row["Family"] == "audio_tactile" for row in generated_rows)
             with wave.open(str(generated_wav), "rb") as audio:
                 assert (audio.getnchannels(), audio.getsampwidth(), audio.getframerate()) == (3, 2, 44_100)
-                assert audio.getnframes() == 5_441
-                pcm = audio.readframes(audio.getnframes())
+                frames = audio.getnframes()
+                assert frames > 0
+                pcm = audio.readframes(frames)
             samples = struct.unpack(f"<{len(pcm) // 2}h", pcm)
-            assert all(samples[index] == 0 for index in range(0, len(samples), 3))
-            assert all(samples[index] == 0 for index in range(1, len(samples), 3))
-            assert any(samples[index] != 0 for index in range(2, 4_000 * 3, 3))
-            assert all(samples[index] == 0 for index in range(4_441 * 3, len(samples)))
+            if planner_profile is None:
+                assert frames == 5_441
+                assert all(samples[index] == 0 for index in range(0, len(samples), 3))
+                assert all(samples[index] == 0 for index in range(1, len(samples), 3))
+                assert any(samples[index] != 0 for index in range(2, 4_000 * 3, 3))
+                assert all(samples[index] == 0 for index in range(4_441 * 3, len(samples)))
+            else:
+                assert any(sample != 0 for sample in samples), "Planner media became silent in the Runner package"
             profile_snapshot = page.evaluate("window.__TAURI_INTERNALS__.invoke('runner_snapshot')")
             assert profile_snapshot["package_verified"] is True
             assert profile_snapshot["identity"]["session_id"] == generated[0].name
@@ -346,7 +363,7 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             report["generated_manifest_sha256"] = sha256(generated_manifest)
             report["generated_wav_sha256"] = sha256(generated_wav)
             report["generated_csv_sha256"] = sha256(generated_csv)
-            report["generated_wav_frames"] = 5_441
+            report["generated_wav_frames"] = frames
             report["planner_profile_package_generated"] = True
 
             expect(page.locator("#inspect-prepared-execution")).to_be_enabled(timeout=10_000)
@@ -439,10 +456,13 @@ def main() -> int:
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--commit", required=True)
+    parser.add_argument("--profile-path", type=Path,
+                        help="Use the JSON and source media exported by the installed Planner")
     parser.add_argument("--elevated-policy", action="store_true",
                         help="Temporarily set an app-specific HKLM debug-port policy for elevated CI hosts")
     args = parser.parse_args()
-    audit(args.binary.resolve(), args.output_dir, args.commit, args.elevated_policy)
+    audit(args.binary.resolve(), args.output_dir, args.commit, args.elevated_policy,
+          args.profile_path.resolve() if args.profile_path else None)
     print(f"Installed Runner WebView passed: {args.output_dir}")
     return 0
 

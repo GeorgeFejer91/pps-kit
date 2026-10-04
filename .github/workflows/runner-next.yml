@@ -671,15 +671,23 @@ jobs:
       - name: Exercise both installed WebViews and native media paths
         shell: pwsh
         run: |
+          $profileRoot = Join-Path $env:RUNNER_TEMP "pps-full-planner-profile-${{ github.run_id }}-${{ github.run_attempt }}"
+          $profile = Join-Path $profileRoot 'ci-planner-profile.json'
           python For-AI/engineering/validation/scripts/run_installed_planner_webview_audit.py `
             --binary $env:PPS_FULL_INSTALLED_PLANNER `
             --output-dir artifacts/full-planner-installed-webview-audit `
-            --commit '${{ github.sha }}' --elevated-policy
+            --commit '${{ github.sha }}' --elevated-policy `
+            --persistent-data-root $profileRoot --export-profile-path $profile
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python For-AI/engineering/validation/scripts/run_installed_runner_webview_audit.py `
             --binary $env:PPS_FULL_INSTALLED_RUNNER `
             --output-dir artifacts/full-runner-installed-webview-audit `
             --commit '${{ github.sha }}' --elevated-policy
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python For-AI/engineering/validation/scripts/run_installed_runner_webview_audit.py `
+            --binary $env:PPS_FULL_INSTALLED_RUNNER `
+            --output-dir artifacts/full-handoff-installed-webview-audit `
+            --commit '${{ github.sha }}' --elevated-policy --profile-path $profile
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify Full reinstall and uninstall ownership
         shell: pwsh
@@ -725,6 +733,7 @@ jobs:
           path: |
             artifacts/full-planner-installed-webview-audit
             artifacts/full-runner-installed-webview-audit
+            artifacts/full-handoff-installed-webview-audit
           if-no-files-found: warn
       - name: Retain the single Full validation installer
         if: success()
