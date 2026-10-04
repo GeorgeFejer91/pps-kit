@@ -305,7 +305,10 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             page.locator("#participant-handedness").select_option("right")
             page.locator("#participant-gender").select_option("prefer_not_to_say")
             page.locator("#setup-form button[type=submit]").click()
-            expect(page.locator("#setup-badge")).to_have_text("Ready", timeout=10_000)
+            expect(page.locator("#prepare-experiment-profile")).to_be_enabled(timeout=10_000)
+            setup_snapshot = page.evaluate("window.__TAURI_INTERNALS__.invoke('runner_snapshot')")
+            assert setup_snapshot["setup"]["submitted"] is True
+            report["participant_setup_submitted"] = True
 
             profile_path = synthetic_planner_profile(fixture_root / "profile")
             output_parent = fixture_root / "generated"
