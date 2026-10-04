@@ -1,0 +1,40 @@
+{
+  "schema": "pps-json-contract-catalog.v1",
+  "contracts": [
+    {
+      "id": "pps-component-manifest.v1",
+      "owner": "distributions/manifests/full.v1.json",
+      "boundary": "Shared, Designer, Runner and Full install composition"
+    },
+    {
+      "id": "pps-study-profile.v1",
+      "owner": "packages/pps-runtime/src/peripersonal_space_toolkit/profile_bundle.py",
+      "boundary": "Planner profile contents handed to the compatibility Runner"
+    },
+    {
+      "id": "pps-profile-bundle.v1",
+      "owner": "packages/pps-runtime/src/peripersonal_space_toolkit/profile_bundle.py",
+      "boundary": "Portable Planner profile archive and asset inventory"
+    },
+    {
+      "id": "pps-experiment-run-setup.v1",
+      "owner": "packages/pps-runtime/src/peripersonal_space_toolkit/dashboard_app.py",
+      "boundary": "Approved Segment 6 plan for package assembly"
+    },
+    {
+      "id": "pps-experiment-profile.v1",
+      "owner": "packages/pps-runtime/src/peripersonal_space_toolkit/experiment_profile.py",
+      "boundary": "Path-bearing local Planner JSON handoff to the compatibility Runner"
+    },
+    {
+      "id": "pps-run-session.v1",
+      "owner": "packages/pps-runtime/src/peripersonal_space_toolkit/session_runner.py",
+      "boundary": "Prepared participant package verified by the Rust Runner"
+    },
+    {
+      "id": "pps-runner-authority-snapshot.v1",
+      "owner": "packages/pps-contracts/src/lib.rs",
+      "boundary": "Path-free authoritative state shared with local and phone controls"
+    }
+  ]
+}

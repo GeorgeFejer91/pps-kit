@@ -7,6 +7,7 @@ from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[3]
 MANIFEST_DIR = ROOT / "distributions" / "manifests"
+CONTRACT_CATALOG_PATH = ROOT / "docs" / "contracts" / "catalog.v1.json"
 ALLOWLIST_PATH = ROOT / "For-AI" / "engineering" / "migration" / "root-allowlist.v1.json"
 FORBIDDEN_DISTRIBUTION_PARTS = {
     "For-AI",
@@ -56,6 +57,21 @@ def test_component_contract_and_dependency_versions_are_exact():
         "shared", "designer", "runner"
     }
     assert manifests["full"]["composition"] == {"shared_copies": 1, "central_hub": False}
+
+
+def test_json_contract_catalog_points_to_its_existing_owners():
+    catalog = json.loads(CONTRACT_CATALOG_PATH.read_text(encoding="utf-8"))
+    assert catalog["schema"] == "pps-json-contract-catalog.v1"
+    contracts = catalog["contracts"]
+    ids = [contract["id"] for contract in contracts]
+    assert len(ids) == len(set(ids))
+    tracked = set(_tracked_paths())
+    for contract in contracts:
+        assert contract["id"].startswith("pps-") and ".v" in contract["id"]
+        assert contract["boundary"].strip()
+        owner = contract["owner"]
+        assert owner in tracked
+        assert contract["id"] in (ROOT / owner).read_text(encoding="utf-8")
 
 
 def test_every_install_mapping_has_exactly_one_owner_and_is_public():

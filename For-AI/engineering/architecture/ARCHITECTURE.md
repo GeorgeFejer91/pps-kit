@@ -30,6 +30,9 @@ files exactly once.
 
 ## Stable Interfaces
 
+- The public [JSON handoff catalog](../../../docs/contracts/README.md) points to
+  existing contract owners; [component manifests](../../../distributions/manifests/README.md)
+  remain the installation inventory owner. Update the owner before the index.
 - `.pps-profile` and prepared-experiment packages are the stable Designer to
   Runner handoff.
 - Segment 0-6 manifests, hashes, and stale-upstream rules remain authoritative.
