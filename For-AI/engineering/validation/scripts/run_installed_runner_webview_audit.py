@@ -135,19 +135,26 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             browser = playwright.chromium.connect_over_cdp(f"http://127.0.0.1:{port}", timeout=30_000)
             deadline = time.monotonic() + 30
             while time.monotonic() < deadline and page is None:
-                report["playwright_page_origins"] = sorted({
-                    origin_only(candidate.url)
-                    for context in browser.contexts for candidate in context.pages
-                })
-                page = next(
-                    (candidate for context in browser.contexts for candidate in context.pages
-                     if installed_app_url(candidate.url)),
-                    None,
-                )
+                candidates = [candidate for context in browser.contexts for candidate in context.pages]
+                report["playwright_page_origins"] = sorted({origin_only(item.url) for item in candidates})
+                page = next((item for item in candidates if installed_app_url(item.url)
+                             or item.locator("#participant-code").count() > 0), None)
                 if page is None:
                     time.sleep(0.25)
             report["cdp_targets"] = cdp_targets(port)
+            if page is None:
+                report["playwright_page_details"] = []
+                for candidate in [item for context in browser.contexts for item in context.pages]:
+                    detail = {"reported_origin": origin_only(candidate.url)}
+                    try:
+                        detail["dom_origin"] = origin_only(candidate.evaluate("location.href"))
+                        detail["title"] = candidate.title()
+                        detail["has_participant_control"] = candidate.locator("#participant-code").count() > 0
+                    except Exception as error:
+                        detail["inspection_error"] = type(error).__name__
+                    report["playwright_page_details"].append(detail)
             assert page is not None, "No installed Tauri page appeared in WebView2"
+            assert installed_app_url(page.evaluate("location.href")), "Playwright attached to an unexpected origin"
             errors = []
             page.on("pageerror", lambda error: errors.append(str(error)))
             page.locator("#participant-code").wait_for(timeout=30_000)
