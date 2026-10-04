@@ -82,3 +82,5 @@ browser screenshots verify this compiled layout with a mocked native boundary;
 the installed Windows Runner audit also verifies the three tabs at 1028 px after
 native package selection, schedule inspection, and PCM preparation. Installed
 zoom, long-label, and text-spacing cases remain open.
+The participant badge shows **Submitted** after valid setup before a package is
+verified, then **Ready** when the package and setup are both ready.

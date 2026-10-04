@@ -2,6 +2,8 @@
 
 This is the execution contract for the target two-app Tauri package. It is a
 plan, not a claim that the installer or Designer Tauri shell exists today.
+The user selected the stable Planner bundle identifier
+`org.peripersonalspace.planner` on 2026-10-04.
 
 ## Inputs and ownership
 

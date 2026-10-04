@@ -283,7 +283,7 @@ function renderSnapshot(next) {
   text("block-time", `${formatDuration(elapsed)} / ${formatDuration(duration)}`);
   elements["block-progress"].style.width = `${duration > 0 ? Math.min(100, elapsed / duration * 100) : 0}%`;
 
-  text("setup-badge", next.setup?.ready ? "Ready" : "Not submitted");
+  text("setup-badge", next.setup?.ready ? "Ready" : next.setup?.submitted ? "Submitted" : "Not submitted");
   elements["setup-badge"].dataset.tone = next.setup?.ready ? "ready" : "";
   if (document.activeElement !== elements["participant-code"]) elements["participant-code"].value = next.setup?.participant_code || "";
   if (document.activeElement !== elements["participant-age"]) elements["participant-age"].value = next.setup?.age ?? "";
