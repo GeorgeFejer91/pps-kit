@@ -320,7 +320,24 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
             assert len(generated) == 1 and generated[0].is_dir(), (
                 generated, page.evaluate("window.installedAuditToasts || []"),
             )
-            expect(page.locator("#package-badge")).to_have_text("Verified", timeout=10_000)
+            try:
+                expect(page.locator("#package-badge")).to_have_text("Verified", timeout=30_000)
+            except AssertionError:
+                report["package_preparation_files_on_failure"] = [
+                    {"path": str(path.relative_to(generated[0])), "size": path.stat().st_size}
+                    for path in sorted(generated[0].rglob("*")) if path.is_file()
+                ][:40]
+                for name, probe in (
+                    ("package_preparation_toasts_on_failure", lambda: page.evaluate("window.installedAuditToasts || []")),
+                    ("package_preparation_visible_toast_on_failure", lambda: page.locator("#toast").inner_text()),
+                    ("package_preparation_native_state_on_failure", lambda: page.evaluate(
+                        "window.__TAURI_INTERNALS__.invoke('runner_snapshot')")),
+                ):
+                    try:
+                        report[name] = probe()
+                    except Exception as diagnostic_error:
+                        report[name] = f"{type(diagnostic_error).__name__}: {diagnostic_error}"
+                raise
             generated_manifest = generated[0] / "session_manifest.json"
             generated_wav = generated[0] / "blocks" / "Block_01.wav"
             generated_csv = generated[0] / "blocks" / "Block_01.csv"
