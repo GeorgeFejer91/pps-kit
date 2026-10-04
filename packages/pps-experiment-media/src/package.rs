@@ -652,6 +652,11 @@ fn verify_and_compile(
         return Err(package_error("profile_package_plan_invalid"));
     }
     for (index, (block, media)) in receipt.blocks().iter().zip(assembled).enumerate() {
+        if block.block_wav().sha256() != media.sha256()
+            || block.block_wav().encoded_byte_count() != media.bytes()
+        {
+            return Err(package_error("profile_package_media_changed"));
+        }
         let summary = &receipt.summary().blocks[index];
         let mut options = BlockScheduleOptions::new(summary.index);
         options.block_label = summary.label.clone();
