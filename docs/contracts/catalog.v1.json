@@ -44,7 +44,7 @@
     {
       "id": "pps-run-session-group.v1",
       "owner": "packages/pps-runtime/src/peripersonal_space_toolkit/session_runner.py",
-      "boundary": "Pre/post participant part-package links for the Planner-to-Runner handoff and result grouping"
+      "boundary": "Pre/post participant part-package links; native V2 completion is derived from sealed per-part results"
     },
     {
       "id": "pps-runner-part-split.v1",
@@ -95,6 +95,16 @@
       "id": "pps.native-results.v1",
       "owner": "apps/runner/src-tauri/src/event_journal.rs",
       "boundary": "Published native result manifest and event/CSV hashes"
+    },
+    {
+      "id": "pps.native-result-file-audit.v1",
+      "owner": "For-AI/engineering/validation/scripts/validate_native_results.py",
+      "boundary": "Independent single-part file-contract validation report; no participant or timing qualification"
+    },
+    {
+      "id": "pps.native-group-result-file-audit.v1",
+      "owner": "For-AI/engineering/validation/scripts/validate_native_results.py",
+      "boundary": "Independent two-part native group file-contract validation report; no participant or timing qualification"
     }
   ]
 }

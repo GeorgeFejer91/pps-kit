@@ -348,6 +348,95 @@ fn completed_result_publishes_exact_synced_hashes_counts_and_an_exclusive_commit
 }
 
 #[test]
+fn split_part_native_results_form_one_auditable_group() {
+    let root = std::env::temp_dir().join(format!("pps-result-group-{}", random_nonce()));
+    fs::create_dir(&root).unwrap();
+    let group_id = "P001_group";
+    let source_sha256 = "c".repeat(64);
+    let mut prepared = Vec::new();
+    let mut parts = Vec::new();
+    for number in 1..=2 {
+        let folder = format!("part_{number:02}");
+        let part_dir = root.join(&folder);
+        fs::create_dir(&part_dir).unwrap();
+        fs::write(part_dir.join("block.wav"), b"not-played-validation-bytes").unwrap();
+        fs::write(part_dir.join("block.csv"), b"Trial_UID\ntrial-1\n").unwrap();
+        let session_id = format!("P001_group_part_{number:02}");
+        let manifest_path = part_dir.join("session_manifest.json");
+        fs::write(&manifest_path, serde_json::to_vec(&serde_json::json!({
+            "schema": "pps-run-session.v1",
+            "participant_id": "P001", "session_id": session_id,
+            "session_group_id": group_id, "part_split_schema": "pps-runner-part-split.v1",
+            "part_number": number, "part_session_id": session_id,
+            "part_folder_name": folder, "source_run_setup_sha256": source_sha256,
+            "execution_mode": "design_schedule_blocks",
+            "blocks": [{"index": 1, "label": "Fixture block", "manifest_path": "block.csv",
+                        "wav_path": "block.wav", "trial_count": 1, "duration_s": 1.0, "metadata": {}}]
+        })).unwrap()).unwrap();
+        prepared.push(verify_prepared_session(VerificationRequest::new(&manifest_path)).unwrap());
+        parts.push(
+            serde_json::json!({"part_number": number, "part_session_id": session_id,
+            "part_folder_name": folder, "completed": false}),
+        );
+    }
+    fs::write(
+        root.join("session_group_manifest.json"),
+        serde_json::to_vec(&serde_json::json!({
+            "schema": "pps-run-session-group.v1", "part_split_schema": "pps-runner-part-split.v1",
+            "session_group_id": group_id, "participant_id": "P001",
+            "source_run_setup_sha256": source_sha256,
+            "parts_per_participant": 2, "parts": parts
+        }))
+        .unwrap(),
+    )
+    .unwrap();
+
+    for (index, verified) in prepared.iter().enumerate() {
+        if index == 1 {
+            assert!(verify_first_part_completion(verified).is_ok());
+        }
+        let mut journal = NativeEventJournal::create(verified).unwrap();
+        scored_prefix(&mut journal);
+        journal.finish(4, 9, 3).unwrap();
+        wait_until(|| journal.retired());
+        assert!(!journal.failed());
+        assert!(journal.completion_receipt().is_some());
+    }
+
+    if let Some(directory) = std::env::var_os("PPS_NATIVE_RESULT_FIXTURE_DIR") {
+        let destination = PathBuf::from(directory).join("group");
+        fs::create_dir_all(&destination).unwrap();
+        fs::copy(
+            root.join("session_group_manifest.json"),
+            destination.join("session_group_manifest.json"),
+        )
+        .unwrap();
+        for number in 1..=2 {
+            let folder = format!("part_{number:02}");
+            let part_dir = root.join(&folder);
+            let target = destination.join(&folder);
+            fs::create_dir(&target).unwrap();
+            fs::copy(
+                part_dir.join("session_manifest.json"),
+                target.join("session_manifest.json"),
+            )
+            .unwrap();
+            for entry in fs::read_dir(&part_dir).unwrap() {
+                let path = entry.unwrap().path();
+                let name = path.file_name().unwrap().to_string_lossy();
+                if name.ends_with(".results.json")
+                    || name.ends_with(".jsonl")
+                    || name.ends_with(".csv")
+                {
+                    fs::copy(&path, target.join(name.as_ref())).unwrap();
+                }
+            }
+        }
+    }
+    fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
 fn publication_collision_or_interruption_retains_partial_evidence_without_completing() {
     for collision in ["trials.csv", "events.results.json", "interrupted"] {
         let root = std::env::temp_dir().join(format!("pps-publication-fault-{}", random_nonce()));

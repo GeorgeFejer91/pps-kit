@@ -153,7 +153,12 @@ filesystems fail closed; partial/pending/orphan files remain. Power loss,
 directory persistence, device drain and physical timing need separate evidence.
 Use `validation/scripts/validate_native_results.py` under `For-AI/engineering/`
 for read-only file/hash/prefix/V1-projection checks; synthetic files are not
-participant acquisition.
+participant acquisition. Its `--group-manifest` mode derives two-part native
+completion from the adjacent package identities and both sealed
+result manifests. The prepared Rust group manifest's `completed: false` fields
+are not native run evidence; this audit does not rewrite them. It requires one
+unambiguous published result per part and still makes no physical timing,
+recording-device, or participant-use claim.
 
 `pps-runner-execution::response` is the shared scoring/CSV owner; Python remains
 the oracle. `trial_capture.rs` consumes callback boundaries without another

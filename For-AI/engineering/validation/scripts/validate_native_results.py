@@ -103,13 +103,83 @@ def validate(manifest_path: Path, *, expected_package_sha256: str | None = None)
             "scoredTrialCount": len(scored), "datasetRowCount": len(rows)}
 
 
+def validate_group(group_manifest_path: Path) -> dict[str, Any]:
+    """Derive split-session completion from both native commit manifests."""
+    _require(group_manifest_path.name == "session_group_manifest.json", "a session group manifest is required")
+    group_manifest_path = group_manifest_path.resolve(strict=True)
+    group = json.loads(_bounded_bytes(group_manifest_path, 256 * 1024))
+    _require(isinstance(group, dict), "invalid split session group")
+    parts = group.get("parts")
+    _require(group.get("schema") == "pps-run-session-group.v1"
+             and group.get("part_split_schema") == "pps-runner-part-split.v1"
+             and group.get("parts_per_participant") == 2
+             and isinstance(parts, list) and len(parts) == 2
+             and isinstance(group.get("session_group_id"), str) and bool(group["session_group_id"])
+             and isinstance(group.get("participant_id"), str) and bool(group["participant_id"])
+             and isinstance(group.get("source_run_setup_sha256"), str)
+             and re.fullmatch(r"[0-9a-f]{64}", group["source_run_setup_sha256"]) is not None,
+             "invalid split session group")
+    totals = {"eventRecordCount": 0, "scoredTrialCount": 0, "datasetRowCount": 0}
+    for number, part in enumerate(parts, 1):
+        folder = f"part_{number:02}"
+        _require(isinstance(part, dict) and type(part.get("part_number")) is int
+                 and part["part_number"] == number
+                 and part.get("part_folder_name") == folder
+                 and isinstance(part.get("part_session_id"), str) and bool(part["part_session_id"]),
+                 "invalid split part identity")
+        part_dir = (group_manifest_path.parent / folder).resolve(strict=True)
+        _require(part_dir.parent == group_manifest_path.parent and part_dir.is_dir(),
+                 "split part leaves its session group")
+        package_path = (part_dir / "session_manifest.json").resolve(strict=True)
+        _require(package_path.parent == part_dir and package_path.is_file(),
+                 "split package leaves its part directory")
+        package_bytes = _bounded_bytes(package_path, 256 * 1024)
+        package = json.loads(package_bytes)
+        _require(isinstance(package, dict)
+                 and package.get("schema") == "pps-run-session.v1"
+                 and package.get("part_split_schema") == "pps-runner-part-split.v1"
+                 and package.get("participant_id") == group["participant_id"]
+                 and package.get("session_group_id") == group["session_group_id"]
+                 and type(package.get("part_number")) is int and package["part_number"] == number
+                 and package.get("part_folder_name") == folder
+                 and package.get("part_session_id") == part["part_session_id"]
+                 and package.get("source_run_setup_sha256") == group["source_run_setup_sha256"]
+                 and isinstance(package.get("session_id"), str) and bool(package["session_id"])
+                 and isinstance(package.get("execution_mode"), str) and bool(package["execution_mode"]),
+                 "split package differs from its group")
+        package_sha256 = hashlib.sha256(package_bytes).hexdigest()
+        results = sorted(part_dir.glob("native_events_*.results.json"))
+        _require(len(results) == 1 and re.fullmatch(r"native_events_[A-Za-z0-9_-]{32}\.results\.json", results[0].name)
+                 is not None, "split part needs one unambiguous published native result")
+        result_manifest = json.loads(_bounded_bytes(results[0], 256 * 1024))
+        _require(isinstance(result_manifest, dict), "invalid native result")
+        identity = result_manifest.get("identity", {})
+        _require(isinstance(identity, dict)
+                 and identity.get("participantId") == group["participant_id"]
+                 and identity.get("sessionId") == package.get("session_id")
+                 and identity.get("partSessionId") == part["part_session_id"]
+                 and identity.get("partNumber") == number
+                 and identity.get("executionMode") == package.get("execution_mode"),
+                 "native result differs from its split package")
+        audit = validate(results[0], expected_package_sha256=package_sha256)
+        for key in totals:
+            totals[key] += audit[key]
+    return {"schema": "pps.native-group-result-file-audit.v1", "passed": True,
+            "evidence": "file-contract-only", "timingQualification": "unqualified",
+            "sessionGroupComplete": True, "partCount": 2, **totals}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("manifest", type=Path)
+    parser.add_argument("manifest", type=Path, nargs="?")
+    parser.add_argument("--group-manifest", type=Path, help="Audit a completed two-part native session")
     parser.add_argument("--package-sha256", help="Expected verified package manifest digest")
     args = parser.parse_args()
+    if bool(args.manifest) == bool(args.group_manifest) or (args.group_manifest and args.package_sha256):
+        parser.error("provide one result manifest or --group-manifest; --package-sha256 applies to one result")
     try:
-        result = validate(args.manifest, expected_package_sha256=args.package_sha256)
+        result = (validate_group(args.group_manifest) if args.group_manifest else
+                  validate(args.manifest, expected_package_sha256=args.package_sha256))
     except (ValueError, OSError, KeyError, TypeError) as error:
         # Keep private identities, file contents and absolute paths out of logs.
         print(json.dumps({"passed": False, "evidence": "file-contract-only", "errorType": type(error).__name__,
