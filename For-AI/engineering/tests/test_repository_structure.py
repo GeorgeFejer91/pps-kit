@@ -31,11 +31,11 @@ def _tracked_paths() -> list[str]:
     return [line.replace("\\", "/") for line in completed.stdout.splitlines() if line]
 
 
-def _manifests() -> dict[str, dict]:
+def _manifests(version: str = "v1") -> dict[str, dict]:
     result = {}
-    for path in MANIFEST_DIR.glob("*.v1.json"):
+    for path in MANIFEST_DIR.glob(f"*.{version}.json"):
         data = json.loads(path.read_text(encoding="utf-8"))
-        if data.get("schema") == "pps-component-manifest.v1":
+        if data.get("schema") == f"pps-component-manifest.{version}":
             result[data["component_id"]] = data
     return result
 
@@ -59,6 +59,24 @@ def test_component_contract_and_dependency_versions_are_exact():
     assert manifests["full"]["composition"] == {"shared_copies": 1, "central_hub": False}
 
 
+def test_v2_full_owns_both_apps_and_one_compatible_shared_tree():
+    manifests = _manifests("v2")
+    assert set(manifests) == {"shared", "planner", "runner", "full"}
+    version = manifests["shared"]["version"]
+    assert all(manifest["version"] == version and manifest["platform"] == "windows-x64"
+               for manifest in manifests.values())
+    assert manifests["planner"]["dependencies"] == [{"component_id": "shared", "version": version}]
+    assert manifests["runner"]["dependencies"] == [{"component_id": "shared", "version": version}]
+    assert manifests["full"]["dependencies"] == [
+        {"component_id": component, "version": version}
+        for component in ("shared", "planner", "runner")
+    ]
+    assert manifests["full"]["composition"] == {"shared_copies": 1, "central_hub": False}
+    assert manifests["full"]["entrypoints"] == (
+        manifests["planner"]["entrypoints"] + manifests["runner"]["entrypoints"]
+    )
+
+
 def test_json_contract_catalog_points_to_its_existing_owners():
     catalog = json.loads(CONTRACT_CATALOG_PATH.read_text(encoding="utf-8"))
     assert catalog["schema"] == "pps-json-contract-catalog.v1"
@@ -75,17 +93,18 @@ def test_json_contract_catalog_points_to_its_existing_owners():
 
 
 def test_every_install_mapping_has_exactly_one_owner_and_is_public():
-    owners: dict[str, str] = {}
-    for component_id, manifest in _manifests().items():
-        exclusions = set(manifest["exclusions"])
-        assert "For-AI/**" in exclusions
-        for mapping in manifest["source_to_install"]:
-            source = PurePosixPath(mapping["source"])
-            assert not (set(source.parts) & FORBIDDEN_DISTRIBUTION_PARTS)
-            assert "android" not in mapping["source"].lower()
-            install = mapping["install"]
-            assert install not in owners, f"{install} owned by {owners[install]} and {component_id}"
-            owners[install] = component_id
+    for version in ("v1", "v2"):
+        owners: dict[str, str] = {}
+        for component_id, manifest in _manifests(version).items():
+            exclusions = set(manifest["exclusions"])
+            assert "For-AI/**" in exclusions
+            for mapping in manifest["source_to_install"]:
+                source = PurePosixPath(mapping["source"])
+                assert not (set(source.parts) & FORBIDDEN_DISTRIBUTION_PARTS)
+                assert "android" not in mapping["source"].lower()
+                install = mapping["install"]
+                assert install not in owners, f"{install} owned by {owners[install]} and {component_id}"
+                owners[install] = component_id
 
 
 def test_android_experiment_is_not_a_public_entrypoint_or_manifest_source():
