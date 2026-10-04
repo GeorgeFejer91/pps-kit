@@ -1608,6 +1608,7 @@ mod tests {
                     .status,
                 AppliedStatus::Accepted
             );
+            let expected_revision = core.revision();
             let remote = core.dispatch(
                 DispatchOrigin::Remote {
                     controller_id: "controller".into(),
@@ -1619,7 +1620,7 @@ mod tests {
                     scope: Scope::SessionTransport,
                     action: Action::PartStart,
                     args: json!({"part_number":2}),
-                    expected_revision: None,
+                    expected_revision: Some(expected_revision),
                     epoch: 7,
                     sequence: 1,
                 },
