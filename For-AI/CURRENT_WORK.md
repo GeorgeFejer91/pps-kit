@@ -33,10 +33,10 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   Local/phone control shares one actor,
   callback scheduler, and result journal. Source activation and result
   publication remain unqualified for participant use.
-- **Latest completed evidence:** speaker switching source `c014d75f` passed
-  local Rust tests, Clippy, formatting, eleven Python/Rust differential tests,
-  and all 14
-  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37183464651).
+- **Latest completed evidence:** bounded multichannel assembly source `00bd77d3`
+  passed local Rust audio/CPAL/media tests, Clippy, formatting, eleven
+  Python/Rust differential tests, and all 14
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37184677260).
   Its Runner-only NSIS package passed a fresh Windows CI install inventory.
   The downloaded validation marker matches the commit and its SHA-256 matches
   the artifact manifest. Installed executable and HTML/CSS hashes were recorded.

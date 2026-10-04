@@ -26,6 +26,23 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
+- Bounded multichannel native source checkpoint
+  `00bd77d30b13f0a84f45649640e9201093bd07c3` resolves the closed
+  unity-gain 4–18-channel output route, then assembles 3–18-channel block WAVs
+  according to the maximum approved trial output width. Rust audio, CPAL and
+  media tests/Clippy passed locally. Eleven Python/Rust differential tests
+  compared PCM byte for byte and V1 CSV fields, including speaker targets on
+  channels 8 and 16 and a separate tactile target on channel 17. All 14
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37184677260)
+  passed across Windows, macOS and Linux. The earlier direct-route commit
+  `dadedbc9` failed desktop compilation because a new error variant lacked a
+  Runner mapping; this checkpoint includes that correction. The downloaded
+  Runner-only Windows NSIS validation package has the matching source marker
+  and measured SHA-256 matching its manifest:
+  `e985eafadff10813671334b4f88e5f047fbbf61afd57961a7a1c2d35550cfa49`.
+  Windows CI recorded fresh-installed executable, HTML and CSS hashes. No
+  installed WebView, physical output, recording, participant run or two-app
+  Full installer was qualified by this artifact.
 - Native three-channel speaker switching source checkpoint
   `c014d75feabf2081a24c4612032cc3559f56f47e` reproduces the Python
   segment-boundary, gain, source-channel and tactile-preservation behavior in

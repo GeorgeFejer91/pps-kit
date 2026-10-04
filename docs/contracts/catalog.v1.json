@@ -24,12 +24,12 @@
     {
       "id": "pps-experiment-profile.v1",
       "owner": "packages/pps-runtime/src/peripersonal_space_toolkit/experiment_profile.py",
-      "boundary": "Path-bearing local Planner JSON handoff to Python compatibility assembly and Rust inventory, participant-plan, and standard-route V1 package preparation"
+      "boundary": "Path-bearing local Planner JSON handoff to Python compatibility assembly and Rust inventory, participant-plan, and bounded 3-18-channel V1 package preparation"
     },
     {
       "id": "pps-run-session.v1",
       "owner": "packages/pps-runtime/src/peripersonal_space_toolkit/session_runner.py",
-      "boundary": "Prepared participant package produced by the Python compatibility path or standard-route Rust media crate and verified by the Rust Runner"
+      "boundary": "Prepared participant package produced by the Python compatibility path or bounded multichannel Rust media crate and verified by the Rust Runner"
     },
     {
       "id": "pps-runner-authority-snapshot.v1",
@@ -44,7 +44,7 @@
     {
       "id": "pps-runner-prepared-audio-summary.v1",
       "owner": "apps/runner/src-tauri/src/prepared_audio.rs",
-      "boundary": "Native PCM and renderer-plan preparation reported to the desktop WebView"
+      "boundary": "Native PCM and exact 2-18-channel renderer-plan preparation reported to the desktop WebView"
     },
     {
       "id": "pps-runner-native-output-preflight.v1",
