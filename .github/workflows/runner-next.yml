@@ -255,6 +255,7 @@ jobs:
       - name: Reject generated-source or lock drift
         run: git diff --exit-code -- Cargo.lock apps/runner/compiled
       - name: Stage validation-only artifact
+        id: stage_validation
         shell: pwsh
         run: |
           $bundles = @(Get-ChildItem -Path "${{ matrix.bundle_glob }}" -File)
@@ -339,7 +340,7 @@ jobs:
         run: |
           $audit = 'artifacts/runner-installed-webview-audit'
           python For-AI/engineering/validation/scripts/run_installed_runner_webview_audit.py `
-            --binary $env:PPS_INSTALLED_RUNNER --output-dir $audit --commit '${{ github.sha }}'
+            --binary $env:PPS_INSTALLED_RUNNER --output-dir $audit --commit '${{ github.sha }}' --elevated-policy
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $report = Get-Content -LiteralPath (Join-Path $audit 'report.json') -Raw | ConvertFrom-Json
           if (-not $report.passed -or $report.commit -ne '${{ github.sha }}') {
@@ -362,6 +363,7 @@ jobs:
           path: artifacts/runner-installed-webview-audit
           if-no-files-found: warn
       - uses: actions/upload-artifact@v7
+        if: always() && steps.stage_validation.outcome == 'success'
         with:
           name: pps-runner-preview-validation-${{ matrix.slug }}-${{ runner.arch }}-${{ github.sha }}
           path: dist/runner-validation/${{ matrix.slug }}
