@@ -16,7 +16,7 @@ from urllib.request import ProxyHandler, build_opener
 import wave
 import winreg
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 from pywinauto import Desktop
 
 
@@ -211,10 +211,7 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             errors = []
             page.on("pageerror", lambda error: errors.append(str(error)))
             page.locator("#participant-code").wait_for(timeout=30_000)
-            page.wait_for_function(
-                "document.querySelector('#state-chip')?.textContent?.trim() !== 'Connecting'",
-                timeout=30_000,
-            )
+            expect(page.locator("#state-chip")).not_to_have_text("Connecting", timeout=30_000)
             state = page.locator("#state-chip").inner_text().strip()
             assert state != "Native bridge unavailable", state
             assert page.evaluate("typeof window.__TAURI_INTERNALS__?.invoke") == "function"
@@ -244,46 +241,30 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             assert page.locator("#select-session-manifest").is_enabled()
             page.locator("#select-session-manifest").click()
             choose_manifest_in_native_dialog(process.pid, manifest_path)
-            page.wait_for_function(
-                "document.querySelector('#package-badge')?.textContent?.trim() === 'Verified'",
-                timeout=30_000,
-            )
+            expect(page.locator("#package-badge")).to_have_text("Verified", timeout=30_000)
             adopted = page.evaluate("window.__TAURI_INTERNALS__.invoke('runner_snapshot')")
             assert adopted["package_verified"] is True
             assert adopted["identity"]["session_id"] == "CI_SYNTHETIC_PART_01"
             assert adopted["safety"]["local_armed"] is False
-            page.wait_for_function(
-                "document.querySelector('#package-block-count')?.textContent?.trim() === '1'",
-                timeout=10_000,
-            )
-            assert page.locator("#package-block-count").inner_text().strip() == "1"
+            expect(page.locator("#package-block-count")).to_have_text("1", timeout=10_000)
             report["synthetic_manifest_sha256"] = sha256(manifest_path)
             report["prepared_session_selected"] = True
             report["selected_run_phase"] = adopted["run"]["phase"]
 
             inspect = page.locator("#inspect-prepared-execution")
-            inspect.wait_for(state="visible", timeout=10_000)
-            page.wait_for_function(
-                "!document.querySelector('#inspect-prepared-execution')?.disabled",
-                timeout=10_000,
-            )
+            expect(inspect).to_be_enabled(timeout=10_000)
             inspect.click()
-            page.wait_for_function(
-                "document.querySelector('#execution-inspection-status')?.textContent?.trim() === 'Compiled · inspection only'",
-                timeout=30_000,
+            expect(page.locator("#execution-inspection-status")).to_have_text(
+                "Compiled · inspection only", timeout=30_000,
             )
             report["rust_schedule_compiled"] = True
 
-            page.wait_for_function(
-                "!document.querySelector('#prepare-current-audio-block')?.disabled",
-                timeout=10_000,
-            )
+            expect(page.locator("#prepare-current-audio-block")).to_be_enabled(timeout=10_000)
             page.locator("#prepare-current-audio-block").click()
-            page.wait_for_function(
-                "document.querySelector('#prepared-audio-status')?.textContent?.trim() === 'Prepared · output not reserved'",
-                timeout=30_000,
+            expect(page.locator("#prepared-audio-status")).to_have_text(
+                "Prepared · output not reserved", timeout=30_000,
             )
-            assert page.locator("#native-output-prepare").is_disabled()
+            expect(page.locator("#native-output-prepare")).to_be_disabled()
             report["native_pcm_prepared"] = True
             report["tabs"] = []
             for tab in ("control", "logging", "remote"):
