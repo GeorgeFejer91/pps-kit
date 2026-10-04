@@ -27,7 +27,8 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   profile, prepares a V1-compatible package, and adopts it through the existing
   native authority. Standard three-channel block assembly supports four
   Python-compatible tactile waveform shapes on channels 1–3, ITI silence, and
-  provisional tactile drive compensation. Local/phone control shares one actor,
+  provisional tactile drive compensation, plus Python-compatible speaker
+  switching within the three-channel route. Local/phone control shares one actor,
   callback scheduler, and result journal. Source activation and result
   publication remain unqualified for participant use.
 - **Latest completed evidence:** tactile synthesis source `5685fc10` passed
@@ -38,7 +39,7 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   The downloaded validation marker matches the commit and its SHA-256 matches
   the artifact manifest. Installed executable and HTML/CSS hashes were recorded.
   Neither an installed WebView nor physical output was tested from this package.
-- **Next gates:** complete speaker switching and approved output routes beyond
+- **Next gates:** add approved speaker-array and tactile output routes beyond
   three channels through the Python oracle; run the installed native
   single-block workflow on a compatible calibrated device; validate event/CSV
   files and recording; extend to full profiles and multiple blocks; then build

@@ -218,6 +218,8 @@ def test_rust_binds_exported_trial_wav_to_exact_bytes_and_audio_hint(tmp_path: P
 def _standard_block_profile(
     folder: Path, *, tactile_shape: str = "", tactile_duration_ms: int = 10,
     tactile_channel: int | None = None, source_channels: int = 3,
+    speaker_channels: str = "", speaker_times_ms: str = "", speaker_gains: str = "",
+    speaker_source_channel: str = "",
 ) -> Path:
     folder.mkdir(parents=True)
     target = folder / "baseline_frontal_40ms_loom.wav"
@@ -239,6 +241,8 @@ def _standard_block_profile(
             "looming_segment_onset_s", "tactile_onset_s", "soa_ms", "iti_ms",
             "tactile_waveform_shape", "tactile_frequency_hz", "tactile_duration_ms",
             "tactile_pulse_duration_ms", "tactile_channel",
+            "speaker_switch_channels", "speaker_switch_times_ms", "speaker_switch_gains",
+            "speaker_source_channel",
         ])
         writer.writeheader()
         writer.writerow({
@@ -250,6 +254,10 @@ def _standard_block_profile(
             "tactile_duration_ms": tactile_duration_ms if tactile_shape else "",
             "tactile_pulse_duration_ms": 1 if tactile_shape == "pulse_train" else "",
             "tactile_channel": tactile_channel if tactile_channel is not None else "",
+            "speaker_switch_channels": speaker_channels,
+            "speaker_switch_times_ms": speaker_times_ms,
+            "speaker_switch_gains": speaker_gains,
+            "speaker_source_channel": speaker_source_channel,
         })
         writer.writerow({
             "block_trial_index": 2, "family": "catch", "trial_file_path": str(catch),
@@ -387,6 +395,70 @@ def test_native_tactile_extension_and_package_metadata_match_python(tmp_path: Pa
         assert expected.getnframes() > 5441
         assert observed.getnframes() == expected.getnframes()
         assert observed.readframes(observed.getnframes()) == expected.readframes(expected.getnframes())
+
+
+def test_native_three_channel_speaker_switching_matches_python(tmp_path: Path, monkeypatch) -> None:
+    from peripersonal_space_toolkit.session_runner import _materialize_segment_block_wav
+
+    monkeypatch.setenv("PPS_WOOJER_TACTILE_COMPENSATION_MS", "23")
+    cases = (
+        ("boundaries", "1|2", "0|30|100", "", "", "", 3, 3),
+        ("starts-mix", "2|1", "0|50", "0.5|1.25", "mix", "square", 3, 3),
+        ("tactile-overlap", "3|1", "0|60|100", "1|0.5", "2", "", 3, 3),
+        ("stereo-source", "2|1", "0|40", "", "", "", None, 2),
+    )
+    for name, channels, times, gains, source_channel, tactile_shape, tactile_channel, source_channels in cases:
+        profile_path = _standard_block_profile(
+            tmp_path / name, tactile_shape=tactile_shape, tactile_channel=tactile_channel,
+            source_channels=source_channels,
+            speaker_channels=channels, speaker_times_ms=times,
+            speaker_gains=gains, speaker_source_channel=source_channel,
+        )
+        source_block = read_experiment_profile(profile_path)["assembly"]["blocks"][0]
+        python_wav = profile_path.parent / "python-block.wav"
+        _, _, _, python_rows, _ = _materialize_segment_block_wav(
+            python_wav, source_block["rows"], participant_id="P001", session_id="P001_fixture",
+            part_number=1, phase="single", phase_label="Single", output_block_index=1,
+            participant_block_position=1, source_block_index=1, source_block_label="First",
+            source_block_csv_path=Path(source_block["source_csv_path"]),
+        )
+        native_dir = tmp_path / f"P001_{name}_native"
+        completed = subprocess.run(
+            ["cargo", "run", "--quiet", "--locked", "-p", "pps-experiment-media", "--example", "profile_package_probe"],
+            cwd=ROOT, input=json.dumps({
+                "profile_path": str(profile_path), "participant_id": "P001", "output_dir": str(native_dir),
+            }), env=os.environ.copy(), text=True, capture_output=True, check=True,
+        )
+        assert json.loads(completed.stdout)["accepted"], (name, completed.stdout)
+        with wave.open(str(python_wav), "rb") as expected, wave.open(str(native_dir / "blocks" / "Block_01.wav"), "rb") as observed:
+            assert (observed.getnframes(), observed.getnchannels(), observed.getframerate()) == (
+                expected.getnframes(), expected.getnchannels(), expected.getframerate(),
+            )
+            assert observed.readframes(observed.getnframes()) == expected.readframes(expected.getnframes()), name
+        with (native_dir / "blocks" / "Block_01.csv").open(newline="", encoding="utf-8") as source:
+            native_rows = list(csv.DictReader(source))
+        compared = (
+            "Channels", "Audio_Output_Mode", "Speaker_Switch_Times_ms",
+            "Speaker_Switch_Channels", "Speaker_Switch_Gains", "Speaker_Source_Channel",
+            "Speaker_Switch_Generated", "Tactile_Latency_Compensation_Note",
+        )
+        assert {key: native_rows[0][key] for key in compared} == {
+            key: str(python_rows[0][key]) for key in compared
+        }, name
+
+
+def test_native_speaker_switching_rejects_unroutable_channel(tmp_path: Path) -> None:
+    profile_path = _standard_block_profile(
+        tmp_path / "unroutable", speaker_channels="1|4", speaker_times_ms="0|50|100",
+    )
+    completed = subprocess.run(
+        ["cargo", "run", "--quiet", "--locked", "-p", "pps-experiment-media", "--example", "profile_block_probe"],
+        cwd=ROOT, input=json.dumps({
+            "profile_path": str(profile_path), "participant_id": "P001",
+            "output_path": str(profile_path.parent / "unsupported-block.wav"),
+        }), env=os.environ.copy(), text=True, capture_output=True, check=True,
+    )
+    assert json.loads(completed.stdout)["code"] == "profile_block_transform_unsupported"
 
 
 def test_native_block_rejects_unsupported_tactile_transform(tmp_path: Path) -> None:

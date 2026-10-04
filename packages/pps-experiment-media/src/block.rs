@@ -70,7 +70,7 @@ impl fmt::Display for BlockMediaError {
 
 impl std::error::Error for BlockMediaError {}
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct TrialFrameSpan {
     pub start: u64,
     pub end: u64,
@@ -80,6 +80,7 @@ pub struct TrialFrameSpan {
     pub tactile_compensation_note: &'static str,
     pub(crate) prepared_channels: u16,
     pub(crate) tactile_waveform: Option<TactileWaveform>,
+    pub(crate) speaker_switching: Option<SpeakerSwitching>,
 }
 
 /// Content-bound on-disk PCM16 block. Path/hash never serialize to WebView.
@@ -189,21 +190,169 @@ pub(crate) fn family(fields: &BTreeMap<String, String>) -> &'static str {
     }
 }
 
-fn has_speaker_switching(fields: &BTreeMap<String, String>) -> bool {
-    row_value(
+#[derive(Debug, Clone)]
+pub(crate) struct SpeakerSegment {
+    start: u64,
+    end: u64,
+    channel: u16,
+    gain: f32,
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct SpeakerSwitching {
+    pub(crate) channels: Vec<u16>,
+    pub(crate) times_ms: Vec<f64>,
+    pub(crate) gains: Vec<f64>,
+    pub(crate) source_channel: String,
+    pub(crate) tactile_channel: u16,
+    pub(crate) prepared_channels: u16,
+    segments: Vec<SpeakerSegment>,
+    mixdown: bool,
+    source_index: usize,
+}
+
+fn contract_parts(text: &str) -> impl Iterator<Item = &str> {
+    text.split(['|', ';', ','])
+        .map(str::trim)
+        .filter(|part| !part.is_empty())
+}
+
+fn speaker_switching(
+    fields: &BTreeMap<String, String>,
+    frames: u64,
+    sample_rate_hz: u32,
+    source_channels: u16,
+) -> Result<Option<SpeakerSwitching>, BlockMediaError> {
+    let channel_text = row_value(
         fields,
         &[
             "speaker_switch_channels",
             "Speaker_Switch_Channels",
             "speaker_output_channels",
             "Speaker_Output_Channels",
+        ],
+    )
+    .unwrap_or("")
+    .trim();
+    let times_text = row_value(
+        fields,
+        &[
             "speaker_switch_times_ms",
             "Speaker_Switch_Times_ms",
             "speaker_switch_boundaries_ms",
             "Speaker_Switch_Boundaries_ms",
         ],
     )
-    .is_some()
+    .unwrap_or("")
+    .trim();
+    if channel_text.is_empty() && times_text.is_empty() {
+        return Ok(None);
+    }
+    let channels: Vec<u16> = contract_parts(channel_text)
+        .filter_map(|part| part.parse::<f64>().ok())
+        .filter(|value| value.is_finite() && *value >= 1.0)
+        .map(|value| value.trunc().min(f64::from(u16::MAX)) as u16)
+        .filter(|channel| *channel > 0)
+        .collect();
+    let mut times_ms: Vec<f64> = contract_parts(times_text)
+        .filter_map(|part| part.parse::<f64>().ok())
+        .filter(|value| value.is_finite() && *value >= 0.0)
+        .collect();
+    if channels.is_empty() || times_ms.is_empty() {
+        return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
+    }
+    if channels.iter().any(|channel| *channel > OUTPUT_CHANNELS) {
+        return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
+    }
+    if times_ms.len() == channels.len() {
+        times_ms.push(
+            times_ms[times_ms.len() - 1].max(frames as f64 / f64::from(sample_rate_hz) * 1000.0),
+        );
+    }
+    if times_ms.len() != channels.len() + 1 || times_ms.windows(2).any(|pair| pair[1] < pair[0]) {
+        return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
+    }
+    let gain_text =
+        row_value(fields, &["speaker_switch_gains", "Speaker_Switch_Gains"]).unwrap_or("");
+    let mut gains: Vec<f64> = contract_parts(gain_text)
+        .filter_map(|part| part.parse::<f64>().ok())
+        .filter(|value| value.is_finite())
+        .collect();
+    if gains.is_empty() {
+        gains = vec![1.0; channels.len()];
+    }
+    if gains.len() != channels.len() || gains.iter().any(|value| value.abs() > f64::from(f32::MAX))
+    {
+        return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
+    }
+    let source_channel = row_value(
+        fields,
+        &["speaker_source_channel", "Speaker_Source_Channel"],
+    )
+    .unwrap_or("1")
+    .trim();
+    let source_channel = if source_channel.is_empty() {
+        "1".to_owned()
+    } else {
+        source_channel.to_owned()
+    };
+    let mixdown = matches!(
+        source_channel.to_ascii_lowercase().as_str(),
+        "mix" | "mixdown" | "mean" | "mono" | "mono_mixdown"
+    );
+    let source_index = if mixdown {
+        0
+    } else {
+        let index = source_channel
+            .parse::<f64>()
+            .ok()
+            .filter(|value| value.is_finite())
+            .unwrap_or(1.0)
+            .trunc()
+            .max(1.0)
+            - 1.0;
+        if index >= f64::from(source_channels) {
+            return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
+        }
+        index as usize
+    };
+    let tactile_channel = number(
+        row_value(fields, &["tactile_channel", "Tactile_Channel"]),
+        0.0,
+    )
+    .trunc()
+    .max(0.0);
+    if tactile_channel > f64::from(OUTPUT_CHANNELS) {
+        return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
+    }
+    let tactile_channel = tactile_channel as u16;
+    let prepared_channels = source_channels
+        .max(channels.iter().copied().max().unwrap_or(0))
+        .max(tactile_channel);
+    let mut segments = Vec::with_capacity(channels.len());
+    for (index, channel) in channels.iter().enumerate() {
+        let start =
+            bounded_frames(times_ms[index] / 1000.0 * f64::from(sample_rate_hz))?.min(frames);
+        let end =
+            bounded_frames(times_ms[index + 1] / 1000.0 * f64::from(sample_rate_hz))?.min(frames);
+        segments.push(SpeakerSegment {
+            start,
+            end,
+            channel: *channel,
+            gain: gains[index] as f32,
+        });
+    }
+    Ok(Some(SpeakerSwitching {
+        channels,
+        times_ms,
+        gains,
+        source_channel,
+        tactile_channel,
+        prepared_channels,
+        segments,
+        mixdown,
+        source_index,
+    }))
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -635,8 +784,9 @@ fn require_storage(estimated_bytes: u64, available_bytes: u64) -> Result<(), Blo
 }
 
 /// Assemble one 2/3-channel-source PCM16 block in approved trial order.
-/// Speaker-array switching remains unsupported until its native output route
-/// exists. Publication never overwrites.
+/// Speaker switching within the existing three-channel route is supported;
+/// larger arrays reject until their native output route exists.
+/// Publication never overwrites.
 pub fn assemble_standard_profile_block(
     plan: &ProfileParticipantPlan,
     block_ordinal: usize,
@@ -673,11 +823,15 @@ pub fn assemble_standard_profile_block(
         if hint.format() != "WAV" || !matches!(hint.channels(), 2 | 3) {
             return Err(BlockMediaError(BlockMediaErrorCode::SourceUnsupported));
         }
-        if has_speaker_switching(trial.fields()) {
-            return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
-        }
         let waveform = tactile_waveform(trial.fields(), family(trial.fields()), sample_rate_hz)?;
         let trial_frames = hint.frames().max(waveform.map_or(0, TactileWaveform::stop));
+        speaker_switching(
+            trial.fields(),
+            trial_frames,
+            sample_rate_hz,
+            hint.channels()
+                .max(waveform.map_or(0, |value| value.channel)),
+        )?;
         estimated_frames = estimated_frames
             .checked_add(trial_frames)
             .and_then(|frames| frames.checked_add(iti_frames(trial.fields(), sample_rate_hz).ok()?))
@@ -767,7 +921,7 @@ pub fn assemble_standard_profile_block(
                 .max(waveform.map_or(0, TactileWaveform::stop)),
         )
         .map_err(|_| BlockMediaError(BlockMediaErrorCode::ResourceLimit))?;
-        let prepared_channels = media
+        let source_prepared_channels = media
             .channels()
             .max(waveform.map_or(0, |value| value.channel));
         let (shift, tactile_compensation_note) = tactile_shift(
@@ -782,39 +936,76 @@ pub fn assemble_standard_profile_block(
                     sample_rate_hz,
                 )
             },
-            prepared_channels,
+            source_prepared_channels,
             frames,
             sample_rate_hz,
             tactile_onset_s(trial.fields(), trial_family),
             trial_family,
         );
+        let switching = speaker_switching(
+            trial.fields(),
+            frames as u64,
+            sample_rate_hz,
+            source_prepared_channels,
+        )?;
+        let prepared_channels = switching
+            .as_ref()
+            .map_or(source_prepared_channels, |spec| spec.prepared_channels);
+        let prepared_sample = |frame: usize, channel: usize| {
+            let source = if channel == 2 && shift > 0 {
+                match frame.checked_add(shift).filter(|source| *source < frames) {
+                    Some(source) => source,
+                    None => return 0.0,
+                }
+            } else {
+                frame
+            };
+            trial_sample(
+                samples,
+                channels,
+                source_frames,
+                waveform,
+                source,
+                channel,
+                sample_rate_hz,
+            )
+        };
+        let mut active_segment = 0;
         for frame in 0..frames {
-            for channel in 0..usize::from(OUTPUT_CHANNELS) {
-                let value = if channel == 2 && shift > 0 {
-                    frame
-                        .checked_add(shift)
-                        .filter(|source| *source < frames)
-                        .map_or(0.0, |source| {
-                            trial_sample(
-                                samples,
-                                channels,
-                                source_frames,
-                                waveform,
-                                source,
-                                channel,
-                                sample_rate_hz,
-                            )
-                        })
+            let segment = switching.as_ref().and_then(|spec| {
+                while active_segment < spec.segments.len()
+                    && frame as u64 >= spec.segments[active_segment].end
+                {
+                    active_segment += 1;
+                }
+                spec.segments
+                    .get(active_segment)
+                    .filter(|segment| frame as u64 >= segment.start && (frame as u64) < segment.end)
+            });
+            let source_signal = if let (Some(_), Some(spec)) = (segment, switching.as_ref()) {
+                if spec.mixdown {
+                    (prepared_sample(frame, 0) + prepared_sample(frame, 1)) * 0.5
                 } else {
-                    trial_sample(
-                        samples,
-                        channels,
-                        source_frames,
-                        waveform,
-                        frame,
-                        channel,
-                        sample_rate_hz,
-                    )
+                    prepared_sample(frame, spec.source_index)
+                }
+            } else {
+                0.0
+            };
+            for channel in 0..usize::from(OUTPUT_CHANNELS) {
+                let value = if let Some(spec) = switching.as_ref() {
+                    let tactile = if spec.tactile_channel == channel as u16 + 1
+                        && channel < usize::from(source_prepared_channels)
+                    {
+                        prepared_sample(frame, channel)
+                    } else {
+                        0.0
+                    };
+                    tactile
+                        + segment
+                            .filter(|segment| segment.channel == channel as u16 + 1)
+                            .map_or(0.0, |segment| source_signal * segment.gain)
+                } else {
+                    prepared_sample(frame, channel)
                 };
                 writer
                     .write_sample(output_sample(value))
@@ -842,6 +1033,7 @@ pub fn assemble_standard_profile_block(
             tactile_compensation_note,
             prepared_channels,
             tactile_waveform: waveform,
+            speaker_switching: switching,
         });
         cursor = end;
     }
@@ -881,7 +1073,10 @@ pub fn assemble_standard_profile_block(
 mod tests {
     use std::collections::BTreeMap;
 
-    use super::{require_storage, tactile_waveform, BlockMediaErrorCode, STORAGE_RESERVE_BYTES};
+    use super::{
+        require_storage, speaker_switching, tactile_waveform, BlockMediaErrorCode,
+        STORAGE_RESERVE_BYTES,
+    };
 
     #[test]
     fn storage_preflight_keeps_three_output_copies_and_a_reserve() {
@@ -917,6 +1112,23 @@ mod tests {
             tactile_waveform(&fields, "audio_tactile", 44_100)
                 .unwrap_err()
                 .0,
+            BlockMediaErrorCode::TransformUnsupported
+        );
+    }
+
+    #[test]
+    fn speaker_switching_rejects_reversed_or_incomplete_boundaries() {
+        let mut fields = BTreeMap::from([
+            ("speaker_switch_channels".to_owned(), "1|2".to_owned()),
+            ("speaker_switch_times_ms".to_owned(), "0|50|40".to_owned()),
+        ]);
+        assert_eq!(
+            speaker_switching(&fields, 4_000, 44_100, 3).unwrap_err().0,
+            BlockMediaErrorCode::TransformUnsupported
+        );
+        fields.insert("speaker_switch_times_ms".to_owned(), "0".to_owned());
+        assert_eq!(
+            speaker_switching(&fields, 4_000, 44_100, 3).unwrap_err().0,
             BlockMediaErrorCode::TransformUnsupported
         );
     }

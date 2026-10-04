@@ -416,6 +416,132 @@ fn prepared_row(
         "Sequence_Variant_Key",
         &["sequence_variant_key", "Sequence_Variant_Key"],
     );
+    let switching = span.speaker_switching.as_ref();
+    let mode = field(
+        source,
+        &[
+            "audio_output_mode",
+            "Audio_Output_Mode",
+            "speaker_array_mode",
+            "Speaker_Array_Mode",
+        ],
+    );
+    set(
+        &mut row,
+        "Audio_Output_Mode",
+        if mode.is_empty() && switching.is_some() {
+            "switched_speaker_array"
+        } else {
+            mode
+        },
+    );
+    set_alias(
+        &mut row,
+        source,
+        "Speaker_Array_ID",
+        &["speaker_array_id", "Speaker_Array_ID"],
+    );
+    set_alias(
+        &mut row,
+        source,
+        "Speaker_Array_Layout",
+        &["speaker_array_layout", "Speaker_Array_Layout"],
+    );
+    set_alias(
+        &mut row,
+        source,
+        "Speaker_Switch_Sequence",
+        &["speaker_switch_sequence", "Speaker_Switch_Sequence"],
+    );
+    let times = field(
+        source,
+        &[
+            "speaker_switch_times_ms",
+            "Speaker_Switch_Times_ms",
+            "speaker_switch_boundaries_ms",
+            "Speaker_Switch_Boundaries_ms",
+        ],
+    );
+    set(
+        &mut row,
+        "Speaker_Switch_Times_ms",
+        if times.is_empty() {
+            switching.map_or_else(String::new, |spec| {
+                spec.times_ms
+                    .iter()
+                    .map(|value| six_significant(*value))
+                    .collect::<Vec<_>>()
+                    .join("|")
+            })
+        } else {
+            times.to_owned()
+        },
+    );
+    let channels = field(
+        source,
+        &[
+            "speaker_switch_channels",
+            "Speaker_Switch_Channels",
+            "speaker_output_channels",
+            "Speaker_Output_Channels",
+        ],
+    );
+    set(
+        &mut row,
+        "Speaker_Switch_Channels",
+        if channels.is_empty() {
+            switching.map_or_else(String::new, |spec| {
+                spec.channels
+                    .iter()
+                    .map(u16::to_string)
+                    .collect::<Vec<_>>()
+                    .join("|")
+            })
+        } else {
+            channels.to_owned()
+        },
+    );
+    let gains = field(source, &["speaker_switch_gains", "Speaker_Switch_Gains"]);
+    set(
+        &mut row,
+        "Speaker_Switch_Gains",
+        if gains.is_empty() {
+            switching.map_or_else(String::new, |spec| {
+                spec.gains
+                    .iter()
+                    .map(|value| six_significant(*value))
+                    .collect::<Vec<_>>()
+                    .join("|")
+            })
+        } else {
+            gains.to_owned()
+        },
+    );
+    let source_channel = field(
+        source,
+        &["speaker_source_channel", "Speaker_Source_Channel"],
+    );
+    set(
+        &mut row,
+        "Speaker_Source_Channel",
+        if source_channel.is_empty() {
+            switching.map_or("", |spec| spec.source_channel.as_str())
+        } else {
+            source_channel
+        },
+    );
+    set(
+        &mut row,
+        "Speaker_Switch_Generated",
+        if switching.is_some() {
+            "true"
+        } else {
+            field(
+                source,
+                &["speaker_switch_generated", "Speaker_Switch_Generated"],
+            )
+        },
+    );
     set_alias(
         &mut row,
         source,
