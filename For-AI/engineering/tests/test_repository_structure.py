@@ -67,7 +67,7 @@ def test_json_contract_catalog_points_to_its_existing_owners():
     assert len(ids) == len(set(ids))
     tracked = set(_tracked_paths())
     for contract in contracts:
-        assert contract["id"].startswith("pps-") and ".v" in contract["id"]
+        assert contract["id"].startswith(("pps-", "pps.")) and ".v" in contract["id"]
         assert contract["boundary"].strip()
         owner = contract["owner"]
         assert owner in tracked

@@ -35,6 +35,41 @@
       "id": "pps-runner-authority-snapshot.v1",
       "owner": "packages/pps-contracts/src/lib.rs",
       "boundary": "Path-free authoritative state shared with local and phone controls"
+    },
+    {
+      "id": "pps-runner-public-snapshot.v1",
+      "owner": "apps/runner/src-tauri/src/runtime.rs",
+      "boundary": "Participant-free public state advertised to browser controllers"
+    },
+    {
+      "id": "pps-runner-prepared-audio-summary.v1",
+      "owner": "apps/runner/src-tauri/src/prepared_audio.rs",
+      "boundary": "Native PCM and renderer-plan preparation reported to the desktop WebView"
+    },
+    {
+      "id": "pps-runner-native-output-preflight.v1",
+      "owner": "apps/runner/src-tauri/src/native_output.rs",
+      "boundary": "Local output readiness reported to the desktop WebView"
+    },
+    {
+      "id": "pps-runner-native-output-inventory.v1",
+      "owner": "apps/runner/src-tauri/src/native_output.rs",
+      "boundary": "Enumerated output devices and configurations for local selection"
+    },
+    {
+      "id": "pps-runner-native-output-reservation.v1",
+      "owner": "apps/runner/src-tauri/src/native_output.rs",
+      "boundary": "Exact silent output reservation used for native activation"
+    },
+    {
+      "id": "pps.native-event-journal.v1",
+      "owner": "apps/runner/src-tauri/src/event_journal.rs",
+      "boundary": "Durable native event evidence for independent result validation"
+    },
+    {
+      "id": "pps.native-results.v1",
+      "owner": "apps/runner/src-tauri/src/event_journal.rs",
+      "boundary": "Published native result manifest and event/CSV hashes"
     }
   ]
 }
