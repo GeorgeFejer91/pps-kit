@@ -46,14 +46,20 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
   A local V1 Designer/compatibility Runner Full Windows package was rebuilt on
   2026-09-28 and both installed entrypoints opened in a clean-folder smoke.
   It is an unpublished packaging candidate, not V2 or physical qualification.
-- **Next gate:** native experiment activation and one complete installed
-  experiment; extend the same owner to full profiles/multiple blocks.
-  The candidate remains non-executable/unqualified until its complete adapter
-  is enabled. Qualification requires observed devices/routes and calibration;
-  source tests cannot supply physical evidence.
+  The separate native Runner source candidate `41f192d3` passed all 14 exact-SHA
+  CI jobs, including the Windows NSIS validation bundle. That installer was
+  hash-checked, installed in isolation, and opened; its UI verified a synthetic
+  V1 package, compiled its schedule, and prepared one native PCM block. Device
+  inventory found no configuration matching that synthetic three-channel block.
+- **Next gate:** complete an installed native single-block run with a checked
+  compatible and calibrated output route, then validate its event/CSV files and
+  recording. Extend the same owner to full profiles/multiple blocks. The native
+  activation path exists in source but remains unqualified; no participant run or
+  physical timing evidence is claimed. Build the two-app V2 Full installer and
+  verify that exact package separately before release.
 - **Local constraint:** complete native V2 builds and the Standard tier remain
-  unrun under the 15 GiB working allowance. Local V1 packaging and installed
-  smoke succeeded with current free space; CI supplies native V2 builds.
+  unrun under the 15 GiB working allowance. CI supplies native V2 builds; local
+  storage is presently insufficient for another native build without cleanup.
 
 Detailed run artifacts stay in ignored validation folders. Preserve the pre-sync
 Git bundle and dirty-file backup until reconciliation is verified.

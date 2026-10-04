@@ -121,7 +121,14 @@ as the Rust owner retires its cache; audio preparation is required again.
 Desktop notifications remain in their owning panel
 and use the shared bounded-text helper.
 
-Preparation and these source seams do not enable execution. Native activation,
-whole profiles/multiple blocks, an installed
-complete experiment, calibration and physical qualification remain gates.
-Wire completion is denied for real packages; Stop preserves partial results.
+The current native source candidate enables a fenced, explicitly acknowledged
+single-block activation only after verified package, compiled schedule, prepared
+PCM and a matching silent output reservation. Start/Resume still wait for durable
+intent and callback confirmation. It is unqualified and requires a checked local
+route and levels; preparation alone does not enable execution. Exact-SHA CI and
+an isolated Windows NSIS install verified package adoption, schedule compilation
+and PCM preparation. The synthetic three-channel block had no matching local
+output configuration, so no installed run, physical playback, recording or result
+publication was tested. Whole profiles/multiple blocks, calibration and physical
+qualification remain gates. Wire completion remains denied for real packages;
+Stop preserves partial results.
