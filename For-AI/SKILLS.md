@@ -10,9 +10,10 @@ work. Missing external skills use the disclosed existing-tooling fallback
 below, never an invented claim that a skill ran.
 
 This table is the maintained skill inventory. At each task boundary, select
-only applicable rows, confirm that each selected skill is available, read its
-`SKILL.md` and only the references needed for the change, then record any
-unavailable skill and the fallback used. Apply Ponytail/YAGNI after tracing the
+only applicable rows, confirm that each selected skill is available, and read
+its `SKILL.md` and only the references needed for the change. Name the selected
+skills in the task plan; report an unavailable skill and the fallback used in
+the handoff. Apply Ponytail/YAGNI after tracing the
 existing owner: reuse source, contracts, and checks before adding code,
 dependencies, guidance files, or parallel UI implementations. Never trim
 validation, calibration, accessibility, privacy, or safety to satisfy YAGNI.

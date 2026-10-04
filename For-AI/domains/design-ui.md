@@ -16,17 +16,19 @@ a spacing-only change does not require the experiment literature.
 - Promotion/Pages/installer: [WORKFLOW.md](../WORKFLOW.md) and
   [packaging](../packaging/README.md).
 
-Use **Ponytail**, **Uncodixfy Pretext** (including its
-`references/accordion-stretch.md` mode), and the local orchestrator for Planner
-HTML work. Apply the stretch layout review to every Planner Segment 0–6 and
-every Runner/companion UI segment: define the bounded panel, anchors, minimum
-width and height, and ordered control groups before fitting text. Keep labels
-with inputs. A segment that cannot hold its real content at the readable
-minimum must reflow or use an explicit host/detail scroll policy; never conceal
-controls behind overflow. Use browser automation for actual controls/rendered geometry.
-Load Tauri/Rust when changing that native boundary; add remote-control guidance
-for authorization, transport, or state sync. [SKILLS.md](../SKILLS.md) records
-sources and availability handling.
+Use **Ponytail** and **Uncodixfy Pretext** (including its
+`references/accordion-stretch.md` mode) for Planner, Runner, and companion
+HTML work; use the local orchestrator for Planner work. Review each UI shell,
+each Planner Segment 0–6, each Runner tab, each phone mode, and the bounded
+panels within them. For each bounded, resizable panel, define its anchors,
+minimum width and height, and ordered control groups before fitting text.
+Keep labels with inputs. Content that cannot fit at the readable minimum must
+reflow or use an explicit host/detail scroll policy; never conceal controls
+behind overflow. Use browser automation for actual controls/rendered geometry.
+Load **tauri-rust-developer** for desktop WebView/native boundaries and its
+security reference when changing IPC or capabilities; add remote-control
+guidance for authorization, transport, or state sync.
+[SKILLS.md](../SKILLS.md) records sources and availability handling.
 
 The V1 native Designer's `ShellApi` exposes methods to pywebview; keep its window
 reference private because pywebview recursively inspects public API fields.
