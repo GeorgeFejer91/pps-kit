@@ -57,12 +57,23 @@ on:
       - "For-AI/engineering/validation/scripts/run_installed_runner_webview_audit.py"
       - ".github/workflows/runner-next.yml"
   workflow_dispatch:
+    inputs:
+      installed_artifact_run_id:
+        description: Existing validation run ID for a fast installed-WebView audit retry
+        required: false
+        type: string
+      installed_artifact_commit:
+        description: Exact commit recorded in that run's Windows validation artifact
+        required: false
+        type: string
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
   rust-core:
+    if: github.event_name != 'workflow_dispatch' || inputs.installed_artifact_run_id == ''
     name: Rust core (${{ matrix.os }})
     strategy:
       fail-fast: false
@@ -84,6 +95,7 @@ jobs:
         run: ./For-AI/engineering/automation/check_runner_next.ps1 -Mode Core
 
   desktop-shell:
+    if: github.event_name != 'workflow_dispatch' || inputs.installed_artifact_run_id == ''
     name: Tauri desktop (${{ matrix.os }})
     strategy:
       fail-fast: false
@@ -113,6 +125,7 @@ jobs:
           if-no-files-found: error
 
   python-rust-package-oracle:
+    if: github.event_name != 'workflow_dispatch' || inputs.installed_artifact_run_id == ''
     name: Python/Rust V1 package oracle (${{ matrix.os }})
     needs: desktop-shell
     strategy:
@@ -147,6 +160,7 @@ jobs:
           For-AI/engineering/tests/test_native_result_file_audit.py
 
   browser-companion:
+    if: github.event_name != 'workflow_dispatch' || inputs.installed_artifact_run_id == ''
     name: Browser companion
     runs-on: ubuntu-latest
     steps:
@@ -177,6 +191,7 @@ jobs:
           if-no-files-found: warn
 
   desktop-validation-bundle:
+    if: github.event_name != 'workflow_dispatch' || inputs.installed_artifact_run_id == ''
     name: Validation bundle (${{ matrix.slug }})
     needs: [desktop-shell, browser-companion]
     strategy:
@@ -371,7 +386,67 @@ jobs:
           retention-days: 7
           compression-level: 0
 
+  installed-webview-retry:
+    name: Installed WebView audit from existing Windows bundle
+    if: inputs.installed_artifact_run_id != ''
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v5
+        with:
+          run-id: ${{ inputs.installed_artifact_run_id }}
+          name: pps-runner-preview-validation-windows-host-nsis-X64-${{ inputs.installed_artifact_commit }}
+          github-token: ${{ github.token }}
+          path: artifacts/installed-audit-source
+      - name: Verify and install the exact validation artifact
+        shell: pwsh
+        env:
+          SOURCE_COMMIT: ${{ inputs.installed_artifact_commit }}
+        run: |
+          $source = 'artifacts/installed-audit-source'
+          $marker = Get-Content -LiteralPath (Join-Path $source 'VALIDATION_ONLY.txt')
+          if ($marker -notcontains "commit=$env:SOURCE_COMMIT" -or
+              $marker -notcontains 'distribution_status=ci_validation_artifact_not_release') {
+            throw 'Validation marker does not match the requested commit.'
+          }
+          $installer = @(Get-ChildItem -LiteralPath $source -Filter '*.exe' -File)
+          if ($installer.Count -ne 1) { throw 'Expected one Windows NSIS installer.' }
+          $expectedHash = ((Get-Content -LiteralPath (Join-Path $source 'SHA256SUMS.txt')) -split '\s+')[0]
+          $actualHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $installer[0].FullName).Hash.ToLowerInvariant()
+          if ($expectedHash -ne $actualHash) { throw 'Validation installer hash mismatch.' }
+          $installRoot = Join-Path $env:RUNNER_TEMP "pps-runner-audit-${{ github.run_id }}-${{ github.run_attempt }}"
+          if (Test-Path -LiteralPath $installRoot) { throw 'Install directory is not fresh.' }
+          $process = Start-Process -FilePath $installer[0].FullName `
+            -ArgumentList @('/S', "/D=$installRoot") -WindowStyle Hidden -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "NSIS install failed: $($process.ExitCode)." }
+          $binary = Join-Path $installRoot 'pps-experiment-runner.exe'
+          if (-not (Test-Path -LiteralPath $binary -PathType Leaf)) { throw 'Installed Runner missing.' }
+          "PPS_INSTALLED_RUNNER=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Install pinned WebView audit driver
+        run: python -m pip install --disable-pip-version-check playwright==1.61.0
+      - name: Exercise installed WebView and native snapshot
+        shell: pwsh
+        env:
+          SOURCE_COMMIT: ${{ inputs.installed_artifact_commit }}
+        run: |
+          python For-AI/engineering/validation/scripts/run_installed_runner_webview_audit.py `
+            --binary $env:PPS_INSTALLED_RUNNER `
+            --output-dir artifacts/runner-installed-webview-audit `
+            --commit $env:SOURCE_COMMIT --elevated-policy
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Retain installed audit report and screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: runner-installed-webview-retry-${{ inputs.installed_artifact_commit }}
+          path: artifacts/runner-installed-webview-audit
+          if-no-files-found: warn
+
   quest-apk:
+    if: github.event_name != 'workflow_dispatch' || inputs.installed_artifact_run_id == ''
     name: Optional native Quest APK
     runs-on: ubuntu-latest
     steps:

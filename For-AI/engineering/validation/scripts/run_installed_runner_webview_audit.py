@@ -38,6 +38,20 @@ def installed_app_url(url: str) -> bool:
     )
 
 
+def origin_only(url: str) -> str:
+    parsed = urlparse(url)
+    return f"{parsed.scheme}://{parsed.hostname}" if parsed.hostname else parsed.scheme or "unknown"
+
+
+def cdp_targets(port: int) -> list[dict[str, str]]:
+    try:
+        with build_opener(ProxyHandler({})).open(f"http://127.0.0.1:{port}/json/list", timeout=2) as response:
+            return [{"type": item.get("type", ""), "origin": origin_only(item.get("url", ""))}
+                    for item in json.load(response)]
+    except (OSError, ValueError):
+        return []
+
+
 def wait_for_webview(port: int, process: subprocess.Popen[bytes]) -> dict:
     endpoint = f"http://127.0.0.1:{port}/json/version"
     direct_http = build_opener(ProxyHandler({}))
@@ -116,10 +130,15 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
         )
         version = wait_for_webview(port, process)
         report["webview2_browser"] = version.get("Browser", "unknown")
+        report["cdp_targets"] = cdp_targets(port)
         with sync_playwright() as playwright:
             browser = playwright.chromium.connect_over_cdp(f"http://127.0.0.1:{port}", timeout=30_000)
             deadline = time.monotonic() + 30
             while time.monotonic() < deadline and page is None:
+                report["playwright_page_origins"] = sorted({
+                    origin_only(candidate.url)
+                    for context in browser.contexts for candidate in context.pages
+                })
                 page = next(
                     (candidate for context in browser.contexts for candidate in context.pages
                      if installed_app_url(candidate.url)),
@@ -127,6 +146,7 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
                 )
                 if page is None:
                     time.sleep(0.25)
+            report["cdp_targets"] = cdp_targets(port)
             assert page is not None, "No installed Tauri page appeared in WebView2"
             errors = []
             page.on("pageerror", lambda error: errors.append(str(error)))
