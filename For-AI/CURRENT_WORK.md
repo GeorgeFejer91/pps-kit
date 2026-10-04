@@ -71,7 +71,10 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   schedule, prepared native PCM, and wrote a durable **partial** event journal
   and 18-column CSV. A separate synthetic profile audit also passed. The
   installed screenshots cover the Planner segments and Runner control, logging,
-  and remote tabs. Its native output inventory was empty on the CI host, so
+  and remote tabs; review of all ten saved views and their geometry found no
+  horizontal overflow at the installed 1013/1028-pixel widths. The Runner's
+  multichannel audio and physical capture controls remain disabled. Its native
+  output inventory was empty on the CI host, so
   neither installed audit reserved physical output or completed participant
   acquisition. A separate three-platform synthetic native-result
   fixture reached a complete result manifest; the independent Python validator
