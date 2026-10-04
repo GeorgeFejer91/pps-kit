@@ -92,6 +92,12 @@ fn profile_preparation_error(code: &str) -> PreparedSessionCommandError {
         "profile_block_resource_limit" | "profile_package_limit" => {
             "This profile exceeds the native package preparation limit."
         }
+        "profile_block_storage_unavailable" => {
+            "The selected folder's available storage could not be confirmed. Choose a local folder and retry."
+        }
+        "profile_block_storage_low" => {
+            "The selected folder does not have enough free space to prepare this block. Free space and retry."
+        }
         "profile_ingredient_changed"
         | "profile_block_media_changed"
         | "profile_plan_source_changed" => {

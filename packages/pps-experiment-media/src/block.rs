@@ -18,6 +18,7 @@ use crate::bind_profile_trial_wav;
 
 const OUTPUT_CHANNELS: u16 = 3;
 const MAX_OUTPUT_WAV_BYTES: u64 = 768 * 1024 * 1024;
+const STORAGE_RESERVE_BYTES: u64 = 8 * 1024 * 1024;
 const DEFAULT_TACTILE_COMPENSATION_MS: f64 = 23.0;
 static PENDING_SEQUENCE: AtomicU64 = AtomicU64::new(1);
 
@@ -28,6 +29,8 @@ pub enum BlockMediaErrorCode {
     TransformUnsupported,
     MixedSampleRates,
     ResourceLimit,
+    StorageUnavailable,
+    StorageLow,
     MediaChanged,
     OutputExists,
     OutputFailed,
@@ -41,6 +44,8 @@ impl BlockMediaErrorCode {
             Self::TransformUnsupported => "profile_block_transform_unsupported",
             Self::MixedSampleRates => "profile_block_sample_rates_mixed",
             Self::ResourceLimit => "profile_block_resource_limit",
+            Self::StorageUnavailable => "profile_block_storage_unavailable",
+            Self::StorageLow => "profile_block_storage_low",
             Self::MediaChanged => "profile_block_media_changed",
             Self::OutputExists => "profile_block_output_exists",
             Self::OutputFailed => "profile_block_output_failed",
@@ -374,6 +379,17 @@ fn output_hash(path: &Path) -> Result<(String, u64), BlockMediaError> {
     Ok((format!("{:x}", digest.finalize()), bytes))
 }
 
+fn require_storage(estimated_bytes: u64, available_bytes: u64) -> Result<(), BlockMediaError> {
+    let required_bytes = estimated_bytes
+        .checked_mul(3)
+        .and_then(|bytes| bytes.checked_add(STORAGE_RESERVE_BYTES))
+        .ok_or(BlockMediaError(BlockMediaErrorCode::ResourceLimit))?;
+    if available_bytes < required_bytes {
+        return Err(BlockMediaError(BlockMediaErrorCode::StorageLow));
+    }
+    Ok(())
+}
+
 /// Assemble one standard 2/3-channel PCM16 block in approved trial order.
 /// Advanced tactile synthesis and speaker switching reject explicitly until
 /// their Python oracle behavior is reproduced. Publication never overwrites.
@@ -438,6 +454,15 @@ pub fn assemble_standard_profile_block(
     if !parent.is_dir() {
         return Err(BlockMediaError(BlockMediaErrorCode::OutputFailed));
     }
+    let estimated_bytes = estimated_frames
+        .checked_mul(u64::from(OUTPUT_CHANNELS) * 2)
+        .and_then(|bytes| bytes.checked_add(44))
+        .ok_or(BlockMediaError(BlockMediaErrorCode::ResourceLimit))?;
+    // Like the Python generation preflight, allow room for output, scratch,
+    // and filesystem overhead before decoding any trial or creating a file.
+    let available_bytes = fs2::available_space(parent)
+        .map_err(|_| BlockMediaError(BlockMediaErrorCode::StorageUnavailable))?;
+    require_storage(estimated_bytes, available_bytes)?;
     let name = output_path
         .file_name()
         .and_then(|name| name.to_str())
@@ -566,4 +591,23 @@ pub fn assemble_standard_profile_block(
         sample_rate_hz,
         spans,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{require_storage, BlockMediaErrorCode, STORAGE_RESERVE_BYTES};
+
+    #[test]
+    fn storage_preflight_keeps_three_output_copies_and_a_reserve() {
+        let required = 3 * 1024 * 1024 + STORAGE_RESERVE_BYTES;
+        assert_eq!(
+            require_storage(1024 * 1024, required - 1).unwrap_err().0,
+            BlockMediaErrorCode::StorageLow
+        );
+        assert!(require_storage(1024 * 1024, required).is_ok());
+        assert_eq!(
+            require_storage(u64::MAX, u64::MAX).unwrap_err().0,
+            BlockMediaErrorCode::ResourceLimit
+        );
+    }
 }

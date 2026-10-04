@@ -62,9 +62,13 @@ verifier, compiles every block schedule, and publishes the canonical manifest
 last without overwriting an existing package. The Runner main window selects the
 profile and output folder through native dialogs, calls this producer on a
 blocking worker, and adopts its existing V1 verification receipt. No path enters
-WebView or phone IPC. This candidate still needs a bounded storage preflight,
-advanced media transforms, installed execution, and physical timing
-qualification. Path-bearing receipts stay native-only.
+WebView or phone IPC. Before decoding or creating each block WAV, the native
+assembler checks its bounded output estimate against available space on the
+selected filesystem with the Python preflight's threefold reserve and 8 MiB
+margin. A concurrent disk change can still cause an ordinary write failure;
+the pending WAV is removed and the final manifest is not published. This
+candidate still needs advanced media transforms, installed execution, and
+physical timing qualification. Path-bearing receipts stay native-only.
 
 Designer generation jobs bind to the captured design signature. Ingredient media
 stays in staging until the source and cooperative cancellation checks admit
