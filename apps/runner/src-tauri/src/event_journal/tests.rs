@@ -371,7 +371,7 @@ fn split_part_native_results_form_one_auditable_group() {
             "part_folder_name": folder, "source_run_setup_sha256": source_sha256,
             "execution_mode": "design_schedule_blocks",
             "blocks": [{"index": 1, "label": "Fixture block", "manifest_path": "block.csv",
-                        "wav_path": "block.wav", "trial_count": 1, "duration_s": 1.0, "metadata": {}}]
+                        "wav_path": "block.wav", "trial_count": 3, "duration_s": 1.0, "metadata": {}}]
         })).unwrap()).unwrap();
         prepared.push(verify_prepared_session(VerificationRequest::new(&manifest_path)).unwrap());
         parts.push(

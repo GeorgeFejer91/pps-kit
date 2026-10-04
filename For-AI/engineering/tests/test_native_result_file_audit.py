@@ -57,7 +57,7 @@ def _fixture(root: Path, *, sha: str = "a" * 64,
     return path
 
 
-def _group_fixture(root: Path) -> Path:
+def _group_fixture(root: Path, *, trials_per_part: int = 3) -> Path:
     group_id = "P001_group"
     entries = []
     for number in (1, 2):
@@ -69,7 +69,7 @@ def _group_fixture(root: Path) -> Path:
                    "participant_id": "P001", "session_group_id": group_id, "part_number": number,
                    "part_folder_name": folder, "part_session_id": session_id, "session_id": session_id,
                    "source_run_setup_sha256": "c" * 64,
-                   "execution_mode": "participant_block_wavs"}
+                   "execution_mode": "participant_block_wavs", "blocks": [{"trial_count": trials_per_part}]}
         package_bytes = json.dumps(package).encode()
         (part_dir / "session_manifest.json").write_bytes(package_bytes)
         identity = {"participantId": "P001", "sessionId": session_id, "partSessionId": session_id,
@@ -144,6 +144,12 @@ def test_native_group_audit_rejects_cross_part_identity_and_modified_package(tmp
     first_package = tmp_path / "part_01" / "session_manifest.json"
     first_package.write_text(first_package.read_text() + " ", encoding="utf-8")
     with pytest.raises(ValueError, match="another package"):
+        audit.validate_group(group_path)
+
+
+def test_native_group_audit_rejects_plausible_results_with_wrong_package_trial_count(tmp_path: Path) -> None:
+    group_path = _group_fixture(tmp_path, trials_per_part=2)
+    with pytest.raises(ValueError, match="trial count differs"):
         audit.validate_group(group_path)
 
 

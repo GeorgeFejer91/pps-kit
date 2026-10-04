@@ -147,6 +147,11 @@ def validate_group(group_manifest_path: Path) -> dict[str, Any]:
                  and isinstance(package.get("session_id"), str) and bool(package["session_id"])
                  and isinstance(package.get("execution_mode"), str) and bool(package["execution_mode"]),
                  "split package differs from its group")
+        blocks = package.get("blocks")
+        _require(isinstance(blocks, list) and bool(blocks)
+                 and all(isinstance(block, dict) and type(block.get("trial_count")) is int
+                         and block["trial_count"] > 0 for block in blocks),
+                 "split package has no valid trial count")
         package_sha256 = hashlib.sha256(package_bytes).hexdigest()
         results = sorted(part_dir.glob("native_events_*.results.json"))
         _require(len(results) == 1 and re.fullmatch(r"native_events_[A-Za-z0-9_-]{32}\.results\.json", results[0].name)
@@ -162,6 +167,8 @@ def validate_group(group_manifest_path: Path) -> dict[str, Any]:
                  and identity.get("executionMode") == package.get("execution_mode"),
                  "native result differs from its split package")
         audit = validate(results[0], expected_package_sha256=package_sha256)
+        _require(audit["scoredTrialCount"] == sum(block["trial_count"] for block in blocks),
+                 "native result trial count differs from its split package")
         for key in totals:
             totals[key] += audit[key]
     return {"schema": "pps.native-group-result-file-audit.v1", "passed": True,
