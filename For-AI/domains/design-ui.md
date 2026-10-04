@@ -57,6 +57,11 @@ Check Pages parity when the same change is published there.
 The final planner action exports the verified local experiment JSON; the portable
 audio bundle remains a separate action. Keep review evidence, instruction audio,
 and long source filenames in disclosures so the approved plan remains readable.
+The Planner's embedded 3D viewer receives only named trajectory and camera
+commands through parent/iframe messages; the parent does not read cross-origin
+frame properties in an installed WebView. Segment status badges wrap their full
+text under the shared Pretext check. Segment 6 says ready to lock only after
+its run setup is ready and the custom review cursor has confirmed Segments 0–5.
 Designer and Runner share `pps-resources/assets/ui/bounded-text.mjs` for Pretext
 measurement. For each touched bounded control, first set its responsive outer
 box with Grid/Flex and `box-sizing`, then subtract padding, borders, icons and

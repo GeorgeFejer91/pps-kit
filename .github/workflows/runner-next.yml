@@ -29,6 +29,8 @@ on:
       - "For-AI/engineering/validation/scripts/validate_native_results.py"
       - "For-AI/engineering/validation/scripts/run_runner_profile_ui_audit.py"
       - "For-AI/engineering/validation/scripts/run_installed_runner_webview_audit.py"
+      - "For-AI/engineering/validation/scripts/run_installed_planner_webview_audit.py"
+      - "For-AI/engineering/release/tools/package_inventory.py"
       - ".github/workflows/runner-next.yml"
   push:
     branches: [main]
@@ -59,6 +61,8 @@ on:
       - "For-AI/engineering/validation/scripts/validate_native_results.py"
       - "For-AI/engineering/validation/scripts/run_runner_profile_ui_audit.py"
       - "For-AI/engineering/validation/scripts/run_installed_runner_webview_audit.py"
+      - "For-AI/engineering/validation/scripts/run_installed_planner_webview_audit.py"
+      - "For-AI/engineering/release/tools/package_inventory.py"
       - ".github/workflows/runner-next.yml"
   workflow_dispatch:
     inputs:
@@ -734,6 +738,7 @@ jobs:
             artifacts/full-planner-installed-webview-audit
             artifacts/full-runner-installed-webview-audit
             artifacts/full-handoff-installed-webview-audit
+            dist/full-validation/windows-host-nsis/INSTALLED_COMPONENT_INVENTORY.json
           if-no-files-found: warn
       - name: Retain the single Full validation installer
         if: success()

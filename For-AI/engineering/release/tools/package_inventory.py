@@ -187,6 +187,32 @@ def main(argv: list[str] | None = None) -> int:
     write_inventory(inventory, args.output)
     print(f"Wrote {args.output}")
     if args.strict and (inventory["missing_required"] or inventory["mismatched"]):
+        for path in inventory["missing_required"]:
+            print(f"Missing installed component path: {path}")
+        for path in inventory["mismatched"]:
+            print(f"Installed component bytes differ from source: {path}")
+            item = next(entry for entry in inventory["items"] if entry["path"] == path)
+            source = REPO_ROOT / item["source"]
+            installed = args.stage_root / path
+            if source.is_dir() and installed.is_dir():
+                source_root = _filesystem_path(source)
+                installed_root = _filesystem_path(installed)
+                source_files = {
+                    file.relative_to(source_root).as_posix(): file
+                    for file in source_root.rglob("*") if file.is_file()
+                }
+                installed_files = {
+                    file.relative_to(installed_root).as_posix(): file
+                    for file in installed_root.rglob("*") if file.is_file()
+                }
+                differences = 0
+                for relative in sorted(source_files.keys() | installed_files.keys()):
+                    if (relative not in source_files or relative not in installed_files
+                            or sha256_file(source_files[relative]) != sha256_file(installed_files[relative])):
+                        print(f"  Different file: {relative}")
+                        differences += 1
+                        if differences >= 10:
+                            break
         return 1
     return 0
 

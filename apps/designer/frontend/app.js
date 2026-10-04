@@ -6259,9 +6259,19 @@ function syncFilmstripSourceOptions() {
   updateFilmstripCounts();
 }
 
+function profileReadyToLock() {
+  const progress = normalizedDesignerProgress();
+  const reviewed = !isCustomMode() || (
+    progress.edit_step === "run"
+    && progress.needs_review_steps.length === 0
+    && WORKFLOW_STEPS.slice(0, -1).every((step) => progress.confirmed_steps.includes(step))
+  );
+  return Boolean(state.run_sequence_setup?.ready && getWorkflowStep("run")?.complete && reviewed);
+}
+
 function renderRun() {
   const setup = state.run_sequence_setup || {};
-  const profileValid = Boolean(setup.ready || getWorkflowStep("run")?.complete);
+  const profileValid = profileReadyToLock();
   const finalized = isProfileFinalized();
   if ($("participants") && document.activeElement !== $("participants")) {
     $("participants").value = state.design.protocol?.participants ?? setup.participant_count ?? 1;
@@ -6480,7 +6490,9 @@ function renderWorkflow() {
     const needsReview = Boolean(sequentialEdit && needsReviewSteps.has(stepId));
     const downstream = Boolean(sequentialEdit && index > activeIndex);
     const locked = Boolean(sequentialEdit && !current);
-    const complete = Boolean(step.complete);
+    const complete = stepId === "run" && customMode && !isProfileFinalized()
+      ? profileReadyToLock()
+      : Boolean(step.complete);
     const link = document.querySelector(`[data-step-link="${stepId}"]`);
     const stateLabel = document.querySelector(`[data-step-state="${stepId}"]`);
     const badges = document.querySelectorAll(`[data-step-badge="${stepId}"]`);
@@ -8105,22 +8117,14 @@ function updateViewer() {
   if (!state) return;
   const payload = trajectoryPayloadFromControls();
   syncPreviewModeControls(payload.preview_mode);
-  const viewerWindow = trajectoryViewerWindow();
-  const updateTrajectory = viewerWindow?.updateTrajectory;
-  if (typeof updateTrajectory !== "function") {
-    viewerReady = false;
-    window.setTimeout(updateViewer, 150);
-    return;
-  }
-  viewerReady = true;
-  updateTrajectory(payload);
+  if (!viewerReady) return;
+  callTrajectoryViewer("updateTrajectory", payload);
   // Frame the opening view: once the viewer has rendered real data, center and
   // fit the PPS radius square so it is correct for the actual radius (the
   // default render uses a 1.1 m placeholder). Runs once per (re)load.
   if (!viewerInitialFitDone) {
     viewerInitialFitDone = true;
-    const fitRadius = viewerWindow?.fitTrajectoryRadius;
-    if (typeof fitRadius === "function") fitRadius();
+    callTrajectoryViewer("fitTrajectoryRadius");
   }
 }
 
@@ -8133,8 +8137,7 @@ function setPreviewMode(mode) {
 
 function callTrajectoryViewer(method, ...args) {
   const viewerWindow = trajectoryViewerWindow();
-  const fn = viewerWindow?.[method];
-  if (typeof fn === "function") fn(...args);
+  viewerWindow?.postMessage({ type: "pps-trajectory-command", method, args }, "*");
 }
 
 function currentTrajectoryControls() {
@@ -9361,6 +9364,11 @@ function wireEvents() {
     const frame = $("trajectory-frame");
     if (event.source !== frame.contentWindow) return;
     const data = event.data || {};
+    if (data.type === "pps-trajectory-ready") {
+      viewerReady = true;
+      updateViewer();
+      return;
+    }
     if (data.type === "pps-source-trajectory-select") {
       selectIngredient(String(data.source_label || ""));
       return;
@@ -9372,7 +9380,6 @@ function wireEvents() {
     applyTrajectoryControlUpdate(data.controls || {});
   });
   $("trajectory-frame").addEventListener("load", () => {
-    viewerReady = true;
     viewerInitialFitDone = false;
     updateViewer();
   });

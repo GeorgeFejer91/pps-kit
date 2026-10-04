@@ -1112,4 +1112,28 @@ window.fitTrajectoryRadius = function fitTrajectoryRadius() {
 window.zoomTrajectoryCamera = zoomTrajectoryCamera;
 window.snapTrajectoryView = snapTrajectoryView;
 
+window.addEventListener("message", (event) => {
+  if (event.source !== window.parent || event.data?.type !== "pps-trajectory-command") return;
+  const { method, args } = event.data;
+  if (!Array.isArray(args)) return;
+  switch (method) {
+    case "updateTrajectory":
+      if (args.length === 1 && args[0] && typeof args[0] === "object") window.updateTrajectory(args[0]);
+      break;
+    case "fitTrajectoryRadius":
+      window.fitTrajectoryRadius();
+      break;
+    case "resetTrajectoryCamera":
+      window.resetTrajectoryCamera();
+      break;
+    case "zoomTrajectoryCamera":
+      if (args[0] === "in" || args[0] === "out") zoomTrajectoryCamera(args[0]);
+      break;
+    case "snapTrajectoryView":
+      if (typeof args[0] === "string") snapTrajectoryView(args[0]);
+      break;
+  }
+});
+
 container.dataset.viewerReady = "true";
+window.parent.postMessage({ type: "pps-trajectory-ready" }, "*");

@@ -8,6 +8,8 @@ description: Change PPS Designer HTML controls and their local backend contracts
 Use for the PPS Designer's HTML/JavaScript interface and local software actions.
 The browser collects decisions; the local backend validates/materializes them;
 manifests record provenance. Native timing and acquisition remain native.
+Segment 6: Profile Validation and Save locks a reusable profile; actual participant
+setup, acquisition folders, capture, and recording belong to the Runner.
 
 ## Route before editing
 

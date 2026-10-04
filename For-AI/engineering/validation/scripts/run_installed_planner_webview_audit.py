@@ -235,6 +235,19 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
                     expect(page.locator("#customize-modal")).to_be_hidden(timeout=60_000)
                     assert page.evaluate("window.PPSDesignerApp.getState().design.name") == "CI installed Planner study"
                     report["custom_study_created_through_ui"] = True
+                    expect(page.locator("#run-sequence-status")).to_have_text("review required")
+                    report["incomplete_profile_not_ready_to_lock"] = True
+                    page.wait_for_function("""() => [...document.querySelectorAll('.step-badge')]
+                      .filter(node => node.getClientRects().length && getComputedStyle(node).display !== 'none')
+                      .every(node => ['fit', 'reflow'].includes(node.dataset.pretextResult))""", timeout=30_000)
+                    badge_fit = page.locator(".step-badge:visible").evaluate_all("""nodes => nodes.map(node => ({
+                      text: node.textContent.trim(), width: node.clientWidth, scrollWidth: node.scrollWidth,
+                      height: node.clientHeight, scrollHeight: node.scrollHeight,
+                      pretext: node.dataset.pretextResult
+                    }))""")
+                    assert all(item["scrollWidth"] <= item["width"] + 1 and
+                               item["scrollHeight"] <= item["height"] + 1 for item in badge_fit), badge_fit
+                    report["badge_fit_count"] = len(badge_fit)
                     for segment in SEGMENTS:
                         panel = page.locator(f"#{segment}-segment")
                         panel.scroll_into_view_if_needed()
@@ -248,6 +261,9 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
                         filename = f"segment-{segment}.png"
                         page.screenshot(path=str(output / filename))
                         report["segments"].append({"name": segment, "screenshot": filename, "geometry": geometry})
+                    expect(page.frame_locator("#trajectory-frame").locator("#viewer")).to_have_attribute(
+                        "data-viewer-ready", "true", timeout=30_000)
+                    report["trajectory_viewer_ready"] = True
                     report["native_3dti_media"] = prove_native_media(
                         page, full_profile=export_profile_path is not None)
                     if export_profile_path is not None:

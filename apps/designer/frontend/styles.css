@@ -229,7 +229,7 @@ button {
   padding: var(--space-2);
   cursor: pointer;
   line-height: 1.35;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .bounded-select-option:hover,
@@ -3051,6 +3051,7 @@ body.resizing-panel * {
 
 .panel-heading {
   justify-content: space-between;
+  flex-wrap: wrap;
   min-height: var(--control-height);
   margin-bottom: var(--space-3);
   font-weight: 700;
@@ -3059,6 +3060,8 @@ body.resizing-panel * {
 .panel-title {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
   gap: 7px;
 }
 
@@ -3085,9 +3088,9 @@ body.resizing-panel * {
   font-size: 11px;
   font-weight: 700;
   max-width: 40ch;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
 }
 
 .step-badge[hidden] {
@@ -5118,6 +5121,7 @@ a:focus-visible,
 
 .toolbar-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
 }
