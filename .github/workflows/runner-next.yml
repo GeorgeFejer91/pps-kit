@@ -285,6 +285,44 @@ jobs:
           $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $destination
           "$($hash.Hash.ToLowerInvariant())  $($bundles[0].Name)" |
             Set-Content -Encoding ascii (Join-Path $stage "SHA256SUMS.txt")
+      - name: Check fresh Windows installer inventory
+        if: matrix.slug == 'windows-host-nsis'
+        shell: pwsh
+        run: |
+          $stage = "dist/runner-validation/windows-host-nsis"
+          $installer = @(Get-ChildItem -LiteralPath $stage -Filter '*.exe' -File)
+          if ($installer.Count -ne 1) { throw "Expected one staged NSIS installer." }
+          $installRoot = Join-Path $env:RUNNER_TEMP "pps-runner-install-${{ github.run_id }}-${{ github.run_attempt }}"
+          if ($installRoot -match '\s' -or (Test-Path -LiteralPath $installRoot)) {
+            throw "The CI install directory must be fresh and contain no spaces."
+          }
+          $process = Start-Process -FilePath $installer[0].FullName `
+            -ArgumentList @('/S', "/D=$installRoot") -WindowStyle Hidden -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "NSIS silent install failed: $($process.ExitCode)." }
+          $binary = Join-Path $installRoot 'pps-experiment-runner.exe'
+          $installedHtml = Join-Path $installRoot 'web/index.html'
+          $installedCss = Join-Path $installRoot 'web/assets/style.css'
+          foreach ($path in @($binary, $installedHtml, $installedCss)) {
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+              throw "The installed Runner inventory is incomplete: $path"
+            }
+          }
+          $htmlHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $installedHtml).Hash.ToLowerInvariant()
+          $cssHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $installedCss).Hash.ToLowerInvariant()
+          if ($htmlHash -ne (Get-FileHash -Algorithm SHA256 -LiteralPath 'apps/runner/compiled/index.html').Hash.ToLowerInvariant() -or
+              $cssHash -ne (Get-FileHash -Algorithm SHA256 -LiteralPath 'apps/runner/compiled/assets/style.css').Hash.ToLowerInvariant()) {
+            throw "Installed frontend resource bytes differ from the canonical compiled files."
+          }
+          @(
+            'schema=pps-runner-installed-inventory.v1'
+            "commit=${{ github.sha }}"
+            'scope=ci_silent_install_inventory_only'
+            "binary_sha256=$((Get-FileHash -Algorithm SHA256 -LiteralPath $binary).Hash.ToLowerInvariant())"
+            "html_sha256=$htmlHash"
+            "css_sha256=$cssHash"
+            'webview_launched=false'
+            'physical_output_qualified=false'
+          ) | Set-Content -Encoding ascii (Join-Path $stage 'INSTALL_INVENTORY.txt')
       - uses: actions/upload-artifact@v7
         with:
           name: pps-runner-preview-validation-${{ matrix.slug }}-${{ runner.arch }}-${{ github.sha }}
