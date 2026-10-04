@@ -26,6 +26,17 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
+- Latest Runner source checkpoint: `0471968181b8569ac1ac9d1689025cd03c10b08e`.
+  [Its exact-SHA CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37167989483)
+  passed all 14 jobs. It corrects stale native-readiness copy and wraps enlarged
+  package detail text. Local checks passed 65 frontend tests, canonical build,
+  six rendered output layouts/control cases, 24 Rust Core tests, two Pages
+  assembly checks. CI also rejected generated-asset drift. The Windows NSIS
+  validation artifact matches SHA-256
+  `cdb10373d7e373d48096ce22df7243be49c443ecd75b6c275c036f1845f7a052`.
+  Its marker records this exact commit, unsigned/validation-only distribution,
+  and unqualified scientific status. This newer artifact has not been installed
+  or visually checked from its package.
 - Native single-block activation source: `41f192d39a66b7cc4f7221cd20b8e40853e149c3`.
   [Its exact-SHA CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37166255621)
   passed all 14 jobs, including Rust Core and Tauri Desktop on three operating

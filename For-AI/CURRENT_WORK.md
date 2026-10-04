@@ -51,6 +51,9 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
   hash-checked, installed in isolation, and opened; its UI verified a synthetic
   V1 package, compiled its schedule, and prepared one native PCM block. Device
   inventory found no configuration matching that synthetic three-channel block.
+  A newer UI/readiness source checkpoint `04719681` passed all 14 exact-SHA CI
+  jobs and produced a hash-checked Windows NSIS validation bundle; it has not
+  been installed or visually checked from its package.
 - **Next gate:** complete an installed native single-block run with a checked
   compatible and calibrated output route, then validate its event/CSV files and
   recording. Extend the same owner to full profiles/multiple blocks. The native
