@@ -64,8 +64,10 @@ preserve each source channel at the same physical output index. This direct
 route requires unity gains; study-specific channel roles, calibration, and
 physical verification remain open. Windows builds now enumerate CPAL's ASIO
 host before WASAPI and admit F32 or I32 output configurations; I32 callbacks
-convert the bounded F32 render buffer without allocation. CI compilation does
-not establish the Komplete Audio 6 three-channel route or measured timing.
+convert the bounded F32 render buffer without allocation. The 256-entry bounded
+inventory preserves 44.1 kHz/3-channel ASIO configurations behind lower rates
+even when a device exposes 18 outputs. CI compilation and a synthetic inventory
+test do not establish the Komplete Audio 6 three-channel route or measured timing.
 The block has a
 bounded size and is published without overwriting an existing file. The same crate now
 materializes a standard-route `pps-run-session.v1` CSV/manifest package for one

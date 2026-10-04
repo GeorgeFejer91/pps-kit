@@ -14,7 +14,7 @@ Each status applies to its stated surface, not to the whole product.
 | 6 | PARTIAL: actual Pretext, explicit no-fit, complete labels, keyboard input, narrow/enlarged text and spacing; installed Planner and Runner screenshots and horizontal geometry | Companion device and full accessibility qualification |
 | 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full scheduling UI and native profile assembly |
 | 8 | VERIFIED: plan/resource preflight, source/cancel/publication fences, shared job completion and rollback | Qualify additional generation routes if selected |
-| 9 | PARTIAL: exact CPAL port with Windows ASIO/WASAPI F32/I32 discovery, fenced sequential block activation in source, one run journal and package-total result count, local output preflight, closed unity-gain direct route for 4–18-channel WAVs, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Compatible calibrated hardware route, installed multi-block playback/results, full-profile execution and qualification |
+| 9 | PARTIAL: exact CPAL port with Windows ASIO/WASAPI F32/I32 discovery and 256-config inventory retaining 44.1 kHz after lower ASIO rates on an 18-output device, fenced sequential block activation in source, one run journal and package-total result count, local output preflight, closed unity-gain direct route for 4–18-channel WAVs, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Compatible calibrated hardware route, installed multi-block playback/results, full-profile execution and qualification |
 | 10 | PARTIAL: shared Rust/browser contracts; Rust JSON inventory and participant block/trial selection; bounded 3–18-channel PCM16 assembly, four tactile waveform shapes and speaker switching, V1 CSV/manifest, and Python PCM/row oracle checks; installed Runner adopted the actual installed two-block Planner JSON profile and prepared native PCM | Complete profile execution and qualified physical routes |
 | 11 | PARTIAL: authenticated local/phone commands use one dispatch/control owner, shared scope fixture and fresh-state gate | Complete real-package execution |
 | 12 | PARTIAL: retry/input fences, durable intent versus callback confirmation, bounded deadlines, per-run journal and exclusive hashed result publication | Installed filesystems, recovery and complete execution |
@@ -26,10 +26,11 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
-- Full candidate `76b5f525826c357e30ed5b075920dbd87b31688e` passed all
-  16 non-skipped [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37227818117).
-  The [single Full validation installer](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37227818117/artifacts/11313192953)
-  has verified SHA-256 `17ffb768eb8728ea12c908513cc4a7c1d1e350d9737c173b91e4f81a15c0f807`.
+- Full candidate `6844ac86beb00b6b982ef01aa42204d1037f800f` passed all
+  16 non-skipped [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37230324305).
+  The [single Full validation installer](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37230324305/artifacts/11314111693)
+  has SHA-256 `2802cbd9bb0adf593860c6fd0dc6e63ec09120040bbd48f6c752c793f0ade633`,
+  independently checked from the artifact archive against `SHA256SUMS.txt`.
   Its installed Planner rendered 3DTI media and exported a two-block JSON
   profile with six inventoried source files; its installed Runner prepared the
   matching `P001` two-block package (3 channels, 44.1 kHz, 7,938 frames per
@@ -41,7 +42,7 @@ Each status applies to its stated surface, not to the whole product.
   participant playback, complete installed recording, or local-PC reinstall was
   tested. A separate downloaded Windows synthetic native-result fixture passed
   the independent Python file audit with a complete manifest, five event
-  records, three scored trials, and two Part 2 dataset rows; its timing remains
+  records, three scored trials, and two dataset rows; its timing remains
   unqualified and it is not installed-participant evidence.
 
 - Two-part Planner-profile source candidate: the native producer follows the

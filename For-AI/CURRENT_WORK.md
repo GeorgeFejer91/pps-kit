@@ -31,7 +31,9 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   three-channel minimum and an 18-channel bound. The decoded/output path has a
   closed unity-gain, channel-for-channel route for 4–18-channel WAVs. Windows
   output discovery now includes ASIO before WASAPI and admits F32/I32 stream
-  formats; physical route calibration remains open.
+  formats. Its bounded 256-config inventory retains the three-channel 44.1 kHz
+  route even after lower ASIO rates on an 18-output device; physical route
+  calibration remains open.
   Local/phone control shares one actor,
   callback scheduler, and result journal. Source activation and result
   publication remain unqualified for participant use. The candidate now advances
@@ -43,16 +45,17 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   Part 2 only when the adjacent Part 1 package and its sealed
   native result reverify from disk, including after a Runner restart. Installed
   part transition and grouped result completion remain open.
-- **Latest completed evidence:** exact source `76b5f525826c357e30ed5b075920dbd87b31688e`
+- **Latest completed evidence:** exact source `6844ac86beb00b6b982ef01aa42204d1037f800f`
   passed all 16 non-skipped
-  [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37227818117),
+  [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37230324305),
   including three-platform Rust Core/Desktop and Python/Rust package oracles,
   rendered Runner output/participant and Planner segment audits, standalone
   validation bundles, and the Full two-app
   Windows install. The Full validation installer is retained as a downloadable
-  [workflow artifact](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37227818117/artifacts/11313192953)
+  [workflow artifact](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37230324305/artifacts/11314111693)
   through 2026-10-11. Its SHA-256 is
-  `17ffb768eb8728ea12c908513cc4a7c1d1e350d9737c173b91e4f81a15c0f807`.
+  `2802cbd9bb0adf593860c6fd0dc6e63ec09120040bbd48f6c752c793f0ade633`,
+  independently checked against the artifact's `SHA256SUMS.txt`.
   It is unsigned and marked validation-only, not a participant-use release.
 - **Installed two-app evidence:** the exact Full installer had zero missing or
   mismatched entries across 21 component inventory items, one compatible
