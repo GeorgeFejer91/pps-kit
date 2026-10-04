@@ -48,6 +48,25 @@ recording, local-PC reinstall, Runner's stable identifier, ASIO SDK licensing,
 and release qualification remain open. Follow the
 [Windows installer plan](windows-installer.md) for those gates.
 
+## ASIO SDK build input and release decision
+
+Windows Runner builds enable CPAL's `asio` feature. Its locked `asio-sys 0.4.0`
+build script statically links Steinberg SDK sources and otherwise downloads the
+SDK from a mutable URL. Validation CI now verifies the official
+[ASIO SDK 2.3.4 archive](https://download.steinberg.net/sdk_downloads/ASIO-SDK_2.3.4_2025-10-15.zip)
+against SHA-256
+`d5ebf0c20dd2c5f43771fd0c1418f4b361bf52434ee670097cfa6b3a335e2eca`
+and passes the extracted directory as `CPAL_ASIO_DIR`. The Full validation
+artifact includes `ASIO_SDK_PROVENANCE.txt`; a passing build proves the input
+hash, not distribution permission.
+
+Steinberg's archive `LICENSE.txt` offers GPLv3 or its proprietary ASIO license.
+For proprietary publication, that text requires an agreement signed by
+Steinberg. [Steinberg's announcement](https://ocl-steinberg-live.steinberg.net/_storage/asset/808575/storage/master/Press%20Release%20-%202025-10-15%20-%20OBS%20Partnership-%20EN.pdf)
+confirms the dual model. The repository's `Cargo.toml` declares MIT for PPS
+crates; it does not select a license for Steinberg code. Resolve and document
+the intended ASIO distribution path and notices before a public release.
+
 ## Stage boundary
 
 The [workflow](../WORKFLOW.md) keeps source, package, and release claims
