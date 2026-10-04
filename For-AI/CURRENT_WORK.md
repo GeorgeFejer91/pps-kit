@@ -82,11 +82,16 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
   `07c93b27` passed all 14 [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37176982714).
   Its Windows NSIS Runner-only artifact has the exact-commit marker and matching
   SHA-256 `b4beead5e364596f8a86bf17b1288e507f5e3a158ee7b7bdae79e5913853c470`.
-  It has not been installed or visually checked. Advanced media transforms,
-  bounded native storage preflight, and native execution from the JSON profile
-  remain incomplete.
-- **Next gate:** add the native package storage preflight and complete an
-  installed native single-block run with a checked,
+  It has not been installed or visually checked. The later native storage
+  preflight checkpoint `d0b2ebc5` passed all 14
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37177890540).
+  Its Windows NSIS Runner-only artifact has the exact-commit marker and matching
+  SHA-256 `34b1b95eb7dfb0c08289fddcf530fd6341c2bed37bcc13e2424da7776f143bf4`.
+  It has not been installed. Advanced media transforms and installed native
+  execution from the JSON profile remain incomplete.
+- **Next gate:** extend native media assembly to the approved advanced routes
+  through the Python oracle, then complete an installed native single-block
+  run with a checked,
   compatible and calibrated output route, then validate its event/CSV files and
   recording. Extend the same owner to full profiles/multiple blocks. The native
   activation path exists in source but remains unqualified; no participant run or
