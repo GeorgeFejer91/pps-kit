@@ -8,9 +8,11 @@
     "dev": "vite --host 127.0.0.1"
   },
   "dependencies": {
-    "@chenglou/pretext": "0.0.8"
+    "@chenglou/pretext": "0.0.8",
+    "@tauri-apps/api": "^2.12.1"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.12.1",
     "vite": "6.4.3"
   }
 }

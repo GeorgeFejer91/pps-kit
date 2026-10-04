@@ -3,6 +3,7 @@ import {
   refreshDocumentationTypography,
 } from "./documentation_typography.js";
 import { DesignerApiError, createDesignerApi } from "./designer_api.js";
+import { invoke, isTauri } from "@tauri-apps/api/core";
 import {
   NEXT_STEP,
   STEP_SEGMENT_FOLDERS,
@@ -685,10 +686,9 @@ async function api(path, options = {}) {
   try {
     const headers = { "Content-Type": "application/json", ...(fetchOptions.headers || {}) };
     if (companionToken) headers["X-PPS-Companion-Token"] = companionToken;
-    response = await fetch(apiUrl(path), {
-      ...fetchOptions,
-      headers
-    });
+    response = isTauri()
+      ? await nativePlannerResponse(path, fetchOptions)
+      : await fetch(apiUrl(path), { ...fetchOptions, headers });
   } catch (error) {
     setConnectionStatus(false);
     throw error;
@@ -718,6 +718,25 @@ async function api(path, options = {}) {
 }
 
 const designerApi = createDesignerApi(api);
+
+async function nativePlannerResponse(path, options = {}) {
+  const reply = await invoke("planner_request", {
+    request: { method: options.method || "GET", path, body: options.body || "" },
+  });
+  if (reply.error) throw new Error(reply.error);
+  const bytes = Uint8Array.from(atob(reply.body_base64), (char) => char.charCodeAt(0));
+  const headers = { "Content-Type": reply.content_type };
+  if (reply.content_disposition) headers["Content-Disposition"] = reply.content_disposition;
+  return new Response(bytes, { status: reply.status, headers });
+}
+
+async function previewMediaUrl(path) {
+  if (!isTauri()) return apiUrl(path);
+  const response = await api(path, { rawResponse: true });
+  const url = URL.createObjectURL(await response.blob());
+  setTimeout(() => URL.revokeObjectURL(url), 10 * 60 * 1000);
+  return url;
+}
 
 function apiUrl(path) {
   if (/^https?:\/\//i.test(path)) return path;
@@ -750,6 +769,14 @@ function isCompanionDashboardOrigin() {
 }
 
 function loadApiBase() {
+  if (isTauri()) {
+    apiBase = "";
+    const panel = $("companion-panel");
+    panel.querySelector(".layout-title").textContent = "Bundled Planner";
+    panel.querySelectorAll("label, input, button").forEach((item) => { item.hidden = true; });
+    $("mobile-companion-toggle").querySelector("strong").textContent = "Bundled Planner";
+    return;
+  }
   const companionOrigin = isCompanionDashboardOrigin();
   const stored = localStorage.getItem("ppsDashboard.apiBase");
   apiBase = companionOrigin ? "" : (stored || LOCAL_BACKEND_DEFAULT);
@@ -5838,7 +5865,7 @@ async function previewFilmstripRow(button) {
       activeTrialRowPreviewAudio.pause();
       activeTrialRowPreviewAudio = null;
     }
-    const audio = new Audio(apiUrl(`${preview.url}?v=${Date.now()}`));
+    const audio = new Audio(await previewMediaUrl(`${preview.url}?v=${Date.now()}`));
     activeTrialRowPreviewAudio = audio;
     audio.addEventListener("ended", () => button.classList.remove("playing"), { once: true });
     audio.addEventListener("pause", () => button.classList.remove("playing"), { once: true });
@@ -5888,7 +5915,7 @@ async function previewSourceLabel(button) {
     const preview = await designerApi.previewAudioSource(payload);
     button.disabled = false;
     await playSourcePreviewAudio(
-      apiUrl(`${preview.url}?v=${Date.now()}`),
+      await previewMediaUrl(`${preview.url}?v=${Date.now()}`),
       button,
       audioContext,
       contextReady,

@@ -1,3 +1,5 @@
+import { isTauri } from "@tauri-apps/api/core";
+
 const DATABASE_NAME = "pps-designer";
 const DATABASE_VERSION = 1;
 const DRAFT_STORE = "drafts";
@@ -184,7 +186,7 @@ function applyTheme(theme) {
 }
 
 function initializeChrome() {
-  const desktop = new URLSearchParams(location.search).get("desktop") === "1";
+  const desktop = isTauri() || new URLSearchParams(location.search).get("desktop") === "1";
   document.body.classList.toggle("desktop-applet", desktop);
   document.getElementById("designer-capability-badge").textContent = desktop ? "desktop full" : "hosted compose";
   applyTheme(localStorage.getItem("ppsDesigner.theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));

@@ -10,6 +10,7 @@ members = [
     "packages/pps-session-package",
     "packages/pps-experiment-media",
     "apps/runner/src-tauri",
+    "apps/designer/src-tauri",
     "apps/quest-runner/native/pps-quest-core",
 ]
 

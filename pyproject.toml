@@ -28,7 +28,7 @@ mp3 = ["pydub>=0.25.1"]
 gui = ["PySide6>=6.7,<6.8"]
 lsl = ["pylsl>=1.16"]
 web = ["fastapi>=0.110,<1", "uvicorn>=0.27,<1", "websockets>=12,<16", "qrcode[pil]>=7.4,<9"]
-designer = ["fastapi>=0.110,<1", "uvicorn>=0.27,<1", "pywebview>=5.4,<7"]
+designer = ["fastapi>=0.110,<1", "uvicorn>=0.27,<1", "pywebview>=5.4,<7", "httpx>=0.27,<1"]
 xdf = ["pyxdf>=1.17"]
 validation = [
   "pylsl>=1.16",
@@ -50,6 +50,7 @@ pps-decode = "peripersonal_space_toolkit.cli:decode"
 pps-analyze = "peripersonal_space_toolkit.cli:analyze"
 pps-design = "peripersonal_space_toolkit.qt_designer_app:main"
 pps-designer = "peripersonal_space_toolkit.designer_shell:main"
+pps-planner-worker = "peripersonal_space_toolkit.planner_worker:main"
 pps-audio-stress = "peripersonal_space_toolkit.audio_device_stress:main"
 pps-latency-validate = "peripersonal_space_toolkit.latency_validation:main"
 pps-dashboard = "peripersonal_space_toolkit.dashboard_app:main"

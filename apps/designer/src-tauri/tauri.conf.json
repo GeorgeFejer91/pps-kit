@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "PPS Experiment Planner",
+  "version": "0.1.0",
+  "identifier": "org.peripersonalspace.planner",
+  "build": {
+    "beforeDevCommand": "npm --prefix frontend run dev -- --port 1421",
+    "devUrl": "http://127.0.0.1:1421",
+    "beforeBuildCommand": "npm --prefix frontend run build",
+    "frontendDist": "../frontend/compiled"
+  },
+  "app": {
+    "windows": [{
+      "label": "main",
+      "title": "PPS Experiment Planner",
+      "width": 1480,
+      "height": 900,
+      "minWidth": 980,
+      "minHeight": 640,
+      "resizable": true
+    }],
+    "security": {
+      "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost; img-src 'self' data: blob:; media-src 'self' blob:; frame-src 'self'; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "../../../packages/pps-resources/assets/app/pps_toolkit_icon.png",
+      "../../../packages/pps-resources/assets/app/pps_toolkit_icon.icns",
+      "../../../packages/pps-resources/assets/app/pps_toolkit_icon.ico"
+    ]
+  }
+}

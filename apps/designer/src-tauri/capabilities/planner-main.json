@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "planner-main",
+  "description": "Bundled Planner UI access to its private local worker.",
+  "windows": ["main"],
+  "permissions": ["allow-planner-request"]
+}
