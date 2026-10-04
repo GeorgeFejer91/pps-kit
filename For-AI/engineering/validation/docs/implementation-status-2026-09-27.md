@@ -26,6 +26,32 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
+- Sequential native-block and next-block UI source checkpoint
+  `af15af80315dabab67333cede047bd7469813f75` passed all 14 normal
+  [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37193395931):
+  Core/Desktop and Python/Rust package oracles on Windows, macOS and Linux,
+  the rendered browser audit, and three validation bundles. Local Runner Core
+  tests (25), frontend tests (66), formatting, and canonical frontend build
+  passed. The candidate advances verified blocks in ordinal order, keeps one
+  result journal, requires a fresh native output reservation and local
+  acknowledgement for each block, and only finalizes after the last block with
+  the package's total trial count. The main-window-only no-argument IPC chooses
+  the next block in Rust. The rendered audit measured the new control at six
+  viewport or text-size cases and mocked block ordinal 1 with four direct
+  channels; it did not execute physical playback.
+  The downloaded unsigned Runner-only Windows NSIS validation installer has a
+  matching source marker and SHA-256
+  `7fc22ba17817b1e19d291e05a9693299d7413ebe083d3a7d44e1dc5e2f5d2a1f`,
+  equal to its manifest. A fresh Windows CI install recorded executable
+  SHA-256 `0567263b55c211c7c86ac6327cb8d63e348cd7b1b01c32faaf24b95e84c11b2f`;
+  installed HTML/CSS hashes match canonical source. The real installed WebView
+  returned the Rust idle snapshot and displayed the next-block control. Its
+  control, logging and remote tabs passed horizontal geometry at 1028 CSS px;
+  all three screenshots were inspected. Inventory and report agree on audit
+  SHA-256 `0dd6484b6aba35e9f7a7dbd5e4f92195a4c7a759fc5bf117ec163d07d198bba2`.
+  This is an idle UI/bridge check. Installed multi-block execution, participant
+  results, recording, calibrated output, physical timing, the Planner Tauri app,
+  and a two-app Full installer remain unverified.
 - Exact-source package-publication and installed Runner-only WebView checkpoint
   `7591525c7381dafe0590597d4b1c8659edbc1656` passed all 14 normal
   [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37190366500),

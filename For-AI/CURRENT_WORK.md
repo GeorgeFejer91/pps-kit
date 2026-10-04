@@ -36,20 +36,24 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   verified blocks in order, retaining one result journal and requiring a fresh
   output reservation and acknowledgement for each block. Failed in-process
   native profile-package publication rolls back newly linked destination files.
-- **Latest completed evidence:** local media tests (5), Clippy, and one-block
-  and two-block Python/Rust package differentials passed for the publication
-  rollback. All 14 normal
-  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37190366500)
-  passed for source `7591525c`, including three-platform Core/Desktop and
-  Python/Rust oracles plus Windows/macOS/Linux validation bundles.
+- **Latest completed evidence:** `af15af80315dabab67333cede047bd7469813f75`
+  passed all 14 normal
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37193395931),
+  including three-platform Core/Desktop and Python/Rust package oracles plus
+  Windows/macOS/Linux validation bundles. Local Runner Core tests (25),
+  frontend tests (66), formatting, and the canonical frontend build passed.
+  The rendered browser audit checked the next-block control at six viewport or
+  text-size cases and mocked preparation of block ordinal 1 with four direct
+  channels. It used a mocked native bridge, not installed execution.
 - **Installed Runner UI evidence:** the Runner-only NSIS validation installer
   from that exact run has SHA-256
-  `7d88a8db9e52dc6dd1ecf296f450552b607681de959324af825722fc10edba45`,
+  `7fc22ba17817b1e19d291e05a9693299d7413ebe083d3a7d44e1dc5e2f5d2a1f`,
   matching its manifest and commit marker. Fresh Windows CI installation
   matched bundled HTML/CSS to canonical source and launched the real WebView.
-  The idle Rust snapshot and control, logging, and remote tab checks passed;
-  all three screenshots were inspected. Inventory and report agree on installed
-  binary SHA-256 `d521696bd91a3d1f17ad798fce7cf507b08e011db201d821d45c8b0723e1808b`.
+  The idle Rust snapshot, next-block control, and control, logging, and remote
+  tab checks passed; all three screenshots were inspected. Inventory and report
+  agree on installed binary SHA-256
+  `0567263b55c211c7c86ac6327cb8d63e348cd7b1b01c32faaf24b95e84c11b2f`.
   No participant execution, physical output, recording, or Full installer was
   verified by this UI audit.
 - **Next gates:** qualify each larger-array hardware route and its levels,
