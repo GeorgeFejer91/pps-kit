@@ -69,10 +69,13 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
   Runner-only validation artifact has the exact-commit marker and matching
   SHA-256 `c966496f70ef45b3f9e350812fc8fb10b96d320b9e7d6e512b79fe7d1fd17af4`.
   It has not been installed, and the new media crate is not wired into that
-  Runner executable. The later standard-route package source candidate passes
-  local Rust and Python-oracle checks but has not yet passed exact-SHA CI, been
-  linked into Runner, or been installed. Advanced media transforms and native
-  execution from the JSON profile remain incomplete.
+  Runner executable. The later standard-route package source checkpoint
+  `7d59dece` passed all 14 [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37175498741),
+  including the three platform Python/Rust oracles and validation bundles.
+  Its Windows NSIS Runner-only artifact has the exact-commit marker and matching
+  SHA-256 `1e0b97ca9a1946c18ccc1197a14b6e8114f794e1eedd16cbaf8773162af14c5b`.
+  It has not been linked into Runner or installed. Advanced media transforms
+  and native execution from the JSON profile remain incomplete.
 - **Next gate:** link the verified standard-route package producer to Runner's
   existing package adoption path without adding another schema or scheduler.
   Complete an installed native single-block run with a checked,

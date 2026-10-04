@@ -31,8 +31,15 @@ Each status applies to its stated surface, not to the whole product.
   canonical manifest after staged and final verification/schedule compilation.
   Local `pps-experiment-media` Clippy/check/tests, `pps-session-package` tests,
   and seven Python/Rust differential tests pass, including populated V1 row
-  fields, byte-identical PCM, and a two-block order fixture. This source is
-  not linked into the Runner executable. Exact-SHA CI, installed adoption,
+  fields, byte-identical PCM, and a two-block order fixture. The source
+  checkpoint is `7d59dece351cff8060b2e5c105de773e6c714e47`.
+  [Exact-SHA CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37175498741)
+  passed all 14 jobs: Rust Core, Tauri Desktop, Python/Rust V1 oracles on
+  Windows/macOS/Linux, Browser, Quest preview, and three validation bundles.
+  The downloaded Windows NSIS Runner-only artifact has a matching commit marker
+  and verified SHA-256
+  `1e0b97ca9a1946c18ccc1197a14b6e8114f794e1eedd16cbaf8773162af14c5b`.
+  The media crate is not linked into that Runner executable. Installed adoption,
   compatible output selection, recording, and physical qualification remain.
 - Native standard-route profile media source checkpoint:
   `ceb12d02f1ad3d6bc66c24b01bc37931abd7bd47`.
