@@ -26,6 +26,25 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
+- Exact-source installed Runner-only WebView checkpoint
+  `bcfc444ec3a12b4b8dea99e3c419d015114f36c7` passed all 14 normal
+  [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37188235590),
+  including the Windows NSIS build, fresh install inventory and real installed
+  WebView audit. The downloaded validation marker names this commit. Measured
+  installer SHA-256
+  `4da4b70f175791a668af02e53f4c8d5ed7bde5ddf58ead68c9183e3c3d83bdd3`
+  matches `SHA256SUMS.txt`. The installed executable hash
+  `217ee77d3d80ac010983d7d67d802714c10ac1fc0f1030003b730e493d8f7357`
+  agrees between `INSTALL_INVENTORY.txt` and `WEBVIEW_AUDIT.json`; the latter's
+  SHA-256 `a070afbae7850cf2a9c247ea258b9f423bf81fa82e105599fafc67a085c0a829`
+  agrees with the separate screenshot/report artifact. CI verified installed
+  HTML/CSS byte parity with the canonical compiled frontend. The WebView used
+  `http://tauri.localhost/`, returned the real Rust authority snapshot in idle
+  state, and passed control/logging/remote tab clicks and horizontal geometry at
+  1028 CSS px. All three exact-run screenshots were inspected. The control and
+  remote views scroll with the document as intended. This was an idle UI and
+  bridge smoke test: no real package activation, participant response, physical
+  output, recording, Planner app, or Full two-app installer was qualified.
 - Installed Runner-only WebView checkpoint: the Windows NSIS validation artifact
   from `893ada652716f0159fc0b301d28902653bb6b1ec` has a matching
   `VALIDATION_ONLY.txt` marker and measured installer SHA-256

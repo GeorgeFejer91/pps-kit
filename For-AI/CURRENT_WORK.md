@@ -41,18 +41,18 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   The downloaded validation marker matches the commit and its SHA-256 matches
   the artifact manifest. Installed executable and HTML/CSS hashes were recorded.
   That package was not launched; physical output was not tested.
-- **Installed Runner UI evidence:** the separate Runner-only NSIS validation
-  artifact from source `893ada65` has installer SHA-256
-  `23ed5a86c121de8513d1c9f9020a329c6ff1b7e7320e91b32a66b6b7bf7ce80e`.
-  Its fresh Windows CI inventory matched the installed HTML/CSS to the canonical
-  compiled files. An [audit-only retry](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37188087715)
-  used that exact installer with audit script `9f7aefd4`: the installed WebView
-  exposed the real Rust snapshot, rendered all three tabs, and passed tab and
-  horizontal-overflow checks. The retained report and screenshots document an
-  idle, unverified, disarmed state. The initial full workflow's WebView step
-  failed on Playwright target discovery; the retry resolved that audit issue.
-  No participant execution, physical output, recording, or Full installer was
-  verified by this UI audit.
+- **Installed Runner UI evidence:** all 14 normal
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37188235590)
+  passed for source `bcfc444e`. The separate Runner-only NSIS validation
+  artifact has installer SHA-256
+  `4da4b70f175791a668af02e53f4c8d5ed7bde5ddf58ead68c9183e3c3d83bdd3`,
+  matching its manifest. Fresh Windows CI installation matched the installed
+  HTML/CSS to the canonical compiled files and launched the real WebView/Rust
+  bridge. The control, logging and remote tabs passed interaction and horizontal
+  overflow checks; their screenshots were inspected. The retained report and
+  inventory agree on the installed binary hash and document an idle, unverified,
+  disarmed state. No participant execution, physical output, recording, or Full
+  installer was verified by this UI audit.
 - **Next gates:** qualify each larger-array hardware route and its levels,
   then run the installed native
   single-block workflow on a compatible calibrated device; validate event/CSV
