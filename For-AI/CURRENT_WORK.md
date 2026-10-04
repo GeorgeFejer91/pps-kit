@@ -53,7 +53,13 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
   inventory found no configuration matching that synthetic three-channel block.
   A newer UI/readiness source checkpoint `04719681` passed all 14 exact-SHA CI
   jobs and produced a hash-checked Windows NSIS validation bundle; it has not
-  been installed or visually checked from its package.
+  been installed or visually checked from its package. The subsequent native
+  JSON profile inventory preflight checkpoint `9015f12d` passed all 14
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37169370392).
+  Its Windows NSIS validation artifact has an exact-commit marker and matching
+  SHA-256 `55f0ca5782d554663de37e81d3f48d13a0d5273d4ad1a02ac75ce77f430ff3da`;
+  it has not been installed. Rust verifies the exported local file inventory
+  before handoff; it does not yet assemble or execute that JSON profile.
 - **Next gate:** complete an installed native single-block run with a checked
   compatible and calibrated output route, then validate its event/CSV files and
   recording. Extend the same owner to full profiles/multiple blocks. The native

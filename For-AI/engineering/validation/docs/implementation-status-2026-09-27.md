@@ -26,7 +26,21 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
-- Latest Runner source checkpoint: `0471968181b8569ac1ac9d1689025cd03c10b08e`.
+- Latest native JSON inventory preflight source checkpoint:
+  `9015f12d35f50a19be106f7483a49764fcea792d`.
+  [Its exact-SHA CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37169370392)
+  passed all 14 jobs, including the three Python/Rust V1 oracle jobs with the
+  new Planner-exported JSON profile differential cases and the three validation
+  package builds. Local profile tests passed (2), as did bounded generation
+  and dashboard-job checks (4 each); the Rust session-package tests, Clippy
+  and formatting passed. The downloaded Windows NSIS validation artifact's
+  exact-commit marker and SHA-256 manifest matched its actual SHA-256
+  `55f0ca5782d554663de37e81d3f48d13a0d5273d4ad1a02ac75ce77f430ff3da`.
+  This adds bounded, read-only Rust verification of the Planner's local JSON
+  ingredient inventory. It does not native-assemble or execute the profile.
+  This exact package has not been installed, visually checked, or used for
+  playback, recording, or participant data collection.
+- Latest Runner UI/readiness source checkpoint: `0471968181b8569ac1ac9d1689025cd03c10b08e`.
   [Its exact-SHA CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37167989483)
   passed all 14 jobs. It corrects stale native-readiness copy and wraps enlarged
   package detail text. Local checks passed 65 frontend tests, canonical build,
