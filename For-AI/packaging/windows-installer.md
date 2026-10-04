@@ -18,7 +18,9 @@ The user selected the stable Planner bundle identifier
 
 The Full Planner worker serves only private `/api/*` calls through stdio;
 its dashboard factory skips static frontend mounting. Tauri embeds the Planner
-HTML, and Full installs the Shared resources once outside the worker.
+HTML, and Full installs the Shared resources once outside the worker. The
+Planner process selects its native 3DTI renderer from that installed Shared
+tree.
 
 ## Build sequence
 

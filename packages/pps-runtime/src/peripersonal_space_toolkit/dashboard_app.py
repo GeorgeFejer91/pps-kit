@@ -1788,7 +1788,12 @@ class DashboardController:
                     include_tactile=False,
                 )
                 if result.exit_code != 0:
-                    raise RuntimeError(f"Renderer failed for {label}; no outputs were published.")
+                    detail = str(_load_json(result.manifest_path).get("message") or "").strip()
+                    detail = " ".join(detail.split())[:600]
+                    raise RuntimeError(
+                        f"Renderer failed for {label}: {detail}" if detail
+                        else f"Renderer failed for {label}; no outputs were published."
+                    )
                 raw_wav_path = _baked_wav_path(result, label)
                 if raw_wav_path is None or not _path_exists(raw_wav_path):
                     raise RuntimeError(f"Bake did not create a WAV for {label}.")

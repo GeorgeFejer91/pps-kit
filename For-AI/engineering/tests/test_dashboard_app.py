@@ -2752,7 +2752,9 @@ def test_render_completion_never_publishes_stale_cancelled_or_failed_ingredients
         wav = Path(output_dir) / "partial.wav"
         sf.write(wav, np.zeros((441, 2), dtype=np.float32), 44100)
         manifest, qc = Path(output_dir) / "render_manifest.json", Path(output_dir) / "render_qc.csv"
-        manifest.write_text(json.dumps({"wav_outputs": [{"path": str(wav)}]}), encoding="utf-8")
+        manifest.write_text(json.dumps({"wav_outputs": [{"path": str(wav)}],
+            "message": "3DTI could not load its installed SOFA file" if reason == "renderer_failed" else ""}),
+            encoding="utf-8")
         qc.write_text("", encoding="utf-8")
         return RenderResult("backend_failed" if reason == "renderer_failed" else "rendered_reference",
             1 if reason == "renderer_failed" else 0, Path(output_dir), Path(design_path), manifest, qc, wav_paths=(wav,))
@@ -2777,6 +2779,8 @@ def test_render_completion_never_publishes_stale_cancelled_or_failed_ingredients
         finished = _wait_job(client, job["job_id"])
         state = client.get("/api/state").json()
         assert finished["status"] == ("cancelled" if reason == "cancelled" else "failed")
+        if reason == "renderer_failed":
+            assert "3DTI could not load its installed SOFA file" in finished["error"]
         if reason == "design_changed":
             assert finished["error_code"] == "job_source_changed" and finished["retryable"]
             assert state["design"]["name"] == "Newer planner settings"

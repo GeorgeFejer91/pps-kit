@@ -81,6 +81,14 @@ impl Worker {
             .resolve("shared", tauri::path::BaseDirectory::Resource)
         {
             if shared.join("study_templates").is_dir() {
+                let renderer = shared
+                    .join("third_party")
+                    .join("3dti_renderer")
+                    .join("bin")
+                    .join("pps-3dti-renderer.exe");
+                if renderer.is_file() {
+                    command.env("PPS_3DTI_RENDERER", renderer);
+                }
                 command.env("PPS_TOOLKIT_ROOT", shared);
             }
         }

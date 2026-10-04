@@ -10,5 +10,6 @@ schemas stay with their owning modules.
 
 The current component inventory remains in
 [`distributions/manifests/`](../../distributions/manifests/README.md). Those
-manifests describe the V1 package layout; a two-app Tauri Full installer will
-need a versioned manifest update and installed-path audit.
+manifests describe both the V1 compatibility package and the V2 two-app Tauri
+Full installer. The V2 installed-path audit compares the exact source and
+installed component bytes.
