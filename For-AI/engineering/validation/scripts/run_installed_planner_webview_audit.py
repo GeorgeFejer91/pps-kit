@@ -263,6 +263,14 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
                         page.screenshot(path=str(output / filename))
                         report["segments"].append({"name": segment, "screenshot": filename, "geometry": geometry})
                     page.locator("#trajectory-frame").scroll_into_view_if_needed()
+                    frame = page.locator("#trajectory-frame")
+                    expect(frame).not_to_have_attribute("src", "about:blank", timeout=10_000)
+                    child_frames = [candidate for candidate in page.frames if candidate.parent_frame == page.main_frame]
+                    report["trajectory_frame"] = {
+                        "src": frame.get_attribute("src"),
+                        "urls": [candidate.url for candidate in child_frames],
+                        "body_excerpt": page.frame_locator("#trajectory-frame").locator("body").inner_text()[:300],
+                    }
                     expect(page.frame_locator("#trajectory-frame").locator("#viewer")).to_have_attribute(
                         "data-viewer-ready", "true", timeout=30_000)
                     report["trajectory_viewer_ready"] = True

@@ -62,6 +62,9 @@ commands through parent/iframe messages; the parent does not read cross-origin
 frame properties in an installed WebView. Segment status badges wrap their full
 text under the shared Pretext check. Segment 6 says ready to lock only after
 its run setup is ready and the custom review cursor has confirmed Segments 0–5.
+Tauri injects the Planner CSP into every bundled HTML page, including the
+viewer: keep `frame-src 'self'` and `frame-ancestors 'self'` so only the bundled
+Planner page can embed it. The installed WebView audit must see its ready marker.
 Designer and Runner share `pps-resources/assets/ui/bounded-text.mjs` for Pretext
 measurement. For each touched bounded control, first set its responsive outer
 box with Grid/Flex and `box-sizing`, then subtract padding, borders, icons and
