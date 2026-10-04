@@ -515,6 +515,10 @@ fn prepared_session_adoption_error(reason: &'static str) -> PreparedSessionComma
             reason,
             "The prepared package participant does not match the submitted setup.",
         ),
+        "prepared_part_one_completion_required" => PreparedSessionCommandError::new(
+            reason,
+            "Complete and publish Part 1 in this Runner before opening its verified Part 2 package.",
+        ),
         "runtime_unavailable" => PreparedSessionCommandError::runtime(),
         _ => PreparedSessionCommandError::new(
             "invalid_verified_package",

@@ -68,8 +68,10 @@ materializes a standard-route `pps-run-session.v1` CSV/manifest package for one
 approved participant's block order. For an approved two-part pre/post plan it
 publishes separate verified part packages under one `pps-run-session-group.v1`
 manifest and returns Part 1 for native adoption. Part 2 remains an explicit
-prepared-manifest selection; installed transition and grouped results are not
-qualified. It rechecks the JSON/source
+prepared-manifest selection. The source candidate verifies the adjacent Part 1
+package and its sealed native result before Part 2 adoption, including after
+a process restart. Installed transition and grouped results are not qualified.
+It rechecks the JSON/source
 inventory, verifies the staged and published package with the existing V1
 verifier, compiles every block schedule, and publishes the canonical manifest
 last without overwriting an existing package. In-process publication errors

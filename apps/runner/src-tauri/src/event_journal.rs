@@ -22,8 +22,8 @@ use pps_brsp::random_nonce;
 use pps_runner_execution::{
     data_min_row, encode_data_min_csv, PreparedLedgerBatch, MAX_LEDGER_ENCODED_BYTES,
 };
-use pps_session_package::VerifiedPreparedSession;
-use serde::Serialize;
+use pps_session_package::{verify_prepared_session, VerificationRequest, VerifiedPreparedSession};
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 const QUEUE_CAPACITY: usize = 8;
@@ -50,7 +50,7 @@ struct Progress {
 
 /// Native-only acknowledgement of the exact published prefix, never a browser
 /// completion request. The manifest contains relative names; no path crosses IPC.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct NativeResultReceipt {
     pub package_manifest_sha256: String,
@@ -63,6 +63,209 @@ pub(crate) struct NativeResultReceipt {
     pub dataset_row_count: u64,
     pub events_sha256: String,
     pub dataset_sha256: String,
+}
+
+/// Native-only proof that the adjacent Part 1 package has a complete, sealed
+/// result. This is re-created from disk on every Part 2 selection so a
+/// pre/post participant can return after the application has closed.
+pub(crate) struct VerifiedFirstPart {
+    manifest_path: PathBuf,
+    participant_id: String,
+    session_group_id: String,
+}
+
+impl VerifiedFirstPart {
+    pub(crate) fn matches(&self, next: &VerifiedPreparedSession) -> bool {
+        self.participant_id == next.summary().participant_id
+            && self.session_group_id == next.summary().session_group_id
+            && next.summary().part_number == Some(2)
+            && self.manifest_path.parent().and_then(Path::parent)
+                == next.manifest_path().parent().and_then(Path::parent)
+    }
+}
+
+pub(crate) fn verify_first_part_completion(
+    next: &VerifiedPreparedSession,
+) -> Result<VerifiedFirstPart, &'static str> {
+    if next.summary().part_number != Some(2) {
+        return Err("prepared_part_one_completion_required");
+    }
+    let next_dir = next
+        .manifest_path()
+        .parent()
+        .ok_or("prepared_part_one_completion_required")?;
+    if next.manifest_path().file_name() != Some(std::ffi::OsStr::new("session_manifest.json"))
+        || next_dir.file_name() != Some(std::ffi::OsStr::new("part_02"))
+    {
+        return Err("prepared_part_one_completion_required");
+    }
+    let first_path = next_dir
+        .parent()
+        .ok_or("prepared_part_one_completion_required")?
+        .join("part_01")
+        .join("session_manifest.json");
+    let first = verify_prepared_session(VerificationRequest::new(&first_path))
+        .map_err(|_| "prepared_part_one_completion_required")?;
+    if first.summary().part_number != Some(1)
+        || first.summary().participant_id != next.summary().participant_id
+        || first.summary().session_group_id.is_empty()
+        || first.summary().session_group_id != next.summary().session_group_id
+        || !has_published_native_result(&first)
+    {
+        return Err("prepared_part_one_completion_required");
+    }
+    Ok(VerifiedFirstPart {
+        manifest_path: first.manifest_path().to_path_buf(),
+        participant_id: first.summary().participant_id.clone(),
+        session_group_id: first.summary().session_group_id.clone(),
+    })
+}
+
+fn has_published_native_result(first: &VerifiedPreparedSession) -> bool {
+    let Ok(entries) = fs::read_dir(first.session_dir()) else {
+        return false;
+    };
+    let mut seen = 0_usize;
+    for entry in entries {
+        let Ok(entry) = entry else { return false };
+        seen += 1;
+        if seen > 4096 {
+            return false;
+        }
+        let name = entry.file_name();
+        let name = name.to_string_lossy();
+        let Some(nonce) = name
+            .strip_prefix("native_events_")
+            .and_then(|name| name.strip_suffix(".results.json"))
+        else {
+            continue;
+        };
+        if nonce.len() != 32
+            || !nonce
+                .bytes()
+                .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_'))
+        {
+            return false;
+        }
+        if verify_published_result(first, nonce) {
+            return true;
+        }
+    }
+    false
+}
+
+fn verify_published_result(first: &VerifiedPreparedSession, nonce: &str) -> bool {
+    let directory = first.session_dir();
+    let manifest_path = directory.join(format!("native_events_{nonce}.results.json"));
+    let events_path = directory.join(format!("native_events_{nonce}.jsonl"));
+    let dataset_path = directory.join(format!("native_trials_{nonce}.csv"));
+    let Ok(manifest_bytes) = read_bounded_file(&manifest_path, MAX_BATCH_BYTES) else {
+        return false;
+    };
+    let Ok(manifest) = serde_json::from_slice::<serde_json::Value>(&manifest_bytes) else {
+        return false;
+    };
+    let Some(receipt) = manifest
+        .get("receipt")
+        .and_then(|value| serde_json::from_value::<NativeResultReceipt>(value.clone()).ok())
+    else {
+        return false;
+    };
+    let identity = &manifest["identity"];
+    if manifest["schema"] != "pps.native-results.v1"
+        || manifest["completion"] != "complete"
+        || manifest["timingQualification"] != "unqualified"
+        || manifest["audioEvidence"] != "software-frame-submission"
+        || manifest["eventsFile"] != format!("native_events_{nonce}.jsonl")
+        || manifest["datasetFile"] != format!("native_trials_{nonce}.csv")
+        || identity["participantId"] != first.summary().participant_id
+        || identity["sessionId"] != first.summary().session_id
+        || identity["partSessionId"] != first.summary().part_session_id
+        || identity["partNumber"] != 1
+        || identity["executionMode"] != first.summary().execution_mode
+        || receipt.package_manifest_sha256 != first.manifest_sha256()
+        || receipt.first_event_sequence == 0
+        || receipt.last_event_sequence == u64::MAX
+        || receipt.last_event_sequence < receipt.first_event_sequence
+        || receipt.event_record_count
+            != receipt.last_event_sequence - receipt.first_event_sequence + 1
+        || receipt.scored_trial_count == 0
+        || receipt.dataset_row_count > receipt.scored_trial_count
+    {
+        return false;
+    }
+    let Ok(events) = read_bounded_file(&events_path, MAX_FILE_BYTES) else {
+        return false;
+    };
+    let Ok(dataset) = read_bounded_file(&dataset_path, MAX_FILE_BYTES) else {
+        return false;
+    };
+    if format!("{:x}", Sha256::digest(&events)) != receipt.events_sha256
+        || format!("{:x}", Sha256::digest(&dataset)) != receipt.dataset_sha256
+        || events.last() != Some(&b'\n')
+    {
+        return false;
+    }
+    let mut lines = events[..events.len() - 1].split(|byte| *byte == b'\n');
+    let Some(Ok(header)) = lines
+        .next()
+        .map(serde_json::from_slice::<serde_json::Value>)
+    else {
+        return false;
+    };
+    if header["schema"] != "pps.native-event-journal.v1"
+        || header["packageManifestSha256"] != receipt.package_manifest_sha256
+        || header["participantId"] != first.summary().participant_id
+        || header["sessionId"] != first.summary().session_id
+        || header["partSessionId"] != first.summary().part_session_id
+        || header["partNumber"] != 1
+        || header["executionMode"] != first.summary().execution_mode
+        || header["timingQualification"] != "unqualified"
+    {
+        return false;
+    }
+    let mut expected = receipt.first_event_sequence;
+    let mut scored = 0_u64;
+    let mut final_frames = false;
+    let mut tail = serde_json::Value::Null;
+    for line in lines {
+        let Ok(event) = serde_json::from_slice::<serde_json::Value>(line) else {
+            return false;
+        };
+        if event["sequence"].as_u64() != Some(expected) || event["eventType"] == "trial.interrupted"
+        {
+            return false;
+        }
+        if event["eventType"] == "trial.scored" {
+            scored += 1;
+        }
+        if event["eventType"] == "audio.final-frame-submitted" {
+            final_frames = true;
+        }
+        let Some(next_expected) = expected.checked_add(1) else {
+            return false;
+        };
+        expected = next_expected;
+        tail = event;
+    }
+    expected == receipt.last_event_sequence + 1
+        && scored == receipt.scored_trial_count
+        && final_frames
+        && tail["eventType"] == "native.results.finalization-requested"
+        && tail["payload"]["packageGeneration"] == receipt.package_generation
+        && tail["payload"]["runGeneration"] == receipt.run_generation
+        && tail["payload"]["expectedScoredTrials"] == receipt.scored_trial_count
+}
+
+fn read_bounded_file(path: &Path, maximum: usize) -> std::io::Result<Vec<u8>> {
+    let mut bytes = Vec::new();
+    File::open(path)?
+        .take(maximum as u64 + 1)
+        .read_to_end(&mut bytes)?;
+    if bytes.len() > maximum {
+        return Err(std::io::Error::other("native result file limit"));
+    }
+    Ok(bytes)
 }
 
 struct Publication {

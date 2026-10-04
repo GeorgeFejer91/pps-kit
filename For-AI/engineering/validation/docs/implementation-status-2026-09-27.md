@@ -33,7 +33,15 @@ Each status applies to its stated surface, not to the whole product.
   publication without touching unrelated files. The Python/Rust differential
   compares both parts' PCM bytes and prepared row identities; Python can load
   both manifests. Local media/session-package tests, Clippy, and catalog checks
-  passed. Installed part transition, result-group completion, hardware output,
+  passed. Commit `87d2dd707781de807af984da193738b01bed7143` passed all 14
+  non-skipped [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37195331037).
+  Its exact Windows validation installer has SHA-256
+  `d299dd038eea70dff035fdf3f791cebdb073546aafd11d4cc34dbd1ded7ced50`;
+  the installed idle WebView audit passed with binary SHA-256
+  `4564b916e0546b2f9feff23025d3c40d5e016b5e102bbe12865d4913f18f9af4`.
+  The next source candidate verifies a sealed native Part 1 result before
+  adopting its sibling Part 2, including after restart; a local publish/resume/
+  tamper test passed. Installed part transition, result-group completion, hardware output,
   recording and the two-app Full installer are not established by this source
   evidence.
 - Sequential native-block and next-block UI source checkpoint

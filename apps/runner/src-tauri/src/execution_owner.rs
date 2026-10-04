@@ -26,7 +26,7 @@ use tokio::sync::{broadcast, oneshot};
 use std::path::PathBuf;
 
 use crate::{
-    event_journal::{JournalError, NativeEventJournal, NativeResultSeal},
+    event_journal::{JournalError, NativeEventJournal, NativeResultSeal, VerifiedFirstPart},
     latency_diagnostics::{AuthorityMailboxDiagnostics, LatencyStage, LatencyTrace},
     native_output::{
         NativeExecutionActivationRequest, NativeOutputAuthority, NativeOutputCleanupObservation,
@@ -1596,11 +1596,17 @@ impl OwnerState {
     fn adopt_verified_session(
         &mut self,
         verified: VerifiedPreparedSession,
+        first_part: Option<VerifiedFirstPart>,
         package: VerifiedPackageSummary,
         next_secret: PairingSecret,
         next_session_id: String,
         next_epoch: u64,
     ) -> Result<RunnerSnapshot, &'static str> {
+        if verified.summary().part_number == Some(2)
+            && !first_part.is_some_and(|proof| proof.matches(&verified))
+        {
+            return Err("prepared_part_one_completion_required");
+        }
         let Some(next_generation) = self.package_generation.checked_add(1) else {
             self.fail_stop_unavailable("authority.generation.exhausted", "authority_unavailable");
             return Err("runtime_unavailable");
@@ -2979,6 +2985,7 @@ impl ExecutionOwner {
     pub(crate) fn adopt_verified_session_blocking(
         &self,
         verified: VerifiedPreparedSession,
+        first_part: Option<VerifiedFirstPart>,
         package: VerifiedPackageSummary,
         next_secret: PairingSecret,
         next_session_id: String,
@@ -2990,6 +2997,7 @@ impl ExecutionOwner {
             move |state| {
                 state.adopt_verified_session(
                     verified,
+                    first_part,
                     package,
                     next_secret,
                     next_session_id,
@@ -3002,6 +3010,7 @@ impl ExecutionOwner {
     pub(crate) async fn adopt_verified_session(
         &self,
         verified: VerifiedPreparedSession,
+        first_part: Option<VerifiedFirstPart>,
         package: VerifiedPackageSummary,
         next_secret: PairingSecret,
         next_session_id: String,
@@ -3013,6 +3022,7 @@ impl ExecutionOwner {
             move |state| {
                 state.adopt_verified_session(
                     verified,
+                    first_part,
                     package,
                     next_secret,
                     next_session_id,

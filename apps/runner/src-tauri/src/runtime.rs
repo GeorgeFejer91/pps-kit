@@ -19,7 +19,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tokio::sync::{broadcast, oneshot};
 
-use crate::event_journal::NativeEventJournal;
+use crate::event_journal::{verify_first_part_completion, NativeEventJournal};
 use crate::execution_owner::{
     AuthorityView, ExecutionOwner, LanOwnerReceipt, OwnerStartConfiguration, OwnerSubmitError,
     RemoteOwnerIdentity, MAILBOX_CAPACITY, NORMAL_MAILBOX_CAPACITY,
@@ -978,11 +978,15 @@ impl AppRuntime {
         &self,
         verified: VerifiedPreparedSession,
     ) -> Result<RunnerSnapshot, &'static str> {
+        let first_part = (verified.summary().part_number == Some(2))
+            .then(|| verify_first_part_completion(&verified))
+            .transpose()?;
         let package = verified_package_projection(&verified)?;
         self.0
             .authority
             .adopt_verified_session_blocking(
                 verified,
+                first_part,
                 package,
                 PairingSecret::generate(),
                 format!("session_{}", &random_nonce()[..18]),
@@ -995,11 +999,22 @@ impl AppRuntime {
         &self,
         verified: VerifiedPreparedSession,
     ) -> Result<RunnerSnapshot, &'static str> {
+        let (verified, first_part) = if verified.summary().part_number == Some(2) {
+            tauri::async_runtime::spawn_blocking(move || {
+                let proof = verify_first_part_completion(&verified)?;
+                Ok::<_, &'static str>((verified, Some(proof)))
+            })
+            .await
+            .map_err(|_| "runtime_unavailable")??
+        } else {
+            (verified, None)
+        };
         let package = verified_package_projection(&verified)?;
         self.0
             .authority
             .adopt_verified_session(
                 verified,
+                first_part,
                 package,
                 PairingSecret::generate(),
                 format!("session_{}", &random_nonce()[..18]),
@@ -1660,6 +1675,126 @@ mod tests {
         .unwrap();
         let verified = verify_prepared_session(VerificationRequest::new(&manifest_path)).unwrap();
         (root, verified)
+    }
+
+    fn verified_split_pair() -> (
+        std::path::PathBuf,
+        VerifiedPreparedSession,
+        VerifiedPreparedSession,
+    ) {
+        let root = std::env::temp_dir().join(format!("pps-tauri-parts-{}", random_nonce()));
+        let mut parts = Vec::new();
+        for number in 1..=2 {
+            let dir = root.join(format!("part_{number:02}"));
+            fs::create_dir_all(&dir).unwrap();
+            fs::write(dir.join("block.wav"), b"not-played-validation-bytes").unwrap();
+            fs::write(dir.join("block.csv"), b"Trial_UID\ntrial-1\n").unwrap();
+            let manifest_path = dir.join("session_manifest.json");
+            let manifest = serde_json::json!({
+                "schema": "pps-run-session.v1",
+                "participant_id": "P001",
+                "session_id": format!("P001_group_part_{number:02}"),
+                "session_group_id": "P001_group",
+                "part_number": number,
+                "part_session_id": format!("P001_group_part_{number:02}"),
+                "session_dir": dir,
+                "execution_mode": "design_schedule_blocks",
+                "blocks": [{
+                    "index": 1, "label": "Verification block",
+                    "manifest_path": "block.csv", "wav_path": "block.wav",
+                    "trial_count": 1, "duration_s": 1.5, "metadata": {}
+                }]
+            });
+            fs::write(
+                &manifest_path,
+                serde_json::to_vec_pretty(&manifest).unwrap(),
+            )
+            .unwrap();
+            parts.push(verify_prepared_session(VerificationRequest::new(&manifest_path)).unwrap());
+        }
+        (root, parts.remove(0), parts.remove(0))
+    }
+
+    fn publish_first_part_native_result(first: &VerifiedPreparedSession) {
+        use pps_runner_execution::{EventLedger, LedgerEventInput, LedgerReserve};
+
+        let mut journal = NativeEventJournal::create(first).unwrap();
+        let mut ledger = EventLedger::default();
+        let mut scored = LedgerEventInput::new("trial.scored", "native-participant", 2);
+        scored.payload = serde_json::json!({"trial_number": 1, "trial_type": "Catch",
+            "response_given": false, "outcome": "Hit", "rt_ms": "100.000"});
+        let mut tail = LedgerEventInput::new("native.results.finalization-requested", "native", 3);
+        tail.payload = serde_json::json!({"packageGeneration": 1, "runGeneration": 1,
+            "expectedScoredTrials": 1});
+        let batch = ledger
+            .prepare_batch(
+                [
+                    LedgerEventInput::new("audio.final-frame-submitted", "native-output", 1),
+                    scored,
+                    tail,
+                ],
+                LedgerReserve::NONE,
+            )
+            .unwrap();
+        journal.admit(&batch).unwrap();
+        ledger.commit_prepared(batch).unwrap();
+        journal.finish(1, 1, 1).unwrap();
+        for _ in 0..100 {
+            if journal.retired() {
+                break;
+            }
+            thread::sleep(Duration::from_millis(5));
+        }
+        assert!(journal.retired() && !journal.failed());
+    }
+
+    #[test]
+    fn second_part_requires_published_native_first_part_result() {
+        let runtime = AppRuntime::new();
+        let (root, first, second) = verified_split_pair();
+        assert_eq!(
+            runtime.adopt_verified_session(second.clone()),
+            Err("prepared_part_one_completion_required")
+        );
+        runtime.adopt_verified_session(first.clone()).unwrap();
+        assert_eq!(
+            runtime.adopt_verified_session(second.clone()),
+            Err("prepared_part_one_completion_required")
+        );
+        assert_eq!(
+            runtime.snapshot().unwrap().part.current_package_part,
+            Some(1)
+        );
+        publish_first_part_native_result(&first);
+        let resumed = AppRuntime::new();
+        assert_eq!(
+            resumed
+                .adopt_verified_session(second.clone())
+                .unwrap()
+                .part
+                .current_package_part,
+            Some(2)
+        );
+        let event_file = fs::read_dir(first.session_dir())
+            .unwrap()
+            .map(Result::unwrap)
+            .map(|entry| entry.path())
+            .find(|path| {
+                path.file_name()
+                    .unwrap()
+                    .to_string_lossy()
+                    .starts_with("native_events_")
+                    && path
+                        .extension()
+                        .is_some_and(|extension| extension == "jsonl")
+            })
+            .unwrap();
+        fs::write(event_file, b"changed").unwrap();
+        assert_eq!(
+            AppRuntime::new().adopt_verified_session(second),
+            Err("prepared_part_one_completion_required")
+        );
+        fs::remove_dir_all(root).unwrap();
     }
 
     fn pcm16_wav_bytes(sample_rate_hz: u32, frames: u32, seed: i16) -> Vec<u8> {
