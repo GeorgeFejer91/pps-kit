@@ -15,7 +15,7 @@ Each status applies to its stated surface, not to the whole product.
 | 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full scheduling UI and native profile assembly |
 | 8 | VERIFIED: plan/resource preflight, source/cancel/publication fences, shared job completion and rollback | Qualify additional generation routes if selected |
 | 9 | PARTIAL: exact CPAL port, fenced single-block activation in source, local output preflight, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Compatible checked route, installed playback/results, full-profile execution and qualification |
-| 10 | PARTIAL: shared Rust/browser contracts; JSON to existing compatibility assembler; Rust JSON inventory and participant block/trial selection, plus content-bound PCM16 trial decoding with Python-export comparison; sample/tactile/response/CSV oracle checks | Native JSON block media assembly and complete execution capability |
+| 10 | PARTIAL: shared Rust/browser contracts; JSON to existing compatibility assembler; Rust JSON inventory and participant block/trial selection; content-bound PCM16 trial decoding and standard three-channel block assembly with Python PCM comparison; sample/tactile/response/CSV oracle checks | Advanced media transforms, V1 prepared CSV/manifest, and complete native profile execution |
 | 11 | PARTIAL: authenticated local/phone commands use one dispatch/control owner, shared scope fixture and fresh-state gate | Complete real-package execution |
 | 12 | PARTIAL: retry/input fences, durable intent versus callback confirmation, bounded deadlines, per-run journal and exclusive hashed result publication | Installed filesystems, recovery and complete execution |
 | 13 | PARTIAL: secure hosted companion, inert discovery, existing authenticated VDO route | Physical phone direct/relay/network-loss qualification |
@@ -26,7 +26,23 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
-- Latest native participant-plan source checkpoint:
+- Native standard-route profile media source checkpoint:
+  `ceb12d02f1ad3d6bc66c24b01bc37931abd7bd47`.
+  [Its exact-SHA CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37173235934)
+  passed all 14 jobs, including Rust Core, desktop, and Python/Rust profile
+  oracles on Windows, macOS, and Linux plus three validation bundle builds.
+  Local Rust Core fmt/Clippy/tests and five focused Python differential tests
+  passed. A synthetic two/three-channel PCM16 fixture matched Python block
+  PCM byte for byte, including ITI padding, filename-derived tactile onset,
+  and provisional drive advance; active tactile synthesis and speaker switching
+  reject.
+  The downloaded Windows NSIS Runner-only validation artifact has an exact
+  commit marker and a verified SHA-256 of
+  `c966496f70ef45b3f9e350812fc8fb10b96d320b9e7d6e512b79fe7d1fd17af4`.
+  It has not been installed. The new media crate is not linked to that Runner
+  binary; prepared CSV/manifest creation, full transforms, installed playback,
+  recording, and participant data collection remain unverified.
+- Earlier native participant-plan source checkpoint:
   `1fe2c645cdcf98e727b2deb8949a77f1a3bf1e76`.
   [Its exact-SHA CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37170957558)
   passed all 14 jobs, including the Python/Rust profile/order oracle on Windows,

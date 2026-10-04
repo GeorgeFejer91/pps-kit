@@ -24,8 +24,9 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
 - **Domain:** [experiment runtime](domains/experiment-runtime.md), with UI and
   release handoffs. Reuse 3DTI, the 3D viewer, Segment 0–6, current schemas,
   bounded jobs, native ownership and Python/Rust oracle fixtures.
-- **Source stage:** JSON export/compatibility assembly, native inventory and
-  approved participant order selection, bounded generation, shared Pretext,
+- **Source stage:** JSON export/compatibility assembly, native inventory,
+  approved participant order selection, standard-route block PCM assembly,
+  bounded generation, shared Pretext,
   locked dependency patches and phone recovery are implemented.
   Native execution has one actor, one callback scheduler and one journal worker.
   Immutable PCM, response scoring, paired event/CSV files and exclusive result
@@ -54,15 +55,24 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
   inventory found no configuration matching that synthetic three-channel block.
   A newer UI/readiness source checkpoint `04719681` passed all 14 exact-SHA CI
   jobs and produced a hash-checked Windows NSIS validation bundle; it has not
-  been installed or visually checked from its package. The latest native JSON
+  been installed or visually checked from its package. The native JSON
   inventory and participant-plan source checkpoint `1fe2c645` passed all 14
   [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37170957558).
   Its Windows NSIS validation artifact has an exact-commit marker and matching
   SHA-256 `cadd7c3e9c4199c4af6f3bf7598b194a2a985136fe9018fcb1b869ddb17550b1`;
-  it has not been installed. Rust now selects the approved participant block
-  and trial order from the verified local profile and CSVs. Native media
-  assembly and execution from that JSON profile remain incomplete.
-- **Next gate:** complete an installed native single-block run with a checked
+  it has not been installed. Rust selects the approved participant block and
+  trial order from the verified local profile and CSVs. The later standard-route
+  PCM assembly source checkpoint `ceb12d02` passed all 14
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37173235934),
+  including Windows/Linux/macOS Python/Rust oracle checks. Its Windows NSIS
+  Runner-only validation artifact has the exact-commit marker and matching
+  SHA-256 `c966496f70ef45b3f9e350812fc8fb10b96d320b9e7d6e512b79fe7d1fd17af4`.
+  It has not been installed, and the new media crate is not wired into that
+  Runner executable. Full media transforms, prepared-session publication, and
+  native execution from the JSON profile remain incomplete.
+- **Next gate:** publish a V1-compatible prepared block CSV and session manifest
+  from the verified JSON profile, then adopt them through the existing Runner
+  verifier. Complete an installed native single-block run with a checked,
   compatible and calibrated output route, then validate its event/CSV files and
   recording. Extend the same owner to full profiles/multiple blocks. The native
   activation path exists in source but remains unqualified; no participant run or

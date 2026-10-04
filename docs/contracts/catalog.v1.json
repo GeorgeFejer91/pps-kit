@@ -24,7 +24,7 @@
     {
       "id": "pps-experiment-profile.v1",
       "owner": "packages/pps-runtime/src/peripersonal_space_toolkit/experiment_profile.py",
-      "boundary": "Path-bearing local Planner JSON handoff to the compatibility Runner"
+      "boundary": "Path-bearing local Planner JSON handoff to Python compatibility assembly and Rust inventory, participant-plan, and standard-media preflight"
     },
     {
       "id": "pps-run-session.v1",
