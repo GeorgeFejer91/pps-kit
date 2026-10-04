@@ -94,6 +94,9 @@ publication. Segment jobs reuse one completion handler and the existing rebuild
 rollback owner. Cancellation after publication begins is reported as completion,
 not as an unpublished result. Use the existing renderer's `auto` selection and
 retain its explicit native/reference provenance.
+The native 3DTI child receives a plain Win32 working directory: its SOFA/HDF5
+reader cannot open a `\\?\` extended path. Keep the resource-relative HRTF
+reference in the render config and verify the installed Shared copy.
 
 `resource_limits.py` owns bounded assembly CSV reads, plan-entry limits, and
 conservative PCM16/scratch/float32 estimates. Generation and block preparation

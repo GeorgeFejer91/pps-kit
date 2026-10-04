@@ -77,3 +77,11 @@ def test_render_backend_resolves_relative_assets_from_runtime_resource_root(tmp_
     finally:
         monkeypatch.setattr(runtime_paths, "repo_root", original_repo_root)
         importlib.reload(render_backend)
+
+
+def test_native_3dti_cwd_uses_paths_supported_by_sofa_reader():
+    from peripersonal_space_toolkit.render_backend import _native_3dti_cwd
+
+    assert _native_3dti_cwd(Path("\\\\?\\C:\\lab\\shared")) == "C:\\lab\\shared"
+    assert _native_3dti_cwd(Path("\\\\?\\UNC\\server\\share\\shared")) == "\\\\server\\share\\shared"
+    assert _native_3dti_cwd(Path("C:\\lab\\shared")) == "C:\\lab\\shared"

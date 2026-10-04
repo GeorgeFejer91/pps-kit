@@ -114,6 +114,16 @@ def repo_relative_path(path: str | Path) -> Path:
     return REPO_ROOT / resolved
 
 
+def _native_3dti_cwd(path: Path) -> str:
+    """Use a Win32 path that the 3DTI SOFA/HDF5 reader can open."""
+    value = str(path)
+    if value.startswith("\\\\?\\UNC\\"):
+        return "\\\\" + value[8:]
+    if value.startswith("\\\\?\\"):
+        return value[4:]
+    return value
+
+
 def resolve_backend_executable(path: Path | None = None) -> Path:
     if path is not None:
         return path
@@ -1600,7 +1610,7 @@ def render_design_with_3dti(
         # Paths serialized in the scientific config remain resource-relative
         # (for example ``assets/...``). Launch the native adapter from that
         # canonical root so source and frozen builds resolve identical bytes.
-        cwd=REPO_ROOT,
+        cwd=_native_3dti_cwd(REPO_ROOT),
         text=True,
         capture_output=True,
         check=False,
