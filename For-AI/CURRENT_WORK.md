@@ -28,19 +28,22 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   native authority. Standard three-channel block assembly supports four
   Python-compatible tactile waveform shapes on channels 1–3, ITI silence, and
   provisional tactile drive compensation, plus Python-compatible speaker
-  switching within the three-channel route. Local/phone control shares one actor,
+  switching within the three-channel route. The decoded/output path now has a
+  closed unity-gain, channel-for-channel route for 4–18-channel WAVs; no native
+  block producer emits those files yet. Local/phone control shares one actor,
   callback scheduler, and result journal. Source activation and result
   publication remain unqualified for participant use.
-- **Latest completed evidence:** tactile synthesis source `5685fc10` passed
-  local Rust tests, Clippy, formatting, nine Python/Rust differential tests,
+- **Latest completed evidence:** speaker switching source `c014d75f` passed
+  local Rust tests, Clippy, formatting, eleven Python/Rust differential tests,
   and all 14
-  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37182084204).
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37183464651).
   Its Runner-only NSIS package passed a fresh Windows CI install inventory.
   The downloaded validation marker matches the commit and its SHA-256 matches
   the artifact manifest. Installed executable and HTML/CSS hashes were recorded.
   Neither an installed WebView nor physical output was tested from this package.
-- **Next gates:** add approved speaker-array and tactile output routes beyond
-  three channels through the Python oracle; run the installed native
+- **Next gates:** produce approved speaker-array and tactile block WAVs beyond
+  three channels through the Python oracle, then qualify their exact hardware
+  route and levels; run the installed native
   single-block workflow on a compatible calibrated device; validate event/CSV
   files and recording; extend to full profiles and multiple blocks; then build
   and verify the exact two-app Full installer. Installed operation, physical

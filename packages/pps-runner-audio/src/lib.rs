@@ -41,6 +41,9 @@ pub const DEFAULT_MAXIMUM_ENCODED_BYTES: u64 = 768 * 1024 * 1024;
 pub const DEFAULT_MAXIMUM_DECODED_BYTES: u64 = 1280 * 1024 * 1024;
 /// Default frame limit, slightly above 37 minutes at 44.1 kHz.
 pub const DEFAULT_MAXIMUM_FRAMES: u64 = 100_000_000;
+/// Largest exact channel-for-channel route supported by the native output
+/// adapter. This accommodates two eight-speaker arrays and two tactile lines.
+pub const MAXIMUM_DIRECT_OUTPUT_CHANNELS: u16 = 18;
 
 /// Generation fence retained with prepared media so late work can be rejected
 /// by the native authority owner after package replacement.
@@ -111,6 +114,9 @@ pub enum PpsChannelLayout {
     LegacyStudy5TactileAudio,
     /// Canonical source order: `[left, right, tactile]`.
     BinauralLeftRightTactile,
+    /// Every source channel retains its 1-based physical output position.
+    /// The roles and calibration of these channels are study-specific.
+    DirectMultichannel(u16),
 }
 
 #[derive(Clone, PartialEq, Eq)]
@@ -233,7 +239,7 @@ pub enum AudioPreparationError {
     UnsupportedSampleFormat,
     #[error("prepared WAV must use exactly 16 bits per sample")]
     UnsupportedBitsPerSample,
-    #[error("prepared WAV must contain exactly 2 or 3 channels")]
+    #[error("prepared WAV must contain 2 through 18 channels")]
     UnsupportedChannelCount,
     #[error("prepared WAV sample rate does not match the prepared schedule")]
     SampleRateMismatch,
@@ -288,6 +294,7 @@ pub fn bind_and_decode_verified_wav(
     let layout = match spec.channels {
         2 => PpsChannelLayout::LegacyStudy5TactileAudio,
         3 => PpsChannelLayout::BinauralLeftRightTactile,
+        4..=MAXIMUM_DIRECT_OUTPUT_CHANNELS => PpsChannelLayout::DirectMultichannel(spec.channels),
         _ => return Err(AudioPreparationError::UnsupportedChannelCount),
     };
     if spec.sample_rate != request.expected_sample_rate_hz {

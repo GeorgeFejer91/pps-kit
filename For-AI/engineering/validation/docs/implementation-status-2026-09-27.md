@@ -14,8 +14,8 @@ Each status applies to its stated surface, not to the whole product.
 | 6 | PARTIAL: actual Pretext, explicit no-fit, complete labels, keyboard input, narrow/enlarged text and spacing | Actual WebViews and full accessibility qualification |
 | 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full scheduling UI and native profile assembly |
 | 8 | VERIFIED: plan/resource preflight, source/cancel/publication fences, shared job completion and rollback | Qualify additional generation routes if selected |
-| 9 | PARTIAL: exact CPAL port, fenced single-block activation in source, local output preflight, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Compatible checked route, installed playback/results, full-profile execution and qualification |
-| 10 | PARTIAL: shared Rust/browser contracts; JSON to existing compatibility assembler; Rust JSON inventory and participant block/trial selection; content-bound PCM16 trial decoding, three-channel block assembly, four tactile waveform shapes on channels 1–3, and V1 prepared CSV/manifest; native main-window profile/folder selection, predecode storage preflight and existing Runner package adoption; Python PCM/row comparison and sample/tactile/response/CSV oracle checks | Speaker switching, output channels above three, installed adoption and complete profile execution |
+| 9 | PARTIAL: exact CPAL port, fenced single-block activation in source, local output preflight, closed unity-gain direct route for 4–18-channel WAVs, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Compatible calibrated hardware route, installed playback/results, full-profile execution and qualification |
+| 10 | PARTIAL: shared Rust/browser contracts; JSON to existing compatibility assembler; Rust JSON inventory and participant block/trial selection; content-bound PCM16 trial decoding, three-channel block assembly, four tactile waveform shapes and speaker switching on channels 1–3, and V1 prepared CSV/manifest; native main-window profile/folder selection, predecode storage preflight and existing Runner package adoption; Python PCM/row comparison and sample/tactile/response/CSV oracle checks | Native assembly of speaker arrays above three channels, installed adoption and complete profile execution |
 | 11 | PARTIAL: authenticated local/phone commands use one dispatch/control owner, shared scope fixture and fresh-state gate | Complete real-package execution |
 | 12 | PARTIAL: retry/input fences, durable intent versus callback confirmation, bounded deadlines, per-run journal and exclusive hashed result publication | Installed filesystems, recovery and complete execution |
 | 13 | PARTIAL: secure hosted companion, inert discovery, existing authenticated VDO route | Physical phone direct/relay/network-loss qualification |
@@ -26,6 +26,19 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
+- Native three-channel speaker switching source checkpoint
+  `c014d75feabf2081a24c4612032cc3559f56f47e` reproduces the Python
+  segment-boundary, gain, source-channel and tactile-preservation behavior in
+  Rust block WAVs and V1 CSV metadata. Eleven local Python/Rust differential
+  tests and Rust media tests/Clippy passed. All 14
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37183464651)
+  passed, including three-platform Python/Rust oracles and validation bundles.
+  The downloaded Runner-only Windows NSIS validation package carries the exact
+  source marker; its measured SHA-256 matches the manifest:
+  `61861e5c8348fcee2c250b9f80abc8bd3d9f397af02ae0c1e285fb764640c827`.
+  Fresh Windows CI installation recorded executable, HTML and CSS hashes in
+  `INSTALL_INVENTORY.txt`. That check launched no installed WebView and
+  qualified no physical output or recording.
 - Native tactile waveform source checkpoint
   `5685fc10c2f87f305019a77222fa77d16413dc9d` synthesizes sawtooth,
   sine, square, and biphasic square pulse-train shapes on channels 1–3. Local

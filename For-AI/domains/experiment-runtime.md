@@ -57,7 +57,11 @@ square, and biphasic square pulse-train tactile waveforms on channels 1–3,
 including trial extension and prepared CSV metadata. Python-compatible speaker
 switching now routes within those three channels, including gains, mixdown,
 source selection, and tactile preservation. Speaker targets and tactile output
-channels above three still reject explicitly. The block has a
+channels above three still reject in this producer. The native decoder and
+CPAL adapter separately accept exact 4–18-channel PCM16 blocks and preserve
+each source channel at the same physical output index. This direct route
+requires unity gains; study-specific channel roles, calibration and a wider
+native block producer remain open. The block has a
 bounded size and is published without overwriting an existing file. The same crate now
 materializes a standard-route `pps-run-session.v1` CSV/manifest package for one
 approved participant's single-phase block order. It rechecks the JSON/source

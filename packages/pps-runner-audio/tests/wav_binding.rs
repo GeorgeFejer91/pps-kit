@@ -185,7 +185,7 @@ fn decodes_three_channel_pcm16_without_reordering() {
 }
 
 #[test]
-fn rejects_mono_four_channel_float_and_24_bit_inputs() {
+fn rejects_mono_over_limit_float_and_24_bit_inputs() {
     let root = TestDirectory::new();
     let fence = default_fence();
 
@@ -203,14 +203,14 @@ fn rejects_mono_four_channel_float_and_24_bit_inputs() {
         Err(AudioPreparationError::UnsupportedChannelCount)
     ));
 
-    let four = root.join("four.wav");
-    write_i16_wav(&four, 4, 48_000, &[0, 1, 2, 3]);
+    let over_limit = root.join("over-limit.wav");
+    write_i16_wav(&over_limit, 19, 48_000, &[0; 19]);
     assert!(matches!(
         bind(
-            &four,
+            &over_limit,
             &fence,
-            &digest(&four),
-            fs::metadata(&four).unwrap().len(),
+            &digest(&over_limit),
+            fs::metadata(&over_limit).unwrap().len(),
             48_000,
             AudioLoadLimits::default()
         ),

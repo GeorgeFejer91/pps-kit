@@ -155,6 +155,7 @@ impl PreparedAudioCandidate {
             source_channel_layout: match self.media().layout() {
                 PpsChannelLayout::LegacyStudy5TactileAudio => "legacy-study5-tactile-audio",
                 PpsChannelLayout::BinauralLeftRightTactile => "binaural-left-right-tactile",
+                PpsChannelLayout::DirectMultichannel(_) => "direct-multichannel",
             },
             frames: self.media().frames(),
             decoded_bytes: self.decoded_bytes()?,
@@ -342,6 +343,9 @@ fn prepare_verified_audio_with_limits(
     let route = match media.layout() {
         PpsChannelLayout::LegacyStudy5TactileAudio => OutputRouteRequest::legacy_stereo(),
         PpsChannelLayout::BinauralLeftRightTactile => OutputRouteRequest::canonical_three(),
+        PpsChannelLayout::DirectMultichannel(channels) => {
+            OutputRouteRequest::direct_multichannel(channels)
+        }
     };
     let playback_plan = PreparedPlaybackPlan::new(
         media,
@@ -426,6 +430,7 @@ const fn output_route_name(route: ResolvedOutputRouteKind) -> &'static str {
         ResolvedOutputRouteKind::CanonicalFourWithTactileMirror => {
             "canonical-four-with-tactile-mirror"
         }
+        ResolvedOutputRouteKind::DirectMultichannel => "direct-multichannel",
     }
 }
 
@@ -604,6 +609,16 @@ mod tests {
         assert_eq!(canonical.summary().unwrap().output_route, "canonical-three");
         assert_eq!(canonical.playback_plan().route().output_channels(), 3);
         fs::remove_dir_all(canonical_root).unwrap();
+
+        let (direct_root, direct_source) = source_with_channels(4);
+        let direct = prepare_verified_audio(direct_source).unwrap();
+        assert_eq!(direct.playback_plan().gains(), OutputGains::unity());
+        assert_eq!(
+            direct.summary().unwrap().output_route,
+            "direct-multichannel"
+        );
+        assert_eq!(direct.playback_plan().route().output_channels(), 4);
+        fs::remove_dir_all(direct_root).unwrap();
     }
 
     #[test]

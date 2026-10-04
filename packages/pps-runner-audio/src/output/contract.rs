@@ -1,6 +1,6 @@
 use std::{error::Error, fmt};
 
-use crate::{AudioFence, PpsChannelLayout, PreparedPcmBlock};
+use crate::{AudioFence, PpsChannelLayout, PreparedPcmBlock, MAXIMUM_DIRECT_OUTPUT_CHANNELS};
 
 /// Largest callback accepted by the device-independent renderer.
 ///
@@ -132,6 +132,8 @@ pub enum OutputRouteRequest {
         tactile_output: u16,
         tactile_mirror_output: Option<u16>,
     },
+    /// Preserve every source channel at the same physical output index.
+    DirectMultichannel { output_channels: u16 },
 }
 
 impl OutputRouteRequest {
@@ -167,6 +169,10 @@ impl OutputRouteRequest {
             tactile_mirror_output: Some(3),
         }
     }
+
+    pub const fn direct_multichannel(output_channels: u16) -> Self {
+        Self::DirectMultichannel { output_channels }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -174,6 +180,7 @@ pub enum ResolvedOutputRouteKind {
     LegacyStereo,
     CanonicalThree,
     CanonicalFourWithTactileMirror,
+    DirectMultichannel,
 }
 
 /// A closed route whose invariants have been checked before rendering.
@@ -214,7 +221,7 @@ impl fmt::Display for OutputRouteError {
 
 impl Error for OutputRouteError {}
 
-/// Resolve only the three PPS routes implemented by the pure renderer.
+/// Resolve only the closed PPS routes implemented by the pure renderer.
 pub fn resolve_output_route(
     layout: PpsChannelLayout,
     request: OutputRouteRequest,
@@ -286,6 +293,21 @@ pub fn resolve_output_route(
                 output_channels,
             })
         }
+        OutputRouteRequest::DirectMultichannel { output_channels } => {
+            let PpsChannelLayout::DirectMultichannel(source_channels) = layout else {
+                return Err(OutputRouteError::SourceLayoutMismatch);
+            };
+            if output_channels != source_channels {
+                return Err(OutputRouteError::SourceLayoutMismatch);
+            }
+            if !(4..=MAXIMUM_DIRECT_OUTPUT_CHANNELS).contains(&output_channels) {
+                return Err(OutputRouteError::UnsupportedMapping);
+            }
+            Ok(ResolvedOutputRoute {
+                kind: ResolvedOutputRouteKind::DirectMultichannel,
+                output_channels,
+            })
+        }
     }
 }
 
@@ -327,6 +349,7 @@ fn valid_gain(value: f32) -> bool {
 pub enum OutputPlanError {
     Route(OutputRouteError),
     InvalidGain,
+    DirectRouteRequiresUnityGains,
     EmptyMedia,
     PreparedMediaShape,
     EventOrder,
@@ -353,6 +376,7 @@ impl fmt::Display for OutputPlanError {
         match self {
             Self::Route(error) => write!(formatter, "invalid output route: {error}"),
             Self::InvalidGain => formatter.write_str("output gains must be finite values from 0 to 1"),
+            Self::DirectRouteRequiresUnityGains => formatter.write_str("direct multichannel output requires unity gains; study-specific channel calibration is outside this route"),
             Self::EmptyMedia => formatter.write_str("prepared playback media must contain at least one frame"),
             Self::PreparedMediaShape => formatter.write_str("prepared playback media has an inconsistent decoded shape"),
             Self::EventOrder => formatter.write_str("real-time events must use nondecreasing sample order"),
@@ -456,6 +480,11 @@ impl PreparedPlaybackPlan {
             return Err(OutputPlanError::PreparedMediaShape);
         }
         let route = resolve_output_route(media.layout(), route_request)?;
+        if route.kind() == ResolvedOutputRouteKind::DirectMultichannel
+            && gains != OutputGains::unity()
+        {
+            return Err(OutputPlanError::DirectRouteRequiresUnityGains);
+        }
         let mut prior_sample = None;
         for event in &scheduled_events {
             if prior_sample.is_some_and(|prior| event.sample_index() < prior) {

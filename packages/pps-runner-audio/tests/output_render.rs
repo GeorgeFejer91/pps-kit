@@ -160,6 +160,60 @@ fn routes_legacy_and_canonical_vectors_with_gains_and_mirror() {
 }
 
 #[test]
+fn direct_multichannel_route_preserves_all_physical_channel_positions() {
+    let samples = [
+        1_000, -2_000, 3_000, -4_000, 5_000, -6_000, 7_000, -8_000, 9_000, -10_000, 11_000,
+        -12_000, 13_000, -14_000, 15_000, -16_000, 17_000, -18_000,
+    ];
+    let media = prepared_pcm(18, &samples, 31);
+    assert_eq!(media.layout(), PpsChannelLayout::DirectMultichannel(18));
+    let mut output = MockOutput::new(
+        PreparedPlaybackPlan::new(
+            media,
+            4,
+            OutputRouteRequest::direct_multichannel(18),
+            OutputGains::unity(),
+            Box::new([]),
+        )
+        .unwrap(),
+    );
+    start(&mut output);
+    let mut buffer = [0.0; 18];
+    let mut events = [None; 2];
+    let outcome = output.callback(&mut buffer, &mut events);
+    assert_eq!(outcome.state, RenderState::SourceExhausted);
+    assert_eq!(buffer, samples.map(pcm));
+
+    assert_eq!(
+        resolve_output_route(
+            PpsChannelLayout::DirectMultichannel(18),
+            OutputRouteRequest::direct_multichannel(17),
+        )
+        .unwrap_err(),
+        OutputRouteError::SourceLayoutMismatch,
+    );
+    assert_eq!(
+        resolve_output_route(
+            PpsChannelLayout::DirectMultichannel(19),
+            OutputRouteRequest::direct_multichannel(19),
+        )
+        .unwrap_err(),
+        OutputRouteError::UnsupportedMapping,
+    );
+    assert_eq!(
+        PreparedPlaybackPlan::new(
+            prepared_pcm(4, &[1_000, 2_000, 3_000, 4_000], 32),
+            5,
+            OutputRouteRequest::direct_multichannel(4),
+            OutputGains::new(0.5, 1.0).unwrap(),
+            Box::new([]),
+        )
+        .unwrap_err(),
+        OutputPlanError::DirectRouteRequiresUnityGains,
+    );
+}
+
+#[test]
 fn route_resolver_rejects_duplicate_ambiguous_and_unsupported_mappings() {
     let duplicate = resolve_output_route(
         PpsChannelLayout::LegacyStudy5TactileAudio,

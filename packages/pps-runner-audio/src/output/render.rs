@@ -499,6 +499,17 @@ impl RenderEngine {
                     output[output_offset + 3] = tactile;
                 }
             }
+            ResolvedOutputRouteKind::DirectMultichannel => {
+                if source_channels != output_channels {
+                    return false;
+                }
+                let Some(targets) = output.get_mut(..source.len()) else {
+                    return false;
+                };
+                for (target, sample) in targets.iter_mut().zip(source) {
+                    *target = clamp(*sample);
+                }
+            }
         }
         true
     }
