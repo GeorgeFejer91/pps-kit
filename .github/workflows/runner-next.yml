@@ -703,8 +703,19 @@ jobs:
               throw "Full uninstall retained owned component: $path"
             }
           }
+          $incompatibleRoot = Join-Path $env:RUNNER_TEMP "pps-incompatible-shared-${{ github.run_id }}-${{ github.run_attempt }}"
+          $shared = Join-Path $incompatibleRoot 'shared'
+          New-Item -ItemType Directory -Path $shared | Out-Null
+          'legacy shared component' | Set-Content -Encoding ascii (Join-Path $shared 'legacy.marker')
+          $process = Start-Process -FilePath $installer -ArgumentList @('/S', "/D=$incompatibleRoot") `
+            -WindowStyle Hidden -Wait -PassThru
+          if ($process.ExitCode -eq 0 -or
+              (Test-Path -LiteralPath (Join-Path $incompatibleRoot 'pps-experiment-planner.exe'))) {
+            throw 'Full installer accepted an incompatible pre-existing Shared component.'
+          }
           @('schema=pps-full-install-lifecycle.v1', "commit=${{ github.sha }}",
-            'fresh_install=true', 'reinstall=true', 'uninstall=true') |
+            'fresh_install=true', 'reinstall=true', 'uninstall=true',
+            'incompatible_shared_rejected=true') |
             Set-Content -Encoding ascii 'dist/full-validation/windows-host-nsis/INSTALL_LIFECYCLE.txt'
       - name: Retain both installed WebView audits
         if: always()

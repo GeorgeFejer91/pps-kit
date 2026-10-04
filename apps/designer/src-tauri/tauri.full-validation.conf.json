@@ -19,6 +19,7 @@
       "../../../third_party/3dti_AudioToolkit/3DTI_AUDIOTOOLKIT_LICENSE": "shared/third_party/3dti_AudioToolkit/3DTI_AUDIOTOOLKIT_LICENSE",
       "../../../third_party/3dti_AudioToolkit/LICENSE": "shared/third_party/3dti_AudioToolkit/LICENSE",
       "../../../docs/": "shared/docs/",
+      "../../../distributions/manifests/pps-shared-v2-0.1.0.marker": "shared/pps-shared-v2-0.1.0.marker",
       "../../../LICENSE": "shared/LICENSE",
       "../../../THIRD_PARTY_LICENSES.md": "shared/THIRD_PARTY_LICENSES.md",
       "../../../CITATION.cff": "shared/CITATION.cff"

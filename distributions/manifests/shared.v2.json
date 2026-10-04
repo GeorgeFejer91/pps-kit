@@ -18,6 +18,7 @@
     {"source": "third_party/3dti_AudioToolkit/3DTI_AUDIOTOOLKIT_LICENSE", "install": "shared/third_party/3dti_AudioToolkit/3DTI_AUDIOTOOLKIT_LICENSE", "kind": "file"},
     {"source": "third_party/3dti_AudioToolkit/LICENSE", "install": "shared/third_party/3dti_AudioToolkit/LICENSE", "kind": "file"},
     {"source": "docs", "install": "shared/docs", "kind": "tree"},
+    {"source": "distributions/manifests/pps-shared-v2-0.1.0.marker", "install": "shared/pps-shared-v2-0.1.0.marker", "kind": "file"},
     {"source": "LICENSE", "install": "shared/LICENSE", "kind": "file"},
     {"source": "THIRD_PARTY_LICENSES.md", "install": "shared/THIRD_PARTY_LICENSES.md", "kind": "file"},
     {"source": "CITATION.cff", "install": "shared/CITATION.cff", "kind": "file"}

@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "identifier": "org.peripersonalspace.planner",
   "build": {
-    "beforeDevCommand": "npm --prefix frontend run dev -- --port 1421",
+    "beforeDevCommand": "npm run dev -- --port 1421",
     "devUrl": "http://127.0.0.1:1421",
-    "beforeBuildCommand": "npm --prefix frontend run build",
+    "beforeBuildCommand": "npm run build",
     "frontendDist": "../frontend/compiled"
   },
   "app": {

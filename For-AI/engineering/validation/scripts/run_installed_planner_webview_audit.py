@@ -10,7 +10,8 @@ import platform
 import subprocess
 import tempfile
 import time
-import wave
+
+import soundfile as sf
 
 from playwright.sync_api import expect, sync_playwright
 
@@ -74,13 +75,10 @@ def prove_native_media(page) -> dict:
     wav = Path(result["wav_path"])
     manifest = json.loads(Path(result["manifest_path"]).read_text(encoding="utf-8"))
     assert manifest["render_engine"] == "native-3dti"
-    with wave.open(str(wav), "rb") as audio:
-        channels = audio.getnchannels()
-        sample_rate = audio.getframerate()
-        frames = audio.getnframes()
-        samples = audio.readframes(frames)
+    samples, sample_rate = sf.read(wav, dtype="float32", always_2d=True)
+    frames, channels = samples.shape
     assert channels == 2 and sample_rate == 44_100 and frames > 0
-    assert any(samples), "Installed 3DTI render produced silent PCM"
+    assert float(abs(samples).max()) > 0, "Installed 3DTI render produced silent PCM"
     return {"status": result["status"], "wav_sha256": sha256(wav),
             "channels": channels, "sample_rate": sample_rate, "frames": frames,
             "manifest_sha256": sha256(Path(result["manifest_path"]))}

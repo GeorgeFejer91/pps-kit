@@ -15,8 +15,10 @@ V2 uses `planner` for the Tauri Planner application. The Planner worker is built
 without embedded Shared resources in a Full package; its Rust parent locates
 the single installed `shared/` tree. Runner keeps its own bundled web bytes.
 `package_inventory.py --manifest-version v2 --strict` compares installed files
-and trees byte for byte with the exact source build inputs.
+and trees byte for byte with the exact source build inputs. A version marker
+lets the Full installer reject a pre-existing incompatible Shared tree before
+copying files.
 
-Bootstrapper manifests pin the payload SHA-256 and component-inventory SHA-256.
-An existing installation with a different Shared version must be rejected rather
-than merged.
+V1 bootstrapper manifests pin the payload SHA-256 and component-inventory
+SHA-256. An existing installation with a different Shared version must be
+rejected rather than merged.
