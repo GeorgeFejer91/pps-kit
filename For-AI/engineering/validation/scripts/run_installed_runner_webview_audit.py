@@ -97,7 +97,7 @@ def restore_debug_policy(executable: str, previous: tuple[str, int] | None) -> N
 
 def synthetic_prepared_session(root: Path) -> Path:
     """Build valid, silent media for installed verification without participant data."""
-    root.mkdir(parents=True)
+    root.mkdir(parents=True, exist_ok=True)
     wav_path = root / "block.wav"
     with wave.open(str(wav_path), "wb") as audio:
         audio.setnchannels(3)
