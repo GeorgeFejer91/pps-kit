@@ -177,3 +177,37 @@ def test_rust_selects_existing_participant_block_order_and_rejects_profile_diver
     assert [row["code"] for row in rust[3:]] == [
         "profile_plan_invalid", "profile_plan_ingredient_not_listed", "profile_plan_invalid",
     ]
+
+
+def test_rust_binds_exported_trial_wav_to_exact_bytes_and_audio_hint(tmp_path: Path) -> None:
+    valid = _participant_profile(tmp_path / "valid-media")
+    wrong_row = _participant_profile(tmp_path / "wrong-row")
+    block_path = wrong_row.parent / "block.csv"
+    with block_path.open("w", encoding="utf-8", newline="") as output:
+        writer = csv.DictWriter(output, fieldnames=["trial_file_path", "source_sha256"])
+        writer.writeheader()
+        writer.writerow({"trial_file_path": str(wrong_row.parent / "ingredient.wav"), "source_sha256": "0" * 64})
+    setup_path = Path(json.loads(wrong_row.read_text(encoding="utf-8"))["run_setup_path"])
+    wrong_row.write_bytes(experiment_profile_bytes(
+        create_experiment_profile(default_design(), setup_path, source_revision=11)
+    ))
+    bad_hint = valid.with_name("experiment-bad-hint.json")
+    value = json.loads(valid.read_text(encoding="utf-8"))
+    audio = next(item for item in value["files"] if Path(item["path"]).name == "ingredient.wav")
+    audio["audio"]["frames"] += 1
+    bad_hint.write_bytes(experiment_profile_bytes(value))
+    cases = [
+        {"profile_path": str(valid), "participant_id": "P001"},
+        {"profile_path": str(wrong_row), "participant_id": "P001"},
+        {"profile_path": str(bad_hint), "participant_id": "P001"},
+    ]
+    completed = subprocess.run(
+        ["cargo", "run", "--quiet", "--locked", "-p", "pps-experiment-media", "--example", "profile_media_probe"],
+        cwd=ROOT, input=json.dumps({"cases": cases}),
+        text=True, capture_output=True, check=True,
+    )
+    assert json.loads(completed.stdout) == [
+        {"accepted": True, "code": "media_bound", "frames": [480], "sample_rates": [48000], "channels": [2]},
+        {"accepted": False, "code": "profile_audio_row_digest_mismatch", "frames": [], "sample_rates": [], "channels": []},
+        {"accepted": False, "code": "profile_audio_hint_mismatch", "frames": [], "sample_rates": [], "channels": []},
+    ]

@@ -69,7 +69,7 @@ impl std::error::Error for PlanError {}
 #[derive(Debug, Clone)]
 pub struct ProfileTrialSource {
     fields: BTreeMap<String, String>,
-    audio_path: PathBuf,
+    ingredient: VerifiedProfileIngredient,
 }
 
 impl ProfileTrialSource {
@@ -78,7 +78,11 @@ impl ProfileTrialSource {
     }
 
     pub fn audio_path(&self) -> &Path {
-        &self.audio_path
+        self.ingredient.path()
+    }
+
+    pub fn ingredient(&self) -> &VerifiedProfileIngredient {
+        &self.ingredient
     }
 }
 
@@ -407,10 +411,11 @@ pub fn select_profile_participant(
                 .map(String::as_str)
                 .unwrap_or("");
             let audio_path = resolve(audio, trial_base)?;
-            if !files.contains_key(&audio_path) {
-                return Err(PlanError(PlanErrorCode::IngredientNotListed));
-            }
-            trials.push(ProfileTrialSource { fields, audio_path });
+            let ingredient = (**files
+                .get(&audio_path)
+                .ok_or(PlanError(PlanErrorCode::IngredientNotListed))?)
+            .clone();
+            trials.push(ProfileTrialSource { fields, ingredient });
         }
         blocks.push(ProfileBlockSource {
             order_fields,

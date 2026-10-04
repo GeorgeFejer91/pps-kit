@@ -48,7 +48,11 @@ existing Segment 6 block order and Segment 5 trial audio references. It
 rechecks the profile, run setup, source manifest and consumed CSV bytes against
 the exported inventory and frozen rows; it does not schedule, bake media or
 authorize execution. Recheck audio bytes when the native assembler consumes
-them. Neither path-bearing receipt may become a WebView or phone projection.
+them. `pps-experiment-media` now binds an inventoried PCM16 trial WAV to its
+exact decoded bytes through the existing native decoder and checks the exported
+audio hint after decoding. This is one trial media seam, not block assembly or
+an executable package. Neither path-bearing receipt may become a WebView or
+phone projection.
 
 Designer generation jobs bind to the captured design signature. Ingredient media
 stays in staging until the source and cooperative cancellation checks admit

@@ -2751,6 +2751,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "pps-experiment-media"
+version = "0.1.0"
+dependencies = [
+ "hound",
+ "pps-runner-audio",
+ "pps-session-package",
+ "serde",
+ "serde_json",
+ "sha2",
+]
+
+[[package]]
 name = "pps-experiment-runner"
 version = "0.1.0"
 dependencies = [

@@ -85,6 +85,7 @@ pub struct VerifiedProfileIngredient {
     path: PathBuf,
     bytes: u64,
     sha256: String,
+    audio: Option<ProfileAudioHint>,
 }
 
 impl VerifiedProfileIngredient {
@@ -98,6 +99,38 @@ impl VerifiedProfileIngredient {
 
     pub fn sha256(&self) -> &str {
         &self.sha256
+    }
+
+    /// Profile-provided WAV metadata. Bind a decoder to the digest above
+    /// before trusting the hint as a description of the consumed audio.
+    pub fn audio(&self) -> Option<&ProfileAudioHint> {
+        self.audio.as_ref()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct ProfileAudioHint {
+    frames: u64,
+    sample_rate: u32,
+    channels: u16,
+    format: String,
+}
+
+impl ProfileAudioHint {
+    pub const fn frames(&self) -> u64 {
+        self.frames
+    }
+
+    pub const fn sample_rate_hz(&self) -> u32 {
+        self.sample_rate
+    }
+
+    pub const fn channels(&self) -> u16 {
+        self.channels
+    }
+
+    pub fn format(&self) -> &str {
+        &self.format
     }
 }
 
@@ -163,6 +196,7 @@ struct ProfileFile {
     path: String,
     bytes: u64,
     sha256: String,
+    audio: Option<ProfileAudioHint>,
 }
 
 /// Check the exact local ingredient inventory exported by the Planner.
@@ -247,6 +281,7 @@ pub fn verify_experiment_profile_inventory(
             path,
             bytes: item.bytes,
             sha256: actual,
+            audio: item.audio,
         });
     }
     if !seen.contains(&document.run_setup_path) {
