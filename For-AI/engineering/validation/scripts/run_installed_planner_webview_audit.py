@@ -66,7 +66,7 @@ def prove_native_media(page, *, full_profile: bool) -> dict:
             "soa_values_ms": [10], "spatial_values_cm": [100.0],
             "include_baseline_trials": False, "baseline_strategy": "none",
             "baseline_trial_percentage": 0.0, "include_catch_trials": False,
-            "blocks": 1, "participants": 1, "repetitions_per_condition": 1,
+            "blocks": 2, "participants": 1, "repetitions_per_condition": 2,
             "trial_strips": [{"strip_id": "ci-row", "label": "CI native loom row",
                               "elements": [{"element_id": "ci-loom", "kind": "looming_stimulus",
                                             "label": "Looming Stimulus",
@@ -109,8 +109,8 @@ def prove_native_profile(page, profile_path: Path) -> dict:
     stages = (
         ("trial_sequence_batch", "2_trial_sequence_designs", {}),
         ("audiotactile_trial_batch", "3_tactile_and_baseline_trials", {}),
-        ("trial_repetition_pool", "4_trial_repetition_pool", {"default_repetitions": 1}),
-        ("block_csv_preview", "5_block_csv_preview", {"block_count": 1}),
+        ("trial_repetition_pool", "4_trial_repetition_pool", {"default_repetitions": 2}),
+        ("block_csv_preview", "5_block_csv_preview", {"block_count": 2}),
     )
     results = []
     for kind, label, options in stages:
@@ -149,7 +149,8 @@ def prove_native_profile(page, profile_path: Path) -> dict:
     profile_path.write_bytes(base64.b64decode(reply["body_base64"], validate=True))
     profile = json.loads(profile_path.read_text(encoding="utf-8"))
     assert profile["schema"] == "pps-experiment-profile.v1"
-    assert profile["assembly"]["blocks"] and profile["files"]
+    assert len(profile["assembly"]["blocks"]) == 2 and profile["files"]
+    assert all(block["rows"] for block in profile["assembly"]["blocks"])
     for item in profile["files"]:
         path = Path(item["path"])
         assert path.is_file() and path.stat().st_size == item["bytes"]

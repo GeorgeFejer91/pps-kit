@@ -360,7 +360,7 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
             manifest = json.loads(generated_manifest.read_text(encoding="utf-8"))
             assert manifest["schema"] == "pps-run-session.v1"
             assert manifest["participant_id"] == participant_id
-            assert len(manifest["blocks"]) == 1
+            assert len(manifest["blocks"]) == (2 if planner_profile is not None else 1)
             with generated_csv.open(newline="", encoding="utf-8") as source:
                 generated_rows = list(csv.DictReader(source))
             if planner_profile is None:
@@ -370,7 +370,9 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
             else:
                 source_profile = json.loads(profile_path.read_text(encoding="utf-8"))
                 assert source_profile["schema"] == "pps-experiment-profile.v1"
-                assert manifest["blocks"][0]["trial_count"] == len(source_profile["assembly"]["blocks"][0]["rows"])
+                assert sorted(block["trial_count"] for block in manifest["blocks"]) == sorted(
+                    len(block["rows"]) for block in source_profile["assembly"]["blocks"]
+                )
                 assert len(generated_rows) == manifest["blocks"][0]["trial_count"]
                 assert any(row["Family"] == "audio_tactile" for row in generated_rows)
             with wave.open(str(generated_wav), "rb") as audio:
@@ -387,6 +389,20 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
                 assert all(samples[index] == 0 for index in range(4_441 * 3, len(samples)))
             else:
                 assert any(sample != 0 for sample in samples), "Planner media became silent in the Runner package"
+                second_wav = generated[0] / "blocks" / "Block_02.wav"
+                second_csv = generated[0] / "blocks" / "Block_02.csv"
+                assert second_wav.is_file() and second_csv.is_file()
+                with second_csv.open(newline="", encoding="utf-8") as source:
+                    second_rows = list(csv.DictReader(source))
+                assert len(second_rows) == manifest["blocks"][1]["trial_count"] > 0
+                with wave.open(str(second_wav), "rb") as audio:
+                    assert (audio.getnchannels(), audio.getsampwidth(), audio.getframerate()) == (3, 2, 44_100)
+                    second_frames = audio.getnframes()
+                    assert second_frames > 0 and any(audio.readframes(second_frames))
+                report["second_block"] = {
+                    "trial_count": len(second_rows), "frames": second_frames,
+                    "wav_sha256": sha256(second_wav), "csv_sha256": sha256(second_csv),
+                }
             profile_snapshot = page.evaluate("window.__TAURI_INTERNALS__.invoke('runner_snapshot')")
             assert profile_snapshot["package_verified"] is True
             assert profile_snapshot["identity"]["session_id"] == generated[0].name
@@ -396,12 +412,16 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool,
             report["generated_wav_sha256"] = sha256(generated_wav)
             report["generated_csv_sha256"] = sha256(generated_csv)
             report["generated_wav_frames"] = frames
+            report["prepared_block_count"] = len(manifest["blocks"])
             report["planner_profile_package_generated"] = True
 
             expect(page.locator("#inspect-prepared-execution")).to_be_enabled(timeout=10_000)
             page.locator("#inspect-prepared-execution").click()
             expect(page.locator("#execution-inspection-status")).to_have_text(
                 "Compiled · inspection only", timeout=30_000,
+            )
+            expect(page.locator("#execution-inspection-detail")).to_contain_text(
+                f"{len(manifest['blocks'])} block", timeout=30_000,
             )
             report["profile_rust_schedule_compiled"] = True
             expect(page.locator("#prepare-current-audio-block")).to_be_enabled(timeout=10_000)
