@@ -29,7 +29,11 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
   V1-compatible prepared CSV/manifest publication in the media crate,
   bounded generation, shared Pretext,
   locked dependency patches and phone recovery are implemented.
-  Native execution has one actor, one callback scheduler and one journal worker.
+  The Runner main window now selects a local Planner JSON profile and output
+  folder through native dialogs, prepares a standard-route V1 package on a
+  blocking Rust worker, and adopts it through the existing verified-package
+  authority. The WebView receives only the path-free summary. Native execution
+  has one actor, one callback scheduler and one journal worker.
   Immutable PCM, response scoring, paired event/CSV files and exclusive result
   publication share package/run fences. Local and phone commands now use the
   same control path: durable Start/Resume intent, matching callback confirmation,
@@ -74,11 +78,15 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
   including the three platform Python/Rust oracles and validation bundles.
   Its Windows NSIS Runner-only artifact has the exact-commit marker and matching
   SHA-256 `1e0b97ca9a1946c18ccc1197a14b6e8114f794e1eedd16cbaf8773162af14c5b`.
-  It has not been linked into Runner or installed. Advanced media transforms
-  and native execution from the JSON profile remain incomplete.
-- **Next gate:** link the verified standard-route package producer to Runner's
-  existing package adoption path without adding another schema or scheduler.
-  Complete an installed native single-block run with a checked,
+  It has not been installed. The later native adoption source checkpoint
+  `07c93b27` passed all 14 [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37176982714).
+  Its Windows NSIS Runner-only artifact has the exact-commit marker and matching
+  SHA-256 `b4beead5e364596f8a86bf17b1288e507f5e3a158ee7b7bdae79e5913853c470`.
+  It has not been installed or visually checked. Advanced media transforms,
+  bounded native storage preflight, and native execution from the JSON profile
+  remain incomplete.
+- **Next gate:** add the native package storage preflight and complete an
+  installed native single-block run with a checked,
   compatible and calibrated output route, then validate its event/CSV files and
   recording. Extend the same owner to full profiles/multiple blocks. The native
   activation path exists in source but remains unqualified; no participant run or

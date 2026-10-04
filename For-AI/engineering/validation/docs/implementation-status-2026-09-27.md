@@ -15,7 +15,7 @@ Each status applies to its stated surface, not to the whole product.
 | 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full scheduling UI and native profile assembly |
 | 8 | VERIFIED: plan/resource preflight, source/cancel/publication fences, shared job completion and rollback | Qualify additional generation routes if selected |
 | 9 | PARTIAL: exact CPAL port, fenced single-block activation in source, local output preflight, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Compatible checked route, installed playback/results, full-profile execution and qualification |
-| 10 | PARTIAL: shared Rust/browser contracts; JSON to existing compatibility assembler; Rust JSON inventory and participant block/trial selection; content-bound PCM16 trial decoding, standard three-channel block assembly and V1 prepared CSV/manifest source with Python PCM/row comparison; sample/tactile/response/CSV oracle checks | Advanced media transforms, Runner adoption of the native package producer, and complete profile execution |
+| 10 | PARTIAL: shared Rust/browser contracts; JSON to existing compatibility assembler; Rust JSON inventory and participant block/trial selection; content-bound PCM16 trial decoding, standard three-channel block assembly and V1 prepared CSV/manifest; native main-window profile/folder selection and existing Runner package adoption; Python PCM/row comparison and sample/tactile/response/CSV oracle checks | Bounded native storage preflight, advanced media transforms, installed adoption and complete profile execution |
 | 11 | PARTIAL: authenticated local/phone commands use one dispatch/control owner, shared scope fixture and fresh-state gate | Complete real-package execution |
 | 12 | PARTIAL: retry/input fences, durable intent versus callback confirmation, bounded deadlines, per-run journal and exclusive hashed result publication | Installed filesystems, recovery and complete execution |
 | 13 | PARTIAL: secure hosted companion, inert discovery, existing authenticated VDO route | Physical phone direct/relay/network-loss qualification |
@@ -26,6 +26,24 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
+- Native Planner JSON adoption source checkpoint
+  `07c93b27653dacbe4531b9c52c54413faecbbe93` links the existing
+  standard-route media crate to the Runner through a main-window-only,
+  no-path-argument Tauri command. Native dialogs select the JSON and output
+  folder; the blocking worker rechecks the inventory and writes a V1 package;
+  the existing verified-package authority adopts the native receipt. The
+  bundled Runner UI exposes the action after participant setup, measures its
+  two full labels with shared Pretext, and keeps the ordered block list in host
+  document flow. Local fmt, 66 frontend tests, canonical frontend build, and
+  locked Cargo metadata passed. [Exact-SHA CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37176982714)
+  passed all 14 jobs, including Core, Desktop, Python/Rust V1 oracles on all
+  three platforms and the three validation bundles. The downloaded Windows
+  NSIS Runner-only artifact's commit marker matches this source and its
+  SHA-256 matches the manifest:
+  `b4beead5e364596f8a86bf17b1288e507f5e3a158ee7b7bdae79e5913853c470`.
+  It is unsigned, validation-only, uninstalled and not visually checked;
+  storage preflight, advanced transforms, full native execution, recording and
+  physical qualification remain.
 - Standard-route native package source now writes all of one approved
   participant's single-phase blocks as V1 CSV/WAV files and publishes the
   canonical manifest after staged and final verification/schedule compilation.
