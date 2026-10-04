@@ -16,6 +16,8 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 MANIFEST_DIR = REPO_ROOT / "distributions" / "manifests"
 COMPONENT_SCHEMA = "pps-component-manifest."
 INVENTORY_SCHEMA = "pps-resolved-component-inventory."
+TAURI_BUNDLE_TOKEN = b"__TAURI_BUNDLE_TYPE_VAR_UNK"
+TAURI_NSIS_TOKEN = b"__TAURI_BUNDLE_TYPE_VAR_NSS"
 
 
 def _filesystem_path(path: Path) -> Path:
@@ -33,6 +35,15 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def sha256_tauri_nsis_binary(path: Path) -> str:
+    """Hash the single same-length bundle marker Tauri writes into NSIS payloads."""
+    source = path.read_bytes()
+    if source.count(TAURI_BUNDLE_TOKEN) != 1:
+        raise ValueError(f"expected exactly one unpatched Tauri bundle marker in {path}")
+    assert len(TAURI_BUNDLE_TOKEN) == len(TAURI_NSIS_TOKEN)
+    return hashlib.sha256(source.replace(TAURI_BUNDLE_TOKEN, TAURI_NSIS_TOKEN, 1)).hexdigest()
 
 
 def sha256_tree(path: Path) -> str:
@@ -120,6 +131,8 @@ def build_inventory(stage_root: Path | None = None, component_id: str = "full", 
                 "kind": mapping["kind"],
                 "required": True,
             }
+            if mapping.get("binary_patch"):
+                entry["binary_patch"] = mapping["binary_patch"]
             if root is not None:
                 target = root / install
                 entry["exists"] = target.exists()
@@ -131,7 +144,16 @@ def build_inventory(stage_root: Path | None = None, component_id: str = "full", 
                     if manifest_version == "v2":
                         source_path = REPO_ROOT / source
                         entry["source_sha256"] = sha256_file(source_path) if source_path.is_file() else ""
-                        if entry["sha256"] != entry["source_sha256"]:
+                        patch = mapping.get("binary_patch")
+                        if patch == "tauri-nsis":
+                            entry["expected_install_sha256"] = (
+                                sha256_tauri_nsis_binary(source_path) if source_path.is_file() else ""
+                            )
+                        elif patch is None:
+                            entry["expected_install_sha256"] = entry["source_sha256"]
+                        else:
+                            raise ValueError(f"unsupported binary patch: {patch}")
+                        if entry["sha256"] != entry["expected_install_sha256"]:
                             mismatched.append(install)
                 else:
                     filesystem_target = _filesystem_path(target)

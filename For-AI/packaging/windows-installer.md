@@ -29,6 +29,10 @@ The user selected the stable Planner bundle identifier
    Designer, Runner, and one Shared tree; audit ownership, exclusions, runtime
    dependencies, licenses, hashes, and installed paths. Keep private files,
    generated sessions, and all of `For-AI/` out of the payload.
+   The V2 Planner executable mapping declares Tauri's NSIS bundle-marker patch:
+   the installed executable must match the build executable with exactly one
+   `__TAURI_BUNDLE_TYPE_VAR_UNK` to `__TAURI_BUNDLE_TYPE_VAR_NSS` substitution.
+   The inventory rejects every other byte difference.
 4. Build one Full Windows installer over that audited composition. It must
    provide separate **Experiment Planner** and **Experiment Runner** shortcuts,
    support uninstall/repair without corrupting Shared ownership, and reject an
