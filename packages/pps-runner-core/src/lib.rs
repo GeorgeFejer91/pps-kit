@@ -108,6 +108,7 @@ pub struct RunnerCore {
     package_execution_ready: bool,
     native_block: Option<NativeBlockSummary>,
     package_block_count: u32,
+    native_completed_blocks: u32,
     native_control_pending: Option<Action>,
 }
 
@@ -225,6 +226,7 @@ impl RunnerCore {
             package_execution_ready: false,
             native_block: None,
             package_block_count: 0,
+            native_completed_blocks: 0,
             native_control_pending: None,
         };
         core.refresh_derived();
@@ -272,7 +274,8 @@ impl RunnerCore {
             && self.snapshot.package_verified
             && self.snapshot.run.phase == RunnerPhase::Prepared
             && !self.snapshot.safety.local_armed
-            && self.native_block.is_none();
+            && self.native_block.is_none()
+            && self.native_completed_blocks == 0;
         if already {
             self.stamp(&now);
             return Ok(self.snapshot());
@@ -326,6 +329,7 @@ impl RunnerCore {
         self.package_fingerprint = Some(package.fingerprint);
         self.package_execution_ready = false;
         self.package_block_count = package.block_count;
+        self.native_completed_blocks = 0;
         self.native_block = None;
         self.native_control_pending = None;
         self.snapshot.audit_event_count = self.snapshot.audit_event_count.saturating_add(1);
@@ -341,11 +345,9 @@ impl RunnerCore {
         now: ClockStamp,
     ) -> Result<(), &'static str> {
         if self.package_fingerprint.as_deref() != Some(fingerprint)
-            || !matches!(
-                self.snapshot.run.phase,
-                RunnerPhase::Prepared | RunnerPhase::Interrupted | RunnerPhase::Completed
-            )
+            || self.snapshot.run.phase != RunnerPhase::Prepared
             || block.block_index == 0
+            || block.block_ordinal != self.native_completed_blocks
             || block.block_ordinal >= self.package_block_count
             || block.block_label.len() > 1024
             || block.duration_ns == 0
@@ -366,8 +368,16 @@ impl RunnerCore {
         self.native_block.is_some()
     }
 
+    pub fn next_native_block_ordinal(&self) -> Option<u32> {
+        (self.package_fingerprint.is_some()
+            && self.snapshot.run.phase == RunnerPhase::Prepared
+            && !self.snapshot.safety.local_armed
+            && self.native_completed_blocks < self.package_block_count)
+            .then_some(self.native_completed_blocks)
+    }
+
     /// Native owner only, after checking its current port and result journal.
-    /// Activation enables the complete single-block adapter without qualifying
+    /// Activation enables the current verified block without qualifying
     /// physical onset, response timing or calibration. It never arms or starts.
     pub fn activate_native_execution(
         &mut self,
@@ -375,15 +385,11 @@ impl RunnerCore {
         now: ClockStamp,
     ) -> Result<bool, &'static str> {
         if self.package_fingerprint.as_deref() != Some(fingerprint)
-            || self.package_block_count != 1
             || self
                 .native_block
                 .as_ref()
-                .is_none_or(|block| block.block_ordinal != 0)
-            || !matches!(
-                self.snapshot.run.phase,
-                RunnerPhase::Prepared | RunnerPhase::Completed | RunnerPhase::Interrupted
-            )
+                .is_none_or(|block| block.block_ordinal != self.native_completed_blocks)
+            || self.snapshot.run.phase != RunnerPhase::Prepared
             || self.snapshot.safety.local_armed
             || !self.snapshot.setup.ready
             || self.native_control_pending.is_some()
@@ -436,6 +442,48 @@ impl RunnerCore {
         }
     }
 
+    /// A drained non-final block leaves the same run journal open. The next
+    /// block must be prepared and armed separately on the native target.
+    pub fn complete_native_block(
+        &mut self,
+        fingerprint: &str,
+        block_ordinal: u32,
+        now: ClockStamp,
+    ) -> Result<(), &'static str> {
+        if self.package_fingerprint.as_deref() != Some(fingerprint)
+            || !self.package_execution_ready
+            || self.native_control_pending.is_some()
+            || self.snapshot.run.phase != RunnerPhase::Running
+            || self.native_completed_blocks != block_ordinal
+            || self
+                .native_block
+                .as_ref()
+                .is_none_or(|block| block.block_ordinal != block_ordinal)
+            || block_ordinal
+                .checked_add(1)
+                .is_none_or(|next| next >= self.package_block_count)
+        {
+            return Err("native_block_completion_scope_invalid");
+        }
+        self.native_completed_blocks += 1;
+        self.snapshot.run.phase = RunnerPhase::Prepared;
+        self.snapshot.active_block.active = false;
+        self.snapshot.active_block.running = false;
+        self.snapshot.active_block.paused = false;
+        self.snapshot.active_block.block_index = None;
+        self.snapshot.active_block.display_block_index = None;
+        self.snapshot.active_block.duration_s = None;
+        self.snapshot.active_block.elapsed_s = None;
+        self.snapshot.active_block.last_anchor_server_monotonic_ns = None;
+        self.snapshot.safety.local_armed = false;
+        self.snapshot.safety.capture_started = false;
+        self.snapshot.safety.audio_route_ready = false;
+        self.package_execution_ready = false;
+        self.native_block = None;
+        self.bump_revision(&now);
+        Ok(())
+    }
+
     /// Native owner only: all media submission and response windows have
     /// resolved. This begins file publication; it does not certify completion.
     pub fn begin_native_finalization(
@@ -447,6 +495,10 @@ impl RunnerCore {
             || !self.package_execution_ready
             || self.native_control_pending.is_some()
             || self.snapshot.run.phase != RunnerPhase::Running
+            || self.native_block.as_ref().is_none_or(|block| {
+                block.block_ordinal.checked_add(1) != Some(self.package_block_count)
+                    || block.block_ordinal != self.native_completed_blocks
+            })
         {
             return Err("native_result_scope_invalid");
         }
@@ -472,6 +524,7 @@ impl RunnerCore {
             return Err("native_result_scope_invalid");
         }
         self.snapshot.run.phase = RunnerPhase::Completed;
+        self.native_completed_blocks = self.package_block_count;
         self.bump_revision(&now);
         Ok(())
     }
@@ -985,6 +1038,9 @@ impl RunnerCore {
     }
 
     fn submit_setup(&mut self, args: &Value) -> Result<bool, &'static str> {
+        if self.native_completed_blocks > 0 {
+            return Err("setup_locked_during_run");
+        }
         if matches!(
             self.snapshot.run.phase,
             RunnerPhase::Running | RunnerPhase::Paused | RunnerPhase::InstructionGate
@@ -1225,6 +1281,9 @@ impl RunnerCore {
         .to_owned();
         self.snapshot.run.progress_label = match phase {
             RunnerPhase::Idle => "Prepare a validated session package",
+            RunnerPhase::Prepared if self.native_completed_blocks > 0 => {
+                "Block complete — prepare and arm the next verified block"
+            }
             RunnerPhase::Prepared
                 if self.snapshot.package_verified && !self.package_execution_ready =>
             {
@@ -1557,7 +1616,7 @@ mod tests {
     }
 
     #[test]
-    fn native_activation_requires_the_whole_prepared_package_and_stays_unqualified() {
+    fn native_activation_requires_the_next_prepared_block_and_stays_unqualified() {
         for count in [1, 2] {
             let mut core = ready_core();
             let mut package = verified_package("P001");
@@ -1581,13 +1640,6 @@ mod tests {
             assert!(core
                 .activate_native_execution(&"b".repeat(64), clock(7))
                 .is_err());
-            if count != 1 {
-                assert!(core
-                    .activate_native_execution(&fingerprint, clock(8))
-                    .is_err());
-                assert!(!core.native_execution_ready());
-                continue;
-            }
             assert!(core
                 .activate_native_execution(&fingerprint, clock(8))
                 .unwrap());
@@ -1644,6 +1696,78 @@ mod tests {
                 .activate_native_execution(&fingerprint, clock(14))
                 .is_err());
         }
+    }
+
+    #[test]
+    fn native_blocks_advance_in_order_and_only_the_last_can_finalize() {
+        let mut core = ready_core();
+        let mut package = verified_package("P001");
+        package.block_count = 2;
+        let fingerprint = package.fingerprint.clone();
+        core.adopt_verified_package(package.clone(), clock(4))
+            .unwrap();
+        assert_eq!(core.next_native_block_ordinal(), Some(0));
+        let block = |ordinal| NativeBlockSummary {
+            block_index: ordinal + 1,
+            block_ordinal: ordinal,
+            block_label: format!("Block {}", ordinal + 1),
+            duration_ns: 1_000_000_000,
+        };
+        assert!(core
+            .prepare_native_block(&fingerprint, block(1), clock(5))
+            .is_err());
+        core.prepare_native_block(&fingerprint, block(0), clock(6))
+            .unwrap();
+        core.activate_native_execution(&fingerprint, clock(7))
+            .unwrap();
+        core.dispatch_local(Action::TargetArm, json!({}), clock(8));
+        core.dispatch_local(Action::PartStart, json!({"part_number": 2}), clock(9));
+        core.confirm_native_control(Action::PartStart, clock(10))
+            .unwrap();
+        assert!(core
+            .begin_native_finalization(&fingerprint, clock(11))
+            .is_err());
+        assert!(core
+            .complete_native_block(&fingerprint, 1, clock(11))
+            .is_err());
+        core.complete_native_block(&fingerprint, 0, clock(12))
+            .unwrap();
+        assert_eq!(core.snapshot().run.phase, RunnerPhase::Prepared);
+        assert!(!core.snapshot().run.complete);
+        assert!(!core.snapshot().safety.local_armed);
+        assert_eq!(core.next_native_block_ordinal(), Some(1));
+        assert_eq!(
+            core.snapshot().run.progress_label,
+            "Block complete — prepare and arm the next verified block"
+        );
+        assert_eq!(
+            core.dispatch_local(Action::SetupSubmit, json!({}), clock(13))
+                .reason,
+            "setup_locked_during_run"
+        );
+        assert!(core
+            .prepare_native_block(&fingerprint, block(0), clock(14))
+            .is_err());
+        core.prepare_native_block(&fingerprint, block(1), clock(15))
+            .unwrap();
+        core.activate_native_execution(&fingerprint, clock(16))
+            .unwrap();
+        core.dispatch_local(Action::TargetArm, json!({}), clock(17));
+        let started = core.dispatch_local(Action::PartStart, json!({"part_number": 2}), clock(18));
+        assert_eq!(started.snapshot.run.progress_label, "Block 2 / 2");
+        core.confirm_native_control(Action::PartStart, clock(19))
+            .unwrap();
+        assert!(core
+            .complete_native_block(&fingerprint, 1, clock(20))
+            .is_err());
+        core.begin_native_finalization(&fingerprint, clock(21))
+            .unwrap();
+        core.complete_native_finalization(&fingerprint, clock(22))
+            .unwrap();
+        assert!(core.snapshot().run.complete);
+        assert_eq!(core.next_native_block_ordinal(), None);
+        core.adopt_verified_package(package, clock(23)).unwrap();
+        assert_eq!(core.next_native_block_ordinal(), Some(0));
     }
 
     #[test]
@@ -2185,7 +2309,8 @@ mod tests {
     fn native_finalization_requires_the_current_run_and_receipt_while_wire_actions_cannot_complete_it(
     ) {
         let mut core = ready_core();
-        let package = verified_package("P001");
+        let mut package = verified_package("P001");
+        package.block_count = 1;
         let fingerprint = package.fingerprint.clone();
         core.adopt_verified_package(package, clock(4)).unwrap();
         assert!(core
@@ -2194,6 +2319,17 @@ mod tests {
         assert!(core
             .begin_native_finalization(&fingerprint, clock(5))
             .is_err());
+        core.prepare_native_block(
+            &fingerprint,
+            NativeBlockSummary {
+                block_index: 1,
+                block_ordinal: 0,
+                block_label: "Block".to_owned(),
+                duration_ns: 1_000_000_000,
+            },
+            clock(5),
+        )
+        .unwrap();
         // This exercises the reducer seam, not an executable adapter or device.
         core.package_execution_ready = true;
         core.snapshot.run.phase = RunnerPhase::Running;
@@ -2249,7 +2385,7 @@ mod tests {
         core.adopt_verified_package(package, clock(4)).unwrap();
         let block = NativeBlockSummary {
             block_index: 17,
-            block_ordinal: 2,
+            block_ordinal: 0,
             block_label: "Actual looming block".to_owned(),
             duration_ns: 2_250_000_000,
         };
@@ -2279,13 +2415,13 @@ mod tests {
             "P001_session_20260831_part_02"
         );
         assert_eq!(started.snapshot.active_block.block_index, Some(17));
-        assert_eq!(started.snapshot.active_block.display_block_index, Some(3));
+        assert_eq!(started.snapshot.active_block.display_block_index, Some(1));
         assert_eq!(started.snapshot.active_block.duration_s, Some(2.25));
         assert_eq!(
             started.snapshot.active_block.block_label,
             "Actual looming block"
         );
-        assert_eq!(started.snapshot.run.progress_label, "Block 3 / 6");
+        assert_eq!(started.snapshot.run.progress_label, "Block 1 / 6");
         assert_eq!(core.native_control_pending(), Some(Action::PartStart));
         assert!(!started.snapshot.run.participant_capture_ready);
         assert_eq!(

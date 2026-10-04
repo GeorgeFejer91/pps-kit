@@ -50,7 +50,7 @@ test("ordinary-browser preview supports deterministic local clicks and fails rem
     /available only in the native Tauri runner/iu,
   );
   await assert.rejects(
-    () => adapter.prepareFirstAudioBlock(),
+    () => adapter.prepareCurrentAudioBlock(),
     /available only in the Tauri runner/iu,
   );
   await assert.rejects(() => adapter.recordResponse(), /only in the native Tauri runner/iu);
@@ -76,7 +76,7 @@ test("Tauri adapter sends exact remote-owner DTOs and keeps LAN activation expli
   await adapter.selectPreparedSession();
   await adapter.prepareExperimentProfile();
   await adapter.inspectPreparedExecution();
-  await adapter.prepareFirstAudioBlock();
+  await adapter.prepareCurrentAudioBlock();
   await adapter.remoteSessionClaim({
     sessionId: "session_12345678",
     controllerId: "controller_12345678",
@@ -104,7 +104,7 @@ test("Tauri adapter sends exact remote-owner DTOs and keeps LAN activation expli
     ["select_prepared_session", undefined],
     ["prepare_experiment_profile", undefined],
     ["inspect_prepared_execution", undefined],
-    ["prepare_first_audio_block", undefined],
+    ["prepare_current_audio_block", undefined],
     ["remote_session_claim", { request: {
       sessionId: "session_12345678",
       controllerId: "controller_12345678",

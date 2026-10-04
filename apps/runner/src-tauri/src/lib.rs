@@ -375,7 +375,7 @@ async fn inspect_prepared_execution(
 }
 
 #[tauri::command]
-async fn prepare_first_audio_block(
+async fn prepare_current_audio_block(
     window: tauri::WebviewWindow,
     state: tauri::State<'_, AppRuntime>,
 ) -> Result<PreparedAudioSummary, PreparedSessionCommandError> {
@@ -383,7 +383,7 @@ async fn prepare_first_audio_block(
         .map_err(|error| PreparedSessionCommandError::new(&error.code, &error.message))?;
     let runtime = state.inner().clone();
     let preparation = runtime
-        .begin_prepared_audio_preparation_async(0)
+        .begin_prepared_audio_preparation_async()
         .await
         .map_err(prepared_audio_runtime_error)?;
     let (_preparation_guard, summary) = match preparation {
@@ -445,7 +445,11 @@ fn prepared_audio_runtime_error(reason: &'static str) -> PreparedSessionCommandE
         ),
         "prepared_audio_block_missing" => PreparedSessionCommandError::new(
             reason,
-            "The verified package does not contain a first audio block.",
+            "The verified package does not contain the current audio block.",
+        ),
+        "prepared_audio_block_out_of_order" => PreparedSessionCommandError::new(
+            reason,
+            "Only the next verified block can be prepared; reselect the package to start a new run.",
         ),
         "prepared_audio_sample_rate_invalid" => PreparedSessionCommandError::new(
             reason,
@@ -488,6 +492,10 @@ fn prepared_execution_runtime_error(reason: &'static str) -> PreparedSessionComm
         "prepared_package_replaced" => PreparedSessionCommandError::new(
             reason,
             "The selected prepared package was replaced during inspection; inspect it again.",
+        ),
+        "prepared_execution_active_run" => PreparedSessionCommandError::new(
+            reason,
+            "The current run has begun; reselect the package before recompiling its schedules.",
         ),
         "runtime_unavailable" => PreparedSessionCommandError::runtime(),
         _ => PreparedSessionCommandError::new(
@@ -712,7 +720,7 @@ pub fn run() {
             select_prepared_session,
             prepare_experiment_profile,
             inspect_prepared_execution,
-            prepare_first_audio_block,
+            prepare_current_audio_block,
             remote_session_claim,
             remote_session_renew,
             remote_session_dispatch,

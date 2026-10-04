@@ -10,7 +10,7 @@ fn main() {
             "select_prepared_session",
             "prepare_experiment_profile",
             "inspect_prepared_execution",
-            "prepare_first_audio_block",
+            "prepare_current_audio_block",
             "remote_session_claim",
             "remote_session_renew",
             "remote_session_dispatch",

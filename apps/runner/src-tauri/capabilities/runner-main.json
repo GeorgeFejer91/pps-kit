@@ -15,7 +15,7 @@
     "allow-select-prepared-session",
     "allow-prepare-experiment-profile",
     "allow-inspect-prepared-execution",
-    "allow-prepare-first-audio-block",
+    "allow-prepare-current-audio-block",
     "allow-remote-session-claim",
     "allow-remote-session-renew",
     "allow-remote-session-dispatch",

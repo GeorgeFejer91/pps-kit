@@ -119,7 +119,8 @@ function renderPreparedAudio(nextPreparation) {
     && qualification === "unqualified"
     && candidate.executable === false
     && outputPlanPrepared === true
-    && blockOrdinal === 0
+    && Number.isSafeInteger(blockOrdinal) && blockOrdinal >= 0
+    && blockOrdinal < Number(planValue(preparedExecution, "blockCount", "block_count"))
     && Number.isSafeInteger(sampleRate) && sampleRate > 0
     && [2, 3].includes(channels)
     && ["legacy-study5-tactile-audio", "binaural-left-right-tactile"].includes(layout)
@@ -134,15 +135,15 @@ function renderPreparedAudio(nextPreparation) {
     && byteBudget === 1280 * 1024 * 1024
     && decodedBytes <= byteBudget;
   preparedAudio = valid ? candidate : null;
-  nativeOutputSetup.update(snapshot, preparedAudio, preparedPlan?.blocks?.length);
+  nativeOutputSetup.update(snapshot, preparedAudio);
   text("prepared-audio-status", preparedAudio ? "Prepared · output not reserved" : "Not prepared");
   text(
     "prepared-audio-detail",
     preparedAudio
-      ? `Block 1 is content-bound in the one-block native PCM and renderer-plan cache: ${frames.toLocaleString()} frames at ${sampleRate.toLocaleString()} Hz, ${channels} source channels (${layout}), ${(decodedBytes / (1024 * 1024)).toFixed(2)} MiB, ${scheduledEventCount.toLocaleString()} scheduled events, proposed route ${outputRoute}. Output qualification: ${qualification}; preparation alone does not enable a run.`
+      ? `Block ${blockOrdinal + 1} is content-bound in the one-block native PCM and renderer-plan cache: ${frames.toLocaleString()} frames at ${sampleRate.toLocaleString()} Hz, ${channels} source channels (${layout}), ${(decodedBytes / (1024 * 1024)).toFixed(2)} MiB, ${scheduledEventCount.toLocaleString()} scheduled events, proposed route ${outputRoute}. Output qualification: ${qualification}; preparation alone does not enable a run.`
       : preparedExecution
-        ? "Prepare the first verified WAV and renderer-neutral plan in the bounded native cache. This does not open an output device, qualify a route, arm, or execute the experiment."
-        : "Native PCM and output-plan preparation is unavailable until the first schedule is inspected.",
+        ? "Prepare the next verified WAV and renderer-neutral plan in the bounded native cache. This does not open an output device, qualify a route, arm, or execute the experiment."
+        : "Native PCM and output-plan preparation is unavailable until the schedule is inspected.",
   );
   return !candidate || valid;
 }
@@ -200,7 +201,7 @@ function renderPreparedPlan(nextPlan) {
   text(
     "package-detail",
     preparedPlan
-      ? `${blocks.length} ordered block${blocks.length === 1 ? "" : "s"} passed native V1 provenance checks. Inspect the Rust schedule and prepare audio. Native execution requires a complete single-block package, compatible output, and explicit acknowledgement.`
+      ? `${blocks.length} ordered block${blocks.length === 1 ? "" : "s"} passed native V1 provenance checks. Inspect the Rust schedule and prepare audio. Each native block requires compatible output and explicit acknowledgement.`
       : "The native verifier checks the V1 manifest, ordered block files, source hashes, and trial counts before adoption.",
   );
 }
@@ -335,14 +336,14 @@ function renderSnapshot(next) {
   elements["inspect-prepared-execution"].title = api.kind === "tauri-native"
     ? "Reverify the retained package and compile a path-free schedule inspection"
     : "Rust schedule inspection is available in the native Tauri app";
-  elements["prepare-first-audio-block"].disabled = api.kind !== "tauri-native"
+  elements["prepare-current-audio-block"].disabled = api.kind !== "tauri-native"
     || !preparedExecution
-    || active
+    || phase !== "prepared"
     || Boolean(preparedAudio);
-  elements["prepare-first-audio-block"].title = api.kind === "tauri-native"
-    ? "Content-bind the first verified WAV and renderer-neutral plan in the one-block native cache"
+  elements["prepare-current-audio-block"].title = api.kind === "tauri-native"
+    ? "Content-bind the next verified WAV and renderer-neutral plan in the one-block native cache"
     : "Native audio preparation is available in the Tauri app";
-  nativeOutputSetup.update(next, preparedAudio, preparedPlan?.blocks?.length);
+  nativeOutputSetup.update(next, preparedAudio);
   updateInboundPolicyUi();
 
   if (inboundPrivateTarget?.nativeClaimReceipt && !next.safety?.local_armed) {
@@ -1054,11 +1055,11 @@ function bindLocalActions() {
     }
   });
 
-  elements["prepare-first-audio-block"].addEventListener("click", async () => {
-    const button = elements["prepare-first-audio-block"];
+  elements["prepare-current-audio-block"].addEventListener("click", async () => {
+    const button = elements["prepare-current-audio-block"];
     button.disabled = true;
     try {
-      const prepared = await api.prepareFirstAudioBlock();
+      const prepared = await api.prepareCurrentAudioBlock();
       if (!renderPreparedAudio(prepared)) {
         throw new Error("The native runner returned an invalid prepared-audio summary.");
       }

@@ -94,11 +94,11 @@
                     <button id="select-session-manifest" class="button" type="button">Choose prepared session manifest</button>
                   </div>
                   <button id="inspect-prepared-execution" class="button" type="button" disabled>Compile and inspect Rust schedule</button>
-                  <button id="prepare-first-audio-block" class="button" type="button" disabled>Prepare first audio block</button>
+                  <button id="prepare-current-audio-block" class="button" type="button" disabled>Prepare next audio block</button>
                   <button id="prepare-demo-button" class="button" type="button" data-action="package.prepare_demo">Prepare deterministic validation demo</button>
                   <p id="package-detail" class="safety-copy">The native verifier checks the V1 manifest, ordered block files, source hashes, and trial counts before adoption.</p>
                   <p id="execution-inspection-detail" class="safety-copy">Schedule inspection is unavailable until a real prepared session is selected.</p>
-                  <p id="prepared-audio-detail" class="safety-copy">Native PCM preparation is unavailable until the first schedule is inspected.</p>
+                  <p id="prepared-audio-detail" class="safety-copy">Native PCM preparation is unavailable until the schedule is inspected.</p>
                   <ol id="package-block-list" class="package-block-list" aria-label="Verified package blocks"></ol>
                   <div class="inline-actions">
                     <button class="button" type="button" data-action="target.arm">Arm local target</button>
@@ -112,7 +112,7 @@
             <aside class="workspace-side stack">
               <section class="panel stack compact-stack" aria-labelledby="native-output-heading">
                 <h2 id="native-output-heading">Prepare audio output</h2>
-                <p id="native-output-detail" class="safety-copy" role="status">Prepare the first audio block before choosing an output device.</p>
+                <p id="native-output-detail" class="safety-copy" role="status">Prepare the current audio block before choosing an output device.</p>
                 <button id="native-output-list" class="button" type="button" disabled>List output devices</button>
                 <label>Output device<select id="native-output-route" aria-describedby="native-output-selection" disabled>
                   <option value="">Choose output device…</option>

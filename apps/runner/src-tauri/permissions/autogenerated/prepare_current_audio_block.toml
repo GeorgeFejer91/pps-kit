@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-prepare-current-audio-block"
+description = "Enables the prepare_current_audio_block command without any pre-configured scope."
+commands.allow = ["prepare_current_audio_block"]
+
+[[permission]]
+identifier = "deny-prepare-current-audio-block"
+description = "Denies the prepare_current_audio_block command without any pre-configured scope."
+commands.deny = ["prepare_current_audio_block"]

@@ -646,13 +646,10 @@ impl OwnerState {
             );
             return;
         }
-        // This first complete path is for a whole single-block package. Do
-        // not certify one block of a larger prepared experiment as complete.
         let completion_ready = status.state == pps_runner_audio::RenderState::SourceExhausted
             && playback
                 .final_submission_estimate_ns
                 .is_some_and(|end| end <= stamp.monotonic_ns)
-            && playback.source.receipt.verified_session().blocks().len() == 1
             && playback
                 .capture
                 .complete(playback.source.receipt.schedule().summary().trial_row_count)
@@ -660,8 +657,8 @@ impl OwnerState {
             && snapshot.run.phase == RunnerPhase::Running
             && pending_responses.load(Ordering::Acquire) == 0
             && (self.native_control.is_none() || control_acknowledged == Ok(true));
-        let expected_trials =
-            u64::from(playback.source.receipt.schedule().summary().trial_row_count);
+        let block_ordinal = playback.source.plan.fence().audio().block_ordinal();
+        let block_count = playback.source.receipt.verified_session().blocks().len();
         let reserve = LedgerReserve::new(LEDGER_SAFETY_RECORD_RESERVE, LEDGER_SAFETY_BYTE_RESERVE);
         match inputs {
             Ok(inputs) if inputs.is_empty() => {}
@@ -708,8 +705,58 @@ impl OwnerState {
         if !reservation_available || status.fault.is_some() || status.callback_retired {
             self.fail_stop_unavailable("native.media.callback-unavailable", "evidence_unavailable");
         } else if completion_ready {
-            self.begin_native_finalization(expected_trials, stamp);
+            if usize::try_from(block_ordinal)
+                .ok()
+                .and_then(|index| index.checked_add(1))
+                == Some(block_count)
+            {
+                let Some(total_trials) = self
+                    .compiled_execution
+                    .as_ref()
+                    .map(|compiled| compiled.summary().trial_row_count)
+                else {
+                    self.fail_stop_unavailable(
+                        "native.results.scope-invalid",
+                        "evidence_unavailable",
+                    );
+                    return;
+                };
+                self.begin_native_finalization(total_trials, stamp);
+            } else {
+                self.complete_native_block(block_ordinal, stamp);
+            }
         }
+    }
+
+    fn complete_native_block(&mut self, block_ordinal: u32, stamp: ClockStamp) {
+        let Some(retained) = self.retained_session.as_ref() else {
+            self.fail_stop_unavailable("native.block.scope-invalid", "evidence_unavailable");
+            return;
+        };
+        let mut candidate = self.core.clone();
+        if candidate
+            .complete_native_block(
+                retained.receipt.manifest_sha256(),
+                block_ordinal,
+                stamp.clone(),
+            )
+            .is_err()
+        {
+            self.fail_stop_unavailable("native.block.scope-invalid", "evidence_unavailable");
+            return;
+        }
+        let mut event = Self::ledger_input("native.block.completed", "native", &stamp);
+        event.payload = serde_json::json!({"blockOrdinal": block_ordinal,
+            "runGeneration": self.run_generation.to_string(),
+            "completion": "software-frame-submission", "timingQualification": "unqualified"});
+        if self
+            .commit_candidate(candidate, event, CommitPolicy::Ordinary, true)
+            .is_err()
+        {
+            return;
+        }
+        self.invalidate_prepared_audio();
+        self.native_output.invalidate_for_runner_change();
     }
 
     fn poll_native_control_admission(&mut self) -> Result<(), &'static str> {
@@ -1325,6 +1372,12 @@ impl OwnerState {
         &mut self,
         compiled: CompiledPreparedExecution,
     ) -> Result<PreparedExecutionSummary, &'static str> {
+        if self.core.next_native_block_ordinal() != Some(0)
+            || self.core.native_block_prepared()
+            || self.core.native_execution_ready()
+        {
+            return Err("prepared_execution_active_run");
+        }
         let retained = self
             .retained_session
             .as_ref()
@@ -2218,12 +2271,6 @@ impl OwnerState {
             .native_playback
             .as_ref()
             .expect("checked native preparation");
-        if playback.source.receipt.verified_session().blocks().len() != 1 {
-            return Err(NativeOutputCommandError::new(
-                "native_execution_package_unsupported",
-                "This native adapter currently requires a complete single-block package.",
-            ));
-        }
         let fingerprint = playback.source.receipt.verified_session().manifest_sha256();
         let stamp = self.clock.stamp();
         let mut candidate = self.core.clone();
@@ -2893,13 +2940,14 @@ impl ExecutionOwner {
 
     pub(crate) async fn prepared_audio_source(
         &self,
-        block_ordinal: u32,
     ) -> Result<Result<PreparedAudioLookup, &'static str>, OwnerSubmitError> {
-        self.asynchronous(
-            AdmissionClass::Normal,
-            "prepared_audio_source",
-            move |state| state.prepared_audio_source(block_ordinal),
-        )
+        self.asynchronous(AdmissionClass::Normal, "prepared_audio_source", |state| {
+            let block_ordinal = state
+                .core
+                .next_native_block_ordinal()
+                .ok_or("prepared_audio_block_out_of_order")?;
+            state.prepared_audio_source(block_ordinal)
+        })
         .await
     }
 

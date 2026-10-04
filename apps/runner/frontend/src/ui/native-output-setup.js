@@ -17,7 +17,6 @@ export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia, o
   const acknowledgement = elements["native-execution-acknowledgement"];
   let snapshot = null, media = null, status = null, inventory = null, choices = [];
   let context = 0, busy = false, suspended = false, refreshing = null;
-  let singleBlock = false;
   const native = api.kind === "tauri-native";
   const quiescent = () => snapshot?.safety?.local_armed === false
     && QUIESCENT_PHASES.has(snapshot?.run?.phase);
@@ -36,7 +35,7 @@ export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia, o
     prepare.disabled = route.disabled || !choices[Number(route.value)] || route.value === "";
     release.disabled = !native || !reserved;
     disable.disabled = !native;
-    const canActivate = native && !suspended && !busy && quiescent() && media && singleBlock
+    const canActivate = native && !suspended && !busy && quiescent() && media
       && snapshot?.setup?.ready === true && status?.phase === "reserved-media"
       && status?.executable === false && status?.armed === false
       && !status?.inFlight && !status?.cleanupPending;
@@ -52,13 +51,12 @@ export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia, o
       : !status ? "Native output status is unavailable."
       : !quiescent() ? "The run is armed or active. Its controls and response capture stay with the native target. This route remains unqualified."
       : status.executable ? "Native run enabled. Arm locally, then start on this target or its permitted phone controller. Timing and calibration remain unqualified."
-      : status.phase === "reserved-media" ? (singleBlock
+      : status.phase === "reserved-media"
         ? "Prepared and silent. Check the device route and levels, then enable the unqualified native run."
-        : "Prepared and silent. This native adapter requires a complete single-block package.")
       : status.phase === "reserved-silence" ? "Silent device reserved without media. Release it before preparing the current block."
       : status.phase === "cleanup-pending" ? "Releasing native output. Wait for cleanup before preparing another device."
       : ["faulted", "quarantined"].includes(status.phase) ? "Native output failed. Disable output and inspect the device before preparing again."
-      : !media ? "Prepare the first audio block before listing compatible output devices."
+      : !media ? "Prepare the current audio block before listing compatible output devices."
       : currentInventory() && !choices.length ? "No listed configuration matches this block's channels and sample rate. Check the device, then list again."
       : "List devices, choose a matching configuration, then prepare silent output. Playback and route qualification remain separate.";
   }
@@ -200,7 +198,7 @@ export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia, o
     suspended = false;
     if (refreshing) await refreshing.catch(() => {});
     await refresh();
-  }, update(nextSnapshot, nextMedia, blockCount) {
+  }, update(nextSnapshot, nextMedia) {
     if (nextMedia !== media || snapshot?.epoch !== nextSnapshot?.epoch
       || snapshot?.identity?.session_id !== nextSnapshot?.identity?.session_id) {
       context++;
@@ -210,7 +208,6 @@ export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia, o
     }
     snapshot = nextSnapshot;
     media = nextMedia;
-    singleBlock = blockCount === 1;
     render();
   } };
 }

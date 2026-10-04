@@ -41,8 +41,8 @@ export function createTauriRunnerAdapter({ invokeFn = invoke, listenFn = listen 
     inspectPreparedExecution() {
       return call(invokeFn, "inspect_prepared_execution");
     },
-    prepareFirstAudioBlock() {
-      return call(invokeFn, "prepare_first_audio_block");
+    prepareCurrentAudioBlock() {
+      return call(invokeFn, "prepare_current_audio_block");
     },
     nativeOutputStatus() {
       return call(invokeFn, "native_output_status");

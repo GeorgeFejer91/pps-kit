@@ -860,7 +860,6 @@ impl AppRuntime {
 
     pub async fn begin_prepared_audio_preparation_async(
         &self,
-        block_ordinal: u32,
     ) -> Result<PreparedAudioPreparation, &'static str> {
         self.0
             .prepared_audio_preparation_in_flight
@@ -872,7 +871,7 @@ impl AppRuntime {
         let source = self
             .0
             .authority
-            .prepared_audio_source(block_ordinal)
+            .prepared_audio_source()
             .await
             .map_err(|_| "runtime_unavailable")??;
         Ok(match source {
