@@ -78,8 +78,8 @@ def main() -> int:
         page.wait_for_function("!document.querySelector('#prepare-experiment-profile').disabled")
         assert prepare.is_enabled() and manifest.is_enabled()
         assert page.evaluate("window.participantAudit.profileCalls") == [
-            {"command": "prepare_experiment_profile", "args": None},
-            {"command": "prepare_experiment_profile", "args": None},
+            {"command": "prepare_experiment_profile", "args": {}},
+            {"command": "prepare_experiment_profile", "args": {}},
         ]
 
         for width, height, enlarged in [
