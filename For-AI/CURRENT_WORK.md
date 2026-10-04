@@ -37,29 +37,33 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   output reservation and acknowledgement for each block. Failed in-process
   native profile-package publication rolls back newly linked destination files.
   The bounded producer now stages approved pre/post plans as two verified V1
-  part packages linked by a group manifest and returns Part 1. The next source
-  candidate admits Part 2 only when the adjacent Part 1 package and its sealed
+  part packages linked by a group manifest and returns Part 1. The Runner admits
+  Part 2 only when the adjacent Part 1 package and its sealed
   native result reverify from disk, including after a Runner restart. Installed
   part transition and grouped result completion remain open.
-- **Latest completed evidence:** `87d2dd707781de807af984da193738b01bed7143`
+- **Latest completed evidence:** `bc0665cfe4c0c5513b69debb97533ca09660b3d5`
   passed all 14 non-skipped
-  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37195331037),
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37196339005),
   including three-platform Core/Desktop and Python/Rust package oracles plus
   Windows/macOS/Linux validation bundles. Local Runner Core tests (25),
   frontend tests (66), formatting, and the canonical frontend build passed.
-  The Python/Rust differential covered both pre/post packages and PCM bytes.
+  The Python/Rust differential covered both pre/post packages and PCM bytes;
+  the native Part 2 result-proof test covered rejection, a completed Part 1
+  after process restart, and changed published event bytes.
   The rendered browser audit used a mocked native bridge, not installed
-  execution. Local Runner library tests (141) passed before the Part 2 proof
-  change; its focused publish/resume/tamper test then passed.
+  execution. Local Runner library tests (141) and the focused publish/resume/
+  tamper test passed; CI rebuilt and tested the exact proof revision.
 - **Installed Runner UI evidence:** the Runner-only NSIS validation installer
-  from `87d2dd70` has SHA-256
-  `d299dd038eea70dff035fdf3f791cebdb073546aafd11d4cc34dbd1ded7ced50`,
+  from `bc0665cf` has SHA-256
+  `4ac75e4ab13e69869f8c59d16e8688f73658f8a23187baee99faaac0314591db`,
   matching its manifest and commit marker. Fresh Windows CI installation
   matched bundled HTML/CSS to canonical source and launched the real WebView.
   The idle Rust snapshot, next-block control, and control, logging, and remote
   tab checks passed; all three screenshots were inspected. Inventory and report
   agree on installed binary SHA-256
-  `4564b916e0546b2f9feff23025d3c40d5e016b5e102bbe12865d4913f18f9af4`.
+  `6bfa867a9f8a4750ebdf69dedde26ab45fbcde74aaf2b8aa5916b294ea453a34`.
+  All three installed screenshots are byte-identical to the inspected
+  `87d2dd70` images.
   No participant execution, physical output, recording, or Full installer was
   verified by this UI audit.
 - **Next gates:** qualify each larger-array hardware route and its levels,

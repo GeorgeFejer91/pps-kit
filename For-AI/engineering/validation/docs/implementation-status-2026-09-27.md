@@ -39,9 +39,15 @@ Each status applies to its stated surface, not to the whole product.
   `d299dd038eea70dff035fdf3f791cebdb073546aafd11d4cc34dbd1ded7ced50`;
   the installed idle WebView audit passed with binary SHA-256
   `4564b916e0546b2f9feff23025d3c40d5e016b5e102bbe12865d4913f18f9af4`.
-  The next source candidate verifies a sealed native Part 1 result before
-  adopting its sibling Part 2, including after restart; a local publish/resume/
-  tamper test passed. Installed part transition, result-group completion, hardware output,
+  Commit `bc0665cfe4c0c5513b69debb97533ca09660b3d5` verifies a sealed
+  native Part 1 result before adopting its sibling Part 2, including after
+  restart; its publish/resume/tamper test passed. All 14 non-skipped
+  [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37196339005)
+  passed. The exact Windows validation installer SHA-256 is
+  `4ac75e4ab13e69869f8c59d16e8688f73658f8a23187baee99faaac0314591db`;
+  its installed idle WebView audit passed with binary SHA-256
+  `6bfa867a9f8a4750ebdf69dedde26ab45fbcde74aaf2b8aa5916b294ea453a34`.
+  Installed part transition, result-group completion, hardware output,
   recording and the two-app Full installer are not established by this source
   evidence.
 - Sequential native-block and next-block UI source checkpoint
