@@ -33,18 +33,19 @@ downloaders. They remain the compatibility path.
 Runner and Planner have candidate Tauri shells at `apps/runner/src-tauri/` and
 `apps/designer/src-tauri/`. The Full NSIS configuration composes their bundled
 WebViews with one Shared resource tree. Exact source
-`74ebd6d88ac9d7898a6149e4e011e6422896889a` passed the
-[two-app installed CI audit](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37220850990):
+`76b5f525826c357e30ed5b075920dbd87b31688e` passed the
+[two-app installed CI audit](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37227818117):
 21 inventory items matched source, both installed apps launched, Planner
-generated 3DTI audio and exported a JSON profile, and Runner prepared that
-actual profile into a verified package with PCM and a partial event journal.
+generated 3DTI audio and exported a two-block JSON profile, and Runner prepared
+both blocks into a verified package with PCM and a partial event journal.
 Fresh install, reinstall, uninstall, and incompatible-Shared rejection passed.
-The [single Full validation installer](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37220850990/artifacts/11310537053)
+The [single Full validation installer](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37227818117/artifacts/11313192953)
 has SHA-256
-`2ae3a0a1ba8dbf8d63eed32101246a9907ef8278715ce050b8b9eb38bd2d1f2b`
+`17ffb768eb8728ea12c908513cc4a7c1d1e350d9737c173b91e4f81a15c0f807`
 and is retained through 2026-10-11. It is unsigned and marked validation-only;
-physical output, finalized participant recording, local-PC reinstall, and
-release qualification remain open. Follow the
+the CI host enumerated no output devices. Physical output, finalized participant
+recording, local-PC reinstall, Runner's stable identifier, ASIO SDK licensing,
+and release qualification remain open. Follow the
 [Windows installer plan](windows-installer.md) for those gates.
 
 ## Stage boundary

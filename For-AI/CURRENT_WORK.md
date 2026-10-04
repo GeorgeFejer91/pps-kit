@@ -29,7 +29,9 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   tactile waveform shapes, ITI silence, provisional tactile drive compensation,
   and speaker switching. Its width follows the Python trial maximum with a
   three-channel minimum and an 18-channel bound. The decoded/output path has a
-  closed unity-gain, channel-for-channel route for 4–18-channel WAVs.
+  closed unity-gain, channel-for-channel route for 4–18-channel WAVs. Windows
+  output discovery now includes ASIO before WASAPI and admits F32/I32 stream
+  formats; physical route calibration remains open.
   Local/phone control shares one actor,
   callback scheduler, and result journal. Source activation and result
   publication remain unqualified for participant use. The candidate now advances
@@ -41,33 +43,37 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   Part 2 only when the adjacent Part 1 package and its sealed
   native result reverify from disk, including after a Runner restart. Installed
   part transition and grouped result completion remain open.
-- **Latest completed evidence:** exact source `74ebd6d88ac9d7898a6149e4e011e6422896889a`
+- **Latest completed evidence:** exact source `76b5f525826c357e30ed5b075920dbd87b31688e`
   passed all 16 non-skipped
-  [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37220850990),
+  [CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37227818117),
   including three-platform Rust Core/Desktop and Python/Rust package oracles,
-  rendered browser UI, standalone validation bundles, and the Full two-app
+  rendered Runner output/participant and Planner segment audits, standalone
+  validation bundles, and the Full two-app
   Windows install. The Full validation installer is retained as a downloadable
-  [workflow artifact](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37220850990/artifacts/11310537053)
+  [workflow artifact](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37227818117/artifacts/11313192953)
   through 2026-10-11. Its SHA-256 is
-  `2ae3a0a1ba8dbf8d63eed32101246a9907ef8278715ce050b8b9eb38bd2d1f2b`.
+  `17ffb768eb8728ea12c908513cc4a7c1d1e350d9737c173b91e4f81a15c0f807`.
   It is unsigned and marked validation-only, not a participant-use release.
 - **Installed two-app evidence:** the exact Full installer had zero missing or
   mismatched entries across 21 component inventory items, one compatible
   Shared tree, both shortcuts, and successful clean install, reinstall,
   uninstall, and incompatible-Shared rejection. Both bundled WebViews launched.
   The installed Planner showed all seven segments and its 3D viewer, rendered
-  3DTI audio at 44.1 kHz/3 channels/7,938 frames, and exported a five-source
-  JSON profile. The installed Runner prepared that actual profile for `P001`,
-  generated a verified 3-channel/7,938-frame package, compiled the Rust
+  3DTI audio at 44.1 kHz/3 channels/7,938 frames, and exported a JSON profile
+  with six inventoried source files and two blocks. The installed
+  Runner prepared that actual profile for `P001`, generated a verified
+  two-block package (each 3 channels and 7,938 frames), compiled the Rust
   schedule, prepared native PCM, and wrote a durable **partial** event journal
   and 18-column CSV. A separate synthetic profile audit also passed. The
   installed screenshots cover the Planner segments and Runner control, logging,
-  and remote tabs; neither installed audit reserved physical output or completed
-  participant acquisition. A separate three-platform synthetic native-result
+  and remote tabs. Its native output inventory was empty on the CI host, so
+  neither installed audit reserved physical output or completed participant
+  acquisition. A separate three-platform synthetic native-result
   fixture reached a complete result manifest; the independent Python validator
   passed its event/CSV hashes and V1 projection on the downloaded Windows
   fixture. This is file-contract evidence, not an installed recording.
-- **Next gates:** select the stable Runner bundle identifier, qualify the
+- **Next gates:** select the stable Runner bundle identifier and ASIO SDK
+  distribution license path, qualify the
   physical 3-channel route and levels, then exercise the installed native
   single-block and multi-block workflows on compatible calibrated hardware.
   Verify finalized event/CSV results and recording, measured output/response
