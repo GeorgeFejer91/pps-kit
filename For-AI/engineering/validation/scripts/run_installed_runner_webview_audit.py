@@ -20,7 +20,6 @@ import winreg
 
 from playwright.sync_api import expect, sync_playwright
 from pywinauto import Desktop
-from pywinauto.keyboard import send_keys
 
 
 def local_debug_port() -> int:
@@ -166,27 +165,16 @@ def synthetic_planner_profile(root: Path) -> Path:
     return profile
 
 
-def choose_path_in_native_dialog(process_id: int, path: Path, *, folder: bool = False) -> list[dict] | None:
+def choose_path_in_native_dialog(process_id: int, path: Path, *, folder: bool = False) -> None:
     """Exercise the app-owned Windows chooser; the WebView never supplies a path."""
     dialog = Desktop(backend="uia").window(process=process_id, class_name="#32770")
     dialog.wait("visible", timeout=30)
     if folder:
-        controls = [
-            {"name": control.element_info.name, "id": control.element_info.automation_id,
-             "type": control.element_info.control_type}
-            for control in dialog.descendants()[:100]
-        ]
-        # Windows folder mode has no file-name editor. Navigate the dialog's
-        # address bar, then confirm the current folder with its native button.
-        dialog.set_focus()
-        send_keys("%d")
-        send_keys("^a")
-        send_keys(str(path), with_spaces=True)
-        send_keys("{ENTER}")
-        time.sleep(0.4)
+        folder_name = dialog.child_window(auto_id="1152", control_type="Edit")
+        folder_name.wait("visible", timeout=10)
+        folder_name.set_edit_text(str(path))
         dialog.child_window(auto_id="1", control_type="Button").click()
         dialog.wait_not("visible", timeout=15)
-        return controls
     else:
         file_name = dialog.child_window(auto_id="1148", control_type="ComboBox").child_window(
             control_type="Edit"
@@ -194,7 +182,6 @@ def choose_path_in_native_dialog(process_id: int, path: Path, *, folder: bool = 
         file_name.wait("visible", timeout=10)
         file_name.set_edit_text(str(path))
         dialog.child_window(auto_id="1", control_type="Button").click()
-    return None
 
 
 def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> None:
@@ -316,9 +303,7 @@ def audit(binary: Path, output: Path, commit: str, elevated_policy: bool) -> Non
             expect(page.locator("#prepare-experiment-profile")).to_be_enabled(timeout=10_000)
             page.locator("#prepare-experiment-profile").click()
             choose_path_in_native_dialog(process.pid, profile_path)
-            report["folder_dialog_controls"] = choose_path_in_native_dialog(
-                process.pid, output_parent, folder=True,
-            )
+            choose_path_in_native_dialog(process.pid, output_parent, folder=True)
             expect(page.locator("#prepare-experiment-profile")).to_be_enabled(timeout=60_000)
             generated = list(output_parent.glob("CI_SYNTHETIC_*"))
             report["fixture_generated_locations"] = [
