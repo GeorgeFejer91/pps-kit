@@ -63,13 +63,23 @@ after responsive boxes, padding, icons, and gaps are known. A Pages-hosted
 client-to-PC backend is not the desktop packaging architecture. Load the remote
 skill only for a separately scoped remote-control feature.
 
-For every Planner Segment 0–6 and each Runner or companion UI segment, inspect
-its actual content and bounded panels using Uncodixfy Pretext's accordion
-stretch reference. Give each bounded, resizable segment a definite minimum,
-ordered anchors and groups, width/height-aware spacing, and a full-text no-fit
-path. Content that cannot fit at its readable minimum must reflow or use an
-explicit host/detail scroll policy; never hide it to claim a no-scroll panel.
-Implement and verify one owning segment at a time, then check the full UI.
+For UI work, review both the whole UI shell and every segment inside it against
+Uncodixfy Pretext's `references/accordion-stretch.md`. Apply accordion stretch
+to bounded, resizable panels; retain ordinary document flow where content needs
+to grow. Record the layout decision for each touched surface before editing:
+supported minimum width/height, top/bottom anchors, ordered control groups,
+spacing in both dimensions, Pretext-measured labels, and the full-text no-fit
+path. A panel that cannot fit at its readable minimum must reflow or use an
+explicit host/detail scroll policy; hidden overflow does not count as a fit.
+
+| UI shell | Segments to review separately |
+|---|---|
+| Experiment Planner desktop and intentionally shared hosted UI | Shell, navigation/workspace, each Segment 0–6, and each bounded panel within the active segment. |
+| Experiment Runner desktop | Shell, each Experiment Control/Data Logging/Phone Remote tab, and each bounded panel within the active tab. |
+| Runner phone companion | Shell, Controller and Phone Experiment modes, and each bounded panel or disclosure within the active mode. |
+
+Implement and verify one owning segment at a time, then check its shell and the
+full UI. Installed-WebView evidence is required for an installed desktop claim.
 
 Voice-cloning, game-development, XR, and Quest skills are not default PPS work.
 Load them only for an explicitly relevant task. `for-ai` targets new projects;
