@@ -389,6 +389,8 @@ input[type="checkbox"] {
   .response-target { flex-basis: auto; }
   .form-span { grid-column: auto; }
   .section-heading { align-items: center; flex-wrap: wrap; }
+  .package-block-list li { grid-template-columns: minmax(0, 1fr); gap: 0.25rem; }
+  .package-block-list span { white-space: normal; overflow-wrap: anywhere; }
   .desktop-page .brand-block { min-width: 0; max-width: 100%; }
   .desktop-page .brand-block > div { min-width: 0; overflow-wrap: anywhere; }
   .desktop-page .brand-mark { flex-shrink: 0; width: auto; height: auto; min-width: 2.5em; min-height: 2.5em; padding: 0.4em; }
