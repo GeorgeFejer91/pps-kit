@@ -382,7 +382,7 @@ pub fn select_profile_participant(
             order_base,
         )?;
         let csv_bytes = read_inventoried_document(&source_csv_path, &files)?;
-        let trial_rows = csv_rows(&csv_bytes)?;
+        let mut trial_rows = csv_rows(&csv_bytes)?;
         trial_count = trial_count
             .checked_add(trial_rows.len())
             .filter(|count| *count <= MAX_PLAN_ROWS)
@@ -393,6 +393,9 @@ pub fn select_profile_participant(
         if !rows_match_export(&trial_rows, &embedded["rows"]) {
             return Err(PlanError(PlanErrorCode::PlanInvalid));
         }
+        // The compatibility assembler consumes the approved CSV in this stable
+        // trial-index order; the exported row snapshot retains file order.
+        trial_rows.sort_by_key(|row| plan_int(row.get("block_trial_index").map(String::as_str), 1));
         let trial_base = source_csv_path
             .parent()
             .ok_or(PlanError(PlanErrorCode::PlanInvalid))?;

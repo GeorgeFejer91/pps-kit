@@ -26,6 +26,7 @@ struct ResultRow {
     code: &'static str,
     block_labels: Vec<String>,
     trial_counts: Vec<usize>,
+    trial_orders: Vec<Vec<String>>,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -44,6 +45,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         code: error.code(),
                         block_labels: Vec::new(),
                         trial_counts: Vec::new(),
+                        trial_orders: Vec::new(),
                     };
                 }
             };
@@ -67,12 +69,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         .iter()
                         .map(|block| block.trials().len())
                         .collect(),
+                    trial_orders: plan
+                        .blocks()
+                        .iter()
+                        .map(|block| {
+                            block
+                                .trials()
+                                .iter()
+                                .map(|trial| {
+                                    trial
+                                        .fields()
+                                        .get("block_trial_index")
+                                        .cloned()
+                                        .unwrap_or_default()
+                                })
+                                .collect()
+                        })
+                        .collect(),
                 },
                 Err(error) => ResultRow {
                     accepted: false,
                     code: error.code(),
                     block_labels: Vec::new(),
                     trial_counts: Vec::new(),
+                    trial_orders: Vec::new(),
                 },
             }
         })

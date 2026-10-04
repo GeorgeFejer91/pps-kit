@@ -68,9 +68,12 @@ def _participant_profile(folder: Path) -> Path:
     first_block = folder / "block.csv"
     second_block = folder / "second.csv"
     with second_block.open("w", encoding="utf-8", newline="") as output:
-        writer = csv.DictWriter(output, fieldnames=["trial_file_path"])
+        writer = csv.DictWriter(output, fieldnames=["trial_file_path", "block_trial_index"])
         writer.writeheader()
-        writer.writerows([{"trial_file_path": str(folder / "ingredient.wav")}] * 2)
+        writer.writerows([
+            {"trial_file_path": str(folder / "ingredient.wav"), "block_trial_index": 2},
+            {"trial_file_path": str(folder / "ingredient.wav"), "block_trial_index": 1},
+        ])
     with order_path.open("w", encoding="utf-8", newline="") as output:
         writer = csv.DictWriter(output, fieldnames=[
             "participant_id", "phase_index", "participant_block_position", "block_csv_path", "block_label",
@@ -164,9 +167,12 @@ def test_rust_selects_existing_participant_block_order_and_rejects_profile_diver
     )
     rust = json.loads(completed.stdout)
     assert rust[:3] == [
-        {"accepted": True, "code": "selected", "block_labels": ["First", "Second"], "trial_counts": [1, 2]},
-        {"accepted": True, "code": "selected", "block_labels": ["Other"], "trial_counts": [1]},
-        {"accepted": False, "code": "profile_participant_missing", "block_labels": [], "trial_counts": []},
+        {"accepted": True, "code": "selected", "block_labels": ["First", "Second"],
+         "trial_counts": [1, 2], "trial_orders": [[""], ["1", "2"]]},
+        {"accepted": True, "code": "selected", "block_labels": ["Other"],
+         "trial_counts": [1], "trial_orders": [[""]]},
+        {"accepted": False, "code": "profile_participant_missing", "block_labels": [],
+         "trial_counts": [], "trial_orders": []},
     ]
     assert [row["code"] for row in rust[3:]] == [
         "profile_plan_invalid", "profile_plan_ingredient_not_listed", "profile_plan_invalid",
