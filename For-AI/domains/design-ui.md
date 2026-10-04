@@ -79,4 +79,6 @@ minimum height for wrapping; the document can scroll when content exceeds the
 window. In the 320 px rendered stress case, each verified block row stacks its
 label and metadata so enlarged text stays inside the panel. Exact-source remote
 browser screenshots verify this compiled layout with a mocked native boundary;
-installed-WebView geometry checks are still required.
+the installed Windows Runner audit also verifies the three tabs at 1028 px after
+native package selection, schedule inspection, and PCM preparation. Installed
+zoom, long-label, and text-spacing cases remain open.

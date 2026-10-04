@@ -58,14 +58,19 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   `4ac75e4ab13e69869f8c59d16e8688f73658f8a23187baee99faaac0314591db`,
   matching its manifest and commit marker. Fresh Windows CI installation
   matched bundled HTML/CSS to canonical source and launched the real WebView.
-  The idle Rust snapshot, next-block control, and control, logging, and remote
-  tab checks passed; all three screenshots were inspected. Inventory and report
-  agree on installed binary SHA-256
+  The [installed retry](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37198222783)
+  using the `c3e42d12` audit selected a synthetic, silent three-channel
+  prepared package through the native Windows file chooser, adopted its Rust
+  verification receipt, compiled its schedule, and decoded its PCM into the
+  bounded native cache. The output device remained unselected and unreserved.
+  The idle and prepared Rust states, next-block control, and control, logging,
+  and remote tabs passed; all three prepared-state screenshots were inspected
+  at 1028 px without horizontal overflow. Inventory and report agree on
+  installed binary SHA-256
   `6bfa867a9f8a4750ebdf69dedde26ab45fbcde74aaf2b8aa5916b294ea453a34`.
-  All three installed screenshots are byte-identical to the inspected
-  `87d2dd70` images.
-  No participant execution, physical output, recording, or Full installer was
-  verified by this UI audit.
+  This retry reused the `bc0665cf` installer; it does not establish a new
+  application build. No participant execution, physical output, recording, or
+  Full installer was verified by this UI audit.
 - **Next gates:** qualify each larger-array hardware route and its levels,
   then run the installed native single-block and multi-block workflows on a
   compatible calibrated device; validate event/CSV files and recording; finish
