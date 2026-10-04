@@ -32,7 +32,7 @@ OUTPUT_BRIDGE = """() => {
     if (command === 'inspect_prepared_execution') return {inspectionScope:'schedule-only',
       timingQualification:'unqualified',executable:false,blockCount:1,trialRowCount:1,
       eventCount:2,encodedBytes:500,blocks:[{}]};
-    if (command === 'prepare_first_audio_block') {state.mediaPrepared=true; return {schema:'pps-runner-prepared-audio-summary.v1',
+    if (command === 'prepare_current_audio_block') {state.mediaPrepared=true; return {schema:'pps-runner-prepared-audio-summary.v1',
       preparationScope:'pcm-and-output-plan-cache',outputQualification:'unqualified',
       executable:false,outputPlanPrepared:true,outputRoute:'canonical-three',scheduledEventCount:2,
       blockOrdinal:0,sampleRateHz:48000,sourceChannels:3,sourceChannelLayout:'binaural-left-right-tactile',
@@ -116,7 +116,7 @@ def main() -> int:
         assert listing.is_disabled()
         page.locator("#select-session-manifest").click()
         page.locator("#inspect-prepared-execution").click()
-        page.locator("#prepare-first-audio-block").click()
+        page.locator("#prepare-current-audio-block").click()
         page.wait_for_function("!document.querySelector('#native-output-list').disabled")
         listing.click()
         page.wait_for_function("document.querySelector('#native-output-route').options.length === 2")
@@ -176,7 +176,7 @@ def main() -> int:
         page.locator("#native-output-release").click()
         page.wait_for_function("document.querySelector('#native-output-route').options.length === 1")
         assert listing.is_disabled(), "Release must retire the cached media summary"
-        page.locator("#prepare-first-audio-block").click()
+        page.locator("#prepare-current-audio-block").click()
         page.wait_for_function("!document.querySelector('#native-output-list').disabled")
         listing.click()
         page.wait_for_function("document.querySelector('#native-output-route').options.length === 2")
@@ -192,7 +192,7 @@ def main() -> int:
         assert not detail.inner_text().startswith("Prepared and silent"), "Late reservation must not restore disabled output"
         assert prepare.is_disabled() and page.locator("#native-output-release").is_disabled()
         assert listing.is_disabled(), "Disable must require fresh media preparation"
-        page.locator("#prepare-first-audio-block").click()
+        page.locator("#prepare-current-audio-block").click()
         page.wait_for_function("!document.querySelector('#native-output-list').disabled")
         page.evaluate("window.outputAudit.noMatch = true")
         listing.click()
@@ -210,7 +210,7 @@ def main() -> int:
         assert sum(request["command"] == "native_output_reserve_silence" for request in requests) == 3
         assert page.locator("#participant-response").is_disabled()
         page.locator("#native-output-release").click()
-        page.locator("#prepare-first-audio-block").click()
+        page.locator("#prepare-current-audio-block").click()
         page.wait_for_function("!document.querySelector('#native-output-list').disabled")
         listing.click()
         page.wait_for_function("document.querySelector('#native-output-route').options.length === 2")

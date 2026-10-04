@@ -28,6 +28,8 @@ on:
       - "For-AI/engineering/tests/test_planner_worker_protocol.py"
       - "For-AI/engineering/validation/scripts/validate_native_results.py"
       - "For-AI/engineering/validation/scripts/run_runner_profile_ui_audit.py"
+      - "For-AI/engineering/validation/scripts/run_runner_output_ui_audit.py"
+      - "For-AI/engineering/validation/scripts/run_runner_participant_ui_audit.py"
       - "For-AI/engineering/validation/scripts/run_installed_runner_webview_audit.py"
       - "For-AI/engineering/validation/scripts/run_installed_planner_webview_audit.py"
       - "For-AI/engineering/validation/scripts/run_designer_visual_layout_audit.py"
@@ -61,6 +63,8 @@ on:
       - "For-AI/engineering/tests/test_planner_worker_protocol.py"
       - "For-AI/engineering/validation/scripts/validate_native_results.py"
       - "For-AI/engineering/validation/scripts/run_runner_profile_ui_audit.py"
+      - "For-AI/engineering/validation/scripts/run_runner_output_ui_audit.py"
+      - "For-AI/engineering/validation/scripts/run_runner_participant_ui_audit.py"
       - "For-AI/engineering/validation/scripts/run_installed_runner_webview_audit.py"
       - "For-AI/engineering/validation/scripts/run_installed_planner_webview_audit.py"
       - "For-AI/engineering/validation/scripts/run_designer_visual_layout_audit.py"
@@ -193,6 +197,10 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Audit rendered Runner profile controls
         run: python For-AI/engineering/validation/scripts/run_runner_profile_ui_audit.py
+      - name: Audit rendered Runner output and participant controls
+        run: |
+          python For-AI/engineering/validation/scripts/run_runner_output_ui_audit.py
+          python For-AI/engineering/validation/scripts/run_runner_participant_ui_audit.py
       - name: Audit rendered Planner segments at twelve viewport sizes
         run: |
           npm --prefix apps/designer/frontend ci
@@ -205,6 +213,15 @@ jobs:
         with:
           name: runner-profile-ui-${{ github.sha }}
           path: artifacts/runner-profile-ui-audit
+          if-no-files-found: warn
+      - name: Retain rendered Runner output and participant evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: runner-control-ui-${{ github.sha }}
+          path: |
+            artifacts/runner-output-ui-audit
+            artifacts/runner-participant-ui-audit
           if-no-files-found: warn
       - name: Retain rendered Planner segment evidence
         if: always()
