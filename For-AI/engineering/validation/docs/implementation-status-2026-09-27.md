@@ -1,6 +1,6 @@
 # Approved implementation status
 
-Updated 2026-09-27. Current evidence for the 17 approved
+Updated 2026-10-04. Current evidence for the 17 approved
 [audit items](unification-and-critical-audit-2026-09-27.md).
 Each status applies to its stated surface, not to the whole product.
 
@@ -26,7 +26,24 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
-- Latest native JSON inventory preflight source checkpoint:
+- Latest native participant-plan source checkpoint:
+  `1fe2c645cdcf98e727b2deb8949a77f1a3bf1e76`.
+  [Its exact-SHA CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37170957558)
+  passed all 14 jobs, including the Python/Rust profile/order oracle on Windows,
+  macOS and Linux and all three validation bundle builds. Local checks passed
+  13 Rust integration and three compile-fail documentation tests, Clippy,
+  formatting, five focused Python handoff/compatibility tests, and five
+  component-manifest/contract-catalog structure tests. The downloaded Windows
+  NSIS validation artifact's exact-commit marker and SHA-256 manifest matched
+  its actual SHA-256
+  `cadd7c3e9c4199c4af6f3bf7598b194a2a985136fe9018fcb1b869ddb17550b1`.
+  Rust now selects one participant's existing Segment 6 block order and stable
+  Segment 5 trial-index order from rechecked profile/setup/CSV bytes. Its plan
+  is native-only and provisional: trial audio must be rehashed during media
+  assembly. This exact package has not been installed, visually checked, or
+  used for playback, recording or participant data collection. Native JSON
+  media assembly and complete execution are still absent.
+- Earlier native JSON inventory preflight source checkpoint:
   `9015f12d35f50a19be106f7483a49764fcea792d`.
   [Its exact-SHA CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37169370392)
   passed all 14 jobs, including the three Python/Rust V1 oracle jobs with the
@@ -40,7 +57,7 @@ Each status applies to its stated surface, not to the whole product.
   ingredient inventory. It does not native-assemble or execute the profile.
   This exact package has not been installed, visually checked, or used for
   playback, recording, or participant data collection.
-- Latest Runner UI/readiness source checkpoint: `0471968181b8569ac1ac9d1689025cd03c10b08e`.
+- Earlier Runner UI/readiness source checkpoint: `0471968181b8569ac1ac9d1689025cd03c10b08e`.
   [Its exact-SHA CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37167989483)
   passed all 14 jobs. It corrects stale native-readiness copy and wraps enlarged
   package detail text. Local checks passed 65 frontend tests, canonical build,

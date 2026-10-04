@@ -24,8 +24,9 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
 - **Domain:** [experiment runtime](domains/experiment-runtime.md), with UI and
   release handoffs. Reuse 3DTI, the 3D viewer, Segment 0–6, current schemas,
   bounded jobs, native ownership and Python/Rust oracle fixtures.
-- **Source stage:** JSON export/compatibility assembly, bounded generation,
-  shared Pretext, locked dependency patches and phone recovery are implemented.
+- **Source stage:** JSON export/compatibility assembly, native inventory and
+  approved participant order selection, bounded generation, shared Pretext,
+  locked dependency patches and phone recovery are implemented.
   Native execution has one actor, one callback scheduler and one journal worker.
   Immutable PCM, response scoring, paired event/CSV files and exclusive result
   publication share package/run fences. Local and phone commands now use the
@@ -53,13 +54,14 @@ Updated: 2026-10-04. Replace at stage transitions; do not append command logs.
   inventory found no configuration matching that synthetic three-channel block.
   A newer UI/readiness source checkpoint `04719681` passed all 14 exact-SHA CI
   jobs and produced a hash-checked Windows NSIS validation bundle; it has not
-  been installed or visually checked from its package. The subsequent native
-  JSON profile inventory preflight checkpoint `9015f12d` passed all 14
-  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37169370392).
+  been installed or visually checked from its package. The latest native JSON
+  inventory and participant-plan source checkpoint `1fe2c645` passed all 14
+  [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37170957558).
   Its Windows NSIS validation artifact has an exact-commit marker and matching
-  SHA-256 `55f0ca5782d554663de37e81d3f48d13a0d5273d4ad1a02ac75ce77f430ff3da`;
-  it has not been installed. Rust verifies the exported local file inventory
-  before handoff; it does not yet assemble or execute that JSON profile.
+  SHA-256 `cadd7c3e9c4199c4af6f3bf7598b194a2a985136fe9018fcb1b869ddb17550b1`;
+  it has not been installed. Rust now selects the approved participant block
+  and trial order from the verified local profile and CSVs. Native media
+  assembly and execution from that JSON profile remain incomplete.
 - **Next gate:** complete an installed native single-block run with a checked
   compatible and calibrated output route, then validate its event/CSV files and
   recording. Extend the same owner to full profiles/multiple blocks. The native
