@@ -4,8 +4,9 @@ use std::{
     sync::atomic::{AtomicU64, Ordering},
 };
 
-use hound::{SampleFormat, WavSpec, WavWriter};
+use hound::{SampleFormat, WavReader, WavSpec, WavWriter};
 use pps_experiment_media::bind_profile_trial_wav;
+use pps_experiment_media::block::assemble_standard_profile_block;
 use pps_runner_audio::{AudioFence, AudioLoadLimits};
 use pps_session_package::{
     experiment_plan::select_profile_participant,
@@ -135,10 +136,51 @@ fn trial_decode_rejects_media_changed_after_plan_selection() {
         ),
         (16, 2, 44_100)
     );
+    let block_wav = root.join("prepared-block.wav");
+    let assembled = assemble_standard_profile_block(&plan, 1, &block_wav, 1).unwrap();
+    assert_eq!((assembled.frames(), assembled.channels()), (16, 3));
+    assert_eq!(assembled.bytes(), fs::metadata(&block_wav).unwrap().len());
+    assert_eq!(
+        assembled.sha256(),
+        format!("{:x}", Sha256::digest(fs::read(&block_wav).unwrap()))
+    );
+    assert!(fs::read_dir(&root.0).unwrap().all(|entry| !entry
+        .unwrap()
+        .file_name()
+        .to_string_lossy()
+        .contains(".pending.")));
+    assert_eq!(
+        (assembled.spans()[0].start, assembled.spans()[0].end),
+        (0, 16)
+    );
+    let mut reader = WavReader::open(&block_wav).unwrap();
+    assert_eq!(reader.spec().channels, 3);
+    assert_eq!(
+        reader
+            .samples::<i16>()
+            .take(3)
+            .collect::<Result<Vec<_>, _>>()
+            .unwrap(),
+        vec![100, -100, 0]
+    );
+    assert_eq!(
+        assemble_standard_profile_block(&plan, 1, &block_wav, 1)
+            .unwrap_err()
+            .code(),
+        "profile_block_output_exists"
+    );
     let mut changed = fs::read(&wav).unwrap();
     let last = changed.last_mut().unwrap();
     *last ^= 1;
     fs::write(&wav, changed).unwrap();
     let error = bind_profile_trial_wav(trial, &fence, AudioLoadLimits::default()).unwrap_err();
     assert_eq!(error.code(), "profile_audio_changed_or_unsupported");
+    let rejected = root.join("rejected-block.wav");
+    assert_eq!(
+        assemble_standard_profile_block(&plan, 1, &rejected, 1)
+            .unwrap_err()
+            .code(),
+        "profile_block_media_changed"
+    );
+    assert!(!rejected.exists());
 }

@@ -1,9 +1,12 @@
 //! Content-bound native trial media from an approved Planner profile.
 //!
 //! This binds one source WAV to the exact bytes in the verified inventory.
-//! It does not assemble a block, publish a run package, or authorize playback.
+//! The standard-route assembler composes inventoried trials into one block.
+//! Neither path publishes a run package or authorizes playback.
 
 #![forbid(unsafe_code)]
+
+pub mod block;
 
 use std::fmt;
 

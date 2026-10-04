@@ -9,9 +9,9 @@ rust-version.workspace = true
 [dependencies]
 pps-runner-audio = { path = "../pps-runner-audio" }
 pps-session-package = { path = "../pps-session-package" }
+hound.workspace = true
+sha2.workspace = true
 
 [dev-dependencies]
-hound.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-sha2.workspace = true
