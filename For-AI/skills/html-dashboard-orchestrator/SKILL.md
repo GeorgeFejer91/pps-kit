@@ -12,9 +12,14 @@ manifests record provenance. Native timing and acquisition remain native.
 ## Route before editing
 
 Read [the UI domain](../../domains/design-ui.md) and the current development
-stage. Use Ponytail for implementation and `uncodixfy-pretext` for touched
-HTML text/layout. Resolve them through [SKILLS.md](../../SKILLS.md); report a
-missing skill and use existing checks rather than inventing its rules.
+stage. Use [the skill inventory](../../SKILLS.md) to select Ponytail/YAGNI for
+implementation and `uncodixfy-pretext` for HTML text/layout. Read its
+`accordion-stretch.md` reference and review the UI shell and each Segment 0–6:
+use stretch geometry for bounded, resizable panels and document flow for
+content that must grow. Implement only the affected segments. Load the
+GitHub-sourced `tauri-rust-developer` skill when the Planner's native shell,
+IPC, persistence, or packaging boundary changes. Report an unavailable skill
+and use existing checks rather than inventing its rules.
 
 - Layout-only: read [interface principles](../../interface_design_principles.md)
   and the affected screen's behavior; leave scientific defaults unchanged.

@@ -34,6 +34,12 @@ Use only the relevant sections for the requested stage in
 
 ## Frontend Quality
 
+- For the shell and each Segment 0–6, is the layout decision explicit: bounded
+  accordion stretch or growing document flow? For a touched bounded panel, are
+  its minimum width/height, anchors, ordered groups, and both-axis spacing set?
+- Do full labels fit their inner boxes at readable sizes according to Pretext
+  and the rendered DOM? When they do not, is the reflow, host/detail scroll,
+  or full-text reveal path explicit rather than hidden overflow?
 - Are controls dense, calm, and domain-specific?
 - Are labels short and unambiguous?
 - Are dimensions stable across desktop and narrow viewports?
@@ -44,6 +50,9 @@ Use only the relevant sections for the requested stage in
 
 ## Validation
 
+- Check the touched panel at minimum/expanded width and height independently,
+  then check the containing segment and UI shell. Inspect long text, zoom,
+  focus order, and any intentional scroll region.
 - Run targeted API/schema tests.
 - Run relevant render/session tests when backend behavior changes.
 - Browser-smoke the local dashboard.
