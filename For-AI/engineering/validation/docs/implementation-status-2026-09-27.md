@@ -15,7 +15,7 @@ Each status applies to its stated surface, not to the whole product.
 | 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full scheduling UI and native profile assembly |
 | 8 | VERIFIED: plan/resource preflight, source/cancel/publication fences, shared job completion and rollback | Qualify additional generation routes if selected |
 | 9 | PARTIAL: exact CPAL port, fenced single-block activation in source, local output preflight, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Compatible checked route, installed playback/results, full-profile execution and qualification |
-| 10 | PARTIAL: shared Rust/browser contracts; JSON to existing compatibility assembler; Rust JSON inventory and participant block/trial selection; content-bound PCM16 trial decoding, standard three-channel block assembly and V1 prepared CSV/manifest; native main-window profile/folder selection, predecode storage preflight and existing Runner package adoption; Python PCM/row comparison and sample/tactile/response/CSV oracle checks | Advanced media transforms, installed adoption and complete profile execution |
+| 10 | PARTIAL: shared Rust/browser contracts; JSON to existing compatibility assembler; Rust JSON inventory and participant block/trial selection; content-bound PCM16 trial decoding, three-channel block assembly, four tactile waveform shapes on channels 1–3, and V1 prepared CSV/manifest; native main-window profile/folder selection, predecode storage preflight and existing Runner package adoption; Python PCM/row comparison and sample/tactile/response/CSV oracle checks | Speaker switching, output channels above three, installed adoption and complete profile execution |
 | 11 | PARTIAL: authenticated local/phone commands use one dispatch/control owner, shared scope fixture and fresh-state gate | Complete real-package execution |
 | 12 | PARTIAL: retry/input fences, durable intent versus callback confirmation, bounded deadlines, per-run journal and exclusive hashed result publication | Installed filesystems, recovery and complete execution |
 | 13 | PARTIAL: secure hosted companion, inert discovery, existing authenticated VDO route | Physical phone direct/relay/network-loss qualification |
@@ -26,6 +26,20 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
+- Native tactile waveform source checkpoint
+  `5685fc10c2f87f305019a77222fa77d16413dc9d` synthesizes sawtooth,
+  sine, square, and biphasic square pulse-train shapes on channels 1–3. Local
+  Rust media tests, Clippy, formatting, and nine Python/Rust profile
+  differentials passed; fixtures compared block PCM byte for byte, including
+  source padding, trial extension, tactile drive advance, and prepared CSV
+  metadata. All 14 [exact-SHA CI jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37182084204)
+  passed, including Windows/macOS/Linux Python/Rust V1 oracles and three
+  validation bundles. The downloaded Windows Runner-only NSIS artifact has an
+  exact-commit validation marker and matching SHA-256 manifest; measured
+  SHA-256 is `3cf01ca66f2b9bc1eade6831ad766fbae1787509043265e5de3b9cf49ae82c3a`.
+  Its Windows CI fresh-install inventory recorded the installed executable,
+  HTML and CSS hashes. No installed WebView was launched in that check, and no
+  physical output, recording, or participant execution was qualified.
 - Windows Runner-only installed-inventory CI checkpoint
   `0f22443cb356567c34e6c1ce3703a46950784fa2` passed all 14
   [exact-SHA jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/37180140321).
