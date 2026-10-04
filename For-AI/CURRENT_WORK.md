@@ -25,12 +25,12 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   evidence separate.
 - **Current source:** the native Runner selects and verifies the Planner JSON
   profile, prepares a V1-compatible package, and adopts it through the existing
-  native authority. Standard three-channel block assembly supports four
-  Python-compatible tactile waveform shapes on channels 1–3, ITI silence, and
-  provisional tactile drive compensation, plus Python-compatible speaker
-  switching within the three-channel route. The decoded/output path now has a
-  closed unity-gain, channel-for-channel route for 4–18-channel WAVs; no native
-  block producer emits those files yet. Local/phone control shares one actor,
+  native authority. Standard block assembly supports four Python-compatible
+  tactile waveform shapes, ITI silence, provisional tactile drive compensation,
+  and speaker switching. Its width follows the Python trial maximum with a
+  three-channel minimum and an 18-channel bound. The decoded/output path has a
+  closed unity-gain, channel-for-channel route for 4–18-channel WAVs.
+  Local/phone control shares one actor,
   callback scheduler, and result journal. Source activation and result
   publication remain unqualified for participant use.
 - **Latest completed evidence:** speaker switching source `c014d75f` passed
@@ -41,9 +41,8 @@ Updated: 2026-10-04. Replace at stage transitions; keep historical evidence in
   The downloaded validation marker matches the commit and its SHA-256 matches
   the artifact manifest. Installed executable and HTML/CSS hashes were recorded.
   Neither an installed WebView nor physical output was tested from this package.
-- **Next gates:** produce approved speaker-array and tactile block WAVs beyond
-  three channels through the Python oracle, then qualify their exact hardware
-  route and levels; run the installed native
+- **Next gates:** qualify each larger-array hardware route and its levels,
+  then run the installed native
   single-block workflow on a compatible calibrated device; validate event/CSV
   files and recording; extend to full profiles and multiple blocks; then build
   and verify the exact two-app Full installer. Installed operation, physical

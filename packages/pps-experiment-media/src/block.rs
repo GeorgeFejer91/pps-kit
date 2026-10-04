@@ -10,13 +10,14 @@ use std::{
 };
 
 use hound::{SampleFormat, WavSpec, WavWriter};
-use pps_runner_audio::{AudioFence, AudioLoadLimits};
+use pps_runner_audio::{AudioFence, AudioLoadLimits, MAXIMUM_DIRECT_OUTPUT_CHANNELS};
 use pps_session_package::experiment_plan::ProfileParticipantPlan;
 use sha2::{Digest, Sha256};
 
 use crate::bind_profile_trial_wav;
 
-const OUTPUT_CHANNELS: u16 = 3;
+const MINIMUM_OUTPUT_CHANNELS: u16 = 3;
+const MAXIMUM_OUTPUT_CHANNELS: u16 = MAXIMUM_DIRECT_OUTPUT_CHANNELS;
 const MAX_OUTPUT_WAV_BYTES: u64 = 768 * 1024 * 1024;
 const STORAGE_RESERVE_BYTES: u64 = 8 * 1024 * 1024;
 const DEFAULT_TACTILE_COMPENSATION_MS: f64 = 23.0;
@@ -96,6 +97,7 @@ pub struct AssembledBlockWav {
     bytes: u64,
     frames: u64,
     sample_rate_hz: u32,
+    channels: u16,
     spans: Vec<TrialFrameSpan>,
 }
 
@@ -116,7 +118,7 @@ impl AssembledBlockWav {
         self.sample_rate_hz
     }
     pub const fn channels(&self) -> u16 {
-        OUTPUT_CHANNELS
+        self.channels
     }
     pub fn spans(&self) -> &[TrialFrameSpan] {
         &self.spans
@@ -261,7 +263,10 @@ fn speaker_switching(
     if channels.is_empty() || times_ms.is_empty() {
         return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
     }
-    if channels.iter().any(|channel| *channel > OUTPUT_CHANNELS) {
+    if channels
+        .iter()
+        .any(|channel| *channel > MAXIMUM_OUTPUT_CHANNELS)
+    {
         return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
     }
     if times_ms.len() == channels.len() {
@@ -322,7 +327,7 @@ fn speaker_switching(
     )
     .trunc()
     .max(0.0);
-    if tactile_channel > f64::from(OUTPUT_CHANNELS) {
+    if tactile_channel > f64::from(MAXIMUM_OUTPUT_CHANNELS) {
         return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
     }
     let tactile_channel = tactile_channel as u16;
@@ -520,7 +525,7 @@ fn tactile_waveform(
     )
     .trunc()
     .max(1.0);
-    if channel > f64::from(OUTPUT_CHANNELS) {
+    if channel > f64::from(MAXIMUM_OUTPUT_CHANNELS) {
         return Err(BlockMediaError(BlockMediaErrorCode::TransformUnsupported));
     }
     let start = bounded_frames(tactile_onset_s(fields, trial_family) * f64::from(sample_rate_hz))?;
@@ -548,7 +553,6 @@ fn tactile_waveform(
     }
     start
         .checked_add(frames)
-        .filter(|stop| *stop <= MAX_OUTPUT_WAV_BYTES / (u64::from(OUTPUT_CHANNELS) * 2))
         .ok_or(BlockMediaError(BlockMediaErrorCode::ResourceLimit))?;
     if std::f64::consts::TAU * frequency_hz * frames as f64 / f64::from(sample_rate_hz)
         > f64::from(f32::MAX)
@@ -783,9 +787,9 @@ fn require_storage(estimated_bytes: u64, available_bytes: u64) -> Result<(), Blo
     Ok(())
 }
 
-/// Assemble one 2/3-channel-source PCM16 block in approved trial order.
-/// Speaker switching within the existing three-channel route is supported;
-/// larger arrays reject until their native output route exists.
+/// Assemble one bounded PCM16 block from approved 2/3-channel trial sources.
+/// The block width is the largest trial output width, with a three-channel
+/// minimum. Each output position has the same 1-based meaning as its row.
 /// Publication never overwrites.
 pub fn assemble_standard_profile_block(
     plan: &ProfileParticipantPlan,
@@ -812,6 +816,7 @@ pub fn assemble_standard_profile_block(
         .filter(|rate| *rate > 0)
         .ok_or(BlockMediaError(BlockMediaErrorCode::SourceUnsupported))?;
     let mut estimated_frames = 0_u64;
+    let mut output_channels = MINIMUM_OUTPUT_CHANNELS;
     for trial in block.trials() {
         let hint = trial
             .ingredient()
@@ -825,27 +830,24 @@ pub fn assemble_standard_profile_block(
         }
         let waveform = tactile_waveform(trial.fields(), family(trial.fields()), sample_rate_hz)?;
         let trial_frames = hint.frames().max(waveform.map_or(0, TactileWaveform::stop));
-        speaker_switching(
+        let source_prepared_channels = hint
+            .channels()
+            .max(waveform.map_or(0, |value| value.channel));
+        let switching = speaker_switching(
             trial.fields(),
             trial_frames,
             sample_rate_hz,
-            hint.channels()
-                .max(waveform.map_or(0, |value| value.channel)),
+            source_prepared_channels,
         )?;
+        output_channels = output_channels.max(
+            switching
+                .as_ref()
+                .map_or(source_prepared_channels, |spec| spec.prepared_channels),
+        );
         estimated_frames = estimated_frames
             .checked_add(trial_frames)
             .and_then(|frames| frames.checked_add(iti_frames(trial.fields(), sample_rate_hz).ok()?))
             .ok_or(BlockMediaError(BlockMediaErrorCode::ResourceLimit))?;
-        if 44_u64
-            .checked_add(
-                estimated_frames
-                    .checked_mul(6)
-                    .ok_or(BlockMediaError(BlockMediaErrorCode::ResourceLimit))?,
-            )
-            .is_none_or(|bytes| bytes > MAX_OUTPUT_WAV_BYTES)
-        {
-            return Err(BlockMediaError(BlockMediaErrorCode::ResourceLimit));
-        }
     }
     let parent = output_path
         .parent()
@@ -855,8 +857,9 @@ pub fn assemble_standard_profile_block(
         return Err(BlockMediaError(BlockMediaErrorCode::OutputFailed));
     }
     let estimated_bytes = estimated_frames
-        .checked_mul(u64::from(OUTPUT_CHANNELS) * 2)
+        .checked_mul(u64::from(output_channels) * 2)
         .and_then(|bytes| bytes.checked_add(44))
+        .filter(|bytes| *bytes <= MAX_OUTPUT_WAV_BYTES)
         .ok_or(BlockMediaError(BlockMediaErrorCode::ResourceLimit))?;
     // Like the Python generation preflight, allow room for output, scratch,
     // and filesystem overhead before decoding any trial or creating a file.
@@ -889,7 +892,7 @@ pub fn assemble_standard_profile_block(
     }
     let (pending, file) = pending.ok_or(BlockMediaError(BlockMediaErrorCode::OutputFailed))?;
     let spec = WavSpec {
-        channels: OUTPUT_CHANNELS,
+        channels: output_channels,
         sample_rate: sample_rate_hz,
         bits_per_sample: 16,
         sample_format: SampleFormat::Int,
@@ -991,7 +994,7 @@ pub fn assemble_standard_profile_block(
             } else {
                 0.0
             };
-            for channel in 0..usize::from(OUTPUT_CHANNELS) {
+            for channel in 0..usize::from(output_channels) {
                 let value = if let Some(spec) = switching.as_ref() {
                     let tactile = if spec.tactile_channel == channel as u16 + 1
                         && channel < usize::from(source_prepared_channels)
@@ -1014,7 +1017,7 @@ pub fn assemble_standard_profile_block(
         }
         let iti = iti_frames(trial.fields(), sample_rate_hz)?;
         for _ in 0..iti {
-            for _ in 0..OUTPUT_CHANNELS {
+            for _ in 0..output_channels {
                 writer
                     .write_sample(0_i16)
                     .map_err(|_| BlockMediaError(BlockMediaErrorCode::OutputFailed))?;
@@ -1065,6 +1068,7 @@ pub fn assemble_standard_profile_block(
         bytes,
         frames: cursor,
         sample_rate_hz,
+        channels: output_channels,
         spans,
     })
 }
@@ -1107,7 +1111,7 @@ mod tests {
             BlockMediaErrorCode::TransformUnsupported
         );
         fields.insert("tactile_frequency_hz".to_owned(), "100".to_owned());
-        fields.insert("tactile_channel".to_owned(), "4".to_owned());
+        fields.insert("tactile_channel".to_owned(), "19".to_owned());
         assert_eq!(
             tactile_waveform(&fields, "audio_tactile", 44_100)
                 .unwrap_err()

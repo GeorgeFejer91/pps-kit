@@ -323,10 +323,10 @@ def test_native_tactile_waveforms_match_compatibility_assembly(tmp_path: Path, m
     monkeypatch.setenv("PPS_WOOJER_TACTILE_COMPENSATION_MS", "23")
     for shape, channel, source_channels in (
         ("square", 3, 3), ("pulse_train", 3, 3), ("sawtooth", 1, 3),
-        ("sine", 2, 3), ("square", 3, 2),
+        ("sine", 2, 3), ("square", 3, 2), ("square", 18, 3),
     ):
         profile_path = _standard_block_profile(
-            tmp_path / f"{shape}-{source_channels}", tactile_shape=shape,
+            tmp_path / f"{shape}-{channel}-{source_channels}", tactile_shape=shape,
             tactile_duration_ms=100 if shape == "pulse_train" else 10,
             tactile_channel=channel, source_channels=source_channels,
         )
@@ -397,7 +397,7 @@ def test_native_tactile_extension_and_package_metadata_match_python(tmp_path: Pa
         assert observed.readframes(observed.getnframes()) == expected.readframes(expected.getnframes())
 
 
-def test_native_three_channel_speaker_switching_matches_python(tmp_path: Path, monkeypatch) -> None:
+def test_native_speaker_switching_and_wide_tactile_routes_match_python(tmp_path: Path, monkeypatch) -> None:
     from peripersonal_space_toolkit.session_runner import _materialize_segment_block_wav
 
     monkeypatch.setenv("PPS_WOOJER_TACTILE_COMPENSATION_MS", "23")
@@ -406,6 +406,9 @@ def test_native_three_channel_speaker_switching_matches_python(tmp_path: Path, m
         ("starts-mix", "2|1", "0|50", "0.5|1.25", "mix", "square", 3, 3),
         ("tactile-overlap", "3|1", "0|60|100", "1|0.5", "2", "", 3, 3),
         ("stereo-source", "2|1", "0|40", "", "", "", None, 2),
+        ("eight-speakers", "1|8", "0|40", "", "", "", None, 3),
+        ("two-arrays", "8|16", "0|40", "0.5|1.25", "mix", "", None, 3),
+        ("separate-tactile", "1|18", "0|40", "", "", "square", 17, 3),
     )
     for name, channels, times, gains, source_channel, tactile_shape, tactile_channel, source_channels in cases:
         profile_path = _standard_block_profile(
@@ -449,7 +452,7 @@ def test_native_three_channel_speaker_switching_matches_python(tmp_path: Path, m
 
 def test_native_speaker_switching_rejects_unroutable_channel(tmp_path: Path) -> None:
     profile_path = _standard_block_profile(
-        tmp_path / "unroutable", speaker_channels="1|4", speaker_times_ms="0|50|100",
+        tmp_path / "unroutable", speaker_channels="1|19", speaker_times_ms="0|50|100",
     )
     completed = subprocess.run(
         ["cargo", "run", "--quiet", "--locked", "-p", "pps-experiment-media", "--example", "profile_block_probe"],

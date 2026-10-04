@@ -50,18 +50,19 @@ the exported inventory and frozen rows; it does not schedule, bake media or
 authorize execution. Recheck audio bytes when the native assembler consumes
 them. `pps-experiment-media` binds each inventoried PCM16 trial WAV to its exact
 decoded bytes through the existing native decoder and checks the exported audio
-hint after decoding. Its standard-route assembler stages one three-channel
-PCM16 block in approved trial order, with ITI silence and the provisional
-Woojer drive advance. It synthesizes the Python-compatible sawtooth, sine,
-square, and biphasic square pulse-train tactile waveforms on channels 1–3,
+hint after decoding. Its standard-route assembler stages one bounded PCM16
+block in approved trial order, with ITI silence and the provisional Woojer
+drive advance. It synthesizes the Python-compatible sawtooth, sine, square,
+and biphasic square pulse-train tactile waveforms,
 including trial extension and prepared CSV metadata. Python-compatible speaker
-switching now routes within those three channels, including gains, mixdown,
-source selection, and tactile preservation. Speaker targets and tactile output
-channels above three still reject in this producer. The native decoder and
-CPAL adapter separately accept exact 4–18-channel PCM16 blocks and preserve
-each source channel at the same physical output index. This direct route
-requires unity gains; study-specific channel roles, calibration and a wider
-native block producer remain open. The block has a
+switching supports gains, mixdown, source selection, and tactile preservation.
+The producer now chooses the maximum trial output width for the block, with a
+three-channel minimum and an 18-channel bound. Source PCM remains 2/3-channel;
+switching and tactile synthesis can place samples on higher output channels.
+The native decoder and CPAL adapter accept exact 4–18-channel PCM16 blocks and
+preserve each source channel at the same physical output index. This direct
+route requires unity gains; study-specific channel roles, calibration, and
+physical verification remain open. The block has a
 bounded size and is published without overwriting an existing file. The same crate now
 materializes a standard-route `pps-run-session.v1` CSV/manifest package for one
 approved participant's single-phase block order. It rechecks the JSON/source

@@ -299,6 +299,7 @@ impl PreparedAudioError {
             | OutputPlanError::EventDensityLimitExceeded { .. } => Self::output_plan_limit(),
             OutputPlanError::Route(_)
             | OutputPlanError::InvalidGain
+            | OutputPlanError::DirectRouteRequiresUnityGains
             | OutputPlanError::EmptyMedia
             | OutputPlanError::PreparedMediaShape
             | OutputPlanError::EventOrder => Self::output_plan_unsupported(),
