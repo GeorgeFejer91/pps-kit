@@ -92,6 +92,10 @@ the audio bundle to 256 MiB. Browser soundchecks resolve restored uploads from
 IndexedDB and cancel pending fetch/decode publication when the profile changes.
 Study URLs honor generated record aliases and disclose a split into current
 study records rather than silently presenting one as equivalent.
+The mapper distinguishes registry presence, Methods inventory/access review,
+explicit contract dispositions, template availability and native qualification.
+Generated audit counts never imply replication readiness. Review-source links
+remain separate from DOI identity, including author-version comparison gaps.
 
 New static block previews preserve the selected baseline strategy and include
 instruction/jitter prefixes in looming and tactile onset times. Catch/audio-only
