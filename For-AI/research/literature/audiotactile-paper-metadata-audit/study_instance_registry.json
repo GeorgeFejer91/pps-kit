@@ -305,6 +305,95 @@
           "disaggregation_status": "combined_record_requires_experiment_specific_review"
         }
       ]
+    },
+    {
+      "network_node_id": "doi:10.3389/fnbeh.2015.00004",
+      "doi": "10.3389/fnbeh.2015.00004",
+      "inventory_status": "confirmed_main_audio_tactile_experiment",
+      "instance_count_basis": "One group of 16 completes synchronous and asynchronous days in counterbalanced order, with repeated PPS assessment. Computational simulations and training are supporting contexts.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4313698/fullTextXML::Methods/Design",
+      "review_date": "2026-10-27",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Within-subject synchronous/asynchronous training design",
+          "record_id": "serino_2015_toolless_sync_training",
+          "template_ids": [
+            "serino_2015_toolless_sync_training"
+          ],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Computational neural-network simulations",
+          "disposition": "supporting_computational_context",
+          "basis": "Simulated network experiments are not human audiotactile study rows.",
+          "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4313698/fullTextXML::The computational study"
+        },
+        {
+          "label": "Synchronous and asynchronous training",
+          "disposition": "intervention_within_main_design",
+          "basis": "23 trains per session; 500-ms asynchronous shift; distinct stimuli from assessment. Do not borrow training counts or intervals for assessment.",
+          "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4313698/fullTextXML::Materials and procedures/Design"
+        }
+      ]
+    },
+    {
+      "network_node_id": "doi:10.1038/s41598-020-79767-0",
+      "doi": "10.1038/s41598-020-79767-0",
+      "inventory_status": "confirmed_main_audio_tactile_experiment",
+      "instance_count_basis": "One main auditory-tactile experiment with 40 participants. Emotional and roughness ratings plus anxiety measures are supporting assessments.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7806762/fullTextXML::Methods/Design",
+      "review_date": "2026-10-27",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Main roughness audio-tactile experiment",
+          "record_id": "taffou_2021_auditory_roughness",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Emotional and roughness ratings; STAI measures",
+          "disposition": "supporting_auditory_only_or_questionnaire_context",
+          "basis": "No simultaneous tactile detection outcome; rating stimuli/levels must not replace main PPS rendering.",
+          "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7806762/fullTextXML::Design and procedure"
+        }
+      ]
+    },
+    {
+      "network_node_id": "doi:10.3390/bs14040306",
+      "doi": "10.3390/bs14040306",
+      "inventory_status": "confirmed_main_audio_tactile_experiment",
+      "instance_count_basis": "One 26-participant pre/post design; meditation intervention and practice/calibration do not constitute separate PPS experiments.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11047477/fullTextXML::Methods/Design",
+      "review_date": "2026-10-27",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Within-subject pre/post focused-attention meditation design",
+          "record_id": "mindfulness_pps_2024",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Focused-attention meditation and practice/calibration",
+          "disposition": "intervention_and_familiarization_within_main_design",
+          "basis": "15-minute FAM between two assessments;10-trial familiarization is not an extra experiment.",
+          "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11047477/fullTextXML::2.4"
+        }
+      ]
     }
   ],
   "corpus_freeze": {
