@@ -33,25 +33,33 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 156 study/context rows,
-59 registered publication inventories, eight access-audited publications,
+Current checkpoint (2026-10-27): 94 frozen publications, 158 study/context rows,
+61 registered publication inventories, eight access-audited publications,
 one audited project-lineage identity,
-and 26 publication inventories still unassessed. Registry presence alone
+and 24 publication inventories still unassessed. Registry presence alone
 does not certify a Methods-confirmed inventory: earlier abstract-based or partial
 inventories still require their source and compact-contract audits.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive these distinctions from explicit registry
 evidence categories and the finalized eleven-contract source dispositions.
-The current audit records 57 Methods-backed inventories (44 current primary
-reviews, eight retained primary reviews, and five identified author versions whose
+The current audit records 59 Methods-backed inventories (45 current primary
+reviews, eight retained primary reviews, and six identified author versions whose
 final comparison is pending), one abstract/metadata inventory, one partial
-Methods inventories, eight audited access blockers, one project-lineage boundary, and 26 unregistered publications.
-Only 64 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 30 still need inventory
+Methods inventories, eight audited access blockers, one project-lineage boundary, and 24 unregistered publications.
+Only 67 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 27 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+The racket/observation/elongation checkpoint preserves Biggio’s dated full-source
+review separately from current access limits. Galigani has separate landmark
+and post-training AT cohorts; the accepted manuscript has a missing paragraph
+checked through selected final excerpts, with full final comparison pending.
+Its pilot audio lag of up to 40 ms is a bound, not a fixed correction. Cimmino’s
+PPS control sample conflict (six versus seven) and PRE/POST-only scope remain
+explicit; the overlapping tactile/body battery is adjacent context.
+
 Teneggi now includes three main AT experiments, two identified localization
 groups and an audiovisual control; further Table S2b cohort linkage remains
 unresolved. Only Experiment 3 retains the existing template, and its counts

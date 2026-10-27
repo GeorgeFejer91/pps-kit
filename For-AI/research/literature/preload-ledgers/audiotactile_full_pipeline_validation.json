@@ -1387,7 +1387,8 @@
           "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "full audio/tactile/timing parameters need extraction"
+            "Exact electrical pulse/current, ITI and online response deadline",
+            "PPS control count conflicts six versus seven; no PPS follow-up inventory established"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -1420,9 +1421,10 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "full audio/tactile/timing parameters need extraction"
+        "Exact electrical pulse/current, ITI and online response deadline",
+        "PPS control count conflicts six versus seven; no PPS follow-up inventory established"
       ],
-      "next_required_action": "Extract or source the missing paper parameters: full audio/tactile/timing parameters need extraction",
+      "next_required_action": "Extract or source the missing paper parameters: Exact electrical pulse/current, ITI and online response deadline; PPS control count conflicts six versus seven; no PPS follow-up inventory established",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -4641,11 +4643,11 @@
       ]
     },
     {
-      "audiotactile_task_family": "audio-tactile PPS task around tool-use observation",
+      "audiotactile_task_family": "static near/far AT after active, observed and cognitive tool-training sessions; separate body-landmark cohort",
       "blocking_constraint_ids": [
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
-      "citation_short": "Tool-use observation PPS (2020)",
+      "citation_short": "Galigani et al. (2020)",
       "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
       "doi": "10.1016/j.neuropsychologia.2020.107622",
@@ -4659,7 +4661,8 @@
           "passed": true,
           "source_basis": [
             "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#ferroni_2020_tool_observation",
-            "Consensus MCP 2026-07-15 query: 10.1016/j.cortex.2020.11.021 ageing body space representations peripersonal space audio tactile"
+            "https://arodes.hes-so.ch/record/6098/files/Author%20postprint.pdf",
+            "https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf#page=5"
           ],
           "status": "structured_expected_outcome_extracted"
         },
@@ -4684,7 +4687,9 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract whether PPS task differs from Canzoneri-style dynamic scaffold"
+            "Exact audio source/envelope, ITI distribution/anchor and online response window",
+            "Nominal simultaneity with up to 40 ms pilot auditory lag; exact delivered timing unspecified",
+            "Full final-file comparison and unresolved pilot inventory detail"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -4719,9 +4724,11 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract whether PPS task differs from Canzoneri-style dynamic scaffold"
+        "Exact audio source/envelope, ITI distribution/anchor and online response window",
+        "Nominal simultaneity with up to 40 ms pilot auditory lag; exact delivered timing unspecified",
+        "Full final-file comparison and unresolved pilot inventory detail"
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract whether PPS task differs from Canzoneri-style dynamic scaffold",
+      "next_required_action": "Extract or source the missing paper parameters: Exact audio source/envelope, ITI distribution/anchor and online response window; Nominal simultaneity with up to 40 ms pilot auditory lag; exact delivered timing unspecified; Full final-file comparison and unresolved pilot inventory detail",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",

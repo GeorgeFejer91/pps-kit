@@ -1139,7 +1139,8 @@
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "full audio/tactile/timing parameters need extraction"
+        "Exact electrical pulse/current, ITI and online response deadline",
+        "PPS control count conflicts six versus seven; no PPS follow-up inventory established"
       ]
     },
     {
@@ -1815,20 +1816,22 @@
     },
     {
       "record_id": "ferroni_2020_tool_observation",
-      "citation_short": "Tool-use observation PPS (2020)",
+      "citation_short": "Galigani et al. (2020)",
       "doi": "10.1016/j.neuropsychologia.2020.107622",
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
       "current_template_ids": [],
       "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "audiotactile_task_family": "audio-tactile PPS task around tool-use observation",
+      "audiotactile_task_family": "static near/far AT after active, observed and cognitive tool-training sessions; separate body-landmark cohort",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract whether PPS task differs from Canzoneri-style dynamic scaffold"
+        "Exact audio source/envelope, ITI distribution/anchor and online response window",
+        "Nominal simultaneity with up to 40 ms pilot auditory lag; exact delivered timing unspecified",
+        "Full final-file comparison and unresolved pilot inventory detail"
       ]
     },
     {
