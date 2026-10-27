@@ -42,16 +42,21 @@ inventories still require their source and compact-contract audits.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive these distinctions from explicit registry
 evidence categories and the finalized eleven-contract source dispositions.
-The current audit records 57 Methods-backed inventories (42 current primary
-reviews, eleven retained primary reviews, and four identified author versions whose
+The current audit records 57 Methods-backed inventories (43 current primary
+reviews, ten retained primary reviews, and four identified author versions whose
 final comparison is pending), one abstract/metadata inventory, one partial
 Methods inventories, eight audited access blockers, one project-lineage boundary, and 26 unregistered publications.
-Only 60 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 34 still need inventory
+Only 61 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 33 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Serino (2007) was rechecked against a fresh published copy: one task with blind
+and sighted cohorts, group-specific repeated schedules, and far-source emission
+5 ms before touch. Exact electrical pulse duration and ITI remain unreported;
+command SOA (+5 ms far) is distinct from intended acoustic arrival synchrony.
+
 Canonical current-input matrices were refreshed against template/runtime
 checkpoint `c6c92728` and its Serino asset prerequisite `5f57d3b4`. The existing
 Teneggi template is associated only with Experiment 3; its missing source counts

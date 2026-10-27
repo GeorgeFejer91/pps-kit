@@ -65,7 +65,7 @@ doi:10.1101/492017,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1109/whc.2017.7989970,yes,audited_source_access_gap,source_access_blocked_experiment_inventory_unresolved,1,1,yes,yes,https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf::abstract; dated failed primary full-text routes,2026-10-27
 doi:10.1111/ejn.13872,yes,abstract_or_metadata_inventory,confirmed_total,3,0,no,no,publication_network.v3.json::doi:10.1111/ejn.13872; metadata_audit.jsonl::pfeiffer_2018_vestibular,2026-10-27
 doi:10.1111/j.1460-9568.2010.07210.x,no,not_registered,not_assessed,1,0,no,no,,
-doi:10.1111/j.1467-9280.2007.01952.x,yes,retained_primary_methods_review,confirmed_main_audio_tactile_experiment,1,0,no,no,https://doi.org/10.1111/j.1467-9280.2007.01952.x::Methods; manual_reviews/serino_2007_blind_cane_users.json::segment_2_sequence_and_intermixing;segment_4_counts,2026-10-27
+doi:10.1111/j.1467-9280.2007.01952.x,yes,primary_methods_reviewed,confirmed_main_audio_tactile_experiment,1,1,yes,yes,http://wexler.free.fr/library/files/serino%20%282007%29%20extended%20multisensory%20space%20in%20blind%20cane%20users.pdf::published pp. 643–644,2026-10-27
 doi:10.1152/jn.00652.2017,yes,primary_methods_reviewed,confirmed_two_body_target_cohort_protocols,2,2,yes,yes,https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML::Human Methods; PDF pp. 2-3,2026-10-27
 doi:10.1162/089892902320474481,yes,retained_primary_methods_review,confirmed_total,2,2,yes,yes,manual_reviews/farne_ladavas_2002_auditory_pps_humans.json,2026-10-27
 doi:10.1162/jocn_a_00006,no,not_registered,not_assessed,1,0,no,no,,

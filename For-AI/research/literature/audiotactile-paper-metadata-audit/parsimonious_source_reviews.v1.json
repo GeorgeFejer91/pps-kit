@@ -11034,10 +11034,10 @@
     },
     {
       "study_row_id": "doi:10.1111/j.1467-9280.2007.01952.x",
-      "source_type": "existing_critical_primary_pdf_review",
-      "source_file": "https://doi.org/10.1111/j.1467-9280.2007.01952.x",
+      "source_type": "published_primary_copy_academic_library",
+      "source_file": "http://wexler.free.fr/library/files/serino%20%282007%29%20extended%20multisensory%20space%20in%20blind%20cane%20users.pdf",
       "review_date": "2026-10-27",
-      "review_scope": "Bounded static-task timing, response and trial-allocation normalization. Other contracts retain earlier evidence; no template or native-readiness promotion.",
+      "review_scope": "Fresh full published Methods and rendered critical page reviewed; one experiment with two cohorts and explicit repeated-assessment variants. All eleven dispositions reviewed.",
       "prior_review_pointer": "manual_reviews/serino_2007_blind_cane_users.json",
       "retrieval_attempts": [
         {
@@ -11054,127 +11054,296 @@
           "date": "2026-10-27",
           "route": "manual_reviews/serino_2007_blind_cane_users.json",
           "outcome": "existing_2026-06-16_critical_PDF_review_read; expected_local_PDF_absent"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "http://wexler.free.fr/library/files/serino%20%282007%29%20extended%20multisensory%20space%20in%20blind%20cane%20users.pdf",
+          "outcome": "Published seven-page copy retrieved from public academic-library HTTP route after HTTPS connection refusal. Whole Methods reviewed and critical Methods page rendered. SHA256 f4ce8d7a3d6c1d4742b0c09ad749ec01996f1df6e8f3f0b6e47f7eeb28b314bb."
         }
       ],
       "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
         "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
         "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
         "catch_trial_contract",
         "repetition_allocation",
         "block_order_contract"
       ],
       "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "150 ms white-noise bursts from two identical loudspeakers, equalized to 70 dB at the ear. Spectral waves compared at source origin. Sampling rate, bandwidth, original waveform/seed and onset/offset envelope are unreported.",
+          "page_or_section": "Published pp. 643–644 (PDF pp. 2–3), Method / Procedure and Materials",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "White-noise bursts from stationary speakers."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "White noise, 150 ms."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "No sampling rate, bandwidth, original asset/seed or onset/offset envelope."
+            },
+            "level_envelope_calibration": {
+              "status": "reported",
+              "value": "Near/far ear-level intensity equalized to 70 dB; source spectra compared."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two identical physical loudspeakers."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Static near/far sounds. Near speaker is close to the right hand; far speaker is on the floor approximately 125 cm away at the cane tip. Cane is 125 cm and handle 14 cm. Exact near distance and full coordinates are unreported.",
+          "page_or_section": "Published pp. 643–644 (PDF pp. 2–3), Method / Procedure and Materials",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Static near/far, no moving trajectory."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Right hand holding cane or weight-matched handle."
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "Near by hand; far approximately 125 cm away at cane tip. Exact near position/full coordinates absent."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "Stationary 150 ms burst; no motion speed."
+            }
+          }
+        },
         "trial_sequence": {
-          "status": "reported_complete",
-          "value": "Weak tactile targets, strong tactile nontargets and sound-only catches paired with static near/far auditory locations.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "status": "partial",
+          "value": "Weak tactile targets and strong tactile nontargets are each paired with static near/far sounds; auditory-only catches omit touch. Full trial timing and within-block randomization are unreported.",
+          "page_or_section": "Published pp. 643–644 (PDF pp. 2–3), Method / Procedure and Materials",
           "component_reviews": {
             "trial_families": {
               "status": "reported",
-              "value": "60 weak tactile targets,60 strong tactile nontargets,30 sound-only catches per described task."
+              "value": "Weak-near, weak-far, strong-near, strong-far, sound-only catch."
             },
             "ordered_elements_and_source_selection": {
               "status": "reported",
-              "value": "Weak and strong tactile events paired with near or far sound; no touch on sound-only catches."
+              "value": "Near commands simultaneous; far auditory emission leads touch by 5 ms for propagation compensation."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "Full trial duration, padding and response window unspecified."
             },
             "condition_intermixing": {
-              "status": "reported",
-              "value": "Near/far and trial families occur within each tool-condition task."
+              "status": "not_reported",
+              "value": "Within-task randomization/sequence rules not explicitly specified."
             }
-          },
-          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. Respond only to weak tactile targets; strong tactile events are no-go, not additional response targets."
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Vocal tah to weak touch only; withhold for strong touch and sound-only catches. Voice relay and XGen capture RT. Thirty familiarization trials are separate. No numeric response deadline is specified.",
+          "page_or_section": "Published pp. 643–644 (PDF pp. 2–3), Method / Procedure and Materials",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Weak target go; strong nontarget and auditory-only catch no-go."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Voice relay and XGen."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Vocal tah to weak target."
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "No explicit numeric deadline or online capture window."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_reported",
+          "value": "No ITI, jitter distribution or complete trial-cycle duration found in the full Methods.",
+          "page_or_section": "Published pp. 643–644 (PDF pp. 2–3), Method / Procedure and Materials",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_reported",
+              "value": "ITI/jitter not specified."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "No trial-cycle anchor reported."
+            },
+            "values_or_range": {
+              "status": "not_reported",
+              "value": "No numeric ITI or jitter range."
+            }
+          }
         },
         "soa_schedule": {
-          "status": "reported_complete",
-          "value": "Near: source and tactile onset simultaneous. Far: source starts 5 ms before touch, so tactile-minus-source SOA is+5 ms.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "status": "derived_complete",
+          "value": "Emission/command SOA under tactile-minus-auditory notation is 0 ms near and +5 ms far. Far audio is emitted 5 ms before touch to compensate acoustic propagation; intended arrival synchrony is a different reference.",
+          "page_or_section": "Published pp. 643–644 (PDF pp. 2–3), Method / Procedure and Materials",
           "component_reviews": {
             "reference_event_and_sign": {
-              "status": "reported",
-              "value": "Scheduled source onset; positive means tactile occurs later."
+              "status": "derived",
+              "value": "Tactile onset minus auditory source emission/command onset, not auditory arrival."
             },
             "ordered_soa_values_or_derivable_distance_anchors": {
-              "status": "reported",
-              "value": "Near 0 ms;far+5 ms."
+              "status": "derived",
+              "value": "Near 0 ms; far +5 ms."
             },
             "direction_specific_pairing": {
               "status": "reported",
-              "value": "Static near/far timing compensation for acoustic travel."
+              "value": "Static near/far pairing; compensation applies to far speaker."
             }
           },
-          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. The 5-ms lead concerns physical source scheduling; it must not be represented as a moving-source delay ladder or a measured arrival-time offset."
+          "derivation_note": "Far auditory emission = tactile onset − 5 ms, so tactile minus auditory = +5 ms. Near commands coincide. Acoustic arrival synchrony is not the same timing anchor."
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "Upper side of right index finger, two DS7A constant-current stimulators and two electrode pairs. Weak target calibrated to approximately 90% detection; strong nontarget to 100%. Weak-inside-strong electrode nesting and reverse are split across participant halves. Pulse duration/waveform and individual numeric currents are not reported.",
+          "page_or_section": "Published pp. 643–644 (PDF pp. 2–3), Method / Procedure and Materials",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Electrical stimulation through two DS7A devices."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Upper side of right index finger; two nested electrode pairs with nesting reversed between participant halves."
+            },
+            "waveform_and_duration": {
+              "status": "not_reported",
+              "value": "Electrical pulse duration and waveform not specified; device identity does not establish a 100 µs pulse."
+            },
+            "frequency_or_amplitude": {
+              "status": "not_reported",
+              "value": "Numeric individual currents absent."
+            },
+            "intensity_or_calibration": {
+              "status": "reported",
+              "value": "Weak approximately 90% detection, strong 100% detection."
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "Exact trigger/interface and measured latency absent."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "derived_complete",
+          "value": "No extra tactile-only baseline family exists in the enumerated 150-trial allocation: 120 touch-plus-sound target/nontarget trials and 30 sound-only catches. Comparisons use near/far location and tool state.",
+          "page_or_section": "Published pp. 643–644 (PDF pp. 2–3), Method / Procedure and Materials",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "derived",
+              "value": "Zero extra tactile-only baseline trials within the complete described allocation."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "No separate tactile-only baseline family."
+            },
+            "allocation_rule": {
+              "status": "derived",
+              "value": "Four near/far × weak/strong cells of 30, plus 30 catches, exhaust 150 trials."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "150 − 4 × 30 − 30 = 0 additional baseline rows."
+            }
+          },
+          "derivation_note": "4 tactile event/location cells × 30 + 30 sound-only catches = all 150 reported trials, leaving no separate tactile-only baseline rows."
         },
         "catch_trial_contract": {
-          "status": "reported_complete",
-          "value": "30 sound-only catches plus 60 strong tactile no-go trials;90 no-response rows in total.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "status": "partial",
+          "value": "Thirty sound-only catches per task administration require no vocal response. The 60 strong-touch nontargets are separate no-go trials, not 60 additional paper-labelled catches. Exact near/far sound-only catch allocation is unreported.",
+          "page_or_section": "Published pp. 643–644 (PDF pp. 2–3), Method / Procedure and Materials",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "reported",
-              "value": "Sound-only catches and separate strong tactile nontarget rows."
+              "value": "Sound-only, no tactile event."
             },
             "target_role_and_expected_action": {
               "status": "reported",
-              "value": "Respond only to weak touch; withhold for strong touch and sound-only trials."
+              "value": "Withhold vocal response."
             },
             "allocation_rule": {
-              "status": "reported",
-              "value": "30 sound-only catches;30 strong near and 30 strong far nontargets."
+              "status": "not_reported",
+              "value": "30 total; near/far split not stated."
             },
             "resolved_trial_count": {
               "status": "reported",
-              "value": "30 paper-labelled catches;90 no-response rows including 60 nontargets."
+              "value": "30 paper-labelled sound-only catches per task; strong-touch nontargets remain a separate family."
             }
           },
-          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. Do not relabel all 90 no-response rows as the paper catch count."
+          "derivation_note": "Two near/far strong-touch cells × 30 = 60 strong nontarget trials; these require withholding but do not increase the 30 paper-labelled auditory-only catches."
         },
         "repetition_allocation": {
-          "status": "reported_complete",
-          "value": "30 trials for each of 4 tactile-strength x sound-location cells, plus 30 sound-only catches:150 per described task.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "status": "derived_complete",
+          "value": "Thirty trials in each weak/strong × near/far cell plus 30 sound-only catches give 150 per task. Two blind-cohort administrations imply 300 trials; four sighted-cohort administrations imply 600, assuming the described task repeats for every stated condition. Familiarization (30 trials) and training are excluded.",
+          "page_or_section": "Published pp. 643–644 (PDF pp. 2–3), Method / Procedure and Materials",
           "component_reviews": {
             "factor_dimensions": {
               "status": "reported",
-              "value": "Two tactile strengths x two static sound locations, plus catch family."
+              "value": "Weak/strong tactile event × near/far source; group-specific repeated tool/training states."
             },
             "repetitions_or_exact_counts": {
               "status": "reported",
-              "value": "30 per tactile-strength/location cell;30 sound-only catches."
+              "value": "30 each of four tactile cells plus 30 catches = 150 per task."
             },
             "exceptions_or_overrides": {
               "status": "reported",
-              "value": "30 familiarization trials remain outside the experimental 150."
+              "value": "8 blind participants have 2 tool states; the same 16 sighted participants have 4 assessments. Familiarization/training excluded."
             },
             "derived_total_reconciliation": {
-              "status": "reported",
-              "value": "4 x 30 +30 =150."
+              "status": "derived",
+              "value": "150 × 2 = 300 blind and 150 × 4 = 600 sighted, conditional on repeating the described task for each stated condition."
             }
           },
-          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. "
+          "derivation_note": "Per-task total 150 is explicit. 150 × 2 blind conditions = 300; 150 × 4 sighted conditions = 600 assumes the same task repeated at all stated assessments; practice/training excluded."
         },
         "block_order_contract": {
           "status": "partial",
-          "value": "Cane and handle conditions for all participants; sighted participants additionally tested immediately and one day after cane training.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "value": "Both groups complete cane and weight-matched handle conditions in counterbalanced order. Sighted participants additionally perform cane assessments immediately after ten-minute training and one day later. Exact acquisition-block subdivision, within-task shuffle and relation of later sessions to the counterbalanced initial pair are not fully specified.",
+          "page_or_section": "Published pp. 643–644 (PDF pp. 2–3), Method / Procedure and Materials",
           "component_reviews": {
             "block_count": {
-              "status": "reported",
-              "value": "Two tool-condition assessments for blind participants; four listed assessments for sighted participants."
+              "status": "not_reported",
+              "value": "2 blind/4 sighted task administrations are described; further execution-block subdivision is not."
             },
             "block_composition": {
               "status": "reported",
-              "value": "Described 150-trial task; repetition in every assessment is implied, not explicitly multiplied."
+              "value": "150 trials per described task administration."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "derived",
+              "value": "300/600 totals assume identical 150-trial task repeated for every stated group-specific condition."
+            },
+            "within_block_randomization": {
+              "status": "not_reported",
+              "value": "Within-task randomization not explicitly reported."
             },
             "block_order_or_counterbalancing": {
               "status": "reported",
-              "value": "Initial cane/handle order counterbalanced; sighted follow-ups follow training."
+              "value": "Initial cane/handle counterbalanced; sighted immediate and one-day follow-up after ten-minute cane training."
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "Exact within-block sequence and complete chronology around counterbalanced initial conditions absent."
             }
           },
-          "missing_required_components": [
-            "pool_repeat_or_distribution",
-            "within_block_randomization"
-          ],
-          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. Do not claim 300/600 group totals as directly reported; detailed within-task randomization remains unresolved."
+          "derivation_note": "Per-task total 150 is explicit. 150 × 2 blind conditions = 300; 150 × 4 sighted conditions = 600 assumes the same task repeated at all stated assessments; practice/training excluded."
         }
       }
     },

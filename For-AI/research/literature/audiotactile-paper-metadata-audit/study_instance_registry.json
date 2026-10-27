@@ -1006,10 +1006,10 @@
       "network_node_id": "doi:10.1111/j.1467-9280.2007.01952.x",
       "doi": "10.1111/j.1467-9280.2007.01952.x",
       "inventory_status": "confirmed_main_audio_tactile_experiment",
-      "inventory_evidence_status": "retained_primary_methods_review",
+      "inventory_evidence_status": "primary_methods_reviewed",
       "inventory_evidence_classified_on": "2026-10-27",
-      "instance_count_basis": "One task design with blind/sighted cohorts and group-specific tool/training assessment schedules; blocked conditions are not separate publications or independent experiments.",
-      "evidence_pointer": "https://doi.org/10.1111/j.1467-9280.2007.01952.x::Methods; manual_reviews/serino_2007_blind_cane_users.json::segment_2_sequence_and_intermixing;segment_4_counts",
+      "instance_count_basis": "One main experiment with 8 experienced blind cane users and 16 sighted blindfolded controls (24 participants). Blind cohort has cane/handle conditions; the same sighted cohort has two initial conditions plus immediate and one-day post-training cane assessments. Training, questionnaire screening, calibration and familiarization are embedded context, not separately recruited experiments.",
+      "evidence_pointer": "http://wexler.free.fr/library/files/serino%20%282007%29%20extended%20multisensory%20space%20in%20blind%20cane%20users.pdf::published pp. 643–644",
       "review_date": "2026-10-27",
       "instances": [
         {
@@ -1021,10 +1021,31 @@
             "serino_2007_blind_cane_users"
           ],
           "toolkit_scope": "in_scope",
-          "disaggregation_status": "record_already_experiment_specific"
+          "disaggregation_status": "record_already_experiment_specific",
+          "protocol_variants": [
+            {
+              "label": "Blind experienced cane users",
+              "participants": 8,
+              "task_administrations": 2,
+              "basis": "Cane and weight-matched handle in counterbalanced order."
+            },
+            {
+              "label": "Sighted blindfolded controls",
+              "participants": 16,
+              "task_administrations": 4,
+              "basis": "Initial cane/handle plus cane immediately after ten-minute training and one day later; same participants, not new cohorts."
+            }
+          ]
         }
       ],
-      "source_review_limit": "Inventory and bounded values normalized from existing critical primary PDF review dated 2026-06-16; current main PDF not re-inspected. Current abstract corroborates broad design only."
+      "source_review_limit": "Fresh published copy reviewed. Exact electrical pulse duration/waveform/current, ITI, response deadline, within-task shuffle and catch spatial allocation remain absent; do not import other DS7A protocols.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "http://wexler.free.fr/library/files/serino%20%282007%29%20extended%20multisensory%20space%20in%20blind%20cane%20users.pdf",
+          "outcome": "Published seven-page copy retrieved from public academic-library HTTP route after HTTPS connection refusal. Whole Methods reviewed and critical Methods page rendered. SHA256 f4ce8d7a3d6c1d4742b0c09ad749ec01996f1df6e8f3f0b6e47f7eeb28b314bb."
+        }
+      ]
     },
     {
       "network_node_id": "doi:10.1016/j.neuropsychologia.2017.07.018",

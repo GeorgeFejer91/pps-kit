@@ -1477,6 +1477,23 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         index = read_csv(self.output_dir / "study_instance_index.csv")[1]
         self.assertEqual(next(row for row in index if row["study_row_id"] == ids[0])["parameter_evidence_scope"], "composite_requires_split")
 
+    def test_cane_review_distinguishes_emission_soa_and_group_schedule(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        node = "doi:10.1111/j.1467-9280.2007.01952.x"
+        study = next(row for row in data["studies"] if row["studyRowId"] == node)
+        cs = {row["key"]: row for row in study["contracts"]}
+        self.assertEqual(cs["soa_schedule"]["status"], "derived_complete")
+        self.assertIn("+5 ms", cs["soa_schedule"]["derivationNote"])
+        self.assertIn("300", cs["repetition_allocation"]["derivationNote"])
+        self.assertIn("600", cs["repetition_allocation"]["derivationNote"])
+        self.assertEqual(cs["tactile_target"]["components"]["waveform_and_duration"]["status"], "not_reported")
+        self.assertEqual(cs["jitter_iti_policy"]["status"], "not_reported")
+        self.assertEqual(cs["catch_trial_contract"]["status"], "partial")
+        self.assertEqual(study["nativeQualification"], "not_assessed")
+        publication = next(row for row in data["publications"] if row["networkNodeId"] == node)
+        self.assertTrue(publication["inventoryAudit"]["inventoryAndContractsAudited"])
+        self.assertEqual(publication["inventoryAudit"]["studyRowCount"], 1)
+
     def test_teneggi_template_association_is_experiment_three_only(self) -> None:
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
         studies = {row["studyRowId"]: row for row in data["studies"]}
