@@ -33,7 +33,7 @@ This file is the active checklist and handoff owner; replace state, do not appen
   immutable profile assembly, and rerun Standard after the baseline repairs.
   Primary-source extraction continues independently. Pages assembly now includes
   referenced Study 5 instruction audio with its checked manifest hashes.
-- **Local validation:** 25 Runner core and 143 desktop tests pass; two hardware
+- **Local validation:** 25 Runner core and 150 desktop tests pass; two hardware
   tests are opt-in and separately passed on this Windows host using silent
   one-/two-block fixtures. Independent file audits pass for both (16/30 events,
   1/2 scored rows). Strict Clippy passes. Independent source review found no
@@ -51,7 +51,12 @@ This file is the active checklist and handoff owner; replace state, do not appen
   repairs now pass focused regressions: synchronous accepted-plan mutation
   rejection, Windows long-path file checks, SVG LF parity and routed guidance.
   UI/science parser/CSS repairs are now integrated; rerun Standard after integration.
-  Native importer: seven contract/failure tests pass, plus a real browser-export
+  The next Standard run found four stale scientific ledger assertions and one
+  live registry/test snapshot mismatch (632 passes, ten skips). Science reconciled
+  the dependent ledgers and passed 67 owning checks; a stable-tree Standard rerun
+  is running. Native recovery assessment passes five prefix/corruption checks and
+  real process termination at six write/sync/publication boundaries; UI display
+  and independent source review remain. Native importer: seven contract/failure tests pass, plus a real browser-export
   test independently materializing nine embedded assets offline. The combined
   session-package/designer-core suites pass (35 tests; three opt-in tests skipped),
   with strict Clippy. Independent import review found no blocking defect; disk
@@ -60,9 +65,9 @@ This file is the active checklist and handoff owner; replace state, do not appen
   before build; downloader icon tooling is pinned and an actual smoke downloader
   builds. Installation guides now distinguish V1 layouts from native candidates.
   Clean installation and physical qualification remain open.
-- **Scientific coverage:** frozen 94-publication corpus, 125 study rows and 1,375
-  compact contracts; 179 reported-complete and 40 derived-complete cells after
-  the latest primary-source batches. 70 inventories remain unassessed. The
+- **Scientific coverage:** frozen 94-publication corpus, 126 study rows and 1,386
+  compact contracts; 193 reported-complete and 43 derived-complete cells after
+  the latest primary-source batches. 67 inventories remain unassessed. The
   Cuppini 2011 computational review has a publication boundary row, not a
   fabricated human experiment; its 11 contracts are explicitly not applicable.
   Templates and reviewed evidence do not confer tested native qualification.
@@ -94,8 +99,9 @@ This file is the active checklist and handoff owner; replace state, do not appen
 - [ ] M2G — Freeze scientific generation contracts; implement and verify Rust
   generation and the corrected dry-source 3DTI wrapper, without Python runtime.
   The corrected prepared-input bridge, polar arcs, five noise colours and verified
-  imported WAV policies are integrated; 15 pure generation checks pass. Recipe
-  conversion and session assembly are next. Legacy RNG IDs remain rejected explicitly.
+  imported WAV policies and design/recipe conversion are integrated; 21 pure
+  generation checks pass. Session assembly is next. Legacy RNG IDs remain
+  rejected explicitly; customized source provenance stays explicit.
 - [ ] M3 — Complete native profile assembly, all-block execution and the
   Windows Tauri Designer journey (A2–A3, C2); browser bundle assets materialize
   offline; Python/Rust handoff and result parity pass. Manifest-order progression

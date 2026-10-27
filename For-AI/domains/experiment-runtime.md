@@ -103,6 +103,18 @@ Use `validation/scripts/validate_native_results.py` under `For-AI/engineering/`
 for read-only file/hash/prefix/V1-projection checks; synthetic files are not
 participant acquisition.
 
+Native prepared-session selection also runs `result_recovery.rs` on its blocking
+worker. `resultsAssessment` reports complete/interrupted/orphaned/invalid attempts,
+fixed reason codes and the contiguous event/CSV prefix that can actually be read.
+It uses the same Data_min projection, package hash and final-manifest contract;
+partial filenames alone never certify completion. Counts do not certify an
+interrupted trial, an fsync acknowledgement or physical timing. It neither edits
+files nor resumes/replays acquisition, and returns no participant identities or
+private paths. Scans bound directory entries, attempts, per-record/file bytes and
+aggregate reads; incomplete scans remain explicit. Process-termination checks
+cover six real write/sync/hard-link boundaries, including the final manifest
+commit. These are process-crash checks, not power-loss/directory-persistence proof.
+
 `pps-runner-execution::response` is the shared scoring/CSV owner; Python remains
 the oracle. `trial_capture.rs` consumes callback boundaries without another
 scheduler. Local `runner_record_response` accepts only bounded choice/normalized

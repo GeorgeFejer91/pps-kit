@@ -533,11 +533,18 @@ fn write_batches(
         };
         let write = (|| {
             file.write_all(&batch.bytes)?;
+            #[cfg(test)]
+            tests::crash_probe("after_event_write");
             if let Some(dataset) = dataset.as_mut() {
                 dataset.write_all(&batch.dataset_bytes)?;
                 dataset.sync_data()?;
+                #[cfg(test)]
+                tests::crash_probe("after_dataset_sync");
             }
-            file.sync_data()
+            file.sync_data()?;
+            #[cfg(test)]
+            tests::crash_probe("after_event_sync");
+            Ok::<_, std::io::Error>(())
         })();
         if write.is_err() {
             progress.failed.store(true, Ordering::Release);
@@ -611,7 +618,11 @@ impl Publication {
         // supported host. Unsupported filesystems fail closed. The manifest
         // appears last; two data files without it are not a completed result.
         fs::hard_link(&self.events, &events)?;
+        #[cfg(test)]
+        tests::crash_probe("after_event_link");
         fs::hard_link(&self.dataset, &dataset)?;
+        #[cfg(test)]
+        tests::crash_probe("after_dataset_link");
         // Re-read the published names on the worker: replacing a partial name
         // while its append handle was open must not certify different bytes.
         for (path, expected) in [
@@ -637,7 +648,10 @@ impl Publication {
                 return Err(std::io::Error::other("published bytes changed"));
             }
         }
-        fs::hard_link(&pending, &manifest)
+        fs::hard_link(&pending, &manifest)?;
+        #[cfg(test)]
+        tests::crash_probe("after_manifest_link");
+        Ok(())
     }
 }
 
