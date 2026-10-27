@@ -115,11 +115,54 @@ export async function verifyDesignerControlNames(page, screenshotPath) {
     .some(slot => slot.slot === "before_experiment" && slot.path === `browser-asset:${hash}.wav`), audioHash);
   assert.equal(await page.locator('[data-run-instruction-slot="before_experiment"] [data-instruction-field="path"]').inputValue(), `browser-asset:${audioHash}.wav`, "the instruction form adopts the selected file before later edits");
   assert.match(await page.locator('[data-run-instruction-slot="before_experiment"] .status-label').innerText(), /duration unverified/);
+  // Real file selection and IndexedDB writes, with only completion order controlled.
+  await page.evaluate(() => {
+    window.originalAudioStore = window.PPSDesigner.drafts.storeAudio;
+    window.pendingAudioStores = {};
+    window.revokedImportUrls = [];
+    window.originalRevokeObjectURL = URL.revokeObjectURL;
+    URL.revokeObjectURL = url => { window.revokedImportUrls.push(url); window.originalRevokeObjectURL.call(URL, url); };
+    window.PPSDesigner.drafts.storeAudio = async file => {
+      const stored = await window.originalAudioStore(file);
+      await new Promise(resolve => { window.pendingAudioStores[file.name] = { resolve, url: stored.url }; });
+      return stored;
+    };
+  });
+  const olderBytes = Buffer.from(audioBytes);
+  olderBytes.writeInt16LE(1234, 44);
+  const firstChooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "Load audio for Before experiment", exact: true }).click();
+  await (await firstChooser).setFiles({ name: "Superseded.wav", mimeType: "audio/wav", buffer: olderBytes });
+  await page.waitForFunction(() => window.pendingAudioStores["Superseded.wav"]);
+  const latestChooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "Load audio for Before experiment", exact: true }).click();
+  await (await latestChooser).setFiles({ name: "Latest-instruction.wav", mimeType: "audio/wav", buffer: audioBytes });
+  await page.waitForFunction(() => window.pendingAudioStores["Latest-instruction.wav"]);
+  await page.getByRole("combobox", { name: "Before experiment continue mode", exact: true }).press("Enter");
+  await page.getByRole("option", { name: "Runner button", exact: true }).waitFor();
+  await page.evaluate(() => window.pendingAudioStores["Latest-instruction.wav"].resolve());
+  await page.waitForFunction(() => window.revokedImportUrls.includes(window.pendingAudioStores["Latest-instruction.wav"].url));
+  assert.equal(await page.locator("#bounded-select-menu").isVisible(), false, "a changed instruction profile closes the replaced select's menu");
+  assert.equal(await instruction.inputValue(), "Latest-instruction");
+  await page.evaluate(() => window.pendingAudioStores["Superseded.wav"].resolve());
+  await page.waitForFunction(() => window.revokedImportUrls.includes(window.pendingAudioStores["Superseded.wav"].url));
+  assert.equal(await page.locator('[data-run-instruction-slot="before_experiment"] [data-instruction-field="path"]').inputValue(), `browser-asset:${audioHash}.wav`);
+  await page.evaluate(() => {
+    window.PPSDesigner.drafts.storeAudio = window.originalAudioStore;
+    URL.revokeObjectURL = window.originalRevokeObjectURL;
+  });
   await instruction.fill("Reviewed instruction label");
   await page.waitForFunction(() => window.PPSDesignerApp.getState().design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots.find(slot => slot.slot === "before_experiment").label === "Reviewed instruction label");
   await page.waitForFunction(() => document.activeElement === document.getElementById("instruction-before_experiment-label"));
   const continuation = page.getByRole("combobox", { name: "Before experiment continue mode", exact: true });
-  await continuation.press("Enter");
+  await page.evaluate(() => {
+    window.sameProfileRenderCount = 0;
+    window.sameProfileObserver = new MutationObserver(() => window.sameProfileRenderCount++);
+    window.sameProfileObserver.observe(document.getElementById("run-sequence-summary"), { childList: true });
+  });
+  await continuation.press("Enter"); // Blurring the edited label schedules another identical preview.
+  await page.waitForFunction(() => window.sameProfileRenderCount > 0);
+  await page.evaluate(() => window.sameProfileObserver.disconnect());
   await page.getByRole("option", { name: "Runner button", exact: true }).click();
   await page.waitForFunction(() => window.PPSDesignerApp.getState().design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots.find(slot => slot.slot === "before_experiment").continue_mode === "button");
   await page.waitForFunction(() => document.activeElement === document.getElementById("instruction-before_experiment-continue-combobox"));
@@ -163,6 +206,7 @@ export async function verifyDesignerControlNames(page, screenshotPath) {
   await page.locator("#run-instruction-slots").screenshot({ path: screenshotPath });
   await page.locator("#save-study-profile").click();
   await page.waitForFunction(async () => (await window.PPSDesigner.drafts.load())?.custom_workflow.is_finalized);
+  assert.equal(await instruction.isDisabled(), true, "finalization replaces the identical profile with disabled controls");
   await page.reload();
   await page.waitForFunction(() => window.PPSDesignerApp?.getState()?.custom_workflow.is_finalized);
   const download = page.waitForEvent("download");
@@ -190,7 +234,7 @@ export async function verifyDesignerControlNames(page, screenshotPath) {
   assert.equal(slot.sha256, audioHash);
   assert.equal(slot.browser_asset_id, `${audioHash}.wav`);
   const asset = profile.assets.find(asset => asset.logical_id === slot.browser_asset_id);
-  assert.equal(asset.source_name, "New-instruction.wav");
+  assert.equal(asset.source_name, "Latest-instruction.wav");
   assert.equal(asset.sha256, audioHash);
   assert.deepEqual(entries.get(asset.path), audioBytes);
   const manifest = JSON.parse(entries.get("manifest.json").toString("utf8"));

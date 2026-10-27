@@ -318,6 +318,8 @@ let templateLoadInFlight = false;
 let initialTemplateRequestHandled = !INITIAL_TEMPLATE_REQUEST;
 let pendingAudioImportMode = "preserve";
 let pendingInstructionSlot = "";
+let audioImportRequestId = 0;
+let audioImportHttpQueue = Promise.resolve();
 let pendingBakeRecipe = null;
 let selectedIngredientLabel = "";
 let ingredientEditorDirty = false;
@@ -6585,6 +6587,11 @@ function renderRunInstructions(profile = {}) {
     summary.textContent = enabledCount ? `${enabledCount} of ${slots.length} optional clips enabled` : "optional";
     summary.className = `status-label ${enabledCount ? "ready" : "optional"}`;
   }
+  // An identical debounced preview must not detach a select whose menu is open.
+  if (container.children.length && container.dataset.instructionFinalized === String(prepared)
+    && JSON.stringify(slots) === JSON.stringify(normalizedRunInstructionSlots(collectRunInstructionProfile()))) return;
+  if (activeBoundedSelect && container.contains(activeBoundedSelect)) closeBoundedSelect();
+  container.dataset.instructionFinalized = String(prepared);
   container.innerHTML = slots.map((slot) => {
     const slotName = RUN_INSTRUCTION_SLOTS.find((item) => item.slot === slot.slot)?.label || slot.slot;
     const controlId = `instruction-${slot.slot}`;
@@ -9018,17 +9025,24 @@ function openInstructionAudioPicker(slot) {
 async function importNativeAudio() {
   if (!ensureEditableProject() || workflowSaveInFlight) return;
   const owner = state;
-  const audio = await nativeDesigner.pickAudio();
-  if (!audio || state !== owner || workflowSaveInFlight || !editModeActive) return;
+  const requestId = ++audioImportRequestId;
+  const instructionSlot = pendingInstructionSlot;
+  const importMode = pendingAudioImportMode;
+  const importRecipe = instructionSlot ? null : pendingBakeRecipe;
+  const current = () => requestId === audioImportRequestId && state === owner && !workflowSaveInFlight && editModeActive
+    && (Boolean(instructionSlot) || pendingBakeRecipe === importRecipe);
+  const audio = await nativeDesigner.pickAudio().catch(error => { if (current()) throw error; return null; });
+  if (!audio || !current()) return;
   audio.target_duration_s = audio.duration_s;
-  if (pendingInstructionSlot) {
+  if (instructionSlot) {
     const parameters = state.design.study_profile_reference_parameters;
     parameters.dashboard_run_setup ||= {};
     const profile = parameters.dashboard_run_setup.instruction_profile ||= { slots: [] };
-    profile.slots = profile.slots.filter(item => item.slot !== pendingInstructionSlot);
-    profile.slots.push({ slot: pendingInstructionSlot, label: audio.label, path: audio.path });
-    pendingInstructionSlot = ""; markDesignerDirty(); renderRunInstructions(profile);
-  } else stageImportedAudioForBake(audio, pendingAudioImportMode === "spatialize" ? "spatialize" : "preserve");
+    profile.slots = profile.slots.filter(item => item.slot !== instructionSlot);
+    profile.slots.push({ slot: instructionSlot, label: audio.label, path: audio.path });
+    if (pendingInstructionSlot === instructionSlot) pendingInstructionSlot = "";
+    markDesignerDirty(); renderRunInstructions(profile);
+  } else stageImportedAudioForBake(audio, importMode === "spatialize" ? "spatialize" : "preserve");
   state.preload_inventory.assets.push({ ...audio, source_kind: "imported_audio" });
   showToast("Verified local WAV selected; create the ingredient to commit it.");
 }
@@ -9075,21 +9089,33 @@ async function importAudioFromPicker() {
   if (workflowSaveInFlight) return;
   const importState = state;
   const instructionSlot = pendingInstructionSlot;
+  const importMode = pendingAudioImportMode;
+  const importColor = pendingDisplayColorHex;
+  const importRecipe = instructionSlot ? null : pendingBakeRecipe;
   const input = $("audio-file-input");
   const file = input.files && input.files[0];
   input.value = "";
   if (!file) return;
+  const requestId = ++audioImportRequestId;
+  const current = () => requestId === audioImportRequestId && state === importState && !workflowSaveInFlight && editModeActive
+    && (Boolean(instructionSlot) || pendingBakeRecipe === importRecipe);
+  // V1 import endpoints mutate the server; keep their dispatch order as well as fencing replies.
+  const importHttp = action => {
+    const pending = audioImportHttpQueue.then(() => current() ? action() : null);
+    audioImportHttpQueue = pending.catch(() => {});
+    return pending.catch(error => { if (current()) throw error; return null; });
+  };
   if (staticModeActive) {
-    if (pendingAudioImportMode === "spatialize") {
+    if (importMode === "spatialize") {
       showToast("Hosted mode can use fixed local audio, but cannot spatialize or generate looming audio.");
       return;
     }
-    const stored = await window.PPSDesigner?.drafts?.storeAudio(file);
-    if (!stored) throw new Error("Browser audio storage is unavailable. Export the profile now or use the desktop app.");
-    if (workflowSaveInFlight || state !== importState || !editModeActive) {
-      showToast("The profile changed while importing audio. Choose the file again in the editable draft.");
+    const stored = await window.PPSDesigner?.drafts?.storeAudio(file).catch(error => { if (current()) throw error; return null; });
+    if (!current()) {
+      if (stored?.url) URL.revokeObjectURL(stored.url);
       return;
     }
+    if (!stored) throw new Error("Browser audio storage is unavailable. Export the profile now or use the desktop app.");
     const audio = {
       label: file.name.replace(/\.[^.]+$/, ""),
       path: `browser-asset:${stored.id}`,
@@ -9100,11 +9126,12 @@ async function importAudioFromPicker() {
       render_mode: "preserve",
       motion_mode: "stationary",
       tone_type: "custom_audio",
-      display_color_hex: pendingDisplayColorHex,
+      display_color_hex: importColor,
       source_input_path: `browser-asset:${stored.id}`,
       trajectory_snapshot: {}
     };
     if (instructionSlot) {
+      URL.revokeObjectURL(stored.url); // Instructions use their stored asset ID, never this preview URL.
       const profile = collectRunInstructionProfile();
       const slot = profile.slots.find(item => item.slot === instructionSlot);
       if (!slot) throw new Error("The selected instruction slot is no longer available.");
@@ -9124,7 +9151,7 @@ async function importAudioFromPicker() {
       const remake = pendingBakeRecipe?.action === "remake";
       if (remake) {
         pendingBakeRecipe.audio = { ...audio, label: $("bake-label").value.trim() || audio.label };
-        pendingBakeRecipe.display_color_hex = pendingDisplayColorHex;
+        pendingBakeRecipe.display_color_hex = importColor;
         ingredientEditorDirty = true;
       } else {
         stageImportedAudioForBake(audio, "preserve");
@@ -9134,48 +9161,51 @@ async function importAudioFromPicker() {
     showToast("Local audio staged in this browser; create the clip to commit it");
     return;
   }
-  const contentBase64 = await fileToBase64(file);
-  if (pendingInstructionSlot) {
-    const current = collectRunInstructionProfile().slots.find((slot) => slot.slot === pendingInstructionSlot) || {};
-    const importedState = await designerApi.importRunInstructions({
-      slot: pendingInstructionSlot,
+  const contentBase64 = await fileToBase64(file).catch(error => { if (current()) throw error; return null; });
+  if (!current()) return;
+  if (instructionSlot) {
+    const selectedSlot = collectRunInstructionProfile().slots.find((slot) => slot.slot === instructionSlot) || {};
+    const importedState = await importHttp(() => designerApi.importRunInstructions({
+      slot: instructionSlot,
       filename: file.name,
       content_base64: contentBase64,
-      label: current.label || file.name.replace(/\.[^.]+$/, ""),
-    });
+      label: selectedSlot.label || file.name.replace(/\.[^.]+$/, ""),
+    }));
+    if (!current() || !importedState) return;
     state = importedState;
-    pendingInstructionSlot = "";
+    if (pendingInstructionSlot === instructionSlot) pendingInstructionSlot = "";
     markDesignerSaved();
     renderAll();
     showToast("Instruction audio clip imported locally");
     return;
   }
-  const imported = await designerApi.importAudio({
+  const imported = await importHttp(() => designerApi.importAudio({
     filename: file.name,
     content_base64: contentBase64,
-    use: pendingAudioImportMode === "prestimulus" ? "prestimulus" : "looming",
-    render_mode: pendingAudioImportMode === "spatialize" ? "spatialize" : "preserve",
-    motion_mode: pendingAudioImportMode === "preserve" || pendingAudioImportMode === "prestimulus" ? "stationary" : "looming",
+    use: importMode === "prestimulus" ? "prestimulus" : "looming",
+    render_mode: importMode === "spatialize" ? "spatialize" : "preserve",
+    motion_mode: importMode === "preserve" || importMode === "prestimulus" ? "stationary" : "looming",
     placement: "before",
     target_source_label: "",
     phase: "",
     gap_s: 0,
-    display_color_hex: pendingDisplayColorHex,
+    display_color_hex: importColor,
     stage_only: true,
-  });
+  }));
+  if (!current() || !imported) return;
   if (pendingBakeRecipe?.action === "remake") {
     pendingBakeRecipe.audio = {
       ...pendingBakeRecipe.audio,
       ...imported.audio,
       label: $("bake-label").value.trim() || imported.audio.label,
-      display_color_hex: pendingDisplayColorHex,
+      display_color_hex: importColor,
     };
-    pendingBakeRecipe.display_color_hex = pendingDisplayColorHex;
+    pendingBakeRecipe.display_color_hex = importColor;
     ingredientEditorDirty = true;
     renderBakePanel();
     showToast("Replacement audio staged; use the remake action to commit it");
   } else {
-    stageImportedAudioForBake(imported.audio, pendingAudioImportMode);
+    stageImportedAudioForBake(imported.audio, importMode);
     showToast("Audio staged; use the create action to commit it");
   }
 }
