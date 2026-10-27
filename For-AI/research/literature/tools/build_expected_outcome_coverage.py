@@ -81,7 +81,7 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
         "condition_contrast": "congruent versus incongruent vestibular/auditory motion and no-rotation baselines",
         "source_basis": [
             "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#pfeiffer_2018_vestibular",
-            "Consensus MCP 2026-07-15 query: audiotactile peripersonal space auditory tactile integration boundary looming",
+            "https://noel-lab.org/wp-content/uploads/2024/05/pfeiffer_et_al-2018-european_journal_of_neuroscience.pdf",
         ],
     },
     "matsuda_2021_four_directions": {

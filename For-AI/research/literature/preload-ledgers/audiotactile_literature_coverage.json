@@ -267,8 +267,8 @@
   "coverage_summary": {
     "literature_record_count": 75,
     "literature_record_category_counts": {
-      "covered_runnable_profile": 13,
-      "covered_blocked_missing_publication_parameters": 10,
+      "covered_runnable_profile": 12,
+      "covered_blocked_missing_publication_parameters": 11,
       "covered_blocked_toolkit_structure": 0,
       "not_yet_templated_requires_toolkit_structure": 0,
       "not_yet_templated_missing_publication_parameters": 44,
@@ -989,7 +989,9 @@
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "full trial counts, tactile calibration, and response mapping need extraction"
+        "Original white-noise asset and exact electrical pulse waveform; source nominal sensory period does not establish tactile pulse width",
+        "Experiment 2 complete mirrored geometry and online voice-relay response cutoff unresolved",
+        "Exact within-block ordering and full counterbalancing assignment unavailable; Experiment 2 active-use block is last"
       ]
     },
     {
@@ -1572,11 +1574,20 @@
       "current_template_ids": [
         "pfeiffer_2018_lateral_perihead_left_to_right"
       ],
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "audiotactile_task_family": "bilateral lateral peri-head PPS trajectory profile",
-      "can_recreate_audiotactile_components_now": true,
-      "blocking_constraint_ids": [],
-      "missing_publication_parameters": []
+      "can_recreate_audiotactile_components_now": false,
+      "blocking_constraint_ids": [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+      ],
+      "missing_publication_parameters": [
+        "Experiment 1 repetition and baseline allocation wording is unresolved; no independent E1 ITI or original audio/filter/calibration asset",
+        "Existing MATLAB-example template has a different path/speed from the paper’s initial hold, approach-to-head and final hold; it is a related proxy, not demonstrated source equivalence",
+        "Experiment 3 rotation congruency, physical-direction allocation and catches remain unresolved; audio-only E1 proxy does not reproduce vestibular apparatus or localizers"
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://noel-lab.org/wp-content/uploads/2024/05/pfeiffer_et_al-2018-european_journal_of_neuroscience.pdf",
+      "scope_review_basis": "Primary whole Methods distinguish three main protocols and two localization validations. Template availability stays visible while incomplete counts and script-to-paper geometry prevent source-ready eligibility."
     },
     {
       "record_id": "ieeg_trunk_2018",
@@ -2079,7 +2090,9 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "source PDF reports a trimodal audiovisuotactile Experiment 2 with 2 m virtual-ball approach, 75 cm/s matched dynamic sound, right-cheek 10 ms tactile taps, five delay levels, 540 total trials, and a PPS boundary between D3 and D4/central point near 105 cm; row-level audiovisual/MR provenance metadata are now runner-supported, but exact delay table, original video/3D assets, ExpyVR/RealiSM scripts, binaural source tracks, and physical HMD/audio synchronization remain unresolved before a full runnable profile is honest"
+        "Experiment 2 requires synchronous audiovisual motion and 10 ms cheek touch; row-level audiovisual/MR provenance metadata are now runner-supported, but source assets and physical HMD/audio synchronization remain unresolved",
+        "Five timing labels lack numeric SOAs; 540 reported trials conflicts with 180 from named cells; catch composition and exact allocation unresolved",
+        "Nominal 2 m at 0.75 m/s conflicts with 2.6 s movement; original video/3D assets, binaural tracks and ExpyVR/RealiSM scripts are unavailable"
       ]
     },
     {

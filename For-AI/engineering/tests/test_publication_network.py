@@ -614,9 +614,9 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "toolkitInScopeRecordJoins": 64,
         "toolkitNodeJoins": 65,
         "toolkitInScopeNodeJoins": 60,
-        "toolkitRunnableNodes": 13,
-        "toolkitRunnableRecords": 13,
-        "toolkitSupportedIncompleteNodes": 47,
+        "toolkitRunnableNodes": 12,
+        "toolkitRunnableRecords": 12,
+        "toolkitSupportedIncompleteNodes": 48,
         "toolkitNotAssessedNodes": 29,
         "toolkitAdjacentConflictNodes": 5,
         "toolkitManualReviewRecords": 25,
@@ -715,8 +715,8 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "later_exact_doi_audit": 4,
     }
     assert Counter(node["toolkit"]["status"] for node in nodes) == {
-        "runnable": 13,
-        "supported_incomplete": 47,
+        "runnable": 12,
+        "supported_incomplete": 48,
         "not_assessed": 29,
         "adjacent_scope_conflict": 5,
     }
@@ -770,7 +770,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
     toolkit_records = [record for node in nodes for record in node["toolkit"]["records"]]
     assert len(toolkit_records) == 69
     assert sum(record["inScope"] for record in toolkit_records) == 64
-    assert sum(record["inScope"] and record["recreatable"] for record in toolkit_records) == 13
+    assert sum(record["inScope"] and record["recreatable"] for record in toolkit_records) == 12
     assert sum(record["manualReview"] is not None for record in toolkit_records) == 25
     assert sum(
         any(record["manualReview"] is not None for record in node["toolkit"]["records"])
@@ -789,8 +789,8 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
     assert data["facets"]["toolkitStatuses"] == {
         "adjacent_scope_conflict": 5,
         "not_assessed": 29,
-        "runnable": 13,
-        "supported_incomplete": 47,
+        "runnable": 12,
+        "supported_incomplete": 48,
     }
     assert data["facets"]["edgeProvenance"]["openalex_live_20260808"] == 127
     assert data["facets"]["edgeProvenance"]["primary_source_audit_20260808"] == 52

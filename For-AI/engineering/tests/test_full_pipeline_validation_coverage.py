@@ -47,7 +47,7 @@ def test_full_pipeline_validation_summary_is_conservative():
     assert summary["literature_record_count"] == 75
     assert summary["in_scope_record_count"] == 67
     assert summary["adjacent_not_applicable_record_count"] == 8
-    assert summary["full_emulated_pipeline_validated_record_count"] == 12
+    assert summary["full_emulated_pipeline_validated_record_count"] == 11
     assert summary["human_behavioral_observed_record_count"] == 0
     assert summary["physical_loopback_observed_record_count"] == 0
     mechanistic = next(record for record in pipeline["records"] if record["record_id"] == "serino_2009_tms")
@@ -67,24 +67,24 @@ def test_full_pipeline_validation_summary_is_conservative():
     assert tool_use["gates"]["observed_emulated_expected_match"]["passed"] is False
     assert summary["pipeline_status_counts"] == {
         "adjacent_not_applicable": 8,
-        "full_emulated_source_to_runner_pipeline_validated": 12,
+        "full_emulated_source_to_runner_pipeline_validated": 11,
         "pipeline_incomplete": 1,
-        "profile_present_but_source_parameters_missing": 10,
+        "profile_present_but_source_parameters_missing": 11,
         "source_parameters_missing_before_profile_creation": 44,
     }
     assert summary["primary_gap_counts"] == {
-        "profile_present_but_source_parameters_missing": 10,
+        "profile_present_but_source_parameters_missing": 11,
         "source_parameters_missing_before_profile_creation": 44,
         "toolkit_structure_or_response_contract_missing": 0,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
-        "minimum_source_parameters_captured": 13,
+        "minimum_source_parameters_captured": 12,
         "not_applicable_adjacent_record": 8,
-        "source_parameters_missing_or_unresolved": 54,
+        "source_parameters_missing_or_unresolved": 55,
     }
     assert summary["gate_status_counts"]["observed_emulated_expected_match"] == {
-        "emulated_observed_direction_matches_expected": 12,
-        "no_observed_emulated_comparison": 55,
+        "emulated_observed_direction_matches_expected": 11,
+        "no_observed_emulated_comparison": 56,
         "not_applicable_adjacent_record": 8,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
@@ -102,7 +102,8 @@ def test_full_pipeline_validated_records_pass_every_required_gate():
         record for record in records.values() if record["full_emulated_pipeline_validated"]
     ]
 
-    assert len(full_records) == pipeline["summary"]["full_emulated_pipeline_validated_record_count"] == 12
+    assert len(full_records) == pipeline["summary"]["full_emulated_pipeline_validated_record_count"] == 11
+    assert "pfeiffer_2018_vestibular" not in {r["record_id"] for r in full_records}
     for record in full_records:
         assert record["pipeline_status"] == "full_emulated_source_to_runner_pipeline_validated"
         assert all(gate["passed"] for gate in record["gates"].values()), record["record_id"]
