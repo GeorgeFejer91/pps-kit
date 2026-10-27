@@ -286,10 +286,11 @@ function updateInboundPolicyUi() {
 function renderSnapshot(next, { adoptContext = false } = {}) {
   if (!next || typeof next !== "object") return false;
   if (snapshot) {
-    const sameContext = next.epoch === snapshot.epoch && next.identity?.session_id === snapshot.identity?.session_id;
-    // Epochs are opaque random identities, not increasing generations. Only a
-    // successful local selection/advance may replace the displayed authority.
-    if ((!sameContext && !adoptContext) || (sameContext && next.revision < snapshot.revision)) return false;
+    const sameSession = next.identity?.session_id === snapshot.identity?.session_id;
+    // Epochs are opaque. Within one session, native epoch rotation increments
+    // revision; only an acknowledged selection/advance may replace the session.
+    if ((!sameSession && !adoptContext) || (sameSession && (next.revision < snapshot.revision
+      || (next.epoch !== snapshot.epoch && next.revision === snapshot.revision)))) return false;
   }
   const previous = snapshot;
   snapshot = next;

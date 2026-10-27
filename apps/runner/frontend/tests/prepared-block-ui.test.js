@@ -49,6 +49,9 @@ test("only explicit native adoption accepts a new lower epoch; retired-session r
   assert.equal(render({ ...snapshot("completed", 99), epoch: 900, identity: { session_id: "part-one" } }), false);
   assert.equal(context.snapshot.identity.session_id, "part-two");
   assert.equal(render({ ...partTwo, revision: 0 }), false);
+  assert.equal(render({ ...partTwo, epoch: 1, revision: 2 }), true, "pairing rotation advances revision within the same session");
+  assert.equal(render({ ...partTwo, epoch: 2, revision: 2 }), false, "a same-revision random epoch is not a newer authority");
+  assert.equal(render(partTwo), false, "a delayed old-epoch snapshot cannot roll back rotation");
 });
 
 test("native block completion retires prior media, clears progress and unlocks next preparation", () => {

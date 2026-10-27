@@ -76,9 +76,9 @@ selection never infers resume or timing qualification from those files. The
 group view separates prior group receipts from each part's assessed files and
 reports scan-budget exhaustion as not assessed. Native epochs are opaque:
 only acknowledged local selection/advance adopts a different session, even
-when its epoch is smaller. Late replies cannot clear a replacement selection.
-The
-compiled-browser sequence regression uses a deterministic native boundary;
+when its epoch is smaller. Within the same session, increasing native revisions
+also carry pairing/owner epoch rotations. Late replies cannot clear a replacement
+selection. The compiled-browser sequence regression uses a deterministic native boundary;
 native execution and durable receipts remain covered by the Rust owner tests.
 
 Portable hosted exports embed referenced premade WAVs, spoken instruction clips
