@@ -2,14 +2,14 @@
   "schema": "pps-paper-metadata-manual-review.v1",
   "record_id": "serino_2015_exps_4_to_6",
   "citation_short": "Serino et al. (2015), Exp. 4-6",
-  "review_date": "2026-06-16",
+  "review_date": "2026-10-27",
   "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
   "confidence_score": 0.86,
   "confidence_label": "high_confidence_extraction",
-  "confidence_basis": "Main PDF, OpenDataLoader output, pypdf fallback snippets, rendered figure/methods pages, extracted figure images, and the downloaded supplement DOC/text extraction were checked. Experiments 4-6 are extractable as three separable designs: Exp. 4 hand-versus-trunk with the hand on the chest, Exp. 5 hand near-versus-far from the trunk, and Exp. 6 face-versus-trunk congruent/incongruent sound-location cells. Trajectory distances, speeds, tactile anchors, baseline/catch logic, repetitions, ITI jitter, and total trial counts are reported or directly derived. Remaining uncertainty concerns exact original WAVs for all setups, exact 16-speaker source/gain details, exact SOA milliseconds, block/order rules, response timeout, and whether a single composite profile should be split before implementation.",
+  "confidence_basis": "Primary article and rendered supplement reviewed; high extraction confidence does not imply internally consistent parameters or exact reconstruction. Ten protocol records and source conflicts are explicit in the compact review.",
   "profile_recreation_assessment": {
     "assessment": "possible_with_caveats",
-    "reason": "The publication reports enough Segment 1-4 information to recreate Exp. 4, Exp. 5, and Exp. 6 as separate PPS profiles. Exp. 4/5 can use the reported two-speaker pink-noise near/far setup at 22 cm/s; Exp. 6 can use a renderer-emulated or multi-source 16-speaker front-space profile at 25 cm/s with face/trunk sound-location congruency. Exact author stimulus files, some gain details, block/order rules, and response timeout remain approximations."
+    "reason": "Experiments 4-6 have separate compact source reviews. Exact onset/SOA origins, source realizations, response deadlines and execution order remain unresolved; Experiment 6 gain-law descriptions conflict. These gaps prevent an exact recreation claim."
   },
   "orientation_ledger": {
     "participant_frame": "Exp. 4: right hand adjacent to chest at sternum level; Exp. 5: right hand near or far from trunk; Exp. 6: participant stood at the end of the 16-speaker array. Explicit gaze/facing instruction is not reported.",
@@ -61,6 +61,12 @@
       "source": "tmp/pdfs/serino_2015_exps456_review/page-04.png through page-13.png",
       "status": "reviewed_not_tracked",
       "scope": "Temporary rendered pages checked for figure/caption geometry, methods wording, and design/count paragraphs; page images were not committed."
+    },
+    {
+      "source_type": "primary_article_and_rendered_supplement",
+      "source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+      "status": "reviewed",
+      "scope": "Fresh full Methods and rendered supplementary pp. 2-9; compact experiment-specific reviews supersede unresolved legacy reconstruction claims."
     }
   ],
   "review_attempts": [
@@ -101,25 +107,27 @@
     }
   ],
   "field_status_counts": {
-    "derived": 12,
+    "derived": 7,
     "not_reported_after_review": 1,
-    "reported": 12
+    "reported": 11,
+    "reported_with_caveat": 5,
+    "source_inconsistency_caveat": 1
   },
   "segment_field_audit": {
     "segment_1_stimulus_reconstruction": {
       "stimulus_type": {
-        "status": "derived",
-        "value": "Exp. 4/5 use 44.1 kHz pink-noise samples in the shared two-speaker setup; Exp. 6 uses dynamic auditory stimuli in the 16-speaker setup, with exact waveform not separately specified.",
-        "source_file": "artifacts/paper_metadata_audit/extracted/supplements/serino_2015_exps_4_to_6/41598_2015_BFsrep18603_MOESM1_ESM.txt; artifacts/paper_metadata_audit/publication_pdfs/serino_2015_exps_4_to_6.pdf",
-        "page_or_section": "Supplement, 2-speakers setup; PDF p.11 Acoustic Stimuli",
-        "evidence_note": "Pink-noise provenance is direct for the two-speaker setup; Exp. 6 16-speaker waveform remains less explicit."
+        "status": "reported",
+        "value": "Experiments 4/5 use 44.1-kHz SoundForge-shaped pink noise; Experiment 6 also uses 44.1-kHz pink noise, with a frame-based eight-paired-output algorithm.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": "Source class is explicitly supplied for both apparatus families; original waveform realization remains unavailable."
       },
       "source_provenance": {
-        "status": "derived",
-        "value": "Two-speaker stimuli were SoundForge-shaped pink-noise samples; 16-speaker source asset/noise seed/generation files were not found in PDF or supplement.",
-        "source_file": "artifacts/paper_metadata_audit/extracted/supplements/serino_2015_exps_4_to_6/41598_2015_BFsrep18603_MOESM1_ESM.txt; artifacts/paper_metadata_audit/publication_pdfs/serino_2015_exps_4_to_6.pdf",
-        "page_or_section": "Supplement, 2-speakers setup; PDF pp.11-13",
-        "evidence_note": "The source class is known for Exp. 4/5; exact author files are missing, especially for Exp. 6."
+        "status": "reported_with_caveat",
+        "value": "Supplement gives two-speaker pink-noise/envelope recipe and sixteen-speaker frame/overlap/Hann algorithm; original waveforms and selected operator level remain unresolved.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": ""
       },
       "trajectory_count": {
         "status": "derived",
@@ -129,18 +137,18 @@
         "evidence_note": "Composite record contains three designs; split profiles are preferable for implementation."
       },
       "trajectory_path": {
-        "status": "reported",
-        "value": "Exp. 4/5 sample D1-D6 at 5, 24, 43, 62, 81, 100 cm over a near-far 100 cm two-speaker line; Exp. 6 samples D1-D7 at 5, 37, 69, 101, 133, 165, 197 cm in front space.",
-        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_exps_4_to_6.pdf; artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_exps_4_to_6_images/imageFile1.png",
-        "page_or_section": "PDF pp.5-7 and p.11; Figure 1 caption/setup image",
-        "evidence_note": "Exp. 6 subjects stood at the end of the array, with the farthest speaker at 2 m."
+        "status": "reported_with_caveat",
+        "value": "Experiment 4: hand adjacent to chest without contact, same sound in separate hand/trunk blocks. Experiment 5: source apparatus fixed while hand posture changes. Experiment 6: face/trunk sound and touch sites between subjects; seven front-space samples.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": "See separate compact child reviews for numeric spatial samples and timing limitations."
       },
       "stimulus_duration": {
-        "status": "derived",
-        "value": "Exp. 4/5 full path duration is about 4.55 s from 100 cm at 22 cm/s; Exp. 6 full front-space path is about 8.0 s from 2 m at 25 cm/s.",
-        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_exps_4_to_6.pdf",
-        "page_or_section": "PDF p.11, Acoustic Stimuli",
-        "evidence_note": "Derived from reported path spans and speeds; no separate audio-file duration table was found."
+        "status": "reported_with_caveat",
+        "value": "Nominal path scale and speed constrain an approximate traversal duration, but the audio onset/path origin and endpoint holds are not uniquely established.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": "No exact duration or SOA is accepted from the sampled spatial span alone."
       },
       "stimulus_speed": {
         "status": "reported",
@@ -157,11 +165,11 @@
         "evidence_note": "Exp. 6 sound direction was within-subject, while sound/touch locations were between-subject factors."
       },
       "gain_envelope": {
-        "status": "derived",
-        "value": "Two-speaker looming rose exponentially from 55 to 70 dB SPL and receding reversed this pattern; Exp. 6 reports time-varying speaker intensities but not exact 16-speaker gain endpoints.",
-        "source_file": "artifacts/paper_metadata_audit/extracted/supplements/serino_2015_exps_4_to_6/41598_2015_BFsrep18603_MOESM1_ESM.txt; artifacts/paper_metadata_audit/publication_pdfs/serino_2015_exps_4_to_6.pdf",
-        "page_or_section": "Supplement, 2-speakers setup; PDF p.11 Acoustic Stimuli",
-        "evidence_note": "Good for Exp. 4/5 recreation; 16-speaker envelope remains a caveat."
+        "status": "source_inconsistency_caveat",
+        "value": "Experiments 4/5: opposite 55–70 dB SPL exponential ramps. Experiment 6: Gaussian summary conflicts with equation a/lambda^3 and prose 60 dB per distance doubling.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": "Do not silently choose a gain renderer; equation implies 18.0618 dB per doubling."
       },
       "renderer_or_apparatus": {
         "status": "reported",
@@ -194,11 +202,11 @@
         "evidence_note": "Exp. 5 posture ordering and exact trial order remain unresolved."
       },
       "iti_jitter_policy": {
-        "status": "reported",
-        "value": "Inter-trial intervals were randomly shuffled between 500 and 700 ms.",
-        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_exps_4_to_6.pdf",
-        "page_or_section": "PDF p.13, Design and Analysis",
-        "evidence_note": "Reported as a general rule after the experiment-specific formulas."
+        "status": "reported_with_caveat",
+        "value": "Intertrial interval 500–700 ms, randomly shuffled; exact endpoints and discrete/continuous distribution unresolved.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": "An ITI range is not an exact audio-padding or response-to-next-onset rule."
       },
       "response_window": {
         "status": "not_reported_after_review",
@@ -224,11 +232,11 @@
         "evidence_note": "Methods report motor model, 3 V, 60 mA, 9000 rpm, 5 g, 113 mm2 surface, and 50 ms spin-up."
       },
       "soa_table": {
-        "status": "derived",
-        "value": "Use distance-at-touch grids as SOA anchors: Exp. 4/5 D1-D6 at 5-100 cm and 22 cm/s; Exp. 6 D1-D7 at 5-197 cm and 25 cm/s, reversed for looming versus receding.",
-        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_exps_4_to_6.pdf",
-        "page_or_section": "PDF pp.5-7, p.11, p.12 Design and Analysis",
-        "evidence_note": "Exact millisecond SOAs are not tabulated, but distance/speed mappings are sufficient to derive them."
+        "status": "reported_with_caveat",
+        "value": "Distance-at-touch samples 5, 24, 43, 62, 81, 100 cm, with nominal 22-cm/s auditory motion; exact millisecond SOAs are unresolved.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": "The sample span and nominal speaker/path extent differ. Do not silently choose an origin or collapse opposite-side positions into one center."
       },
       "baseline_strategy": {
         "status": "reported",
@@ -298,7 +306,8 @@
     "Exact trial-order randomization, block order, and response timeout/window are not reported.",
     "Exp. 5 posture order and catch-trial split by posture/direction are not explicit.",
     "Participant gaze/facing direction is not explicitly stated; body-relative mapping follows author labels and figure geometry.",
-    "The two-speaker supplement provenance applies cleanly to Exp. 4/5, but only partially informs Exp. 6."
+    "The two-speaker supplement provenance applies cleanly to Exp. 4/5, but only partially informs Exp. 6.",
+    "Fresh rendered supplement review establishes a partly reported sixteen-speaker source recipe and conflicting gain-law descriptions. Exact SOA origins are not uniquely established. Hand adjacent to chest does not imply contact."
   ],
-  "next_manual_action": "Create three separate implementation candidates: Exp. 4 hand-on-trunk body-part comparison, Exp. 5 peri-hand near/far posture comparison, and Exp. 6 face/trunk congruency profile. Use reported distance grids, speeds, baselines, ITI, and counts; treat original stimulus files, exact 16-speaker gain field, exact SOA milliseconds, block order, and response timeout as approximations."
+  "next_manual_action": "Resolve the explicitly recorded source conflicts and timing/asset gaps before claiming an exact reconstruction. Compact child reviews preserve all ten protocol boundaries; native qualification is not assessed."
 }

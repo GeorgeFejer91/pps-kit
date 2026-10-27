@@ -2,14 +2,14 @@
   "schema": "pps-paper-metadata-manual-review.v1",
   "record_id": "serino_2015_front_back_trunk_exp2",
   "citation_short": "Serino et al. (2015), Exp. 2",
-  "review_date": "2026-06-16",
+  "review_date": "2026-10-27",
   "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
   "confidence_score": 0.84,
   "confidence_label": "high_confidence_extraction",
-  "confidence_basis": "Main PDF, OpenDataLoader output, pypdf fallback extraction, rendered figure/methods pages, and the downloaded supplement DOC/text extraction were checked. Exp. 2 trajectory geometry, apparatus, speed, tactile setup, trial families, ITI, repetitions, and total counts are extractable. Remaining uncertainty concerns the exact 16-speaker waveform/source asset, exact gain/SPL law, the 13-versus-14 distance wording discrepancy, exact baseline timings, block structure, and response timeout.",
+  "confidence_basis": "Primary article and rendered supplement reviewed; high extraction confidence does not imply internally consistent parameters or exact reconstruction. Ten protocol records and source conflicts are explicit in the compact review.",
   "profile_recreation_assessment": {
-    "assessment": "possible_with_caveats",
-    "reason": "Experiment 2 can be recreated as a trunk-centered front/back 16-speaker or renderer-emulated moving-sound profile: dynamic sounds traverse 1 m in front to 1 m behind the standing participant, or the reverse, at 35 cm/s while tactile targets are delivered to sternum/back sites. Exact original acoustic waveform, intensity field, baseline timing schedule, and block/order rules would need approximation."
+    "assessment": "source_inconsistency_requires_resolution",
+    "reason": "372 printed trials: 312 AT, 36 tactile-only and 24 catches by the stated formula. The thirteen-versus-fourteen conflict remains unresolved. Existing template is retained as an approximation, not source-equivalent reconstruction."
   },
   "orientation_ledger": {
     "participant_frame": "Participants stood halfway down the 16-speaker array; explicit gaze/facing direction is not reported beyond author front/back body labels.",
@@ -61,6 +61,12 @@
       "source": "tmp/pdfs/serino_2015_exp2_review/page-02.png; tmp/pdfs/serino_2015_exp2_methods/page-11.png through page-13.png",
       "status": "reviewed_not_tracked",
       "scope": "Temporary rendered pages checked for visual geometry, methods wording, and design/count paragraphs; page images were not committed."
+    },
+    {
+      "source_type": "primary_article_and_rendered_supplement",
+      "source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+      "status": "reviewed",
+      "scope": "Fresh full Methods and rendered supplementary pp. 2-9; compact experiment-specific reviews supersede unresolved legacy reconstruction claims."
     }
   ],
   "review_attempts": [
@@ -101,26 +107,27 @@
     }
   ],
   "field_status_counts": {
-    "derived": 4,
-    "inferred_low_confidence": 1,
-    "not_reported_after_review": 5,
-    "reported": 15
+    "derived": 3,
+    "not_reported_after_review": 4,
+    "reported": 11,
+    "reported_with_caveat": 3,
+    "source_inconsistency_caveat": 4
   },
   "segment_field_audit": {
     "segment_1_stimulus_reconstruction": {
       "stimulus_type": {
-        "status": "inferred_low_confidence",
-        "value": "Dynamic auditory stimuli; likely noise-based by paradigm/supplement context, but the exact 16-speaker Exp. 2 waveform is not directly reported.",
-        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf; artifacts/paper_metadata_audit/extracted/supplements/serino_2015_front_back_trunk_exp2/41598_2015_BFsrep18603_MOESM1_ESM.txt",
-        "page_or_section": "PDF pp.11-12, Acoustic Stimuli; supplement 2-speaker setup",
-        "evidence_note": "Main text reports dynamic sounds and a 16-speaker setup; supplement exposes pink-noise provenance only for the 2-speaker setup."
+        "status": "reported",
+        "value": "Pink noise at 44.1 kHz; eight paired outputs with 2048-sample frames, 1024 overlap and Hann window.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": "Supplement pp. 5-9 explicitly supplies part of the synthesis algorithm."
       },
       "source_provenance": {
-        "status": "not_reported_after_review",
-        "value": "",
-        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf; artifacts/paper_metadata_audit/extracted/supplements/serino_2015_front_back_trunk_exp2/41598_2015_BFsrep18603_MOESM1_ESM.txt",
-        "page_or_section": "PDF pp.11-13; supplement searched for 16-speaker provenance",
-        "evidence_note": "No exact Exp. 2 source WAV, noise seed, or generation script was found after PDF, supplement, fallback, and figure checks."
+        "status": "reported_with_caveat",
+        "value": "Pink noise at 44.1 kHz, eight paired outputs; 2048-sample frames, 1024-sample overlap and Hann window. Printed gain descriptions conflict.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": "Rendered SI p. 7: equation implies 18.0618 dB per distance doubling, but prose says 60 dB and p. 3 describes Gaussian modulation. Lambda is source-to-speaker distance; selected gain/SPL unresolved. No corrected law is assumed."
       },
       "trajectory_count": {
         "status": "reported",
@@ -137,11 +144,11 @@
         "evidence_note": "Figure/caption add the two 8-speaker arrays, 2 m longitudinal distance, and 50 cm lateral array spacing."
       },
       "stimulus_duration": {
-        "status": "derived",
-        "value": "Full front-back traversal duration is about 5.71 s from 2 m path length at 35 cm/s; each 1 m approach/recede half is about 2.86 s.",
-        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
-        "page_or_section": "PDF pp.2, 11, Experiment 2 and Acoustic Stimuli",
-        "evidence_note": "Derived from reported 2 m layout and 35 cm/s velocity; no standalone audio-file duration was reported."
+        "status": "reported_with_caveat",
+        "value": "Nominal path scale and speed constrain an approximate traversal duration, but the audio onset/path origin and endpoint holds are not uniquely established.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": "No exact duration or SOA is accepted from the sampled spatial span alone."
       },
       "stimulus_speed": {
         "status": "reported",
@@ -158,11 +165,11 @@
         "evidence_note": "ANOVA used Mapping Space Front vs Back and Sound Direction Looming vs Receding."
       },
       "gain_envelope": {
-        "status": "reported",
-        "value": "Speaker intensities in the 16-speaker array were modulated as a function of time; exact gain law and SPL endpoints for Exp. 2 are not reported.",
-        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf; artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile1.png",
-        "page_or_section": "PDF p.3 Figure 1 caption; p.11 Acoustic Stimuli",
-        "evidence_note": "Qualitative intensity-field implementation is reported, but not the numeric envelope."
+        "status": "source_inconsistency_caveat",
+        "value": "Supplement p. 3 describes Gaussian modulation; equation 4 gives a * 10^(60 log10(1/lambda)/20) = a/lambda^3; adjacent prose says 60 dB per distance doubling.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": "Rendered SI p. 7: equation implies 18.0618 dB per distance doubling, but prose says 60 dB and p. 3 describes Gaussian modulation. Lambda is source-to-speaker distance; selected gain/SPL unresolved. No corrected law is assumed."
       },
       "renderer_or_apparatus": {
         "status": "reported",
@@ -195,11 +202,11 @@
         "evidence_note": "No explicit block count, trial-order algorithm, or randomization rule beyond ITI shuffling was found."
       },
       "iti_jitter_policy": {
-        "status": "reported",
-        "value": "Inter-trial intervals were randomly shuffled between 500 and 700 ms.",
-        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
-        "page_or_section": "PDF p.13, Design and Analysis",
-        "evidence_note": "Reported as a general rule after the experiment-specific trial-count formulas."
+        "status": "reported_with_caveat",
+        "value": "Intertrial interval 500–700 ms, randomly shuffled; exact endpoints and discrete/continuous distribution unresolved.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": "An ITI range is not an exact audio-padding or response-to-next-onset rule."
       },
       "response_window": {
         "status": "not_reported_after_review",
@@ -225,11 +232,11 @@
         "evidence_note": "Methods also report 3 V, 60 mA, 9000 rpm, 5 g, 113 mm2 surface area, and 50 ms spin-up."
       },
       "soa_table": {
-        "status": "reported",
-        "value": "Distance-at-touch values are reported as 5, 20, 35, 50, 65, 80, and 95 cm in both front and back space; design formula uses 13 distances.",
-        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
-        "page_or_section": "PDF pp.2, 12, Experiment 2 and Design and Analysis",
-        "evidence_note": "Prose says one of 14 delays, while the formula says 13 multisensory distances; exact temporal SOA table is not printed."
+        "status": "source_inconsistency_caveat",
+        "value": "Distance-at-touch samples 5, 20, 35, 50, 65, 80, 95 cm in both front and back, with nominal 35-cm/s auditory motion; exact millisecond SOAs are unresolved.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": "The sample span and nominal speaker/path extent differ. Do not silently choose an origin or collapse opposite-side positions into one center."
       },
       "baseline_strategy": {
         "status": "reported",
@@ -255,11 +262,11 @@
     },
     "segment_4_counts": {
       "repetitions_per_tactile_soa_condition": {
-        "status": "reported",
-        "value": "Exp. 2 formula: [13 multisensory distances x 2 sound directions + 3 baselines + 2 catch trials] x 12 repetitions.",
-        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
-        "page_or_section": "PDF p.12, Design and Analysis",
-        "evidence_note": "Thus each multisensory distance x direction cell has 12 repetitions."
+        "status": "source_inconsistency_caveat",
+        "value": "372 printed trials: 312 AT, 36 tactile-only and 24 catches by the stated formula. The thirteen-versus-fourteen conflict remains unresolved.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": ""
       },
       "baseline_count": {
         "status": "derived",
@@ -283,11 +290,11 @@
         "evidence_note": "The experiments never exceeded 60 minutes, but no Exp. 2 block/session count was found."
       },
       "total_trial_count": {
-        "status": "reported",
-        "value": "Experiment 2 consisted of 372 trials.",
-        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
-        "page_or_section": "PDF p.12, Design and Analysis",
-        "evidence_note": "The total is explicitly reported with the Exp. 2 formula."
+        "status": "source_inconsistency_caveat",
+        "value": "372 printed trials: 312 AT, 36 tactile-only and 24 catches by the stated formula. The thirteen-versus-fourteen conflict remains unresolved.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": ""
       }
     }
   },
@@ -298,7 +305,8 @@
     "Main prose says 14 delays/distances in Exp. 2, whereas the design formula uses 13 multisensory distances.",
     "Exact temporal SOA milliseconds and the identities of the three baseline timings are not printed.",
     "Exact trial-order randomization, block count, and response timeout/window are not reported.",
-    "Participant-facing/gaze direction is not explicitly stated, so body-relative front/back mapping should follow the authors' front/back labels and Figure 1."
+    "Participant-facing/gaze direction is not explicitly stated, so body-relative front/back mapping should follow the authors' front/back labels and Figure 1.",
+    "372 printed trials: 312 AT, 36 tactile-only and 24 catches by the stated formula. The thirteen-versus-fourteen conflict remains unresolved."
   ],
-  "next_manual_action": "Strong candidate for a toolkit recreation as a renderer-emulated or multi-source 16-speaker front/back trunk profile, with the waveform, gain field, baseline timing, and 13/14 distance ambiguity documented as approximations unless author materials become available."
+  "next_manual_action": "Resolve the explicitly recorded source conflicts and timing/asset gaps before claiming an exact reconstruction. Compact child reviews preserve all ten protocol boundaries; native qualification is not assessed."
 }

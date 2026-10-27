@@ -142,19 +142,117 @@
     {
       "network_node_id": "doi:10.1038/srep18603",
       "doi": "10.1038/srep18603",
-      "inventory_status": "confirmed_total",
-      "inventory_evidence_status": "partial_methods_inventory",
+      "inventory_status": "confirmed_seven_main_experiments_and_three_methodological_controls",
+      "inventory_evidence_status": "primary_methods_reviewed",
       "inventory_evidence_classified_on": "2026-10-27",
-      "instance_count_basis": "The network abstract explicitly reports seven experiments. Manual reviews separately cover Experiments 1-3 and the three separable Experiments 4-6; Experiment 7 has no current audit record.",
-      "evidence_pointer": "publication_network.v3.json::doi:10.1038/srep18603; manual_reviews/serino_2015_peri_trunk_exp1.json; manual_reviews/serino_2015_front_back_trunk_exp2.json; manual_reviews/serino_2015_peri_hand_exp3.json; manual_reviews/serino_2015_exps_4_to_6.json",
+      "instance_count_basis": "Primary Methods reports seven main experiments (164 participants) and three methodological controls (27 participants), totaling 191. Experiments 1-6 are direct audio-tactile PPS; Experiment 7 is visual-tactile. Three supplementary localization controls are distinct protocol/cohort records, not extra direct PPS reaction-time experiments.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML::Participants; Results Experiments 1-7; Methods; supplementary Methods pp. 2-9",
       "instances": [
-        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — peritrunk", "record_id": "serino_2015_peri_trunk_exp1", "toolkit_scope": "in_scope", "disaggregation_status": "record_already_experiment_specific"},
-        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — front/back trunk", "record_id": "serino_2015_front_back_trunk_exp2", "toolkit_scope": "in_scope", "disaggregation_status": "record_already_experiment_specific"},
-        {"suffix": "c", "instance_kind": "experiment", "experiment_label": "Experiment 3 — perihand", "record_id": "serino_2015_peri_hand_exp3", "toolkit_scope": "in_scope", "disaggregation_status": "record_already_experiment_specific"},
-        {"suffix": "d", "instance_kind": "experiment", "experiment_label": "Experiment 4 — hand versus trunk/hand on chest", "record_id": "serino_2015_exps_4_to_6", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "e", "instance_kind": "experiment", "experiment_label": "Experiment 5 — near versus far hand posture", "record_id": "serino_2015_exps_4_to_6", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "f", "instance_kind": "experiment", "experiment_label": "Experiment 6 — face versus trunk congruency", "record_id": "serino_2015_exps_4_to_6", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "g", "instance_kind": "experiment", "experiment_label": "Experiment 7 — modality/scope not assessed", "record_id": "", "toolkit_scope": "scope_not_assessed", "disaggregation_status": "experiment_record_not_available"}
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 1 — peritrunk",
+          "record_id": "serino_2015_peri_trunk_exp1",
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 2 — front/back trunk",
+          "record_id": "serino_2015_front_back_trunk_exp2",
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        },
+        {
+          "suffix": "c",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 3 — perihand",
+          "record_id": "serino_2015_peri_hand_exp3",
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        },
+        {
+          "suffix": "d",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 4 — hand versus trunk; hand adjacent to chest without contact",
+          "record_id": "serino_2015_exps_4_to_6",
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "e",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 5 — near versus far hand posture",
+          "record_id": "serino_2015_exps_4_to_6",
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "f",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 6 — face versus trunk congruency",
+          "record_id": "serino_2015_exps_4_to_6",
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "g",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 7 — visual-tactile face/trunk PPS",
+          "record_id": "",
+          "toolkit_scope": "adjacent_visual_tactile",
+          "disaggregation_status": "adjacent_protocol_source_reviewed"
+        },
+        {
+          "suffix": "h",
+          "instance_kind": "methodological_control",
+          "experiment_label": "Supplementary control — two-speaker looming versus static localization",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_auditory_localization_validation",
+          "disaggregation_status": "adjacent_protocol_source_reviewed"
+        },
+        {
+          "suffix": "i",
+          "instance_kind": "methodological_control",
+          "experiment_label": "Supplementary control — two-speaker looming/receding front/back localization",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_auditory_localization_validation",
+          "disaggregation_status": "adjacent_protocol_source_reviewed"
+        },
+        {
+          "suffix": "j",
+          "instance_kind": "methodological_control",
+          "experiment_label": "Supplementary control — sixteen-speaker auditory localization",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_auditory_localization_validation",
+          "disaggregation_status": "adjacent_protocol_source_reviewed"
+        }
+      ],
+      "review_date": "2026-10-27",
+      "source_review_limit": "All ten protocol records have eleven explicit compact dispositions. Retain unresolved trial-count, distance-allocation and gain-law conflicts; reported spatial samples/speeds do not establish every exact SOA. Main-paper template availability and physical qualification remain separate.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+          "outcome": "Primary article XML retrieved; all main Methods and experiment boundaries inspected."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/supplementaryFiles",
+          "outcome": "Original srep18603-s1.doc retrieved; rendered scientific supplement pp. 2-9 inspected, including all three controls, source algorithm and equation 4. SHA256 643a3f161ffa716c025cd52f35526b2879803566611f13467c5caf23a3d2a0ee."
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Visual-tactile Experiment 7 and auditory localization controls",
+          "disposition": "retained_adjacent_protocols_with_explicit_contract_dispositions",
+          "basis": "These are real acquired experiments, but outside the direct audio-tactile PPS measurement contract. Not-applicable dispositions refer to that contract, not absence of scientific features.",
+          "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML::Results Experiment 7; supplement pp. 2-4"
+        }
       ]
     },
     {

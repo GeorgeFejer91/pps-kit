@@ -34,8 +34,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 16,
-        "covered_blocked_missing_publication_parameters": 7,
+        "covered_runnable_profile": 14,
+        "covered_blocked_missing_publication_parameters": 9,
         "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 0,
         "not_yet_templated_missing_publication_parameters": 46,
@@ -789,9 +789,17 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "missing_core_soa_iti_baseline_repetition_parameters"
     ]
     assert records["lamia_2026_arm_movement"]["can_recreate_audiotactile_components_now"] is True
-    assert records["serino_2015_peri_trunk_exp1"]["coverage_category"] == "covered_runnable_profile"
-    assert records["serino_2015_peri_trunk_exp1"]["can_recreate_audiotactile_components_now"] is True
-    assert records["serino_2015_peri_trunk_exp1"]["blocking_constraint_ids"] == []
+    for record_id in ("serino_2015_peri_trunk_exp1", "serino_2015_front_back_trunk_exp2"):
+        revised = records[record_id]
+        assert revised["coverage_category"] == "covered_blocked_missing_publication_parameters"
+        assert revised["can_recreate_audiotactile_components_now"] is False
+        assert revised["blocking_constraint_ids"] == [], "source conflict is not a missing native capability"
+        assert revised["current_template_ids"], "retain existing approximation presets"
+        assert revised["missing_publication_parameters"]
+        prior = revised["prior_software_comparison_evidence"]
+        assert prior["status"] == "historical_ledger_references_retained_not_reverified"
+        assert prior["mouse_click"]["source_report"]
+        assert prior["synthetic_contrast"]["source_report"]
     assert records["smartphone_rt_methods_2025"]["coverage_category"] == "covered_blocked_missing_publication_parameters"
     assert records["smartphone_rt_methods_2025"]["current_template_ids"] == [
         "roussel_2025_dynaspace_mobile_pps"
@@ -821,10 +829,8 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["tonelli_2019_echolocation"]["blocking_constraint_ids"] == []
     assert records["tonelli_2019_echolocation"]["missing_publication_parameters"] == []
     assert records["tonelli_2019_echolocation"]["recreation_caveats"]
-    assert records["serino_2015_front_back_trunk_exp2"]["coverage_category"] == "covered_runnable_profile"
-    assert records["serino_2015_front_back_trunk_exp2"]["can_recreate_audiotactile_components_now"] is True
-    assert records["serino_2015_front_back_trunk_exp2"]["blocking_constraint_ids"] == []
-    assert records["serino_2015_front_back_trunk_exp2"]["missing_publication_parameters"] == []
+    assert "Fourteen" in records["serino_2015_front_back_trunk_exp2"]["missing_publication_parameters"][0]
+    assert "gain" in records["serino_2015_front_back_trunk_exp2"]["missing_publication_parameters"][0]
     assert records["serino_2015_front_back_trunk_exp2"]["recreation_caveats"]
     assert records["galli_2015_wheelchair"]["coverage_category"] == "covered_runnable_profile"
     assert records["galli_2015_wheelchair"]["can_recreate_audiotactile_components_now"] is True

@@ -45,7 +45,7 @@ const NETWORK_EXPECTED = Object.freeze({
   toolkitNodeJoins: 65,
   toolkitInScopeNodeJoins: 62,
   toolkitRunnableNodes: 14,
-  toolkitRunnableRecords: 16,
+  toolkitRunnableRecords: 14,
   toolkitSupportedIncompleteNodes: 48,
   toolkitNotAssessedNodes: 29,
   toolkitAdjacentConflictNodes: 3,
