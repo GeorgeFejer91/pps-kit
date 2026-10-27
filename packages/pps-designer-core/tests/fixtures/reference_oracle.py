@@ -9,7 +9,8 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT / "packages/pps-runtime/src"))
-from peripersonal_space_toolkit.render_backend import _dynaspace_burst_onsets, _tactile_waveform
+from peripersonal_space_toolkit.render_backend import _dynaspace_burst_onsets, _tactile_waveform, _raised_cosine_edge
+from peripersonal_space_toolkit.design import TrajectorySpec, trajectory_point_at_time
 from peripersonal_space_toolkit.loudness import calibration_window_samples, calibration_window_target_rms_dbfs, relative_loudness_envelope
 import numpy as np
 
@@ -35,5 +36,10 @@ fixture = {
     "calibration_window_frames": calibration_window_samples(policy, rate, 8000),
     "target_window_rms_dbfs": calibration_window_target_rms_dbfs(policy, rate, 8000),
     "envelope_samples": {str(i): envelope[i] for i in [0, 1599, 1600, 3200, 4000, 6399, 6400, 7999]},
+    "burst_envelope": _raised_cosine_edge(240, 80).tolist(),
+    "polar_points": [trajectory_point_at_time(TrajectorySpec(
+        start_radius_m=2.0, end_radius_m=1.0, azimuth_start_deg=170.0, azimuth_end_deg=-170.0,
+        elevation_deg=30.0, padding_pre_s=0.2, padding_post_s=0.2, path_length_m=0.6,
+        propagation_speed_mps=1.0), t) for t in [0.0, 0.2, 0.35, 0.5, 0.65, 0.8, 1.0]],
 }
 Path(__file__).with_name("python_reference.json").write_text(json.dumps(fixture, indent=2) + "\n", encoding="utf-8")

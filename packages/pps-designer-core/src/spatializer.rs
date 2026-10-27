@@ -76,10 +76,7 @@ pub fn write_spatializer_input<W: Write>(
     {
         return Err(GenerationError::Invalid("spatializer_options"));
     }
-    let minimum_distance = match prepared.request.trajectory {
-        TrajectorySpec::Fixed { position } => crate::segment_clearance(position, position),
-        TrajectorySpec::Linear { start, end, .. } => crate::segment_clearance(start, end),
-    };
+    let minimum_distance = prepared.request.trajectory.minimum_distance();
     if minimum_distance <= options.head_radius_m {
         return Err(GenerationError::Invalid("source_inside_listener_head"));
     }

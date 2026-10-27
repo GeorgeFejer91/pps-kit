@@ -14,7 +14,7 @@ pps-3dti-renderer.exe --config staging/config.json --output-dir staging `
 ## Prepared PCM contract
 
 `packages/pps-designer-core::write_spatializer_input` writes the required config
-and `dry.f32`. The config declares rate/frames, algorithm/SHA-256, fixed or linear
+and `dry.f32`. The config declares rate/frames, algorithm/SHA-256, fixed, linear or polar
 motion, explicit spatialization controls, and a native-authorized HRTF asset.
 Unknown fields fail. The wrapper verifies byte count, SHA-256 and finite input,
 then renders those samples rather than regenerating noise.
@@ -22,7 +22,8 @@ then renders those samples rather than regenerating noise.
 Output is exactly stereo L/R float32 with the requested frame count. It has no
 normalization, limiter, level ramp or tactile mixing; Rust owns those later
 operations. The toolkit HQ anechoic path uses interpolation, customized ITD and
-512-frame blocks. Linear motion is sampled at each block center. Convolution
+512-frame blocks. Declared-coordinate motion is sampled at each block center;
+polar radius and unwrapped azimuth interpolate directly, preserving arcs. Convolution
 and propagation tails are explicitly truncated at the requested frame count.
 Coordinates map `3DTI(x,y,z) = PPS(y,-x,z)` for PPS X right, Y front, Z up.
 

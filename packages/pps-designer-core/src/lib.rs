@@ -81,6 +81,15 @@ pub enum TrajectorySpec {
         pre_hold_s: f64,
         movement_duration_s: f64,
     },
+    Polar {
+        start_radius_m: f64,
+        end_radius_m: f64,
+        azimuth_start_deg: f64,
+        azimuth_end_deg: f64,
+        elevation_deg: f64,
+        pre_hold_s: f64,
+        movement_duration_s: f64,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -118,6 +127,7 @@ pub struct SourceQc {
     pub frames: usize,
     pub burst_onset_frames: Vec<usize>,
     pub burst_frames: Option<usize>,
+    pub burst_envelope_algorithm: Option<&'static str>,
     pub peak: f64,
     pub rms: f64,
 }
@@ -175,6 +185,39 @@ impl TrajectorySpec {
                     z_m: start.z_m + fraction * (end.z_m - start.z_m),
                 }
             }
+            Self::Polar {
+                start_radius_m,
+                end_radius_m,
+                azimuth_start_deg,
+                azimuth_end_deg,
+                elevation_deg,
+                pre_hold_s,
+                movement_duration_s,
+            } => {
+                let fraction = ((time_s - pre_hold_s) / movement_duration_s).clamp(0.0, 1.0);
+                let radius = start_radius_m + fraction * (end_radius_m - start_radius_m);
+                let azimuth = (azimuth_start_deg
+                    + fraction * (azimuth_end_deg - azimuth_start_deg))
+                    .to_radians();
+                let elevation = elevation_deg.to_radians();
+                Position {
+                    x_m: radius * elevation.cos() * azimuth.sin(),
+                    y_m: radius * elevation.cos() * azimuth.cos(),
+                    z_m: radius * elevation.sin(),
+                }
+            }
+        }
+    }
+
+    fn minimum_distance(&self) -> f64 {
+        match *self {
+            Self::Fixed { position } => segment_clearance(position, position),
+            Self::Linear { start, end, .. } => segment_clearance(start, end),
+            Self::Polar {
+                start_radius_m,
+                end_radius_m,
+                ..
+            } => start_radius_m.min(end_radius_m),
         }
     }
 }
@@ -230,6 +273,33 @@ fn validate(request: &GenerationRequest) -> Result<usize, GenerationError> {
             && pre_hold_s.is_finite()
             && pre_hold_s >= 0.0
             && movement_duration_s.is_finite()
+            && movement_duration_s > 0.0
+            && pre_hold_s + movement_duration_s <= request.duration_s => {}
+        TrajectorySpec::Polar {
+            start_radius_m,
+            end_radius_m,
+            azimuth_start_deg,
+            azimuth_end_deg,
+            elevation_deg,
+            pre_hold_s,
+            movement_duration_s,
+        } if [
+            start_radius_m,
+            end_radius_m,
+            azimuth_start_deg,
+            azimuth_end_deg,
+            elevation_deg,
+            pre_hold_s,
+            movement_duration_s,
+        ]
+        .iter()
+        .all(|v| v.is_finite())
+            && (0.01..=100.0).contains(&start_radius_m)
+            && (0.01..=100.0).contains(&end_radius_m)
+            && (-360.0..=360.0).contains(&azimuth_start_deg)
+            && (-360.0..=360.0).contains(&azimuth_end_deg)
+            && (-90.0..=90.0).contains(&elevation_deg)
+            && pre_hold_s >= 0.0
             && movement_duration_s > 0.0
             && pre_hold_s + movement_duration_s <= request.duration_s => {}
         _ => return Err(GenerationError::Invalid("trajectory")),

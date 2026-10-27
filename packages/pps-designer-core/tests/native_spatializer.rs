@@ -223,6 +223,24 @@ fn native_prepared_pcm_controls_and_final_waveform_are_measured() {
             > 0.005,
         "motion was ignored"
     );
+    modified["trajectory"] = json!({"kind":"polar", "start_radius_m":2.0_f64.sqrt(), "end_radius_m":2.0_f64.sqrt(),
+        "azimuth_start_deg":-45.0,"azimuth_end_deg":45.0,"elevation_deg":0.0,"pre_hold_s":0.1,"movement_duration_s":0.8});
+    assert!(execute(
+        &executable,
+        &directory.join("polar"),
+        &modified,
+        &dry
+    ));
+    let polar = rendered(&directory.join("polar"));
+    assert!(
+        rms(&polar
+            .iter()
+            .zip(&moving)
+            .map(|(a, b)| a - b)
+            .collect::<Vec<_>>())
+            > 0.001,
+        "polar arc was silently replaced with a Cartesian chord"
+    );
 
     modified = config.clone();
     modified["spatialization"]["propagation_delay"] = true.into();

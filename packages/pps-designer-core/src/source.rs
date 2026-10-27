@@ -90,6 +90,7 @@ pub(crate) fn generate_source(
         frames,
         burst_onset_frames: onsets,
         burst_frames,
+        burst_envelope_algorithm: burst_frames.map(|_| "raised-cosine-endpoint-exclusive.v1"),
         peak: peak(&pcm),
         rms: rms(&pcm),
     };
@@ -100,7 +101,7 @@ fn raised_cosine(index: usize, edge: usize) -> f64 {
     if edge <= 1 {
         0.0
     } else {
-        0.5 - 0.5 * (PI * index as f64 / (edge - 1) as f64).cos()
+        0.5 - 0.5 * (PI * index as f64 / edge as f64).cos()
     }
 }
 

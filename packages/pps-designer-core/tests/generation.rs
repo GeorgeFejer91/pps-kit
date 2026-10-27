@@ -318,3 +318,67 @@ fn bridge_rejects_conflicting_loudness_and_invalid_spatial_paths() {
         Err(GenerationError::Invalid("ramp_with_distance_attenuation"))
     ));
 }
+
+#[test]
+fn polar_arcs_and_burst_edges_match_the_reference_samples() {
+    let fixture: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/python_reference.json")).unwrap();
+    let mut input = request();
+    input.trajectory = TrajectorySpec::Polar {
+        start_radius_m: 2.0,
+        end_radius_m: 1.0,
+        azimuth_start_deg: 170.0,
+        azimuth_end_deg: -170.0,
+        elevation_deg: 30.0,
+        pre_hold_s: 0.2,
+        movement_duration_s: 0.6,
+    };
+    let prepared = prepare(&input, &AtomicBool::new(false)).unwrap();
+    for expected in fixture["polar_points"].as_array().unwrap() {
+        let point = prepared
+            .position_at(expected["time_s"].as_f64().unwrap())
+            .unwrap();
+        for (actual, key) in [(point.x_m, "x_m"), (point.y_m, "y_m"), (point.z_m, "z_m")] {
+            assert!((actual - expected[key].as_f64().unwrap()).abs() < 1e-12);
+        }
+    }
+    // The 170 -> -170 reference travels through the front. Neither shortest-arc
+    // wrapping nor a Cartesian chord is an interchangeable interpretation.
+    assert!(prepared.position_at(0.5).unwrap().y_m > 1.0);
+
+    input.duration_s = 0.03;
+    input.tactile.clear();
+    input.trajectory = TrajectorySpec::Fixed {
+        position: Position {
+            x_m: 0.0,
+            y_m: 1.0,
+            z_m: 0.0,
+        },
+    };
+    let white = prepare(&input, &AtomicBool::new(false)).unwrap();
+    input.source = SourceSpec::GaussianBurstTrain {
+        onset_s: 0.0,
+        active_window_s: 0.03,
+        burst_duration_s: 0.03,
+        rise_fall_s: 0.01,
+        target_period_s: 0.095,
+    };
+    let burst = prepare(&input, &AtomicBool::new(false)).unwrap();
+    let mut expected: Vec<_> = white
+        .dry_pcm()
+        .iter()
+        .zip(fixture["burst_envelope"].as_array().unwrap())
+        .map(|(sample, envelope)| sample * envelope.as_f64().unwrap() as f32)
+        .collect();
+    let peak = expected.iter().map(|v| v.abs()).fold(0.0_f32, f32::max);
+    for sample in &mut expected {
+        *sample /= peak;
+    }
+    for (actual, expected) in burst.dry_pcm().iter().zip(expected) {
+        assert!((actual - expected).abs() < 1e-7);
+    }
+    assert_eq!(
+        burst.source_qc().burst_envelope_algorithm,
+        Some("raised-cosine-endpoint-exclusive.v1")
+    );
+}
