@@ -38,9 +38,9 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_blocked_missing_publication_parameters": 5,
         "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 0,
-        "not_yet_templated_missing_publication_parameters": 48,
+        "not_yet_templated_missing_publication_parameters": 47,
         "candidate_needs_full_text_task_audit": 0,
-        "adjacent_out_of_scope": 4,
+        "adjacent_out_of_scope": 5,
     }
     assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 30
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
@@ -925,7 +925,10 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         if "fixed_iti_or_hazard_control_policy" in record["blocking_constraint_ids"]
     } == {"serino_2007_blind_cane_users"}
     assert records["teneggi_2013_social_face"]["doi"] == "10.1016/j.cub.2013.01.043"
-    assert records["serino_2009_tms"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["serino_2009_tms"]["coverage_category"] == "adjacent_out_of_scope"
+    assert records["serino_2009_tms"]["scope_review_source"] == "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC2719059/fullTextXML"
+    assert "sound-to-TMS" in records["serino_2009_tms"]["scope_review_basis"]
+    assert records["serino_2009_tms"]["can_recreate_audiotactile_components_now"] is False
     assert records["serino_2009_tms"]["blocking_constraint_ids"] == []
     assert records["avenanti_2012_motor_cortex"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["avenanti_2012_motor_cortex"]["blocking_constraint_ids"] == []

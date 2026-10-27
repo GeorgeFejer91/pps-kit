@@ -1185,7 +1185,7 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
     runnable_records = [record for record in records if record["runnable_status"] == "runnable_profile_parameters_ready"]
     return {
         "schema": SCHEMA,
-        "generated_on": "2026-07-15",
+        "generated_on": "2026-10-27",
         "source_literature_coverage": "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json",
         "scope": {
             "goal": (

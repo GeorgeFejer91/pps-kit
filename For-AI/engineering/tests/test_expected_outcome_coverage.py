@@ -64,7 +64,6 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "serino_2011_rtms",
     "schizophrenia_tool_use_2022",
     "serino_2007_blind_cane_users",
-    "serino_2009_tms",
     "serino_2018_mixed_reality_pps",
     "serino_2015_exps_4_to_6",
     "serino_2015_front_back_trunk_exp2",
@@ -142,22 +141,28 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         if record["expected_outcome_status"] == "structured_expected_outcome_extracted"
     }
     assert structured_ids == STRUCTURED_EXPECTED_OUTCOME_IDS
+    # Preserve the mechanistic finding while excluding it from direct AT outcomes.
+    mechanistic = records["serino_2009_tms"]
+    assert mechanistic["expected_outcome_status"] == "adjacent_out_of_scope"
+    assert mechanistic["runnable_status"] == "adjacent_not_applicable"
+    assert "TMS-evoked MEP" in mechanistic["expected_outcome"]["observable_metric"]
+    assert mechanistic["current_template_ids"] == []
     assert outcome["summary"] == {
         "literature_record_count": 75,
-        "structured_expected_outcome_record_count": 71,
+        "structured_expected_outcome_record_count": 70,
         "pending_expected_outcome_record_count": 0,
-        "adjacent_or_out_of_scope_record_count": 4,
+        "adjacent_or_out_of_scope_record_count": 5,
         "runnable_profile_parameter_record_count": 18,
         "observed_behavioral_comparison_record_count": 0,
         "mouse_click_simulated_participant_like_comparison_record_count": 17,
         "synthetic_profile_contrast_comparison_record_count": 17,
         "parameter_run_evidence_only_record_count": 1,
-        "not_runnable_no_observed_comparison_record_count": 53,
-        "adjacent_not_applicable_record_count": 4,
+        "not_runnable_no_observed_comparison_record_count": 52,
+        "adjacent_not_applicable_record_count": 5,
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
-            "not_applicable_adjacent_out_of_scope": 4,
-            "not_yet_templated_missing_publication_parameters": 48,
+            "not_applicable_adjacent_out_of_scope": 5,
+            "not_yet_templated_missing_publication_parameters": 47,
             "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
             "template_present_blocked_missing_publication_parameters": 5,
             "ready_profile_parameter_run_available_expected_contrast_unvalidated": 1,

@@ -32,7 +32,7 @@ MANUAL_REVIEW_INDEX_PATH = (
 OUTPUT_PATH = LEDGER_ROOT / "audiotactile_full_pipeline_validation.json"
 
 SCHEMA = "pps-audiotactile-full-pipeline-validation.v1"
-GENERATED_ON = "2026-07-15"
+GENERATED_ON = "2026-10-27"
 MOUSE_CLICK_STATUS = "mouse_click_simulated_participant_like_comparison_available"
 FULL_PIPELINE_STATUS = "full_emulated_source_to_runner_pipeline_validated"
 ADJACENT_STATUS = "adjacent_not_applicable"
