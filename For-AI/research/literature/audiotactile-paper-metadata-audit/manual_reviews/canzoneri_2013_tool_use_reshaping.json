@@ -57,13 +57,19 @@
       "strategy": "Expected-outcome extraction",
       "status": "completed",
       "result": "Figure/result text reports a post-tool-use PPS central-point shift toward far space and Experiment 3 reports no comparable shift after pointing control."
+    },
+    {
+      "strategy": "Schema and protocol-lineage provenance reconciliation",
+      "status": "completed",
+      "reviewed_on": "2026-10-27",
+      "result": "Checked the stored predecessor source pointers and all 25 field dispositions. Ten inherited fields use protocol_lineage_derived, not directly reported evidence; recalculated the summary counts. This pass does not claim renewed full-text retrieval or native qualification."
     }
   ],
   "field_status_counts": {
     "derived": 3,
     "not_reported_after_review": 1,
-    "protocol_lineage_reported": 7,
-    "reported": 18
+    "protocol_lineage_derived": 10,
+    "reported": 11
   },
   "segment_field_audit": {
     "segment_1_stimulus_reconstruction": {
@@ -75,7 +81,7 @@
         "evidence_note": "The 2013 paper directly reports pink noise and 3000 ms duration."
       },
       "source_provenance": {
-        "status": "protocol_lineage_reported",
+        "status": "protocol_lineage_derived",
         "value": "Dynamic sounds follow Canzoneri et al. (2012), where SoundForge 4.5 shaped two pink-noise samples; original source files are not supplied.",
         "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
         "page_or_section": "Segment 1 stimulus reconstruction",
@@ -117,7 +123,7 @@
         "evidence_note": "Both directions are analysed through D1-D5 perceived distance mapping."
       },
       "gain_envelope": {
-        "status": "protocol_lineage_reported",
+        "status": "protocol_lineage_derived",
         "value": "Canzoneri 2012 reports mirrored exponential intensity manipulation; exact SoundForge envelope files are unavailable.",
         "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
         "page_or_section": "Segment 1 gain envelope",
@@ -133,21 +139,21 @@
     },
     "segment_2_sequence_and_intermixing": {
       "trial_rows_families": {
-        "status": "protocol_lineage_reported",
+        "status": "protocol_lineage_derived",
         "value": "Audio-tactile target rows, T0/T6 tactile-only baseline rows, and auditory-only catch rows.",
         "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
         "page_or_section": "Segment 2 and Segment 3 lineage",
         "evidence_note": "The 2013 paper directly reports T1-T5 targets and catches; T0/T6 baselines are inherited from the delegated 2012 protocol."
       },
       "condition_intermixing": {
-        "status": "protocol_lineage_reported",
+        "status": "protocol_lineage_derived",
         "value": "Sound condition, tactile timing, and catches randomly combined/intermingled.",
         "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
         "page_or_section": "Segment 2 sequence and intermixing",
         "evidence_note": "Exact randomization seed/order is not reported and remains a toolkit default."
       },
       "blocked_or_random_order": {
-        "status": "protocol_lineage_reported",
+        "status": "protocol_lineage_derived",
         "value": "Assessment trials split into two paper blocks.",
         "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
         "page_or_section": "Segment 4 block count",
@@ -191,14 +197,14 @@
         "evidence_note": "The paper also gives trial-start equivalents after 1000 ms pre-sound silence."
       },
       "baseline_strategy": {
-        "status": "protocol_lineage_reported",
+        "status": "protocol_lineage_derived",
         "value": "Tactile-only T0/T6 baselines during silence, inherited from Canzoneri et al. (2012).",
         "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
         "page_or_section": "Segment 3 tactile SOA baseline",
         "evidence_note": "The 2013 paper does not restate T0/T6 in the short method paragraph but reports procedures similar to the 2012 protocol."
       },
       "baseline_timing": {
-        "status": "protocol_lineage_reported",
+        "status": "protocol_lineage_derived",
         "value": "T0 at 300 ms from trial start (-700 ms relative to sound onset); T6 at 4600 ms from trial start (3600 ms after sound onset).",
         "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
         "page_or_section": "Segment 3 tactile SOA baseline",
@@ -214,7 +220,7 @@
     },
     "segment_4_counts": {
       "repetitions_per_tactile_soa_condition": {
-        "status": "protocol_lineage_reported",
+        "status": "protocol_lineage_derived",
         "value": "Eight target trials for each T0-T6 timing for each IN/OUT direction.",
         "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
         "page_or_section": "Segment 4 counts",
@@ -228,14 +234,14 @@
         "evidence_note": "2 baseline timings x 2 IN/OUT trial contexts x 8 repetitions."
       },
       "catch_count": {
-        "status": "protocol_lineage_reported",
+        "status": "protocol_lineage_derived",
         "value": "76 auditory-only catch rows per assessment.",
         "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
         "page_or_section": "Segment 4 counts",
         "evidence_note": "This matches the 2013 paper's 40% catch description when paired with 112 tactile-target rows."
       },
       "block_count": {
-        "status": "protocol_lineage_reported",
+        "status": "protocol_lineage_derived",
         "value": "Two assessment blocks.",
         "source_file": "manual_reviews/canzoneri_2012_dynamic_sounds.json",
         "page_or_section": "Segment 4 counts",

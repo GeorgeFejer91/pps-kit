@@ -266,14 +266,14 @@ The proposed target inventory is also not a superset of the current serializer. 
 |---|---:|---:|---|
 | `PUB.S2.response_window` | 2 | 84 | `acquire_or_open_source` |
 | `PUB.S4.total_trial_count` | 4 | 83 | `acquire_or_open_source` |
-| `PUB.S1.gain_envelope` | 1 | 78 | `acquire_or_open_source` |
+| `PUB.S1.gain_envelope` | 1 | 79 | `acquire_or_open_source` |
 | `PUB.S2.iti_jitter_policy` | 2 | 78 | `acquire_or_open_source` |
+| `PUB.S1.source_provenance` | 1 | 77 | `acquire_or_open_source` |
 | `PUB.S4.baseline_count` | 4 | 77 | `acquire_or_open_source` |
-| `PUB.S1.source_provenance` | 1 | 76 | `acquire_or_open_source` |
+| `PUB.S4.catch_count` | 4 | 77 | `acquire_or_open_source` |
 | `PUB.S1.stimulus_speed` | 1 | 76 | `acquire_or_open_source` |
-| `PUB.S4.catch_count` | 4 | 76 | `acquire_or_open_source` |
+| `PUB.S4.block_count` | 4 | 74 | `acquire_or_open_source` |
 | `PUB.S1.stimulus_type` | 1 | 73 | `acquire_or_open_source` |
-| `PUB.S3.soa_table` | 3 | 73 | `acquire_or_open_source` |
 
 ## Review Rules
 
