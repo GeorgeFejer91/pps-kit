@@ -1,4 +1,5 @@
 //! Bounded offline stimulus preparation. No playback, job authority or Python runtime.
+mod imported;
 mod level;
 mod source;
 mod spatializer;
@@ -7,14 +8,33 @@ mod wav;
 use serde::{Deserialize, Serialize};
 use std::sync::atomic::{AtomicBool, Ordering};
 
+pub use imported::prepare_imported_wav;
 pub use level::{compose_spatial_output, GeneratedStimulus, LevelQc};
 pub use spatializer::{write_spatializer_input, HrtfFormat, SpatializerConfig, SpatializerOptions};
 pub use wav::{read_stereo_wav, write_mono_wav, write_stimulus_wav};
 
 pub const REQUEST_SCHEMA: &str = "pps-native-generation.v1";
 pub const SOURCE_ALGORITHM: &str = "rand-0.8.8-std-rng-box-muller.v1";
+pub const IMPORT_ALGORITHM: &str = "wav-pcm-dry.v1";
 pub const MAX_FRAMES: usize = 192_000 * 60;
+pub const MAX_SPECTRAL_FRAMES: usize = 1_048_576;
 pub const MAX_TACTILE_CUES: usize = 256;
+
+/// Implemented kernel semantics; the host must separately verify its renderer
+/// executable/resources and never interpret these as replication qualification.
+pub fn generation_capabilities() -> serde_json::Value {
+    serde_json::json!({"schema":"pps-native-generation-capabilities.v1",
+        "source_algorithms":[SOURCE_ALGORITHM,IMPORT_ALGORITHM],"legacy_numpy_seed_compatible":false,
+        "noise_colors":["white","pink","blue","violet","brown"],
+        "source_profiles":["continuous","gaussian_burst_train"],
+        "burst_policy":"duration_derived_symmetric_fit_endpoint_exclusive",
+        "trajectory_modes":["fixed","linear","polar"],
+        "imported_wav":{"encodings":["pcm16","pcm24","pcm32","float32"],"channels":["mono","stereo_mean"],
+            "length_policies":["exact","trim_or_zero_pad"],"sample_rate_policy":"exact_match","sha256_required":true},
+        "level_modes":["preserve","linear_db_ramp"],"physical_spl_qualified":false,
+        "renderer_contract":"pps-3dti-spatialize.v2","near_field_ild":false,"far_distance_filter":false,
+        "max_frames":MAX_FRAMES,"max_spectral_frames":MAX_SPECTRAL_FRAMES,"max_tactile_cues":MAX_TACTILE_CUES})
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GenerationError {
@@ -59,6 +79,51 @@ pub enum SourceSpec {
         rise_fall_s: f64,
         target_period_s: f64,
     },
+    Noise {
+        color: NoiseColor,
+        profile: SourceProfile,
+    },
+    ImportedWav {
+        sha256: String,
+        channel_policy: ImportChannelPolicy,
+        length_policy: ImportLengthPolicy,
+    },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum NoiseColor {
+    White,
+    Pink,
+    Blue,
+    Violet,
+    Brown,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum SourceProfile {
+    Continuous,
+    GaussianBurstTrain {
+        onset_s: f64,
+        active_window_s: f64,
+        burst_duration_s: f64,
+        rise_fall_s: f64,
+        target_period_s: f64,
+    },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ImportChannelPolicy {
+    Mono,
+    StereoMean,
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ImportLengthPolicy {
+    Exact,
+    TrimOrZeroPad,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -128,6 +193,9 @@ pub struct SourceQc {
     pub burst_onset_frames: Vec<usize>,
     pub burst_frames: Option<usize>,
     pub burst_envelope_algorithm: Option<&'static str>,
+    pub noise_color: Option<NoiseColor>,
+    pub color_algorithm: Option<&'static str>,
+    pub imported_sha256: Option<String>,
     pub peak: f64,
     pub rms: f64,
 }
@@ -240,7 +308,12 @@ pub fn prepare(
 }
 
 fn validate(request: &GenerationRequest) -> Result<usize, GenerationError> {
-    if request.schema != REQUEST_SCHEMA || request.source_algorithm != SOURCE_ALGORITHM {
+    let expected_algorithm = if matches!(request.source, SourceSpec::ImportedWav { .. }) {
+        IMPORT_ALGORITHM
+    } else {
+        SOURCE_ALGORITHM
+    };
+    if request.schema != REQUEST_SCHEMA || request.source_algorithm != expected_algorithm {
         return Err(GenerationError::Invalid("schema_or_source_algorithm"));
     }
     if !(8_000..=192_000).contains(&request.sample_rate_hz)

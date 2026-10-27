@@ -123,6 +123,71 @@ fn ratio_db(a: &[f32], b: &[f32]) -> f64 {
 
 #[test]
 #[ignore = "requires PPS_TEST_RENDERER pointing at the locally built Windows 3DTI executable"]
+fn native_imported_dry_source_preserves_its_tone_and_records_import_algorithm() {
+    let executable =
+        PathBuf::from(std::env::var_os("PPS_TEST_RENDERER").expect("PPS_TEST_RENDERER required"));
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .canonicalize()
+        .unwrap();
+    let directory = root.join("artifacts").join(format!(
+        "native-import-test-{}-{}",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis()
+    ));
+    let tone: Vec<f32> = (0..44100)
+        .map(|i| (0.1 * (2.0 * std::f64::consts::PI * 440.0 * i as f64 / 44100.0).sin()) as f32)
+        .collect();
+    let mut file = std::io::Cursor::new(Vec::new());
+    write_mono_wav(&mut file, &tone, 44100, &AtomicBool::new(false)).unwrap();
+    let bytes = file.into_inner();
+    let mut request = input();
+    request.seed = 0;
+    request.source_algorithm = IMPORT_ALGORITHM.into();
+    request.source = SourceSpec::ImportedWav {
+        sha256: format!("{:x}", Sha256::digest(&bytes)),
+        channel_policy: ImportChannelPolicy::Mono,
+        length_policy: ImportLengthPolicy::Exact,
+    };
+    let prepared = prepare_imported_wav(&request, &bytes, &AtomicBool::new(false)).unwrap();
+    assert_eq!(prepared.dry_pcm(), tone);
+    let options=SpatializerOptions {hrtf_path:root.join("packages/pps-resources/assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa").to_str().unwrap().into(),
+        hrtf_format:HrtfFormat::Sofa,head_radius_m:0.09,distance_attenuation:false,near_field:false,propagation_delay:false};
+    let mut dry = Vec::new();
+    let config =
+        write_spatializer_input(&prepared, &mut dry, &options, &AtomicBool::new(false)).unwrap();
+    assert!(execute(
+        &executable,
+        &directory,
+        &serde_json::to_value(config).unwrap(),
+        &dry
+    ));
+    let stereo = rendered(&directory);
+    let energy = |hz: f64| {
+        let mut real = 0.0;
+        let mut imaginary = 0.0;
+        for (i, frame) in stereo.chunks_exact(2).enumerate().skip(22050) {
+            let phase = 2.0 * std::f64::consts::PI * hz * i as f64 / 44100.0;
+            real += f64::from(frame[0]) * phase.cos();
+            imaginary += f64::from(frame[0]) * phase.sin();
+        }
+        real.hypot(imaginary)
+    };
+    assert!(
+        energy(440.0) > 10.0 * energy(880.0),
+        "imported tone was replaced or altered"
+    );
+    let report: Value =
+        serde_json::from_slice(&fs::read(directory.join("manifest.json")).unwrap()).unwrap();
+    assert_eq!(report["source_algorithm"], IMPORT_ALGORITHM);
+    eprintln!("Native imported-source evidence: {}", directory.display());
+}
+
+#[test]
+#[ignore = "requires PPS_TEST_RENDERER pointing at the locally built Windows 3DTI executable"]
 fn native_prepared_pcm_controls_and_final_waveform_are_measured() {
     let executable =
         PathBuf::from(std::env::var_os("PPS_TEST_RENDERER").expect("PPS_TEST_RENDERER required"));
