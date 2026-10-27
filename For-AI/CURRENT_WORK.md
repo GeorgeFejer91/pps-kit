@@ -38,10 +38,13 @@ This file is the active checklist and handoff owner; replace state, do not appen
   identifies exact source and checks. Source, CI packages, installed behavior,
   physical timing, participant results and replication remain distinct gates.
   Neither installed application nor public downloads changed in this task.
-- **Next action:** verify the final real native Runner interaction, then complete
-  the offline browser-profile journey through installed native packages. The first
-  release build is underway; the pinned candidate builder and Microsoft runtime
-  inventory have preflight evidence, not installed qualification.
+- **Next action:** build the Runner candidate with its existing identifier, then
+  inspect its payload and installed resource paths. The native release compile
+  passes; the pinned candidate builder and Microsoft runtime inventory have
+  preflight evidence, not installed qualification. Actual debug WebView startup
+  passes with canonical bytes and native IPC. Package selection/preload through
+  the Windows picker remains blocked by the native automation helper failing
+  to initialize (kernel assets path not found); no substitute UI driver was used.
   Primary-source extraction continues independently. Pages assembly now includes
   referenced Study 5 instruction audio with its checked manifest hashes.
 - **Local validation:** the stable Standard checkpoint passed 647 tests with ten
@@ -75,8 +78,12 @@ This file is the active checklist and handoff owner; replace state, do not appen
   routes and final cross-product interaction remain open. New physical calibration
   is deferred by the user, not reported as measured.
 - **Scientific coverage:** frozen 94-publication corpus, 136 study rows and 1,496
-  compact contracts; 48 publications have assessed inventories containing 90
-  registered instances; 46 inventories remain unassessed. Original Ferri 2015
+  compact contracts; 49 publications have registry entries, including one newly
+  audited inaccessible-source review unit with unresolved experiment count.
+  The earlier 48 registered inventories are not all Methods-confirmed: historical
+  provisional/abstract-based entries still require source review. Another 45
+  publications have no registered inventory. Registry presence is not a completed
+  experiment audit. Original Ferri 2015
   variants are separated and their conflicts with later reanalysis preserved.
   Device-paper source conflicts reduce fully source-covered emulated records to
   15; the 18 GUI-ready records remain separately labelled. A bounded foundational
