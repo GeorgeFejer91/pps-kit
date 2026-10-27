@@ -460,6 +460,35 @@
         }
       ],
       "supporting_task_boundaries": []
+    },
+    {
+      "network_node_id": "doi:10.1073/pnas.2024548118",
+      "doi": "10.1073/pnas.2024548118",
+      "inventory_status": "confirmed_cohort_specific_variants",
+      "instance_count_basis": "One EEG study has newborn and adult protocol variants. Current main Methods establishes both groups; the existing critical SI review reports different per-block repetitions and block counts. These are cohort variants, not two asserted independent experiments.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/fullTextXML::Methods; manual_reviews/ronga_2021_newborn_erp.json::segment_4_counts (SI Appendix p.3, reviewed2026-06-16)",
+      "review_date": "2026-10-27",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "cohort_variant",
+          "experiment_label": "Newborn passive EEG protocol variant",
+          "record_id": "ronga_2021_newborn_erp",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "cohort_variant",
+          "experiment_label": "Adult control passive EEG protocol variant",
+          "record_id": "ronga_2021_newborn_erp",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        }
+      ],
+      "source_review_limit": "Current SI retrieval failed (PNAS403, PMC browser challenge); historical source review remains authoritative and is explicitly identified. Unreviewed cohort-specific contracts remain composite."
     }
   ],
   "corpus_freeze": {
@@ -573,6 +602,16 @@
       "review_date": "2026-10-27",
       "reason": "The former unassessed publication placeholder is superseded by two source-verified mechanistic experiment rows; it is not equivalent to either child alone.",
       "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC2719059/fullTextXML::Methods/Participants and Procedure"
+    },
+    {
+      "old_study_row_id": "doi:10.1073/pnas.2024548118",
+      "child_study_row_ids": [
+        "doi:10.1073/pnas.2024548118::a",
+        "doi:10.1073/pnas.2024548118::b"
+      ],
+      "review_date": "2026-10-27",
+      "reason": "The single placeholder combined newborn and adult protocol counts. Retain an explicit alias to both cohort variants; neither child alone is equivalent to the former row.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/fullTextXML::Methods; manual_reviews/ronga_2021_newborn_erp.json::segment_4_counts"
     }
   ]
 }

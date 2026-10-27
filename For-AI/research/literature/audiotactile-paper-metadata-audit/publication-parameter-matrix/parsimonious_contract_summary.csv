@@ -1,12 +1,12 @@
 contract_key,segment,label,study_count,reported_complete,derived_complete,approximation_required,partial,conflicting_evidence,low_confidence,explicitly_absent,not_reported,source_unavailable,not_assessed,not_applicable,composite_requires_split,available_or_resolved_count,available_or_resolved_pct,toolkit_encoded_count
-auditory_stimulus,1,Auditory stimulus,125,6,0,21,17,0,6,0,3,25,31,4,12,6,4.8,19
-trajectory_kinematics,1,Trajectory and kinematics,125,15,13,2,18,0,7,0,0,23,31,4,12,28,22.4,19
-trial_sequence,2,Trial sequence,125,18,0,0,30,0,8,0,0,22,31,4,12,18,14.4,19
-task_response,runtime,Task and response,125,9,0,0,39,0,6,0,0,24,31,4,12,9,7.2,4
-jitter_iti_policy,2,Jitter and ITI policy,125,15,0,0,18,0,5,0,11,29,31,4,12,15,12.0,19
-soa_schedule,3,SOA schedule,125,32,3,0,12,1,5,0,0,25,31,4,12,35,28.0,19
-tactile_target,3,Tactile target,125,22,0,1,24,1,5,0,0,25,31,4,12,22,17.6,19
-baseline_trial_contract,3,Baseline/control trials,125,11,10,0,12,1,7,8,3,26,31,4,12,29,23.2,19
-catch_trial_contract,3,Catch/no-target trials,125,16,9,0,14,0,6,7,0,24,31,6,12,32,25.6,19
-repetition_allocation,4,Repetition allocation,125,24,5,0,11,2,4,0,3,29,31,4,12,29,23.2,19
-block_order_contract,5,Block and order policy,125,20,1,0,23,1,5,0,3,25,31,4,12,21,16.8,19
+auditory_stimulus,1,Auditory stimulus,126,6,0,21,16,0,6,0,3,25,31,4,14,6,4.8,19
+trajectory_kinematics,1,Trajectory and kinematics,126,15,13,2,17,0,7,0,0,23,31,4,14,28,22.2,19
+trial_sequence,2,Trial sequence,126,20,0,0,29,0,8,0,0,22,31,4,12,20,15.9,19
+task_response,runtime,Task and response,126,9,0,0,38,0,6,0,0,24,31,4,14,9,7.1,4
+jitter_iti_policy,2,Jitter and ITI policy,126,15,0,0,17,0,5,0,11,29,31,4,14,15,11.9,19
+soa_schedule,3,SOA schedule,126,32,5,0,11,1,5,0,0,25,31,4,12,37,29.4,19
+tactile_target,3,Tactile target,126,22,0,1,23,1,5,0,0,25,31,4,14,22,17.5,19
+baseline_trial_contract,3,Baseline/control trials,126,11,10,0,11,1,7,8,3,26,31,4,14,29,23.0,19
+catch_trial_contract,3,Catch/no-target trials,126,16,9,0,14,0,6,7,0,24,31,5,14,32,25.4,19
+repetition_allocation,4,Repetition allocation,126,26,5,0,10,2,4,0,3,29,31,4,12,31,24.6,19
+block_order_contract,5,Block and order policy,126,21,1,0,23,1,5,0,3,25,31,4,12,22,17.5,19
