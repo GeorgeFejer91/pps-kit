@@ -47,7 +47,8 @@ test("desktop package selection is a local native operation with a bounded plan 
   assert.match(desktopHtml, /id="prepared-audio-detail"/u);
   assert.match(desktopHtml, /id="prepared-audio-status"/u);
   assert.match(desktopHtml, /id="execution-event-count"/u);
-  assert.match(desktopSource, /await api\.selectPreparedSession\(\)/u);
+  assert.match(desktopSource, /\(\) => api\.selectPreparedSession\(\)/u);
+  assert.match(desktopSource, /\(\) => api\.selectPreparedGroup\(\)/u);
   assert.match(desktopSource, /await api\.inspectPreparedExecution\(\)/u);
   assert.match(desktopSource, /await api\.prepareFirstAudioBlock\(\)/u);
   assert.match(desktopSource, /native V1 provenance checks/u);

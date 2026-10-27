@@ -63,12 +63,18 @@ storage releases the locked profile and export action. Keep delayed-storage
 and request-order regression checks alongside real browser interaction checks
 in `apps/designer/frontend/tests/verify-browser-workflows.mjs`.
 
-Runner audio preparation follows the native unfinished-block selection through
-the compatibility command `prepare_first_audio_block`. Accept bounded ordinals
-from the inspected manifest, retire prior media at completion, and show an
-explicit next-block preparation action with cleared elapsed progress. The UI
-does not choose or skip native blocks; device preparation, arm and start remain
-separate local actions.
+Runner audio preparation follows native instruction/block occurrences through
+the compatibility command `prepare_first_audio_block`. Retire prior media at
+playback and gate boundaries; device preparation, arm and start remain separate
+local actions. Click gates use the participant response surface, button gates
+retain the native gate ID, and timed waits expose no manual continuation. Group
+advancement uses the current native revision, clears the prior part's detailed
+summary and requires a fresh schedule inspection. Whole-experiment completion
+depends on the native group receipt, not completed-part counts alone. Selection
+also shows a bounded, paged read-only assessment of existing result files;
+selection never infers resume or timing qualification from those files. The
+compiled-browser sequence regression uses a deterministic native boundary;
+native execution and durable receipts remain covered by the Rust owner tests.
 
 Portable hosted exports embed referenced premade WAVs, spoken instruction clips
 and browser uploads. Resolve premades from their existing inventory/colocated

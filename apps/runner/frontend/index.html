@@ -42,7 +42,7 @@
                 <button id="participant-response" class="response-target" type="button" disabled
                   aria-describedby="participant-response-help" data-pretext>Respond</button>
               </section>
-              <p id="participant-response-help" class="subtle">Click or tap the response area. Space or Enter records a response without a position. Responses are enabled during native playback.</p>
+              <p id="participant-response-help" class="subtle">Click or tap the response area. Space or Enter records a response without a position. Responses are enabled during native playback or an instruction click gate.</p>
 
               <section class="panel">
                 <div class="section-heading">
@@ -54,7 +54,7 @@
                 </div>
                 <div class="control-grid">
                   <button class="button button-primary action-button" type="button" data-action="part.start">Start selected part</button>
-                  <button class="button action-button" type="button" data-action="instruction.continue">Continue instruction</button>
+                  <button class="button action-button" type="button" data-action="instruction.continue" hidden>Continue instruction</button>
                   <button class="button action-button" type="button" data-action="run.pause">Pause</button>
                   <button class="button action-button" type="button" data-action="run.resume">Resume</button>
                   <button class="button action-button" type="button" data-action="run.stop">Stop run</button>
@@ -88,13 +88,26 @@
                   <div class="section-heading"><div><p class="eyebrow">Package</p><h2>Session Package</h2></div><span id="package-badge" class="badge">Unverified</span></div>
                   <p id="package-label" class="subtle">No package loaded.</p>
                   <button id="select-session-manifest" class="button button-primary" type="button">Choose prepared session manifest</button>
+                  <button id="select-session-group" class="button" type="button">Choose participant session group</button>
+                  <p id="session-group-status" class="safety-copy" role="status">Native session-group status unavailable.</p>
+                  <button id="advance-session-part" class="button" type="button" hidden disabled>Load next part</button>
                   <button id="inspect-prepared-execution" class="button" type="button" disabled>Compile and inspect Rust schedule</button>
-                  <button id="prepare-first-audio-block" class="button" type="button" disabled>Prepare first audio block</button>
+                  <button id="prepare-first-audio-block" class="button" type="button" disabled>Prepare next audio occurrence</button>
                   <button id="prepare-demo-button" class="button" type="button" data-action="package.prepare_demo">Prepare deterministic validation demo</button>
                   <p id="package-detail" class="safety-copy">The native verifier checks the V1 manifest, ordered block files, source hashes, and trial counts before adoption.</p>
                   <p id="execution-inspection-detail" class="safety-copy">Schedule inspection is unavailable until a real prepared session is selected.</p>
                   <p id="prepared-audio-detail" class="safety-copy">Native PCM preparation is unavailable until the first schedule is inspected.</p>
                   <ol id="package-block-list" class="package-block-list" aria-label="Verified package blocks"></ol>
+                  <details id="native-results-assessment" hidden>
+                    <summary>Existing result files</summary>
+                    <p id="native-results-summary" class="safety-copy"></p>
+                    <ol id="native-results-list" class="package-block-list" aria-label="Existing result attempts"></ol>
+                    <div class="inline-actions">
+                      <button id="native-results-previous" class="button" type="button" disabled>Previous attempts</button>
+                      <span id="native-results-page" class="subtle" role="status"></span>
+                      <button id="native-results-next" class="button" type="button" disabled>Next attempts</button>
+                    </div>
+                  </details>
                   <div class="inline-actions">
                     <button class="button" type="button" data-action="target.arm">Arm local target</button>
                     <button class="button button-quiet" type="button" data-action="target.disarm">Disarm</button>
@@ -107,12 +120,12 @@
             <aside class="workspace-side stack">
               <section class="panel stack compact-stack" aria-labelledby="native-output-heading">
                 <h2 id="native-output-heading">Prepare audio output</h2>
-                <p id="native-output-detail" class="safety-copy" role="status">Prepare the first audio block before choosing an output device.</p>
+                <p id="native-output-detail" class="safety-copy" role="status">Prepare the next audio occurrence before choosing an output device.</p>
                 <button id="native-output-list" class="button" type="button" disabled>List output devices</button>
                 <label>Output device<select id="native-output-route" aria-describedby="native-output-selection" disabled>
                   <option value="">Choose output device…</option>
                 </select></label>
-                <p id="native-output-selection" class="subtle">Choose a device configuration matching the prepared block.</p>
+                <p id="native-output-selection" class="subtle">Choose a device configuration matching the prepared audio.</p>
                 <button id="native-output-prepare" class="button" type="button" disabled>Prepare silent output</button>
                 <div class="inline-actions">
                   <button id="native-output-release" class="button" type="button" disabled>Release output</button>

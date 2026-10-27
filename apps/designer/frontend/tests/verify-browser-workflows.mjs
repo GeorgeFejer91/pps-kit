@@ -71,6 +71,7 @@ try {
         if (command === "plugin:event|listen") { listener = args.handler; return 1; }
         if (command === "runner_snapshot") return structuredClone(native);
         if (command === "remote_status") return { enabled: false };
+        if (command === "native_group_status") return { revision: native.revision, partCount: 0, currentPart: 0, completedParts: 0, experimentComplete: false };
         if (command === "native_output_status") return { schema: "pps-runner-native-output-preflight.v1", phase: "idle",
           policyGeneration: "1", serviceGeneration: "1", operationGeneration: "1", inventoryGeneration: null,
           reservationGeneration: null, inFlight: false, cleanupPending: false, silenceOnly: true, executable: false, armed: false, qualified: false };
@@ -90,7 +91,7 @@ try {
   await nativeRunner.locator("#prepare-first-audio-block").click();
   await nativeRunner.locator("#prepared-audio-status").filter({ hasText: "Block 1 prepared" }).waitFor();
   await nativeRunner.evaluate(() => { window.advanceNativeFixture("running", 1); window.advanceNativeFixture("prepared", 1); });
-  await nativeRunner.getByRole("button", { name: "Prepare next block", exact: true }).click();
+  await nativeRunner.getByRole("button", { name: "Prepare next audio occurrence", exact: true }).click();
   await nativeRunner.locator("#prepared-audio-status").filter({ hasText: "Block 2 prepared" }).waitFor();
   assert.equal(await nativeRunner.locator("#block-progress").evaluate(element => element.style.width), "0%");
   await nativeRunner.locator("#prepared-audio-status").screenshot({ path: resolve(output, "runner-next-block.png") });
