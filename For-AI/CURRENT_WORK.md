@@ -43,8 +43,7 @@ This file is the active checklist and handoff owner; replace state, do not appen
   automatic approval review rejected the fresh launch check at the new revision
   ("blocked by policy", without a more specific reason). No alternate launch
   was attempted. Complete installed execution remains unverified.
-- **Next action:** resolve the broader hosted-workflow edit-mode visibility
-  failure, run a fresh stable Standard suite when storage permits, and obtain
+- **Next action:** run a fresh stable Standard suite when storage permits and obtain
   exact-revision CI evidence. The final corpus projection, canonical frontend
   and local Pages assembly agree. Installed operation and package identity
   remain separate gates. The first Runner NSIS payload and
@@ -81,9 +80,12 @@ This file is the active checklist and handoff owner; replace state, do not appen
   25 passing frontend tests and fresh actual-browser/Pages assembly checks.
   The final mapper verifies experiment-specific labels and preset ownership,
   DOI search, stable links, keyboard focus, widths from 320 to 1920 px and
-  enlarged/spaced text. The broader hosted-workflow script currently fails
-  before its mapper step because the edit-mode control is hidden; diagnosis
-  is active and full hosted-workflow sign-off is withheld.
+  enlarged/spaced text. The complete Chromium hosted-workflow check now passes
+  with the final 94/178/1,958 projection: visible desktop/phone Edit controls,
+  premade playback/cancellation, failed/delayed save recovery, bundle export,
+  mapper retry/navigation and polled participant drafts. A misplaced hidden-
+  companion selector was corrected, and the legacy HTTP race test uses the
+  explicit V1 companion route. No native-to-hosted fallback was introduced.
   Portable export now retains exact native premade receipts inside the existing
   design and verifies their hashes against the embedded WAV. Ten package-import
   checks, strict Clippy and an actual Chromium export → offline re-export → Rust
@@ -162,6 +164,8 @@ This file is the active checklist and handoff owner; replace state, do not appen
   are pushed to review branches; public Pages/download promotion remains a
   separate verified gate. A local Runner preview is installed at the recorded
   checkpoint; V1 applications and public products were not promoted.
+  [Draft PR #2](https://github.com/GeorgeFejer91/pps-kit/pull/2) tracks integration;
+  no merge or release promotion has occurred.
   The Designer preview identifier proposal is pending explicit confirmation;
   this gates package identity, not source/verification work.
 
@@ -198,13 +202,15 @@ This file is the active checklist and handoff owner; replace state, do not appen
 - [ ] M6 — Review all finish criteria, supported-scope claims and release
   artifacts; publish only under the matching release authorization.
 
-Current blockers are the broader hosted-workflow failure, a fresh full Standard
-run, missing installed evidence and pending Designer package identity approval.
+Current blockers are a fresh full Standard run, final CI, missing installed
+evidence and pending Designer package identity approval.
 Pinned Rust 1.88 Core/Desktop checks pass 183/169 tests with nine/seven opt-in
 skips and strict Clippy; final Designer/Runner frontend checks pass 25/79 tests.
-Cross-platform CI for this expanded source remains to run.
+The first PR CI run passes all three Rust Core platforms, but found a missing
+non-Windows Designer PNG icon and shared text-module CRLF source-map drift.
+Both use existing assets/scoped LF rules in the correction; final CI is pending.
 The pinned-toolchain checks accumulated approximately 15.6 GB of regenerable
-Rust incremental cache, leaving roughly 6 GB free. Automatic approval review
+Rust incremental cache, leaving less than 7 GB free. Automatic approval review
 rejected the exact compiler-cache cleanup as "blocked by policy" without a
 more specific reason. No cleanup ran; explicit user approval is pending before
 the final full validation run. Smaller owning checks continue. New calibration is outside the current task

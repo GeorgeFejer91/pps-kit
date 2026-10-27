@@ -32,6 +32,9 @@
       "../../../LICENSE": "LICENSE",
       "../../../THIRD_PARTY_LICENSES.md": "THIRD_PARTY_LICENSES.md"
     },
-    "icon": ["../../../packages/pps-resources/assets/app/pps_toolkit_icon.ico"]
+    "icon": [
+      "../../../packages/pps-resources/assets/app/pps_toolkit_icon.png",
+      "../../../packages/pps-resources/assets/app/pps_toolkit_icon.ico"
+    ]
   }
 }

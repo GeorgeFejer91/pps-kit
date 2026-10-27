@@ -34,16 +34,21 @@ Each status applies to its stated surface, not to the whole product.
   entry. An independent review passes 32 projection/identity/privacy checks.
   Final mapper controls pass actual Chromium search, study ownership, preset
   navigation, focus, narrow/enlarged-text checks. Designer has 25 passing JS
-  tests; two Pages assembly tests and canonical staging pass. The broader
-  hosted-workflow script currently stops at a hidden edit-mode control and
-  remains under investigation; focused mapper proof does not close that gate.
+  tests; two Pages assembly tests and canonical staging pass. The complete
+  Chromium hosted-workflow check also passes against the final projection,
+  including desktop/phone Edit visibility, playback, save failure/retry,
+  export, stale preview and participant-draft handling. The explicit V1 HTTP
+  race case remains separate from hosted and native adapters.
 - The existing validation owner now selects Designer core/host code and both
   frontends; its workflow also checks the six scientific projection suites on
   Windows. With pinned Rust 1.88, Core passes 183 tests/nine opt-in skips and
   Desktop passes 169/seven skips, with formatting, compilation and strict Clippy.
   Browser mode passes 79 Runner/23 Designer tests, frozen installs with zero
   reported advisories and canonical build-drift checks. These are local Windows
-  results; the expanded cross-platform CI jobs still require an actual run.
+  results. The first draft-PR CI run passes all three Core platforms; Desktop
+  exposed a missing shared PNG icon on non-Windows and Browser exposed CRLF
+  in the shared text module's source map. The scoped corrections reuse the
+  existing icon and LF rules. Final expanded CI remains pending.
 - Integrated provenance checkpoint `c389449a`: 23 Designer frontend tests,
   ten native bundle tests, actual Chromium export/offline re-export/native import,
   strict package Clippy and inspected mapper/Pages checks pass. The subsequent
