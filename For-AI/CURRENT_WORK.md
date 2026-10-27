@@ -44,7 +44,8 @@ This file is the active checklist and handoff owner; replace state, do not appen
   automatic approval review rejected the fresh launch check at the new revision
   ("blocked by policy", without a more specific reason). No alternate launch
   was attempted. Complete installed execution remains unverified.
-- **Next action:** run a fresh stable Standard suite when storage permits, then
+- **Next action:** run the fresh stable Standard suite on the existing Windows
+  CI worker, repair the remaining variant-count expansion, then
   finish the approved-identity installed journey. Exact product-revision CI
   passes all 14 jobs. The final corpus projection, canonical frontend
   and local Pages assembly agree. Installed operation and package identity
@@ -64,6 +65,12 @@ This file is the active checklist and handoff owner; replace state, do not appen
   discrepancies in their disclosed proxy/count/geometry boundaries. Quick
   validation passes 38 tests and the release/privacy audit.
   This is resolved targeted evidence, not a fresh entirely green Standard run.
+  The opt-in native manifest-order fixture now executes three blocks; it passes
+  actual silent callbacks and the independent result-file audit (44 events,
+  three scored/dataset rows). Completion stays false at both earlier boundaries.
+  The existing Windows CI oracle job now selects the full Standard tier, with
+  web/GUI/XDF test dependencies, offscreen Qt and its native writer fixture.
+  YAML and Rust formatting checks pass; its first full Standard run is pending.
   The corrected sample-paced Canzoneri response audit passes
   three checks in 951.25 s, including complete planned/click/marker/analysis joins,
   six distance/motion bins and extended Windows paths. Actual preset baking
@@ -209,7 +216,8 @@ This file is the active checklist and handoff owner; replace state, do not appen
 - [ ] M6 — Review all finish criteria, supported-scope claims and release
   artifacts; publish only under the matching release authorization.
 
-Current blockers are a fresh full Standard run, missing installed
+Current blockers are a fresh full Standard run, remaining F2 variant-count
+expansion, missing installed
 evidence and pending Designer package identity approval.
 Pinned Rust 1.88 Core/Desktop checks pass 183/169 tests with nine/seven opt-in
 skips and strict Clippy; final Designer/Runner frontend checks pass 25/79 tests.
@@ -221,8 +229,10 @@ a scoped LF rule. CI artifacts are not installed/qualified release evidence.
 The pinned-toolchain checks accumulated approximately 15.6 GB of regenerable
 Rust incremental cache, leaving less than 7 GB free. Automatic approval review
 rejected the exact compiler-cache cleanup as "blocked by policy" without a
-more specific reason. No cleanup ran; explicit user approval is pending before
-the final full validation run. Smaller owning checks continue. New calibration is outside the current task
+more specific reason. No cleanup ran; explicit user approval remains pending.
+The full Standard tier will instead use the existing fresh Windows CI worker;
+actual free space is logged before the run. Smaller owning checks continue.
+New calibration is outside the current task
 per user steering; future measured-route claims still require evidence. No new participant study,
 optional XR work, MobX dependency or additional transport is implied.
 

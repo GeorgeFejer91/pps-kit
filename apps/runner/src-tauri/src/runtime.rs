@@ -1890,7 +1890,8 @@ mod tests {
     #[test]
     #[ignore = "requires a real stereo f32 output device; renders silent fixture samples"]
     fn real_multiblock_package_completes_in_manifest_order() {
-        run_silent_native_package(2);
+        // Exercise an interior block transition before the final completion gate.
+        run_silent_native_package(3);
     }
 
     fn run_silent_native_package(block_count: u32) {
