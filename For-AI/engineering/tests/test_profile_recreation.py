@@ -375,4 +375,6 @@ def test_protocol12_matrix_materializes_session_packages_under_each_profile_root
         assert result["template_id"] in str(expected_root)
         assert session_dir == expected_root or expected_root in session_dir.parents
         assert session_manifest == expected_root or expected_root in session_manifest.parents
-        assert session_manifest.exists()
+        # The validator uses the native extended-path form on Windows; a
+        # normal Path.exists() reports false once this fixture reaches MAX_PATH.
+        assert matrix._path_is_file(session_manifest)

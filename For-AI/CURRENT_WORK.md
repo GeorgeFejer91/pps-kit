@@ -44,8 +44,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Integrated Rust workspace: 299 tests pass, three opt-in tests skipped by
   default; the native 3DTI waveform test separately passes on actual generated
   PCM (91.82 s). Go downloader tests pass with verified task-local Go 1.27.3.
-  Complete Standard is running with failures under investigation; clean
-  installation and physical qualification remain open.
+  Standard completed with 626 passes, 10 skips and seven failures. Parent
+  repairs now pass focused regressions: synchronous accepted-plan mutation
+  rejection, Windows long-path file checks, SVG LF parity and routed guidance.
+  UI/science workers own the remaining parser/CSS failures; rerun Standard
+  after integration. Clean installation and physical qualification remain open.
 - **Scientific coverage:** frozen 94-publication corpus, 124 study rows and 1,364
   compact contracts; 156 reported-complete and 38 derived-complete cells after
   the first publisher-source timing batch. 77 inventories remain unassessed.

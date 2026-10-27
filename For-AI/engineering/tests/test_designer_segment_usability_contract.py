@@ -168,7 +168,10 @@ def test_for_ai_contract_uses_profile_finalization_boundary():
     segment_contract = (repo_root / "For-AI" / "segment_registry_contract.md").read_text(encoding="utf-8")
     skill = (repo_root / "For-AI" / "skills" / "html-dashboard-orchestrator" / "SKILL.md").read_text(encoding="utf-8")
 
-    for text in (segment_contract, skill):
-        assert "Segment 6: Profile Validation and Save" in text or "Segment 6 Profile Validation and Save" in text
-        assert "actual participant" in text
-        assert "Runner" in text
+    # The concise entrypoint routes to the authoritative segment contract;
+    # it should not duplicate that full contract in another memory owner.
+    assert "(../../segment_registry_contract.md)" in skill
+    assert "finished-profile-to-Runner handoff" in skill
+    assert "Segment 6: Profile Validation and Save" in segment_contract or "Segment 6 Profile Validation and Save" in segment_contract
+    assert "actual participant" in segment_contract
+    assert "Runner" in segment_contract
