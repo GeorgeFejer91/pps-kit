@@ -829,7 +829,8 @@ def _public_text(value: Any) -> str:
 
 
 def public_projection(
-    study_index: list[dict[str, Any]], evidence_rows: list[dict[str, Any]], corpus_id: str
+    study_index: list[dict[str, Any]], evidence_rows: list[dict[str, Any]], corpus_id: str,
+    study_aliases: dict[str, list[str]],
 ) -> dict[str, Any]:
     """Project finalized component-gated evidence; never infer from templates."""
     by_study: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -891,6 +892,10 @@ def public_projection(
     for publication in publications.values():
         publication["parameterStatusCounts"] = dict(sorted(publication["parameterStatusCounts"].items()))
     status_counts = dict(sorted(Counter(row["evidence_status"] for row in evidence_rows).items()))
+    current_ids = {study["studyRowId"] for study in studies}
+    for old_id, children in study_aliases.items():
+        if old_id in current_ids or not children or len(children) != len(set(children)) or not set(children) <= current_ids:
+            raise ValueError("Study-row alias must resolve a superseded identity to existing distinct children")
     return {
         "schema": "pps-publication-study-reviews.v1",
         "scope": {
@@ -902,6 +907,7 @@ def public_projection(
                    "contracts": len(evidence_rows), "reportedComplete": status_counts.get("reported_complete", 0),
                    "derivedComplete": status_counts.get("derived_complete", 0), "parameterStatusCounts": status_counts},
         "statusLegend": STATUS_LEGEND,
+        "studyRowAliases": dict(sorted(study_aliases.items())),
         "publications": [publications[key] for key in sorted(publications)],
         "studies": studies,
     }
@@ -1488,7 +1494,11 @@ def build(output_dir: Path, public_output: Path | None = None) -> dict[str, Any]
 
     if public_output is not None:
         registry = json.loads(STUDY_REGISTRY_PATH.read_text(encoding="utf-8"))
-        projection = public_projection(study_index, evidence_rows, registry["corpus_freeze"]["id"])
+        migrations = registry.get("study_row_migrations", [])
+        aliases = {row["old_study_row_id"]: row["child_study_row_ids"] for row in migrations}
+        if len(aliases) != len(migrations):
+            raise ValueError("Duplicate superseded study-row identity")
+        projection = public_projection(study_index, evidence_rows, registry["corpus_freeze"]["id"], aliases)
         public_output.parent.mkdir(parents=True, exist_ok=True)
         public_output.write_text(json.dumps(projection, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
 
