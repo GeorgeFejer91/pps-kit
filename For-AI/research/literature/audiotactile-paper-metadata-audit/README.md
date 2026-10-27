@@ -33,7 +33,7 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 141 study/context rows,
+Current checkpoint (2026-10-27): 94 frozen publications, 144 study/context rows,
 54 registered publication inventories, four access-audited publications,
 and 36 publication inventories still unassessed. Registry presence alone
 does not certify a Methods-confirmed inventory: earlier abstract-based or partial
@@ -41,16 +41,24 @@ inventories still require their source and compact-contract audits.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive these distinctions from explicit registry
 evidence categories and the finalized eleven-contract source dispositions.
-The current audit records 47 Methods-backed inventories (35 current primary
+The current audit records 48 Methods-backed inventories (36 current primary
 reviews, eleven retained primary reviews, and one identified author version whose
-final comparison is pending), four abstract/metadata inventories, three partial
+final comparison is pending), four abstract/metadata inventories, two partial
 Methods inventories, four audited access blockers, and 36 unregistered publications.
-Only 44 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 50 still need inventory
+Only 45 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 49 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Serino (2015, srep18603) now includes seven main experiments plus three
+localization controls. Experiment 7 is visual-tactile; the controls are adjacent
+auditory localization tasks. The reviewed source retains the 240-versus-288
+trial conflict, thirteen-versus-fourteen position conflict and incompatible
+supplementary gain descriptions. The first two legacy presets remain available
+but are blocked from source-recreation claims; no formula or timing origin is
+silently repaired.
+
 Tonelli (2019) now separates neck PPS assessment from echolocation training,
 time-bisection training and distance validation; manual trial starts, endpoint
 SOA derivations and source contradictions remain explicit. Finisguerra (2015)

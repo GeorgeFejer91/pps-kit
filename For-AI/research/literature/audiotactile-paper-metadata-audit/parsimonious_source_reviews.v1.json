@@ -5939,700 +5939,893 @@
     },
     {
       "study_row_id": "doi:10.1038/srep18603::d",
-      "source_type": "manual_review_disaggregation",
-      "source_file": "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_reviews/serino_2015_exps_4_to_6.json",
+      "source_type": "primary_article_and_rendered_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Independent whole-publication and experiment-specific review; all eleven compact contracts explicitly disposed. Preserve contradictory counts/gain laws and unresolved timing origins.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
       "contracts": {
         "auditory_stimulus": {
           "status": "approximation_required",
-          "value": "44.1-kHz SoundForge-shaped pink noise in a two-speaker 55-to-70-dB exponential cross-fade; original WAV/envelope unavailable.",
-          "page_or_section": "PDF pp.5,11-13 and supplement; manual review Segment 1",
+          "value": "44.1-kHz pink noise shaped in SoundForge 4.5; two coactivated speakers with opposite exponential ramps, nominal 55–70 dB SPL looming and reversed for receding.",
+          "page_or_section": "Main Results Experiment 4; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "source_mode": {
               "status": "reported",
-              "value": "44.1-kHz SoundForge-shaped pink noise in a two-speaker 55-to-70-dB exponential cross-fade; original WAV/envelope unavailable."
+              "value": "generated"
             },
             "stimulus_identity_or_asset": {
               "status": "reported",
-              "value": "44.1-kHz SoundForge-shaped pink noise in a two-speaker 55-to-70-dB exponential cross-fade; original WAV/envelope unavailable."
+              "value": "Pink-noise samples; exact original WAV/random realization unavailable in reviewed sources."
             },
             "source_recipe_or_asset_provenance": {
               "status": "approximation_required",
-              "value": "44.1-kHz SoundForge-shaped pink noise in a two-speaker 55-to-70-dB exponential cross-fade; original WAV/envelope unavailable."
+              "value": "Reported noise class/sample rate and SoundForge envelope are recoverable, but original waveforms and complete per-speaker gain files are not."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "M-Audio Studiophile AV 360 loudspeakers face each other, separated by 1 m; near within approximately 5 cm, far approximately 1 m from participant."
+            },
+            "level_envelope_calibration": {
+              "status": "approximation_required",
+              "value": "Nominal 55-to-70 dB SPL envelope; near/far intensities vary oppositely. Exact channel transfer/calibration requires an explicit reconstruction decision."
             }
-          }
+          },
+          "evidence_note": "A virtual moving source is an approximation to the physical coactivated pair, not demonstrated acoustic equivalence."
         },
         "trajectory_kinematics": {
-          "status": "derived_complete",
-          "value": "Geometry: Looming/receding line sampled at 5, 24, 43, 62, 81 and 100 cm from the body; hand and trunk tested in separate blocks with the hand on the chest. Kinematics: Reported auditory speed 22 cm/s over the approximately 100-cm two-speaker path; full traversal about 4.55 s.",
-          "page_or_section": "PDF p.5 and Figure 4; manual review Segment 1; PDF p.11; manual review Segment 1",
+          "status": "approximation_required",
+          "value": "Facing near/far loudspeakers separated by 100 cm; sampled positions are not automatically waveform endpoints. Samples: 5, 24, 43, 62, 81, 100 cm; reported speed 22 cm/s.",
+          "page_or_section": "Main Results Experiment 4; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "motion_mode": {
               "status": "reported",
-              "value": "Geometry: Looming/receding line sampled at 5, 24, 43, 62, 81 and 100 cm from the body; hand and trunk tested in separate blocks with the hand on the chest. Kinematics: Reported auditory speed 22 cm/s over the approximately 100-cm two-speaker path; full traversal about 4.55 s."
+              "value": "looming_and_receding"
             },
             "coordinate_frame_body_anchor": {
               "status": "reported",
-              "value": "Geometry: Looming/receding line sampled at 5, 24, 43, 62, 81 and 100 cm from the body; hand and trunk tested in separate blocks with the hand on the chest. Kinematics: Reported auditory speed 22 cm/s over the approximately 100-cm two-speaker path; full traversal about 4.55 s."
+              "value": "Right-hand dorsum or sternum in separate blocks; hand adjacent to chest without contact."
             },
             "geometry": {
               "status": "reported",
-              "value": "Geometry: Looming/receding line sampled at 5, 24, 43, 62, 81 and 100 cm from the body; hand and trunk tested in separate blocks with the hand on the chest. Kinematics: Reported auditory speed 22 cm/s over the approximately 100-cm two-speaker path; full traversal about 4.55 s."
+              "value": "Facing near/far loudspeakers separated by 100 cm; sampled positions are not automatically waveform endpoints. Sample locations: 5, 24, 43, 62, 81, 100 cm."
             },
             "timing_constraint": {
-              "status": "derived",
-              "value": "Geometry: Looming/receding line sampled at 5, 24, 43, 62, 81 and 100 cm from the body; hand and trunk tested in separate blocks with the hand on the chest. Kinematics: Reported auditory speed 22 cm/s over the approximately 100-cm two-speaker path; full traversal about 4.55 s."
+              "status": "approximation_required",
+              "value": "Reported speed 22 cm/s. Exact audio onset-to-path-origin and any endpoint holds are not uniquely specified for the sampled positions."
             }
           },
-          "derivation_note": "Approximate duration derived from the reported path scale and 22 cm/s speed."
+          "evidence_note": "Preserve reported distance/speed constraints without promoting approximate full-path duration into an exact onset schedule. Experiment 5 changes hand posture while auditory source location stays fixed.",
+          "missing_required_components": [
+            "exact_motion_origin_and_hold_convention"
+          ]
         },
         "trial_sequence": {
-          "status": "partial",
-          "value": "Trial-sequence evidence recoverable from the prior combined review: Speeded response to 100-ms hand/chest vibration, ignore sound and withhold on auditory-only catches; no response timeout reported.",
-          "page_or_section": "PDF pp.5,11-13; manual review Segment 2",
-          "missing_required_components": [
-            "ordered_elements_and_source_selection"
-          ],
+          "status": "reported_complete",
+          "value": "Audio-tactile target trials, tactile-only baselines and auditory-only catch/no-go trials.",
+          "page_or_section": "Main Results Experiment 4; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "trial_families": {
               "status": "reported",
-              "value": "Trial-sequence evidence recoverable from the prior combined review: Speeded response to 100-ms hand/chest vibration, ignore sound and withhold on auditory-only catches; no response timeout reported."
+              "value": "AT targets; T-only baselines; A-only catches."
             },
             "ordered_elements_and_source_selection": {
-              "status": "not_reported",
-              "value": ""
+              "status": "reported",
+              "value": "Sound begins, then one 100-ms touch occurs at the distance-linked delay; omit sound for T-only baselines and omit touch for catches. Participant responds only to touch."
             }
-          }
+          },
+          "evidence_note": "The family/event roles are specified; exact delay mapping and allocation conflicts are reviewed separately."
         },
         "task_response": {
           "status": "partial",
-          "value": "Speeded response to 100-ms hand/chest vibration, ignore sound and withhold on auditory-only catches; no response timeout reported.",
-          "page_or_section": "PDF pp.5,11-13; manual review Segment 2",
-          "missing_required_components": [
-            "response_window_and_anchor"
-          ],
+          "value": "Respond rapidly and accurately to touch using a particular button on a wireless XBOX 360 controller; withhold on sound-only catches.",
+          "page_or_section": "Main Results Experiment 4; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "target_and_nontarget_rule": {
               "status": "reported",
-              "value": "Speeded response to 100-ms hand/chest vibration, ignore sound and withhold on auditory-only catches; no response timeout reported."
+              "value": "Touch is the go target; auditory-only trials require no response."
             },
             "response_mode_or_device": {
               "status": "reported",
-              "value": "Speeded response to 100-ms hand/chest vibration, ignore sound and withhold on auditory-only catches; no response timeout reported."
+              "value": "Wireless XBOX 360 gamepad, reported 125-Hz sampling."
             },
             "response_mapping_or_expected_action": {
               "status": "reported",
-              "value": "Speeded response to 100-ms hand/chest vibration, ignore sound and withhold on auditory-only catches; no response timeout reported."
-            },
-            "response_window_and_anchor": {
-              "status": "not_reported",
-              "value": ""
+              "value": "Press the designated button for touch; exact named button/hand mapping is not specified."
             }
-          }
+          },
+          "evidence_note": "No online deadline is provided. Descriptive device sampling does not establish measured PPS Kit response latency.",
+          "missing_required_components": [
+            "response_window_and_anchor",
+            "exact_button_mapping"
+          ]
         },
         "jitter_iti_policy": {
-          "status": "reported_complete",
-          "value": "Intertrial interval randomly shuffled between 500 and 700 ms.",
-          "page_or_section": "PDF p.13; manual review Segment 2",
+          "status": "partial",
+          "value": "Intertrial intervals randomly shuffled between 500 and 700 ms.",
+          "page_or_section": "Main Results Experiment 4; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "policy_type": {
               "status": "reported",
-              "value": "Intertrial interval randomly shuffled between 500 and 700 ms."
-            },
-            "timing_scope_and_anchor": {
-              "status": "reported",
-              "value": "Intertrial interval randomly shuffled between 500 and 700 ms."
+              "value": "random_range"
             },
             "values_or_range": {
               "status": "reported",
-              "value": "Intertrial interval randomly shuffled between 500 and 700 ms."
+              "value": "500–700 ms."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Intertrial interval is named, but source does not identify exact onset/offset/response endpoints. It is not specified as audio padding."
             }
-          }
+          },
+          "evidence_note": "Continuous versus discrete distribution and exact timing anchor are not supplied.",
+          "missing_required_components": [
+            "timing_scope_and_anchor",
+            "distribution"
+          ]
         },
         "soa_schedule": {
-          "status": "derived_complete",
-          "value": "Six distance-at-touch anchors (5,24,43,62,81,100 cm) compiled to SOAs from the 22-cm/s path and reversed by direction.",
-          "page_or_section": "PDF pp.5,11; manual review Segment 3",
-          "derivation_note": "SOAs are derived from reported distance anchors and speed; no exact millisecond table is printed.",
+          "status": "approximation_required",
+          "value": "Distance-at-touch samples 5, 24, 43, 62, 81, 100 cm, with nominal 22-cm/s auditory motion; exact millisecond SOAs are unresolved.",
+          "page_or_section": "Main Results Experiment 4; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "reference_event_and_sign": {
               "status": "reported",
-              "value": "Six distance-at-touch anchors (5,24,43,62,81,100 cm) compiled to SOAs from the 22-cm/s path and reversed by direction."
+              "value": "Delay from auditory onset to tactile onset; positive means touch after sound."
             },
             "ordered_soa_values_or_derivable_distance_anchors": {
-              "status": "derived",
-              "value": "Six distance-at-touch anchors (5,24,43,62,81,100 cm) compiled to SOAs from the 22-cm/s path and reversed by direction."
+              "status": "approximation_required",
+              "value": "Spatial samples are reported, but an exact audio-onset path origin/hold convention is not established."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Looming maps later touch to nearer sound; receding maps later touch to farther sound."
             }
-          }
+          },
+          "evidence_note": "The sample span and nominal speaker/path extent differ. Do not silently choose an origin or collapse opposite-side positions into one center.",
+          "missing_required_components": [
+            "exact_numeric_soa_mapping"
+          ]
         },
         "tactile_target": {
-          "status": "reported_complete",
-          "value": "100-ms, 150-Hz Precision MicroDrives 312-101 vibration on hand dorsum or chest.",
-          "page_or_section": "PDF pp.5,12; manual review Segment 3",
+          "status": "partial",
+          "value": "100-ms vibration using Precision MicroDrives 312-101 motor. Right-hand dorsum or sternum in separate blocks; hand adjacent to chest without contact.",
+          "page_or_section": "Main Results Experiment 4; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "modality": {
               "status": "reported",
-              "value": "100-ms, 150-Hz Precision MicroDrives 312-101 vibration on hand dorsum or chest."
+              "value": "Vibrotactile motor."
             },
             "body_site_and_side": {
               "status": "reported",
-              "value": "100-ms, 150-Hz Precision MicroDrives 312-101 vibration on hand dorsum or chest."
+              "value": "Right-hand dorsum or sternum in separate blocks; hand adjacent to chest without contact."
             },
             "waveform_and_duration": {
               "status": "reported",
-              "value": "100-ms, 150-Hz Precision MicroDrives 312-101 vibration on hand dorsum or chest."
+              "value": "100-ms activation; nominal motor 150 Hz, 3 V, 60 mA, 9000 rpm, 5 g, 113 mm2; approximately 50 ms to maximal rotation."
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "150-Hz nominal motor specification, not a measured constant-frequency onset waveform."
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "No individual amplitude threshold or measured skin-level waveform/calibration is reported."
             }
-          }
+          },
+          "evidence_note": "Motor datasheet values are apparatus descriptors, not evidence of equivalent delivered stimulation.",
+          "missing_required_components": [
+            "delivered_waveform_and_intensity_calibration"
+          ]
         },
         "baseline_trial_contract": {
-          "status": "derived_complete",
-          "value": "Tactile-only endpoint baselines: two timings x two body parts x 16 = 64 trials.",
-          "page_or_section": "PDF pp.5,13; manual review Segments 3-4",
-          "derivation_note": "Count follows the reported experiment formula.",
+          "status": "partial",
+          "value": "64 T-only baseline trials by the stated formula; auditory stimulus omitted.",
+          "page_or_section": "Main Results Experiment 4; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "reported",
-              "value": "Tactile-only endpoint baselines: two timings x two body parts x 16 = 64 trials."
+              "value": "tactile_only_endpoint_baseline"
             },
             "timing_and_anchor": {
-              "status": "reported",
-              "value": "Tactile-only endpoint baselines: two timings x two body parts x 16 = 64 trials."
+              "status": "not_reported",
+              "value": "Nominal delays correspond to nearest/farthest sampled positions; exact numeric timing inherits the unresolved motion origin."
             },
             "allocation_rule": {
-              "status": "reported",
-              "value": "Tactile-only endpoint baselines: two timings x two body parts x 16 = 64 trials."
+              "status": "derived",
+              "value": "(6 x 2 + 2 + 1) x 2 body sites x 16 = 480"
             },
             "resolved_trial_count": {
               "status": "derived",
-              "value": "Tactile-only endpoint baselines: two timings x two body parts x 16 = 64 trials."
+              "value": "64 T-only trials, conditional on the printed formula."
             }
-          }
+          },
+          "evidence_note": "Baseline correction selects the fastest unimodal condition within participant/body part. It is not a stationary sound comparator.",
+          "missing_required_components": [
+            "exact_baseline_timing"
+          ],
+          "derivation_note": "(6 x 2 + 2 + 1) x 2 body sites x 16 = 480"
         },
         "catch_trial_contract": {
           "status": "derived_complete",
-          "value": "Auditory-only/no-response catches: 32 trials inferred from the reported 480-trial formula.",
-          "page_or_section": "PDF p.13; manual review Segment 4",
-          "derivation_note": "Formula residual after audio-tactile and baseline families.",
+          "value": "32 auditory-only/no-touch catch trials require withholding.",
+          "page_or_section": "Main Results Experiment 4; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "reported",
-              "value": "Auditory-only/no-response catches: 32 trials inferred from the reported 480-trial formula."
+              "value": "auditory_only_no_go"
             },
             "target_role_and_expected_action": {
               "status": "reported",
-              "value": "Auditory-only/no-response catches: 32 trials inferred from the reported 480-trial formula."
+              "value": "No touch; withhold button press."
             },
             "allocation_rule": {
-              "status": "reported",
-              "value": "Auditory-only/no-response catches: 32 trials inferred from the reported 480-trial formula."
+              "status": "derived",
+              "value": "(6 x 2 + 2 + 1) x 2 body sites x 16 = 480"
             },
             "resolved_trial_count": {
               "status": "derived",
-              "value": "Auditory-only/no-response catches: 32 trials inferred from the reported 480-trial formula."
+              "value": "32"
             }
-          }
+          },
+          "derivation_note": "(6 x 2 + 2 + 1) x 2 body sites x 16 = 480"
         },
         "repetition_allocation": {
-          "status": "reported_complete",
-          "value": "Sixteen repetitions per reported condition formula; 480 trials total.",
-          "page_or_section": "PDF p.13; manual review Segment 4",
+          "status": "derived_complete",
+          "value": "480 printed trials: 384 AT, 64 tactile-only and 32 catches by the stated formula.",
+          "page_or_section": "Main Results Experiment 4; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "factor_dimensions": {
               "status": "reported",
-              "value": "Sixteen repetitions per reported condition formula; 480 trials total."
+              "value": "Six distances, two directions and two target sites."
             },
             "repetitions_or_exact_counts": {
-              "status": "reported",
-              "value": "Sixteen repetitions per reported condition formula; 480 trials total."
+              "status": "derived",
+              "value": "(6 x 2 + 2 + 1) x 2 body sites x 16 = 480"
             },
             "exceptions_or_overrides": {
               "status": "reported",
-              "value": "Sixteen repetitions per reported condition formula; 480 trials total."
+              "value": "Do not substitute generic approximate family percentages for the experiment-specific formula."
             }
-          }
+          },
+          "derivation_note": "(6 x 2 + 2 + 1) x 2 body sites x 16 = 480"
         },
         "block_order_contract": {
           "status": "partial",
-          "value": "Separate hand and trunk blocks are explicit; exact block count/order beyond that split is not reported.",
-          "page_or_section": "PDF pp.5,13; manual review Segments 2 and 4",
-          "missing_required_components": [
-            "block_composition"
-          ],
+          "value": "Separate hand/trunk blocks are explicit in Experiment 4; exact execution block counts/order are otherwise unresolved.",
+          "page_or_section": "Main Results Experiment 4; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "block_count": {
-              "status": "reported",
-              "value": "Separate hand and trunk blocks are explicit; exact block count/order beyond that split is not reported."
+              "status": "not_reported",
+              "value": "No exact numeric block count is established; two factors do not prove two blocks."
             },
             "block_composition": {
+              "status": "reported",
+              "value": "Six distances, two directions and two target sites."
+            },
+            "block_order_or_counterbalancing": {
               "status": "not_reported",
-              "value": ""
+              "value": "Experiment 4 separates body sites into blocks; exact order/counterbalance is not reported."
+            },
+            "within_block_randomization": {
+              "status": "not_reported",
+              "value": "No full trial shuffle algorithm is provided."
             }
-          }
+          },
+          "evidence_note": "Participant-level factors and repetition counts remain separate from an execution-block schedule.",
+          "missing_required_components": [
+            "block_count",
+            "block_order_or_counterbalancing",
+            "within_block_randomization"
+          ]
         }
       }
     },
     {
       "study_row_id": "doi:10.1038/srep18603::e",
-      "source_type": "manual_review_disaggregation",
-      "source_file": "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_reviews/serino_2015_exps_4_to_6.json",
+      "source_type": "primary_article_and_rendered_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Independent whole-publication and experiment-specific review; all eleven compact contracts explicitly disposed. Preserve contradictory counts/gain laws and unresolved timing origins.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
       "contracts": {
         "auditory_stimulus": {
           "status": "approximation_required",
-          "value": "44.1-kHz SoundForge-shaped pink noise in a two-speaker 55-to-70-dB exponential looming cross-fade; original WAV/envelope unavailable.",
-          "page_or_section": "PDF pp.6,11-13 and supplement; manual review Segment 1",
+          "value": "44.1-kHz pink noise shaped in SoundForge 4.5; two coactivated speakers with opposite exponential ramps, nominal 55–70 dB SPL looming and reversed for receding.",
+          "page_or_section": "Main Results Experiment 5; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "source_mode": {
               "status": "reported",
-              "value": "44.1-kHz SoundForge-shaped pink noise in a two-speaker 55-to-70-dB exponential looming cross-fade; original WAV/envelope unavailable."
+              "value": "generated"
             },
             "stimulus_identity_or_asset": {
               "status": "reported",
-              "value": "44.1-kHz SoundForge-shaped pink noise in a two-speaker 55-to-70-dB exponential looming cross-fade; original WAV/envelope unavailable."
+              "value": "Pink-noise samples; exact original WAV/random realization unavailable in reviewed sources."
             },
             "source_recipe_or_asset_provenance": {
               "status": "approximation_required",
-              "value": "44.1-kHz SoundForge-shaped pink noise in a two-speaker 55-to-70-dB exponential looming cross-fade; original WAV/envelope unavailable."
+              "value": "Reported noise class/sample rate and SoundForge envelope are recoverable, but original waveforms and complete per-speaker gain files are not."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "M-Audio Studiophile AV 360 loudspeakers face each other, separated by 1 m; near within approximately 5 cm, far approximately 1 m from participant."
+            },
+            "level_envelope_calibration": {
+              "status": "approximation_required",
+              "value": "Nominal 55-to-70 dB SPL envelope; near/far intensities vary oppositely. Exact channel transfer/calibration requires an explicit reconstruction decision."
             }
-          }
+          },
+          "evidence_note": "A virtual moving source is an approximation to the physical coactivated pair, not demonstrated acoustic equivalence."
         },
         "trajectory_kinematics": {
-          "status": "derived_complete",
-          "value": "Geometry: Looming line sampled at 5, 24, 43, 62, 81 and 100 cm, tested with the hand positioned near versus far from the trunk. Kinematics: Reported auditory speed 22 cm/s over the approximately 100-cm path; full traversal about 4.55 s.",
-          "page_or_section": "PDF p.6 and Figure 4; manual review Segment 1; PDF p.11; manual review Segment 1",
+          "status": "approximation_required",
+          "value": "Facing near/far loudspeakers separated by 100 cm; sampled positions are not automatically waveform endpoints. Samples: 5, 24, 43, 62, 81, 100 cm; reported speed 22 cm/s.",
+          "page_or_section": "Main Results Experiment 5; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "motion_mode": {
               "status": "reported",
-              "value": "Geometry: Looming line sampled at 5, 24, 43, 62, 81 and 100 cm, tested with the hand positioned near versus far from the trunk. Kinematics: Reported auditory speed 22 cm/s over the approximately 100-cm path; full traversal about 4.55 s."
+              "value": "looming_only"
             },
             "coordinate_frame_body_anchor": {
               "status": "reported",
-              "value": "Geometry: Looming line sampled at 5, 24, 43, 62, 81 and 100 cm, tested with the hand positioned near versus far from the trunk. Kinematics: Reported auditory speed 22 cm/s over the approximately 100-cm path; full traversal about 4.55 s."
+              "value": "Hand dorsum in near/far hand postures; acoustic apparatus remains fixed."
             },
             "geometry": {
               "status": "reported",
-              "value": "Geometry: Looming line sampled at 5, 24, 43, 62, 81 and 100 cm, tested with the hand positioned near versus far from the trunk. Kinematics: Reported auditory speed 22 cm/s over the approximately 100-cm path; full traversal about 4.55 s."
+              "value": "Facing near/far loudspeakers separated by 100 cm; sampled positions are not automatically waveform endpoints. Sample locations: 5, 24, 43, 62, 81, 100 cm."
             },
             "timing_constraint": {
-              "status": "derived",
-              "value": "Geometry: Looming line sampled at 5, 24, 43, 62, 81 and 100 cm, tested with the hand positioned near versus far from the trunk. Kinematics: Reported auditory speed 22 cm/s over the approximately 100-cm path; full traversal about 4.55 s."
+              "status": "approximation_required",
+              "value": "Reported speed 22 cm/s. Exact audio onset-to-path-origin and any endpoint holds are not uniquely specified for the sampled positions."
             }
           },
-          "derivation_note": "Approximate duration derived from the reported path scale and speed."
+          "evidence_note": "Preserve reported distance/speed constraints without promoting approximate full-path duration into an exact onset schedule. Experiment 5 changes hand posture while auditory source location stays fixed.",
+          "missing_required_components": [
+            "exact_motion_origin_and_hold_convention"
+          ]
         },
         "trial_sequence": {
-          "status": "partial",
-          "value": "Trial-sequence evidence recoverable from the prior combined review: Speeded response to 100-ms hand vibration, ignore sound and withhold on catches; no response timeout reported.",
-          "page_or_section": "PDF pp.6,11-13; manual review Segment 2",
-          "missing_required_components": [
-            "ordered_elements_and_source_selection"
-          ],
+          "status": "reported_complete",
+          "value": "Audio-tactile target trials, tactile-only baselines and auditory-only catch/no-go trials.",
+          "page_or_section": "Main Results Experiment 5; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "trial_families": {
               "status": "reported",
-              "value": "Trial-sequence evidence recoverable from the prior combined review: Speeded response to 100-ms hand vibration, ignore sound and withhold on catches; no response timeout reported."
+              "value": "AT targets; T-only baselines; A-only catches."
             },
             "ordered_elements_and_source_selection": {
-              "status": "not_reported",
-              "value": ""
+              "status": "reported",
+              "value": "Sound begins, then one 100-ms touch occurs at the distance-linked delay; omit sound for T-only baselines and omit touch for catches. Participant responds only to touch."
             }
-          }
+          },
+          "evidence_note": "The family/event roles are specified; exact delay mapping and allocation conflicts are reviewed separately."
         },
         "task_response": {
           "status": "partial",
-          "value": "Speeded response to 100-ms hand vibration, ignore sound and withhold on catches; no response timeout reported.",
-          "page_or_section": "PDF pp.6,11-13; manual review Segment 2",
-          "missing_required_components": [
-            "response_window_and_anchor"
-          ],
+          "value": "Respond rapidly and accurately to touch using a particular button on a wireless XBOX 360 controller; withhold on sound-only catches.",
+          "page_or_section": "Main Results Experiment 5; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "target_and_nontarget_rule": {
               "status": "reported",
-              "value": "Speeded response to 100-ms hand vibration, ignore sound and withhold on catches; no response timeout reported."
+              "value": "Touch is the go target; auditory-only trials require no response."
             },
             "response_mode_or_device": {
               "status": "reported",
-              "value": "Speeded response to 100-ms hand vibration, ignore sound and withhold on catches; no response timeout reported."
+              "value": "Wireless XBOX 360 gamepad, reported 125-Hz sampling."
             },
             "response_mapping_or_expected_action": {
               "status": "reported",
-              "value": "Speeded response to 100-ms hand vibration, ignore sound and withhold on catches; no response timeout reported."
-            },
-            "response_window_and_anchor": {
-              "status": "not_reported",
-              "value": ""
+              "value": "Press the designated button for touch; exact named button/hand mapping is not specified."
             }
-          }
+          },
+          "evidence_note": "No online deadline is provided. Descriptive device sampling does not establish measured PPS Kit response latency.",
+          "missing_required_components": [
+            "response_window_and_anchor",
+            "exact_button_mapping"
+          ]
         },
         "jitter_iti_policy": {
-          "status": "reported_complete",
-          "value": "Intertrial interval randomly shuffled between 500 and 700 ms.",
-          "page_or_section": "PDF p.13; manual review Segment 2",
+          "status": "partial",
+          "value": "Intertrial intervals randomly shuffled between 500 and 700 ms.",
+          "page_or_section": "Main Results Experiment 5; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "policy_type": {
               "status": "reported",
-              "value": "Intertrial interval randomly shuffled between 500 and 700 ms."
-            },
-            "timing_scope_and_anchor": {
-              "status": "reported",
-              "value": "Intertrial interval randomly shuffled between 500 and 700 ms."
+              "value": "random_range"
             },
             "values_or_range": {
               "status": "reported",
-              "value": "Intertrial interval randomly shuffled between 500 and 700 ms."
+              "value": "500–700 ms."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Intertrial interval is named, but source does not identify exact onset/offset/response endpoints. It is not specified as audio padding."
             }
-          }
+          },
+          "evidence_note": "Continuous versus discrete distribution and exact timing anchor are not supplied.",
+          "missing_required_components": [
+            "timing_scope_and_anchor",
+            "distribution"
+          ]
         },
         "soa_schedule": {
-          "status": "derived_complete",
-          "value": "Six distance-at-touch anchors (5,24,43,62,81,100 cm) compiled to SOAs from the 22-cm/s looming path.",
-          "page_or_section": "PDF pp.6,11; manual review Segment 3",
-          "derivation_note": "SOAs are derived from reported distance anchors and speed; no exact millisecond table is printed.",
+          "status": "approximation_required",
+          "value": "Distance-at-touch samples 5, 24, 43, 62, 81, 100 cm, with nominal 22-cm/s auditory motion; exact millisecond SOAs are unresolved.",
+          "page_or_section": "Main Results Experiment 5; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "reference_event_and_sign": {
               "status": "reported",
-              "value": "Six distance-at-touch anchors (5,24,43,62,81,100 cm) compiled to SOAs from the 22-cm/s looming path."
+              "value": "Delay from auditory onset to tactile onset; positive means touch after sound."
             },
             "ordered_soa_values_or_derivable_distance_anchors": {
-              "status": "derived",
-              "value": "Six distance-at-touch anchors (5,24,43,62,81,100 cm) compiled to SOAs from the 22-cm/s looming path."
+              "status": "approximation_required",
+              "value": "Spatial samples are reported, but an exact audio-onset path origin/hold convention is not established."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Looming maps later touch to nearer sound; receding maps later touch to farther sound."
             }
-          }
+          },
+          "evidence_note": "The sample span and nominal speaker/path extent differ. Do not silently choose an origin or collapse opposite-side positions into one center.",
+          "missing_required_components": [
+            "exact_numeric_soa_mapping"
+          ]
         },
         "tactile_target": {
-          "status": "reported_complete",
-          "value": "100-ms, 150-Hz Precision MicroDrives 312-101 vibration on the hand dorsum.",
-          "page_or_section": "PDF pp.6,12; manual review Segment 3",
+          "status": "partial",
+          "value": "100-ms vibration using Precision MicroDrives 312-101 motor. Hand dorsum in near/far hand postures; acoustic apparatus remains fixed.",
+          "page_or_section": "Main Results Experiment 5; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "modality": {
               "status": "reported",
-              "value": "100-ms, 150-Hz Precision MicroDrives 312-101 vibration on the hand dorsum."
+              "value": "Vibrotactile motor."
             },
             "body_site_and_side": {
               "status": "reported",
-              "value": "100-ms, 150-Hz Precision MicroDrives 312-101 vibration on the hand dorsum."
+              "value": "Hand dorsum in near/far hand postures; acoustic apparatus remains fixed."
             },
             "waveform_and_duration": {
               "status": "reported",
-              "value": "100-ms, 150-Hz Precision MicroDrives 312-101 vibration on the hand dorsum."
+              "value": "100-ms activation; nominal motor 150 Hz, 3 V, 60 mA, 9000 rpm, 5 g, 113 mm2; approximately 50 ms to maximal rotation."
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "150-Hz nominal motor specification, not a measured constant-frequency onset waveform."
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "No individual amplitude threshold or measured skin-level waveform/calibration is reported."
             }
-          }
+          },
+          "evidence_note": "Motor datasheet values are apparatus descriptors, not evidence of equivalent delivered stimulation.",
+          "missing_required_components": [
+            "delivered_waveform_and_intensity_calibration"
+          ]
         },
         "baseline_trial_contract": {
-          "status": "derived_complete",
-          "value": "Tactile-only endpoint baselines: two timings x two hand postures x 24 = 96 trials.",
-          "page_or_section": "PDF pp.6,13; manual review Segments 3-4",
-          "derivation_note": "Count follows the reported experiment formula.",
+          "status": "partial",
+          "value": "96 T-only baseline trials by the stated formula; auditory stimulus omitted.",
+          "page_or_section": "Main Results Experiment 5; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "reported",
-              "value": "Tactile-only endpoint baselines: two timings x two hand postures x 24 = 96 trials."
+              "value": "tactile_only_endpoint_baseline"
             },
             "timing_and_anchor": {
-              "status": "reported",
-              "value": "Tactile-only endpoint baselines: two timings x two hand postures x 24 = 96 trials."
+              "status": "not_reported",
+              "value": "Nominal delays correspond to nearest/farthest sampled positions; exact numeric timing inherits the unresolved motion origin."
             },
             "allocation_rule": {
-              "status": "reported",
-              "value": "Tactile-only endpoint baselines: two timings x two hand postures x 24 = 96 trials."
+              "status": "derived",
+              "value": "(6 + 2 + 1) x 2 hand postures x 24 = 432"
             },
             "resolved_trial_count": {
               "status": "derived",
-              "value": "Tactile-only endpoint baselines: two timings x two hand postures x 24 = 96 trials."
+              "value": "96 T-only trials, conditional on the printed formula."
             }
-          }
+          },
+          "evidence_note": "Baseline correction selects the fastest unimodal condition within participant/body part. It is not a stationary sound comparator.",
+          "missing_required_components": [
+            "exact_baseline_timing"
+          ],
+          "derivation_note": "(6 + 2 + 1) x 2 hand postures x 24 = 432"
         },
         "catch_trial_contract": {
           "status": "derived_complete",
-          "value": "Auditory-only/no-response catches: 48 trials inferred from the reported 432-trial formula.",
-          "page_or_section": "PDF p.13; manual review Segment 4",
-          "derivation_note": "Formula residual after audio-tactile and baseline families.",
+          "value": "48 auditory-only/no-touch catch trials require withholding.",
+          "page_or_section": "Main Results Experiment 5; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "reported",
-              "value": "Auditory-only/no-response catches: 48 trials inferred from the reported 432-trial formula."
+              "value": "auditory_only_no_go"
             },
             "target_role_and_expected_action": {
               "status": "reported",
-              "value": "Auditory-only/no-response catches: 48 trials inferred from the reported 432-trial formula."
+              "value": "No touch; withhold button press."
             },
             "allocation_rule": {
-              "status": "reported",
-              "value": "Auditory-only/no-response catches: 48 trials inferred from the reported 432-trial formula."
+              "status": "derived",
+              "value": "(6 + 2 + 1) x 2 hand postures x 24 = 432"
             },
             "resolved_trial_count": {
               "status": "derived",
-              "value": "Auditory-only/no-response catches: 48 trials inferred from the reported 432-trial formula."
+              "value": "48"
             }
-          }
+          },
+          "derivation_note": "(6 + 2 + 1) x 2 hand postures x 24 = 432"
         },
         "repetition_allocation": {
-          "status": "reported_complete",
-          "value": "Twenty-four repetitions per reported condition formula; 432 trials total.",
-          "page_or_section": "PDF p.13; manual review Segment 4",
+          "status": "derived_complete",
+          "value": "432 printed trials: 288 AT, 96 tactile-only and 48 catches by the stated formula.",
+          "page_or_section": "Main Results Experiment 5; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "factor_dimensions": {
               "status": "reported",
-              "value": "Twenty-four repetitions per reported condition formula; 432 trials total."
+              "value": "Six distances and two hand postures; looming only."
             },
             "repetitions_or_exact_counts": {
-              "status": "reported",
-              "value": "Twenty-four repetitions per reported condition formula; 432 trials total."
+              "status": "derived",
+              "value": "(6 + 2 + 1) x 2 hand postures x 24 = 432"
             },
             "exceptions_or_overrides": {
               "status": "reported",
-              "value": "Twenty-four repetitions per reported condition formula; 432 trials total."
+              "value": "Do not substitute generic approximate family percentages for the experiment-specific formula."
             }
-          }
+          },
+          "derivation_note": "(6 + 2 + 1) x 2 hand postures x 24 = 432"
         },
         "block_order_contract": {
           "status": "partial",
-          "value": "Near/far hand posture is explicit; exact posture/block order and catch distribution are not fully reported.",
-          "page_or_section": "PDF pp.6,13; manual review Segments 2 and 4",
-          "missing_required_components": [
-            "block_composition"
-          ],
+          "value": "Separate hand/trunk blocks are explicit in Experiment 4; exact execution block counts/order are otherwise unresolved.",
+          "page_or_section": "Main Results Experiment 5; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
           "component_reviews": {
             "block_count": {
-              "status": "reported",
-              "value": "Near/far hand posture is explicit; exact posture/block order and catch distribution are not fully reported."
+              "status": "not_reported",
+              "value": "No exact numeric block count is established; two factors do not prove two blocks."
             },
             "block_composition": {
+              "status": "reported",
+              "value": "Six distances and two hand postures; looming only."
+            },
+            "block_order_or_counterbalancing": {
               "status": "not_reported",
-              "value": ""
+              "value": "Exact block ordering and counterbalance are not reported."
+            },
+            "within_block_randomization": {
+              "status": "not_reported",
+              "value": "No full trial shuffle algorithm is provided."
             }
-          }
+          },
+          "evidence_note": "Participant-level factors and repetition counts remain separate from an execution-block schedule.",
+          "missing_required_components": [
+            "block_count",
+            "block_order_or_counterbalancing",
+            "within_block_randomization"
+          ]
         }
       }
     },
     {
       "study_row_id": "doi:10.1038/srep18603::f",
-      "source_type": "manual_review_disaggregation",
-      "source_file": "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_reviews/serino_2015_exps_4_to_6.json",
+      "source_type": "primary_article_and_rendered_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Independent whole-publication and experiment-specific review; all eleven compact contracts explicitly disposed. Preserve contradictory counts/gain laws and unresolved timing origins.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
       "contracts": {
         "auditory_stimulus": {
-          "status": "approximation_required",
-          "value": "Dynamic sound through a physical 16-speaker array; exact waveform, source asset, SPL endpoints and gain field are not reported.",
-          "page_or_section": "PDF pp.7,11-13; manual review Segment 1",
+          "status": "conflicting_evidence",
+          "value": "Pink noise at 44.1 kHz, eight paired outputs; 2048-sample frames, 1024-sample overlap and Hann window. Printed gain descriptions conflict.",
+          "page_or_section": "Main Results Experiment 6; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
           "component_reviews": {
             "source_mode": {
               "status": "reported",
-              "value": "Dynamic sound through a physical 16-speaker array; exact waveform, source asset, SPL endpoints and gain field are not reported."
+              "value": "generated"
             },
             "stimulus_identity_or_asset": {
               "status": "reported",
-              "value": "Dynamic sound through a physical 16-speaker array; exact waveform, source asset, SPL endpoints and gain field are not reported."
+              "value": "Pink-noise source; original waveform/random realization not supplied."
             },
             "source_recipe_or_asset_provenance": {
               "status": "approximation_required",
-              "value": "Dynamic sound through a physical 16-speaker array; exact waveform, source asset, SPL endpoints and gain field are not reported."
+              "value": "Supplement gives frame synthesis and overlap-add algorithm, not the original source realization or selected operator gain."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two parallel arrays of eight loudspeakers, eight paired outputs; amplitude updated about every 23.22 ms."
+            },
+            "level_envelope_calibration": {
+              "status": "conflicting_evidence",
+              "value": "Supplement p. 3 describes Gaussian modulation; equation 4 gives a * 10^(60 log10(1/lambda)/20) = a/lambda^3; adjacent prose says 60 dB per distance doubling."
             }
-          }
+          },
+          "evidence_note": "Rendered supplement p. 7 independently checked. Equation 4 implies a decrease of 18.0618 dB per distance doubling, not 60 dB. Lambda is source-to-speaker distance; a is an operator level scalar whose chosen value/SPL is unresolved. No gain law is selected as a correction.",
+          "missing_required_components": [
+            "original_source_realization",
+            "operator_gain_and_resolved_level_law"
+          ]
         },
         "trajectory_kinematics": {
-          "status": "derived_complete",
-          "value": "Geometry: Front-space looming/receding path sampled at 5, 37, 69, 101, 133, 165 and 197 cm; sound directed toward face or trunk and crossed with face/trunk touch. Kinematics: Reported speed 25 cm/s over an approximately 2-m front-space path; full traversal about 8 s.",
-          "page_or_section": "PDF p.7 and Figure 5; manual review Segment 1; PDF p.11; manual review Segment 1",
+          "status": "approximation_required",
+          "value": "Participant at array end; farthest speaker at 2 m, with sound toward face or trunk. Samples: 5, 37, 69, 101, 133, 165, 197 cm; reported speed 25 cm/s.",
+          "page_or_section": "Main Results Experiment 6; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
           "component_reviews": {
             "motion_mode": {
               "status": "reported",
-              "value": "Geometry: Front-space looming/receding path sampled at 5, 37, 69, 101, 133, 165 and 197 cm; sound directed toward face or trunk and crossed with face/trunk touch. Kinematics: Reported speed 25 cm/s over an approximately 2-m front-space path; full traversal about 8 s."
+              "value": "looming_and_receding"
             },
             "coordinate_frame_body_anchor": {
               "status": "reported",
-              "value": "Geometry: Front-space looming/receding path sampled at 5, 37, 69, 101, 133, 165 and 197 cm; sound directed toward face or trunk and crossed with face/trunk touch. Kinematics: Reported speed 25 cm/s over an approximately 2-m front-space path; full traversal about 8 s."
+              "value": "Forehead or sternum; tactile site and sound target location are between-subject factors."
             },
             "geometry": {
               "status": "reported",
-              "value": "Geometry: Front-space looming/receding path sampled at 5, 37, 69, 101, 133, 165 and 197 cm; sound directed toward face or trunk and crossed with face/trunk touch. Kinematics: Reported speed 25 cm/s over an approximately 2-m front-space path; full traversal about 8 s."
+              "value": "Participant at array end; farthest speaker at 2 m, with sound toward face or trunk. Sample locations: 5, 37, 69, 101, 133, 165, 197 cm."
             },
             "timing_constraint": {
-              "status": "derived",
-              "value": "Geometry: Front-space looming/receding path sampled at 5, 37, 69, 101, 133, 165 and 197 cm; sound directed toward face or trunk and crossed with face/trunk touch. Kinematics: Reported speed 25 cm/s over an approximately 2-m front-space path; full traversal about 8 s."
+              "status": "approximation_required",
+              "value": "Reported speed 25 cm/s. Exact audio onset-to-path-origin and any endpoint holds are not uniquely specified for the sampled positions."
             }
           },
-          "derivation_note": "2 m / 0.25 m/s = approximately 8 s."
+          "evidence_note": "Preserve reported distance/speed constraints without promoting approximate full-path duration into an exact onset schedule. Experiment 5 changes hand posture while auditory source location stays fixed.",
+          "missing_required_components": [
+            "exact_motion_origin_and_hold_convention"
+          ]
         },
         "trial_sequence": {
-          "status": "partial",
-          "value": "Trial-sequence evidence recoverable from the prior combined review: Speeded response to 100-ms face/chest vibration, ignore sound and withhold on catches; no response timeout reported.",
-          "page_or_section": "PDF pp.7,11-13; manual review Segment 2",
-          "missing_required_components": [
-            "ordered_elements_and_source_selection"
-          ],
+          "status": "reported_complete",
+          "value": "Audio-tactile target trials, tactile-only baselines and auditory-only catch/no-go trials.",
+          "page_or_section": "Main Results Experiment 6; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
           "component_reviews": {
             "trial_families": {
               "status": "reported",
-              "value": "Trial-sequence evidence recoverable from the prior combined review: Speeded response to 100-ms face/chest vibration, ignore sound and withhold on catches; no response timeout reported."
+              "value": "AT targets; T-only baselines; A-only catches."
             },
             "ordered_elements_and_source_selection": {
-              "status": "not_reported",
-              "value": ""
+              "status": "reported",
+              "value": "Sound begins, then one 100-ms touch occurs at the distance-linked delay; omit sound for T-only baselines and omit touch for catches. Participant responds only to touch."
             }
-          }
+          },
+          "evidence_note": "The family/event roles are specified; exact delay mapping and allocation conflicts are reviewed separately."
         },
         "task_response": {
           "status": "partial",
-          "value": "Speeded response to 100-ms face/chest vibration, ignore sound and withhold on catches; no response timeout reported.",
-          "page_or_section": "PDF pp.7,11-13; manual review Segment 2",
-          "missing_required_components": [
-            "response_window_and_anchor"
-          ],
+          "value": "Respond rapidly and accurately to touch using a particular button on a wireless XBOX 360 controller; withhold on sound-only catches.",
+          "page_or_section": "Main Results Experiment 6; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
           "component_reviews": {
             "target_and_nontarget_rule": {
               "status": "reported",
-              "value": "Speeded response to 100-ms face/chest vibration, ignore sound and withhold on catches; no response timeout reported."
+              "value": "Touch is the go target; auditory-only trials require no response."
             },
             "response_mode_or_device": {
               "status": "reported",
-              "value": "Speeded response to 100-ms face/chest vibration, ignore sound and withhold on catches; no response timeout reported."
+              "value": "Wireless XBOX 360 gamepad, reported 125-Hz sampling."
             },
             "response_mapping_or_expected_action": {
               "status": "reported",
-              "value": "Speeded response to 100-ms face/chest vibration, ignore sound and withhold on catches; no response timeout reported."
-            },
-            "response_window_and_anchor": {
-              "status": "not_reported",
-              "value": ""
+              "value": "Press the designated button for touch; exact named button/hand mapping is not specified."
             }
-          }
+          },
+          "evidence_note": "No online deadline is provided. Descriptive device sampling does not establish measured PPS Kit response latency.",
+          "missing_required_components": [
+            "response_window_and_anchor",
+            "exact_button_mapping"
+          ]
         },
         "jitter_iti_policy": {
-          "status": "reported_complete",
-          "value": "Intertrial interval randomly shuffled between 500 and 700 ms.",
-          "page_or_section": "PDF p.13; manual review Segment 2",
+          "status": "partial",
+          "value": "Intertrial intervals randomly shuffled between 500 and 700 ms.",
+          "page_or_section": "Main Results Experiment 6; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
           "component_reviews": {
             "policy_type": {
               "status": "reported",
-              "value": "Intertrial interval randomly shuffled between 500 and 700 ms."
-            },
-            "timing_scope_and_anchor": {
-              "status": "reported",
-              "value": "Intertrial interval randomly shuffled between 500 and 700 ms."
+              "value": "random_range"
             },
             "values_or_range": {
               "status": "reported",
-              "value": "Intertrial interval randomly shuffled between 500 and 700 ms."
+              "value": "500–700 ms."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Intertrial interval is named, but source does not identify exact onset/offset/response endpoints. It is not specified as audio padding."
             }
-          }
+          },
+          "evidence_note": "Continuous versus discrete distribution and exact timing anchor are not supplied.",
+          "missing_required_components": [
+            "timing_scope_and_anchor",
+            "distribution"
+          ]
         },
         "soa_schedule": {
-          "status": "derived_complete",
-          "value": "Seven distance-at-touch anchors (5,37,69,101,133,165,197 cm) compiled to SOAs from the 25-cm/s path and reversed by direction.",
-          "page_or_section": "PDF pp.7,11; manual review Segment 3",
-          "derivation_note": "SOAs are derived from reported distance anchors and speed; no exact millisecond table is printed.",
+          "status": "approximation_required",
+          "value": "Distance-at-touch samples 5, 37, 69, 101, 133, 165, 197 cm, with nominal 25-cm/s auditory motion; exact millisecond SOAs are unresolved.",
+          "page_or_section": "Main Results Experiment 6; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
           "component_reviews": {
             "reference_event_and_sign": {
               "status": "reported",
-              "value": "Seven distance-at-touch anchors (5,37,69,101,133,165,197 cm) compiled to SOAs from the 25-cm/s path and reversed by direction."
+              "value": "Delay from auditory onset to tactile onset; positive means touch after sound."
             },
             "ordered_soa_values_or_derivable_distance_anchors": {
-              "status": "derived",
-              "value": "Seven distance-at-touch anchors (5,37,69,101,133,165,197 cm) compiled to SOAs from the 25-cm/s path and reversed by direction."
+              "status": "approximation_required",
+              "value": "Spatial samples are reported, but an exact audio-onset path origin/hold convention is not established."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Looming maps later touch to nearer sound; receding maps later touch to farther sound."
             }
-          }
+          },
+          "evidence_note": "The sample span and nominal speaker/path extent differ. Do not silently choose an origin or collapse opposite-side positions into one center.",
+          "missing_required_components": [
+            "exact_numeric_soa_mapping"
+          ]
         },
         "tactile_target": {
-          "status": "reported_complete",
-          "value": "100-ms, 150-Hz Precision MicroDrives 312-101 vibration on forehead or upper chest/sternum.",
-          "page_or_section": "PDF pp.7,12; manual review Segment 3",
+          "status": "partial",
+          "value": "100-ms vibration using Precision MicroDrives 312-101 motor. Forehead or sternum; tactile site and sound target location are between-subject factors.",
+          "page_or_section": "Main Results Experiment 6; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
           "component_reviews": {
             "modality": {
               "status": "reported",
-              "value": "100-ms, 150-Hz Precision MicroDrives 312-101 vibration on forehead or upper chest/sternum."
+              "value": "Vibrotactile motor."
             },
             "body_site_and_side": {
               "status": "reported",
-              "value": "100-ms, 150-Hz Precision MicroDrives 312-101 vibration on forehead or upper chest/sternum."
+              "value": "Forehead or sternum; tactile site and sound target location are between-subject factors."
             },
             "waveform_and_duration": {
               "status": "reported",
-              "value": "100-ms, 150-Hz Precision MicroDrives 312-101 vibration on forehead or upper chest/sternum."
+              "value": "100-ms activation; nominal motor 150 Hz, 3 V, 60 mA, 9000 rpm, 5 g, 113 mm2; approximately 50 ms to maximal rotation."
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "150-Hz nominal motor specification, not a measured constant-frequency onset waveform."
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "No individual amplitude threshold or measured skin-level waveform/calibration is reported."
             }
-          }
+          },
+          "evidence_note": "Motor datasheet values are apparatus descriptors, not evidence of equivalent delivered stimulation.",
+          "missing_required_components": [
+            "delivered_waveform_and_intensity_calibration"
+          ]
         },
         "baseline_trial_contract": {
-          "status": "derived_complete",
-          "value": "Tactile-only endpoint baselines: two timings x two directions x 16 = 64 trials for each assigned sound/touch-location cell.",
-          "page_or_section": "PDF pp.7,13; manual review Segments 3-4",
-          "derivation_note": "Count follows the reported experiment formula.",
+          "status": "partial",
+          "value": "64 T-only baseline trials by the stated formula; auditory stimulus omitted.",
+          "page_or_section": "Main Results Experiment 6; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "reported",
-              "value": "Tactile-only endpoint baselines: two timings x two directions x 16 = 64 trials for each assigned sound/touch-location cell."
+              "value": "tactile_only_endpoint_baseline"
             },
             "timing_and_anchor": {
-              "status": "reported",
-              "value": "Tactile-only endpoint baselines: two timings x two directions x 16 = 64 trials for each assigned sound/touch-location cell."
+              "status": "not_reported",
+              "value": "Nominal delays correspond to nearest/farthest sampled positions; exact numeric timing inherits the unresolved motion origin."
             },
             "allocation_rule": {
-              "status": "reported",
-              "value": "Tactile-only endpoint baselines: two timings x two directions x 16 = 64 trials for each assigned sound/touch-location cell."
+              "status": "derived",
+              "value": "(7 + 2 + 1) x 2 directions x 16 = 320 per participant"
             },
             "resolved_trial_count": {
               "status": "derived",
-              "value": "Tactile-only endpoint baselines: two timings x two directions x 16 = 64 trials for each assigned sound/touch-location cell."
+              "value": "64 T-only trials, conditional on the printed formula."
             }
-          }
+          },
+          "evidence_note": "Baseline correction selects the fastest unimodal condition within participant/body part. It is not a stationary sound comparator.",
+          "missing_required_components": [
+            "exact_baseline_timing"
+          ],
+          "derivation_note": "(7 + 2 + 1) x 2 directions x 16 = 320 per participant"
         },
         "catch_trial_contract": {
           "status": "derived_complete",
-          "value": "Auditory-only/no-response catches: 32 trials inferred from the reported 320-trial formula.",
-          "page_or_section": "PDF p.13; manual review Segment 4",
-          "derivation_note": "Formula residual after audio-tactile and baseline families.",
+          "value": "32 auditory-only/no-touch catch trials require withholding.",
+          "page_or_section": "Main Results Experiment 6; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "reported",
-              "value": "Auditory-only/no-response catches: 32 trials inferred from the reported 320-trial formula."
+              "value": "auditory_only_no_go"
             },
             "target_role_and_expected_action": {
               "status": "reported",
-              "value": "Auditory-only/no-response catches: 32 trials inferred from the reported 320-trial formula."
+              "value": "No touch; withhold button press."
             },
             "allocation_rule": {
-              "status": "reported",
-              "value": "Auditory-only/no-response catches: 32 trials inferred from the reported 320-trial formula."
+              "status": "derived",
+              "value": "(7 + 2 + 1) x 2 directions x 16 = 320 per participant"
             },
             "resolved_trial_count": {
               "status": "derived",
-              "value": "Auditory-only/no-response catches: 32 trials inferred from the reported 320-trial formula."
+              "value": "32"
             }
-          }
+          },
+          "derivation_note": "(7 + 2 + 1) x 2 directions x 16 = 320 per participant"
         },
         "repetition_allocation": {
-          "status": "reported_complete",
-          "value": "Sixteen repetitions per assigned sound-location x touch-location cell formula; 320 trials total.",
-          "page_or_section": "PDF p.13; manual review Segment 4",
+          "status": "derived_complete",
+          "value": "320 printed trials: 224 AT, 64 tactile-only and 32 catches by the stated formula.",
+          "page_or_section": "Main Results Experiment 6; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
           "component_reviews": {
             "factor_dimensions": {
               "status": "reported",
-              "value": "Sixteen repetitions per assigned sound-location x touch-location cell formula; 320 trials total."
+              "value": "Seven distances and two directions within subject; sound location and tactile location between subjects."
             },
             "repetitions_or_exact_counts": {
-              "status": "reported",
-              "value": "Sixteen repetitions per assigned sound-location x touch-location cell formula; 320 trials total."
+              "status": "derived",
+              "value": "(7 + 2 + 1) x 2 directions x 16 = 320 per participant"
             },
             "exceptions_or_overrides": {
               "status": "reported",
-              "value": "Sixteen repetitions per assigned sound-location x touch-location cell formula; 320 trials total."
+              "value": "Experiment 6 total is per participant in their assigned sound/touch-location group, not multiplied by four. Equal allocation of 60 participants to four groups is not explicitly established."
             }
-          }
+          },
+          "derivation_note": "(7 + 2 + 1) x 2 directions x 16 = 320 per participant"
         },
         "block_order_contract": {
           "status": "partial",
-          "value": "Sound-location x touch-location is a between-subject design; exact within-run block count/order is not reported.",
-          "page_or_section": "PDF pp.7,13; manual review Segments 2 and 4",
-          "missing_required_components": [
-            "block_composition"
-          ],
+          "value": "Separate hand/trunk blocks are explicit in Experiment 4; exact execution block counts/order are otherwise unresolved.",
+          "page_or_section": "Main Results Experiment 6; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
           "component_reviews": {
             "block_count": {
-              "status": "reported",
-              "value": "Sound-location x touch-location is a between-subject design; exact within-run block count/order is not reported."
+              "status": "not_reported",
+              "value": "No exact numeric block count is established; two factors do not prove two blocks."
             },
             "block_composition": {
+              "status": "reported",
+              "value": "Seven distances and two directions within subject; sound location and tactile location between subjects."
+            },
+            "block_order_or_counterbalancing": {
               "status": "not_reported",
-              "value": ""
+              "value": "Exact block ordering and counterbalance are not reported."
+            },
+            "within_block_randomization": {
+              "status": "not_reported",
+              "value": "No full trial shuffle algorithm is provided."
             }
-          }
+          },
+          "evidence_note": "Participant-level factors and repetition counts remain separate from an execution-block schedule.",
+          "missing_required_components": [
+            "block_count",
+            "block_order_or_counterbalancing",
+            "within_block_randomization"
+          ]
         }
       }
     },
@@ -21449,6 +21642,1871 @@
             }
           },
           "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1038/srep18603::a",
+      "source_type": "primary_article_and_rendered_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Independent whole-publication and experiment-specific review; all eleven compact contracts explicitly disposed. Preserve contradictory counts/gain laws and unresolved timing origins.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "approximation_required",
+          "value": "44.1-kHz pink noise shaped in SoundForge 4.5; two coactivated speakers with opposite exponential ramps, nominal 55–70 dB SPL looming and reversed for receding.",
+          "page_or_section": "Main Results Experiment 1; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "generated"
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Pink-noise samples; exact original WAV/random realization unavailable in reviewed sources."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "approximation_required",
+              "value": "Reported noise class/sample rate and SoundForge envelope are recoverable, but original waveforms and complete per-speaker gain files are not."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "M-Audio Studiophile AV 360 loudspeakers face each other, separated by 1 m; near within approximately 5 cm, far approximately 1 m from participant."
+            },
+            "level_envelope_calibration": {
+              "status": "approximation_required",
+              "value": "Nominal 55-to-70 dB SPL envelope; near/far intensities vary oppositely. Exact channel transfer/calibration requires an explicit reconstruction decision."
+            }
+          },
+          "evidence_note": "A virtual moving source is an approximation to the physical coactivated pair, not demonstrated acoustic equivalence."
+        },
+        "trajectory_kinematics": {
+          "status": "approximation_required",
+          "value": "Facing near/far loudspeakers separated by 100 cm; sampled positions are not automatically waveform endpoints. Samples: 5, 24, 43, 62, 81, 100 cm; reported speed 22 cm/s.",
+          "page_or_section": "Main Results Experiment 1; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "looming_and_receding"
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Upper chest, sternum."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Facing near/far loudspeakers separated by 100 cm; sampled positions are not automatically waveform endpoints. Sample locations: 5, 24, 43, 62, 81, 100 cm."
+            },
+            "timing_constraint": {
+              "status": "approximation_required",
+              "value": "Reported speed 22 cm/s. Exact audio onset-to-path-origin and any endpoint holds are not uniquely specified for the sampled positions."
+            }
+          },
+          "evidence_note": "Preserve reported distance/speed constraints without promoting approximate full-path duration into an exact onset schedule. Experiment 5 changes hand posture while auditory source location stays fixed.",
+          "missing_required_components": [
+            "exact_motion_origin_and_hold_convention"
+          ]
+        },
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Audio-tactile target trials, tactile-only baselines and auditory-only catch/no-go trials.",
+          "page_or_section": "Main Results Experiment 1; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "AT targets; T-only baselines; A-only catches."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Sound begins, then one 100-ms touch occurs at the distance-linked delay; omit sound for T-only baselines and omit touch for catches. Participant responds only to touch."
+            }
+          },
+          "evidence_note": "The family/event roles are specified; exact delay mapping and allocation conflicts are reviewed separately."
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Respond rapidly and accurately to touch using a particular button on a wireless XBOX 360 controller; withhold on sound-only catches.",
+          "page_or_section": "Main Results Experiment 1; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Touch is the go target; auditory-only trials require no response."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Wireless XBOX 360 gamepad, reported 125-Hz sampling."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Press the designated button for touch; exact named button/hand mapping is not specified."
+            }
+          },
+          "evidence_note": "No online deadline is provided. Descriptive device sampling does not establish measured PPS Kit response latency.",
+          "missing_required_components": [
+            "response_window_and_anchor",
+            "exact_button_mapping"
+          ]
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "Intertrial intervals randomly shuffled between 500 and 700 ms.",
+          "page_or_section": "Main Results Experiment 1; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "random_range"
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "500–700 ms."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Intertrial interval is named, but source does not identify exact onset/offset/response endpoints. It is not specified as audio padding."
+            }
+          },
+          "evidence_note": "Continuous versus discrete distribution and exact timing anchor are not supplied.",
+          "missing_required_components": [
+            "timing_scope_and_anchor",
+            "distribution"
+          ]
+        },
+        "soa_schedule": {
+          "status": "approximation_required",
+          "value": "Distance-at-touch samples 5, 24, 43, 62, 81, 100 cm, with nominal 22-cm/s auditory motion; exact millisecond SOAs are unresolved.",
+          "page_or_section": "Main Results Experiment 1; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Delay from auditory onset to tactile onset; positive means touch after sound."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "approximation_required",
+              "value": "Spatial samples are reported, but an exact audio-onset path origin/hold convention is not established."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Looming maps later touch to nearer sound; receding maps later touch to farther sound."
+            }
+          },
+          "evidence_note": "The sample span and nominal speaker/path extent differ. Do not silently choose an origin or collapse opposite-side positions into one center.",
+          "missing_required_components": [
+            "exact_numeric_soa_mapping"
+          ]
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "100-ms vibration using Precision MicroDrives 312-101 motor. Upper chest, sternum.",
+          "page_or_section": "Main Results Experiment 1; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile motor."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Upper chest, sternum."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "100-ms activation; nominal motor 150 Hz, 3 V, 60 mA, 9000 rpm, 5 g, 113 mm2; approximately 50 ms to maximal rotation."
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "150-Hz nominal motor specification, not a measured constant-frequency onset waveform."
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "No individual amplitude threshold or measured skin-level waveform/calibration is reported."
+            }
+          },
+          "evidence_note": "Motor datasheet values are apparatus descriptors, not evidence of equivalent delivered stimulation.",
+          "missing_required_components": [
+            "delivered_waveform_and_intensity_calibration"
+          ]
+        },
+        "baseline_trial_contract": {
+          "status": "conflicting_evidence",
+          "value": "Tactile-only endpoint baselines are explicit, but exact count is unresolved by the conflicting formula.",
+          "page_or_section": "Main Results Experiment 1; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Tactile-only endpoint baselines"
+            },
+            "allocation_rule": {
+              "status": "conflicting_evidence",
+              "value": "Printed total 240 conflicts with literal (6 AT + 2 baseline + 1 catch) x 2 directions x 16 = 288. Applying direction only to AT would give 192 + 32 + 16 = 240, but this is an unresolved repair hypothesis."
+            },
+            "resolved_trial_count": {
+              "status": "conflicting_evidence",
+              "value": "Unresolved; no repaired count is accepted."
+            }
+          },
+          "evidence_note": "Baseline delays correspond to nearest/farthest sampled times. Catch trials omit touch and require withholding."
+        },
+        "catch_trial_contract": {
+          "status": "conflicting_evidence",
+          "value": "Auditory-only no-response catches are explicit, but exact count is unresolved by the conflicting formula.",
+          "page_or_section": "Main Results Experiment 1; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only no-response catches"
+            },
+            "allocation_rule": {
+              "status": "conflicting_evidence",
+              "value": "Printed total 240 conflicts with literal (6 AT + 2 baseline + 1 catch) x 2 directions x 16 = 288. Applying direction only to AT would give 192 + 32 + 16 = 240, but this is an unresolved repair hypothesis."
+            },
+            "resolved_trial_count": {
+              "status": "conflicting_evidence",
+              "value": "Unresolved; no repaired count is accepted."
+            }
+          },
+          "evidence_note": "Baseline delays correspond to nearest/farthest sampled times. Catch trials omit touch and require withholding."
+        },
+        "repetition_allocation": {
+          "status": "conflicting_evidence",
+          "value": "Printed total 240 conflicts with literal (6 AT + 2 baseline + 1 catch) x 2 directions x 16 = 288. Applying direction only to AT would give 192 + 32 + 16 = 240, but this is an unresolved repair hypothesis.",
+          "page_or_section": "Main Results Experiment 1; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Six distances and two directions."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "conflicting_evidence",
+              "value": "Printed total 240 conflicts with literal (6 AT + 2 baseline + 1 catch) x 2 directions x 16 = 288. Applying direction only to AT would give 192 + 32 + 16 = 240, but this is an unresolved repair hypothesis."
+            },
+            "exceptions_or_overrides": {
+              "status": "conflicting_evidence",
+              "value": "Generic approximate 70/20/10 percentages do not resolve the printed allocation."
+            }
+          },
+          "evidence_note": "No reconciled schedule is accepted."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Separate hand/trunk blocks are explicit in Experiment 4; exact execution block counts/order are otherwise unresolved.",
+          "page_or_section": "Main Results Experiment 1; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_reported",
+              "value": "No exact numeric block count is established; two factors do not prove two blocks."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "Six distances and two directions."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "not_reported",
+              "value": "Exact block ordering and counterbalance are not reported."
+            },
+            "within_block_randomization": {
+              "status": "not_reported",
+              "value": "No full trial shuffle algorithm is provided."
+            }
+          },
+          "evidence_note": "Participant-level factors and repetition counts remain separate from an execution-block schedule.",
+          "missing_required_components": [
+            "block_count",
+            "block_order_or_counterbalancing",
+            "within_block_randomization"
+          ]
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1038/srep18603::b",
+      "source_type": "primary_article_and_rendered_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Independent whole-publication and experiment-specific review; all eleven compact contracts explicitly disposed. Preserve contradictory counts/gain laws and unresolved timing origins.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "conflicting_evidence",
+          "value": "Pink noise at 44.1 kHz, eight paired outputs; 2048-sample frames, 1024-sample overlap and Hann window. Printed gain descriptions conflict.",
+          "page_or_section": "Main Results Experiment 2; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "generated"
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Pink-noise source; original waveform/random realization not supplied."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "approximation_required",
+              "value": "Supplement gives frame synthesis and overlap-add algorithm, not the original source realization or selected operator gain."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two parallel arrays of eight loudspeakers, eight paired outputs; amplitude updated about every 23.22 ms."
+            },
+            "level_envelope_calibration": {
+              "status": "conflicting_evidence",
+              "value": "Supplement p. 3 describes Gaussian modulation; equation 4 gives a * 10^(60 log10(1/lambda)/20) = a/lambda^3; adjacent prose says 60 dB per distance doubling."
+            }
+          },
+          "evidence_note": "Rendered supplement p. 7 independently checked. Equation 4 implies a decrease of 18.0618 dB per distance doubling, not 60 dB. Lambda is source-to-speaker distance; a is an operator level scalar whose chosen value/SPL is unresolved. No gain law is selected as a correction.",
+          "missing_required_components": [
+            "original_source_realization",
+            "operator_gain_and_resolved_level_law"
+          ]
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Sound travels from 1 m in front to 1 m behind the participant, or the reverse, through a sixteen-speaker array. Samples: 5, 20, 35, 50, 65, 80, 95 cm in both front and back; reported speed 35 cm/s.",
+          "page_or_section": "Main Results Experiment 2; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "looming_and_receding"
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Front sternum and equivalent back elevation."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Sound travels from 1 m in front to 1 m behind the participant, or the reverse, through a sixteen-speaker array. Sample locations: 5, 20, 35, 50, 65, 80, 95 cm in both front and back."
+            },
+            "timing_constraint": {
+              "status": "approximation_required",
+              "value": "Reported speed 35 cm/s. Exact audio onset-to-path-origin and any endpoint holds are not uniquely specified for the sampled positions."
+            }
+          },
+          "evidence_note": "Preserve reported distance/speed constraints without promoting approximate full-path duration into an exact onset schedule. Experiment 5 changes hand posture while auditory source location stays fixed.",
+          "missing_required_components": [
+            "exact_motion_origin_and_hold_convention"
+          ]
+        },
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Audio-tactile target trials, tactile-only baselines and auditory-only catch/no-go trials.",
+          "page_or_section": "Main Results Experiment 2; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "AT targets; T-only baselines; A-only catches."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Sound begins, then one 100-ms touch occurs at the distance-linked delay; omit sound for T-only baselines and omit touch for catches. Participant responds only to touch."
+            }
+          },
+          "evidence_note": "The family/event roles are specified; exact delay mapping and allocation conflicts are reviewed separately."
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Respond rapidly and accurately to touch using a particular button on a wireless XBOX 360 controller; withhold on sound-only catches.",
+          "page_or_section": "Main Results Experiment 2; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Touch is the go target; auditory-only trials require no response."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Wireless XBOX 360 gamepad, reported 125-Hz sampling."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Press the designated button for touch; exact named button/hand mapping is not specified."
+            }
+          },
+          "evidence_note": "No online deadline is provided. Descriptive device sampling does not establish measured PPS Kit response latency.",
+          "missing_required_components": [
+            "response_window_and_anchor",
+            "exact_button_mapping"
+          ]
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "Intertrial intervals randomly shuffled between 500 and 700 ms.",
+          "page_or_section": "Main Results Experiment 2; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "random_range"
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "500–700 ms."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Intertrial interval is named, but source does not identify exact onset/offset/response endpoints. It is not specified as audio padding."
+            }
+          },
+          "evidence_note": "Continuous versus discrete distribution and exact timing anchor are not supplied.",
+          "missing_required_components": [
+            "timing_scope_and_anchor",
+            "distribution"
+          ]
+        },
+        "soa_schedule": {
+          "status": "conflicting_evidence",
+          "value": "Distance-at-touch samples 5, 20, 35, 50, 65, 80, 95 cm in both front and back, with nominal 35-cm/s auditory motion; exact millisecond SOAs are unresolved.",
+          "page_or_section": "Main Results Experiment 2; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Delay from auditory onset to tactile onset; positive means touch after sound."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "conflicting_evidence",
+              "value": "Fourteen reported front/back samples conflict with thirteen in the allocation formula."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Looming maps later touch to nearer sound; receding maps later touch to farther sound."
+            }
+          },
+          "evidence_note": "The sample span and nominal speaker/path extent differ. Do not silently choose an origin or collapse opposite-side positions into one center.",
+          "missing_required_components": [
+            "exact_numeric_soa_mapping"
+          ]
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "100-ms vibration using Precision MicroDrives 312-101 motor. Front sternum and equivalent back elevation.",
+          "page_or_section": "Main Results Experiment 2; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile motor."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Front sternum and equivalent back elevation."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "100-ms activation; nominal motor 150 Hz, 3 V, 60 mA, 9000 rpm, 5 g, 113 mm2; approximately 50 ms to maximal rotation."
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "150-Hz nominal motor specification, not a measured constant-frequency onset waveform."
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "No individual amplitude threshold or measured skin-level waveform/calibration is reported."
+            }
+          },
+          "evidence_note": "Motor datasheet values are apparatus descriptors, not evidence of equivalent delivered stimulation.",
+          "missing_required_components": [
+            "delivered_waveform_and_intensity_calibration"
+          ]
+        },
+        "baseline_trial_contract": {
+          "status": "partial",
+          "value": "36 T-only baseline trials by the stated formula; auditory stimulus omitted.",
+          "page_or_section": "Main Results Experiment 2; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_endpoint_baseline"
+            },
+            "timing_and_anchor": {
+              "status": "not_reported",
+              "value": "Experiment 2 uses three baseline cells but their exact numeric delays are not supplied."
+            },
+            "allocation_rule": {
+              "status": "derived",
+              "value": "(13 x 2 + 3 + 2) x 12 = 372, conditional on thirteen distance cells; fourteen would give 396."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "36 T-only trials, conditional on the printed formula."
+            }
+          },
+          "evidence_note": "Baseline correction selects the fastest unimodal condition within participant/body part. It is not a stationary sound comparator.",
+          "missing_required_components": [
+            "exact_baseline_timing"
+          ],
+          "derivation_note": "(13 x 2 + 3 + 2) x 12 = 372, conditional on thirteen distance cells; fourteen would give 396."
+        },
+        "catch_trial_contract": {
+          "status": "derived_complete",
+          "value": "24 auditory-only/no-touch catch trials require withholding.",
+          "page_or_section": "Main Results Experiment 2; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_no_go"
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No touch; withhold button press."
+            },
+            "allocation_rule": {
+              "status": "derived",
+              "value": "(13 x 2 + 3 + 2) x 12 = 372, conditional on thirteen distance cells; fourteen would give 396."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "24"
+            }
+          },
+          "evidence_note": "Count is conditional on the printed formula; Experiment 2 geometry remains disputed.",
+          "derivation_note": "(13 x 2 + 3 + 2) x 12 = 372, conditional on thirteen distance cells; fourteen would give 396."
+        },
+        "repetition_allocation": {
+          "status": "conflicting_evidence",
+          "value": "372 printed trials: 312 AT, 36 tactile-only and 24 catches by the stated formula.",
+          "page_or_section": "Main Results Experiment 2; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "conflicting_evidence",
+              "value": "Front/back transit directions with thirteen allocation cells versus fourteen described positions."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "conflicting_evidence",
+              "value": "(13 x 2 + 3 + 2) x 12 = 372, conditional on thirteen distance cells; fourteen would give 396."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Do not substitute generic approximate family percentages for the experiment-specific formula."
+            }
+          },
+          "evidence_note": "The thirteen-versus-fourteen conflict remains unresolved."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Separate hand/trunk blocks are explicit in Experiment 4; exact execution block counts/order are otherwise unresolved.",
+          "page_or_section": "Main Results Experiment 2; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement pp. 3, 5-9",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_reported",
+              "value": "No exact numeric block count is established; two factors do not prove two blocks."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "Front/back transit directions with thirteen allocation cells versus fourteen described positions."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "not_reported",
+              "value": "Exact block ordering and counterbalance are not reported."
+            },
+            "within_block_randomization": {
+              "status": "not_reported",
+              "value": "No full trial shuffle algorithm is provided."
+            }
+          },
+          "evidence_note": "Participant-level factors and repetition counts remain separate from an execution-block schedule.",
+          "missing_required_components": [
+            "block_count",
+            "block_order_or_counterbalancing",
+            "within_block_randomization"
+          ]
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1038/srep18603::c",
+      "source_type": "primary_article_and_rendered_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Independent whole-publication and experiment-specific review; all eleven compact contracts explicitly disposed. Preserve contradictory counts/gain laws and unresolved timing origins.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "approximation_required",
+          "value": "44.1-kHz pink noise shaped in SoundForge 4.5; two coactivated speakers with opposite exponential ramps, nominal 55–70 dB SPL looming and reversed for receding.",
+          "page_or_section": "Main Results Experiment 3; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "generated"
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Pink-noise samples; exact original WAV/random realization unavailable in reviewed sources."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "approximation_required",
+              "value": "Reported noise class/sample rate and SoundForge envelope are recoverable, but original waveforms and complete per-speaker gain files are not."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "M-Audio Studiophile AV 360 loudspeakers face each other, separated by 1 m; near within approximately 5 cm, far approximately 1 m from participant."
+            },
+            "level_envelope_calibration": {
+              "status": "approximation_required",
+              "value": "Nominal 55-to-70 dB SPL envelope; near/far intensities vary oppositely. Exact channel transfer/calibration requires an explicit reconstruction decision."
+            }
+          },
+          "evidence_note": "A virtual moving source is an approximation to the physical coactivated pair, not demonstrated acoustic equivalence."
+        },
+        "trajectory_kinematics": {
+          "status": "approximation_required",
+          "value": "Facing near/far loudspeakers separated by 100 cm; sampled positions are not automatically waveform endpoints. Samples: 5, 27, 50, 71, 93 cm; reported speed 22 cm/s.",
+          "page_or_section": "Main Results Experiment 3; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "looming_and_receding"
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Hand dorsum; hand lateralized at shoulder width."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Facing near/far loudspeakers separated by 100 cm; sampled positions are not automatically waveform endpoints. Sample locations: 5, 27, 50, 71, 93 cm."
+            },
+            "timing_constraint": {
+              "status": "approximation_required",
+              "value": "Reported speed 22 cm/s. Exact audio onset-to-path-origin and any endpoint holds are not uniquely specified for the sampled positions."
+            }
+          },
+          "evidence_note": "Preserve reported distance/speed constraints without promoting approximate full-path duration into an exact onset schedule. Experiment 5 changes hand posture while auditory source location stays fixed.",
+          "missing_required_components": [
+            "exact_motion_origin_and_hold_convention"
+          ]
+        },
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Audio-tactile target trials, tactile-only baselines and auditory-only catch/no-go trials.",
+          "page_or_section": "Main Results Experiment 3; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "AT targets; T-only baselines; A-only catches."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Sound begins, then one 100-ms touch occurs at the distance-linked delay; omit sound for T-only baselines and omit touch for catches. Participant responds only to touch."
+            }
+          },
+          "evidence_note": "The family/event roles are specified; exact delay mapping and allocation conflicts are reviewed separately."
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Respond rapidly and accurately to touch using a particular button on a wireless XBOX 360 controller; withhold on sound-only catches.",
+          "page_or_section": "Main Results Experiment 3; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Touch is the go target; auditory-only trials require no response."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Wireless XBOX 360 gamepad, reported 125-Hz sampling."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Press the designated button for touch; exact named button/hand mapping is not specified."
+            }
+          },
+          "evidence_note": "No online deadline is provided. Descriptive device sampling does not establish measured PPS Kit response latency.",
+          "missing_required_components": [
+            "response_window_and_anchor",
+            "exact_button_mapping"
+          ]
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "Intertrial intervals randomly shuffled between 500 and 700 ms.",
+          "page_or_section": "Main Results Experiment 3; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "random_range"
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "500–700 ms."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Intertrial interval is named, but source does not identify exact onset/offset/response endpoints. It is not specified as audio padding."
+            }
+          },
+          "evidence_note": "Continuous versus discrete distribution and exact timing anchor are not supplied.",
+          "missing_required_components": [
+            "timing_scope_and_anchor",
+            "distribution"
+          ]
+        },
+        "soa_schedule": {
+          "status": "approximation_required",
+          "value": "Distance-at-touch samples 5, 27, 50, 71, 93 cm, with nominal 22-cm/s auditory motion; exact millisecond SOAs are unresolved.",
+          "page_or_section": "Main Results Experiment 3; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Delay from auditory onset to tactile onset; positive means touch after sound."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "approximation_required",
+              "value": "Spatial samples are reported, but an exact audio-onset path origin/hold convention is not established."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Looming maps later touch to nearer sound; receding maps later touch to farther sound."
+            }
+          },
+          "evidence_note": "The sample span and nominal speaker/path extent differ. Do not silently choose an origin or collapse opposite-side positions into one center.",
+          "missing_required_components": [
+            "exact_numeric_soa_mapping"
+          ]
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "100-ms vibration using Precision MicroDrives 312-101 motor. Hand dorsum; hand lateralized at shoulder width.",
+          "page_or_section": "Main Results Experiment 3; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile motor."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Hand dorsum; hand lateralized at shoulder width."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "100-ms activation; nominal motor 150 Hz, 3 V, 60 mA, 9000 rpm, 5 g, 113 mm2; approximately 50 ms to maximal rotation."
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "150-Hz nominal motor specification, not a measured constant-frequency onset waveform."
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "No individual amplitude threshold or measured skin-level waveform/calibration is reported."
+            }
+          },
+          "evidence_note": "Motor datasheet values are apparatus descriptors, not evidence of equivalent delivered stimulation.",
+          "missing_required_components": [
+            "delivered_waveform_and_intensity_calibration"
+          ]
+        },
+        "baseline_trial_contract": {
+          "status": "partial",
+          "value": "32 T-only baseline trials by the stated formula; auditory stimulus omitted.",
+          "page_or_section": "Main Results Experiment 3; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_endpoint_baseline"
+            },
+            "timing_and_anchor": {
+              "status": "not_reported",
+              "value": "Nominal delays correspond to nearest/farthest sampled positions; exact numeric timing inherits the unresolved motion origin."
+            },
+            "allocation_rule": {
+              "status": "derived",
+              "value": "(5 x 2 + 2 + 1) x 16 = 208"
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "32 T-only trials, conditional on the printed formula."
+            }
+          },
+          "evidence_note": "Baseline correction selects the fastest unimodal condition within participant/body part. It is not a stationary sound comparator.",
+          "missing_required_components": [
+            "exact_baseline_timing"
+          ],
+          "derivation_note": "(5 x 2 + 2 + 1) x 16 = 208"
+        },
+        "catch_trial_contract": {
+          "status": "derived_complete",
+          "value": "16 auditory-only/no-touch catch trials require withholding.",
+          "page_or_section": "Main Results Experiment 3; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_no_go"
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No touch; withhold button press."
+            },
+            "allocation_rule": {
+              "status": "derived",
+              "value": "(5 x 2 + 2 + 1) x 16 = 208"
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "16"
+            }
+          },
+          "derivation_note": "(5 x 2 + 2 + 1) x 16 = 208"
+        },
+        "repetition_allocation": {
+          "status": "derived_complete",
+          "value": "208 printed trials: 160 AT, 32 tactile-only and 16 catches by the stated formula.",
+          "page_or_section": "Main Results Experiment 3; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five distances and two directions."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "derived",
+              "value": "(5 x 2 + 2 + 1) x 16 = 208"
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Do not substitute generic approximate family percentages for the experiment-specific formula."
+            }
+          },
+          "derivation_note": "(5 x 2 + 2 + 1) x 16 = 208"
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Separate hand/trunk blocks are explicit in Experiment 4; exact execution block counts/order are otherwise unresolved.",
+          "page_or_section": "Main Results Experiment 3; Methods Acoustic/Tactile Stimuli, General Procedure, Design and Analysis; supplement p. 2",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_reported",
+              "value": "No exact numeric block count is established; two factors do not prove two blocks."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "Five distances and two directions."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "not_reported",
+              "value": "Exact block ordering and counterbalance are not reported."
+            },
+            "within_block_randomization": {
+              "status": "not_reported",
+              "value": "No full trial shuffle algorithm is provided."
+            }
+          },
+          "evidence_note": "Participant-level factors and repetition counts remain separate from an execution-block schedule.",
+          "missing_required_components": [
+            "block_count",
+            "block_order_or_counterbalancing",
+            "within_block_randomization"
+          ]
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1038/srep18603::g",
+      "source_type": "primary_article_and_rendered_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Adjacent protocol boundary reviewed; eleven direct audio-tactile measurement dispositions retain relevant source context without promoting a PPS preset.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "The task presents a looming virtual ball, not an auditory PPS stimulus. Acoustic stimuli are explicitly scoped to Experiments 1–6. Do not fill this row with the sound recipe of Experiment 6.",
+          "page_or_section": "Main Results Experiment7; Methods Visual Stimuli/Tactile Stimuli/General Procedure/Design and Analysis",
+          "evidence_note": "Retain the frozen publication member and its visual-tactile protocol as context. The eleven compact contracts are for direct audio-tactile PPS measurement; not_applicable does not mean the visual task lacks these scientific features.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "Visual context: a 3-D ball travels approximately 2 m toward the face at 100 cm/s, ending in fictive face contact. VR1280 HMD, 1280x1024 pixels, 60-degree diagonal field of view, 60 Hz; ExpyVR. No auditory trajectory applies.",
+          "page_or_section": "Main Results Experiment7; Methods Visual Stimuli/Tactile Stimuli/General Procedure/Design and Analysis",
+          "evidence_note": "Retain the frozen publication member and its visual-tactile protocol as context. The eleven compact contracts are for direct audio-tactile PPS measurement; not_applicable does not mean the visual task lacks these scientific features.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "Visual-tactile experimental trials, tactile-only baseline trials and visual-only catch trials are reported. Visual motion begins before a 100 ms tactile target. Full onset, post-response and fixed-gap timeline is not printed.",
+          "page_or_section": "Main Results Experiment7; Methods Visual Stimuli/Tactile Stimuli/General Procedure/Design and Analysis",
+          "evidence_note": "Retain the frozen publication member and its visual-tactile protocol as context. The eleven compact contracts are for direct audio-tactile PPS measurement; not_applicable does not mean the visual task lacks these scientific features.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Rapid, accurate tactile detection through a particular wireless XBOX 360 gamepad button; controller sampling 125 Hz. Withhold on visual-only catch trials. Exact named button and response deadline are not supplied.",
+          "page_or_section": "Main Results Experiment7; Methods Visual Stimuli/Tactile Stimuli/General Procedure/Design and Analysis",
+          "evidence_note": "Retain the frozen publication member and its visual-tactile protocol as context. The eleven compact contracts are for direct audio-tactile PPS measurement; not_applicable does not mean the visual task lacks these scientific features.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "General Methods reports inter-trial intervals randomly shuffled between 500 and 700 ms for the main experiments. This is contextual visual-task timing; the distribution and reference endpoints are not specified.",
+          "page_or_section": "Main Results Experiment7; Methods Visual Stimuli/Tactile Stimuli/General Procedure/Design and Analysis",
+          "evidence_note": "Retain the frozen publication member and its visual-tactile protocol as context. The eleven compact contracts are for direct audio-tactile PPS measurement; not_applicable does not mean the visual task lacks these scientific features.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Seven visual distance-at-touch anchors: 5, 37, 69, 101, 133, 165, 197 cm. All visual stimuli approach the face. No auditory-to-tactile SOA applies; a numeric visual SOA table and exact start-coordinate convention are not supplied.",
+          "page_or_section": "Main Results Experiment7; Methods Visual Stimuli/Tactile Stimuli/General Procedure/Design and Analysis",
+          "evidence_note": "Retain the frozen publication member and its visual-tactile protocol as context. The eleven compact contracts are for direct audio-tactile PPS measurement; not_applicable does not mean the visual task lacks these scientific features.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Forehead or sternum target, within subjects. Precision MicroDrives 312-101, 150 Hz motor, 100 ms stimulation; nominal 3 V/60 mA/9000 rpm/5 g, 113mm2 surface, 50 ms to maximal rotation. This is a visual-tactile target, not an AT measurement row.",
+          "page_or_section": "Main Results Experiment7; Methods Visual Stimuli/Tactile Stimuli/General Procedure/Design and Analysis",
+          "evidence_note": "Retain the frozen publication member and its visual-tactile protocol as context. The eleven compact contracts are for direct audio-tactile PPS measurement; not_applicable does not mean the visual task lacks these scientific features.",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "Tactile-only visual-task baselines at temporal delays corresponding to the nearest/farthest sampled distances. The formula gives64 baselines across both body locations. Fastest baseline condition mean is subtracted within participant/body part. This is not a stationary auditory comparator.",
+          "page_or_section": "Main Results Experiment7; Methods Visual Stimuli/Tactile Stimuli/General Procedure/Design and Analysis",
+          "evidence_note": "Retain the frozen publication member and its visual-tactile protocol as context. The eleven compact contracts are for direct audio-tactile PPS measurement; not_applicable does not mean the visual task lacks these scientific features.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "Visual-only/no-touch catch trials require withholding. One catch class x 2 body locations x 16 repetitions derives 32 catch trials. No audio-only catch class applies.",
+          "page_or_section": "Main Results Experiment7; Methods Visual Stimuli/Tactile Stimuli/General Procedure/Design and Analysis",
+          "evidence_note": "Retain the frozen publication member and its visual-tactile protocol as context. The eleven compact contracts are for direct audio-tactile PPS measurement; not_applicable does not mean the visual task lacks these scientific features.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "Printed 320 total = (7 bimodal distance cells +2 baseline cells +1 catch cell) x 2 body locations x 16 repetitions. Derived224 visual-tactile +64 tactile-only +32 visual-only. All counts are visual-task context, not a runnable AT preset.",
+          "page_or_section": "Main Results Experiment7; Methods Visual Stimuli/Tactile Stimuli/General Procedure/Design and Analysis",
+          "evidence_note": "Retain the frozen publication member and its visual-tactile protocol as context. The eleven compact contracts are for direct audio-tactile PPS measurement; not_applicable does not mean the visual task lacks these scientific features.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Within-subject face/trunk conditions are explicit. Exact condition/block count, counterbalance and trial shuffle policy are not provided. The body-location factor is not itself proof of two execution blocks.",
+          "page_or_section": "Main Results Experiment7; Methods Visual Stimuli/Tactile Stimuli/General Procedure/Design and Analysis",
+          "evidence_note": "Retain the frozen publication member and its visual-tactile protocol as context. The eleven compact contracts are for direct audio-tactile PPS measurement; not_applicable does not mean the visual task lacks these scientific features.",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1038/srep18603::h",
+      "source_type": "primary_article_and_rendered_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/supplementaryFiles",
+      "review_date": "2026-10-27",
+      "review_scope": "Adjacent protocol boundary reviewed; eleven direct audio-tactile measurement dispositions retain relevant source context without promoting a PPS preset.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Two-speaker pink noise44.1kHz. Looming stimulus uses the shared SoundForge55–70dB exponential cross-fade; static comparator activates both near and far speakers at 70dB. Original waveform/envelope is not attached.",
+          "page_or_section": "Supplement p2, Validation 2-speakers setup > Looming vs.Static",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "Two facing speakers approximately1m apart; near within~5 cm and far~1m from participant. Ten sampled delays probe perceived positions. Exact delays/nominal speed for this validation are not supplied separately.",
+          "page_or_section": "Supplement p2, Validation 2-speakers setup > Looming vs.Static",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "Present looming or static sound, administer a vibrotactile marker at one of ten delays, then obtain a spoken sound-location judgment. No rapid tactile-detection sequence is described.",
+          "page_or_section": "Supplement p2, Validation 2-speakers setup > Looming vs.Static",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Blindfolded participants orally report sound position on0–100 scale, near to far, at the tactile-marker moment. The outcome is perceived distance, not tactile reaction time.",
+          "page_or_section": "Supplement p2, Validation 2-speakers setup > Looming vs.Static",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "No control-specific ITI or jitter policy is reported. Do not import the main RT experiments'500–700 ms interval as an established validation schedule.",
+          "page_or_section": "Supplement p2, Validation 2-speakers setup > Looming vs.Static",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Ten temporal delays from sound onset are reported, without numerical values. The touch marks localization time; it is not the direct-AT PPS dependent task.",
+          "page_or_section": "Supplement p2, Validation 2-speakers setup > Looming vs.Static",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "A vibrotactile marker is delivered. The control-specific site, pulse duration and amplitude are not stated; the main tactile-apparatus heading is explicitly Experiments1–7.",
+          "page_or_section": "Supplement p2, Validation 2-speakers setup > Looming vs.Static",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "Static dual-speaker70dB sound is a perceptual comparator, not a tactile-only RT baseline. No main-task baseline schedule is reported for this control.",
+          "page_or_section": "Supplement p2, Validation 2-speakers setup > Looming vs.Static",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "No no-target catch procedure is reported for the localization control. Do not import main-experiment catch percentages.",
+          "page_or_section": "Supplement p2, Validation 2-speakers setup > Looming vs.Static",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "2movement x 10delay within-subject design, n14. Repetitions and total trial count are not reported; 20condition cells are not20verified trials.",
+          "page_or_section": "Supplement p2, Validation 2-speakers setup > Looming vs.Static",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Within-subject factorial design is reported. Block count/order/counterbalancing and trial shuffle policy are not reported.",
+          "page_or_section": "Supplement p2, Validation 2-speakers setup > Looming vs.Static",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1038/srep18603::i",
+      "source_type": "primary_article_and_rendered_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/supplementaryFiles",
+      "review_date": "2026-10-27",
+      "review_scope": "Adjacent protocol boundary reviewed; eleven direct audio-tactile measurement dispositions retain relevant source context without promoting a PPS preset.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Shared two-speaker looming/receding sounds as described in the preceding setup: pink noise44.1kHz, SoundForge, opposed55–70dB envelopes. Original samples and exact envelope data unavailable.",
+          "page_or_section": "Supplement p3, Validation 2-speakers setup > Looming vs.Receding",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "Looming and receding stimuli in front and back space; six sampled delays. The validation tests localization directionality, not front/back tactile RT boundaries.",
+          "page_or_section": "Supplement p3, Validation 2-speakers setup > Looming vs.Receding",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "Sound plus a tactile marker at one of six delays, followed by a spoken location score. Full trial timeline is not specified.",
+          "page_or_section": "Supplement p3, Validation 2-speakers setup > Looming vs.Receding",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Six blindfolded participants orally rate sound location0–100, near to far, at touch. No speeded tactile-detection task or response deadline is stated.",
+          "page_or_section": "Supplement p3, Validation 2-speakers setup > Looming vs.Receding",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "No control-specific jitter/ITI is reported. Do not silently inherit the main RT schedule.",
+          "page_or_section": "Supplement p3, Validation 2-speakers setup > Looming vs.Receding",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Six tactile-marker delays from sound onset, numeric values not reported. Direction-dependent distance ordering is studied; no complete auditory-to-tactile PPS measurement schedule is supplied.",
+          "page_or_section": "Supplement p3, Validation 2-speakers setup > Looming vs.Receding",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Vibrotactile marker present; control-specific site/duration/amplitude unreported. Do not assume the RT task body anchor.",
+          "page_or_section": "Supplement p3, Validation 2-speakers setup > Looming vs.Receding",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "No tactile-only baseline condition is reported. Direction and front/back factors are experimental localization conditions.",
+          "page_or_section": "Supplement p3, Validation 2-speakers setup > Looming vs.Receding",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "No catch/no-target allocation is reported for this localization control.",
+          "page_or_section": "Supplement p3, Validation 2-speakers setup > Looming vs.Receding",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "2directions x 2front/back spaces x 6delay within-subject design, n6. No repetitions or total trial count supplied; 24cells are not a trial count.",
+          "page_or_section": "Supplement p3, Validation 2-speakers setup > Looming vs.Receding",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Within-subject factors are explicit. Block count/order, condition counterbalance and trial shuffle not reported.",
+          "page_or_section": "Supplement p3, Validation 2-speakers setup > Looming vs.Receding",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1038/srep18603::j",
+      "source_type": "primary_article_and_rendered_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/supplementaryFiles",
+      "review_date": "2026-10-27",
+      "review_scope": "Adjacent protocol boundary reviewed; eleven direct audio-tactile measurement dispositions retain relevant source context without promoting a PPS preset.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Shared16speaker apparatus; appendix supplies pink-noise44.1kHz synthesis, 8paired channels, 2048sampleframes with 1024overlap, Hann window and distance weighting. Operator gain and source realization are unspecified; weighting equation/prose conflict is recorded separately.",
+          "page_or_section": "Supplement pp3–4, Validation 16-speakers setup; Appendix pp5–9",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "Participants at array midpoint. Traversals start1m or2m in front and end1m or2m behind, 35 cm/s; twelve sampled positions (sixfront/sixback). Initial static locations calibrate the subjective score scale.",
+          "page_or_section": "Supplement pp3–4, Validation 16-speakers setup; Appendix pp5–9",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "First hear static reference sounds at±1m/±2m with assigned scores; then dynamic front-to-back traversals with tactile-marker localization queries. Exact reference-trial counts and full timeline not stated.",
+          "page_or_section": "Supplement pp3–4, Validation 16-speakers setup; Appendix pp5–9",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Seven blindfolded participants report perceived location on−200to200 scale at touch. Reference scores100/200 denote1/2mfront;−100/−200 denote1/2mback. Not a tactile RT task.",
+          "page_or_section": "Supplement pp3–4, Validation 16-speakers setup; Appendix pp5–9",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "No control-specific ITI, jitter distribution or response gap is reported.",
+          "page_or_section": "Supplement pp3–4, Validation 16-speakers setup; Appendix pp5–9",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Twelve marker delays (sixfront/sixback), without numeric times or exact position list. No main-PPS auditory-to-tactile response schedule can be copied.",
+          "page_or_section": "Supplement pp3–4, Validation 16-speakers setup; Appendix pp5–9",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Vibrotactile sampling marker present; site, duration and amplitude not specified for the control.",
+          "page_or_section": "Supplement pp3–4, Validation 16-speakers setup; Appendix pp5–9",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "Static±1m/±2m references establish the rating scale. They are not baseline tactile-response trials and do not justify a native stationary-baseline block.",
+          "page_or_section": "Supplement pp3–4, Validation 16-speakers setup; Appendix pp5–9",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "No no-target catch allocation is reported for this localization control.",
+          "page_or_section": "Supplement pp3–4, Validation 16-speakers setup; Appendix pp5–9",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "2 starting-spans x 12 delays within-subject design, n7. Repetitions and total trials, including reference trials, are not reported.",
+          "page_or_section": "Supplement pp3–4, Validation 16-speakers setup; Appendix pp5–9",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Static references precede dynamic judgments. Subsequent condition/trial order and block counts are unreported.",
+          "page_or_section": "Supplement pp3–4, Validation 16-speakers setup; Appendix pp5–9",
+          "evidence_note": "Adjacent apparatus/localization validation uses tactile markers with spoken auditory-distance ratings. It is not a direct audio-tactile PPS reaction-time measurement. Preserve useful source facts without promoting it into a runnable PPS measurement preset.",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Outside the direct audio-tactile PPS measurement contract; contextual source facts retained."
+            }
+          }
         }
       }
     }

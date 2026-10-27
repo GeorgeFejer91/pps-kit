@@ -11,20 +11,20 @@
     "structured_expected_outcome_record_count": 69,
     "pending_expected_outcome_record_count": 0,
     "adjacent_or_out_of_scope_record_count": 6,
-    "runnable_profile_parameter_record_count": 16,
+    "runnable_profile_parameter_record_count": 14,
     "observed_behavioral_comparison_record_count": 0,
-    "mouse_click_simulated_participant_like_comparison_record_count": 15,
-    "synthetic_profile_contrast_comparison_record_count": 15,
+    "mouse_click_simulated_participant_like_comparison_record_count": 13,
+    "synthetic_profile_contrast_comparison_record_count": 13,
     "parameter_run_evidence_only_record_count": 1,
-    "not_runnable_no_observed_comparison_record_count": 53,
+    "not_runnable_no_observed_comparison_record_count": 55,
     "adjacent_not_applicable_record_count": 6,
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 6,
       "not_yet_templated_missing_publication_parameters": 46,
-      "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 15,
+      "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 13,
       "ready_profile_parameter_run_available_expected_contrast_unvalidated": 1,
-      "template_present_blocked_missing_publication_parameters": 7
+      "template_present_blocked_missing_publication_parameters": 9
     }
   },
   "expected_outcome_extraction_sources": {
@@ -950,11 +950,11 @@
       "record_id": "serino_2015_peri_trunk_exp1",
       "citation_short": "Serino et al. (2015), Exp. 1",
       "doi": "10.1038/srep18603",
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "current_template_ids": [
         "serino_2015_peri_trunk_exp1"
       ],
-      "runnable_status": "runnable_profile_parameters_ready",
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "distance_dependent_audio_tactile_facilitation",
@@ -977,32 +977,22 @@
         "paper_audit_visualization_candidate_count": "6",
         "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
         "manual_review_confidence_label": "high_confidence_extraction",
-        "manual_review_profile_recreation_assessment": "possible_with_caveats"
+        "manual_review_profile_recreation_assessment": "source_inconsistency_requires_resolution"
       },
-      "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison",
-      "observed_evidence_boundary": "The ready-profile mouse-click expected-outcome audit runs deterministic participant-like mouse clicks through SessionRunnerController after response windows and compares the runner-produced analysis RTs with the paper's structured expected effect. This proves runner-level software comparison behavior only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
-      "required_next_evidence": "Collect participant data before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic mouse-click simulated participant-like software evidence only.",
-      "observed_profile_contrast_evidence": {
-        "status": "deterministic_synthetic_profile_contrast_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
-        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
-      },
-      "observed_mouse_click_participant_like_evidence": {
-        "status": "mouse_click_simulated_participant_like_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/ready_profile_mouse_click_expected_outcome_audit_report.json",
-        "model_boundary": "Deterministic participant-like mouse clicks were injected through SessionRunnerController after tactile onsets and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
-      }
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "serino_2015_front_back_trunk_exp2",
       "citation_short": "Serino et al. (2015), Exp. 2",
       "doi": "10.1038/srep18603",
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "current_template_ids": [
         "serino_2015_front_back_trunk_exp2"
       ],
-      "runnable_status": "runnable_profile_parameters_ready",
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "front_back_trunk_audio_tactile_pps_boundary",
@@ -1025,22 +1015,12 @@
         "paper_audit_visualization_candidate_count": "6",
         "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
         "manual_review_confidence_label": "high_confidence_extraction",
-        "manual_review_profile_recreation_assessment": "possible_with_caveats_16_speaker_front_back_trunk_profile"
+        "manual_review_profile_recreation_assessment": "source_inconsistency_requires_resolution"
       },
-      "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison",
-      "observed_evidence_boundary": "The ready-profile mouse-click expected-outcome audit runs deterministic participant-like mouse clicks through SessionRunnerController after response windows and compares the runner-produced analysis RTs with the paper's structured expected effect. This proves runner-level software comparison behavior only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
-      "required_next_evidence": "Collect participant data before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic mouse-click simulated participant-like software evidence only.",
-      "observed_profile_contrast_evidence": {
-        "status": "deterministic_synthetic_profile_contrast_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
-        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
-      },
-      "observed_mouse_click_participant_like_evidence": {
-        "status": "mouse_click_simulated_participant_like_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/ready_profile_mouse_click_expected_outcome_audit_report.json",
-        "model_boundary": "Deterministic participant-like mouse clicks were injected through SessionRunnerController after tactile onsets and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
-      }
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "serino_2015_peri_hand_exp3",
@@ -1073,7 +1053,7 @@
         "paper_audit_visualization_candidate_count": "6",
         "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
         "manual_review_confidence_label": "high_confidence_extraction",
-        "manual_review_profile_recreation_assessment": "possible_with_caveats_lateralized_peri_hand_profile"
+        "manual_review_profile_recreation_assessment": "possible_with_caveats"
       },
       "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
       "observed_comparison_gap": "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison",
@@ -1119,7 +1099,7 @@
         "paper_audit_visualization_candidate_count": "6",
         "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
         "manual_review_confidence_label": "high_confidence_extraction",
-        "manual_review_profile_recreation_assessment": "possible_with_caveats_split_into_exp4_exp5_exp6_profiles"
+        "manual_review_profile_recreation_assessment": "possible_with_caveats"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",

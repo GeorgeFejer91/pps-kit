@@ -615,7 +615,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "toolkitNodeJoins": 65,
         "toolkitInScopeNodeJoins": 62,
         "toolkitRunnableNodes": 14,
-        "toolkitRunnableRecords": 16,
+        "toolkitRunnableRecords": 14,
         "toolkitSupportedIncompleteNodes": 48,
         "toolkitNotAssessedNodes": 29,
         "toolkitAdjacentConflictNodes": 3,
@@ -770,7 +770,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
     toolkit_records = [record for node in nodes for record in node["toolkit"]["records"]]
     assert len(toolkit_records) == 69
     assert sum(record["inScope"] for record in toolkit_records) == 66
-    assert sum(record["inScope"] and record["recreatable"] for record in toolkit_records) == 16
+    assert sum(record["inScope"] and record["recreatable"] for record in toolkit_records) == 14
     assert sum(record["manualReview"] is not None for record in toolkit_records) == 25
     assert sum(
         any(record["manualReview"] is not None for record in node["toolkit"]["records"])
