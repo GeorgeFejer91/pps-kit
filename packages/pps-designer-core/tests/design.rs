@@ -35,6 +35,30 @@ fn contract_output(plan: &IngredientGenerationPlan) -> (Vec<u8>, GeneratedStimul
 }
 
 #[test]
+fn legacy_radius_only_design_defaults_to_polar_without_changing_arc() {
+    let original = payload();
+    let mut legacy = original.clone();
+    legacy["design"]["trajectory"]
+        .as_object_mut()
+        .unwrap()
+        .remove("coordinate_mode");
+    let expected = plan_ingredient_generation(&original, &opt_in()).unwrap();
+    let actual = plan_ingredient_generation(&legacy, &opt_in()).unwrap();
+    assert_eq!(
+        serde_json::to_value(&actual.request.trajectory).unwrap(),
+        serde_json::to_value(&expected.request.trajectory).unwrap()
+    );
+    assert_eq!(actual.trajectory_snapshot["coordinate_mode"], "polar");
+    legacy["design"]["trajectory"]["coordinate_mode"] = json!("unknown");
+    assert_eq!(
+        plan_ingredient_generation(&legacy, &opt_in())
+            .unwrap_err()
+            .code,
+        "unsupported_trajectory_mode"
+    );
+}
+
+#[test]
 fn full_payload_preserves_saved_polar_arc_and_explicit_source_algorithm() {
     let p = payload();
     let plan = plan_ingredient_generation(&p, &opt_in()).unwrap();
