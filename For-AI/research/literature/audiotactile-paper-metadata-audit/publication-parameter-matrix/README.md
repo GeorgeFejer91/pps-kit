@@ -95,7 +95,7 @@ These implementation matrices describe the exact current **design/profile serial
 | Confirmed structured visualization rows | 0 |
 | Audit records outside focused network | 6 |
 
-Toolkit publication states: `adjacent_scope_conflict` 3, `not_assessed` 29, `runnable` 14, `supported_incomplete` 48.
+Toolkit publication states: `adjacent_scope_conflict` 3, `not_assessed` 29, `runnable` 13, `supported_incomplete` 49.
 
 Study-instance evidence stages: `current_audit_without_manual_review` 66, `manual_review` 37, `no_exact_doi_audit_join` 43.
 
@@ -284,8 +284,8 @@ The proposed target inventory is also not a superset of the current serializer. 
 | `PUB.S4.baseline_count` | 4 | 77 | `acquire_or_open_source` |
 | `PUB.S4.catch_count` | 4 | 77 | `acquire_or_open_source` |
 | `PUB.S1.stimulus_speed` | 1 | 76 | `acquire_or_open_source` |
-| `PUB.S4.block_count` | 4 | 74 | `acquire_or_open_source` |
-| `PUB.S4.repetitions_per_tactile_soa_condition` | 4 | 74 | `acquire_or_open_source` |
+| `PUB.S4.block_count` | 4 | 75 | `acquire_or_open_source` |
+| `PUB.S4.repetitions_per_tactile_soa_condition` | 4 | 75 | `acquire_or_open_source` |
 
 ## Review Rules
 

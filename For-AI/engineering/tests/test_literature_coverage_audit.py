@@ -34,8 +34,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 14,
-        "covered_blocked_missing_publication_parameters": 9,
+        "covered_runnable_profile": 13,
+        "covered_blocked_missing_publication_parameters": 10,
         "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 0,
         "not_yet_templated_missing_publication_parameters": 46,
@@ -915,10 +915,11 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/"
         "serino_2015_toolless_known_parameter_validation_report.json"
     )
-    assert records["canzoneri_2013_amputation_prosthesis"]["coverage_category"] == "covered_runnable_profile"
-    assert records["canzoneri_2013_amputation_prosthesis"]["can_recreate_audiotactile_components_now"] is True
+    assert records["canzoneri_2013_amputation_prosthesis"]["coverage_category"] == "covered_blocked_missing_publication_parameters"
+    assert records["canzoneri_2013_amputation_prosthesis"]["can_recreate_audiotactile_components_now"] is False
     assert records["canzoneri_2013_amputation_prosthesis"]["blocking_constraint_ids"] == []
-    assert records["canzoneri_2013_amputation_prosthesis"]["missing_publication_parameters"] == []
+    assert "80" in records["canzoneri_2013_amputation_prosthesis"]["missing_publication_parameters"][0]
+    assert records["canzoneri_2013_amputation_prosthesis"]["prior_software_comparison_evidence"]["mouse_click"]["source_report"]
     assert records["canzoneri_2013_amputation_prosthesis"]["known_parameter_validation_report"] == (
         "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/"
         "canzoneri_2013_amputation_known_parameter_validation_report.json"

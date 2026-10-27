@@ -128,15 +128,45 @@
     {
       "network_node_id": "doi:10.1038/srep02844",
       "doi": "10.1038/srep02844",
-      "inventory_status": "at_least_three_experiments",
-      "inventory_evidence_status": "partial_methods_inventory",
+      "inventory_status": "confirmed_three_experiments_with_tactile_only_boundary",
+      "inventory_evidence_status": "primary_methods_reviewed",
       "inventory_evidence_classified_on": "2026-10-27",
-      "instance_count_basis": "The critical review explicitly covers audio-tactile Experiments 2 and 3; the publication abstract also describes a separate body-representation task treated conservatively as Experiment 1 pending scope verification.",
-      "evidence_pointer": "manual_reviews/canzoneri_2013_amputation_prosthesis.json; publication_network.v3.json::doi:10.1038/srep02844",
+      "instance_count_basis": "Three numbered experiments: tactile body-representation judgments, amputee/control audio-tactile PPS, and healthy upper-arm/hand audio-tactile PPS. Experiment 1 includes seven of the ten amputees plus seven controls; Experiment 2 includes all ten amputees plus ten different controls; Experiment 3 has twelve healthy controls. The amputee cohort overlaps across Experiments 1 and 2.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML::Results/Methods Experiments 1-3",
       "instances": [
-        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — body-representation task; scope unverified", "record_id": "", "toolkit_scope": "scope_not_assessed", "disaggregation_status": "experiment_record_not_available"},
-        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — audio-tactile PPS", "record_id": "canzoneri_2013_amputation_prosthesis", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "c", "instance_kind": "experiment", "experiment_label": "Experiment 3 — audio-tactile PPS", "record_id": "canzoneri_2013_amputation_prosthesis", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 1 — tactile distance/body-representation judgment",
+          "record_id": "",
+          "toolkit_scope": "adjacent_tactile_body_representation",
+          "disaggregation_status": "adjacent_protocol_source_reviewed"
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 2 — amputee and healthy-control audio-tactile PPS",
+          "record_id": "canzoneri_2013_amputation_prosthesis",
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "c",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 3 — upper-arm versus hand audio-tactile PPS",
+          "record_id": "canzoneri_2013_amputation_prosthesis",
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        }
+      ],
+      "review_date": "2026-10-27",
+      "source_review_limit": "Whole primary text reviewed. Preserve 76-versus-80 target-count contradiction; Experiment 3 changes target site while speaker positions remain fixed. No missing waveform/calibration or original sound file is filled from a toolkit default.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "outcome": "Primary full XML retrieved and whole-publication Methods/experiment boundaries inspected. SHA256 884df48aa22266ee122e698c27c2815e7db995008c27bd47b1418f0c6bcd974c."
+        }
       ]
     },
     {

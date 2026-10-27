@@ -85,7 +85,6 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
 
 RUNNABLE_STRUCTURED_IDS = {
     "biggio_2017_racket_tool_use",
-    "canzoneri_2013_amputation_prosthesis",
     "canzoneri_2012_dynamic_sounds",
     "galli_2015_wheelchair",
     "noel_2015_walking",
@@ -152,19 +151,19 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "structured_expected_outcome_record_count": 69,
         "pending_expected_outcome_record_count": 0,
         "adjacent_or_out_of_scope_record_count": 6,
-        "runnable_profile_parameter_record_count": 14,
+        "runnable_profile_parameter_record_count": 13,
         "observed_behavioral_comparison_record_count": 0,
-        "mouse_click_simulated_participant_like_comparison_record_count": 13,
-        "synthetic_profile_contrast_comparison_record_count": 13,
+        "mouse_click_simulated_participant_like_comparison_record_count": 12,
+        "synthetic_profile_contrast_comparison_record_count": 12,
         "parameter_run_evidence_only_record_count": 1,
-        "not_runnable_no_observed_comparison_record_count": 55,
+        "not_runnable_no_observed_comparison_record_count": 56,
         "adjacent_not_applicable_record_count": 6,
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 6,
             "not_yet_templated_missing_publication_parameters": 46,
-            "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 13,
-            "template_present_blocked_missing_publication_parameters": 9,
+            "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 12,
+            "template_present_blocked_missing_publication_parameters": 10,
             "ready_profile_parameter_run_available_expected_contrast_unvalidated": 1,
         },
     }
