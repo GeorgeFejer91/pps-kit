@@ -2,6 +2,40 @@
 
 This folder is dedicated to metadata extraction from published audio-tactile PPS papers. It is intentionally independent from GUI/profile recreation: the goal is to inspect papers and supplements and record whether Segment 1-4 metadata can be extracted.
 
+## Audiotactile publication freeze (2026-10-27)
+
+`study_instance_registry.json::corpus_freeze` fixes the current 94-publication
+identity set, by hash, and the 124 registered review rows at the freeze date.
+These rows include unassessed placeholders; they are not 124 verified experiments.
+The nine outside-map boundary records distinguish three adjacent-family deferrals
+from six unresolved identities. Missing DOI/map eligibility is not a scientific
+exclusion. The existing in-map adjacent scope conflict stays visible. Broader
+human PPS families are deferred for this publication; Windows is first, and
+the hosted product offers preparation/preview only.
+
+The freeze is **open**. Completion requires a source-backed inventory or actual
+dated access attempts for every frozen publication, plus a disposition for each
+in-scope experiment's eleven compact scientific contracts. Unresolved parameters,
+approximations and inaccessible sources may remain as explicit audited gaps;
+unassessed work cannot be counted as completed. The exact acceptance criteria
+live with the registry. No completion criterion depends on filling every one of
+the 281 method/validation fields or adopting adjacent PPS families.
+
+The first bounded source batch (2026-10-27) adds four experiment-scoped timing/count
+reviews for Canzoneri et al. (2012), DOI `10.1371/journal.pone.0044306`, from the
+publisher's Methods and readable Figure 1 caption. Three contracts resolve as
+reported and the baseline count/anchor conversion as derived. Seven contracts
+retain partial evidence. The main PPS row keeps its stable ID; the separate
+localization validation task is explicitly retained as supporting context.
+Consensus required reauthentication; publisher HTML was accessible; the linked
+figure image returned a fetch error. These attempts are recorded in the source
+review, and no unseen figure was used to finalize geometry. No new source was
+declared unavailable, and no physical route was qualified.
+
+The public projection is rebuilt after the matrix resolver; see
+[`publication-network/README.md`](../publication-network/README.md#public-study-evidence).
+Paper evidence, linked templates and native qualification are independent.
+
 ## Local Artifact Folders
 
 - `artifacts/paper_metadata_audit/publication_pdfs/`: place publication PDFs here as `<record_id>.pdf`.

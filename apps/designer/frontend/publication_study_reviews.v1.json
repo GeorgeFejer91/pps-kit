@@ -12,20 +12,20 @@
     "publications": 94,
     "studies": 124,
     "contracts": 1364,
-    "reportedComplete": 153,
-    "derivedComplete": 37,
+    "reportedComplete": 156,
+    "derivedComplete": 38,
     "parameterStatusCounts": {
       "approximation_required": 24,
       "composite_requires_split": 132,
       "conflicting_evidence": 5,
-      "derived_complete": 37,
+      "derived_complete": 38,
       "explicitly_absent": 14,
       "low_confidence": 75,
       "not_applicable": 14,
       "not_assessed": 352,
       "not_reported": 22,
-      "partial": 248,
-      "reported_complete": 153,
+      "partial": 244,
+      "reported_complete": 156,
       "source_unavailable": 288
     }
   },
@@ -1007,7 +1007,9 @@
         "canzoneri_2012_dynamic_sounds"
       ],
       "parameterStatusCounts": {
-        "partial": 11
+        "derived_complete": 1,
+        "partial": 7,
+        "reported_complete": 3
       },
       "nativeQualification": "not_assessed"
     },
@@ -27605,15 +27607,17 @@
     {
       "studyRowId": "doi:10.1371/journal.pone.0044306",
       "networkNodeId": "doi:10.1371/journal.pone.0044306",
-      "label": "Dynamic sounds capture the boundaries of peripersonal space representation in humans.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Dynamic sounds capture the boundaries of peripersonal space representation in humans. (a)",
+      "experimentLabel": "Main audio-tactile PPS task",
+      "inventoryStatus": "confirmed_audio_tactile_pps_task_with_supporting_localizer",
+      "evidenceScope": "experiment_specific",
       "templateIds": [
         "canzoneri_2012_dynamic_sounds"
       ],
       "parameterStatusCounts": {
-        "partial": 11
+        "derived_complete": 1,
+        "partial": 7,
+        "reported_complete": 3
       },
       "nativeQualification": "not_assessed",
       "contracts": [
@@ -27704,19 +27708,27 @@
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "partial",
-          "value": "Soa table: T1 300 ms, T2 800 ms, T3 1500 ms, T4 2200 ms, T5 2700 ms after sound onset; T0/T6 baseline timings also included.",
+          "status": "reported_complete",
+          "value": "T1-T5: +300, +800, +1500, +2200, +2700 ms from auditory onset.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Methods, Procedures and Materials",
-          "evidenceNote": "T1-T5 are crossed with both IN and OUT sounds.",
+          "pageOrSection": "Publisher HTML, Methods: Procedures and Materials (timing/allocation paragraphs; Figure 1 caption)",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "300, 800, 1500, 2200, 2700 ms; IN and OUT.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive delay after auditory onset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
@@ -27738,55 +27750,102 @@
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "partial",
-          "value": "Baseline strategy: Unimodal tactile baseline condition without concurrent sound, implemented during pre-sound and post-sound silence periods. | Baseline timing: T0 at 300 ms from trial start, before sound onset; T6 at 4600 ms from trial start, after sound administration. | Baseline count: T0 and T6 produce 32 baseline/unimodal tactile target trials total: 2 timings x 2 sound-condition trial contexts x 8 repetitions.",
+          "status": "derived_complete",
+          "value": "T0/T6: 300/4600 ms from trial start; 32 targets without concurrent sound.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Methods, Procedures and Materials; PDF p.3, Results | PDF p.3, Methods, Procedures and Materials",
-          "evidenceNote": "The results explicitly describe T0 and T6 as unimodal conditions. | With sound onset after 1000 ms silence, T0 is -700 ms relative to sound onset and T6 is 3600 ms after onset. | Derived from the reported repetition structure and T0/T6 baseline role.",
-          "derivationNote": "Derived from the reported repetition structure and T0/T6 baseline role.",
-          "reviewedOn": "2026-06-16",
+          "pageOrSection": "Publisher HTML, Methods: Procedures and Materials (timing/allocation paragraphs; Figure 1 caption)",
+          "evidenceNote": "",
+          "derivationNote": "32 = 2 baseline timings × 2 sound contexts × 8; onset-relative times are -700 and +3600 ms.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
-          "missingComponents": [
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "8 targets per timing per sound context.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "T0 and T6 tactile-only timing controls.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "2 timings × 2 sound contexts × 8 = 32.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "300 and 4600 ms from trial start; auditory onset at 1000 ms.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "partial",
-          "value": "Catch trial type: Auditory-only catch trials with no tactile stimulation. | Catch count: Seventy-six auditory-only catch trials in the main experiment; calibration used 5 catches intermingled with 10 tactile stimuli.",
+          "status": "reported_complete",
+          "value": "76 auditory-only catches intermingled with 112 targets.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.2-3, Methods, Procedures and Materials",
-          "evidenceNote": "Catches are used in calibration and the main experiment. | The main catch count is separate from calibration.",
+          "pageOrSection": "Publisher HTML, Methods: Procedures and Materials (timing/allocation paragraphs; Figure 1 caption)",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
-          "missingComponents": [
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "76 catches randomly intermingled; prose also states 40%.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only; no tactile target.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "76 catches in main task; calibration separate.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Respond to touch; ignore sound.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "partial",
-          "value": "Repetitions per tactile soa condition: Eight target trials for each temporal delay T0-T6 for each sound condition IN and OUT. | Total trial count: One hundred eighty-eight main-task trials total: 112 tactile-target trials plus 76 auditory-only catch trials.",
+          "status": "reported_complete",
+          "value": "8 × 7 delays × 2 directions = 112 targets; 76 catches; 188 trials.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Methods, Procedures and Materials",
-          "evidenceNote": "This yields 112 tactile-target trials in the main task. | Total is derived from explicitly reported target and catch counts.",
-          "derivationNote": "Total is derived from explicitly reported target and catch counts.",
-          "reviewedOn": "2026-06-16",
+          "pageOrSection": "Publisher HTML, Methods: Procedures and Materials (timing/allocation paragraphs; Figure 1 caption)",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Catches separately allocated; calibration and localization task excluded.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "T0-T6 × IN/OUT.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "8 targets/cell; 112 targets + 76 catches.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
