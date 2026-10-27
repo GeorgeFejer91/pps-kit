@@ -10,23 +10,23 @@
   },
   "counts": {
     "publications": 94,
-    "studies": 126,
-    "contracts": 1386,
-    "reportedComplete": 210,
+    "studies": 127,
+    "contracts": 1397,
+    "reportedComplete": 218,
     "derivedComplete": 44,
     "parameterStatusCounts": {
       "approximation_required": 24,
       "composite_requires_split": 146,
       "conflicting_evidence": 7,
       "derived_complete": 44,
-      "explicitly_absent": 16,
-      "low_confidence": 64,
-      "not_applicable": 55,
-      "not_assessed": 341,
+      "explicitly_absent": 19,
+      "low_confidence": 54,
+      "not_applicable": 66,
+      "not_assessed": 330,
       "not_reported": 23,
-      "partial": 179,
-      "reported_complete": 210,
-      "source_unavailable": 277
+      "partial": 190,
+      "reported_complete": 218,
+      "source_unavailable": 276
     }
   },
   "statusLegend": {
@@ -45,6 +45,10 @@
     "mixed_across_studies": "The publication's registered study rows have different statuses."
   },
   "studyRowAliases": {
+    "doi:10.1038/s41598-019-45084-4": [
+      "doi:10.1038/s41598-019-45084-4::a",
+      "doi:10.1038/s41598-019-45084-4::b"
+    ],
     "doi:10.1073/pnas.2024548118": [
       "doi:10.1073/pnas.2024548118::a",
       "doi:10.1073/pnas.2024548118::b"
@@ -556,12 +560,14 @@
     {
       "networkNodeId": "doi:10.1038/s41598-019-45084-4",
       "studyIds": [
-        "doi:10.1038/s41598-019-45084-4"
+        "doi:10.1038/s41598-019-45084-4::a",
+        "doi:10.1038/s41598-019-45084-4::b"
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "low_confidence": 10,
-        "source_unavailable": 1
+        "explicitly_absent": 3,
+        "partial": 11,
+        "reported_complete": 8
       },
       "nativeQualification": "not_assessed"
     },
@@ -1155,7 +1161,7 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "not_applicable": 11
       },
       "nativeQualification": "not_assessed"
     },
@@ -16487,217 +16493,705 @@
       ]
     },
     {
-      "studyRowId": "doi:10.1038/s41598-019-45084-4",
+      "studyRowId": "doi:10.1038/s41598-019-45084-4::a",
       "networkNodeId": "doi:10.1038/s41598-019-45084-4",
-      "label": "Identifying peripersonal space boundaries in newborns.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Identifying peripersonal space boundaries in newborns. (a)",
+      "experimentLabel": "Pilot Study — three intensities with audio-tactile stimulation",
+      "inventoryStatus": "confirmed_pilot_and_main_experiment",
+      "evidenceScope": "composite_requires_split",
       "templateIds": [],
       "parameterStatusCounts": {
-        "low_confidence": 10,
-        "source_unavailable": 1
+        "explicitly_absent": 2,
+        "partial": 5,
+        "reported_complete": 4
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "low_confidence",
-          "value": "Stimulus type: Auto-mined candidates: pink noise; pure tone; 2.5 Hz; 8000 Hz | Source provenance: Auto-mined candidates: pink-noise samples | Auditory conditions: Auto-mined candidates: approaching; IN sound; front; rear; left; right | Gain envelope: Auto-mined candidates: 70 dB; 0.005 dB; 55 dB; 56.5 dB; 59 dB; 62.5 dB; 76 dB; 68.5 dB; 47 dB | Renderer or apparatus: Auto-mined candidates: loudspeaker(s); speaker(s); virtual audio source",
+          "status": "partial",
+          "value": "Static 8000-Hz sinusoidal waveform samples, 2000 ms, at 55, 62.5 and 70 dB.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 2, 8, 7 | source page/section(s) 8, 2, 6 | source page/section(s) 7, 8, 10 | source page/section(s) 8, 7, 9 | source page/section(s) 8, 9, 7",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "Levels were measured at newborn head position. Sampling rate, ramps, generation/import route and original asset provenance remain unresolved; this is not a reconstruction of Canzoneri pink noise.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
           "missingComponents": [
             "source_mode",
-            "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Constant-frequency 8000-Hz tones, 2000 ms; original files not supplied in the inspected paper.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "low_confidence",
-          "value": "Trajectory path: Auto-mined candidates: towards body; away from body; approaching trajectory; receding trajectory; 1 cm | Stimulus duration: Auto-mined candidates: duration relative to sound onset; duration relative to sound offset; 3000 ms; 2000 ms; 3 s; 2 s | Trajectory count: Auto-mined candidates: four body-relative directions; approaching and receding motions | Gain envelope: Auto-mined candidates: 70 dB; 0.005 dB; 55 dB; 56.5 dB; 59 dB; 62.5 dB; 76 dB; 68.5 dB; 47 dB | Renderer or apparatus: Auto-mined candidates: loudspeaker(s); speaker(s); virtual audio source",
+          "status": "partial",
+          "value": "Fixed loudspeakers under the left and right monitor halves; intensity levels are not measured auditory distances.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 7, 2, 9 | source page/section(s) 8, 9, 7 | source page/section(s) 10, 8, 2 | source page/section(s) 8, 7, 9",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "Exact speaker coordinates and the allocation of audio across speakers are unresolved. Do not equate monitor distance with exact speaker distance or map intensity to metric newborn PPS boundaries.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
           "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
+            "geometry"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Head/face relative setup; monitor about 35 cm from the face, speakers below the screen.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "Static sources; no approach/recession trajectory.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "Each tone lasts 2000 ms.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "low_confidence",
-          "value": "Trial rows families: Auto-mined candidates: audio-tactile trials | Task sequence rules: Auto-mined candidates: ignore sound; tactile target trials",
+          "status": "reported_complete",
+          "value": "3000-ms central flicker, then 2000-ms sound/stimulation with flicker continuing, then two visual targets for 2000 ms.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 8, 9, 4 | source page/section(s) 8, 9, 2",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "The endpoint follows stimulation: do not substitute a tactile-onset reaction-time task or a moving-sound SOA ladder.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
-          "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Pilot intensity trials randomized.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "2.5-Hz white circle first; sound with manual forehead stroke in the audio-tactile condition; two peripheral infant-face targets immediately after stimulation ends.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Audio-tactile trials at three intensities.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "low_confidence",
-          "value": "Task sequence rules: Auto-mined candidates: ignore sound; tactile target trials",
+          "status": "partial",
+          "value": "Offline video-coded latency of the first eye movement from the center toward either peripheral visual target.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 8, 9, 2",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "Targets remain visible for 2000 ms, but an explicit coding cutoff/timeout convention is not specified. Do not turn display duration into a verified online response deadline.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
           "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "First center-to-peripheral-target eye movement; no key or vocal response.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Video recording and offline observer coding of saccades.",
+              "note": ""
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Latency measured from visual-target onset; central fixation validity gate.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Orient to the visual targets; valid trials require central fixation immediately before their appearance.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "low_confidence",
-          "value": "Iti jitter policy: Auto-mined candidates: 3000 ms; 2000 ms; 3 s; 2 s",
+          "status": "reported_complete",
+          "value": "The next trial begins immediately after the 2000-ms visual-target display; nominal trial sequence lasts 7000 ms.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 7, 8, 9",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "Nominal 7000-ms cycle is derived from the stage durations, not a tactile-to-tactile SOA or random jitter policy.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
-          "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Fixed contiguous trial sequence, with session termination when attention is lost.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "Next central attention-getter begins when the preceding visual targets disappear.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "No additional between-trial interval; stages are 3000 + 2000 + 2000 ms.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "low_confidence",
-          "value": "Soa table: Auto-mined candidates: 3000 ms; 2000 ms",
+          "status": "partial",
+          "value": "One gentle manual forehead stroke during the 2000-ms sound; exact onset offset is unresolved.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 8, 9, 1",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "Figure 3 describes touch at the same time as sound, but the stroke is applied by hand. No exact trigger delay or tolerance is reported; do not encode hardware-exact 0-ms SOA.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
           "missingComponents": [
-            "reference_event_and_sign",
             "ordered_soa_values_or_derivable_distance_anchors"
           ],
-          "components": {}
+          "components": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Tactile onset relative to auditory onset; positive would mean touch later than sound.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "One gentle, slow paintbrush stroke on the forehead during auditory stimulation.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "The 2000-ms sound window does not establish exact brush-contact duration, force, speed or waveform. Study 1 auditory-only controls omit the stroke.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
           "missingComponents": [
-            "modality",
-            "body_site_and_side",
             "waveform_and_duration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Forehead, deliberately non-lateralized to avoid priming a saccade side.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Manual paintbrush stroking.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "low_confidence",
-          "value": "Baseline timing: Auto-mined candidates: 3000 ms; 2000 ms; 3 s; 2 s | Baseline count: Auto-mined candidates: 30 trials; 31 trials",
+          "status": "explicitly_absent",
+          "value": "No separate tactile-only or auditory-only baseline group in the pilot; all three intensity conditions use audio-tactile stimulation.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 7, 8, 9 | source page/section(s) 8, 9, 2",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "All planned trials are audio-tactile intensity conditions.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "explicitly_absent",
+              "value": "No distinct unisensory baseline trial family.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "0 additional baseline trials.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "No separate baseline timing.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "low_confidence",
-          "value": "Catch trial type: Auto-mined candidates: 30 trials; 31 trials | Catch count: Auto-mined candidates: 30 trials; 31 trials",
+          "status": "explicitly_absent",
+          "value": "No withhold/no-target catch trial family; each planned trial ends with visual response targets.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 7, 8, 9 | source page/section(s) 8, 2, 9",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "Study 1 auditory-only control trials still require a visual orienting response.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "0 additional catch trials.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "explicitly_absent",
+              "value": "No behavioral withhold catch family.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "0.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Every presented trial invites a visual orienting response.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "low_confidence",
-          "value": "Repetitions per tactile soa condition: Auto-mined candidates: 30 trials; 31 trials | Total trial count: Auto-mined candidates: 30 trials; 31 trials",
+          "status": "reported_complete",
+          "value": "Planned maximum 30 trials: 10 per intensity; stop when attention no longer lasts.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 9, 7, 8 | source page/section(s) 9, 8, 2",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "reported",
+              "value": "3 x 10 = 30 maximum.",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Attention-dependent stopping; maximum planned counts are not guaranteed administered or valid counts.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Three sound intensities, audio-tactile only.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "10 per intensity.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "low_confidence",
-          "value": "Blocked or random order: Auto-mined candidates: randomized/random order | Total trial count: Auto-mined candidates: 30 trials; 31 trials",
+          "status": "reported_complete",
+          "value": "One attention-limited session, maximum 30 trials.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 8, 2, 7 | source page/section(s) 9, 8, 2",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "Maximum sequence truncates with attention; do not force every newborn to receive all planned repetitions.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "10 per intensity; no additional test-block structure reported.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "reported",
+              "value": "One session per newborn in this study.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Random intensity order.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1038/s41598-019-45084-4::b",
+      "networkNodeId": "doi:10.1038/s41598-019-45084-4",
+      "label": "Identifying peripersonal space boundaries in newborns. (b)",
+      "experimentLabel": "Study 1 — five intensities with audio-tactile and auditory-only groups",
+      "inventoryStatus": "confirmed_pilot_and_main_experiment",
+      "evidenceScope": "composite_requires_split",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "explicitly_absent": 1,
+        "partial": 6,
+        "reported_complete": 4
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "partial",
+          "value": "Static 8000-Hz sinusoidal waveform samples, 2000 ms, at 47, 55, 59, 62.5 and 70 dB.",
+          "compositeValue": "",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "Levels were measured at newborn head position. Sampling rate, ramps, generation/import route and original asset provenance remain unresolved; this is not a reconstruction of Canzoneri pink noise.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
           "missingComponents": [
-            "block_count",
-            "block_composition"
+            "source_mode",
+            "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Constant-frequency 8000-Hz tones, 2000 ms; original files not supplied in the inspected paper.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "partial",
+          "value": "Fixed loudspeakers under the left and right monitor halves; intensity levels are not measured auditory distances.",
+          "compositeValue": "",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "Exact speaker coordinates and the allocation of audio across speakers are unresolved. Do not equate monitor distance with exact speaker distance or map intensity to metric newborn PPS boundaries.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
+          "missingComponents": [
+            "geometry"
+          ],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Head/face relative setup; monitor about 35 cm from the face, speakers below the screen.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "Static sources; no approach/recession trajectory.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "Each tone lasts 2000 ms.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "reported_complete",
+          "value": "3000-ms central flicker, then 2000-ms sound/stimulation with flicker continuing, then two visual targets for 2000 ms.",
+          "compositeValue": "",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "The endpoint follows stimulation: do not substitute a tactile-onset reaction-time task or a moving-sound SOA ladder.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
+          "missingComponents": [],
+          "components": {
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Separate randomly assigned stimulation groups; exact within-group intensity order is not explicitly restated for Study 1.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "2.5-Hz white circle first; sound with manual forehead stroke in the audio-tactile condition; two peripheral infant-face targets immediately after stimulation ends.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Five intensities within each assigned group; auditory-only control is a separate participant group.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "partial",
+          "value": "Offline video-coded latency of the first eye movement from the center toward either peripheral visual target.",
+          "compositeValue": "",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "Targets remain visible for 2000 ms, but an explicit coding cutoff/timeout convention is not specified. Do not turn display duration into a verified online response deadline.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
+          "missingComponents": [
+            "response_window_and_anchor"
+          ],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "First center-to-peripheral-target eye movement; no key or vocal response.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Video recording and offline observer coding of saccades.",
+              "note": ""
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Latency measured from visual-target onset; central fixation validity gate.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Orient to the visual targets; valid trials require central fixation immediately before their appearance.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "reported_complete",
+          "value": "The next trial begins immediately after the 2000-ms visual-target display; nominal trial sequence lasts 7000 ms.",
+          "compositeValue": "",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "Nominal 7000-ms cycle is derived from the stage durations, not a tactile-to-tactile SOA or random jitter policy.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Fixed contiguous trial sequence, with session termination when attention is lost.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "Next central attention-getter begins when the preceding visual targets disappear.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "No additional between-trial interval; stages are 3000 + 2000 + 2000 ms.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "partial",
+          "value": "One gentle manual forehead stroke during the 2000-ms sound; exact onset offset is unresolved.",
+          "compositeValue": "",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "Figure 3 describes touch at the same time as sound, but the stroke is applied by hand. No exact trigger delay or tolerance is reported; do not encode hardware-exact 0-ms SOA.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
+          "missingComponents": [
+            "ordered_soa_values_or_derivable_distance_anchors"
+          ],
+          "components": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Tactile onset relative to auditory onset; positive would mean touch later than sound.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "partial",
+          "value": "One gentle, slow paintbrush stroke on the forehead during auditory stimulation.",
+          "compositeValue": "",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "The 2000-ms sound window does not establish exact brush-contact duration, force, speed or waveform. Study 1 auditory-only controls omit the stroke.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
+          "missingComponents": [
+            "waveform_and_duration"
+          ],
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Forehead, deliberately non-lateralized to avoid priming a saccade side.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Manual paintbrush stroking.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "reported_complete",
+          "value": "Auditory-only between-group control repeats the visual-target sequence without a forehead stroke.",
+          "compositeValue": "",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "Do not insert auditory-only controls into each audio-tactile participant pool or label them no-response catches.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "7 each at 55, 62.5 and 70 dB; 5 each at 47 and 59 dB; attention-dependent early termination.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only participant control group, not within-pool tactile-only baseline.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "Up to 31 planned control trials per auditory-only participant; actual valid trials vary.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Same 3000-ms flicker, 2000-ms tone, 2000-ms visual-target sequence.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "explicitly_absent",
+          "value": "No withhold/no-target catch trial family; each planned trial ends with visual response targets.",
+          "compositeValue": "",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "Study 1 auditory-only control trials still require a visual orienting response.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "0 additional catch trials.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "explicitly_absent",
+              "value": "No behavioral withhold catch family.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "0.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Every presented trial invites a visual orienting response.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "reported_complete",
+          "value": "Planned maximum 31 trials: 7 each at 55, 62.5 and 70 dB; 5 each at 47 and 59 dB; stop when attention no longer lasts.",
+          "compositeValue": "",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
+          "missingComponents": [],
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "reported",
+              "value": "3 x 7 + 2 x 5 = 31 maximum.",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Attention-dependent stopping; maximum planned counts are not guaranteed administered or valid counts.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five sound intensities within either audio-tactile or auditory-only participant group.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "7 each at 55, 62.5 and 70 dB; 5 each at 47 and 59 dB.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "partial",
+          "value": "One attention-limited session, maximum 31 trials.",
+          "compositeValue": "",
+          "pageOrSection": "Methods pp. 8-9, Table 4 and Figure 3 (institutional PDF pp. 9-10)",
+          "evidenceNote": "Study 1 participants are randomly assigned to a stimulation group, but the pilot statement of random trial order is not explicitly repeated for Study 1.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1038/s41598-019-45084-4",
+          "missingComponents": [
+            "within_block_randomization"
+          ],
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "7 each at 55, 62.5 and 70 dB; 5 each at 47 and 59 dB; no additional test-block structure reported.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "reported",
+              "value": "One session per newborn in this study.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -32761,214 +33255,350 @@
     {
       "studyRowId": "doi:10.3389/fpsyg.2022.983189",
       "networkNodeId": "doi:10.3389/fpsyg.2022.983189",
-      "label": "Effects of guided exploration on reaching measures of auditory peripersonal space.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Effects of guided exploration on reaching measures of auditory peripersonal space. (a)",
+      "experimentLabel": "Auditory reaching before and after active/guided feedback training",
+      "inventoryStatus": "confirmed_one_adjacent_reaching_experiment",
+      "evidenceScope": "experiment_specific",
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "not_applicable": 11
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent auditory reaching with tactile training feedback; outside direct audio-tactile replication contracts.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Materials and methods, Design and procedure pp. 3-4; Figure 1",
+          "evidenceNote": "Reaching follows sound offset. Pretest/posttest remove the source; active/guided training supplies hand-speaker contact. No timed tactile target or tactile-detection reaction-time endpoint is present. Motion tracking and manual training remain external requirements.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2022.983189",
-          "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
-            "source_recipe_or_asset_provenance"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent auditory reaching with tactile training feedback; outside direct audio-tactile replication contracts.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Materials and methods, Design and procedure pp. 3-4; Figure 1",
+          "evidenceNote": "Reaching follows sound offset. Pretest/posttest remove the source; active/guided training supplies hand-speaker contact. No timed tactile target or tactile-detection reaction-time endpoint is present. Motion tracking and manual training remain external requirements.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2022.983189",
-          "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent auditory reaching with tactile training feedback; outside direct audio-tactile replication contracts.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Materials and methods, Design and procedure pp. 3-4; Figure 1",
+          "evidenceNote": "Reaching follows sound offset. Pretest/posttest remove the source; active/guided training supplies hand-speaker contact. No timed tactile target or tactile-detection reaction-time endpoint is present. Motion tracking and manual training remain external requirements.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2022.983189",
-          "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent auditory reaching with tactile training feedback; outside direct audio-tactile replication contracts.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Materials and methods, Design and procedure pp. 3-4; Figure 1",
+          "evidenceNote": "Reaching follows sound offset. Pretest/posttest remove the source; active/guided training supplies hand-speaker contact. No timed tactile target or tactile-detection reaction-time endpoint is present. Motion tracking and manual training remain external requirements.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2022.983189",
-          "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
-            "response_window_and_anchor"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent auditory reaching with tactile training feedback; outside direct audio-tactile replication contracts.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Materials and methods, Design and procedure pp. 3-4; Figure 1",
+          "evidenceNote": "Reaching follows sound offset. Pretest/posttest remove the source; active/guided training supplies hand-speaker contact. No timed tactile target or tactile-detection reaction-time endpoint is present. Motion tracking and manual training remain external requirements.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2022.983189",
-          "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent auditory reaching with tactile training feedback; outside direct audio-tactile replication contracts.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Materials and methods, Design and procedure pp. 3-4; Figure 1",
+          "evidenceNote": "Reaching follows sound offset. Pretest/posttest remove the source; active/guided training supplies hand-speaker contact. No timed tactile target or tactile-detection reaction-time endpoint is present. Motion tracking and manual training remain external requirements.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2022.983189",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent auditory reaching with tactile training feedback; outside direct audio-tactile replication contracts.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Materials and methods, Design and procedure pp. 3-4; Figure 1",
+          "evidenceNote": "Reaching follows sound offset. Pretest/posttest remove the source; active/guided training supplies hand-speaker contact. No timed tactile target or tactile-detection reaction-time endpoint is present. Motion tracking and manual training remain external requirements.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2022.983189",
-          "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent auditory reaching with tactile training feedback; outside direct audio-tactile replication contracts.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Materials and methods, Design and procedure pp. 3-4; Figure 1",
+          "evidenceNote": "Reaching follows sound offset. Pretest/posttest remove the source; active/guided training supplies hand-speaker contact. No timed tactile target or tactile-detection reaction-time endpoint is present. Motion tracking and manual training remain external requirements.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2022.983189",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent auditory reaching with tactile training feedback; outside direct audio-tactile replication contracts.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Materials and methods, Design and procedure pp. 3-4; Figure 1",
+          "evidenceNote": "Reaching follows sound offset. Pretest/posttest remove the source; active/guided training supplies hand-speaker contact. No timed tactile target or tactile-detection reaction-time endpoint is present. Motion tracking and manual training remain external requirements.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2022.983189",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent auditory reaching with tactile training feedback; outside direct audio-tactile replication contracts.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Materials and methods, Design and procedure pp. 3-4; Figure 1",
+          "evidenceNote": "Reaching follows sound offset. Pretest/posttest remove the source; active/guided training supplies hand-speaker contact. No timed tactile target or tactile-detection reaction-time endpoint is present. Motion tracking and manual training remain external requirements.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2022.983189",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent auditory reaching with tactile training feedback; outside direct audio-tactile replication contracts.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Materials and methods, Design and procedure pp. 3-4; Figure 1",
+          "evidenceNote": "Reaching follows sound offset. Pretest/posttest remove the source; active/guided training supplies hand-speaker contact. No timed tactile target or tactile-detection reaction-time endpoint is present. Motion tracking and manual training remain external requirements.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2022.983189",
-          "missingComponents": [
-            "block_count",
-            "block_composition"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Direct auditory-tactile experimental contract does not apply to this reaching endpoint.",
+              "note": ""
+            }
+          }
         }
       ]
     },

@@ -3784,7 +3784,7 @@
       ]
     },
     {
-      "audiotactile_task_family": "newborn audio-tactile PPS boundary task with sound-intensity/distance and tactile response measures",
+      "audiotactile_task_family": "newborn visual-saccade endpoint following static audio-tactile stimulation; sound-intensity conditions without a verified metric-distance map",
       "blocking_constraint_ids": [
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
@@ -3827,7 +3827,7 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract auditory intensity/distance levels, tactile timing, response measure, and infant-specific apparatus separately from participant age"
+            "exact manual stroke onset/duration and reproducible contact profile; exact speaker coordinates/channel allocation; original tone asset recipe/provenance; explicit saccade coding window; Study 1 within-session trial-order rule. Known intensity levels, stage durations and planned maximum counts are separately source-reviewed."
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -3862,9 +3862,9 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract auditory intensity/distance levels, tactile timing, response measure, and infant-specific apparatus separately from participant age"
+        "exact manual stroke onset/duration and reproducible contact profile; exact speaker coordinates/channel allocation; original tone asset recipe/provenance; explicit saccade coding window; Study 1 within-session trial-order rule. Known intensity levels, stage durations and planned maximum counts are separately source-reviewed."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract auditory intensity/distance levels, tactile timing, response measure, and infant-specific apparatus separately from participant age",
+      "next_required_action": "Extract or source the missing paper parameters: exact manual stroke onset/duration and reproducible contact profile; exact speaker coordinates/channel allocation; original tone asset recipe/provenance; explicit saccade coding window; Study 1 within-session trial-order rule. Known intensity levels, stage durations and planned maximum counts are separately source-reviewed.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",

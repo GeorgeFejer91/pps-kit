@@ -630,6 +630,65 @@
       ],
       "source_review_limit": "Current primary PDF Methods and Figure 1 inspected.",
       "identity_note": "DOI and primary paper are Collignon et al.(2009). Legacy record/template IDs retain tajadura_jimenez for continuity; they are not an authorship claim."
+    },
+    {
+      "network_node_id": "doi:10.1038/s41598-019-45084-4",
+      "doi": "10.1038/s41598-019-45084-4",
+      "inventory_status": "confirmed_pilot_and_main_experiment",
+      "instance_count_basis": "The primary paper separates a three-intensity Pilot Study from five-intensity Study 1. Study 1 randomizes participants to audio-tactile or auditory-only groups; those groups are factors within Study 1, not a third experiment.",
+      "evidence_pointer": "https://pure-oai.bham.ac.uk/ws/portalfiles/portal/70592622/Orioli_et_al_Identifying_peripersonal_space_Scientific_Reports_2019.pdf::Results/Pilot study and Study 1; Methods pp. 8-9; Table 4 and Figure 3",
+      "review_date": "2026-10-27",
+      "framework_disposition": "noncanonical_static_audio_tactile_stimulation_with_subsequent_visual_saccade_endpoint",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "pilot_experiment",
+          "experiment_label": "Pilot Study — three intensities with audio-tactile stimulation",
+          "record_id": "newborn_boundaries_2019",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "experiment",
+          "experiment_label": "Study 1 — five intensities with audio-tactile and auditory-only groups",
+          "record_id": "newborn_boundaries_2019",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        }
+      ],
+      "source_review_limit": "Current primary PDF Methods and rendered Table 4/Figure 3 inspected. Intensity is manipulated at fixed speakers; no verified newborn distance-perception map, original stimulus files, exact manual touch timing, or native qualification is established."
+    },
+    {
+      "network_node_id": "doi:10.3389/fpsyg.2022.983189",
+      "doi": "10.3389/fpsyg.2022.983189",
+      "inventory_status": "confirmed_one_adjacent_reaching_experiment",
+      "instance_count_basis": "One randomized pretest-training-posttest design has Active, Guided and Control groups. The endpoint is reaching-based auditory distance/reachability; touch is exploratory or guided feedback during training, not a time-locked tactile detection target.",
+      "evidence_pointer": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2022.983189/pdf::Materials and methods, Design and procedure pp. 3-4; Figure 1",
+      "review_date": "2026-10-27",
+      "framework_disposition": "adjacent_auditory_reaching_with_tactile_training_feedback",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Auditory reaching before and after active/guided feedback training",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_auditory_reaching_context",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Active and guided tactile feedback training",
+          "disposition": "intervention_context_not_tactile_detection_task",
+          "basis": "Pretest/posttest remove the speaker after sound offset; active/guided training permits hand-speaker contact after the sound. The control group receives no tactile feedback. The reported 92 trials per phase are reaching trials, not auditory-tactile target repetitions.",
+          "evidence_pointer": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2022.983189/pdf::Design and procedure pp. 3-4; Figure 1"
+        }
+      ],
+      "source_review_limit": "Current primary PDF Methods and Figure 1 inspected. Boundary classification preserves 94-publication membership and does not claim that reaching, motion tracking or guided physical training is implemented or qualified."
     }
   ],
   "corpus_freeze": {
@@ -953,6 +1012,16 @@
       "review_date": "2026-10-27",
       "reason": "The single placeholder combined newborn and adult protocol counts. Retain an explicit alias to both cohort variants; neither child alone is equivalent to the former row.",
       "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/fullTextXML::Methods; manual_reviews/ronga_2021_newborn_erp.json::segment_4_counts"
+    },
+    {
+      "old_study_row_id": "doi:10.1038/s41598-019-45084-4",
+      "child_study_row_ids": [
+        "doi:10.1038/s41598-019-45084-4::a",
+        "doi:10.1038/s41598-019-45084-4::b"
+      ],
+      "review_date": "2026-10-27",
+      "reason": "The former unassessed placeholder combined a three-intensity pilot and five-intensity main study. Both children are disclosed; neither alone is equivalent to the previous publication row.",
+      "evidence_pointer": "https://pure-oai.bham.ac.uk/ws/portalfiles/portal/70592622/Orioli_et_al_Identifying_peripersonal_space_Scientific_Reports_2019.pdf::Pilot study; Study 1; Methods pp. 8-9 and Table 4"
     }
   ]
 }
