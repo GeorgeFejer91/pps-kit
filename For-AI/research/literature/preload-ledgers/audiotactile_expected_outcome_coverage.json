@@ -1,6 +1,6 @@
 {
   "schema": "pps-audiotactile-expected-outcome-coverage.v1",
-  "generated_on": "2026-07-15",
+  "generated_on": "2026-10-27",
   "source_literature_coverage": "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json",
   "scope": {
     "goal": "Track whether each known audiotactile PPS literature record has a structured expected outcome and whether the current toolkit has observed evidence that can be compared against it.",
@@ -8,20 +8,20 @@
   },
   "summary": {
     "literature_record_count": 75,
-    "structured_expected_outcome_record_count": 71,
+    "structured_expected_outcome_record_count": 70,
     "pending_expected_outcome_record_count": 0,
-    "adjacent_or_out_of_scope_record_count": 4,
+    "adjacent_or_out_of_scope_record_count": 5,
     "runnable_profile_parameter_record_count": 18,
     "observed_behavioral_comparison_record_count": 0,
     "mouse_click_simulated_participant_like_comparison_record_count": 17,
     "synthetic_profile_contrast_comparison_record_count": 17,
     "parameter_run_evidence_only_record_count": 1,
-    "not_runnable_no_observed_comparison_record_count": 53,
-    "adjacent_not_applicable_record_count": 4,
+    "not_runnable_no_observed_comparison_record_count": 52,
+    "adjacent_not_applicable_record_count": 5,
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
-      "not_applicable_adjacent_out_of_scope": 4,
-      "not_yet_templated_missing_publication_parameters": 48,
+      "not_applicable_adjacent_out_of_scope": 5,
+      "not_yet_templated_missing_publication_parameters": 47,
       "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
       "ready_profile_parameter_run_available_expected_contrast_unvalidated": 1,
       "template_present_blocked_missing_publication_parameters": 5
@@ -188,10 +188,10 @@
       "record_id": "serino_2009_tms",
       "citation_short": "Serino et al. (2009)",
       "doi": "10.1371/journal.pone.0006582",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "coverage_category": "adjacent_out_of_scope",
       "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
-      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "runnable_status": "adjacent_not_applicable",
+      "expected_outcome_status": "adjacent_out_of_scope",
       "expected_outcome": {
         "outcome_family": "time_dependent_motor_coding_of_hand_centered_pps",
         "primary_expected_effect": "Near-hand sounds are expected to enhance hand MEPs at short sound-to-TMS intervals, while longer intervals reverse the pattern toward greater far-sound excitability; the effect is hand-centered rather than body-centered.",
@@ -203,7 +203,7 @@
           "Consensus MCP 2026-07-15 query: 10.1371/journal.pone.0006582 Serino 2009 TMS peripersonal space audio tactile"
         ]
       },
-      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_extraction_blocker": "adjacent_out_of_scope",
       "expected_outcome_source_audit": {
         "paper_audit_pdf_status": "open_access_unavailable",
         "paper_audit_supplement_status": "not_checked",
@@ -212,10 +212,10 @@
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "adjacent_not_applicable",
+      "observed_comparison_gap": "not_applicable_adjacent_out_of_scope",
+      "observed_evidence_boundary": "The record is adjacent or out of scope for audiotactile PPS outcome comparison.",
+      "required_next_evidence": "No outcome comparison required unless the record is reclassified as in scope."
     },
     {
       "record_id": "tajadura_jimenez_2009_visual_deprivation",
