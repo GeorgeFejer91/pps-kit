@@ -52,6 +52,15 @@ if (outputArgumentIndex >= 0 && !outputArgument) {
 const OUTPUT_DIR = outputArgument
   ? path.resolve(REPO_ROOT, outputArgument)
   : path.join(AUDIT_DIR, "publication-parameter-matrix");
+const publicArgumentIndex = process.argv.indexOf("--public-output");
+const publicArgument = publicArgumentIndex >= 0 ? process.argv[publicArgumentIndex + 1] : "";
+if (publicArgumentIndex >= 0 && !publicArgument) {
+  throw new Error("--public-output requires a file path");
+}
+// Temporary matrix builds must not overwrite the tracked browser asset.
+const PUBLIC_OUTPUT = publicArgument
+  ? path.resolve(REPO_ROOT, publicArgument)
+  : outputArgument ? null : path.join(REPO_ROOT, "apps/designer/frontend/publication_study_reviews.v1.json");
 const GENERATED_ON = "2026-08-12";
 const PARSIMONIOUS_CONTRACT_COUNT = 11;
 const PYTHON_EXECUTABLE = process.env.PYTHON || (process.platform === "win32" ? "python" : "python3");
@@ -2490,7 +2499,8 @@ const currentMatrixBuild = JSON.parse(
 const parsimoniousMatrixBuild = JSON.parse(
   execFileSync(
     PYTHON_EXECUTABLE,
-    [PARSIMONIOUS_BUILDER_PATH, "--output", OUTPUT_DIR],
+    [PARSIMONIOUS_BUILDER_PATH, "--output", OUTPUT_DIR,
+      ...(PUBLIC_OUTPUT ? ["--public-output", PUBLIC_OUTPUT] : [])],
     { cwd: REPO_ROOT, encoding: "utf8" },
   ),
 );

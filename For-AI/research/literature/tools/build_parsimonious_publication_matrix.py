@@ -810,7 +810,103 @@ def _toolkit_evidence(
     return encoding_status, " | ".join(value_parts), _unique_text(profile_files)
 
 
-def build(output_dir: Path) -> dict[str, Any]:
+def _public_text(value: Any) -> str:
+    """Allow factual review text, but fail closed on local source/runtime paths.
+
+    Public HTTP URLs are intentionally preserved (including DOI suffix slashes).
+    Local source_file/profile fields are never selected for this projection.
+    """
+    text = str(value or "")
+    without_urls = re.sub(r"https?://[^\s<>\"']+", "", text, flags=re.I)
+    if re.search(
+        r"file://|[a-z]:[\\/]|\\\\|/(?:Users|home)/|"
+        r"(?<![\w/])(?:artifacts|For-AI|packages|apps)[\\/]",
+        without_urls, flags=re.I,
+    ):
+        raise ValueError("Public study review contains a local source/runtime path")
+    return text
+
+
+def public_projection(
+    study_index: list[dict[str, Any]], evidence_rows: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Project finalized component-gated evidence; never infer from templates."""
+    by_study: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in evidence_rows:
+        by_study[row["study_row_id"]].append(row)
+    studies = []
+    publications: dict[str, dict[str, Any]] = {}
+    for study in sorted(study_index, key=lambda row: row["study_row_id"]):
+        rows = by_study[study["study_row_id"]]
+        if {row["contract_key"] for row in rows} != set(EXPECTED_CONTRACT_KEYS) or len(rows) != 11:
+            raise ValueError("Public study review requires exactly eleven finalized contracts")
+        rows = sorted(rows, key=lambda row: EXPECTED_CONTRACT_KEYS.index(row["contract_key"]))
+        contracts = []
+        for row in rows:
+            if row["evidence_status"] not in STATUS_LEGEND:
+                raise ValueError("Unknown public evidence status")
+            statuses = json.loads(row["component_status_json"])
+            values = json.loads(row["component_value_json"])
+            notes = json.loads(row["component_evidence_note_json"])
+            contracts.append({
+                "key": row["contract_key"],
+                "label": _public_text(row["contract_label"]),
+                "status": row["evidence_status"],
+                "value": _public_text(row["paper_value"]),
+                "compositeValue": _public_text(row["composite_record_value"]),
+                "pageOrSection": _public_text(row["page_or_section"]),
+                "evidenceNote": _public_text(row["evidence_note"]),
+                "derivationNote": _public_text(row["derivation_note"]),
+                "reviewedOn": row["review_date"],
+                "sourceUrl": _doi_source_pointer(study.get("doi")),
+                "missingComponents": [v for v in row["missing_required_components"].split(" | ") if v],
+                "components": {
+                    key: {"status": status, "value": _public_text(values.get(key)),
+                          "note": _public_text(notes.get(key))}
+                    for key, status in sorted(statuses.items())
+                },
+            })
+        counts = dict(sorted(Counter(row["evidence_status"] for row in rows).items()))
+        templates = sorted(set(filter(None, study.get("profile_id", "").split(" | "))))
+        studies.append({
+            "studyRowId": study["study_row_id"],
+            "networkNodeId": study["network_node_id"],
+            "label": _public_text(study["study_label"]),
+            "experimentLabel": _public_text(study.get("experiment_label")),
+            "inventoryStatus": study["instance_inventory_status"],
+            "evidenceScope": study["parameter_evidence_scope"],
+            "templateIds": templates,
+            "parameterStatusCounts": counts,
+            "nativeQualification": "not_assessed",
+            "contracts": contracts,
+        })
+        publication = publications.setdefault(study["network_node_id"], {
+            "networkNodeId": study["network_node_id"], "studyIds": [], "templateIds": [],
+            "parameterStatusCounts": Counter(), "nativeQualification": "not_assessed",
+        })
+        publication["studyIds"].append(study["study_row_id"])
+        publication["templateIds"] = sorted(set(publication["templateIds"]) | set(templates))
+        publication["parameterStatusCounts"].update(counts)
+    for publication in publications.values():
+        publication["parameterStatusCounts"] = dict(sorted(publication["parameterStatusCounts"].items()))
+    status_counts = dict(sorted(Counter(row["evidence_status"] for row in evidence_rows).items()))
+    return {
+        "schema": "pps-publication-study-reviews.v1",
+        "scope": {
+            "corpusId": "pps-audiotactile-publication-freeze-20261027",
+            "onlineActions": ["prepare", "preview"],
+            "nativeQualification": "not_assessed",
+        },
+        "counts": {"publications": len(publications), "studies": len(studies),
+                   "contracts": len(evidence_rows), "reportedComplete": status_counts.get("reported_complete", 0),
+                   "derivedComplete": status_counts.get("derived_complete", 0), "parameterStatusCounts": status_counts},
+        "statusLegend": STATUS_LEGEND,
+        "publications": [publications[key] for key in sorted(publications)],
+        "studies": studies,
+    }
+
+
+def build(output_dir: Path, public_output: Path | None = None) -> dict[str, Any]:
     contract_document = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
     if contract_document.get("schema") != "pps-parsimonious-emulation-contract.v1":
         raise RuntimeError("Unexpected parsimonious emulation contract schema")
@@ -1389,6 +1485,11 @@ def build(output_dir: Path) -> dict[str, Any]:
         ["status", "description", "default_review_action"],
     )
 
+    if public_output is not None:
+        projection = public_projection(study_index, evidence_rows)
+        public_output.parent.mkdir(parents=True, exist_ok=True)
+        public_output.write_text(json.dumps(projection, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
     return {
         "schema": contract_document["schema"],
         "contract_count": len(contracts),
@@ -1403,8 +1504,9 @@ def build(output_dir: Path) -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument("--public-output", type=Path)
     args = parser.parse_args()
-    result = build(args.output.resolve())
+    result = build(args.output.resolve(), args.public_output.resolve() if args.public_output else None)
     print(json.dumps(result, sort_keys=True))
 
 
