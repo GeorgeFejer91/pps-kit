@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
 
 export async function verifyRunnerNavigation(page) {
@@ -98,17 +99,67 @@ export async function verifyDesignerControlNames(page, screenshotPath) {
   assert.equal(await instruction.count(), 1);
   assert.equal(await page.getByRole("combobox", { name: "Before experiment continue mode", exact: true }).count(), 1);
   assert.equal(await page.getByRole("spinbutton", { name: "Before experiment delay seconds", exact: true }).count(), 1);
+  const audioBytes = Buffer.alloc(44 + 4410 * 2);
+  audioBytes.write("RIFF", 0); audioBytes.writeUInt32LE(audioBytes.length - 8, 4);
+  audioBytes.write("WAVEfmt ", 8); audioBytes.writeUInt32LE(16, 16);
+  audioBytes.writeUInt16LE(1, 20); audioBytes.writeUInt16LE(1, 22);
+  audioBytes.writeUInt32LE(44100, 24); audioBytes.writeUInt32LE(88200, 28);
+  audioBytes.writeUInt16LE(2, 32); audioBytes.writeUInt16LE(16, 34);
+  audioBytes.write("data", 36); audioBytes.writeUInt32LE(audioBytes.length - 44, 40);
+  for (let i = 0; i < 4410; i++) audioBytes.writeInt16LE(Math.round(500 * Math.sin(i / 20)), 44 + i * 2);
+  const audioHash = createHash("sha256").update(audioBytes).digest("hex");
+  const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "Load audio for Before experiment", exact: true }).click();
+  await (await chooser).setFiles({ name: "New-instruction.wav", mimeType: "audio/wav", buffer: audioBytes });
+  await page.waitForFunction(hash => window.PPSDesignerApp.getState().design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots
+    .some(slot => slot.slot === "before_experiment" && slot.path === `browser-asset:${hash}.wav`), audioHash);
+  assert.equal(await page.locator('[data-run-instruction-slot="before_experiment"] [data-instruction-field="path"]').inputValue(), `browser-asset:${audioHash}.wav`, "the instruction form adopts the selected file before later edits");
+  assert.match(await page.locator('[data-run-instruction-slot="before_experiment"] .status-label').innerText(), /duration unverified/);
   await instruction.fill("Reviewed instruction label");
-  await page.waitForFunction(() => window.PPSDesignerApp.getState().design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots[0].label === "Reviewed instruction label");
+  await page.waitForFunction(() => window.PPSDesignerApp.getState().design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots.find(slot => slot.slot === "before_experiment").label === "Reviewed instruction label");
   await page.waitForFunction(() => document.activeElement === document.getElementById("instruction-before_experiment-label"));
   const continuation = page.getByRole("combobox", { name: "Before experiment continue mode", exact: true });
   await continuation.press("Enter");
   await page.getByRole("option", { name: "Runner button", exact: true }).click();
-  await page.waitForFunction(() => window.PPSDesignerApp.getState().design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots[0].continue_mode === "button");
+  await page.waitForFunction(() => window.PPSDesignerApp.getState().design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots.find(slot => slot.slot === "before_experiment").continue_mode === "button");
   await page.waitForFunction(() => document.activeElement === document.getElementById("instruction-before_experiment-continue-combobox"));
   const delay = page.getByRole("spinbutton", { name: "Before experiment delay seconds", exact: true });
   await delay.fill("2.5");
-  await page.waitForFunction(() => window.PPSDesignerApp.getState().design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots[0].delay_s === 2.5);
+  await page.waitForFunction(() => window.PPSDesignerApp.getState().design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots.find(slot => slot.slot === "before_experiment").delay_s === 2.5);
+  const focusEvidence = [];
+  for (const height of [620, 1000]) {
+    await page.setViewportSize({ width: 1440, height });
+    const ids = ["enabled", "label", "import", "continue-combobox", "delay", "button"].map(field => `instruction-after_experiment-${field}`);
+    await page.locator(`#${ids[0]}`).focus();
+    for (let i = 0; i < ids.length; i++) {
+      if (i) await page.keyboard.press("Tab");
+      assert.equal(await page.evaluate(() => document.activeElement.id), ids[i]);
+      await page.waitForFunction(() => {
+        const box = document.activeElement.getBoundingClientRect();
+        return box.top >= 0 && box.bottom <= innerHeight;
+      });
+      await page.evaluate(async () => {
+        let previous = NaN, stable = 0;
+        for (let frame = 0; frame < 180 && stable < 3; frame++) {
+          await new Promise(requestAnimationFrame);
+          const top = document.activeElement.getBoundingClientRect().top;
+          stable = Math.abs(top - previous) < 0.1 ? stable + 1 : 0;
+          previous = top;
+        }
+      });
+      const visible = await page.evaluate(() => {
+        const node = document.activeElement, box = node.getBoundingClientRect();
+        const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+        const footer = document.querySelector("#save-study-profile").closest(".step-footer").getBoundingClientRect();
+        return { visible: Boolean(hit && (node === hit || node.contains(hit))) && box.top >= 0 && box.bottom <= innerHeight
+          && (box.bottom <= footer.top || box.top >= footer.bottom), box: box.toJSON(), footer: footer.toJSON() };
+      });
+      focusEvidence.push({ height, id: ids[i], ...visible });
+      if (!visible.visible) await page.screenshot({ path: `${screenshotPath}-focus-${height}.png` });
+      assert.equal(visible.visible, true, `${ids[i]} is fully above the footer at ${height}px: ${JSON.stringify(visible)}`);
+    }
+  }
+  await writeFile(join(dirname(screenshotPath), "instruction-focus.json"), JSON.stringify(focusEvidence, null, 2));
   await page.locator("#run-instruction-slots").screenshot({ path: screenshotPath });
   await page.locator("#save-study-profile").click();
   await page.waitForFunction(async () => (await window.PPSDesigner.drafts.load())?.custom_workflow.is_finalized);
@@ -121,15 +172,27 @@ export async function verifyDesignerControlNames(page, screenshotPath) {
   await file.saveAs(path);
   const bytes = await readFile(path);
   let profile;
+  const entries = new Map();
   for (let offset = 0; bytes.readUInt32LE(offset) === 0x04034b50;) {
     assert.equal(bytes.readUInt16LE(offset + 8), 0, "the existing bundle stores entries uncompressed");
     const size = bytes.readUInt32LE(offset + 18), nameSize = bytes.readUInt16LE(offset + 26), extraSize = bytes.readUInt16LE(offset + 28);
     const start = offset + 30 + nameSize + extraSize;
-    if (bytes.toString("utf8", offset + 30, offset + 30 + nameSize) === "profile.json") profile = JSON.parse(bytes.toString("utf8", start, start + size));
+    const name = bytes.toString("utf8", offset + 30, offset + 30 + nameSize);
+    entries.set(name, bytes.subarray(start, start + size));
+    if (name === "profile.json") profile = JSON.parse(bytes.toString("utf8", start, start + size));
     offset = start + size;
   }
-  const slot = profile.design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots[0];
+  const slot = profile.design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots.find(slot => slot.slot === "before_experiment");
   assert.equal(slot.label, "Reviewed instruction label");
   assert.equal(slot.continue_mode, "button");
   assert.equal(slot.delay_s, 2.5);
+  assert.equal(slot.path, `browser-asset:${audioHash}.wav`);
+  assert.equal(slot.sha256, audioHash);
+  assert.equal(slot.browser_asset_id, `${audioHash}.wav`);
+  const asset = profile.assets.find(asset => asset.logical_id === slot.browser_asset_id);
+  assert.equal(asset.source_name, "New-instruction.wav");
+  assert.equal(asset.sha256, audioHash);
+  assert.deepEqual(entries.get(asset.path), audioBytes);
+  const manifest = JSON.parse(entries.get("manifest.json").toString("utf8"));
+  assert.equal(manifest.files.find(file => file.path === asset.path).sha256, audioHash);
 }

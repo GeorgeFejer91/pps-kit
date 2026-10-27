@@ -6560,6 +6560,7 @@ function normalizedRunInstructionSlots(profile = {}) {
       enabled: Boolean(item.enabled),
       required: false,
       path: item.path || "",
+      browser_asset_id: item.browser_asset_id || "",
       duration_s: Number(item.duration_s || 0),
       sample_rate: Number(item.sample_rate || 0),
       channels: Number(item.channels || 0),
@@ -6587,7 +6588,7 @@ function renderRunInstructions(profile = {}) {
   container.innerHTML = slots.map((slot) => {
     const slotName = RUN_INSTRUCTION_SLOTS.find((item) => item.slot === slot.slot)?.label || slot.slot;
     const controlId = `instruction-${slot.slot}`;
-    const duration = slot.duration_s ? `${slot.duration_s.toFixed(slot.duration_s >= 10 ? 1 : 2)}s` : "no clip";
+    const duration = slot.duration_s ? `${slot.duration_s.toFixed(slot.duration_s >= 10 ? 1 : 2)}s` : slot.path ? "duration unverified" : "no clip";
     const modeOptions = RUN_INSTRUCTION_CONTINUE_MODES.map((mode) => (
       `<option value="${mode.value}" ${mode.value === slot.continue_mode ? "selected" : ""}>${mode.label}</option>`
     )).join("");
@@ -6605,6 +6606,7 @@ function renderRunInstructions(profile = {}) {
         <input id="${controlId}-delay" aria-label="${escapeHtml(slotName)} delay seconds" data-instruction-field="delay_s" type="number" min="0" step="0.1" value="${slot.delay_s}" ${prepared ? "disabled" : ""} title="Delay seconds">
         <input id="${controlId}-button" aria-label="${escapeHtml(slotName)} Runner button label" data-instruction-field="button_label" type="text" value="${escapeHtml(slot.button_label)}" ${prepared ? "disabled" : ""} title="Runner button label">
         <input data-instruction-field="path" type="hidden" value="${escapeHtml(slot.path)}">
+        <input data-instruction-field="browser_asset_id" type="hidden" value="${escapeHtml(slot.browser_asset_id)}">
         <input data-instruction-field="duration_s" type="hidden" value="${slot.duration_s}">
         <input data-instruction-field="sample_rate" type="hidden" value="${slot.sample_rate}">
         <input data-instruction-field="channels" type="hidden" value="${slot.channels}">
@@ -6628,6 +6630,7 @@ function collectRunInstructionProfile() {
       enabled: field("enabled")?.checked === true,
       required: false,
       path: field("path")?.value.trim() || "",
+      browser_asset_id: field("browser_asset_id")?.value.trim() || "",
       duration_s: Number(field("duration_s")?.value || 0),
       sample_rate: Number(field("sample_rate")?.value || 0),
       channels: Number(field("channels")?.value || 0),
@@ -9071,6 +9074,7 @@ async function importNativeProfile() {
 async function importAudioFromPicker() {
   if (workflowSaveInFlight) return;
   const importState = state;
+  const instructionSlot = pendingInstructionSlot;
   const input = $("audio-file-input");
   const file = input.files && input.files[0];
   input.value = "";
@@ -9100,13 +9104,22 @@ async function importAudioFromPicker() {
       source_input_path: `browser-asset:${stored.id}`,
       trajectory_snapshot: {}
     };
-    if (pendingInstructionSlot) {
-      const profile = state.design.study_profile_reference_parameters?.dashboard_run_setup || {};
-      profile.instruction_profile = profile.instruction_profile || { slots: [] };
-      profile.instruction_profile.slots = (profile.instruction_profile.slots || []).filter((item) => item.slot !== pendingInstructionSlot);
-      profile.instruction_profile.slots.push({ slot: pendingInstructionSlot, label: audio.label, path: audio.path, browser_asset_id: stored.id });
-      state.design.study_profile_reference_parameters.dashboard_run_setup = profile;
-      pendingInstructionSlot = "";
+    if (instructionSlot) {
+      const profile = collectRunInstructionProfile();
+      const slot = profile.slots.find(item => item.slot === instructionSlot);
+      if (!slot) throw new Error("The selected instruction slot is no longer available.");
+      Object.assign(slot, { label: audio.label, path: audio.path, browser_asset_id: stored.id,
+        sha256: stored.sha256, duration_s: 0, sample_rate: 0, channels: 0, source: "browser_upload" });
+      const parameters = state.design.study_profile_reference_parameters ||= {};
+      parameters.dashboard_run_setup ||= {};
+      parameters.dashboard_run_setup.instruction_profile = profile;
+      state.run_sequence_setup = { ...(state.run_sequence_setup || {}), instruction_profile: profile };
+      if (pendingInstructionSlot === instructionSlot) pendingInstructionSlot = "";
+      markDesignerDirty();
+      renderRunInstructions(profile);
+      scheduleRunSequencePreview();
+      showToast("Instruction audio selected locally. Review and save the profile; exact WAV timing is checked on desktop.");
+      return;
     } else {
       const remake = pendingBakeRecipe?.action === "remake";
       if (remake) {

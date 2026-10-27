@@ -206,6 +206,31 @@ test("audio imports already pending cannot mutate a finalizing or replaced hoste
   }
 });
 
+test("hosted instruction selection replaces old media in both design and form without dropping continuation settings", async () => {
+  const old = { slot: "before_experiment", label: "Old", path: "old.wav", enabled: true,
+    continue_mode: "button", delay_s: 2.5, button_label: "Begin", duration_s: 85.7, sample_rate: 44100, channels: 2, sha256: "old-hash" };
+  const original = { design: { study_profile_reference_parameters: {} }, run_sequence_setup: { instruction_profile: { slots: [old] } } };
+  let rendered, dirty = 0, previews = 0;
+  const context = vm.createContext({
+    state: original, staticModeActive: true, editModeActive: true, workflowSaveInFlight: false,
+    pendingAudioImportMode: "instruction", pendingInstructionSlot: "before_experiment", pendingDisplayColorHex: "#112233",
+    $: () => ({ files: [{ name: "New.wav" }], value: "" }),
+    window: { PPSDesigner: { drafts: { storeAudio: async () => ({ id: "new.wav", url: "blob:new", sha256: "new-hash" }) } } },
+    collectRunInstructionProfile: () => ({ slots: [structuredClone(old)] }),
+    renderRunInstructions: profile => { rendered = profile; }, markDesignerDirty: () => dirty++,
+    scheduleRunSequencePreview: () => previews++, showToast() {}, renderBakePanel() { throw new Error("Instruction import must not stage an ingredient"); },
+  });
+  vm.runInContext(handler("importAudioFromPicker", "function fileToBase64"), context);
+  await vm.runInContext("importAudioFromPicker()", context);
+  const profile = original.design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile;
+  assert.equal(profile, rendered);
+  assert.equal(profile, original.run_sequence_setup.instruction_profile);
+  assert.deepEqual(JSON.parse(JSON.stringify(profile.slots[0])), { ...old, label: "New", path: "browser-asset:new.wav",
+    browser_asset_id: "new.wav", sha256: "new-hash", duration_s: 0, sample_rate: 0, channels: 0, source: "browser_upload" });
+  assert.equal(dirty, 1);
+  assert.equal(previews, 1);
+});
+
 test("storage failure leaves finalization editable and retryable", async () => {
   const storage = deferred();
   const { context, shell, save } = finalizationHarness(() => storage.promise);
