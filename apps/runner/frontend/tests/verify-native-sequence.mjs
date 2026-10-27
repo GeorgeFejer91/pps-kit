@@ -93,6 +93,12 @@ try {
       } };
   });
   await page.goto(`http://127.0.0.1:${server.address().port}/apps/runner/compiled/index.html`);
+  await page.locator("#lsl-ready").filter({ hasText: "Not supported in this preview" }).waitFor();
+  await page.getByRole("button", { name: "Data Logging", exact: true }).click();
+  assert.match(await page.locator('[data-panel="logging"]').innerText(), /Durable event log and result receipts\s+Supported in the native Runner/);
+  assert.equal(await page.locator("#native-recording-status").innerText(), "Trial-response recording not started.");
+  await page.locator('[data-panel="logging"]').screenshot({ path: resolve(output, "runner-recording-capabilities.png") });
+  await page.getByRole("button", { name: "Experiment Control", exact: true }).click();
   await page.locator("#select-session-group").click();
   await page.locator("#native-results-summary").filter({ hasText: "not resumed" }).waitFor();
   assert.match(await page.locator("#native-results-list").innerText(), /interrupted/);

@@ -323,13 +323,21 @@ function renderSnapshot(next, { adoptContext = false } = {}) {
   if (preparedPlan && preparedSessionId !== next.identity?.session_id) renderPreparedPlan(null);
   text("audio-route", next.safety?.audio_route_ready ? "Ready" : "Not ready");
   text("local-armed", next.safety?.local_armed ? "Yes" : "No");
-  text("lsl-ready", next.safety?.lsl_ready ? "Ready" : "Not ready");
+  text("lsl-ready", next.safety?.lsl_ready ? "Ready" : api.kind === "tauri-native" ? "Not supported in this preview" : "Not ready");
   text("capture-ready", next.safety?.capture_started ? "Started" : "Not started");
   text("session-id", next.identity?.session_id);
   text("package-part", next.part?.current_package_part ? `Part ${next.part.current_package_part}` : "—");
   text("revision", next.revision ?? 0);
   text("audit-events", next.audit_event_count ?? 0);
   text("last-note", next.last_note, "None");
+  text("native-recording-status", api.kind !== "tauri-native" ? "Browser preview: native result recording is unavailable."
+    : next.run?.participant_capture_ready === true ? "Trial-response recording active."
+    : phase === "completed" ? "Part result files finalized."
+    : ["interrupted", "error"].includes(phase) ? "Trial-response recording stopped. Inspect existing result files."
+    : phase === "paused" ? "Trial-response recording paused."
+    : ["running", "instruction_gate"].includes(phase) ? "Execution active; trial responses are not currently accepted."
+    : completedBlockIndex > 0 ? "No trial-response recording active between occurrences."
+    : "Trial-response recording not started.");
 
   const allowed = new Set(next.allowed_actions || []);
   document.querySelectorAll("[data-action]").forEach((button) => {

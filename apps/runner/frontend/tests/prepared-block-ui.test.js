@@ -91,3 +91,16 @@ test("native instruction summaries require their own scope and retire at the wai
   assert.equal(prepare({ ...instruction, mediaKind: "unrecognized" }), false);
   assert.equal(prepare({ ...instruction, instructionContinueMode: "automatic" }), false);
 });
+
+test("native capability labels separate durable recording support, active capture and absent LSL", () => {
+  const { context, elements, render } = harness();
+  render(snapshot("prepared", 1, 0));
+  assert.equal(elements["lsl-ready"].textContent, "Not supported in this preview");
+  assert.equal(elements["native-recording-status"].textContent, "Trial-response recording not started.");
+  render({ ...snapshot("running", 2), run: { phase: "running", participant_capture_ready: true }, safety: { lsl_ready: true } });
+  assert.equal(elements["lsl-ready"].textContent, "Ready");
+  assert.equal(elements["native-recording-status"].textContent, "Trial-response recording active.");
+  context.api.kind = "browser-preview";
+  render(snapshot("running", 3));
+  assert.match(elements["native-recording-status"].textContent, /native result recording is unavailable/);
+});

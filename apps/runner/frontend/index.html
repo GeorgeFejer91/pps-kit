@@ -177,14 +177,15 @@
           <div class="workspace-grid balanced-grid">
             <section class="panel stack">
               <div class="section-heading"><div><p class="eyebrow">Acquisition</p><h2>Data Logging</h2></div><span class="badge">Target-owned</span></div>
-              <div class="check-list read-only-list">
-                <label><input type="checkbox" checked disabled> Bounded in-memory semantic audit preview</label>
-                <label><input type="checkbox" disabled> Durable scientific event log</label>
-                <label><input type="checkbox" disabled> Lab Streaming Layer mirror</label>
-                <label><input type="checkbox" disabled> Multichannel audio evidence</label>
-                <label><input type="checkbox" disabled> Physical capture evidence</label>
-              </div>
-              <p class="safety-copy">This rebuild exposes state, but it does not silently enable hardware acquisition. Native readiness gates remain authoritative.</p>
+              <dl class="summary-list">
+                <div><dt>Semantic event audit</dt><dd>Supported; bounded local preview</dd></div>
+                <div><dt>Durable event log and result receipts</dt><dd>Supported in the native Runner</dd></div>
+                <div><dt>Lab Streaming Layer mirror</dt><dd>Not supported in this preview</dd></div>
+                <div><dt>Multichannel audio recording</dt><dd>Not supported in this preview</dd></div>
+                <div><dt>Physical capture</dt><dd>Not supported in this preview</dd></div>
+              </dl>
+              <p id="native-recording-status" class="safety-copy" role="status">Trial-response recording not started.</p>
+              <p class="safety-copy">Native execution records semantic events and trial results. Playback alone does not establish physical timing or capture qualification.</p>
             </section>
             <section class="panel stack">
               <p class="eyebrow">Session annotation</p>
