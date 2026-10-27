@@ -1615,7 +1615,7 @@ function staticTrialFileRow({
 
 function staticTrialFileCount(design) {
   const protocol = design.protocol || {};
-  const soas = (protocol.soa_values_ms || []).filter(value => Number.isFinite(Number(value)));
+  const soas = (protocol.soa_values_ms || []).filter(value => Number.isFinite(Number(value))).map(Number);
   const baselines = staticBaselineSoaValues(protocol, soas).length;
   return (protocol.trial_strips || []).reduce((total, strip) => {
     const variants = countStripVariants(strip);
