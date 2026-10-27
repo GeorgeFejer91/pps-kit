@@ -26858,6 +26858,884 @@
           }
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.cognition.2018.04.001",
+      "source_type": "primary_abstract_and_indexed_methods_access_gap",
+      "source_file": "https://pubmed.ncbi.nlm.nih.gov/29655026/",
+      "review_date": "2026-10-27",
+      "review_scope": "Primary snippets establish one 41-person cohort with PPS in Session 1 and heartbeat/time-estimation supporting measures in Session 2. Five PPS-fit exclusions are reported at that stage only; full Methods inventory unavailable. Do not mark a complete Methods inventory or import parameter values from related papers. The full author manuscript has not been reviewed or compared to the final publisher version.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "Publisher snippet confirms looming sounds accompany tactile targets, but exact auditory source, waveform, envelope, duration and level were not accessible in full Methods.",
+          "page_or_section": "PubMed abstract; publisher indexed Participants and Individual PPS boundary snippets; actual full-text access attempts recorded",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "Looming sound accompanies tactile targets; exact source recipe unavailable."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            }
+          },
+          "evidence_note": "Access-audited primary snippets only; not a complete Methods inventory. No related-paper protocol is substituted."
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Looming sound and a fitted PPS boundary are confirmed; exact spatial endpoints and kinematic law remain unavailable.",
+          "page_or_section": "PubMed abstract; publisher indexed Participants and Individual PPS boundary snippets; actual full-text access attempts recorded",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Looming sound; no exact endpoints or kinematic law available."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            }
+          },
+          "evidence_note": "Access-audited primary snippets only; not a complete Methods inventory. No related-paper protocol is substituted."
+        },
+        "trial_sequence": {
+          "status": "source_unavailable",
+          "value": "Session 1 is the PPS task. Complete acquisition trial sequence and timing are not accessible.",
+          "page_or_section": "PubMed abstract; publisher indexed Participants and Individual PPS boundary snippets; actual full-text access attempts recorded",
+          "component_reviews": {
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            }
+          },
+          "evidence_note": "Access-audited primary snippets only; not a complete Methods inventory. No related-paper protocol is substituted."
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Tactile-target reaction times are used to fit a sigmoid PPS boundary. Response hand, device and acquisition deadline are not exposed by the inspected snippets.",
+          "page_or_section": "PubMed abstract; publisher indexed Participants and Individual PPS boundary snippets; actual full-text access attempts recorded",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Tactile-target reaction times used to estimate PPS boundary; other response details inaccessible."
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            }
+          },
+          "evidence_note": "Access-audited primary snippets only; not a complete Methods inventory. No related-paper protocol is substituted."
+        },
+        "jitter_iti_policy": {
+          "status": "source_unavailable",
+          "value": "Exact jitter and ITI policy were not accessible. Do not inherit another Ferri protocol from a citation.",
+          "page_or_section": "PubMed abstract; publisher indexed Participants and Individual PPS boundary snippets; actual full-text access attempts recorded",
+          "component_reviews": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            }
+          },
+          "evidence_note": "Access-audited primary snippets only; not a complete Methods inventory. No related-paper protocol is substituted."
+        },
+        "soa_schedule": {
+          "status": "source_unavailable",
+          "value": "No complete audio-tactile SOA list or onset convention was available in the inspected primary snippets.",
+          "page_or_section": "PubMed abstract; publisher indexed Participants and Individual PPS boundary snippets; actual full-text access attempts recorded",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            }
+          },
+          "evidence_note": "Access-audited primary snippets only; not a complete Methods inventory. No related-paper protocol is substituted."
+        },
+        "tactile_target": {
+          "status": "source_unavailable",
+          "value": "Tactile target detection is confirmed, but site, waveform, intensity and calibration are not accessible.",
+          "page_or_section": "PubMed abstract; publisher indexed Participants and Individual PPS boundary snippets; actual full-text access attempts recorded",
+          "component_reviews": {
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            }
+          },
+          "evidence_note": "Access-audited primary snippets only; not a complete Methods inventory. No related-paper protocol is substituted."
+        },
+        "baseline_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Tactile-only or other baseline trial allocation cannot be established from the abstract/snippets.",
+          "page_or_section": "PubMed abstract; publisher indexed Participants and Individual PPS boundary snippets; actual full-text access attempts recorded",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            }
+          },
+          "evidence_note": "Access-audited primary snippets only; not a complete Methods inventory. No related-paper protocol is substituted."
+        },
+        "catch_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Catch trial family and count cannot be established from the abstract/snippets.",
+          "page_or_section": "PubMed abstract; publisher indexed Participants and Individual PPS boundary snippets; actual full-text access attempts recorded",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            }
+          },
+          "evidence_note": "Access-audited primary snippets only; not a complete Methods inventory. No related-paper protocol is substituted."
+        },
+        "repetition_allocation": {
+          "status": "source_unavailable",
+          "value": "No acquisition cell repetition counts or total trial count were retrieved.",
+          "page_or_section": "PubMed abstract; publisher indexed Participants and Individual PPS boundary snippets; actual full-text access attempts recorded",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            }
+          },
+          "evidence_note": "Access-audited primary snippets only; not a complete Methods inventory. No related-paper protocol is substituted."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Same participants perform PPS in Session 1 and heartbeat counting/time estimation in Session 2. Within-session block count, task order policy and counterbalancing remain unavailable.",
+          "page_or_section": "PubMed abstract; publisher indexed Participants and Individual PPS boundary snippets; actual full-text access attempts recorded",
+          "component_reviews": {
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Full Methods access blocked after documented primary routes; exact component unavailable."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "PPS Session 1; heartbeat counting/time estimation Session 2; acquisition blocks inaccessible."
+            }
+          },
+          "evidence_note": "Access-audited primary snippets only; not a complete Methods inventory. No related-paper protocol is substituted."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1073/pnas.2516229122",
+      "source_type": "primary_final_methods_preprint_v1_compared",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC12704728/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "One stationary near/far audio–tactile acquisition, 41 recruited and 37 analyzed. Cardiac/HEP, questionnaires and control analyses are supporting measures, not independent cohorts. Final and exact preprint v1 describe the same cohort and protocol. Main final article and preprint v1 Methods reviewed. Final SI publisher PDF HTTP403; Europe PMC supplementaryFiles requests timed out twice. V2 PDF/source XML HTTP403. No supplementary or v2-body review is claimed.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "784 Hz pure tones, 50 ms, from two fixed Visaton FRS 8 speakers. Source levels/frequencies equalized to approximately 60 dB with Room EQ Wizard and MiniDSP EARS; near remained perceptually louder. Sampling rate, envelope and full digital recipe are not reported.",
+          "page_or_section": "Published main article, Materials and Methods > Participants; Task and Stimuli; Experimental Procedure; Physiological and EEG Recordings; Questionnaires; Performance; ECG",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "Pure tones from fixed loudspeakers."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "784 Hz, 50 ms tones; no original asset supplied."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "Sampling rate and onset/offset envelope are not specified."
+            },
+            "level_envelope_calibration": {
+              "status": "reported",
+              "value": "Approximately 60 dB, source frequencies/levels equalized with Room EQ Wizard and MiniDSP EARS. Near sound remained perceptually louder; this is not ear-level loudness equalization."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two Visaton FRS 8 speakers on table."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability."
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Stationary near (<10 cm) and far (130 cm) sources relative to the stimulated right hand near the chest. Arms rest on the table and head on chinrest. Exact near distance, azimuth and full coordinates remain unspecified.",
+          "page_or_section": "Published main article, Materials and Methods > Participants; Task and Stimuli; Experimental Procedure; Physiological and EEG Recordings; Questionnaires; Performance; ECG",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Stationary near/far sources; no moving trajectory."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Right stimulated hand near chest, arms on table, head on chinrest."
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "Near speaker <10 cm, far 130 cm from hand; exact near distance and full azimuth/coordinates are not supplied."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "50 ms stationary tone; no movement velocity."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability."
+        },
+        "trial_sequence": {
+          "status": "partial",
+          "value": "Trial begins with a 4–8 s jittered interval, followed by AT-near, AT-far, T, A-near or A-far. In AT trials sound begins 40 ms after touch. Trial ends 0.1 s after response or at maximal response time of 1 s. Blocks begin/end with 30 s rest; exact jitter distribution and response-window origin across modalities remain unspecified.",
+          "page_or_section": "Published main article, Materials and Methods > Participants; Task and Stimuli; Experimental Procedure; Physiological and EEG Recordings; Questionnaires; Performance; ECG",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "AT-near, AT-far, tactile-only, auditory-near, auditory-far."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Trial-start 4–8 s interval, stimulus family; sound follows touch by 40 ms in AT trials; end 0.1 s after response or maximal response time of 1 s."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "Exact response-window origin across modalities is not further specified."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Randomly intermingled conditions."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability."
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Press a key with the right index finger as fast as possible to touch; ignore sounds and withhold on auditory-only catches. Maximum response time is 1 s, with exact modality-specific origin unspecified. Blink after response; otherwise fixate behind far speaker. Offline RT <100 ms or beyond two condition SD is separate analysis.",
+          "page_or_section": "Published main article, Materials and Methods > Participants; Task and Stimuli; Experimental Procedure; Physiological and EEG Recordings; Questionnaires; Performance; ECG",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to any tactile stimulus, ignore sounds; auditory-only trials are catches."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Keypress with right index finger."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "One keypress for touch, withhold on auditory-only."
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "Maximum response time 1 s is explicit; exact onset anchor across modality families is not further specified."
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Offline RT <100 ms and beyond two within-condition SD excluded. Fixate dot; blink after response."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability."
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "Jittered trial-start interval of 4–8 s; distribution and discrete resolution are not reported. End occurs 0.1 s after response or at maximum response time of 1 s. Do not assume uniform jitter.",
+          "page_or_section": "Published main article, Materials and Methods > Participants; Task and Stimuli; Experimental Procedure; Physiological and EEG Recordings; Questionnaires; Performance; ECG",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Jittered trial-start interval; response-contingent trial termination."
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "Interval at trial start before stimulus. End 0.1 s after response or maximal response time 1 s."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "4–8 s trial-start interval."
+            },
+            "distribution": {
+              "status": "not_reported",
+              "value": "Distribution and discrete resolution not reported."
+            },
+            "randomization": {
+              "status": "not_reported",
+              "value": "No randomization seed/algorithm reported."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability."
+        },
+        "soa_schedule": {
+          "status": "derived_complete",
+          "value": "Sound starts 40 ms AFTER tactile onset. In tactile-onset-minus-auditory-onset notation, SOA is −0.040 s. Both near/far conditions share this timing. Cardiac phase/HEP are analyses of recorded physiology, not a cardiac-triggered stimulus schedule.",
+          "page_or_section": "Published main article, Materials and Methods > Participants; Task and Stimuli; Experimental Procedure; Physiological and EEG Recordings; Questionnaires; Performance; ECG",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "derived",
+              "value": "Tactile onset minus auditory onset: audio follows touch by 40 ms, giving −40 ms."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "derived",
+              "value": "One AT SOA: −0.040 s, same in near/far conditions."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Fixed near/far sources; no trajectory directions."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability.",
+          "derivation_note": "Reported auditory onset is 40 ms after touch. Tactile-onset minus auditory-onset = 0 − 0.040 = −0.040 s. Cardiac phase is recorded for analysis, not a reported trigger schedule."
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "Right-hand dorsum receives one 200 µs electrical square pulse from Digitimer DS7A, through two 8 mm Ag/AgCl electrodes. Intensity is twice individual detection threshold: final mean 3.7 ± 0.7 mA, range 2.5–5.1 mA. Electrode site alternates and threshold is redetermined between blocks. Trigger/interface details remain unspecified.",
+          "page_or_section": "Published main article, Materials and Methods > Participants; Task and Stimuli; Experimental Procedure; Physiological and EEG Recordings; Questionnaires; Performance; ECG",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Electrical stimulation via Digitimer DS7A constant-current stimulator."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Right-hand dorsum; pair of 8 mm Ag/AgCl electrodes between middle/index or middle/ring tendons, alternating after blocks."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Single 200 µs square pulse."
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "Twice individual detection threshold; final mean 3.7 ± 0.7 mA, range 2.5–5.1 mA."
+            },
+            "intensity_or_calibration": {
+              "status": "reported",
+              "value": "Method of limits, twice threshold; redetermined after blocks with electrode-site alternation."
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "Stimulator trigger/interface and measured hardware latency are not specified in main Methods."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability."
+        },
+        "baseline_trial_contract": {
+          "status": "derived_complete",
+          "value": "Tactile-only T trials use the same target without sound: 12 per block × 5 blocks = 60. The 30 s quiet rest at block boundaries is not a tactile baseline trial.",
+          "page_or_section": "Published main article, Materials and Methods > Participants; Task and Stimuli; Experimental Procedure; Physiological and EEG Recordings; Questionnaires; Performance; ECG",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Tactile-only without sound; distinct from 30 s quiet rest at block boundaries."
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Same tactile target after trial-start 4–8 s interval; no sound anchor exists in this family."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "12 tactile-only trials per block, five blocks."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "12 × 5 = 60 tactile-only baseline trials."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability.",
+          "derivation_note": "12 tactile-only trials per block × 5 blocks = 60."
+        },
+        "catch_trial_contract": {
+          "status": "derived_complete",
+          "value": "Auditory-only A-near and A-far require no response: 12 each per block, 60 each over five blocks, 120 catches total (40% of 300 main trials).",
+          "page_or_section": "Published main article, Materials and Methods > Participants; Task and Stimuli; Experimental Procedure; Physiological and EEG Recordings; Questionnaires; Performance; ECG",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only near and far, no touch."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Withhold response."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "12 auditory-near and 12 auditory-far per block; five blocks."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "2 × 12 × 5 = 120 catches (60 near, 60 far)."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability.",
+          "derivation_note": "12 near + 12 far auditory-only catches per block, multiplied by 5 blocks = 120; 60 per source."
+        },
+        "repetition_allocation": {
+          "status": "derived_complete",
+          "value": "Five conditions × 12 trials per condition × 5 blocks = 300 acquisition trials, 60 of each condition: 180 tactile targets and 120 auditory-only catches. Separate training: at least two 20-trial auditory-distance blocks until error <20%, and 40 task-practice trials (10 AT-near + 10 AT-far + 10 T + 5 A-near + 5 A-far).",
+          "page_or_section": "Published main article, Materials and Methods > Participants; Task and Stimuli; Experimental Procedure; Physiological and EEG Recordings; Questionnaires; Performance; ECG",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five conditions: AT-near, AT-far, T, A-near, A-far."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "12 trials per condition per block; five blocks."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Training is separate: at least two 20-trial auditory-distance blocks until error <20%; 40-trial task practice (10/10/10/5/5)."
+            },
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "5 × 12 × 5 = 300 main trials; 3 tactile-target conditions × 60 = 180 targets, 2 catch conditions × 60 = 120 catches."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability.",
+          "derivation_note": "Five conditions × 12 trials × 5 blocks = 300; tactile targets 3 × 60 = 180 and auditory-only catches 2 × 60 = 120. Training remains separate."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Auditory familiarization/discrimination then task practice then five acquisition blocks. Conditions are randomly intermingled, 12 each per block. Electrode repositioning, intensity adjustment and eye calibration precede blocks; 30 s rest at both block boundaries and feedback afterward. Exact shuffle constraints are not reported.",
+          "page_or_section": "Published main article, Materials and Methods > Participants; Task and Stimuli; Experimental Procedure; Physiological and EEG Recordings; Questionnaires; Performance; ECG",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "Five main acquisition blocks after auditory training and task practice."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "60 trials each: 12 per five conditions."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "Same condition allocation in all five blocks."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Conditions randomly intermingled."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Training then acquisition; electrode reposition/intensity adjustment and eye calibration before blocks, 30 s rest at each block boundary, feedback after block."
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "Exact constrained-shuffle algorithm or run restrictions are not reported."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1101/2025.06.25.660685",
+      "source_type": "primary_preprint_v1_final_compared_v2_unavailable",
+      "source_file": "https://www.biorxiv.org/content/biorxiv/early/2025/06/27/2025.06.25.660685.full.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "One stationary near/far audio–tactile acquisition, 41 recruited and 37 analyzed. Cardiac/HEP, questionnaires and control analyses are supporting measures, not independent cohorts. Final and exact preprint v1 describe the same cohort and protocol. Main final article and preprint v1 Methods reviewed. Final SI publisher PDF HTTP403; Europe PMC supplementaryFiles requests timed out twice. V2 PDF/source XML HTTP403. No supplementary or v2-body review is claimed.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "784 Hz pure tones, 50 ms, from two fixed Visaton FRS 8 speakers. Source levels/frequencies equalized to approximately 60 dB with Room EQ Wizard and MiniDSP EARS; near remained perceptually louder. Sampling rate, envelope and full digital recipe are not reported.",
+          "page_or_section": "Exact bioRxiv v1, Methods pp. 15–16 (p. 15 line 474 for tactile range)",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "Pure tones from fixed loudspeakers."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "784 Hz, 50 ms tones; no original asset supplied."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "Sampling rate and onset/offset envelope are not specified."
+            },
+            "level_envelope_calibration": {
+              "status": "reported",
+              "value": "Approximately 60 dB, source frequencies/levels equalized with Room EQ Wizard and MiniDSP EARS. Near sound remained perceptually louder; this is not ear-level loudness equalization."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two Visaton FRS 8 speakers on table."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability."
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Stationary near (<10 cm) and far (130 cm) sources relative to the stimulated right hand near the chest. Arms rest on the table and head on chinrest. Exact near distance, azimuth and full coordinates remain unspecified.",
+          "page_or_section": "Exact bioRxiv v1, Methods pp. 15–16 (p. 15 line 474 for tactile range)",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Stationary near/far sources; no moving trajectory."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Right stimulated hand near chest, arms on table, head on chinrest."
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "Near speaker <10 cm, far 130 cm from hand; exact near distance and full azimuth/coordinates are not supplied."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "50 ms stationary tone; no movement velocity."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability."
+        },
+        "trial_sequence": {
+          "status": "partial",
+          "value": "Trial begins with a 4–8 s jittered interval, followed by AT-near, AT-far, T, A-near or A-far. In AT trials sound begins 40 ms after touch. Trial ends 0.1 s after response or at maximal response time of 1 s. Blocks begin/end with 30 s rest; exact jitter distribution and response-window origin across modalities remain unspecified.",
+          "page_or_section": "Exact bioRxiv v1, Methods pp. 15–16 (p. 15 line 474 for tactile range)",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "AT-near, AT-far, tactile-only, auditory-near, auditory-far."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Trial-start 4–8 s interval, stimulus family; sound follows touch by 40 ms in AT trials; end 0.1 s after response or maximal response time of 1 s."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "Exact response-window origin across modalities is not further specified."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Randomly intermingled conditions."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability."
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Press a key with the right index finger as fast as possible to touch; ignore sounds and withhold on auditory-only catches. Maximum response time is 1 s, with exact modality-specific origin unspecified. Blink after response; otherwise fixate behind far speaker. Offline RT <100 ms or beyond two condition SD is separate analysis.",
+          "page_or_section": "Exact bioRxiv v1, Methods pp. 15–16 (p. 15 line 474 for tactile range)",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to any tactile stimulus, ignore sounds; auditory-only trials are catches."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Keypress with right index finger."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "One keypress for touch, withhold on auditory-only."
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "Maximum response time 1 s is explicit; exact onset anchor across modality families is not further specified."
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Offline RT <100 ms and beyond two within-condition SD excluded. Fixate dot; blink after response."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability."
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "Jittered trial-start interval of 4–8 s; distribution and discrete resolution are not reported. End occurs 0.1 s after response or at maximum response time of 1 s. Do not assume uniform jitter.",
+          "page_or_section": "Exact bioRxiv v1, Methods pp. 15–16 (p. 15 line 474 for tactile range)",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Jittered trial-start interval; response-contingent trial termination."
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "Interval at trial start before stimulus. End 0.1 s after response or maximal response time 1 s."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "4–8 s trial-start interval."
+            },
+            "distribution": {
+              "status": "not_reported",
+              "value": "Distribution and discrete resolution not reported."
+            },
+            "randomization": {
+              "status": "not_reported",
+              "value": "No randomization seed/algorithm reported."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability."
+        },
+        "soa_schedule": {
+          "status": "derived_complete",
+          "value": "Sound starts 40 ms AFTER tactile onset. In tactile-onset-minus-auditory-onset notation, SOA is −0.040 s. Both near/far conditions share this timing. Cardiac phase/HEP are analyses of recorded physiology, not a cardiac-triggered stimulus schedule.",
+          "page_or_section": "Exact bioRxiv v1, Methods pp. 15–16 (p. 15 line 474 for tactile range)",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "derived",
+              "value": "Tactile onset minus auditory onset: audio follows touch by 40 ms, giving −40 ms."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "derived",
+              "value": "One AT SOA: −0.040 s, same in near/far conditions."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Fixed near/far sources; no trajectory directions."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability.",
+          "derivation_note": "Reported auditory onset is 40 ms after touch. Tactile-onset minus auditory-onset = 0 − 0.040 = −0.040 s. Cardiac phase is recorded for analysis, not a reported trigger schedule."
+        },
+        "tactile_target": {
+          "status": "conflicting_evidence",
+          "value": "Right-hand dorsum, single 200 µs DS7A electrical square pulse, two 8 mm Ag/AgCl electrodes, twice individually measured threshold with site/threshold adjustment between blocks. Exact v1 p. 15 line 474 prints mean 3.7 ± 0.7 mA with range 25.3–51 mA, an internal inconsistency. Final range 2.5–5.1 mA is a later correction, not silently substituted into v1. Trigger/interface details remain unspecified.",
+          "page_or_section": "Exact bioRxiv v1, Methods pp. 15–16 (p. 15 line 474 for tactile range)",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Electrical stimulation via Digitimer DS7A constant-current stimulator."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Right-hand dorsum; pair of 8 mm Ag/AgCl electrodes between middle/index or middle/ring tendons, alternating after blocks."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Single 200 µs square pulse."
+            },
+            "frequency_or_amplitude": {
+              "status": "conflicting_evidence",
+              "value": "V1 mean 3.7 ± 0.7 mA conflicts with printed range 25.3–51 mA. Rendered original p. 15 line 474 verified; final range differs."
+            },
+            "intensity_or_calibration": {
+              "status": "reported",
+              "value": "Method of limits, twice threshold; redetermined after blocks with electrode-site alternation."
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "Stimulator trigger/interface and measured hardware latency are not specified in main Methods."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability."
+        },
+        "baseline_trial_contract": {
+          "status": "derived_complete",
+          "value": "Tactile-only T trials use the same target without sound: 12 per block × 5 blocks = 60. The 30 s quiet rest at block boundaries is not a tactile baseline trial.",
+          "page_or_section": "Exact bioRxiv v1, Methods pp. 15–16 (p. 15 line 474 for tactile range)",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Tactile-only without sound; distinct from 30 s quiet rest at block boundaries."
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Same tactile target after trial-start 4–8 s interval; no sound anchor exists in this family."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "12 tactile-only trials per block, five blocks."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "12 × 5 = 60 tactile-only baseline trials."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability.",
+          "derivation_note": "12 tactile-only trials per block × 5 blocks = 60."
+        },
+        "catch_trial_contract": {
+          "status": "derived_complete",
+          "value": "Auditory-only A-near and A-far require no response: 12 each per block, 60 each over five blocks, 120 catches total (40% of 300 main trials).",
+          "page_or_section": "Exact bioRxiv v1, Methods pp. 15–16 (p. 15 line 474 for tactile range)",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only near and far, no touch."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Withhold response."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "12 auditory-near and 12 auditory-far per block; five blocks."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "2 × 12 × 5 = 120 catches (60 near, 60 far)."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability.",
+          "derivation_note": "12 near + 12 far auditory-only catches per block, multiplied by 5 blocks = 120; 60 per source."
+        },
+        "repetition_allocation": {
+          "status": "derived_complete",
+          "value": "Five conditions × 12 trials per condition × 5 blocks = 300 acquisition trials, 60 of each condition: 180 tactile targets and 120 auditory-only catches. Separate training: at least two 20-trial auditory-distance blocks until error <20%, and 40 task-practice trials (10 AT-near + 10 AT-far + 10 T + 5 A-near + 5 A-far).",
+          "page_or_section": "Exact bioRxiv v1, Methods pp. 15–16 (p. 15 line 474 for tactile range)",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five conditions: AT-near, AT-far, T, A-near, A-far."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "12 trials per condition per block; five blocks."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Training is separate: at least two 20-trial auditory-distance blocks until error <20%; 40-trial task practice (10/10/10/5/5)."
+            },
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "5 × 12 × 5 = 300 main trials; 3 tactile-target conditions × 60 = 180 targets, 2 catch conditions × 60 = 120 catches."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability.",
+          "derivation_note": "Five conditions × 12 trials × 5 blocks = 300; tactile targets 3 × 60 = 180 and auditory-only catches 2 × 60 = 120. Training remains separate."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Auditory familiarization/discrimination then task practice then five acquisition blocks. Conditions are randomly intermingled, 12 each per block. Electrode repositioning, intensity adjustment and eye calibration precede blocks; 30 s rest at both block boundaries and feedback afterward. Exact shuffle constraints are not reported.",
+          "page_or_section": "Exact bioRxiv v1, Methods pp. 15–16 (p. 15 line 474 for tactile range)",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "Five main acquisition blocks after auditory training and task practice."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "60 trials each: 12 per five conditions."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "Same condition allocation in all five blocks."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Conditions randomly intermingled."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Training then acquisition; electrode reposition/intensity adjustment and eye calibration before blocks, 30 s rest at each block boundary, feedback after block."
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "Exact constrained-shuffle algorithm or run restrictions are not reported."
+            }
+          },
+          "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability."
+        }
+      }
     }
   ]
 }

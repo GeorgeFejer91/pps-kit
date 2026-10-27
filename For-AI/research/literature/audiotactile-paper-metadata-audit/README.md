@@ -34,24 +34,30 @@ live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
 Current checkpoint (2026-10-27): 94 frozen publications, 148 study/context rows,
-56 registered publication inventories, five access-audited publications,
+58 registered publication inventories, six access-audited publications,
 one audited project-lineage identity,
-and 32 publication inventories still unassessed. Registry presence alone
+and 29 publication inventories still unassessed. Registry presence alone
 does not certify a Methods-confirmed inventory: earlier abstract-based or partial
 inventories still require their source and compact-contract audits.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive these distinctions from explicit registry
 evidence categories and the finalized eleven-contract source dispositions.
-The current audit records 53 Methods-backed inventories (40 current primary
+The current audit records 55 Methods-backed inventories (42 current primary
 reviews, eleven retained primary reviews, and two identified author versions whose
 final comparison is pending), two abstract/metadata inventories, one partial
-Methods inventories, five audited access blockers, one project-lineage boundary, and 32 unregistered publications.
-Only 52 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 42 still need inventory
+Methods inventories, six audited access blockers, one project-lineage boundary, and 29 unregistered publications.
+Only 55 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 39 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Loescher final/v1 retain one shared 41-to-37 cohort and 300-trial stationary
+near/far acquisition. Audio follows touch by 40 ms (tactile-relative SOA −40 ms).
+The v1 current-range inconsistency and final correction remain version-specific;
+v2 body and final SI were inaccessible. Ardizzi has a documented Methods access
+gap with supporting interoception tasks, not invented additional PPS cohorts.
+
 Galli (2015) now has three Methods-confirmed training groups sharing blindfolded
 pre/post PPS assessment: 216 trials per assessment, 432 across both. The reported
 500 ms ITI and approximate 3.66 s trial duration do not resolve padding or the
