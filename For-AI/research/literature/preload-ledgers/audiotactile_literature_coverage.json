@@ -1714,8 +1714,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract logarithmic distances, fixed-distance baselines, and sound-propagation settings"
-      ]
+        "Exact Gaussian-noise realization, LISTEN HRTF and complete room/render settings; motion time origin; trailing-silence distribution and online response deadline. Current Table 2 resolves sound-onset SOAs, -250/+3500-ms baseline anchors, two sampling sessions and 1152-row allocation; old 300-ms-shifted anchors are superseded."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://hal.science/hal-02418179/document",
+      "scope_review_basis": "Fresh DOI-linked author manuscript and rendered Table 2 separate sound-onset anchors from leading silence, analysis RT inclusion from online timing, and one two-session PPS experiment from auditory discomfort tasks."
     },
     {
       "record_id": "ferroni_2020_tool_observation",

@@ -4594,7 +4594,7 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract logarithmic distances, fixed-distance baselines, and sound-propagation settings"
+            "Exact Gaussian-noise realization, LISTEN HRTF and complete room/render settings; motion time origin; trailing-silence distribution and online response deadline. Current Table 2 resolves sound-onset SOAs, -250/+3500-ms baseline anchors, two sampling sessions and 1152-row allocation; old 300-ms-shifted anchors are superseded."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -4629,9 +4629,9 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract logarithmic distances, fixed-distance baselines, and sound-propagation settings"
+        "Exact Gaussian-noise realization, LISTEN HRTF and complete room/render settings; motion time origin; trailing-silence distribution and online response deadline. Current Table 2 resolves sound-onset SOAs, -250/+3500-ms baseline anchors, two sampling sessions and 1152-row allocation; old 300-ms-shifted anchors are superseded."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract logarithmic distances, fixed-distance baselines, and sound-propagation settings",
+      "next_required_action": "Extract or source the missing paper parameters: Exact Gaussian-noise realization, LISTEN HRTF and complete room/render settings; motion time origin; trailing-silence distribution and online response deadline. Current Table 2 resolves sound-onset SOAs, -250/+3500-ms baseline anchors, two sampling sessions and 1152-row allocation; old 300-ms-shifted anchors are superseded.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",

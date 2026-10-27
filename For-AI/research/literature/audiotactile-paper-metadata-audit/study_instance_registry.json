@@ -1081,6 +1081,79 @@
         "basis": "The later Bassolino 2022 article explicitly identifies this paper as prior partial reporting of its healthy-control data; do not count that shared evidence as independent replication."
       },
       "source_review_limit": "Fresh institutional published PDF Methods inspected. Keep explicit 2000-ms foot-response window, three positive SOAs and 110-row recipe while leaving hand crossing, silent baseline zero anchor, interval anchor and block count unresolved."
+    },
+    {
+      "network_node_id": "doi:10.1016/j.jneumeth.2019.108534",
+      "doi": "10.1016/j.jneumeth.2019.108534",
+      "inventory_status": "confirmed_one_two_session_audiotactile_experiment",
+      "instance_count_basis": "One cohort completes logarithmic and pseudo-linear distance-sampling sessions on different days. Session, sound movement and touch delay are within-participant factors. Three subsequent auditory discomfort tasks are supporting assessments, not additional tactile RT experiments.",
+      "evidence_pointer": "https://hal.science/hal-02418179/document::sections 2.1-2.3, manuscript pp. 3-7; Table 2 p. 5",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_matched_expectancy_with_distance_sampling_comparison",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Logarithmic/pseudo-linear sampling with fixed and looming controls",
+          "record_id": "hobeika_2020_methods",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Auditory Behavioral Assessment Tests",
+          "disposition": "auditory_only_affective_validation",
+          "basis": "After the second session, logarithmic and linear six-step auditory tasks collect 0-10 discomfort ratings, followed by a fixed-distance task. No touch or speeded tactile response occurs.",
+          "evidence_pointer": "https://hal.science/hal-02418179/document::section 2.3.2"
+        }
+      ],
+      "source_review_limit": "Fresh HAL author manuscript with journal DOI and rendered Table 2 inspected. Correct the older coarse sound-onset anchor error and avoid treating an analysis inclusion interval as online response timing or random range as uniform. Exact source realization/HRTF, motion onset, interval distribution and response deadline remain unresolved."
+    },
+    {
+      "network_node_id": "doi:10.1250/ast.41.345",
+      "doi": "10.1250/ast.41.345",
+      "inventory_status": "confirmed_three_reported_social_context_experiments",
+      "instance_count_basis": "The primary short report explicitly describes collaboration, competition and audience experiments. The conditions, group sizes and several reported statistics match the longer 2019 report, but this short report does not explicitly declare data reuse; cohort independence is therefore unresolved.",
+      "evidence_pointer": "https://www.jstage.jst.go.jp/article/ast/41/1/41_E19280/_pdf::sections 2-3, pp. 345-347; Table 1",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_social_context_short_report",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Collaborative experiment (short report)",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "b",
+          "experiment_label": "Competitive experiment (short report)",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "c",
+          "experiment_label": "Audience experiment (short report)",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        }
+      ],
+      "source_lineage": {
+        "network_node_id": "doi:10.1098/rsos.181878",
+        "relationship": "possible_overlapping_report_not_independent_replication_evidence",
+        "basis": "Both primary reports give the same three social conditions, analyzed group sizes 26/29/26 and collaborative right-hemispace F(7,168)=2.24. This supports an overlap flag, not a definitive participant-level linkage or silent transfer of omitted parameters."
+      },
+      "source_review_limit": "Fresh publisher PDF and rendered Table 1 inspected. Retain reported delays/levels and social designs; the short report omits exact baseline anchors, catches, repetitions and blocks. Do not borrow 480-row counts or catches from the longer report without an explicit source linkage."
     }
   ],
   "corpus_freeze": {
@@ -1449,6 +1522,17 @@
       "review_date": "2026-10-27",
       "reason": "Primary Methods establishes three independent collaboration, competition and audience experiments. Social condition, hemispace and partner position are factors within each; the former publication placeholder is not equivalent to any one child.",
       "evidence_pointer": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6731720/::sections 2.3-2.4"
+    },
+    {
+      "old_study_row_id": "doi:10.1250/ast.41.345",
+      "child_study_row_ids": [
+        "doi:10.1250/ast.41.345::a",
+        "doi:10.1250/ast.41.345::b",
+        "doi:10.1250/ast.41.345::c"
+      ],
+      "review_date": "2026-10-27",
+      "reason": "Primary short report explicitly describes three social-context experiments. Possible overlap with the longer 2019 report remains flagged; these rows do not establish three independent replications.",
+      "evidence_pointer": "https://www.jstage.jst.go.jp/article/ast/41/1/41_E19280/_pdf::sections 2-3"
     }
   ]
 }
