@@ -22,7 +22,7 @@ live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
 Current checkpoint (2026-10-27): 94 frozen publications, 126 study/context rows,
-29 registered publication inventories and 65 publication inventories still
+32 registered publication inventories and 62 publication inventories still
 unassessed. The earlier counts below describe individual historical checkpoints.
 Tonelli (2019) now separates neck PPS assessment from echolocation training,
 time-bisection training and distance validation; manual trial starts, endpoint
@@ -33,6 +33,12 @@ TMS, not tactile-detection timing. Existing detailed source evidence remains
 available for future mechanistic work. The map preserves this frozen member
 independently from its current out-of-scope task classification; expected-outcome
 and full-pipeline ledgers use the same decision. No qualification status changed.
+The static-task batch adds Collignon (2009) from current primary Methods and
+Figure 1, and Serino (2007)/Biggio (2017) from the existing critical PDF reviews.
+It preserves external-side response mapping, analysis windows versus online
+timeouts, strong tactile nontargets versus sound-only catches, and group-specific
+block counts. Prior-review reuse is explicit; unsuccessful current PDF access
+does not erase that evidence or imply a newly inspected source.
 
 The first bounded source batch (2026-10-27) adds four experiment-scoped timing/count
 reviews for Canzoneri et al. (2012), DOI `10.1371/journal.pone.0044306`, from the
