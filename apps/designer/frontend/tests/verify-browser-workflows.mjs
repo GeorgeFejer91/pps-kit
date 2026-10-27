@@ -169,6 +169,7 @@ try {
   await writeFile(resolve(output, "browser-full-block-plan.json"), JSON.stringify({
     design: previewFixture.design, block_csv_preview: previewFixture.block_csv_preview,
     variants: await designer.evaluate(() => window.PPSDesignerApp.getAssemblyVariants()),
+    run_sequence_setup: previewFixture.run_sequence_setup, participant_orders: previewFixture.participant_orders,
   }, null, 2));
   await designer.locator("#edit-mode-button").click();
   await designer.locator("#save-study-profile").click();
@@ -330,12 +331,24 @@ try {
   const presetPage = await presetPagePromise;
   await presetPage.waitForFunction(id => window.PPSDesignerApp?.getState()?.selected_template === id, linkedPublication.templateIds[0]);
   assert.equal(new URL(presetPage.url()).searchParams.get("template"), linkedPublication.templateIds[0]);
-  const [legacyStudyId, splitStudyIds] = Object.entries(reviewData.studyRowAliases)[0];
+  const legacyStudyId = "doi:10.1371/journal.pone.0006582";
+  const splitStudyIds = reviewData.studyRowAliases[legacyStudyId];
   await mapper.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1&page=documentation&study=${encodeURIComponent(legacyStudyId)}#docs-publication-network`);
   await network.scrollIntoViewIfNeeded();
   await mapper.locator("[data-study-alias-notice]").waitFor();
   assert.equal(await detail.locator("[data-study-id]").count(), splitStudyIds.length);
   assert.match(await detail.innerText(), /Not Applicable/i);
+  const rongaId = "doi:10.1073/pnas.2024548118";
+  const rongaChildren = reviewData.studyRowAliases[rongaId];
+  if (rongaChildren) {
+    await mapper.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1&page=documentation&study=${encodeURIComponent(rongaId)}#docs-publication-network`);
+    await network.scrollIntoViewIfNeeded();
+    await mapper.locator("[data-study-alias-notice]").waitFor();
+    assert.equal(await detail.locator("[data-study-id]").count(), rongaChildren.length);
+    for (const id of rongaChildren) assert.equal(await detail.locator(`[data-study-id="${id}"]`).count(), 1);
+    assert.match(await detail.innerText(), /newborn/i);
+    assert.match(await detail.innerText(), /adult/i);
+  }
   assert.deepEqual(errors, []);
   report.checks.push("Mapper retry, DOI search, keyboard detail, study deep link, evidence separation, responsive layout and preset navigation");
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });

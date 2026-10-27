@@ -5,7 +5,8 @@ import test from "node:test";
 import { webcrypto } from "node:crypto";
 
 const app = await readFile(new URL("../app.js", import.meta.url), "utf8");
-const chrome = await readFile(new URL("../designer_main.js", import.meta.url), "utf8");
+const chrome = (await readFile(new URL("../designer_main.js", import.meta.url), "utf8"))
+  .replace('import { nativeDesigner } from "./native_designer.js";', 'const nativeDesigner = { enabled: false };');
 const deferred = () => {
   let resolve, reject;
   const promise = new Promise((yes, no) => { resolve = yes; reject = no; });

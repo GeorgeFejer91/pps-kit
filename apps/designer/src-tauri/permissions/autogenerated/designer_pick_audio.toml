@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-designer-pick-audio"
+description = "Enables the designer_pick_audio command without any pre-configured scope."
+commands.allow = ["designer_pick_audio"]
+
+[[permission]]
+identifier = "deny-designer-pick-audio"
+description = "Denies the designer_pick_audio command without any pre-configured scope."
+commands.deny = ["designer_pick_audio"]

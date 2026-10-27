@@ -1,3 +1,5 @@
+import { nativeDesigner } from "./native_designer.js";
+
 const DATABASE_NAME = "pps-designer";
 const DATABASE_VERSION = 1;
 const DRAFT_STORE = "drafts";
@@ -37,6 +39,11 @@ async function get(storeName, key) {
 
 const drafts = {
   async save(snapshot) {
+    if (nativeDesigner.enabled) {
+      await nativeDesigner.save(snapshot);
+      document.dispatchEvent(new CustomEvent("pps-designer-saved"));
+      return;
+    }
     try {
       await put(DRAFT_STORE, "active", { savedAt: new Date().toISOString(), snapshot });
       document.dispatchEvent(new CustomEvent("pps-designer-saved"));
@@ -45,6 +52,7 @@ const drafts = {
     }
   },
   async load() {
+    if (nativeDesigner.enabled) return (await nativeDesigner.load()).snapshot;
     return (await get(DRAFT_STORE, "active"))?.snapshot || null;
   },
   async storeAudio(file) {
@@ -122,7 +130,7 @@ async function exportBundle(snapshot) {
   let totalBytes = 0;
   for (const { item, key } of references) {
     const reference = String(item[key] || "");
-    const browserId = reference.startsWith("browser-asset:") ? reference.slice("browser-asset:".length) : item.browser_asset_id;
+    const browserId = reference.startsWith("browser-asset:") ? reference.slice("browser-asset:".length) : reference.startsWith("native-assets/") ? null : item.browser_asset_id;
     if (!reference && !browserId) continue;
     const sourceKey = browserId ? `browser-asset:${browserId}` : reference;
     let id = resolved.get(sourceKey);
@@ -153,7 +161,8 @@ async function exportBundle(snapshot) {
           spokenManifests.add(directory);
         }
         const asset = inventory.get(reference);
-        if (!asset || !(spokenPath || /^assets\/preloads\/[a-zA-Z0-9_./-]+$/.test(reference)) || reference.split("/").includes("..") || !/^[a-f0-9]{64}$/.test(asset.sha256 || "")) {
+        const nativeAsset = nativeDesigner.enabled && /^native-assets\/[a-f0-9]{64}\.wav$/.test(reference);
+        if (!asset || !(nativeAsset || spokenPath || /^assets\/preloads\/[a-zA-Z0-9_./-]+$/.test(reference)) || reference.split("/").includes("..") || !/^[a-f0-9]{64}$/.test(asset.sha256 || "")) {
           throw new Error(`Audio is not in the verified preload inventory: ${item.label || reference}`);
         }
         const url = window.PPSDesignerApp?.preloadAssetUrl(reference);
@@ -210,7 +219,7 @@ async function exportBundle(snapshot) {
     profile_kind: "custom",
     display_name: design.name,
     created_at: new Date().toISOString(),
-    capability_provenance: "hosted_compose",
+    capability_provenance: nativeDesigner.enabled ? "native_customized_unqualified" : "hosted_compose",
     parent: { profile_id: design.study_profile_reference_parameters?.customized_from_profile_id || "" },
     files: fileInventory,
   };
@@ -227,6 +236,7 @@ async function exportDesktopProfile(format) {
 }
 
 async function saveProfileDownload(blob, filename) {
+  if (nativeDesigner.enabled) { await nativeDesigner.exportProfile(blob); return; }
   const shell = window.pywebview?.api;
   const nativeSave = shell?.save_profile || (filename.endsWith(".pps-profile") ? shell?.save_profile_bundle : null);
   if (nativeSave) {
@@ -259,9 +269,10 @@ function applyTheme(theme) {
 }
 
 function initializeChrome() {
-  const desktop = new URLSearchParams(location.search).get("desktop") === "1";
+  const desktop = nativeDesigner.enabled || new URLSearchParams(location.search).get("desktop") === "1";
   document.body.classList.toggle("desktop-applet", desktop);
-  document.getElementById("designer-capability-badge").textContent = desktop ? "desktop full" : "hosted compose";
+  document.body.classList.toggle("native-designer", nativeDesigner.enabled);
+  document.getElementById("designer-capability-badge").textContent = nativeDesigner.enabled ? "native preparation · unqualified" : desktop ? "desktop full" : "hosted compose";
   applyTheme(localStorage.getItem("ppsDesigner.theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
   document.getElementById("designer-theme-toggle")?.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
   document.getElementById("designer-help")?.addEventListener("click", () => document.querySelector('[data-segment-info="study"]')?.click());
@@ -277,7 +288,7 @@ function initializeChrome() {
   document.getElementById("export-profile-bundle")?.addEventListener("click", async () => {
     try {
       const snapshot = window.PPSDesignerApp.getState();
-      if (!window.PPSDesignerApp.isHosted()) await exportDesktopProfile("bundle"); else await exportBundle(snapshot);
+      if (!window.PPSDesignerApp.isHosted() && !nativeDesigner.enabled) await exportDesktopProfile("bundle"); else await exportBundle(snapshot);
     } catch (error) { alert(error.message || String(error)); }
   });
   document.getElementById("export-experiment-json")?.addEventListener("click", async () => {
