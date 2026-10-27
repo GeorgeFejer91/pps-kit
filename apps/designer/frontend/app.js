@@ -651,6 +651,7 @@ function initializeBoundedSelects() {
   upgradeBoundedSelects();
 }
 let runSequencePreviewTimer = null;
+let runSequencePreviewRequestId = 0;
 let activePage = "toolkit";
 let editModeActive = false;
 let staticModeActive = false;
@@ -6259,7 +6260,7 @@ function renderRun() {
   const saveProfileButton = $("save-study-profile");
   if (saveProfileButton) {
     saveProfileButton.hidden = finalized;
-    saveProfileButton.disabled = !profileValid;
+    saveProfileButton.disabled = !profileValid || workflowSaveInFlight;
     saveProfileButton.title = profileValid
       ? (staticModeActive ? "Lock this browser-local profile for portable export." : "Register and lock this validated profile in the researcher workspace.")
       : "Complete profile validation before finalizing.";
@@ -7866,6 +7867,7 @@ async function downloadBlockRandomization() {
 }
 
 function scheduleRunSequencePreview() {
+  runSequencePreviewRequestId += 1;
   window.clearTimeout(runSequencePreviewTimer);
   renderRun();
   runSequencePreviewTimer = window.setTimeout(() => {
@@ -7875,6 +7877,7 @@ function scheduleRunSequencePreview() {
 
 async function previewRunSequence() {
   if (!ensureEditableProject()) return;
+  const requestId = ++runSequencePreviewRequestId;
   if (staticModeActive) {
     state.design = collectPayload().design;
     refreshHostedWorkflowSteps();
@@ -7883,16 +7886,31 @@ async function previewRunSequence() {
       message: "Browser-local order preview",
     });
     renderAll();
-    return;
+    return true;
   }
-  state = await designerApi.previewRunSequence(collectPayload());
-  renderAll();
+  const requestedState = state;
+  const payload = collectPayload();
+  const payloadKey = JSON.stringify(payload);
+  const current = () => requestId === runSequencePreviewRequestId
+    && state === requestedState && editModeActive && !workflowSaveInFlight && !templateLoadInFlight
+    && JSON.stringify(collectPayload()) === payloadKey;
+  try {
+    const preview = await designerApi.previewRunSequence(payload);
+    if (!current()) return false;
+    state = preview;
+    renderAll();
+    return true;
+  } catch (error) {
+    if (current()) throw error;
+    return false;
+  }
 }
 
 async function regenerateRunSequence() {
   if (!ensureEditableProject()) return;
-  await previewRunSequence();
-  showToast("Order preview refreshed. Save by locking the profile when review is complete.");
+  if (await previewRunSequence()) {
+    showToast("Order preview refreshed. Save by locking the profile when review is complete.");
+  }
 }
 
 async function ensureLocalBackendState() {
@@ -7907,6 +7925,7 @@ async function ensureLocalBackendState() {
 }
 
 async function savePreparedStudyProfile() {
+  if (workflowSaveInFlight) return;
   if (staticModeActive) {
     state.design = collectPayload().design;
     refreshHostedWorkflowSteps();
@@ -7924,14 +7943,31 @@ async function savePreparedStudyProfile() {
       showToast("Complete every required segment before finalizing this profile.");
       return;
     }
-    state.design.study_profile_reference_parameters.profile_status = "finalized";
-    state.design.study_profile_reference_parameters.finalized_at = new Date().toISOString();
-    state.custom_workflow.is_finalized = true;
-    editModeActive = false;
-    await window.PPSDesigner?.drafts?.save(state);
-    markDesignerSaved();
-    renderAll();
-    showToast("Profile finalized and locked. Use Edit to create another named custom copy.");
+    const draftState = state;
+    const payloadKey = JSON.stringify(collectPayload());
+    const finalizedState = clone(state);
+    finalizedState.design.study_profile_reference_parameters.profile_status = "finalized";
+    finalizedState.design.study_profile_reference_parameters.finalized_at = new Date().toISOString();
+    finalizedState.custom_workflow.is_finalized = true;
+    workflowSaveInFlight = true;
+    renderRun();
+    try {
+      if (!window.PPSDesigner?.drafts?.save) throw new Error("Browser storage is unavailable. The profile remains editable.");
+      await window.PPSDesigner.drafts.save(finalizedState);
+      if (state !== draftState) return;
+      if (JSON.stringify(collectPayload()) !== payloadKey) {
+        markDesignerDirty();
+        throw new Error("The design changed while saving. Review the current draft and lock it again.");
+      }
+      state = finalizedState;
+      editModeActive = false;
+      markDesignerSaved();
+      renderAll();
+      showToast("Profile finalized and locked. Use Edit to create another named custom copy.");
+    } finally {
+      workflowSaveInFlight = false;
+      renderRun();
+    }
     return;
   }
   if (!(await ensureLocalBackendState())) return;

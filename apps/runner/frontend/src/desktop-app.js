@@ -16,6 +16,7 @@ import {
 import { renderQrCode } from "./ui/qr-code.js";
 import { initializeTextLayout } from "./ui/text-layout.js";
 import { bindParticipantResponse } from "./ui/participant-response.js";
+import { bindParticipantSetupDraft } from "./ui/participant-setup-draft.js";
 import { bindNativeOutputSetup } from "./ui/native-output-setup.js";
 import { installBrowserLifecycle } from "./remote/browser-lifecycle.js";
 
@@ -25,6 +26,7 @@ const api = selectRunnerAdapter();
 let nativeSnapshotSubscription = null;
 let nativeUpdatesReady = false;
 const elements = Object.fromEntries([...document.querySelectorAll("[id]")].map((element) => [element.id, element]));
+const participantSetupDraft = bindParticipantSetupDraft(elements);
 const participantResponse = bindParticipantResponse({
   target: elements["participant-response"], api,
   liveState: () => nativeUpdatesReady,
@@ -280,11 +282,7 @@ function renderSnapshot(next) {
 
   text("setup-badge", next.setup?.ready ? "Ready" : "Not submitted");
   elements["setup-badge"].dataset.tone = next.setup?.ready ? "ready" : "";
-  if (document.activeElement !== elements["participant-code"]) elements["participant-code"].value = next.setup?.participant_code || "";
-  if (document.activeElement !== elements["participant-age"]) elements["participant-age"].value = next.setup?.age ?? "";
-  if (document.activeElement !== elements["participant-handedness"]) elements["participant-handedness"].value = next.setup?.handedness === "unspecified" ? "" : (next.setup?.handedness || "");
-  if (document.activeElement !== elements["participant-gender"]) elements["participant-gender"].value = next.setup?.gender === "unspecified" ? "" : (next.setup?.gender || "");
-  elements["name-sharing"].checked = Boolean(next.setup?.name_sharing_opt_in);
+  participantSetupDraft.refresh(next);
 
   text("package-badge", next.package_verified ? "Verified" : "Unverified");
   elements["package-badge"].dataset.tone = next.package_verified ? "ready" : "";
@@ -1036,16 +1034,17 @@ function bindLocalActions() {
 
   elements["setup-form"].addEventListener("submit", async (event) => {
     event.preventDefault();
+    const submission = participantSetupDraft.capture();
     const args = {
-      participant_code: elements["participant-code"].value,
-      participant_name: elements["participant-name"].value,
-      name_sharing_opt_in: elements["name-sharing"].checked,
-      age: Number(elements["participant-age"].value),
-      handedness: elements["participant-handedness"].value,
-      gender: elements["participant-gender"].value,
+      ...submission.values,
+      age: Number(submission.values.age),
       part_labels: snapshot?.setup?.part_labels ?? { "1": "Part 1", "2": "Part 2" },
     };
-    try { await dispatch("setup.submit", args); } catch (error) { showToast(error.message, { error: true }); }
+    try {
+      await dispatch("setup.submit", args);
+      participantSetupDraft.acknowledge(submission);
+      participantSetupDraft.refresh(snapshot);
+    } catch (error) { showToast(error.message, { error: true }); }
   });
 
   elements["note-button"].addEventListener("click", async () => {

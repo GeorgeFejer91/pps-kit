@@ -110,8 +110,10 @@ async function exportBundle(snapshot) {
   const encoder = new TextEncoder();
   const design = structuredClone(snapshot.design);
   const assetIds = new Set();
-  for (const item of [...(design.custom_looming_files || []), ...(design.prestimulus_files || [])]) {
-    if (item.browser_asset_id) assetIds.add(item.browser_asset_id);
+  const instructions = design.study_profile_reference_parameters?.dashboard_run_setup?.instruction_profile?.slots || [];
+  for (const item of [...(design.custom_looming_files || []), ...(design.prestimulus_files || []), ...instructions]) {
+    const id = item.browser_asset_id || (item.path?.startsWith("browser-asset:") ? item.path.slice("browser-asset:".length) : "");
+    if (id) assetIds.add(id);
   }
   const assetRecords = [];
   const files = [];
