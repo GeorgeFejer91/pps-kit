@@ -1915,8 +1915,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract exact audio-tactile reaction-time task parameters; body-image/social-cognition variables are non-blocking context"
-      ]
+        "Original pink-noise clip/envelope and level calibration; tactile waveform/duration; ITI/foreperiod, response timeout and silent-control zero-time anchor. The author manuscript reports 3000-ms sound, five SOAs and the reconciled 81-trial schedule."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://aru.figshare.com/articles/journal_contribution/The_Impact_of_Body_Image_on_Social_Cognition_Fear_of_Negative_Evaluation_Mediates_the_Relationship_between_Body_Surveillance_and_Interpersonal_Distance_in_Women/26381626",
+      "scope_review_basis": "Author-deposited manuscript section 2.2.9 confirms the in-scope audio-tactile assessment and separates it from interpersonal-distance measures; the compact review retains technical gaps."
     },
     {
       "record_id": "mindfulness_pps_2024",

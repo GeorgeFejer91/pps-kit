@@ -12514,6 +12514,495 @@
           "evidence_note": "Do not represent the training as a third PPS experiment or silently replace the printed block total."
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.bodyim.2024.101777",
+      "source_type": "author_deposited_manuscript",
+      "source_file": "https://aru.figshare.com/articles/journal_contribution/The_Impact_of_Body_Image_on_Social_Cognition_Fear_of_Negative_Evaluation_Mediates_the_Relationship_between_Body_Surveillance_and_Interpersonal_Distance_in_Women/26381626",
+      "review_date": "2026-10-27",
+      "review_scope": "Fresh author-deposited manuscript review of the explicit audio-tactile task; preserve silent-row anchor, waveform, asset and timing gaps. Social measures are companion context.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://aru.figshare.com/articles/journal_contribution/The_Impact_of_Body_Image_on_Social_Cognition_Fear_of_Negative_Evaluation_Mediates_the_Relationship_between_Body_Surveillance_and_Interpersonal_Distance_in_Women/26381626",
+          "outcome": "Repository article metadata HTTP 200; linked author manuscript DOCX file 47954698 downloaded HTTP 200 and Methods section 2.2.9 inspected."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "3000-ms dynamic pink-noise audio clips at 44.1 kHz, delivered over headphones.",
+          "page_or_section": "Author-deposited manuscript section 2.2.9 Peripersonal space",
+          "component_reviews": {
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Pink noise, 3000 ms, 44.1-kHz sampling, with increasing intensity."
+            }
+          },
+          "missing_required_components": [
+            "source_mode",
+            "source_recipe_or_asset_provenance"
+          ],
+          "evidence_note": "The exact asset, generation/import route, envelope endpoints/shape and calibration are not supplied in the inspected Methods; a generic pink-noise default is not a complete reconstruction."
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Gain-based looming through headphones; later touch delays are described as perceptually nearer.",
+          "page_or_section": "Author-deposited manuscript section 2.2.9 Peripersonal space",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "gain_only_proxy"
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Participant body; tactile site is left index finger."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3000-ms sound."
+            }
+          },
+          "missing_required_components": [
+            "geometry"
+          ],
+          "evidence_note": "The source gives no metric source trajectory or validated delay-to-distance conversion; qualitative far/near labels do not establish physical coordinates."
+        },
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Looming audio-tactile targets, sound-only catches and silent tactile controls in random order.",
+          "page_or_section": "Author-deposited manuscript section 2.2.9 Peripersonal space",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "60 audio-tactile targets, 7 auditory-only catches, 14 silent tactile controls."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Audio onset precedes the selected touch delay on target rows; catches omit touch; unimodal controls omit sound."
+            }
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Press the spacebar with the right index finger for left-index touch, ignoring sound.",
+          "page_or_section": "Author-deposited manuscript section 2.2.9 Peripersonal space",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to tactile stimulation; auditory-only rows contain no tactile target."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Computer keyboard spacebar; Arduino and LabView 8 control stimulus timing and record RT."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Right index finger spacebar press, as fast as possible."
+            }
+          },
+          "missing_required_components": [
+            "response_window_and_anchor"
+          ],
+          "evidence_note": "No online response deadline or timeout rule is specified."
+        },
+        "jitter_iti_policy": {
+          "status": "not_reported",
+          "value": "The inspected Methods does not specify an ITI, foreperiod or jitter policy.",
+          "page_or_section": "Author-deposited manuscript section 2.2.9 Peripersonal space",
+          "component_reviews": {},
+          "missing_required_components": [
+            "policy_type",
+            "timing_scope_and_anchor",
+            "values_or_range"
+          ],
+          "evidence_note": "The 3000-ms sound duration and approximate 12-15-minute task duration do not define an intertrial schedule."
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "Auditory-onset anchored +300,+800,+1500,+2200,+2700 ms.",
+          "page_or_section": "Author-deposited manuscript section 2.2.9 Peripersonal space",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive delay means touch after auditory onset."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "+300,+800,+1500,+2200,+2700 ms."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "Non-painful vibrotactile stimulus on the left index finger, secured with medical tape.",
+          "page_or_section": "Author-deposited manuscript section 2.2.9 Peripersonal space",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile device."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Left, nondominant index finger."
+            }
+          },
+          "missing_required_components": [
+            "waveform_and_duration"
+          ],
+          "evidence_note": "Frequency, duration, actuator identity and individual intensity procedure remain unresolved; Arduino control does not identify a tactile waveform."
+        },
+        "baseline_trial_contract": {
+          "status": "partial",
+          "value": "14 silent tactile controls: 7 at nominal +300 ms and 7 at nominal +2700 ms.",
+          "page_or_section": "Author-deposited manuscript section 2.2.9 Peripersonal space",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_soa_matched at the earliest/latest target delays."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "7 repetitions at each of two silent-condition delays."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "14 = 7 x 2."
+            }
+          },
+          "missing_required_components": [
+            "timing_and_anchor"
+          ],
+          "evidence_note": "Methods names the two delays while omitting audio, but does not explicitly define the zero-time trigger in silent rows. Do not silently substitute pre-sound/post-sound endpoint baselines or a verified trial-onset anchor."
+        },
+        "catch_trial_contract": {
+          "status": "reported_complete",
+          "value": "7 auditory-only looming catches, with no tactile response target.",
+          "page_or_section": "Author-deposited manuscript section 2.2.9 Peripersonal space",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_withhold"
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Ignore sound and withhold a tactile-target response when touch is absent."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "7 sound-only trials."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "7."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "reported_complete",
+          "value": "81 total trials = 12 x 5 target delays + 7 catches + 14 silent controls.",
+          "page_or_section": "Author-deposited manuscript section 2.2.9 Peripersonal space",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five target SOAs, two silent-control delays, and auditory-only catch family."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "12 per target SOA; 7 catches; 7 each per silent-control delay."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "No group- or delay-specific count override reported."
+            },
+            "derived_total_reconciliation": {
+              "status": "reported",
+              "value": "60 + 7 + 14 = 81."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "reported_complete",
+          "value": "One 81-trial assessment sequence in randomized order, about 12-15 minutes.",
+          "page_or_section": "Author-deposited manuscript section 2.2.9 Peripersonal space",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "One assessment sequence; no separate test-block partition described."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "All 81 rows presented in randomized order."
+            }
+          }
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.3758/app.72.4.885",
+      "source_type": "primary_article_pdf",
+      "source_file": "https://link.springer.com/content/pdf/10.3758/APP.72.4.885.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "Fresh primary Methods distinguishes active haptic spatial judgment from discrete tactile-target detection, preserving frozen membership and group factors.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://link.springer.com/content/pdf/10.3758/APP.72.4.885.pdf",
+          "outcome": "HTTP 200 publisher PDF; Method, Haptic Line Bisection Task, Number Presentation and Procedure inspected."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-number priming during active haptic bisection, outside direct auditory-tactile target contracts.",
+          "page_or_section": "Method pp. 886-887",
+          "evidence_note": "Participants explore a wooden rod for 10 seconds while recorded numbers or a control word repeat once per second, then indicate its midpoint. The measured outcome is spatial bisection error; no instrumented tactile target, detection SOA or tactile RT response is reported.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-number priming during active haptic bisection, outside direct auditory-tactile target contracts.",
+          "page_or_section": "Method pp. 886-887",
+          "evidence_note": "Participants explore a wooden rod for 10 seconds while recorded numbers or a control word repeat once per second, then indicate its midpoint. The measured outcome is spatial bisection error; no instrumented tactile target, detection SOA or tactile RT response is reported.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-number priming during active haptic bisection, outside direct auditory-tactile target contracts.",
+          "page_or_section": "Method pp. 886-887",
+          "evidence_note": "Participants explore a wooden rod for 10 seconds while recorded numbers or a control word repeat once per second, then indicate its midpoint. The measured outcome is spatial bisection error; no instrumented tactile target, detection SOA or tactile RT response is reported.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            }
+          }
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-number priming during active haptic bisection, outside direct auditory-tactile target contracts.",
+          "page_or_section": "Method pp. 886-887",
+          "evidence_note": "Participants explore a wooden rod for 10 seconds while recorded numbers or a control word repeat once per second, then indicate its midpoint. The measured outcome is spatial bisection error; no instrumented tactile target, detection SOA or tactile RT response is reported.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-number priming during active haptic bisection, outside direct auditory-tactile target contracts.",
+          "page_or_section": "Method pp. 886-887",
+          "evidence_note": "Participants explore a wooden rod for 10 seconds while recorded numbers or a control word repeat once per second, then indicate its midpoint. The measured outcome is spatial bisection error; no instrumented tactile target, detection SOA or tactile RT response is reported.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-number priming during active haptic bisection, outside direct auditory-tactile target contracts.",
+          "page_or_section": "Method pp. 886-887",
+          "evidence_note": "Participants explore a wooden rod for 10 seconds while recorded numbers or a control word repeat once per second, then indicate its midpoint. The measured outcome is spatial bisection error; no instrumented tactile target, detection SOA or tactile RT response is reported.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-number priming during active haptic bisection, outside direct auditory-tactile target contracts.",
+          "page_or_section": "Method pp. 886-887",
+          "evidence_note": "Participants explore a wooden rod for 10 seconds while recorded numbers or a control word repeat once per second, then indicate its midpoint. The measured outcome is spatial bisection error; no instrumented tactile target, detection SOA or tactile RT response is reported.",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-number priming during active haptic bisection, outside direct auditory-tactile target contracts.",
+          "page_or_section": "Method pp. 886-887",
+          "evidence_note": "Participants explore a wooden rod for 10 seconds while recorded numbers or a control word repeat once per second, then indicate its midpoint. The measured outcome is spatial bisection error; no instrumented tactile target, detection SOA or tactile RT response is reported.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            }
+          }
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-number priming during active haptic bisection, outside direct auditory-tactile target contracts.",
+          "page_or_section": "Method pp. 886-887",
+          "evidence_note": "Participants explore a wooden rod for 10 seconds while recorded numbers or a control word repeat once per second, then indicate its midpoint. The measured outcome is spatial bisection error; no instrumented tactile target, detection SOA or tactile RT response is reported.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-number priming during active haptic bisection, outside direct auditory-tactile target contracts.",
+          "page_or_section": "Method pp. 886-887",
+          "evidence_note": "Participants explore a wooden rod for 10 seconds while recorded numbers or a control word repeat once per second, then indicate its midpoint. The measured outcome is spatial bisection error; no instrumented tactile target, detection SOA or tactile RT response is reported.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-number priming during active haptic bisection, outside direct auditory-tactile target contracts.",
+          "page_or_section": "Method pp. 886-887",
+          "evidence_note": "Participants explore a wooden rod for 10 seconds while recorded numbers or a control word repeat once per second, then indicate its midpoint. The measured outcome is spatial bisection error; no instrumented tactile target, detection SOA or tactile RT response is reported.",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "This direct audio-tactile contract does not apply to active haptic midpoint judgment."
+            }
+          }
+        }
+      }
     }
   ]
 }
