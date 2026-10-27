@@ -34,6 +34,30 @@ function handler(name, next) {
   return app.slice(app.indexOf(`async function ${name}(`), app.indexOf(`\n${next}`));
 }
 
+test("instruction preview debounce preserves form values while native review invalidates immediately", async () => {
+  let timer, invalidated = 0, previewed = 0;
+  const context = vm.createContext({ state: { native_execution_review: { accepted: true } }, editModeActive: true,
+    nativePreparedResult: { path: "prior-output" }, nativeExecutionMessage: "", designerDirty: true,
+    runSequencePreviewRequestId: 0, runSequencePreviewTimer: null,
+    nativeDesigner: { enabled: true, invalidate: () => invalidated++ },
+    window: { clearTimeout() {}, setTimeout(callback) { timer = callback; return 1; } },
+    stopActiveSourcePreview() {}, renderNativeExecution() {}, renderRun() { throw new Error("would discard current form"); },
+    isCustomMode: () => true, isProfileReadonlyMode: () => false, reportError: error => { throw error; },
+    previewRunSequence: async () => { assert.equal(context.state.native_execution_review, null); previewed++; },
+  });
+  vm.runInContext(app.slice(app.indexOf("function invalidateNativeAuthoring("), app.indexOf("function markDesignerSaved(")), context);
+  vm.runInContext(app.slice(app.indexOf("function scheduleRunSequencePreview("), app.indexOf("async function previewRunSequence(")), context);
+  // Input reaches its local preview listener, then the document dirty listener.
+  context.scheduleRunSequencePreview();
+  context.markDesignerDirty();
+  assert.equal(invalidated, 1);
+  assert.equal(context.state.native_execution_review, null);
+  assert.equal(context.nativePreparedResult, null);
+  assert.equal(previewed, 0);
+  timer();
+  assert.equal(previewed, 1);
+});
+
 test("only the explicit V1 loopback dashboard enables companion controls", () => {
   const nodes = [{ hidden: false }, { hidden: false }];
   const context = vm.createContext({

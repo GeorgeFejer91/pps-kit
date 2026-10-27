@@ -1,3 +1,4 @@
+import { verifyDesignerControlNames, verifyRunnerNavigation } from "./accessibility-browser.mjs";
 import { verifySequenceScaling } from "./sequence-scaling-browser.mjs";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
@@ -54,7 +55,8 @@ try {
   await runner.locator("#setup-badge").filter({ hasText: /^Ready$/ }).waitFor();
   assert.equal(await runner.locator("#participant-chip").innerText(), "LOCAL-002");
   assert.deepEqual(errors, []);
-  report.checks.push("Runner draft survives snapshot refresh and acknowledged submit");
+  await verifyRunnerNavigation(runner);
+  report.checks.push("Runner draft survives snapshot refresh and acknowledged submit; ordinary section navigation exposes current page and keyboard order");
 
   const nativeRunner = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   await nativeRunner.addInitScript(() => {
@@ -231,6 +233,14 @@ try {
   assert.deepEqual(errors, []);
   report.checks.push("Exact 46656 variants and oversized drafts survive real hosted edit, save and restore");
   await scaling.close();
+  const accessible = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  accessible.on("pageerror", error => errors.push(error.message));
+  accessible.on("dialog", dialog => dialog.accept());
+  await accessible.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1`);
+  await verifyDesignerControlNames(accessible, resolve(output, "accessible-instructions.png"));
+  assert.deepEqual(errors, []);
+  report.checks.push("Designer names, keyboard order, focus across event/preview rerenders and dialog return; 320–1920px plus 200% CSS zoom");
+  await accessible.close();
 
   const companionPreview = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   companionPreview.on("pageerror", error => errors.push(error.message));
