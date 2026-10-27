@@ -372,6 +372,8 @@ pub fn plan_ingredient_generation(
         loudness["start_target_rms_dbfs"] = json!(start_rms_dbfs);
         loudness["end_target_rms_dbfs"] = json!(end_rms_dbfs);
         loudness["calibration_window_s"] = json!(calibration_window_s);
+        loudness["distance_gain_policy"] =
+            json!("disable_direct_path_gain_for_calibrated_loudness");
     }
     if !candidate_design["study_profile_reference_parameters"].is_object() {
         candidate_design["study_profile_reference_parameters"] = json!({});
@@ -1149,7 +1151,12 @@ fn level_policy(
             "Choose estimated SPL or explicit digital dBFS.",
         ));
     }
-    if policy["distance_gain_policy"] != "disable_direct_path_gain_for_calibrated_loudness" {
+    // normalize_loudness_policy supplies this value when the existing HTML
+    // payload omits it. An explicitly conflicting value remains an error.
+    if policy
+        .get("distance_gain_policy")
+        .is_some_and(|value| value != "disable_direct_path_gain_for_calibrated_loudness")
+    {
         return Err(error(
             "conflicting_distance_gain",
             "bake_recipe.loudness_policy.distance_gain_policy",
