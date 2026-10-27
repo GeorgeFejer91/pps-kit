@@ -59,6 +59,60 @@ fn legacy_radius_only_design_defaults_to_polar_without_changing_arc() {
 }
 
 #[test]
+fn legacy_ramp_defaults_disable_distance_gain_and_record_effective_policy() {
+    let mut p = payload();
+    p["bake_recipe"]["loudness_policy"]
+        .as_object_mut()
+        .unwrap()
+        .remove("distance_gain_policy");
+    let plan = plan_ingredient_generation(&p, &opt_in()).unwrap();
+    assert!(!plan.renderer.distance_attenuation);
+    assert_eq!(
+        plan.loudness_policy["distance_gain_policy"],
+        "disable_direct_path_gain_for_calibrated_loudness"
+    );
+    let (_, stimulus, _) = contract_output(&plan);
+    assert!(
+        (stimulus.level_qc.actual_window_rms_dbfs.unwrap()
+            - stimulus.level_qc.target_window_rms_dbfs.unwrap())
+        .abs()
+            <= 0.02
+    );
+    p["bake_recipe"]["loudness_policy"]["distance_gain_policy"] = json!("inverse_square");
+    assert_eq!(
+        plan_ingredient_generation(&p, &opt_in()).unwrap_err().code,
+        "conflicting_distance_gain"
+    );
+}
+
+#[test]
+#[ignore = "requires PPS_NATIVE_GENERATION_REQUEST actual WebView IPC capture"]
+fn actual_native_webview_payload_reaches_explicit_algorithm_opt_in() {
+    let capture: Value = serde_json::from_slice(
+        &std::fs::read(std::env::var("PPS_NATIVE_GENERATION_REQUEST").unwrap()).unwrap(),
+    )
+    .unwrap();
+    let mut opt: GenerationOptIn = serde_json::from_value(capture["opt_in"].clone()).unwrap();
+    opt.accept_non_legacy_source_algorithm = false;
+    assert_eq!(
+        plan_ingredient_generation(&capture["payload"], &opt)
+            .unwrap_err()
+            .code,
+        "new_source_algorithm_opt_in_required"
+    );
+    opt.accept_non_legacy_source_algorithm = true;
+    let plan = plan_ingredient_generation(&capture["payload"], &opt).unwrap();
+    assert!(!plan.renderer.distance_attenuation);
+    let prepared = prepare(&plan.request, &AtomicBool::new(false)).unwrap();
+    assert_eq!(
+        prepared.dry_pcm().len(),
+        (plan.request.duration_s * f64::from(plan.request.sample_rate_hz)).round_ties_even()
+            as usize
+    );
+    assert!(prepared.dry_pcm().iter().any(|v| *v != 0.0));
+}
+
+#[test]
 fn full_payload_preserves_saved_polar_arc_and_explicit_source_algorithm() {
     let p = payload();
     let plan = plan_ingredient_generation(&p, &opt_in()).unwrap();
