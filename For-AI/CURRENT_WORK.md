@@ -28,7 +28,8 @@ This file is the active checklist and handoff owner; replace state, do not appen
   assembly preserve ordered pre/post parts and instruction media. Native instruction
   playback and distinct ordered-part execution now pass callback and journal
   checks. Full native preparation passes on the actual 408-trial fixture; durable
-  cross-part completion receipts and Runner group/recovery UI are in progress.
+  cross-part completion receipts now bind exact attempts. Runner instruction/group
+  and read-only recovery controls are integrated; installed interaction remains.
   The native Designer host and explicit frontend adapter are now integrated;
   actual WebView controls generate and preview through Rust/C++ without HTTP fallback.
   B1–B3/C1 fixes and the sanitized study projection are integrated
@@ -37,9 +38,10 @@ This file is the active checklist and handoff owner; replace state, do not appen
   identifies exact source and checks. Source, CI packages, installed behavior,
   physical timing, participant results and replication remain distinct gates.
   Neither installed application nor public downloads changed in this task.
-- **Next action:** bind both exact part attempts in one durable completion receipt,
-  finish Runner group/recovery controls, and verify the complete offline
-  browser-profile journey through installed native packages.
+- **Next action:** verify the final real native Runner interaction, then complete
+  the offline browser-profile journey through installed native packages. The first
+  release build is underway; the pinned candidate builder and Microsoft runtime
+  inventory have preflight evidence, not installed qualification.
   Primary-source extraction continues independently. Pages assembly now includes
   referenced Study 5 instruction audio with its checked manifest hashes.
 - **Local validation:** the stable Standard checkpoint passed 647 tests with ten
@@ -61,13 +63,20 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Portable bundles retain distinct stationary-control references and instruction
   audio. Native remaking drops stale comparator receipts even at identical duration.
   Recovery assessment remains read-only; six prior crash-boundary tests protect
-  existing evidence, without acquisition replay. Group result auditing is being
-  added against the producer's exact attempt/hash schema. Installation, deployed
+  existing evidence, without acquisition replay. The independent group audit passes both actual parts (173 events/four rows)
+  and nine corruption/mixing contract checks. Native read-only group assessment
+  passes seven checks including actual saved receipts; strict Clippy passes.
+  The worker's latest Runner suite passes 159 checks with two opt-in device
+  tests skipped. Condition gates retain their button acknowledgement without
+  inventing instruction audio. Independent UI review found and closed epoch/
+  late-adoption races; 78 Runner frontend checks pass. Designer storage now stages
+  immutable assets and cleans import extraction on success/failure; ten host
+  checks and actual nine-asset failure/retry evidence pass. Installation, deployed
   routes and final cross-product interaction remain open. New physical calibration
   is deferred by the user, not reported as measured.
-- **Scientific coverage:** frozen 94-publication corpus, 132 study rows and 1,452
-  compact contracts; 43 publications have assessed inventories containing 81
-  registered instances; 51 inventories remain unassessed. Original Ferri 2015
+- **Scientific coverage:** frozen 94-publication corpus, 136 study rows and 1,496
+  compact contracts; 48 publications have assessed inventories containing 90
+  registered instances; 46 inventories remain unassessed. Original Ferri 2015
   variants are separated and their conflicts with later reanalysis preserved.
   Device-paper source conflicts reduce fully source-covered emulated records to
   15; the 18 GUI-ready records remain separately labelled. A bounded foundational
