@@ -819,6 +819,41 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(Counter(row["disposition"] for row in boundaries), {"identity_pending_not_scientifically_excluded": 6, "deferred_adjacent_family": 3})
         self.assertTrue(all(row["evidence_pointer"] and row["basis"] and row["next_action"] for row in boundaries))
 
+    def test_frozen_identity_audit_and_bounded_lineage_keep_omissions_visible(self) -> None:
+        freeze = json.loads(REGISTRY.read_text(encoding="utf-8"))["corpus_freeze"]
+        network = json.loads((ROOT / freeze["publication_authority"]).read_text(encoding="utf-8"))
+        nodes = network["nodes"]
+        ids = {row["id"] for row in nodes}
+        audit = freeze["identity_audit"]
+        self.assertEqual(audit["unique_publication_ids"], len(ids))
+        self.assertEqual(audit["unique_normalized_dois"], len({row["doi"].lower() for row in nodes}))
+        self.assertTrue(all(row["id"] == "doi:" + row["doi"].lower() for row in nodes))
+        records = json.loads((ROOT / "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json").read_text(encoding="utf-8"))["literature_records"]
+        doi_by_record = {row["record_id"]: row.get("doi", "").lower() for row in records}
+        joins = [(node, record) for node in nodes for record in node["toolkit"]["records"]]
+        self.assertEqual(audit["exact_doi_record_joins"], len(joins))
+        self.assertEqual(audit["mismatched_record_doi_joins"], 0)
+        for node, record in joins:
+            self.assertEqual(doi_by_record[record["recordId"]], node["doi"].lower())
+        self.assertIn("not a fresh", audit["scope"])
+
+        check = freeze["foundational_lineage_check"]
+        candidates = check["candidates"]
+        self.assertEqual(check["candidate_count"], len(candidates))
+        self.assertEqual(len({row["doi"] for row in candidates}), len(candidates))
+        self.assertEqual(check["present_in_frozen_corpus"], sum("doi:" + row["doi"] in ids for row in candidates))
+        outside = [row for row in candidates if "doi:" + row["doi"] not in ids]
+        self.assertEqual(check["outside_frozen_corpus"], len(outside))
+        self.assertTrue(all(row["seed_reference_locators"] for row in candidates))
+        self.assertEqual({row["doi"] for row in outside}, {"10.1007/s00221-010-2255-x"})
+        for row in outside:
+            self.assertEqual(row["membership"], "outside_frozen_corpus")
+            self.assertEqual(row["disposition"], "source_backed_omission_candidate")
+            self.assertEqual(row["network_node_id"], "")
+            self.assertIn("Full Methods were not reviewed", row["evidence_basis"])
+            self.assertTrue(row["identity_source_url"] and row["membership_decision"] and row["next_action"])
+        self.assertEqual(freeze["completion_status"], "open")
+
     def test_primary_timing_batch_keeps_anchors_counts_and_remaining_gaps(self) -> None:
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
         study = next(row for row in data["studies"] if row["studyRowId"] == "doi:10.1371/journal.pone.0044306")

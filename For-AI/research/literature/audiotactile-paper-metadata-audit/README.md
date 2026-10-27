@@ -13,6 +13,18 @@ exclusion. The existing in-map adjacent scope conflict stays visible. Broader
 human PPS families are deferred for this publication; Windows is first, and
 the hosted product offers preparation/preview only.
 
+The freeze's identity audit reconciles all 94 unique DOI identities and the 69
+exact-DOI source-record joins. It reuses the dated resolver evidence; it is not a
+fresh verification of all publisher metadata. A bounded one-hop lineage check
+of Canzoneri (2012), Serino (2007/2009), and Finisguerra (2015) selected 12 human
+spatial audiotactile or auditory-PPS motor antecedents through 2012. Eleven are
+present. Occelli et al. (2010), DOI `10.1007/s00221-010-2255-x`, is absent from
+both the original citation snapshot and the frozen map. Its identity and primary
+abstract are verified; its full Methods remain unreviewed. It is recorded as an
+omission candidate for an explicit corpus-version decision, without changing the
+94-member freeze. This check does not establish exhaustive literature coverage
+or resolve the six earlier outside-map identity gaps.
+
 The freeze is **open**. Completion requires a source-backed inventory or actual
 dated access attempts for every frozen publication, plus a disposition for each
 in-scope experiment's eleven compact scientific contracts. Unresolved parameters,
