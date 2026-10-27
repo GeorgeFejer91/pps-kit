@@ -501,11 +501,11 @@ code {
   border-color: #dfb9b4;
 }
 
-.profile-mode-panel,
 [data-companion-only][hidden] {
   display: none !important;
 }
 
+.profile-mode-panel,
 .companion-panel {
   display: grid;
   gap: 7px;

@@ -13,6 +13,8 @@ await mkdir(output, { recursive: true });
 const types = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".wav": "audio/wav", ".woff2": "font/woff2" };
 const server = createServer(async (request, response) => {
   let path = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
+  if (path === "/dashboard/") path = "/apps/designer/frontend/compiled/index.html";
+  else if (path.startsWith("/dashboard/")) path = path.replace("/dashboard/", "/apps/designer/frontend/compiled/");
   if (path.startsWith("/assets/preloads/")) path = `/packages/pps-resources${path}`;
   if (path.startsWith("/assets/breathing/")) path = `/packages/pps-resources${path}`;
   if (path.startsWith("/study_templates/")) path = `/packages/pps-resources${path}`;
@@ -111,8 +113,11 @@ try {
     };
   });
   designer.on("pageerror", error => errors.push(error.message));
-  await designer.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1&desktop=1`);
+  await designer.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1`);
   await designer.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
+  assert.equal(await designer.locator("#edit-mode-button").isVisible(), true, "Hosted authoring must expose the Edit switch");
+  assert.equal(await designer.locator("#companion-panel").isVisible(), false, "Hosted authoring must keep V1 companion controls hidden");
+  await designer.locator("#profile-mode-panel").screenshot({ path: resolve(output, "hosted-edit-switch.png") });
   const play = designer.locator("[data-preview-source-label]").first();
   await play.click();
   await designer.waitForFunction(() => window.previewStarts === 1);
@@ -217,27 +222,27 @@ try {
   assert.ok(report.text.scrollHeight <= report.text.height + 1);
   assert.deepEqual(errors, []);
 
-  const nativePreview = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
-  nativePreview.on("pageerror", error => errors.push(error.message));
-  await nativePreview.addInitScript(origin => localStorage.setItem("ppsDashboard.apiBase", origin), base);
+  const companionPreview = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  companionPreview.on("pageerror", error => errors.push(error.message));
   const pendingPreviews = [];
   let onPreview;
-  await nativePreview.route("**/api/**", async route => {
+  await companionPreview.route("**/api/**", async route => {
     const path = new URL(route.request().url()).pathname;
-    if (path === "/api/state") await route.fulfill({ json: previewFixture });
+    if (path === "/api/state") await route.fulfill({ json: { ...previewFixture, static_mode: false } });
     else if (path === "/api/run-sequence/preview") { pendingPreviews.push(route); onPreview?.(); }
     else await route.fulfill({ status: 404, json: { detail: "No unrelated mutation in this test" } });
   });
-  await nativePreview.goto(`${base}/apps/designer/frontend/compiled/index.html?desktop=1`);
-  await nativePreview.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
-  assert.equal(await nativePreview.evaluate(() => window.PPSDesignerApp.isHosted()), false);
-  await nativePreview.locator("#edit-mode-button").click();
+  await companionPreview.goto(`${base}/dashboard/`);
+  await companionPreview.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
+  assert.equal(await companionPreview.evaluate(() => window.PPSDesignerApp.isHosted()), false);
+  assert.equal(await companionPreview.locator("#companion-panel").isVisible(), true);
+  await companionPreview.locator("#edit-mode-button").click();
   for (const count of [2, 3]) {
     const requested = new Promise((done, fail) => {
       const timeout = setTimeout(() => fail(new Error("Order preview request was not sent")), 10_000);
       onPreview = () => { clearTimeout(timeout); done(); };
     });
-    await nativePreview.locator("#participants").fill(String(count));
+    await companionPreview.locator("#participants").fill(String(count));
     await requested;
   }
   assert.equal(pendingPreviews.length, 2);
@@ -248,15 +253,15 @@ try {
   };
   await writeFile(resolve(output, "order-preview-payload.json"), JSON.stringify(pendingPreviews[1].request().postDataJSON(), null, 2));
   await pendingPreviews[1].fulfill({ json: responseFor(pendingPreviews[1]) });
-  await nativePreview.waitForFunction(() => window.PPSDesignerApp.getState().design.protocol.participants === 3);
-  const oldResponse = nativePreview.waitForResponse(response => response.url().endsWith("/api/run-sequence/preview"));
+  await companionPreview.waitForFunction(() => window.PPSDesignerApp.getState().design.protocol.participants === 3);
+  const oldResponse = companionPreview.waitForResponse(response => response.url().endsWith("/api/run-sequence/preview"));
   await pendingPreviews[0].fulfill({ json: responseFor(pendingPreviews[0]) });
   await oldResponse;
-  await nativePreview.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
-  assert.equal(await nativePreview.evaluate(() => window.PPSDesignerApp.getState().design.protocol.participants), 3);
-  assert.equal(await nativePreview.locator("#participants").inputValue(), "3");
+  await companionPreview.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+  assert.equal(await companionPreview.evaluate(() => window.PPSDesignerApp.getState().design.protocol.participants), 3);
+  assert.equal(await companionPreview.locator("#participants").inputValue(), "3");
   assert.deepEqual(errors, []);
-  report.checks.push("Designer reversed HTTP preview responses preserve the latest form and state");
+  report.checks.push("Explicit V1 companion route with mocked reversed HTTP preview responses preserves the latest form and state");
   const mapper = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   mapper.on("pageerror", error => errors.push(error.message));
   let failReview = true;
@@ -272,6 +277,7 @@ try {
   await mapper.locator("#publication-network-retry").click();
   await mapper.waitForFunction(() => document.querySelector("[data-publication-network-root]").dataset.publicationNetworkState === "ready");
   const reviewData = JSON.parse(await readFile(resolve(root, "apps/designer/frontend/publication_study_reviews.v1.json"), "utf8"));
+  report.catalogueCounts = reviewData.counts;
   assert.equal(await network.getAttribute("data-publication-network-nodes"), String(reviewData.counts.publications));
   assert.equal(await network.getAttribute("data-publication-network-studies"), String(reviewData.counts.studies));
   assert.equal(await mapper.locator("#publication-network-results li").count(), 40);
@@ -354,8 +360,9 @@ try {
   assert.deepEqual(errors, []);
   report.checks.push("Mapper retry, DOI search, keyboard detail, study deep link, evidence separation, responsive layout and preset navigation");
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
-  await phone.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1&desktop=1`);
+  await phone.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1`);
   await phone.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
+  assert.equal(await phone.locator("#edit-mode-button").isVisible(), true, "Phone authoring must expose the Edit switch");
   await phone.evaluate(() => { document.documentElement.dataset.theme = "dark"; });
   assert.equal(await phone.locator("#mobile-companion-toggle").evaluate(element => getComputedStyle(element).display), "none");
   const removalControls = phone.locator(".panel.profile-readonly [data-remove-noise], .panel.profile-readonly [data-remove-audio]");
@@ -367,7 +374,7 @@ try {
     const color = getComputedStyle(probe).color; probe.remove(); return color;
   }));
   await phone.screenshot({ path: resolve(output, "designer-phone-dark-reduced-motion.png") });
-  report.checks.push("Compiled phone hides readonly removal/native companion controls, preserves dark labels and reduced-motion collapse");
+  report.checks.push("Hosted desktop and phone expose Edit while hiding companion controls; phone preserves dark labels, readonly removal and reduced motion");
   await writeFile(resolve(output, "report.json"), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {
