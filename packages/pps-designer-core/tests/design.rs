@@ -403,3 +403,55 @@ fn publication_checks_actual_bytes_and_preserves_rename_links_without_stale_qual
     )
     .is_err());
 }
+
+#[test]
+fn same_duration_colour_remake_discards_its_stationary_comparator() {
+    let mut p = payload();
+    p["design"]["noises"] = json!([
+        {"label":"Native burst","noise_type":"pink","duration_ms":1000,
+         "prebaked_path":"native-assets/old-moving.wav",
+         "native_stationary_baseline_asset":"native-assets/old-control.wav",
+         "native_stationary_baseline_sha256":"a".repeat(64),
+         "native_stationary_baseline_provenance":{"baseline_policy":"native-stationary-t0-source-profile.v2"}},
+        {"label":"Other","noise_type":"white","native_stationary_baseline_asset":"native-assets/other-control.wav"}
+    ]);
+    p["bake_recipe"]["action"] = json!("remake");
+    p["bake_recipe"]["original_label"] = json!("Native burst");
+    p["bake_recipe"]["noise_type"] = json!("white");
+    let plan = plan_ingredient_generation(&p, &opt_in()).unwrap();
+    let (wav, stimulus, report) = contract_output(&plan);
+    let entry = generated_ingredient_entry(
+        &plan,
+        "native-assets/new-moving.wav",
+        &wav,
+        &stimulus,
+        &report,
+        &AtomicBool::new(false),
+    )
+    .unwrap();
+    assert_eq!(entry.asset()["duration_ms"], 1000);
+    let publication = apply_generated_ingredient(&plan, &entry).unwrap();
+    let sources = publication.design["noises"].as_array().unwrap();
+    let remade = sources
+        .iter()
+        .find(|source| source["label"] == "Native burst")
+        .unwrap();
+    assert_eq!(remade["noise_type"], "white");
+    assert_eq!(remade["prebaked_path"], "native-assets/new-moving.wav");
+    for field in [
+        "native_stationary_baseline_asset",
+        "native_stationary_baseline_sha256",
+        "native_stationary_baseline_provenance",
+    ] {
+        assert!(remade.get(field).is_none(), "remake retained stale {field}");
+    }
+    assert_eq!(
+        sources
+            .iter()
+            .find(|source| source["label"] == "Other")
+            .unwrap()["native_stationary_baseline_asset"],
+        "native-assets/other-control.wav"
+    );
+    assert_eq!(publication.invalidate_segments, [2, 3, 4, 5, 6]);
+    assert!(publication.invalidate_run_package);
+}
