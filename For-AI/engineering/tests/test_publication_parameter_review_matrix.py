@@ -1479,6 +1479,21 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         index = read_csv(self.output_dir / "study_instance_index.csv")[1]
         self.assertEqual(next(row for row in index if row["study_row_id"] == ids[0])["parameter_evidence_scope"], "composite_requires_split")
 
+    def test_collignon_full_contract_audit_preserves_electrical_ambiguity(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        node = "doi:10.1016/j.neuropsychologia.2009.07.025"
+        study = next(x for x in data["studies"] if x["studyRowId"] == node)
+        cs = {c["key"]: c for c in study["contracts"]}
+        self.assertEqual(cs["auditory_stimulus"]["status"], "approximation_required")
+        self.assertIn("five 1-ms", cs["tactile_target"]["value"])
+        self.assertIn("25 ms", cs["tactile_target"]["value"])
+        self.assertEqual(cs["tactile_target"]["components"]["waveform_and_duration"]["status"], "not_reported")
+        self.assertIn("not proof", cs["tactile_target"]["evidenceNote"])
+        self.assertEqual(cs["jitter_iti_policy"]["components"]["timing_scope_and_anchor"]["status"], "not_reported")
+        self.assertEqual(cs["repetition_allocation"]["status"], "derived_complete")
+        pub = next(x for x in data["publications"] if x["networkNodeId"] == node)
+        self.assertTrue(pub["inventoryAudit"]["inventoryAndContractsAudited"])
+
     def test_context_audit_keeps_access_and_exact_preprint_phase_boundaries(self) -> None:
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
         studies = {row["studyRowId"]: row for row in data["studies"]}

@@ -12678,39 +12678,112 @@
       "source_type": "primary_article_pdf",
       "source_file": "https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf",
       "review_date": "2026-10-27",
-      "review_scope": "Bounded static-task timing, response and trial-allocation normalization. Other contracts retain earlier evidence; no template or native-readiness promotion.",
+      "review_scope": "Main article inventory and all eleven contracts; PDF pp.2-3/published pp.3237-3238, Methods 2.1-2.4 and Figure 1 inspected. Supplements not newly retrieved. No template/native qualification promotion.",
       "prior_review_pointer": "manual_reviews/tajadura_jimenez_2009_visual_deprivation.json",
       "retrieval_attempts": [
         {
           "date": "2026-10-27",
           "route": "https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf",
-          "outcome": "HTTP200_primary_article_PDF; Methods2.2-2.4_and_rendered_Figure1_inspected"
+          "outcome": "HTTP 200_primary_article_PDF; Methods 2.2-2.4_and_rendered_Figure 1_inspected"
         },
         {
           "date": "2026-10-27",
           "route": "https://pubmed.ncbi.nlm.nih.gov/19666035/",
           "outcome": "DOI_title_and_Collignon_authorship_confirmed"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/abs/pii/S0028393209003194",
+          "outcome": "Direct publisher access 403; author-hosted main PDF read. Main article cites supporting figure/table; their current bytes were not retrieved in this pass."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf",
+          "outcome": "Main Methods and rendered Figure 1 independently inspected by coordinator and science owner. SHA256 f9fdc5559c89960831816262f1086ecd41b2b25947c7a95f502b70e21e4bcf35. No new supplementary review claimed."
         }
       ],
       "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
         "trial_sequence",
         "task_response",
         "jitter_iti_policy",
         "soa_schedule",
+        "tactile_target",
         "baseline_trial_contract",
         "catch_trial_contract",
         "repetition_allocation",
         "block_order_contract"
       ],
       "contracts": {
+        "auditory_stimulus": {
+          "status": "approximation_required",
+          "value": "Static 100-ms pink-noise burst; normalized peak 90%, plateau 90 ms with 5-ms rise/fall; Adobe Audition 2.0; Gigaworks T 20 loudspeakers; 75 dB SPL each side.",
+          "page_or_section": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "Generated pink noise."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "100-ms pink-noise burst."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "approximation_required",
+              "value": "Audition 2.0 recipe: 90% peak, 90-ms plateau, 5-ms rise/fall. Exact source file, seed, sample rate and envelope functional shape unavailable."
+            },
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "75 dB SPL both channels, at least 40 dB above each participant hearing threshold. Measurement placement/procedure unreported."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Physical left/right Gigaworks T 20 speakers; Presentation on Dell XPS/Windows XP."
+            }
+          },
+          "evidence_note": "A generic pink-noise file or headphone HRTF render is an explicit substitution, not recovered original audio."
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Static left/right external locations; hands 30 cm anterior and 25 cm either side of body midline; adjacent speakers at lateral±25 cm; crossed/uncrossed hand posture.",
+          "page_or_section": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Static; no approach, recession or speed."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "External left/right relative to body midline; anatomical hand swaps sides when arms cross."
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "Hands 30 cm in front,±25 cm lateral, palms down. Speakers immediately beside hands,±25 cm lateral. Exact speaker height/hand-speaker offset not specified."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "Fixed location throughout 100-ms burst."
+            },
+            "padding_or_holds": {
+              "status": "not_applicable",
+              "value": "No movement hold/padding phase in this static lateralization task."
+            },
+            "attenuation_law": {
+              "status": "not_applicable",
+              "value": "No distance trajectory or attenuation law; loudspeaker level separately reported."
+            }
+          },
+          "evidence_note": "Do not invent exact 3D speaker coordinates from the schematic; reported relative geometry is the static scientific contract."
+        },
         "trial_sequence": {
-          "status": "reported_complete",
-          "value": "Auditory-only,tactile-only and congruent simultaneous audio-tactile targets on either external side.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "status": "partial",
+          "value": "Auditory-only, tactile-only and congruent simultaneous audio-tactile targets on either external side.",
+          "page_or_section": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
           "component_reviews": {
             "trial_families": {
               "status": "reported",
-              "value": "A,T,AT crossed with left/right external stimulus side."
+              "value": "A, T, AT crossed with left/right external stimulus side."
             },
             "ordered_elements_and_source_selection": {
               "status": "reported",
@@ -12719,6 +12792,10 @@
             "condition_intermixing": {
               "status": "reported",
               "value": "Six side/modality cells randomly intermixed within each posture block."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "Single nominal 100 ms event; exact complete trial margins and interval endpoint convention are not specified."
             }
           },
           "evidence_note": "Current primary Methods and rendered Figure 1 inspected. "
@@ -12726,11 +12803,11 @@
         "task_response": {
           "status": "partial",
           "value": "Press the button on the external stimulus side; crossed hands reverse which anatomical hand presses that button.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "page_or_section": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
           "component_reviews": {
             "target_and_nontarget_rule": {
               "status": "reported",
-              "value": "Every A,T,AT trial requires left/right lateralization."
+              "value": "Every A, T, AT trial requires left/right lateralization."
             },
             "response_mode_or_device": {
               "status": "reported",
@@ -12743,6 +12820,10 @@
             "scoring_rule": {
               "status": "reported",
               "value": "Analysis includes 150-1000-ms post-stimulus RTs and computes inverse efficiency; this is not an online timeout."
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "No online response deadline found.150-1000 ms is the analysis RT filter, not a task timeout."
             }
           },
           "missing_required_components": [
@@ -12753,30 +12834,35 @@
         "jitter_iti_policy": {
           "status": "partial",
           "value": "Reported interstimulus interval mean 1950 ms, range 1200-2700 ms.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "page_or_section": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
           "component_reviews": {
             "policy_type": {
               "status": "reported",
               "value": "Variable interstimulus interval."
             },
             "timing_scope_and_anchor": {
-              "status": "reported",
-              "value": "Interstimulus interval; exact event endpoint convention unresolved."
+              "status": "not_reported",
+              "value": "Called interstimulus interval; onset/offset endpoint convention not specified."
             },
             "values_or_range": {
               "status": "reported",
-              "value": "1200-2700 ms,mean 1950 ms."
+              "value": "1200-2700 ms, mean 1950 ms."
+            },
+            "distribution": {
+              "status": "not_reported",
+              "value": "Range 1200-2700 ms and mean 1950 ms do not establish a uniform distribution."
             }
           },
           "missing_required_components": [
+            "timing_scope_and_anchor",
             "distribution"
           ],
           "evidence_note": "Current primary Methods and rendered Figure 1 inspected. Do not assume a uniform distribution from the mean/range or silently relabel ISI as an offset-to-onset ITI."
         },
         "soa_schedule": {
           "status": "reported_complete",
-          "value": "Simultaneous congruent audio-tactile targets:0-ms SOA on both external sides.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "value": "Simultaneous congruent audio-tactile targets: 0-ms SOA on both external sides.",
+          "page_or_section": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
           "component_reviews": {
             "reference_event_and_sign": {
               "status": "reported",
@@ -12788,15 +12874,50 @@
             },
             "direction_specific_pairing": {
               "status": "reported",
-              "value": "Static left/right side,not approach/recede."
+              "value": "Static left/right side, not approach/recede."
             }
           },
           "evidence_note": "Current primary Methods and rendered Figure 1 inspected. "
         },
+        "tactile_target": {
+          "status": "partial",
+          "value": "Electrical stimulation of either middle finger: five 1-ms biphasic square pulses every 25 ms, described as 40 Hz for 100 ms; individually calibrated and left/right sensation matched.",
+          "page_or_section": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Electrical via Grass S 88 and PSIU6 isolation unit."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Ring electrodes around proximal/distal interphalangeal joints of the left/right middle finger."
+            },
+            "waveform_and_duration": {
+              "status": "not_reported",
+              "value": "Published: five 1-ms biphasic square pulses at 25-ms intervals, 40 Hz for 100 ms. Exact phase-width and train-endpoint convention not specified; retain these published values without rounding to four pulses or assuming 101 ms."
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "40 Hz; individual amplitude calibrated. Group means(SD)23(11)V sighted, 17(12)V early-blind, 24(11)V late-blind are summaries, not individual settings."
+            },
+            "intensity_or_calibration": {
+              "status": "reported",
+              "value": "Per-hand strongest prominent comfortable/nonpainful sensation, then perceived left/right intensity matched."
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "Presentation-controlled electrical stimulation; exact hardware trigger wiring/latency not provided."
+            }
+          },
+          "evidence_note": "Five pulse onsets separated by 25 ms span 100 ms before final pulse width. The nominal 100-ms train description does not resolve sample-level convention; this is an ambiguity, not proof of a source error.",
+          "missing_required_components": [
+            "waveform_and_duration"
+          ]
+        },
         "baseline_trial_contract": {
           "status": "reported_complete",
-          "value": "Per posture block:100 auditory-only and 100 tactile-only response targets serve unisensory comparison conditions.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "value": "Per posture block: 100 auditory-only and 100 tactile-only response targets serve unisensory comparison conditions.",
+          "page_or_section": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "reported",
@@ -12815,12 +12936,12 @@
               "value": "200 unisensory control trials per block."
             }
           },
-          "evidence_note": "Current primary Methods and rendered Figure 1 inspected. These are response-target trials,not silent baseline rows or catches."
+          "evidence_note": "Current primary Methods and rendered Figure 1 inspected. These are response-target trials, not silent baseline rows or catches."
         },
         "catch_trial_contract": {
           "status": "explicitly_absent",
           "value": "No behavioral catch/no-go family in the exhaustive A/T/AT lateralization design.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "page_or_section": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "explicitly_absent",
@@ -12839,12 +12960,12 @@
               "value": "0."
             }
           },
-          "evidence_note": "Current primary Methods and rendered Figure 1 inspected. "
+          "evidence_note": "Absence is inferred from the explicitly exhaustive 6-cell/300-trial allocation and response instruction for every modality. Auditory-only trials are response targets, not catches."
         },
         "repetition_allocation": {
-          "status": "reported_complete",
-          "value": "2 sides x 3 modalities x 50 repetitions =300 trials per posture block;600 across two test blocks.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "status": "derived_complete",
+          "value": "2 sides x 3 modalities x 50 repetitions =300 trials per posture block; 600 across two test blocks.",
+          "page_or_section": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
           "component_reviews": {
             "factor_dimensions": {
               "status": "reported",
@@ -12859,16 +12980,17 @@
               "value": "21 practice trials before each block excluded from 600 test trials."
             },
             "derived_total_reconciliation": {
-              "status": "reported",
-              "value": "2 x 3 x 50 x 2 postures =600 test trials."
+              "status": "derived",
+              "value": "2 sides ×3 modalities ×50 trials ×2 postures =600 test trials.2 blocks ×21 practice =42 practice trials, separate from 600."
             }
           },
-          "evidence_note": "Current primary Methods and rendered Figure 1 inspected. "
+          "evidence_note": "300 per posture is reported; 600 combined and 42 practice are derived using the displayed formulas.",
+          "derivation_note": "Two postures × two sides × three modalities × 50 repetitions = 600 main trials. Two blocks × 21 practice trials = 42 separate practice trials."
         },
         "block_order_contract": {
           "status": "reported_complete",
-          "value": "Two posture blocks,uncrossed and crossed,with counterbalanced order and a 10-minute pause.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "value": "Two posture blocks, uncrossed and crossed, with counterbalanced order and a 10-minute pause.",
+          "page_or_section": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
           "component_reviews": {
             "block_count": {
               "status": "reported",
@@ -12892,7 +13014,7 @@
             },
             "sequence_constraints": {
               "status": "reported",
-              "value": "10-minute pause between blocks;21 practice trials precede each block."
+              "value": "10-minute pause between blocks; 21 practice trials precede each block."
             }
           },
           "evidence_note": "Current primary Methods and rendered Figure 1 inspected. "

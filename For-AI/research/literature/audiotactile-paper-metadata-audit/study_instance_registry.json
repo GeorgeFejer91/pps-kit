@@ -1262,10 +1262,10 @@
     {
       "network_node_id": "doi:10.1016/j.neuropsychologia.2009.07.025",
       "doi": "10.1016/j.neuropsychologia.2009.07.025",
-      "inventory_status": "confirmed_main_audio_tactile_experiment",
+      "inventory_status": "confirmed_single_main_factorial_experiment",
       "inventory_evidence_status": "primary_methods_reviewed",
       "inventory_evidence_classified_on": "2026-10-27",
-      "instance_count_basis": "One lateralization protocol with two posture blocks across early-blind,late-blind and sighted groups. Postures and groups are design factors,not separate experiments.",
+      "instance_count_basis": "One factorial lateralization experiment, 12 sighted, 10 early-blind and 11 late-blind participants (33 derived total). Crossed/uncrossed posture, external side and A/T/AT modality are within-person factors; audiometry, tactile calibration and 21 practice trials per block are embedded checks, not additional cohorts.",
       "evidence_pointer": "https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf::Methods; manual_reviews/tajadura_jimenez_2009_visual_deprivation.json::segment_2_sequence_and_intermixing;segment_4_counts",
       "review_date": "2026-10-27",
       "instances": [
@@ -1279,11 +1279,48 @@
             "tajadura_jimenez_2009_uncrossed_visual_deprivation"
           ],
           "toolkit_scope": "in_scope",
-          "disaggregation_status": "record_already_experiment_specific"
+          "disaggregation_status": "record_already_experiment_specific",
+          "cohort": "12 sighted + 10 early-blind + 11 late-blind = 33 independent participants; same factorial design."
         }
       ],
-      "source_review_limit": "Current primary PDF Methods and Figure 1 inspected.",
-      "identity_note": "DOI and primary paper are Collignon et al.(2009). Legacy record/template IDs retain tajadura_jimenez for continuity; they are not an authorship claim."
+      "source_review_limit": "Supporting results figure/table cited; not retrieved in this pass. Do not claim every supplement reviewed. Main Methods and rendered Figure 1 inspected independently; exact noise asset, full speaker geometry, electrical train convention, online deadline and interval anchor/distribution remain explicit gaps.",
+      "identity_note": "DOI and primary paper are Collignon et al.(2009). Legacy record/template IDs retain tajadura_jimenez for continuity; they are not an authorship claim.",
+      "source_cohorts": [
+        {
+          "label": "Sighted control",
+          "n": 12
+        },
+        {
+          "label": "Early blind",
+          "n": 10
+        },
+        {
+          "label": "Late blind",
+          "n": 11
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf",
+          "outcome": "HTTP 200_primary_article_PDF; Methods 2.2-2.4_and_rendered_Figure 1_inspected"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://pubmed.ncbi.nlm.nih.gov/19666035/",
+          "outcome": "DOI_title_and_Collignon_authorship_confirmed"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/abs/pii/S0028393209003194",
+          "outcome": "Direct publisher access 403; author-hosted main PDF read. Main article cites supporting figure/table; their current bytes were not retrieved in this pass."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf",
+          "outcome": "Main Methods and rendered Figure 1 independently inspected by coordinator and science owner. SHA256 f9fdc5559c89960831816262f1086ecd41b2b25947c7a95f502b70e21e4bcf35. No new supplementary review claimed."
+        }
+      ]
     },
     {
       "network_node_id": "doi:10.1038/s41598-019-45084-4",

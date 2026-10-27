@@ -46,12 +46,19 @@ The current audit records 60 Methods-backed inventories (46 current primary
 reviews, eight retained primary reviews, and six identified author versions whose
 final comparison is pending), one abstract/metadata inventory, one partial
 Methods inventories, ten audited access blockers, one project-lineage boundary, and 21 unregistered publications.
-Only 70 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 24 still need inventory
+Only 71 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 23 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Collignon’s one factorial experiment now has all eleven source dispositions:
+12 sighted, ten early-blind and eleven late-blind participants, with postures
+within person. The five-pulse/25 ms/nominal 100 ms electrical description has
+an unresolved endpoint convention; it is not silently changed to four pulses
+or called a proven error. Main Methods are reviewed; cited supplementary
+results material was not retrieved in this pass.
+
 Haptic geometric matching retains four minimum numbered adjacent experiments
 with a documented full-Methods access gap and unresolved Exp1/2 assignment.
 The predictive visuo-tactile chapter remains provisional context after actual

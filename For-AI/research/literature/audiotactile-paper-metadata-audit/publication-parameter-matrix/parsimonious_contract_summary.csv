@@ -1,12 +1,12 @@
 contract_key,segment,label,study_count,reported_complete,derived_complete,approximation_required,partial,conflicting_evidence,low_confidence,explicitly_absent,not_reported,source_unavailable,not_assessed,not_applicable,composite_requires_split,available_or_resolved_count,available_or_resolved_pct,toolkit_encoded_count
-auditory_stimulus,1,Auditory stimulus,162,5,0,25,56,3,1,0,4,17,14,33,4,5,3.1,20
+auditory_stimulus,1,Auditory stimulus,162,5,0,26,55,3,1,0,4,17,14,33,4,5,3.1,20
 trajectory_kinematics,1,Trajectory and kinematics,162,19,6,8,57,2,1,0,1,17,14,33,4,25,15.4,20
-trial_sequence,2,Trial sequence,162,52,4,0,34,1,1,0,1,18,14,33,4,56,34.6,20
+trial_sequence,2,Trial sequence,162,51,4,0,35,1,1,0,1,18,14,33,4,55,34.0,20
 task_response,runtime,Task and response,162,14,0,0,75,3,1,0,1,17,14,33,4,14,8.6,4
 jitter_iti_policy,2,Jitter and ITI policy,162,15,0,0,50,3,1,0,22,20,14,33,4,15,9.3,20
 soa_schedule,3,SOA schedule,162,65,9,5,8,2,1,0,3,18,14,33,4,74,45.7,20
 tactile_target,3,Tactile target,162,30,0,0,47,11,1,0,2,20,14,33,4,30,18.5,20
 baseline_trial_contract,3,Baseline/control trials,162,20,24,0,30,2,1,9,7,18,14,33,4,53,32.7,20
 catch_trial_contract,3,Catch/no-target trials,162,27,19,0,17,4,1,13,8,20,14,35,4,59,36.4,20
-repetition_allocation,4,Repetition allocation,162,26,36,0,16,9,1,0,3,20,14,33,4,62,38.3,20
+repetition_allocation,4,Repetition allocation,162,25,37,0,16,9,1,0,3,20,14,33,4,62,38.3,20
 block_order_contract,5,Block and order policy,162,25,4,0,47,9,0,0,7,19,14,33,4,29,17.9,20
