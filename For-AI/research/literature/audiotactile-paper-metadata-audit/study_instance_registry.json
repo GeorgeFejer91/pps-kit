@@ -899,11 +899,11 @@
     {
       "network_node_id": "doi:10.1073/pnas.2024548118",
       "doi": "10.1073/pnas.2024548118",
-      "inventory_status": "confirmed_cohort_specific_variants",
+      "inventory_status": "confirmed_newborn_adult_variants_and_separate_newborn_pilot",
       "inventory_evidence_status": "primary_methods_reviewed",
       "inventory_evidence_classified_on": "2026-10-27",
-      "instance_count_basis": "One EEG study has newborn and adult protocol variants. Current main Methods establishes both groups; the existing critical SI review reports different per-block repetitions and block counts. These are cohort variants, not two asserted independent experiments.",
-      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/fullTextXML::Methods; manual_reviews/ronga_2021_newborn_erp.json::segment_4_counts (SI Appendix p.3, reviewed2026-06-16)",
+      "instance_count_basis": "SI identifies 35 newborns: 5 separate stimulus-adequacy pilot participants and 30 main enrollees, with 5 exclusions (2 irritability/crying, 3 deep sleep), leaving 25 analyzed. Adult comparison has 25 participants (15 female). Main newborn/adult variants retain a/b; pilot is c. Adult simultaneity validation is mentioned without N/overlap and remains a bounded supporting activity, not an invented independent cohort.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false::original Methods sapp.pdf pp. 2–3",
       "review_date": "2026-10-27",
       "instances": [
         {
@@ -913,7 +913,8 @@
           "record_id": "ronga_2021_newborn_erp",
           "template_ids": [],
           "toolkit_scope": "in_scope",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort": "30 main newborn enrollees, 5 exclusions, 25 analyzed; separate 5-newborn pilot excluded from main count."
         },
         {
           "suffix": "b",
@@ -922,10 +923,40 @@
           "record_id": "ronga_2021_newborn_erp",
           "template_ids": [],
           "toolkit_scope": "in_scope",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort": "25 adult comparison participants, 15 female."
+        },
+        {
+          "suffix": "c",
+          "instance_kind": "supporting_pilot",
+          "experiment_label": "Newborn stimulus-adequacy pilot",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_calibration_pilot",
+          "disaggregation_status": "adjacent_protocol_source_reviewed",
+          "cohort": "Five newborn pilot participants, separate from the 30 main enrollees."
         }
       ],
-      "source_review_limit": "Current SI retrieval failed (PNAS403, PMC browser challenge); historical source review remains authoritative and is explicitly identified. Unreviewed cohort-specific contracts remain composite."
+      "source_review_limit": "Current main and original Methods supplement reviewed. Jitter distribution and exact interval onset/offset anchor remain unspecified; newborn stopping policy is compliance-dependent. Native electrical/EEG qualification is not assessed.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/fullTextXML",
+          "outcome": "Current primary main XML reviewed. SHA256 b54c0109f3d71d1a2905d64f3fd18c70c44b61f1a3aa554b0d930e3d2153a816."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "outcome": "Original Methods sapp.pdf retrieved through official Europe PMC supplement route; only Methods PDF read. Rendered SI pp. 2–3 inspected. SHA256 d41155c035f590d67d912cafee1947275b88a3fc0242b35b7186aa3923a88114."
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Adult perceived-simultaneity pilot check",
+          "disposition": "supporting_activity_cohort_unresolved",
+          "basis": "SI p. 3 says pilot participants perceived delayed audio/touch as simultaneous; no cohort size or overlap is specified. Do not assign these observations to the five-newborn pilot."
+        }
+      ]
     },
     {
       "network_node_id": "doi:10.1007/s00221-019-05469-3",
@@ -3049,11 +3080,12 @@
       "old_study_row_id": "doi:10.1073/pnas.2024548118",
       "child_study_row_ids": [
         "doi:10.1073/pnas.2024548118::a",
-        "doi:10.1073/pnas.2024548118::b"
+        "doi:10.1073/pnas.2024548118::b",
+        "doi:10.1073/pnas.2024548118::c"
       ],
       "review_date": "2026-10-27",
-      "reason": "The single placeholder combined newborn and adult protocol counts. Retain an explicit alias to both cohort variants; neither child alone is equivalent to the former row.",
-      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/fullTextXML::Methods; manual_reviews/ronga_2021_newborn_erp.json::segment_4_counts"
+      "reason": "The single placeholder combined newborn and adult protocol counts. Retain an explicit alias to both cohort variants; neither child alone is equivalent to the former row. Fresh original SI adds the separately enrolled five-newborn adequacy pilot as child c; a/b remain unchanged.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false"
     },
     {
       "old_study_row_id": "doi:10.1038/s41598-019-45084-4",

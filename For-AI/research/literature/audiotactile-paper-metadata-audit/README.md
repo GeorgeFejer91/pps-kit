@@ -33,7 +33,7 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 151 study/context rows,
+Current checkpoint (2026-10-27): 94 frozen publications, 152 study/context rows,
 59 registered publication inventories, eight access-audited publications,
 one audited project-lineage identity,
 and 26 publication inventories still unassessed. Registry presence alone
@@ -46,12 +46,17 @@ The current audit records 57 Methods-backed inventories (43 current primary
 reviews, ten retained primary reviews, and four identified author versions whose
 final comparison is pending), one abstract/metadata inventory, one partial
 Methods inventories, eight audited access blockers, one project-lineage boundary, and 26 unregistered publications.
-Only 61 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 33 still need inventory
+Only 62 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 32 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Ronga (2021) fresh original SI establishes 4–6 s random ITI, with distribution
+and anchor still unspecified, and a separate five-newborn adequacy pilot. Main
+enrollment is 30 newborns with 25 analyzed; the adult variant has 25. Unisensory
+ERP controls and EEG baseline correction remain distinct from no-go catches.
+
 Serino (2007) was rechecked against a fresh published copy: one task with blind
 and sighted cohorts, group-specific repeated schedules, and far-source emission
 5 ms before touch. Exact electrical pulse duration and ITI remain unreported;

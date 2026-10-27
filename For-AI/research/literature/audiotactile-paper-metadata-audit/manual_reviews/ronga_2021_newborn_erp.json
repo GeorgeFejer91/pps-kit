@@ -2,7 +2,7 @@
   "schema": "pps-paper-metadata-manual-review.v1",
   "record_id": "ronga_2021_newborn_erp",
   "citation_short": "Ronga et al. (2021), newborn ERP",
-  "review_date": "2026-06-16",
+  "review_date": "2026-10-27",
   "manual_review_status": "manual_review_completed_main_pdf_and_pnas_supplements",
   "confidence_score": 0.9,
   "confidence_label": "high_confidence_extraction",
@@ -47,6 +47,12 @@
       "source": "tmp/pdfs/ronga_2021_newborn_review/sapp_page-2.png through sapp_page-3.png",
       "status": "reviewed_not_tracked",
       "scope": "Temporary rendered SI methods pages were visually checked to repair text-extraction loss around near/far speaker placement."
+    },
+    {
+      "source_type": "supplement_pdf",
+      "source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+      "status": "reviewed",
+      "scope": "Original Methods sapp.pdf newly recovered through Europe PMC; rendered pp. 2–3 confirm pilot/main enrollment and explicit 4–6 s jitter. Other historical fields remain individually scoped."
     }
   ],
   "review_attempts": [
@@ -176,10 +182,10 @@
       },
       "iti_jitter_policy": {
         "status": "reported",
-        "value": "A long inter-trial interval greater than 2 s was used; exact distribution or fixed values are not reported.",
-        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
-        "page_or_section": "SI Appendix p.3, Stimuli and experimental task",
-        "evidence_note": "The SI states the ITI lower bound and rationale but not the full distribution."
+        "value": "Inter-trial interval randomly jittered between 4 and 6 s. Exact distribution family and onset-to-onset versus offset-to-onset anchor are not specified.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+        "page_or_section": "Original SI Appendix p. 3, Stimuli and experimental task; fresh rendered review 2026-10-27",
+        "evidence_note": "The >2 s passage is rationale; the preceding paragraph explicitly reports 4–6 s. No uniform distribution is inferred."
       },
       "response_window": {
         "status": "not_applicable",
@@ -276,7 +282,8 @@
     "The speaker model is not reported.",
     "The ITI policy is only reported as greater than 2 s, without exact distribution or fixed values.",
     "Newborn trial totals vary by compliance across 3-6 blocks.",
-    "This is a passive ERP endpoint rather than a behavioral RT task."
+    "This is a passive ERP endpoint rather than a behavioral RT task.",
+    "Fresh SI separates five newborn pilot participants from 30 main enrollees and 25 analyzed, and explicitly reports 4–6 s random ITI. The exact interval anchor/distribution and newborn stopping threshold remain unspecified."
   ],
   "next_manual_action": "Use this as a high-confidence static near/far protocol source for Cell lineage and newborn/adult ERP profile recreation; exact ITI distribution and speaker model remain approximation points.",
   "source_retrieval_followups": [
