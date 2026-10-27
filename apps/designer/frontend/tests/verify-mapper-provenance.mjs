@@ -18,6 +18,8 @@ assert.ok(reviews.inventoryAudit, "The fixture must contain generated inventory 
 const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".woff2": "font/woff2" };
 const server = createServer(async (request, response) => {
   let pathname = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
+  if (pathname === "/dashboard/") pathname = "/apps/designer/frontend/compiled/index.html";
+  else if (pathname.startsWith("/dashboard/assets/")) pathname = pathname.replace("/dashboard/assets/", "/apps/designer/frontend/compiled/assets/");
   if (["/assets/preloads/", "/assets/breathing/", "/study_templates/"].some(prefix => pathname.startsWith(prefix))) pathname = `/packages/pps-resources${pathname}`;
   const path = resolve(root, `.${pathname}`);
   if (!path.startsWith(root.endsWith(sep) ? root : root + sep)) { response.writeHead(403).end(); return; }
@@ -25,13 +27,16 @@ const server = createServer(async (request, response) => {
   catch { response.writeHead(404).end(); }
 });
 await new Promise(done => server.listen(0, "127.0.0.1", done));
-const base = `http://127.0.0.1:${server.address().port}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1&page=documentation`;
+const origin = `http://127.0.0.1:${server.address().port}`;
+const base = `${origin}/apps/designer/frontend/compiled/index.html?page=documentation`;
 const browser = await chromium.launch({ headless: true, args: ["--mute-audio"] });
 const report = { browser: browser.version(), fixtureSha256: createHash("sha256").update(bytes).digest("hex"), fixturePath, checks: [] };
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   const errors = [];
+  const httpApiRequests = [];
   page.on("pageerror", error => errors.push(error.message));
+  page.on("request", request => { if (new URL(request.url()).pathname.startsWith("/api/")) httpApiRequests.push(request.url()); });
   await page.route("**/publication_study_reviews.v1-*.json", route => route.fulfill({ json: reviews }));
   const author = reviews.publications.find(row => row.inventoryAudit?.evidenceStatus === "author_version_methods_reviewed_final_comparison_pending");
   assert.ok(author);
@@ -41,6 +46,11 @@ try {
   await page.goto(`${base}&study=${encodeURIComponent(study.studyRowId)}#docs-publication-network`);
   const detail = page.locator("#publication-network-detail");
   await detail.waitFor({ state: "visible" });
+  await page.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
+  const hostedSnapshot = await page.evaluate(() => window.PPSDesignerApp.getState());
+  assert.equal(await page.locator("#companion-panel").isVisible(), false);
+  assert.equal(await page.locator("#mobile-companion-toggle").isVisible(), false);
+  assert.equal(await page.locator(".rail-note").isVisible(), false);
   assert.match(await detail.innerText(), /Author-version Methods reviewed; final-version comparison pending/);
   const cell = detail.locator(`[data-study-id="${study.studyRowId}"] [data-contract-key="${contract.key}"]`);
   await cell.locator(":scope > summary").click();
@@ -75,6 +85,25 @@ try {
     assert.match(value, evidenceStatus === "abstract_or_metadata_inventory" ? /Methods inventory unresolved/ : evidenceStatus === "audited_source_access_gap" ? /Methods unavailable/ : /No registered inventory/);
   }
   report.checks.push("Registered abstract-only inventory, audited access blocker, and absent registry entry stay distinct");
+  const partialStudy = reviews.studies.find(study => study.contracts.some(contract => contract.status === "partial"));
+  const partial = partialStudy.contracts.find(contract => contract.status === "partial");
+  await page.goto(`${base}&study=${encodeURIComponent(partialStudy.studyRowId)}#docs-publication-network`);
+  const partialCell = detail.locator(`[data-study-id="${partialStudy.studyRowId}"] [data-contract-key="${partial.key}"]`);
+  await partialCell.locator(":scope > summary").click();
+  assert.match(await partialCell.innerText(), /Some required stimulus, timing, or trial-structure details are missing or unresolved/);
+  assert.doesNotMatch(await partialCell.innerText(), /Coarse 25-field/);
+  assert.deepEqual(httpApiRequests, [], "Normal hosted startup must not probe a localhost companion");
+  report.checks.push("Hosted startup hides legacy connection/Qt controls without HTTP probes; partial evidence describes missing protocol details");
+
+  const legacy = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  await legacy.route("**/api/state", route => route.fulfill({ json: { ...hostedSnapshot, static_mode: false } }));
+  await legacy.goto(`${origin}/dashboard/`);
+  await legacy.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
+  assert.equal(await legacy.locator("#companion-panel").isVisible(), true);
+  assert.equal(await legacy.locator("#backend-url").isEnabled(), true);
+  assert.equal(await legacy.locator("#connect-backend").isVisible(), true);
+  report.checks.push("Explicit V1 loopback route retains connection controls (mocked companion response; not native/installed proof)");
+  await legacy.close();
   assert.deepEqual(errors, []);
   await writeFile(resolve(output, "mapper-provenance-report.json"), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));

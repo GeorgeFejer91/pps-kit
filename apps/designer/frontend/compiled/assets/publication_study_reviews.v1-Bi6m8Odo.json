@@ -2657,7 +2657,7 @@
       "label": "Tool-use reshapes the boundaries of body and peripersonal space representations. (a)",
       "experimentLabel": "Experiment 1A — tool-use training PPS task",
       "inventoryStatus": "confirmed_audio_tactile_instances",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
@@ -3056,7 +3056,7 @@
       "label": "Tool-use reshapes the boundaries of body and peripersonal space representations. (b)",
       "experimentLabel": "Experiment 3 — pointing-control PPS task",
       "inventoryStatus": "confirmed_audio_tactile_instances",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
@@ -3691,7 +3691,7 @@
       "label": "Anisotropy of lateral peripersonal space is linked to handedness. (a)",
       "experimentLabel": "Handedness and lateral PPS — experiment inventory unresolved after access attempts",
       "inventoryStatus": "source_access_blocked_experiment_inventory_unresolved",
-      "evidenceScope": "none",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "source_unavailable": 11
@@ -4208,7 +4208,7 @@
       "label": "Enhanced audio-tactile multisensory interaction in a peripersonal task after echolocation. (a)",
       "experimentLabel": "Pre/post neck PPS assessment with echolocation and control groups",
       "inventoryStatus": "confirmed_main_audio_tactile_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [
         "tonelli_2019_echolocation"
       ],
@@ -4616,7 +4616,7 @@
       "label": "Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. (a)",
       "experimentLabel": "Experiment 1",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "explicitly_absent": 1,
@@ -4994,7 +4994,7 @@
       "label": "Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. (b)",
       "experimentLabel": "Experiment 2",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "explicitly_absent": 1,
@@ -5372,7 +5372,7 @@
       "label": "Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. (c)",
       "experimentLabel": "Experiment 3",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "explicitly_absent": 2,
@@ -5750,7 +5750,7 @@
       "label": "Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. (d)",
       "experimentLabel": "Experiment 4",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
@@ -6136,7 +6136,7 @@
       "label": "Comparison of peripersonal space in front and rear spaces. (a)",
       "experimentLabel": "Front/rear PPS with one-second approaching probes",
       "inventoryStatus": "confirmed_one_pps_experiment_with_two_supporting_tasks",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "partial": 5,
@@ -6507,7 +6507,7 @@
       "label": "Does musical interaction in a jazz duet modulate peripersonal space? (a)",
       "experimentLabel": "Musicians: cooperative/uncooperative duet and alone baseline (author version)",
       "inventoryStatus": "author_version_inventory_assessed_final_comparison_pending",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "derived_complete": 2,
@@ -6520,9 +6520,9 @@
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
           "status": "partial",
-          "value": "Author thesis version: 50-ms784-Hz tone with50-Hz sinusoidal amplitude modulation and5-ms rise/fall; Audacity-generated and delivered through one of two loudspeakers.",
+          "value": "Author thesis version: 50-ms 784-Hz tone with 50-Hz sinusoidal amplitude modulation and 5-ms rise/fall; Audacity-generated and delivered through one of two loudspeakers.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. Modulation depth, sample rate, absolute playback level and original tone asset are not reported; these are not toolkit defaults.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -6540,7 +6540,7 @@
             },
             "stimulus_identity_or_asset": {
               "status": "reported",
-              "value": "784-Hz carrier,50-Hz amplitude modulation,50-ms duration and5-ms onset/offset ramps; Audacity.",
+              "value": "784-Hz carrier, 50-Hz amplitude modulation, 50-ms duration and 5-ms onset/offset ramps; Audacity.",
               "note": ""
             }
           }
@@ -6549,10 +6549,10 @@
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
           "status": "partial",
-          "value": "Author thesis version: Static near/far loudspeakers: near beside right arm; far120cm from participant chair beside the partner.",
+          "value": "Author thesis version: Static near/far loudspeakers: near beside right arm; far 120 cm from participant chair beside the partner.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
-          "evidenceNote": "Identified author thesis; final article equivalence not verified. Do not label120cm as hand-to-speaker distance or create a looming trajectory.",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
+          "evidenceNote": "Identified author thesis; final article equivalence not verified. Do not label 120 cm as hand-to-speaker distance or create a looming trajectory.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00426-020-01365-6",
@@ -6569,7 +6569,7 @@
             },
             "geometry": {
               "status": "reported",
-              "value": "Near beside right arm, no exact metric offset; far120cm from participant chair.",
+              "value": "Near beside right arm, no exact metric offset; far 120 cm from participant chair.",
               "note": ""
             },
             "motion_mode": {
@@ -6588,10 +6588,10 @@
           "key": "trial_sequence",
           "label": "Trial sequence",
           "status": "reported_complete",
-          "value": "Author thesis version: Five families: Anear,Afar,T,TAnear,TAfar; simultaneous bimodal sound/touch; perform a task administration after each musical take and once alone.",
+          "value": "Author thesis version: Five families: Anear, Afar, T, TAnear, TAfar; simultaneous bimodal sound/touch; perform a task administration after each musical take and once alone.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
-          "evidenceNote": "Identified author thesis; final article equivalence not verified. Partner-present/alone context is distinct from tactile-only baseline trial family; musical excerpts are an external manipulation, not the50-ms auditory task asset.",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
+          "evidenceNote": "Identified author thesis; final article equivalence not verified. Partner-present/alone context is distinct from tactile-only baseline trial family; musical excerpts are an external manipulation, not the 50-ms auditory task asset.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00426-020-01365-6",
@@ -6615,10 +6615,10 @@
           "key": "task_response",
           "label": "Task and response",
           "status": "partial",
-          "value": "Author thesis version: Right-index button press on detecting right-hand touch; withhold for auditory-only events. RT and0-7perceived-touch intensity ratings are collected.",
+          "value": "Author thesis version: Right-index button press on detecting right-hand touch; withhold for auditory-only events. RT and 0-7perceived-touch intensity ratings are collected.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
-          "evidenceNote": "Identified author thesis; final article equivalence not verified. No online response deadline or rating collection sequence is stated. The±2SDRT exclusion rule is analysis, not an online timeout.",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
+          "evidenceNote": "Identified author thesis; final article equivalence not verified. No online response deadline or rating collection sequence is stated. The ±2 SD RT exclusion rule is analysis, not an online timeout.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00426-020-01365-6",
@@ -6636,7 +6636,7 @@
             },
             "response_mode_or_device": {
               "status": "reported",
-              "value": "Response box on desk, E-primev2; box model unspecified.",
+              "value": "Response box on desk, E-prime v2; box model unspecified.",
               "note": ""
             },
             "target_and_nontarget_rule": {
@@ -6650,9 +6650,9 @@
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
           "status": "partial",
-          "value": "Author thesis version: Jittering inter-stimulus interval6000-8000ms.",
+          "value": "Author thesis version: Jittering inter-stimulus interval 6000-8000 ms.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. No onset/offset/response/rating anchor or uniform distribution is stated.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -6671,7 +6671,7 @@
             },
             "values_or_range": {
               "status": "reported",
-              "value": "6000-8000ms.",
+              "value": "6000-8000 ms.",
               "note": ""
             }
           }
@@ -6680,9 +6680,9 @@
           "key": "soa_schedule",
           "label": "SOA schedule",
           "status": "reported_complete",
-          "value": "Author thesis version: Simultaneous audio-tactile near and far targets:0msSOA.",
+          "value": "Author thesis version: Simultaneous audio-tactile near and far targets: 0 ms SOA.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. ",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -6693,7 +6693,7 @@
           "components": {
             "ordered_soa_values_or_derivable_distance_anchors": {
               "status": "reported",
-              "value": "0ms for both static positions.",
+              "value": "0 ms for both static positions.",
               "note": ""
             },
             "reference_event_and_sign": {
@@ -6707,10 +6707,10 @@
           "key": "tactile_target",
           "label": "Tactile target",
           "status": "reported_complete",
-          "value": "Author thesis version: DS7A200-microsecond constant-current square pulse to right-hand dorsum, at twice individual perceptual threshold by method of limits.",
+          "value": "Author thesis version: DS7 A 200-microsecond constant-current square pulse to right-hand dorsum, at twice individual perceptual threshold by method of limits.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
-          "evidenceNote": "Identified author thesis; final article equivalence not verified. Reported group mean2.01mA/range0.51-3.2mA is descriptive, not a transferable safe amplitude or PPS Kit device calibration.",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
+          "evidenceNote": "Identified author thesis; final article equivalence not verified. Reported group mean 2.01 mA/range 0.51-3.2 mA is descriptive, not a transferable safe amplitude or PPS Kit device calibration.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00426-020-01365-6",
@@ -6720,12 +6720,12 @@
           "components": {
             "body_site_and_side": {
               "status": "reported",
-              "value": "Right-hand dorsum; bipolar electrodes1cm apart on Velcro strap, position randomly shifted about1cm to reduce habituation.",
+              "value": "Right-hand dorsum; bipolar electrodes 1 cm apart on Velcro strap, position randomly shifted about 1 cm to reduce habituation.",
               "note": ""
             },
             "modality": {
               "status": "reported",
-              "value": "Transcutaneous electrical stimulation, DigitimerDS7A.",
+              "value": "Transcutaneous electrical stimulation, Digitimer DS7 A.",
               "note": ""
             },
             "waveform_and_duration": {
@@ -6739,9 +6739,9 @@
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
           "status": "reported_complete",
-          "value": "Author thesis version: 24tactile-only trials per120-trial task administration; these normalize bimodal RTs.",
+          "value": "Author thesis version: 24tactile-only trials per 120-trial task administration; these normalize bimodal RTs.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. The alone-baseline social condition contains all five families and must not be confused with the T trial family.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -6752,7 +6752,7 @@
           "components": {
             "allocation_rule": {
               "status": "reported",
-              "value": "12T trials in each of two60-trial blocks.",
+              "value": "12 T trials in each of two 60-trial blocks.",
               "note": ""
             },
             "family_or_explicit_none": {
@@ -6762,12 +6762,12 @@
             },
             "resolved_trial_count": {
               "status": "reported",
-              "value": "24T trials per task administration.",
+              "value": "24 T trials per task administration.",
               "note": ""
             },
             "timing_and_anchor": {
               "status": "reported",
-              "value": "Touch is the sole stimulus in T trials; subject to the same incompletely anchored6000-8000msISI.",
+              "value": "Touch is the sole stimulus in T trials; subject to the same incompletely anchored 6000-8000msISI.",
               "note": ""
             }
           }
@@ -6776,9 +6776,9 @@
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
           "status": "reported_complete",
-          "value": "Author thesis version: 48auditory-only catches per120-trial administration, split equally between near and far; withhold response.",
+          "value": "Author thesis version: 48auditory-only catches per 120-trial administration, split equally between near and far; withhold response.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. ",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -6789,7 +6789,7 @@
           "components": {
             "allocation_rule": {
               "status": "reported",
-              "value": "12Anear+12Afar per60-trial block, two blocks.",
+              "value": "12 Anear+12 Afar per 60-trial block, two blocks.",
               "note": ""
             },
             "family_or_explicit_none": {
@@ -6799,7 +6799,7 @@
             },
             "resolved_trial_count": {
               "status": "reported",
-              "value": "48overall:24near+24far per administration.",
+              "value": "48 overall: 24 near+24 far per administration.",
               "note": ""
             },
             "target_role_and_expected_action": {
@@ -6813,11 +6813,11 @@
           "key": "repetition_allocation",
           "label": "Repetition allocation",
           "status": "derived_complete",
-          "value": "Author thesis version: Two60-trial blocks per administration:24of each family=120rows. Main musicians have five administrations, giving600task rows by derivation.",
+          "value": "Author thesis version: Two 60-trial blocks per administration: 24 of each family=120 rows. Main musicians have five administrations, giving 600 task rows by derivation.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. ",
-          "derivationNote": "12repetitions x5families x2blocks=120rows per administration. Two cooperative takes+two uncooperative takes+one alone baseline=5administrations;120x5=600main-musician rows. The source states the per-administration recipe and five administrations, not the600total explicitly.",
+          "derivationNote": "12 repetitions x 5 families x 2 blocks=120 rows per administration. Two cooperative takes+two uncooperative takes+one alone baseline=5 administrations; 120 x 5=600 main-musician rows. The source states the per-administration recipe and five administrations, not the 600total explicitly.",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00426-020-01365-6",
           "evidenceSourceUrl": "https://backoffice.biblio.ugent.be/download/8673877/8673880",
@@ -6831,12 +6831,12 @@
             },
             "factor_dimensions": {
               "status": "reported",
-              "value": "Five trial families x two60-trial blocks; two cooperative and two uncooperative post-take administrations plus one alone baseline.",
+              "value": "Five trial families x two 60-trial blocks; two cooperative and two uncooperative post-take administrations plus one alone baseline.",
               "note": ""
             },
             "repetitions_or_exact_counts": {
               "status": "derived",
-              "value": "12of each of five families per block;2blocks per administration.",
+              "value": "12 of each of five families per block; 2 blocks per administration.",
               "note": ""
             }
           }
@@ -6845,9 +6845,9 @@
           "key": "block_order_contract",
           "label": "Block and order policy",
           "status": "derived_complete",
-          "value": "Author thesis version: Two60-trial blocks per task, pseudo-randomized with no more than two identical consecutive trials; cooperative/uncooperative session order counterbalanced.",
+          "value": "Author thesis version: Two 60-trial blocks per task, pseudo-randomized with no more than two identical consecutive trials; cooperative/uncooperative session order counterbalanced.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. No random seed, exact pseudo-randomization algorithm or allocation ratio for baseline placement is stated.",
           "derivationNote": "Two task blocks per administration x five administrations = ten task blocks in the main regimen; session order is directly reported.",
           "reviewedOn": "2026-10-27",
@@ -6858,17 +6858,17 @@
           "components": {
             "block_composition": {
               "status": "reported",
-              "value": "12Anear,12Afar,12T,12TAnear,12TAfar per block.",
+              "value": "12 Anear, 12 Afar, 12 T, 12 TAnear, 12 TAfar per block.",
               "note": ""
             },
             "block_count": {
               "status": "derived",
-              "value": "Two per administration;five main administrations, hence ten task blocks across the regimen.",
+              "value": "Two per administration; five main administrations, hence ten task blocks across the regimen.",
               "note": ""
             },
             "block_order_or_counterbalancing": {
               "status": "reported",
-              "value": "Cooperative/uncooperative sessions counterbalanced and separated by2-3weeks. Alone baseline occurs at start of first or end of second session.",
+              "value": "Cooperative/uncooperative sessions counterbalanced and separated by 2-3 weeks. Alone baseline occurs at start of first or end of second session.",
               "note": ""
             },
             "within_block_randomization": {
@@ -6886,7 +6886,7 @@
       "label": "Does musical interaction in a jazz duet modulate peripersonal space? (b)",
       "experimentLabel": "Nonmusician baseline-only comparison (author version)",
       "inventoryStatus": "author_version_inventory_assessed_final_comparison_pending",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "partial": 4,
@@ -6898,9 +6898,9 @@
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
           "status": "partial",
-          "value": "Author thesis version: 50-ms784-Hz tone with50-Hz sinusoidal amplitude modulation and5-ms rise/fall; Audacity-generated and delivered through one of two loudspeakers.",
+          "value": "Author thesis version: 50-ms 784-Hz tone with 50-Hz sinusoidal amplitude modulation and 5-ms rise/fall; Audacity-generated and delivered through one of two loudspeakers.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. Modulation depth, sample rate, absolute playback level and original tone asset are not reported; these are not toolkit defaults.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -6918,7 +6918,7 @@
             },
             "stimulus_identity_or_asset": {
               "status": "reported",
-              "value": "784-Hz carrier,50-Hz amplitude modulation,50-ms duration and5-ms onset/offset ramps; Audacity.",
+              "value": "784-Hz carrier, 50-Hz amplitude modulation, 50-ms duration and 5-ms onset/offset ramps; Audacity.",
               "note": ""
             }
           }
@@ -6927,10 +6927,10 @@
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
           "status": "partial",
-          "value": "Author thesis version: Static near/far loudspeakers: near beside right arm; far120cm from participant chair beside the partner.",
+          "value": "Author thesis version: Static near/far loudspeakers: near beside right arm; far 120 cm from participant chair beside the partner.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
-          "evidenceNote": "Identified author thesis; final article equivalence not verified. Do not label120cm as hand-to-speaker distance or create a looming trajectory.",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
+          "evidenceNote": "Identified author thesis; final article equivalence not verified. Do not label 120 cm as hand-to-speaker distance or create a looming trajectory.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00426-020-01365-6",
@@ -6947,7 +6947,7 @@
             },
             "geometry": {
               "status": "reported",
-              "value": "Near beside right arm, no exact metric offset; far120cm from participant chair.",
+              "value": "Near beside right arm, no exact metric offset; far 120 cm from participant chair.",
               "note": ""
             },
             "motion_mode": {
@@ -6966,10 +6966,10 @@
           "key": "trial_sequence",
           "label": "Trial sequence",
           "status": "reported_complete",
-          "value": "Author thesis version: Nonmusician comparison performs the alone-baseline administration only, with the same five families Anear,Afar,T,TAnear,TAfar.",
+          "value": "Author thesis version: Nonmusician comparison performs the alone-baseline administration only, with the same five families Anear, Afar, T, TAnear, TAfar.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
-          "evidenceNote": "Identified author thesis; final article equivalence not verified. Partner-present/alone context is distinct from tactile-only baseline trial family; musical excerpts are an external manipulation, not the50-ms auditory task asset.",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
+          "evidenceNote": "Identified author thesis; final article equivalence not verified. Partner-present/alone context is distinct from tactile-only baseline trial family; musical excerpts are an external manipulation, not the 50-ms auditory task asset.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00426-020-01365-6",
@@ -6993,10 +6993,10 @@
           "key": "task_response",
           "label": "Task and response",
           "status": "partial",
-          "value": "Author thesis version: Right-index button press on detecting right-hand touch; withhold for auditory-only events. RT and0-7perceived-touch intensity ratings are collected.",
+          "value": "Author thesis version: Right-index button press on detecting right-hand touch; withhold for auditory-only events. RT and 0-7perceived-touch intensity ratings are collected.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
-          "evidenceNote": "Identified author thesis; final article equivalence not verified. No online response deadline or rating collection sequence is stated. The±2SDRT exclusion rule is analysis, not an online timeout.",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
+          "evidenceNote": "Identified author thesis; final article equivalence not verified. No online response deadline or rating collection sequence is stated. The ±2 SD RT exclusion rule is analysis, not an online timeout.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00426-020-01365-6",
@@ -7014,7 +7014,7 @@
             },
             "response_mode_or_device": {
               "status": "reported",
-              "value": "Response box on desk, E-primev2; box model unspecified.",
+              "value": "Response box on desk, E-prime v2; box model unspecified.",
               "note": ""
             },
             "target_and_nontarget_rule": {
@@ -7028,9 +7028,9 @@
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
           "status": "partial",
-          "value": "Author thesis version: Jittering inter-stimulus interval6000-8000ms.",
+          "value": "Author thesis version: Jittering inter-stimulus interval 6000-8000 ms.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. No onset/offset/response/rating anchor or uniform distribution is stated.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7049,7 +7049,7 @@
             },
             "values_or_range": {
               "status": "reported",
-              "value": "6000-8000ms.",
+              "value": "6000-8000 ms.",
               "note": ""
             }
           }
@@ -7058,9 +7058,9 @@
           "key": "soa_schedule",
           "label": "SOA schedule",
           "status": "reported_complete",
-          "value": "Author thesis version: Simultaneous audio-tactile near and far targets:0msSOA.",
+          "value": "Author thesis version: Simultaneous audio-tactile near and far targets: 0 ms SOA.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. ",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7071,7 +7071,7 @@
           "components": {
             "ordered_soa_values_or_derivable_distance_anchors": {
               "status": "reported",
-              "value": "0ms for both static positions.",
+              "value": "0 ms for both static positions.",
               "note": ""
             },
             "reference_event_and_sign": {
@@ -7085,10 +7085,10 @@
           "key": "tactile_target",
           "label": "Tactile target",
           "status": "reported_complete",
-          "value": "Author thesis version: DS7A200-microsecond constant-current square pulse to right-hand dorsum, at twice individual perceptual threshold by method of limits.",
+          "value": "Author thesis version: DS7 A 200-microsecond constant-current square pulse to right-hand dorsum, at twice individual perceptual threshold by method of limits.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
-          "evidenceNote": "Identified author thesis; final article equivalence not verified. Reported group mean2.01mA/range0.51-3.2mA is descriptive, not a transferable safe amplitude or PPS Kit device calibration.",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
+          "evidenceNote": "Identified author thesis; final article equivalence not verified. Reported group mean 2.01 mA/range 0.51-3.2 mA is descriptive, not a transferable safe amplitude or PPS Kit device calibration.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00426-020-01365-6",
@@ -7098,12 +7098,12 @@
           "components": {
             "body_site_and_side": {
               "status": "reported",
-              "value": "Right-hand dorsum; bipolar electrodes1cm apart on Velcro strap, position randomly shifted about1cm to reduce habituation.",
+              "value": "Right-hand dorsum; bipolar electrodes 1 cm apart on Velcro strap, position randomly shifted about 1 cm to reduce habituation.",
               "note": ""
             },
             "modality": {
               "status": "reported",
-              "value": "Transcutaneous electrical stimulation, DigitimerDS7A.",
+              "value": "Transcutaneous electrical stimulation, Digitimer DS7 A.",
               "note": ""
             },
             "waveform_and_duration": {
@@ -7117,9 +7117,9 @@
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
           "status": "reported_complete",
-          "value": "Author thesis version: 24tactile-only trials per120-trial task administration; these normalize bimodal RTs.",
+          "value": "Author thesis version: 24tactile-only trials per 120-trial task administration; these normalize bimodal RTs.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. The alone-baseline social condition contains all five families and must not be confused with the T trial family.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7130,7 +7130,7 @@
           "components": {
             "allocation_rule": {
               "status": "reported",
-              "value": "12T trials in each of two60-trial blocks.",
+              "value": "12 T trials in each of two 60-trial blocks.",
               "note": ""
             },
             "family_or_explicit_none": {
@@ -7140,12 +7140,12 @@
             },
             "resolved_trial_count": {
               "status": "reported",
-              "value": "24T trials per task administration.",
+              "value": "24 T trials per task administration.",
               "note": ""
             },
             "timing_and_anchor": {
               "status": "reported",
-              "value": "Touch is the sole stimulus in T trials; subject to the same incompletely anchored6000-8000msISI.",
+              "value": "Touch is the sole stimulus in T trials; subject to the same incompletely anchored 6000-8000msISI.",
               "note": ""
             }
           }
@@ -7154,9 +7154,9 @@
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
           "status": "reported_complete",
-          "value": "Author thesis version: 48auditory-only catches per120-trial administration, split equally between near and far; withhold response.",
+          "value": "Author thesis version: 48auditory-only catches per 120-trial administration, split equally between near and far; withhold response.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. ",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7167,7 +7167,7 @@
           "components": {
             "allocation_rule": {
               "status": "reported",
-              "value": "12Anear+12Afar per60-trial block, two blocks.",
+              "value": "12 Anear+12 Afar per 60-trial block, two blocks.",
               "note": ""
             },
             "family_or_explicit_none": {
@@ -7177,7 +7177,7 @@
             },
             "resolved_trial_count": {
               "status": "reported",
-              "value": "48overall:24near+24far per administration.",
+              "value": "48 overall: 24 near+24 far per administration.",
               "note": ""
             },
             "target_role_and_expected_action": {
@@ -7191,9 +7191,9 @@
           "key": "repetition_allocation",
           "label": "Repetition allocation",
           "status": "reported_complete",
-          "value": "Author thesis version: Baseline-only control:two60-trial blocks=120trials,24of each of five families.",
+          "value": "Author thesis version: Baseline-only control: two 60-trial blocks=120 trials, 24 of each of five families.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. ",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7209,12 +7209,12 @@
             },
             "factor_dimensions": {
               "status": "reported",
-              "value": "Five trial families across two blocks;one alone-baseline administration.",
+              "value": "Five trial families across two blocks; one alone-baseline administration.",
               "note": ""
             },
             "repetitions_or_exact_counts": {
               "status": "reported",
-              "value": "12of each family per block;24of each family total;120total.",
+              "value": "12 of each family per block; 24 of each family total; 120total.",
               "note": ""
             }
           }
@@ -7223,9 +7223,9 @@
           "key": "block_order_contract",
           "label": "Block and order policy",
           "status": "reported_complete",
-          "value": "Author thesis version: Two60-trial blocks in the alone baseline; pseudo-random family order avoids more than two identical consecutive trials.",
+          "value": "Author thesis version: Two 60-trial blocks in the alone baseline; pseudo-random family order avoids more than two identical consecutive trials.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. ",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7236,7 +7236,7 @@
           "components": {
             "block_composition": {
               "status": "reported",
-              "value": "12of each of five families per block.",
+              "value": "12 of each of five families per block.",
               "note": ""
             },
             "block_count": {
@@ -7264,7 +7264,7 @@
       "label": "Does musical interaction in a jazz duet modulate peripersonal space? (c)",
       "experimentLabel": "Nonmusician sample-size pilot; exact implementation unresolved (author version)",
       "inventoryStatus": "author_version_inventory_assessed_final_comparison_pending",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "not_reported": 9,
@@ -7278,7 +7278,7 @@
           "status": "not_reported",
           "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "pageOrSection": "Author thesis chapter 3 Participants pp. 70-71; final comparison pending",
           "evidenceNote": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7314,7 +7314,7 @@
           "status": "not_reported",
           "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "pageOrSection": "Author thesis chapter 3 Participants pp. 70-71; final comparison pending",
           "evidenceNote": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7356,7 +7356,7 @@
           "status": "partial",
           "value": "Author thesis version: Ten nonmusicians performed the audio-tactile task in the alone-baseline condition for the sample-size power pilot.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. No separate pilot schedule, target/catch counts or apparatus equivalence is specified; retain the explicit lineage as a constraint only.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7380,7 +7380,7 @@
           "status": "not_reported",
           "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "pageOrSection": "Author thesis chapter 3 Participants pp. 70-71; final comparison pending",
           "evidenceNote": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7422,7 +7422,7 @@
           "status": "not_reported",
           "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "pageOrSection": "Author thesis chapter 3 Participants pp. 70-71; final comparison pending",
           "evidenceNote": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7458,7 +7458,7 @@
           "status": "not_reported",
           "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "pageOrSection": "Author thesis chapter 3 Participants pp. 70-71; final comparison pending",
           "evidenceNote": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7488,7 +7488,7 @@
           "status": "not_reported",
           "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "pageOrSection": "Author thesis chapter 3 Participants pp. 70-71; final comparison pending",
           "evidenceNote": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7524,7 +7524,7 @@
           "status": "not_reported",
           "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "pageOrSection": "Author thesis chapter 3 Participants pp. 70-71; final comparison pending",
           "evidenceNote": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7566,7 +7566,7 @@
           "status": "not_reported",
           "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "pageOrSection": "Author thesis chapter 3 Participants pp. 70-71; final comparison pending",
           "evidenceNote": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7606,9 +7606,9 @@
           "key": "repetition_allocation",
           "label": "Repetition allocation",
           "status": "partial",
-          "value": "Author thesis version: Power pilot contains10nonmusicians; exact trial repetitions, blocks and total are not specified.",
+          "value": "Author thesis version: Power pilot contains10 nonmusicians; exact trial repetitions, blocks and total are not specified.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "pageOrSection": "Author thesis chapter 3, pp. 71-74; final-article comparison pending",
           "evidenceNote": "Identified author thesis; final article equivalence not verified. Participant count is not a trial count; do not manufacture120pilot rows from the later implementation.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -7626,7 +7626,7 @@
             },
             "factor_dimensions": {
               "status": "reported",
-              "value": "Baseline audio-tactile task,10nonmusicians; conditions used in the power contrast are not fully enumerated.",
+              "value": "Baseline audio-tactile task, 10 nonmusicians; conditions used in the power contrast are not fully enumerated.",
               "note": ""
             }
           }
@@ -7637,7 +7637,7 @@
           "status": "not_reported",
           "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
           "compositeValue": "",
-          "pageOrSection": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "pageOrSection": "Author thesis chapter 3 Participants pp. 70-71; final comparison pending",
           "evidenceNote": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -8377,7 +8377,7 @@
       "label": "The impact of body image on social cognition: Fear of negative evaluation mediates the relationship between body surveillance and interpersonal distance in women. (a)",
       "experimentLabel": "Audio-tactile PPS assessment in body-image correlational study",
       "inventoryStatus": "confirmed_one_audiotactile_assessment_protocol",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "not_reported": 1,
@@ -8725,7 +8725,7 @@
       "label": "Peripersonal space as the space of the bodily self. (a)",
       "experimentLabel": "Experiment 1 — front-space/chest",
       "inventoryStatus": "confirmed_main_plus_supplemental_variant",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [
         "noel_2015_bodily_self"
       ],
@@ -9110,7 +9110,7 @@
       "label": "Peripersonal space as the space of the bodily self. (b)",
       "experimentLabel": "Experiment 2 — back-space/back",
       "inventoryStatus": "confirmed_main_plus_supplemental_variant",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [
         "noel_2015_bodily_self_back_space"
       ],
@@ -9495,7 +9495,7 @@
       "label": "Peripersonal space as the space of the bodily self. (c)",
       "experimentLabel": "Supplemental front-space receding control",
       "inventoryStatus": "confirmed_main_plus_supplemental_variant",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "derived_complete": 1,
@@ -10350,7 +10350,7 @@
       "label": "How ageing shapes body and space representations: A comparison study between healthy young and older adults. (a)",
       "experimentLabel": "Bilateral PPS assessment in young and older adults",
       "inventoryStatus": "confirmed_one_audiotactile_group_comparison",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "partial": 6,
@@ -10713,7 +10713,7 @@
       "label": "Seeming confines: Electrophysiological evidence of peripersonal space remapping following tool-use in humans. (a)",
       "experimentLabel": "Experiment1: Behavioral spatial-congruency control independent of auditory intensity. (abstract only)",
       "inventoryStatus": "source_access_blocked_three_abstract_reported_experiments",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "source_unavailable": 11
@@ -11130,7 +11130,7 @@
       "label": "Seeming confines: Electrophysiological evidence of peripersonal space remapping following tool-use in humans. (b)",
       "experimentLabel": "Experiment2: EEG demonstration of greater near than far multisensory super-additivity. (abstract only)",
       "inventoryStatus": "source_access_blocked_three_abstract_reported_experiments",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "source_unavailable": 11
@@ -11547,7 +11547,7 @@
       "label": "Seeming confines: Electrophysiological evidence of peripersonal space remapping following tool-use in humans. (c)",
       "experimentLabel": "Experiment3: Main experiment comparing after tool-use training versus after far-space visual discrimination training. (abstract only)",
       "inventoryStatus": "source_access_blocked_three_abstract_reported_experiments",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "source_unavailable": 11
@@ -12200,7 +12200,7 @@
       "label": "Social modulation of peripersonal space boundaries. (a)",
       "experimentLabel": "Experiment 1 — mannequin versus other-person PPS",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
@@ -12602,7 +12602,7 @@
       "label": "Social modulation of peripersonal space boundaries. (b)",
       "experimentLabel": "Experiment 2 — cooperative versus noncooperative interaction",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
@@ -13004,7 +13004,7 @@
       "label": "Social modulation of peripersonal space boundaries. (c)",
       "experimentLabel": "Experiment 3 — cooperative interaction before versus after",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
@@ -13405,7 +13405,7 @@
       "label": "Capturing the dynamics of peripersonal space by integrating expectancy effects and sound propagation properties. (a)",
       "experimentLabel": "Logarithmic/pseudo-linear sampling with fixed and looming controls",
       "inventoryStatus": "confirmed_one_two_session_audiotactile_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "derived_complete": 2,
@@ -15104,7 +15104,7 @@
       "label": "Full body action remapping of peripersonal space: the case of walking. (a)",
       "experimentLabel": "Experiment 1 — locomotion task",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
@@ -15722,7 +15722,7 @@
       "label": "Moving sounds within the peripersonal space modulate the motor system. (a)",
       "experimentLabel": "Moving-sound auditory/TMS motor-excitability experiment",
       "inventoryStatus": "confirmed_one_adjacent_mechanistic_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "not_applicable": 11
@@ -16330,7 +16330,7 @@
       "label": "Emotion-inducing approaching sounds shape the boundaries of multisensory peripersonal space. (a)",
       "experimentLabel": "Experiment 1 — artificial power-law-noise valence",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [
         "ferri_2015_artificial_looming_valence"
       ],
@@ -16721,7 +16721,7 @@
       "label": "Emotion-inducing approaching sounds shape the boundaries of multisensory peripersonal space. (b)",
       "experimentLabel": "Experiment 2 — ecological/IADS-sound valence",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [
         "ferri_2015_ecological_looming_valence"
       ],
@@ -19078,7 +19078,7 @@
       "label": "Peri-personal space encoding in patients with disorders of consciousness and cognitive-motor dissociation. (a)",
       "experimentLabel": "Experiment 1 — healthy participants",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "explicitly_absent": 1,
@@ -19451,7 +19451,7 @@
       "label": "Peri-personal space encoding in patients with disorders of consciousness and cognitive-motor dissociation. (b)",
       "experimentLabel": "Experiment 2 — disorders of consciousness",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "explicitly_absent": 1,
@@ -20296,7 +20296,7 @@
       "label": "Multisensory integration in peripersonal space indexes consciousness states in sleep and disorders of consciousness. (a)",
       "experimentLabel": "Experiment 1: healthy wake/sleep chest EEG",
       "inventoryStatus": "confirmed_two_cohort_specific_pps_experiments",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "conflicting_evidence": 1,
@@ -20711,7 +20711,7 @@
       "label": "Multisensory integration in peripersonal space indexes consciousness states in sleep and disorders of consciousness. (b)",
       "experimentLabel": "Experiment 2: clinical DoC arm EEG",
       "inventoryStatus": "confirmed_two_cohort_specific_pps_experiments",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "explicitly_absent": 1,
@@ -21116,7 +21116,7 @@
       "label": "Identifying peripersonal space boundaries in newborns. (a)",
       "experimentLabel": "Pilot Study — three intensities with audio-tactile stimulation",
       "inventoryStatus": "confirmed_pilot_and_main_experiment",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "explicitly_absent": 2,
@@ -21491,7 +21491,7 @@
       "label": "Identifying peripersonal space boundaries in newborns. (b)",
       "experimentLabel": "Study 1 — five intensities with audio-tactile and auditory-only groups",
       "inventoryStatus": "confirmed_pilot_and_main_experiment",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "explicitly_absent": 1,
@@ -21863,7 +21863,7 @@
       "label": "Enlarged representation of peripersonal space in pregnancy. (a)",
       "experimentLabel": "Abdominal PPS task across three longitudinal sessions",
       "inventoryStatus": "confirmed_longitudinal_audio_tactile_task",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "explicitly_absent": 1,
@@ -22235,7 +22235,7 @@
       "label": "Auditory roughness elicits defense reactions. (a)",
       "experimentLabel": "Main roughness audio-tactile experiment",
       "inventoryStatus": "confirmed_main_audio_tactile_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "derived_complete": 1,
@@ -22642,7 +22642,7 @@
       "label": "Frontal and parietal background connectivity and their dynamic changes account for individual differences in the multisensory representation of peripersonal space. (a)",
       "experimentLabel": "Reused behavioral boundary-estimation protocol",
       "inventoryStatus": "confirmed_reanalysis_with_two_protocol_variants",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "partial": 7,
@@ -22987,7 +22987,7 @@
       "label": "Frontal and parietal background connectivity and their dynamic changes account for individual differences in the multisensory representation of peripersonal space. (b)",
       "experimentLabel": "Reused fMRI protocol with left-finger attention targets",
       "inventoryStatus": "confirmed_reanalysis_with_two_protocol_variants",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "conflicting_evidence": 5,
@@ -23669,7 +23669,7 @@
       "label": "Multisensory-driven facilitation within the peripersonal space is modulated by the expectations about stimulus location on the body. (a)",
       "experimentLabel": "Visuotactile detection with unilateral/bilateral tactile tasks",
       "inventoryStatus": "confirmed_one_visuotactile_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "not_applicable": 11
@@ -24041,7 +24041,7 @@
       "label": "Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution. (a)",
       "experimentLabel": "Experiment 1 — 3000-ms sound/endpoint baselines",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [
         "barumerli_2026_arm_movement_exp1"
       ],
@@ -24430,7 +24430,7 @@
       "label": "Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution. (b)",
       "experimentLabel": "Experiment 2 — 4000-ms sound/five matched baselines",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [
         "barumerli_2026_arm_movement_exp2"
       ],
@@ -25052,7 +25052,7 @@
       "label": "Amputation and prosthesis implantation shape body and peripersonal space representations. (b)",
       "experimentLabel": "Experiment 2 — audio-tactile PPS",
       "inventoryStatus": "at_least_three_experiments",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
@@ -25441,7 +25441,7 @@
       "label": "Amputation and prosthesis implantation shape body and peripersonal space representations. (c)",
       "experimentLabel": "Experiment 3 — audio-tactile PPS",
       "inventoryStatus": "at_least_three_experiments",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
@@ -26516,7 +26516,7 @@
       "label": "Body part-centered and full body-centered peripersonal space representations. (d)",
       "experimentLabel": "Experiment 4 — hand versus trunk/hand on chest",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
@@ -26899,7 +26899,7 @@
       "label": "Body part-centered and full body-centered peripersonal space representations. (e)",
       "experimentLabel": "Experiment 5 — near versus far hand posture",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
@@ -27282,7 +27282,7 @@
       "label": "Body part-centered and full body-centered peripersonal space representations. (f)",
       "experimentLabel": "Experiment 6 — face versus trunk congruency",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
@@ -28984,7 +28984,7 @@
       "label": "Body and peripersonal space representations in chronic stroke patients with upper limb motor deficits. (a)",
       "experimentLabel": "Bilateral PPS assessment in chronic stroke and controls",
       "inventoryStatus": "confirmed_one_audiotactile_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "partial": 6,
@@ -29577,7 +29577,7 @@
       "label": "Audio-Tactile and Peripersonal Space Processing Around the Trunk in Human Parietal and Temporal Cortex: An Intracranial EEG Study. (a)",
       "experimentLabel": "Passive trunk audio-tactile iEEG experiment",
       "inventoryStatus": "confirmed_main_audio_tactile_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "derived_complete": 2,
@@ -30454,7 +30454,7 @@
       "label": "Tool-use Extends Peripersonal Space Boundaries in Schizophrenic Patients. (a)",
       "experimentLabel": "PPS assessment before and after physical tool use",
       "inventoryStatus": "confirmed_one_group_comparison_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "conflicting_evidence": 3,
@@ -30815,7 +30815,7 @@
       "label": "Social coding of the multisensory space around us. (a)",
       "experimentLabel": "Experiment 1: collaboration",
       "inventoryStatus": "confirmed_three_social_context_experiments",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "derived_complete": 1,
@@ -31194,7 +31194,7 @@
       "label": "Social coding of the multisensory space around us. (b)",
       "experimentLabel": "Experiment 2: competition",
       "inventoryStatus": "confirmed_three_social_context_experiments",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "derived_complete": 1,
@@ -31573,7 +31573,7 @@
       "label": "Social coding of the multisensory space around us. (c)",
       "experimentLabel": "Experiment 3: inactive audience",
       "inventoryStatus": "confirmed_three_social_context_experiments",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "derived_complete": 1,
@@ -31952,7 +31952,7 @@
       "label": "Multisensory integration in Peripersonal Space indexes consciousness states in sleep and disorders of consciousness (a)",
       "experimentLabel": "Healthy wake/sleep chest EEG (preprintv1)",
       "inventoryStatus": "confirmed_two_cohort_specific_pps_protocols_preprint_v1",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "conflicting_evidence": 1,
@@ -32371,7 +32371,7 @@
       "label": "Multisensory integration in Peripersonal Space indexes consciousness states in sleep and disorders of consciousness (b)",
       "experimentLabel": "Clinical DoC arm EEG (preprintv1)",
       "inventoryStatus": "confirmed_two_cohort_specific_pps_protocols_preprint_v1",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "explicitly_absent": 1,
@@ -33248,7 +33248,7 @@
       "label": "Audio-tactile and peripersonal space processing around the trunk in human parietal and temporal cortex: an intracranial EEG study (a)",
       "experimentLabel": "Passive trunk A/T/AT iEEG paradigm (preprint v1)",
       "inventoryStatus": "confirmed_one_passive_trunk_ieeg_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "derived_complete": 2,
@@ -33889,7 +33889,7 @@
       "label": "Vibration on the soles of the feet evoking a sensation of walking expands peripersonal space (a)",
       "experimentLabel": "2017 pseudo-walking conference report — Methods inventory unresolved",
       "inventoryStatus": "source_access_blocked_experiment_inventory_unresolved",
-      "evidenceScope": "none",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "source_unavailable": 11
@@ -35895,7 +35895,7 @@
       "label": "Auditory peripersonal space in humans. (a)",
       "experimentLabel": "Experiment 1 — right-side front/back × near/far × sound type",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
@@ -36279,7 +36279,7 @@
       "label": "Auditory peripersonal space in humans. (b)",
       "experimentLabel": "Experiment 2 — left-back near/far white noise",
       "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
@@ -37136,7 +37136,7 @@
       "label": "Remapping Peripersonal Space by Using Foot-Sole Vibrations Without Any Body Movement. (a)",
       "experimentLabel": "2019 foot-sole/forearm journal report — Methods inventory unresolved",
       "inventoryStatus": "source_access_blocked_experiment_inventory_unresolved",
-      "evidenceScope": "none",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "source_unavailable": 11
@@ -37889,7 +37889,7 @@
       "label": "Lost in time and space? Multisensory processing of peripersonal space and time perception in people with frequent experiences of depersonalisation. (a)",
       "experimentLabel": "Depersonalisation PPS comparison (retained final review)",
       "inventoryStatus": "one_main_pps_protocol_with_mtt_supporting_task_retained_review_current_access_blocked",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "not_reported": 2,
@@ -38296,7 +38296,7 @@
       "label": "Social impact on audiotactile integration near the body (a)",
       "experimentLabel": "Collaborative experiment (short report)",
       "inventoryStatus": "confirmed_three_reported_social_context_experiments",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "not_reported": 2,
@@ -38633,7 +38633,7 @@
       "label": "Social impact on audiotactile integration near the body (b)",
       "experimentLabel": "Competitive experiment (short report)",
       "inventoryStatus": "confirmed_three_reported_social_context_experiments",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "not_reported": 2,
@@ -38970,7 +38970,7 @@
       "label": "Social impact on audiotactile integration near the body (c)",
       "experimentLabel": "Audience experiment (short report)",
       "inventoryStatus": "confirmed_three_reported_social_context_experiments",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "not_reported": 2,
@@ -39307,7 +39307,7 @@
       "label": "Motor properties of peripersonal space in humans. (a)",
       "experimentLabel": "Experiment 1 — auditory/TMS, hand near speaker",
       "inventoryStatus": "confirmed_two_adjacent_mechanistic_experiments",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "not_applicable": 11
@@ -39679,7 +39679,7 @@
       "label": "Motor properties of peripersonal space in humans. (b)",
       "experimentLabel": "Experiment 2 — auditory/TMS, arm rotated backward",
       "inventoryStatus": "confirmed_two_adjacent_mechanistic_experiments",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "not_applicable": 11
@@ -40335,7 +40335,7 @@
       "label": "Intertrial Variability in the Premotor Cortex Accounts for Individual Differences in Peripersonal Space. (a)",
       "experimentLabel": "Main behavioral boundary estimation",
       "inventoryStatus": "confirmed_five_pps_protocol_instances_in_three_cohorts",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "conflicting_evidence": 1,
@@ -40718,7 +40718,7 @@
       "label": "Intertrial Variability in the Premotor Cortex Accounts for Individual Differences in Peripersonal Space. (b)",
       "experimentLabel": "fMRI PPS with left-index attention targets",
       "inventoryStatus": "confirmed_five_pps_protocol_instances_in_three_cohorts",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "conflicting_evidence": 2,
@@ -41094,7 +41094,7 @@
       "label": "Intertrial Variability in the Premotor Cortex Accounts for Individual Differences in Peripersonal Space. (c)",
       "experimentLabel": "Across-session reproducibility of the behavioral boundary",
       "inventoryStatus": "confirmed_five_pps_protocol_instances_in_three_cohorts",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "conflicting_evidence": 1,
@@ -41477,7 +41477,7 @@
       "label": "Intertrial Variability in the Premotor Cortex Accounts for Individual Differences in Peripersonal Space. (d)",
       "experimentLabel": "Across-task Experiment 1: sound-only catches",
       "inventoryStatus": "confirmed_five_pps_protocol_instances_in_three_cohorts",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "conflicting_evidence": 1,
@@ -41845,7 +41845,7 @@
       "label": "Intertrial Variability in the Premotor Cortex Accounts for Individual Differences in Peripersonal Space. (e)",
       "experimentLabel": "Across-task Experiment 2: left-index withhold catches",
       "inventoryStatus": "confirmed_five_pps_protocol_instances_in_three_cohorts",
-      "evidenceScope": "composite_requires_split",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "conflicting_evidence": 1,
@@ -42685,7 +42685,7 @@
       "label": "Lost in time and space? Multisensory processing of peripersonal space and time perception in Depersonalisation (a)",
       "experimentLabel": "Depersonalisation PPS comparison (preprint v1; conflicted SI)",
       "inventoryStatus": "one_main_pps_protocol_with_mtt_supporting_task_supplement_context_conflicted",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "conflicting_evidence": 9,
@@ -43819,7 +43819,7 @@
       "label": "Extending peripersonal space representation without tool-use: evidence from a combined behavioral-computational approach. (a)",
       "experimentLabel": "Within-subject synchronous/asynchronous training design",
       "inventoryStatus": "confirmed_main_audio_tactile_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [
         "serino_2015_toolless_sync_training"
       ],
@@ -44169,7 +44169,7 @@
       "label": "Organization, maturation, and plasticity of multisensory integration: insights from computational modeling studies. (a)",
       "experimentLabel": "Computational review; no new human experiment",
       "inventoryStatus": "confirmed_publication_scope_boundary",
-      "evidenceScope": "none",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "not_applicable": 11
@@ -45249,7 +45249,7 @@
       "label": "Effects of guided exploration on reaching measures of auditory peripersonal space. (a)",
       "experimentLabel": "Auditory reaching before and after active/guided feedback training",
       "inventoryStatus": "confirmed_one_adjacent_reaching_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "not_applicable": 11
@@ -45621,7 +45621,7 @@
       "label": "Cynophobic fear adaptively extends peri-personal space. (a)",
       "experimentLabel": "Main rear-field audio-tactile fear experiment",
       "inventoryStatus": "confirmed_main_audio_tactile_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [
         "taffou_2014_cynophobic_rear_looming"
       ],
@@ -46016,7 +46016,7 @@
       "label": "VR Setup to Assess Peripersonal Space Audio-Tactile 3D Boundaries (a)",
       "experimentLabel": "Pilot 3D audio-tactile boundary assessment",
       "inventoryStatus": "confirmed_one_audiotactile_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [
         "lerner_2021_3d_audio_tactile_boundary"
       ],
@@ -46366,7 +46366,7 @@
       "label": "Mindfulness Affects the Boundaries of Bodily Self-Representation: The Effect of Focused-Attention Meditation in Fading the Boundary of Peripersonal Space. (a)",
       "experimentLabel": "Within-subject pre/post focused-attention meditation design",
       "inventoryStatus": "confirmed_main_audio_tactile_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "conflicting_evidence": 1,
@@ -46789,7 +46789,7 @@
       "label": "Using Android Smartphones to Collect Precise Measures of Reaction Times to Multisensory Stimuli. (a)",
       "experimentLabel": "Android audio-tactile behavioral validation",
       "inventoryStatus": "confirmed_one_audiotactile_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [
         "roussel_2025_dynaspace_mobile_pps"
       ],
@@ -47170,7 +47170,7 @@
       "label": "Crossmodal interaction between the mental number line and peripersonal haptic space representation in sighted and blind individuals. (a)",
       "experimentLabel": "Auditory-number priming of active haptic rod bisection",
       "inventoryStatus": "confirmed_one_adjacent_haptic_bisection_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "not_applicable": 11
@@ -47542,7 +47542,7 @@
       "label": "Creating a Walking Sensation for the Seated--A Sensation of Pseudo-walking Expands Peripersonal Space (a)",
       "experimentLabel": "Summarized heel-context PPS protocol; no new cohort",
       "inventoryStatus": "confirmed_summary_protocol_not_independent_experiment",
-      "evidenceScope": "experiment_specific",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "not_reported": 3,

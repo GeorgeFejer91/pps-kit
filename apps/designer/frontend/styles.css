@@ -502,6 +502,10 @@ code {
 }
 
 .profile-mode-panel,
+[data-companion-only][hidden] {
+  display: none !important;
+}
+
 .companion-panel {
   display: grid;
   gap: 7px;

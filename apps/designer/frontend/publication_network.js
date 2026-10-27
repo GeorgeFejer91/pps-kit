@@ -80,6 +80,11 @@ export function evidenceSummary(counts = {}) {
   return `${counts.reported_complete || 0} reported complete · ${counts.derived_complete || 0} derived complete · ${total} contracts`;
 }
 
+function contractStatusDescription(status, legend = {}) {
+  if (status === "partial") return "Some required stimulus, timing, or trial-structure details are missing or unresolved.";
+  return legend[status] || "Evidence status unavailable.";
+}
+
 export function inventoryAuditSummary(audit) {
   if (!audit) return "Methods inventory audit is unavailable in this snapshot.";
   return `${audit.registeredInventories} of ${audit.publications} inventories registered · ${audit.methodsReviewedInventories} Methods inventories reviewed · ${audit.auditedAccessBlockers} documented access blockers · ${audit.inventoryAndContractsAudited} inventory and contract audits complete · ${audit.remainingInventoryOrContractAudit} remaining`;
@@ -581,10 +586,10 @@ export async function initializePublicationNetwork(root) {
         attributes: { "data-contract-key": contract.key } });
       disclosure.append(element("summary", {}, [
         element("span", { text: contract.label, attributes: { "data-pretext": true } }),
-        element("small", { text: titleCase(contract.status), attributes: { title: reviews.statusLegend[contract.status] } }),
+        element("small", { text: titleCase(contract.status), attributes: { title: contractStatusDescription(contract.status, reviews.statusLegend) } }),
       ]));
       const fields = element("div", { className: "publication-network-contract-evidence" }, [
-        element("p", { text: reviews.statusLegend[contract.status] || "Evidence status unavailable." }),
+        element("p", { text: contractStatusDescription(contract.status, reviews.statusLegend) }),
         element("p", { text: contract.value || "No study-specific value recorded." }),
       ]);
       if (contract.compositeValue) fields.append(element("p", { text: `Combined-record evidence, not a study-specific value: ${contract.compositeValue}` }));
