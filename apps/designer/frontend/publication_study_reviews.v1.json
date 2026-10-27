@@ -22,9 +22,9 @@
       "explicitly_absent": 20,
       "low_confidence": 21,
       "not_applicable": 77,
-      "not_assessed": 275,
-      "not_reported": 41,
-      "partial": 319,
+      "not_assessed": 264,
+      "not_reported": 44,
+      "partial": 327,
       "reported_complete": 293,
       "source_unavailable": 210
     }
@@ -1494,13 +1494,13 @@
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
-        "registered": false,
-        "evidenceStatus": "not_registered",
-        "inventoryStatus": "not_assessed",
+        "registered": true,
+        "evidenceStatus": "audited_source_access_gap",
+        "inventoryStatus": "source_access_blocked_experiment_inventory_unresolved",
         "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -1667,13 +1667,13 @@
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
-        "registered": false,
-        "evidenceStatus": "not_registered",
-        "inventoryStatus": "not_assessed",
+        "registered": true,
+        "evidenceStatus": "audited_source_access_gap",
+        "inventoryStatus": "source_access_blocked_experiment_inventory_unresolved",
         "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -2126,17 +2126,18 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "not_reported": 3,
+        "partial": 8
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
-        "registered": false,
-        "evidenceStatus": "not_registered",
-        "inventoryStatus": "not_assessed",
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_summary_protocol_not_independent_experiment",
         "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -32212,9 +32213,9 @@
     {
       "studyRowId": "doi:10.1109/whc.2017.7989970",
       "networkNodeId": "doi:10.1109/whc.2017.7989970",
-      "label": "Vibration on the soles of the feet evoking a sensation of walking expands peripersonal space",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
+      "label": "Vibration on the soles of the feet evoking a sensation of walking expands peripersonal space (a)",
+      "experimentLabel": "2017 pseudo-walking conference report — Methods inventory unresolved",
+      "inventoryStatus": "source_access_blocked_experiment_inventory_unresolved",
       "evidenceScope": "none",
       "templateIds": [],
       "parameterStatusCounts": {
@@ -32226,222 +32227,503 @@
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Institutional digest confirms a seated chest-vibration RT task during looming sound with foot-sole context; full experiment/cohort count and numeric settings are not established.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1109/whc.2017.7989970",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "source_mode",
             "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "level_envelope_calibration": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "renderer_apparatus": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Institutional digest confirms a seated chest-vibration RT task during looming sound with foot-sole context; full experiment/cohort count and numeric settings are not established.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1109/whc.2017.7989970",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "motion_mode",
             "coordinate_frame_body_anchor",
             "geometry",
             "timing_constraint"
           ],
-          "components": {}
+          "components": {
+            "attenuation_law": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "padding_or_holds": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Institutional digest confirms a seated chest-vibration RT task during looming sound with foot-sole context; full experiment/cohort count and numeric settings are not established.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1109/whc.2017.7989970",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "trial_families",
             "ordered_elements_and_source_selection"
           ],
-          "components": {}
+          "components": {
+            "condition_intermixing": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "within_trial_timing_or_placement": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Institutional digest confirms a seated chest-vibration RT task during looming sound with foot-sole context; full experiment/cohort count and numeric settings are not established.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1109/whc.2017.7989970",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "target_and_nontarget_rule",
             "response_mode_or_device",
             "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "scoring_rule": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Institutional digest confirms a seated chest-vibration RT task during looming sound with foot-sole context; full experiment/cohort count and numeric settings are not established.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1109/whc.2017.7989970",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
             "values_or_range"
           ],
-          "components": {}
+          "components": {
+            "distribution": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "randomization": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Institutional digest confirms a seated chest-vibration RT task during looming sound with foot-sole context; full experiment/cohort count and numeric settings are not established.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1109/whc.2017.7989970",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "reference_event_and_sign",
             "ordered_soa_values_or_derivable_distance_anchors"
           ],
-          "components": {}
+          "components": {
+            "direction_specific_pairing": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Institutional digest confirms a seated chest-vibration RT task during looming sound with foot-sole context; full experiment/cohort count and numeric settings are not established.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1109/whc.2017.7989970",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "modality",
             "body_site_and_side",
             "waveform_and_duration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "external_trigger": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "frequency_or_amplitude": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "intensity_or_calibration": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Institutional digest confirms a seated chest-vibration RT task during looming sound with foot-sole context; full experiment/cohort count and numeric settings are not established.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1109/whc.2017.7989970",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "family_or_explicit_none",
             "timing_and_anchor",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "crossing_rule": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Institutional digest confirms a seated chest-vibration RT task during looming sound with foot-sole context; full experiment/cohort count and numeric settings are not established.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1109/whc.2017.7989970",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "family_or_explicit_none",
             "target_role_and_expected_action",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "crossing_rule": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Institutional digest confirms a seated chest-vibration RT task during looming sound with foot-sole context; full experiment/cohort count and numeric settings are not established.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1109/whc.2017.7989970",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "factor_dimensions",
             "repetitions_or_exact_counts",
             "exceptions_or_overrides"
           ],
-          "components": {}
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Institutional digest confirms a seated chest-vibration RT task during looming sound with foot-sole context; full experiment/cohort count and numeric settings are not established.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1109/whc.2017.7989970",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "block_count",
             "block_composition"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "pool_repeat_or_distribution": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "sequence_constraints": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -35178,9 +35460,9 @@
     {
       "studyRowId": "doi:10.1177/0956797619869337",
       "networkNodeId": "doi:10.1177/0956797619869337",
-      "label": "Remapping Peripersonal Space by Using Foot-Sole Vibrations Without Any Body Movement.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
+      "label": "Remapping Peripersonal Space by Using Foot-Sole Vibrations Without Any Body Movement. (a)",
+      "experimentLabel": "2019 foot-sole/forearm journal report — Methods inventory unresolved",
+      "inventoryStatus": "source_access_blocked_experiment_inventory_unresolved",
       "evidenceScope": "none",
       "templateIds": [],
       "parameterStatusCounts": {
@@ -35192,222 +35474,503 @@
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Publisher abstract confirms sole-versus-forearm comparison but cannot distinguish experiments/cohorts from within-participant conditions. The linked technical summary is not an exhaustive journal Methods inventory.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/0956797619869337",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://journals.sagepub.com/doi/10.1177/0956797619869337",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "source_mode",
             "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "level_envelope_calibration": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "renderer_apparatus": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Publisher abstract confirms sole-versus-forearm comparison but cannot distinguish experiments/cohorts from within-participant conditions. The linked technical summary is not an exhaustive journal Methods inventory.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/0956797619869337",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://journals.sagepub.com/doi/10.1177/0956797619869337",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "motion_mode",
             "coordinate_frame_body_anchor",
             "geometry",
             "timing_constraint"
           ],
-          "components": {}
+          "components": {
+            "attenuation_law": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "padding_or_holds": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Publisher abstract confirms sole-versus-forearm comparison but cannot distinguish experiments/cohorts from within-participant conditions. The linked technical summary is not an exhaustive journal Methods inventory.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/0956797619869337",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://journals.sagepub.com/doi/10.1177/0956797619869337",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "trial_families",
             "ordered_elements_and_source_selection"
           ],
-          "components": {}
+          "components": {
+            "condition_intermixing": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "within_trial_timing_or_placement": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Publisher abstract confirms sole-versus-forearm comparison but cannot distinguish experiments/cohorts from within-participant conditions. The linked technical summary is not an exhaustive journal Methods inventory.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/0956797619869337",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://journals.sagepub.com/doi/10.1177/0956797619869337",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "target_and_nontarget_rule",
             "response_mode_or_device",
             "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "scoring_rule": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Publisher abstract confirms sole-versus-forearm comparison but cannot distinguish experiments/cohorts from within-participant conditions. The linked technical summary is not an exhaustive journal Methods inventory.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/0956797619869337",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://journals.sagepub.com/doi/10.1177/0956797619869337",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
             "values_or_range"
           ],
-          "components": {}
+          "components": {
+            "distribution": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "randomization": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Publisher abstract confirms sole-versus-forearm comparison but cannot distinguish experiments/cohorts from within-participant conditions. The linked technical summary is not an exhaustive journal Methods inventory.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/0956797619869337",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://journals.sagepub.com/doi/10.1177/0956797619869337",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "reference_event_and_sign",
             "ordered_soa_values_or_derivable_distance_anchors"
           ],
-          "components": {}
+          "components": {
+            "direction_specific_pairing": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Publisher abstract confirms sole-versus-forearm comparison but cannot distinguish experiments/cohorts from within-participant conditions. The linked technical summary is not an exhaustive journal Methods inventory.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/0956797619869337",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://journals.sagepub.com/doi/10.1177/0956797619869337",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "modality",
             "body_site_and_side",
             "waveform_and_duration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "external_trigger": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "frequency_or_amplitude": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "intensity_or_calibration": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Publisher abstract confirms sole-versus-forearm comparison but cannot distinguish experiments/cohorts from within-participant conditions. The linked technical summary is not an exhaustive journal Methods inventory.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/0956797619869337",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://journals.sagepub.com/doi/10.1177/0956797619869337",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "family_or_explicit_none",
             "timing_and_anchor",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "crossing_rule": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Publisher abstract confirms sole-versus-forearm comparison but cannot distinguish experiments/cohorts from within-participant conditions. The linked technical summary is not an exhaustive journal Methods inventory.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/0956797619869337",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://journals.sagepub.com/doi/10.1177/0956797619869337",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "family_or_explicit_none",
             "target_role_and_expected_action",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "crossing_rule": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Publisher abstract confirms sole-versus-forearm comparison but cannot distinguish experiments/cohorts from within-participant conditions. The linked technical summary is not an exhaustive journal Methods inventory.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/0956797619869337",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://journals.sagepub.com/doi/10.1177/0956797619869337",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "factor_dimensions",
             "repetitions_or_exact_counts",
             "exceptions_or_overrides"
           ],
-          "components": {}
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Exact replication contract unresolved because full Methods were not obtained through the dated primary routes. Abstract-level task context does not establish the required parameters; absence of reporting is not inferred.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Access audit 2026-10-27; accessible abstract only",
+          "evidenceNote": "Publisher abstract confirms sole-versus-forearm comparison but cannot distinguish experiments/cohorts from within-participant conditions. The linked technical summary is not an exhaustive journal Methods inventory.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/0956797619869337",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://journals.sagepub.com/doi/10.1177/0956797619869337",
+          "sourceType": "audited_source_access_gap_with_abstract_context",
           "missingComponents": [
             "block_count",
             "block_composition"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "pool_repeat_or_distribution": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "sequence_constraints": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "source_unavailable",
+              "value": "Primary Methods unavailable in this audit; related-report values not substituted.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -45303,236 +45866,406 @@
     {
       "studyRowId": "doi:10.53829/ntr201911fa4",
       "networkNodeId": "doi:10.53829/ntr201911fa4",
-      "label": "Creating a Walking Sensation for the Seated--A Sensation of Pseudo-walking Expands Peripersonal Space",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Creating a Walking Sensation for the Seated--A Sensation of Pseudo-walking Expands Peripersonal Space (a)",
+      "experimentLabel": "Summarized heel-context PPS protocol; no new cohort",
+      "inventoryStatus": "confirmed_summary_protocol_not_independent_experiment",
+      "evidenceScope": "experiment_specific",
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "not_reported": 3,
+        "partial": 8
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Approaching white noise produced by changing sound intensity; separate from the footstep recording driving heel vibrations.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "NTT Technical Review, printed pp.24-25, sections2-3 and rendered Figures2-3",
+          "evidenceNote": "No original waveform/seed, sampling rate, duration, SPL, gain law or auditory transducer specification. The heel footstep asset is not the auditory PPS cue.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.53829/ntr201911fa4",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf",
+          "sourceType": "primary_author_technical_report_summary",
           "missingComponents": [
             "source_mode",
-            "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "source_mode": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "White-noise intensity change gives approach cue.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Apparent forward approach toward seated participant; rendered Figure3 probes0.4,0.8,1.2,1.6m.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "NTT Technical Review, printed pp.24-25, sections2-3 and rendered Figures2-3",
+          "evidenceNote": "Probe positions are not full trajectory endpoints; exact reference origin, duration, speed and level-to-distance map are not reported.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.53829/ntr201911fa4",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf",
+          "sourceType": "primary_author_technical_report_summary",
           "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
             "timing_constraint"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Seated participant, forward PPS interpretation.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Four plotted probe distances:0.4,0.8,1.2,1.6m.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "Approach represented by auditory intensity change.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Chest-target detection during approaching sound under three heel-context patterns, compared with no heel vibration.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "NTT Technical Review, printed pp.24-25, sections2-3 and rendered Figures2-3",
+          "evidenceNote": "Full context onset/offset, trial timeline, intermixing and any target-absent families are not specified.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.53829/ntr201911fa4",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf",
+          "sourceType": "primary_author_technical_report_summary",
           "missingComponents": [
-            "trial_families",
             "ordered_elements_and_source_selection"
           ],
-          "components": {}
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Chest detection with walking-pattern heel vibration, asynchronous version, or60-Hz sinusoid; no-heel-vibration context baseline.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Detect suprathreshold chest vibration as quickly as possible; reaction time is measured.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "NTT Technical Review, printed pp.24-25, sections2-3 and rendered Figures2-3",
+          "evidenceNote": "Response button/key, effector, device, online window, scoring and repeat policy are not stated.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.53829/ntr201911fa4",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf",
+          "sourceType": "primary_author_technical_report_summary",
           "missingComponents": [
-            "target_and_nontarget_rule",
             "response_mode_or_device",
             "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Chest vibration is the detected target; heel vibration is the context manipulation.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_reported",
+          "value": "No PPS ITI, target jitter distribution or event anchor is reported.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "NTT Technical Review, printed pp.24-25, sections2-3 and rendered Figures2-3",
+          "evidenceNote": "Randomized/asynchronous heel step onsets are a context manipulation, not a PPS ITI or SOA-jitter rule; even that context distribution is unspecified.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.53829/ntr201911fa4",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf",
+          "sourceType": "primary_author_technical_report_summary",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
             "values_or_range"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Four target delays relative to sound onset sample four perceived distances; numerical SOAs are absent.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "NTT Technical Review, printed pp.24-25, sections2-3 and rendered Figures2-3",
+          "evidenceNote": "Do not convert0.4/0.8/1.2/1.6m probe labels into milliseconds without a motion law.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.53829/ntr201911fa4",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf",
+          "sourceType": "primary_author_technical_report_summary",
           "missingComponents": [
-            "reference_event_and_sign",
             "ordered_soa_values_or_derivable_distance_anchors"
           ],
-          "components": {}
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Tactile detection probe at one of four delays relative to auditory onset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Suprathreshold150-Hz chest vibration is the target. Voice-coil heel vibrations provide a distinct walking context.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "NTT Technical Review, printed pp.24-25, sections2-3 and rendered Figures2-3",
+          "evidenceNote": "Heel patterns use recorded footsteps low-pass filtered at120Hz, an asynchronous version, or60-Hz sinusoid. Equal average amplitudes do not establish RMS matching. Target model/duration/threshold procedure and context file/filter order/cadence/amplitudes remain unresolved.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.53829/ntr201911fa4",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf",
+          "sourceType": "primary_author_technical_report_summary",
           "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
+            "target_duration_and_amplitude_calibration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Detected target on chest; context applied to heels/soles.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Chest vibrotactile target; separate heel/sole voice-coil context.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Chest target frequency150Hz; target duration not reported.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Figure3 baseline removes heel vibration while retaining approaching sound and chest-target detection.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "NTT Technical Review, printed pp.24-25, sections2-3 and rendered Figures2-3",
+          "evidenceNote": "This is not tactile-only/no-audio baseline and not an absent-target catch. Baseline count, order, timeline and additional baseline families are unspecified.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.53829/ntr201911fa4",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf",
+          "sourceType": "primary_author_technical_report_summary",
           "missingComponents": [
-            "family_or_explicit_none",
             "timing_and_anchor",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Context baseline: no heel vibration, with auditory PPS cue and chest detection retained.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_reported",
+          "value": "No target-absent/withhold catch schedule or explicit catch absence is reported.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "NTT Technical Review, printed pp.24-25, sections2-3 and rendered Figures2-3",
+          "evidenceNote": "The no-heel-vibration condition does not remove the chest target and is not a catch.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.53829/ntr201911fa4",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf",
+          "sourceType": "primary_author_technical_report_summary",
           "missingComponents": [
             "family_or_explicit_none",
             "target_role_and_expected_action",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Four probe distances and three heel-context traces plus a no-heel baseline are identified; no trial repetitions, total or cohort size is reported.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "NTT Technical Review, printed pp.24-25, sections2-3 and rendered Figures2-3",
+          "evidenceNote": "Plotted conditions do not establish trial counts. Omissions, catch/baseline counts and subjective-rating timing are unspecified.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.53829/ntr201911fa4",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf",
+          "sourceType": "primary_author_technical_report_summary",
           "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
+            "repetitions_or_exact_counts"
           ],
-          "components": {}
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "No new independent cohort reported; this technical article summarizes the cited journal result.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Four probe distances crossed with the reported heel-context conditions; exact factorial allocation unspecified.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_reported",
+          "value": "No PPS block count, composition, order, randomization, counterbalancing or break schedule is reported.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "NTT Technical Review, printed pp.24-25, sections2-3 and rendered Figures2-3",
+          "evidenceNote": "Subjective walking ratings and an Open House motorized-chair demonstration are supporting contexts, not additional PPS blocks or experiments.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.53829/ntr201911fa4",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf",
+          "sourceType": "primary_author_technical_report_summary",
           "missingComponents": [
             "block_count",
             "block_composition"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_reported",
+              "value": "Not specified in the complete five-page technical report.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -45776,19 +46509,19 @@
   ],
   "inventoryAudit": {
     "publications": 94,
-    "registeredInventories": 53,
-    "methodsReviewedInventories": 44,
-    "auditedAccessBlockers": 1,
-    "publicationsWithAllContractDispositions": 40,
-    "inventoryAndContractsAudited": 38,
-    "remainingInventoryOrContractAudit": 56,
+    "registeredInventories": 56,
+    "methodsReviewedInventories": 45,
+    "auditedAccessBlockers": 3,
+    "publicationsWithAllContractDispositions": 43,
+    "inventoryAndContractsAudited": 41,
+    "remainingInventoryOrContractAudit": 53,
     "inventoryEvidenceCounts": {
       "abstract_or_metadata_inventory": 4,
-      "audited_source_access_gap": 1,
+      "audited_source_access_gap": 3,
       "author_version_methods_reviewed_final_comparison_pending": 1,
-      "not_registered": 41,
+      "not_registered": 38,
       "partial_methods_inventory": 4,
-      "primary_methods_reviewed": 32,
+      "primary_methods_reviewed": 33,
       "retained_primary_methods_review": 11
     },
     "interpretation": "Audited means inventory evidence or documented access blocker plus eleven explicit source dispositions per retained row. It does not mean all values are reported, final-version equivalence is proven, a template exists, or native hardware is qualified."
