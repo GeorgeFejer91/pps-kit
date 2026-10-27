@@ -52,6 +52,11 @@ or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Canonical current-input matrices were refreshed against template/runtime
+checkpoint `c6c92728` and its Serino asset prerequisite `5f57d3b4`. The existing
+Teneggi template is associated only with Experiment 3; its missing source counts
+and declared substitutions remain blockers, independently of template presence.
+
 Canzoneri (2012) now includes the 17-person main task and adjacent 7-person
 localization control, with overlap unreported. T0/T6 targets occur in the silence
 windows of trials that retain the same 3 s sound. The published pulse is 100 µs;

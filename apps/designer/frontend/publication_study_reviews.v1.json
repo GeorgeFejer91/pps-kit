@@ -543,7 +543,9 @@
         "doi:10.1016/j.cub.2013.01.043::b",
         "doi:10.1016/j.cub.2013.01.043::c"
       ],
-      "templateIds": [],
+      "templateIds": [
+        "teneggi_2013_social_face_pps"
+      ],
       "parameterStatusCounts": {
         "approximation_required": 3,
         "derived_complete": 3,
@@ -14496,7 +14498,9 @@
       "experimentLabel": "Experiment 3 — cooperative interaction before versus after",
       "inventoryStatus": "confirmed_total",
       "evidenceScope": "study_specific_source_review",
-      "templateIds": [],
+      "templateIds": [
+        "teneggi_2013_social_face_pps"
+      ],
       "parameterStatusCounts": {
         "approximation_required": 1,
         "derived_complete": 1,

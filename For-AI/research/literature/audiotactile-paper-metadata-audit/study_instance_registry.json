@@ -151,9 +151,36 @@
       "instance_count_basis": "The reviewed main PDF explicitly describes three audio-tactile PPS experiments: social presence/mannequin, cooperative versus noncooperative interaction, and cooperative interaction before/after. Their sound durations and condition structures differ, so the prior single review row was not lossless.",
       "evidence_pointer": "artifacts/paper_metadata_audit/publication_pdfs/doi_10.1016_j.cub.2013.01.043__105d921e527a.pdf::PDF pp.1-5; metadata_audit.jsonl::teneggi_2013_social_face",
       "instances": [
-        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — mannequin versus other-person PPS", "record_id": "teneggi_2013_social_face", "template_ids": [], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — cooperative versus noncooperative interaction", "record_id": "teneggi_2013_social_face", "template_ids": [], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "c", "instance_kind": "experiment", "experiment_label": "Experiment 3 — cooperative interaction before versus after", "record_id": "teneggi_2013_social_face", "template_ids": [], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 1 — mannequin versus other-person PPS",
+          "record_id": "teneggi_2013_social_face",
+          "template_ids": [],
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 2 — cooperative versus noncooperative interaction",
+          "record_id": "teneggi_2013_social_face",
+          "template_ids": [],
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "c",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 3 — cooperative interaction before versus after",
+          "record_id": "teneggi_2013_social_face",
+          "template_ids": [
+            "teneggi_2013_social_face_pps"
+          ],
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "template_association_basis": "Existing template explicitly scoped to Experiment 3 by implementation checkpoint c6c92728: IN only, seven reported SOAs and 500 ms pre/post sound silence. Missing original Experiment 3 repetition/catch allocation and source/stimulus substitutions remain blocking; association does not certify source completeness or native qualification."
+        }
       ]
     },
     {
