@@ -37905,6 +37905,1781 @@
           "outcome": "Response status code does not indicate success: 403 (Forbidden)."
         }
       ]
+    },
+    {
+      "study_row_id": "doi:10.1162/jocn_a_00006::a",
+      "source_type": "author_hosted_published_article",
+      "source_file": "https://www.alessioavenanti.com/pdf_library/serino_2011jocn.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "Experiment 1A: 12 participants. Full published Methods and figure read; familiarization and calibration are embedded, not independent cohorts.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "Physical loudspeakers present 100 ms white-noise bursts at near and far locations. Levels are matched to approximately 70 dB above the head; the exact waveform recipe is not supplied.",
+          "page_or_section": "Published article pp.2957–2959 / PDF pp.2–4, Experiment 1A Methods, Procedure and Figure 1",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "Physical loudspeaker presentation of white-noise bursts."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "100 ms white-noise burst; two identical loudspeakers."
+            },
+            "level_envelope_calibration": {
+              "status": "reported",
+              "value": "Near and far levels matched to approximately 70 dB at the vertex. Recorded spectra checked equality of emitted frequencies at the speakers."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two identical physical loudspeakers; no virtual spatializer is described."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "No waveform, seed, sample rate, bandwidth, envelope or loudspeaker model is supplied. The reported noise type does not identify an exact source asset."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Static near/far sources are positioned relative to the right hand. Near is approximately 5 cm from the hand, 50 cm from the torso and 60 cm from the head; far is 100 cm from the near speaker, approximately 150 cm from the torso and 160 cm from the head.",
+          "page_or_section": "Published article pp.2957–2959 / PDF pp.2–4, Experiment 1A Methods, Procedure and Figure 1",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Static physical sources; no continuous trajectory."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Right hand, torso and head; Figure 1 shows the hand-forward arrangement."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "Each sound is active for 100 ms; trials last approximately 3 s."
+            },
+            "attenuation_law": {
+              "status": "reported",
+              "value": "The source levels are adjusted so near and far sound levels are approximately equal at the head, rather than imposing a moving-source distance gain."
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "Several approximate body-relative distances and a setup diagram are given, but no complete 3D coordinates, elevation or reproducible placement tolerance."
+            },
+            "padding_or_holds": {
+              "status": "not_reported",
+              "value": "Exact pre-stimulus and post-stimulus margins within the approximately 3 s trial are not supplied."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "partial",
+          "value": "The enumerated task crosses weak/strong touch with no/near/far sound and adds sound-only catches. Two response-rule blocks designate either weak or strong touch as the target.",
+          "page_or_section": "Published article pp.2957–2959 / PDF pp.2–4, Experiment 1A Methods, Procedure and Figure 1",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Weak and strong tactile events with no, near or far sound; near/far sound-only catches. The nondesignated tactile intensity requires withholding."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "One tactile event and the selected sound are delivered with near simultaneous commands or a 5 ms far-sound lead; no sound in unimodal tactile trials and no touch in labeled catches."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "Approximately 3 s trial duration is stated, but exact stimulus placement, onset/offset margins and response timeout are not."
+            },
+            "condition_intermixing": {
+              "status": "not_reported",
+              "value": "The full within-block presentation order and randomization rule are not reported."
+            }
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Blindfolded participants say “tah” quickly for the designated tactile intensity, withhold responses to the other intensity and sound-only catches, and ignore sound. The endpoint is vocal tactile RT.",
+          "page_or_section": "Published article pp.2957–2959 / PDF pp.2–4, Experiment 1A Methods, Procedure and Figure 1",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Weak is target in one block and strong in the other; the alternate intensity and sound-only trials are nontargets."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Voice-activated relay; XGen software controls presentation and records responses."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Say “tah” as quickly as possible for the designated touch, otherwise withhold. Thirty familiarization trials precede acquisition."
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Tactile RT, omissions and false alarms. RT more than two standard deviations from the mean is trimmed offline."
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "RT is interpreted relative to tactile delivery, but the numeric online window and hardware latency compensation are not specified. Offline trimming is not an acquisition deadline."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "Each trial lasts approximately 3 s. A separate intertrial interval, exact event anchors and jitter distribution are not supplied.",
+          "page_or_section": "Published article pp.2957–2959 / PDF pp.2–4, Experiment 1A Methods, Procedure and Figure 1",
+          "component_reviews": {
+            "values_or_range": {
+              "status": "reported",
+              "value": "Approximately 3 s per trial."
+            },
+            "policy_type": {
+              "status": "not_reported",
+              "value": "The approximate cycle does not establish a fixed or variable ITI policy."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "The paper does not isolate stimulus offset, response completion or next-trial onset as the ITI anchor."
+            },
+            "distribution": {
+              "status": "not_reported",
+              "value": "No jitter distribution or sampling step."
+            },
+            "randomization": {
+              "status": "not_reported",
+              "value": "No timing-sequence generation procedure."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "derived_complete",
+          "value": "Using tactile onset minus emitted-audio onset, near SOA is 0 ms and far SOA is +5 ms. The far sound is commanded early to compensate its longer travel time, not to create a 5 ms perceptual lag.",
+          "page_or_section": "Published article pp.2957–2959 / PDF pp.2–4, Experiment 1A Methods, Procedure and Figure 1",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "The source describes electrical command timing: near sound and touch together; far sound begins 5 ms before touch."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Near versus far static speaker condition; no looming direction."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "derived",
+              "value": "Canonical tactile-minus-emitted-audio onset: near 0 ms, far +5 ms."
+            }
+          },
+          "derivation_note": "For far sound, t_audio = t_touch − 5 ms; therefore t_touch − t_audio = +5 ms. Perceptual arrival was intended to align."
+        },
+        "tactile_target": {
+          "status": "conflicting_evidence",
+          "value": "The right index receives a single rectangular monophasic electrical pulse lasting 100 microseconds. Weak and strong intensities are calibrated individually. The article calls the stimulators constant-current but calls the pulse constant-voltage; retain this unresolved apparatus wording.",
+          "page_or_section": "Published article pp.2957–2959 / PDF pp.2–4, Experiment 1A Methods, Procedure and Figure 1",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Electrocutaneous stimulation through two pairs of electrodes and two DS7A stimulators."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Dorsal surface of the right index finger."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Single rectangular monophasic pulse, 100 microseconds (0.1 ms), visually checked on PDF p.3."
+            },
+            "intensity_or_calibration": {
+              "status": "reported",
+              "value": "Weak level must be detected on at least 9 of 10 tests; strong is 1.5 times weak, checked for complete detection and perfect weak/strong discrimination. The full historical calibration procedure is in the source."
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "No measured latency or explicit trigger interface/correction is supplied."
+            },
+            "frequency_or_amplitude": {
+              "status": "conflicting_evidence",
+              "value": "Materials names constant-current DS7A stimulators, then describes a constant-voltage pulse. Do not silently choose one electrical-output interpretation."
+            }
+          },
+          "evidence_note": "These are source apparatus descriptions, not new calibration measurements or device-operation instructions. A software 100 ms vibration is not the reported 100 microsecond electrical pulse."
+        },
+        "baseline_trial_contract": {
+          "status": "partial",
+          "value": "The enumerated 128-trial task includes 40 no-sound tactile events: 20 weak and 20 strong. Their target/nontarget role changes with the response-rule block.",
+          "page_or_section": "Published article pp.2957–2959 / PDF pp.2–4, Experiment 1A Methods, Procedure and Figure 1",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Unisensory tactile factorial control, with sound omitted."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "20 weak plus 20 strong no-sound events in the enumerated task."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "40 no-sound rows per enumerated 128-trial task."
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "Both tactile intensities occur without sound; target status follows the current weak/strong rule."
+            },
+            "timing_and_anchor": {
+              "status": "not_reported",
+              "value": "No sound onset exists in these trials, and exact tactile placement within the approximately 3 s trial is not specified."
+            }
+          },
+          "evidence_note": "The paragraph states 128 trials and then describes two condition blocks. Do not call 80 baseline trials per participant directly reported; that depends on repeating the full task in each block."
+        },
+        "catch_trial_contract": {
+          "status": "derived_complete",
+          "value": "The source labels eight sound-only events as catches: four near and four far. It separately includes 60 tactile nontarget events per response-rule task; do not hide those under an eight-row total withholding schedule.",
+          "page_or_section": "Published article pp.2957–2959 / PDF pp.2–4, Experiment 1A Methods, Procedure and Figure 1",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Eight labeled auditory-only catches plus a distinct nondesignated-intensity tactile nontarget family."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Withhold for sound without touch and for the tactile intensity not designated as target."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Four near and four far sound-only catches; 20 nontarget-intensity events in each of no/near/far sound conditions."
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "Labeled catches cross near/far only. Tactile nontargets cross no/near/far and reverse intensity with the rule block."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "8 labeled catches plus 3×20=60 tactile nontargets, totaling 68 withholding rows per enumerated 128-trial task."
+            }
+          },
+          "derivation_note": "The 128 rows contain 60 designated-intensity target events, 60 opposite-intensity nontarget events and 8 sound-only catches. The two-block repetition ambiguity remains separate."
+        },
+        "repetition_allocation": {
+          "status": "partial",
+          "value": "The explicit inventory is 20 trials in each weak/strong × no/near/far cell, plus eight sound-only catches, totaling 128. Two response-rule blocks are described, but 256 per participant is an interpretation rather than an explicit printed total.",
+          "page_or_section": "Published article pp.2957–2959 / PDF pp.2–4, Experiment 1A Methods, Procedure and Figure 1",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "2 tactile intensities ×3 sound conditions; 2 response-rule blocks."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "20 per intensity/sound cell, plus four near and four far catches; printed total 128."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Thirty familiarization trials and intensity-calibration tests are separate from the enumerated acquisition inventory."
+            },
+            "derived_total_reconciliation": {
+              "status": "not_reported",
+              "value": "6×20+8=128 is exact. Repeating that inventory in each of two rule blocks would give 256, but per-block versus whole-session scope is not stated unambiguously."
+            }
+          },
+          "derivation_note": "128 = 2×3×20+8. The conditional 2×128=256 must retain its task-repetition assumption."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Weak-target and strong-target conditions run in separate blocks, with order counterbalanced between participants.",
+          "page_or_section": "Published article pp.2957–2959 / PDF pp.2–4, Experiment 1A Methods, Procedure and Figure 1",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "Two response-rule blocks."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Weak-target versus strong-target order counterbalanced."
+            },
+            "block_composition": {
+              "status": "not_reported",
+              "value": "The 128-row task inventory is given, but exact scope of that total across the two blocks is not explicit."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "not_reported",
+              "value": "Whether the complete 128-row pool repeats per block is not explicitly printed."
+            },
+            "within_block_randomization": {
+              "status": "not_reported",
+              "value": "No full trial randomization rule."
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "No seed, run limits or constrained catch placement."
+            }
+          }
+        }
+      },
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.alessioavenanti.com/pdf_library/serino_2011jocn.pdf",
+          "outcome": "Published page-layout article, publicly retained on author website; SHA256 0c5702c7f35c72dbbe4c9194b33893b83b6bce787a1563c58d898465371f521a"
+        }
+      ]
+    },
+    {
+      "study_row_id": "doi:10.1162/jocn_a_00006::b",
+      "source_type": "author_hosted_published_article",
+      "source_file": "https://www.alessioavenanti.com/pdf_library/serino_2011jocn.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "Experiment 1B: 18 new participants, repeated hand-forward/backward conditions. Same task apparatus with explicit removal of no-sound conditions.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "Physical loudspeakers present 100 ms white-noise bursts at near and far locations. Levels are matched to approximately 70 dB above the head; the exact waveform recipe is not supplied.",
+          "page_or_section": "Published article pp.2959–2960 / PDF pp.4–5, Experiment 1B Methods; explicitly inherited Experiment 1A materials",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "Physical loudspeaker presentation of white-noise bursts."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "100 ms white-noise burst; two identical loudspeakers."
+            },
+            "level_envelope_calibration": {
+              "status": "reported",
+              "value": "Near and far levels matched to approximately 70 dB at the vertex. Recorded spectra checked equality of emitted frequencies at the speakers."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two identical physical loudspeakers; no virtual spatializer is described."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "No waveform, seed, sample rate, bandwidth, envelope or loudspeaker model is supplied. The reported noise type does not identify an exact source asset."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "The physical speakers remain fixed while the right arm changes posture. Hand-forward distances are approximately 5/100 cm; hand-backward distances are approximately 80/180 cm from near/far speakers. Head-relative sound geometry stays unchanged.",
+          "page_or_section": "Published article pp.2959–2960 / PDF pp.4–5, Experiment 1B Methods; explicitly inherited Experiment 1A materials",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Static sources with a between-block hand-posture manipulation."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Right hand is the changing reference; head and torso placement remain stable."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "Inherited 100 ms sounds and approximately 3 s trials."
+            },
+            "attenuation_law": {
+              "status": "reported",
+              "value": "Inherited near/far sound-level matching at the vertex."
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "Approximate hand distances and Figure 1 are available, but full 3D coordinates and posture tolerances are not."
+            },
+            "padding_or_holds": {
+              "status": "not_reported",
+              "value": "Exact trial margins remain unspecified."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "partial",
+          "value": "Weak targets and strong nontargets occur with near/far sounds, with additional sound-only catches. No-sound tactile conditions are explicitly removed.",
+          "page_or_section": "Published article pp.2959–2960 / PDF pp.4–5, Experiment 1B Methods; explicitly inherited Experiment 1A materials",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Weak-near, weak-far, strong-near, strong-far, and sound-only near/far catches."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Inherited paired tactile/audio command timing. Near/far sound choice and weak/strong touch define the trial; catch omits touch."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "Approximately 3 s cycle, without precise margins or response cutoff."
+            },
+            "condition_intermixing": {
+              "status": "not_reported",
+              "value": "Within-block condition order is unspecified."
+            }
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Always respond vocally to weak touch; withhold for strong touch and sound-only catches. Apparatus, blindfold and tactile RT endpoint are inherited from Experiment 1A.",
+          "page_or_section": "Published article pp.2959–2960 / PDF pp.4–5, Experiment 1B Methods; explicitly inherited Experiment 1A materials",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Weak touch is always the target; strong touch and sound-only catches require withholding."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Voice-activated relay; XGen software controls presentation and records responses."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Say “tah” promptly for weak touch; ignore sound and do not respond to strong touch or catches."
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Tactile RT, omissions and false alarms. RT more than two standard deviations from the mean is trimmed offline."
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "RT is interpreted relative to tactile delivery, but the numeric online window and hardware latency compensation are not specified. Offline trimming is not an acquisition deadline."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "Each trial lasts approximately 3 s. A separate intertrial interval, exact event anchors and jitter distribution are not supplied.",
+          "page_or_section": "Published article pp.2959–2960 / PDF pp.4–5, Experiment 1B Methods; explicitly inherited Experiment 1A materials",
+          "component_reviews": {
+            "values_or_range": {
+              "status": "reported",
+              "value": "Approximately 3 s per trial."
+            },
+            "policy_type": {
+              "status": "not_reported",
+              "value": "The approximate cycle does not establish a fixed or variable ITI policy."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "The paper does not isolate stimulus offset, response completion or next-trial onset as the ITI anchor."
+            },
+            "distribution": {
+              "status": "not_reported",
+              "value": "No jitter distribution or sampling step."
+            },
+            "randomization": {
+              "status": "not_reported",
+              "value": "No timing-sequence generation procedure."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "derived_complete",
+          "value": "Using tactile onset minus emitted-audio onset, near SOA is 0 ms and far SOA is +5 ms. The far sound is commanded early to compensate its longer travel time, not to create a 5 ms perceptual lag.",
+          "page_or_section": "Published article pp.2959–2960 / PDF pp.4–5, Experiment 1B Methods; explicitly inherited Experiment 1A materials",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "The source describes electrical command timing: near sound and touch together; far sound begins 5 ms before touch."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Near versus far static speaker condition; no looming direction."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "derived",
+              "value": "Canonical tactile-minus-emitted-audio onset: near 0 ms, far +5 ms."
+            }
+          },
+          "derivation_note": "For far sound, t_audio = t_touch − 5 ms; therefore t_touch − t_audio = +5 ms. Perceptual arrival was intended to align."
+        },
+        "tactile_target": {
+          "status": "conflicting_evidence",
+          "value": "The right index receives a single rectangular monophasic electrical pulse lasting 100 microseconds. Weak and strong intensities are calibrated individually. The article calls the stimulators constant-current but calls the pulse constant-voltage; retain this unresolved apparatus wording.",
+          "page_or_section": "Published article pp.2959–2960 / PDF pp.4–5, Experiment 1B Methods; explicitly inherited Experiment 1A materials",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Electrocutaneous stimulation through two pairs of electrodes and two DS7A stimulators."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Dorsal surface of the right index finger."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Single rectangular monophasic pulse, 100 microseconds (0.1 ms), visually checked on PDF p.3."
+            },
+            "intensity_or_calibration": {
+              "status": "reported",
+              "value": "Weak level must be detected on at least 9 of 10 tests; strong is 1.5 times weak, checked for complete detection and perfect weak/strong discrimination. The full historical calibration procedure is in the source."
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "No measured latency or explicit trigger interface/correction is supplied."
+            },
+            "frequency_or_amplitude": {
+              "status": "conflicting_evidence",
+              "value": "Materials names constant-current DS7A stimulators, then describes a constant-voltage pulse. Do not silently choose one electrical-output interpretation."
+            }
+          },
+          "evidence_note": "These are source apparatus descriptions, not new calibration measurements or device-operation instructions. A software 100 ms vibration is not the reported 100 microsecond electrical pulse."
+        },
+        "baseline_trial_contract": {
+          "status": "explicitly_absent",
+          "value": "The no-sound tactile conditions are explicitly removed. Hand-forward/backward conditions are repeated posture blocks, not a silent baseline trial family.",
+          "page_or_section": "Published article pp.2959–2960 / PDF pp.4–5, Experiment 1B Methods; explicitly inherited Experiment 1A materials",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "explicitly_absent",
+              "value": "No separate no-sound tactile baseline family in the enumerated task."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable because the no-sound baseline family is explicitly absent."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Not applicable because the no-sound baseline family is explicitly absent."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Not applicable because the no-sound baseline family is explicitly absent."
+            },
+            "crossing_rule": {
+              "status": "not_applicable",
+              "value": "Not applicable because the no-sound baseline family is explicitly absent."
+            }
+          }
+        },
+        "catch_trial_contract": {
+          "status": "derived_complete",
+          "value": "Twenty sound-only catches (10 near, 10 far) require withholding. Sixty strong-touch nontargets are a separate withholding family.",
+          "page_or_section": "Published article pp.2959–2960 / PDF pp.4–5, Experiment 1B Methods; explicitly inherited Experiment 1A materials",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only labeled catches and separate strong-touch nontargets."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Withhold for sound-only and strong touch; respond only to weak touch."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "10 near plus 10 far catches; 30 strong-touch events at each speaker."
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "Both sound-only and strong-touch families cross near/far speaker conditions."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "20 labeled catches plus 60 strong-touch nontargets =80 withholding rows per enumerated 140-trial task."
+            }
+          },
+          "derivation_note": "2×10=20 sound-only catches; 2×30=60 strong nontargets. The remaining 60 rows are weak targets."
+        },
+        "repetition_allocation": {
+          "status": "partial",
+          "value": "Thirty trials per weak/strong × near/far cell plus 20 sound-only catches give the printed 140-trial task. Two posture blocks are described; 280 per participant requires the explicit assumption that the full task repeats in each block.",
+          "page_or_section": "Published article pp.2959–2960 / PDF pp.4–5, Experiment 1B Methods; explicitly inherited Experiment 1A materials",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "2 tactile intensities ×2 sound distances; 2 hand postures."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "30 per intensity/distance cell plus 10 near and 10 far catches, printed total 140."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "No no-sound tactile trials."
+            },
+            "derived_total_reconciliation": {
+              "status": "not_reported",
+              "value": "4×30+20=140 is exact; the full per-participant count across posture blocks is not explicitly printed."
+            }
+          },
+          "derivation_note": "140 =2×2×30+20. Conditional repetition in both posture blocks would yield 280; preserve that assumption."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Hand-forward and hand-backward are two counterbalanced condition blocks in the same 18 new participants.",
+          "page_or_section": "Published article pp.2959–2960 / PDF pp.4–5, Experiment 1B Methods; explicitly inherited Experiment 1A materials",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "Two hand-posture blocks."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Posture-block order counterbalanced between participants."
+            },
+            "block_composition": {
+              "status": "not_reported",
+              "value": "The 140-row inventory is stated, but per-block versus whole-participant scope is not explicit."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "not_reported",
+              "value": "Complete task repetition in each block is an interpretation."
+            },
+            "within_block_randomization": {
+              "status": "not_reported",
+              "value": "No complete randomization algorithm."
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "No random seed or run limits."
+            }
+          }
+        }
+      },
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.alessioavenanti.com/pdf_library/serino_2011jocn.pdf",
+          "outcome": "Published page-layout article, publicly retained on author website; SHA256 0c5702c7f35c72dbbe4c9194b33893b83b6bce787a1563c58d898465371f521a"
+        }
+      ]
+    },
+    {
+      "study_row_id": "doi:10.1162/jocn_a_00006::c",
+      "source_type": "author_hosted_published_article",
+      "source_file": "https://www.alessioavenanti.com/pdf_library/serino_2011jocn.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "Experiment 2: 10 new participants; four within-person rTMS/no-rTMS conditions. Genuine audiotactile RT task, not an auditory-to-MEP experiment.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "Physical loudspeakers present 100 ms white-noise bursts at near and far locations. Levels are matched to approximately 70 dB above the head; the exact waveform recipe is not supplied.",
+          "page_or_section": "Published article pp.2961–2962 / PDF pp.6–7, Experiment 2 Materials, Procedure and Data Analysis; explicitly inherited Experiment 1B task",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "Physical loudspeaker presentation of white-noise bursts."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "100 ms white-noise burst; two identical loudspeakers."
+            },
+            "level_envelope_calibration": {
+              "status": "reported",
+              "value": "Near and far levels matched to approximately 70 dB at the vertex. Recorded spectra checked equality of emitted frequencies at the speakers."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two identical physical loudspeakers; no virtual spatializer is described."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "No waveform, seed, sample rate, bandwidth, envelope or loudspeaker model is supplied. The reported noise type does not identify an exact source asset."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Static near/far sources are positioned relative to the right hand. Near is approximately 5 cm from the hand, 50 cm from the torso and 60 cm from the head; far is 100 cm from the near speaker, approximately 150 cm from the torso and 160 cm from the head.",
+          "page_or_section": "Published article pp.2961–2962 / PDF pp.6–7, Experiment 2 Materials, Procedure and Data Analysis; explicitly inherited Experiment 1B task",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Static physical sources; no continuous trajectory."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Right hand, torso and head; Figure 1 shows the hand-forward arrangement."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "Each sound is active for 100 ms; trials last approximately 3 s."
+            },
+            "attenuation_law": {
+              "status": "reported",
+              "value": "The source levels are adjusted so near and far sound levels are approximately equal at the head, rather than imposing a moving-source distance gain."
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "Several approximate body-relative distances and a setup diagram are given, but no complete 3D coordinates, elevation or reproducible placement tolerance."
+            },
+            "padding_or_holds": {
+              "status": "not_reported",
+              "value": "Exact pre-stimulus and post-stimulus margins within the approximately 3 s trial are not supplied."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "partial",
+          "value": "Weak targets and strong nontargets occur with near/far sounds, with additional sound-only catches. No-sound tactile conditions are explicitly removed.",
+          "page_or_section": "Published article pp.2961–2962 / PDF pp.6–7, Experiment 2 Materials, Procedure and Data Analysis; explicitly inherited Experiment 1B task",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Weak-near, weak-far, strong-near, strong-far, and sound-only near/far catches."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Inherited paired tactile/audio command timing. Near/far sound choice and weak/strong touch define the trial; catch omits touch."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "Approximately 3 s cycle, without precise margins or response cutoff."
+            },
+            "condition_intermixing": {
+              "status": "not_reported",
+              "value": "Within-block condition order is unspecified."
+            }
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Always respond vocally to weak touch; withhold for strong touch and sound-only catches. Apparatus, blindfold and tactile RT endpoint are inherited from Experiment 1A.",
+          "page_or_section": "Published article pp.2961–2962 / PDF pp.6–7, Experiment 2 Materials, Procedure and Data Analysis; explicitly inherited Experiment 1B task",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Weak touch is always the target; strong touch and sound-only catches require withholding."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Voice-activated relay; XGen software controls presentation and records responses."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Say “tah” promptly for weak touch; ignore sound and do not respond to strong touch or catches."
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Tactile RT, omissions and false alarms. RT more than two standard deviations from the mean is trimmed offline."
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "RT is interpreted relative to tactile delivery, but the numeric online window and hardware latency compensation are not specified. Offline trimming is not an acquisition deadline."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "Each trial lasts approximately 3 s. A separate intertrial interval, exact event anchors and jitter distribution are not supplied.",
+          "page_or_section": "Published article pp.2961–2962 / PDF pp.6–7, Experiment 2 Materials, Procedure and Data Analysis; explicitly inherited Experiment 1B task",
+          "component_reviews": {
+            "values_or_range": {
+              "status": "reported",
+              "value": "Approximately 3 s per trial."
+            },
+            "policy_type": {
+              "status": "not_reported",
+              "value": "The approximate cycle does not establish a fixed or variable ITI policy."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "The paper does not isolate stimulus offset, response completion or next-trial onset as the ITI anchor."
+            },
+            "distribution": {
+              "status": "not_reported",
+              "value": "No jitter distribution or sampling step."
+            },
+            "randomization": {
+              "status": "not_reported",
+              "value": "No timing-sequence generation procedure."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "derived_complete",
+          "value": "Using tactile onset minus emitted-audio onset, near SOA is 0 ms and far SOA is +5 ms. The far sound is commanded early to compensate its longer travel time, not to create a 5 ms perceptual lag.",
+          "page_or_section": "Published article pp.2961–2962 / PDF pp.6–7, Experiment 2 Materials, Procedure and Data Analysis; explicitly inherited Experiment 1B task",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "The source describes electrical command timing: near sound and touch together; far sound begins 5 ms before touch."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Near versus far static speaker condition; no looming direction."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "derived",
+              "value": "Canonical tactile-minus-emitted-audio onset: near 0 ms, far +5 ms."
+            }
+          },
+          "derivation_note": "For far sound, t_audio = t_touch − 5 ms; therefore t_touch − t_audio = +5 ms. Perceptual arrival was intended to align."
+        },
+        "tactile_target": {
+          "status": "conflicting_evidence",
+          "value": "The right index receives a single rectangular monophasic electrical pulse lasting 100 microseconds. Weak and strong intensities are calibrated individually. The article calls the stimulators constant-current but calls the pulse constant-voltage; retain this unresolved apparatus wording.",
+          "page_or_section": "Published article pp.2961–2962 / PDF pp.6–7, Experiment 2 Materials, Procedure and Data Analysis; explicitly inherited Experiment 1B task",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Electrocutaneous stimulation through two pairs of electrodes and two DS7A stimulators."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Dorsal surface of the right index finger."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Single rectangular monophasic pulse, 100 microseconds (0.1 ms), visually checked on PDF p.3."
+            },
+            "intensity_or_calibration": {
+              "status": "reported",
+              "value": "Weak level must be detected on at least 9 of 10 tests; strong is 1.5 times weak, checked for complete detection and perfect weak/strong discrimination. The full historical calibration procedure is in the source."
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "No measured latency or explicit trigger interface/correction is supplied."
+            },
+            "frequency_or_amplitude": {
+              "status": "conflicting_evidence",
+              "value": "Materials names constant-current DS7A stimulators, then describes a constant-voltage pulse. Do not silently choose one electrical-output interpretation."
+            }
+          },
+          "evidence_note": "These are source apparatus descriptions, not new calibration measurements or device-operation instructions. A software 100 ms vibration is not the reported 100 microsecond electrical pulse."
+        },
+        "baseline_trial_contract": {
+          "status": "explicitly_absent",
+          "value": "There is no no-sound tactile trial family. The no-rTMS baseline is a complete sounding 140-trial task block; it is not an audio-muted baseline row.",
+          "page_or_section": "Published article pp.2961–2962 / PDF pp.6–7, Experiment 2 Materials, Procedure and Data Analysis; explicitly inherited Experiment 1B task",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "explicitly_absent",
+              "value": "No separate no-sound tactile baseline family in the enumerated task."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable because the no-sound baseline family is explicitly absent."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Not applicable because the no-sound baseline family is explicitly absent."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Not applicable because the no-sound baseline family is explicitly absent."
+            },
+            "crossing_rule": {
+              "status": "not_applicable",
+              "value": "Not applicable because the no-sound baseline family is explicitly absent."
+            }
+          }
+        },
+        "catch_trial_contract": {
+          "status": "derived_complete",
+          "value": "Twenty sound-only catches (10 near, 10 far) require withholding. Sixty strong-touch nontargets are a separate withholding family.",
+          "page_or_section": "Published article pp.2961–2962 / PDF pp.6–7, Experiment 2 Materials, Procedure and Data Analysis; explicitly inherited Experiment 1B task",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only labeled catches and separate strong-touch nontargets."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Withhold for sound-only and strong touch; respond only to weak touch."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "10 near plus 10 far catches; 30 strong-touch events at each speaker."
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "Both sound-only and strong-touch families cross near/far speaker conditions."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "20 labeled catches plus 60 strong-touch nontargets =80 withholding rows per enumerated 140-trial task."
+            }
+          },
+          "derivation_note": "2×10=20 sound-only catches; 2×30=60 strong nontargets. The remaining 60 rows are weak targets.",
+          "evidence_note": "Experiment 2 restates 20 sound-only catches and explicitly inherits Experiment 1B except for posture; its 10 near/10 far split is therefore inherited rather than separately restated."
+        },
+        "repetition_allocation": {
+          "status": "derived_complete",
+          "value": "Each of four blocks contains 30 trials per weak/strong × near/far cell plus 20 catches: 140 per block, 560 across the two-day experiment.",
+          "page_or_section": "Published article pp.2961–2962 / PDF pp.6–7, Experiment 2 Materials, Procedure and Data Analysis; explicitly inherited Experiment 1B task",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "2 tactile intensities ×2 sound distances ×4 block conditions: no-rTMS, post-vPMc, post-PPc and post-V1."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "30 in each of four tactile/audio cells, 20 catches and 140 trials per block; four blocks total."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Arm remains forward; tactile-only trials remain absent. Motor-threshold calibration and the rTMS trains are not acquisition task rows."
+            },
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "4×(4×30+20)=560 task rows: 240 weak targets, 240 strong nontargets and 80 sound-only catches."
+            }
+          },
+          "derivation_note": "The source explicitly links 140 trials to each approximately 7-minute block; four such blocks give 560, unlike the unresolved repetition scope in Experiment 1."
+        },
+        "block_order_contract": {
+          "status": "conflicting_evidence",
+          "value": "Four blocks run over two days: a no-rTMS block and three blocks immediately after rTMS over vPMc, PPc or V1. Post-rTMS order is counterbalanced. Baseline placement conflicts between Procedure and Data Analysis.",
+          "page_or_section": "Published article pp.2961–2962 / PDF pp.6–7, Experiment 2 Materials, Procedure and Data Analysis; explicitly inherited Experiment 1B task",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "Four task blocks over two days."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "140 trials in each block; same behavioral audiotactile task."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "The complete 140-trial task is repeated in all four conditions."
+            },
+            "sequence_constraints": {
+              "status": "reported",
+              "value": "At least one hour separates blocks within a session; post-rTMS tasks follow the stimulation train."
+            },
+            "within_block_randomization": {
+              "status": "not_reported",
+              "value": "No exact trial sequence, seed or constrained allocation is reported."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "conflicting_evidence",
+              "value": "Procedure: no-rTMS baseline first in six participants and last in the remaining four. Data Analysis: half first and half last, implying five/five. Do not reconcile silently."
+            }
+          },
+          "evidence_note": "rTMS is an experimental manipulation before genuine behavioral audiotactile acquisition. MEP recording is used for intensity calibration here, not as this task’s outcome."
+        }
+      },
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.alessioavenanti.com/pdf_library/serino_2011jocn.pdf",
+          "outcome": "Published page-layout article, publicly retained on author website; SHA256 0c5702c7f35c72dbbe4c9194b33893b83b6bce787a1563c58d898465371f521a"
+        }
+      ]
+    },
+    {
+      "study_row_id": "doi:10.1016/j.neuroimage.2012.06.063::a",
+      "source_type": "author_hosted_published_article",
+      "source_file": "https://www.alessioavenanti.com/pdf_library/Avenanti_2012Neuroimage.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "16 participants; Real versus Sham PMc tDCS. Whole published Methods reviewed. Two separate samples, repeated sessions within each; motor calibration and ITI touches are embedded activities.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: Physical near/far loudspeakers emit 300 ms white-noise bursts, matched to approximately 70 dB above the head. Exact source waveforms and envelope are not supplied.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real versus Sham PMc tDCS are within-person sessions in 16 participants."
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: Sources are static: near approximately 5 cm from the right hand; far described as approximately 100 cm from the hand and physically 100 cm from the near speaker. No looming trajectory is used.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real versus Sham PMc tDCS are within-person sessions in 16 participants."
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: Each acquisition trial combines near/far sound with one sound-to-TMS delay, then records the MEP. Attention touches are outside these acquisition events.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real versus Sham PMc tDCS are within-person sessions in 16 participants."
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: Primary endpoint is right-FDI MEP amplitude. The secondary attention task requires a left-foot lift for strong palm touch; an experimenter watches that response.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real versus Sham PMc tDCS are within-person sessions in 16 participants."
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: MEP trials use a 10–12 s ITI. Palm attention events are at least 4–5 s from the TMS probe. The exact ITI distribution is not reported.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real versus Sham PMc tDCS are within-person sessions in 16 participants."
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: 50, 175 and 300 ms are auditory-onset-to-M1-TMS delays. They are not tactile SOAs and must not populate an audiotactile schedule.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real versus Sham PMc tDCS are within-person sessions in 16 participants."
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: Three solenoids, 5 mm apart, touch the right palm during ITIs. One versus three simultaneous solenoids define weak/strong attention events; strong events are 20%. Numeric pulse duration is not reported.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real versus Sham PMc tDCS are within-person sessions in 16 participants."
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: The control is the other post-tDCS condition, not a silent tactile baseline. No direct audiotactile baseline trial family is defined.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real versus Sham PMc tDCS are within-person sessions in 16 participants."
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: No direct audiotactile catch schedule is defined. Frequent weak attention touches are not auditory-only catch trials.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real versus Sham PMc tDCS are within-person sessions in 16 participants."
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: Two blocks of 42 MEP trials per post-tDCS session and two sessions imply 168 MEP trials per participant. Do not infer exactly seven repeats of all six distance/delay cells merely from 42.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real versus Sham PMc tDCS are within-person sessions in 16 participants.",
+          "derivation_note": "2 blocks×42 MEP trials×2 sessions=168. This is mechanistic-context allocation, not direct audiotactile trial count."
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: Two post-tDCS sessions are separated by at least one week and counterbalanced; block order is randomized. Trial sound/delay combinations are random, without a complete seed or constraint specification.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real versus Sham PMc tDCS are within-person sessions in 16 participants."
+        }
+      },
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.alessioavenanti.com/pdf_library/Avenanti_2012Neuroimage.pdf",
+          "outcome": "Published page-layout article, publicly retained on author website; SHA256 2d498c2d4378ea8aad8de08946065c56a6445d3d433accd7675a6f57ff96278a"
+        }
+      ]
+    },
+    {
+      "study_row_id": "doi:10.1016/j.neuroimage.2012.06.063::b",
+      "source_type": "author_hosted_published_article",
+      "source_file": "https://www.alessioavenanti.com/pdf_library/Avenanti_2012Neuroimage.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "14 different participants; Real PPc versus Real V1 tDCS. Whole published Methods reviewed. Two separate samples, repeated sessions within each; motor calibration and ITI touches are embedded activities.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: Physical near/far loudspeakers emit 300 ms white-noise bursts, matched to approximately 70 dB above the head. Exact source waveforms and envelope are not supplied.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real PPc versus Real V1 tDCS are within-person sessions in 14 different participants."
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: Sources are static: near approximately 5 cm from the right hand; far described as approximately 100 cm from the hand and physically 100 cm from the near speaker. No looming trajectory is used.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real PPc versus Real V1 tDCS are within-person sessions in 14 different participants."
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: Each acquisition trial combines near/far sound with one sound-to-TMS delay, then records the MEP. Attention touches are outside these acquisition events.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real PPc versus Real V1 tDCS are within-person sessions in 14 different participants."
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: Primary endpoint is right-FDI MEP amplitude. The secondary attention task requires a left-foot lift for strong palm touch; an experimenter watches that response.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real PPc versus Real V1 tDCS are within-person sessions in 14 different participants."
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: MEP trials use a 10–12 s ITI. Palm attention events are at least 4–5 s from the TMS probe. The exact ITI distribution is not reported.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real PPc versus Real V1 tDCS are within-person sessions in 14 different participants."
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: 50, 175 and 300 ms are auditory-onset-to-M1-TMS delays. They are not tactile SOAs and must not populate an audiotactile schedule.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real PPc versus Real V1 tDCS are within-person sessions in 14 different participants."
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: Three solenoids, 5 mm apart, touch the right palm during ITIs. One versus three simultaneous solenoids define weak/strong attention events; strong events are 20%. Numeric pulse duration is not reported.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real PPc versus Real V1 tDCS are within-person sessions in 14 different participants."
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: The control is the other post-tDCS condition, not a silent tactile baseline. No direct audiotactile baseline trial family is defined.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real PPc versus Real V1 tDCS are within-person sessions in 14 different participants."
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: No direct audiotactile catch schedule is defined. Frequent weak attention touches are not auditory-only catch trials.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real PPc versus Real V1 tDCS are within-person sessions in 14 different participants."
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: Two blocks of 42 MEP trials per post-tDCS session and two sessions imply 168 MEP trials per participant. Do not infer exactly seven repeats of all six distance/delay cells merely from 42.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real PPc versus Real V1 tDCS are within-person sessions in 14 different participants.",
+          "derivation_note": "2 blocks×42 MEP trials×2 sessions=168. This is mechanistic-context allocation, not direct audiotactile trial count."
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-to-motor-excitability endpoint: sound is followed by a single-pulse M1 TMS probe and right-FDI MEP recording. Separate palm touches occur during the ITI to maintain attention, at least 4–5 s away from TMS. This is not an audiotactile detection schedule. Context: Two post-tDCS sessions are separated by at least one week and counterbalanced; block order is randomized. Trial sound/delay combinations are random, without a complete seed or constraint specification.",
+          "page_or_section": "Published NeuroImage 63 (2012), pp.282–283 / PDF pp.2–3, complete Methods, Design, Procedure, Tactile stimulation and Figure 1",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct audiotactile PPS contract because the acquired endpoint is a sound-conditioned MEP, not tactile detection."
+            }
+          },
+          "evidence_note": "The source has a real tactile attention task, but it is temporally separate from the MEP acquisition. Real PPc versus Real V1 tDCS are within-person sessions in 14 different participants."
+        }
+      },
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.alessioavenanti.com/pdf_library/Avenanti_2012Neuroimage.pdf",
+          "outcome": "Published page-layout article, publicly retained on author website; SHA256 2d498c2d4378ea8aad8de08946065c56a6445d3d433accd7675a6f57ff96278a"
+        }
+      ]
+    },
+    {
+      "study_row_id": "doi:10.1093/neucas/7.2.97",
+      "source_type": "published_abstract_access_gap",
+      "source_file": "https://pubmed.ncbi.nlm.nih.gov/11320157/",
+      "review_date": "2026-10-27",
+      "review_scope": "One provisional extinction-case identity. The abstract establishes one case, but complete experiments, controls, repeated sessions and cohort inventory remain unresolved. No parameters borrowed from the distinct 2002 group paper.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "The published abstract compares white-noise bursts and pure tones in an auditory–tactile extinction case. Full stimulus duration, level and synthesis details remain inaccessible.",
+          "page_or_section": "Published primary abstract, PubMed PMID 11320157; final full Methods unavailable after recorded publisher and author-version attempts",
+          "component_reviews": {
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "White-noise bursts and pure-tone comparison."
+            },
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Physical versus synthesized presentation chain cannot be established from the reviewed abstract."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Waveform recipe/assets, tone frequencies, sample rate and duration require full Methods."
+            },
+            "level_envelope_calibration": {
+              "status": "source_unavailable",
+              "value": "Numeric level, envelope and calibration not established."
+            },
+            "renderer_apparatus": {
+              "status": "source_unavailable",
+              "value": "Apparatus not established from the abstract."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "The abstract contrasts near/far sounds on the ipsilesional side of the head with touch on the contralesional side. Exact geometry and timing remain inaccessible.",
+          "page_or_section": "Published primary abstract, PubMed PMID 11320157; final full Methods unavailable after recorded publisher and author-version attempts",
+          "component_reviews": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Head-relative ipsilesional sound and contralesional touch."
+            },
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "The exact presentation sequence and motion implementation need full Methods; the near/far comparison alone is insufficient."
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Numeric distances and complete setup unavailable."
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Active duration and event timing unavailable."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "source_unavailable",
+          "value": "The abstract does not supply this contract and full Methods were not obtained. This is an audited access limitation, not evidence that the final article omits the parameter.",
+          "page_or_section": "Published primary abstract, PubMed PMID 11320157; final full Methods unavailable after recorded publisher and author-version attempts",
+          "component_reviews": {
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            }
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "The abstract reports auditory–tactile extinction in one right-brain-damaged patient with tactile extinction. It does not establish the trial report procedure or response window.",
+          "page_or_section": "Published primary abstract, PubMed PMID 11320157; final full Methods unavailable after recorded publisher and author-version attempts",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Contralesional touch detection is affected by ipsilesional sound; this is an extinction endpoint, not assumed speeded RT."
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Actual report device or verbal procedure unavailable."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Exact instructions and mapping unavailable."
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "No established response window or temporal anchor."
+            },
+            "scoring_rule": {
+              "status": "source_unavailable",
+              "value": "Exact trial scoring unavailable."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "source_unavailable",
+          "value": "The abstract does not supply this contract and full Methods were not obtained. This is an audited access limitation, not evidence that the final article omits the parameter.",
+          "page_or_section": "Published primary abstract, PubMed PMID 11320157; final full Methods unavailable after recorded publisher and author-version attempts",
+          "component_reviews": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "source_unavailable",
+          "value": "The abstract does not supply this contract and full Methods were not obtained. This is an audited access limitation, not evidence that the final article omits the parameter.",
+          "page_or_section": "Published primary abstract, PubMed PMID 11320157; final full Methods unavailable after recorded publisher and author-version attempts",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "The published abstract identifies tactile stimulation on the contralesional side of the head, without recoverable waveform or apparatus details.",
+          "page_or_section": "Published primary abstract, PubMed PMID 11320157; final full Methods unavailable after recorded publisher and author-version attempts",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Tactile stimulation."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Contralesional side of the head; exact stimulated site requires Methods."
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Waveform and pulse duration unavailable."
+            },
+            "frequency_or_amplitude": {
+              "status": "source_unavailable",
+              "value": "Frequency/amplitude unavailable."
+            },
+            "intensity_or_calibration": {
+              "status": "source_unavailable",
+              "value": "Calibration procedure unavailable."
+            },
+            "external_trigger": {
+              "status": "source_unavailable",
+              "value": "Trigger mechanics unavailable."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "source_unavailable",
+          "value": "The abstract does not supply this contract and full Methods were not obtained. This is an audited access limitation, not evidence that the final article omits the parameter.",
+          "page_or_section": "Published primary abstract, PubMed PMID 11320157; final full Methods unavailable after recorded publisher and author-version attempts",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            }
+          }
+        },
+        "catch_trial_contract": {
+          "status": "source_unavailable",
+          "value": "The abstract does not supply this contract and full Methods were not obtained. This is an audited access limitation, not evidence that the final article omits the parameter.",
+          "page_or_section": "Published primary abstract, PubMed PMID 11320157; final full Methods unavailable after recorded publisher and author-version attempts",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "source_unavailable",
+          "value": "The abstract does not supply this contract and full Methods were not obtained. This is an audited access limitation, not evidence that the final article omits the parameter.",
+          "page_or_section": "Published primary abstract, PubMed PMID 11320157; final full Methods unavailable after recorded publisher and author-version attempts",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            },
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "source_unavailable",
+          "value": "The abstract does not supply this contract and full Methods were not obtained. This is an audited access limitation, not evidence that the final article omits the parameter.",
+          "page_or_section": "Published primary abstract, PubMed PMID 11320157; final full Methods unavailable after recorded publisher and author-version attempts",
+          "component_reviews": {
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            },
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Cannot establish this component from the abstract; full Methods were unavailable in the recorded retrieval."
+            }
+          }
+        }
+      },
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://pubmed.ncbi.nlm.nih.gov/11320157/",
+          "outcome": "Primary published abstract via PubMed; primary abstract read through web; separate local HTTP 200 was a reCAPTCHA challenge."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://doi.org/10.1093/neucas/7.2.97",
+          "outcome": "publisher route403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.tandfonline.com/doi/10.1093/neucas/7.2.97",
+          "outcome": "PubMed fulltext link403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.researchgate.net/publication/12016250_Auditory_Peripersonal_Space_in_Humans_a_Case_of_Auditory-Tactile_Extinction",
+          "outcome": "abstract and download link accessible; observed author PDF link403, no local fulltext"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://r1.unitn.it/cats/pubblicazioni_root/",
+          "outcome": "author citation located earlier; subsequent full listing retrieval403; no PDF obtained"
+        }
+      ]
     }
   ]
 }

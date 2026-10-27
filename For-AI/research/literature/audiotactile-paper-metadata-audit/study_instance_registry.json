@@ -3467,6 +3467,158 @@
           "role": "Chapter 9.2 same-title author-version lead; retrieval 403 and final-version comparison pending."
         }
       ]
+    },
+    {
+      "network_node_id": "doi:10.1162/jocn_a_00006",
+      "doi": "10.1162/jocn_a_00006",
+      "inventory_status": "confirmed_three_behavioral_protocols",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Experiment 1A has 12 participants, 1B has 18 new participants, and Experiment 2 has ten new participants: 40 unique participants across three behavioral protocols.",
+      "evidence_pointer": "https://www.alessioavenanti.com/pdf_library/serino_2011jocn.pdf",
+      "source_version": "Published page-layout article, publicly retained on author website",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.alessioavenanti.com/pdf_library/serino_2011jocn.pdf",
+          "outcome": "Published page-layout article, publicly retained on author website; SHA256 0c5702c7f35c72dbbe4c9194b33893b83b6bce787a1563c58d898465371f521a"
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "behavioral_protocol",
+          "experiment_label": "Experiment 1A: intensity and near/far audiotactile task",
+          "record_id": "serino_2011_rtms",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_n": 12
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "behavioral_protocol",
+          "experiment_label": "Experiment 1B: arm-position control",
+          "record_id": "serino_2011_rtms",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_n": 18
+        },
+        {
+          "suffix": "c",
+          "instance_kind": "behavioral_protocol",
+          "experiment_label": "Experiment 2: audiotactile task after rTMS",
+          "record_id": "serino_2011_rtms",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_n": 10
+        }
+      ],
+      "supporting_task_boundaries": [
+        "Tactile calibration/familiarization and MEP-based motor-threshold calibration are embedded checks, not additional AT experiments."
+      ],
+      "source_sha256": "0c5702c7f35c72dbbe4c9194b33893b83b6bce787a1563c58d898465371f521a"
+    },
+    {
+      "network_node_id": "doi:10.1016/j.neuroimage.2012.06.063",
+      "doi": "10.1016/j.neuroimage.2012.06.063",
+      "inventory_status": "confirmed_two_mechanistic_experiments",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Two different samples: 16 in Experiment 1 and 14 in Experiment 2; repeated post-tDCS sessions within participant.",
+      "evidence_pointer": "https://www.alessioavenanti.com/pdf_library/Avenanti_2012Neuroimage.pdf",
+      "source_version": "Published page-layout article, publicly retained on author website",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.alessioavenanti.com/pdf_library/Avenanti_2012Neuroimage.pdf",
+          "outcome": "Published page-layout article, publicly retained on author website; SHA256 2d498c2d4378ea8aad8de08946065c56a6445d3d433accd7675a6f57ff96278a"
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "adjacent_mechanistic_experiment",
+          "experiment_label": "Experiment 1: premotor perturbation and MEP recording",
+          "record_id": "avenanti_2012_motor_cortex",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_auditory_motor_excitability",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_n": 16
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "adjacent_mechanistic_experiment",
+          "experiment_label": "Experiment 2: parietal and visual active controls",
+          "record_id": "avenanti_2012_motor_cortex",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_auditory_motor_excitability",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_n": 14
+        }
+      ],
+      "supporting_task_boundaries": [
+        "ITI tactile attention events and motor-threshold calibration are embedded, not separate AT PPS acquisitions."
+      ],
+      "source_sha256": "2d498c2d4378ea8aad8de08946065c56a6445d3d433accd7675a6f57ff96278a"
+    },
+    {
+      "network_node_id": "doi:10.1093/neucas/7.2.97",
+      "doi": "10.1093/neucas/7.2.97",
+      "inventory_status": "provisional_case_inventory_with_access_gap",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "One abstract-confirmed case; full experimental blocks, diagnostic controls, sessions and any additional participants remain inaccessible.",
+      "evidence_pointer": "https://pubmed.ncbi.nlm.nih.gov/11320157/",
+      "source_version": "Primary published abstract via PubMed",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://pubmed.ncbi.nlm.nih.gov/11320157/",
+          "outcome": "Primary published abstract via PubMed; primary abstract read through web; separate local HTTP 200 was a reCAPTCHA challenge."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://doi.org/10.1093/neucas/7.2.97",
+          "outcome": "publisher route403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.tandfonline.com/doi/10.1093/neucas/7.2.97",
+          "outcome": "PubMed fulltext link403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.researchgate.net/publication/12016250_Auditory_Peripersonal_Space_in_Humans_a_Case_of_Auditory-Tactile_Extinction",
+          "outcome": "abstract and download link accessible; observed author PDF link403, no local fulltext"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://r1.unitn.it/cats/pubblicazioni_root/",
+          "outcome": "author citation located earlier; subsequent full listing retrieval403; no PDF obtained"
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "provisional_case",
+          "experiment_label": "Auditory–tactile extinction case; provisional inventory",
+          "record_id": "ladavas_2001_auditory_tactile_extinction",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "provisional_inventory_with_access_blocker",
+          "cohort_n": 1
+        }
+      ],
+      "supporting_task_boundaries": [
+        "Number of experimental blocks, separate diagnostic/control tasks, repeated sessions and any additional participants cannot be established from abstract. Do not claim full inventory completed."
+      ],
+      "source_review_limit": "Number of experimental blocks, separate diagnostic/control tasks, repeated sessions and any additional participants cannot be established from abstract. Do not claim full inventory completed."
     }
   ],
   "corpus_freeze": {
@@ -3997,6 +4149,27 @@
       ],
       "reason": "Two duration protocols acquired in the same thirteen participants; these rows do not imply two independent cohorts.",
       "evidence_pointer": "https://dael.euracoustics.org/confs/fa2025/data/articles/000866.pdf",
+      "review_date": "2026-10-27"
+    },
+    {
+      "old_study_row_id": "doi:10.1162/jocn_a_00006",
+      "child_study_row_ids": [
+        "doi:10.1162/jocn_a_00006::a",
+        "doi:10.1162/jocn_a_00006::b",
+        "doi:10.1162/jocn_a_00006::c"
+      ],
+      "reason": "Experiment 1A has 12 participants, 1B has 18 new participants, and Experiment 2 has ten new participants: 40 unique participants across three behavioral protocols.",
+      "evidence_pointer": "https://www.alessioavenanti.com/pdf_library/serino_2011jocn.pdf",
+      "review_date": "2026-10-27"
+    },
+    {
+      "old_study_row_id": "doi:10.1016/j.neuroimage.2012.06.063",
+      "child_study_row_ids": [
+        "doi:10.1016/j.neuroimage.2012.06.063::a",
+        "doi:10.1016/j.neuroimage.2012.06.063::b"
+      ],
+      "reason": "Two different samples: 16 in Experiment 1 and 14 in Experiment 2; repeated post-tDCS sessions within participant.",
+      "evidence_pointer": "https://www.alessioavenanti.com/pdf_library/Avenanti_2012Neuroimage.pdf",
       "review_date": "2026-10-27"
     }
   ]

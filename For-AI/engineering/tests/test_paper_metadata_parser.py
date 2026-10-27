@@ -414,7 +414,8 @@ def test_missing_pdf_request_list_tracks_main_pdfs_and_supplements():
     }
 
     # Serino 2009's two sound-to-TMS experiments are a reviewed mechanistic boundary.
-    assert len(in_scope_ids) == 68
+    assert len(in_scope_ids) == 67
+    assert "avenanti_2012_motor_cortex" not in in_scope_ids
     assert "social_perception_2017" not in in_scope_ids
     assert "serino_2009_tms" not in in_scope_ids
     assert "finisguerra_2015_moving_sounds_motor" not in in_scope_ids

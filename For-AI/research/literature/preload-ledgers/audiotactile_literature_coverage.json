@@ -271,9 +271,9 @@
       "covered_blocked_missing_publication_parameters": 10,
       "covered_blocked_toolkit_structure": 0,
       "not_yet_templated_requires_toolkit_structure": 0,
-      "not_yet_templated_missing_publication_parameters": 45,
+      "not_yet_templated_missing_publication_parameters": 44,
       "candidate_needs_full_text_task_audit": 0,
-      "adjacent_out_of_scope": 7
+      "adjacent_out_of_scope": 8
     },
     "current_template_count": 30,
     "current_profile_check_pass_count": 25,
@@ -1005,7 +1005,9 @@
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "full audio, tactile, and response settings need extraction"
+        "Exact white-noise asset, seed, sample rate, bandwidth and envelope; complete calibrated apparatus geometry",
+        "Electrical constant-current/constant-voltage wording and Experiment 2 baseline-order conflict",
+        "Exact trial event margins, ITI distribution and online response deadline; Experiment 1A/1B total repetition scope"
       ]
     },
     {
@@ -1016,13 +1018,16 @@
         "holmes_2020_systematic_review"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "audiotactile_task_family": "audio-tactile PPS stimulation with motor-evoked-potential endpoint",
+      "coverage_category": "adjacent_out_of_scope",
+      "audiotactile_task_family": "Auditory-to-motor-excitability task; separate ITI tactile attention events",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
-      "missing_publication_parameters": [
-        "extract audio-tactile task timing, tactile stimulation, motor-evoked-potential timing, trigger markers, baseline/ITI policy, and trial counts before templating; runner can now preserve declared external trigger metadata but hardware TTL validation remains outside software-runner scope"
-      ]
+      "missing_publication_parameters": [],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://www.alessioavenanti.com/pdf_library/Avenanti_2012Neuroimage.pdf",
+      "scope_review_basis": "Published Methods pp.282–283 and Figure 1 identify sound-to-TMS MEP acquisition under cathodal tDCS; 50/175/300 ms are sound-to-TMS delays. Palm attention events are at least 4–5 s from TMS and are not an audiotactile SOA schedule.",
+      "adjacent_apparatus_boundary": "Physical TMS/tDCS/EMG and electrical or solenoid apparatus remain outside software qualification; preserving external-trigger metadata does not validate their hardware timing.",
+      "retained_frozen_corpus_boundary": true
     },
     {
       "record_id": "serino_2011_professional_fencers",

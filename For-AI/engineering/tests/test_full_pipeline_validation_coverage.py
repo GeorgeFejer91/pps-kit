@@ -45,8 +45,8 @@ def test_full_pipeline_validation_summary_is_conservative():
     summary = pipeline["summary"]
 
     assert summary["literature_record_count"] == 75
-    assert summary["in_scope_record_count"] == 68
-    assert summary["adjacent_not_applicable_record_count"] == 7
+    assert summary["in_scope_record_count"] == 67
+    assert summary["adjacent_not_applicable_record_count"] == 8
     assert summary["full_emulated_pipeline_validated_record_count"] == 12
     assert summary["human_behavioral_observed_record_count"] == 0
     assert summary["physical_loopback_observed_record_count"] == 0
@@ -66,30 +66,30 @@ def test_full_pipeline_validation_summary_is_conservative():
     assert tool_use["gates"]["toolkit_gui_implementation"]["passed"] is True
     assert tool_use["gates"]["observed_emulated_expected_match"]["passed"] is False
     assert summary["pipeline_status_counts"] == {
-        "adjacent_not_applicable": 7,
+        "adjacent_not_applicable": 8,
         "full_emulated_source_to_runner_pipeline_validated": 12,
         "pipeline_incomplete": 1,
         "profile_present_but_source_parameters_missing": 10,
-        "source_parameters_missing_before_profile_creation": 45,
+        "source_parameters_missing_before_profile_creation": 44,
     }
     assert summary["primary_gap_counts"] == {
         "profile_present_but_source_parameters_missing": 10,
-        "source_parameters_missing_before_profile_creation": 45,
+        "source_parameters_missing_before_profile_creation": 44,
         "toolkit_structure_or_response_contract_missing": 0,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
         "minimum_source_parameters_captured": 13,
-        "not_applicable_adjacent_record": 7,
-        "source_parameters_missing_or_unresolved": 55,
+        "not_applicable_adjacent_record": 8,
+        "source_parameters_missing_or_unresolved": 54,
     }
     assert summary["gate_status_counts"]["observed_emulated_expected_match"] == {
         "emulated_observed_direction_matches_expected": 12,
-        "no_observed_emulated_comparison": 56,
-        "not_applicable_adjacent_record": 7,
+        "no_observed_emulated_comparison": 55,
+        "not_applicable_adjacent_record": 8,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
-        "blocked_by_missing_profile_parameters": 50,
-        "not_applicable_adjacent_record": 7,
+        "blocked_by_missing_profile_parameters": 49,
+        "not_applicable_adjacent_record": 8,
         "segment_0_to_6_gui_toolkit_path_ready": 18,
     }
     assert "not collected participant evidence" in pipeline["scope"]["evidence_boundary"]

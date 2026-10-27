@@ -38,9 +38,9 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_blocked_missing_publication_parameters": 10,
         "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 0,
-        "not_yet_templated_missing_publication_parameters": 45,
+        "not_yet_templated_missing_publication_parameters": 44,
         "candidate_needs_full_text_task_audit": 0,
-        "adjacent_out_of_scope": 7,
+        "adjacent_out_of_scope": 8,
     }
     assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 30
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
@@ -947,7 +947,8 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert "sound-to-TMS" in records["serino_2009_tms"]["scope_review_basis"]
     assert records["serino_2009_tms"]["can_recreate_audiotactile_components_now"] is False
     assert records["serino_2009_tms"]["blocking_constraint_ids"] == []
-    assert records["avenanti_2012_motor_cortex"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["avenanti_2012_motor_cortex"]["coverage_category"] == "adjacent_out_of_scope"
+    assert "sound-to-TMS" in records["avenanti_2012_motor_cortex"]["scope_review_basis"]
     assert records["avenanti_2012_motor_cortex"]["blocking_constraint_ids"] == []
     assert records["barumerli_2026_semantic_looming_auditory_only"]["coverage_category"] == "adjacent_out_of_scope"
     assert records["barumerli_2026_semantic_looming_auditory_only"]["doi"] == "10.1038/s41598-026-48067-4"
