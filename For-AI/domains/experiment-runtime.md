@@ -129,6 +129,17 @@ and use the shared bounded-text helper.
 
 Manifest-order execution is source-verified through normal native dispatch and
 real one-/two-block silent CPAL callback fixtures with independent result-file
-audits. Full profile assembly, installed
-complete experiments, calibration and physical qualification remain gates.
+audits. `pps-designer-core` now preserves the existing participant ordering
+through a versioned CPython-compatible planner, binds both operator reviews,
+and assembles distinct pre/post parts with shared run-setup provenance and
+verified instruction PCM. Its complete 600-occurrence browser capture matches
+the existing Python planner. `pps-session-package` verifies instruction WAV
+hashes, actual frames/rate/channels, finite PCM and contained paths; its native
+group receipt binds both ordered parts and their shared provenance. Neither
+receipt nor source completion flags establish that the experiment ran.
+The Runner currently refuses playback of instruction-bearing/split packages
+until the corresponding native consumer lands; inspection is still available.
+Complete installed experiments and native instruction/group execution remain
+gates. The user deferred new physical calibration on 2026-10-27; hardware
+operation is assumed, never recorded as measured qualification.
 Wire completion is denied for real packages; Stop preserves partial results.

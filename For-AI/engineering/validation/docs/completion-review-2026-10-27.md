@@ -6,6 +6,13 @@ The user approved implementation of the expanded publication-ready plan.
 This section supersedes the earlier setup-only scope and wave assignments;
 the source review below remains the finding/evidence inventory.
 
+Subsequent user direction on 2026-10-27: proceed without new calibrations and
+assume hardware operation for now. This defers physical calibration work for
+the current delivery; it does not turn an assumption into measured timing or
+behavioral replication evidence. Installed/software, catalogue and provenance
+gates remain required. Retain unqualified physical labels until real measurements
+support stronger claims.
+
 Implementation now has verified single-/multi-block native activation,
 the hosted persistence/preview/participant fixes, experiment-level mapper,
 bounded Rust source generation and corrected 3DTI bridge. Native portable
