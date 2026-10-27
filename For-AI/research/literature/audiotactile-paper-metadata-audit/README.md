@@ -43,6 +43,24 @@ and supplementary/code review remain open. Other unidentified same-day tasks
 remain an unassessed boundary. The unchanged 124 review rows now contain 76
 unassessed publication inventories; this count is not a completion claim.
 
+The next batch verifies Taffou and Viaud-Delmon (2014), DOI
+`10.3389/fpsyt.2014.00122`, against the Methods and rendered Figure 1. Its
+head-centred rear trajectories must not be treated as finger-centred geometry.
+Six contracts resolve as reported and the 64 baseline trials as derived; four
+retain asset, calibration, response-window or jitter-distribution gaps.
+
+Serino et al. (2009), DOI `10.1371/journal.pone.0006582`, is adjudicated as adjacent
+auditory/TMS mechanistic context. Methods and rendered Figure 1 establish two
+experiments: the sound-to-TMS intervals are not audio-tactile SOAs, and tactile
+attention is performed separately in intertrial intervals. The publication stays
+in the frozen map, with its coverage category corrected and two explicit
+experiment rows. Direct audio-tactile replication contracts are not applicable
+to those rows. The former publication placeholder is preserved as a documented
+one-to-many alias in `study_row_migrations` and the public `studyRowAliases` map.
+This source-backed split changes the current row count to **125**, while the
+publication freeze stays **94** and **74** publication inventories remain
+unassessed. Membership was frozen; the initial placeholder count was not.
+
 The public projection is rebuilt after the matrix resolver; see
 [`publication-network/README.md`](../publication-network/README.md#public-study-evidence).
 Paper evidence, linked templates and native qualification are independent.

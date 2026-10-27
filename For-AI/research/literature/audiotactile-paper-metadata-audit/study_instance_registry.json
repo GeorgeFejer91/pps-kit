@@ -247,6 +247,64 @@
           "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6565702/fullTextXML::Methods/Procedure"
         }
       ]
+    },
+    {
+      "network_node_id": "doi:10.3389/fpsyt.2014.00122",
+      "doi": "10.3389/fpsyt.2014.00122",
+      "inventory_status": "confirmed_main_audio_tactile_experiment",
+      "instance_count_basis": "One main audio-tactile task with dog-fear groups; auditory emotional evaluations before/after are supporting tasks, not extra PPS experiments.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4153021/fullTextXML::Materials and Methods; Figure1",
+      "review_date": "2026-10-27",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Main rear-field audio-tactile fear experiment",
+          "record_id": "taffou_2014_cynophobic_rear_looming",
+          "template_ids": [
+            "taffou_2014_cynophobic_rear_looming"
+          ],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Emotional evaluation before and after the PPS task",
+          "disposition": "supporting_auditory_only_context",
+          "basis": "Non-spatialized sound valence/arousal ratings; no tactile integration outcome.",
+          "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4153021/fullTextXML::Emotional evaluation task"
+        }
+      ]
+    },
+    {
+      "network_node_id": "doi:10.1371/journal.pone.0006582",
+      "doi": "10.1371/journal.pone.0006582",
+      "inventory_status": "confirmed_two_adjacent_mechanistic_experiments",
+      "instance_count_basis": "Methods explicitly separates Experiments1 and2 by right-arm posture. Main outcome is sound-related TMS-evoked MEP modulation; tactile attention is delivered separately during ITIs.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC2719059/fullTextXML::Methods/Procedure; Tactile stimulation; Figure1",
+      "review_date": "2026-10-27",
+      "framework_disposition": "adjacent_auditory_motor_tms_with_intertrial_tactile_attention",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 1 — auditory/TMS, hand near speaker",
+          "record_id": "serino_2009_tms",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_mechanistic_context",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 2 — auditory/TMS, arm rotated backward",
+          "record_id": "serino_2009_tms",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_mechanistic_context",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        }
+      ]
     }
   ],
   "corpus_freeze": {
@@ -349,5 +407,17 @@
       "basis": "Existing exact-DOI review disagrees with the legacy audio-tactile inclusion label; retain visible rather than silently remove.",
       "evidence_pointer": "apps/designer/frontend/publication_network.v3.json::doi:10.1038/s41598-022-21469-w"
     }
-  }
+  },
+  "study_row_migrations": [
+    {
+      "old_study_row_id": "doi:10.1371/journal.pone.0006582",
+      "child_study_row_ids": [
+        "doi:10.1371/journal.pone.0006582::a",
+        "doi:10.1371/journal.pone.0006582::b"
+      ],
+      "review_date": "2026-10-27",
+      "reason": "The former unassessed publication placeholder is superseded by two source-verified mechanistic experiment rows; it is not equivalent to either child alone.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC2719059/fullTextXML::Methods/Participants and Procedure"
+    }
+  ]
 }

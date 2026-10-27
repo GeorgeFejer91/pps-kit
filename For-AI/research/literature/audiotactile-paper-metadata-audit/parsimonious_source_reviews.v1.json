@@ -7252,6 +7252,765 @@
           "evidence_note": "The paper describes a session sequence, not an explicit block count/composition or counterbalancing rule; unresolved rather than defaulted to one block."
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.3389/fpsyt.2014.00122",
+      "source_type": "publication_pdf_and_primary_article_xml",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4153021/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Primary Methods and rendered Figure 1 checked; source-asset/calibration/response/jitter gaps retained. No native qualification.",
+      "orientation_ledger": {
+        "participant_frame": "Seated blindfolded, headrest, hands palms-down aligned to mid-sagittal plane.",
+        "apparatus_frame": "Headphone-rendered virtual locations; no moving room loudspeakers.",
+        "body_mapping": "Top-view figure faces page-right; source rays lie behind participant; black triangles left and white right.",
+        "tactile_anchor": "Palmar left index; coordinates centred on head, not finger.",
+        "evidence_class": "text/caption reported; Figure 1 pixels inspected; no unscaled numeric measurements"
+      },
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4153021/fullTextXML",
+          "outcome": "full_Methods_and_caption_inspected; no supplementary-material element in article XML"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.frontiersin.org/journals/psychiatry/articles/10.3389/fpsyt.2014.00122/pdf",
+          "outcome": "public_PDF_retrieved; page3 Figure 1 rendered_and_inspected"
+        }
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "Dog growling/sheep bleating; 32-bit 44.1-kHz audio; 3000 ms; HD650 headphones; LISTEN non-individual HRTF.",
+          "page_or_section": "Publisher PDF pp.2-3, Materials and Methods/Main experiment; Figure 1A-B inspected",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "Headphone binaural rendering."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Dog growling and sheep bleating, Audacity edited."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "LISTEN non-individual HRTF; HD650; Presentation."
+            }
+          },
+          "evidence_note": "Exact source clips, HRTF identity and output calibration remain unresolved.",
+          "missing_required_components": [
+            "source_recipe_or_asset_provenance",
+            "level_envelope_calibration"
+          ]
+        },
+        "trajectory_kinematics": {
+          "status": "reported_complete",
+          "value": "Head-centred rear approach at +135° or -135°, 520 to 20 cm, over 3000 ms.",
+          "page_or_section": "Publisher PDF pp.2-3, Materials and Methods/Main experiment; Figure 1A-B inspected",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Virtual source approaches from rear."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Head-centred distances; seated blindfolded; hands mid-sagittal; left-index touch."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Right +135° and left -135°; 520 to 20 cm from head."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3000-ms trajectory interval."
+            }
+          },
+          "evidence_note": "Figure 1B top view: participant faces page-right; black triangles are participant-left. No constant physical speed is inferred."
+        },
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Random targets at 7 tactile timings across 2 sounds and2 rear sides, with auditory-only catches.",
+          "page_or_section": "Publisher PDF pp.2-3, Materials and Methods/Main experiment; Figure 1A-B inspected",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Audio-tactile targets, silent-window tactile controls, auditory-only catches."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "1000-ms silence, 3000-ms dog/sheep looming sound, 2700-3300-ms silence; optional tactile target."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Random combinations and intermingled catches."
+            }
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Right-index button press to left-index vibration; ignore sound and avoid anticipation.",
+          "page_or_section": "Publisher PDF pp.2-3, Materials and Methods/Main experiment; Figure 1A-B inspected",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond only to tactile stimulus."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Right-index button press."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Speeded touch detection; no anticipatory press."
+            }
+          },
+          "evidence_note": "Exact response deadline remains unverified.",
+          "missing_required_components": [
+            "response_window_and_anchor"
+          ]
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "1000-ms pre-sound silence; 2700-3300-ms silence after sound offset.",
+          "page_or_section": "Publisher PDF pp.2-3, Materials and Methods/Main experiment; Figure 1A-B inspected",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Fixed pre-sound padding and variable post-sound interval."
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "Before onset and after offset of 3000-ms sound."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1000 ms before; 2700-3300 ms after."
+            }
+          },
+          "evidence_note": "Sampling distribution is not established by this Methods/figure review; do not substitute uniform.",
+          "missing_required_components": [
+            "distribution"
+          ]
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "T1-T5:0, 750, 1500, 2250, 3000 ms from sound onset.",
+          "page_or_section": "Publisher PDF pp.2-3, Materials and Methods/Main experiment; Figure 1A-B inspected",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Zero at auditory onset; positive tactile delays thereafter."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "0, 750, 1500, 2250, 3000 ms."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Same schedule for both rear sides and sound types."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "20-ms 250-Hz sinusoidal vibration at palmar left index, via small loudspeaker.",
+          "page_or_section": "Publisher PDF pp.2-3, Materials and Methods/Main experiment; Figure 1A-B inspected",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Palmar left index finger."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "20-ms sinusoid at 250 Hz."
+            }
+          },
+          "evidence_note": "Amplitude/calibration not finalized; perceptible-but-inaudible description is not a calibrated output.",
+          "missing_required_components": [
+            "intensity_or_calibration"
+          ]
+        },
+        "baseline_trial_contract": {
+          "status": "derived_complete",
+          "value": "Tbefore/Tafter at 350/4650 ms from trial start; 64 tactile-only controls.",
+          "page_or_section": "Publisher PDF pp.2-3, Materials and Methods/Main experiment; Figure 1A-B inspected",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Tactile controls in silent pre/post windows."
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "350 and4650 ms from trial start; sound onset 1000 ms."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "8 repetitions × 2 timings × 2 sides × 2 sounds."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "64 controls included among 224 tactile targets."
+            }
+          },
+          "derivation_note": "2 × 2 × 2 × 8 = 64; onset-relative times -650 and+3650 ms."
+        },
+        "catch_trial_contract": {
+          "status": "reported_complete",
+          "value": "32 auditory-only catches (12.5% of 256 trials).",
+          "page_or_section": "Publisher PDF pp.2-3, Materials and Methods/Main experiment; Figure 1A-B inspected",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only catch."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No tactile target; withhold button response."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "32 catches randomly intermingled."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "32."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "reported_complete",
+          "value": "8 repetitions × 7 timings × 2 sides × 2 sounds =224 targets; 32 catches; 256 total.",
+          "page_or_section": "Publisher PDF pp.2-3, Materials and Methods/Main experiment; Figure 1A-B inspected",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "7 tactile timings × 2 rear sides × 2 sound types."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "8 targets per 28 conditions; 224 targets and32 catches."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Tbefore/Tafter included in target count; emotional ratings separate."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "reported_complete",
+          "value": "8 blocks of 32 trials from the randomized target/catch pool.",
+          "page_or_section": "Publisher PDF pp.2-3, Materials and Methods/Main experiment; Figure 1A-B inspected",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "8."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "32 trials per block, equally partitioned from 256 randomized trials."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Random target combinations with intermingled catches."
+            }
+          },
+          "evidence_note": "No additional per-block factorial balance is asserted."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1371/journal.pone.0006582::a",
+      "source_type": "publication_pdf_and_primary_article_xml",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC2719059/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Source-backed adjacent mechanistic disposition, not unavailable parameters. Frozen publication membership retained; direct-AT contract is not applicable to either TMS experiment.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC2719059/fullTextXML",
+          "outcome": "full_Methods_inspected; two_experiments_confirmed"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0006582&type=printable",
+          "outcome": "public_PDF_retrieved; pp2-3_Methods_and_Figure1_inspected"
+        }
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right hand near speaker.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right hand near speaker.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right hand near speaker.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right hand near speaker.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right hand near speaker.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right hand near speaker.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right hand near speaker.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right hand near speaker.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right hand near speaker.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right hand near speaker.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right hand near speaker.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1371/journal.pone.0006582::b",
+      "source_type": "publication_pdf_and_primary_article_xml",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC2719059/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Source-backed adjacent mechanistic disposition, not unavailable parameters. Frozen publication membership retained; direct-AT contract is not applicable to either TMS experiment.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC2719059/fullTextXML",
+          "outcome": "full_Methods_inspected; two_experiments_confirmed"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0006582&type=printable",
+          "outcome": "public_PDF_retrieved; pp2-3_Methods_and_Figure1_inspected"
+        }
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right arm rotated backward; both sources far from hand.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right arm rotated backward; both sources far from hand.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right arm rotated backward; both sources far from hand.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right arm rotated backward; both sources far from hand.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right arm rotated backward; both sources far from hand.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right arm rotated backward; both sources far from hand.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right arm rotated backward; both sources far from hand.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right arm rotated backward; both sources far from hand.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right arm rotated backward; both sources far from hand.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right arm rotated backward; both sources far from hand.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP task; tactile attention occurs separately in intertrial intervals. Right arm rotated backward; both sources far from hand.",
+          "page_or_section": "Publisher PDF pp.2-4, Methods/Procedure/Tactile stimulation; Figure 1",
+          "evidence_note": "50/100/200/300-ms intervals are sound-to-TMS, never auditory-to-tactile SOAs. Tactile attention is at least 4-5 s from TMS in 10-12-s ITIs.",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Outside direct auditory-tactile replication scope."
+            }
+          }
+        }
+      }
     }
   ]
 }
