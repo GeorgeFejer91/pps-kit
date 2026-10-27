@@ -139,6 +139,51 @@ fn corrupted_asset_hash_and_missing_references_leave_no_published_tree() {
 }
 
 #[test]
+fn stationary_comparator_rebinds_its_own_asset_without_reusing_moving_identity() {
+    let f = Fixture::new();
+    f.bundle(|_, profile, files| {
+        let mut bytes = files[0].1.clone();
+        let last = bytes.len() - 2;
+        bytes[last..].copy_from_slice(&12_i16.to_le_bytes());
+        let digest = format!("{:x}", Sha256::digest(&bytes));
+        profile["assets"].as_array_mut().unwrap().push(json!({"logical_id":"stationary","path":"assets/stationary",
+            "sha256":digest,"bytes":bytes.len(),"media_type":"audio/wav","source_name":"stationary.wav"}));
+        profile["design"]["noises"][0]["native_stationary_baseline_asset"] = json!("browser-asset:stationary");
+        profile["design"]["noises"][0]["native_stationary_baseline_sha256"] = json!(digest);
+        files.push(("assets/stationary".into(), bytes));
+    });
+    let receipt =
+        materialize_profile_bundle(&f.source(), &f.destination(), &AtomicBool::new(false)).unwrap();
+    let noise = &receipt.rebased_design()["noises"][0];
+    let primary = receipt
+        .assets()
+        .iter()
+        .find(|a| a.logical_id == "cue")
+        .unwrap();
+    let comparator = receipt
+        .assets()
+        .iter()
+        .find(|a| a.logical_id == "stationary")
+        .unwrap();
+    assert_eq!(noise["prebaked_path"], primary.path.to_str().unwrap());
+    assert_eq!(
+        noise["native_stationary_baseline_asset"],
+        comparator.path.to_str().unwrap()
+    );
+    assert_ne!(primary.sha256, comparator.sha256);
+    assert_eq!(
+        noise["native_stationary_baseline_sha256"],
+        comparator.sha256
+    );
+    let missing = Fixture::new();
+    missing.bundle(|_, profile, _| {
+        profile["design"]["noises"][0]["native_stationary_baseline_asset"] =
+            json!("browser-asset:missing");
+    });
+    missing.assert_rejected();
+}
+
+#[test]
 fn traversal_case_collisions_and_unlisted_types_are_rejected() {
     for member in [
         "../escape.wav",

@@ -297,8 +297,11 @@ fn rebind_group(group: &mut Value, field: &str, assets: &BTreeMap<String, PathBu
             .and_then(Value::as_str)
             .unwrap_or_default()
             .to_owned();
+        // A secondary comparator belongs to the noise but has its own identity.
+        let primary = field != "native_stationary_baseline_asset";
         let id = item
             .get("browser_asset_id")
+            .filter(|_| primary)
             .and_then(Value::as_str)
             .filter(|id| !id.is_empty());
         let path_id = path.strip_prefix("browser-asset:");
@@ -319,7 +322,9 @@ fn rebind_group(group: &mut Value, field: &str, assets: &BTreeMap<String, PathBu
                     .to_owned(),
             ),
         );
-        item.remove("browser_asset_id");
+        if primary {
+            item.remove("browser_asset_id");
+        }
     }
     Ok(())
 }
@@ -533,6 +538,7 @@ pub fn materialize_profile_bundle(
     }
     for (group, field) in [
         ("noises", "prebaked_path"),
+        ("noises", "native_stationary_baseline_asset"),
         ("custom_looming_files", "path"),
         ("prestimulus_files", "path"),
     ] {
