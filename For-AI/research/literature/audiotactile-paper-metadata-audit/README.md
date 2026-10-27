@@ -33,22 +33,28 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 168 study/context rows,
-82 registered publication inventories and 12 unregistered publications.
+Current checkpoint (2026-10-27): 94 frozen publications, 169 study/context rows,
+85 registered publication inventories and 9 unregistered publications.
 Registry presence alone does not certify a Methods-confirmed inventory.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive evidence categories and finalized eleven-contract
-source dispositions. The current audit records 66 Methods-backed inventories
-(52 current primary reviews, 8 retained primary reviews and
+source dispositions. The current audit records 67 Methods-backed inventories
+(53 current primary reviews, 8 retained primary reviews and
 6 identified author versions whose final comparison is pending),
 1 abstract/metadata and 1 partial Methods inventories,
-13 audited access blockers and 1 project-lineage boundary.
-Only 80 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 14 still need inventory
+15 audited access blockers and 1 project-lineage boundary.
+Only 83 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 11 still need inventory
 or contract review. A partial value counts as reviewed when its missing parts
 are explicit; an inherited coarse field or unassessed child does not.
 These are audit counts, not runnable or scientifically qualified study counts.
 The earlier counts below describe individual historical checkpoints.
+Sancristóbal retains one cohort across behavioral and passive auditory imaging
+protocols; the latter has no tactile acquisition. Matching Ferri demographics
+do not establish dataset reuse or independent recruitment. Di Cosmo retains
+six delay labels without borrowed timing values. The TiCS Spotlight is a
+provisional context boundary; both full-source access gaps remain explicit.
+
 The pregnancy v1 protocol retains its own longitudinal sampling and acquisition
 parameters; additions in the final paper are comparison notes only. The affective
 touch v1 has three tasks in one 35-person cohort, with incompatible allocations,
