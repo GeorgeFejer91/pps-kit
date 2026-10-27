@@ -191,6 +191,136 @@
         {"suffix": "a", "instance_kind": "profile_variant", "experiment_label": "Healthy wake/sleep chest EEG PPS variant", "record_id": "cell_reports_medicine_2026_consciousness", "template_ids": [], "toolkit_scope": "profile_variant_in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
         {"suffix": "b", "instance_kind": "profile_variant", "experiment_label": "Disorders-of-consciousness arm clinical PPS variant", "record_id": "cell_reports_medicine_2026_consciousness", "template_ids": [], "toolkit_scope": "profile_variant_in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
       ]
+    },
+    {
+      "network_node_id": "doi:10.1371/journal.pone.0044306",
+      "doi": "10.1371/journal.pone.0044306",
+      "inventory_status": "confirmed_audio_tactile_pps_task_with_supporting_localizer",
+      "instance_count_basis": "Publisher Methods distinguishes the main tactile-detection PPS task from a separate sound-localization validation task. Only the main PPS task is a replication row here.",
+      "evidence_pointer": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306#sec002",
+      "review_date": "2026-10-27",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Main audio-tactile PPS task",
+          "record_id": "canzoneri_2012_dynamic_sounds",
+          "template_ids": [
+            "canzoneri_2012_dynamic_sounds"
+          ],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Sound-localization validation",
+          "disposition": "supporting_validation_context",
+          "basis": "80-trial perceived-distance rating task with forearm touch; distinct from the main PPS tactile-reaction-time experiment.",
+          "evidence_pointer": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306#sec002"
+        }
+      ]
     }
-  ]
+  ],
+  "corpus_freeze": {
+    "id": "pps-audiotactile-publication-freeze-20261027",
+    "frozen_on": "2026-10-27",
+    "completion_status": "open",
+    "publication_authority": "apps/designer/frontend/publication_network.v3.json",
+    "publication_count": 94,
+    "publication_id_sha256": "16f8f076c36f0564fddcccfdf2149f43bd1245352f35a0e2940fa49cbc08a303",
+    "registered_study_rows_at_freeze": 124,
+    "scope": "Audiotactile PPS publications in the existing dated 94-publication map, with explicit unresolved identity and adjacent-family boundaries. This is a bounded corpus audit, not an exhaustive literature claim.",
+    "platform_scope": "Windows first; hosted prepare/preview only; native qualification requires separate observed evidence.",
+    "deferred_scope": "Broader human PPS families outside audiotactile experiments; no automatic new literature expansion.",
+    "authority_rule": "Publication metadata coverage, experiment inventory, reviewed parameters, template availability, and physical qualification remain independent.",
+    "completion_criteria": [
+      "Every frozen publication has a source-backed experiment inventory or a dated audited source-access gap; current unassessed placeholders do not count as reviewed.",
+      "Each in-scope experiment has an eleven-contract disposition with primary-source section/page evidence, component review and derivations where applicable; partial, conflicting or approximation states may remain only as explicit bounded gaps.",
+      "An inaccessible-source disposition records actual retrieval routes, dates and outcomes; not_assessed is never silently converted to source_unavailable.",
+      "Boundary records retain identity conflicts and scientific exclusion reasons separately from DOI or map eligibility. A newly resolved candidate requires an explicit corpus-version decision.",
+      "Public projection regenerates deterministically, preserves stable IDs, excludes private sources, and never upgrades evidence from defaults, templates or native implementation labels.",
+      "Science audit sign-off reports remaining gaps and does not imply that any preset or physical route is qualified."
+    ],
+    "boundary_records": [
+      {
+        "source_id": "s2:a59674e92994a1800d2b458998ca84ec8173bff1",
+        "title": "Peripersonal space Task – Audio-tactile interaction paradigm , Set up Description",
+        "disposition": "identity_pending_not_scientifically_excluded",
+        "evidence_pointer": "publication-network/citation_snapshot.v1.json::s2:a59674e92994a1800d2b458998ca84ec8173bff1",
+        "basis": "Existing audio-tactile candidate lacks a verified DOI; public map eligibility is not a scientific exclusion.",
+        "next_action": "Resolve identity and source before any future corpus-version change."
+      },
+      {
+        "source_id": "s2:bf162e7b53e381030520fb956f29621018a99af8",
+        "title": "Integration of tactile, visual, and acoustic stimuli in the peripersonal and extrapersonal space of unilaterally brain-damaged patients",
+        "disposition": "identity_pending_not_scientifically_excluded",
+        "evidence_pointer": "publication-network/citation_snapshot.v1.json::s2:bf162e7b53e381030520fb956f29621018a99af8",
+        "basis": "Existing audio-tactile candidate lacks a verified DOI; public map eligibility is not a scientific exclusion.",
+        "next_action": "Resolve identity and source before any future corpus-version change."
+      },
+      {
+        "source_id": "s2:dc9efaa028822672316fdac32cf9b5c66e656594",
+        "title": "The Effect of Spacial information on Audiotactile Temporal Order Judgment",
+        "disposition": "identity_pending_not_scientifically_excluded",
+        "evidence_pointer": "publication-network/citation_snapshot.v1.json::s2:dc9efaa028822672316fdac32cf9b5c66e656594",
+        "basis": "Existing audio-tactile candidate lacks a verified DOI; public map eligibility is not a scientific exclusion.",
+        "next_action": "Resolve identity and source before any future corpus-version change."
+      },
+      {
+        "record_id": "barumerli_2026_semantic_looming_auditory_only",
+        "doi": "10.1038/s41598-026-48067-4",
+        "disposition": "deferred_adjacent_family",
+        "evidence_pointer": "preload-ledgers/audiotactile_literature_coverage.json::barumerli_2026_semantic_looming_auditory_only",
+        "basis": "adjacent/auditory-only DOI excluded from focused network",
+        "next_action": "Retain outside this audiotactile-first publication scope."
+      },
+      {
+        "record_id": "lower_limb_pps_2017",
+        "doi": "10.1007/s00221-017-5115-0",
+        "disposition": "deferred_adjacent_family",
+        "evidence_pointer": "preload-ledgers/audiotactile_literature_coverage.json::lower_limb_pps_2017",
+        "basis": "adjacent/out-of-scope DOI excluded from focused network",
+        "next_action": "Retain outside this audiotactile-first publication scope."
+      },
+      {
+        "record_id": "novel_two_phase_audio_tactile_2025",
+        "doi": "",
+        "disposition": "identity_pending_not_scientifically_excluded",
+        "evidence_pointer": "preload-ledgers/audiotactile_literature_coverage.json::novel_two_phase_audio_tactile_2025",
+        "basis": "no DOI; cannot exact-DOI join to network",
+        "next_action": "Resolve bibliographic identity; retain as an explicit unresolved boundary."
+      },
+      {
+        "record_id": "serino_2011_professional_fencers",
+        "doi": "",
+        "disposition": "identity_pending_not_scientifically_excluded",
+        "evidence_pointer": "preload-ledgers/audiotactile_literature_coverage.json::serino_2011_professional_fencers",
+        "basis": "no DOI; cannot exact-DOI join to network",
+        "next_action": "Resolve bibliographic identity; retain as an explicit unresolved boundary."
+      },
+      {
+        "record_id": "spiousas_2025_auditory_only",
+        "doi": "10.3758/s13414-025-03071-0",
+        "disposition": "deferred_adjacent_family",
+        "evidence_pointer": "preload-ledgers/audiotactile_literature_coverage.json::spiousas_2025_auditory_only",
+        "basis": "adjacent/auditory-only DOI excluded from focused network",
+        "next_action": "Retain outside this audiotactile-first publication scope."
+      },
+      {
+        "record_id": "teramoto_2013_visual_deprivation",
+        "doi": "10.1037/a0028416",
+        "disposition": "identity_pending_not_scientifically_excluded",
+        "evidence_pointer": "preload-ledgers/audiotactile_literature_coverage.json::teramoto_2013_visual_deprivation",
+        "basis": "DOI belongs to a review node excluded from the focused empirical network",
+        "next_action": "Resolve bibliographic identity; retain as an explicit unresolved boundary."
+      }
+    ],
+    "retained_scope_conflict": {
+      "network_node_id": "doi:10.1038/s41598-022-21469-w",
+      "disposition": "retained_adjacent_scope_conflict",
+      "basis": "Existing exact-DOI review disagrees with the legacy audio-tactile inclusion label; retain visible rather than silently remove.",
+      "evidence_pointer": "apps/designer/frontend/publication_network.v3.json::doi:10.1038/s41598-022-21469-w"
+    }
+  }
 }

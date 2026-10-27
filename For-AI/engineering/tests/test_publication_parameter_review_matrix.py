@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import importlib.util
+import hashlib
 import json
 import subprocess
 import tempfile
@@ -194,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 16)
+        self.assertEqual(len(registry["entries"]), 17)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 46)
+        self.assertEqual(registered_instance_count, 47)
         network = json.loads(
             (
                 ROOT
@@ -636,7 +637,12 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             ).read_text(encoding="utf-8")
         )
         for entry in source_reviews["entries"]:
-            self.assertEqual(list(entry["contracts"]), expected_contracts)
+            # Bounded batches name exactly what was reviewed. Omitted contracts
+            # retain the existing resolver evidence, rather than fake reviews.
+            reviewed = entry.get("reviewed_contract_keys", expected_contracts)
+            self.assertTrue(reviewed)
+            self.assertEqual(reviewed, [key for key in expected_contracts if key in reviewed])
+            self.assertEqual(list(entry["contracts"]), reviewed)
             for contract_key, review in entry["contracts"].items():
                 self.assertNotIn(review["status"], legacy_statuses)
                 self.assertIn("component_reviews", review)
@@ -651,7 +657,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
                 )
         self.assertEqual(
             sum(row["experiment_scoped_source_override"] == "yes" for row in evidence),
-            len(source_reviews["entries"]) * len(expected_contracts),
+            sum(len(entry["contracts"]) for entry in source_reviews["entries"]),
         )
 
         _, summary = read_csv(
@@ -796,6 +802,38 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         for text in ["https://doi.org/10.1016/j.cognition.2015.07.012", "Source https://publisher.example/artifacts/paper.pdf, Methods pp. 3–4", "10.1007/s00221-013-3532-2"]:
             self.assertEqual(module._public_text(text), text)
 
+    def test_corpus_freeze_preserves_identities_and_explicit_boundaries(self) -> None:
+        registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+        freeze = registry["corpus_freeze"]
+        network = json.loads((ROOT / freeze["publication_authority"]).read_text(encoding="utf-8"))
+        ids = sorted(row["id"] for row in network["nodes"])
+        self.assertEqual(freeze["publication_count"], len(ids))
+        self.assertEqual(freeze["publication_id_sha256"], hashlib.sha256(("\n".join(ids) + "\n").encode()).hexdigest())
+        self.assertEqual(freeze["completion_status"], "open")
+        boundaries = freeze["boundary_records"]
+        self.assertEqual(len(boundaries), 9)
+        self.assertEqual({row["record_id"] for row in boundaries if "record_id" in row}, {row["record_id"] for row in read_csv(self.output_dir / "audit_records_outside_network.csv")[1]})
+        self.assertEqual(Counter(row["disposition"] for row in boundaries), {"identity_pending_not_scientifically_excluded": 6, "deferred_adjacent_family": 3})
+        self.assertTrue(all(row["evidence_pointer"] and row["basis"] and row["next_action"] for row in boundaries))
+
+    def test_primary_timing_batch_keeps_anchors_counts_and_remaining_gaps(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        study = next(row for row in data["studies"] if row["studyRowId"] == "doi:10.1371/journal.pone.0044306")
+        self.assertEqual(study["templateIds"], ["canzoneri_2012_dynamic_sounds"])
+        contracts = {row["key"]: row for row in study["contracts"]}
+        self.assertEqual(contracts["soa_schedule"]["status"], "reported_complete")
+        self.assertIn("+300, +800, +1500, +2200, +2700", contracts["soa_schedule"]["value"])
+        baseline = contracts["baseline_trial_contract"]
+        self.assertEqual(baseline["status"], "derived_complete")
+        self.assertIn("-700 and +3600", baseline["derivationNote"])
+        self.assertIn("32", baseline["components"]["resolved_trial_count"]["value"])
+        self.assertEqual(contracts["catch_trial_contract"]["status"], "reported_complete")
+        self.assertIn("76", contracts["catch_trial_contract"]["value"])
+        self.assertEqual(contracts["repetition_allocation"]["status"], "reported_complete")
+        self.assertIn("188", contracts["repetition_allocation"]["value"])
+        self.assertEqual(study["parameterStatusCounts"], {"derived_complete": 1, "partial": 7, "reported_complete": 3})
+        self.assertEqual(study["nativeQualification"], "not_assessed")
+
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:
             second = Path(second_temp) / "matrix"
@@ -840,6 +878,13 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
                     (self.output_dir / relative).read_bytes(),
                     (second / relative).read_bytes(),
                     str(relative),
+                )
+                # Git may normalize text line endings by platform; content must
+                # nevertheless match the checked-in source-derived projection.
+                self.assertEqual(
+                    (self.output_dir / relative).read_text(encoding="utf-8"),
+                    (TRACKED_OUTPUT / relative).read_text(encoding="utf-8"),
+                    f"Stale tracked matrix: {relative}",
                 )
 
 
