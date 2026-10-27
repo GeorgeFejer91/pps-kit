@@ -57,6 +57,7 @@ This file is the active checklist and handoff owner; replace state, do not appen
   skipped and twelve catalogue failures caused by changing source inputs during
   the run. A subsequent stable six-suite catalogue check passes 104 tests with
   one skip, including all twelve failed cases and byte-deterministic rebuilding.
+  The subsequent 74-publication source checkpoint passes 107 tests with one skip.
   This is resolved targeted evidence, not a fresh entirely green Standard run.
   The corrected sample-paced Canzoneri response audit passes
   three checks in 951.25 s, including complete planned/click/marker/analysis joins,
@@ -118,10 +119,10 @@ This file is the active checklist and handoff owner; replace state, do not appen
   interaction, clean-Windows prerequisites and deployed routes remain open. New physical calibration
   is deferred by the user, not reported as measured.
 - **Scientific coverage:** frozen 94-publication corpus; the latest integrated
-  projection has 158 study rows and 1,738 compact contracts. After the cane-use,
-  newborn supplement, social/walking and tool-observation batches, 67 publications
-  pass inventory/access plus all eleven source-disposition checks; 27 remain.
-  There are 70 registered entries, 59 Methods-backed inventories, eight audited
+  projection has 163 study rows and 1,793 compact contracts. After the context,
+  Collignon and front/rear/duration batches, 74 publications pass inventory/access
+  plus all eleven source-disposition checks; 20 remain.
+  There are 76 registered entries, 62 Methods-backed inventories, eleven audited
   access blockers and one project-lineage record, with source-version and
   overlapping-cohort limitations retained.
   Abstract-only and partial inventories do not pass by registration alone.
