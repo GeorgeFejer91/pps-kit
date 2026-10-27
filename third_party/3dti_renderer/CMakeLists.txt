@@ -5,6 +5,7 @@ project(pps_3dti_renderer LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(PPS_RENDERER_OUTPUT_DIR "${CMAKE_CURRENT_LIST_DIR}/bin" CACHE PATH "Native renderer output directory")
 
 set(THREEDTI_ROOT "${CMAKE_CURRENT_LIST_DIR}/../3dti_AudioToolkit" CACHE PATH "Pinned 3DTI AudioToolkit source root")
 set(NLOHMANN_JSON_ROOT "${CMAKE_CURRENT_LIST_DIR}/../nlohmann_json" CACHE PATH "Pinned nlohmann/json source root")
@@ -111,6 +112,10 @@ add_executable(pps-3dti-renderer
   ${THREEDTI_ILD_RESOURCE_SOURCES}
 )
 
+if(WIN32)
+  target_link_libraries(pps-3dti-renderer PRIVATE bcrypt)
+endif()
+
 target_compile_definitions(pps-3dti-renderer PRIVATE
   _3DTI_ANGLE_CONVENTION_DEFAULT
   NOMINMAX
@@ -143,5 +148,5 @@ if(PPS_ENABLE_SOFA_READER)
 endif()
 
 set_target_properties(pps-3dti-renderer PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/bin"
+  RUNTIME_OUTPUT_DIRECTORY "${PPS_RENDERER_OUTPUT_DIR}"
 )

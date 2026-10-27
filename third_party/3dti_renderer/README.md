@@ -1,103 +1,72 @@
-# PPS 3DTI Renderer Wrapper
+# PPS 3DTI wrapper
 
-The Python/Qt app calls a narrow native executable at:
-
-`third_party/3dti_renderer/bin/pps-3dti-renderer.exe`
-
-The wrapper is the boundary between the experiment-specific PPS designer and
-the pinned 3DTI AudioToolkit source snapshot in `third_party/3dti_AudioToolkit`.
-It should keep 3DTI as the renderer of record while exposing only this command
-line contract to Python:
+The Windows wrapper retains 3DTI AudioToolkit commit
+`6bfee08705675308a8c348b4c3a4d582586d2f99`. The Rust Designer uses
+`pps-3dti-spatialize.v2`, consuming prepared PCM with no Python generation.
+Rebuilding source does not update installed packages or the historical tracked
+executable in `bin/`.
 
 ```powershell
-pps-3dti-renderer.exe `
-  --config render_config.3dti.json `
-  --output-dir rendered `
-  --manifest render_manifest.json `
-  --qc render_qc.csv
+pps-3dti-renderer.exe --config staging/config.json --output-dir staging `
+  --manifest staging/spatialized.json --qc staging/spatialized.csv
 ```
 
-Expected native-wrapper behavior:
+## Prepared PCM contract
 
-- read `pps-3dti-render-config.v1`
-- synthesize the deterministic generated noise streams
-- render one stationary listener and one moving source through 3DTI
-- write binaural WAV files named from `outputs.expected_wav_pattern`
-- write `render_manifest.json` with exact renderer, resource, WAV, and level hashes
-- write `render_qc.csv` with duration, sample rate, peak, clipping, and cue summaries
+`packages/pps-designer-core::write_spatializer_input` writes the required config
+and `dry.f32`. The config declares rate/frames, algorithm/SHA-256, fixed or linear
+motion, explicit spatialization controls, and a native-authorized HRTF asset.
+Unknown fields fail. The wrapper verifies byte count, SHA-256 and finite input,
+then renders those samples rather than regenerating noise.
 
-Current Python behavior:
+Output is exactly stereo L/R float32 with the requested frame count. It has no
+normalization, limiter, level ramp or tactile mixing; Rust owns those later
+operations. The toolkit HQ anechoic path uses interpolation, customized ITD and
+512-frame blocks. Linear motion is sampled at each block center. Convolution
+and propagation tails are explicitly truncated at the requested frame count.
+Coordinates map `3DTI(x,y,z) = PPS(y,-x,z)` for PPS X right, Y front, Z up.
 
-- `pps-render-design --engine native-3dti` requires this executable and reports
-  `backend_missing` when it is absent.
-- `pps-render-design --engine auto` uses this executable when available.
-- If the executable is absent, `auto` renders with the bundled Python
-  SOFA/FABIAN reference engine from the same config and labels outputs
-  `rendered_reference`.
+Attenuation and propagation are explicit switches. Toolkit attenuation uses a
+**1.95 m** reference and approximately -6.0206 dB per distance doubling, with
+smoothing. HRTF ear projection may still change level/spectrum when gain
+attenuation is disabled. Far-distance filtering is disabled. Near-field ILD
+correction fails pending a verified ILD asset; an unloaded filter is not
+presented as conformance.
 
-The Python reference renderer exists so the GUI can already produce auditable
-stimulus WAVs. The native wrapper is still the planned 3DTI renderer-of-record
-for final 3DTI-backed publication builds.
+Invalid values, source paths inside the listener head, HRTF rate mismatch,
+unsupported normalization or layout fail. No implicit resampling occurs.
+Limits: 1 MiB config, 8–192 kHz, 60 s / 11,520,000 frames, 512 MiB HRTF. SHA-256
+uses Windows BCrypt. The job owner controls deadline, cancellation and staging.
 
-## Native Wrapper Source
+The v2 report records actual source/stereo PCM and HRTF hashes, toolkit commit,
+rate/layout, all controls, block/tail policies, digital peak, and
+`physical_spl_qualified: false`.
 
-This folder now contains the small native wrapper project:
+## Build and verify
 
-- `CMakeLists.txt`
-- `src/pps_3dti_renderer.cpp`
-
-The wrapper consumes the exact `render_config.3dti.json` emitted by
-`pps-render-design`, maps PPS app coordinates into the default 3DTI coordinate
-system, calls 3DTI's anechoic high-quality binaural path, and writes a
-three-channel WAV:
-
-- channel 0: binaural left
-- channel 1: binaural right
-- channel 2: vibrotactile cue
-
-Coordinate mapping:
-
-```text
-PPS app: X right, Y front, Z up
-3DTI default: X forward, -Y right, Z up
-adapter: 3DTI(x, y, z) = (app_y, -app_x, app_z)
-```
-
-Build dependencies that are not vendored here:
-
-- CMake and a C++17 compiler
-- `nlohmann_json`
-- optional: the SOFA C++ reader API that provides `SOFA.h` and
-  `SOFAExceptions.h`, needed only when the wrapper reads `.sofa` files directly
-
-The wrapper can load either:
-
-- `source.sofa_file`, using 3DTI's `HRTFFactory` plus the external SOFA C++
-  reader; or
-- `source.hrtf_3dti_file`, using 3DTI's native `.3dti-hrtf` cereal loader.
-
-The current Python config emits `source.sofa_file` because the bundled FABIAN
-asset is a SOFA file. A future release can add a preconverted `.3dti-hrtf` cache
-beside the SOFA file and avoid the SOFA C++ reader at native-render runtime.
-
-Example CMake configure:
+CMake, a C++17 compiler and Windows SDK are required. The toolkit, JSON header,
+and bundled SOFA reader/dependencies are vendored. Keep build outputs away from
+tracked historical binaries:
 
 ```powershell
-cmake -S third_party\3dti_renderer -B third_party\3dti_renderer\build `
-  -DSOFA_INCLUDE_DIR=C:\path\to\sofa\include `
-  -DSOFA_LIBRARY=C:\path\to\sofa\lib\sofa.lib `
-  -DCMAKE_TOOLCHAIN_FILE=C:\path\to\vcpkg\scripts\buildsystems\vcpkg.cmake
-cmake --build third_party\3dti_renderer\build --config Release
+cmake -S third_party/3dti_renderer -B artifacts/3dti-v2-build `
+  -DPPS_RENDERER_OUTPUT_DIR="$PWD/artifacts/3dti-v2-bin"
+cmake --build artifacts/3dti-v2-build --config Release --parallel 4
+$env:PPS_TEST_RENDERER = (Resolve-Path 'artifacts/3dti-v2-bin/Release/pps-3dti-renderer.exe').Path
+cargo test -p pps-designer-core --test native_spatializer -- --ignored --nocapture
 ```
 
-To build a wrapper that only accepts preconverted `.3dti-hrtf` files:
+The 2026-10-27 MSVC/FABIAN offline test passes source amplitude, attenuation,
+motion, propagation, channel, hash and ±0.02 dB level assertions. It opens no
+audio device. Packaging, physical qualification and full catalogue support
+remain separate. See the kernel README for reference fixtures and limits.
 
-```powershell
-cmake -S third_party\3dti_renderer -B third_party\3dti_renderer\build `
-  -DPPS_ENABLE_SOFA_READER=OFF
-cmake --build third_party\3dti_renderer\build --config Release
-```
+## Historical v1 adapter
 
-The current development machine used for this repository did not have CMake, a
-C++ compiler, or the SOFA C++ reader on PATH, so the source is present but the
-native executable is not yet bundled.
+`pps-3dti-render-config.v1` remains a legacy Python adapter for compatibility.
+It generates C++ noise, uses nearest sampled motion and implicit distance
+effects, peak normalizes, mixes tactile itself and emits placeholder WAV hashes.
+It is not the new Rust generation path, does not establish NumPy seed or
+burst/level conformance, and must not be selected by the native Designer worker.
+The rebuilt v2 executable and dependencies need integration/release checks
+before being packaged.
