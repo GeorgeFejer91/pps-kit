@@ -238,7 +238,7 @@ async fn prepare_first_audio_block(
         .map_err(|error| PreparedSessionCommandError::new(&error.code, &error.message))?;
     let runtime = state.inner().clone();
     let preparation = runtime
-        .begin_prepared_audio_preparation_async(0)
+        .begin_next_prepared_audio_preparation_async()
         .await
         .map_err(prepared_audio_runtime_error)?;
     let (_preparation_guard, summary) = match preparation {
@@ -300,7 +300,7 @@ fn prepared_audio_runtime_error(reason: &'static str) -> PreparedSessionCommandE
         ),
         "prepared_audio_block_missing" => PreparedSessionCommandError::new(
             reason,
-            "The verified package does not contain a first audio block.",
+            "The verified package has no remaining audio block to prepare.",
         ),
         "prepared_audio_sample_rate_invalid" => PreparedSessionCommandError::new(
             reason,

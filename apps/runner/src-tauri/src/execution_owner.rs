@@ -343,6 +343,45 @@ struct NativeFinalization {
     seal: Option<NativeResultSeal>,
 }
 
+/// Completed manifest prefix in one uninterrupted native attempt. Generation
+/// changes make old progress inert without carrying a second trial schedule.
+#[derive(Clone, Copy, Default)]
+struct NativeSessionProgress {
+    run_generation: u64,
+    completed_blocks: u32,
+    scored_trials: u64,
+}
+
+impl NativeSessionProgress {
+    fn for_run(self, run_generation: u64) -> Self {
+        if self.run_generation == run_generation {
+            self
+        } else {
+            Self {
+                run_generation,
+                ..Self::default()
+            }
+        }
+    }
+
+    fn advance(self, ordinal: u32, block_count: usize, trials: u64) -> Result<Self, &'static str> {
+        if ordinal != self.completed_blocks || ordinal as usize >= block_count {
+            return Err("native_block_order_invalid");
+        }
+        Ok(Self {
+            run_generation: self.run_generation,
+            completed_blocks: self
+                .completed_blocks
+                .checked_add(1)
+                .ok_or("native_block_count_overflow")?,
+            scored_trials: self
+                .scored_trials
+                .checked_add(trials)
+                .ok_or("native_trial_count_overflow")?,
+        })
+    }
+}
+
 struct OwnerState {
     core: RunnerCore,
     remote: RemoteConfig,
@@ -361,6 +400,7 @@ struct OwnerState {
     ledger: EventLedger,
     event_journal: Option<(u64, u64, NativeEventJournal)>,
     native_finalization: Option<NativeFinalization>,
+    native_progress: NativeSessionProgress,
     evidence_unavailable: bool,
     clock: ProcessClock,
     lease_duration: Duration,
@@ -641,13 +681,12 @@ impl OwnerState {
             );
             return;
         }
-        // This first complete path is for a whole single-block package. Do
-        // not certify one block of a larger prepared experiment as complete.
+        // A closed block advances only the verified manifest prefix. Whole
+        // session publication additionally requires every block and trial.
         let completion_ready = status.state == pps_runner_audio::RenderState::SourceExhausted
             && playback
                 .final_submission_estimate_ns
                 .is_some_and(|end| end <= stamp.monotonic_ns)
-            && playback.source.receipt.verified_session().blocks().len() == 1
             && playback
                 .capture
                 .complete(playback.source.receipt.schedule().summary().trial_row_count)
@@ -703,7 +742,71 @@ impl OwnerState {
         if !reservation_available || status.fault.is_some() || status.callback_retired {
             self.fail_stop_unavailable("native.media.callback-unavailable", "evidence_unavailable");
         } else if completion_ready {
-            self.begin_native_finalization(expected_trials, stamp);
+            self.finish_native_block(expected_trials, stamp);
+        }
+    }
+
+    fn finish_native_block(&mut self, expected_trials: u64, stamp: ClockStamp) {
+        let Some(playback) = self.native_playback.as_ref() else {
+            return;
+        };
+        let ordinal = playback.source.plan.fence().audio().block_ordinal();
+        let block_count = playback.source.receipt.verified_session().blocks().len();
+        let fingerprint = playback
+            .source
+            .receipt
+            .verified_session()
+            .manifest_sha256()
+            .to_owned();
+        let next = self.native_progress.for_run(self.run_generation).advance(
+            ordinal,
+            block_count,
+            expected_trials,
+        );
+        let Ok(next) = next else {
+            self.fail_stop_unavailable("native.block.order-invalid", "evidence_unavailable");
+            return;
+        };
+        let final_block = next.completed_blocks as usize == block_count;
+        let mut candidate = self.core.clone();
+        if !final_block
+            && candidate
+                .await_next_native_block(&fingerprint, ordinal, stamp.clone())
+                .is_err()
+        {
+            self.fail_stop_unavailable("native.block.scope-invalid", "evidence_unavailable");
+            return;
+        }
+        let mut event = Self::ledger_input("native.block.finished", "native", &stamp);
+        event.payload = serde_json::json!({"blockOrdinal": ordinal, "completedBlocks": next.completed_blocks,
+            "scoredTrials": expected_trials, "sessionScoredTrials": next.scored_trials,
+            "timingQualification": "unqualified", "sessionComplete": false});
+        if self
+            .commit_candidate(candidate, event, CommitPolicy::Ordinary, true)
+            .is_err()
+        {
+            return;
+        }
+        self.native_progress = next;
+        if final_block {
+            let total_trials = self.compiled_execution.as_ref().and_then(|compiled| {
+                compiled
+                    .schedules()
+                    .iter()
+                    .try_fold(0_u64, |sum, schedule| {
+                        sum.checked_add(u64::from(schedule.summary().trial_row_count))
+                    })
+            });
+            if total_trials != Some(next.scored_trials) {
+                self.fail_stop_unavailable("native.results.count-invalid", "evidence_unavailable");
+                return;
+            }
+            self.begin_native_finalization(next.scored_trials, stamp);
+        } else {
+            // Keep the same journal/run generation across a successful block
+            // boundary; retire only the exhausted one-block media reservation.
+            self.invalidate_prepared_audio();
+            self.native_output.invalidate_for_runner_change();
         }
     }
 
@@ -2207,6 +2310,17 @@ impl OwnerState {
                     "Prepare the current package and its event journal before binding media.",
                 ));
             }
+            if cached.candidate.media().fence().block_ordinal()
+                != self
+                    .native_progress
+                    .for_run(self.run_generation)
+                    .completed_blocks
+            {
+                return Err(NativeOutputCommandError::new(
+                    "native_block_order_invalid",
+                    "Prepare the next unfinished block in manifest order.",
+                ));
+            }
             Some(NativePlaybackSource::capture(&cached.candidate))
         } else {
             None
@@ -2263,7 +2377,15 @@ impl OwnerState {
         };
         let stamp = self.clock.stamp();
         let mut candidate = self.core.clone();
-        let executable = prepared.source.receipt.verified_session().blocks().len() == 1;
+        let executable = prepared.source.plan.fence().audio().block_ordinal()
+            == self
+                .native_progress
+                .for_run(self.run_generation)
+                .completed_blocks;
+        if !executable {
+            self.native_output.invalidate_for_runner_change();
+            return Err(NativeOutputCommandError::changed());
+        }
         let prepare = prepared.source.block_summary().and_then(|block| {
             let ordinal = block.block_ordinal;
             let fingerprint = prepared.source.receipt.verified_session().manifest_sha256();
@@ -2491,6 +2613,7 @@ impl ExecutionOwner {
                     ledger,
                     event_journal: None,
                     native_finalization: None,
+                    native_progress: NativeSessionProgress::default(),
                     evidence_unavailable: false,
                     clock,
                     lease_duration,
@@ -2820,14 +2943,19 @@ impl ExecutionOwner {
         )
     }
 
-    pub(crate) async fn prepared_audio_source(
+    pub(crate) async fn next_prepared_audio_source(
         &self,
-        block_ordinal: u32,
     ) -> Result<Result<PreparedAudioLookup, &'static str>, OwnerSubmitError> {
         self.asynchronous(
             AdmissionClass::Normal,
             "prepared_audio_source",
-            move |state| state.prepared_audio_source(block_ordinal),
+            move |state| {
+                let ordinal = state
+                    .native_progress
+                    .for_run(state.run_generation)
+                    .completed_blocks;
+                state.prepared_audio_source(ordinal)
+            },
         )
         .await
     }
@@ -3335,6 +3463,29 @@ mod tests {
     use futures_util::FutureExt;
     use pps_contracts::AppliedStatus;
     use std::sync::Barrier;
+
+    #[test]
+    fn native_session_progress_is_an_ordered_generation_scoped_prefix() {
+        let progress = NativeSessionProgress::default().for_run(7);
+        assert!(progress.advance(1, 2, 4).is_err());
+        let first = progress.advance(0, 2, 4).unwrap();
+        assert_eq!(first.completed_blocks, 1);
+        assert!(first.advance(0, 2, 4).is_err());
+        let complete = first.advance(1, 2, 3).unwrap();
+        assert_eq!(complete.completed_blocks, 2);
+        assert_eq!(complete.scored_trials, 7);
+        assert!(complete.advance(2, 2, 1).is_err());
+        let restarted = complete.for_run(8);
+        assert_eq!(restarted.completed_blocks, 0);
+        assert_eq!(restarted.scored_trials, 0);
+        assert!(restarted.advance(1, 2, 3).is_err());
+        assert!(NativeSessionProgress {
+            scored_trials: u64::MAX,
+            ..progress
+        }
+        .advance(0, 2, 1)
+        .is_err());
+    }
 
     #[tokio::test]
     async fn cancelled_input_wait_retains_pending_fence_until_actor_and_full_queue_drops_it() {

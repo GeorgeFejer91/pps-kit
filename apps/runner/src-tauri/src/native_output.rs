@@ -1251,6 +1251,10 @@ impl<D: NativeOutputDriver> CoordinatorState<D> {
             });
             return;
         }
+        // A policy change can arrive after the loop's reconciliation while it
+        // waits for this request. Reconcile before creating new private state;
+        // otherwise the next loop would discard a successfully returned inventory.
+        self.reconcile(latest, observation, notice);
         if self.quarantined {
             let _ = request.reply.send(CoordinatorReply::Failed {
                 ticket: request.ticket,
@@ -1953,6 +1957,45 @@ pub(crate) mod tests {
             .unwrap();
         authority.complete_reserve(reserve, Ok(21)).unwrap();
         authority
+    }
+
+    #[test]
+    fn enumeration_after_policy_change_survives_the_next_reconciliation() {
+        let mut state = CoordinatorState::new(Ok(FakeDriver {
+            control: Arc::new(FakeControl::default()),
+            inventory_generation: 0,
+            reservation_generation: 0,
+        }));
+        let latest = AtomicU64::new(SERVICE_GENERATION + 1);
+        let observation = CoordinatorObservation::new();
+        let notice = CoordinatorNotice::new();
+        let shutdown = AtomicBool::new(false);
+        let (reply, mut receiver) = oneshot::channel();
+        let mut request_ticket = ticket(NativeOutputOperationKind::Enumerate, 1);
+        request_ticket.policy_generation = SERVICE_GENERATION + 1;
+        // The policy can change while the coordinator waits in recv_timeout,
+        // after the loop's reconciliation and before this request arrives.
+        state.process(
+            CoordinatorRequest {
+                ticket: request_ticket,
+                operation: CoordinatorOperation::Enumerate,
+                deadline: Instant::now() + Duration::from_secs(1),
+                reply,
+            },
+            &latest,
+            &observation,
+            &notice,
+            &shutdown,
+        );
+        assert!(matches!(
+            receiver.try_recv().unwrap(),
+            CoordinatorReply::Enumerated { .. }
+        ));
+        state.reconcile(latest.load(Ordering::Acquire), &observation, &notice);
+        assert!(
+            state.inventory.is_some(),
+            "a successful current inventory must remain reservable"
+        );
     }
 
     #[test]
