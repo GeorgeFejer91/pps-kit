@@ -2,7 +2,7 @@
 
 Generated 2026-10-27 from the tracked `pps-publication-citation-network.v3` asset, exact-DOI audit joins, manual-review overrides, current profile manifests, and the repository's code/schema surfaces.
 
-The primary paper-review deliverable is a **128-row × 11-contract categorical matrix** aligned to Toolkit Segments 1-5 and runtime: auditory stimulus; trajectory geometry plus kinematics; trial sequence; task/response behavior; jitter/ITI; SOA schedule; tactile target; baseline trials; catch trials; repetition allocation; and block composition/order. Every one of the 94 citation-network publications is represented, and a strict 94-row aggregate is supplied. The registered view has 128 rows because 39 publications have tracked experiment inventories (including single-task inventories).
+The primary paper-review deliverable is a **128-row × 11-contract categorical matrix** aligned to Toolkit Segments 1-5 and runtime: auditory stimulus; trajectory geometry plus kinematics; trial sequence; task/response behavior; jitter/ITI; SOA schedule; tactile target; baseline trials; catch trials; repetition allocation; and block composition/order. Every one of the 94 citation-network publications is represented, and a strict 94-row aggregate is supplied. The registered view has 128 rows because 42 publications have tracked experiment inventories (including single-task inventories).
 
 The exact **128-row × 115-input** current design/profile matrices remain the implementation crosswalk. The broader **128-row × 281-leaf** target matrix remains a scientific-method and validation-gap inventory—not claims about fields accepted by the current serializer. Publications without a registry entry remain one review unit and are explicitly marked `experiment_count_not_assessed`; do not infer that they contain only one experiment. Only 37 of 94 nodes have tracked abstract text, and 26 have neither abstract text nor an exact-DOI audit record, so 128 is an evidence-backed review-row count rather than an exhaustive true experiment count.
 
@@ -95,7 +95,7 @@ These implementation matrices describe the exact current **design/profile serial
 | Confirmed structured visualization rows | 0 |
 | Audit records outside focused network | 6 |
 
-Toolkit publication states: `adjacent_scope_conflict` 3, `not_assessed` 29, `runnable` 16, `supported_incomplete` 46.
+Toolkit publication states: `adjacent_scope_conflict` 3, `not_assessed` 29, `runnable` 14, `supported_incomplete` 48.
 
 Study-instance evidence stages: `current_audit_without_manual_review` 59, `manual_review` 37, `no_exact_doi_audit_join` 32.
 

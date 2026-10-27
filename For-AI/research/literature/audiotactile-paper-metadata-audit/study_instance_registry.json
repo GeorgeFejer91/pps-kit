@@ -824,6 +824,102 @@
         }
       ],
       "source_review_limit": "Fresh publisher PDF Methods inspected. Spoken numbers accompany ten-second manual exploration; endpoint is midpoint error, not tactile reaction time. Retained frozen membership does not imply implementation of haptic exploration or spatial judgment."
+    },
+    {
+      "network_node_id": "doi:10.3389/frvir.2021.644214",
+      "doi": "10.3389/frvir.2021.644214",
+      "inventory_status": "confirmed_one_audiotactile_experiment",
+      "instance_count_basis": "One pilot experiment uses twelve virtual directions and flat/dynamic sound conditions. Body measurement, tactile calibration and familiarization prepare the same experiment, not independent cohorts.",
+      "evidence_pointer": "https://www.frontiersin.org/journals/virtual-reality/articles/10.3389/frvir.2021.644214/pdf::Methods pp. 7-11; Figure 1 and Table 1 p. 2",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_pps_assessment_with_external_apparatus",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Pilot 3D audio-tactile boundary assessment",
+          "record_id": "lerner_2021_3d_boundary",
+          "template_ids": [
+            "lerner_2021_3d_audio_tactile_boundary"
+          ],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Tactile calibration and familiarization",
+          "disposition": "apparatus_calibration_and_practice",
+          "basis": "Individual belt calibration and ten training trials precede the main task; the calibration count wording is itself unclear.",
+          "evidence_pointer": "https://www.frontiersin.org/journals/virtual-reality/articles/10.3389/frvir.2021.644214/pdf::Methods pp. 9-11"
+        }
+      ],
+      "source_review_limit": "Fresh primary Methods and rendered Figure 1/Table 1 inspected. Keep the incompatible main-trial totals, head/sternum origin wording and unresolved rendering/timing details. Template availability is separate from scientific completeness and native qualification."
+    },
+    {
+      "network_node_id": "doi:10.3390/s25196072",
+      "doi": "10.3390/s25196072",
+      "inventory_status": "confirmed_one_audiotactile_experiment",
+      "instance_count_basis": "One behavioral PPS experiment follows device timing/response-chain bench validation. Five Android device models and apparatus checks are not five participant PPS experiments.",
+      "evidence_pointer": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12526932/::sections 3-7, especially 7.1.1 and 7.1.3-7.1.4",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_pps_assessment_with_external_apparatus",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Android audio-tactile behavioral validation",
+          "record_id": "smartphone_rt_methods_2025",
+          "template_ids": [
+            "roussel_2025_dynaspace_mobile_pps"
+          ],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Smartphone timing and response-chain validation",
+          "disposition": "published_apparatus_validation_not_pps_kit_qualification",
+          "basis": "Sections 3-6 validate the authors device/measurement chain; the participant experiment uses one selected phone model. That evidence cannot qualify PPS Kit, Windows or another device.",
+          "evidence_pointer": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12526932/::sections 3-7"
+        }
+      ],
+      "source_review_limit": "Fresh primary article XML inspected. Preserve catch-total, figure-loop and block-duration inconsistencies; the original Android measurements are source evidence only and do not raise PPS Kit native qualification."
+    },
+    {
+      "network_node_id": "doi:10.1093/braincomms/fcac179",
+      "doi": "10.1093/braincomms/fcac179",
+      "inventory_status": "confirmed_one_audiotactile_experiment",
+      "instance_count_basis": "One baseline case-control assessment compares affected/unaffected or left/right hand conditions. Body-landmark, avatar and questionnaire measures are companion assessments, not separate PPS experiments. Some healthy-control data were reported previously.",
+      "evidence_pointer": "https://arodes.hes-so.ch/nanna/record/11915/files/Bassolino_2022_Body_peripersonal_space.pdf::PPS task p. 4; Supplementary Methods, PPS task p. 7",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_pps_assessment_with_external_apparatus",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Bilateral PPS assessment in chronic stroke and controls",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Body representation, questionnaire and clinical assessments",
+          "disposition": "companion_measures_not_pps_protocol",
+          "basis": "The main Methods separates PPS from body-landmark localization, avatar adjustment, explicit limb feelings and clinical/lesion measures.",
+          "evidence_pointer": "https://arodes.hes-so.ch/nanna/record/11915/files/Bassolino_2022_Body_peripersonal_space.pdf::Experimental testing pp. 3-5"
+        }
+      ],
+      "source_review_limit": "Fresh main PDF and official supplementary Methods p. 7 inspected. Protocol settings are retained without clinical participant records; repeated-hand count crossing and interval anchor remain unresolved, with no physical qualification claim.",
+      "source_lineage": {
+        "network_node_id": "doi:10.1016/j.cortex.2020.11.021",
+        "relationship": "partly_reused_healthy_control_data",
+        "basis": "Main Participants section states that healthy-control data were partially reported in reference 32, Sorrentino et al. How ageing shapes body and space representations."
+      }
     }
   ],
   "corpus_freeze": {

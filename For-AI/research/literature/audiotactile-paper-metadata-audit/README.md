@@ -34,7 +34,7 @@ live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
 Current checkpoint (2026-10-27): 94 frozen publications, 128 study/context rows,
-39 registered publication inventories and 55 publication inventories still
+42 registered publication inventories and 52 publication inventories still
 unassessed. The earlier counts below describe individual historical checkpoints.
 Tonelli (2019) now separates neck PPS assessment from echolocation training,
 time-bisection training and distance validation; manual trial starts, endpoint
@@ -70,6 +70,17 @@ audio-tactile assessment despite its body-image title; Cattaneo (2010) instead
 uses spoken-number priming of active haptic rod bisection. Its adjacent boundary
 is based on primary Methods, not its title. All six publications remain in the
 frozen map, and every native qualification status remains not assessed.
+
+Lerner (2021) and Roussel (2025) retain available templates while their primary
+Methods expose incompatible totals and timing descriptions. Published apparatus
+validation is not transferred to PPS Kit. Bassolino (2022) adds the stroke PPS
+assessment from main and supplementary Methods, preserving the foot-pedal
+response window and separating companion body-representation measures. Its hand
+count crossing and interval/anchor details remain explicit gaps.
+The two existing device presets remain available, but their source completeness
+is now blocked by unresolved publication parameters. Historical software-audit
+references remain in the coverage records. Full source-to-emulated-runner claims
+therefore decrease from 17 to 15; no new human or physical validation is implied.
 
 The first bounded source batch (2026-10-27) adds four experiment-scoped timing/count
 reviews for Canzoneri et al. (2012), DOI `10.1371/journal.pone.0044306`, from the
