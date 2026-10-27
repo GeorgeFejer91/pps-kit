@@ -91,16 +91,28 @@ pub fn verify_prepared_group(path: &Path) -> Result<VerifiedPreparedGroup, Verif
         .map_err(|_| invalid("Run setup is not valid JSON."))?;
     let order = &setup_document["approved_segment6"];
     let sources = &setup_document["approved_segment5"];
+    if reviewed_digest(order)? != text(&group, "approved_run_order_sha256")? {
+        return Err(invalid(
+            "Accepted run-order digest does not match its serialized preview.",
+        ));
+    }
+    if reviewed_digest(sources)? != text(&setup_document, "approved_preview_sha256")? {
+        return Err(invalid(
+            "Accepted source-block digest does not match its serialized preview.",
+        ));
+    }
+    if json_digest(&setup_document["design"])? != text(&setup_document, "design_sha256")? {
+        return Err(invalid(
+            "Accepted design digest does not match its serialized design.",
+        ));
+    }
     if sha256_bytes(&setup_bytes) != setup_hash
         || setup_document["schema"] != "pps-native-run-setup.v1"
         || setup_document["participant_id"] != participant
         || setup_document["session_group_id"] != group_id
         || setup_document["approved_run_order_sha256"] != group["approved_run_order_sha256"]
-        || reviewed_digest(order)? != text(&group, "approved_run_order_sha256")?
-        || reviewed_digest(sources)? != text(&setup_document, "approved_preview_sha256")?
         || order["assembly_preview_sha256"] != setup_document["approved_preview_sha256"]
         || order["design_sha256"] != setup_document["design_sha256"]
-        || json_digest(&setup_document["design"])? != text(&setup_document, "design_sha256")?
         || order["schema"] != "pps-native-run-order-preview.v1"
         || order["experiment_structure"] != "pre_post"
         || order["parts_per_participant"].as_u64() != Some(2)
