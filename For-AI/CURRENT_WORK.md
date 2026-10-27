@@ -20,20 +20,21 @@ This file is the active checklist and handoff owner; replace state, do not appen
   3DTI/viewer, Segment 0–6, schemas, Rust authority and Python oracle.
 - **Product source:** existing generation, JSON/compatibility handoff,
   callback-confirmed controls, response scoring and journal safeguards remain.
-  Single-block native activation now passes a real CPAL callback test using
-  silent synthetic PCM. Native profile assembly and multi-block execution remain
-  incomplete. B1–B3/C1 fixes and the sanitized study projection are integrated
+  Single- and two-block native activation/progression pass real CPAL callback
+  tests using silent synthetic PCM. Native profile assembly remains incomplete. B1–B3/C1 fixes and the sanitized study projection are integrated
   on the review branch; mapper, catalogue and release work continue.
 - **Evidence:** the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md)
   identifies exact source and checks. Source, CI packages, installed behavior,
   physical timing, participant results and replication remain distinct gates.
   Neither installed application nor public downloads changed in this task.
-- **Next action:** finish independent A1/UI review, then enforce manifest-order
-  block progression with the existing one-block cache and journal. Generation,
+- **Next action:** integrate the reviewed Rust generation kernel and complete profile
+  assembly, next-block UI and remaining generation policies. Generation,
   mapper/Tauri and primary-source extraction continue in parallel.
-- **Local validation:** 24 Runner core and 140 desktop tests pass; one hardware
-  test is opt-in and separately passed on this Windows host using a silent
-  four-frame fixture. It exercises normal native dispatch, callback confirmation,
+- **Local validation:** 25 Runner core and 143 desktop tests pass; two hardware
+  tests are opt-in and separately passed on this Windows host using silent
+  one-/two-block fixtures. Independent file audits pass for both (16/30 events,
+  1/2 scored rows). Strict Clippy passes. Independent source review found no
+  blocking A1/A3 or output-policy race defect after the fixes. It exercises normal native dispatch, callback confirmation,
   scoring and durable result publication, not physical timing or installed IPC.
   UI worker: 4 Designer, 68 Runner and 2 Pages tests pass, canonical builds and
   Chromium controls checked (storage failure/retry, reversed preview replies,
@@ -74,7 +75,8 @@ This file is the active checklist and handoff owner; replace state, do not appen
   generation and the corrected dry-source 3DTI wrapper, without Python runtime.
 - [ ] M3 — Complete native profile assembly, all-block execution and the
   Windows Tauri Designer journey (A2–A3, C2); browser bundle assets materialize
-  offline; Python/Rust handoff and result parity pass.
+  offline; Python/Rust handoff and result parity pass. Manifest-order progression
+  now passes source and real silent-callback checks; profile/UI integration remains.
 - [ ] M4 — Close supported acquisition/recovery, accessibility/performance and
   evidence-record gaps (D1–D2, F1–F2, I1); audit every included experiment's 11
   replication contracts and finish citation mapper/preset navigation.

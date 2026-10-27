@@ -374,10 +374,10 @@ impl RunnerCore {
         now: ClockStamp,
     ) -> Result<(), &'static str> {
         if self.package_fingerprint.as_deref() != Some(fingerprint)
-            || !self
+            || self
                 .native_block
                 .as_ref()
-                .is_some_and(|block| block.block_ordinal == block_ordinal)
+                .is_none_or(|block| block.block_ordinal != block_ordinal)
             || self.native_control_pending.is_some()
             || !matches!(
                 self.snapshot.run.phase,
@@ -395,6 +395,39 @@ impl RunnerCore {
 
     pub fn native_control_pending(&self) -> Option<Action> {
         self.native_control_pending
+    }
+
+    /// The native owner has closed this block's media and response windows,
+    /// retained its evidence, and verified another block exists in manifest order.
+    /// The next block needs fresh preparation and an explicit local Arm/Start.
+    pub fn await_next_native_block(
+        &mut self,
+        fingerprint: &str,
+        completed_ordinal: u32,
+        now: ClockStamp,
+    ) -> Result<(), &'static str> {
+        if self.package_fingerprint.as_deref() != Some(fingerprint)
+            || !self.package_execution_ready
+            || self.native_control_pending.is_some()
+            || self.snapshot.run.phase != RunnerPhase::Running
+            || self
+                .native_block
+                .as_ref()
+                .is_none_or(|block| block.block_ordinal != completed_ordinal)
+            || completed_ordinal
+                .checked_add(1)
+                .is_none_or(|next| next >= self.package_block_count)
+        {
+            return Err("native_block_completion_scope_invalid");
+        }
+        self.snapshot.run.phase = RunnerPhase::Prepared;
+        self.snapshot.active_block.active = false;
+        self.snapshot.active_block.running = false;
+        self.snapshot.active_block.paused = false;
+        self.snapshot.active_block.elapsed_s = self.snapshot.active_block.duration_s;
+        self.snapshot.safety.capture_started = false;
+        self.invalidate_native_block(&now);
+        Ok(())
     }
 
     /// Confirm an existing native request after its matching callback record
@@ -1214,7 +1247,7 @@ impl RunnerCore {
             RunnerPhase::Prepared
                 if self.snapshot.package_verified && !self.package_execution_ready =>
             {
-                "Verified plan loaded — Rust playback adapter pending"
+                "Prepare the next verified block and reserve its output"
             }
             RunnerPhase::Prepared => "Submit setup and arm on this target",
             RunnerPhase::Ready => "Start Part 01 or Part 02",
@@ -2138,6 +2171,55 @@ mod tests {
     }
 
     #[test]
+    fn native_block_boundary_requires_confirmation_and_never_completes_the_session() {
+        let mut core = ready_core();
+        let package = verified_package("P001");
+        core.adopt_verified_package(package.clone(), clock(4))
+            .unwrap();
+        core.prepare_native_block(
+            &package.fingerprint,
+            NativeBlockSummary {
+                block_index: 1,
+                block_ordinal: 0,
+                block_label: "First block".to_owned(),
+                duration_ns: 1000,
+            },
+            clock(5),
+        )
+        .unwrap();
+        core.activate_native_block(&package.fingerprint, 0, clock(6))
+            .unwrap();
+        core.dispatch_local(Action::TargetArm, json!({}), clock(7));
+        core.dispatch_local(Action::PartStart, json!({"part_number": 2}), clock(8));
+        assert!(core
+            .await_next_native_block(&package.fingerprint, 0, clock(9))
+            .is_err());
+        core.confirm_native_control(Action::PartStart, clock(10))
+            .unwrap();
+        assert!(core
+            .await_next_native_block(&package.fingerprint, 1, clock(11))
+            .is_err());
+        assert!(core
+            .await_next_native_block(&"b".repeat(64), 0, clock(11))
+            .is_err());
+        core.await_next_native_block(&package.fingerprint, 0, clock(12))
+            .unwrap();
+        let snapshot = core.snapshot();
+        assert_eq!(snapshot.run.phase, RunnerPhase::Prepared);
+        assert_eq!(snapshot.active_block.display_block_index, Some(1));
+        assert!(!snapshot.run.complete);
+        assert!(!snapshot.safety.local_armed);
+        assert!(!snapshot.run.participant_capture_ready);
+        assert!(!snapshot.allowed_actions.contains(&Action::TargetArm));
+        assert!(core
+            .await_next_native_block(&package.fingerprint, 0, clock(13))
+            .is_err());
+        assert!(core
+            .begin_native_finalization(&package.fingerprint, clock(13))
+            .is_err());
+    }
+
+    #[test]
     fn native_activation_requires_the_current_staged_block_and_remains_unarmed() {
         let mut core = ready_core();
         let package = verified_package("P001");
@@ -2382,7 +2464,7 @@ mod tests {
         assert_eq!(adopted.run.phase, RunnerPhase::Prepared);
         assert_eq!(
             adopted.run.progress_label,
-            "Verified plan loaded — Rust playback adapter pending"
+            "Prepare the next verified block and reserve its output"
         );
         assert!(!adopted
             .allowed_actions

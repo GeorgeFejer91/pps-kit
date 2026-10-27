@@ -91,8 +91,12 @@ prefix after syncing both files. Failure/backpressure neutralizes output while
 safety still proceeds. Finalization freezes a prefix, syncs/closes both files,
 exclusively publishes final names, checks hashes, and publishes the manifest
 last. Only a matching native package/run/count/sequence receipt can complete a
-whole single-block package after response windows and the final software estimate
-close. Missing/interrupted trials cannot complete. Unsupported hard-link
+whole manifest-ordered package after every block's response windows and final
+software estimate close. A generation-scoped completed prefix prevents skips or
+repeats; between blocks the exhausted port is retired and the same journal stays
+open. The existing preload command selects the next unfinished block natively,
+followed by a fresh local output reservation and Arm/Start. Interrupted attempts
+restart as a new generation and cannot combine old partial evidence into completion. Missing/interrupted trials cannot complete. Unsupported hard-link
 filesystems fail closed; partial/pending/orphan files remain. Power loss,
 directory persistence, device drain and physical timing need separate evidence.
 Use `validation/scripts/validate_native_results.py` under `For-AI/engineering/`
@@ -115,7 +119,7 @@ The local output view uses the existing main-window-only native preflight
 commands. It lists configurations matching prepared channels/sample rate,
 requires an explicit choice, and preserves decimal generation fences. Cache preparation stays silent. A successful current output reservation binds
 verified media and its durable journal, enabling local Arm for a whole
-single-block package; only the subsequent Arm/Start sequence requests playback. Disable remains available during a pending
+manifest block; only the subsequent Arm/Start sequence requests playback. Disable remains available during a pending
 operation; stale replies cannot restore its UI. Suspension clears the view's
 inventory; resume reads fresh native state without replay. The Rust owner keeps
 the device/port authority. Release/disable clears the displayed media summary
@@ -123,7 +127,8 @@ as the Rust owner retires its cache; audio preparation is required again.
 Desktop notifications remain in their owning panel
 and use the shared bounded-text helper.
 
-Single-block activation is source-verified through normal native dispatch and
-a real silent CPAL callback fixture. Whole profiles/multiple blocks, installed
+Manifest-order execution is source-verified through normal native dispatch and
+real one-/two-block silent CPAL callback fixtures with independent result-file
+audits. Full profile assembly, installed
 complete experiments, calibration and physical qualification remain gates.
 Wire completion is denied for real packages; Stop preserves partial results.

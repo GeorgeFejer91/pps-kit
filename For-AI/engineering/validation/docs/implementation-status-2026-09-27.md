@@ -15,7 +15,7 @@ Each status applies to its stated surface, not to the whole product.
 | 6 | PARTIAL: actual Pretext, explicit no-fit, complete labels, keyboard input, narrow/enlarged text and spacing | Actual WebViews and full accessibility qualification |
 | 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full scheduling UI and native profile assembly |
 | 8 | VERIFIED: plan/resource preflight, source/cancel/publication fences, shared job completion and rollback | Qualify additional generation routes if selected |
-| 9 | PARTIAL: exact CPAL port, local output preflight, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Full-profile/multi-block execution and an installed experiment; single-block activation source-verified |
+| 9 | PARTIAL: exact CPAL port, local output preflight, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Full-profile assembly and an installed experiment; manifest-order execution source-verified |
 | 10 | PARTIAL: shared Rust/browser contracts; JSON to existing compatibility assembler; sample/tactile/response/CSV oracle checks | Native JSON assembly and complete execution capability |
 | 11 | PARTIAL: authenticated local/phone commands use one dispatch/control owner, shared scope fixture and fresh-state gate | Complete real-package execution |
 | 12 | PARTIAL: retry/input fences, durable intent versus callback confirmation, bounded deadlines, per-run journal and exclusive hashed result publication | Installed filesystems, recovery and complete execution |
@@ -27,6 +27,13 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
+- Manifest-order checkpoint (2026-10-27, review branch): 25 core/143 desktop
+  tests and strict Clippy pass. Both opt-in one-/two-block silent CPAL tests pass;
+  the independent Python file auditor verifies 16/30 events and 1/2 scored rows.
+  No complete result exists between blocks. A deterministic output-policy race
+  regression failed before reconciliation was moved before request processing;
+  all 11 native-output tests pass. Independent source review found no blocking
+  state/evidence issue. This is software/file evidence, not installed qualification.
 - Publication implementation checkpoint (2026-10-27, review branch): the
   native owner now activates only the current, staged single-block package after
   media, output and journal checks. Core activation does not arm or play.
@@ -91,17 +98,19 @@ The same bounded worker freezes and syncs events/18-column Data_min CSV,
 exclusively publishes final names, checks hashes and writes the result manifest
 last. The native receipt must match the frozen package/run/count/sequence before
 completion. Independent Python validation checks actual synthetic Rust worker
-files, event/CSV projection and substituted or malformed evidence. First closure
-covers a whole single-block package, closed response windows and an elapsed final
-software submission estimate. Interrupted/missing trials cannot complete.
+files, event/CSV projection and substituted or malformed evidence. Current closure
+covers the whole manifest-ordered package, closed response windows and each final
+software submission estimate. Only a contiguous completed block prefix contributes
+to the final count; the same journal/run persists between successfully closed
+blocks, with fresh local preparation and Arm/Start. Interrupted/missing trials cannot complete.
 
 Unsupported hard-link filesystems fail closed. Partial/pending/orphan files remain;
 no final data are overwritten or automatically removed. Power-loss recovery,
 directory durability, device drain and physical onset require separate evidence.
 Callback observations, sample positions and CPAL driver predictions are explicitly
 unqualified. Cache inspection does not qualify a device route. Current verified
-media/output/journal binding now enables explicit local Arm/Start for one block.
-Whole profiles/multiple blocks, complete local validation,
+media/output/journal binding now enables explicit local Arm/Start per block.
+Whole profile assembly, complete local validation,
 installed inspection and calibrated physical acquisition remain outstanding.
 The workspace volume has approximately 65.5 GiB free as of 2026-10-27; the
 former storage blocker is no longer observed. This documentation review did
