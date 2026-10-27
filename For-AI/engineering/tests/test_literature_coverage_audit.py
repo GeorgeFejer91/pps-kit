@@ -780,7 +780,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["spadone_2021_connectivity"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["spadone_2021_connectivity"]["blocking_constraint_ids"] == []
     assert records["spadone_2021_connectivity"]["missing_publication_parameters"] == [
-        "extract near/far, flat/dynamic, fMRI block timing, and paper-specific ITI/foreperiod/hazard values separately from scanner context before templating"
+        "Original stimulus recipe/assets and electrical waveform; current behavioral catch allocation; fMRI active/passive role wording conflict, ambiguous catch denominator and ITI selection distribution. Individual near/far SOA rule is reported, not a universal fixed pair."
     ]
     assert records["hobeika_2018_anisotropy"]["coverage_category"] == (
         "not_yet_templated_missing_publication_parameters"
