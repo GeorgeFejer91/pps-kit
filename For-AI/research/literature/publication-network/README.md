@@ -84,12 +84,27 @@ The public JSON exposes `publications` keyed by `networkNodeId` and `studies`
 keyed by stable `studyRowId`, with eleven `contracts` per registered row. Each
 contract carries its final evidence `status`, short factual `value`, separately
 labelled `compositeValue`, source DOI URL, page/section, review date, missing
-components and component evidence. `templateIds` means a profile link exists;
+components and component evidence. `sourceUrl` preserves the DOI identity;
+`evidenceSourceUrl` links the actual reviewed public source when a single safe
+HTTP(S) pointer exists, and `sourceType` identifies its evidence layer/version.
+Local, composite and credentialed source pointers are omitted, not published.
+`templateIds` means a profile link exists;
 it does not alter `parameterStatusCounts`. `studyRowAliases` resolves a superseded placeholder to its explicit experiment
 children; a one-to-many alias is not equivalence to either child alone.
 `nativeQualification` remains
 `not_assessed` even for fully resolved paper evidence. Online actions are
 limited to `prepare` and `preview`.
+
+`inventoryAudit` separately counts registered inventories, Methods-backed
+inventories, audited access blockers, and publications with eleven explicit
+source dispositions for every retained row. Its machine-readable row ledger is
+`publication_inventory_audit.csv` beside the compact matrices. Registry presence,
+abstract counts and inherited coarse fields cannot pass that audit gate.
+An eligible inventoried author version may retain an explicit final-comparison
+gap; an inaccessible source requires dated actual attempts and an unresolved
+publication review unit. Neither disposition establishes runnable replication
+or native qualification. New registry entries need an explicit
+`inventory_evidence_status`; missing classification stays open.
 
 The projection selects public fields explicitly and rejects local source/runtime
 paths in review text; it preserves HTTP source URLs and DOI strings. It includes

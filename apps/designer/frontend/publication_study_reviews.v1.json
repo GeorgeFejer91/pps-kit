@@ -44338,5 +44338,24 @@
         }
       ]
     }
-  ]
+  ],
+  "inventoryAudit": {
+    "publications": 94,
+    "registeredInventories": 50,
+    "methodsReviewedInventories": 41,
+    "auditedAccessBlockers": 1,
+    "publicationsWithAllContractDispositions": 36,
+    "inventoryAndContractsAudited": 34,
+    "remainingInventoryOrContractAudit": 60,
+    "inventoryEvidenceCounts": {
+      "abstract_or_metadata_inventory": 4,
+      "audited_source_access_gap": 1,
+      "author_version_methods_reviewed_final_comparison_pending": 1,
+      "not_registered": 44,
+      "partial_methods_inventory": 4,
+      "primary_methods_reviewed": 30,
+      "retained_primary_methods_review": 10
+    },
+    "interpretation": "Audited means inventory evidence or documented access blocker plus eleven explicit source dispositions per retained row. It does not mean all values are reported, final-version equivalence is proven, a template exists, or native hardware is qualified."
+  }
 }

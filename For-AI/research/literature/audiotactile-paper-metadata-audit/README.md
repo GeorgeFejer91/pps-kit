@@ -37,7 +37,20 @@ Current checkpoint (2026-10-27): 94 frozen publications, 138 study/context rows,
 49 registered publication inventories, one access-audited unresolved publication
 unit, and 44 publication inventories still unassessed. Registry presence alone
 does not certify a Methods-confirmed inventory: earlier abstract-based or partial
-inventories still require their source and compact-contract audits. The earlier counts below describe individual historical checkpoints.
+inventories still require their source and compact-contract audits.
+`publication-parameter-matrix/publication_inventory_audit.csv` and the public
+`inventoryAudit` summary derive these distinctions from explicit registry
+evidence categories and the finalized eleven-contract source dispositions.
+The current audit records 41 Methods-backed inventories (30 current primary
+reviews, ten retained primary reviews, and one identified author version whose
+final comparison is pending), four abstract/metadata inventories, four partial
+Methods inventories, one audited access blocker, and 44 unregistered publications.
+Only 34 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 60 still need inventory
+or contract review. A partial parameter value can count as reviewed when its
+missing parts are explicit; a coarse inherited field or unassessed child cannot.
+These are audit counts, not counts of runnable or scientifically qualified studies.
+The earlier counts below describe individual historical checkpoints.
 Tonelli (2019) now separates neck PPS assessment from echolocation training,
 time-bisection training and distance validation; manual trial starts, endpoint
 SOA derivations and source contradictions remain explicit. Finisguerra (2015)

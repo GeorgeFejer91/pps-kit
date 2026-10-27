@@ -21,6 +21,7 @@
     "publication_current_input_review_matrix.csv",
     "publication_current_toolkit_input_matrix.csv",
     "publication_current_toolkit_input_values.csv",
+    "publication_inventory_audit.csv",
     "publication_parameter_dictionary.csv",
     "publication_parameter_evidence_detail.csv",
     "publication_parameter_matrix.csv",

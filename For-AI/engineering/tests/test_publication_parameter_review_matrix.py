@@ -1337,6 +1337,31 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertIn("source_recipe_or_asset_provenance", main["auditory_stimulus"]["missingComponents"])
         self.assertEqual(main["jitter_iti_policy"]["status"], "partial")
 
+    def test_inventory_audit_does_not_count_registry_presence_as_methods_review(self) -> None:
+        rows = read_csv(self.output_dir / "publication_inventory_audit.csv")[1]
+        self.assertEqual(len(rows), 94)
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        summary = data["inventoryAudit"]
+        self.assertEqual(summary["registeredInventories"], 50)
+        self.assertEqual(summary["methodsReviewedInventories"], 41)
+        self.assertEqual(summary["auditedAccessBlockers"], 1)
+        self.assertEqual(summary["inventoryEvidenceCounts"], dict(Counter(row["inventory_evidence_status"] for row in rows)))
+        self.assertEqual(summary["inventoryAndContractsAudited"], sum(row["inventory_and_contracts_audited"] == "yes" for row in rows))
+        self.assertEqual(summary["remainingInventoryOrContractAudit"], 94 - summary["inventoryAndContractsAudited"])
+        by_node = {row["network_node_id"]: row for row in rows}
+        abstract_only = by_node["doi:10.1007/s00221-020-05771-5"]
+        self.assertEqual(abstract_only["inventory_evidence_status"], "abstract_or_metadata_inventory")
+        self.assertEqual(abstract_only["all_rows_have_eleven_source_dispositions"], "yes")
+        self.assertEqual(abstract_only["inventory_and_contracts_audited"], "no")
+        source_partial = by_node["doi:10.1371/journal.pone.0044306"]
+        self.assertEqual(source_partial["inventory_evidence_status"], "primary_methods_reviewed")
+        self.assertEqual(source_partial["all_rows_have_eleven_source_dispositions"], "no")
+        self.assertEqual(source_partial["inventory_and_contracts_audited"], "no")
+        gap = by_node["doi:10.1007/s00221-017-5158-2"]
+        self.assertEqual(gap["inventory_evidence_status"], "audited_source_access_gap")
+        self.assertEqual(gap["inventory_and_contracts_audited"], "yes")
+        self.assertEqual(data["scope"]["nativeQualification"], "not_assessed")
+
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:
             second = Path(second_temp) / "matrix"
