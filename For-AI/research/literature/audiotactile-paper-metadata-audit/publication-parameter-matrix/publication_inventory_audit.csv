@@ -23,7 +23,7 @@ doi:10.1016/j.jneumeth.2019.108534,yes,primary_methods_reviewed,confirmed_one_tw
 doi:10.1016/j.neuroimage.2012.06.063,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1016/j.neuropsychologia.2006.12.004,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1016/j.neuropsychologia.2008.07.025,no,not_registered,not_assessed,1,0,no,no,,
-doi:10.1016/j.neuropsychologia.2009.07.025,yes,primary_methods_reviewed,confirmed_main_audio_tactile_experiment,1,0,no,no,https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf::Methods; manual_reviews/tajadura_jimenez_2009_visual_deprivation.json::segment_2_sequence_and_intermixing;segment_4_counts,2026-10-27
+doi:10.1016/j.neuropsychologia.2009.07.025,yes,primary_methods_reviewed,confirmed_single_main_factorial_experiment,1,1,yes,yes,https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf::Methods; manual_reviews/tajadura_jimenez_2009_visual_deprivation.json::segment_2_sequence_and_intermixing;segment_4_counts,2026-10-27
 doi:10.1016/j.neuropsychologia.2009.11.009,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1016/j.neuropsychologia.2014.08.030,yes,author_version_methods_reviewed_final_comparison_pending,confirmed_main_and_supporting_protocol_inventory,3,3,yes,yes,https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf,2026-10-27
 doi:10.1016/j.neuropsychologia.2014.09.043,yes,primary_methods_reviewed,confirmed_one_adjacent_mechanistic_experiment,1,1,yes,yes,https://www.researchgate.net/publication/266398259_Moving_sounds_within_the_peripersonal_space_modulate_the_motor_system::2.3.1 Main experiment;2.3.2 Sound-localization judgments,2026-10-27

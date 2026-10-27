@@ -12,20 +12,20 @@
     "publications": 94,
     "studies": 162,
     "contracts": 1782,
-    "reportedComplete": 298,
-    "derivedComplete": 102,
+    "reportedComplete": 296,
+    "derivedComplete": 103,
     "parameterStatusCounts": {
-      "approximation_required": 38,
+      "approximation_required": 39,
       "composite_requires_split": 44,
       "conflicting_evidence": 49,
-      "derived_complete": 102,
+      "derived_complete": 103,
       "explicitly_absent": 22,
       "low_confidence": 10,
       "not_applicable": 365,
       "not_assessed": 154,
       "not_reported": 59,
       "partial": 437,
-      "reported_complete": 298,
+      "reported_complete": 296,
       "source_unavailable": 204
     }
   },
@@ -682,19 +682,21 @@
         "tajadura_jimenez_2009_uncrossed_visual_deprivation"
       ],
       "parameterStatusCounts": {
+        "approximation_required": 1,
+        "derived_complete": 1,
         "explicitly_absent": 1,
         "partial": 5,
-        "reported_complete": 5
+        "reported_complete": 3
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
         "registered": true,
         "evidenceStatus": "primary_methods_reviewed",
-        "inventoryStatus": "confirmed_main_audio_tactile_experiment",
+        "inventoryStatus": "confirmed_single_main_factorial_experiment",
         "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -18652,72 +18654,130 @@
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2009.07.025",
       "label": "Early visual deprivation alters multisensory processing in peripersonal space. (a)",
       "experimentLabel": "Collignon 2009 static lateralization with crossed and uncrossed hands",
-      "inventoryStatus": "confirmed_main_audio_tactile_experiment",
-      "evidenceScope": "experiment_specific",
+      "inventoryStatus": "confirmed_single_main_factorial_experiment",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [
         "tajadura_jimenez_2009_crossed_visual_deprivation",
         "tajadura_jimenez_2009_uncrossed_visual_deprivation"
       ],
       "parameterStatusCounts": {
+        "approximation_required": 1,
+        "derived_complete": 1,
         "explicitly_absent": 1,
         "partial": 5,
-        "reported_complete": 5
+        "reported_complete": 3
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "partial",
-          "value": "Stimulus type: Auditory stimuli were 100 ms pink-noise bursts. | Source provenance: Pink-noise bursts were produced with Adobe Audition 2.0; no original WAV, seed, or full recipe is supplied. | Auditory conditions: Auditory-only left/right, tactile-only left/right, and congruent audio-tactile left/right conditions were used in both posture blocks. | Gain envelope: Pink-noise bursts had 90% normalized peak value, 90 ms plateau, 5 ms rise/fall, and 75 dB SPL in both channels. | Renderer or apparatus: Stereo speakers were Gigaworks T20 units; stimuli/RTs were controlled by Presentation on a Dell XPS Windows XP computer.",
+          "status": "approximation_required",
+          "value": "Static 100-ms pink-noise burst; normalized peak 90%, plateau 90 ms with 5-ms rise/fall; Adobe Audition 2.0; Gigaworks T 20 loudspeakers; 75 dB SPL each side.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.2, Stimuli | PDF pp.2-3, Stimuli/Procedure | PDF p.2, Stimuli/Procedure",
-          "evidenceNote": "The sound class and duration are explicitly reported. | Software provenance is reported; exact asset provenance remains incomplete. | The 2 sides x 3 condition formula and congruent bimodal rule are reported. | Amplitude/envelope and SPL are explicitly reported. | Speaker model and control software/computer are reported.",
+          "pageOrSection": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
+          "evidenceNote": "A generic pink-noise file or headphone HRTF render is an explicit substitution, not recovered original audio.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2009.07.025",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf",
+          "sourceType": "primary_article_pdf",
           "missingComponents": [
-            "source_recipe_or_asset_provenance",
-            "level_envelope_calibration"
+            "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "75 dB SPL both channels, at least 40 dB above each participant hearing threshold. Measurement placement/procedure unreported.",
+              "note": ""
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Physical left/right Gigaworks T 20 speakers; Presentation on Dell XPS/Windows XP.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "reported",
+              "value": "Generated pink noise.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "approximation_required",
+              "value": "Audition 2.0 recipe: 90% peak, 90-ms plateau, 5-ms rise/fall. Exact source file, seed, sample rate and envelope functional shape unavailable.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "100-ms pink-noise burst.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
           "status": "partial",
-          "value": "Trajectory path: Static left/right speakers were immediately beside the hands, 25 cm left/right of body midline; hands were 30 cm in front of the body and 50 cm apart. | Stimulus duration: Auditory bursts lasted 100 ms, with 90 ms plateau and 5 ms rise/fall ramps. | Stimulus speed: No looming, receding, moving, or apparent-motion auditory trajectory was used. | Trajectory count: Two static auditory source sides: left external hemispace and right external hemispace. | Gain envelope: Pink-noise bursts had 90% normalized peak value, 90 ms plateau, 5 ms rise/fall, and 75 dB SPL in both channels. | Renderer or apparatus: Stereo speakers were Gigaworks T20 units; stimuli/RTs were controlled by Presentation on a Dell XPS Windows XP computer.",
+          "value": "Static left/right external locations; hands 30 cm anterior and 25 cm either side of body midline; adjacent speakers at lateral±25 cm; crossed/uncrossed hand posture.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.2-3, Procedure and Figure 1 | PDF p.2, Stimuli | PDF p.2, Stimuli/Procedure",
-          "evidenceNote": "Text reports distances; Figure 1 confirms the top-view left/right static layout. | Duration and envelope timing are stated together. | This is a static lateralization task. | The task varies external side, not motion trajectory. | Amplitude/envelope and SPL are explicitly reported. | Speaker model and control software/computer are reported.",
+          "pageOrSection": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
+          "evidenceNote": "Do not invent exact 3D speaker coordinates from the schematic; reported relative geometry is the static scientific contract.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2009.07.025",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf",
+          "sourceType": "primary_article_pdf",
           "missingComponents": [
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
+            "geometry"
           ],
-          "components": {}
+          "components": {
+            "attenuation_law": {
+              "status": "not_applicable",
+              "value": "No distance trajectory or attenuation law; loudspeaker level separately reported.",
+              "note": ""
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "External left/right relative to body midline; anatomical hand swaps sides when arms cross.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "Hands 30 cm in front,±25 cm lateral, palms down. Speakers immediately beside hands,±25 cm lateral. Exact speaker height/hand-speaker offset not specified.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "Static; no approach, recession or speed.",
+              "note": ""
+            },
+            "padding_or_holds": {
+              "status": "not_applicable",
+              "value": "No movement hold/padding phase in this static lateralization task.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "Fixed location throughout 100-ms burst.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "reported_complete",
-          "value": "Auditory-only,tactile-only and congruent simultaneous audio-tactile targets on either external side.",
+          "status": "partial",
+          "value": "Auditory-only, tactile-only and congruent simultaneous audio-tactile targets on either external side.",
           "compositeValue": "",
-          "pageOrSection": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "pageOrSection": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
           "evidenceNote": "Current primary Methods and rendered Figure 1 inspected. ",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2009.07.025",
           "evidenceSourceUrl": "https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf",
           "sourceType": "primary_article_pdf",
-          "missingComponents": [],
+          "missingComponents": [
+            "ordered_elements_and_source_selection"
+          ],
           "components": {
             "condition_intermixing": {
               "status": "reported",
@@ -18731,7 +18791,12 @@
             },
             "trial_families": {
               "status": "reported",
-              "value": "A,T,AT crossed with left/right external stimulus side.",
+              "value": "A, T, AT crossed with left/right external stimulus side.",
+              "note": ""
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "Single nominal 100 ms event; exact complete trial margins and interval endpoint convention are not specified.",
               "note": ""
             }
           }
@@ -18742,7 +18807,7 @@
           "status": "partial",
           "value": "Press the button on the external stimulus side; crossed hands reverse which anatomical hand presses that button.",
           "compositeValue": "",
-          "pageOrSection": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "pageOrSection": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
           "evidenceNote": "Current primary Methods and rendered Figure 1 inspected. Online response deadline is unresolved. Figure 1 pixels confirm the external-side mapping.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -18763,6 +18828,11 @@
               "value": "Two response keys; hand on each key follows the posture condition.",
               "note": ""
             },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "No online response deadline found.150-1000 ms is the analysis RT filter, not a task timeout.",
+              "note": ""
+            },
             "scoring_rule": {
               "status": "reported",
               "value": "Analysis includes 150-1000-ms post-stimulus RTs and computes inverse efficiency; this is not an online timeout.",
@@ -18770,7 +18840,7 @@
             },
             "target_and_nontarget_rule": {
               "status": "reported",
-              "value": "Every A,T,AT trial requires left/right lateralization.",
+              "value": "Every A, T, AT trial requires left/right lateralization.",
               "note": ""
             }
           }
@@ -18781,7 +18851,7 @@
           "status": "partial",
           "value": "Reported interstimulus interval mean 1950 ms, range 1200-2700 ms.",
           "compositeValue": "",
-          "pageOrSection": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "pageOrSection": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
           "evidenceNote": "Current primary Methods and rendered Figure 1 inspected. Do not assume a uniform distribution from the mean/range or silently relabel ISI as an offset-to-onset ITI.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -18789,22 +18859,28 @@
           "evidenceSourceUrl": "https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf",
           "sourceType": "primary_article_pdf",
           "missingComponents": [
+            "timing_scope_and_anchor",
             "distribution"
           ],
           "components": {
+            "distribution": {
+              "status": "not_reported",
+              "value": "Range 1200-2700 ms and mean 1950 ms do not establish a uniform distribution.",
+              "note": ""
+            },
             "policy_type": {
               "status": "reported",
               "value": "Variable interstimulus interval.",
               "note": ""
             },
             "timing_scope_and_anchor": {
-              "status": "reported",
-              "value": "Interstimulus interval; exact event endpoint convention unresolved.",
+              "status": "not_reported",
+              "value": "Called interstimulus interval; onset/offset endpoint convention not specified.",
               "note": ""
             },
             "values_or_range": {
               "status": "reported",
-              "value": "1200-2700 ms,mean 1950 ms.",
+              "value": "1200-2700 ms, mean 1950 ms.",
               "note": ""
             }
           }
@@ -18813,9 +18889,9 @@
           "key": "soa_schedule",
           "label": "SOA schedule",
           "status": "reported_complete",
-          "value": "Simultaneous congruent audio-tactile targets:0-ms SOA on both external sides.",
+          "value": "Simultaneous congruent audio-tactile targets: 0-ms SOA on both external sides.",
           "compositeValue": "",
-          "pageOrSection": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "pageOrSection": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
           "evidenceNote": "Current primary Methods and rendered Figure 1 inspected. ",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -18826,7 +18902,7 @@
           "components": {
             "direction_specific_pairing": {
               "status": "reported",
-              "value": "Static left/right side,not approach/recede.",
+              "value": "Static left/right side, not approach/recede.",
               "note": ""
             },
             "ordered_soa_values_or_derivable_distance_anchors": {
@@ -18845,29 +18921,59 @@
           "key": "tactile_target",
           "label": "Tactile target",
           "status": "partial",
-          "value": "Tactile stimulus: Each tactile stimulus was five 1 ms biphasic square pulses every 25 ms, 40 Hz for 100 ms, delivered by ring electrodes on the middle finger of each hand.",
+          "value": "Electrical stimulation of either middle finger: five 1-ms biphasic square pulses every 25 ms, described as 40 Hz for 100 ms; individually calibrated and left/right sensation matched.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.2, Stimuli",
-          "evidenceNote": "Waveform, pulse count, frequency/duration, site, and electrodes are reported.",
+          "pageOrSection": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
+          "evidenceNote": "Five pulse onsets separated by 25 ms span 100 ms before final pulse width. The nominal 100-ms train description does not resolve sample-level convention; this is an ambiguity, not proof of a source error.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2009.07.025",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf",
+          "sourceType": "primary_article_pdf",
           "missingComponents": [
-            "waveform_and_duration",
-            "intensity_or_calibration"
+            "waveform_and_duration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Ring electrodes around proximal/distal interphalangeal joints of the left/right middle finger.",
+              "note": ""
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "Presentation-controlled electrical stimulation; exact hardware trigger wiring/latency not provided.",
+              "note": ""
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "40 Hz; individual amplitude calibrated. Group means(SD)23(11)V sighted, 17(12)V early-blind, 24(11)V late-blind are summaries, not individual settings.",
+              "note": ""
+            },
+            "intensity_or_calibration": {
+              "status": "reported",
+              "value": "Per-hand strongest prominent comfortable/nonpainful sensation, then perceived left/right intensity matched.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Electrical via Grass S 88 and PSIU6 isolation unit.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_reported",
+              "value": "Published: five 1-ms biphasic square pulses at 25-ms intervals, 40 Hz for 100 ms. Exact phase-width and train-endpoint convention not specified; retain these published values without rounding to four pulses or assuming 101 ms.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
           "status": "reported_complete",
-          "value": "Per posture block:100 auditory-only and 100 tactile-only response targets serve unisensory comparison conditions.",
+          "value": "Per posture block: 100 auditory-only and 100 tactile-only response targets serve unisensory comparison conditions.",
           "compositeValue": "",
-          "pageOrSection": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
-          "evidenceNote": "Current primary Methods and rendered Figure 1 inspected. These are response-target trials,not silent baseline rows or catches.",
+          "pageOrSection": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
+          "evidenceNote": "Current primary Methods and rendered Figure 1 inspected. These are response-target trials, not silent baseline rows or catches.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2009.07.025",
@@ -18903,8 +19009,8 @@
           "status": "explicitly_absent",
           "value": "No behavioral catch/no-go family in the exhaustive A/T/AT lateralization design.",
           "compositeValue": "",
-          "pageOrSection": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
-          "evidenceNote": "Current primary Methods and rendered Figure 1 inspected. ",
+          "pageOrSection": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
+          "evidenceNote": "Absence is inferred from the explicitly exhaustive 6-cell/300-trial allocation and response instruction for every modality. Auditory-only trials are response targets, not catches.",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2009.07.025",
@@ -18937,12 +19043,12 @@
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "reported_complete",
-          "value": "2 sides x 3 modalities x 50 repetitions =300 trials per posture block;600 across two test blocks.",
+          "status": "derived_complete",
+          "value": "2 sides x 3 modalities x 50 repetitions =300 trials per posture block; 600 across two test blocks.",
           "compositeValue": "",
-          "pageOrSection": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
-          "evidenceNote": "Current primary Methods and rendered Figure 1 inspected. ",
-          "derivationNote": "",
+          "pageOrSection": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
+          "evidenceNote": "300 per posture is reported; 600 combined and 42 practice are derived using the displayed formulas.",
+          "derivationNote": "Two postures × two sides × three modalities × 50 repetitions = 600 main trials. Two blocks × 21 practice trials = 42 separate practice trials.",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2009.07.025",
           "evidenceSourceUrl": "https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf",
@@ -18950,8 +19056,8 @@
           "missingComponents": [],
           "components": {
             "derived_total_reconciliation": {
-              "status": "reported",
-              "value": "2 x 3 x 50 x 2 postures =600 test trials.",
+              "status": "derived",
+              "value": "2 sides ×3 modalities ×50 trials ×2 postures =600 test trials.2 blocks ×21 practice =42 practice trials, separate from 600.",
               "note": ""
             },
             "exceptions_or_overrides": {
@@ -18975,9 +19081,9 @@
           "key": "block_order_contract",
           "label": "Block and order policy",
           "status": "reported_complete",
-          "value": "Two posture blocks,uncrossed and crossed,with counterbalanced order and a 10-minute pause.",
+          "value": "Two posture blocks, uncrossed and crossed, with counterbalanced order and a 10-minute pause.",
           "compositeValue": "",
-          "pageOrSection": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "pageOrSection": "Published pp.3237-3238; Methods 2.1-2.4 and Figure 1",
           "evidenceNote": "Current primary Methods and rendered Figure 1 inspected. ",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
@@ -19008,7 +19114,7 @@
             },
             "sequence_constraints": {
               "status": "reported",
-              "value": "10-minute pause between blocks;21 practice trials precede each block.",
+              "value": "10-minute pause between blocks; 21 practice trials precede each block.",
               "note": ""
             },
             "within_block_randomization": {
@@ -62804,9 +62910,9 @@
     "methodsReviewedInventories": 60,
     "auditedAccessBlockers": 10,
     "projectLineageReviews": 1,
-    "publicationsWithAllContractDispositions": 70,
-    "inventoryAndContractsAudited": 70,
-    "remainingInventoryOrContractAudit": 24,
+    "publicationsWithAllContractDispositions": 71,
+    "inventoryAndContractsAudited": 71,
+    "remainingInventoryOrContractAudit": 23,
     "inventoryEvidenceCounts": {
       "abstract_or_metadata_inventory": 1,
       "audited_source_access_gap": 10,
