@@ -1346,7 +1346,7 @@ for (const node of network.nodes) {
   }
 }
 
-if (studyInstanceRows.length !== 152) {
+if (studyInstanceRows.length !== 156) {
   throw new Error(`Expected 148 registered study-instance rows, found ${studyInstanceRows.length}`);
 }
 if (atomicEvidenceRows.length !== studyInstanceRows.length * PAPER_PARAMETERS.length) {

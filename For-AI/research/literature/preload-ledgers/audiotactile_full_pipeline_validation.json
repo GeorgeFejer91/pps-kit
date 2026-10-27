@@ -1588,7 +1588,8 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "exact distance/timing table from supplement"
+            "Experiment 3 exact repetition, catch and subblock allocation",
+            "Original waveform/exponential fade and electrical-to-vibrotactile substitution; source 100 microsecond pulse"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -1631,9 +1632,10 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "exact distance/timing table from supplement"
+        "Experiment 3 exact repetition, catch and subblock allocation",
+        "Original waveform/exponential fade and electrical-to-vibrotactile substitution; source 100 microsecond pulse"
       ],
-      "next_required_action": "Extract or source the missing paper parameters: exact distance/timing table from supplement",
+      "next_required_action": "Extract or source the missing paper parameters: Experiment 3 exact repetition, catch and subblock allocation; Original waveform/exponential fade and electrical-to-vibrotactile substitution; source 100 microsecond pulse",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
