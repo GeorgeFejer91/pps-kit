@@ -422,6 +422,28 @@ impl RunnerCore {
         Ok(())
     }
 
+    /// Native-only V1 condition boundary after the preceding real occurrence
+    /// has closed. Optional absent media never removes its button gate.
+    pub fn native_condition_transition_gate(
+        &mut self,
+        fingerprint: &str,
+        block_ordinal: u32,
+        gate: InstructionGateSnapshot,
+        now: ClockStamp,
+    ) -> Result<(), &'static str> {
+        if self.package_fingerprint.as_deref() != Some(fingerprint)
+            || self.native_block.as_ref().map(|block| block.block_ordinal) != Some(block_ordinal)
+            || self.native_control_pending.is_some()
+            || self.snapshot.run.phase != RunnerPhase::Running
+            || gate.next_action != "continue-button"
+            || !gate.waiting
+        {
+            return Err("native_instruction_scope_invalid");
+        }
+        self.native_instruction = true;
+        self.native_instruction_gate(gate, false, now)
+    }
+
     pub fn set_native_more_parts(&mut self, more: bool, now: ClockStamp) {
         self.native_more_parts = more;
         self.bump_revision(&now);

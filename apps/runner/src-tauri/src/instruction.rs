@@ -8,6 +8,7 @@ pub(crate) struct NativeStage {
     pub block_ordinal: u32,
     pub instruction: Option<usize>,
     pub needs_continue: bool,
+    pub transition_without_audio: bool,
 }
 
 pub(crate) fn stages(session: &VerifiedPreparedSession) -> Result<Vec<NativeStage>, &'static str> {
@@ -16,14 +17,17 @@ pub(crate) fn stages(session: &VerifiedPreparedSession) -> Result<Vec<NativeStag
         return Err("native_stage_count_invalid");
     }
     let mut result = Vec::with_capacity(count * 4 + 2);
-    // A missing optional recording cannot silently erase the V1 mandatory
-    // condition-transition acknowledgement. This native slice requires a
-    // verified transition recording for mixed-condition single-part packages.
+    // V1 requires a button acknowledgement at a condition transition even
+    // when its optional recording is absent. Attach it to the preceding real
+    // occurrence; never manufacture PCM or a scored trial for a silent gate.
     let has_transition = session
         .instructions()
         .iter()
         .any(|item| item.slot() == InstructionSlot::BetweenConditions);
-    let mut add = |block: usize, slot: Option<InstructionSlot>, needs_continue: bool| {
+    let add = |result: &mut Vec<NativeStage>,
+               block: usize,
+               slot: Option<InstructionSlot>,
+               needs_continue: bool| {
         let instruction = match slot {
             Some(slot) => match session
                 .instructions()
@@ -40,14 +44,25 @@ pub(crate) fn stages(session: &VerifiedPreparedSession) -> Result<Vec<NativeStag
             block_ordinal: block as u32,
             instruction,
             needs_continue,
+            transition_without_audio: false,
         });
     };
     if !session.is_split_part() || session.summary().part_number.unwrap_or(1) == 1 {
-        add(0, Some(InstructionSlot::BeforeExperiment), true);
+        add(
+            &mut result,
+            0,
+            Some(InstructionSlot::BeforeExperiment),
+            true,
+        );
     }
     for index in 0..count {
-        add(index, Some(InstructionSlot::BeforeEachBlock), true);
-        add(index, None, false);
+        add(
+            &mut result,
+            index,
+            Some(InstructionSlot::BeforeEachBlock),
+            true,
+        );
+        add(&mut result, index, None, false);
         let same_condition = session.blocks().get(index + 1).is_some_and(|next| {
             let key = |block: &pps_session_package::VerifiedPreparedBlock| {
                 let metadata = block.metadata();
@@ -69,12 +84,26 @@ pub(crate) fn stages(session: &VerifiedPreparedSession) -> Result<Vec<NativeStag
             };
             key(&session.blocks()[index]) == key(next)
         });
-        add(index, Some(InstructionSlot::AfterEachBlock), same_condition);
+        add(
+            &mut result,
+            index,
+            Some(InstructionSlot::AfterEachBlock),
+            same_condition,
+        );
         if index + 1 < count && !same_condition {
             if !has_transition {
-                return Err("native_condition_transition_instruction_required");
+                result
+                    .last_mut()
+                    .ok_or("native_stage_count_invalid")?
+                    .transition_without_audio = true;
+            } else {
+                add(
+                    &mut result,
+                    index,
+                    Some(InstructionSlot::BetweenConditions),
+                    true,
+                );
             }
-            add(index, Some(InstructionSlot::BetweenConditions), true);
         }
     }
     let closing = if session.is_split_part() && session.summary().part_number == Some(1) {
@@ -82,6 +111,6 @@ pub(crate) fn stages(session: &VerifiedPreparedSession) -> Result<Vec<NativeStag
     } else {
         InstructionSlot::AfterExperiment
     };
-    add(count - 1, Some(closing), false);
+    add(&mut result, count - 1, Some(closing), false);
     Ok(result)
 }
