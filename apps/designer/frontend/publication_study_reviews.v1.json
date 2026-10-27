@@ -10,22 +10,22 @@
   },
   "counts": {
     "publications": 94,
-    "studies": 151,
-    "contracts": 1661,
-    "reportedComplete": 296,
-    "derivedComplete": 82,
+    "studies": 152,
+    "contracts": 1672,
+    "reportedComplete": 298,
+    "derivedComplete": 86,
     "parameterStatusCounts": {
       "approximation_required": 38,
-      "composite_requires_split": 69,
+      "composite_requires_split": 55,
       "conflicting_evidence": 48,
-      "derived_complete": 82,
+      "derived_complete": 86,
       "explicitly_absent": 22,
       "low_confidence": 10,
-      "not_applicable": 209,
+      "not_applicable": 222,
       "not_assessed": 187,
       "not_reported": 57,
-      "partial": 408,
-      "reported_complete": 296,
+      "partial": 414,
+      "reported_complete": 298,
       "source_unavailable": 235
     }
   },
@@ -73,7 +73,8 @@
     ],
     "doi:10.1073/pnas.2024548118": [
       "doi:10.1073/pnas.2024548118::a",
-      "doi:10.1073/pnas.2024548118::b"
+      "doi:10.1073/pnas.2024548118::b",
+      "doi:10.1073/pnas.2024548118::c"
     ],
     "doi:10.1098/rsos.181878": [
       "doi:10.1098/rsos.181878::a",
@@ -1216,24 +1217,25 @@
       "networkNodeId": "doi:10.1073/pnas.2024548118",
       "studyIds": [
         "doi:10.1073/pnas.2024548118::a",
-        "doi:10.1073/pnas.2024548118::b"
+        "doi:10.1073/pnas.2024548118::b",
+        "doi:10.1073/pnas.2024548118::c"
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "composite_requires_split": 14,
-        "derived_complete": 2,
-        "partial": 1,
-        "reported_complete": 5
+        "derived_complete": 6,
+        "not_applicable": 13,
+        "partial": 7,
+        "reported_complete": 7
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
         "registered": true,
         "evidenceStatus": "primary_methods_reviewed",
-        "inventoryStatus": "confirmed_cohort_specific_variants",
-        "studyRowCount": 2,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "inventoryStatus": "confirmed_newborn_adult_variants_and_separate_newborn_pilot",
+        "studyRowCount": 3,
+        "rowsWithElevenSourceDispositions": 3,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -33001,91 +33003,133 @@
       "networkNodeId": "doi:10.1073/pnas.2024548118",
       "label": "Spatial tuning of electrophysiological responses to multisensory stimuli reveals a primitive coding of the body boundaries in newborns (a)",
       "experimentLabel": "Newborn passive EEG protocol variant",
-      "inventoryStatus": "confirmed_cohort_specific_variants",
-      "evidenceScope": "composite_requires_split",
+      "inventoryStatus": "confirmed_newborn_adult_variants_and_separate_newborn_pilot",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "composite_requires_split": 7,
-        "derived_complete": 1,
-        "partial": 1,
-        "reported_complete": 2
+        "derived_complete": 3,
+        "not_applicable": 1,
+        "partial": 4,
+        "reported_complete": 3
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Stimulus type: Auditory stimulation used 784 Hz tones. | Source provenance: Tones were generated with Audacity; exact original audio file is not supplied. | Auditory conditions: Auditory-only near, auditory-only far, bimodal near, and bimodal far, plus tactile-only. | Gain envelope: Tone intensity about 64 dB; sinusoidal 50 Hz amplitude modulation; 5 ms rise/fall ramps. | Renderer or apparatus: Two loudspeakers controlled with a combined E-Prime-Arduino system; tactile pulses delivered by DS7A Digitimer.",
-          "pageOrSection": "SI Appendix p.2, Stimuli and experimental task | SI Appendix p.3, Stimuli and experimental task | SI Appendix pp.2-3, Stimuli and experimental task",
-          "evidenceNote": "The SI identifies the tone frequency and stimulus class. | Software provenance is reported, but no reusable sound asset is included. | The SI enumerates the five experimental conditions. | Intensity and amplitude envelope parameters are reported. | Control and stimulation apparatus are reported, but speaker model is not.",
+          "status": "partial",
+          "value": "784 Hz tone with sinusoidal 50 Hz amplitude modulation, 50 ms duration and 5 ms rise/fall, generated in Audacity; approximately 64 dB. Exact waveform, AM depth/phase, sampling rate and measurement anchor are not specified.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
           "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "Approximately 64 dB stated; calibration/measurement anchor not identified.",
+              "note": ""
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two physical near/far loudspeakers.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "reported",
+              "value": "Amplitude-modulated tone from two fixed loudspeakers.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "Audacity is named, but original WAV, AM depth/phase and sample rate absent.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "784 Hz carrier, 50 Hz sinusoidal AM, 50 ms tone, 5 ms rise/fall.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Trajectory path: Near speaker was less than 5 cm from the right stimulated hand; far speaker was 140 cm from the right hand. | Stimulus duration: Tone duration was 50 ms, including 5 ms rise and fall times. | Stimulus speed: No auditory motion speed applies; stimulation used static near/far loudspeaker positions. | Trajectory count: Two static auditory positions: near and far; used in auditory-only and audio-tactile rows. | Gain envelope: Tone intensity about 64 dB; sinusoidal 50 Hz amplitude modulation; 5 ms rise/fall ramps. | Renderer or apparatus: Two loudspeakers controlled with a combined E-Prime-Arduino system; tactile pulses delivered by DS7A Digitimer.",
-          "pageOrSection": "SI Appendix pp.2-3, Stimuli and experimental task | SI Appendix p.2, Stimuli and experimental task | PDF p.1, Methods and Fig. 1",
-          "evidenceNote": "Rendered SI pages verified the near/far distances and body anchor. | Duration and ramp timing are explicitly reported. | The paradigm is static near/far, not looming or receding. | The main paper names ANear, AFar, TANear, and TAFar conditions. | Intensity and amplitude envelope parameters are reported. | Control and stimulation apparatus are reported, but speaker model is not.",
+          "status": "partial",
+          "value": "Static near (<5 cm) and far (140 cm) sources relative to the stimulated right hand. Full spatial coordinates and exact near distance are not supplied; no moving trajectory.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
           "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
+            "geometry"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Right stimulated hand; newborns on mothers’ arms, adults seated.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "Near <5 cm, far 140 cm; exact near distance/full coordinates not supplied.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "Static near/far.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "50 ms stationary tone; no movement speed.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
           "status": "reported_complete",
-          "value": "Five intermixed conditions: T, ANear, AFar, TANear, TAFar.",
+          "value": "Five intermixed conditions: T, A-near, A-far, TA-near and TA-far. Touch occurs at trigger when present; audio occurs 40 ms after trigger in both unisensory and bimodal trials. Equal condition counts within blocks; rests/feedings between newborn blocks are not extra trial conditions.",
           "compositeValue": "",
-          "pageOrSection": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
-          "evidenceNote": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. Unisensory control families are distinct from behavioral catches.",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "https://www.pnas.org/doi/suppl/10.1073/pnas.2024548118/suppl_file/pnas.2024548118.sapp.pdf",
-          "sourceType": "existing_primary_supplement_review_with_current_main_methods",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
           "missingComponents": [],
           "components": {
             "condition_intermixing": {
               "status": "reported",
-              "value": "Conditions intermixed with counts matched within each block.",
+              "value": "All five conditions intermixed with equal per-block counts.",
               "note": ""
             },
             "ordered_elements_and_source_selection": {
               "status": "reported",
-              "value": "Trigger/tactile onset followed 40 ms later by auditory onset in auditory rows.",
+              "value": "Touch at trigger when present; audio 40 ms after trigger whenever present.",
               "note": ""
             },
             "trial_families": {
               "status": "reported",
-              "value": "Tactile-only, two auditory-only positions, two bimodal positions.",
+              "value": "T, A-near, A-far, TA-near, TA-far.",
               "note": ""
             },
             "within_trial_timing_or_placement": {
               "status": "reported",
-              "value": "Bimodal auditory stimulus follows tactile stimulus by 40 ms.",
+              "value": "Same audio-trigger delay in unisensory and bimodal trials.",
               "note": ""
             }
           }
@@ -33093,72 +33137,107 @@
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Task sequence rules: Auditory stimuli occurred 40 ms after trigger in all auditory rows; in bimodal rows, auditory input followed tactile input by 40 ms. | Response window: No per-trial behavioral response window applies; this was passive EEG/ERP stimulation.",
-          "pageOrSection": "SI Appendix p.3, Stimuli and experimental task",
-          "evidenceNote": "The presentation-system delay is explained as task-critical timing. | No response task is described.",
+          "status": "reported_complete",
+          "value": "Passive EEG/ERP acquisition with no behavioral response or deadline. Compare bimodal versus summed unimodal ERPs near/far. EEG epochs span −0.5 to +1 s relative to stimulus trigger; this is an analysis window, not an RT response window.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
-          "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
-            "response_window_and_anchor"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "No overt response required.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "EEG/ERP recording, no participant button/vocal response.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "No behavioral response window; EEG epochs are trigger-relative analysis intervals.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Passive stimulus exposure; no go/no-go task.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Iti jitter policy: A long inter-trial interval greater than 2 s was used; exact distribution or fixed values are not reported.",
-          "pageOrSection": "SI Appendix p.3, Stimuli and experimental task",
-          "evidenceNote": "The SI states the ITI lower bound and rationale but not the full distribution.",
+          "status": "partial",
+          "value": "The original SI explicitly reports an inter-trial interval randomly jittered from 4 to 6 s. Its later >2 s statement explains the ERP rationale. Distribution shape and onset-to-onset versus offset-to-onset convention are not specified.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
           "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
+            "timing_scope_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "distribution": {
+              "status": "not_reported",
+              "value": "Distribution family and discretization unreported.",
+              "note": ""
+            },
+            "policy_type": {
+              "status": "reported",
+              "value": "Randomly jittered inter-trial interval.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Inter-trial scope explicit; exact onset/offset anchoring absent.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "4–6 s.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
           "status": "derived_complete",
-          "value": "Auditory onset follows tactile onset by 40 ms; canonical tactile-minus-auditory SOA is -40 ms.",
+          "value": "Touch is at trigger and auditory onset is 40 ms later in both near/far bimodal conditions. Canonical tactile-minus-auditory SOA is −40 ms. Auditory-only conditions retain the same +40 ms trigger delay.",
           "compositeValue": "",
-          "pageOrSection": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
-          "evidenceNote": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. ",
-          "derivationNote": "Auditory = tactile +40 ms, so tactile - auditory = -40 ms.",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "With tactile at trigger (0 ms) and auditory onset at +40 ms, tactile − auditory = 0 − 40 = −40 ms. Auditory-only trials also use +40 ms trigger delay.",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "https://www.pnas.org/doi/suppl/10.1073/pnas.2024548118/suppl_file/pnas.2024548118.sapp.pdf",
-          "sourceType": "existing_primary_supplement_review_with_current_main_methods",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
           "missingComponents": [],
           "components": {
             "direction_specific_pairing": {
               "status": "reported",
-              "value": "Same offset for static near and far auditory locations.",
+              "value": "Static near/far sources, both share trigger-relative timing.",
               "note": ""
             },
             "ordered_soa_values_or_derivable_distance_anchors": {
               "status": "derived",
-              "value": "-40 ms for bimodal near and far conditions; no manipulated SOA ladder.",
+              "value": "Single −40 ms AT SOA, near and far.",
               "note": ""
             },
             "reference_event_and_sign": {
               "status": "derived",
-              "value": "Zero at auditory onset; tactile-minus-auditory sign convention.",
+              "value": "Tactile onset minus auditory onset: 0 − 40 ms = −40 ms.",
               "note": ""
             }
           }
@@ -33166,98 +33245,157 @@
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Tactile stimulus: 200 microsecond non-painful transcutaneous square-wave pulses to right hand dorsum via DS7A and bipolar electrodes.",
-          "pageOrSection": "SI Appendix p.2, Stimuli and experimental task",
-          "evidenceNote": "Tactile modality, site, device, duration, and electrodes are reported.",
+          "status": "reported_complete",
+          "value": "Right-hand dorsum, 200 µs constant-current square-wave electrical pulse from DS7A, bipolar electrodes approximately 1 cm apart on a Velcro strap. Newborn current fixed at historical 11 mA after the separate adequacy pilot. Electrode site randomly shifted approximately 1 cm to reduce habituation.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
-          "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Right-hand dorsum; bipolar electrodes about 1 cm apart, site shifted about 1 cm.",
+              "note": ""
+            },
+            "external_trigger": {
+              "status": "reported",
+              "value": "Combined Eprime–Arduino presentation; touch at trigger, auditory emission 40 ms later.",
+              "note": ""
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "Newborn current fixed at historical 11 mA after the separate adequacy pilot.",
+              "note": ""
+            },
+            "intensity_or_calibration": {
+              "status": "reported",
+              "value": "Historical cohort-specific intensity procedure; no new device calibration.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Electrical square-wave constant-current stimulation via DS7A.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "200 µs square-wave pulse.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Baseline strategy: Unisensory T, ANear, and AFar rows were used to form sums/control responses; EEG baseline correction used prestimulus interval. | Baseline timing: EEG epochs used -0.5 to +1 s around stimulus trigger, with baseline correction from -0.5 to 0 s. | Baseline count: Unisensory control rows had the same per-condition counts: newborn 15-30 each, adult 36 each.",
-          "pageOrSection": "SI Appendix pp.3-4, EEG processing | SI Appendix p.3, EEG processing | SI Appendix p.3, Stimuli and experimental task",
-          "evidenceNote": "The analysis contrasts bimodal responses with summed unisensory responses. | Epoch and baseline windows are explicitly reported. | Counts were matched across intermixed conditions.",
-          "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "status": "derived_complete",
+          "value": "T, A-near and A-far are unisensory trial controls: 15–30 per unisensory condition, 45–90 unisensory control trials total. EEG correction over −0.5 to 0 s relative to trigger is a separate analysis interval, not extra trials.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "Three unisensory conditions × five per block × 3–6 blocks = 45–90 controls; 15–30 each.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "5 per condition per block across 3–6 blocks.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Three unisensory controls T/A-near/A-far for summed-unimodal ERP comparison.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "15–30 per unisensory condition, 45–90 unisensory control trials total",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "T at trigger; auditory controls at +40 ms. EEG baseline correction −0.5 to 0 s is distinct.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Catch trial type: No catch or no-go trials are described. | Catch count: No catch/no-go count applies.",
-          "pageOrSection": "",
-          "evidenceNote": "The five rows are active unisensory or bimodal conditions. | No catch family is reported.",
+          "status": "not_applicable",
+          "value": "No catch/no-go family in this five-condition passive paradigm. A-near and A-far are unisensory ERP controls, not catches.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Unisensory controls are counted under baseline/repetition contracts.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Passive paradigm has no go/no-go catch role.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "No catch family assigned.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "No participant response expected on any trial.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "reported_complete",
-          "value": "Newborn: 5 trials per condition per block; 25 trials per block; 75-150 total over 3-6 blocks.",
+          "status": "derived_complete",
+          "value": "Newborns: five conditions × five trials × 3–6 compliance-dependent blocks = 75–150 trials, 15–30 per condition. Equal condition counts retained despite variable block count; planned range is not an asserted exact per-participant total.",
           "compositeValue": "",
-          "pageOrSection": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
-          "evidenceNote": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. ",
-          "derivationNote": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "5 × 5 × (3–6) = 75–150 total; 5 × (3–6) = 15–30 per condition.",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "https://www.pnas.org/doi/suppl/10.1073/pnas.2024548118/suppl_file/pnas.2024548118.sapp.pdf",
-          "sourceType": "existing_primary_supplement_review_with_current_main_methods",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
           "missingComponents": [],
           "components": {
             "derived_total_reconciliation": {
-              "status": "reported",
-              "value": "5 x 5 x 3-6 = 75-150 trials.",
+              "status": "derived",
+              "value": "5 × 5 × (3–6) = 75–150 total; 5 × (3–6) = 15–30 per condition.",
               "note": ""
             },
             "exceptions_or_overrides": {
               "status": "reported",
-              "value": "Counts matched across conditions within blocks.",
+              "value": "Newborn block count depends on compliance; pilot excluded.",
               "note": ""
             },
             "factor_dimensions": {
               "status": "reported",
-              "value": "Five conditions: T, ANear, AFar, TANear, TAFar.",
+              "value": "Five conditions T/A-near/A-far/TA-near/TA-far.",
               "note": ""
             },
             "repetitions_or_exact_counts": {
               "status": "reported",
-              "value": "5 per condition per block.",
+              "value": "Five per condition per block, 3–6 blocks.",
               "note": ""
             }
           }
@@ -33266,37 +33404,48 @@
           "key": "block_order_contract",
           "label": "Block and order policy",
           "status": "partial",
-          "value": "Newborn: 3-6 blocks of 25 trials; pseudo-random order, at most two identical trials consecutively.",
+          "value": "Newborns receive 3–6 blocks of 25 trials, five per condition, depending on compliance; feeding/rest may occur between blocks. Pseudorandom order allows at most two identical trials consecutively. Operational stopping threshold remains unspecified.",
           "compositeValue": "",
-          "pageOrSection": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
-          "evidenceNote": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. Newborn stopping/selection rule for 3-6 blocks is not specified by the stored review.",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "https://www.pnas.org/doi/suppl/10.1073/pnas.2024548118/suppl_file/pnas.2024548118.sapp.pdf",
-          "sourceType": "existing_primary_supplement_review_with_current_main_methods",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
           "missingComponents": [
-            "sequence_constraints"
+            "block_composition",
+            "block_order_or_counterbalancing"
           ],
           "components": {
             "block_composition": {
               "status": "reported",
-              "value": "Five conditions x 5 trials = 25 per block.",
+              "value": "25 trials: five of each condition.",
               "note": ""
             },
             "block_count": {
               "status": "reported",
-              "value": "3-6 blocks.",
+              "value": "3–6 compliance-dependent blocks.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "not_reported",
+              "value": "Compliance determines stopping; exact operational threshold and rest length absent.",
               "note": ""
             },
             "pool_repeat_or_distribution": {
               "status": "reported",
-              "value": "Condition counts repeated per block.",
+              "value": "Equal condition counts per block.",
+              "note": ""
+            },
+            "sequence_constraints": {
+              "status": "reported",
+              "value": "No more than two identical consecutive trials.",
               "note": ""
             },
             "within_block_randomization": {
               "status": "reported",
-              "value": "Pseudo-randomized; no more than two identical trials in a row.",
+              "value": "Pseudorandom condition order.",
               "note": ""
             }
           }
@@ -33308,90 +33457,133 @@
       "networkNodeId": "doi:10.1073/pnas.2024548118",
       "label": "Spatial tuning of electrophysiological responses to multisensory stimuli reveals a primitive coding of the body boundaries in newborns (b)",
       "experimentLabel": "Adult control passive EEG protocol variant",
-      "inventoryStatus": "confirmed_cohort_specific_variants",
-      "evidenceScope": "composite_requires_split",
+      "inventoryStatus": "confirmed_newborn_adult_variants_and_separate_newborn_pilot",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "composite_requires_split": 7,
-        "derived_complete": 1,
-        "reported_complete": 3
+        "derived_complete": 3,
+        "not_applicable": 1,
+        "partial": 3,
+        "reported_complete": 4
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Stimulus type: Auditory stimulation used 784 Hz tones. | Source provenance: Tones were generated with Audacity; exact original audio file is not supplied. | Auditory conditions: Auditory-only near, auditory-only far, bimodal near, and bimodal far, plus tactile-only. | Gain envelope: Tone intensity about 64 dB; sinusoidal 50 Hz amplitude modulation; 5 ms rise/fall ramps. | Renderer or apparatus: Two loudspeakers controlled with a combined E-Prime-Arduino system; tactile pulses delivered by DS7A Digitimer.",
-          "pageOrSection": "SI Appendix p.2, Stimuli and experimental task | SI Appendix p.3, Stimuli and experimental task | SI Appendix pp.2-3, Stimuli and experimental task",
-          "evidenceNote": "The SI identifies the tone frequency and stimulus class. | Software provenance is reported, but no reusable sound asset is included. | The SI enumerates the five experimental conditions. | Intensity and amplitude envelope parameters are reported. | Control and stimulation apparatus are reported, but speaker model is not.",
+          "status": "partial",
+          "value": "784 Hz tone with sinusoidal 50 Hz amplitude modulation, 50 ms duration and 5 ms rise/fall, generated in Audacity; approximately 64 dB. Exact waveform, AM depth/phase, sampling rate and measurement anchor are not specified.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
           "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "Approximately 64 dB stated; calibration/measurement anchor not identified.",
+              "note": ""
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two physical near/far loudspeakers.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "reported",
+              "value": "Amplitude-modulated tone from two fixed loudspeakers.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "Audacity is named, but original WAV, AM depth/phase and sample rate absent.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "784 Hz carrier, 50 Hz sinusoidal AM, 50 ms tone, 5 ms rise/fall.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Trajectory path: Near speaker was less than 5 cm from the right stimulated hand; far speaker was 140 cm from the right hand. | Stimulus duration: Tone duration was 50 ms, including 5 ms rise and fall times. | Stimulus speed: No auditory motion speed applies; stimulation used static near/far loudspeaker positions. | Trajectory count: Two static auditory positions: near and far; used in auditory-only and audio-tactile rows. | Gain envelope: Tone intensity about 64 dB; sinusoidal 50 Hz amplitude modulation; 5 ms rise/fall ramps. | Renderer or apparatus: Two loudspeakers controlled with a combined E-Prime-Arduino system; tactile pulses delivered by DS7A Digitimer.",
-          "pageOrSection": "SI Appendix pp.2-3, Stimuli and experimental task | SI Appendix p.2, Stimuli and experimental task | PDF p.1, Methods and Fig. 1",
-          "evidenceNote": "Rendered SI pages verified the near/far distances and body anchor. | Duration and ramp timing are explicitly reported. | The paradigm is static near/far, not looming or receding. | The main paper names ANear, AFar, TANear, and TAFar conditions. | Intensity and amplitude envelope parameters are reported. | Control and stimulation apparatus are reported, but speaker model is not.",
+          "status": "partial",
+          "value": "Static near (<5 cm) and far (140 cm) sources relative to the stimulated right hand. Full spatial coordinates and exact near distance are not supplied; no moving trajectory.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
           "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
+            "geometry"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Right stimulated hand; newborns on mothers’ arms, adults seated.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "Near <5 cm, far 140 cm; exact near distance/full coordinates not supplied.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "Static near/far.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "50 ms stationary tone; no movement speed.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
           "status": "reported_complete",
-          "value": "Five intermixed conditions: T, ANear, AFar, TANear, TAFar.",
+          "value": "Five intermixed conditions: T, A-near, A-far, TA-near and TA-far. Touch occurs at trigger when present; audio occurs 40 ms after trigger in both unisensory and bimodal trials. Equal condition counts within blocks; rests/feedings between newborn blocks are not extra trial conditions.",
           "compositeValue": "",
-          "pageOrSection": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
-          "evidenceNote": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. Unisensory control families are distinct from behavioral catches.",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "https://www.pnas.org/doi/suppl/10.1073/pnas.2024548118/suppl_file/pnas.2024548118.sapp.pdf",
-          "sourceType": "existing_primary_supplement_review_with_current_main_methods",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
           "missingComponents": [],
           "components": {
             "condition_intermixing": {
               "status": "reported",
-              "value": "Conditions intermixed with counts matched within each block.",
+              "value": "All five conditions intermixed with equal per-block counts.",
               "note": ""
             },
             "ordered_elements_and_source_selection": {
               "status": "reported",
-              "value": "Trigger/tactile onset followed 40 ms later by auditory onset in auditory rows.",
+              "value": "Touch at trigger when present; audio 40 ms after trigger whenever present.",
               "note": ""
             },
             "trial_families": {
               "status": "reported",
-              "value": "Tactile-only, two auditory-only positions, two bimodal positions.",
+              "value": "T, A-near, A-far, TA-near, TA-far.",
               "note": ""
             },
             "within_trial_timing_or_placement": {
               "status": "reported",
-              "value": "Bimodal auditory stimulus follows tactile stimulus by 40 ms.",
+              "value": "Same audio-trigger delay in unisensory and bimodal trials.",
               "note": ""
             }
           }
@@ -33399,72 +33591,107 @@
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Task sequence rules: Auditory stimuli occurred 40 ms after trigger in all auditory rows; in bimodal rows, auditory input followed tactile input by 40 ms. | Response window: No per-trial behavioral response window applies; this was passive EEG/ERP stimulation.",
-          "pageOrSection": "SI Appendix p.3, Stimuli and experimental task",
-          "evidenceNote": "The presentation-system delay is explained as task-critical timing. | No response task is described.",
+          "status": "reported_complete",
+          "value": "Passive EEG/ERP acquisition with no behavioral response or deadline. Compare bimodal versus summed unimodal ERPs near/far. EEG epochs span −0.5 to +1 s relative to stimulus trigger; this is an analysis window, not an RT response window.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
-          "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
-            "response_window_and_anchor"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "No overt response required.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "EEG/ERP recording, no participant button/vocal response.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "No behavioral response window; EEG epochs are trigger-relative analysis intervals.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Passive stimulus exposure; no go/no-go task.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Iti jitter policy: A long inter-trial interval greater than 2 s was used; exact distribution or fixed values are not reported.",
-          "pageOrSection": "SI Appendix p.3, Stimuli and experimental task",
-          "evidenceNote": "The SI states the ITI lower bound and rationale but not the full distribution.",
+          "status": "partial",
+          "value": "The original SI explicitly reports an inter-trial interval randomly jittered from 4 to 6 s. Its later >2 s statement explains the ERP rationale. Distribution shape and onset-to-onset versus offset-to-onset convention are not specified.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
           "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
+            "timing_scope_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "distribution": {
+              "status": "not_reported",
+              "value": "Distribution family and discretization unreported.",
+              "note": ""
+            },
+            "policy_type": {
+              "status": "reported",
+              "value": "Randomly jittered inter-trial interval.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Inter-trial scope explicit; exact onset/offset anchoring absent.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "4–6 s.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
           "status": "derived_complete",
-          "value": "Auditory onset follows tactile onset by 40 ms; canonical tactile-minus-auditory SOA is -40 ms.",
+          "value": "Touch is at trigger and auditory onset is 40 ms later in both near/far bimodal conditions. Canonical tactile-minus-auditory SOA is −40 ms. Auditory-only conditions retain the same +40 ms trigger delay.",
           "compositeValue": "",
-          "pageOrSection": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
-          "evidenceNote": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. ",
-          "derivationNote": "Auditory = tactile +40 ms, so tactile - auditory = -40 ms.",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "With tactile at trigger (0 ms) and auditory onset at +40 ms, tactile − auditory = 0 − 40 = −40 ms. Auditory-only trials also use +40 ms trigger delay.",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "https://www.pnas.org/doi/suppl/10.1073/pnas.2024548118/suppl_file/pnas.2024548118.sapp.pdf",
-          "sourceType": "existing_primary_supplement_review_with_current_main_methods",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
           "missingComponents": [],
           "components": {
             "direction_specific_pairing": {
               "status": "reported",
-              "value": "Same offset for static near and far auditory locations.",
+              "value": "Static near/far sources, both share trigger-relative timing.",
               "note": ""
             },
             "ordered_soa_values_or_derivable_distance_anchors": {
               "status": "derived",
-              "value": "-40 ms for bimodal near and far conditions; no manipulated SOA ladder.",
+              "value": "Single −40 ms AT SOA, near and far.",
               "note": ""
             },
             "reference_event_and_sign": {
               "status": "derived",
-              "value": "Zero at auditory onset; tactile-minus-auditory sign convention.",
+              "value": "Tactile onset minus auditory onset: 0 − 40 ms = −40 ms.",
               "note": ""
             }
           }
@@ -33472,98 +33699,157 @@
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Tactile stimulus: 200 microsecond non-painful transcutaneous square-wave pulses to right hand dorsum via DS7A and bipolar electrodes.",
-          "pageOrSection": "SI Appendix p.2, Stimuli and experimental task",
-          "evidenceNote": "Tactile modality, site, device, duration, and electrodes are reported.",
+          "status": "reported_complete",
+          "value": "Right-hand dorsum, 200 µs constant-current square-wave electrical pulse from DS7A, bipolar electrodes approximately 1 cm apart on a Velcro strap. Adults at twice individual perceptual threshold by method of limits; historical mean 4.01 ± 1.03 mA. Electrode site randomly shifted approximately 1 cm to reduce habituation.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
-          "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Right-hand dorsum; bipolar electrodes about 1 cm apart, site shifted about 1 cm.",
+              "note": ""
+            },
+            "external_trigger": {
+              "status": "reported",
+              "value": "Combined Eprime–Arduino presentation; touch at trigger, auditory emission 40 ms later.",
+              "note": ""
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "Adults at twice individual perceptual threshold by method of limits; historical mean 4.01 ± 1.03 mA.",
+              "note": ""
+            },
+            "intensity_or_calibration": {
+              "status": "reported",
+              "value": "Historical cohort-specific intensity procedure; no new device calibration.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Electrical square-wave constant-current stimulation via DS7A.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "200 µs square-wave pulse.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Baseline strategy: Unisensory T, ANear, and AFar rows were used to form sums/control responses; EEG baseline correction used prestimulus interval. | Baseline timing: EEG epochs used -0.5 to +1 s around stimulus trigger, with baseline correction from -0.5 to 0 s. | Baseline count: Unisensory control rows had the same per-condition counts: newborn 15-30 each, adult 36 each.",
-          "pageOrSection": "SI Appendix pp.3-4, EEG processing | SI Appendix p.3, EEG processing | SI Appendix p.3, Stimuli and experimental task",
-          "evidenceNote": "The analysis contrasts bimodal responses with summed unisensory responses. | Epoch and baseline windows are explicitly reported. | Counts were matched across intermixed conditions.",
-          "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "status": "derived_complete",
+          "value": "T, A-near and A-far are unisensory trial controls: 36 per unisensory condition, 108 unisensory control trials total. EEG correction over −0.5 to 0 s relative to trigger is a separate analysis interval, not extra trials.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "Three unisensory conditions × twelve per block × three blocks = 108 controls; 36 each.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "12 per condition per block across 3 blocks.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Three unisensory controls T/A-near/A-far for summed-unimodal ERP comparison.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "36 per unisensory condition, 108 unisensory control trials total",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "T at trigger; auditory controls at +40 ms. EEG baseline correction −0.5 to 0 s is distinct.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Catch trial type: No catch or no-go trials are described. | Catch count: No catch/no-go count applies.",
-          "pageOrSection": "",
-          "evidenceNote": "The five rows are active unisensory or bimodal conditions. | No catch family is reported.",
+          "status": "not_applicable",
+          "value": "No catch/no-go family in this five-condition passive paradigm. A-near and A-far are unisensory ERP controls, not catches.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Unisensory controls are counted under baseline/repetition contracts.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Passive paradigm has no go/no-go catch role.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "No catch family assigned.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "No participant response expected on any trial.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "reported_complete",
-          "value": "Adult: 12 trials per condition per block; 60 trials per block; 180 total over 3 blocks.",
+          "status": "derived_complete",
+          "value": "Adults: five conditions × twelve trials × three blocks = 180 trials, 36 per condition.",
           "compositeValue": "",
-          "pageOrSection": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
-          "evidenceNote": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. ",
-          "derivationNote": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "5 × 12 × 3 = 180 total; 12 × 3 = 36 per condition.",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "https://www.pnas.org/doi/suppl/10.1073/pnas.2024548118/suppl_file/pnas.2024548118.sapp.pdf",
-          "sourceType": "existing_primary_supplement_review_with_current_main_methods",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
           "missingComponents": [],
           "components": {
             "derived_total_reconciliation": {
-              "status": "reported",
-              "value": "5 x 12 x 3 = 180 trials.",
+              "status": "derived",
+              "value": "5 × 12 × 3 = 180 total; 12 × 3 = 36 per condition.",
               "note": ""
             },
             "exceptions_or_overrides": {
               "status": "reported",
-              "value": "Counts matched across conditions within blocks.",
+              "value": "Adult allocation differs from newborn variant; no compliance-dependent block range stated.",
               "note": ""
             },
             "factor_dimensions": {
               "status": "reported",
-              "value": "Five conditions: T, ANear, AFar, TANear, TAFar.",
+              "value": "Five conditions T/A-near/A-far/TA-near/TA-far.",
               "note": ""
             },
             "repetitions_or_exact_counts": {
               "status": "reported",
-              "value": "12 per condition per block.",
+              "value": "Twelve per condition per block, three blocks.",
               "note": ""
             }
           }
@@ -33572,35 +33858,412 @@
           "key": "block_order_contract",
           "label": "Block and order policy",
           "status": "reported_complete",
-          "value": "Adult: 3 blocks of 60 trials; pseudo-random order, at most two identical trials consecutively.",
+          "value": "Adults receive three 60-trial blocks, twelve per condition. Pseudorandom order prevents more than two identical consecutive trials.",
           "compositeValue": "",
-          "pageOrSection": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
-          "evidenceNote": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. ",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
-          "evidenceSourceUrl": "https://www.pnas.org/doi/suppl/10.1073/pnas.2024548118/suppl_file/pnas.2024548118.sapp.pdf",
-          "sourceType": "existing_primary_supplement_review_with_current_main_methods",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
           "missingComponents": [],
           "components": {
             "block_composition": {
               "status": "reported",
-              "value": "Five conditions x 12 trials = 60 per block.",
+              "value": "60 trials: twelve of each condition.",
               "note": ""
             },
             "block_count": {
               "status": "reported",
-              "value": "3 blocks.",
+              "value": "Three blocks.",
               "note": ""
             },
             "pool_repeat_or_distribution": {
               "status": "reported",
-              "value": "Condition counts repeated per block.",
+              "value": "Equal condition counts per block.",
+              "note": ""
+            },
+            "sequence_constraints": {
+              "status": "reported",
+              "value": "No more than two identical consecutive trials.",
               "note": ""
             },
             "within_block_randomization": {
               "status": "reported",
-              "value": "Pseudo-randomized; no more than two identical trials in a row.",
+              "value": "Pseudorandom condition order.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1073/pnas.2024548118::c",
+      "networkNodeId": "doi:10.1073/pnas.2024548118",
+      "label": "Spatial tuning of electrophysiological responses to multisensory stimuli reveals a primitive coding of the body boundaries in newborns (c)",
+      "experimentLabel": "Newborn stimulus-adequacy pilot",
+      "inventoryStatus": "confirmed_newborn_adult_variants_and_separate_newborn_pilot",
+      "evidenceScope": "study_specific_source_review",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "not_applicable": 11
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "not_applicable",
+          "value": "Five-newborn stimulus-adequacy pilot, separate from 30 main enrollees, selected stimulus intensity yielding visible ERPs while newborns remained calm. Supporting calibration feasibility is not a separately reported near/far PPS effect. Exact trial count/order and protocol distribution are unreported. Adult simultaneity pilot is a separate mentioned activity with unknown N/overlap, not assigned to these five newborns.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "not_applicable",
+          "value": "Five-newborn stimulus-adequacy pilot, separate from 30 main enrollees, selected stimulus intensity yielding visible ERPs while newborns remained calm. Supporting calibration feasibility is not a separately reported near/far PPS effect. Exact trial count/order and protocol distribution are unreported. Adult simultaneity pilot is a separate mentioned activity with unknown N/overlap, not assigned to these five newborns.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "not_applicable",
+          "value": "Five-newborn stimulus-adequacy pilot, separate from 30 main enrollees, selected stimulus intensity yielding visible ERPs while newborns remained calm. Supporting calibration feasibility is not a separately reported near/far PPS effect. Exact trial count/order and protocol distribution are unreported. Adult simultaneity pilot is a separate mentioned activity with unknown N/overlap, not assigned to these five newborns.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "not_applicable",
+          "value": "Five-newborn stimulus-adequacy pilot, separate from 30 main enrollees, selected stimulus intensity yielding visible ERPs while newborns remained calm. Supporting calibration feasibility is not a separately reported near/far PPS effect. Exact trial count/order and protocol distribution are unreported. Adult simultaneity pilot is a separate mentioned activity with unknown N/overlap, not assigned to these five newborns.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "not_applicable",
+          "value": "Five-newborn stimulus-adequacy pilot, separate from 30 main enrollees, selected stimulus intensity yielding visible ERPs while newborns remained calm. Supporting calibration feasibility is not a separately reported near/far PPS effect. Exact trial count/order and protocol distribution are unreported. Adult simultaneity pilot is a separate mentioned activity with unknown N/overlap, not assigned to these five newborns.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "not_applicable",
+          "value": "Five-newborn stimulus-adequacy pilot, separate from 30 main enrollees, selected stimulus intensity yielding visible ERPs while newborns remained calm. Supporting calibration feasibility is not a separately reported near/far PPS effect. Exact trial count/order and protocol distribution are unreported. Adult simultaneity pilot is a separate mentioned activity with unknown N/overlap, not assigned to these five newborns.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "not_applicable",
+          "value": "Five-newborn stimulus-adequacy pilot, separate from 30 main enrollees, selected stimulus intensity yielding visible ERPs while newborns remained calm. Supporting calibration feasibility is not a separately reported near/far PPS effect. Exact trial count/order and protocol distribution are unreported. Adult simultaneity pilot is a separate mentioned activity with unknown N/overlap, not assigned to these five newborns.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "not_applicable",
+          "value": "Five-newborn stimulus-adequacy pilot, separate from 30 main enrollees, selected stimulus intensity yielding visible ERPs while newborns remained calm. Supporting calibration feasibility is not a separately reported near/far PPS effect. Exact trial count/order and protocol distribution are unreported. Adult simultaneity pilot is a separate mentioned activity with unknown N/overlap, not assigned to these five newborns.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "not_applicable",
+          "value": "Five-newborn stimulus-adequacy pilot, separate from 30 main enrollees, selected stimulus intensity yielding visible ERPs while newborns remained calm. Supporting calibration feasibility is not a separately reported near/far PPS effect. Exact trial count/order and protocol distribution are unreported. Adult simultaneity pilot is a separate mentioned activity with unknown N/overlap, not assigned to these five newborns.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "not_applicable",
+          "value": "Five-newborn stimulus-adequacy pilot, separate from 30 main enrollees, selected stimulus intensity yielding visible ERPs while newborns remained calm. Supporting calibration feasibility is not a separately reported near/far PPS effect. Exact trial count/order and protocol distribution are unreported. Adult simultaneity pilot is a separate mentioned activity with unknown N/overlap, not assigned to these five newborns.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "not_applicable",
+          "value": "Five-newborn stimulus-adequacy pilot, separate from 30 main enrollees, selected stimulus intensity yielding visible ERPs while newborns remained calm. Supporting calibration feasibility is not a separately reported near/far PPS effect. Exact trial count/order and protocol distribution are unreported. Adult simultaneity pilot is a separate mentioned activity with unknown N/overlap, not assigned to these five newborns.",
+          "compositeValue": "",
+          "pageOrSection": "Original pnas.2024548118.sapp.pdf, SI pp. 2–3; EEG processing pp. 3–4; current main Methods",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1073/pnas.2024548118",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false",
+          "sourceType": "primary_main_and_original_methods_supplement",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Adjacent stimulus-adequacy pilot; no separate reported direct PPS acquisition contract.",
               "note": ""
             }
           }
@@ -56506,9 +57169,9 @@
     "methodsReviewedInventories": 57,
     "auditedAccessBlockers": 8,
     "projectLineageReviews": 1,
-    "publicationsWithAllContractDispositions": 61,
-    "inventoryAndContractsAudited": 61,
-    "remainingInventoryOrContractAudit": 33,
+    "publicationsWithAllContractDispositions": 62,
+    "inventoryAndContractsAudited": 62,
+    "remainingInventoryOrContractAudit": 32,
     "inventoryEvidenceCounts": {
       "abstract_or_metadata_inventory": 1,
       "audited_source_access_gap": 8,
