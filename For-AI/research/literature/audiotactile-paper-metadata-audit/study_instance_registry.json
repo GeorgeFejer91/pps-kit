@@ -1002,6 +1002,85 @@
         "basis": "Spadone 2021 identifies this dataset but restates incompatible fMRI repetition/run counts and one ITI value. Both versions remain explicit; no independent replication or automatic protocol equivalence is inferred."
       },
       "source_review_limit": "Fresh author-hosted primary article inspected. Preserve current/voltage terminology, a post-catch time-unit contradiction, ambiguous fMRI catch denominator and the later reanalysis differences. Across-task repetition counts are not silently inherited from the main cohort. Physical calibration remains unassessed."
+    },
+    {
+      "network_node_id": "doi:10.1098/rsos.181878",
+      "doi": "10.1098/rsos.181878",
+      "inventory_status": "confirmed_three_social_context_experiments",
+      "instance_count_basis": "Primary section 2.3 explicitly distinguishes collaborative, competitive and audience experiments with separate participant groups. Isolated/dyad condition, left/right hemispace and partner position are factors within each experiment.",
+      "evidence_pointer": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6731720/::sections 2.1-2.4",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_spatialized_looming_with_social_context",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Experiment 1: collaboration",
+          "record_id": "social_coding_2019",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "b",
+          "experiment_label": "Experiment 2: competition",
+          "record_id": "social_coding_2019",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "c",
+          "experiment_label": "Experiment 3: inactive audience",
+          "record_id": "social_coding_2019",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        }
+      ],
+      "source_review_limit": "Fresh full primary Methods inspected. Common protocol values are explicitly shared across the three experiments, while social instructions differ. Original bubbling-water asset, HRTF/room configuration, motion law, response deadline and silence distribution are unresolved; source/device performance does not qualify PPS Kit."
+    },
+    {
+      "network_node_id": "doi:10.1016/j.cortex.2020.11.021",
+      "doi": "10.1016/j.cortex.2020.11.021",
+      "inventory_status": "confirmed_one_audiotactile_group_comparison",
+      "instance_count_basis": "One PPS assessment compares young/older groups and both hands. Body-landmark localization, avatar adjustment and subsequent sound localization are companion measures, not additional PPS-boundary experiments.",
+      "evidence_pointer": "https://arodes.hes-so.ch/nanna/record/7034/files/Published%20version.pdf::section 2.2.3, journal pp. 60-61",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_pps_assessment_with_age_group_factor",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Bilateral PPS assessment in young and older adults",
+          "record_id": "ageing_2021",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Body-landmark and avatar tasks",
+          "disposition": "companion_body_representation_assessments",
+          "basis": "Sections 2.2.1-2.2.2 assess implicit/explicit body metrics separately from the PPS reaction-time task.",
+          "evidence_pointer": "https://arodes.hes-so.ch/nanna/record/7034/files/Published%20version.pdf::sections 2.2.1-2.2.3"
+        },
+        {
+          "label": "Sound localization validation",
+          "disposition": "perceptual_validation_not_independent_pps_boundary_task",
+          "basis": "After both-hand PPS assessment, the older group and a young subgroup verbally indicate perceived sound distance on a visible 0-100-cm ruler at three touch delays. No speeded tactile response boundary is measured.",
+          "evidence_pointer": "https://arodes.hes-so.ch/nanna/record/7034/files/Published%20version.pdf::Unimodal sound localization task, journal p. 61"
+        }
+      ],
+      "source_lineage": {
+        "network_node_id": "doi:10.1093/braincomms/fcac179",
+        "relationship": "healthy_control_data_partly_reused_in_later_stroke_study",
+        "basis": "The later Bassolino 2022 article explicitly identifies this paper as prior partial reporting of its healthy-control data; do not count that shared evidence as independent replication."
+      },
+      "source_review_limit": "Fresh institutional published PDF Methods inspected. Keep explicit 2000-ms foot-response window, three positive SOAs and 110-row recipe while leaving hand crossing, silent baseline zero anchor, interval anchor and block count unresolved."
     }
   ],
   "corpus_freeze": {
@@ -1359,6 +1438,17 @@
       "review_date": "2026-10-27",
       "reason": "Primary Methods separates main behavioral and fMRI protocols, same-task session reproducibility, and two catch-variant experiments. Five protocol rows represent three cohorts, not independent replications; supporting localization and passive auditory localizer remain disclosed context.",
       "evidence_pointer": "https://static1.squarespace.com/static/528facb6e4b0a18b7e9cde91/t/567541f969492e8da7dd7336/1450525177323/Intertrial%2BVariability%2Bin%2Bthe%2BPremotor%2BCortex%2BAccounts%2Bfor%2BIndividual%2BDifferences%2Bin%2BPeripersonal%2BSp.pdf::Materials and Methods pp. 2-3"
+    },
+    {
+      "old_study_row_id": "doi:10.1098/rsos.181878",
+      "child_study_row_ids": [
+        "doi:10.1098/rsos.181878::a",
+        "doi:10.1098/rsos.181878::b",
+        "doi:10.1098/rsos.181878::c"
+      ],
+      "review_date": "2026-10-27",
+      "reason": "Primary Methods establishes three independent collaboration, competition and audience experiments. Social condition, hemispace and partner position are factors within each; the former publication placeholder is not equivalent to any one child.",
+      "evidence_pointer": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6731720/::sections 2.3-2.4"
     }
   ]
 }

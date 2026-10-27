@@ -4225,7 +4225,7 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "exact task parameters need extraction; social context is non-blocking"
+            "Original bubbling-water recording, LISTEN HRTF identity and complete room/render configuration; motion time law; online response deadline; trailing-silence distribution; catch allocation across social/hemispace conditions. Three experiments share nine 0-3000-ms SOAs, -650/+3650-ms baseline anchors and 480-row schedules."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -4260,9 +4260,9 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "exact task parameters need extraction; social context is non-blocking"
+        "Original bubbling-water recording, LISTEN HRTF identity and complete room/render configuration; motion time law; online response deadline; trailing-silence distribution; catch allocation across social/hemispace conditions. Three experiments share nine 0-3000-ms SOAs, -650/+3650-ms baseline anchors and 480-row schedules."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: exact task parameters need extraction; social context is non-blocking",
+      "next_required_action": "Extract or source the missing paper parameters: Original bubbling-water recording, LISTEN HRTF identity and complete room/render configuration; motion time law; online response deadline; trailing-silence distribution; catch allocation across social/hemispace conditions. Three experiments share nine 0-3000-ms SOAs, -650/+3650-ms baseline anchors and 480-row schedules.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -4992,7 +4992,7 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "exact task parameters need extraction; age group context is non-blocking"
+            "Original audio generation/envelope and distance mapping; silent-baseline zero trigger; inter-stimulus interval anchor/distribution; whether 110-row recipe repeats per hand; PPS block count/composition. Current Methods reports 300/1500/2700-ms SOAs and a 2000-ms right-foot response window."
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -5027,9 +5027,9 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "exact task parameters need extraction; age group context is non-blocking"
+        "Original audio generation/envelope and distance mapping; silent-baseline zero trigger; inter-stimulus interval anchor/distribution; whether 110-row recipe repeats per hand; PPS block count/composition. Current Methods reports 300/1500/2700-ms SOAs and a 2000-ms right-foot response window."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: exact task parameters need extraction; age group context is non-blocking",
+      "next_required_action": "Extract or source the missing paper parameters: Original audio generation/envelope and distance mapping; silent-baseline zero trigger; inter-stimulus interval anchor/distribution; whether 110-row recipe repeats per hand; PPS block count/composition. Current Methods reports 300/1500/2700-ms SOAs and a 2000-ms right-foot response window.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
