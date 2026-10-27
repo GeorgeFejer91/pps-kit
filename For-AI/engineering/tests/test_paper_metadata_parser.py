@@ -414,8 +414,9 @@ def test_missing_pdf_request_list_tracks_main_pdfs_and_supplements():
     }
 
     # Serino 2009's two sound-to-TMS experiments are a reviewed mechanistic boundary.
-    assert len(in_scope_ids) == 70
+    assert len(in_scope_ids) == 69
     assert "serino_2009_tms" not in in_scope_ids
+    assert "finisguerra_2015_moving_sounds_motor" not in in_scope_ids
     by_record: dict[str, set[str]] = {}
     for request in requests:
         by_record.setdefault(request["record_id"], set()).add(request["requested_item"])

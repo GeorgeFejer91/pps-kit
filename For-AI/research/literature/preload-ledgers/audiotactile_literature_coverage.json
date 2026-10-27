@@ -271,9 +271,9 @@
       "covered_blocked_missing_publication_parameters": 5,
       "covered_blocked_toolkit_structure": 0,
       "not_yet_templated_requires_toolkit_structure": 0,
-      "not_yet_templated_missing_publication_parameters": 47,
+      "not_yet_templated_missing_publication_parameters": 46,
       "candidate_needs_full_text_task_audit": 0,
-      "adjacent_out_of_scope": 5
+      "adjacent_out_of_scope": 6
     },
     "current_template_count": 30,
     "current_profile_check_pass_count": 25,
@@ -2213,15 +2213,19 @@
         "web_search_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "audiotactile_task_family": "moving-sound hand-PPS task with rare tactile targets and motor-system/TMS endpoint",
+      "coverage_category": "adjacent_out_of_scope",
+      "audiotactile_task_family": "moving auditory-TMS/MEP mechanism with separate tactile attention and localization validation",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://www.researchgate.net/publication/266398259_Moving_sounds_within_the_peripersonal_space_modulate_the_motor_system",
+      "scope_review_basis": "Primary Methods sections 2.3.1-2.3.2: main outcome is TMS-evoked MEP amplitude. Rare tactile probes are separated from TMS by 4-5 s and serve attention; subsequent sound-localization judgments validate the apparatus. The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+      "recreation_caveats": [
+        "TMS/EMG acquisition and physical qualification remain external requirements for the mechanistic experiment. Boundary classification does not establish software or hardware support.",
+        "Existing critical primary review retains incomplete audio waveform, tactile calibration and baseline-probe inclusion evidence for any future mechanistic recreation."
       ],
-      "missing_publication_parameters": [
-        "extract moving-sound trajectory, tactile target schedule, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating; vocal/voice-key response metadata is now runner-supported"
-      ]
+      "retained_frozen_corpus_boundary": true
     },
     {
       "record_id": "biggio_2017_racket_tool_use",

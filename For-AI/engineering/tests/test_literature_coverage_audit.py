@@ -38,9 +38,9 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_blocked_missing_publication_parameters": 5,
         "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 0,
-        "not_yet_templated_missing_publication_parameters": 47,
+        "not_yet_templated_missing_publication_parameters": 46,
         "candidate_needs_full_text_task_audit": 0,
-        "adjacent_out_of_scope": 5,
+        "adjacent_out_of_scope": 6,
     }
     assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 30
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
@@ -851,12 +851,11 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     )
     assert records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"] == []
     assert "tactile_discrimination_or_localization_response" not in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]
-    assert records["finisguerra_2015_moving_sounds_motor"]["coverage_category"] == (
-        "not_yet_templated_missing_publication_parameters"
-    )
-    assert records["finisguerra_2015_moving_sounds_motor"]["blocking_constraint_ids"] == [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-    ]
+    assert records["finisguerra_2015_moving_sounds_motor"]["coverage_category"] == "adjacent_out_of_scope"
+    assert records["finisguerra_2015_moving_sounds_motor"]["blocking_constraint_ids"] == []
+    assert records["finisguerra_2015_moving_sounds_motor"]["retained_frozen_corpus_boundary"] is True
+    assert "sound-position-to-TMS" in records["finisguerra_2015_moving_sounds_motor"]["scope_review_basis"]
+    assert "physical qualification" in records["finisguerra_2015_moving_sounds_motor"]["recreation_caveats"][0]
     assert records["biggio_2017_racket_tool_use"]["coverage_category"] == "covered_runnable_profile"
     assert records["biggio_2017_racket_tool_use"]["current_template_ids"] == [
         "biggio_2017_no_racket",

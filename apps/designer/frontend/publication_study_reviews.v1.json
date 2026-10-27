@@ -21,10 +21,10 @@
       "derived_complete": 44,
       "explicitly_absent": 15,
       "low_confidence": 64,
-      "not_applicable": 45,
+      "not_applicable": 56,
       "not_assessed": 341,
       "not_reported": 23,
-      "partial": 203,
+      "partial": 192,
       "reported_complete": 197,
       "source_unavailable": 277
     }
@@ -406,7 +406,7 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "partial": 11
+        "not_applicable": 11
       },
       "nativeQualification": "not_assessed"
     },
@@ -11394,203 +11394,350 @@
     {
       "studyRowId": "doi:10.1016/j.neuropsychologia.2014.09.043",
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2014.09.043",
-      "label": "Moving sounds within the peripersonal space modulate the motor system.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Moving sounds within the peripersonal space modulate the motor system. (a)",
+      "experimentLabel": "Moving-sound auditory/TMS motor-excitability experiment",
+      "inventoryStatus": "confirmed_one_adjacent_mechanistic_experiment",
+      "evidenceScope": "experiment_specific",
       "templateIds": [],
       "parameterStatusCounts": {
-        "partial": 11
+        "not_applicable": 11
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "partial",
-          "value": "Source provenance: Custom Matlab software and a microcontroller controlled an eight-speaker array; exact source sound file or waveform asset is not supplied. | Auditory conditions: Experimental factors were sound movement direction (IN, OUT) and sound position/distance (15, 30, 45, 60, 75, 90 cm). Sounds were task-irrelevant during TMS trials. | Gain envelope: A microcontroller controlled volume flow across speakers; maximum intensity was calibrated by phonometer to 70 dB at the closest hand position for both IN and OUT sounds. | Renderer or apparatus: Custom-made eight-loudspeaker array hidden from view, Matlab control, microcontroller volume flow, CED interface triggering TMS, phonometer calibration.",
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.2-5, Method/Figure 1; supplement route checked 2026-06-16 | PDF p.3, Main experiment | PDF pp.3-4, Main experiment | PDF p.3, Figure 1 and Main experiment",
-          "evidenceNote": "The paper reports moving sounds but does not identify the waveform as noise, tone, or another sound class. | Apparatus/software provenance is reported, while the audio asset is not. | The design paragraph gives the 2 x 6 direction-distance factor structure. | Calibration and cross-speaker volume control are reported; exact gain algorithm is not. | The auditory rendering apparatus is described in the main experiment section.",
+          "pageOrSection": "Primary article Methods,2.3.1-2.3.2",
+          "evidenceNote": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.09.043",
-          "missingComponents": [
-            "source_recipe_or_asset_provenance",
-            "level_envelope_calibration"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "partial",
-          "value": "Trajectory path: Sound moved along an eight-loudspeaker line beside the right hand, with loudspeakers 15 cm apart and sampled positions at 15, 30, 45, 60, 75, and 90 cm from the hand over a 105 cm device span. | Stimulus duration: The moving sound traversed the 105 cm path in 3 s. | Stimulus speed: Moving sounds traveled at 35 cm/s. | Trajectory count: Two moving-sound directions: IN approaching the body/hand and OUT receding from it. | Gain envelope: A microcontroller controlled volume flow across speakers; maximum intensity was calibrated by phonometer to 70 dB at the closest hand position for both IN and OUT sounds. | Renderer or apparatus: Custom-made eight-loudspeaker array hidden from view, Matlab control, microcontroller volume flow, CED interface triggering TMS, phonometer calibration.",
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.3-4, Figure 1 and Main experiment | PDF p.3, Main experiment | PDF pp.2-3, Introduction and Figure 1 | PDF p.3, Figure 1 and Main experiment",
-          "evidenceNote": "Figure and methods give the speaker array and sampled distance positions. | Duration is explicitly reported with path length and speed. | Speed is explicitly stated. | The hypotheses and Figure 1 explicitly distinguish IN and OUT sounds. | Calibration and cross-speaker volume control are reported; exact gain algorithm is not. | The auditory rendering apparatus is described in the main experiment section.",
+          "pageOrSection": "Primary article Methods,2.3.1-2.3.2",
+          "evidenceNote": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.09.043",
-          "missingComponents": [
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "partial",
-          "value": "Trial rows families: Rows/families: PRE baseline MEP recording, EXP TMS moving-sound trials, EXP rare tactile no-TMS trials, POST baseline MEP recording, and a later sound-localization control task. | Task sequence rules: Subjects ignored task-irrelevant sounds during TMS trials, kept the hand relaxed, and responded verbally only to rare tactile stimulation on the dorsum of the right hand. | Condition intermixing: Within EXP, TMS trials from the 2 x 6 direction-distance design were randomly combined and randomly intermingled with rare tactile no-TMS trials.",
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.2-4, Main experiment and localization judgments | PDF pp.3-4, Main experiment | PDF p.4, Main experiment",
-          "evidenceNote": "The methods separate baseline, experimental, tactile-probe, and localization phases. | The TMS/ignore-sound and tactile-response rules are reported. | The design paragraph reports random combination and intermingling.",
+          "pageOrSection": "Primary article Methods,2.3.1-2.3.2",
+          "evidenceNote": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.09.043",
-          "missingComponents": [
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "partial",
-          "value": "Task sequence rules: Subjects ignored task-irrelevant sounds during TMS trials, kept the hand relaxed, and responded verbally only to rare tactile stimulation on the dorsum of the right hand.",
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.3-4, Main experiment | PDF pp.3-4; supplement route checked 2026-06-16",
-          "evidenceNote": "The TMS/ignore-sound and tactile-response rules are reported. | Participants responded verbally as fast as possible to rare tactile probes, but no numeric response deadline/window was found.",
+          "pageOrSection": "Primary article Methods,2.3.1-2.3.2",
+          "evidenceNote": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.09.043",
-          "missingComponents": [
-            "response_window_and_anchor"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "partial",
-          "value": "Iti jitter policy: Software-controlled inter-trial interval was always greater than 10 s, precisely 10-12 s; tactile stimuli were at least 4-5 s apart from TMS pulses.",
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.4, Main experiment",
-          "evidenceNote": "The ITI range and tactile-TMS separation are both reported.",
+          "pageOrSection": "Primary article Methods,2.3.1-2.3.2",
+          "evidenceNote": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.09.043",
-          "missingComponents": [
-            "timing_scope_and_anchor",
-            "values_or_range"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "partial",
-          "value": "Soa table: Sampled sound positions were 15, 30, 45, 60, 75, and 90 cm from the hand; TMS was delivered 50 ms after the sound reached a sampled position, and tactile probes used the same six positions without TMS.",
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.3-4, Main experiment and localization control",
-          "evidenceNote": "The event table is reported as distance-at-event rather than a normal behavioral SOA ladder.",
+          "pageOrSection": "Primary article Methods,2.3.1-2.3.2",
+          "evidenceNote": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.09.043",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "partial",
-          "value": "Tactile stimulus: Rare tactile stimulation used a DS7A Digitimer constant-current electrical stimulator via Neuroline neurological electrodes on the dorsum of the right hand.",
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.3-4, Main experiment",
-          "evidenceNote": "Stimulator, electrode type, and body site are reported; pulse duration/current are not.",
+          "pageOrSection": "Primary article Methods,2.3.1-2.3.2",
+          "evidenceNote": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.09.043",
-          "missingComponents": [
-            "waveform_and_duration",
-            "intensity_or_calibration"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "partial",
-          "value": "Baseline strategy: MEP baseline used PRE and POST no-noise baseline recordings with subjects' eyes closed; averaged baseline MEPs were used to compute MEP modulation. | Baseline timing: Baseline was phase-level rather than in-trial: one PRE and one POST block were run without sound/noise around the EXP session. | Baseline count: Two baseline blocks, PRE and POST, each had 12 baseline MEP trials; each baseline also included 2 tactile attention probes without TMS.",
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.2-4, Main experiment and Data pre-processing | PDF pp.2-3, Main experiment",
-          "evidenceNote": "Baseline blocks and baseline-normalized MEP index are described. | No baseline SOA exists; baselines are pre/post recording phases. | Baseline block and tactile-probe counts are reported.",
+          "pageOrSection": "Primary article Methods,2.3.1-2.3.2",
+          "evidenceNote": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.09.043",
-          "missingComponents": [
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "partial",
-          "value": "Catch trial type: No conventional catch label is used. The 144 TMS moving-sound trials are tactile-absent/no-response trials while subjects wait for rare tactile probes; false alarms to tactile were tracked. | Catch count: If tactile-absent no-response trials are treated as catch trials, EXP contains 144 target-absent TMS moving-sound trials; the paper does not use the term catch.",
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.3-4, Main experiment",
-          "evidenceNote": "Derived from rare tactile target instructions, target-absent TMS trials, and reported false alarms. | Derived from 144 TMS trials without tactile targets and rare tactile-response instructions.",
-          "derivationNote": "Derived from rare tactile target instructions, target-absent TMS trials, and reported false alarms. | Derived from 144 TMS trials without tactile targets and rare tactile-response instructions.",
-          "reviewedOn": "2026-06-16",
+          "pageOrSection": "Primary article Methods,2.3.1-2.3.2",
+          "evidenceNote": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.09.043",
-          "missingComponents": [
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "partial",
-          "value": "Repetitions per tactile soa condition: TMS trials: each of the 12 direction-position cells was repeated 12 times. Rare tactile no-TMS trials: 2 repetitions per direction-position cell, 24 total. Localization control: 6 per cell, 72 total. | Total trial count: Main experiment contains 144 TMS trials plus 24 EXP tactile no-TMS trials and 24 baseline MEP trials; baseline tactile probes add or are included as 2 per baseline, so total is about 192-196 depending on inclusion.",
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.4, Main experiment and localization judgments | PDF pp.2-4, Main experiment",
-          "evidenceNote": "Repetition counts are explicit for TMS, tactile no-TMS, and localization-control trials. | Derived from explicit counts; wording is ambiguous about whether baseline tactile probes are included in the 12 baseline trials.",
-          "derivationNote": "Derived from explicit counts; wording is ambiguous about whether baseline tactile probes are included in the 12 baseline trials.",
-          "reviewedOn": "2026-06-16",
+          "pageOrSection": "Primary article Methods,2.3.1-2.3.2",
+          "evidenceNote": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.09.043",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "partial",
-          "value": "Blocked or random order: The sequence was PRE baseline, EXP session, POST baseline; the 144 TMS trials were equally distributed across four experimental blocks and randomized within the design. | Block count: Three main phases were run: PRE baseline, EXP, and POST baseline. EXP TMS trials were equally distributed across four experimental blocks. | Condition intermixing: Within EXP, TMS trials from the 2 x 6 direction-distance design were randomly combined and randomly intermingled with rare tactile no-TMS trials. | Total trial count: Main experiment contains 144 TMS trials plus 24 EXP tactile no-TMS trials and 24 baseline MEP trials; baseline tactile probes add or are included as 2 per baseline, so total is about 192-196 depending on inclusion.",
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.2-4, Main experiment | PDF p.4, Main experiment",
-          "evidenceNote": "Baseline order and four EXP blocks are explicitly reported. | Phase and EXP block counts are explicitly reported. | The design paragraph reports random combination and intermingling. | Derived from explicit counts; wording is ambiguous about whether baseline tactile probes are included in the 12 baseline trials.",
-          "derivationNote": "Derived from explicit counts; wording is ambiguous about whether baseline tactile probes are included in the 12 baseline trials.",
-          "reviewedOn": "2026-06-16",
+          "pageOrSection": "Primary article Methods,2.3.1-2.3.2",
+          "evidenceNote": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.09.043",
-          "missingComponents": [
-            "block_composition",
-            "block_order_or_counterbalancing"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable.",
+              "note": ""
+            }
+          }
         }
       ]
     },

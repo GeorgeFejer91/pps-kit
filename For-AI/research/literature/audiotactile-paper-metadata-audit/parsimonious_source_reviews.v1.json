@@ -9968,6 +9968,274 @@
           "evidence_note": "The two blocks described for echolocation training are not PPS blocks. REST duration is contradictory: Procedure 30 min, Figure 2 caption 15 min."
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.neuropsychologia.2014.09.043",
+      "source_type": "author_posted_primary_article_text_with_existing_critical_pdf_review",
+      "source_file": "https://www.researchgate.net/publication/266398259_Moving_sounds_within_the_peripersonal_space_modulate_the_motor_system",
+      "review_date": "2026-10-27",
+      "review_scope": "Primary Methods sections 2.3.1-2.3.2: main outcome is TMS-evoked MEP amplitude. Rare tactile probes are separated from TMS by 4-5 s and serve attention; subsequent sound-localization judgments validate the apparatus. Frozen publication retained as an explicit boundary; no parameter-unavailable claim.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.researchgate.net/publication/266398259_Moving_sounds_within_the_peripersonal_space_modulate_the_motor_system",
+          "outcome": "author_posted_primary_article_Methods_2.3.1_and_2.3.2_read"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/abs/pii/S0028393214003480",
+          "outcome": "HTTP403_on_open; publisher_search_excerpt_corresponds_to_TMS_endpoint"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.researchgate.net/publication/profile/Michela-Bassolino/publication/266398259_Moving_sounds_within_the_peripersonal_space_modulate_the_motor_system/links/5b03dd3da6fdccf9e4f7c343/Moving-sounds-within-the-peripersonal-space-modulate-the-motor-system.pdf",
+          "outcome": "HTTP404; no_PDF_retrieved"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "manual_reviews/finisguerra_2015_moving_sounds_motor.json",
+          "outcome": "existing_2026-06-16_primary_PDF_review_read; expected_local_PDF_absent"
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
+          "page_or_section": "Primary article Methods,2.3.1-2.3.2",
+          "evidence_note": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
+          "page_or_section": "Primary article Methods,2.3.1-2.3.2",
+          "evidence_note": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
+          "page_or_section": "Primary article Methods,2.3.1-2.3.2",
+          "evidence_note": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            }
+          }
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
+          "page_or_section": "Primary article Methods,2.3.1-2.3.2",
+          "evidence_note": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
+          "page_or_section": "Primary article Methods,2.3.1-2.3.2",
+          "evidence_note": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
+          "page_or_section": "Primary article Methods,2.3.1-2.3.2",
+          "evidence_note": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
+          "page_or_section": "Primary article Methods,2.3.1-2.3.2",
+          "evidence_note": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
+          "page_or_section": "Primary article Methods,2.3.1-2.3.2",
+          "evidence_note": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            }
+          }
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
+          "page_or_section": "Primary article Methods,2.3.1-2.3.2",
+          "evidence_note": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
+          "page_or_section": "Primary article Methods,2.3.1-2.3.2",
+          "evidence_note": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent auditory-TMS/MEP mechanism; outside direct audio-tactile replication scope.",
+          "page_or_section": "Primary article Methods,2.3.1-2.3.2",
+          "evidence_note": "The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Direct audio-tactile replication contract not applicable."
+            }
+          }
+        }
+      }
     }
   ]
 }
