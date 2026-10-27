@@ -8829,6 +8829,246 @@
           }
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.3389/fpsyg.2011.00077",
+      "source_type": "publisher_full_text_scope_review",
+      "source_file": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2011.00077/full",
+      "review_date": "2026-10-27",
+      "review_scope": "Publication-level computational-review boundary. Model coordinates and simulation schedules are not extracted as human acquisition parameters.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2011.00077/full",
+          "outcome": "publisher_review_type_and_model_sections_inspected"
+        }
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "No new human audiotactile experiment in this computational review.",
+          "page_or_section": "Article type; General Introduction; Multisensory Representation of Peripersonal Space / Model description",
+          "evidence_note": "Two neural-network models and simulation results; retained as literature context, not a human replication protocol.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "No new human audiotactile experiment in this computational review.",
+          "page_or_section": "Article type; General Introduction; Multisensory Representation of Peripersonal Space / Model description",
+          "evidence_note": "Two neural-network models and simulation results; retained as literature context, not a human replication protocol.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "No new human audiotactile experiment in this computational review.",
+          "page_or_section": "Article type; General Introduction; Multisensory Representation of Peripersonal Space / Model description",
+          "evidence_note": "Two neural-network models and simulation results; retained as literature context, not a human replication protocol.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            }
+          }
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "No new human audiotactile experiment in this computational review.",
+          "page_or_section": "Article type; General Introduction; Multisensory Representation of Peripersonal Space / Model description",
+          "evidence_note": "Two neural-network models and simulation results; retained as literature context, not a human replication protocol.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "No new human audiotactile experiment in this computational review.",
+          "page_or_section": "Article type; General Introduction; Multisensory Representation of Peripersonal Space / Model description",
+          "evidence_note": "Two neural-network models and simulation results; retained as literature context, not a human replication protocol.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "No new human audiotactile experiment in this computational review.",
+          "page_or_section": "Article type; General Introduction; Multisensory Representation of Peripersonal Space / Model description",
+          "evidence_note": "Two neural-network models and simulation results; retained as literature context, not a human replication protocol.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "No new human audiotactile experiment in this computational review.",
+          "page_or_section": "Article type; General Introduction; Multisensory Representation of Peripersonal Space / Model description",
+          "evidence_note": "Two neural-network models and simulation results; retained as literature context, not a human replication protocol.",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "No new human audiotactile experiment in this computational review.",
+          "page_or_section": "Article type; General Introduction; Multisensory Representation of Peripersonal Space / Model description",
+          "evidence_note": "Two neural-network models and simulation results; retained as literature context, not a human replication protocol.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            }
+          }
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "No new human audiotactile experiment in this computational review.",
+          "page_or_section": "Article type; General Introduction; Multisensory Representation of Peripersonal Space / Model description",
+          "evidence_note": "Two neural-network models and simulation results; retained as literature context, not a human replication protocol.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "No new human audiotactile experiment in this computational review.",
+          "page_or_section": "Article type; General Introduction; Multisensory Representation of Peripersonal Space / Model description",
+          "evidence_note": "Two neural-network models and simulation results; retained as literature context, not a human replication protocol.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "No new human audiotactile experiment in this computational review.",
+          "page_or_section": "Article type; General Introduction; Multisensory Representation of Peripersonal Space / Model description",
+          "evidence_note": "Two neural-network models and simulation results; retained as literature context, not a human replication protocol.",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "No new human experiment; computational-review scope boundary."
+            }
+          }
+        }
+      }
     }
   ]
 }

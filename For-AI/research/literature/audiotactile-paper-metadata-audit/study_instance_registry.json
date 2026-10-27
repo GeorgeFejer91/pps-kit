@@ -394,6 +394,25 @@
           "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11047477/fullTextXML::2.4"
         }
       ]
+    },
+    {
+      "network_node_id": "doi:10.3389/fpsyg.2011.00077",
+      "doi": "10.3389/fpsyg.2011.00077",
+      "inventory_status": "confirmed_publication_scope_boundary",
+      "instance_count_basis": "Publisher labels this a review. It presents two computational neural-network models and simulation results, without a new human audiotactile experiment. This retained row represents the publication boundary, not an experiment count.",
+      "evidence_pointer": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2011.00077/full::Article type; General Introduction; Model description",
+      "review_date": "2026-10-27",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "publication_scope_boundary",
+          "experiment_label": "Computational review; no new human experiment",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_computational_review",
+          "disaggregation_status": "not_applicable_no_new_human_experiment"
+        }
+      ]
     }
   ],
   "corpus_freeze": {
