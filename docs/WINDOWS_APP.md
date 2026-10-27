@@ -10,6 +10,8 @@ The Python-free Rust/Tauri Designer and native Runner are currently separate
 release candidates. Source tests do not establish an installed update or
 physical timing qualification. The source/build commands below describe the
 existing V1 workflow until a verified native package replaces it.
+See the [native preview workflow and capability table](NATIVE_WINDOWS_PREVIEW.md)
+for its separate import, generation, execution and result paths.
 
 ## V1 source-development setup
 
@@ -87,7 +89,7 @@ The experimental Android companion is disabled/hidden in the current V1 Focus
 Mode and excluded from the public component packages. Do not expect a default
 LAN service or pairing tab. The native Runner's phone route has separate
 scope/qualification gates; desktop installation does not qualify it.
-The [Android companion notes](ANDROID_RUNNER_COMPANION.md) describe internal
+The [Android companion notes](https://github.com/GeorgeFejer91/pps-kit/blob/main/For-AI/experiments/android-companion/docs/ANDROID_RUNNER_COMPANION.md) describe internal
 experimental work, not the supported Windows installation path.
 
 Build the native Android companion debug APK:
@@ -182,7 +184,7 @@ channels:
 Those rendered files require one synchronized 3+ channel output device. On the
 lab Komplete setup, use `Komplete Audio ASIO Driver`; the Windows `Output 1/2`
 and `Output 3/4` pairs are legacy-only. See
-[Audio Routing And Stress Test](AUDIO_ROUTING_STRESS_TEST.md).
+[Audio Routing And Stress Test](https://github.com/GeorgeFejer91/pps-kit/blob/main/For-AI/engineering/validation/docs/AUDIO_ROUTING_STRESS_TEST.md).
 
 The runner keeps one persistent ASIO output stream open and mixes instructions,
 blocks, background audio, and click/tactile feedback into that stream. This is

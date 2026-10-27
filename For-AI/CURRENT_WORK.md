@@ -37,20 +37,30 @@ This file is the active checklist and handoff owner; replace state, do not appen
 - **Evidence:** the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md)
   identifies exact source and checks. Source, CI packages, installed behavior,
   physical timing, participant results and replication remain distinct gates.
-  Neither installed application nor public downloads changed in this task.
-- **Next action:** build the Runner candidate with its existing identifier, then
-  inspect its payload and installed resource paths. The native release compile
-  passes; the pinned candidate builder and Microsoft runtime inventory have
-  preflight evidence, not installed qualification. Actual debug WebView startup
-  passes with canonical bytes and native IPC. Package selection/preload through
+  V1 installations and public downloads remain unchanged. A separate local
+  Runner preview candidate was installed and its startup verified; complete
+  installed execution remains unverified.
+- **Next action:** resolve the legacy emulation harness's observed-vs-expected
+  failure, integrate remaining primary-source batches and finish hosted/native
+  wording. Rebuild candidates after the final source checkpoint. The first
+  Runner NSIS payload and installed native WebView startup pass without Python
+  or checkout paths on PATH; this is not a clean-Windows/full-journey result.
+  Package selection/preload through
   the Windows picker remains blocked by the native automation helper failing
   to initialize (kernel assets path not found); no substitute UI driver was used.
   Primary-source extraction continues independently. Pages assembly now includes
   referenced Study 5 instruction audio with its checked manifest hashes.
-- **Local validation:** the stable Standard checkpoint passed 647 tests with ten
-  skips; subsequent product changes have focused checks and still need a final
-  Standard run. Current integrated native applications pass 155 Runner and eight
-  Designer tests (six opt-in checks skipped), with strict Clippy. The core/package
+- **Local validation:** the current Standard run completed with 666 passed,
+  ten skipped and two failed checks. Both retained old scientific eligibility
+  assumptions; the replacement positive fixture also exposed long Windows paths
+  silently yielding no manifest rows. That reader now reuses the Runner path
+  owner and enforces complete row counts; the emulation engine's remaining
+  response-timing/join failure is under investigation. Do not report Standard
+  as passing yet. The integrated Rust selection (Designer, Runner, Designer core
+  and package verifier) passes 230 checks with 16 opt-in skips and strict Clippy.
+  PCM cancellation now uses a deterministic writer-boundary check, replacing a
+  five-second polling race; production cancellation behavior was unchanged.
+  The core/package
   numeric checkpoint passed 58 checks with nine opt-in skips. Exact binary64 JSON
   reload now preserves accepted design/order hashes; all 15 verifier checks pass
   including the full 408-trial group. No hash tolerance or verification bypass
@@ -59,7 +69,7 @@ This file is the active checklist and handoff owner; replace state, do not appen
   reselection preserving prior files. Independent audits found 92/81 events and
   two/two scored rows in the two tiny callback fixtures; instruction channel,
   sample boundaries and saved delays pass. These are software checks.
-  Designer: sixteen frontend tests and two Pages assembly checks pass. Actual
+  Designer/Runner: 96 frontend tests and canonical Pages assembly pass. Actual
   WebView generation/review/acceptance has 204 source trial rows and 600 participant
   occurrences; the 2 GiB, two-part native preparation passes strict verification,
   forged acceptance rejection, edit cancellation cleanup and restart revocation.
@@ -69,24 +79,28 @@ This file is the active checklist and handoff owner; replace state, do not appen
   existing evidence, without acquisition replay. The independent group audit passes both actual parts (173 events/four rows)
   and nine corruption/mixing contract checks. Native read-only group assessment
   passes seven checks including actual saved receipts; strict Clippy passes.
-  The worker's latest Runner suite passes 159 checks with two opt-in device
-  tests skipped. Condition gates retain their button acknowledgement without
+  Condition gates retain their button acknowledgement without
   inventing instruction audio. Independent UI review found and closed epoch/
-  late-adoption races; 78 Runner frontend checks pass. Designer storage now stages
+  late-adoption races. Designer storage now stages
   immutable assets and cleans import extraction on success/failure; ten host
-  checks and actual nine-asset failure/retry evidence pass. Installation, deployed
-  routes and final cross-product interaction remain open. New physical calibration
+  checks and actual nine-asset failure/retry evidence pass. The integrated mapper's
+  source/version links and generated inventory counts pass actual Chromium checks
+  at 320/768/1440 px with measured readable labels. Installed Runner startup is
+  verified at `b8e0e789`; later UI changes require a rebuilt package. Full installed
+  interaction, clean-Windows prerequisites and deployed routes remain open. New physical calibration
   is deferred by the user, not reported as measured.
-- **Scientific coverage:** frozen 94-publication corpus, 136 study rows and 1,496
-  compact contracts; 49 publications have registry entries, including one newly
-  audited inaccessible-source review unit with unresolved experiment count.
-  The earlier 48 registered inventories are not all Methods-confirmed: historical
-  provisional/abstract-based entries still require source review. Another 45
-  publications have no registered inventory. Registry presence is not a completed
-  experiment audit. Original Ferri 2015
+- **Scientific coverage:** frozen 94-publication corpus, 141 study rows and 1,551
+  compact contracts. The generated inventory audit reports 58 registered entries,
+  47 Methods-backed inventories (with source-version limitations retained), four
+  audited access blockers and 36 unregistered publications. Only 44 publications
+  pass inventory/access plus all eleven source-disposition checks; 50 remain.
+  Abstract-only and partial inventories do not pass by registration alone.
+  The mapper separates these states and links reviewed sources separately from
+  publication DOI identity. Original Ferri 2015
   variants are separated and their conflicts with later reanalysis preserved.
-  Device-paper source conflicts reduce fully source-covered emulated records to
-  15; the 18 GUI-ready records remain separately labelled. A bounded foundational
+  Device-paper source conflicts reduce the legacy emulation-eligible records to
+  15; this is not a fresh all-profile execution result. The 18 GUI-ready records
+  remain separately labelled. A bounded foundational
   check found 11 of 12 selected antecedents; Occelli 2010 is an outside-map
   omission candidate. Do not silently change membership or claim exhaustiveness.
   Templates and reviewed evidence do not confer native or physical qualification.
@@ -105,7 +119,8 @@ This file is the active checklist and handoff owner; replace state, do not appen
   `codex/pps-publication-integration`, `codex/pps-catalogue`,
   `codex/pps-rust-generation`, and `codex/pps-ui-desktop`. Verified checkpoints
   are pushed to review branches; public Pages/download promotion remains a
-  separate verified gate. No installed/public product update is claimed yet.
+  separate verified gate. A local Runner preview is installed at the recorded
+  checkpoint; V1 applications and public products were not promoted.
   The Designer preview identifier proposal is pending explicit confirmation;
   this gates package identity, not source/verification work.
 
@@ -129,8 +144,8 @@ This file is the active checklist and handoff owner; replace state, do not appen
   offline; Python/Rust handoff and result parity pass. Manifest-order progression
   now passes source and real silent-callback checks, including next-block UI.
   Browser bundle materialization, native host preparation and instruction/group
-  execution pass software checks; durable group receipt, final Runner UI and
-  installed evidence remain.
+  execution, durable group receipts and final Runner UI pass software checks;
+  complete installed interaction remains.
 - [ ] M4 — Close supported acquisition/recovery, accessibility/performance and
   evidence-record gaps (D1–D2, F1–F2, I1); audit every included experiment's 11
   replication contracts and finish citation mapper/preset navigation.

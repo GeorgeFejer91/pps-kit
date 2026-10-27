@@ -10,6 +10,10 @@ current studies.
 This is an architecture and software-qualification preview. It is not yet a
 publication-qualified replacement for the existing Windows ASIO, LSL,
 LabRecorder, wired-loopback, tactile-calibration, top-up, or analysis paths.
+The [Windows preview workflow](NATIVE_WINDOWS_PREVIEW.md) records the current
+native capability boundary: verified ordered-part execution and durable
+journal/result receipts are implemented; LSL/LabRecorder and physical capture
+remain unavailable in this candidate.
 
 ## Architecture
 
@@ -48,8 +52,9 @@ The implementation is split into these boundaries:
   browser, network, or audio-device dependency.
 - `packages/pps-runner-audio/`: verified PCM decode plus the device-independent
   playback plan and callback renderer.
-- `packages/pps-runner-audio-cpal/`: reservation-only WASAPI/CoreAudio/ALSA
-  output owner; it is not connected to experiment media or authority yet.
+- `packages/pps-runner-audio-cpal/`: WASAPI/CoreAudio/ALSA output owner with
+  bounded reservations and callback-confirmed prepared-media playback, connected
+  to native authority. A supported backend is not a qualified physical route.
 - `apps/runner/`: Tauri desktop preview and the shared multi-page browser UI.
 - `apps/quest-runner/`: native Kotlin/Meta Spatial SDK immersive shell with a
   Rust `cdylib` through JNI. Tauri is deliberately not the Quest renderer.

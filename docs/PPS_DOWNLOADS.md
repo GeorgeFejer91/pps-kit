@@ -1,6 +1,9 @@
 # PPS Kit Downloads
 
 PPS Kit V1 publishes two independent Windows programs and one combined suite.
+The [Python-free native preview](NATIVE_WINDOWS_PREVIEW.md) is qualified
+separately. A V1 downloader does not install the Rust/Tauri preview merely
+because newer source code is available in this repository.
 
 ## Choose a Download
 

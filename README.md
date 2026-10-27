@@ -9,9 +9,12 @@ installable Windows applications:
 - **PPS Experiment Runner** opens prepared experiments, performs participant
   runs, records evidence, and provides normal post-run review.
 
-Both products use the same scientific schemas, Python runtime, approved
-resources, and immutable study templates. They can be downloaded separately or
-together; V1 does not add a central hub.
+The published V1 products share scientific schemas, a Python runtime, approved
+resources and immutable study templates. They can be downloaded separately or
+together; V1 does not add a central hub. The same repository now develops a
+[Python-free Rust/Tauri Windows preview](docs/NATIVE_WINDOWS_PREVIEW.md) and
+an Online Designer for preparation with premade assets. Native source progress
+does not change an existing V1 download or establish installed qualification.
 
 ## Repository Map
 
