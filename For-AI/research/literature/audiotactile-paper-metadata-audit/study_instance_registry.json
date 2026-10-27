@@ -1189,6 +1189,44 @@
         }
       ],
       "source_review_limit": "Fresh institutional manuscript and rendered Figure 1 inspected. Keep physical four-speaker crossfades distinct from headphone rendering. Warning tone, probe onset and silent-baseline anchors are separate; the wording does not unambiguously anchor the one-second cue interval. No source calibration transfers to PPS Kit."
+    },
+    {
+      "network_node_id": "doi:10.1007/s00221-017-5158-2",
+      "doi": "10.1007/s00221-017-5158-2",
+      "inventory_status": "source_access_blocked_experiment_inventory_unresolved",
+      "instance_count_basis": "One retained publication review unit, not one confirmed experiment. The accessible abstract identifies a handedness/lateral audiotactile PPS study, but the number and boundaries of Methods experiments remain unresolved because the attempted primary full-text routes did not yield Methods.",
+      "evidence_pointer": "https://link.springer.com/article/10.1007/s00221-017-5158-2::abstract and subscription preview; HAL hal-01712036 metadata",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_lateral_pps_from_abstract_methods_unavailable",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "unresolved_publication_review_unit",
+          "experiment_label": "Handedness and lateral PPS — experiment inventory unresolved after access attempts",
+          "record_id": "hobeika_2018_anisotropy",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "source_access_blocked_inventory_unresolved"
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://link.springer.com/content/pdf/10.1007/s00221-017-5158-2.pdf",
+          "outcome": "HTTP 200 HTML redirect to the publisher article subscription preview. Abstract accessible; full Methods/PDF not delivered."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.archives-ouvertes.fr/search/",
+          "outcome": "HTTP 200 exact-title metadata lookup identified hal-01712036 and https://hal.science/hal-01712036v1; the record supplied no fileMain_s document URL."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://hal.science/hal-01712036/document",
+          "outcome": "HTTP 404 HTML; no deposited full text obtained."
+        }
+      ],
+      "source_review_limit": "This is a dated access audit, not a Methods-confirmed inventory. Neither a single experiment nor missing reporting is inferred from unavailable text. Publisher preview and HAL metadata do not supply the eleven replication contracts; no later Hobeika protocol is silently substituted. An inspectable source could reopen this disposition."
     }
   ],
   "corpus_freeze": {

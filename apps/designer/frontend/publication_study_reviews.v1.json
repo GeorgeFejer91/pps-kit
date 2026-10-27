@@ -2700,9 +2700,9 @@
     {
       "studyRowId": "doi:10.1007/s00221-017-5158-2",
       "networkNodeId": "doi:10.1007/s00221-017-5158-2",
-      "label": "Anisotropy of lateral peripersonal space is linked to handedness.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
+      "label": "Anisotropy of lateral peripersonal space is linked to handedness. (a)",
+      "experimentLabel": "Handedness and lateral PPS — experiment inventory unresolved after access attempts",
+      "inventoryStatus": "source_access_blocked_experiment_inventory_unresolved",
       "evidenceScope": "none",
       "templateIds": [],
       "parameterStatusCounts": {
@@ -2714,30 +2714,56 @@
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "evidenceNote": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-017-5158-2",
           "missingComponents": [
             "source_mode",
             "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "level_envelope_calibration": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "renderer_apparatus": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "evidenceNote": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-017-5158-2",
           "missingComponents": [
             "motion_mode",
@@ -2745,35 +2771,87 @@
             "geometry",
             "timing_constraint"
           ],
-          "components": {}
+          "components": {
+            "attenuation_law": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "padding_or_holds": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "evidenceNote": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-017-5158-2",
           "missingComponents": [
             "trial_families",
             "ordered_elements_and_source_selection"
           ],
-          "components": {}
+          "components": {
+            "condition_intermixing": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "within_trial_timing_or_placement": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "evidenceNote": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-017-5158-2",
           "missingComponents": [
             "target_and_nontarget_rule",
@@ -2781,71 +2859,170 @@
             "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "scoring_rule": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "evidenceNote": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-017-5158-2",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
             "values_or_range"
           ],
-          "components": {}
+          "components": {
+            "distribution": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "randomization": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "evidenceNote": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-017-5158-2",
           "missingComponents": [
             "reference_event_and_sign",
             "ordered_soa_values_or_derivable_distance_anchors"
           ],
-          "components": {}
+          "components": {
+            "direction_specific_pairing": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "evidenceNote": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-017-5158-2",
           "missingComponents": [
             "modality",
             "body_site_and_side",
             "waveform_and_duration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "external_trigger": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "frequency_or_amplitude": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "intensity_or_calibration": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "evidenceNote": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-017-5158-2",
           "missingComponents": [
             "family_or_explicit_none",
@@ -2853,18 +3030,44 @@
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "crossing_rule": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "evidenceNote": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-017-5158-2",
           "missingComponents": [
             "family_or_explicit_none",
@@ -2872,42 +3075,120 @@
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "crossing_rule": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "evidenceNote": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-017-5158-2",
           "missingComponents": [
             "factor_dimensions",
             "repetitions_or_exact_counts",
             "exceptions_or_overrides"
           ],
-          "components": {}
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
           "status": "source_unavailable",
-          "value": "",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "evidenceNote": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-017-5158-2",
           "missingComponents": [
             "block_count",
             "block_composition"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "pool_repeat_or_distribution": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "sequence_constraints": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication.",
+              "note": ""
+            }
+          }
         }
       ]
     },
