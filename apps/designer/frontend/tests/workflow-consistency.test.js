@@ -12,6 +12,22 @@ const deferred = () => {
   return { promise, resolve, reject };
 };
 
+test("static trial timing includes instruction and jitter prefixes without inventing tactile catch events", () => {
+  const functions = app.slice(app.indexOf("function staticVariantLoomingOnsetMs("), app.indexOf("function staticTrialFileBakePayload("));
+  const context = vm.createContext({ slugify: value => value, previewVariantKey: () => "variant" });
+  vm.runInContext(functions, context);
+  const inventory = new Map([["Instruction", { kind: "prestimulus", duration_ms: 4000 }], ["Noise", { kind: "generated_noise", duration_ms: 4000 }]]);
+  const variant = [{ kind: "audio", label: "Instruction" }, { kind: "jitter", value: 250 }, { kind: "audio", label: "Noise" }];
+  assert.equal(context.staticVariantLoomingOnsetMs(variant, inventory), 4250);
+  const base = { templateId: "test", rowIndex: 0, rowLabel: "Row", family: "audio_tactile", folderName: "target", variant, variantIndex: 1, durationMs: 8250, loomingOnsetMs: 4250, soaMs: 0 };
+  assert.equal(context.staticTrialFileRow(base).tactile_onset_s, 4.25);
+  assert.equal(context.staticTrialFileRow({ ...base, soaMs: 500 }).tactile_onset_s, 4.75);
+  assert.equal(context.staticTrialFileRow({ ...base, family: "catch" }).tactile_onset_s, "");
+  assert.equal(context.staticBaselineMode({ baseline_strategy: "stationary_burst", baseline_custom_trial_mode: "tactile_only" }), "stationary_burst");
+  assert.equal(context.staticBaselineMode({ baseline_strategy: "min_max", baseline_custom_trial_mode: "tactile_only" }), "audio_tactile");
+  assert.equal(context.staticBaselineMode({ baseline_strategy: "custom", baseline_custom_trial_mode: "tactile_only" }), "tactile_only");
+});
+
 // Exercise the existing non-exported browser handlers without initializing the whole page.
 function handler(name, next) {
   return app.slice(app.indexOf(`async function ${name}(`), app.indexOf(`\n${next}`));
