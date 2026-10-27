@@ -1488,7 +1488,7 @@ def build(output_dir: Path, public_output: Path | None = None) -> dict[str, Any]
     if public_output is not None:
         projection = public_projection(study_index, evidence_rows)
         public_output.parent.mkdir(parents=True, exist_ok=True)
-        public_output.write_text(json.dumps(projection, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        public_output.write_text(json.dumps(projection, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
 
     return {
         "schema": contract_document["schema"],
