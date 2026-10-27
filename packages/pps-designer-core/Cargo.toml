@@ -12,3 +12,8 @@ sha2.workspace = true
 rand = "=0.8.8"
 hound = "=3.5.1"
 rustfft = "=6.4.1"
+csv.workspace = true
+
+[dev-dependencies]
+pps-session-package = { path = "../pps-session-package" }
+pps-runner-execution = { path = "../pps-runner-execution" }
