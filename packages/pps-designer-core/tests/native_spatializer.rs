@@ -1,4 +1,8 @@
 //! Explicit offline native test: no audio device or playback is opened.
+use pps_designer_core::design::{
+    apply_generated_ingredient, generated_ingredient_entry, plan_ingredient_generation,
+    GenerationOptIn,
+};
 use pps_designer_core::*;
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
@@ -184,6 +188,87 @@ fn native_imported_dry_source_preserves_its_tone_and_records_import_algorithm() 
         serde_json::from_slice(&fs::read(directory.join("manifest.json")).unwrap()).unwrap();
     assert_eq!(report["source_algorithm"], IMPORT_ALGORITHM);
     eprintln!("Native imported-source evidence: {}", directory.display());
+}
+
+#[test]
+#[ignore = "requires PPS_TEST_RENDERER pointing at the locally built Windows 3DTI executable"]
+fn native_designer_payload_produces_verified_stereo_ingredient_and_custom_design() {
+    let executable =
+        PathBuf::from(std::env::var_os("PPS_TEST_RENDERER").expect("PPS_TEST_RENDERER required"));
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .canonicalize()
+        .unwrap();
+    let directory = root.join("artifacts").join(format!(
+        "native-ingredient-test-{}-{}",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis()
+    ));
+    let mut payload: Value =
+        serde_json::from_str(include_str!("fixtures/ingredient_payload.json")).unwrap();
+    payload["design"]["trajectory"]["sample_rate"] = json!(44100);
+    let plan = plan_ingredient_generation(
+        &payload,
+        &GenerationOptIn {
+            source_algorithm: SOURCE_ALGORITHM.into(),
+            accept_non_legacy_source_algorithm: true,
+            seed: 123,
+        },
+    )
+    .unwrap();
+    let cancel = AtomicBool::new(false);
+    let prepared = prepare(&plan.request, &cancel).unwrap();
+    let options=SpatializerOptions{hrtf_path:root.join("packages/pps-resources/assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa").to_str().unwrap().into(),
+        hrtf_format:HrtfFormat::Sofa,head_radius_m:plan.renderer.head_radius_m,distance_attenuation:plan.renderer.distance_attenuation,
+        near_field:plan.renderer.near_field,propagation_delay:plan.renderer.propagation_delay};
+    let mut dry = Vec::new();
+    let config = write_spatializer_input(&prepared, &mut dry, &options, &cancel).unwrap();
+    assert!(execute(
+        &executable,
+        &directory,
+        &serde_json::to_value(config).unwrap(),
+        &dry
+    ));
+    let stereo = rendered(&directory);
+    let generated = compose_spatial_output(prepared, stereo, &cancel).unwrap();
+    assert!(
+        (generated.level_qc.actual_window_rms_dbfs.unwrap()
+            - generated.level_qc.target_window_rms_dbfs.unwrap())
+        .abs()
+            < 0.02
+    );
+    let mut wav = std::io::Cursor::new(Vec::new());
+    write_ingredient_wav(&mut wav, &generated, &cancel).unwrap();
+    let bytes = wav.into_inner();
+    fs::write(directory.join("ingredient.wav"), &bytes).unwrap();
+    let report: Value =
+        serde_json::from_slice(&fs::read(directory.join("manifest.json")).unwrap()).unwrap();
+    let entry = generated_ingredient_entry(
+        &plan,
+        "ingredients/native.wav",
+        &bytes,
+        &generated,
+        &report,
+        &cancel,
+    )
+    .unwrap();
+    let publication = apply_generated_ingredient(&plan, &entry).unwrap();
+    assert_eq!(publication.design["noises"][0]["label"], "Native burst");
+    assert_eq!(entry.asset()["channels"], 2);
+    assert_eq!(entry.asset()["frames"], 44100);
+    assert_eq!(
+        publication.design["study_profile_reference_parameters"]["native_generation_qualification"],
+        "customized_native_generation_unqualified"
+    );
+    fs::write(
+        directory.join("publication.json"),
+        serde_json::to_vec_pretty(&publication).unwrap(),
+    )
+    .unwrap();
+    eprintln!("Native ingredient evidence: {}", directory.display());
 }
 
 #[test]

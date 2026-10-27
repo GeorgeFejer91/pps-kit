@@ -1,4 +1,5 @@
 //! Bounded offline stimulus preparation. No playback, job authority or Python runtime.
+pub mod design;
 mod imported;
 mod level;
 mod source;
@@ -11,7 +12,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 pub use imported::prepare_imported_wav;
 pub use level::{compose_spatial_output, GeneratedStimulus, LevelQc};
 pub use spatializer::{write_spatializer_input, HrtfFormat, SpatializerConfig, SpatializerOptions};
-pub use wav::{read_stereo_wav, write_mono_wav, write_stimulus_wav};
+pub use wav::{read_stereo_wav, write_ingredient_wav, write_mono_wav, write_stimulus_wav};
 
 pub const REQUEST_SCHEMA: &str = "pps-native-generation.v1";
 pub const SOURCE_ALGORITHM: &str = "rand-0.8.8-std-rng-box-muller.v1";
@@ -32,6 +33,10 @@ pub fn generation_capabilities() -> serde_json::Value {
         "imported_wav":{"encodings":["pcm16","pcm24","pcm32","float32"],"channels":["mono","stereo_mean"],
             "length_policies":["exact","trim_or_zero_pad"],"sample_rate_policy":"exact_match","sha256_required":true},
         "level_modes":["preserve","linear_db_ramp"],"physical_spl_qualified":false,
+        "designer_adapter":{"input":"collectPayload plus bake_recipe","ingredient_kinds":["generated_noise","imported_audio"],
+            "source_profile_ids":["continuous_noise","dynaspace_gaussian_burst_train"],"output_channels":2,
+            "source_algorithm_opt_in_required":true,"fixed_audio_preservation":false,"measured_calibration_receipt":false,
+            "propagation_delay_default":true,"near_field":false,"qualification":"customized_native_generation_unqualified"},
         "renderer_contract":"pps-3dti-spatialize.v2","near_field_ild":false,"far_distance_filter":false,
         "max_frames":MAX_FRAMES,"max_spectral_frames":MAX_SPECTRAL_FRAMES,"max_tactile_cues":MAX_TACTILE_CUES})
 }

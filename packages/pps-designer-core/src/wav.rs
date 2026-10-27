@@ -27,6 +27,54 @@ pub fn write_stimulus_wav<W: Write + Seek>(
     )
 }
 
+/// Segment 1 ingredients contain audio only; tactile is assembled later from
+/// the approved trial plan. Never silently discard an already-present cue.
+pub fn write_ingredient_wav<W: Write + Seek>(
+    output: W,
+    stimulus: &GeneratedStimulus,
+    cancelled: &AtomicBool,
+) -> Result<(), GenerationError> {
+    check_cancelled(cancelled)?;
+    if stimulus.interleaved_pcm.is_empty()
+        || !stimulus.interleaved_pcm.len().is_multiple_of(3)
+        || stimulus.interleaved_pcm.len() / 3 > MAX_FRAMES
+        || !(8000..=192000).contains(&stimulus.sample_rate_hz)
+        || stimulus.interleaved_pcm.iter().any(|v| !v.is_finite())
+    {
+        return Err(GenerationError::InvalidAudio);
+    }
+    if stimulus
+        .interleaved_pcm
+        .chunks_exact(3)
+        .any(|v| v[2] != 0.0)
+    {
+        return Err(GenerationError::Invalid("ingredient_contains_tactile"));
+    }
+    let mut writer = hound::WavWriter::new(
+        output,
+        hound::WavSpec {
+            channels: 2,
+            sample_rate: stimulus.sample_rate_hz,
+            bits_per_sample: 32,
+            sample_format: hound::SampleFormat::Float,
+        },
+    )
+    .map_err(|_| GenerationError::Io)?;
+    for (index, frame) in stimulus.interleaved_pcm.chunks_exact(3).enumerate() {
+        if index % 4096 == 0 {
+            check_cancelled(cancelled)?;
+        }
+        writer
+            .write_sample(frame[0])
+            .map_err(|_| GenerationError::Io)?;
+        writer
+            .write_sample(frame[1])
+            .map_err(|_| GenerationError::Io)?;
+    }
+    check_cancelled(cancelled)?;
+    writer.finalize().map_err(|_| GenerationError::Io)
+}
+
 fn write_wav<W: Write + Seek>(
     output: W,
     samples: &[f32],
