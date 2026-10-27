@@ -24,3 +24,39 @@ pub use playback::{
     PlaybackFault, PlaybackPort, PlaybackRecordKind, PlaybackStatus, PLAYBACK_EVENT_CAPACITY,
 };
 pub use service::CpalOutputService;
+
+/// Device-free access to the production callback, available only to explicit
+/// test builds. These observations never establish physical timing.
+#[cfg(feature = "test-support")]
+pub mod test_support {
+    use crate::{
+        playback::{PlaybackCallback, PlaybackOwner},
+        PlaybackPort,
+    };
+    use pps_runner_audio::PreparedPlaybackPlan;
+    use std::{sync::Arc, time::Instant};
+
+    pub struct SoftwarePlayback {
+        _owner: PlaybackOwner,
+        callback: PlaybackCallback,
+    }
+    impl SoftwarePlayback {
+        pub fn new(plan: Arc<PreparedPlaybackPlan>) -> (Self, PlaybackPort) {
+            let (mut owner, callback) = PlaybackOwner::new(plan);
+            let fence = owner.fence().clone();
+            let port = owner
+                .take_port(&fence)
+                .expect("new software callback has one port");
+            (
+                Self {
+                    _owner: owner,
+                    callback,
+                },
+                port,
+            )
+        }
+        pub fn render(&mut self, output: &mut [f32], observed: Instant) -> bool {
+            self.callback.render(output, observed, None)
+        }
+    }
+}

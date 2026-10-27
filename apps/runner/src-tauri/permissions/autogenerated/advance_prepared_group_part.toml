@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-advance-prepared-group-part"
+description = "Enables the advance_prepared_group_part command without any pre-configured scope."
+commands.allow = ["advance_prepared_group_part"]
+
+[[permission]]
+identifier = "deny-advance-prepared-group-part"
+description = "Denies the advance_prepared_group_part command without any pre-configured scope."
+commands.deny = ["advance_prepared_group_part"]

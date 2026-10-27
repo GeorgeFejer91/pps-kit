@@ -1708,6 +1708,8 @@ pub(crate) mod tests {
 
     #[derive(Default)]
     pub(crate) struct FakeControl {
+        software_callback: Mutex<Option<pps_runner_audio_cpal::test_support::SoftwarePlayback>>,
+        software_enabled: AtomicBool,
         enumerate_calls: AtomicU64,
         enumerate_finished: AtomicU64,
         reserve_calls: AtomicU64,
@@ -1724,6 +1726,14 @@ pub(crate) mod tests {
     }
 
     impl FakeControl {
+        pub(crate) fn enable_software_callback(&self) {
+            self.software_enabled.store(true, Ordering::Release);
+        }
+        pub(crate) fn render_software_callback(&self, output: &mut [f32]) {
+            if let Some(callback) = self.software_callback.lock().unwrap().as_mut() {
+                callback.render(output, Instant::now());
+            }
+        }
         pub(crate) fn release_calls(&self) -> u64 {
             self.release_calls.load(Ordering::Acquire)
         }
@@ -1754,6 +1764,22 @@ pub(crate) mod tests {
         type Inventory = FakeInventory;
         type Selection = FakeSelection;
         type Receipt = FakeReceipt;
+
+        fn prepare_playback(
+            &mut self,
+            _receipt: &Self::Receipt,
+            plan: Arc<PreparedPlaybackPlan>,
+        ) -> Result<PlaybackPort, NativeOutputCommandError> {
+            if !self.control.software_enabled.load(Ordering::Acquire) {
+                return Err(NativeOutputCommandError::new(
+                    "native_output_media_unavailable",
+                    "Software callback is disabled.",
+                ));
+            }
+            let (callback, port) = pps_runner_audio_cpal::test_support::SoftwarePlayback::new(plan);
+            *self.control.software_callback.lock().unwrap() = Some(callback);
+            Ok(port)
+        }
 
         fn enumerate(&mut self) -> Result<Self::Inventory, NativeOutputCommandError> {
             self.control.record_driver_thread();

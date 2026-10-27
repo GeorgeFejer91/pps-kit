@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-select-prepared-group"
+description = "Enables the select_prepared_group command without any pre-configured scope."
+commands.allow = ["select_prepared_group"]
+
+[[permission]]
+identifier = "deny-select-prepared-group"
+description = "Denies the select_prepared_group command without any pre-configured scope."
+commands.deny = ["select_prepared_group"]

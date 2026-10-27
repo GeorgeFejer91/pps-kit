@@ -109,6 +109,9 @@ pub struct RunnerCore {
     native_block: Option<NativeBlockSummary>,
     package_block_count: u32,
     native_control_pending: Option<Action>,
+    native_instruction: bool,
+    native_instruction_delay: bool,
+    native_more_parts: bool,
 }
 
 impl RunnerCore {
@@ -226,6 +229,9 @@ impl RunnerCore {
             native_block: None,
             package_block_count: 0,
             native_control_pending: None,
+            native_instruction: false,
+            native_instruction_delay: false,
+            native_more_parts: false,
         };
         core.refresh_derived();
         core
@@ -326,6 +332,8 @@ impl RunnerCore {
         self.package_execution_ready = false;
         self.package_block_count = package.block_count;
         self.native_block = None;
+        self.native_instruction = false;
+        self.native_more_parts = false;
         self.native_control_pending = None;
         self.snapshot.audit_event_count = self.snapshot.audit_event_count.saturating_add(1);
         self.bump_revision(&now);
@@ -353,6 +361,7 @@ impl RunnerCore {
             return Err("native_block_scope_invalid");
         }
         self.native_block = Some(block);
+        self.native_instruction = false;
         self.native_control_pending = None;
         self.package_execution_ready = false;
         self.snapshot.safety.local_armed = false;
@@ -362,6 +371,60 @@ impl RunnerCore {
 
     pub fn native_block_prepared(&self) -> bool {
         self.native_block.is_some()
+    }
+
+    pub fn mark_native_instruction(&mut self, now: ClockStamp) -> Result<(), &'static str> {
+        if self.native_block.is_none()
+            || !matches!(
+                self.snapshot.run.phase,
+                RunnerPhase::Prepared | RunnerPhase::Interrupted | RunnerPhase::Completed
+            )
+        {
+            return Err("native_instruction_scope_invalid");
+        }
+        self.native_instruction = true;
+        self.bump_revision(&now);
+        Ok(())
+    }
+
+    pub fn native_instruction_gate(
+        &mut self,
+        gate: InstructionGateSnapshot,
+        delay: bool,
+        now: ClockStamp,
+    ) -> Result<(), &'static str> {
+        if !self.native_instruction
+            || self.native_control_pending.is_some()
+            || self.snapshot.run.phase != RunnerPhase::Running
+        {
+            return Err("native_instruction_scope_invalid");
+        }
+        self.native_instruction_delay = delay;
+        self.snapshot.instruction_gate = gate;
+        self.snapshot.run.phase = RunnerPhase::InstructionGate;
+        self.snapshot.safety.capture_started = false;
+        self.bump_revision(&now);
+        Ok(())
+    }
+
+    pub fn native_instruction_timer_elapsed(
+        &mut self,
+        now: ClockStamp,
+    ) -> Result<(), &'static str> {
+        if !self.native_instruction_delay || self.snapshot.run.phase != RunnerPhase::InstructionGate
+        {
+            return Err("native_instruction_scope_invalid");
+        }
+        self.snapshot.run.phase = RunnerPhase::Running;
+        self.snapshot.instruction_gate.waiting = false;
+        self.snapshot.instruction_gate.gate_id.clear();
+        self.bump_revision(&now);
+        Ok(())
+    }
+
+    pub fn set_native_more_parts(&mut self, more: bool, now: ClockStamp) {
+        self.native_more_parts = more;
+        self.bump_revision(&now);
     }
 
     /// Native owner only, after binding the current verified media, output
@@ -406,6 +469,21 @@ impl RunnerCore {
         completed_ordinal: u32,
         now: ClockStamp,
     ) -> Result<(), &'static str> {
+        if completed_ordinal
+            .checked_add(1)
+            .is_none_or(|next| next >= self.package_block_count)
+        {
+            return Err("native_block_completion_scope_invalid");
+        }
+        self.await_next_native_stage(fingerprint, completed_ordinal, now)
+    }
+
+    pub fn await_next_native_stage(
+        &mut self,
+        fingerprint: &str,
+        completed_ordinal: u32,
+        now: ClockStamp,
+    ) -> Result<(), &'static str> {
         if self.package_fingerprint.as_deref() != Some(fingerprint)
             || !self.package_execution_ready
             || self.native_control_pending.is_some()
@@ -414,9 +492,6 @@ impl RunnerCore {
                 .native_block
                 .as_ref()
                 .is_none_or(|block| block.block_ordinal != completed_ordinal)
-            || completed_ordinal
-                .checked_add(1)
-                .is_none_or(|next| next >= self.package_block_count)
         {
             return Err("native_block_completion_scope_invalid");
         }
@@ -1160,6 +1235,7 @@ impl RunnerCore {
         let parsed: GateArgs = parse_args(args)?;
         if self.snapshot.run.phase != RunnerPhase::InstructionGate
             || !self.snapshot.instruction_gate.waiting
+            || self.native_instruction_delay
         {
             return Err("instruction_gate_not_waiting");
         }
@@ -1224,7 +1300,7 @@ impl RunnerCore {
 
     fn refresh_derived(&mut self) {
         let phase = self.snapshot.run.phase;
-        self.snapshot.run.complete = phase == RunnerPhase::Completed;
+        self.snapshot.run.complete = phase == RunnerPhase::Completed && !self.native_more_parts;
         self.snapshot.run.thread_alive = matches!(
             phase,
             RunnerPhase::Running | RunnerPhase::Paused | RunnerPhase::InstructionGate
@@ -1283,10 +1359,19 @@ impl RunnerCore {
                 self.package_block_count
             );
         }
+        if self.native_instruction && matches!(phase, RunnerPhase::Running | RunnerPhase::Paused) {
+            self.snapshot.run.progress_label = "Instruction audio".to_owned();
+        }
+        if phase == RunnerPhase::Completed && self.native_more_parts {
+            self.snapshot.run.state_label = "Part complete".to_owned();
+            self.snapshot.run.progress_label =
+                "Part artifacts finalized; next part remains".to_owned();
+        }
         self.snapshot.active_block.running = phase == RunnerPhase::Running;
         self.snapshot.active_block.paused = phase == RunnerPhase::Paused;
         self.snapshot.active_block.instruction_waiting = phase == RunnerPhase::InstructionGate;
         self.snapshot.run.participant_capture_ready = phase == RunnerPhase::Running
+            && !self.native_instruction
             && self.native_block.is_some()
             && self.package_execution_ready
             && self.native_control_pending.is_none();
@@ -1330,7 +1415,9 @@ impl RunnerCore {
         }
         match phase {
             RunnerPhase::Ready => actions.push(Action::PartStart),
-            RunnerPhase::InstructionGate => actions.push(Action::InstructionContinue),
+            RunnerPhase::InstructionGate if !self.native_instruction_delay => {
+                actions.push(Action::InstructionContinue)
+            }
             RunnerPhase::Running => actions.push(Action::RunPause),
             RunnerPhase::Paused => actions.push(Action::RunResume),
             _ => {}
