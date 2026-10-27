@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 24)
+        self.assertEqual(len(registry["entries"]), 26)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 55)
+        self.assertEqual(registered_instance_count, 57)
         network = json.loads(
             (
                 ROOT
@@ -937,6 +937,29 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         # Apparently adjacent titles can still contain audio-tactile tasks.
         for retained in ("doi:10.1016/j.bodyim.2024.101777", "doi:10.1016/j.actpsy.2011.01.003", "doi:10.3758/app.72.4.885"):
             self.assertNotEqual({row["status"] for row in studies[retained]["contracts"]}, {"not_applicable"})
+
+    def test_passive_and_directional_tasks_keep_trial_units_and_time_anchors(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        studies = {row["studyRowId"]: row for row in data["studies"]}
+        ieeg = studies["doi:10.1093/cercor/bhy156"]
+        contracts = {row["key"]: row for row in ieeg["contracts"]}
+        self.assertEqual(contracts["task_response"]["status"], "reported_complete")
+        self.assertEqual(contracts["task_response"]["components"]["response_window_and_anchor"]["status"], "not_applicable")
+        self.assertIn("three", contracts["trial_sequence"]["value"])
+        self.assertIn("255", contracts["repetition_allocation"]["value"])
+        self.assertIn("510", contracts["repetition_allocation"]["components"]["derived_total_reconciliation"]["value"])
+        self.assertEqual(contracts["catch_trial_contract"]["status"], "explicitly_absent")
+        self.assertIn("controls", contracts["catch_trial_contract"]["value"])
+        matsuda = studies["doi:10.1038/s41598-021-90784-5"]
+        contracts = {row["key"]: row for row in matsuda["contracts"]}
+        self.assertEqual(contracts["baseline_trial_contract"]["status"], "derived_complete")
+        self.assertIn("+3700", contracts["baseline_trial_contract"]["value"])
+        self.assertNotIn("+3600", contracts["baseline_trial_contract"]["value"])
+        self.assertIn("800", contracts["repetition_allocation"]["components"]["derived_total_reconciliation"]["value"])
+        self.assertIn("turns", contracts["block_order_contract"]["evidenceNote"])
+        self.assertEqual(matsuda["templateIds"], ["matsuda_2021_four_directions"])
+        for study in (ieeg, matsuda):
+            self.assertEqual(study["nativeQualification"], "not_assessed")
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:
