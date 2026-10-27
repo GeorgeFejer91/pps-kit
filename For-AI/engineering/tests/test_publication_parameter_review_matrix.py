@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 62)
+        self.assertEqual(len(registry["entries"]), 65)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 116)
+        self.assertEqual(registered_instance_count, 119)
         network = json.loads(
             (
                 ROOT
@@ -1477,6 +1477,33 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         index = read_csv(self.output_dir / "study_instance_index.csv")[1]
         self.assertEqual(next(row for row in index if row["study_row_id"] == ids[0])["parameter_evidence_scope"], "composite_requires_split")
 
+    def test_interoception_versions_keep_negative_soa_and_distinct_current_evidence(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        studies = {row["studyRowId"]: row for row in data["studies"]}
+        final = studies["doi:10.1073/pnas.2516229122"]
+        pre = studies["doi:10.1101/2025.06.25.660685"]
+        for study in (final, pre):
+            cs = {row["key"]: row for row in study["contracts"]}
+            self.assertEqual(cs["soa_schedule"]["status"], "derived_complete")
+            self.assertIn("−0.040", cs["soa_schedule"]["derivationNote"])
+            self.assertIn("300", cs["repetition_allocation"]["value"])
+            self.assertIn("120", cs["catch_trial_contract"]["value"])
+            self.assertEqual(cs["jitter_iti_policy"]["components"]["distribution"]["status"], "not_reported")
+            self.assertEqual(cs["task_response"]["components"]["response_window_and_anchor"]["status"], "not_reported")
+            self.assertEqual(study["nativeQualification"], "not_assessed")
+        fc = {row["key"]: row for row in final["contracts"]}
+        pc = {row["key"]: row for row in pre["contracts"]}
+        self.assertEqual(fc["tactile_target"]["status"], "partial")
+        self.assertEqual(pc["tactile_target"]["status"], "conflicting_evidence")
+        self.assertIn("2.5–5.1", fc["tactile_target"]["value"])
+        self.assertIn("25.3–51", pc["tactile_target"]["value"])
+        self.assertNotEqual(fc["tactile_target"]["evidenceSourceUrl"], pc["tactile_target"]["evidenceSourceUrl"])
+        pubs = {row["networkNodeId"]: row for row in data["publications"]}
+        gap = pubs["doi:10.1016/j.cognition.2018.04.001"]["inventoryAudit"]
+        self.assertEqual(gap["evidenceStatus"], "audited_source_access_gap")
+        self.assertTrue(gap["inventoryAndContractsAudited"])
+        self.assertEqual(gap["studyRowCount"], 1)
+
     def test_wheelchair_groups_share_blindfolded_acquisition_without_timing_defaults(self) -> None:
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
         node = "doi:10.3389/fpsyg.2015.00639"
@@ -1504,9 +1531,9 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(len(rows), 94)
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
         summary = data["inventoryAudit"]
-        self.assertEqual(summary["registeredInventories"], 62)
-        self.assertEqual(summary["methodsReviewedInventories"], 53)
-        self.assertEqual(summary["auditedAccessBlockers"], 5)
+        self.assertEqual(summary["registeredInventories"], 65)
+        self.assertEqual(summary["methodsReviewedInventories"], 55)
+        self.assertEqual(summary["auditedAccessBlockers"], 6)
         self.assertEqual(summary["inventoryEvidenceCounts"], dict(Counter(row["inventory_evidence_status"] for row in rows)))
         self.assertEqual(summary["inventoryAndContractsAudited"], sum(row["inventory_and_contracts_audited"] == "yes" for row in rows))
         self.assertEqual(summary["remainingInventoryOrContractAudit"], 94 - summary["inventoryAndContractsAudited"])
