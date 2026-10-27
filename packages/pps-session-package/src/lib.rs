@@ -6,6 +6,11 @@
 //! no filesystem paths or hashes; resolved paths and digests remain in the
 //! Rust-only [`VerifiedPreparedSession`] receipt.
 
+mod profile_bundle;
+pub use profile_bundle::{
+    materialize_profile_bundle, ProfileBundleError, VerifiedProfileAsset, VerifiedProfileBundle,
+};
+
 use std::{
     fmt, fs,
     io::{self, Read, Write},
