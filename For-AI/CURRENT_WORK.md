@@ -6,10 +6,12 @@ This file is the active checklist and handoff owner; replace state, do not appen
 - **Goal:** publish an audited audiotactile catalogue and citation mapper,
   reliable online preparation with premade assets, and a Python-free Windows
   Tauri/Rust Designer → immutable experiment profile → native Runner →
-  inspectable results, followed by installed and physical qualification.
+  inspectable results and installed qualification. On 2026-10-27 the user
+  explicitly deferred new calibration runs and asked to assume hardware works.
+  Treat hardware operation as an assumption; do not label physical timing measured.
   The [completion review and multi-agent plan](engineering/validation/docs/completion-review-2026-10-27.md)
   defines the finish criteria and extends the original 17 audit items.
-- **Current milestone:** Wave 1 implementation, explicitly authorized on
+- **Current milestone:** Wave 2 integration, explicitly authorized on
   2026-10-27. M0 is delivered; the expanded plan is now being implemented.
   Online use is prepare/preview only; Windows and audiotactile paradigms are
   the first release. Audited inaccessible-source gaps may be published without
@@ -22,15 +24,18 @@ This file is the active checklist and handoff owner; replace state, do not appen
   callback-confirmed controls, response scoring and journal safeguards remain.
   Single- and two-block native activation/progression pass real CPAL callback
   tests using silent synthetic PCM. Native portable-profile extraction now verifies
-  and rebinds embedded media offline; immutable session assembly remains incomplete.
+  and rebinds embedded media offline. Immutable source-block and participant
+  assembly now preserve ordered pre/post parts and instruction media; native
+  instruction/group execution and desktop integration remain incomplete.
   B1–B3/C1 fixes and the sanitized study projection are integrated
   on the review branch; mapper, catalogue and release work continue.
 - **Evidence:** the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md)
   identifies exact source and checks. Source, CI packages, installed behavior,
   physical timing, participant results and replication remain distinct gates.
   Neither installed application nor public downloads changed in this task.
-- **Next action:** connect the Rust design/recipe adapter and Tauri host, complete
-  immutable profile assembly, and rerun Standard after the baseline repairs.
+- **Next action:** integrate the verified Tauri host, connect native instructions
+  and all-part execution, generate explicit stationary comparators, then verify
+  the complete offline browser-profile journey and build native packages.
   Primary-source extraction continues independently. Pages assembly now includes
   referenced Study 5 instruction audio with its checked manifest hashes.
 - **Local validation:** 25 Runner core and 150 desktop tests pass; two hardware
@@ -50,13 +55,15 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Standard completed with 626 passes, 10 skips and seven failures. Parent
   repairs now pass focused regressions: synchronous accepted-plan mutation
   rejection, Windows long-path file checks, SVG LF parity and routed guidance.
-  UI/science parser/CSS repairs are now integrated; rerun Standard after integration.
-  The next Standard run found four stale scientific ledger assertions and one
-  live registry/test snapshot mismatch (632 passes, ten skips). Science reconciled
-  the dependent ledgers and passed 67 owning checks; a stable-tree Standard rerun
-  is running. Native recovery assessment passes five prefix/corruption checks and
-  real process termination at six write/sync/publication boundaries; UI display
-  and independent source review remain. Native importer: seven contract/failure tests pass, plus a real browser-export
+  UI/science parser/CSS repairs are integrated. The intermediate Standard run
+  found four stale scientific ledger assertions and one live registry/test
+  snapshot mismatch. After reconciliation the stable Standard run passes:
+  **647 passed, ten skipped**, with three runtime warnings retained in its log.
+  Native recovery assessment passes six prefix/corruption/package-context checks
+  and real process termination at six write/sync/publication boundaries. Independent
+  review found and closed a count/identity criterion gap: complete results now
+  match the selected verified package, not only their own receipt. UI display
+  remains. Native importer: seven contract/failure tests pass, plus a real browser-export
   test independently materializing nine embedded assets offline. The combined
   session-package/designer-core suites pass (35 tests; three opt-in tests skipped),
   with strict Clippy. Independent import review found no blocking defect; disk
@@ -64,10 +71,21 @@ This file is the active checklist and handoff owner; replace state, do not appen
   focused tests: obsolete distribution arguments and placeholder URLs fail
   before build; downloader icon tooling is pinned and an actual smoke downloader
   builds. Installation guides now distinguish V1 layouts from native candidates.
-  Clean installation and physical qualification remain open.
+  Native participant planning passes all 600 occurrences from the real browser
+  capture against the Python oracle. The integrated Designer core passes 32
+  pure checks; the independently rebuilt 3DTI passes all three waveform tests.
+  Instruction/group verification passes 15 checks including an actual assembled
+  two-part fixture. Strict core/package Clippy and the Runner split-part denial
+  pass. Both frontend toolchains now pin Vite 6.4.5 with repaired dependency
+  advisories; Designer's locked install reports zero vulnerabilities. The latest
+  catalogue integration passes 38 matrix/network checks.
+  Clean installation remains open; new physical calibration is deferred by user.
 - **Scientific coverage:** frozen 94-publication corpus, 126 study rows and 1,386
-  compact contracts; 193 reported-complete and 43 derived-complete cells after
-  the latest primary-source batches. 67 inventories remain unassessed. The
+  compact contracts; 210 reported-complete and 44 derived-complete cells after
+  the latest primary-source batches. 62 inventories remain unassessed. A bounded
+  foundational-reference check found 11 of 12 selected antecedents in the frozen
+  corpus; Occelli 2010 is recorded as an outside-map omission candidate, without
+  silently changing membership or claiming exhaustiveness. The
   Cuppini 2011 computational review has a publication boundary row, not a
   fabricated human experiment; its 11 contracts are explicitly not applicable.
   Templates and reviewed evidence do not confer tested native qualification.
@@ -100,24 +118,27 @@ This file is the active checklist and handoff owner; replace state, do not appen
   generation and the corrected dry-source 3DTI wrapper, without Python runtime.
   The corrected prepared-input bridge, polar arcs, five noise colours and verified
   imported WAV policies and design/recipe conversion are integrated; 21 pure
-  generation checks pass. Session assembly is next. Legacy RNG IDs remain
+  generation checks passed at that checkpoint. Participant/session assembly and
+  full captured order parity now pass; stationary comparator integration remains. Legacy RNG IDs remain
   rejected explicitly; customized source provenance stays explicit.
 - [ ] M3 — Complete native profile assembly, all-block execution and the
   Windows Tauri Designer journey (A2–A3, C2); browser bundle assets materialize
   offline; Python/Rust handoff and result parity pass. Manifest-order progression
   now passes source and real silent-callback checks, including next-block UI.
-  Browser bundle materialization passes; native host/session assembly remains.
+  Browser bundle materialization and native participant assembly pass; host
+  integration, instruction/group execution and installed evidence remain.
 - [ ] M4 — Close supported acquisition/recovery, accessibility/performance and
   evidence-record gaps (D1–D2, F1–F2, I1); audit every included experiment's 11
   replication contracts and finish citation mapper/preset navigation.
-- [ ] M5 — Build and inspect exact-revision installed packages, then qualify
-  advertised phone and physical routes (G3, E1, D3, I2).
+- [ ] M5 — Build and inspect exact-revision installed packages and advertised
+  phone routes (G3, E1). New physical calibration (D3/I2) is deferred by the
+  user; hardware operation is assumed, with no measured qualification claim.
 - [ ] M6 — Review all finish criteria, supported-scope claims and release
   artifacts; publish only under the matching release authorization.
 
-Current blockers are incomplete product paths and missing installed/physical
-evidence, not the former storage shortage. Hardware availability and measured
-route decisions remain explicit external gates. No new participant study,
+Current blockers are incomplete product paths and missing installed evidence,
+not the former storage shortage. New calibration is outside the current task
+per user steering; future measured-route claims still require evidence. No new participant study,
 optional XR work, MobX dependency or additional transport is implied.
 
 Detailed run artifacts stay in ignored validation folders. Preserve the pre-sync

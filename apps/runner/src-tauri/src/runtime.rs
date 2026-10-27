@@ -2598,6 +2598,25 @@ mod tests {
     }
 
     #[test]
+    fn split_part_cannot_silently_run_as_a_complete_experiment() {
+        let runtime = AppRuntime::new();
+        let (root, original) = verified_audio_package("P001", 1);
+        let path = original.manifest_path();
+        let mut manifest: serde_json::Value =
+            serde_json::from_slice(&fs::read(path).unwrap()).unwrap();
+        manifest["part_split_schema"] = serde_json::json!("pps-runner-part-split.v1");
+        fs::write(path, serde_json::to_vec(&manifest).unwrap()).unwrap();
+        let verified = verify_prepared_session(VerificationRequest::new(path)).unwrap();
+        runtime.adopt_verified_session(verified).unwrap();
+        compile_current_execution(&runtime);
+        assert_eq!(
+            runtime.begin_prepared_audio_preparation(0).err().unwrap(),
+            "prepared_group_execution_required"
+        );
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
     fn prepared_audio_capture_is_denied_while_a_demo_run_is_active() {
         let runtime = locally_ready_runtime();
         runtime

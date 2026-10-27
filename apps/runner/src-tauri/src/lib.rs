@@ -281,6 +281,14 @@ fn prepared_audio_preparation_error(error: PreparedAudioError) -> PreparedSessio
 
 fn prepared_audio_runtime_error(reason: &'static str) -> PreparedSessionCommandError {
     match reason {
+        "prepared_instruction_execution_required" => PreparedSessionCommandError::new(
+            reason,
+            "This package requires instruction playback. Native instruction execution is not available in this candidate yet.",
+        ),
+        "prepared_group_execution_required" => PreparedSessionCommandError::new(
+            reason,
+            "This package belongs to a multi-part experiment. Native group execution is not available in this candidate yet.",
+        ),
         "prepared_audio_preparation_in_progress" => PreparedSessionCommandError::new(
             reason,
             "A native audio preload is already in progress.",

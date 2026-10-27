@@ -1468,6 +1468,14 @@ impl OwnerState {
                 .retained_session
                 .as_ref()
                 .ok_or("prepared_session_missing")?;
+            // Verification permits inspection; playback must not silently omit
+            // saved instructions or promote one split part to a whole session.
+            if !retained.receipt.instructions().is_empty() {
+                return Err("prepared_instruction_execution_required");
+            }
+            if retained.receipt.is_split_part() {
+                return Err("prepared_group_execution_required");
+            }
             let compiled = self
                 .compiled_execution
                 .as_ref()
