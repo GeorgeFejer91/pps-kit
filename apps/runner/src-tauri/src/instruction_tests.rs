@@ -4,6 +4,13 @@ fn instruction_group_fixture() -> (
     std::path::PathBuf,
     pps_session_package::VerifiedPreparedGroup,
 ) {
+    instruction_group_fixture_with_blocks(2)
+}
+
+fn instruction_group_fixture_with_blocks(block_count: u32) -> (
+    std::path::PathBuf,
+    pps_session_package::VerifiedPreparedGroup,
+) {
     use pps_designer_core::assembly::*;
     use serde_json::json;
     use sha2::{Digest, Sha256};
@@ -38,7 +45,7 @@ fn instruction_group_fixture() -> (
     ];
     let cue = make_asset("cue", AssemblyAssetRole::TactileCue, true, 80);
     let design = json!({"noises":[{"label":"Noise","prebaked_path":"noise","gain":1.0}],"custom_looming_files":[],"prestimulus_files":[],
-    "protocol":{"blocks":2,"participants":1,"random_seed":17,"baseline_strategy":"tactile_only","participant_order_policy":{"schema":"pps-participant-order-policy.v1","algorithm":"counterbalanced_rotation","seed":17},
+    "protocol":{"blocks":block_count,"participants":1,"random_seed":17,"baseline_strategy":"tactile_only","participant_order_policy":{"schema":"pps-participant-order-policy.v1","algorithm":"counterbalanced_rotation","seed":17},
         "trial_strips":[{"label":"Row","elements":[{"kind":"looming_stimulus","source_labels":["Noise"]}]}]},
     "study_profile_reference_parameters":{"dashboard_run_setup":{"experiment_structure":"pre_post","seed":41,"instruction_profile":{"schema":"pps-run-instructions.v1","slots":[
         {"slot":"before_experiment","enabled":true,"path":"speech","continue_mode":"click"},
@@ -48,9 +55,9 @@ fn instruction_group_fixture() -> (
         {"slot":"after_experiment","enabled":true,"path":"speech","continue_mode":"click"}
     ]}}}});
     let variants = json!([{"row_label":"Row","sequence_variant_key":"Noise","choices":[{"kind":"audio","label":"Noise"}]}]);
-    let blocks:Vec<Value> = (1..=2).map(|index| json!({"block_index":index,"block_label":format!("Block {index}"),"trial_count":1,"duration_ms":100,"preview_row_count":1,"preview_rows":[
+    let blocks:Vec<Value> = (1..=block_count).map(|index| json!({"block_index":index,"block_label":format!("Block {index}"),"trial_count":1,"duration_ms":100,"preview_row_count":1,"preview_rows":[
         {"block_index":index,"block_label":format!("Block {index}"),"block_trial_index":1,"trial_pool_index":index,"family":"catch","row_label":"Row","sequence_variant_key":"Noise","sequence_labels":"Noise","soa_ms":0,"duration_ms":100,"duration_s":0.1,"looming_segment_onset_s":0,"tactile_onset_s":"","baseline_mode":"tactile_only","trial_file_path":"static://placeholder","source_sha256":""}]})).collect();
-    let preview = json!({"schema":"pps-block-csv-preview.v1","accepted":true,"block_count":2,"total_trials":2,"total_count":2,"randomization_seed":17,"randomization_strategy":"seeded_gellermann_row_order_preserving","blocks":blocks});
+    let preview = json!({"schema":"pps-block-csv-preview.v1","accepted":true,"block_count":block_count,"total_trials":block_count,"total_count":block_count,"randomization_seed":17,"randomization_strategy":"seeded_gellermann_row_order_preserving","blocks":blocks});
     let source =
         plan_assembly_preview(&design, &preview, &variants, &assets, &cue, &cancel).unwrap();
     let order = plan_run_order_preview(&source, &assets, &cancel).unwrap();
@@ -239,7 +246,7 @@ fn run_software_part(
 
 #[test]
 fn software_callback_instructions_and_two_parts_preserve_gates_identity_and_results() {
-    let (root, group) = instruction_group_fixture();
+    let (root, group) = instruction_group_fixture_with_blocks(3);
     let expected_parts: Vec<_> = group
         .parts()
         .iter()
@@ -296,7 +303,7 @@ fn software_callback_instructions_and_two_parts_preserve_gates_identity_and_resu
         assert_eq!(manifests.len(), 1);
         let manifest: Value = serde_json::from_slice(&fs::read(&manifests[0]).unwrap()).unwrap();
         assert_eq!(manifest["identity"]["partSessionId"], *expected_id);
-        assert_eq!(manifest["receipt"]["scoredTrialCount"], 2);
+        assert_eq!(manifest["receipt"]["scoredTrialCount"], 3);
         assert_eq!(manifest["timingQualification"], "unqualified");
     }
     eprintln!("software instruction/group evidence: {}", root.display());

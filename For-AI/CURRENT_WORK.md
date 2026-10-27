@@ -68,6 +68,9 @@ This file is the active checklist and handoff owner; replace state, do not appen
   The opt-in native manifest-order fixture now executes three blocks; it passes
   actual silent callbacks and the independent result-file audit (44 events,
   three scored/dataset rows). Completion stays false at both earlier boundaries.
+  The instruction/group fixture also now uses three blocks per part, covering
+  click/button/delay gates and breaks; its independent whole-group audit passes
+  245 events and six scored/dataset rows. All three instruction regressions pass.
   The existing Windows CI oracle job now selects the full Standard tier, with
   web/GUI/XDF test dependencies, offscreen Qt and its native writer fixture.
   YAML and Rust formatting checks pass; its first full Standard run is pending.
