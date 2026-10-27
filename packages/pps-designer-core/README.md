@@ -119,6 +119,50 @@ adapter test rendered its polar burst path through the actual C++ executable,
 verified stereo bytes/metadata, and measured the calibrated window within
 ±0.02 dB in 15 s (2026-10-27).
 
+## Frozen source-block assembly
+
+`assembly::VerifiedAssemblyAsset::from_wav_bytes(reference, bytes, sha256, role,
+cancelled)` decodes bounded PCM16/24/32 or float32 WAV. Roles are
+`BinauralIngredient`, `Instruction`, `TactileCue`, and `StationaryBaseline`.
+The native-only receipt binds actual samples and hash. It opens no path;
+the host resolves only native-authorized assets and budgets all acquisition.
+Rates must match. Mono instructions duplicate into L/R; tactile must be the
+verified existing mono cue. There is no source substitution or hidden resampling.
+
+`plan_assembly_preview(design, preview, variants, assets, tactile, cancelled)`
+consumes all existing Segment 5 `blocks[].preview_rows` and the existing
+`stripPreviewVariants` choices as `{row_label, sequence_variant_key, choices}`.
+It checks design seed/block count, row counts/order, unique source/variant
+bindings, chosen factors, bounded sample counts and complete cue fit. It returns
+`AssemblyPreview` with corrected actual durations/onsets, `accepted: false`,
+and hashes for local review. No second randomization happens. The exact existing
+instruction offset gain (default -6 dB) applies once. Tactile-only baseline mutes
+the looming segment while retaining instructions; stationary-burst baseline
+requires a source's explicit `native_stationary_baseline_asset` reference with
+the same rate and duration. A moving waveform is never reused as a stationary
+comparator. The complete actual 204-row browser fixture correctly reports the
+missing stationary comparator; its four selected audio assets and 100 ms cue
+are 44.1 kHz. That is a capability check, not successful full-study assembly.
+
+`accept_assembly_preview(preview, expected_design_hash, expected_preview_hash,
+revision)` creates a native-only accepted plan. `prepare_accepted_session(plan,
+assets, tactile, private_output_dir, participant_id, session_id, cancelled)`
+then writes actual 3-channel trial/block WAVs, exact source CSV rows, sample-indexed
+prepared CSVs, and a `pps-run-session.v1` participant-block package. The directory
+must be new; it remains private until the host revalidates it with the existing
+package verifier and atomically publishes its manifest reference after the
+revision/cancellation fence. Do not rename an already verified candidate because
+V1 source paths bind that directory. Failed partial candidates remain private
+for host cleanup. WAV/CSV/JSON files are flushed before the manifest is returned.
+
+This checkpoint assembles reviewed **source blocks once**. Pre/post phases,
+counterbalanced participant order and instruction-slot execution require the
+existing participant planner contract and are explicitly gated; they are not
+flattened into one invented part. Tests verify two real source blocks through
+the production package verifier and event scheduler, exact audio/tactile samples,
+preserved row order, missing/stale inputs, and cancellation during WAV writing
+without a session manifest. Output remains physically unqualified.
+
 ## Verification
 
 `cargo test -p pps-designer-core` tests actual PCM, channels, silence, timing,
@@ -142,5 +186,6 @@ versus Cartesian waveform differences, passed in 67 s.
 Evidence remains in ignored `artifacts/`. No audio device is opened or qualified.
 
 Unavailable: legacy NumPy generation; resampled or compressed imported sources;
-additional trajectory/burst policies; ILD near-field correction; full profile
-assembly; physical calibration. This subset is not full catalogue replication.
+additional trajectory/burst policies; ILD near-field correction; complete
+participant/phase profile assembly and instruction slots; physical calibration.
+This subset is not full catalogue replication.
