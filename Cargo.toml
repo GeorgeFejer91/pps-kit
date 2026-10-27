@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "packages/pps-designer-core",
     "packages/pps-contracts",
     "packages/pps-brsp",
     "packages/pps-runner-core",

@@ -41,7 +41,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
   participant draft/submit, instruction export). Science worker: 27 matrix/network
   tests pass, including source freshness and frozen identities; the coordinator
   independently reran the preceding 25-test projection checkpoint.
-  Complete Standard, clean installation and physical qualification remain open.
+  Integrated Rust workspace: 299 tests pass, three opt-in tests skipped by
+  default; the native 3DTI waveform test separately passes on actual generated
+  PCM (91.82 s). Go downloader tests pass with verified task-local Go 1.27.3.
+  Complete Standard is running with failures under investigation; clean
+  installation and physical qualification remain open.
 - **Scientific coverage:** frozen 94-publication corpus, 124 study rows and 1,364
   compact contracts; 156 reported-complete and 38 derived-complete cells after
   the first publisher-source timing batch. 77 inventories remain unassessed.
@@ -73,6 +77,9 @@ This file is the active checklist and handoff owner; replace state, do not appen
   verified with a silent synthetic fixture; installed/physical gates stay open.
 - [ ] M2G — Freeze scientific generation contracts; implement and verify Rust
   generation and the corrected dry-source 3DTI wrapper, without Python runtime.
+  First kernel and corrected prepared-input bridge are integrated (`73eee126`):
+  nine waveform/contract tests pass; colored/imported/polar paths and profile
+  conversion are the next slice. Legacy RNG IDs remain rejected explicitly.
 - [ ] M3 — Complete native profile assembly, all-block execution and the
   Windows Tauri Designer journey (A2–A3, C2); browser bundle assets materialize
   offline; Python/Rust handoff and result parity pass. Manifest-order progression
