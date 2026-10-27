@@ -79,6 +79,46 @@ fallible, and bounded loops check cancellation. At the maximum, one job needs
 hundreds of MiB across PCM buffers plus the separate HRTF process. The caller
 must serialize generation against its resource budget.
 
+## Existing Designer payload adapter
+
+`design::plan_ingredient_generation(payload, opt_in)` consumes the complete
+`collectPayload()` object plus `bake_recipe`, including pending
+`trajectory_controls`. `GenerationOptIn` requires the exact source algorithm,
+`accept_non_legacy_source_algorithm: true`, and the native seed for generated
+noise. Legacy NumPy IDs fail. The returned plan contains the request, renderer
+policy, opaque HRTF/import references, and canonical source/snapshot metadata.
+It never opens a path. The host resolves imports only from native picker or
+verified **dry-source** receipts, never from arbitrary saved `source_input_path`
+or a prebaked spatial output. Import SHA/channel/length policies are required.
+
+Unchanged rounded controls preserve saved polar arcs and unwrapped angles.
+Deliberate endpoint edits follow the existing Cartesian control semantics;
+explicit polar edits require complete polar design fields. Pending holds and
+movement update both DSP and canonical metadata. Estimated SPL maps to digital
+targets but remains unmeasured; measured claims fail pending verified receipts.
+The native policy defaults to propagation delay on, near-field/far filtering off,
+with explicit attenuation derived from the level policy. The optional recipe
+`spatialization` object can explicitly set those three Boolean effect switches;
+near-field and far filtering still fail as unsupported.
+
+After generation, `write_ingredient_wav` emits stereo and rejects any tactile
+cue. `design::generated_ingredient_entry(plan, relative_path, wav_bytes,
+stimulus, renderer_report, cancelled)` checks staged PCM against the DSP result
+and renderer policy, hashes the actual WAV, and returns a Serialize-only receipt.
+`design::apply_generated_ingredient(plan, entry)` returns canonical `design` and
+`asset` values plus `invalidate_segments: [2,3,4,5,6]` and
+`invalidate_run_package: true`. It inserts/replaces the correct collection,
+propagates existing source-label references, and marks the design customized
+and unqualified. The host owns accepted-plan locks, revision/cancellation fences,
+atomic publication, and downstream file/state invalidation. A plan digest binds
+the full payload **and** explicit algorithm/seed opt-in.
+
+`tests/fixtures/ingredient_payload.json` freezes the existing payload shape;
+it is a contract fixture, not a real study qualification. The explicit native
+adapter test rendered its polar burst path through the actual C++ executable,
+verified stereo bytes/metadata, and measured the calibrated window within
+±0.02 dB in 15 s (2026-10-27).
+
 ## Verification
 
 `cargo test -p pps-designer-core` tests actual PCM, channels, silence, timing,
