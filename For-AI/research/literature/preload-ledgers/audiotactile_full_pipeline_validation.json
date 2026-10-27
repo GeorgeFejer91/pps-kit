@@ -5704,7 +5704,7 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract exact audio-tactile reaction-time task parameters; body-image/social-cognition variables are non-blocking context"
+            "Original pink-noise clip/envelope and level calibration; tactile waveform/duration; ITI/foreperiod, response timeout and silent-control zero-time anchor. The author manuscript reports 3000-ms sound, five SOAs and the reconciled 81-trial schedule."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -5739,9 +5739,9 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract exact audio-tactile reaction-time task parameters; body-image/social-cognition variables are non-blocking context"
+        "Original pink-noise clip/envelope and level calibration; tactile waveform/duration; ITI/foreperiod, response timeout and silent-control zero-time anchor. The author manuscript reports 3000-ms sound, five SOAs and the reconciled 81-trial schedule."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract exact audio-tactile reaction-time task parameters; body-image/social-cognition variables are non-blocking context",
+      "next_required_action": "Extract or source the missing paper parameters: Original pink-noise clip/envelope and level calibration; tactile waveform/duration; ITI/foreperiod, response timeout and silent-control zero-time anchor. The author manuscript reports 3000-ms sound, five SOAs and the reconciled 81-trial schedule.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",

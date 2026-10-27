@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 37)
+        self.assertEqual(len(registry["entries"]), 39)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 71)
+        self.assertEqual(registered_instance_count, 73)
         network = json.loads(
             (
                 ROOT
@@ -1019,7 +1019,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(entry["instances"][0]["instance_kind"], "publication_scope_boundary")
         self.assertEqual(len(data["publications"]), 94)
         # Apparently adjacent titles can still contain audio-tactile tasks.
-        for retained in ("doi:10.1016/j.bodyim.2024.101777", "doi:10.1016/j.actpsy.2011.01.003", "doi:10.3758/app.72.4.885"):
+        for retained in ("doi:10.1016/j.bodyim.2024.101777", "doi:10.1016/j.actpsy.2011.01.003"):
             self.assertNotEqual({row["status"] for row in studies[retained]["contracts"]}, {"not_applicable"})
 
     def test_passive_and_directional_tasks_keep_trial_units_and_time_anchors(self) -> None:
@@ -1163,6 +1163,28 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(inventory["source_lineage"]["network_node_id"], "doi:10.1523/jneurosci.1696-15.2015")
         for study_id in (old + "::a", old + "::b", "doi:10.1093/schbul/sbac067", boundary["studyRowId"]):
             self.assertEqual(studies[study_id]["nativeQualification"], "not_assessed")
+
+    def test_body_image_protocol_is_retained_and_haptic_bisection_is_disclosed(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        studies = {row["studyRowId"]: row for row in data["studies"]}
+        finn = studies["doi:10.1016/j.bodyim.2024.101777"]
+        contracts = {row["key"]: row for row in finn["contracts"]}
+        self.assertIn("81", contracts["repetition_allocation"]["value"])
+        self.assertIn("14", contracts["baseline_trial_contract"]["value"])
+        self.assertIn("+300", contracts["baseline_trial_contract"]["value"])
+        self.assertEqual(contracts["baseline_trial_contract"]["status"], "partial")
+        self.assertIn("timing_and_anchor", contracts["baseline_trial_contract"]["missingComponents"])
+        self.assertEqual(contracts["jitter_iti_policy"]["status"], "not_reported")
+        self.assertIn("left index", contracts["tactile_target"]["value"])
+        self.assertIn("right index", contracts["task_response"]["value"])
+        haptic = studies["doi:10.3758/app.72.4.885"]
+        self.assertEqual(haptic["parameterStatusCounts"], {"not_applicable": 11})
+        registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+        inventory = next(row for row in registry["entries"] if row["network_node_id"] == haptic["networkNodeId"])
+        self.assertEqual(len(inventory["instances"]), 1)
+        self.assertIn("bisection", inventory["instance_count_basis"])
+        for study in (finn, haptic):
+            self.assertEqual(study["nativeQualification"], "not_assessed")
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:

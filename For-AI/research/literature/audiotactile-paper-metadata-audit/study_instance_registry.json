@@ -774,6 +774,56 @@
         }
       ],
       "source_review_limit": "Current primary article and official supplementary Methods inspected. The supplement gives incompatible trial totals and current/voltage pulse terminology; do not reconcile by importing a predecessor schedule or by silently changing the hardware specification."
+    },
+    {
+      "network_node_id": "doi:10.1016/j.bodyim.2024.101777",
+      "doi": "10.1016/j.bodyim.2024.101777",
+      "inventory_status": "confirmed_one_audiotactile_assessment_protocol",
+      "instance_count_basis": "One correlational study contains an audio-tactile PPS assessment, alongside interpersonal comfort-distance tasks and questionnaires. The companion measures are not separate PPS experiments.",
+      "evidence_pointer": "https://aru.figshare.com/articles/journal_contribution/The_Impact_of_Body_Image_on_Social_Cognition_Fear_of_Negative_Evaluation_Mediates_the_Relationship_between_Body_Surveillance_and_Interpersonal_Distance_in_Women/26381626::author-deposited manuscript section 2.2.9 Peripersonal space",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_looming_rt_with_separate_social_measures",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Audio-tactile PPS assessment in body-image correlational study",
+          "record_id": "body_image_social_cognition_2024",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Interpersonal comfort-distance and questionnaire measures",
+          "disposition": "companion_measures_not_pps_protocol",
+          "evidence_pointer": "https://aru.figshare.com/articles/journal_contribution/The_Impact_of_Body_Image_on_Social_Cognition_Fear_of_Negative_Evaluation_Mediates_the_Relationship_between_Body_Surveillance_and_Interpersonal_Distance_in_Women/26381626::sections 2.2.8-2.2.9",
+          "basis": "The primary manuscript distinguishes comfort-distance/IPD and questionnaire measures from the audio-tactile PPS task."
+        }
+      ],
+      "source_review_limit": "Author-deposited manuscript DOCX retrieved and its Methods inspected; do not infer exclusion from a body-image title, a calibrated level envelope, or an unstated ITI/response timeout."
+    },
+    {
+      "network_node_id": "doi:10.3758/app.72.4.885",
+      "doi": "10.3758/app.72.4.885",
+      "inventory_status": "confirmed_one_adjacent_haptic_bisection_experiment",
+      "instance_count_basis": "One experiment compares blind and sighted groups on active wooden-rod bisection while hearing spoken numbers or a control word. Groups and word/rod factors are not independent experiments; there is no discrete tactile-target detection endpoint.",
+      "evidence_pointer": "https://link.springer.com/content/pdf/10.3758/APP.72.4.885.pdf::Method, Haptic Line Bisection Task, Number Presentation and Procedure pp. 886-887",
+      "review_date": "2026-10-27",
+      "framework_disposition": "adjacent_auditory_numeric_priming_of_active_haptic_spatial_judgment",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Auditory-number priming of active haptic rod bisection",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_active_haptic_spatial_judgment",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "source_review_limit": "Fresh publisher PDF Methods inspected. Spoken numbers accompany ten-second manual exploration; endpoint is midpoint error, not tactile reaction time. Retained frozen membership does not imply implementation of haptic exploration or spatial judgment."
     }
   ],
   "corpus_freeze": {

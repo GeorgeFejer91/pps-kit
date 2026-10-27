@@ -33,8 +33,8 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 127 study/context rows,
-34 registered publication inventories and 60 publication inventories still
+Current checkpoint (2026-10-27): 94 frozen publications, 128 study/context rows,
+39 registered publication inventories and 55 publication inventories still
 unassessed. The earlier counts below describe individual historical checkpoints.
 Tonelli (2019) now separates neck PPS assessment from echolocation training,
 time-bisection training and distance validation; manual trial starts, endpoint
@@ -60,6 +60,16 @@ partial; auditory-only group controls are not catches. Hüg (2022) is retained a
 one adjacent auditory-reaching experiment with tactile feedback during training,
 not a timed tactile-detection protocol. Its source-backed boundary does not
 establish native reaching or motion-tracking support.
+
+Spadone (2021) separates the reused behavioral localizer and fMRI protocol,
+with explicit Ferri (2015) dataset lineage; these are not independent new cohorts.
+Ferroni (2022) now uses its retrieved official supplement, preserving incompatible
+trial totals and electrical-mode wording. Rossi Sebastiano (2022) is confirmed
+as an adjacent visuotactile boundary. Finn (2024) provides an in-scope 81-trial
+audio-tactile assessment despite its body-image title; Cattaneo (2010) instead
+uses spoken-number priming of active haptic rod bisection. Its adjacent boundary
+is based on primary Methods, not its title. All six publications remain in the
+frozen map, and every native qualification status remains not assessed.
 
 The first bounded source batch (2026-10-27) adds four experiment-scoped timing/count
 reviews for Canzoneri et al. (2012), DOI `10.1371/journal.pone.0044306`, from the
