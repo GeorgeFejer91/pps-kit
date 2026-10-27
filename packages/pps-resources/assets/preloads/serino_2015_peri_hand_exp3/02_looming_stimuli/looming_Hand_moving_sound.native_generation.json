@@ -1,0 +1,152 @@
+{
+  "asset": {
+    "bytes": 1411268,
+    "channels": 2,
+    "duration_s": 4.0,
+    "frames": 176400,
+    "noise_type": "pink",
+    "path": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
+    "sample_rate": 44100,
+    "sha256": "8b7940a83caa1b5f3ba9de2ea2e9a29733c10c8ff4c3a9f6d135deef1bea9874",
+    "source_profile": "continuous_noise"
+  },
+  "direction": "looming",
+  "hrtf_sha256": "83ebbcd9a09d17679b95d201c9775438c0bb1199d565c3fc7a25448a905cdc3c",
+  "level_qc": {
+    "actual_window_rms_dbfs": null,
+    "applied_gain_db": -22.59353221592102,
+    "audio_peak_dbfs": -0.9151500413110016,
+    "calibration_window_frames": null,
+    "kind": "peak_normalize",
+    "physical_spl_qualified": false,
+    "target_peak_dbfs": -0.9151498112135024,
+    "target_window_rms_dbfs": null
+  },
+  "measured_pcm": {
+    "channels": 2,
+    "clipping": false,
+    "duration_s": 4.0,
+    "finite": true,
+    "first_500ms_rms": 0.05463099642328919,
+    "frames": 176400,
+    "last_500ms_rms": 0.16263665761913176,
+    "peak": 0.8999999761581421,
+    "peak_dbfs": -0.9151500413110016,
+    "rms": 0.10831013064741948,
+    "sample_rate": 44100,
+    "silent_100ms_windows": 0
+  },
+  "provenance": {
+    "apparatus": "Binaural FABIAN/3DTI proxy for original two-speaker intensity motion; near-field correction disabled.",
+    "legacy_numpy_seed_compatible": false,
+    "level_policy": "Explicit digital peak 0.90 with distance attenuation; no SPL or source-envelope equivalence.",
+    "motion": "Reported 22 cm/s applied to the chosen 88 cm path gives 4 s; exact original onset origin remains unresolved.",
+    "physical_spl_qualified": false,
+    "physical_timing_qualified": false,
+    "renderer_tail": "Native output truncates at the chosen 4 s duration; no sound hold or padded movement.",
+    "scientific_source_conformance": false,
+    "seed_policy": "Explicit native V2 seeds 20152232/20153241; their integers do not establish legacy waveform parity.",
+    "source_origin": "Chosen 93 cm sound-onset anchor and right-hand 35 cm lateral offset are approximation conventions.",
+    "terminal_silence": "Separate 100 ms trial-strip silence required for terminal tactile cue; absent from this 4 s auditory WAV and not source-reported."
+  },
+  "proxy_policy": "serino-exp3-continuous-pink-cartesian-proxy.v2",
+  "renderer_executable_sha256": "69ae0808f0f50620ec06fea9e9fcd9cd6aa965b9bbdf2b6ad46d35a22d873121",
+  "request": {
+    "duration_s": 4.0,
+    "level": {
+      "kind": "peak_normalize",
+      "peak_ceiling_dbfs": -0.9151498112135024,
+      "target_peak_dbfs": -0.9151498112135024
+    },
+    "sample_rate_hz": 44100,
+    "schema": "pps-native-generation.v1",
+    "seed": 20152232,
+    "source": {
+      "color": "pink",
+      "kind": "noise",
+      "profile": {
+        "kind": "continuous"
+      }
+    },
+    "source_algorithm": "rand-0.8.8-std-rng-box-muller.v1",
+    "tactile": [],
+    "trajectory": {
+      "end": {
+        "x_m": 0.35,
+        "y_m": 0.05,
+        "z_m": 0.0
+      },
+      "kind": "linear",
+      "movement_duration_s": 4.0,
+      "pre_hold_s": 0.0,
+      "start": {
+        "x_m": 0.35,
+        "y_m": 0.93,
+        "z_m": 0.0
+      }
+    }
+  },
+  "schema": "pps-premade-native-proxy-evidence.v1",
+  "source_pointer": "Main Results Experiment3; Methods Acoustic Stimuli; SI two-speaker setup p2",
+  "source_qc": {
+    "burst_envelope_algorithm": null,
+    "burst_frames": null,
+    "burst_onset_frames": [],
+    "color_algorithm": "reference-spectral-shaping-rustfft-6.4.1.v1",
+    "frames": 176400,
+    "imported_sha256": null,
+    "noise_color": "pink",
+    "numpy_seed_compatible": false,
+    "peak": 1.0,
+    "rms": 0.22332294909131795,
+    "seed": 20152232,
+    "source_algorithm": "rand-0.8.8-std-rng-box-muller.v1"
+  },
+  "source_reference": "https://doi.org/10.1038/srep18603",
+  "spatializer_report": {
+    "attenuation_db_per_double_distance": -6.020599842071533,
+    "attenuation_reference_distance_m": 1.95,
+    "block_size_frames": 512,
+    "channels": 2,
+    "customized_itd": true,
+    "frames": 176400,
+    "hrtf_format": "sofa",
+    "hrtf_sha256": "83ebbcd9a09d17679b95d201c9775438c0bb1199d565c3fc7a25448a905cdc3c",
+    "motion": {
+      "end": {
+        "x_m": 0.35,
+        "y_m": 0.05,
+        "z_m": 0.0
+      },
+      "kind": "linear",
+      "movement_duration_s": 4.0,
+      "pre_hold_s": 0.0,
+      "start": {
+        "x_m": 0.35,
+        "y_m": 0.93,
+        "z_m": 0.0
+      }
+    },
+    "motion_sampling": "declared-coordinate-interpolation-at-block-center",
+    "output": "stereo.wav",
+    "peak": 12.13162899017334,
+    "physical_spl_qualified": false,
+    "sample_rate_hz": 44100,
+    "schema": "pps-3dti-spatialized.v2",
+    "source_algorithm": "rand-0.8.8-std-rng-box-muller.v1",
+    "source_sha256": "632e765ba546cd15892991d7cffbdc41ceaaeb076cf7e821e5d68419547dfe7d",
+    "spatialization": {
+      "distance_attenuation": true,
+      "far_distance_filter": false,
+      "head_radius_m": 0.09,
+      "near_field": false,
+      "normalization": "none",
+      "output_channels": 2,
+      "propagation_delay": true
+    },
+    "stereo_pcm_sha256": "46be8bf2dfd10e52ff40a1f6fda55ae72fe86be9bfa8d89fed2dad4ac97dc874",
+    "tail_policy": "truncate-at-requested-frames",
+    "toolkit_commit": "6bfee08705675308a8c348b4c3a4d582586d2f99"
+  },
+  "template_id": "serino_2015_peri_hand_exp3"
+}
