@@ -689,6 +689,91 @@
         }
       ],
       "source_review_limit": "Current primary PDF Methods and Figure 1 inspected. Boundary classification preserves 94-publication membership and does not claim that reaching, motion tracking or guided physical training is implemented or qualified."
+    },
+    {
+      "network_node_id": "doi:10.1038/s41598-021-00048-5",
+      "doi": "10.1038/s41598-021-00048-5",
+      "inventory_status": "confirmed_reanalysis_with_two_protocol_variants",
+      "instance_count_basis": "The paper reanalyzes the Ferri et al. 2015 dataset and separately describes behavioral boundary estimation and the fMRI protocol. These are linked protocol variants, not two newly recruited independent experiments.",
+      "evidence_pointer": "https://www.nature.com/articles/s41598-021-00048-5.pdf::Methods pp. 9-10; Figure 1",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_behavioral_localizer_and_fmri_reanalysis",
+      "source_lineage": {
+        "network_node_id": "doi:10.1523/jneurosci.1696-15.2015",
+        "relationship": "reanalysis_of_existing_dataset",
+        "basis": "Methods identifies the earlier dataset; task and individual near/far selection are restated in the current primary article."
+      },
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Reused behavioral boundary-estimation protocol",
+          "record_id": "spadone_2021_connectivity",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "reanalysis_protocol_variant",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "b",
+          "experiment_label": "Reused fMRI protocol with left-finger attention targets",
+          "record_id": "spadone_2021_connectivity",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "reanalysis_protocol_variant",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        }
+      ],
+      "source_review_limit": "Current primary Methods and rendered Figure 1 inspected. Reuse does not establish independent replication; active/passive wording conflicts, incomplete catch allocation and original asset provenance remain explicit."
+    },
+    {
+      "network_node_id": "doi:10.1038/s41598-022-21469-w",
+      "doi": "10.1038/s41598-022-21469-w",
+      "inventory_status": "confirmed_one_visuotactile_experiment",
+      "instance_count_basis": "One within-participant design compares counterbalanced unilateral and bilateral tactile tasks paired with visual LEDs. The task variants are factors within one experiment; there is no auditory stimulation paradigm.",
+      "evidence_pointer": "https://www.nature.com/articles/s41598-022-21469-w.pdf::Materials and methods pp. 2-3",
+      "review_date": "2026-10-27",
+      "framework_disposition": "adjacent_visuotactile_boundary",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Visuotactile detection with unilateral/bilateral tactile tasks",
+          "record_id": "rossi_sebastiano_2022_visuotactile",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_visuotactile_context",
+          "instance_kind": "experiment",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "source_review_limit": "Current primary Methods confirms visual LEDs and electrical hand targets. Retain frozen publication membership while keeping direct auditory-tactile contracts not applicable; no visual or electrical native implementation claim."
+    },
+    {
+      "network_node_id": "doi:10.1093/schbul/sbac067",
+      "doi": "10.1093/schbul/sbac067",
+      "inventory_status": "confirmed_one_group_comparison_experiment",
+      "instance_count_basis": "One pre-training-post protocol compares clinical and healthy groups. Sessions 1 and 3 repeat the PPS assessment, and Session 2 is physical tool-use training; these are phases of one experiment.",
+      "evidence_pointer": "https://www.unipr.it/sites/default/files/2022-06/Ferroni%20et%20al%202022_0.pdf::Procedure p. 3; publisher Supplementary Materials section 1.2 Apparatus and Procedure",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_looming_flat_pre_post_physical_tool_use",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "PPS assessment before and after physical tool use",
+          "record_id": "schizophrenia_tool_use_2022",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Physical tool-use training",
+          "disposition": "intervention_context_not_independent_pps_experiment",
+          "basis": "Fifty objects are moved across table areas and back, 100 movements over about ten minutes, between the two PPS assessments.",
+          "evidence_pointer": "https://www.unipr.it/sites/default/files/2022-06/Ferroni%20et%20al%202022_0.pdf::Procedure p. 3"
+        }
+      ],
+      "source_review_limit": "Current primary article and official supplementary Methods inspected. The supplement gives incompatible trial totals and current/voltage pulse terminology; do not reconcile by importing a predecessor schedule or by silently changing the hardware specification."
     }
   ],
   "corpus_freeze": {
@@ -787,9 +872,10 @@
     ],
     "retained_scope_conflict": {
       "network_node_id": "doi:10.1038/s41598-022-21469-w",
-      "disposition": "retained_adjacent_scope_conflict",
-      "basis": "Existing exact-DOI review disagrees with the legacy audio-tactile inclusion label; retain visible rather than silently remove.",
-      "evidence_pointer": "apps/designer/frontend/publication_network.v3.json::doi:10.1038/s41598-022-21469-w"
+      "disposition": "source_assessed_adjacent_visuotactile_retained",
+      "basis": "Current primary Methods confirms visual LEDs paired with electrical hand targets, without auditory stimulation. Frozen publication membership remains retained; direct audio-tactile contracts are not applicable.",
+      "evidence_pointer": "https://www.nature.com/articles/s41598-022-21469-w.pdf::Materials and methods pp. 2-3",
+      "review_date": "2026-10-27"
     },
     "identity_audit": {
       "reviewed_on": "2026-10-27",
@@ -1022,6 +1108,16 @@
       "review_date": "2026-10-27",
       "reason": "The former unassessed placeholder combined a three-intensity pilot and five-intensity main study. Both children are disclosed; neither alone is equivalent to the previous publication row.",
       "evidence_pointer": "https://pure-oai.bham.ac.uk/ws/portalfiles/portal/70592622/Orioli_et_al_Identifying_peripersonal_space_Scientific_Reports_2019.pdf::Pilot study; Study 1; Methods pp. 8-9 and Table 4"
+    },
+    {
+      "old_study_row_id": "doi:10.1038/s41598-021-00048-5",
+      "child_study_row_ids": [
+        "doi:10.1038/s41598-021-00048-5::a",
+        "doi:10.1038/s41598-021-00048-5::b"
+      ],
+      "review_date": "2026-10-27",
+      "reason": "The former placeholder combined the reused behavioral localizer and fMRI protocol. The children are linked reanalysis protocol variants, not new independent cohorts; neither alone is equivalent to the prior publication row.",
+      "evidence_pointer": "https://www.nature.com/articles/s41598-021-00048-5.pdf::Methods pp. 9-10"
     }
   ]
 }

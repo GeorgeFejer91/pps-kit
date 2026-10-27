@@ -4893,7 +4893,7 @@
           "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract near/far, flat/dynamic, fMRI block timing, and paper-specific ITI/foreperiod/hazard values separately from scanner context before templating"
+            "Original stimulus recipe/assets and electrical waveform; current behavioral catch allocation; fMRI active/passive role wording conflict, ambiguous catch denominator and ITI selection distribution. Individual near/far SOA rule is reported, not a universal fixed pair."
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -4926,9 +4926,9 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract near/far, flat/dynamic, fMRI block timing, and paper-specific ITI/foreperiod/hazard values separately from scanner context before templating"
+        "Original stimulus recipe/assets and electrical waveform; current behavioral catch allocation; fMRI active/passive role wording conflict, ambiguous catch denominator and ITI selection distribution. Individual near/far SOA rule is reported, not a universal fixed pair."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract near/far, flat/dynamic, fMRI block timing, and paper-specific ITI/foreperiod/hazard values separately from scanner context before templating",
+      "next_required_action": "Extract or source the missing paper parameters: Original stimulus recipe/assets and electrical waveform; current behavioral catch allocation; fMRI active/passive role wording conflict, ambiguous catch denominator and ITI selection distribution. Individual near/far SOA rule is reported, not a universal fixed pair.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -5501,7 +5501,7 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract PPS task parameters; clinical group and tool-use context are non-blocking"
+            "Original auditory asset/recipe and duration; contradictory 180-target versus 120-total schedule and unresolved shared 40% baseline/catch allocation; online response deadline; conflicting constant-current/constant-voltage pulse specification. SI reports five positive SOAs, -700-ms tactile baseline, 1000-ms ITI and 100-microsecond electrical pulse."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -5536,9 +5536,9 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract PPS task parameters; clinical group and tool-use context are non-blocking"
+        "Original auditory asset/recipe and duration; contradictory 180-target versus 120-total schedule and unresolved shared 40% baseline/catch allocation; online response deadline; conflicting constant-current/constant-voltage pulse specification. SI reports five positive SOAs, -700-ms tactile baseline, 1000-ms ITI and 100-microsecond electrical pulse."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract PPS task parameters; clinical group and tool-use context are non-blocking",
+      "next_required_action": "Extract or source the missing paper parameters: Original auditory asset/recipe and duration; contradictory 180-target versus 120-total schedule and unresolved shared 40% baseline/catch allocation; online response deadline; conflicting constant-current/constant-voltage pulse specification. SI reports five positive SOAs, -700-ms tactile baseline, 1000-ms ITI and 100-microsecond electrical pulse.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",

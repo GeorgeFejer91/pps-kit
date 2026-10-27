@@ -1760,8 +1760,11 @@
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "extract near/far, flat/dynamic, fMRI block timing, and paper-specific ITI/foreperiod/hazard values separately from scanner context before templating"
-      ]
+        "Original stimulus recipe/assets and electrical waveform; current behavioral catch allocation; fMRI active/passive role wording conflict, ambiguous catch denominator and ITI selection distribution. Individual near/far SOA rule is reported, not a universal fixed pair."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://www.nature.com/articles/s41598-021-00048-5.pdf",
+      "scope_review_basis": "Primary Methods pp. 9-10 reuses Ferri 2015 data and distinguishes behavioral localizer from fMRI protocol; current source contradictions and gaps remain in the component review."
     },
     {
       "record_id": "ageing_2021",
@@ -1872,8 +1875,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract PPS task parameters; clinical group and tool-use context are non-blocking"
-      ]
+        "Original auditory asset/recipe and duration; contradictory 180-target versus 120-total schedule and unresolved shared 40% baseline/catch allocation; online response deadline; conflicting constant-current/constant-voltage pulse specification. SI reports five positive SOAs, -700-ms tactile baseline, 1000-ms ITI and 100-microsecond electrical pulse."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://oup.silverchair-cdn.com/oup/backfile/Content_public/Journal/schizophreniabulletin/48/5/10.1093_schbul_sbac067/1/sbac067_suppl_supplementary_material.docx",
+      "scope_review_basis": "Current official supplementary section 1.2 was retrieved and inspected; the primary article separates two assessments from physical tool-use intervention. Gaps are source conflicts/missing details, not an unavailable supplement."
     },
     {
       "record_id": "teraoka_2024_front_rear",
@@ -2191,7 +2197,10 @@
       "audiotactile_task_family": "visuo-tactile PPS task, not an audio-tactile profile",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
-      "missing_publication_parameters": []
+      "missing_publication_parameters": [],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://www.nature.com/articles/s41598-022-21469-w.pdf",
+      "scope_review_basis": "Primary Methods pp. 2-3 confirms one counterbalanced visuotactile design with LEDs and electrical hand targets; retained as an adjacent boundary without implying auditory-tactile or native support."
     },
     {
       "record_id": "teramoto_2013_beyond_head_audiotactile",
