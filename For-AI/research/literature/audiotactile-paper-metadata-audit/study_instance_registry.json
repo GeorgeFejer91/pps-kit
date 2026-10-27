@@ -172,17 +172,73 @@
     {
       "network_node_id": "doi:10.1016/j.neuropsychologia.2026.109490",
       "doi": "10.1016/j.neuropsychologia.2026.109490",
-      "inventory_status": "confirmed_total",
-      "inventory_evidence_status": "abstract_or_metadata_inventory",
+      "inventory_status": "abstract_four_experiments_full_inventory_access_blocked",
+      "inventory_evidence_status": "audited_source_access_gap",
       "inventory_evidence_classified_on": "2026-10-27",
-      "instance_count_basis": "The audit known-prior-gaps section and the network abstract explicitly describe a comprehensive four-experiment design.",
-      "evidence_pointer": "paper_audits/ferroni_2026_pps_plasticity.md; publication_network.v3.json::doi:10.1016/j.neuropsychologia.2026.109490",
+      "instance_count_basis": "Primary abstract identifies four experiments and 289 participants study-wide. Publisher graphical caption mentions visual–tactile/audio–tactile, hand/foot, reference-frame and posture factors. Experiment-specific modality assignment, cohort independence, conditions and supporting controls remain inaccessible; do not assign factors to a–d from abstract order.",
+      "evidence_pointer": "https://pubmed.ncbi.nlm.nih.gov/42128086/; https://www.sciencedirect.com/science/article/pii/S0028393226001363::abstract and indexed graphical-abstract caption",
       "instances": [
-        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1", "record_id": "ferroni_2026_pps_plasticity", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2", "record_id": "ferroni_2026_pps_plasticity", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "c", "instance_kind": "experiment", "experiment_label": "Experiment 3", "record_id": "ferroni_2026_pps_plasticity", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "d", "instance_kind": "experiment", "experiment_label": "Experiment 4", "record_id": "ferroni_2026_pps_plasticity", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
-      ]
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 1 — allocation and modalities not disaggregated",
+          "record_id": "ferroni_2026_pps_plasticity",
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "source_scope_limit": "Exact modality and parameter allocation for this numbered experiment cannot be established from accessible abstract/caption."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 2 — allocation and modalities not disaggregated",
+          "record_id": "ferroni_2026_pps_plasticity",
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "source_scope_limit": "Exact modality and parameter allocation for this numbered experiment cannot be established from accessible abstract/caption."
+        },
+        {
+          "suffix": "c",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 3 — allocation and modalities not disaggregated",
+          "record_id": "ferroni_2026_pps_plasticity",
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "source_scope_limit": "Exact modality and parameter allocation for this numbered experiment cannot be established from accessible abstract/caption."
+        },
+        {
+          "suffix": "d",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 4 — allocation and modalities not disaggregated",
+          "record_id": "ferroni_2026_pps_plasticity",
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "source_scope_limit": "Exact modality and parameter allocation for this numbered experiment cannot be established from accessible abstract/caption."
+        }
+      ],
+      "review_date": "2026-10-27",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "outcome": "Primary bibliographic abstract inspected."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0028393226001363",
+          "outcome": "Indexed content only; direct full-page requests HTTP403."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://air.unipr.it/cris/rp/rp73265",
+          "outcome": "Indexed title only; direct request HTTP403."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.elsevier.com/content/article/PII:S0028393226001363?httpAccept=text/xml",
+          "outcome": "HTTP 200 returns only bibliographic coredata, no body or Methods."
+        }
+      ],
+      "source_review_limit": "Retain frozen membership and existing suffixes; this is an audited access blocker, not a complete Methods inventory or runnable profile. Do not copy Ferroni2020/2022 protocols or assign direct-AT applicability to every condition without Methods."
     },
     {
       "network_node_id": "doi:10.1016/j.nicl.2019.101940",

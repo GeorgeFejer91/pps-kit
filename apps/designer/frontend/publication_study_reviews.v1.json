@@ -16,7 +16,7 @@
     "derivedComplete": 77,
     "parameterStatusCounts": {
       "approximation_required": 37,
-      "composite_requires_split": 113,
+      "composite_requires_split": 69,
       "conflicting_evidence": 48,
       "derived_complete": 77,
       "explicitly_absent": 22,
@@ -26,7 +26,7 @@
       "not_reported": 57,
       "partial": 409,
       "reported_complete": 301,
-      "source_unavailable": 191
+      "source_unavailable": 235
     }
   },
   "statusLegend": {
@@ -877,17 +877,17 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "composite_requires_split": 44
+        "source_unavailable": 44
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
         "registered": true,
-        "evidenceStatus": "abstract_or_metadata_inventory",
-        "inventoryStatus": "confirmed_total",
+        "evidenceStatus": "audited_source_access_gap",
+        "inventoryStatus": "abstract_four_experiments_full_inventory_access_blocked",
         "studyRowCount": 4,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "rowsWithElevenSourceDispositions": 4,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -20219,235 +20219,416 @@
       "studyRowId": "doi:10.1016/j.neuropsychologia.2026.109490::a",
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2026.109490",
       "label": "Dealing with the world close to our body. Characterizing determinants of peripersonal space plasticity. (a)",
-      "experimentLabel": "Experiment 1",
-      "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "experimentLabel": "Experiment 1 — allocation and modalities not disaggregated",
+      "inventoryStatus": "abstract_four_experiments_full_inventory_access_blocked",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "composite_requires_split": 11
+        "source_unavailable": 11
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific waveform, duration, spectral content, level and rendering are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "source_mode",
             "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific endpoints, trajectories and motion law are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "motion_mode",
             "coordinate_frame_body_anchor",
             "geometry",
             "timing_constraint"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific acquisition sequence and relation to experimental phases are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "trial_families",
             "ordered_elements_and_source_selection"
           ],
-          "components": {}
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Exact experiment-specific response task/device and online deadline are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "target_and_nontarget_rule",
             "response_mode_or_device",
             "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific ITI/jitter policy is unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
             "values_or_range"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific audio/visual-to-tactile timing values and onset anchors are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "reference_event_and_sign",
             "ordered_soa_values_or_derivable_distance_anchors"
           ],
-          "components": {}
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific site, device, waveform and calibration are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "modality",
             "body_site_and_side",
             "waveform_and_duration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific baseline family/allocation is unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "family_or_explicit_none",
             "timing_and_anchor",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific catch family/allocation is unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "family_or_explicit_none",
             "target_role_and_expected_action",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "No experiment-specific sample or trial-cell counts obtained. 289 is the study-wide abstract participant total, not a trial count or verified per-experiment allocation.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "factor_dimensions",
             "repetitions_or_exact_counts",
             "exceptions_or_overrides"
           ],
-          "components": {}
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific phases, ordering and counterbalancing are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "block_count",
             "block_composition"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -20455,235 +20636,416 @@
       "studyRowId": "doi:10.1016/j.neuropsychologia.2026.109490::b",
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2026.109490",
       "label": "Dealing with the world close to our body. Characterizing determinants of peripersonal space plasticity. (b)",
-      "experimentLabel": "Experiment 2",
-      "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "experimentLabel": "Experiment 2 — allocation and modalities not disaggregated",
+      "inventoryStatus": "abstract_four_experiments_full_inventory_access_blocked",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "composite_requires_split": 11
+        "source_unavailable": 11
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific waveform, duration, spectral content, level and rendering are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "source_mode",
             "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific endpoints, trajectories and motion law are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "motion_mode",
             "coordinate_frame_body_anchor",
             "geometry",
             "timing_constraint"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific acquisition sequence and relation to experimental phases are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "trial_families",
             "ordered_elements_and_source_selection"
           ],
-          "components": {}
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Exact experiment-specific response task/device and online deadline are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "target_and_nontarget_rule",
             "response_mode_or_device",
             "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific ITI/jitter policy is unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
             "values_or_range"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific audio/visual-to-tactile timing values and onset anchors are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "reference_event_and_sign",
             "ordered_soa_values_or_derivable_distance_anchors"
           ],
-          "components": {}
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific site, device, waveform and calibration are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "modality",
             "body_site_and_side",
             "waveform_and_duration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific baseline family/allocation is unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "family_or_explicit_none",
             "timing_and_anchor",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific catch family/allocation is unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "family_or_explicit_none",
             "target_role_and_expected_action",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "No experiment-specific sample or trial-cell counts obtained. 289 is the study-wide abstract participant total, not a trial count or verified per-experiment allocation.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "factor_dimensions",
             "repetitions_or_exact_counts",
             "exceptions_or_overrides"
           ],
-          "components": {}
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific phases, ordering and counterbalancing are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "block_count",
             "block_composition"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -20691,235 +21053,416 @@
       "studyRowId": "doi:10.1016/j.neuropsychologia.2026.109490::c",
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2026.109490",
       "label": "Dealing with the world close to our body. Characterizing determinants of peripersonal space plasticity. (c)",
-      "experimentLabel": "Experiment 3",
-      "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "experimentLabel": "Experiment 3 — allocation and modalities not disaggregated",
+      "inventoryStatus": "abstract_four_experiments_full_inventory_access_blocked",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "composite_requires_split": 11
+        "source_unavailable": 11
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific waveform, duration, spectral content, level and rendering are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "source_mode",
             "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific endpoints, trajectories and motion law are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "motion_mode",
             "coordinate_frame_body_anchor",
             "geometry",
             "timing_constraint"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific acquisition sequence and relation to experimental phases are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "trial_families",
             "ordered_elements_and_source_selection"
           ],
-          "components": {}
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Exact experiment-specific response task/device and online deadline are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "target_and_nontarget_rule",
             "response_mode_or_device",
             "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific ITI/jitter policy is unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
             "values_or_range"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific audio/visual-to-tactile timing values and onset anchors are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "reference_event_and_sign",
             "ordered_soa_values_or_derivable_distance_anchors"
           ],
-          "components": {}
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific site, device, waveform and calibration are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "modality",
             "body_site_and_side",
             "waveform_and_duration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific baseline family/allocation is unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "family_or_explicit_none",
             "timing_and_anchor",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific catch family/allocation is unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "family_or_explicit_none",
             "target_role_and_expected_action",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "No experiment-specific sample or trial-cell counts obtained. 289 is the study-wide abstract participant total, not a trial count or verified per-experiment allocation.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "factor_dimensions",
             "repetitions_or_exact_counts",
             "exceptions_or_overrides"
           ],
-          "components": {}
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific phases, ordering and counterbalancing are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "block_count",
             "block_composition"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -20927,235 +21470,416 @@
       "studyRowId": "doi:10.1016/j.neuropsychologia.2026.109490::d",
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2026.109490",
       "label": "Dealing with the world close to our body. Characterizing determinants of peripersonal space plasticity. (d)",
-      "experimentLabel": "Experiment 4",
-      "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "experimentLabel": "Experiment 4 — allocation and modalities not disaggregated",
+      "inventoryStatus": "abstract_four_experiments_full_inventory_access_blocked",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "composite_requires_split": 11
+        "source_unavailable": 11
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific waveform, duration, spectral content, level and rendering are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "source_mode",
             "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific endpoints, trajectories and motion law are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "motion_mode",
             "coordinate_frame_body_anchor",
             "geometry",
             "timing_constraint"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific acquisition sequence and relation to experimental phases are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "trial_families",
             "ordered_elements_and_source_selection"
           ],
-          "components": {}
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Exact experiment-specific response task/device and online deadline are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "target_and_nontarget_rule",
             "response_mode_or_device",
             "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific ITI/jitter policy is unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
             "values_or_range"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific audio/visual-to-tactile timing values and onset anchors are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "reference_event_and_sign",
             "ordered_soa_values_or_derivable_distance_anchors"
           ],
-          "components": {}
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific site, device, waveform and calibration are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "modality",
             "body_site_and_side",
             "waveform_and_duration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific baseline family/allocation is unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "family_or_explicit_none",
             "timing_and_anchor",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific catch family/allocation is unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "family_or_explicit_none",
             "target_role_and_expected_action",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "No experiment-specific sample or trial-cell counts obtained. 289 is the study-wide abstract participant total, not a trial count or verified per-experiment allocation.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "factor_dimensions",
             "repetitions_or_exact_counts",
             "exceptions_or_overrides"
           ],
-          "components": {}
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Experiment-specific phases, ordering and counterbalancing are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "evidenceNote": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+          "sourceType": "primary_abstract_graphical_caption_audited_methods_access_gap",
           "missingComponents": [
             "block_count",
             "block_composition"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -55075,14 +55799,14 @@
     "publications": 94,
     "registeredInventories": 68,
     "methodsReviewedInventories": 57,
-    "auditedAccessBlockers": 7,
+    "auditedAccessBlockers": 8,
     "projectLineageReviews": 1,
-    "publicationsWithAllContractDispositions": 58,
-    "inventoryAndContractsAudited": 58,
-    "remainingInventoryOrContractAudit": 36,
+    "publicationsWithAllContractDispositions": 59,
+    "inventoryAndContractsAudited": 59,
+    "remainingInventoryOrContractAudit": 35,
     "inventoryEvidenceCounts": {
-      "abstract_or_metadata_inventory": 2,
-      "audited_source_access_gap": 7,
+      "abstract_or_metadata_inventory": 1,
+      "audited_source_access_gap": 8,
       "author_version_methods_reviewed_final_comparison_pending": 4,
       "not_registered": 26,
       "partial_methods_inventory": 1,

@@ -1477,6 +1477,20 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         index = read_csv(self.output_dir / "study_instance_index.csv")[1]
         self.assertEqual(next(row for row in index if row["study_row_id"] == ids[0])["parameter_evidence_scope"], "composite_requires_split")
 
+    def test_plasticity_four_slots_are_access_audited_not_methods_confirmed(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        node = "doi:10.1016/j.neuropsychologia.2026.109490"
+        publication = next(row for row in data["publications"] if row["networkNodeId"] == node)
+        audit = publication["inventoryAudit"]
+        self.assertEqual(audit["evidenceStatus"], "audited_source_access_gap")
+        self.assertTrue(audit["inventoryAndContractsAudited"])
+        self.assertEqual(audit["studyRowCount"], 4)
+        for study in [row for row in data["studies"] if row["studyRowId"].startswith(node + "::")]:
+            self.assertEqual(study["parameterStatusCounts"], {"source_unavailable": 11})
+            self.assertEqual(study["nativeQualification"], "not_assessed")
+            self.assertTrue(all("metadata response is not access to Methods" in c["evidenceNote"] for c in study["contracts"]))
+            self.assertEqual(study["templateIds"], [])
+
     def test_accepted_social_body_protocols_keep_different_timing_and_cohort_boundaries(self) -> None:
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
         studies = {row["studyRowId"]: row for row in data["studies"]}
@@ -1570,7 +1584,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         summary = data["inventoryAudit"]
         self.assertEqual(summary["registeredInventories"], 68)
         self.assertEqual(summary["methodsReviewedInventories"], 57)
-        self.assertEqual(summary["auditedAccessBlockers"], 7)
+        self.assertEqual(summary["auditedAccessBlockers"], 8)
         self.assertEqual(summary["inventoryEvidenceCounts"], dict(Counter(row["inventory_evidence_status"] for row in rows)))
         self.assertEqual(summary["inventoryAndContractsAudited"], sum(row["inventory_and_contracts_audited"] == "yes" for row in rows))
         self.assertEqual(summary["remainingInventoryOrContractAudit"], 94 - summary["inventoryAndContractsAudited"])
