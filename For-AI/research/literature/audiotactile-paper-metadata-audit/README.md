@@ -34,7 +34,7 @@ live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
 Current checkpoint (2026-10-27): 94 frozen publications, 128 study/context rows,
-43 registered publication inventories and 51 publication inventories still
+45 registered publication inventories and 49 publication inventories still
 unassessed. The earlier counts below describe individual historical checkpoints.
 Tonelli (2019) now separates neck PPS assessment from echolocation training,
 time-bisection training and distance validation; manual trial starts, endpoint
@@ -87,6 +87,14 @@ three cohorts; localization validation and the passive auditory fMRI localizer
 remain supporting context. The later Spadone (2021) reanalysis differs in
 fMRI repetitions, runs and one ITI, so both versions retain explicit conflicts.
 The original post-catch time-unit conflict and across-task count gaps remain open.
+
+Hobeika (2019) now has three source-confirmed social-context experiments, with
+common 480-row schedules and nine simultaneous/positive touch delays. Sorrentino
+(2021) adds the bilateral ageing comparison and its explicit right-foot response
+window, keeping the hand-count crossing and silent/interval anchors unresolved.
+Fresh Methods replaces earlier unsupported complete labels for a 220-row total,
+constant-speed trajectory and fully anchored ITI; prior values remain in Git history.
+Social/native synchronization and physical stimulus equivalence remain unassessed.
 
 The first bounded source batch (2026-10-27) adds four experiment-scoped timing/count
 reviews for Canzoneri et al. (2012), DOI `10.1371/journal.pone.0044306`, from the

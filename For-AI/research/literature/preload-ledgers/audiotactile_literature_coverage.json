@@ -1641,8 +1641,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "exact task parameters need extraction; social context is non-blocking"
-      ]
+        "Original bubbling-water recording, LISTEN HRTF identity and complete room/render configuration; motion time law; online response deadline; trailing-silence distribution; catch allocation across social/hemispace conditions. Three experiments share nine 0-3000-ms SOAs, -650/+3650-ms baseline anchors and 480-row schedules."
+      ],
+      "scope_review_source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6731720/",
+      "scope_review_basis": "Current primary Methods distinguishes collaboration, competition and inactive audience; within-experiment social and spatial factors are not extra experiments. Public evidence does not establish native two-participant synchronization.",
+      "scope_review_date": "2026-10-27"
     },
     {
       "record_id": "social_perception_2017",
@@ -1784,8 +1787,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "exact task parameters need extraction; age group context is non-blocking"
-      ]
+        "Original audio generation/envelope and distance mapping; silent-baseline zero trigger; inter-stimulus interval anchor/distribution; whether 110-row recipe repeats per hand; PPS block count/composition. Current Methods reports 300/1500/2700-ms SOAs and a 2000-ms right-foot response window."
+      ],
+      "scope_review_source": "https://arodes.hes-so.ch/nanna/record/7034/files/Published%20version.pdf",
+      "scope_review_basis": "Fresh published Methods separates one bilateral age-group PPS assessment from body and sound-localization tasks; later partial control-data reuse is disclosed without independent replication claims.",
+      "scope_review_date": "2026-10-27"
     },
     {
       "record_id": "seeming_confines_2021",

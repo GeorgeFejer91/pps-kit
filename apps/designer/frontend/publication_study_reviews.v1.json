@@ -10,23 +10,23 @@
   },
   "counts": {
     "publications": 94,
-    "studies": 132,
-    "contracts": 1452,
-    "reportedComplete": 254,
-    "derivedComplete": 53,
+    "studies": 134,
+    "contracts": 1474,
+    "reportedComplete": 268,
+    "derivedComplete": 54,
     "parameterStatusCounts": {
-      "approximation_required": 24,
+      "approximation_required": 22,
       "composite_requires_split": 146,
       "conflicting_evidence": 27,
-      "derived_complete": 53,
+      "derived_complete": 54,
       "explicitly_absent": 19,
       "low_confidence": 27,
       "not_applicable": 77,
       "not_assessed": 308,
       "not_reported": 26,
-      "partial": 254,
-      "reported_complete": 254,
-      "source_unavailable": 237
+      "partial": 274,
+      "reported_complete": 268,
+      "source_unavailable": 226
     }
   },
   "statusLegend": {
@@ -56,6 +56,11 @@
     "doi:10.1073/pnas.2024548118": [
       "doi:10.1073/pnas.2024548118::a",
       "doi:10.1073/pnas.2024548118::b"
+    ],
+    "doi:10.1098/rsos.181878": [
+      "doi:10.1098/rsos.181878::a",
+      "doi:10.1098/rsos.181878::b",
+      "doi:10.1098/rsos.181878::c"
     ],
     "doi:10.1371/journal.pone.0006582": [
       "doi:10.1371/journal.pone.0006582::a",
@@ -282,10 +287,8 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "approximation_required": 2,
-        "derived_complete": 2,
-        "partial": 1,
-        "reported_complete": 6
+        "partial": 6,
+        "reported_complete": 5
       },
       "nativeQualification": "not_assessed"
     },
@@ -828,11 +831,15 @@
     {
       "networkNodeId": "doi:10.1098/rsos.181878",
       "studyIds": [
-        "doi:10.1098/rsos.181878"
+        "doi:10.1098/rsos.181878::a",
+        "doi:10.1098/rsos.181878::b",
+        "doi:10.1098/rsos.181878::c"
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "source_unavailable": 11
+        "derived_complete": 3,
+        "partial": 15,
+        "reported_complete": 15
       },
       "nativeQualification": "not_assessed"
     },
@@ -7629,47 +7636,36 @@
     {
       "studyRowId": "doi:10.1016/j.cortex.2020.11.021",
       "networkNodeId": "doi:10.1016/j.cortex.2020.11.021",
-      "label": "How ageing shapes body and space representations: A comparison study between healthy young and older adults.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "How ageing shapes body and space representations: A comparison study between healthy young and older adults. (a)",
+      "experimentLabel": "Bilateral PPS assessment in young and older adults",
+      "inventoryStatus": "confirmed_one_audiotactile_group_comparison",
+      "evidenceScope": "experiment_specific",
       "templateIds": [],
       "parameterStatusCounts": {
-        "approximation_required": 2,
-        "derived_complete": 2,
-        "partial": 1,
-        "reported_complete": 6
+        "partial": 6,
+        "reported_complete": 5
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "approximation_required",
-          "value": "Three-second broadband looming sound played over near/far physical speakers; exact spectrum/gain law is not reported.",
+          "status": "partial",
+          "value": "3000-ms broadband noise, made to loom through intensity manipulation on two speakers.",
           "compositeValue": "",
-          "pageOrSection": "Article pp.60-61 / PDF pp.5-6, Methods",
-          "evidenceNote": "",
+          "pageOrSection": "Section 2.2.3, journal pp. 60-61 (PDF pp. 5-6)",
+          "evidenceNote": "Original file/generator, calibrated envelope and source mixing are unresolved; do not substitute an unqualified generic noise waveform.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2020.11.021",
           "missingComponents": [
+            "source_mode",
             "source_recipe_or_asset_provenance"
           ],
           "components": {
-            "source_mode": {
-              "status": "reported",
-              "value": "Three-second broadband looming sound played over near/far physical speakers; exact spectrum/gain law is not reported.",
-              "note": ""
-            },
-            "source_recipe_or_asset_provenance": {
-              "status": "approximation_required",
-              "value": "Three-second broadband looming sound played over near/far physical speakers; exact spectrum/gain law is not reported.",
-              "note": ""
-            },
             "stimulus_identity_or_asset": {
               "status": "reported",
-              "value": "Three-second broadband looming sound played over near/far physical speakers; exact spectrum/gain law is not reported.",
+              "value": "Dynamic broadband noise; sound duration 3 s; ExpyVR controls acoustic/tactile delivery.",
               "note": ""
             }
           }
@@ -7677,34 +7673,36 @@
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "derived_complete",
-          "value": "Geometry: Apparent looming between approximately 100 cm and 0 cm on each tested side. Kinematics: Three-second motion over approximately 1 m; nominal speed approximately 0.33 m/s.",
+          "status": "partial",
+          "value": "Near speaker at 0 cm from the tested hand and far speaker 100 cm away; intensity-based approach.",
           "compositeValue": "",
-          "pageOrSection": "Article pp.60-61 / PDF pp.5-6",
-          "evidenceNote": "",
-          "derivationNote": "1.0 m / 3.0 s.",
-          "reviewedOn": "2026-08-12",
+          "pageOrSection": "Section 2.2.3, journal pp. 60-61 (PDF pp. 5-6)",
+          "evidenceNote": "Main text describes a linear negative relationship between delay and perceived distance, but no reproducible envelope-to-distance calibration is given.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2020.11.021",
-          "missingComponents": [],
+          "missingComponents": [
+            "intensity_to_distance_mapping"
+          ],
           "components": {
             "coordinate_frame_body_anchor": {
               "status": "reported",
-              "value": "Geometry: Apparent looming between approximately 100 cm and 0 cm on each tested side. Kinematics: Three-second motion over approximately 1 m; nominal speed approximately 0.33 m/s.",
+              "value": "Tested left or right hand.",
               "note": ""
             },
             "geometry": {
               "status": "reported",
-              "value": "Geometry: Apparent looming between approximately 100 cm and 0 cm on each tested side. Kinematics: Three-second motion over approximately 1 m; nominal speed approximately 0.33 m/s.",
+              "value": "Near 0 cm and far 100 cm from the hand/near speaker.",
               "note": ""
             },
             "motion_mode": {
               "status": "reported",
-              "value": "Geometry: Apparent looming between approximately 100 cm and 0 cm on each tested side. Kinematics: Three-second motion over approximately 1 m; nominal speed approximately 0.33 m/s.",
+              "value": "gain_only_proxy",
               "note": ""
             },
             "timing_constraint": {
-              "status": "derived",
-              "value": "Geometry: Apparent looming between approximately 100 cm and 0 cm on each tested side. Kinematics: Three-second motion over approximately 1 m; nominal speed approximately 0.33 m/s.",
+              "status": "reported",
+              "value": "3000-ms sound.",
               "note": ""
             }
           }
@@ -7712,26 +7710,24 @@
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "partial",
-          "value": "Trial-sequence evidence recoverable from the prior combined review: Respond with the right foot to hand-vibration targets within a 2-s response window.",
+          "status": "reported_complete",
+          "value": "Looming sound with delayed hand vibration, silent tactile controls, or sound-only catches; trial types and delays randomized.",
           "compositeValue": "",
-          "pageOrSection": "Article pp.60-61 / PDF pp.5-6",
+          "pageOrSection": "Section 2.2.3, journal pp. 60-61 (PDF pp. 5-6)",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2020.11.021",
-          "missingComponents": [
-            "ordered_elements_and_source_selection"
-          ],
+          "missingComponents": [],
           "components": {
             "ordered_elements_and_source_selection": {
-              "status": "not_reported",
-              "value": "",
+              "status": "reported",
+              "value": "Sound onset precedes delayed touch on bimodal trials; unimodal rows omit sound; catches omit touch. Both hand conditions are tested in randomized order.",
               "note": ""
             },
             "trial_families": {
               "status": "reported",
-              "value": "Trial-sequence evidence recoverable from the prior combined review: Respond with the right foot to hand-vibration targets within a 2-s response window.",
+              "value": "20 targets per three delays, 10 silent controls per delay, 20 sound-only catches in the described recipe.",
               "note": ""
             }
           }
@@ -7740,33 +7736,33 @@
           "key": "task_response",
           "label": "Task and response",
           "status": "reported_complete",
-          "value": "Respond with the right foot to hand-vibration targets within a 2-s response window.",
+          "value": "Press a foot pedal with the right foot within 2000 ms from tactile onset; ignore looming sound.",
           "compositeValue": "",
-          "pageOrSection": "Article pp.60-61 / PDF pp.5-6",
-          "evidenceNote": "",
+          "pageOrSection": "Section 2.2.3, journal pp. 60-61 (PDF pp. 5-6)",
+          "evidenceNote": "Young/older group is a between-participant comparison, not a different response route.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2020.11.021",
           "missingComponents": [],
           "components": {
             "response_mapping_or_expected_action": {
               "status": "reported",
-              "value": "Respond with the right foot to hand-vibration targets within a 2-s response window.",
+              "value": "Right-foot press as quickly as possible.",
               "note": ""
             },
             "response_mode_or_device": {
               "status": "reported",
-              "value": "Respond with the right foot to hand-vibration targets within a 2-s response window.",
+              "value": "Foot pedal.",
               "note": ""
             },
             "response_window_and_anchor": {
               "status": "reported",
-              "value": "Respond with the right foot to hand-vibration targets within a 2-s response window.",
+              "value": "2000 ms from tactile delivery.",
               "note": ""
             },
             "target_and_nontarget_rule": {
               "status": "reported",
-              "value": "Respond with the right foot to hand-vibration targets within a 2-s response window.",
+              "value": "Respond to hand vibration; auditory-only catch trials have no touch target.",
               "note": ""
             }
           }
@@ -7774,29 +7770,27 @@
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "reported_complete",
-          "value": "Intertrial intervals of 500, 750 or 1000 ms.",
+          "status": "partial",
+          "value": "Inter-stimulus intervals randomly selected from 500,750,1000 ms; event anchor not stated.",
           "compositeValue": "",
-          "pageOrSection": "Article pp.60-61 / PDF pp.5-6",
-          "evidenceNote": "",
+          "pageOrSection": "Section 2.2.3, journal pp. 60-61 (PDF pp. 5-6)",
+          "evidenceNote": "Do not silently relabel an unspecified inter-stimulus interval as tactile-to-tactile, response-to-next-onset or sound-offset ITI.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2020.11.021",
-          "missingComponents": [],
+          "missingComponents": [
+            "timing_scope_and_anchor",
+            "distribution"
+          ],
           "components": {
             "policy_type": {
               "status": "reported",
-              "value": "Intertrial intervals of 500, 750 or 1000 ms.",
-              "note": ""
-            },
-            "timing_scope_and_anchor": {
-              "status": "reported",
-              "value": "Intertrial intervals of 500, 750 or 1000 ms.",
+              "value": "discrete_set",
               "note": ""
             },
             "values_or_range": {
               "status": "reported",
-              "value": "Intertrial intervals of 500, 750 or 1000 ms.",
+              "value": "500,750,1000 ms.",
               "note": ""
             }
           }
@@ -7805,23 +7799,23 @@
           "key": "soa_schedule",
           "label": "SOA schedule",
           "status": "reported_complete",
-          "value": "Tactile onsets at 300, 1500 and 2700 ms after sound onset.",
+          "value": "Auditory-onset anchored +300,+1500,+2700 ms, labelled far/medium/near.",
           "compositeValue": "",
-          "pageOrSection": "Article pp.60-61 / PDF pp.5-6",
+          "pageOrSection": "Section 2.2.3, journal pp. 60-61 (PDF pp. 5-6)",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2020.11.021",
           "missingComponents": [],
           "components": {
             "ordered_soa_values_or_derivable_distance_anchors": {
               "status": "reported",
-              "value": "Tactile onsets at 300, 1500 and 2700 ms after sound onset.",
+              "value": "+300,+1500,+2700 ms.",
               "note": ""
             },
             "reference_event_and_sign": {
               "status": "reported",
-              "value": "Tactile onsets at 300, 1500 and 2700 ms after sound onset.",
+              "value": "Touch after sound onset is positive.",
               "note": ""
             }
           }
@@ -7829,31 +7823,29 @@
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "approximation_required",
-          "value": "100-ms, 150-Hz hand vibration; exact intensity/calibration requires further atomic review.",
+          "status": "reported_complete",
+          "value": "100-ms vibration to the dorsum of the tested hand using a Precision MicroDrives 312-101 motor.",
           "compositeValue": "",
-          "pageOrSection": "Article pp.60-61 / PDF pp.5-6",
-          "evidenceNote": "",
+          "pageOrSection": "Section 2.2.3, journal pp. 60-61 (PDF pp. 5-6)",
+          "evidenceNote": "Reported motor specifications and pulse duration describe the authors apparatus; no replacement-actuator calibration is inferred.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2020.11.021",
-          "missingComponents": [
-            "waveform_and_duration"
-          ],
+          "missingComponents": [],
           "components": {
             "body_site_and_side": {
               "status": "reported",
-              "value": "100-ms, 150-Hz hand vibration; exact intensity/calibration requires further atomic review.",
+              "value": "Dorsum of the tested left or right hand.",
               "note": ""
             },
             "modality": {
               "status": "reported",
-              "value": "100-ms, 150-Hz hand vibration; exact intensity/calibration requires further atomic review.",
+              "value": "Shaftless vibration motor, model 312-101.",
               "note": ""
             },
             "waveform_and_duration": {
-              "status": "approximation_required",
-              "value": "100-ms, 150-Hz hand vibration; exact intensity/calibration requires further atomic review.",
+              "status": "reported",
+              "value": "100 ms; device specifications 3 V, 60 mA, 9000 rpm, 150 Hz, 5 g.",
               "note": ""
             }
           }
@@ -7861,34 +7853,31 @@
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "derived_complete",
-          "value": "Tactile-only baseline at each of three SOAs on each tested side, 10 repetitions per SOA/side: 3 x 2 x 10 = 60 baseline trials.",
+          "status": "partial",
+          "value": "30 silent controls in the described recipe: 10 at each nominal +300,+1500,+2700-ms delay.",
           "compositeValue": "",
-          "pageOrSection": "Article pp.60-61 / PDF pp.5-6, Methods",
-          "evidenceNote": "",
-          "derivationNote": "3 SOAs x 2 sides x 10 repetitions = 60.",
-          "reviewedOn": "2026-08-12",
+          "pageOrSection": "Section 2.2.3, journal pp. 60-61 (PDF pp. 5-6)",
+          "evidenceNote": "Main Methods gives equivalent delays but does not define the silent-row zero trigger. The fastest mean unisensory RT is an analysis baseline selection, not a fourth trial family.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2020.11.021",
-          "missingComponents": [],
+          "missingComponents": [
+            "timing_and_anchor"
+          ],
           "components": {
             "allocation_rule": {
               "status": "reported",
-              "value": "Tactile-only baseline at each of three SOAs on each tested side, 10 repetitions per SOA/side: 3 x 2 x 10 = 60 baseline trials.",
+              "value": "10 per each of three silent-condition delays.",
               "note": ""
             },
             "family_or_explicit_none": {
               "status": "reported",
-              "value": "Tactile-only baseline at each of three SOAs on each tested side, 10 repetitions per SOA/side: 3 x 2 x 10 = 60 baseline trials.",
+              "value": "tactile_only_soa_matched",
               "note": ""
             },
             "resolved_trial_count": {
-              "status": "derived",
-              "value": "Tactile-only baseline at each of three SOAs on each tested side, 10 repetitions per SOA/side: 3 x 2 x 10 = 60 baseline trials.",
-              "note": ""
-            },
-            "timing_and_anchor": {
               "status": "reported",
-              "value": "Tactile-only baseline at each of three SOAs on each tested side, 10 repetitions per SOA/side: 3 x 2 x 10 = 60 baseline trials.",
+              "value": "30 per described recipe.",
               "note": ""
             }
           }
@@ -7897,33 +7886,33 @@
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
           "status": "reported_complete",
-          "value": "Twenty auditory-only catch trials per side.",
+          "value": "20 sound-only catches in the described recipe; no tactile response target.",
           "compositeValue": "",
-          "pageOrSection": "Article pp.60-61 / PDF pp.5-6",
-          "evidenceNote": "",
+          "pageOrSection": "Section 2.2.3, journal pp. 60-61 (PDF pp. 5-6)",
+          "evidenceNote": "Whether the complete recipe is repeated separately for each hand is retained in the allocation gap.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2020.11.021",
           "missingComponents": [],
           "components": {
             "allocation_rule": {
               "status": "reported",
-              "value": "Twenty auditory-only catch trials per side.",
+              "value": "20 catches per described recipe.",
               "note": ""
             },
             "family_or_explicit_none": {
               "status": "reported",
-              "value": "Twenty auditory-only catch trials per side.",
+              "value": "auditory_only_withhold",
               "note": ""
             },
             "resolved_trial_count": {
               "status": "reported",
-              "value": "Twenty auditory-only catch trials per side.",
+              "value": "20 per described recipe.",
               "note": ""
             },
             "target_role_and_expected_action": {
               "status": "reported",
-              "value": "Twenty auditory-only catch trials per side.",
+              "value": "Withhold tactile detection response when vibration is absent.",
               "note": ""
             }
           }
@@ -7931,29 +7920,31 @@
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "reported_complete",
-          "value": "Twenty bimodal repetitions per SOA and side; 110 trials per side, 220 total.",
+          "status": "partial",
+          "value": "Described recipe totals 110 rows: 20 x 3 targets + 10 x 3 controls + 20 catches; hand crossing is not explicit.",
           "compositeValue": "",
-          "pageOrSection": "Article pp.60-61 / PDF pp.5-6",
-          "evidenceNote": "",
+          "pageOrSection": "Section 2.2.3, journal pp. 60-61 (PDF pp. 5-6)",
+          "evidenceNote": "Do not automatically double to 220 without a declared interpretation of the hand factor; the current primary Methods describes both hands but leaves that count crossing implicit.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2020.11.021",
-          "missingComponents": [],
+          "missingComponents": [
+            "derived_total_reconciliation"
+          ],
           "components": {
             "exceptions_or_overrides": {
               "status": "reported",
-              "value": "Twenty bimodal repetitions per SOA and side; 110 trials per side, 220 total.",
+              "value": "Both hands tested; current Methods does not explicitly state whether the 110-row recipe is per hand or whole-session total.",
               "note": ""
             },
             "factor_dimensions": {
               "status": "reported",
-              "value": "Twenty bimodal repetitions per SOA and side; 110 trials per side, 220 total.",
+              "value": "Three delays x bimodal/unimodal family, catch family and both tested hands; young/older groups.",
               "note": ""
             },
             "repetitions_or_exact_counts": {
               "status": "reported",
-              "value": "Twenty bimodal repetitions per SOA and side; 110 trials per side, 220 total.",
+              "value": "60 bimodal targets, 30 silent controls and 20 catches in the described recipe.",
               "note": ""
             }
           }
@@ -7961,24 +7952,22 @@
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "reported_complete",
-          "value": "Left/right side runs totaled 110 trials each; side order randomized.",
+          "status": "partial",
+          "value": "Hand order randomized; PPS block count and block composition are not stated.",
           "compositeValue": "",
-          "pageOrSection": "Article pp.60-61 / PDF pp.5-6",
-          "evidenceNote": "",
+          "pageOrSection": "Section 2.2.3, journal pp. 60-61 (PDF pp. 5-6)",
+          "evidenceNote": "Five blocks in section 2.2.1 belong to body-landmark localization, not the PPS task. Subsequent sound localization is also a separate supporting task.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2020.11.021",
-          "missingComponents": [],
+          "missingComponents": [
+            "block_count",
+            "block_composition"
+          ],
           "components": {
-            "block_composition": {
+            "within_block_randomization": {
               "status": "reported",
-              "value": "Left/right side runs totaled 110 trials each; side order randomized.",
-              "note": ""
-            },
-            "block_count": {
-              "status": "reported",
-              "value": "Left/right side runs totaled 110 trials each; side order randomized.",
+              "value": "Delays and trial types randomized; left/right hand condition order randomized among participants.",
               "note": ""
             }
           }
@@ -25628,216 +25617,1073 @@
       ]
     },
     {
-      "studyRowId": "doi:10.1098/rsos.181878",
+      "studyRowId": "doi:10.1098/rsos.181878::a",
       "networkNodeId": "doi:10.1098/rsos.181878",
-      "label": "Social coding of the multisensory space around us.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Social coding of the multisensory space around us. (a)",
+      "experimentLabel": "Experiment 1: collaboration",
+      "inventoryStatus": "confirmed_three_social_context_experiments",
+      "evidenceScope": "composite_requires_split",
       "templateIds": [],
       "parameterStatusCounts": {
-        "source_unavailable": 11
+        "derived_complete": 1,
+        "partial": 5,
+        "reported_complete": 5
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "3000-ms bubbling-water recording, 32-bit/44.1 kHz, binaurally rendered with Max/MSP 6.1.8 Spat and nonindividual LISTEN HRTFs.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "Exact recording, LISTEN subject/filter, room dimensions/materials and render configuration are not supplied by this Methods. Reported ear-level ranges (35-61 dBA contralateral; 37-78 ipsilateral) are source apparatus observations, not portable calibration.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1098/rsos.181878",
           "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "source_mode": {
+              "status": "reported",
+              "value": "imported_asset",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Bubbling water through Beyerdynamic DT770 headphones; nearfield correction; dynamic first reflections through order 3 and late reverberation in a 650-m3 virtual shoebox room.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "Theoretical source range 135 to 20 cm from the head, approaching from frontal -60 or +60 degrees over the 3000-ms sound.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "The paper deliberately reports outcomes by delay rather than treating perceived absolute distances as measured. No constant-speed law or exact room dimensions are stated; do not infer them from endpoints.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1098/rsos.181878",
           "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
+            "motion_time_law_and_complete_renderer_geometry"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Head-centred left/right frontal hemispace; hands contact the midsagittal body plane.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "-60 degrees left or +60 degrees right; theoretical start/end distances 135/20 cm.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "spatialized_approach",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3000-ms sound.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "reported_complete",
+          "value": "1000-ms leading silence, 3000-ms looming sound, then 2700-3300-ms trailing silence; touch may occur before, during or after sound.",
           "compositeValue": "",
-          "pageOrSection": "",
+          "pageOrSection": "Sections 2.1-2.3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1098/rsos.181878",
-          "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Leading silence -> left/right looming sound -> trailing silence; target row has one touch, catch row none. Collaboration: paired participants share a team goal and are told that global dyad performance is recorded.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Nine bimodal delays, pre/post silent-period tactile baselines and auditory-only catches, crossed with social condition and hemispace.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "Detect left-index vibration with a right-finger button press, as quickly as possible without anticipating.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "No online response deadline is given. Social instructions alter perceived collaboration/competition, not the basic touch detection rule. Collaboration: paired participants share a team goal and are told that global dyad performance is recorded.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1098/rsos.181878",
           "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Right finger button press; left index rests on the tactile actuator.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Button response recorded by Presentation software; exact response hardware not identified.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to touch; ignore sound and withhold when touch is absent.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "1000-ms leading silence and 2700-3300-ms trailing silence after audio offset; distribution unspecified.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "A varying range is not evidence for a uniform distribution. Preserve leading and trailing intervals separately from the sound duration.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1098/rsos.181878",
           "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
+            "distribution"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Fixed leading interval plus variable trailing range.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "1000 ms before audio onset; 2700-3300 ms after 3000-ms sound offset.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1000 ms leading; 2700-3300 ms trailing.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "reported_complete",
+          "value": "Sound-onset anchored 0,+375,+750,+1125,+1500,+1875,+2250,+2625,+3000 ms.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "T1 at zero is excluded from a later analysis after a facilitation check; it remains part of the delivered trial schedule. +3000 coincides with nominal sound offset.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1098/rsos.181878",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "0,+375,+750,+1125,+1500,+1875,+2250,+2625,+3000 ms.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Zero means simultaneous touch/sound onset; positive touch after sound onset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "reported_complete",
+          "value": "20-ms 250-Hz sinusoid on a 28-mm miniature speaker contacting the left index palmar surface.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "The paper reports that vibration is perceivable and its sound inaudible; this is not physical qualification of a replacement actuator.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1098/rsos.181878",
-          "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Palmar surface of left index finger.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Miniature loudspeaker vibration.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "250-Hz sinusoid, 20 ms; 28-mm speaker.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "derived_complete",
+          "value": "80 silent-period tactile baselines overall, at -650 and +3650 ms relative to sound onset.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "Baseline touch occurs during silence in a row that also contains sound later or earlier; this is not an entirely audio-free row.",
+          "derivationNote": "The reported 44 cells are 2 social conditions x 2 hemispaces x 11 touch delays, each repeated ten times. The two pre/post delays therefore contribute 10 x 2 x 2 x 2 = 80 rows.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1098/rsos.181878",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "10 repeats x 2 silent-period delays x 2 hemispaces x 2 social conditions.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_endpoint_pre_post",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "80 = 10 x 2 x 2 x 2.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "-650 ms before sound onset; +3650 ms after sound onset, or 650 ms after its 3000-ms offset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "40 auditory-only catches across the 480-trial experiment; withhold tactile response.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "Overall count is explicit; allocation across social condition and hemispace is not stated. Do not silently impose equal catch-cell balancing.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1098/rsos.181878",
           "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
+            "catch_distribution_across_social_and_hemispace_cells"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "40 catches randomly intermingled with 440 tactile-containing trials; 8.3% rounded.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_withhold",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "40 overall.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No tactile target; withhold response.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "reported_complete",
+          "value": "480 total rows: 440 tactile-containing rows plus 40 catches; tactile rows include 360 during-sound targets and 80 pre/post baselines.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "360 during-sound rows and 80 baselines are derived subcounts from nine versus two delay levels. The stated 91.7% tactile-containing proportion includes the silent-period targets.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1098/rsos.181878",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "T1 is delivered but later excluded from the main facilitation analysis; isolated and dyad are repeated conditions, not separate cohorts.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "2 social conditions x 2 hemispaces x 11 touch delays = 44 cells.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "10 tactile targets per cell = 440; 40 auditory-only catches.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "reported_complete",
+          "value": "Ten blocks of 48 rows, about five minutes each; isolated/dyad presentation order counterbalanced.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "Seat and partner-position assignment remain fixed throughout. Paired participants sit one metre apart; the isolated condition retains an empty neighbouring chair. Collaboration: paired participants share a team goal and are told that global dyad performance is recorded.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "48 trials per block; random target/catch intermixing. Social conditions presented in counterbalanced order.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "reported",
+              "value": "10 blocks.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Random combination of target cells; catches randomly intermingled.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1098/rsos.181878::b",
+      "networkNodeId": "doi:10.1098/rsos.181878",
+      "label": "Social coding of the multisensory space around us. (b)",
+      "experimentLabel": "Experiment 2: competition",
+      "inventoryStatus": "confirmed_three_social_context_experiments",
+      "evidenceScope": "composite_requires_split",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "derived_complete": 1,
+        "partial": 5,
+        "reported_complete": 5
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "partial",
+          "value": "3000-ms bubbling-water recording, 32-bit/44.1 kHz, binaurally rendered with Max/MSP 6.1.8 Spat and nonindividual LISTEN HRTFs.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "Exact recording, LISTEN subject/filter, room dimensions/materials and render configuration are not supplied by this Methods. Reported ear-level ranges (35-61 dBA contralateral; 37-78 ipsilateral) are source apparatus observations, not portable calibration.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1098/rsos.181878",
           "missingComponents": [
-            "block_count",
-            "block_composition"
+            "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "source_mode": {
+              "status": "reported",
+              "value": "imported_asset",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Bubbling water through Beyerdynamic DT770 headphones; nearfield correction; dynamic first reflections through order 3 and late reverberation in a 650-m3 virtual shoebox room.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "partial",
+          "value": "Theoretical source range 135 to 20 cm from the head, approaching from frontal -60 or +60 degrees over the 3000-ms sound.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "The paper deliberately reports outcomes by delay rather than treating perceived absolute distances as measured. No constant-speed law or exact room dimensions are stated; do not infer them from endpoints.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [
+            "motion_time_law_and_complete_renderer_geometry"
+          ],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Head-centred left/right frontal hemispace; hands contact the midsagittal body plane.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "-60 degrees left or +60 degrees right; theoretical start/end distances 135/20 cm.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "spatialized_approach",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3000-ms sound.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "reported_complete",
+          "value": "1000-ms leading silence, 3000-ms looming sound, then 2700-3300-ms trailing silence; touch may occur before, during or after sound.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Leading silence -> left/right looming sound -> trailing silence; target row has one touch, catch row none. Competition: paired participants pursue individual speed and are told that only the faster answer on each trial is recorded.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Nine bimodal delays, pre/post silent-period tactile baselines and auditory-only catches, crossed with social condition and hemispace.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "partial",
+          "value": "Detect left-index vibration with a right-finger button press, as quickly as possible without anticipating.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "No online response deadline is given. Social instructions alter perceived collaboration/competition, not the basic touch detection rule. Competition: paired participants pursue individual speed and are told that only the faster answer on each trial is recorded.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [
+            "response_window_and_anchor"
+          ],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Right finger button press; left index rests on the tactile actuator.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Button response recorded by Presentation software; exact response hardware not identified.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to touch; ignore sound and withhold when touch is absent.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "partial",
+          "value": "1000-ms leading silence and 2700-3300-ms trailing silence after audio offset; distribution unspecified.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "A varying range is not evidence for a uniform distribution. Preserve leading and trailing intervals separately from the sound duration.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [
+            "distribution"
+          ],
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Fixed leading interval plus variable trailing range.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "1000 ms before audio onset; 2700-3300 ms after 3000-ms sound offset.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1000 ms leading; 2700-3300 ms trailing.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "reported_complete",
+          "value": "Sound-onset anchored 0,+375,+750,+1125,+1500,+1875,+2250,+2625,+3000 ms.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "T1 at zero is excluded from a later analysis after a facilitation check; it remains part of the delivered trial schedule. +3000 coincides with nominal sound offset.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "0,+375,+750,+1125,+1500,+1875,+2250,+2625,+3000 ms.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Zero means simultaneous touch/sound onset; positive touch after sound onset.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "reported_complete",
+          "value": "20-ms 250-Hz sinusoid on a 28-mm miniature speaker contacting the left index palmar surface.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "The paper reports that vibration is perceivable and its sound inaudible; this is not physical qualification of a replacement actuator.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Palmar surface of left index finger.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Miniature loudspeaker vibration.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "250-Hz sinusoid, 20 ms; 28-mm speaker.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "derived_complete",
+          "value": "80 silent-period tactile baselines overall, at -650 and +3650 ms relative to sound onset.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "Baseline touch occurs during silence in a row that also contains sound later or earlier; this is not an entirely audio-free row.",
+          "derivationNote": "The reported 44 cells are 2 social conditions x 2 hemispaces x 11 touch delays, each repeated ten times. The two pre/post delays therefore contribute 10 x 2 x 2 x 2 = 80 rows.",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "10 repeats x 2 silent-period delays x 2 hemispaces x 2 social conditions.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_endpoint_pre_post",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "80 = 10 x 2 x 2 x 2.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "-650 ms before sound onset; +3650 ms after sound onset, or 650 ms after its 3000-ms offset.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "partial",
+          "value": "40 auditory-only catches across the 480-trial experiment; withhold tactile response.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "Overall count is explicit; allocation across social condition and hemispace is not stated. Do not silently impose equal catch-cell balancing.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [
+            "catch_distribution_across_social_and_hemispace_cells"
+          ],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "40 catches randomly intermingled with 440 tactile-containing trials; 8.3% rounded.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_withhold",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "40 overall.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No tactile target; withhold response.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "reported_complete",
+          "value": "480 total rows: 440 tactile-containing rows plus 40 catches; tactile rows include 360 during-sound targets and 80 pre/post baselines.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "360 during-sound rows and 80 baselines are derived subcounts from nine versus two delay levels. The stated 91.7% tactile-containing proportion includes the silent-period targets.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "T1 is delivered but later excluded from the main facilitation analysis; isolated and dyad are repeated conditions, not separate cohorts.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "2 social conditions x 2 hemispaces x 11 touch delays = 44 cells.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "10 tactile targets per cell = 440; 40 auditory-only catches.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "reported_complete",
+          "value": "Ten blocks of 48 rows, about five minutes each; isolated/dyad presentation order counterbalanced.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "Seat and partner-position assignment remain fixed throughout. Paired participants sit one metre apart; the isolated condition retains an empty neighbouring chair. Competition: paired participants pursue individual speed and are told that only the faster answer on each trial is recorded.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "48 trials per block; random target/catch intermixing. Social conditions presented in counterbalanced order.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "reported",
+              "value": "10 blocks.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Random combination of target cells; catches randomly intermingled.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1098/rsos.181878::c",
+      "networkNodeId": "doi:10.1098/rsos.181878",
+      "label": "Social coding of the multisensory space around us. (c)",
+      "experimentLabel": "Experiment 3: inactive audience",
+      "inventoryStatus": "confirmed_three_social_context_experiments",
+      "evidenceScope": "composite_requires_split",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "derived_complete": 1,
+        "partial": 5,
+        "reported_complete": 5
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "partial",
+          "value": "3000-ms bubbling-water recording, 32-bit/44.1 kHz, binaurally rendered with Max/MSP 6.1.8 Spat and nonindividual LISTEN HRTFs.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "Exact recording, LISTEN subject/filter, room dimensions/materials and render configuration are not supplied by this Methods. Reported ear-level ranges (35-61 dBA contralateral; 37-78 ipsilateral) are source apparatus observations, not portable calibration.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [
+            "source_recipe_or_asset_provenance"
+          ],
+          "components": {
+            "source_mode": {
+              "status": "reported",
+              "value": "imported_asset",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Bubbling water through Beyerdynamic DT770 headphones; nearfield correction; dynamic first reflections through order 3 and late reverberation in a 650-m3 virtual shoebox room.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "partial",
+          "value": "Theoretical source range 135 to 20 cm from the head, approaching from frontal -60 or +60 degrees over the 3000-ms sound.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "The paper deliberately reports outcomes by delay rather than treating perceived absolute distances as measured. No constant-speed law or exact room dimensions are stated; do not infer them from endpoints.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [
+            "motion_time_law_and_complete_renderer_geometry"
+          ],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Head-centred left/right frontal hemispace; hands contact the midsagittal body plane.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "-60 degrees left or +60 degrees right; theoretical start/end distances 135/20 cm.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "spatialized_approach",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3000-ms sound.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "reported_complete",
+          "value": "1000-ms leading silence, 3000-ms looming sound, then 2700-3300-ms trailing silence; touch may occur before, during or after sound.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Leading silence -> left/right looming sound -> trailing silence; target row has one touch, catch row none. Audience: one participant performs while the other remains inactive and immobile.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Nine bimodal delays, pre/post silent-period tactile baselines and auditory-only catches, crossed with social condition and hemispace.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "partial",
+          "value": "Detect left-index vibration with a right-finger button press, as quickly as possible without anticipating.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "No online response deadline is given. Social instructions alter perceived collaboration/competition, not the basic touch detection rule. Audience: one participant performs while the other remains inactive and immobile.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [
+            "response_window_and_anchor"
+          ],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Right finger button press; left index rests on the tactile actuator.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Button response recorded by Presentation software; exact response hardware not identified.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to touch; ignore sound and withhold when touch is absent.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "partial",
+          "value": "1000-ms leading silence and 2700-3300-ms trailing silence after audio offset; distribution unspecified.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "A varying range is not evidence for a uniform distribution. Preserve leading and trailing intervals separately from the sound duration.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [
+            "distribution"
+          ],
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Fixed leading interval plus variable trailing range.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "1000 ms before audio onset; 2700-3300 ms after 3000-ms sound offset.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1000 ms leading; 2700-3300 ms trailing.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "reported_complete",
+          "value": "Sound-onset anchored 0,+375,+750,+1125,+1500,+1875,+2250,+2625,+3000 ms.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "T1 at zero is excluded from a later analysis after a facilitation check; it remains part of the delivered trial schedule. +3000 coincides with nominal sound offset.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "0,+375,+750,+1125,+1500,+1875,+2250,+2625,+3000 ms.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Zero means simultaneous touch/sound onset; positive touch after sound onset.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "reported_complete",
+          "value": "20-ms 250-Hz sinusoid on a 28-mm miniature speaker contacting the left index palmar surface.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "The paper reports that vibration is perceivable and its sound inaudible; this is not physical qualification of a replacement actuator.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Palmar surface of left index finger.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Miniature loudspeaker vibration.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "250-Hz sinusoid, 20 ms; 28-mm speaker.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "derived_complete",
+          "value": "80 silent-period tactile baselines overall, at -650 and +3650 ms relative to sound onset.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "Baseline touch occurs during silence in a row that also contains sound later or earlier; this is not an entirely audio-free row.",
+          "derivationNote": "The reported 44 cells are 2 social conditions x 2 hemispaces x 11 touch delays, each repeated ten times. The two pre/post delays therefore contribute 10 x 2 x 2 x 2 = 80 rows.",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "10 repeats x 2 silent-period delays x 2 hemispaces x 2 social conditions.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_endpoint_pre_post",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "80 = 10 x 2 x 2 x 2.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "-650 ms before sound onset; +3650 ms after sound onset, or 650 ms after its 3000-ms offset.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "partial",
+          "value": "40 auditory-only catches across the 480-trial experiment; withhold tactile response.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "Overall count is explicit; allocation across social condition and hemispace is not stated. Do not silently impose equal catch-cell balancing.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [
+            "catch_distribution_across_social_and_hemispace_cells"
+          ],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "40 catches randomly intermingled with 440 tactile-containing trials; 8.3% rounded.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_withhold",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "40 overall.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No tactile target; withhold response.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "reported_complete",
+          "value": "480 total rows: 440 tactile-containing rows plus 40 catches; tactile rows include 360 during-sound targets and 80 pre/post baselines.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "360 during-sound rows and 80 baselines are derived subcounts from nine versus two delay levels. The stated 91.7% tactile-containing proportion includes the silent-period targets.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "T1 is delivered but later excluded from the main facilitation analysis; isolated and dyad are repeated conditions, not separate cohorts.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "2 social conditions x 2 hemispaces x 11 touch delays = 44 cells.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "10 tactile targets per cell = 440; 40 auditory-only catches.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "reported_complete",
+          "value": "Ten blocks of 48 rows, about five minutes each; isolated/dyad presentation order counterbalanced.",
+          "compositeValue": "",
+          "pageOrSection": "Sections 2.1-2.3",
+          "evidenceNote": "Seat and partner-position assignment remain fixed throughout. Paired participants sit one metre apart; the isolated condition retains an empty neighbouring chair. Audience: one participant performs while the other remains inactive and immobile.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1098/rsos.181878",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "48 trials per block; random target/catch intermixing. Social conditions presented in counterbalanced order.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "reported",
+              "value": "10 blocks.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Random combination of target cells; catches randomly intermingled.",
+              "note": ""
+            }
+          }
         }
       ]
     },
