@@ -79,9 +79,23 @@ try {
   assert.equal(await designer.locator("#edit-mode-button").getAttribute("aria-checked"), "true");
   await designer.locator("section").filter({ has: designer.locator("#save-study-profile") }).last()
     .screenshot({ path: resolve(output, "designer-save-failure.png") });
-  await designer.evaluate(() => { window.PPSDesigner.drafts.save = window.realDraftSave; });
+  await designer.evaluate(() => {
+    window.PPSDesigner.drafts.save = async snapshot => {
+      await new Promise(done => { window.finishDraftSave = done; });
+      await window.realDraftSave(snapshot);
+    };
+  });
   await designer.locator("#save-study-profile").click();
+  await designer.waitForFunction(() => typeof window.finishDraftSave === "function");
+  const pendingCount = await designer.locator("#participants").inputValue();
+  assert.equal(await designer.evaluate(() => document.querySelector(".app-shell").inert), true);
+  assert.equal(await designer.evaluate(() => window.PPSDesignerApp.restoreHostedDraft({ design: { name: "Other project" } })), false);
+  await designer.locator("#participants").focus();
+  await designer.keyboard.type("99");
+  assert.equal(await designer.locator("#participants").inputValue(), pendingCount);
+  await designer.evaluate(() => window.finishDraftSave());
   await designer.waitForFunction(() => window.PPSDesignerApp.getState().custom_workflow.is_finalized);
+  assert.equal(await designer.evaluate(() => document.querySelector(".app-shell").inert), false);
   assert.equal(await designer.evaluate(async () => (await window.PPSDesigner.drafts.load()).custom_workflow.is_finalized), true);
   assert.equal(await designer.locator("#edit-mode-button").getAttribute("aria-checked"), "false");
   const downloadPromise = designer.waitForEvent("download");
@@ -138,6 +152,83 @@ try {
   assert.equal(await nativePreview.locator("#participants").inputValue(), "3");
   assert.deepEqual(errors, []);
   report.checks.push("Designer reversed HTTP preview responses preserve the latest form and state");
+  const mapper = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  mapper.on("pageerror", error => errors.push(error.message));
+  let failReview = true;
+  await mapper.route("**/publication_study_reviews.v1-*.json", async route => {
+    if (failReview) { failReview = false; await route.fulfill({ status: 503 }); }
+    else await route.continue();
+  });
+  await mapper.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1&page=documentation#docs-publication-network`);
+  const network = mapper.locator("[data-publication-network-root]");
+  await network.scrollIntoViewIfNeeded();
+  await mapper.locator("#publication-network-retry").waitFor({ state: "visible" });
+  assert.equal(await network.getAttribute("data-publication-network-state"), "error");
+  await mapper.locator("#publication-network-retry").click();
+  await mapper.waitForFunction(() => document.querySelector("[data-publication-network-root]").dataset.publicationNetworkState === "ready");
+  const reviewData = JSON.parse(await readFile(resolve(root, "apps/designer/frontend/publication_study_reviews.v1.json"), "utf8"));
+  assert.equal(await network.getAttribute("data-publication-network-nodes"), String(reviewData.counts.publications));
+  assert.equal(await network.getAttribute("data-publication-network-studies"), String(reviewData.counts.studies));
+  assert.equal(await mapper.locator("#publication-network-results li").count(), 40);
+  const search = mapper.locator("#publication-network-search");
+  await search.fill("https://doi.org/10.1007/s00221-013-3532-2");
+  assert.equal(await mapper.locator("#publication-network-results li").count(), 1);
+  const result = mapper.locator(".publication-network-result-button");
+  await result.focus();
+  await mapper.keyboard.press("Enter");
+  const detail = mapper.locator("#publication-network-detail");
+  await detail.waitFor({ state: "visible" });
+  assert.equal(await detail.locator("[data-study-id]").count(), 2);
+  assert.match(await detail.innerText(), /Publication evidence[\s\S]*Template availability[\s\S]*Native qualification[\s\S]*Not Assessed/i);
+  assert.match(await detail.innerText(), /2 reported complete · 2 derived complete · 22 contracts/);
+  assert.equal(await detail.locator("[data-open-designer-template]").count(), 0);
+  const study = detail.locator("[data-study-id]").first();
+  await study.locator(":scope > summary").click();
+  await study.locator("[data-contract-key]").first().locator(":scope > summary").click();
+  const studyId = await study.getAttribute("data-study-id");
+  await mapper.waitForFunction(id => new URL(location.href).searchParams.get("study") === id, studyId);
+  const deepLink = mapper.url();
+  await detail.screenshot({ path: resolve(output, "mapper-study-review.png") });
+  await mapper.keyboard.press("Escape");
+  assert.equal(await result.evaluate(element => element === document.activeElement), true);
+  await search.fill("NoSuchPublication xxxxxxxxx");
+  assert.equal(await mapper.locator("#publication-network-results li").count(), 0);
+  assert.ok((await mapper.locator("#publication-network-status").innerText()).startsWith(`0 of ${reviewData.counts.publications}`));
+  await search.fill("");
+  assert.equal(await mapper.locator("#publication-network-results li").count(), 40);
+  await mapper.goto(deepLink);
+  await network.scrollIntoViewIfNeeded();
+  await mapper.waitForFunction(id => [...document.querySelectorAll("[data-study-id]")].some(element => element.dataset.studyId === id && element.open), studyId);
+  for (const width of [320, 768, 1440, 1920]) {
+    await mapper.setViewportSize({ width, height: 1000 });
+    await network.scrollIntoViewIfNeeded();
+    await mapper.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+    assert.equal(await mapper.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, `page overflow at ${width}`);
+    assert.equal(await detail.evaluate(element => element.getBoundingClientRect().right <= element.parentElement.getBoundingClientRect().right + 1), true, `detail clipping at ${width}`);
+    await network.screenshot({ path: resolve(output, `mapper-${width}.png`) });
+  }
+  await mapper.setViewportSize({ width: 768, height: 1000 });
+  await mapper.evaluate(() => {
+    const sizes = [...document.querySelectorAll("[data-publication-network-root] p, [data-publication-network-root] button, [data-publication-network-root] input, [data-publication-network-root] label, [data-publication-network-root] summary, [data-publication-network-root] h3, [data-publication-network-root] h4, [data-publication-network-root] dt, [data-publication-network-root] dd, [data-publication-network-root] small")].map(element => [element, parseFloat(getComputedStyle(element).fontSize)]);
+    for (const [element, size] of sizes) element.style.fontSize = `${size * 2}px`;
+  });
+  await network.scrollIntoViewIfNeeded();
+  await network.screenshot({ path: resolve(output, "mapper-text-200.png") });
+  assert.equal(await mapper.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, "page overflow at enlarged text");
+  assert.equal(await detail.evaluate(element => element.getBoundingClientRect().right <= element.parentElement.getBoundingClientRect().right + 1), true, "detail clipping at enlarged text");
+  report.mapperText = await mapper.locator("#publication-network-search").evaluate(element => ({ width: element.clientWidth, scrollWidth: element.scrollWidth }));
+  const linkedPublication = reviewData.publications.find(publication => publication.templateIds.length);
+  await mapper.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1&page=documentation&publication=${encodeURIComponent(linkedPublication.networkNodeId)}#docs-publication-network`);
+  await network.scrollIntoViewIfNeeded();
+  const templateLink = mapper.locator("[data-open-designer-template]").first();
+  await templateLink.waitFor({ state: "visible" });
+  const presetPagePromise = mapper.waitForEvent("popup");
+  await templateLink.click();
+  const presetPage = await presetPagePromise;
+  await presetPage.waitForFunction(id => window.PPSDesignerApp?.getState()?.selected_template === id, linkedPublication.templateIds[0]);
+  assert.equal(new URL(presetPage.url()).searchParams.get("template"), linkedPublication.templateIds[0]);
+  assert.deepEqual(errors, []);
+  report.checks.push("Mapper retry, DOI search, keyboard detail, study deep link, evidence separation, responsive layout and preset navigation");
   await writeFile(resolve(output, "report.json"), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {

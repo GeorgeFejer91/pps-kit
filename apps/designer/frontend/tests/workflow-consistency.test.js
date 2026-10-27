@@ -76,32 +76,58 @@ test("a changed form or project rejects a pending preview, including stale failu
 });
 
 function finalizationHarness(save) {
+  const shell = { inert: false };
   const context = vm.createContext({
     state: { design: { study_profile_reference_parameters: {} }, custom_workflow: { is_custom: true, is_finalized: false } },
-    staticModeActive: true, editModeActive: true, workflowSaveInFlight: false,
+    staticModeActive: true, editModeActive: true, workflowSaveInFlight: false, hostedFinalizationInFlight: false, templateLoadInFlight: false,
+    runSequencePreviewRequestId: 0, runSequencePreviewTimer: null,
     WORKFLOW_STEPS: ["study", "stimulus", "run"],
     normalizedDesignerProgress: () => ({ edit_step: "run", confirmed_steps: ["study", "stimulus"], needs_review_steps: [] }),
     getWorkflowStep: () => ({ complete: true }), refreshHostedWorkflowSteps() {},
-    clone: structuredClone, window: { PPSDesigner: { drafts: { save } } },
+    clone: structuredClone, window: { clearTimeout() {}, PPSDesigner: { drafts: { save } } },
+    document: { querySelector: () => shell }, $: () => ({ focus() {} }),
     markDesignerSaved() {}, renderAll() {}, renderRun() {}, renderWorkflow() {}, showToast() {},
   });
   vm.runInContext(`function collectPayload() { return { design: structuredClone(state.design) }; }
     ${handler("savePreparedStudyProfile", "function openSaveProfileModal")}`, Object.assign(context, { structuredClone }));
-  return { context, save: () => vm.runInContext("savePreparedStudyProfile()", context) };
+  return { context, shell, save: () => vm.runInContext("savePreparedStudyProfile()", context) };
 }
+
+test("audio imports already pending cannot mutate a finalizing or replaced hosted profile", async () => {
+  for (const boundary of ["saving", "replaced", "locked"]) {
+    const storage = deferred();
+    const original = { design: { name: "original" } };
+    const context = vm.createContext({
+      state: original, staticModeActive: true, editModeActive: true, workflowSaveInFlight: false,
+      pendingAudioImportMode: "instruction", pendingInstructionSlot: "welcome", showToast() {},
+      $: () => ({ files: [{ name: "welcome.wav" }], value: "" }),
+      window: { PPSDesigner: { drafts: { storeAudio: () => storage.promise } } },
+    });
+    vm.runInContext(handler("importAudioFromPicker", "function fileToBase64"), context);
+    const pending = vm.runInContext("importAudioFromPicker()", context);
+    if (boundary === "saving") context.workflowSaveInFlight = true;
+    if (boundary === "replaced") context.state = { design: { name: "other" } };
+    if (boundary === "locked") context.editModeActive = false;
+    storage.resolve({ id: "clip", url: "blob:clip" });
+    await pending;
+    assert.deepEqual(original, { design: { name: "original" } });
+  }
+});
 
 test("storage failure leaves finalization editable and retryable", async () => {
   const storage = deferred();
-  const { context, save } = finalizationHarness(() => storage.promise);
+  const { context, shell, save } = finalizationHarness(() => storage.promise);
   const pending = save();
   assert.equal(context.state.custom_workflow.is_finalized, false, "not locked before persistence");
   assert.equal(context.editModeActive, true);
+  assert.equal(shell.inert, true, "authoring controls cannot mutate a pending finalization");
   storage.reject(new Error("Quota exceeded"));
   await assert.rejects(pending, /Quota exceeded/);
   assert.equal(context.state.custom_workflow.is_finalized, false);
   assert.equal(context.state.design.study_profile_reference_parameters.profile_status, undefined);
   assert.equal(context.editModeActive, true);
   assert.equal(context.workflowSaveInFlight, false);
+  assert.equal(shell.inert, false);
   context.window.PPSDesigner.drafts.save = async snapshot => {
     assert.equal(snapshot.custom_workflow.is_finalized, true);
   };

@@ -657,6 +657,7 @@ let editModeActive = false;
 let staticModeActive = false;
 let designerDirty = false;
 let workflowSaveInFlight = false;
+let hostedFinalizationInFlight = false;
 let staticModeReason = "";
 let staticPreloadInventory = null;
 let staticTemplatesCache = null;
@@ -980,6 +981,7 @@ async function reconnectBackendFromControls({ includeToken = true } = {}) {
 }
 
 async function setEditMode(active) {
+  if (workflowSaveInFlight) return editModeActive;
   if (active) {
     if (!state) {
       showToast("Wait for the dashboard state to load before editing.");
@@ -3213,22 +3215,30 @@ function initializePublicationNetworkSurface() {
   const load = () => {
     if (publicationNetworkInitPromise) return publicationNetworkInitPromise;
     root.dataset.publicationNetworkState = "loading";
+    const loading = $("publication-network-loading");
+    const message = $("publication-network-loading-message");
+    const retry = $("publication-network-retry");
+    loading.hidden = false;
+    loading.classList.remove("error");
+    loading.querySelector(".publication-network-spinner").hidden = false;
+    message.textContent = "Preparing publication network…";
+    retry.hidden = true;
     publicationNetworkInitPromise = import("./publication_network.js")
       .then(({ initializePublicationNetwork }) => initializePublicationNetwork(root))
       .catch((error) => {
         root.dataset.publicationNetworkState = "error";
-        const loading = $("publication-network-loading");
-        if (loading) {
-          loading.hidden = false;
-          loading.classList.add("error");
-          const message = loading.querySelector("span:last-child");
-          if (message) message.textContent = "The publication network could not be loaded.";
-        }
+        publicationNetworkInitPromise = null;
+        loading.hidden = false;
+        loading.classList.add("error");
+        loading.querySelector(".publication-network-spinner").hidden = true;
+        message.textContent = "Publication data could not be loaded. Retry when your connection is available.";
+        retry.hidden = false;
+        $("publication-network-status").textContent = "Publication data unavailable.";
         console.error(error);
-        throw error;
       });
     return publicationNetworkInitPromise;
   };
+  $("publication-network-retry").addEventListener("click", load);
   if (!("IntersectionObserver" in window)) {
     load();
     return;
@@ -7012,7 +7022,7 @@ async function reopenWorkflowStep(stepId) {
 }
 
 async function loadTemplate() {
-  if (templateLoadInFlight) return;
+  if (templateLoadInFlight || workflowSaveInFlight) return;
   const select = $("template-select");
   if (!confirmDiscardUnsaved("load another profile")) {
     renderStudy();
@@ -7032,7 +7042,10 @@ async function loadTemplate() {
       showToast("Start the local companion backend before creating custom studies.");
       return;
     }
-    state = await staticStateForTemplate(id);
+    const previousState = state;
+    const loadedState = await staticStateForTemplate(id);
+    if (workflowSaveInFlight || state !== previousState) return;
+    state = loadedState;
     staticModeActive = true;
     resetEditMode();
     setConnectionStatus(false, "static profile");
@@ -7057,13 +7070,17 @@ async function loadTemplate() {
 }
 
 async function loadCustomProject(projectIdOverride = "") {
+  if (workflowSaveInFlight) return;
   const select = $("existing-custom-project");
   const projectId = projectIdOverride || select?.value || "";
   if (!projectId) {
     showToast("Choose a custom study to open");
     return;
   }
-  state = await designerApi.loadProject(projectId);
+  const previousState = state;
+  const loadedState = await designerApi.loadProject(projectId);
+  if (workflowSaveInFlight || state !== previousState) return;
+  state = loadedState;
   resetEditMode();
   renderAll();
   updateViewer();
@@ -7087,7 +7104,7 @@ function syncModalEnvironment() {
   const open = Boolean(activeModalBackdrop());
   const shell = document.querySelector(".app-shell");
   const skipLink = document.querySelector(".skip-link");
-  if (shell) shell.inert = open;
+  if (shell) shell.inert = open || hostedFinalizationInFlight;
   if (skipLink) skipLink.inert = open;
   document.body.classList.toggle("modal-open", open);
 }
@@ -7876,6 +7893,7 @@ function scheduleRunSequencePreview() {
 }
 
 async function previewRunSequence() {
+  if (workflowSaveInFlight) return false;
   if (!ensureEditableProject()) return;
   const requestId = ++runSequencePreviewRequestId;
   if (staticModeActive) {
@@ -7925,7 +7943,7 @@ async function ensureLocalBackendState() {
 }
 
 async function savePreparedStudyProfile() {
-  if (workflowSaveInFlight) return;
+  if (workflowSaveInFlight || templateLoadInFlight) return;
   if (staticModeActive) {
     state.design = collectPayload().design;
     refreshHostedWorkflowSteps();
@@ -7950,7 +7968,14 @@ async function savePreparedStudyProfile() {
     finalizedState.design.study_profile_reference_parameters.finalized_at = new Date().toISOString();
     finalizedState.custom_workflow.is_finalized = true;
     workflowSaveInFlight = true;
+    hostedFinalizationInFlight = true;
+    runSequencePreviewRequestId += 1;
+    window.clearTimeout(runSequencePreviewTimer);
+    const shell = document.querySelector(".app-shell");
+    const wasInert = shell?.inert || false;
+    if (shell) shell.inert = true;
     renderRun();
+    showToast("Saving profile…");
     try {
       if (!window.PPSDesigner?.drafts?.save) throw new Error("Browser storage is unavailable. The profile remains editable.");
       await window.PPSDesigner.drafts.save(finalizedState);
@@ -7966,7 +7991,10 @@ async function savePreparedStudyProfile() {
       showToast("Profile finalized and locked. Use Edit to create another named custom copy.");
     } finally {
       workflowSaveInFlight = false;
+      hostedFinalizationInFlight = false;
+      if (shell) shell.inert = wasInert;
       renderRun();
+      $(state.custom_workflow?.is_finalized ? "export-profile-bundle" : "save-study-profile")?.focus({ preventScroll: true });
     }
     return;
   }
@@ -8745,6 +8773,8 @@ function openInstructionAudioPicker(slot) {
 }
 
 async function importAudioFromPicker() {
+  if (workflowSaveInFlight) return;
+  const importState = state;
   const input = $("audio-file-input");
   const file = input.files && input.files[0];
   input.value = "";
@@ -8756,6 +8786,10 @@ async function importAudioFromPicker() {
     }
     const stored = await window.PPSDesigner?.drafts?.storeAudio(file);
     if (!stored) throw new Error("Browser audio storage is unavailable. Export the profile now or use the desktop app.");
+    if (workflowSaveInFlight || state !== importState || !editModeActive) {
+      showToast("The profile changed while importing audio. Choose the file again in the editable draft.");
+      return;
+    }
     const audio = {
       label: file.name.replace(/\.[^.]+$/, ""),
       path: `browser-asset:${stored.id}`,
@@ -9553,7 +9587,7 @@ window.PPSDesignerApp = Object.freeze({
   },
   isHosted: () => staticModeActive,
   restoreHostedDraft: (snapshot) => {
-    if (!snapshot?.design) return false;
+    if (workflowSaveInFlight || !snapshot?.design) return false;
     state = clone(snapshot);
     staticModeActive = true;
     editModeActive = false;

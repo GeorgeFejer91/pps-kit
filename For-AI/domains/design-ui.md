@@ -47,3 +47,18 @@ and long source filenames in disclosures so the approved plan remains readable.
 Designer and Runner share `pps-resources/assets/ui/bounded-text.mjs` for Pretext
 measurement. CSS owns wrapping and text size; user zoom is never reduced to fit.
 Unsupported text layout is marked for DOM verification rather than claimed to fit.
+
+The citation mapper joins the generated publication network to
+`publication_study_reviews.v1.json`. Keep publication evidence, linked template
+availability and native qualification separate. Search and publication/study
+URL parameters use the existing paged list and detail pane; counts come from
+the projection. A template link opens preparation/preview, not a qualification
+claim. Failed data loads expose a retry. The detail grid reflows using its
+available container width, including when text is enlarged.
+
+Hosted finalization holds authoring controls inert until browser storage
+settles. Project restores and late preview/audio results cannot change that
+pending snapshot. Failed storage releases the editable draft; successful
+storage releases the locked profile and export action. Keep delayed-storage
+and request-order regression checks alongside real browser interaction checks
+in `apps/designer/frontend/tests/verify-browser-workflows.mjs`.

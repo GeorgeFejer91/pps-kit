@@ -247,6 +247,10 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
         assert "checked" in topology and "checked" not in timeline
 
         assert markup.by_id("publication-network-results-sort")[0] == "select"
+        search = markup.by_id("publication-network-search")[1]
+        assert search["type"] == "search"
+        assert search["aria-controls"] == "publication-network-results publication-network-graph"
+        assert markup.by_id("publication-network-retry")[0] == "button"
         assert markup.by_id("publication-network-workspace")[0] == "div"
         assert markup.by_id("publication-network-stage")[0] == "div"
 
@@ -290,7 +294,6 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
             "publication-network-zoom-out",
             "publication-network-reset-view",
             "publication-network-edge-mode",
-            "publication-network-search",
         ):
             assert f'id="{removed_contract}"' not in html
         assert 'value="prominence"' not in html
@@ -300,11 +303,11 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
         assert "main experimental paradigms and design variations" in html
         assert "not a systematic or exhaustive review" in html
         assert "Each of the 94 non-review publications" not in html
-        assert "Implemented in Toolkit" in html
-        assert "Not implemented yet" in html
-        assert "Circle area increases with incoming citations from other papers" in html
+        assert "Linked Toolkit template" in html
+        assert "No linked template" in html
+        assert "Circle area reflects incoming citations" in html
         assert "Larger circle = cited by more included papers" in html
-        assert "without an artificial perimeter" in html
+        assert "publication evidence, template availability and native qualification" in html
 
 
 def test_publication_network_source_and_compiled_contracts_stay_in_sync() -> None:
@@ -330,6 +333,7 @@ def test_publication_network_source_and_compiled_contracts_stay_in_sync() -> Non
 
     source_compiled_assets = DASHBOARD / "compiled" / "assets"
     assert list(source_compiled_assets.glob("publication_network.v3-*.json"))
+    assert list(source_compiled_assets.glob("publication_study_reviews.v1-*.json"))
     assert not list(source_compiled_assets.glob("publication_network.v2-*.json"))
 
 
@@ -371,7 +375,15 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         'target: "_blank"',
         'rel: "noopener noreferrer"',
         '"data-open-designer-template": templateId',
-        "records.flatMap",
+        "review.templateIds",
+        "publication_study_reviews.v1.json",
+        "pps-publication-study-reviews.v1",
+        "Publication evidence",
+        "Template availability",
+        "Native qualification",
+        "Study-level parameter review",
+        "data-study-id",
+        "data-contract-key",
         "Open in Experiment Designer",
         'layout: "topology"',
         "nodes[index].network?.radius",
@@ -486,7 +498,6 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         "searchActive",
         "searchMatchCount",
         "matchSet",
-        "controls.search",
     ):
         assert removed_contract not in network_js
 
