@@ -20,8 +20,11 @@ import verifies inventories and media hashes in a temporary directory, then
 publishes and rebinds all four authoring audio groups; original bundle records
 remain unchanged alongside a local rebinding receipt. A real nine-asset browser
 export passes this offline path. Pages assembly now includes only referenced
-spoken assets and their checked manifests. This closes neither immutable
-session assembly nor installed/physical qualification. CURRENT_WORK remains
+spoken assets and their checked manifests. Native immutable participant/part
+assembly, ordered instruction/block execution and durable group receipts now
+have software evidence. Installed journeys remain separate. The native preview
+explicitly excludes V1 LSL/LabRecorder capture; the existing V1 evidence does
+not transfer to the Rust preview. CURRENT_WORK remains
 the current acceptance checklist; later review findings below are historical
 starting conditions, not claims that these implementations are absent.
 

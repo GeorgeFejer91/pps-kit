@@ -177,5 +177,9 @@ mixed encodings use the existing decoded concatenation path. The Serino hand
 premade assets are a versioned Rust/3DTI continuous-pink proxy: four seconds at
 44.1 kHz, explicit seeds, digital peak 0.9 and inverse-square attenuation.
 Per-asset native generation sidecars bind renderer/resource/output hashes and QC.
+The ordinary preload builder verifies those sidecars against actual WAV bytes
+and template motion/level policy before preserving native provenance. It rejects
+stale evidence and Python force-regeneration of a native-owned asset; use the
+existing Rust regeneration harness for that asset instead.
 The derived onset origin, right-hand offset, level policy and separate 100-ms
 terminal trial margin do not establish source-envelope or physical equivalence.

@@ -71,6 +71,13 @@ This file is the active checklist and handoff owner; replace state, do not appen
   All 30 templates now pass actual cue-containment baking (29-profile rerun
   plus the final native Serino/Taffou checks); 19 focused waveform, provenance
   and release-audit checks pass. Independent runtime review verified the fixes.
+  Ordinary catalogue rebuilding now preserves and verifies native asset provenance;
+  stale audio/template receipts and Python force-regeneration are rejected. Thirteen
+  focused native-catalogue/profile/release checks pass. The canonical Designer has
+  20 passing frontend tests and fresh actual-browser/Pages assembly checks.
+  Review found premade native generation receipts were dropped by portable export;
+  UI owns a narrow fix carrying/verifying inline provenance in the existing design
+  while keeping the ZIP format and audio-only asset inventory unchanged.
   The integrated Rust selection (Designer, Runner, Designer core
   and package verifier) passes 230 checks with 16 opt-in skips and strict Clippy.
   PCM cancellation now uses a deterministic writer-boundary check, replacing a
@@ -106,9 +113,9 @@ This file is the active checklist and handoff owner; replace state, do not appen
   interaction, clean-Windows prerequisites and deployed routes remain open. New physical calibration
   is deferred by the user, not reported as measured.
 - **Scientific coverage:** frozen 94-publication corpus; the latest integrated
-  projection has 150 study rows and 1,650 compact contracts. After the accepted
-  body-ownership and inaccessible-plasticity batches, 59 publications pass
-  inventory/access plus all eleven source-disposition checks; 35 remain.
+  projection has 151 study rows and 1,661 compact contracts. After the accepted
+  body-ownership, inaccessible-plasticity and Canzoneri batches, 60 publications
+  pass inventory/access plus all eleven source-disposition checks; 34 remain.
   There are 68 registered entries, 57 Methods-backed inventories, eight audited
   access blockers and one project-lineage record, with source-version and
   overlapping-cohort limitations retained.

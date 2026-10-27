@@ -2,7 +2,7 @@
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "serino_2015_peri_hand_exp3",
   "title": "Serino 2015 peri-hand PPS Experiment 3",
-  "visible_variant_label": "B",
+  "visible_variant_label": "",
   "publication_status": "published",
   "profile_type": "",
   "asset_mode": "bundled_local",
@@ -55,14 +55,16 @@
     "engine": "rust-native-corrected-3dti",
     "include_tactile": false,
     "tactile_policy": "deferred_until_session_preparation",
-    "proxy_policy": "serino-exp3-continuous-pink-cartesian-proxy.v2",
-    "scientific_source_conformance": false
+    "scientific_source_conformance": false,
+    "proxy_policies": [
+      "serino-exp3-continuous-pink-cartesian-proxy.v2"
+    ]
   },
   "assets": [
     {
       "label": "Hand moving sound",
       "path": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
-      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/catalog/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
       "sha256": "8b7940a83caa1b5f3ba9de2ea2e9a29733c10c8ff4c3a9f6d135deef1bea9874",
       "duration_s": 4.0,
       "sample_rate": 44100,
@@ -101,9 +103,8 @@
         }
       },
       "source_profile": "continuous_noise",
-      "source_profile_parameters": {},
-      "bytes": 1411268,
       "frames": 176400,
+      "bytes": 1411268,
       "native_generation_provenance": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.native_generation.json",
       "native_generation_provenance_sha256": "155a8ecd83ceaf00164dfe54ee878d6462dc82fd1f17b0c6f766c0e03a9009f7",
       "proxy_policy": "serino-exp3-continuous-pink-cartesian-proxy.v2"
@@ -111,7 +112,7 @@
     {
       "label": "Hand moving sound - receding",
       "path": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
-      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/catalog/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
       "sha256": "29ec47e802d9cd69a70448f1531d2e88b9defd87c087e8cc818f9f3709c78003",
       "duration_s": 4.0,
       "sample_rate": 44100,
@@ -150,9 +151,8 @@
         }
       },
       "source_profile": "continuous_noise",
-      "source_profile_parameters": {},
-      "bytes": 1411268,
       "frames": 176400,
+      "bytes": 1411268,
       "native_generation_provenance": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.native_generation.json",
       "native_generation_provenance_sha256": "c2aedf2888d9f27b62d91c5702ff4b6d793eb82d84396275a87c8a4b3b47539a",
       "proxy_policy": "serino-exp3-continuous-pink-cartesian-proxy.v2"
@@ -161,6 +161,6 @@
   "notes": [
     "Prebaked WAVs are local auditory-only profile assets.",
     "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",
-    "The browser dashboard only orchestrates local companion verification and use of these files."
+    "Hosted preparation uses verified premade assets; native generation and participant execution require the desktop applications."
   ]
 }

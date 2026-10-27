@@ -5,7 +5,7 @@
     {
       "label": "Hand moving sound",
       "path": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
-      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/catalog/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
       "sha256": "8b7940a83caa1b5f3ba9de2ea2e9a29733c10c8ff4c3a9f6d135deef1bea9874",
       "duration_s": 4.0,
       "sample_rate": 44100,
@@ -44,9 +44,8 @@
         }
       },
       "source_profile": "continuous_noise",
-      "source_profile_parameters": {},
-      "bytes": 1411268,
       "frames": 176400,
+      "bytes": 1411268,
       "native_generation_provenance": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.native_generation.json",
       "native_generation_provenance_sha256": "155a8ecd83ceaf00164dfe54ee878d6462dc82fd1f17b0c6f766c0e03a9009f7",
       "proxy_policy": "serino-exp3-continuous-pink-cartesian-proxy.v2"
@@ -54,7 +53,7 @@
     {
       "label": "Hand moving sound - receding",
       "path": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
-      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/catalog/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
       "sha256": "29ec47e802d9cd69a70448f1531d2e88b9defd87c087e8cc818f9f3709c78003",
       "duration_s": 4.0,
       "sample_rate": 44100,
@@ -93,9 +92,8 @@
         }
       },
       "source_profile": "continuous_noise",
-      "source_profile_parameters": {},
-      "bytes": 1411268,
       "frames": 176400,
+      "bytes": 1411268,
       "native_generation_provenance": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.native_generation.json",
       "native_generation_provenance_sha256": "c2aedf2888d9f27b62d91c5702ff4b6d793eb82d84396275a87c8a4b3b47539a",
       "proxy_policy": "serino-exp3-continuous-pink-cartesian-proxy.v2"
