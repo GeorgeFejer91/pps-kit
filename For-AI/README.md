@@ -22,10 +22,13 @@ then load only its relevant references and skills. Do not read all of `For-AI/`,
 | Published paradigms, paper audits, replication claims, analysis, manuscript | [Scientific evidence](domains/scientific-evidence.md) |
 | Git checkpoints, tests, Pages, component ownership, installers | [Release operations](domains/release-operations.md) |
 
+<!-- for-ai-coding-workflows-route:start -->
 For cross-domain work, select one owning domain and read the neighboring
 handoff contract. [SKILLS.md](SKILLS.md) maps skills to tasks;
 [WORKFLOW.md](WORKFLOW.md) separates preview, source, packaging, and release.
 [module_map.md](module_map.md) locates code without loading history.
+The skill index includes bundled RTK and focused/multi-phase workflow guides.
+<!-- for-ai-coding-workflows-route:end -->
 
 ## Shared boundaries
 

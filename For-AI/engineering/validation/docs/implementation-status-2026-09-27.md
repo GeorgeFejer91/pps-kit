@@ -1,13 +1,14 @@
 # Approved implementation status
 
-Updated 2026-09-27. Current evidence for the 17 approved
+Reviewed 2026-10-27 against the existing 2026-09-27 product checkpoint.
+Current evidence for the 17 approved
 [audit items](unification-and-critical-audit-2026-09-27.md).
 Each status applies to its stated surface, not to the whole product.
 
 | Item | Implemented / observed surface | Remaining gate |
 | --- | --- | --- |
 | 1 | VERIFIED: locked Core/Desktop fmt, Clippy and tests on three CI platforms | Retain these checks through further execution work |
-| 2 | PARTIAL: migrated validators, fresh editable setup, bounded fixtures and retained scratch evidence | Complete Standard tier needs more storage |
+| 2 | PARTIAL: migrated validators, fresh editable setup, bounded fixtures and retained scratch evidence | Complete Standard tier still pending; storage blocker no longer observed on 2026-10-27 |
 | 3 | PARTIAL: one compact source/package/capability record; conservative readiness | Complete native adapter and measured evidence |
 | 4 | VERIFIED: shared profile/limits/scoring/text/job owners; concise For-AI routing; one native actor/scheduler/file worker | Extract only seams changed by further work |
 | 5 | VERIFIED browser source: planner disclosures/JSON action, phone Pair/state/action flow, participant response, local output picker and inline notifications | Installed UI inspection |
@@ -34,8 +35,9 @@ Each status applies to its stated surface, not to the whole product.
   Documentation-only synchronization does not change these product bytes.
 - Output-setup UI source: `97d69fd448b2a3bb92331f3a377e84a54bd006b9`.
   [Its exact-source CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36353428304)
-  is running. The preceding UI candidate
-  [passed all 11 source/oracle/browser/optional-Quest jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36352863787).
+  has completed: all 14 source/oracle/browser/optional-Quest/validation-package
+  jobs passed (GitHub job statuses checked 2026-10-27). The three validation
+  installers were built, not installed here.
   The final repair clears the UI media summary when Rust retires its cache on
   release/disable; the audit enforces fresh audio preparation before another
   reservation. Native backend files remain unchanged from the verified controls.
@@ -56,7 +58,7 @@ Each status applies to its stated surface, not to the whole product.
   [passed all 14 jobs](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36351705620).
   Its three validation installers were built, not installed here. The current
   output UI [Pages deployment](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36353428303)
-  succeeded; fresh parity passes all 470 files and four main routes.
+  succeeded; the 2026-09-27 parity check passed all 470 files and four main routes.
   Repeat hosted parity after each changed UI deployment.
   Pages uses the canonical compiled companion assets; text inputs use LF.
 
@@ -85,8 +87,11 @@ no final data are overwritten or automatically removed. Power-loss recovery,
 directory durability, device drain and physical onset require separate evidence.
 Callback observations, sample positions and CPAL driver predictions are explicitly
 unqualified. Preparation does not enable execution or qualify a device route.
-Native activation, whole profiles/multiple blocks, more local build storage,
+Native activation, whole profiles/multiple blocks, complete local validation,
 installed inspection and calibrated physical acquisition remain outstanding.
+The workspace volume has approximately 65.5 GiB free as of 2026-10-27; the
+former storage blocker is no longer observed. This documentation review did
+not rerun the Standard tier, native builds, hosted parity or installed checks.
 
 No installed application change, participant acquisition, scientific replication,
 physical onset or newly qualified route is claimed by this record.

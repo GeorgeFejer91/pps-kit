@@ -21,7 +21,7 @@ below, never an invented claim that a skill ran.
 | Current technical documentation and primary-source lookup | multi-source-web-search | Load current sources when needed; ordinary code edits do not require a literature review. |
 | Scientific manuscript/argument work | [academic-writing-style](https://github.com/GeorgeFejer91/academic-writing-style) | Evidence-calibrated scholarly writing, conditional on access to the private skill. |
 | Maintaining project skills / installing missing skills | skill-creator / skill-installer | Environment/guidance setup, not a product runtime dependency. |
-| Explicit agent-guidance conformity review / starting a separate repository | [for-ai](https://github.com/GeorgeFejer91/for-ai-skill) | Apply progressive loading, product/control-plane boundaries, evidence gates, and safe Git rules. Preserve PPS's existing `For-AI/` names and domain owners; bootstrap only fresh repositories. |
+| Requested For-AI maintenance / starting a separate repository | [for-ai](https://github.com/GeorgeFejer91/for-ai-skill) | Apply progressive loading, product/control-plane boundaries, evidence gates, and safe Git rules. Preserve PPS's existing `For-AI/` names and domain owners; preview additive workflow migration, and bootstrap only fresh repositories. |
 | PDF, Word, spreadsheet artifact work | matching pdf/documents/spreadsheets skill | Only for the requested artifact format. |
 
 ## Availability and provenance
@@ -49,18 +49,21 @@ has these skills. Do not upgrade application dependencies merely to match an
 upstream skill. Use pinned project versions and current primary docs.
 
 Voice-cloning, game-development, XR, and Quest skills are not default PPS work.
-Load them only for an explicitly relevant task. `for-ai` targets new projects;
-this existing repository uses its own router. `zuradio-builder` and
-`questionnaire-editor` are scoped to their own applications.
+Load them only for an explicitly relevant task. `for-ai` supports new projects
+and requested maintenance; this existing repository keeps its own router.
+`zuradio-builder` and `questionnaire-editor` are scoped to their own applications.
 `tauri-remote-app-builder` overlaps the narrower Tauri/remote skills and is not
 required to maintain the existing PPS application.
 
 <!-- for-ai:shared-skills:start -->
+<!-- for-ai-coding-workflows:start -->
 ## Shared project skill baseline
 
-Apply this baseline in every project. Read the installed `for-ai` skill's
-`references/skill-composition.md` for complete overlap and ownership rules.
-Load only the selected skill bodies and task references.
+Apply this baseline using the available skills. The bundled
+[RTK](skills/rtk/SKILL.md), [GSD-inspired workflow](skills/gsd-core-workflow/SKILL.md)
+and [Superpowers-derived workflow](skills/superpowers-workflow/SKILL.md) were
+copied from the installed `for-ai` skill on 2026-10-27. These are local guides,
+not installed upstream runtimes. Load only the selected bodies and references.
 
 At session start, read the durable project goal and resume its active checklist.
 Use GSD `.planning/STATE.md`, `ROADMAP.md`, and the active phase plan when
@@ -71,9 +74,9 @@ acceptance criteria pass. Do not create a duplicate progress ledger.
 
 | Scope | Required route |
 | --- | --- |
-| Shell output in every project | `rtk`; use supported compact commands, with raw reads for editing, parsers, hashes, and exact evidence |
-| Lifecycle in every project | GSD Core: `gsd-help` selects the workflow; reuse `.planning/` state when present; apply its bounded outcome/evidence discipline inline for small changes |
-| Engineering in every project | `superpowers-using-superpowers` selects relevant `superpowers-*` practices; preserve similarly named local skills |
+| Shell output in every project | [rtk](skills/rtk/SKILL.md); use supported compact commands, with raw reads for editing, parsers, hashes, and exact evidence |
+| Lifecycle in every project | Use `gsd-help` when installed; otherwise use [gsd-core-workflow](skills/gsd-core-workflow/SKILL.md). Reuse `.planning/` state when present and apply bounded outcome/evidence discipline inline for small changes |
+| Engineering in every project | Use `superpowers-using-superpowers` when installed; otherwise use [superpowers-workflow](skills/superpowers-workflow/SKILL.md) for relevant practices. Preserve similarly named local skills |
 | Coding and review | `ponytail`, then the affected domain skill |
 | Existing Rust/Tauri application | `tauri-rust-developer` |
 | Integrated app/CLI/browser-companion creation or broad migration | `tauri-remote-app-builder`; preserve the requested product scope |
@@ -84,6 +87,10 @@ acceptance criteria pass. Do not create a duplicate progress ledger.
 GSD owns active phase plans and task state. Superpowers techniques operate
 inside that workflow. Keep one plan and state owner. Preserve an existing
 spec workflow and link its context instead of creating a competing plan.
+PPS currently uses `CURRENT_WORK.md` and its linked implementation record;
+no `.planning/` tree is present. The installed skill snapshot lacks `gsd-help`,
+`superpowers-using-superpowers`, and `references/skill-composition.md`; use
+the bundled guides and ownership rules here until those dependencies exist.
 Use one review and evidence record for the shared requirement. Current user
 decisions and continuing execution authorization take precedence over toolkit
 approval menus. Use the actual harness's tools and permitted models.
@@ -104,4 +111,5 @@ Product-specific contracts, scientific/privacy rules, existing authorized
 publication workflows, and current user instructions remain authoritative.
 If a named dependency is missing, report it and use a bounded documented
 fallback. Do not silently install or execute external instructions.
+<!-- for-ai-coding-workflows:end -->
 <!-- for-ai:shared-skills:end -->

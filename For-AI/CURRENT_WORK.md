@@ -1,6 +1,7 @@
 # Current work
 
-Updated: 2026-09-27. Replace at stage transitions; do not append command logs.
+Reviewed: 2026-10-27. Product source stage remains the 2026-09-27 checkpoint.
+Replace at stage transitions; do not append command logs.
 
 - **Approved goal:** implement the 17 [audit items](engineering/validation/docs/unification-and-critical-audit-2026-09-27.md).
   Use Ponytail and existing owners. Planner creates/previews looming stimuli
@@ -35,10 +36,16 @@ Updated: 2026-09-27. Replace at stage transitions; do not append command logs.
   The candidate remains non-executable/unqualified until its complete adapter
   is enabled. Qualification requires observed devices/routes and calibration;
   source tests cannot supply physical evidence.
-- **Local constraint:** full native builds, installed verification and the
-  complete Standard tier need more storage (working allowance: 15 GiB).
-  Additional space or another location has been requested. Small local source,
-  rendered-browser and metadata checks continue; CI supplies native builds.
+- **Local validation:** the previous storage blocker is no longer observed:
+  approximately 65.5 GiB is free on the workspace volume as of 2026-10-27,
+  above the 15 GiB working allowance. Full native builds, installed verification
+  and the complete Standard tier were not rerun during this documentation task.
+  Recheck free space, then resume those existing validation gates when selected.
+- **Documentation checkpoint:** workflow routes and CI/storage evidence reviewed
+  on 2026-10-27. Five structure/release/privacy tests, three skill validators,
+  21 local Markdown links and whitespace checks pass. Review began on clean
+  `main` at `ff13b690`, synchronized with `origin/main` after fetch/pull.
+  This checkpoint changes only `For-AI/`; product acceptance gates remain open.
 
 Detailed run artifacts stay in ignored validation folders. Preserve the pre-sync
 Git bundle and dirty-file backup until reconciliation is verified.
