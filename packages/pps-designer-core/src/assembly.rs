@@ -400,13 +400,20 @@ pub fn plan_assembly_preview(
             }
             let tactile_onset = if ["audio_tactile", "baseline"].contains(&family) {
                 let soa = finite_number(&row["soa_ms"])? / 1000.0;
-                if soa < 0.0 {
-                    return Err(GenerationError::Invalid("assembly_negative_soa"));
-                }
-                let onset = variant
-                    .looming
-                    .checked_add(sample_index(soa, rate))
-                    .ok_or(GenerationError::ResourceLimit)?;
+                // Round the signed offset independently of the sound onset, as for
+                // positive SOAs. Negative offsets may use existing pre-sound frames.
+                let offset = sample_index(soa.abs(), rate);
+                let onset = if soa < 0.0 {
+                    variant
+                        .looming
+                        .checked_sub(offset)
+                        .ok_or(GenerationError::Invalid("assembly_tactile_outside_trial"))?
+                } else {
+                    variant
+                        .looming
+                        .checked_add(offset)
+                        .ok_or(GenerationError::ResourceLimit)?
+                };
                 if onset
                     .checked_add(tactile.frames())
                     .is_none_or(|end| end > variant.frames)
