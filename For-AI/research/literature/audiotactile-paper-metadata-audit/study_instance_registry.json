@@ -9,38 +9,10 @@
       "instance_count_basis": "The publication title, network abstract, and audit citation explicitly say four experiments; the current automated record is combined.",
       "evidence_pointer": "paper_audits/holmes_2020_four_experiments.md; publication_network.v3.json::doi:10.1007/s00221-020-05771-5",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 1",
-          "record_id": "holmes_2020_four_experiments",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 2",
-          "record_id": "holmes_2020_four_experiments",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "c",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 3",
-          "record_id": "holmes_2020_four_experiments",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "d",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 4",
-          "record_id": "holmes_2020_four_experiments",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        }
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1", "record_id": "holmes_2020_four_experiments", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2", "record_id": "holmes_2020_four_experiments", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "c", "instance_kind": "experiment", "experiment_label": "Experiment 3", "record_id": "holmes_2020_four_experiments", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "d", "instance_kind": "experiment", "experiment_label": "Experiment 4", "record_id": "holmes_2020_four_experiments", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
       ]
     },
     {
@@ -50,24 +22,8 @@
       "instance_count_basis": "The reviewed main PDF identifies audio-tactile PPS measurements in Experiment 1A (tool-use training) and Experiment 3 (pointing-control training). Experiments 1B and 2 are body-representation controls without the audio-tactile PPS task and remain outside this task-instance matrix.",
       "evidence_pointer": "artifacts/paper_metadata_audit/publication_pdfs/doi_10.1007_s00221-013-3532-2__299a1419d7a1.pdf::PDF pp.3-6,14; metadata_audit.jsonl::canzoneri_2013_tool_use_reshaping",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 1A — tool-use training PPS task",
-          "record_id": "canzoneri_2013_tool_use_reshaping",
-          "template_ids": [],
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 3 — pointing-control PPS task",
-          "record_id": "canzoneri_2013_tool_use_reshaping",
-          "template_ids": [],
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        }
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1A — tool-use training PPS task", "record_id": "canzoneri_2013_tool_use_reshaping", "template_ids": [], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 3 — pointing-control PPS task", "record_id": "canzoneri_2013_tool_use_reshaping", "template_ids": [], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
       ]
     },
     {
@@ -77,37 +33,9 @@
       "instance_count_basis": "The critical review separates two main experiments and a supplemental front-space receding control.",
       "evidence_pointer": "manual_reviews/noel_2015_bodily_self.json",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 1 — front-space/chest",
-          "record_id": "noel_2015_bodily_self",
-          "template_ids": [
-            "noel_2015_bodily_self"
-          ],
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 2 — back-space/back",
-          "record_id": "noel_2015_bodily_self",
-          "template_ids": [
-            "noel_2015_bodily_self_back_space"
-          ],
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "c",
-          "instance_kind": "supplemental_control",
-          "experiment_label": "Supplemental front-space receding control",
-          "record_id": "noel_2015_bodily_self",
-          "template_ids": [],
-          "toolkit_scope": "supplemental_in_scope_control",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        }
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — front-space/chest", "record_id": "noel_2015_bodily_self", "template_ids": ["noel_2015_bodily_self"], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — back-space/back", "record_id": "noel_2015_bodily_self", "template_ids": ["noel_2015_bodily_self_back_space"], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "c", "instance_kind": "supplemental_control", "experiment_label": "Supplemental front-space receding control", "record_id": "noel_2015_bodily_self", "template_ids": [], "toolkit_scope": "supplemental_in_scope_control", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
       ]
     },
     {
@@ -117,22 +45,8 @@
       "instance_count_basis": "The critical review explicitly covers Experiment 1 and the Experiment 2 optic-flow control.",
       "evidence_pointer": "manual_reviews/noel_2015_walking.json",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 1 — locomotion task",
-          "record_id": "noel_2015_walking",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 2 — optic-flow control",
-          "record_id": "noel_2015_walking",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        }
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — locomotion task", "record_id": "noel_2015_walking", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — optic-flow control", "record_id": "noel_2015_walking", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
       ]
     },
     {
@@ -142,33 +56,9 @@
       "instance_count_basis": "The reviewed main PDF explicitly describes three audio-tactile PPS experiments: social presence/mannequin, cooperative versus noncooperative interaction, and cooperative interaction before/after. Their sound durations and condition structures differ, so the prior single review row was not lossless.",
       "evidence_pointer": "artifacts/paper_metadata_audit/publication_pdfs/doi_10.1016_j.cub.2013.01.043__105d921e527a.pdf::PDF pp.1-5; metadata_audit.jsonl::teneggi_2013_social_face",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 1 — mannequin versus other-person PPS",
-          "record_id": "teneggi_2013_social_face",
-          "template_ids": [],
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 2 — cooperative versus noncooperative interaction",
-          "record_id": "teneggi_2013_social_face",
-          "template_ids": [],
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "c",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 3 — cooperative interaction before versus after",
-          "record_id": "teneggi_2013_social_face",
-          "template_ids": [],
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        }
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — mannequin versus other-person PPS", "record_id": "teneggi_2013_social_face", "template_ids": [], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — cooperative versus noncooperative interaction", "record_id": "teneggi_2013_social_face", "template_ids": [], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "c", "instance_kind": "experiment", "experiment_label": "Experiment 3 — cooperative interaction before versus after", "record_id": "teneggi_2013_social_face", "template_ids": [], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
       ]
     },
     {
@@ -178,22 +68,8 @@
       "instance_count_basis": "The reviewed accepted-manuscript PDF explicitly labels the artificial power-law-noise task as Experiment 1 and the ecological/IADS-sound task as Experiment 2 in the abstract, Methods, Results, Discussion, figures, and table. The two exact-DOI audit records therefore correspond to formal experiments rather than informal profile variants.",
       "evidence_pointer": "artifacts/paper_metadata_audit/publication_pdfs/doi_10.1016_j.neuropsychologia.2015.03.001__8a3e82fe7431.pdf::PDF pp.1,8-13; parsimonious_source_reviews.v1.json::doi:10.1016/j.neuropsychologia.2015.03.001::a,b",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 1 — artificial power-law-noise valence",
-          "record_id": "ferri_2015_artificial_valence",
-          "toolkit_scope": "in_scope",
-          "disaggregation_status": "record_already_experiment_specific"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 2 — ecological/IADS-sound valence",
-          "record_id": "ferri_2015_ecological_valence",
-          "toolkit_scope": "in_scope",
-          "disaggregation_status": "record_already_experiment_specific"
-        }
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — artificial power-law-noise valence", "record_id": "ferri_2015_artificial_valence", "toolkit_scope": "in_scope", "disaggregation_status": "record_already_experiment_specific"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — ecological/IADS-sound valence", "record_id": "ferri_2015_ecological_valence", "toolkit_scope": "in_scope", "disaggregation_status": "record_already_experiment_specific"}
       ]
     },
     {
@@ -203,38 +79,10 @@
       "instance_count_basis": "The audit known-prior-gaps section and the network abstract explicitly describe a comprehensive four-experiment design.",
       "evidence_pointer": "paper_audits/ferroni_2026_pps_plasticity.md; publication_network.v3.json::doi:10.1016/j.neuropsychologia.2026.109490",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 1",
-          "record_id": "ferroni_2026_pps_plasticity",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 2",
-          "record_id": "ferroni_2026_pps_plasticity",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "c",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 3",
-          "record_id": "ferroni_2026_pps_plasticity",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "d",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 4",
-          "record_id": "ferroni_2026_pps_plasticity",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        }
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1", "record_id": "ferroni_2026_pps_plasticity", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2", "record_id": "ferroni_2026_pps_plasticity", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "c", "instance_kind": "experiment", "experiment_label": "Experiment 3", "record_id": "ferroni_2026_pps_plasticity", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "d", "instance_kind": "experiment", "experiment_label": "Experiment 4", "record_id": "ferroni_2026_pps_plasticity", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
       ]
     },
     {
@@ -244,22 +92,8 @@
       "instance_count_basis": "The critical review separates Experiment 1 healthy participants and Experiment 2 disorders-of-consciousness patients.",
       "evidence_pointer": "manual_reviews/disorders_consciousness_2019.json",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 1 — healthy participants",
-          "record_id": "disorders_consciousness_2019",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 2 — disorders of consciousness",
-          "record_id": "disorders_consciousness_2019",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        }
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — healthy participants", "record_id": "disorders_consciousness_2019", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — disorders of consciousness", "record_id": "disorders_consciousness_2019", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
       ]
     },
     {
@@ -269,28 +103,8 @@
       "instance_count_basis": "The critical review and two existing templates separate Experiment 1 and Experiment 2 arm-movement profiles.",
       "evidence_pointer": "manual_reviews/lamia_2026_arm_movement.json; study_templates/barumerli_2026_arm_movement_exp1.json; study_templates/barumerli_2026_arm_movement_exp2.json",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 1 — 3000-ms sound/endpoint baselines",
-          "record_id": "lamia_2026_arm_movement",
-          "template_ids": [
-            "barumerli_2026_arm_movement_exp1"
-          ],
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 2 — 4000-ms sound/five matched baselines",
-          "record_id": "lamia_2026_arm_movement",
-          "template_ids": [
-            "barumerli_2026_arm_movement_exp2"
-          ],
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        }
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — 3000-ms sound/endpoint baselines", "record_id": "lamia_2026_arm_movement", "template_ids": ["barumerli_2026_arm_movement_exp1"], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — 4000-ms sound/five matched baselines", "record_id": "lamia_2026_arm_movement", "template_ids": ["barumerli_2026_arm_movement_exp2"], "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
       ]
     },
     {
@@ -300,30 +114,9 @@
       "instance_count_basis": "The critical review explicitly covers audio-tactile Experiments 2 and 3; the publication abstract also describes a separate body-representation task treated conservatively as Experiment 1 pending scope verification.",
       "evidence_pointer": "manual_reviews/canzoneri_2013_amputation_prosthesis.json; publication_network.v3.json::doi:10.1038/srep02844",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 1 — body-representation task; scope unverified",
-          "record_id": "",
-          "toolkit_scope": "scope_not_assessed",
-          "disaggregation_status": "experiment_record_not_available"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 2 — audio-tactile PPS",
-          "record_id": "canzoneri_2013_amputation_prosthesis",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "c",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 3 — audio-tactile PPS",
-          "record_id": "canzoneri_2013_amputation_prosthesis",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        }
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — body-representation task; scope unverified", "record_id": "", "toolkit_scope": "scope_not_assessed", "disaggregation_status": "experiment_record_not_available"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — audio-tactile PPS", "record_id": "canzoneri_2013_amputation_prosthesis", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "c", "instance_kind": "experiment", "experiment_label": "Experiment 3 — audio-tactile PPS", "record_id": "canzoneri_2013_amputation_prosthesis", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
       ]
     },
     {
@@ -333,62 +126,13 @@
       "instance_count_basis": "The network abstract explicitly reports seven experiments. Manual reviews separately cover Experiments 1-3 and the three separable Experiments 4-6; Experiment 7 has no current audit record.",
       "evidence_pointer": "publication_network.v3.json::doi:10.1038/srep18603; manual_reviews/serino_2015_peri_trunk_exp1.json; manual_reviews/serino_2015_front_back_trunk_exp2.json; manual_reviews/serino_2015_peri_hand_exp3.json; manual_reviews/serino_2015_exps_4_to_6.json",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 1 — peritrunk",
-          "record_id": "serino_2015_peri_trunk_exp1",
-          "toolkit_scope": "in_scope",
-          "disaggregation_status": "record_already_experiment_specific"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 2 — front/back trunk",
-          "record_id": "serino_2015_front_back_trunk_exp2",
-          "toolkit_scope": "in_scope",
-          "disaggregation_status": "record_already_experiment_specific"
-        },
-        {
-          "suffix": "c",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 3 — perihand",
-          "record_id": "serino_2015_peri_hand_exp3",
-          "toolkit_scope": "in_scope",
-          "disaggregation_status": "record_already_experiment_specific"
-        },
-        {
-          "suffix": "d",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 4 — hand versus trunk/hand on chest",
-          "record_id": "serino_2015_exps_4_to_6",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "e",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 5 — near versus far hand posture",
-          "record_id": "serino_2015_exps_4_to_6",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "f",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 6 — face versus trunk congruency",
-          "record_id": "serino_2015_exps_4_to_6",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "g",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 7 — modality/scope not assessed",
-          "record_id": "",
-          "toolkit_scope": "scope_not_assessed",
-          "disaggregation_status": "experiment_record_not_available"
-        }
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — peritrunk", "record_id": "serino_2015_peri_trunk_exp1", "toolkit_scope": "in_scope", "disaggregation_status": "record_already_experiment_specific"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — front/back trunk", "record_id": "serino_2015_front_back_trunk_exp2", "toolkit_scope": "in_scope", "disaggregation_status": "record_already_experiment_specific"},
+        {"suffix": "c", "instance_kind": "experiment", "experiment_label": "Experiment 3 — perihand", "record_id": "serino_2015_peri_hand_exp3", "toolkit_scope": "in_scope", "disaggregation_status": "record_already_experiment_specific"},
+        {"suffix": "d", "instance_kind": "experiment", "experiment_label": "Experiment 4 — hand versus trunk/hand on chest", "record_id": "serino_2015_exps_4_to_6", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "e", "instance_kind": "experiment", "experiment_label": "Experiment 5 — near versus far hand posture", "record_id": "serino_2015_exps_4_to_6", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "f", "instance_kind": "experiment", "experiment_label": "Experiment 6 — face versus trunk congruency", "record_id": "serino_2015_exps_4_to_6", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "g", "instance_kind": "experiment", "experiment_label": "Experiment 7 — modality/scope not assessed", "record_id": "", "toolkit_scope": "scope_not_assessed", "disaggregation_status": "experiment_record_not_available"}
       ]
     },
     {
@@ -398,30 +142,9 @@
       "instance_count_basis": "The network abstract says 46 participants completed three experiments; the current audit record is not experiment-specific.",
       "evidence_pointer": "publication_network.v3.json::doi:10.1111/ejn.13872; metadata_audit.jsonl::pfeiffer_2018_vestibular",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 1",
-          "record_id": "pfeiffer_2018_vestibular",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 2",
-          "record_id": "pfeiffer_2018_vestibular",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "c",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 3",
-          "record_id": "pfeiffer_2018_vestibular",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        }
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1", "record_id": "pfeiffer_2018_vestibular", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2", "record_id": "pfeiffer_2018_vestibular", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "c", "instance_kind": "experiment", "experiment_label": "Experiment 3", "record_id": "pfeiffer_2018_vestibular", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
       ]
     },
     {
@@ -431,22 +154,8 @@
       "instance_count_basis": "The critical review explicitly separates Experiment 1 and Experiment 2 condition sets and procedures.",
       "evidence_pointer": "manual_reviews/farne_ladavas_2002_auditory_pps_humans.json",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 1 — right-side front/back × near/far × sound type",
-          "record_id": "farne_ladavas_2002_auditory_pps_humans",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 2 — left-back near/far white noise",
-          "record_id": "farne_ladavas_2002_auditory_pps_humans",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        }
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — right-side front/back × near/far × sound type", "record_id": "farne_ladavas_2002_auditory_pps_humans", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — left-back near/far white noise", "record_id": "farne_ladavas_2002_auditory_pps_humans", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
       ]
     },
     {
@@ -456,22 +165,8 @@
       "instance_count_basis": "The audit known-prior-gaps section explicitly names Experiment 2 as the trimodal audiovisual-tactile mixed-reality task; Experiment 1 is retained as unreviewed pending full inventory.",
       "evidence_pointer": "paper_audits/serino_2018_mixed_reality_pps.md",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 1 — scope not disaggregated",
-          "record_id": "",
-          "toolkit_scope": "scope_not_assessed",
-          "disaggregation_status": "experiment_record_not_available"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 2 — trimodal audiovisual-tactile mixed reality",
-          "record_id": "serino_2018_mixed_reality_pps",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        }
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — scope not disaggregated", "record_id": "", "toolkit_scope": "scope_not_assessed", "disaggregation_status": "experiment_record_not_available"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — trimodal audiovisual-tactile mixed reality", "record_id": "serino_2018_mixed_reality_pps", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
       ]
     },
     {
@@ -481,30 +176,9 @@
       "instance_count_basis": "The network abstract explicitly enumerates active-wheelchair, passive-wheelchair, and blindfolded experiments.",
       "evidence_pointer": "publication_network.v3.json::doi:10.3389/fpsyg.2015.00639; metadata_audit.jsonl::galli_2015_wheelchair",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 1 — active wheelchair",
-          "record_id": "galli_2015_wheelchair",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 2 — passive wheelchair",
-          "record_id": "galli_2015_wheelchair",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "c",
-          "instance_kind": "experiment",
-          "experiment_label": "Experiment 3 — blindfolded",
-          "record_id": "galli_2015_wheelchair",
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        }
+        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — active wheelchair", "record_id": "galli_2015_wheelchair", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — passive wheelchair", "record_id": "galli_2015_wheelchair", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "c", "instance_kind": "experiment", "experiment_label": "Experiment 3 — blindfolded", "record_id": "galli_2015_wheelchair", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
       ]
     },
     {
@@ -514,24 +188,8 @@
       "instance_count_basis": "The publication abstract and critical STAR Methods review distinguish two incompatible audio-tactile PPS protocol variants: healthy wake/sleep chest EEG and disorders-of-consciousness arm clinical EEG. Tracked evidence does not establish formal Experiment 1/2 numbering.",
       "evidence_pointer": "publication_network.v3.json::doi:10.1016/j.xcrm.2026.102705; manual_reviews/cell_reports_medicine_2026_consciousness.json::profile_recreation_assessment; manual_reviews/cell_reports_medicine_2026_consciousness.json::segment_field_audit",
       "instances": [
-        {
-          "suffix": "a",
-          "instance_kind": "profile_variant",
-          "experiment_label": "Healthy wake/sleep chest EEG PPS variant",
-          "record_id": "cell_reports_medicine_2026_consciousness",
-          "template_ids": [],
-          "toolkit_scope": "profile_variant_in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        },
-        {
-          "suffix": "b",
-          "instance_kind": "profile_variant",
-          "experiment_label": "Disorders-of-consciousness arm clinical PPS variant",
-          "record_id": "cell_reports_medicine_2026_consciousness",
-          "template_ids": [],
-          "toolkit_scope": "profile_variant_in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
-        }
+        {"suffix": "a", "instance_kind": "profile_variant", "experiment_label": "Healthy wake/sleep chest EEG PPS variant", "record_id": "cell_reports_medicine_2026_consciousness", "template_ids": [], "toolkit_scope": "profile_variant_in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
+        {"suffix": "b", "instance_kind": "profile_variant", "experiment_label": "Disorders-of-consciousness arm clinical PPS variant", "record_id": "cell_reports_medicine_2026_consciousness", "template_ids": [], "toolkit_scope": "profile_variant_in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
       ]
     },
     {
@@ -796,9 +454,7 @@
           "instance_kind": "experiment",
           "experiment_label": "Four-direction body-rotation audio-tactile experiment",
           "record_id": "matsuda_2021_four_directions",
-          "template_ids": [
-            "matsuda_2021_four_directions"
-          ],
+          "template_ids": ["matsuda_2021_four_directions"],
           "toolkit_scope": "in_scope",
           "disaggregation_status": "record_already_experiment_specific"
         }
