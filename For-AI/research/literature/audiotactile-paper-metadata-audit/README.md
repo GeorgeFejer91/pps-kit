@@ -33,8 +33,8 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 126 study/context rows,
-32 registered publication inventories and 62 publication inventories still
+Current checkpoint (2026-10-27): 94 frozen publications, 127 study/context rows,
+34 registered publication inventories and 60 publication inventories still
 unassessed. The earlier counts below describe individual historical checkpoints.
 Tonelli (2019) now separates neck PPS assessment from echolocation training,
 time-bisection training and distance validation; manual trial starts, endpoint
@@ -51,6 +51,15 @@ It preserves external-side response mapping, analysis windows versus online
 timeouts, strong tactile nontargets versus sound-only catches, and group-specific
 block counts. Prior-review reuse is explicit; unsuccessful current PDF access
 does not erase that evidence or imply a newly inspected source.
+
+Orioli (2019) now has separate pilot and Study 1 rows, retaining an alias from
+the old publication placeholder. Current primary Methods and rendered Figure 3 /
+Table 4 establish static intensity conditions, visual saccade responses and
+attention-limited planned maxima of 30/31 trials. Manual brush timing remains
+partial; auditory-only group controls are not catches. Hüg (2022) is retained as
+one adjacent auditory-reaching experiment with tactile feedback during training,
+not a timed tactile-detection protocol. Its source-backed boundary does not
+establish native reaching or motion-tracking support.
 
 The first bounded source batch (2026-10-27) adds four experiment-scoped timing/count
 reviews for Canzoneri et al. (2012), DOI `10.1371/journal.pone.0044306`, from the

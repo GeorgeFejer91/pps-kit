@@ -52,21 +52,21 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         summary = self.build_summary
         self.assertEqual(summary["publications"], 94)
         self.assertEqual(summary["networkEdges"], 750)
-        self.assertEqual(summary["studyInstances"], 126)
+        self.assertEqual(summary["studyInstances"], 127)
         self.assertEqual(summary["parsimoniousContractCount"], 11)
-        self.assertEqual(summary["parsimoniousReviewCells"], 1_386)
+        self.assertEqual(summary["parsimoniousReviewCells"], 1_397)
         self.assertEqual(summary["currentToolkitInputParameters"], 115)
-        self.assertEqual(summary["currentInputReviewCells"], 14_490)
+        self.assertEqual(summary["currentInputReviewCells"], 14_605)
         self.assertEqual(summary["currentInputsOutsideTargetInventory"], 26)
         self.assertEqual(summary["targetMethodValidationParameters"], 281)
         self.assertEqual(summary["targetConfigurationCandidates"], 275)
         self.assertEqual(summary["targetValidationLeaves"], 6)
-        self.assertEqual(summary["targetMethodReviewCells"], 35_406)
+        self.assertEqual(summary["targetMethodReviewCells"], 35_687)
         self.assertEqual(summary["structuredOrientationReviewRecords"], 8)
         self.assertEqual(summary["experimentSpecificOrientationRows"], 4)
         self.assertEqual(summary["combinedOrientationRows"], 10)
         self.assertEqual(summary["automatedVisualizationCandidates"], 173)
-        self.assertEqual(summary["studyVisualizationCandidateRows"], 251)
+        self.assertEqual(summary["studyVisualizationCandidateRows"], 258)
         self.assertEqual(summary["confirmedVisualizationRows"], 0)
         self.assertEqual(summary["publicationNodesWithAbstract"], 37)
         self.assertEqual(summary["publicationNodesWithoutAbstractOrAudit"], 26)
@@ -84,7 +84,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(len(paths), len(set(paths)))
         self.assertTrue(all(path.startswith("design.") for path in paths))
         self.assertEqual(matrix_header[-115:], paths)
-        self.assertEqual(len(rows), 126)
+        self.assertEqual(len(rows), 127)
         self.assertTrue(all(row[path] for row in rows for path in paths))
         self.assertIn("parser", dictionary_header)
         self.assertIn("serializer", dictionary_header)
@@ -100,11 +100,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         header, rows = read_csv(
             self.output_dir / "study_instance_current_input_review_matrix.csv"
         )
-        self.assertEqual(len(rows), 126)
+        self.assertEqual(len(rows), 127)
         self.assertEqual(header[-115:], paths)
         self.assertTrue(all(row[path] for row in rows for path in paths))
         _, queue = read_csv(self.output_dir / "current_input_review_queue.csv")
-        self.assertEqual(len(queue), 126 * 115)
+        self.assertEqual(len(queue), 127 * 115)
         self.assertEqual(
             len({(row["study_row_id"], row["current_toolkit_input_path"]) for row in queue}),
             len(queue),
@@ -135,7 +135,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(len(target_paths), len(set(target_paths)))
         self.assertTrue(all(path.startswith("target.") for path in target_paths))
         self.assertEqual(matrix_header[-281:], target_paths)
-        self.assertEqual(len(rows), 126)
+        self.assertEqual(len(rows), 127)
         self.assertTrue(all(row[path] for row in rows for path in target_paths))
         for field in (
             "current_design_binding_state",
@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 32)
+        self.assertEqual(len(registry["entries"]), 34)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 64)
+        self.assertEqual(registered_instance_count, 67)
         network = json.loads(
             (
                 ROOT
@@ -323,7 +323,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         header, rows = read_csv(
             self.output_dir / "study_instance_target_method_evidence_sidecar.csv"
         )
-        self.assertEqual(len(rows), 126 * 281)
+        self.assertEqual(len(rows), 127 * 281)
         for field in (
             "study_row_id",
             "network_node_id",
@@ -355,7 +355,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
 
     def test_orientation_and_visualization_reviews_remain_unconfounded(self) -> None:
         _, orientation = read_csv(self.output_dir / "study_orientation_review.csv")
-        self.assertEqual(len(orientation), 126)
+        self.assertEqual(len(orientation), 127)
         orientation_counts = Counter(
             row["orientation_review_status"] for row in orientation
         )
@@ -379,15 +379,18 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         visualization_counts = Counter(
             row["confirmation_status"] for row in visualizations
         )
-        self.assertEqual(visualization_counts["automated_candidate_unverified"], 120)
+        self.assertEqual(visualization_counts["automated_candidate_unverified"], 113)
         self.assertEqual(
             visualization_counts["record_level_candidate_requires_experiment_check"],
-            131,
+            145,
         )
         self.assertNotIn("confirmed", visualization_counts)
         ronga = [row for row in visualizations if row["study_row_id"].startswith("doi:10.1073/pnas.2024548118::")]
         self.assertEqual(len(ronga), 8)  # Four publication candidates for each cohort variant.
         self.assertEqual({row["confirmation_status"] for row in ronga}, {"record_level_candidate_requires_experiment_check"})
+        orioli = [row for row in visualizations if row["study_row_id"].startswith("doi:10.1038/s41598-019-45084-4::")]
+        self.assertEqual(len(orioli), 14)  # Seven legacy candidates now need pilot/main assignment.
+        self.assertEqual({row["confirmation_status"] for row in orioli}, {"record_level_candidate_requires_experiment_check"})
 
     def test_parsimonious_matrix_is_complete_compact_and_evidence_guarded(self) -> None:
         expected_contracts = [
@@ -454,7 +457,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         header, rows = read_csv(
             self.output_dir / "study_instance_parsimonious_status_matrix.csv"
         )
-        self.assertEqual(len(rows), 126)
+        self.assertEqual(len(rows), 127)
         self.assertEqual(
             header[:-11],
             [
@@ -495,7 +498,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             "component_evidence_note_json",
         ):
             self.assertIn(field, evidence_header)
-        self.assertEqual(len(evidence), 126 * 11)
+        self.assertEqual(len(evidence), 127 * 11)
         self.assertEqual(
             len({(row["study_row_id"], row["contract_key"]) for row in evidence}),
             len(evidence),
@@ -679,7 +682,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
                 for row in evidence
                 if row["contract_key"] == contract_key
             )
-            self.assertEqual(summary_row["study_count"], "126")
+            self.assertEqual(summary_row["study_count"], "127")
             for status in summary_statuses:
                 self.assertEqual(int(summary_row[status]), counts[status])
             resolved = sum(
@@ -693,7 +696,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             self.assertEqual(int(summary_row["available_or_resolved_count"]), resolved)
             self.assertEqual(
                 float(summary_row["available_or_resolved_pct"]),
-                round(100 * resolved / 126, 1),
+                round(100 * resolved / 127, 1),
             )
 
         _, review_queue = read_csv(
@@ -872,6 +875,46 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(study["parameterStatusCounts"], {"derived_complete": 1, "partial": 7, "reported_complete": 3})
         self.assertEqual(study["nativeQualification"], "not_assessed")
 
+    def test_newborn_intensity_studies_preserve_visual_endpoint_and_planned_maxima(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        node = "doi:10.1038/s41598-019-45084-4"
+        self.assertEqual(data["studyRowAliases"][node], [node + "::a", node + "::b"])
+        studies = [row for row in data["studies"] if row["networkNodeId"] == node]
+        self.assertEqual(len(studies), 2)
+        for study in studies:
+            contracts = {row["key"]: row for row in study["contracts"]}
+            pilot = study["studyRowId"].endswith("::a")
+            self.assertIn("Offline video-coded", contracts["task_response"]["value"])
+            self.assertEqual(contracts["task_response"]["status"], "partial")
+            self.assertEqual(contracts["soa_schedule"]["status"], "partial")
+            self.assertIn("manual", contracts["soa_schedule"]["value"])
+            self.assertIn("metric", contracts["trajectory_kinematics"]["evidenceNote"])
+            self.assertIn("30" if pilot else "31", contracts["repetition_allocation"]["value"])
+            self.assertIn("maximum", contracts["repetition_allocation"]["value"])
+            self.assertIn("Attention-dependent", contracts["repetition_allocation"]["components"]["exceptions_or_overrides"]["value"])
+            self.assertEqual(contracts["catch_trial_contract"]["status"], "explicitly_absent")
+            baseline = contracts["baseline_trial_contract"]
+            self.assertEqual(baseline["status"], "explicitly_absent" if pilot else "reported_complete")
+            if not pilot:
+                self.assertIn("between-group", baseline["value"])
+                self.assertEqual(contracts["block_order_contract"]["status"], "partial")
+            self.assertEqual(study["templateIds"], [])
+            self.assertEqual(study["nativeQualification"], "not_assessed")
+
+    def test_guided_reaching_keeps_tactile_training_outside_detection_contracts(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        node = "doi:10.3389/fpsyg.2022.983189"
+        studies = [row for row in data["studies"] if row["networkNodeId"] == node]
+        self.assertEqual(len(studies), 1)
+        study = studies[0]
+        self.assertEqual(study["parameterStatusCounts"], {"not_applicable": 11})
+        registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+        inventory = next(row for row in registry["entries"] if row["network_node_id"] == node)
+        self.assertEqual(inventory["framework_disposition"], "adjacent_auditory_reaching_with_tactile_training_feedback")
+        self.assertIn("92 trials", inventory["supporting_task_boundaries"][0]["basis"])
+        self.assertEqual(study["templateIds"], [])
+        self.assertEqual(study["nativeQualification"], "not_assessed")
+
     def test_pregnancy_review_does_not_inherit_prior_study_baselines(self) -> None:
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
         study = next(row for row in data["studies"] if row["studyRowId"] == "doi:10.1038/s41598-019-45224-w")
@@ -1018,7 +1061,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             self.assertEqual(contracts["tactile_target"]["status"], "composite_requires_split")
             self.assertEqual(study["nativeQualification"], "not_assessed")
         self.assertEqual(len(data["publications"]), 94)
-        self.assertEqual(len(data["studies"]), 126)
+        self.assertEqual(len(data["studies"]), 127)
 
     def test_echolocation_assessment_keeps_training_and_manual_timing_separate(self) -> None:
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
