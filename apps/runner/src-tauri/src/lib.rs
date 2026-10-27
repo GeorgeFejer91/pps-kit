@@ -6,6 +6,7 @@ mod native_playback;
 mod prepared_audio;
 mod prepared_execution;
 mod remote;
+mod result_recovery;
 mod runtime;
 mod trial_capture;
 
@@ -62,6 +63,7 @@ struct PreparedSessionSelection {
     cancelled: bool,
     summary: Option<PreparedSessionSummary>,
     snapshot: RunnerSnapshot,
+    results_assessment: Option<result_recovery::NativeResultsAssessment>,
 }
 
 #[tauri::command]
@@ -169,6 +171,7 @@ async fn select_prepared_session(
         return Ok(PreparedSessionSelection {
             cancelled: true,
             summary: None,
+            results_assessment: None,
             snapshot: runtime
                 .snapshot_async()
                 .await
@@ -182,8 +185,11 @@ async fn select_prepared_session(
         )
     })?;
 
-    let verified = tauri::async_runtime::spawn_blocking(move || {
-        verify_prepared_session(VerificationRequest::new(&manifest_path))
+    let (verified, results_assessment) = tauri::async_runtime::spawn_blocking(move || {
+        verify_prepared_session(VerificationRequest::new(&manifest_path)).map(|verified| {
+            let assessment = result_recovery::assess_native_results(&verified);
+            (verified, assessment)
+        })
     })
     .await
     .map_err(|_| PreparedSessionCommandError::runtime())?
@@ -198,6 +204,7 @@ async fn select_prepared_session(
         cancelled: false,
         summary: Some(summary),
         snapshot,
+        results_assessment: Some(results_assessment),
     })
 }
 
