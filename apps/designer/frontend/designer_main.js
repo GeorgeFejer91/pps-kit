@@ -60,7 +60,7 @@ const drafts = {
     const digest = [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))]
       .map((value) => value.toString(16).padStart(2, "0")).join("");
     const id = `${digest}.${String(file.name).split(".").pop()?.toLowerCase() || "wav"}`;
-    const record = { id, name: file.name, type: file.type || "audio/wav", bytes, size: file.size };
+    const record = { id, name: file.name, type: file.type || "audio/wav", bytes, size: file.size, sha256: digest };
     await put(ASSET_STORE, id, record);
     return { ...record, url: URL.createObjectURL(new Blob([bytes], { type: record.type })) };
   },

@@ -239,7 +239,7 @@ try {
   await accessible.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1`);
   await verifyDesignerControlNames(accessible, resolve(output, "accessible-instructions.png"));
   assert.deepEqual(errors, []);
-  report.checks.push("Designer names, keyboard order, focus across event/preview rerenders and dialog return; 320–1920px plus 200% CSS zoom");
+  report.checks.push("Designer names, keyboard/focus, 320–1920px and 200% CSS zoom; uploaded instruction bytes/hash survive preview, lock, reload and export; last-slot focus clears footer at 620/1000px");
   await accessible.close();
 
   const companionPreview = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
