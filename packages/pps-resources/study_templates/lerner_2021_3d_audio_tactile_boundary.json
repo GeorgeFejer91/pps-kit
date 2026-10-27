@@ -5,29 +5,120 @@
   "source_url": "https://www.frontiersin.org/journals/virtual-reality/articles/10.3389/frvir.2021.644214/full",
   "doi": "10.3389/frvir.2021.644214",
   "verification_status": "partial",
-  "notes": "3D Tune-In/Unity PPS mapping study. The preload catalog expands the paper's twelve virtual source directions into local auditory-only trajectory assets for the dynamic and flat pink-noise source types. The runnable profile captures the reported 144 audio-tactile condition rows; subject-specific body/head scaling and exact Unity/3D Tune-In rendering remain provenance caveats.",
+  "notes": "3D Tune-In/Unity PPS mapping study. The preload catalog expands the paper's twelve virtual source directions into local auditory-only trajectory assets for the dynamic and flat pink-noise source types. The runnable profile captures the reported 144 audio-tactile condition rows; subject-specific body/head scaling and exact Unity/3D Tune-In rendering remain provenance caveats. A 100-ms derived terminal margin contains the existing software cue; it is not a reported trial interval or evidence of full-protocol timing equivalence.",
   "reference_parameters": {
     "audio_engine": "3D Tune-In Toolkit in Unity",
     "directions_reported": 12,
     "virtual_sound_source_radius_m": 1.2,
     "preload_end_radius_m": 0.01,
     "virtual_sound_source_positions": [
-      {"label": "direction_01", "x_left_right_m": 0.0, "y_down_top_m": 0.6, "z_behind_front_m": 1.0392304845, "end_radius_m": 0.01, "movement_duration_s": 5.5},
-      {"label": "direction_02", "x_left_right_m": 0.6, "y_down_top_m": 1.0392304845, "z_behind_front_m": 0.0, "end_radius_m": 0.01, "movement_duration_s": 5.5},
-      {"label": "direction_03", "x_left_right_m": 1.0392304845, "y_down_top_m": 0.0, "z_behind_front_m": 0.6, "end_radius_m": 0.01, "movement_duration_s": 5.5},
-      {"label": "direction_04", "x_left_right_m": 0.0, "y_down_top_m": -0.6, "z_behind_front_m": 1.0392304845, "end_radius_m": 0.01, "movement_duration_s": 5.5},
-      {"label": "direction_05", "x_left_right_m": -0.6, "y_down_top_m": 1.0392304845, "z_behind_front_m": 0.0, "end_radius_m": 0.01, "movement_duration_s": 5.5},
-      {"label": "direction_06", "x_left_right_m": 1.0392304845, "y_down_top_m": 0.0, "z_behind_front_m": -0.6, "end_radius_m": 0.01, "movement_duration_s": 5.5},
-      {"label": "direction_07", "x_left_right_m": 0.0, "y_down_top_m": -0.6, "z_behind_front_m": -1.0392304845, "end_radius_m": 0.01, "movement_duration_s": 5.5},
-      {"label": "direction_08", "x_left_right_m": -0.6, "y_down_top_m": -1.0392304845, "z_behind_front_m": 0.0, "end_radius_m": 0.01, "movement_duration_s": 5.5},
-      {"label": "direction_09", "x_left_right_m": -1.0392304845, "y_down_top_m": 0.0, "z_behind_front_m": -0.6, "end_radius_m": 0.01, "movement_duration_s": 5.5},
-      {"label": "direction_10", "x_left_right_m": 0.0, "y_down_top_m": 0.6, "z_behind_front_m": -1.0392304845, "end_radius_m": 0.01, "movement_duration_s": 5.5},
-      {"label": "direction_11", "x_left_right_m": 0.6, "y_down_top_m": -1.0392304845, "z_behind_front_m": 0.0, "end_radius_m": 0.01, "movement_duration_s": 5.5},
-      {"label": "direction_12", "x_left_right_m": -1.0392304845, "y_down_top_m": 0.0, "z_behind_front_m": 0.6, "end_radius_m": 0.01, "movement_duration_s": 5.5}
+      {
+        "label": "direction_01",
+        "x_left_right_m": 0.0,
+        "y_down_top_m": 0.6,
+        "z_behind_front_m": 1.0392304845,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_02",
+        "x_left_right_m": 0.6,
+        "y_down_top_m": 1.0392304845,
+        "z_behind_front_m": 0.0,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_03",
+        "x_left_right_m": 1.0392304845,
+        "y_down_top_m": 0.0,
+        "z_behind_front_m": 0.6,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_04",
+        "x_left_right_m": 0.0,
+        "y_down_top_m": -0.6,
+        "z_behind_front_m": 1.0392304845,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_05",
+        "x_left_right_m": -0.6,
+        "y_down_top_m": 1.0392304845,
+        "z_behind_front_m": 0.0,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_06",
+        "x_left_right_m": 1.0392304845,
+        "y_down_top_m": 0.0,
+        "z_behind_front_m": -0.6,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_07",
+        "x_left_right_m": 0.0,
+        "y_down_top_m": -0.6,
+        "z_behind_front_m": -1.0392304845,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_08",
+        "x_left_right_m": -0.6,
+        "y_down_top_m": -1.0392304845,
+        "z_behind_front_m": 0.0,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_09",
+        "x_left_right_m": -1.0392304845,
+        "y_down_top_m": 0.0,
+        "z_behind_front_m": -0.6,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_10",
+        "x_left_right_m": 0.0,
+        "y_down_top_m": 0.6,
+        "z_behind_front_m": -1.0392304845,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_11",
+        "x_left_right_m": 0.6,
+        "y_down_top_m": -1.0392304845,
+        "z_behind_front_m": 0.0,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_12",
+        "x_left_right_m": -1.0392304845,
+        "y_down_top_m": 0.0,
+        "z_behind_front_m": 0.6,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      }
     ],
     "sound_velocity_mps": 0.22,
     "reference_arm_length_cm": 70.0,
-    "stimulus_distance_scale_arm_lengths": [1.7, 1.5, 1.3, 1.1, 0.9, 0.7],
+    "stimulus_distance_scale_arm_lengths": [
+      1.7,
+      1.5,
+      1.3,
+      1.1,
+      0.9,
+      0.7
+    ],
     "distance_scale": "Stimulus timepoints are reported as 0.7-1.7 arm lengths from the chest; profile uses a 70 cm reference arm length, yielding 119, 105, 91, 77, 63, and 49 cm paired with the 5.5 s movement window.",
     "profile_check_complete": true,
     "reported_trial_formula": "144 audio-tactile trials: 12 virtual directions x 2 sound conditions (dynamic looming pink noise and flat stationary pink noise) x 6 arm-length-scaled tactile timepoints x 1 repetition. The profile distributes the pool across four reported experiment blocks.",
@@ -46,7 +137,12 @@
       "subject-specific arm length scaling is represented by a 70 cm reference-arm conversion instead of live participant scaling",
       "the exact original Unity scene, 3D Tune-In runtime behavior, and MATLAB stimulus-generation scripts are not redistributed",
       "the article's 24-trials-per-block wording conflicts with the reported total trial count"
-    ]
+    ],
+    "software_trial_padding_ms": {
+      "pre": 0,
+      "post": 100
+    },
+    "software_trial_padding_basis": "Derived containment for the existing software timeline: pre=0 ms; post=max(0,max(SOA)+cue duration-source duration)=5500+100-5500=100 ms. Lerner et al. 2021, Audio Stimuli, The Tactile Stimuli and Procedure, pp.8-11: 5.5-s sound and 100-ms tactile cue. Source SOAs depend on individual arm-length distances; the existing evenly spaced software grid remains a source-conflicted proxy. A 100-ms terminal margin only contains the software last cue and does not resolve that conflict."
   },
   "design": {
     "name": "Lerner 2021 3D audio-tactile PPS boundary",
@@ -157,8 +253,20 @@
               "kind": "looming_stimulus",
               "label": "3D audio-tactile source",
               "source_label": "Dynamic pink 3D sound",
-              "source_labels": ["Dynamic pink 3D sound", "Flat pink 3D sound"],
+              "source_labels": [
+                "Dynamic pink 3D sound",
+                "Flat pink 3D sound"
+              ],
               "randomized": true
+            },
+            {
+              "element_id": "lerner_2021_3d_audio_tactile_boundary-cue-tail",
+              "kind": "jitter",
+              "label": "Derived tactile-cue tail",
+              "jitter_values_ms": [
+                100
+              ],
+              "randomized": false
             }
           ]
         }
@@ -183,6 +291,10 @@
     {
       "field": "expected outcome",
       "source": "Results report individual 3D PPS boundary polyhedra and no systematic flat-versus-dynamic advantage; Table 2 gives 26 closer flat thresholds and 26 closer dynamic thresholds across valid subject/trajectory pairs."
+    },
+    {
+      "field": "software cue containment and source limitation",
+      "source": "Lerner et al. 2021, Audio Stimuli, The Tactile Stimuli and Procedure, pp.8-11: 5.5-s sound and 100-ms tactile cue. Source SOAs depend on individual arm-length distances; the existing evenly spaced software grid remains a source-conflicted proxy. A 100-ms terminal margin only contains the software last cue and does not resolve that conflict. DOI 10.3389/frvir.2021.644214."
     }
   ]
 }

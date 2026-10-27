@@ -91,13 +91,29 @@ prefix after syncing both files. Failure/backpressure neutralizes output while
 safety still proceeds. Finalization freezes a prefix, syncs/closes both files,
 exclusively publishes final names, checks hashes, and publishes the manifest
 last. Only a matching native package/run/count/sequence receipt can complete a
-whole single-block package after response windows and the final software estimate
-close. Missing/interrupted trials cannot complete. Unsupported hard-link
+whole manifest-ordered package after every block's response windows and final
+software estimate close. A generation-scoped completed prefix prevents skips or
+repeats; between blocks the exhausted port is retired and the same journal stays
+open. The existing preload command selects the next unfinished block natively,
+followed by a fresh local output reservation and Arm/Start. Interrupted attempts
+restart as a new generation and cannot combine old partial evidence into completion. Missing/interrupted trials cannot complete. Unsupported hard-link
 filesystems fail closed; partial/pending/orphan files remain. Power loss,
 directory persistence, device drain and physical timing need separate evidence.
 Use `validation/scripts/validate_native_results.py` under `For-AI/engineering/`
 for read-only file/hash/prefix/V1-projection checks; synthetic files are not
 participant acquisition.
+
+Native prepared-session selection also runs `result_recovery.rs` on its blocking
+worker. `resultsAssessment` reports complete/interrupted/orphaned/invalid attempts,
+fixed reason codes and the contiguous event/CSV prefix that can actually be read.
+It uses the same Data_min projection, package hash and final-manifest contract;
+partial filenames alone never certify completion. Counts do not certify an
+interrupted trial, an fsync acknowledgement or physical timing. It neither edits
+files nor resumes/replays acquisition, and returns no participant identities or
+private paths. Scans bound directory entries, attempts, per-record/file bytes and
+aggregate reads; incomplete scans remain explicit. Process-termination checks
+cover six real write/sync/hard-link boundaries, including the final manifest
+commit. These are process-crash checks, not power-loss/directory-persistence proof.
 
 `pps-runner-execution::response` is the shared scoring/CSV owner; Python remains
 the oracle. `trial_capture.rs` consumes callback boundaries without another
@@ -113,8 +129,9 @@ The main window may listen/unlisten but cannot emit authority snapshots.
 
 The local output view uses the existing main-window-only native preflight
 commands. It lists configurations matching prepared channels/sample rate,
-requires an explicit choice, and preserves decimal generation fences. Silent
-preparation never enables Start. Disable remains available during a pending
+requires an explicit choice, and preserves decimal generation fences. Cache preparation stays silent. A successful current output reservation binds
+verified media and its durable journal, enabling local Arm for a whole
+manifest block; only the subsequent Arm/Start sequence requests playback. Disable remains available during a pending
 operation; stale replies cannot restore its UI. Suspension clears the view's
 inventory; resume reads fresh native state without replay. The Rust owner keeps
 the device/port authority. Release/disable clears the displayed media summary
@@ -122,7 +139,43 @@ as the Rust owner retires its cache; audio preparation is required again.
 Desktop notifications remain in their owning panel
 and use the shared bounded-text helper.
 
-Preparation and these source seams do not enable execution. Native activation,
-whole profiles/multiple blocks, an installed
-complete experiment, calibration and physical qualification remain gates.
+Manifest-order execution is source-verified through normal native dispatch and
+real one-/two-block silent CPAL callback fixtures with independent result-file
+audits. `pps-designer-core` now preserves the existing participant ordering
+through a versioned CPython-compatible planner, binds both operator reviews,
+and assembles distinct pre/post parts with shared run-setup provenance and
+verified instruction PCM. Its complete 600-occurrence browser capture matches
+the existing Python planner. `pps-session-package` verifies instruction WAV
+hashes, actual frames/rate/channels, finite PCM and contained paths; its native
+group receipt binds both ordered parts and their shared provenance. Neither
+receipt nor source completion flags establish that the experiment ran.
+The native consumer now executes verified instruction-bearing/split packages,
+including click/button/delay gates and ordered-part result receipts, with real
+silent callback and independent result-audit evidence. Complete installed
+experiments remain a separate gate. The user deferred new physical calibration on 2026-10-27; hardware
+operation is assumed, never recorded as measured qualification.
 Wire completion is denied for real packages; Stop preserves partial results.
+
+Negative sound-relative SOAs are valid only when an explicit sequence prefix
+contains them. Rust rounds the offset magnitude with the established ties-to-even
+policy, uses checked subtraction/addition from sound onset, and requires the
+complete cue within existing trial frames. It never inserts implicit padding.
+Actual cue PCM, signed CSV and verified schedule checks cover -700 ms after a
+1000-ms prefix, both trial boundaries, overflow and half-sample rounding.
+
+The compatibility trial writer also rejects complete cues outside actual WAV
+frames, including cached manifests. Explicit reported silence and derived
+software containment margins remain distinct in profile provenance. Canzoneri
+and Taffou pre/post-sound controls use the existing custom/audio-tactile baseline
+mode: the cue occurs in silence while the full trial retains its sound. Teneggi's
+template targets Experiment 3 only; its one-per-SOA preview does not supply
+unreported repetition, catch or block counts. It remains source-blocked.
+
+Native FLOAT sources cannot be FFmpeg stream-copied together with PCM silence.
+The fast path requires identical audio encoding and exact combined frame counts;
+mixed encodings use the existing decoded concatenation path. The Serino hand
+premade assets are a versioned Rust/3DTI continuous-pink proxy: four seconds at
+44.1 kHz, explicit seeds, digital peak 0.9 and inverse-square attenuation.
+Per-asset native generation sidecars bind renderer/resource/output hashes and QC.
+The derived onset origin, right-hand offset, level policy and separate 100-ms
+terminal trial margin do not establish source-envelope or physical equivalence.

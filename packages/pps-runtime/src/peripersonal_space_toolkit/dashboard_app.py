@@ -3988,6 +3988,7 @@ def _audio_file_info(path: Path) -> dict[str, Any]:
     return {
         "duration_ms": duration_ms,
         "duration_s": round(duration_ms / 1000.0, 6),
+        "frames": int(info.frames),
         "sample_rate": int(info.samplerate),
         "channels": int(info.channels),
     }
@@ -4261,8 +4262,16 @@ def _write_silence_wav(path: Path, duration_s: float, sample_rate: int, channels
 
 
 def _ffmpeg_concat_lossless(segment_paths: list[Path], output_path: Path) -> bool:
+    import soundfile as sf
+
     ffmpeg = shutil.which("ffmpeg")
     if not ffmpeg or not segment_paths:
+        return False
+    infos = [sf.info(_soundfile_path(path)) for path in segment_paths]
+    formats = {(info.samplerate, info.channels, info.format, info.subtype, info.endian) for info in infos}
+    if len(formats) != 1:
+        # Stream-copying FLOAT audio and PCM silence reinterprets sample bytes.
+        # The existing decoded concatenation path handles mixed encodings.
         return False
     digest = hashlib.sha256(str(output_path).encode("utf-8")).hexdigest()[:12]
     list_path = output_path.parent / f"concat_{digest}.txt"
@@ -4282,7 +4291,14 @@ def _ffmpeg_concat_lossless(segment_paths: list[Path], output_path: Path) -> boo
         os.unlink(_filesystem_path(list_path))
     except OSError:
         pass
-    return completed.returncode == 0 and _path_exists(output_path)
+    if completed.returncode != 0 or not _path_exists(output_path):
+        return False
+    output = sf.info(_soundfile_path(output_path))
+    return (
+        output.frames == sum(info.frames for info in infos)
+        and output.samplerate == infos[0].samplerate
+        and output.channels == infos[0].channels
+    )
 
 
 def _write_variant_wav_lossless(path: Path, chunks: list[dict[str, Any]], silence_dir: Path) -> float:
@@ -5560,6 +5576,16 @@ def _validate_tactile_trial_manifest(manifest: dict[str, Any], *, design: Stimul
             errors.append(f"Segment 3 trial file duration changed: {path.name}.")
         if family not in {"catch", "auditory_only"} and int(item.get("tactile_channel") or 0) != 3:
             errors.append(f"Segment 3 manifest does not mark channel 3 as tactile: {path.name}.")
+        if family not in {"catch", "auditory_only"}:
+            try:
+                onset = float(item["tactile_onset_s"])
+                duration = float(item["tactile_duration_ms"]) / 1000.0
+                start = round(onset * info["sample_rate"])
+                cue_frames = round(duration * info["sample_rate"])
+                if start < 0 or cue_frames <= 0 or start + cue_frames > info["frames"]:
+                    raise ValueError("cue outside trial")
+            except (KeyError, ValueError, TypeError, OverflowError):
+                errors.append(f"Segment 3 tactile cue is outside the trial audio or has invalid timing: {path.name}.")
     return errors
 
 
@@ -6123,18 +6149,16 @@ def _tactile_cue_duration_ms(sample_rate: int) -> int:
 def _tactile_channel(sample_rate: int, frames: int, tactile_onset_s: float) -> Any:
     import numpy as np
 
-    channel = np.zeros(max(0, frames), dtype="float32")
     cue = _load_tactile_cue(sample_rate)
     start = int(round(float(tactile_onset_s) * sample_rate))
-    cue_start = 0
-    if start < 0:
-        cue_start = min(len(cue), -start)
-        start = 0
-    if start >= len(channel) or cue_start >= len(cue):
-        return channel
-    end = min(len(channel), start + len(cue) - cue_start)
-    if end > start:
-        channel[start:end] += cue[cue_start: cue_start + (end - start)]
+    end = start + len(cue)
+    if start < 0 or not len(cue) or end > frames:
+        raise ValueError(
+            "Tactile cue is outside the trial audio. Add explicit pre/post-sound "
+            "silence or correct the saved SOA; the complete cue must fit."
+        )
+    channel = np.zeros(frames, dtype="float32")
+    channel[start:end] = cue
     peak = float(np.max(np.abs(channel))) if channel.size else 0.0
     if peak > 1.0:
         channel /= peak

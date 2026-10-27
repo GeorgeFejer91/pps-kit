@@ -204,7 +204,7 @@ def build_profile_parameters_manifest(
             unsupported.append({"segment": str(segment), "parameter": parameter, "reason": note or parameter})
 
     _record_profile_identity_fields(template, record)
-    _record_core_fields(design, source_assets, record)
+    _record_core_fields(design, source_assets, record, reference_parameters=template.reference_parameters)
     _record_gap_fields(template, record)
 
     validation_warnings = validate_design(design)
@@ -440,6 +440,8 @@ def _record_core_fields(
     design: StimulusDesign,
     source_assets: list[dict[str, Any]],
     record: Any,
+    *,
+    reference_parameters: dict[str, Any],
 ) -> None:
     protocol = design.protocol
     record(
@@ -482,29 +484,38 @@ def _record_core_fields(
         for element in strip.elements
         for value in element.jitter_values_ms
     ]
+    padding_basis = str(reference_parameters.get("software_trial_padding_basis") or "")
+    timing_status = STATUS_INFERRED if padding_basis else (STATUS_REPORTED if jitter_values else STATUS_DEFAULTED)
     record(
         "2",
         "jitter_values_ms",
-        STATUS_REPORTED if jitter_values else STATUS_DEFAULTED,
+        timing_status,
         jitter_values,
-        "Explicit jitter values encoded." if jitter_values else "No explicit jitter box is encoded.",
+        padding_basis or ("Explicit jitter values encoded." if jitter_values else "No explicit jitter box is encoded."),
     )
     record(
         "2",
         "iti_jitter_policy",
-        STATUS_REPORTED if jitter_values else STATUS_DEFAULTED,
-        "jitter/iti box" if jitter_values else "no explicit Segment 2 ITI/jitter box",
-        "Segment 2 encodes explicit ITI/jitter timing values."
+        timing_status,
+        "derived software containment" if padding_basis else ("jitter/iti box" if jitter_values else "no explicit Segment 2 ITI/jitter box"),
+        padding_basis or ("Segment 2 encodes explicit ITI/jitter timing values."
         if jitter_values
-        else "No explicit ITI/jitter box is encoded; missing ITI/jitter is only a blocker when listed as a publication gap.",
+        else "No explicit ITI/jitter box is encoded; missing ITI/jitter is only a blocker when listed as a publication gap."),
     )
     record(
         "3",
         "soa_values_ms",
-        STATUS_REPORTED if protocol.soa_values_ms else STATUS_MISSING,
+        STATUS_MISSING if not protocol.soa_values_ms else (STATUS_INFERRED if reference_parameters.get("soa_values_ms_basis") else STATUS_REPORTED),
         list(protocol.soa_values_ms),
-        "SOA values are encoded." if protocol.soa_values_ms else "No SOA values are encoded.",
+        str(reference_parameters.get("soa_values_ms_basis") or ("SOA values are encoded." if protocol.soa_values_ms else "No SOA values are encoded.")),
     )
+    if "software_tactile_cue_duration_ms" in reference_parameters:
+        record(
+            "3", "tactile_cue_substitution", STATUS_DEFAULTED,
+            {"reported_ms": reference_parameters.get("reported_tactile_duration_ms"),
+             "software_ms": reference_parameters["software_tactile_cue_duration_ms"]},
+            "The shared audio-channel cue is a software substitution, not the reported physical stimulus.",
+        )
     record(
         "3",
         "tactile_sites",
@@ -534,29 +545,30 @@ def _record_core_fields(
         else "No baseline trials are configured.",
     )
     catch_value: Any = protocol.catch_trials_exact if protocol.catch_trials_exact is not None else protocol.catch_trial_percentage
+    count_basis = str(reference_parameters.get("software_trial_count_basis") or "")
     record(
         "3",
         "catch_mode",
-        STATUS_REPORTED if protocol.include_catch_trials or catch_value else STATUS_DEFAULTED,
+        STATUS_DEFAULTED if count_basis else (STATUS_REPORTED if protocol.include_catch_trials or catch_value else STATUS_DEFAULTED),
         catch_value,
-        "Catch settings are encoded." if protocol.include_catch_trials or catch_value else "No catch trials are configured.",
+        count_basis or ("Catch settings are encoded." if protocol.include_catch_trials or catch_value else "No catch trials are configured."),
     )
     repetition_defaults = dict(getattr(protocol, "trial_pool_repetition_defaults", {}) or {})
     record(
         "4",
         "trial_pool_repetitions",
-        STATUS_REPORTED if repetition_defaults else STATUS_INFERRED,
+        STATUS_DEFAULTED if count_basis else (STATUS_REPORTED if repetition_defaults else STATUS_INFERRED),
         repetition_defaults or protocol.repetitions_per_condition,
-        "Segment 4 repetition defaults are encoded."
+        count_basis or ("Segment 4 repetition defaults are encoded."
         if repetition_defaults
-        else "Segment 4 can infer repetitions from repetitions_per_condition.",
+        else "Segment 4 can infer repetitions from repetitions_per_condition."),
     )
     record(
         "5",
         "block_count",
-        STATUS_REPORTED if protocol.blocks else STATUS_DEFAULTED,
+        STATUS_DEFAULTED if count_basis else (STATUS_REPORTED if protocol.blocks else STATUS_DEFAULTED),
         protocol.blocks,
-        "Block count is encoded." if protocol.blocks else "Block count is a runner default and is not part of the publication acceptance gate.",
+        count_basis or ("Block count is encoded." if protocol.blocks else "Block count is a runner default and is not part of the publication acceptance gate."),
     )
     record(
         "5",

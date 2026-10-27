@@ -6,7 +6,7 @@
   "doi": "10.1038/srep18603",
   "source_url": "https://www.nature.com/articles/srep18603",
   "verification_status": "partial",
-  "notes": "Peri-trunk looming/receding task originally implemented with a two-speaker analog setup. Timing, distance, and trial-count fields are literature-derived; the toolkit recreates the reported near-far trajectory with the binaural spatial renderer rather than treating the speakers as a separate audio source.",
+  "notes": "Peri-trunk looming/receding task originally implemented with a two-speaker analog setup. Timing, distance, and trial-count fields are literature-derived; the toolkit recreates the reported near-far trajectory with the binaural spatial renderer rather than treating the speakers as a separate audio source. A 100-ms derived terminal margin contains the existing software cue; it is not a reported trial interval or evidence of full-protocol timing equivalence.",
   "reference_parameters": {
     "distances_cm": [
       100,
@@ -22,7 +22,12 @@
     ],
     "repetitions_reported": 16,
     "profile_check_complete": true,
-    "analog_apparatus_recreation": "Original near/far speakers are modeled as the reported 100 cm to 5 cm moving-sound trajectory in the binaural renderer."
+    "analog_apparatus_recreation": "Original near/far speakers are modeled as the reported 100 cm to 5 cm moving-sound trajectory in the binaural renderer.",
+    "software_trial_padding_ms": {
+      "pre": 0,
+      "post": 100
+    },
+    "software_trial_padding_basis": "Derived containment for the existing software timeline: pre=0 ms; post=max(0,max(SOA)+cue duration-source duration)=4318+100-4318=100 ms. Serino et al. 2015 main article pp.11-13 and Supplementary Methods: 100-ms cue and 500-700-ms ITI; exact numerical SOAs/sound duration/onset origin remain unresolved. The existing sampled-distance/speed timeline is a proxy under an assumed 100-cm origin. A 100-ms terminal margin only contains its final cue; it is not the reported ITI or source-reported silence."
   },
   "provenance": [
     {
@@ -32,6 +37,10 @@
     {
       "field": "trial count",
       "source": "Methods report 240 trials: multisensory D1-D6 plus baselines and catch trials by two directions and 16 repetitions."
+    },
+    {
+      "field": "software cue containment and source limitation",
+      "source": "Serino et al. 2015 main article pp.11-13 and Supplementary Methods: 100-ms cue and 500-700-ms ITI; exact numerical SOAs/sound duration/onset origin remain unresolved. The existing sampled-distance/speed timeline is a proxy under an assumed 100-cm origin. A 100-ms terminal margin only contains its final cue; it is not the reported ITI or source-reported silence. DOI 10.1038/srep18603."
     }
   ]
 }

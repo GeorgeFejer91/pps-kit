@@ -26,6 +26,8 @@
       3600
     ],
     "tactile_pulse_duration_us": 100,
+    "reported_tactile_duration_ms": 0.1,
+    "software_tactile_cue_duration_ms": 100,
     "response_rule": "vocal response to tactile target, ignore sound",
     "analysis_outlier_rule": "trim RTs exceeding 2 SD from participant/condition mean",
     "analog_apparatus_recreation": "Original near/far speakers and SoundForge motion are modeled as the reported 110 cm to 10 cm moving-sound trajectory in the binaural renderer when exact author gain files are not available.",
@@ -38,6 +40,10 @@
     ]
   },
   "provenance": [
+    {
+      "field": "trial sequence and tactile baselines",
+      "source": "PLOS ONE Methods, Procedures and Materials, paragraphs beginning 'For each trial' and 'Finally': 1000 ms silence before and after the 3000 ms sound; T0/T6 occur at 300/4600 ms from trial start, equivalent to -700/+3600 ms from sound onset. DOI 10.1371/journal.pone.0044306."
+    },
     {
       "field": "SOA values",
       "source": "PLOS ONE Methods report T1-T5 as 300, 800, 1500, 2200, and 2700 ms from sound onset."

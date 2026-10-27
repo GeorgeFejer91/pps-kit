@@ -6,8 +6,16 @@
   "doi": "10.1038/s41598-021-90784-5",
   "source_url": "https://www.nature.com/articles/s41598-021-90784-5",
   "verification_status": "verified",
-  "notes": "Four body-relative direction blocks. The template represents one direction block; duplicate with azimuth/body orientation changes for front, rear, left, and right. Speaker apparatus references are treated as original analog setup provenance while the profile recreates reported motion with the binaural renderer.",
-  "reference_parameters": {},
+  "notes": "Four body-relative direction blocks. The template represents one direction block; duplicate with azimuth/body orientation changes for front, rear, left, and right. Speaker apparatus references are treated as original analog setup provenance while the profile recreates reported motion with the binaural renderer. The 700-ms prefix and 800-ms suffix are derived software containment margins, not reported trial timing. The shared 100-ms audio-channel cue substitutes for the reported 24-ms chest actuator stimulus; fixed trial padding and ITI are unreported in the reviewed Methods prose.",
+  "reference_parameters": {
+    "software_trial_padding_ms": {
+      "pre": 700,
+      "post": 800
+    },
+    "reported_tactile_duration_ms": 24,
+    "software_tactile_cue_duration_ms": 100,
+    "software_trial_padding_basis": "Derived containment only: pre=max(0,-min(SOA))=700 ms; post=max(0,max(SOA)+software cue duration-sound duration)=3700+100-3000=800 ms. Fixed full-trial silence and ITI are not specified in the reviewed Methods prose."
+  },
   "provenance": [
     {
       "field": "block composition",
@@ -16,6 +24,10 @@
     {
       "field": "stimuli",
       "source": "Methods report 3000 ms pink noise moving between 10 and 110 cm with T1-T5 at 300-2700 ms."
+    },
+    {
+      "field": "baseline offsets and derived software margins",
+      "source": "Matsuda et al. 2021, Audio stimuli, Tactile stimuli and Procedure, DOI 10.1038/s41598-021-90784-5 (PMC8163804): 3000-ms sound, 24-ms tactile stimulus, controls 700 ms before onset/after offset. The margins and 100-ms software cue are separate implementation choices; formula in reference_parameters."
     }
   ]
 }

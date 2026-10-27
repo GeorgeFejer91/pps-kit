@@ -54,7 +54,7 @@
         "segment": "3",
         "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
         "passed": true,
-        "field_count": 5,
+        "field_count": 6,
         "blocking_reasons": []
       },
       {
@@ -95,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 6,
+      "value": 12,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -136,23 +136,26 @@
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "jitter_values_ms",
-      "status": "defaulted",
-      "value": [],
-      "note": "No explicit jitter box is encoded."
+      "status": "inferred",
+      "value": [
+        500,
+        600
+      ],
+      "note": "Derived containment only: pre=max(0,-min(SOA))=500 ms; post=max(0,max(SOA)+software cue duration-sound duration)=3500+100-3000=600 ms. The article does not report a fixed full-trial padding or response timeout; ITI is experimenter controlled."
     },
     {
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "iti_jitter_policy",
-      "status": "defaulted",
-      "value": "no explicit Segment 2 ITI/jitter box",
-      "note": "No explicit ITI/jitter box is encoded; missing ITI/jitter is only a blocker when listed as a publication gap."
+      "status": "inferred",
+      "value": "derived software containment",
+      "note": "Derived containment only: pre=max(0,-min(SOA))=500 ms; post=max(0,max(SOA)+software cue duration-sound duration)=3500+100-3000=600 ms. The article does not report a fixed full-trial padding or response timeout; ITI is experimenter controlled."
     },
     {
       "segment": "3",
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "soa_values_ms",
-      "status": "reported",
+      "status": "inferred",
       "value": [
         0,
         500,
@@ -162,7 +165,18 @@
         2500,
         3000
       ],
-      "note": "SOA values are encoded."
+      "note": "Derived from seven equally spaced positions: elapsed_ms=(119-distance_cm)/34*1000, for distance_cm=[119,102,85,68,51,34,17]. Methods pp. 856-858 (DOI 10.1007/s00221-019-05469-3) report 17-cm spacing and 34 cm/s, not this numerical SOA table."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "tactile_cue_substitution",
+      "status": "defaulted",
+      "value": {
+        "reported_ms": 20,
+        "software_ms": 100
+      },
+      "note": "The shared audio-channel cue is a software substitution, not the reported physical stimulus."
     },
     {
       "segment": "3",
@@ -243,23 +257,23 @@
   "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
-      "profile_metadata": "assets/preloads/tonelli_2019_echolocation/01_profile/profile_metadata.json",
-      "profile_parameters_manifest": "assets/preloads/tonelli_2019_echolocation/01_profile/profile_parameters_manifest.json"
+      "profile_metadata": "packages/pps-resources/assets/preloads/tonelli_2019_echolocation/01_profile/profile_metadata.json",
+      "profile_parameters_manifest": "packages/pps-resources/assets/preloads/tonelli_2019_echolocation/01_profile/profile_parameters_manifest.json"
     },
     "02_looming_stimuli": {
-      "stimulus_sources": "assets/preloads/tonelli_2019_echolocation/02_looming_stimuli/stimulus_sources.json",
-      "trajectory_inventory": "assets/preloads/tonelli_2019_echolocation/02_looming_stimuli/trajectory_inventory.json",
+      "stimulus_sources": "packages/pps-resources/assets/preloads/tonelli_2019_echolocation/02_looming_stimuli/stimulus_sources.json",
+      "trajectory_inventory": "packages/pps-resources/assets/preloads/tonelli_2019_echolocation/02_looming_stimuli/trajectory_inventory.json",
       "asset_count": 1
     },
     "03_baseline_strategy": {
-      "baseline_strategy": "assets/preloads/tonelli_2019_echolocation/03_baseline_strategy/baseline_strategy.json"
+      "baseline_strategy": "packages/pps-resources/assets/preloads/tonelli_2019_echolocation/03_baseline_strategy/baseline_strategy.json"
     },
     "04_trial_designer": {
-      "trial_design": "assets/preloads/tonelli_2019_echolocation/04_trial_designer/trial_design.json",
+      "trial_design": "packages/pps-resources/assets/preloads/tonelli_2019_echolocation/04_trial_designer/trial_design.json",
       "trial_row_count": 1
     },
     "05_run_setup": {
-      "run_defaults": "assets/preloads/tonelli_2019_echolocation/05_run_setup/run_defaults.json",
+      "run_defaults": "packages/pps-resources/assets/preloads/tonelli_2019_echolocation/05_run_setup/run_defaults.json",
       "block_count": 1,
       "participant_count": 44
     },
@@ -274,6 +288,10 @@
     }
   },
   "provenance": [
+    {
+      "field": "baseline offsets and software containment",
+      "source": "Tonelli et al. 2019, Methods pp. 856-858, Peripersonal space task (DOI 10.1007/s00221-019-05469-3): targets 500 ms before sound onset and 500 ms after sound offset; 3000-ms motion and 20-ms vibration; no fixed ITI. The software margins and 100-ms cue are explicitly separate implementation choices with their formula in reference_parameters."
+    },
     {
       "field": "trial counts",
       "source": "Methods report 140 trials: 28 tactile-only, 28 catch, and 12 trials for each audio-tactile combination."

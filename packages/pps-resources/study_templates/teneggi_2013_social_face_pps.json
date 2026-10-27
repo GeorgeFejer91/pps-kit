@@ -1,26 +1,37 @@
 {
   "template_id": "teneggi_2013_social_face_pps",
-  "title": "Teneggi 2013 social modulation face PPS",
+  "title": "Teneggi 2013 Experiment 3 cooperation PPS scaffold",
   "citation": "Teneggi, C., Canzoneri, E., di Pellegrino, G., & Serino, A. (2013). Social modulation of peripersonal space boundaries. Current Biology, 23(5), 406-411.",
-  "source_url": "https://pubmed.ncbi.nlm.nih.gov/23394831/",
+  "source_url": "https://ars.els-cdn.com/content/image/1-s2.0-S096098221300078X-mmc1.pdf",
   "doi": "10.1016/j.cub.2013.01.043",
   "verification_status": "partial",
-  "notes": "Face-centered social PPS task. The preload captures the audio-tactile face schedule, but social partner/mannequin/cooperation manipulations are not GUI fields yet.",
+  "notes": "Experiment 3 only: approaching four-second sound with 500 ms silence before and after, and seven reported sound-relative SOAs. The one-per-SOA preview is a software scaffold: Experiment 3 repetitions, integer catches and block allocation are not separately reported in the reviewed supplement. No tactile-only baseline class is reported for this experiment. The premade Gaussian burst train and binaural path are substitutions for the original intensity-modulated pink sound; the shared 100-ms audio cue substitutes for the 100-microsecond electrical stimulus. Pre/post cooperation, physical stimulation and voice-key capture need separate implementation. This is not a replication-ready preset.",
   "reference_parameters": {
-    "profile_type": "face_audio_tactile_social_context",
+    "profile_type": "face_audio_tactile_social_context_exp3",
+    "experiment_identity": "Teneggi et al. (2013), Experiment 3",
+    "source_pointer": "Supplemental Experimental Procedures, PDF pp. 7-9 of 11; Experiment 3 paragraph",
+    "reported_participants": 20,
+    "sound_duration_ms": 4000,
+    "pre_sound_silence_ms": 500,
+    "post_sound_silence_ms": 500,
+    "reported_tactile_duration_ms": 0.1,
+    "software_tactile_cue_duration_ms": 100,
+    "software_trial_count_basis": "Preview choice only: one presentation per SOA, no catches, one block. Experiment 3 repetition, integer catch and block counts are not separately reported; the eight repetitions and 80+24 trials described for Experiments 1/2 must not be inherited.",
     "implemented_controls": [
       "face tactile site",
-      "approaching/receding sound labels",
-      "five distance samples"
+      "approaching sound only",
+      "seven reported SOAs",
+      "reported 500-ms pre/post sound silence"
     ],
     "implementation_gaps": [
-      "other-person/mannequin context",
-      "economic-game manipulation",
-      "exact distance/timing table from supplement"
+      "Experiment 3 exact repetition, integer catch and block counts are unreported; preview counts are software defaults",
+      "exact original pink-noise intensity envelope and speaker transfer; premade Gaussian burst train is a source substitution",
+      "100-microsecond electrical pulse and voice-key response capture require external apparatus",
+      "pre/post cooperative economic-game context with the same fair confederate is not implemented"
     ]
   },
   "design": {
-    "name": "Teneggi 2013 social face PPS",
+    "name": "Teneggi 2013 Experiment 3 timing scaffold",
     "sofa_file": "",
     "noises": [
       {
@@ -55,36 +66,28 @@
       "use_inverse_square": true
     },
     "protocol": {
-      "repetitions_per_condition": 12,
+      "repetitions_per_condition": 1,
       "soa_values_ms": [
-        0,
-        1000,
-        1955,
-        3000,
-        4000
+        250,
+        750,
+        1300,
+        1800,
+        2500,
+        3200,
+        3700
       ],
-      "spatial_values_cm": [
-        93,
-        71,
-        50,
-        27,
-        5
-      ],
-      "pair_spatial_values_with_soas": true,
+      "spatial_values_cm": [],
+      "pair_spatial_values_with_soas": false,
       "auditory_motion_directions": [
-        "looming",
-        "receding"
+        "looming"
       ],
       "tactile_sites": [
         "face"
       ],
-      "catch_trial_percentage": 10.0,
-      "catch_trials_exact": null,
-      "include_baseline_trials": true,
-      "baseline_soa_values_ms": [
-        0,
-        4000
-      ],
+      "catch_trial_percentage": 0,
+      "catch_trials_exact": 0,
+      "include_baseline_trials": false,
+      "baseline_soa_values_ms": [],
       "respiratory_phases": [
         "Any"
       ],
@@ -95,34 +98,60 @@
       "trial_strips": [
         {
           "strip_id": "teneggi-social-face-row",
-          "label": "Social face PPS moving-sound trial",
+          "label": "Experiment 3 approaching sound timing scaffold",
           "audio_tactile_percentage": 100.0,
           "catch_percentage": 0.0,
           "baseline_percentage": 0.0,
           "elements": [
             {
+              "element_id": "teneggi-exp3-pre-sound-silence",
+              "kind": "jitter",
+              "label": "Pre-sound silence",
+              "jitter_values_ms": [
+                500
+              ],
+              "randomized": false
+            },
+            {
               "element_id": "teneggi-face-moving-sound",
               "kind": "looming_stimulus",
               "label": "Face-centered moving sound",
-              "source_label": "",
-              "source_labels": [],
+              "source_label": "Face-centered moving sound",
+              "source_labels": [
+                "Face-centered moving sound"
+              ],
               "randomized": true
+            },
+            {
+              "element_id": "teneggi-exp3-post-sound-silence",
+              "kind": "jitter",
+              "label": "Post-sound silence",
+              "jitter_values_ms": [
+                500
+              ],
+              "randomized": false
             }
           ]
         }
       ],
-      "participants": 1,
-      "random_seed": 20130304
+      "participants": 20,
+      "random_seed": 20130304,
+      "trial_pool_repetition_defaults": {
+        "default": 1,
+        "audio_tactile": 1
+      },
+      "include_catch_trials": false,
+      "baseline_strategy": "none"
     }
   },
   "provenance": [
     {
-      "field": "core task",
-      "source": "PubMed abstract reports tactile detection on the face with task-irrelevant approaching/receding sounds."
+      "field": "experiment-specific timing and counts",
+      "source": "Teneggi 2013 Supplemental Experimental Procedures, PDF pp. 7-9 of 11, https://ars.els-cdn.com/content/image/1-s2.0-S096098221300078X-mmc1.pdf. Experiment 3: N=20, IN only, 4 s sound, 500 ms pre/post silence, seven SOAs 250/750/1300/1800/2500/3200/3700 ms; 100-microsecond electrical pulses. The preceding 8 x 5 x 2 = 80 target +24 catch count applies to Experiments 1/2, not Experiment 3."
     },
     {
-      "field": "social manipulation gap",
-      "source": "The GUI currently has no social-context or economic-game factor fields, so this is an audio-tactile scaffold only."
+      "field": "software substitutions",
+      "source": "One-per-SOA preview counts, binaural premade Gaussian burst-train asset, and 100-ms audio-channel tactile cue are explicit toolkit substitutions. Social intervention and original apparatus are not recreated."
     }
   ]
 }

@@ -6,7 +6,7 @@
   "doi": "10.1007/s00221-013-3532-2",
   "source_url": "https://cris.unibo.it/handle/11585/152096",
   "verification_status": "partial",
-  "notes": "Tool-use PPS plasticity profile. The publication reports an audio-tactile interaction task before and after use of a 1 m tool. This preload recreates the runnable PPS assessment task using the paper-reported method plus the delegated Canzoneri et al. (2012) protocol lineage: 3000 ms IN/OUT pink-noise sounds, T1-T5 tactile delays, T0/T6 tactile-only baselines, 76 auditory-only catches, and two paper blocks. The 20-minute physical tool-use and pointing-control interventions are retained as context rather than automated runner phases.",
+  "notes": "Tool-use PPS plasticity profile. The publication reports an audio-tactile interaction task before and after use of a 1 m tool. This preload recreates the runnable PPS assessment task using the paper-reported method plus the delegated Canzoneri et al. (2012) protocol lineage: 3000 ms IN/OUT pink-noise sounds, T1-T5 tactile delays, T0/T6 tactile-only baselines, 76 auditory-only catches, and two paper blocks. The 20-minute physical tool-use and pointing-control interventions are retained as context rather than automated runner phases. The executable sequence now includes the reported 1000-ms silence before and after each 3000-ms sound; relative SOAs are unchanged.",
   "reference_parameters": {
     "profile_type": "audio_tactile_tool_use_plasticity",
     "publication_status": "published",
@@ -63,6 +63,10 @@
     {
       "field": "expected outcome",
       "source": "2013 Results/Figure 3 report a post-tool-use shift of the fitted PPS central point toward far space; Experiment 3 pointing control reports no comparable shift."
+    },
+    {
+      "field": "trial silence",
+      "source": "Canzoneri et al. 2013, Experimental Brain Research, author-uploaded final-layout article pp. 27-28 (DOI 10.1007/s00221-013-3532-2): 3000-ms sound preceded and followed by 1000-ms silence. PPS-specific pulse duration and additional ITI are not specified here."
     }
   ]
 }

@@ -29,6 +29,17 @@
       "metadata": {},
       "elements": [
         {
+          "element_id": "matsuda_2021_four_directions-pre-sound",
+          "kind": "jitter",
+          "label": "Derived pre-sound margin",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            700
+          ],
+          "randomized": false
+        },
+        {
           "element_id": "matsuda-looming-source",
           "kind": "looming_stimulus",
           "label": "Pink moving sound",
@@ -39,6 +50,17 @@
           ],
           "jitter_values_ms": [],
           "randomized": true
+        },
+        {
+          "element_id": "matsuda_2021_four_directions-post-sound",
+          "kind": "jitter",
+          "label": "Derived post-sound margin",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            800
+          ],
+          "randomized": false
         }
       ]
     }

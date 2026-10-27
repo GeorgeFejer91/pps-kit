@@ -14,6 +14,7 @@ from peripersonal_space_toolkit.profile_recreation import (
     STATUS_REPORTED,
     STATUS_UNSUPPORTED,
     _classify_gap,
+    build_profile_parameters_manifest,
 )
 from peripersonal_space_toolkit.templates import DEFAULT_STUDY_TEMPLATE_ID, load_templates
 
@@ -21,6 +22,25 @@ from peripersonal_space_toolkit.templates import DEFAULT_STUDY_TEMPLATE_ID, load
 ROOT = Path(__file__).resolve().parents[3]
 VALIDATION_SCRIPT_DIR = ROOT / "For-AI/engineering/validation" / "scripts"
 STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID = "study5_dynaspace_lateral_45_pps"
+
+
+def test_tonelli_derived_padding_and_cue_substitution_are_not_reported_parameters():
+    resources = ROOT / "packages" / "pps-resources"
+    template = next(t for t in load_templates(resources / "study_templates") if t.template_id == "tonelli_2019_echolocation")
+    profile = resources / "assets" / "preloads" / template.template_id
+    sources = json.loads((profile / "02_looming_stimuli" / "stimulus_sources.json").read_text(encoding="utf-8"))["assets"]
+    manifest = build_profile_parameters_manifest(template, source_assets=sources, profile_dir=profile)
+    fields = {field["parameter"]: field for field in manifest["field_inventory"]}
+    for name in ("jitter_values_ms", "iti_jitter_policy", "soa_values_ms"):
+        assert fields[name]["status"] == STATUS_INFERRED
+        assert "Derived" in fields[name]["note"]
+    assert fields["jitter_values_ms"]["value"] == [500, 600]
+    assert fields["tactile_cue_substitution"]["status"] == STATUS_DEFAULTED
+    assert fields["tactile_cue_substitution"]["value"] == {"reported_ms": 20, "software_ms": 100}
+    template.design.protocol.soa_values_ms = []
+    empty = build_profile_parameters_manifest(template, source_assets=sources, profile_dir=profile)
+    soa = next(field for field in empty["field_inventory"] if field["parameter"] == "soa_values_ms")
+    assert soa["status"] == STATUS_MISSING
 
 
 def _load_validation_script(name: str):
@@ -31,6 +51,23 @@ def _load_validation_script(name: str):
     sys.modules[path.stem] = module
     spec.loader.exec_module(module)
     return module
+
+
+def test_teneggi_exp3_preview_does_not_claim_inherited_counts_or_baselines():
+    resources = ROOT / "packages" / "pps-resources"
+    template = next(t for t in load_templates(resources / "study_templates") if t.template_id == "teneggi_2013_social_face_pps")
+    profile = resources / "assets" / "preloads" / template.template_id
+    sources = json.loads((profile / "02_looming_stimuli" / "stimulus_sources.json").read_text(encoding="utf-8"))["assets"]
+    manifest = build_profile_parameters_manifest(template, source_assets=sources, profile_dir=profile)
+    fields = {field["parameter"]: field for field in manifest["field_inventory"]}
+    for name in ("catch_mode", "trial_pool_repetitions", "block_count"):
+        assert fields[name]["status"] == STATUS_DEFAULTED
+        assert "Experiment 3" in fields[name]["note"]
+    protocol = template.design.protocol
+    assert protocol.soa_values_ms == [250, 750, 1300, 1800, 2500, 3200, 3700]
+    assert protocol.auditory_motion_directions == ["looming"]
+    assert not protocol.include_baseline_trials
+    assert not manifest["recreation_status"]["profile_checks_passed"]
 
 
 def test_profile_recreation_manifests_cover_all_current_templates():
