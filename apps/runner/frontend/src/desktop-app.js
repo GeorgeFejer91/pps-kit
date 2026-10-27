@@ -43,8 +43,8 @@ const nativeOutputSetup = bindNativeOutputSetup({ elements, api,
 const sessionProgress = bindSessionProgress({ elements, api,
   onError: error => showToast(error.message, { error: true }),
   onAdvance: next => {
+    if (!renderSnapshot(next, { adoptContext: true })) return;
     renderPreparedPlan(null);
-    renderSnapshot(next);
     showToast("Next part loaded. Inspect its schedule, then prepare its first audio occurrence.");
   },
 });
@@ -55,6 +55,7 @@ let snapshot = null;
 let preparedPlan = null;
 let preparedExecution = null;
 let preparedAudio = null;
+let packageSelectionInFlight = false;
 let remoteStatus = null;
 let invitationUrl = "";
 let toastTimer = null;
@@ -282,10 +283,14 @@ function updateInboundPolicyUi() {
   }
 }
 
-function renderSnapshot(next) {
-  if (!next || typeof next !== "object") return;
-  if (snapshot && (next.epoch < snapshot.epoch
-    || (next.epoch === snapshot.epoch && next.revision < snapshot.revision))) return;
+function renderSnapshot(next, { adoptContext = false } = {}) {
+  if (!next || typeof next !== "object") return false;
+  if (snapshot) {
+    const sameContext = next.epoch === snapshot.epoch && next.identity?.session_id === snapshot.identity?.session_id;
+    // Epochs are opaque random identities, not increasing generations. Only a
+    // successful local selection/advance may replace the displayed authority.
+    if ((!sameContext && !adoptContext) || (sameContext && next.revision < snapshot.revision)) return false;
+  }
   const previous = snapshot;
   snapshot = next;
   participantResponse.refresh(next);
@@ -347,8 +352,8 @@ function renderSnapshot(next) {
     || !next.package_verified
     || !preparedExecution;
   if (preparedAudio && invalidatesPreparedAudio) renderPreparedAudio(null);
-  elements["select-session-manifest"].disabled = api.kind !== "tauri-native" || active;
-  elements["select-session-group"].disabled = api.kind !== "tauri-native" || active;
+  elements["select-session-manifest"].disabled = api.kind !== "tauri-native" || active || packageSelectionInFlight || sessionProgress.isBusy();
+  elements["select-session-group"].disabled = elements["select-session-manifest"].disabled;
   elements["select-session-manifest"].title = api.kind === "tauri-native"
     ? "Select and verify a pps-run-session.v1 manifest locally"
     : "Prepared-session selection is available in the native Tauri app";
@@ -383,6 +388,7 @@ function renderSnapshot(next) {
   if (inboundPrivateTarget?.nativeClaimReceipt && !next.safety?.local_armed) {
     void stopInboundNetworking("local_target_disarmed");
   }
+  return true;
 }
 
 function readRemoteUrl(status) {
@@ -1028,22 +1034,28 @@ function bindLocalActions() {
 
   for (const [id, select] of [["select-session-manifest", () => api.selectPreparedSession()],
     ["select-session-group", () => api.selectPreparedGroup()]]) elements[id].addEventListener("click", async () => {
+    if (packageSelectionInFlight || sessionProgress.isBusy()) return;
+    packageSelectionInFlight = true;
+    sessionProgress.setSelecting(true);
     const button = elements[id];
     button.disabled = true;
+    if (snapshot) renderSnapshot(snapshot);
     try {
       const selection = await select();
-      renderSnapshot(normalizedSnapshot(selection));
+      renderSnapshot(normalizedSnapshot(selection), { adoptContext: !selection?.cancelled });
       if (selection?.cancelled) {
         showToast("Prepared-session selection cancelled.");
         return;
       }
       renderPreparedPlan(selection?.summary);
-      sessionProgress.setAssessment(selection?.resultsAssessment ?? null);
+      sessionProgress.setAssessment(selection?.resultsAssessment ?? null, selection?.groupResultsAssessment ?? null);
       await refreshRemote();
       showToast("Prepared session verified and adopted by the native Rust authority.");
     } catch (error) {
       showToast(error.message, { error: true });
     } finally {
+      packageSelectionInFlight = false;
+      sessionProgress.setSelecting(false);
       if (snapshot) renderSnapshot(snapshot);
     }
   });

@@ -249,8 +249,8 @@ input[type="checkbox"] {
 .token-list span { border-radius: 6px; background: var(--surface-soft); color: var(--muted); padding: 0.25rem 0.4rem; font-family: ui-monospace, monospace; font-size: 0.62rem; }
 .package-block-list { display: grid; gap: 0.4rem; max-height: 12rem; margin: 0; padding: 0; overflow: auto; list-style: none; }
 .package-block-list:empty { display: none; }
-#native-results-list { max-height: none; overflow: visible; margin-block: 0.75rem; }
-#native-results-list li { display: block; overflow-wrap: anywhere; font-size: 0.8rem; }
+#native-results-list, #native-group-results-list { max-height: none; overflow: visible; margin-block: 0.75rem; }
+#native-results-list li, #native-group-results-list li { display: block; overflow-wrap: anywhere; font-size: 0.8rem; }
 #native-results-assessment summary { min-height: 44px; padding-block: 0.5rem; cursor: pointer; }
 .desktop-page [hidden] { display: none !important; }
 .package-block-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-soft); padding: 0.55rem 0.65rem; }

@@ -102,6 +102,16 @@
                   <ol id="package-block-list" class="package-block-list" aria-label="Verified package blocks"></ol>
                   <details id="native-results-assessment" hidden>
                     <summary>Existing result files</summary>
+                    <div id="native-group-results" hidden>
+                      <p id="native-group-results-summary" class="safety-copy"></p>
+                      <ol id="native-group-results-list" class="package-block-list" aria-label="Prior group receipts"></ol>
+                      <div class="inline-actions">
+                        <button id="native-group-results-previous" class="button" type="button" disabled>Previous groups</button>
+                        <span id="native-group-results-page" class="subtle" role="status"></span>
+                        <button id="native-group-results-next" class="button" type="button" disabled>Next groups</button>
+                      </div>
+                    </div>
+                    <label id="native-results-part-label" hidden>Result files for part<select id="native-results-part"></select></label>
                     <p id="native-results-summary" class="safety-copy"></p>
                     <ol id="native-results-list" class="package-block-list" aria-label="Existing result attempts"></ol>
                     <div class="inline-actions">

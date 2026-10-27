@@ -73,6 +73,11 @@ summary and requires a fresh schedule inspection. Whole-experiment completion
 depends on the native group receipt, not completed-part counts alone. Selection
 also shows a bounded, paged read-only assessment of existing result files;
 selection never infers resume or timing qualification from those files. The
+group view separates prior group receipts from each part's assessed files and
+reports scan-budget exhaustion as not assessed. Native epochs are opaque:
+only acknowledged local selection/advance adopts a different session, even
+when its epoch is smaller. Late replies cannot clear a replacement selection.
+The
 compiled-browser sequence regression uses a deterministic native boundary;
 native execution and durable receipts remain covered by the Rust owner tests.
 

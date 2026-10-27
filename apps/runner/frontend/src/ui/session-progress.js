@@ -22,11 +22,23 @@ export function validResultsAssessment(value) {
       && (attempt.commonEventSequence === null || count(attempt.commonEventSequence)));
 }
 
+export function validGroupResultsAssessment(value) {
+  return value?.schema === "pps.native-group-result-assessment.v1" && value.timingQualification === "unqualified"
+    && typeof value.completeScan === "boolean" && typeof value.reason === "string"
+    && Array.isArray(value.parts) && value.parts.length <= 2
+    && new Set(value.parts.map(part => part.partNumber)).size === value.parts.length
+    && value.parts.every(part => [1, 2].includes(part.partNumber) && validResultsAssessment(part.assessment))
+    && Array.isArray(value.groups) && value.groups.length <= 256
+    && value.groups.every(group => /^[A-Za-z0-9_-]{1,128}$/u.test(group.groupAttemptId)
+      && ["complete", "invalid", "interrupted", "not_assessed"].includes(group.status) && typeof group.reason === "string"
+      && [group.partCount, group.scoredTrialCount, group.datasetRowCount].every(value => value === null || count(value)));
+}
+
 // The native owner chooses parts and authorizes advancement. This module displays
 // its bounded status and selection-time file assessment without reconstructing either.
 export function bindSessionProgress({ elements, api, onAdvance, onError }) {
-  let snapshot = null, status = null, pending = null, busy = false, context = 0;
-  let assessment = null, page = 0, requestedKey = "";
+  let snapshot = null, status = null, pending = null, busy = false, selecting = false, context = 0;
+  let assessment = null, groupAssessment = null, page = 0, groupPage = 0, requestedKey = "";
   const native = api.kind === "tauri-native";
   const next = elements["advance-session-part"];
   const summary = elements["session-group-status"];
@@ -34,7 +46,7 @@ export function bindSessionProgress({ elements, api, onAdvance, onError }) {
 
   function renderGroup() {
     next.hidden = !status?.partCount;
-    next.disabled = !native || busy || !current() || snapshot?.run?.phase !== "completed"
+    next.disabled = !native || busy || selecting || !current() || snapshot?.run?.phase !== "completed"
       || status.experimentComplete || status.completedParts >= status.partCount || status.completedParts !== status.currentPart;
     next.textContent = status?.currentPart && status.currentPart < status.partCount ? `Load part ${status.currentPart + 1}` : "Load next part";
     summary.textContent = !native ? "Session groups are available in the native Runner."
@@ -48,7 +60,7 @@ export function bindSessionProgress({ elements, api, onAdvance, onError }) {
 
   function renderAssessment() {
     const panel = elements["native-results-assessment"];
-    panel.hidden = !assessment;
+    panel.hidden = !assessment && !groupAssessment;
     elements["native-results-summary"].textContent = assessment
       ? `${assessment.attempts.length} existing attempt${assessment.attempts.length === 1 ? "" : "s"} · ${assessment.completeScan ? "scan complete" : "partial scan"} (${assessment.reason.replaceAll("_", " ")}). File contents only; timing remains unqualified. Selection starts a new attempt; these files are not resumed.` : "";
     const attempts = assessment?.attempts ?? [];
@@ -60,6 +72,19 @@ export function bindSessionProgress({ elements, api, onAdvance, onError }) {
     elements["native-results-page"].textContent = attempts.length ? `Page ${page + 1} of ${Math.ceil(attempts.length / PAGE_SIZE)}` : "No existing result attempts found.";
     elements["native-results-previous"].disabled = page === 0;
     elements["native-results-next"].disabled = (page + 1) * PAGE_SIZE >= attempts.length;
+    elements["native-group-results"].hidden = !groupAssessment;
+    elements["native-results-part-label"].hidden = !groupAssessment?.parts.length;
+    const groups = groupAssessment?.groups ?? [];
+    elements["native-group-results-summary"].textContent = groupAssessment
+      ? `${groups.length} prior group receipt${groups.length === 1 ? "" : "s"} · ${groupAssessment.completeScan ? "scan complete" : "partial scan"} (${groupAssessment.reason.replaceAll("_", " ")}). These records describe earlier attempts, not the current run. Timing remains unqualified.` : "";
+    elements["native-group-results-list"].replaceChildren(...groups.slice(groupPage * PAGE_SIZE, (groupPage + 1) * PAGE_SIZE).map(group => {
+      const item = document.createElement("li");
+      item.textContent = `${group.groupAttemptId}: ${group.status.replaceAll("_", " ")} · ${group.partCount ?? "unknown"} parts, ${group.scoredTrialCount ?? "unknown"} scored trials, ${group.datasetRowCount ?? "unknown"} dataset rows · ${group.reason.replaceAll("_", " ")}`;
+      return item;
+    }));
+    elements["native-group-results-page"].textContent = groups.length ? `Page ${groupPage + 1} of ${Math.ceil(groups.length / PAGE_SIZE)}` : "No prior group receipts found.";
+    elements["native-group-results-previous"].disabled = groupPage === 0;
+    elements["native-group-results-next"].disabled = (groupPage + 1) * PAGE_SIZE >= groups.length;
   }
 
   async function refresh() {
@@ -86,10 +111,12 @@ export function bindSessionProgress({ elements, api, onAdvance, onError }) {
   next.addEventListener("click", async () => {
     if (next.disabled) return;
     busy = true;
+    const token = context;
     const expectedRevision = status.revision;
     renderGroup();
     try {
       const advanced = await api.advancePreparedGroupPart({ expectedRevision });
+      if (token !== context) return;
       status = null;
       setAssessment(null);
       onAdvance(advanced);
@@ -99,16 +126,33 @@ export function bindSessionProgress({ elements, api, onAdvance, onError }) {
   for (const [id, delta] of [["native-results-previous", -1], ["native-results-next", 1]]) {
     elements[id].addEventListener("click", () => { if (!elements[id].disabled) { page += delta; renderAssessment(); } });
   }
-  function setAssessment(value) {
-    if (value && !validResultsAssessment(value)) throw new Error("The native Runner returned an invalid result-file assessment.");
-    assessment = value;
+  for (const [id, delta] of [["native-group-results-previous", -1], ["native-group-results-next", 1]]) {
+    elements[id].addEventListener("click", () => { if (!elements[id].disabled) { groupPage += delta; renderAssessment(); } });
+  }
+  elements["native-results-part"].addEventListener("change", () => {
+    assessment = groupAssessment?.parts.find(part => String(part.partNumber) === elements["native-results-part"].value)?.assessment ?? null;
     page = 0;
-    elements["native-results-assessment"].open = Boolean(value?.attempts.length);
+    renderAssessment();
+  });
+  function setAssessment(value, groupValue = null) {
+    if (value && !validResultsAssessment(value)) throw new Error("The native Runner returned an invalid result-file assessment.");
+    if (groupValue && !validGroupResultsAssessment(groupValue)) throw new Error("The native Runner returned an invalid group-result assessment.");
+    groupAssessment = groupValue;
+    assessment = groupValue?.parts[0]?.assessment ?? value;
+    page = 0;
+    groupPage = 0;
+    elements["native-results-part"].replaceChildren(...(groupValue?.parts ?? []).map(part => {
+      const option = document.createElement("option");
+      option.value = String(part.partNumber);
+      option.textContent = `Part ${part.partNumber}`;
+      return option;
+    }));
+    elements["native-results-assessment"].open = Boolean(assessment?.attempts.length || groupValue?.groups.length);
     renderAssessment();
   }
   renderGroup();
   renderAssessment();
-  return { setAssessment, update(nextSnapshot) {
+  return { setAssessment, isBusy: () => busy, setSelecting(value) { selecting = value; renderGroup(); }, update(nextSnapshot) {
     if (snapshot?.epoch !== nextSnapshot?.epoch || snapshot?.identity?.session_id !== nextSnapshot?.identity?.session_id) {
       context++; status = null; requestedKey = ""; setAssessment(null);
     }

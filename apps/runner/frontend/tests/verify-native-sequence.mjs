@@ -27,7 +27,7 @@ try {
   await page.addInitScript(() => {
     let listener, callbackId = 0, stage = 0, part = 1, completed = 0, groupSelected = false, receipt = false;
     const callbacks = new Map();
-    const native = { epoch: 1, revision: 1, run: { phase: "prepared", complete: false },
+    const native = { epoch: 900, revision: 1, run: { phase: "prepared", complete: false },
       active_block: { active: false, display_block_index: 0 }, identity: { session_id: "fixture-part-1" },
       part: { selected_part: 1, current_package_part: 1 }, safety: { local_armed: false }, allowed_actions: [], package_verified: true };
     const snapshot = () => structuredClone(native);
@@ -44,6 +44,7 @@ try {
       finishWait() { stage++; native.run.phase = "prepared"; native.instruction_gate = null; emit(); },
       completePart() { completed = part; native.run = { phase: "completed", complete: false }; native.instruction_gate = null; emit(); },
       publishReceipt() { receipt = true; native.run.complete = true; emit(); },
+      retiredResponse() { callbacks.get(listener)?.({ payload: { ...snapshot(), epoch: 900, revision: 999, identity: { session_id: "fixture-part-1" } } }); },
     };
     window.__TAURI_INTERNALS__ = { transformCallback(callback) { const id = ++callbackId; callbacks.set(id, callback); return id; },
       async invoke(command, args) {
@@ -59,10 +60,13 @@ try {
           publicationStatus: receipt ? "complete" : completed === 2 ? "publishing" : "not_started" };
         if (command === "select_prepared_group") {
           groupSelected = true; emit();
-          return { snapshot: snapshot(), summary: { sessionId: native.identity.session_id, blocks: [{ index: 1, label: "Part one source" }] },
-            resultsAssessment: { schema: "pps.native-result-assessment.v1", inspectionScope: "read-only-file-prefix", timingQualification: "unqualified",
+          const assessment = { schema: "pps.native-result-assessment.v1", inspectionScope: "read-only-file-prefix", timingQualification: "unqualified",
               completeScan: true, reason: "assessed", attempts: [{ attemptId: "a".repeat(32), status: "interrupted", reason: "readable_prefix",
-                commonEventSequence: 3, commonEventRecords: 4, commonDatasetRows: 1 }] } };
+                commonEventSequence: 3, commonEventRecords: 4, commonDatasetRows: 1 }] };
+          return { snapshot: snapshot(), summary: { sessionId: native.identity.session_id, blocks: [{ index: 1, label: "Part one source" }] },
+            resultsAssessment: assessment, groupResultsAssessment: { schema: "pps.native-group-result-assessment.v1", timingQualification: "unqualified",
+              completeScan: false, reason: "group_scan_limit", parts: [{ partNumber: 1, assessment }, { partNumber: 2, assessment: { ...assessment, attempts: [] } }],
+              groups: [{ groupAttemptId: "prior-group", status: "not_assessed", reason: "group_scan_limit", partCount: null, scoredTrialCount: null, datasetRowCount: null }] } };
         }
         if (command === "inspect_prepared_execution") return { eventCount: 10, trialRowCount: 2, blockCount: 1, encodedBytes: 500,
           blocks: [{}], inspectionScope: "schedule-only", timingQualification: "unqualified", executable: false };
@@ -81,7 +85,7 @@ try {
         }
         if (command === "advance_prepared_group_part") {
           if (args.expectedRevision !== native.revision || completed !== 1) throw Error("Stale group advance");
-          part = 2; native.identity.session_id = "fixture-part-2"; native.part = { selected_part: 2, current_package_part: 2 };
+          part = 2; native.epoch = 2; native.identity.session_id = "fixture-part-2"; native.part = { selected_part: 2, current_package_part: 2 };
           native.run = { phase: "prepared", complete: false }; emit(); return snapshot();
         }
         throw Error(`Unexpected fixture command: ${command}`);
@@ -91,6 +95,13 @@ try {
   await page.locator("#select-session-group").click();
   await page.locator("#native-results-summary").filter({ hasText: "not resumed" }).waitFor();
   assert.match(await page.locator("#native-results-list").innerText(), /interrupted/);
+  assert.match(await page.locator("#native-group-results-list").innerText(), /not assessed/);
+  assert.doesNotMatch(await page.locator("#session-group-status").innerText(), /Experiment complete/);
+  await page.locator("#native-results-part").selectOption("2");
+  assert.equal(await page.locator("#native-results-list li").count(), 0);
+  await page.locator("#native-results-part").selectOption("1");
+  assert.equal(await page.locator("#native-results-list li").count(), 1);
+  await page.locator("#native-group-results").screenshot({ path: resolve(output, "runner-group-recovery.png") });
   assert.equal(await page.locator("#advance-session-part").isDisabled(), true);
   await page.locator("#inspect-prepared-execution").click();
   await page.locator("#prepare-first-audio-block").click();
@@ -116,6 +127,8 @@ try {
   await page.locator("#session-group-status").filter({ hasText: "Part 1 of 2 · 1 complete" }).waitFor();
   await page.getByRole("button", { name: "Load part 2", exact: true }).click();
   await page.locator("#session-id").filter({ hasText: "fixture-part-2" }).waitFor();
+  await page.evaluate(() => window.sequenceFixture.retiredResponse());
+  assert.equal(await page.locator("#session-id").innerText(), "fixture-part-2");
   assert.equal(await page.locator("#package-block-list li").count(), 0, "part one detail retired");
   assert.equal(await page.locator("#native-results-assessment").isVisible(), false);
   assert.equal(await page.locator("#inspect-prepared-execution").isEnabled(), true);
