@@ -34,7 +34,7 @@ live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
 Current checkpoint (2026-10-27): 94 frozen publications, 128 study/context rows,
-45 registered publication inventories and 49 publication inventories still
+47 registered publication inventories and 47 publication inventories still
 unassessed. The earlier counts below describe individual historical checkpoints.
 Tonelli (2019) now separates neck PPS assessment from echolocation training,
 time-bisection training and distance validation; manual trial starts, endpoint
@@ -95,6 +95,12 @@ window, keeping the hand-count crossing and silent/interval anchors unresolved.
 Fresh Methods replaces earlier unsupported complete labels for a 220-row total,
 constant-speed trajectory and fully anchored ITI; prior values remain in Git history.
 Social/native synchronization and physical stimulus equivalence remain unassessed.
+
+Hobeika methods (2020) is one two-session experiment. Its rendered Table 2
+corrects the earlier 300-ms-shifted sound-onset delays; analysis inclusion and
+random timing are no longer overstated as an online window or uniform jitter.
+The separate short social report has three explicit experiment rows but possible
+overlap with the longer 2019 report; omitted counts/anchors are not borrowed.
 
 The first bounded source batch (2026-10-27) adds four experiment-scoped timing/count
 reviews for Canzoneri et al. (2012), DOI `10.1371/journal.pone.0044306`, from the
