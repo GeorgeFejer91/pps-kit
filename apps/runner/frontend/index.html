@@ -25,13 +25,13 @@
       </header>
 
       <nav class="tabbar" aria-label="Runner sections">
-        <button class="tab-button is-active" type="button" data-tab="control" aria-selected="true">Experiment Control</button>
-        <button class="tab-button" type="button" data-tab="logging" aria-selected="false">Data Logging</button>
-        <button class="tab-button" type="button" data-tab="remote" aria-selected="false">Phone Remote</button>
+        <button class="tab-button is-active" type="button" data-tab="control" aria-current="page" aria-controls="runner-control">Experiment Control</button>
+        <button class="tab-button" type="button" data-tab="logging" aria-controls="runner-logging">Data Logging</button>
+        <button class="tab-button" type="button" data-tab="remote" aria-controls="runner-remote">Phone Remote</button>
       </nav>
 
       <main>
-        <section class="tab-panel is-active" data-panel="control">
+        <section class="tab-panel is-active" id="runner-control" data-panel="control">
           <div class="workspace-grid">
             <div class="workspace-main stack">
               <section class="hero-panel panel">
@@ -173,7 +173,7 @@
           </div>
         </section>
 
-        <section class="tab-panel" data-panel="logging">
+        <section class="tab-panel" id="runner-logging" data-panel="logging">
           <div class="workspace-grid balanced-grid">
             <section class="panel stack">
               <div class="section-heading"><div><p class="eyebrow">Acquisition</p><h2>Data Logging</h2></div><span class="badge">Target-owned</span></div>
@@ -197,7 +197,7 @@
           </div>
         </section>
 
-        <section class="tab-panel" data-panel="remote">
+        <section class="tab-panel" id="runner-remote" data-panel="remote">
           <div class="workspace-grid balanced-grid">
             <section class="panel stack">
               <div class="section-heading">

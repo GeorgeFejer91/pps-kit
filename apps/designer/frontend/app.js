@@ -5533,10 +5533,23 @@ function updateBaselineDecision() {
   renderBaselineTactileSummary();
 }
 
+function restoreFocusAfterRender(container) {
+  const active = document.activeElement;
+  if (!container.contains(active) || !active.id) return () => {};
+  const { id, selectionStart, selectionEnd } = active;
+  return () => {
+    const control = document.getElementById(id);
+    if (!control || control === active) return;
+    control.focus({ preventScroll: true });
+    if (selectionStart !== null && typeof selectionStart === "number") control.setSelectionRange?.(selectionStart, selectionEnd);
+  };
+}
+
 function renderTrialStrips() {
   const list = $("filmstrip-list");
   if (!list) return;
   const strips = state.design.protocol?.trial_strips || [];
+  const restoreFocus = restoreFocusAfterRender(list);
   list.innerHTML = "";
   if (!strips.length) {
     list.appendChild(renderAddRowControl(-1, true));
@@ -5548,6 +5561,7 @@ function renderTrialStrips() {
     list.appendChild(renderAddRowControl(index, false));
   });
   updateFilmstripCounts();
+  restoreFocus();
 }
 
 function stripMixValues(strip = {}) {
@@ -5584,8 +5598,8 @@ function renderTrialStripRow(strip, index, options = {}) {
     </div>`}
     <div class="filmstrip-row-body">
       <div class="field-row trial-condition-field">
-        <label>Condition label</label>
-        <input data-strip-field="label" value="${escapeAttr(strip.label || `Trial type ${index + 1}`)}">
+        <label for="trial-condition-${index}">Condition label</label>
+        <input id="trial-condition-${index}" data-strip-field="label" value="${escapeAttr(strip.label || `Trial type ${index + 1}`)}">
       </div>
       <div class="filmstrip-row-summary" aria-live="polite">
         <span class="filmstrip-row-expression">${escapeHtml(trialStripExpression(strip))}</span>
@@ -5610,7 +5624,7 @@ function renderTrialStripRow(strip, index, options = {}) {
   `;
   const sequence = row.querySelector(".filmstrip-sequence");
   for (const [elementIndex, element] of elements.entries()) {
-    sequence.appendChild(renderTrialStripElement(element, elementIndex));
+    sequence.appendChild(renderTrialStripElement(element, elementIndex, index));
     sequence.appendChild(renderAddEventControl(index, elementIndex + 1, strip));
   }
   if (!elements.length) {
@@ -5619,7 +5633,7 @@ function renderTrialStripRow(strip, index, options = {}) {
   return row;
 }
 
-function renderTrialStripElement(element, index) {
+function renderTrialStripElement(element, index, rowIndex) {
   const sourceType = element.kind === "fixed_audio" || element.kind === "jitter"
     ? element.kind
     : "looming_stimulus";
@@ -5630,10 +5644,12 @@ function renderTrialStripElement(element, index) {
   if (sourceType === "fixed_audio") {
     card.innerHTML = renderFixedBlock(element);
   } else if (sourceType === "jitter") {
-    card.innerHTML = renderJitterBlock(element);
+    card.innerHTML = renderJitterBlock(element, `trial-${rowIndex}-event-${index}-jitter`);
   } else {
     card.innerHTML = renderAudioPoolBlock(element);
   }
+  const mode = card.querySelector('[data-element-field="is_jitter"]');
+  if (mode) mode.id = `trial-${rowIndex}-event-${index}-mode`;
   return card;
 }
 
@@ -5705,7 +5721,7 @@ function renderAudioPoolBlock(element) {
   `;
 }
 
-function renderJitterBlock(element) {
+function renderJitterBlock(element, controlId) {
   const title = "Jitter / ITI event";
   const values = formatList(element.jitter_values_ms || []);
   return `
@@ -5718,8 +5734,8 @@ function renderJitterBlock(element) {
       Jitter / ITI box
     </label>
     <div class="field-row">
-      <label>Jitter values ms</label>
-      <textarea data-element-field="jitter_values_ms" rows="5" autocomplete="off" placeholder="500&#10;700&#10;1100&#10;2700">${escapeHtml((element.jitter_values_ms || []).join("\n"))}</textarea>
+      <label for="${controlId}">Jitter values ms</label>
+      <textarea id="${controlId}" data-element-field="jitter_values_ms" rows="5" autocomplete="off" placeholder="500&#10;700&#10;1100&#10;2700">${escapeHtml((element.jitter_values_ms || []).join("\n"))}</textarea>
     </div>
     <input data-element-field="label" type="hidden" value="${escapeAttr(element.label || title)}">
     <input data-element-field="randomized" type="hidden" value="true">
@@ -6559,6 +6575,7 @@ function normalizedRunInstructionSlots(profile = {}) {
 function renderRunInstructions(profile = {}) {
   const container = $("run-instruction-slots");
   if (!container) return;
+  const restoreFocus = restoreFocusAfterRender(container);
   const prepared = isProfileFinalized();
   const slots = normalizedRunInstructionSlots(profile);
   const enabledCount = slots.filter((slot) => slot.enabled && slot.path).length;
@@ -6568,6 +6585,8 @@ function renderRunInstructions(profile = {}) {
     summary.className = `status-label ${enabledCount ? "ready" : "optional"}`;
   }
   container.innerHTML = slots.map((slot) => {
+    const slotName = RUN_INSTRUCTION_SLOTS.find((item) => item.slot === slot.slot)?.label || slot.slot;
+    const controlId = `instruction-${slot.slot}`;
     const duration = slot.duration_s ? `${slot.duration_s.toFixed(slot.duration_s >= 10 ? 1 : 2)}s` : "no clip";
     const modeOptions = RUN_INSTRUCTION_CONTINUE_MODES.map((mode) => (
       `<option value="${mode.value}" ${mode.value === slot.continue_mode ? "selected" : ""}>${mode.label}</option>`
@@ -6575,15 +6594,16 @@ function renderRunInstructions(profile = {}) {
     return `
       <article class="run-instruction-slot" data-run-instruction-slot="${escapeHtml(slot.slot)}">
         <label class="inline-toggle">
-          <input type="checkbox" data-instruction-field="enabled" ${slot.enabled ? "checked" : ""} ${prepared ? "disabled" : ""}>
-          <span>${escapeHtml(RUN_INSTRUCTION_SLOTS.find((item) => item.slot === slot.slot)?.label || slot.slot)}</span>
+          <input id="${controlId}-enabled" type="checkbox" data-instruction-field="enabled" ${slot.enabled ? "checked" : ""} ${prepared ? "disabled" : ""}>
+          <span>${escapeHtml(slotName)}</span>
         </label>
-        <input class="instruction-label-input" data-instruction-field="label" type="text" value="${escapeHtml(slot.label)}" ${prepared ? "disabled" : ""}>
-        <button type="button" class="instruction-import-button" data-instruction-import="${escapeHtml(slot.slot)}" ${prepared ? "disabled" : ""}>Load Audio</button>
+        <label class="visually-hidden" for="${controlId}-label">${escapeHtml(slotName)} audio label</label>
+        <input id="${controlId}-label" class="instruction-label-input" data-instruction-field="label" type="text" value="${escapeHtml(slot.label)}" ${prepared ? "disabled" : ""}>
+        <button id="${controlId}-import" type="button" class="instruction-import-button" aria-label="Load audio for ${escapeHtml(slotName)}" data-instruction-import="${escapeHtml(slot.slot)}" ${prepared ? "disabled" : ""}>Load Audio</button>
         <span class="status-label ${slot.path ? "ready" : "optional"}">${escapeHtml(duration)}</span>
-        <select data-instruction-field="continue_mode" ${prepared ? "disabled" : ""}>${modeOptions}</select>
-        <input data-instruction-field="delay_s" type="number" min="0" step="0.1" value="${slot.delay_s}" ${prepared ? "disabled" : ""} title="Delay seconds">
-        <input data-instruction-field="button_label" type="text" value="${escapeHtml(slot.button_label)}" ${prepared ? "disabled" : ""} title="Runner button label">
+        <select id="${controlId}-continue" aria-label="${escapeHtml(slotName)} continue mode" data-instruction-field="continue_mode" ${prepared ? "disabled" : ""}>${modeOptions}</select>
+        <input id="${controlId}-delay" aria-label="${escapeHtml(slotName)} delay seconds" data-instruction-field="delay_s" type="number" min="0" step="0.1" value="${slot.delay_s}" ${prepared ? "disabled" : ""} title="Delay seconds">
+        <input id="${controlId}-button" aria-label="${escapeHtml(slotName)} Runner button label" data-instruction-field="button_label" type="text" value="${escapeHtml(slot.button_label)}" ${prepared ? "disabled" : ""} title="Runner button label">
         <input data-instruction-field="path" type="hidden" value="${escapeHtml(slot.path)}">
         <input data-instruction-field="duration_s" type="hidden" value="${slot.duration_s}">
         <input data-instruction-field="sample_rate" type="hidden" value="${slot.sample_rate}">
@@ -6593,6 +6613,8 @@ function renderRunInstructions(profile = {}) {
       </article>
     `;
   }).join("");
+  upgradeBoundedSelects(container);
+  restoreFocus();
 }
 
 function collectRunInstructionProfile() {
@@ -6993,15 +7015,20 @@ function collectPayload({ includeIngredientDraft = false } = {}) {
     design.protocol.participant_order_policy.preview_count = design.protocol.participants;
     design.protocol.participant_order_policy.seed = design.protocol.random_seed;
   }
+  const runSetup = {
+    experiment_structure: currentExperimentStructure(),
+    seed: design.protocol.random_seed,
+    instruction_profile: collectRunInstructionProfile(),
+  };
+  design.study_profile_reference_parameters = {
+    ...(design.study_profile_reference_parameters || {}),
+    dashboard_run_setup: { ...(design.study_profile_reference_parameters?.dashboard_run_setup || {}), ...runSetup },
+  };
   return {
     participant_id: state.participant_id || (state.custom_workflow?.is_custom ? "" : "P001"),
     design,
     trajectory_controls: trajectoryControls,
-    run_setup: {
-      experiment_structure: currentExperimentStructure(),
-      seed: design.protocol.random_seed,
-      instruction_profile: collectRunInstructionProfile(),
-    }
+    run_setup: runSetup
   };
 }
 
@@ -8097,7 +8124,6 @@ async function downloadBlockRandomization() {
 function scheduleRunSequencePreview() {
   runSequencePreviewRequestId += 1;
   window.clearTimeout(runSequencePreviewTimer);
-  renderRun();
   runSequencePreviewTimer = window.setTimeout(() => {
     previewRunSequence().catch(reportError);
   }, 300);

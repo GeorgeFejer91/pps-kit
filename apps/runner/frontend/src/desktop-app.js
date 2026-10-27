@@ -1023,7 +1023,8 @@ function bindTabs() {
       document.querySelectorAll(".tab-button").forEach((candidate) => {
         const active = candidate === button;
         candidate.classList.toggle("is-active", active);
-        candidate.setAttribute("aria-selected", String(active));
+        if (active) candidate.setAttribute("aria-current", "page");
+        else candidate.removeAttribute("aria-current");
       });
       document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === button.dataset.tab));
     });
