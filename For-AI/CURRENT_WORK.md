@@ -21,37 +21,43 @@ This file is the active checklist and handoff owner; replace state, do not appen
 - **Product source:** existing generation, JSON/compatibility handoff,
   callback-confirmed controls, response scoring and journal safeguards remain.
   Single- and two-block native activation/progression pass real CPAL callback
-  tests using silent synthetic PCM. Native profile assembly remains incomplete. B1–B3/C1 fixes and the sanitized study projection are integrated
+  tests using silent synthetic PCM. Native portable-profile extraction now verifies
+  and rebinds embedded media offline; immutable session assembly remains incomplete.
+  B1–B3/C1 fixes and the sanitized study projection are integrated
   on the review branch; mapper, catalogue and release work continue.
 - **Evidence:** the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md)
   identifies exact source and checks. Source, CI packages, installed behavior,
   physical timing, participant results and replication remain distinct gates.
   Neither installed application nor public downloads changed in this task.
-- **Next action:** integrate the reviewed Rust generation kernel and complete profile
-  assembly, next-block UI and remaining generation policies. Generation,
-  mapper/Tauri and primary-source extraction continue in parallel.
+- **Next action:** connect the Rust design/recipe adapter and Tauri host, complete
+  immutable profile assembly, and rerun Standard after the baseline repairs.
+  Primary-source extraction continues independently. Pages assembly now includes
+  referenced Study 5 instruction audio with its checked manifest hashes.
 - **Local validation:** 25 Runner core and 143 desktop tests pass; two hardware
   tests are opt-in and separately passed on this Windows host using silent
   one-/two-block fixtures. Independent file audits pass for both (16/30 events,
   1/2 scored rows). Strict Clippy passes. Independent source review found no
   blocking A1/A3 or output-policy race defect after the fixes. It exercises normal native dispatch, callback confirmation,
   scoring and durable result publication, not physical timing or installed IPC.
-  UI worker: 4 Designer, 68 Runner and 2 Pages tests pass, canonical builds and
+  UI worker: 5 Designer, 70 Runner and 2 Pages tests pass, canonical builds and
   Chromium controls checked (storage failure/retry, reversed preview replies,
-  participant draft/submit, instruction export). Science worker: 27 matrix/network
-  tests pass, including source freshness and frozen identities; the coordinator
-  independently reran the preceding 25-test projection checkpoint.
+  participant draft/submit, instruction export). Science worker: 44 parser/matrix/network
+  tests pass, including source freshness and frozen identities. Independent review
+  also passes the five finalization checks and finds no further actionable race.
   Integrated Rust workspace: 299 tests pass, three opt-in tests skipped by
   default; the native 3DTI waveform test separately passes on actual generated
   PCM (91.82 s). Go downloader tests pass with verified task-local Go 1.27.3.
   Standard completed with 626 passes, 10 skips and seven failures. Parent
   repairs now pass focused regressions: synchronous accepted-plan mutation
   rejection, Windows long-path file checks, SVG LF parity and routed guidance.
-  UI/science workers own the remaining parser/CSS failures; rerun Standard
-  after integration. Clean installation and physical qualification remain open.
-- **Scientific coverage:** frozen 94-publication corpus, 124 study rows and 1,364
-  compact contracts; 156 reported-complete and 38 derived-complete cells after
-  the first publisher-source timing batch. 77 inventories remain unassessed.
+  UI/science parser/CSS repairs are now integrated; rerun Standard after integration.
+  Native importer: seven contract/failure tests pass, plus a real browser-export
+  test independently materializing nine embedded assets offline. The combined
+  session-package/designer-core suites pass (35 tests; three opt-in tests skipped),
+  with strict Clippy. Clean installation and physical qualification remain open.
+- **Scientific coverage:** frozen 94-publication corpus, 125 study rows and 1,375
+  compact contracts; 179 reported-complete and 40 derived-complete cells after
+  the latest primary-source batches. 71 inventories remain unassessed.
   Templates and reviewed evidence do not confer tested native qualification.
 - **Installed agent baseline:** updated For-AI, 23 GSD skills/35 converted roles,
   15 prefixed Superpowers skills and three Agents Inc companions. Existing
@@ -80,13 +86,14 @@ This file is the active checklist and handoff owner; replace state, do not appen
   verified with a silent synthetic fixture; installed/physical gates stay open.
 - [ ] M2G — Freeze scientific generation contracts; implement and verify Rust
   generation and the corrected dry-source 3DTI wrapper, without Python runtime.
-  First kernel and corrected prepared-input bridge are integrated (`73eee126`):
-  nine waveform/contract tests pass; colored/imported/polar paths and profile
-  conversion are the next slice. Legacy RNG IDs remain rejected explicitly.
+  The corrected prepared-input bridge, polar arcs, five noise colours and verified
+  imported WAV policies are integrated; 15 pure generation checks pass. Recipe
+  conversion and session assembly are next. Legacy RNG IDs remain rejected explicitly.
 - [ ] M3 — Complete native profile assembly, all-block execution and the
   Windows Tauri Designer journey (A2–A3, C2); browser bundle assets materialize
   offline; Python/Rust handoff and result parity pass. Manifest-order progression
-  now passes source and real silent-callback checks; profile/UI integration remains.
+  now passes source and real silent-callback checks, including next-block UI.
+  Browser bundle materialization passes; native host/session assembly remains.
 - [ ] M4 — Close supported acquisition/recovery, accessibility/performance and
   evidence-record gaps (D1–D2, F1–F2, I1); audit every included experiment's 11
   replication contracts and finish citation mapper/preset navigation.

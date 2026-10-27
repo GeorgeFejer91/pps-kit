@@ -6,6 +6,18 @@ The user approved implementation of the expanded publication-ready plan.
 This section supersedes the earlier setup-only scope and wave assignments;
 the source review below remains the finding/evidence inventory.
 
+Implementation now has verified single-/multi-block native activation,
+the hosted persistence/preview/participant fixes, experiment-level mapper,
+bounded Rust source generation and corrected 3DTI bridge. Native portable
+import verifies inventories and media hashes in a temporary directory, then
+publishes and rebinds all four authoring audio groups; original bundle records
+remain unchanged alongside a local rebinding receipt. A real nine-asset browser
+export passes this offline path. Pages assembly now includes only referenced
+spoken assets and their checked manifests. This closes neither immutable
+session assembly nor installed/physical qualification. CURRENT_WORK remains
+the current acceptance checklist; later review findings below are historical
+starting conditions, not claims that these implementations are absent.
+
 ### Product contract
 
 - First release: audiotactile PPS, Windows, online preparation/preview with
