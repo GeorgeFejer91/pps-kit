@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 20)
+        self.assertEqual(len(registry["entries"]), 23)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 51)
+        self.assertEqual(registered_instance_count, 54)
         network = json.loads(
             (
                 ROOT
@@ -888,6 +888,39 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertIn("distribution", contracts["jitter_iti_policy"]["missingComponents"])
         self.assertEqual(contracts["auditory_stimulus"]["status"], "partial")
         self.assertEqual(study["nativeQualification"], "not_assessed")
+
+    def test_training_batch_separates_measurement_counts_and_missing_baselines(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        studies = {row["studyRowId"]: row for row in data["studies"]}
+        serino = studies["doi:10.3389/fnbeh.2015.00004"]
+        contracts = {row["key"]: row for row in serino["contracts"]}
+        self.assertEqual(contracts["baseline_trial_contract"]["status"], "not_reported")
+        self.assertEqual(contracts["jitter_iti_policy"]["status"], "not_reported")
+        self.assertIn("training", contracts["jitter_iti_policy"]["evidenceNote"])
+        self.assertEqual(contracts["catch_trial_contract"]["status"], "partial")
+        self.assertIn("resolved_trial_count", contracts["catch_trial_contract"]["missingComponents"])
+        self.assertEqual(contracts["repetition_allocation"]["status"], "partial")
+        self.assertIn("23 trains", contracts["repetition_allocation"]["evidenceNote"])
+        mindfulness = studies["doi:10.3390/bs14040306"]
+        contracts = {row["key"]: row for row in mindfulness["contracts"]}
+        self.assertEqual(contracts["baseline_trial_contract"]["status"], "partial")
+        self.assertIn("timing_and_anchor", contracts["baseline_trial_contract"]["missingComponents"])
+        self.assertIn("12", contracts["baseline_trial_contract"]["components"]["resolved_trial_count"]["value"])
+        self.assertEqual(contracts["tactile_target"]["status"], "conflicting_evidence")
+        self.assertIn("constant-voltage", contracts["tactile_target"]["evidenceNote"])
+        self.assertEqual(mindfulness["templateIds"], [])
+        taffou = studies["doi:10.1038/s41598-020-79767-0"]
+        contracts = {row["key"]: row for row in taffou["contracts"]}
+        self.assertIn("80", contracts["baseline_trial_contract"]["components"]["resolved_trial_count"]["value"])
+        self.assertIn("40", contracts["catch_trial_contract"]["value"])
+        self.assertIn("trunk", contracts["trajectory_kinematics"]["components"]["coordinate_frame_body_anchor"]["value"])
+        self.assertEqual(taffou["templateIds"], [])
+        registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+        for study in (serino, mindfulness, taffou):
+            self.assertEqual(study["nativeQualification"], "not_assessed")
+            inventory = next(row for row in registry["entries"] if row["network_node_id"] == study["networkNodeId"])
+            self.assertEqual(len(inventory["instances"]), 1)
+            self.assertTrue(inventory["supporting_task_boundaries"])
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:

@@ -8011,6 +8011,824 @@
           }
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.3389/fnbeh.2015.00004",
+      "source_type": "primary_article_xml_and_available_figure",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4313698/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Main human PPS measurement task and supporting-task boundaries reviewed. Missing acquisition, calibration and execution evidence remains unresolved; no native qualification.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4313698/fullTextXML",
+          "outcome": "full_Methods_and_captions_inspected"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.frontiersin.org/journals/behavioral-neuroscience/articles/10.3389/fnbeh.2015.00004/pdf",
+          "outcome": "public_PDF_retrieved; page9 Figure6 rendered_and_inspected"
+        }
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "3000-ms pink noise; IN/OUT apparent motion across two hidden loudspeakers; C.I.R.O. control.",
+          "page_or_section": "The behavioral study, Materials and procedures; Figure 6 and Design, publisher PDF pp.8-9",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "Physical two-loudspeaker intensity manipulation."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Pink-noise samples for assessment; ecological pencil-tapping sound belongs to training."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "C.I.R.O.; near/far loudspeakers."
+            }
+          },
+          "missing_required_components": [
+            "source_recipe_or_asset_provenance",
+            "level_envelope_calibration"
+          ],
+          "evidence_note": "Exact assessment waveform, envelope and acoustic calibration are not established by this source pass."
+        },
+        "trajectory_kinematics": {
+          "status": "reported_complete",
+          "value": "Apparent IN/OUT motion over 3000 ms; near speaker about 5 cm from right hand, far speaker about 100 cm from near speaker.",
+          "page_or_section": "The behavioral study, Materials and procedures; Figure 6 and Design, publisher PDF pp.8-9",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Approaching and receding apparent sound."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Right-hand centred; seated beside apparatus table; Figure 6 pairs D1 far with D5 near."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Near speaker ~5 cm from hand; speaker separation ~100 cm."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3000 ms per IN or OUT sound."
+            }
+          },
+          "evidence_note": "Figure 6 pixels inspected. Physical speaker separation is not proof of linear perceived speed."
+        },
+        "trial_sequence": {
+          "status": "partial",
+          "value": "IN/OUT sound with a tactile target on 77% of trials; remaining trials are auditory-only catches.",
+          "page_or_section": "The behavioral study, Materials and procedures; Figure 6 and Design, publisher PDF pp.8-9",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Audio-tactile targets and auditory-only catches."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "3000-ms IN or OUT sound; tactile target at one of five onset-relative delays."
+            }
+          },
+          "missing_required_components": [
+            "condition_intermixing"
+          ],
+          "evidence_note": "The measurement-task order is not specified here; training timing must not be imported."
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Speeded vocal response to right-hand touch; ignore sound; voice-activated relay records latency.",
+          "page_or_section": "The behavioral study, Materials and procedures; Figure 6 and Design, publisher PDF pp.8-9",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Detect touch; auditory-only catch has no target."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Vocal response and voice-activated relay."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Respond as quickly as possible to tactile target."
+            }
+          },
+          "missing_required_components": [
+            "response_window_and_anchor"
+          ]
+        },
+        "jitter_iti_policy": {
+          "status": "not_reported",
+          "value": "The assessment-task intertrial interval and padding are not stated in the inspected measurement Methods.",
+          "page_or_section": "The behavioral study, Materials and procedures; Figure 6 and Design, publisher PDF pp.8-9",
+          "component_reviews": {},
+          "missing_required_components": [
+            "policy_type",
+            "timing_scope_and_anchor",
+            "values_or_range"
+          ],
+          "evidence_note": "4000-6000 ms intervals belong to the training trains, not the PPS measurement trials."
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "T1-T5: 300, 800, 1500, 2200, 2700 ms from sound onset.",
+          "page_or_section": "The behavioral study, Materials and procedures; Figure 6 and Design, publisher PDF pp.8-9",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Tactile delays after auditory onset."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "300, 800, 1500, 2200, 2700 ms."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "D1 far: T1 IN/T5 OUT; D2: T2 IN/T4 OUT; D3: T3 both; D4: T4 IN/T2 OUT; D5 near: T5 IN/T1 OUT."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "Electrocutaneous stimulation of right hand via DS7 A and Neuroline electrodes for assessment.",
+          "page_or_section": "The behavioral study, Materials and procedures; Figure 6 and Design, publisher PDF pp.8-9",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Electrocutaneous assessment target."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Right hand; precise electrode site not restated."
+            },
+            "external_trigger": {
+              "status": "reported",
+              "value": "DS7 A constant-current stimulator, Neuroline electrodes; C.I.R.O. control."
+            }
+          },
+          "missing_required_components": [
+            "waveform_and_duration",
+            "intensity_or_calibration"
+          ],
+          "evidence_note": "Training uses different solenoids at right index tip; its tactile parameters cannot substitute for assessment."
+        },
+        "baseline_trial_contract": {
+          "status": "not_reported",
+          "value": "No tactile-only measurement baseline timing or count is specified in this article Methods.",
+          "page_or_section": "The behavioral study, Materials and procedures; Figure 6 and Design, publisher PDF pp.8-9",
+          "component_reviews": {},
+          "missing_required_components": [
+            "family_or_explicit_none",
+            "timing_and_anchor",
+            "allocation_rule",
+            "resolved_trial_count"
+          ],
+          "evidence_note": "Absence of a reported baseline is not an explicit statement that none occurred; do not import predecessor T0/T6."
+        },
+        "catch_trial_contract": {
+          "status": "partial",
+          "value": "Auditory-only catches are the remaining 23% after 77% target trials; no exact denominator reported.",
+          "page_or_section": "The behavioral study, Materials and procedures; Figure 6 and Design, publisher PDF pp.8-9",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only catch."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No tactile target; no tactile-detection response expected."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "23% of trials, complement of reported 77% target fraction."
+            }
+          },
+          "missing_required_components": [
+            "resolved_trial_count"
+          ],
+          "evidence_note": "A rounded percentage alone cannot justify the existing template count."
+        },
+        "repetition_allocation": {
+          "status": "partial",
+          "value": "Five tactile delays crossed with IN/OUT and repeated assessments; per-cell trial repetitions unreported.",
+          "page_or_section": "The behavioral study, Materials and procedures; Figure 6 and Design, publisher PDF pp.8-9",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five delays, two sound directions; synchronous/asynchronous training days and pre/post assessments."
+            }
+          },
+          "missing_required_components": [
+            "repetitions_or_exact_counts",
+            "exceptions_or_overrides"
+          ],
+          "evidence_note": "Training has 23 trains of ten paired events; those are not PPS assessment repetitions."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Two counterbalanced training days; baseline assessment then two training sessions with an assessment block after each.",
+          "page_or_section": "The behavioral study, Materials and procedures; Figure 6 and Design, publisher PDF pp.8-9",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "Three assessment occasions per training day; two days."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Synchronous/asynchronous day order counterbalanced."
+            }
+          },
+          "missing_required_components": [
+            "block_composition"
+          ],
+          "evidence_note": "The six assessment occasions do not establish the number or distribution of trials within each block."
+        }
+      },
+      "orientation_ledger": {
+        "participant_frame": "Seated beside table; right-hand assessment.",
+        "apparatus_frame": "Two physical speakers; near ~5 cm from hand and far ~100 cm from near.",
+        "body_mapping": "Figure 6 D1 far to D5 near; opposite temporal mapping for IN/OUT.",
+        "evidence_class": "Methods and rendered Figure 6; no unscaled angle/speed inference"
+      }
+    },
+    {
+      "study_row_id": "doi:10.1038/s41598-020-79767-0",
+      "source_type": "primary_article_xml_and_available_figure",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7806762/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Main human PPS measurement task and supporting-task boundaries reviewed. Missing acquisition, calibration and execution evidence remains unresolved; no native qualification.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7806762/fullTextXML",
+          "outcome": "full_Methods_and_captions_inspected"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.nature.com/articles/s41598-020-79767-0.pdf",
+          "outcome": "PDF text indexed; local retrieval returned non-PDF and screenshot route failed on cookie redirect"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fs41598-020-79767-0/MediaObjects/41598_2020_79767_Fig1_HTML.png",
+          "outcome": "publisher_Figure1_pixels_retrieved_and_inspected"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7806762/fullTextXML::MOESM1",
+          "outcome": "supplement_DOCX_link_identified; prior_review_records_analysis_supplement; current_pass_not_retrieved"
+        }
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "44.1-kHz harmonic sound: 500-Hz fundamental plus seven harmonics to 4 kHz; rough variant uses 70-Hz AM at depth 1; 3000 ms.",
+          "page_or_section": "Methods, Stimuli/Apparatus and Measure of PPS via the auditory-tactile interaction experiment; Figure 1",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "Binaural synthesis through headphones."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Harmonic non-rough and amplitude-modulated rough sounds."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "reported",
+              "value": "F0 relative amplitude 1, first harmonic 0.5, others approximately 0.25; AM70 Hz depth 1."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Max/MSP6.1.8 Spat; LISTEN HRTF; reflections through order 3, late reverberation and nearfield correction; DT770."
+            }
+          },
+          "missing_required_components": [
+            "level_envelope_calibration"
+          ],
+          "evidence_note": "Harmonic amplitudes are approximate; HRTF identity, room/Spat parameters and final main-task calibration remain incomplete. Rating-task SPL values are not substituted for the main binaural task."
+        },
+        "trajectory_kinematics": {
+          "status": "reported_complete",
+          "value": "Left-rear virtual approach at source-described 135 degrees, 520 to 20 cm from head centre, 3000 ms; reported velocity 166.67 cm/s.",
+          "page_or_section": "Methods, Stimuli/Apparatus and Measure of PPS via the auditory-tactile interaction experiment; Figure 1",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Looming virtual sound."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Head-centred coordinates; hands at midline in contact with trunk to assess trunk PPS; left-index touch."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Left rear 135 degrees; 520 to 20 cm from head centre."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3000 ms; source reports 166.67 cm/s."
+            }
+          },
+          "evidence_note": "Figure 1 pixels checked: participant faces page-top, rear-left path appears lower-left. Preserve source angle convention rather than silently applying a renderer sign."
+        },
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Random targets at seven tactile timings across two sound types, intermingled with auditory-only catches.",
+          "page_or_section": "Methods, Stimuli/Apparatus and Measure of PPS via the auditory-tactile interaction experiment; Figure 1",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Audio-tactile targets, silent-window tactile controls, auditory-only catches."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "1000-ms silence, 3000-ms rough/non-rough looming sound, 2700-3300-ms silence; optional tactile target."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Random combinations and intermingled catches."
+            }
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Right-index numeric-keypad response to left-index vibration; ignore sounds.",
+          "page_or_section": "Methods, Stimuli/Apparatus and Measure of PPS via the auditory-tactile interaction experiment; Figure 1",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond only to tactile stimulus."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Wired numeric keypad (Essentiel b), right-index press; Presentation 16.3 records responses."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Respond as quickly as possible to tactile targets; withhold on catches."
+            }
+          },
+          "evidence_note": "Exact response deadline remains unverified.",
+          "missing_required_components": [
+            "response_window_and_anchor"
+          ]
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "1000-ms pre-sound silence; 2700-3300-ms silence after sound offset.",
+          "page_or_section": "Methods, Stimuli/Apparatus and Measure of PPS via the auditory-tactile interaction experiment; Figure 1",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Fixed pre-sound padding and variable post-sound interval."
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "Before onset and after offset of 3000-ms sound."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1000 ms before; 2700-3300 ms after."
+            }
+          },
+          "evidence_note": "Sampling distribution is not established by this Methods/figure review; do not substitute uniform.",
+          "missing_required_components": [
+            "distribution"
+          ]
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "T1-T5:0, 750, 1500, 2250, 3000 ms from sound onset.",
+          "page_or_section": "Methods, Stimuli/Apparatus and Measure of PPS via the auditory-tactile interaction experiment; Figure 1",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Zero at auditory onset; positive tactile delays thereafter."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "0, 750, 1500, 2250, 3000 ms."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Same five delays for rough and non-rough left-rear approach."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "20-ms 250-Hz sinusoid via 28-mm Veco 8-ohm miniature loudspeaker on palmar left index.",
+          "page_or_section": "Methods, Stimuli/Apparatus and Measure of PPS via the auditory-tactile interaction experiment; Figure 1",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Palmar left index finger."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "20-ms sinusoid at 250 Hz."
+            }
+          },
+          "evidence_note": "Amplitude/calibration not finalized; perceptible-but-inaudible description is not a calibrated output.",
+          "missing_required_components": [
+            "intensity_or_calibration"
+          ]
+        },
+        "baseline_trial_contract": {
+          "status": "derived_complete",
+          "value": "80 tactile-only baseline controls at -650 and+3650 ms relative to sound onset, included among 280 tactile targets.",
+          "page_or_section": "Methods, Stimuli/Apparatus and Measure of PPS via the auditory-tactile interaction experiment; Figure 1",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Silent-window tactile controls before and after sound."
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "-650 ms before sound onset; +650 ms after offset, equivalent +3650 ms from onset."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "20 repetitions per timing and sound type."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "80 controls among 280 target trials."
+            }
+          },
+          "derivation_note": "2 baseline timings x 2 sound types x 20 repetitions =80."
+        },
+        "catch_trial_contract": {
+          "status": "reported_complete",
+          "value": "40 auditory-only catches, intermingled with 280 target trials; 12.5% of 320.",
+          "page_or_section": "Methods, Stimuli/Apparatus and Measure of PPS via the auditory-tactile interaction experiment; Figure 1",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only catch."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No tactile target; withhold detection response."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "40 catches randomly intermingled across experiment; no claim of exact per-sound balance."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "40."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "reported_complete",
+          "value": "20 repetitions of each of 14 timing-by-sound conditions; 280 tactile targets plus 40 catches.",
+          "page_or_section": "Methods, Stimuli/Apparatus and Measure of PPS via the auditory-tactile interaction experiment; Figure 1",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Seven tactile timings x two sound types."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "20 per timing/sound condition."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "40 separate auditory-only catch trials."
+            },
+            "derived_total_reconciliation": {
+              "status": "reported",
+              "value": "280 targets +40 catches =320 trials."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "reported_complete",
+          "value": "Ten blocks of 32 randomly ordered trials; about 2-minute familiarization precedes test.",
+          "page_or_section": "Methods, Stimuli/Apparatus and Measure of PPS via the auditory-tactile interaction experiment; Figure 1",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "10 experimental blocks."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "320 trials equally divided into 10 blocks of 32; per-condition balancing within each block is not claimed."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "Total trial pool distributed across ten blocks."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "14 conditions randomized and catches intermingled."
+            }
+          }
+        }
+      },
+      "orientation_ledger": {
+        "participant_frame": "Seated blindfolded in headrest; hands at midline touching trunk.",
+        "apparatus_frame": "Binaural virtual path; distances measured from head centre.",
+        "body_mapping": "Figure 1 faces page-top; lower-left path is participant rear-left at source-described 135 degrees.",
+        "evidence_class": "Primary Methods and Figure 1 pixels; no renderer-specific sign inferred"
+      }
+    },
+    {
+      "study_row_id": "doi:10.3390/bs14040306",
+      "source_type": "primary_article_xml_and_available_figure",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11047477/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Main human PPS measurement task and supporting-task boundaries reviewed. Missing acquisition, calibration and execution evidence remains unresolved; no native qualification.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11047477/fullTextXML",
+          "outcome": "full_Methods_and_captions_inspected"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.mdpi.com/2076-328X/14/4/306/pdf",
+          "outcome": "publisher_PDF_route_HTTP403; no figure pixels obtained"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.mdpi.com/2076-328X/14/4/306",
+          "outcome": "publisher_HTML_route_HTTP403_locally_and429_in_web_reader; primary_XML_fallback_read"
+        }
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "44.1-kHz pink noise lasting 3000 ms; two-speaker IN cross-fade, reported exponential 55-70 dB SPL rise.",
+          "page_or_section": "Materials and Methods sections2.3-2.5; Figure1 caption; baseline limits checked against task Methods",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "Physical near/far loudspeakers."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Pink noise."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "reported",
+              "value": "44.1-kHz noise; far speaker decreases while near speaker increases."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "E-prime 2.0 and two loudspeakers."
+            }
+          },
+          "missing_required_components": [
+            "level_envelope_calibration"
+          ],
+          "evidence_note": "Original sample and calibrated room/speaker transfer are not supplied; reported endpoints alone do not establish the exact envelope."
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Near speaker 5 cm from left cheek; far speaker 100 cm from near, both 100 cm elevation; apparent approach 3000 ms.",
+          "page_or_section": "Materials and Methods sections2.3-2.5; Figure1 caption; baseline limits checked against task Methods",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "IN apparent approach by two-speaker cross-fade."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Blindfolded seated participant; left-cheek anchor."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Near 5 cm from cheek,100 cm speaker separation and 100 cm speaker elevation."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3000-ms sound."
+            }
+          },
+          "missing_required_components": [
+            "coordinate_frame_body_anchor"
+          ],
+          "evidence_note": "Exact horizontal orientation relative to participant is not established by the inspected text. Figure 1 procedure graphic could not be retrieved in this pass."
+        },
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "1000-ms silence,3000-ms IN sound,1000-ms silence; seven tactile timings with intermingled catches.",
+          "page_or_section": "Materials and Methods sections2.3-2.5; Figure1 caption; baseline limits checked against task Methods",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Audio-tactile targets, pre/post-sound tactile controls and auditory-only catches."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Fixed silent lead, approaching pink noise, fixed silent tail."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "42 target trials randomly intermingled with 20 catches per assessment."
+            }
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Spacebar press on cheek stimulation; trial-start response time adjusted by tactile onset.",
+          "page_or_section": "Materials and Methods sections2.3-2.5; Figure1 caption; baseline limits checked against task Methods",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to cheek touch; no tactile target on catches."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Keyboard spacebar."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Press when touch is detected."
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Recorded trial-start latency adjusted for target delay."
+            }
+          },
+          "missing_required_components": [
+            "response_window_and_anchor"
+          ]
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "1000-ms silence before and after 3000-ms sound.",
+          "page_or_section": "Materials and Methods sections2.3-2.5; Figure1 caption; baseline limits checked against task Methods",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Fixed within-trial silent padding."
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "Before sound onset and after sound offset."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1000 ms on each side."
+            }
+          },
+          "missing_required_components": [
+            "randomization"
+          ],
+          "evidence_note": "An additional intertrial gap or jitter policy is not specified; padding alone is not proof of a complete ITI contract."
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "T1-T5:300,800,1500,2200,2700 ms from sound onset.",
+          "page_or_section": "Materials and Methods sections2.3-2.5; Figure1 caption; baseline limits checked against task Methods",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive tactile delays after sound onset."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "300,800,1500,2200,2700 ms."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Approaching sound only."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "conflicting_evidence",
+          "value": "Left-cheek electrical target,100-microsecond monophasic rectangular pulse; DS7 A; individually calibrated.",
+          "page_or_section": "Materials and Methods sections2.3-2.5; Figure1 caption; baseline limits checked against task Methods",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Electrical."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Left cheek."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "100-microsecond single rectangular monophasic pulse."
+            },
+            "intensity_or_calibration": {
+              "status": "reported",
+              "value": "Separate detection calibration;5-mA adjustments; reported participant range 60-90 mA."
+            }
+          },
+          "evidence_note": "Source calls apparatus constant-current and pulse constant-voltage. Retain unresolved description rather than silently choose a device mode; reported historical settings are not a qualified execution prescription."
+        },
+        "baseline_trial_contract": {
+          "status": "partial",
+          "value": "T0 before sound and T6 after sound; six trials each, yielding 12 controls per assessment; exact offsets not stated.",
+          "page_or_section": "Materials and Methods sections2.3-2.5; Figure1 caption; baseline limits checked against task Methods",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Pre/post-sound tactile-only controls."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Six repetitions at each of T0 and T6."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "12 controls included among 42 tactile targets."
+            }
+          },
+          "missing_required_components": [
+            "timing_and_anchor"
+          ],
+          "evidence_note": "Do not import -700/+3600-ms anchors from a predecessor or template.",
+          "derivation_note": "2 baseline timings x 6 repetitions =12."
+        },
+        "catch_trial_contract": {
+          "status": "reported_complete",
+          "value": "20 auditory-only catches among 62 trials per assessment.",
+          "page_or_section": "Materials and Methods sections2.3-2.5; Figure1 caption; baseline limits checked against task Methods",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only catch."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No touch; withhold target response."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "20 catches randomly intermingled with 42 targets."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "20 per assessment."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "reported_complete",
+          "value": "Six repetitions at each T0-T6 timing;42 tactile targets plus 20 catches per assessment.",
+          "page_or_section": "Materials and Methods sections2.3-2.5; Figure1 caption; baseline limits checked against task Methods",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Seven tactile delays in one IN condition."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "Six per timing."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "20 additional auditory-only catches; familiarization separate."
+            },
+            "derived_total_reconciliation": {
+              "status": "reported",
+              "value": "7 x 6 +20 =62 trials per pre/post assessment."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "reported_complete",
+          "value": "One 62-trial assessment before and one after 15-minute FAM;10 familiarization trials include 2 catches.",
+          "page_or_section": "Materials and Methods sections2.3-2.5; Figure1 caption; baseline limits checked against task Methods",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "Two assessment occasions, pre and post FAM."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "62 trials per assessment."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Target trials and catches randomly intermingled."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Fixed pre-FAM then post-FAM order."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "Same assessment design repeated pre/post; familiarization is separate."
+            }
+          }
+        }
+      }
     }
   ]
 }
