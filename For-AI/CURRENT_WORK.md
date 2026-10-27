@@ -11,7 +11,7 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Treat hardware operation as an assumption; do not label physical timing measured.
   The [completion review and multi-agent plan](engineering/validation/docs/completion-review-2026-10-27.md)
   defines the finish criteria and extends the original 17 audit items.
-- **Current milestone:** Wave 2 integration, explicitly authorized on
+- **Current milestone:** Wave 3 source verification, explicitly authorized on
   2026-10-27. M0 is delivered; the expanded plan is now being implemented.
   Online use is prepare/preview only; Windows and audiotactile paradigms are
   the first release. Audited inaccessible-source gaps may be published without
@@ -43,21 +43,22 @@ This file is the active checklist and handoff owner; replace state, do not appen
   automatic approval review rejected the fresh launch check at the new revision
   ("blocked by policy", without a more specific reason). No alternate launch
   was attempted. Complete installed execution remains unverified.
-- **Next action:** finish the remaining source batches, verify the corrected
-  preset waveforms and integrated Standard suite, then rebuild canonical
-  frontend/Pages artifacts against the final public projection. Source review
-  and package identity remain separate gates. The first Runner NSIS payload and
+- **Next action:** resolve the broader hosted-workflow edit-mode visibility
+  failure, run a fresh stable Standard suite when storage permits, and obtain
+  exact-revision CI evidence. The final corpus projection, canonical frontend
+  and local Pages assembly agree. Installed operation and package identity
+  remain separate gates. The first Runner NSIS payload and
   installed native WebView startup passed without Python or checkout paths on
   PATH; this is not a clean-Windows/full-journey result. Package selection through
   the Windows picker remains blocked by the native automation helper failing
   to initialize (kernel assets path not found); no substitute UI driver was used.
-  Primary-source extraction continues independently. Pages assembly now includes
+  The bounded corpus audit is complete with disclosed gaps. Pages assembly includes
   referenced Study 5 instruction audio with its checked manifest hashes.
 - **Local validation:** the latest Standard run finished with 686 passed, ten
   skipped and twelve catalogue failures caused by changing source inputs during
-  the run. A subsequent stable six-suite catalogue check passes 104 tests with
-  one skip, including all twelve failed cases and byte-deterministic rebuilding.
-  The subsequent 74-publication source checkpoint passes 107 tests with one skip.
+  the run. The final stable corpus/profile/synthetic-eligibility checks pass
+  123 tests with one skip, including all twelve failed cases and deterministic
+  rebuilding. Independent whole-projection review passes 32 checks.
   This is resolved targeted evidence, not a fresh entirely green Standard run.
   The corrected sample-paced Canzoneri response audit passes
   three checks in 951.25 s, including complete planned/click/marker/analysis joins,
@@ -77,7 +78,12 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Ordinary catalogue rebuilding now preserves and verifies native asset provenance;
   stale audio/template receipts and Python force-regeneration are rejected. Thirteen
   focused native-catalogue/profile/release checks pass. The canonical Designer has
-  23 passing frontend tests and fresh actual-browser/Pages assembly checks.
+  25 passing frontend tests and fresh actual-browser/Pages assembly checks.
+  The final mapper verifies experiment-specific labels and preset ownership,
+  DOI search, stable links, keyboard focus, widths from 320 to 1920 px and
+  enlarged/spaced text. The broader hosted-workflow script currently fails
+  before its mapper step because the edit-mode control is hidden; diagnosis
+  is active and full hosted-workflow sign-off is withheld.
   Portable export now retains exact native premade receipts inside the existing
   design and verifies their hashes against the embedded WAV. Ten package-import
   checks, strict Clippy and an actual Chromium export → offline re-export → Rust
@@ -118,19 +124,23 @@ This file is the active checklist and handoff owner; replace state, do not appen
   check was rejected by automatic approval review. Full installed
   interaction, clean-Windows prerequisites and deployed routes remain open. New physical calibration
   is deferred by the user, not reported as measured.
-- **Scientific coverage:** frozen 94-publication corpus; the latest integrated
-  projection has 163 study rows and 1,793 compact contracts. After the context,
-  Collignon and front/rear/duration batches, 74 publications pass inventory/access
-  plus all eleven source-disposition checks; 20 remain.
-  There are 76 registered entries, 62 Methods-backed inventories, eleven audited
-  access blockers and one project-lineage record, with source-version and
-  overlapping-cohort limitations retained.
-  Abstract-only and partial inventories do not pass by registration alone.
+- **Scientific coverage:** the frozen 94-publication corpus audit is complete
+  with disclosed gaps. The final projection has 178 study rows and 1,958 compact
+  contracts; every publication has an assessed inventory or documented access
+  blocker and every contract has a reviewed disposition. There are no remaining
+  unassessed/composite inventory placeholders. All 94 entries are registered:
+  74 Methods-backed inventories (59 current primary, eight retained primary,
+  seven author-version records awaiting final-version comparison), 19 documented
+  access blockers and one project-lineage record. Source-version and overlapping-
+  cohort limitations remain explicit. Audited coverage is not parameter completeness.
   The mapper separates these states and links reviewed sources separately from
   publication DOI identity. Original Ferri 2015
   variants are separated and their conflicts with later reanalysis preserved.
-  Protocol/count conflicts leave 13 source-ready and 12 legacy emulation-eligible
-  records; this is not a fresh all-profile execution result. The 18 GUI-ready records
+  Protocol/count conflicts leave 12 legacy runnable-profile configuration records
+  and 11 legacy emulation-eligible records; neither count means all eleven
+  contracts are resolved or a fresh all-profile execution passed. Pfeiffer's
+  accessible source exposes a trajectory/count mismatch with the script proxy,
+  so it is excluded from these eligible sets. The 18 GUI-ready records
   remain separately labelled. A bounded foundational
   check found 11 of 12 selected antecedents; Occelli 2010 is an outside-map
   omission candidate. Do not silently change membership or claim exhaustiveness.
@@ -180,14 +190,24 @@ This file is the active checklist and handoff owner; replace state, do not appen
 - [ ] M4 — Close supported acquisition/recovery, accessibility/performance and
   evidence-record gaps (D1–D2, F1–F2, I1); audit every included experiment's 11
   replication contracts and finish citation mapper/preset navigation.
+  The bounded catalogue audit and mapper/preset source checks are complete;
+  installed accessibility/acquisition evidence remains open.
 - [ ] M5 — Build and inspect exact-revision installed packages and advertised
   phone routes (G3, E1). New physical calibration (D3/I2) is deferred by the
   user; hardware operation is assumed, with no measured qualification claim.
 - [ ] M6 — Review all finish criteria, supported-scope claims and release
   artifacts; publish only under the matching release authorization.
 
-Current blockers are incomplete product paths and missing installed evidence,
-not the former storage shortage. New calibration is outside the current task
+Current blockers are the broader hosted-workflow failure, a fresh full Standard
+run, missing installed evidence and pending Designer package identity approval.
+Pinned Rust 1.88 Core/Desktop checks pass 183/169 tests with nine/seven opt-in
+skips and strict Clippy; final Designer/Runner frontend checks pass 25/79 tests.
+Cross-platform CI for this expanded source remains to run.
+The pinned-toolchain checks accumulated approximately 15.6 GB of regenerable
+Rust incremental cache, leaving roughly 6 GB free. Automatic approval review
+rejected the exact compiler-cache cleanup as "blocked by policy" without a
+more specific reason. No cleanup ran; explicit user approval is pending before
+the final full validation run. Smaller owning checks continue. New calibration is outside the current task
 per user steering; future measured-route claims still require evidence. No new participant study,
 optional XR work, MobX dependency or additional transport is implied.
 

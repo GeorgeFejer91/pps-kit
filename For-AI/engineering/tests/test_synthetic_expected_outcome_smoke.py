@@ -10,8 +10,8 @@ ROOT = Path(__file__).resolve().parents[3]
 LEDGER_PATH = ROOT / "For-AI" / "research" / "literature" / "preload-ledgers" / "audiotactile_expected_outcome_coverage.json"
 SCRIPT_PATH = ROOT / "For-AI/engineering/validation" / "scripts" / "run_synthetic_expected_outcome_smoke.py"
 
-# Primary-source conflicts exclude the smartphone, Lerner 2021 and Serino 2015
-# trunk Exp1/Exp2 records from this explicitly reviewed eligible set.
+# Primary-source conflicts exclude the smartphone, Lerner 2021, Serino 2015
+# trunk Exp1/Exp2 and Pfeiffer 2018 records from this reviewed eligible set.
 READY_PROFILE_IDS = {
     "biggio_2017_racket_tool_use",
     "tajadura_jimenez_2009_visual_deprivation",
@@ -21,7 +21,6 @@ READY_PROFILE_IDS = {
     "matsuda_2021_four_directions",
     "noel_2015_bodily_self",
     "noel_2015_walking",
-    "pfeiffer_2018_vestibular",
     "serino_2015_peri_hand_exp3",
     "serino_2015_toolless_sync_training",
     "tonelli_2019_echolocation",

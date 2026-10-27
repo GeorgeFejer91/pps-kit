@@ -10,8 +10,8 @@ Each status applies to its stated surface, not to the whole product.
 | Item | Implemented / observed surface | Remaining gate |
 | --- | --- | --- |
 | 1 | VERIFIED at the linked baseline: locked Core/Desktop fmt, Clippy and tests on three CI platforms; later native changes have Windows checks | Repeat exact-revision CI before source promotion |
-| 2 | PARTIAL: Standard finished 686 passed/10 skipped/12 catalogue failures during source mutation; stable catalogue rerun passes 104/1 skipped including all failed cases | Fresh stable Standard run before structural merge/release |
-| 3 | PARTIAL: separate source/template/native capability records; explicit hosted/Tauri adapters and conservative readiness | Complete catalogue and installed evidence |
+| 2 | PARTIAL: Standard finished 686 passed/10 skipped/12 catalogue failures during source mutation; final stable source/profile checks pass 123/1 skipped including all failed cases | Fresh stable Standard run before structural merge/release |
+| 3 | VERIFIED catalogue/source separation: 94 assessed publications, 178 study rows, 1,958 dispositions; separate source/template/native capability records and explicit hosted/Tauri adapters | Installed evidence; disclosed scientific gaps withhold readiness |
 | 4 | VERIFIED: shared profile/limits/scoring/text/job owners; concise For-AI routing; one native actor/scheduler/file worker | Extract only seams changed by further work |
 | 5 | VERIFIED browser source: planner disclosures/JSON action, phone Pair/state/action flow, participant response, local output picker and inline notifications | Installed UI inspection |
 | 6 | PARTIAL: actual Pretext, explicit no-fit, complete labels, keyboard input, narrow/enlarged text and spacing | Actual WebViews and full accessibility qualification |
@@ -29,6 +29,14 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
+- The bounded frozen-corpus audit is complete with disclosed gaps: 74 Methods-
+  backed inventories, 19 documented access blockers and one project-lineage
+  entry. An independent review passes 32 projection/identity/privacy checks.
+  Final mapper controls pass actual Chromium search, study ownership, preset
+  navigation, focus, narrow/enlarged-text checks. Designer has 25 passing JS
+  tests; two Pages assembly tests and canonical staging pass. The broader
+  hosted-workflow script currently stops at a hidden edit-mode control and
+  remains under investigation; focused mapper proof does not close that gate.
 - The existing validation owner now selects Designer core/host code and both
   frontends; its workflow also checks the six scientific projection suites on
   Windows. With pinned Rust 1.88, Core passes 183 tests/nine opt-in skips and
