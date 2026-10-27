@@ -23509,6 +23509,1344 @@
           }
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.1152/jn.00652.2017::a",
+      "source_type": "primary_final_xml_and_rendered_publisher_pdf",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Human Methods and computational boundary reviewed; keep printed timing precision, separate body-target cohorts and source-renderer limitations.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "outcome": "Primary full XML retrieved; full human Methods and model boundaries inspected."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://noel-lab.org/wp-content/uploads/2024/05/jneurophysiology.pdf",
+          "outcome": "Author-hosted publisher PDF retrieved; human Methods p. 3 rendered and independently inspected. SHA256 4f8c5b67a40f00ef7e190785dd03d997d2cd0b499f859013de7594165d9f8e87."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "approximation_required",
+          "value": "Dynamic broadband noise at reported constant loudness of 50 dB, using two arrays of eight speakers.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "generated"
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Broadband noise; source does not specify white-noise or pink-noise identity for this acquisition."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "approximation_required",
+              "value": "Original waveform, sampling rate, spectral shaping and exact level reference/calibration unresolved. Movement algorithm is explicitly referred to Serino 2015b, DOI 10.1038/srep18603."
+            },
+            "renderer_apparatus": {
+              "status": "approximation_required",
+              "value": "Two arrays of eight JBL Control 1 Pro WH speakers, M-Audio Fast Track Ultra 8R; arrays 50 cm to either side and extend 2 m forward at target height. Cited algorithm has unresolved gain descriptions."
+            },
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "Reported constant loudness 50 dB does not specify reference/SPL calibration or the relation to the cited variable-gain renderer."
+            }
+          },
+          "evidence_note": "The reviewed Serino supplement partly specifies synthesis but has competing Gaussian/equation/prose gain laws. That lineage does not establish the exact current constant-level realization."
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Looming sound over 2 m at 25 or 75 cm/s; sampled body distances 175, 150, 125, 100, 75, 50 and 25 cm.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "looming"
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Forehead height; participant blindfolded at the end of the speaker arrays."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Two-metre approach; samples proceed from 175 to 25 cm from the participant."
+            },
+            "timing_constraint": {
+              "status": "derived",
+              "value": "Nominal full traversal: 2/0.25 = 8 s; 2/0.75 = 2.666666... s."
+            }
+          },
+          "evidence_note": "Exact renderer endpoint/sample rounding remains unresolved. Human SOAs are directly printed and do not require replacing them with model simulation times.",
+          "missing_required_components": [
+            "rendering_endpoint_and_rounding"
+          ],
+          "derivation_note": "Nominal full-path duration = reported 2-m extent divided by 0.25 or 0.75 m/s. This is not an observed WAV length."
+        },
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Randomly intermixed AT targets, T-only baseline trials and A-only catches, at both speeds.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Seven AT distance cells, two T-only temporal anchors and one A-only catch cell per speed."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Sound starts before one 100-ms touch at the specified delay. T-only omits sound; A-only omits touch. Respond only to touch."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "All trial types randomized."
+            }
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Rapid tactile detection using a right-hand-held wireless XBOX 360 controller; withhold on auditory-only catches.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Touch requires response; sound alone requires withholding."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Wireless XBOX 360 gamepad; the paper reports 215-Hz sampling."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Press a gamepad button when touch is detected; exact button/finger not specified."
+            }
+          },
+          "evidence_note": "RT exclusions below 200 or above 900 ms are analysis rules, not an acquired response timeout or measured hardware latency.",
+          "missing_required_components": [
+            "response_window_and_anchor",
+            "exact_button_mapping"
+          ]
+        },
+        "jitter_iti_policy": {
+          "status": "not_reported",
+          "value": "No human intertrial interval or jitter policy is specified in the reviewed Methods.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_reported",
+              "value": "No human acquisition interval specification; model integration steps are not ITI."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "No human acquisition interval specification; model integration steps are not ITI."
+            },
+            "values_or_range": {
+              "status": "not_reported",
+              "value": "No human acquisition interval specification; model integration steps are not ITI."
+            }
+          },
+          "evidence_note": "Do not substitute the cited predecessor ITI or the model simulation clock."
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "Slow SOAs: 1000, 2000, 3000, 4000, 5000, 6000, 7000 ms. Fast SOAs: 330, 660, 1000, 1330, 1660, 2000, 2330 ms.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Touch delay from sound onset; positive means touch after sound."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "At both speeds T1 through T7 map to distances 175, 150, 125, 100, 75, 50, 25 cm. Preserve the printed fast timings; do not replace them with exact thirds."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Looming only: later touch corresponds to nearer sound."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "100-ms Precision MicroDrives 312-101 motor activation at forehead.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile motor."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Forehead."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Nominal motor: 3 V, 60 mA, 150 Hz, 5 g, 113 mm2 surface, 50 ms to maximal rotation; 100-ms activation."
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "Measured skin displacement/intensity, onset latency and individual calibration are not supplied."
+            }
+          },
+          "evidence_note": "Motor specifications do not establish constant skin-level onset waveform or native equivalence.",
+          "missing_required_components": [
+            "delivered_waveform_and_intensity_calibration"
+          ]
+        },
+        "baseline_trial_contract": {
+          "status": "derived_complete",
+          "value": "64 tactile-only baseline trials: two endpoint-equivalent timings per speed, each repeated 16 times.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_endpoint_baseline"
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Slow 1000/7000 ms and fast 330/2330 ms relative to the corresponding trial sound-onset position; no auditory signal is delivered."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Two timing anchors x two speeds x 16 repetitions."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "64."
+            }
+          },
+          "evidence_note": "Both baseline conditions are actually acquired. Subtracting the faster baseline median within participant/velocity is an analysis choice.",
+          "derivation_note": "2 endpoint timings x 2 speeds x 16 repetitions = 64 tactile-only trials."
+        },
+        "catch_trial_contract": {
+          "status": "derived_complete",
+          "value": "32 auditory-only/no-touch catches require withholding.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_no_go"
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No touch; no button press."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "One catch cell per speed, repeated 16 times."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "32."
+            }
+          },
+          "derivation_note": "1 catch cell x 2 speeds x 16 repetitions = 32 catches."
+        },
+        "repetition_allocation": {
+          "status": "derived_complete",
+          "value": "320 trials per participant: 224 AT targets, 64 T-only baselines and 32 A-only catches.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Two speeds within subject; seven AT distances, two baseline timings and one catch cell. Face/trunk is between subjects."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "derived",
+              "value": "2 x (7 + 2 + 1) x 16 = 320."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Face cohort 16; trunk 16 recruited and 15 analyzed after one technical exclusion. Each participant performs one body-target protocol."
+            }
+          },
+          "derivation_note": "AT: 2 x 7 x 16 = 224; baseline: 2 x 2 x 16 = 64; catch: 2 x 1 x 16 = 32; total 320."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "All trial types randomized; exact block partition, breaks and randomization algorithm/seed are unspecified.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_reported",
+              "value": "No numerical block partition supplied."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "320-trial acquisition includes both velocities and all three families."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "All trial types randomized."
+            }
+          },
+          "evidence_note": "Two velocities or two cohorts do not imply two within-participant blocks.",
+          "missing_required_components": [
+            "block_count",
+            "block_order_or_counterbalancing"
+          ]
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1152/jn.00652.2017::b",
+      "source_type": "primary_final_xml_and_rendered_publisher_pdf",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Human Methods and computational boundary reviewed; keep printed timing precision, separate body-target cohorts and source-renderer limitations.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "outcome": "Primary full XML retrieved; full human Methods and model boundaries inspected."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://noel-lab.org/wp-content/uploads/2024/05/jneurophysiology.pdf",
+          "outcome": "Author-hosted publisher PDF retrieved; human Methods p. 3 rendered and independently inspected. SHA256 4f8c5b67a40f00ef7e190785dd03d997d2cd0b499f859013de7594165d9f8e87."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "approximation_required",
+          "value": "Dynamic broadband noise at reported constant loudness of 50 dB, using two arrays of eight speakers.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "generated"
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Broadband noise; source does not specify white-noise or pink-noise identity for this acquisition."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "approximation_required",
+              "value": "Original waveform, sampling rate, spectral shaping and exact level reference/calibration unresolved. Movement algorithm is explicitly referred to Serino 2015b, DOI 10.1038/srep18603."
+            },
+            "renderer_apparatus": {
+              "status": "approximation_required",
+              "value": "Two arrays of eight JBL Control 1 Pro WH speakers, M-Audio Fast Track Ultra 8R; arrays 50 cm to either side and extend 2 m forward at target height. Cited algorithm has unresolved gain descriptions."
+            },
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "Reported constant loudness 50 dB does not specify reference/SPL calibration or the relation to the cited variable-gain renderer."
+            }
+          },
+          "evidence_note": "The reviewed Serino supplement partly specifies synthesis but has competing Gaussian/equation/prose gain laws. That lineage does not establish the exact current constant-level realization."
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Looming sound over 2 m at 25 or 75 cm/s; sampled body distances 175, 150, 125, 100, 75, 50 and 25 cm.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "looming"
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Upper chest at sternum height; participant blindfolded at the end of the speaker arrays."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Two-metre approach; samples proceed from 175 to 25 cm from the participant."
+            },
+            "timing_constraint": {
+              "status": "derived",
+              "value": "Nominal full traversal: 2/0.25 = 8 s; 2/0.75 = 2.666666... s."
+            }
+          },
+          "evidence_note": "Exact renderer endpoint/sample rounding remains unresolved. Human SOAs are directly printed and do not require replacing them with model simulation times.",
+          "missing_required_components": [
+            "rendering_endpoint_and_rounding"
+          ],
+          "derivation_note": "Nominal full-path duration = reported 2-m extent divided by 0.25 or 0.75 m/s. This is not an observed WAV length."
+        },
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Randomly intermixed AT targets, T-only baseline trials and A-only catches, at both speeds.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Seven AT distance cells, two T-only temporal anchors and one A-only catch cell per speed."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Sound starts before one 100-ms touch at the specified delay. T-only omits sound; A-only omits touch. Respond only to touch."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "All trial types randomized."
+            }
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Rapid tactile detection using a right-hand-held wireless XBOX 360 controller; withhold on auditory-only catches.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Touch requires response; sound alone requires withholding."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Wireless XBOX 360 gamepad; the paper reports 215-Hz sampling."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Press a gamepad button when touch is detected; exact button/finger not specified."
+            }
+          },
+          "evidence_note": "RT exclusions below 200 or above 900 ms are analysis rules, not an acquired response timeout or measured hardware latency.",
+          "missing_required_components": [
+            "response_window_and_anchor",
+            "exact_button_mapping"
+          ]
+        },
+        "jitter_iti_policy": {
+          "status": "not_reported",
+          "value": "No human intertrial interval or jitter policy is specified in the reviewed Methods.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_reported",
+              "value": "No human acquisition interval specification; model integration steps are not ITI."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "No human acquisition interval specification; model integration steps are not ITI."
+            },
+            "values_or_range": {
+              "status": "not_reported",
+              "value": "No human acquisition interval specification; model integration steps are not ITI."
+            }
+          },
+          "evidence_note": "Do not substitute the cited predecessor ITI or the model simulation clock."
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "Slow SOAs: 1000, 2000, 3000, 4000, 5000, 6000, 7000 ms. Fast SOAs: 330, 660, 1000, 1330, 1660, 2000, 2330 ms.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Touch delay from sound onset; positive means touch after sound."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "At both speeds T1 through T7 map to distances 175, 150, 125, 100, 75, 50, 25 cm. Preserve the printed fast timings; do not replace them with exact thirds."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Looming only: later touch corresponds to nearer sound."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "100-ms Precision MicroDrives 312-101 motor activation at upper chest at sternum.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile motor."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Upper chest at sternum."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Nominal motor: 3 V, 60 mA, 150 Hz, 5 g, 113 mm2 surface, 50 ms to maximal rotation; 100-ms activation."
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "Measured skin displacement/intensity, onset latency and individual calibration are not supplied."
+            }
+          },
+          "evidence_note": "Motor specifications do not establish constant skin-level onset waveform or native equivalence.",
+          "missing_required_components": [
+            "delivered_waveform_and_intensity_calibration"
+          ]
+        },
+        "baseline_trial_contract": {
+          "status": "derived_complete",
+          "value": "64 tactile-only baseline trials: two endpoint-equivalent timings per speed, each repeated 16 times.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_endpoint_baseline"
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Slow 1000/7000 ms and fast 330/2330 ms relative to the corresponding trial sound-onset position; no auditory signal is delivered."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Two timing anchors x two speeds x 16 repetitions."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "64."
+            }
+          },
+          "evidence_note": "Both baseline conditions are actually acquired. Subtracting the faster baseline median within participant/velocity is an analysis choice.",
+          "derivation_note": "2 endpoint timings x 2 speeds x 16 repetitions = 64 tactile-only trials."
+        },
+        "catch_trial_contract": {
+          "status": "derived_complete",
+          "value": "32 auditory-only/no-touch catches require withholding.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_no_go"
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No touch; no button press."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "One catch cell per speed, repeated 16 times."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "32."
+            }
+          },
+          "derivation_note": "1 catch cell x 2 speeds x 16 repetitions = 32 catches."
+        },
+        "repetition_allocation": {
+          "status": "derived_complete",
+          "value": "320 trials per participant: 224 AT targets, 64 T-only baselines and 32 A-only catches.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Two speeds within subject; seven AT distances, two baseline timings and one catch cell. Face/trunk is between subjects."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "derived",
+              "value": "2 x (7 + 2 + 1) x 16 = 320."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Face cohort 16; trunk 16 recruited and 15 analyzed after one technical exclusion. Each participant performs one body-target protocol."
+            }
+          },
+          "derivation_note": "AT: 2 x 7 x 16 = 224; baseline: 2 x 2 x 16 = 64; catch: 2 x 1 x 16 = 32; total 320."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "All trial types randomized; exact block partition, breaks and randomization algorithm/seed are unspecified.",
+          "page_or_section": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_reported",
+              "value": "No numerical block partition supplied."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "320-trial acquisition includes both velocities and all three families."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "All trial types randomized."
+            }
+          },
+          "evidence_note": "Two velocities or two cohorts do not imply two within-participant blocks.",
+          "missing_required_components": [
+            "block_count",
+            "block_order_or_counterbalancing"
+          ]
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.neuropsychologia.2020.107579::a",
+      "source_type": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
+      "source_file": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+      "review_date": "2026-10-27",
+      "review_scope": "All eleven contracts explicitly audited against accessible primary excerpts and actual failed full-text routes; no claim of complete Methods access.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "outcome": "Indexed primary publisher preview exposes author abstract and selected Methods/analysis paragraphs. It establishes 70 included participants, 35 new participants in Experiment 2, but not full acquisition parameters."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/abs/pii/S0028393220302529",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://air.unipr.it/handle/11381/2879719",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://ricerca.unich.it/handle/11564/767635?mode=complete",
+          "outcome": "Search-index metadata saysfulltextreserved/archive-manageronly; directweb403. No restricted PDF requested."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unimore.it/retrieve/e31e124f-58b6-987f-e053-3705fe0a095a/Tesi_Ferroni%20Francesca.pdf",
+          "outcome": "Primaryauthor thesisrouteweb/native403; no chapterdata borrowed."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.openalex.org/works/https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "outcome": "Metadata givespublisher/PubMedonly; no alternativeOAfulltext."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "Looming and static sounds appear in the accessible analysis excerpt; exact waveform, duration, level and renderer require full Methods.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {},
+          "missing_required_components": [
+            "source_mode",
+            "stimulus_identity_or_asset",
+            "source_recipe_or_asset_provenance"
+          ]
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Dynamic/looming versus static stimuli are named; exact path, distances and timing are unavailable.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {},
+          "missing_required_components": [
+            "motion_mode",
+            "coordinate_frame_body_anchor",
+            "geometry",
+            "timing_constraint"
+          ]
+        },
+        "trial_sequence": {
+          "status": "partial",
+          "value": "PPS assessed before and after actual tool use; exhaustive within-trial/family list unavailable.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {},
+          "missing_required_components": [
+            "trial_families",
+            "ordered_elements_and_source_selection"
+          ]
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Tactile target RTs are assessed at delays relative to looming sound. Response device, button/finger and acquisition deadline are inaccessible.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {},
+          "missing_required_components": [
+            "target_and_nontarget_rule",
+            "response_mode_or_device",
+            "response_mapping_or_expected_action",
+            "response_window_and_anchor"
+          ]
+        },
+        "jitter_iti_policy": {
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            }
+          },
+          "missing_required_components": [
+            "policy_type",
+            "timing_scope_and_anchor",
+            "values_or_range"
+          ]
+        },
+        "soa_schedule": {
+          "status": "partial",
+          "value": "Multiple tactile delays relative to looming-sound onset are described; exact delays are not exposed.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {},
+          "missing_required_components": [
+            "reference_event_and_sign",
+            "ordered_soa_values_or_derivable_distance_anchors"
+          ]
+        },
+        "tactile_target": {
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            }
+          },
+          "missing_required_components": [
+            "modality",
+            "body_site_and_side",
+            "waveform_and_duration"
+          ]
+        },
+        "baseline_trial_contract": {
+          "status": "partial",
+          "value": "Baseline in the accessible analysis means pre-training assessment. A static-sound comparison is named, but this does not establish a tactile-only family or its timing.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {},
+          "missing_required_components": [
+            "family_or_explicit_none",
+            "timing_and_anchor",
+            "allocation_rule",
+            "resolved_trial_count"
+          ]
+        },
+        "catch_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            }
+          },
+          "missing_required_components": [
+            "family_or_explicit_none",
+            "target_role_and_expected_action",
+            "allocation_rule",
+            "resolved_trial_count"
+          ]
+        },
+        "repetition_allocation": {
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            }
+          },
+          "missing_required_components": [
+            "factor_dimensions",
+            "repetitions_or_exact_counts",
+            "exceptions_or_overrides"
+          ]
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "PPS is measured before and after actual tool use. Relative-high/low schizotypy classifications do not define additional experiments; exact blocks/order unavailable.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {},
+          "missing_required_components": [
+            "block_count",
+            "block_composition"
+          ]
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.neuropsychologia.2020.107579::b",
+      "source_type": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
+      "source_file": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+      "review_date": "2026-10-27",
+      "review_scope": "All eleven contracts explicitly audited against accessible primary excerpts and actual failed full-text routes; no claim of complete Methods access.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "outcome": "Indexed primary publisher preview exposes author abstract and selected Methods/analysis paragraphs. It establishes 70 included participants, 35 new participants in Experiment 2, but not full acquisition parameters."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/abs/pii/S0028393220302529",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://air.unipr.it/handle/11381/2879719",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://ricerca.unich.it/handle/11564/767635?mode=complete",
+          "outcome": "Search-index metadata saysfulltextreserved/archive-manageronly; directweb403. No restricted PDF requested."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unimore.it/retrieve/e31e124f-58b6-987f-e053-3705fe0a095a/Tesi_Ferroni%20Francesca.pdf",
+          "outcome": "Primaryauthor thesisrouteweb/native403; no chapterdata borrowed."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.openalex.org/works/https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "outcome": "Metadata givespublisher/PubMedonly; no alternativeOAfulltext."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "Looming and static sounds appear in the accessible analysis excerpt; exact waveform, duration, level and renderer require full Methods.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {},
+          "missing_required_components": [
+            "source_mode",
+            "stimulus_identity_or_asset",
+            "source_recipe_or_asset_provenance"
+          ]
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Dynamic/looming versus static stimuli are named; exact path, distances and timing are unavailable.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {},
+          "missing_required_components": [
+            "motion_mode",
+            "coordinate_frame_body_anchor",
+            "geometry",
+            "timing_constraint"
+          ]
+        },
+        "trial_sequence": {
+          "status": "partial",
+          "value": "PPS assessed before and after observed tool use; exhaustive within-trial/family list unavailable.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {},
+          "missing_required_components": [
+            "trial_families",
+            "ordered_elements_and_source_selection"
+          ]
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Tactile target RTs are assessed at delays relative to looming sound. Response device, button/finger and acquisition deadline are inaccessible.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {},
+          "missing_required_components": [
+            "target_and_nontarget_rule",
+            "response_mode_or_device",
+            "response_mapping_or_expected_action",
+            "response_window_and_anchor"
+          ]
+        },
+        "jitter_iti_policy": {
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            }
+          },
+          "missing_required_components": [
+            "policy_type",
+            "timing_scope_and_anchor",
+            "values_or_range"
+          ]
+        },
+        "soa_schedule": {
+          "status": "partial",
+          "value": "Multiple tactile delays relative to looming-sound onset are described; exact delays are not exposed.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {},
+          "missing_required_components": [
+            "reference_event_and_sign",
+            "ordered_soa_values_or_derivable_distance_anchors"
+          ]
+        },
+        "tactile_target": {
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            }
+          },
+          "missing_required_components": [
+            "modality",
+            "body_site_and_side",
+            "waveform_and_duration"
+          ]
+        },
+        "baseline_trial_contract": {
+          "status": "partial",
+          "value": "Baseline in the accessible analysis means pre-training assessment. A static-sound comparison is named, but this does not establish a tactile-only family or its timing.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {},
+          "missing_required_components": [
+            "family_or_explicit_none",
+            "timing_and_anchor",
+            "allocation_rule",
+            "resolved_trial_count"
+          ]
+        },
+        "catch_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            }
+          },
+          "missing_required_components": [
+            "family_or_explicit_none",
+            "target_role_and_expected_action",
+            "allocation_rule",
+            "resolved_trial_count"
+          ]
+        },
+        "repetition_allocation": {
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            },
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked."
+            }
+          },
+          "missing_required_components": [
+            "factor_dimensions",
+            "repetitions_or_exact_counts",
+            "exceptions_or_overrides"
+          ]
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "PPS is measured before and after observed tool use. Relative-high/low schizotypy classifications do not define additional experiments; exact blocks/order unavailable.",
+          "page_or_section": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidence_note": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "component_reviews": {},
+          "missing_required_components": [
+            "block_count",
+            "block_composition"
+          ]
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.schres.2021.06.026",
+      "source_type": "accepted_author_manuscript_final_comparison_pending",
+      "source_file": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "Computational scope reviewed in identified accepted manuscript; eleven explicit non-acquisition dispositions. No source-code execution or final-version parity claim.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf",
+          "outcome": "Institutional accepted manuscript readable through web source; Methods 2.1-2.4 and modeling results inspected. Direct native PDF fetch returned 403; this does not negate the actual web access."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://github.com/renatoparedes/SCZ_PPS_Model/blob/357613bbe147c2eaec8ef218b058a50c523617b3/README.md",
+          "outcome": "Pinned current README and file inventory inspected; no notebooks executed and no participant spreadsheet acquired. This revision postdates publication and is not verified publication-era code."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Cited human-task summary describes 3000-ms sounds with a 55–70 dB exponential rise; this computational paper does not generate new empirical acquisition audio.",
+          "page_or_section": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidence_note": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "30 cm/s is an explicit model assumption because the empirical speed was not reported. Seven delays map to model spatial inputs; this is not a measured moving-source trajectory.",
+          "page_or_section": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidence_note": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "The model fits existing behavioral curves and manipulates neural architecture/noise. No new acquired human trial stream.",
+          "page_or_section": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidence_note": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            }
+          }
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Model RT is a tactile-neuron activation threshold crossing at 90% maximum, then linearly rescaled to behavioral data; it is not a participant button timestamp.",
+          "page_or_section": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidence_note": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "No new human acquisition interval. Model integration/simulation times are not ITI settings.",
+          "page_or_section": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidence_note": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Seven delays between 300 and 2700 ms are represented in the model. Human acquisition parameters belong to the cited empirical source, not a new study here.",
+          "page_or_section": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidence_note": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Model represents a 10 x 5 cm left-hand skin area while describing the prior task as right-hand stimulation. Its 100-ms neural inputs differ from the cited 100-microsecond stimulation; these are model conventions.",
+          "page_or_section": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidence_note": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "The healthy-control network fitted to an existing average curve is a model baseline, not an extra human control trial.",
+          "page_or_section": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidence_note": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            }
+          }
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "No new human catch/no-go acquisition. A simulation paper cannot establish catch absence in the original experiment.",
+          "page_or_section": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidence_note": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "Parameter explorations and fits are simulations; no newly recruited cohort or new human repetition allocation.",
+          "page_or_section": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidence_note": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "E/I balance, feedback/pruning and two-point tactile-discrimination predictions are model analyses, not new human blocks.",
+          "page_or_section": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidence_note": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper."
+            }
+          }
+        }
+      }
     }
   ]
 }

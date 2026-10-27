@@ -1518,8 +1518,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract velocity levels, peri-face/peri-trunk mapping, timing, tactile settings, response settings, and whether the psychophysical task reuses an existing dynamic PPS scaffold"
-      ]
+        "Original broadband source realization and level reference; exact cited renderer realization, ITI and acquisition-block partition remain unresolved. Printed speed-specific SOAs and 320-trial allocation are reviewed and must not be replaced by model timings."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+      "scope_review_basis": "Two body-target cohort protocols separately reviewed; model conditions are not extra human experiments."
     },
     {
       "record_id": "pfeiffer_2018_vestibular",

@@ -30,12 +30,12 @@ doi:10.1016/j.neuropsychologia.2014.09.043,yes,primary_methods_reviewed,confirme
 doi:10.1016/j.neuropsychologia.2014.10.027,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1016/j.neuropsychologia.2015.03.001,yes,retained_primary_methods_review,confirmed_total,2,2,yes,yes,"artifacts/paper_metadata_audit/publication_pdfs/doi_10.1016_j.neuropsychologia.2015.03.001__8a3e82fe7431.pdf::PDF pp.1,8-13; parsimonious_source_reviews.v1.json::doi:10.1016/j.neuropsychologia.2015.03.001::a,b",2026-10-27
 doi:10.1016/j.neuropsychologia.2017.07.018,yes,retained_primary_methods_review,confirmed_main_audio_tactile_experiment,1,0,no,no,https://doi.org/10.1016/j.neuropsychologia.2017.07.018::Methods; manual_reviews/biggio_2017_racket_tool_use.json::segment_2_sequence_and_intermixing;segment_4_counts,2026-10-27
-doi:10.1016/j.neuropsychologia.2020.107579,no,not_registered,not_assessed,1,0,no,no,,
+doi:10.1016/j.neuropsychologia.2020.107579,yes,audited_source_access_gap,two_experiments_from_primary_excerpt_full_methods_access_blocked,2,2,yes,yes,https://www.sciencedirect.com/science/article/pii/S0028393220302529::publisher abstract and selected Methods/analysis excerpt,2026-10-27
 doi:10.1016/j.neuropsychologia.2020.107622,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1016/j.neuropsychologia.2021.107823,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1016/j.neuropsychologia.2026.109490,yes,abstract_or_metadata_inventory,confirmed_total,4,0,no,no,paper_audits/ferroni_2026_pps_plasticity.md; publication_network.v3.json::doi:10.1016/j.neuropsychologia.2026.109490,2026-10-27
 doi:10.1016/j.nicl.2019.101940,yes,retained_primary_methods_review,confirmed_total,2,2,yes,yes,manual_reviews/disorders_consciousness_2019.json,2026-10-27
-doi:10.1016/j.schres.2021.06.026,no,not_registered,not_assessed,1,0,no,no,,
+doi:10.1016/j.schres.2021.06.026,yes,author_version_methods_reviewed_final_comparison_pending,no_new_human_acquisition_computational_context,1,1,yes,yes,"https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf::Methods 2.1-2.4, PDF pp. 6-10",2026-10-27
 doi:10.1016/j.tics.2016.01.005,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1016/j.xcrm.2026.102705,yes,primary_methods_reviewed,confirmed_two_cohort_specific_pps_experiments,2,2,yes,yes,"https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13130652/fullTextXML::STARMethods, participant/protocol sections; publisherPDFpp.15-18/e1-e4",2026-10-27
 doi:10.1038/s41598-019-45084-4,yes,primary_methods_reviewed,confirmed_pilot_and_main_experiment,2,2,yes,yes,https://pure-oai.bham.ac.uk/ws/portalfiles/portal/70592622/Orioli_et_al_Identifying_peripersonal_space_Scientific_Reports_2019.pdf::Results/Pilot study and Study 1; Methods pp. 8-9; Table 4 and Figure 3,2026-10-27
@@ -66,7 +66,7 @@ doi:10.1109/whc.2017.7989970,yes,audited_source_access_gap,source_access_blocked
 doi:10.1111/ejn.13872,yes,abstract_or_metadata_inventory,confirmed_total,3,0,no,no,publication_network.v3.json::doi:10.1111/ejn.13872; metadata_audit.jsonl::pfeiffer_2018_vestibular,2026-10-27
 doi:10.1111/j.1460-9568.2010.07210.x,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1111/j.1467-9280.2007.01952.x,yes,retained_primary_methods_review,confirmed_main_audio_tactile_experiment,1,0,no,no,https://doi.org/10.1111/j.1467-9280.2007.01952.x::Methods; manual_reviews/serino_2007_blind_cane_users.json::segment_2_sequence_and_intermixing;segment_4_counts,2026-10-27
-doi:10.1152/jn.00652.2017,no,not_registered,not_assessed,1,0,no,no,,
+doi:10.1152/jn.00652.2017,yes,primary_methods_reviewed,confirmed_two_body_target_cohort_protocols,2,2,yes,yes,https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML::Human Methods; PDF pp. 2-3,2026-10-27
 doi:10.1162/089892902320474481,yes,retained_primary_methods_review,confirmed_total,2,2,yes,yes,manual_reviews/farne_ladavas_2002_auditory_pps_humans.json,2026-10-27
 doi:10.1162/jocn_a_00006,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1163/22134808-000s0136,no,not_registered,not_assessed,1,0,no,no,,

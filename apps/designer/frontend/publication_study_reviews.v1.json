@@ -10,23 +10,23 @@
   },
   "counts": {
     "publications": 94,
-    "studies": 144,
-    "contracts": 1584,
-    "reportedComplete": 293,
-    "derivedComplete": 57,
+    "studies": 146,
+    "contracts": 1606,
+    "reportedComplete": 297,
+    "derivedComplete": 63,
     "parameterStatusCounts": {
-      "approximation_required": 32,
+      "approximation_required": 34,
       "composite_requires_split": 146,
       "conflicting_evidence": 43,
-      "derived_complete": 57,
+      "derived_complete": 63,
       "explicitly_absent": 22,
-      "low_confidence": 20,
-      "not_applicable": 121,
-      "not_assessed": 242,
-      "not_reported": 42,
-      "partial": 334,
-      "reported_complete": 293,
-      "source_unavailable": 232
+      "low_confidence": 10,
+      "not_applicable": 132,
+      "not_assessed": 220,
+      "not_reported": 44,
+      "partial": 356,
+      "reported_complete": 297,
+      "source_unavailable": 239
     }
   },
   "statusLegend": {
@@ -55,6 +55,10 @@
       "doi:10.1016/j.cortex.2021.08.004::b",
       "doi:10.1016/j.cortex.2021.08.004::c"
     ],
+    "doi:10.1016/j.neuropsychologia.2020.107579": [
+      "doi:10.1016/j.neuropsychologia.2020.107579::a",
+      "doi:10.1016/j.neuropsychologia.2020.107579::b"
+    ],
     "doi:10.1038/s41598-019-45084-4": [
       "doi:10.1038/s41598-019-45084-4::a",
       "doi:10.1038/s41598-019-45084-4::b"
@@ -75,6 +79,10 @@
     "doi:10.1101/2024.10.25.619776": [
       "doi:10.1101/2024.10.25.619776::a",
       "doi:10.1101/2024.10.25.619776::b"
+    ],
+    "doi:10.1152/jn.00652.2017": [
+      "doi:10.1152/jn.00652.2017::a",
+      "doi:10.1152/jn.00652.2017::b"
     ],
     "doi:10.1250/ast.41.345": [
       "doi:10.1250/ast.41.345::a",
@@ -783,21 +791,23 @@
     {
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2020.107579",
       "studyIds": [
-        "doi:10.1016/j.neuropsychologia.2020.107579"
+        "doi:10.1016/j.neuropsychologia.2020.107579::a",
+        "doi:10.1016/j.neuropsychologia.2020.107579::b"
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "partial": 14,
+        "source_unavailable": 8
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
-        "registered": false,
-        "evidenceStatus": "not_registered",
-        "inventoryStatus": "not_assessed",
-        "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "registered": true,
+        "evidenceStatus": "audited_source_access_gap",
+        "inventoryStatus": "two_experiments_from_primary_excerpt_full_methods_access_blocked",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -892,17 +902,17 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "not_applicable": 11
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
-        "registered": false,
-        "evidenceStatus": "not_registered",
-        "inventoryStatus": "not_assessed",
+        "registered": true,
+        "evidenceStatus": "author_version_methods_reviewed_final_comparison_pending",
+        "inventoryStatus": "no_new_human_acquisition_computational_context",
         "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -1590,22 +1600,26 @@
     {
       "networkNodeId": "doi:10.1152/jn.00652.2017",
       "studyIds": [
-        "doi:10.1152/jn.00652.2017"
+        "doi:10.1152/jn.00652.2017::a",
+        "doi:10.1152/jn.00652.2017::b"
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "low_confidence": 10,
-        "source_unavailable": 1
+        "approximation_required": 2,
+        "derived_complete": 6,
+        "not_reported": 2,
+        "partial": 8,
+        "reported_complete": 4
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
-        "registered": false,
-        "evidenceStatus": "not_registered",
-        "inventoryStatus": "not_assessed",
-        "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_two_body_target_cohort_protocols",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -17423,31 +17437,32 @@
       ]
     },
     {
-      "studyRowId": "doi:10.1016/j.neuropsychologia.2020.107579",
+      "studyRowId": "doi:10.1016/j.neuropsychologia.2020.107579::a",
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2020.107579",
-      "label": "Schizotypy and individual differences in peripersonal space plasticity.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Schizotypy and individual differences in peripersonal space plasticity. (a)",
+      "experimentLabel": "Experiment 1: actual tool use (partial primary Methods)",
+      "inventoryStatus": "two_experiments_from_primary_excerpt_full_methods_access_blocked",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "partial": 7,
+        "source_unavailable": 4
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Looming and static sounds appear in the accessible analysis excerpt; exact waveform, duration, level and renderer require full Methods.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
           "missingComponents": [
             "source_mode",
             "stimulus_identity_or_asset",
@@ -17458,16 +17473,16 @@
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Dynamic/looming versus static stimuli are named; exact path, distances and timing are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
           "missingComponents": [
             "motion_mode",
             "coordinate_frame_body_anchor",
@@ -17479,16 +17494,16 @@
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "PPS assessed before and after actual tool use; exhaustive within-trial/family list unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
           "missingComponents": [
             "trial_families",
             "ordered_elements_and_source_selection"
@@ -17498,16 +17513,16 @@
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Tactile target RTs are assessed at delays relative to looming sound. Response device, button/finger and acquisition deadline are inaccessible.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
           "missingComponents": [
             "target_and_nontarget_rule",
             "response_mode_or_device",
@@ -17519,36 +17534,52 @@
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
             "values_or_range"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Multiple tactile delays relative to looming-sound onset are described; exact delays are not exposed.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
           "missingComponents": [
             "reference_event_and_sign",
             "ordered_soa_values_or_derivable_distance_anchors"
@@ -17558,36 +17589,52 @@
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "not_assessed",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
           "missingComponents": [
             "modality",
             "body_site_and_side",
             "waveform_and_duration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Baseline in the accessible analysis means pre-training assessment. A static-sound comparison is named, but this does not establish a tactile-only family or its timing.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
           "missingComponents": [
             "family_or_explicit_none",
             "timing_and_anchor",
@@ -17599,57 +17646,400 @@
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
           "missingComponents": [
             "family_or_explicit_none",
             "target_role_and_expected_action",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "not_assessed",
-          "value": "",
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
           "missingComponents": [
             "factor_dimensions",
             "repetitions_or_exact_counts",
             "exceptions_or_overrides"
           ],
-          "components": {}
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "PPS is measured before and after actual tool use. Relative-high/low schizotypy classifications do not define additional experiments; exact blocks/order unavailable.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
+          "missingComponents": [
+            "block_count",
+            "block_composition"
+          ],
+          "components": {}
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1016/j.neuropsychologia.2020.107579::b",
+      "networkNodeId": "doi:10.1016/j.neuropsychologia.2020.107579",
+      "label": "Schizotypy and individual differences in peripersonal space plasticity. (b)",
+      "experimentLabel": "Experiment 2: observed tool use (partial primary Methods)",
+      "inventoryStatus": "two_experiments_from_primary_excerpt_full_methods_access_blocked",
+      "evidenceScope": "study_specific_source_review",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "partial": 7,
+        "source_unavailable": 4
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "partial",
+          "value": "Looming and static sounds appear in the accessible analysis excerpt; exact waveform, duration, level and renderer require full Methods.",
+          "compositeValue": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
+          "missingComponents": [
+            "source_mode",
+            "stimulus_identity_or_asset",
+            "source_recipe_or_asset_provenance"
+          ],
+          "components": {}
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "partial",
+          "value": "Dynamic/looming versus static stimuli are named; exact path, distances and timing are unavailable.",
+          "compositeValue": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
+          "missingComponents": [
+            "motion_mode",
+            "coordinate_frame_body_anchor",
+            "geometry",
+            "timing_constraint"
+          ],
+          "components": {}
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "partial",
+          "value": "PPS assessed before and after observed tool use; exhaustive within-trial/family list unavailable.",
+          "compositeValue": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
+          "missingComponents": [
+            "trial_families",
+            "ordered_elements_and_source_selection"
+          ],
+          "components": {}
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "partial",
+          "value": "Tactile target RTs are assessed at delays relative to looming sound. Response device, button/finger and acquisition deadline are inaccessible.",
+          "compositeValue": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
+          "missingComponents": [
+            "target_and_nontarget_rule",
+            "response_mode_or_device",
+            "response_mapping_or_expected_action",
+            "response_window_and_anchor"
+          ],
+          "components": {}
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
+          "compositeValue": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
+          "missingComponents": [
+            "policy_type",
+            "timing_scope_and_anchor",
+            "values_or_range"
+          ],
+          "components": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "partial",
+          "value": "Multiple tactile delays relative to looming-sound onset are described; exact delays are not exposed.",
+          "compositeValue": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
+          "missingComponents": [
+            "reference_event_and_sign",
+            "ordered_soa_values_or_derivable_distance_anchors"
+          ],
+          "components": {}
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
+          "compositeValue": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
+          "missingComponents": [
+            "modality",
+            "body_site_and_side",
+            "waveform_and_duration"
+          ],
+          "components": {
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "partial",
+          "value": "Baseline in the accessible analysis means pre-training assessment. A static-sound comparison is named, but this does not establish a tactile-only family or its timing.",
+          "compositeValue": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
+          "missingComponents": [
+            "family_or_explicit_none",
+            "timing_and_anchor",
+            "allocation_rule",
+            "resolved_trial_count"
+          ],
+          "components": {}
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
+          "compositeValue": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
+          "missingComponents": [
+            "family_or_explicit_none",
+            "target_role_and_expected_action",
+            "allocation_rule",
+            "resolved_trial_count"
+          ],
+          "components": {
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "source_unavailable",
+          "value": "Full Methods/SI remains inaccessible through the documented routes; exact acquisition contract unresolved.",
+          "compositeValue": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
+          "missingComponents": [
+            "factor_dimensions",
+            "repetitions_or_exact_counts",
+            "exceptions_or_overrides"
+          ],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Full primary Methods/SI access blocked.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "partial",
+          "value": "PPS is measured before and after observed tool use. Relative-high/low schizotypy classifications do not define additional experiments; exact blocks/order unavailable.",
+          "compositeValue": "",
+          "pageOrSection": "Primary publisher abstract and indexed Methods/analysis excerpts; no full Methods/SI review",
+          "evidenceNote": "Do not fill blocked fields from neighboring publications or toolkit defaults. Included sample is 35 per experiment; recruitment/exclusion totals are unresolved.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "sourceType": "partial_primary_publisher_excerpt_with_audited_full_text_access_gap",
           "missingComponents": [
             "block_count",
             "block_composition"
@@ -19823,236 +20213,372 @@
     {
       "studyRowId": "doi:10.1016/j.schres.2021.06.026",
       "networkNodeId": "doi:10.1016/j.schres.2021.06.026",
-      "label": "Influence of E/I balance and pruning in peri-personal space differences in schizophrenia: A computational approach.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Influence of E/I balance and pruning in peri-personal space differences in schizophrenia: A computational approach. (a)",
+      "experimentLabel": "Computational model fitted to prior data; no new human acquisition",
+      "inventoryStatus": "no_new_human_acquisition_computational_context",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "not_applicable": 11
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Cited human-task summary describes 3000-ms sounds with a 55–70 dB exponential rise; this computational paper does not generate new empirical acquisition audio.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidenceNote": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.schres.2021.06.026",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
-            "source_recipe_or_asset_provenance"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "30 cm/s is an explicit model assumption because the empirical speed was not reported. Seven delays map to model spatial inputs; this is not a measured moving-source trajectory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidenceNote": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.schres.2021.06.026",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "The model fits existing behavioral curves and manipulates neural architecture/noise. No new acquired human trial stream.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidenceNote": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.schres.2021.06.026",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Model RT is a tactile-neuron activation threshold crossing at 90% maximum, then linearly rescaled to behavioral data; it is not a participant button timestamp.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidenceNote": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.schres.2021.06.026",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
-            "response_window_and_anchor"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "No new human acquisition interval. Model integration/simulation times are not ITI settings.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidenceNote": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.schres.2021.06.026",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Seven delays between 300 and 2700 ms are represented in the model. Human acquisition parameters belong to the cited empirical source, not a new study here.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidenceNote": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.schres.2021.06.026",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Model represents a 10 x 5 cm left-hand skin area while describing the prior task as right-hand stimulation. Its 100-ms neural inputs differ from the cited 100-microsecond stimulation; these are model conventions.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidenceNote": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.schres.2021.06.026",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "The healthy-control network fitted to an existing average curve is a model baseline, not an extra human control trial.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidenceNote": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.schres.2021.06.026",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "No new human catch/no-go acquisition. A simulation paper cannot establish catch absence in the original experiment.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidenceNote": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.schres.2021.06.026",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Parameter explorations and fits are simulations; no newly recruited cohort or new human repetition allocation.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidenceNote": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.schres.2021.06.026",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "E/I balance, feedback/pruning and two-point tactile-discrimination predictions are model analyses, not new human blocks.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript Methods 2.1-2.4 and Results, PDF pp. 6-10; final/SI comparison pending",
+          "evidenceNote": "Explicit computational context outside direct human audio-tactile acquisition. Not-applicable does not erase the original empirical study or make model assumptions reported human parameters.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.schres.2021.06.026",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "block_count",
-            "block_composition"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "No new human acquisition in this computational paper.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -37638,239 +38164,838 @@
       ]
     },
     {
-      "studyRowId": "doi:10.1152/jn.00652.2017",
+      "studyRowId": "doi:10.1152/jn.00652.2017::a",
       "networkNodeId": "doi:10.1152/jn.00652.2017",
-      "label": "Neural adaptation accounts for the dynamic resizing of peripersonal space: evidence from a psychophysical-computational approach.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Neural adaptation accounts for the dynamic resizing of peripersonal space: evidence from a psychophysical-computational approach. (a)",
+      "experimentLabel": "Peri-face cohort: two looming speeds",
+      "inventoryStatus": "confirmed_two_body_target_cohort_protocols",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "low_confidence": 10,
-        "source_unavailable": 1
+        "approximation_required": 1,
+        "derived_complete": 3,
+        "not_reported": 1,
+        "partial": 4,
+        "reported_complete": 2
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "source_unavailable",
-          "value": "Auditory conditions: Auto-mined candidates: approaching; IN sound; front; rear; left; right | Renderer or apparatus: Auto-mined candidates: loudspeaker(s); speaker(s); virtual audio source",
+          "status": "approximation_required",
+          "value": "Dynamic broadband noise at reported constant loudness of 50 dB, using two arrays of eight speakers.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 16, 3, 2 | source page/section(s) 3, 6, 1",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "The reviewed Serino supplement partly specifies synthesis but has competing Gaussian/equation/prose gain laws. That lineage does not establish the exact current constant-level realization.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
           "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
-            "source_recipe_or_asset_provenance"
+            "source_recipe_or_asset_provenance",
+            "renderer_apparatus"
           ],
-          "components": {}
+          "components": {
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "Reported constant loudness 50 dB does not specify reference/SPL calibration or the relation to the cited variable-gain renderer.",
+              "note": ""
+            },
+            "renderer_apparatus": {
+              "status": "approximation_required",
+              "value": "Two arrays of eight JBL Control 1 Pro WH speakers, M-Audio Fast Track Ultra 8R; arrays 50 cm to either side and extend 2 m forward at target height. Cited algorithm has unresolved gain descriptions.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "reported",
+              "value": "generated",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "approximation_required",
+              "value": "Original waveform, sampling rate, spectral shaping and exact level reference/calibration unresolved. Movement algorithm is explicitly referred to Serino 2015b, DOI 10.1038/srep18603.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Broadband noise; source does not specify white-noise or pink-noise identity for this acquisition.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "low_confidence",
-          "value": "Trajectory path: Auto-mined candidates: approaching trajectory; 0 cm; 10 cm; 400 cm | Stimulus duration: Auto-mined candidates: duration relative to sound onset; 500 ms; 200 ms; 100 ms; 1 s; 2 s; 0.66 s; 1.00 s; 1.33 s; 1.66 s; 2.33 s; 15 s | Stimulus speed: Auto-mined candidates: 75 cm/s | Trajectory count: Auto-mined candidates: four body-relative directions | Renderer or apparatus: Auto-mined candidates: loudspeaker(s); speaker(s); virtual audio source",
+          "status": "partial",
+          "value": "Looming sound over 2 m at 25 or 75 cm/s; sampled body distances 175, 150, 125, 100, 75, 50 and 25 cm.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 3, 6, 5 | source page/section(s) 22, 11, 3 | source page/section(s) 3, 6, 8 | source page/section(s) 2, 3, 8 | source page/section(s) 3, 6, 1",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "Exact renderer endpoint/sample rounding remains unresolved. Human SOAs are directly printed and do not require replacing them with model simulation times.",
+          "derivationNote": "Nominal full-path duration = reported 2-m extent divided by 0.25 or 0.75 m/s. This is not an observed WAV length.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
           "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
+            "rendering_endpoint_and_rounding"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Forehead height; participant blindfolded at the end of the speaker arrays.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Two-metre approach; samples proceed from 175 to 25 cm from the participant.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "looming",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "derived",
+              "value": "Nominal full traversal: 2/0.25 = 8 s; 2/0.75 = 2.666666... s.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "low_confidence",
-          "value": "Trial rows families: Auto-mined candidates: audio-tactile trials; unimodal tactile trials; catch trials; baseline trials | Task sequence rules: Auto-mined candidates: catch/no-target trials | Condition intermixing: Auto-mined candidates: randomized",
+          "status": "reported_complete",
+          "value": "Randomly intermixed AT targets, T-only baseline trials and A-only catches, at both speeds.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 3, 12, 13 | source page/section(s) 3, 11, 15",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [],
+          "components": {
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "All trial types randomized.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Sound starts before one 100-ms touch at the specified delay. T-only omits sound; A-only omits touch. Respond only to touch.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Seven AT distance cells, two T-only temporal anchors and one A-only catch cell per speed.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "low_confidence",
-          "value": "Task sequence rules: Auto-mined candidates: catch/no-target trials | Response window: Auto-mined candidates: button response",
+          "status": "partial",
+          "value": "Rapid tactile detection using a right-hand-held wireless XBOX 360 controller; withhold on auditory-only catches.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 3, 12, 13 | source page/section(s) 3, 6, 18",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "RT exclusions below 200 or above 900 ms are analysis rules, not an acquired response timeout or measured hardware latency.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
           "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
-            "response_window_and_anchor"
+            "response_window_and_anchor",
+            "exact_button_mapping"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Press a gamepad button when touch is detected; exact button/finger not specified.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Wireless XBOX 360 gamepad; the paper reports 215-Hz sampling.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Touch requires response; sound alone requires withholding.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "low_confidence",
-          "value": "Iti jitter policy: Auto-mined candidates: 100 ms; 1 s; 2 s; 0.66 s; 1.00 s; 1.33 s; 1.66 s; 2.33 s; 15 s; 1 ms; 100-250 ms",
+          "status": "not_reported",
+          "value": "No human intertrial interval or jitter policy is specified in the reviewed Methods.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 3, 5, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "Do not substitute the cited predecessor ITI or the model simulation clock.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
             "values_or_range"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "not_reported",
+              "value": "No human acquisition interval specification; model integration steps are not ITI.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "No human acquisition interval specification; model integration steps are not ITI.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_reported",
+              "value": "No human acquisition interval specification; model integration steps are not ITI.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "low_confidence",
-          "value": "Soa table: Auto-mined candidates: 100 ms; 200 ms; 500 ms",
+          "status": "reported_complete",
+          "value": "Slow SOAs: 1000, 2000, 3000, 4000, 5000, 6000, 7000 ms. Fast SOAs: 330, 660, 1000, 1330, 1660, 2000, 2330 ms.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 3, 11, 22",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [],
+          "components": {
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Looming only: later touch corresponds to nearer sound.",
+              "note": ""
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "At both speeds T1 through T7 map to distances 175, 150, 125, 100, 75, 50, 25 cm. Preserve the printed fast timings; do not replace them with exact thirds.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Touch delay from sound onset; positive means touch after sound.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "low_confidence",
-          "value": "Tactile stimulus: Auto-mined candidates: 1 ms; 100-250 ms; 100 ms",
+          "status": "partial",
+          "value": "100-ms Precision MicroDrives 312-101 motor activation at forehead.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 6, 5, 10",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "Motor specifications do not establish constant skin-level onset waveform or native equivalence.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
           "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
+            "delivered_waveform_and_intensity_calibration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Forehead.",
+              "note": ""
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "Measured skin displacement/intensity, onset latency and individual calibration are not supplied.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile motor.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Nominal motor: 3 V, 60 mA, 150 Hz, 5 g, 113 mm2 surface, 50 ms to maximal rotation; 100-ms activation.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "low_confidence",
-          "value": "Baseline strategy: Auto-mined candidates: unimodal tactile baseline | Baseline timing: Auto-mined candidates: 100 ms; 1 s; 2 s; 0.66 s; 1.00 s; 1.33 s; 1.66 s; 2.33 s; 15 s; T6 | Baseline count: Auto-mined candidates: 320 trials",
+          "status": "derived_complete",
+          "value": "64 tactile-only baseline trials: two endpoint-equivalent timings per speed, each repeated 16 times.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 13, 3, 18 | source page/section(s) 3, 4, 5 | source page/section(s) 13, 3, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "Both baseline conditions are actually acquired. Subtracting the faster baseline median within participant/velocity is an analysis choice.",
+          "derivationNote": "2 endpoint timings x 2 speeds x 16 repetitions = 64 tactile-only trials.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Two timing anchors x two speeds x 16 repetitions.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_endpoint_baseline",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "64.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Slow 1000/7000 ms and fast 330/2330 ms relative to the corresponding trial sound-onset position; no auditory signal is delivered.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "low_confidence",
-          "value": "Catch trial type: Auto-mined candidates: 320 trials | Catch count: Auto-mined candidates: 320 trials",
+          "status": "derived_complete",
+          "value": "32 auditory-only/no-touch catches require withholding.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 3, 12, 4 | source page/section(s) 3, 12, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "",
+          "derivationNote": "1 catch cell x 2 speeds x 16 repetitions = 32 catches.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "One catch cell per speed, repeated 16 times.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_no_go",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "32.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No touch; no button press.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "low_confidence",
-          "value": "Repetitions per tactile soa condition: Auto-mined candidates: 320 trials; 5 trials | Total trial count: Auto-mined candidates: 320 trials",
+          "status": "derived_complete",
+          "value": "320 trials per participant: 224 AT targets, 64 T-only baselines and 32 A-only catches.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 3, 11, 19 | source page/section(s) 3, 6, 10",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "",
+          "derivationNote": "AT: 2 x 7 x 16 = 224; baseline: 2 x 2 x 16 = 64; catch: 2 x 1 x 16 = 32; total 320.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Face cohort 16; trunk 16 recruited and 15 analyzed after one technical exclusion. Each participant performs one body-target protocol.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Two speeds within subject; seven AT distances, two baseline timings and one catch cell. Face/trunk is between subjects.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "derived",
+              "value": "2 x (7 + 2 + 1) x 16 = 320.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "low_confidence",
-          "value": "Blocked or random order: Auto-mined candidates: randomized/random order | Condition intermixing: Auto-mined candidates: randomized | Total trial count: Auto-mined candidates: 320 trials",
+          "status": "partial",
+          "value": "All trial types randomized; exact block partition, breaks and randomization algorithm/seed are unspecified.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 3, 4, 5 | source page/section(s) 3, 11, 15 | source page/section(s) 3, 6, 10",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "Two velocities or two cohorts do not imply two within-participant blocks.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
           "missingComponents": [
             "block_count",
-            "block_composition"
+            "block_order_or_counterbalancing"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "320-trial acquisition includes both velocities and all three families.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_reported",
+              "value": "No numerical block partition supplied.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "All trial types randomized.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1152/jn.00652.2017::b",
+      "networkNodeId": "doi:10.1152/jn.00652.2017",
+      "label": "Neural adaptation accounts for the dynamic resizing of peripersonal space: evidence from a psychophysical-computational approach. (b)",
+      "experimentLabel": "Peri-trunk cohort: two looming speeds",
+      "inventoryStatus": "confirmed_two_body_target_cohort_protocols",
+      "evidenceScope": "study_specific_source_review",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "approximation_required": 1,
+        "derived_complete": 3,
+        "not_reported": 1,
+        "partial": 4,
+        "reported_complete": 2
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "approximation_required",
+          "value": "Dynamic broadband noise at reported constant loudness of 50 dB, using two arrays of eight speakers.",
+          "compositeValue": "",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "The reviewed Serino supplement partly specifies synthesis but has competing Gaussian/equation/prose gain laws. That lineage does not establish the exact current constant-level realization.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [
+            "source_recipe_or_asset_provenance",
+            "renderer_apparatus"
+          ],
+          "components": {
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "Reported constant loudness 50 dB does not specify reference/SPL calibration or the relation to the cited variable-gain renderer.",
+              "note": ""
+            },
+            "renderer_apparatus": {
+              "status": "approximation_required",
+              "value": "Two arrays of eight JBL Control 1 Pro WH speakers, M-Audio Fast Track Ultra 8R; arrays 50 cm to either side and extend 2 m forward at target height. Cited algorithm has unresolved gain descriptions.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "reported",
+              "value": "generated",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "approximation_required",
+              "value": "Original waveform, sampling rate, spectral shaping and exact level reference/calibration unresolved. Movement algorithm is explicitly referred to Serino 2015b, DOI 10.1038/srep18603.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Broadband noise; source does not specify white-noise or pink-noise identity for this acquisition.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "partial",
+          "value": "Looming sound over 2 m at 25 or 75 cm/s; sampled body distances 175, 150, 125, 100, 75, 50 and 25 cm.",
+          "compositeValue": "",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "Exact renderer endpoint/sample rounding remains unresolved. Human SOAs are directly printed and do not require replacing them with model simulation times.",
+          "derivationNote": "Nominal full-path duration = reported 2-m extent divided by 0.25 or 0.75 m/s. This is not an observed WAV length.",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [
+            "rendering_endpoint_and_rounding"
+          ],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Upper chest at sternum height; participant blindfolded at the end of the speaker arrays.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Two-metre approach; samples proceed from 175 to 25 cm from the participant.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "looming",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "derived",
+              "value": "Nominal full traversal: 2/0.25 = 8 s; 2/0.75 = 2.666666... s.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "reported_complete",
+          "value": "Randomly intermixed AT targets, T-only baseline trials and A-only catches, at both speeds.",
+          "compositeValue": "",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [],
+          "components": {
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "All trial types randomized.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Sound starts before one 100-ms touch at the specified delay. T-only omits sound; A-only omits touch. Respond only to touch.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Seven AT distance cells, two T-only temporal anchors and one A-only catch cell per speed.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "partial",
+          "value": "Rapid tactile detection using a right-hand-held wireless XBOX 360 controller; withhold on auditory-only catches.",
+          "compositeValue": "",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "RT exclusions below 200 or above 900 ms are analysis rules, not an acquired response timeout or measured hardware latency.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [
+            "response_window_and_anchor",
+            "exact_button_mapping"
+          ],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Press a gamepad button when touch is detected; exact button/finger not specified.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Wireless XBOX 360 gamepad; the paper reports 215-Hz sampling.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Touch requires response; sound alone requires withholding.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "not_reported",
+          "value": "No human intertrial interval or jitter policy is specified in the reviewed Methods.",
+          "compositeValue": "",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "Do not substitute the cited predecessor ITI or the model simulation clock.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [
+            "policy_type",
+            "timing_scope_and_anchor",
+            "values_or_range"
+          ],
+          "components": {
+            "policy_type": {
+              "status": "not_reported",
+              "value": "No human acquisition interval specification; model integration steps are not ITI.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "No human acquisition interval specification; model integration steps are not ITI.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_reported",
+              "value": "No human acquisition interval specification; model integration steps are not ITI.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "reported_complete",
+          "value": "Slow SOAs: 1000, 2000, 3000, 4000, 5000, 6000, 7000 ms. Fast SOAs: 330, 660, 1000, 1330, 1660, 2000, 2330 ms.",
+          "compositeValue": "",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [],
+          "components": {
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Looming only: later touch corresponds to nearer sound.",
+              "note": ""
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "At both speeds T1 through T7 map to distances 175, 150, 125, 100, 75, 50, 25 cm. Preserve the printed fast timings; do not replace them with exact thirds.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Touch delay from sound onset; positive means touch after sound.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "partial",
+          "value": "100-ms Precision MicroDrives 312-101 motor activation at upper chest at sternum.",
+          "compositeValue": "",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "Motor specifications do not establish constant skin-level onset waveform or native equivalence.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [
+            "delivered_waveform_and_intensity_calibration"
+          ],
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Upper chest at sternum.",
+              "note": ""
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "Measured skin displacement/intensity, onset latency and individual calibration are not supplied.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile motor.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Nominal motor: 3 V, 60 mA, 150 Hz, 5 g, 113 mm2 surface, 50 ms to maximal rotation; 100-ms activation.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "derived_complete",
+          "value": "64 tactile-only baseline trials: two endpoint-equivalent timings per speed, each repeated 16 times.",
+          "compositeValue": "",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "Both baseline conditions are actually acquired. Subtracting the faster baseline median within participant/velocity is an analysis choice.",
+          "derivationNote": "2 endpoint timings x 2 speeds x 16 repetitions = 64 tactile-only trials.",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Two timing anchors x two speeds x 16 repetitions.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_endpoint_baseline",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "64.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Slow 1000/7000 ms and fast 330/2330 ms relative to the corresponding trial sound-onset position; no auditory signal is delivered.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "derived_complete",
+          "value": "32 auditory-only/no-touch catches require withholding.",
+          "compositeValue": "",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "",
+          "derivationNote": "1 catch cell x 2 speeds x 16 repetitions = 32 catches.",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "One catch cell per speed, repeated 16 times.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_no_go",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "32.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No touch; no button press.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "derived_complete",
+          "value": "320 trials per participant: 224 AT targets, 64 T-only baselines and 32 A-only catches.",
+          "compositeValue": "",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "",
+          "derivationNote": "AT: 2 x 7 x 16 = 224; baseline: 2 x 2 x 16 = 64; catch: 2 x 1 x 16 = 32; total 320.",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Face cohort 16; trunk 16 recruited and 15 analyzed after one technical exclusion. Each participant performs one body-target protocol.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Two speeds within subject; seven AT distances, two baseline timings and one catch cell. Face/trunk is between subjects.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "derived",
+              "value": "2 x (7 + 2 + 1) x 16 = 320.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "partial",
+          "value": "All trial types randomized; exact block partition, breaks and randomization algorithm/seed are unspecified.",
+          "compositeValue": "",
+          "pageOrSection": "Human Methods, publisher PDF pp. 2-3 / printed pp. 2308-2309",
+          "evidenceNote": "Two velocities or two cohorts do not imply two within-participant blocks.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1152/jn.00652.2017",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "sourceType": "primary_final_xml_and_rendered_publisher_pdf",
+          "missingComponents": [
+            "block_count",
+            "block_order_or_counterbalancing"
+          ],
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "320-trial acquisition includes both velocities and all three families.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_reported",
+              "value": "No numerical block partition supplied.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "All trial types randomized.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -50167,19 +51292,19 @@
   ],
   "inventoryAudit": {
     "publications": 94,
-    "registeredInventories": 58,
-    "methodsReviewedInventories": 48,
-    "auditedAccessBlockers": 4,
-    "publicationsWithAllContractDispositions": 46,
-    "inventoryAndContractsAudited": 45,
-    "remainingInventoryOrContractAudit": 49,
+    "registeredInventories": 61,
+    "methodsReviewedInventories": 50,
+    "auditedAccessBlockers": 5,
+    "publicationsWithAllContractDispositions": 49,
+    "inventoryAndContractsAudited": 48,
+    "remainingInventoryOrContractAudit": 46,
     "inventoryEvidenceCounts": {
       "abstract_or_metadata_inventory": 4,
-      "audited_source_access_gap": 4,
-      "author_version_methods_reviewed_final_comparison_pending": 1,
-      "not_registered": 36,
+      "audited_source_access_gap": 5,
+      "author_version_methods_reviewed_final_comparison_pending": 2,
+      "not_registered": 33,
       "partial_methods_inventory": 2,
-      "primary_methods_reviewed": 36,
+      "primary_methods_reviewed": 37,
       "retained_primary_methods_review": 11
     },
     "interpretation": "Audited means inventory evidence or documented access blocker plus eleven explicit source dispositions per retained row. It does not mean all values are reported, final-version equivalence is proven, a template exists, or native hardware is qualified."
