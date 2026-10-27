@@ -80,6 +80,9 @@ when its epoch is smaller. Within the same session, increasing native revisions
 also carry pairing/owner epoch rotations. Late replies cannot clear a replacement
 selection. The compiled-browser sequence regression uses a deterministic native boundary;
 native execution and durable receipts remain covered by the Rust owner tests.
+Native status distinguishes supported durable event/result recording from active
+trial-response capture. This preview explicitly marks LSL mirroring, audio
+recording and physical capture unsupported; playback is not capture evidence.
 
 Portable hosted exports embed referenced premade WAVs, spoken instruction clips
 and browser uploads. Resolve premades from their existing inventory/colocated
