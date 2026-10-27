@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { bindSessionProgress, validGroupStatus, validResultsAssessment } from "../src/ui/session-progress.js";
+import { bindSessionProgress, validGroupStatus, validResultsAssessment, validGroupResultsAssessment } from "../src/ui/session-progress.js";
 
 const snap = (revision, phase = "completed", session = "part1") => ({ revision, epoch: 1, run: { phase, complete: false }, identity: { session_id: session } });
 const group = (revision, completedParts = 1) => ({ revision, partCount: 2, currentPart: 1, completedParts, experimentComplete: false });
@@ -29,6 +29,35 @@ test("group advancement uses the current native revision and does not infer expe
   assert.equal(h.elements["advance-session-part"].disabled, true);
 });
 
+test("prior group receipts remain separate from live completion and scan limits stay not assessed", () => {
+  const oldDocument = globalThis.document;
+  globalThis.document = { createElement: () => ({}) };
+  try {
+    const h = harness({ kind: "browser-preview" });
+    const assessment = { schema: "pps.native-result-assessment.v1", inspectionScope: "read-only-file-prefix", timingQualification: "unqualified",
+      completeScan: true, reason: "assessed", attempts: [] };
+    const part2 = { ...assessment, attempts: [{ attemptId: "a".repeat(32), status: "orphaned", reason: "missing_part",
+      commonEventSequence: null, commonEventRecords: 0, commonDatasetRows: 0 }] };
+    const groupAssessment = { schema: "pps.native-group-result-assessment.v1", timingQualification: "unqualified", completeScan: false, reason: "group_scan_limit",
+      parts: [{ partNumber: 1, assessment }, { partNumber: 2, assessment: part2 }],
+      groups: Array.from({ length: 9 }, (_, index) => ({ groupAttemptId: String(index), status: index === 8 ? "not_assessed" : "complete", reason: index === 8 ? "group_scan_limit" : "verified",
+        partCount: index === 8 ? null : 2, scoredTrialCount: null, datasetRowCount: null })) };
+    h.progress.setAssessment(assessment, groupAssessment);
+    assert.equal(h.elements["native-group-results-list"].children.length, 8);
+    assert.doesNotMatch(h.elements["session-group-status"].textContent, /Experiment complete/);
+    h.elements["native-group-results-next"].handlers.click();
+    assert.match(h.elements["native-group-results-list"].children[0].textContent, /not assessed/);
+    assert.doesNotMatch(h.elements["native-group-results-list"].children[0].textContent, /invalid|corrupt/);
+    h.elements["native-results-part"].value = "2";
+    h.elements["native-results-part"].handlers.change();
+    assert.match(h.elements["native-results-list"].children[0].textContent, /orphaned/);
+    assert.equal(validGroupResultsAssessment({ ...groupAssessment, parts: [groupAssessment.parts[0], groupAssessment.parts[0]] }), false);
+    h.progress.setAssessment(null);
+    assert.equal(h.elements["native-results-assessment"].hidden, true);
+    assert.equal(h.elements["native-group-results-list"].children.length, 0);
+  } finally { globalThis.document = oldDocument; }
+});
+
 test("late group status cannot enable advancement for a replacement session", async () => {
   let resolveFirst, reads = 0;
   const h = harness({ nativeGroupStatus: () => ++reads === 1 ? new Promise(resolve => { resolveFirst = resolve; })
@@ -40,6 +69,23 @@ test("late group status cannot enable advancement for a replacement session", as
   assert.equal(h.elements["advance-session-part"].disabled, true);
   assert.equal(h.elements["advance-session-part"].hidden, true);
   assert.match(h.elements["session-group-status"].textContent, /Single prepared session/);
+});
+
+test("late successful advancement cannot clear a replacement selection or its assessment", async () => {
+  let resolveAdvance;
+  const h = harness({ nativeGroupStatus: async () => group(5),
+    advancePreparedGroupPart: () => new Promise(resolve => { resolveAdvance = resolve; }) });
+  h.progress.update(snap(5));
+  await flush();
+  const advancing = h.elements["advance-session-part"].handlers.click();
+  h.progress.update(snap(8, "prepared", "replacement"));
+  h.progress.setAssessment({ schema: "pps.native-result-assessment.v1", inspectionScope: "read-only-file-prefix", timingQualification: "unqualified",
+    completeScan: false, reason: "replacement_assessment", attempts: [] });
+  resolveAdvance(snap(6, "prepared", "old-next-part"));
+  await advancing;
+  assert.equal(h.advances.length, 0);
+  assert.equal(h.elements["native-results-assessment"].hidden, false);
+  assert.match(h.elements["native-results-summary"].textContent, /replacement assessment/);
 });
 
 test("result assessment is bounded, path-free, paginated, and cleared when the selected part changes", () => {

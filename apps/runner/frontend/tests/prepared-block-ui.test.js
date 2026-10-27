@@ -22,12 +22,12 @@ function harness() {
     preparedExecution: { blockCount: 2 }, preparedPlan: { sessionId: "session" },
     api: { kind: "tauri-native" }, participantResponse: { refresh() {} }, participantSetupDraft: { refresh() {} },
     nativeOutputSetup: { update() {} }, updateInboundPolicyUi() {}, inboundPrivateTarget: null,
-    sessionProgress: { update() {} },
+    sessionProgress: { update() {}, isBusy: () => false }, packageSelectionInFlight: false,
     document: { querySelectorAll: () => [], createElement: () => ({}) },
   });
   vm.runInContext([extract("text", "titleCase"), extract("titleCase", "formatDuration"), extract("formatDuration", "showToast"),
     extract("planValue", "renderPreparedAudio"), extract("renderPreparedAudio", "renderPreparedExecution"), extract("renderSnapshot", "readRemoteUrl")].join("\n"), context);
-  return { context, elements, render: value => { context.next = value; vm.runInContext("renderSnapshot(next)", context); },
+  return { context, elements, render: (value, adoptContext = false) => { context.next = value; context.adoptContext = adoptContext; return vm.runInContext("renderSnapshot(next, {adoptContext})", context); },
     prepare: value => { context.audio = value; return vm.runInContext("renderPreparedAudio(audio)", context); } };
 }
 
@@ -36,6 +36,19 @@ test("next-block preparation accepts a bounded native ordinal and displays it", 
   assert.equal(prepare(prepared(1)), true);
   assert.match(elements["prepared-audio-status"].textContent, /Block 2 prepared/);
   for (const ordinal of [-1, 2, 0.5]) assert.equal(prepare(prepared(ordinal)), false);
+});
+
+test("only explicit native adoption accepts a new lower epoch; retired-session responses cannot overwrite it", () => {
+  const { context, render } = harness();
+  context.snapshot = { ...snapshot("completed", 9), epoch: 900, identity: { session_id: "part-one" } };
+  context.preparedPlan = null;
+  const partTwo = { ...snapshot("prepared", 1), epoch: 2, identity: { session_id: "part-two" } };
+  assert.equal(render(partTwo), false, "an unacknowledged event cannot adopt a new authority");
+  assert.equal(render(partTwo, true), true);
+  assert.equal(context.snapshot.identity.session_id, "part-two");
+  assert.equal(render({ ...snapshot("completed", 99), epoch: 900, identity: { session_id: "part-one" } }), false);
+  assert.equal(context.snapshot.identity.session_id, "part-two");
+  assert.equal(render({ ...partTwo, revision: 0 }), false);
 });
 
 test("native block completion retires prior media, clears progress and unlocks next preparation", () => {
