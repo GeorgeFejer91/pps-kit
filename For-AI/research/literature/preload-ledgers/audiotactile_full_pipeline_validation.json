@@ -3206,7 +3206,7 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "exact lateral trajectory, timing, and tactile-site mapping need extraction"
+            "All eleven compact replication contracts and the Methods experiment inventory remain unresolved after actual publisher/HAL access attempts on 2026-10-27. Abstract-only lateral/handedness scope is retained; missing reporting is not inferred from inaccessible Methods."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -3241,9 +3241,9 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "exact lateral trajectory, timing, and tactile-site mapping need extraction"
+        "All eleven compact replication contracts and the Methods experiment inventory remain unresolved after actual publisher/HAL access attempts on 2026-10-27. Abstract-only lateral/handedness scope is retained; missing reporting is not inferred from inaccessible Methods."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: exact lateral trajectory, timing, and tactile-site mapping need extraction",
+      "next_required_action": "Extract or source the missing paper parameters: All eleven compact replication contracts and the Methods experiment inventory remain unresolved after actual publisher/HAL access attempts on 2026-10-27. Abstract-only lateral/handedness scope is retained; missing reporting is not inferred from inaccessible Methods.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",

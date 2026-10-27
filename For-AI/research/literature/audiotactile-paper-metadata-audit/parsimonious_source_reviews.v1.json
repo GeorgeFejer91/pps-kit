@@ -16960,6 +16960,349 @@
           "evidence_note": "The inspected Methods does not specify counterbalancing or randomization of front/rear block order."
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.1007/s00221-017-5158-2",
+      "source_type": "audited_source_access_gap",
+      "source_file": "https://link.springer.com/article/10.1007/s00221-017-5158-2",
+      "review_date": "2026-10-27",
+      "review_scope": "Actual source-access audit only; no Methods-confirmed inventory or parameter extraction.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://link.springer.com/content/pdf/10.1007/s00221-017-5158-2.pdf",
+          "outcome": "HTTP 200 HTML redirect to the publisher article subscription preview. Abstract accessible; full Methods/PDF not delivered."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.archives-ouvertes.fr/search/",
+          "outcome": "HTTP 200 exact-title metadata lookup identified hal-01712036 and https://hal.science/hal-01712036v1; the record supplied no fileMain_s document URL."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://hal.science/hal-01712036/document",
+          "outcome": "HTTP 404 HTML; no deposited full text obtained."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "source_unavailable",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
+          "page_or_section": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "component_reviews": {
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "level_envelope_calibration": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "renderer_apparatus": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            }
+          },
+          "evidence_note": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts."
+        },
+        "trajectory_kinematics": {
+          "status": "source_unavailable",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
+          "page_or_section": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "padding_or_holds": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "attenuation_law": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            }
+          },
+          "evidence_note": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts."
+        },
+        "trial_sequence": {
+          "status": "source_unavailable",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
+          "page_or_section": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "component_reviews": {
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "condition_intermixing": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            }
+          },
+          "evidence_note": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts."
+        },
+        "task_response": {
+          "status": "source_unavailable",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
+          "page_or_section": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "scoring_rule": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            }
+          },
+          "evidence_note": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts."
+        },
+        "jitter_iti_policy": {
+          "status": "source_unavailable",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
+          "page_or_section": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "component_reviews": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "distribution": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "randomization": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            }
+          },
+          "evidence_note": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts."
+        },
+        "soa_schedule": {
+          "status": "source_unavailable",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
+          "page_or_section": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "direction_specific_pairing": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            }
+          },
+          "evidence_note": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts."
+        },
+        "tactile_target": {
+          "status": "source_unavailable",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
+          "page_or_section": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "component_reviews": {
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "frequency_or_amplitude": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "intensity_or_calibration": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "external_trigger": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            }
+          },
+          "evidence_note": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts."
+        },
+        "baseline_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
+          "page_or_section": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "crossing_rule": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            }
+          },
+          "evidence_note": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts."
+        },
+        "catch_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
+          "page_or_section": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "crossing_rule": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            }
+          },
+          "evidence_note": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts."
+        },
+        "repetition_allocation": {
+          "status": "source_unavailable",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
+          "page_or_section": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "derived_total_reconciliation": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            }
+          },
+          "evidence_note": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts."
+        },
+        "block_order_contract": {
+          "status": "source_unavailable",
+          "value": "Primary Methods unavailable through the dated publisher and HAL routes. This contract cannot be determined from the accessible abstract; its absence from the paper is not established.",
+          "page_or_section": "Publisher subscription preview and HAL metadata, access audit 2026-10-27; no Methods pages inspected",
+          "component_reviews": {
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "within_block_randomization": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            },
+            "sequence_constraints": {
+              "status": "source_unavailable",
+              "value": "Methods not obtained; do not infer this component or substitute a related publication."
+            }
+          },
+          "evidence_note": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts."
+        }
+      }
     }
   ]
 }

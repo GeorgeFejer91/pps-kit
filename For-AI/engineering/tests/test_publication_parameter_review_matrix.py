@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 48)
+        self.assertEqual(len(registry["entries"]), 49)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 90)
+        self.assertEqual(registered_instance_count, 91)
         network = json.loads(
             (
                 ROOT
@@ -1295,6 +1295,18 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertIn("1250", contracts["baseline_trial_contract"]["value"])
         self.assertEqual(contracts["jitter_iti_policy"]["status"], "partial")
         self.assertIn("four", contracts["trajectory_kinematics"]["value"])
+
+    def test_audited_access_gap_does_not_claim_a_confirmed_experiment(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        study = next(row for row in data["studies"] if row["studyRowId"] == "doi:10.1007/s00221-017-5158-2")
+        self.assertEqual(study["inventoryStatus"], "source_access_blocked_experiment_inventory_unresolved")
+        self.assertEqual(len(study["contracts"]), 11)
+        self.assertEqual({row["status"] for row in study["contracts"]}, {"source_unavailable"})
+        registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+        record = next(row for row in registry["entries"] if row["network_node_id"] == study["studyRowId"])
+        self.assertEqual(record["instances"][0]["instance_kind"], "unresolved_publication_review_unit")
+        self.assertIn("not one confirmed experiment", record["instance_count_basis"])
+        self.assertGreaterEqual(len(record["retrieval_attempts"]), 2)
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:
