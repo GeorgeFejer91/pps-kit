@@ -1542,8 +1542,10 @@ class DashboardController:
             project=project,
             payload={"recipe_kind": recipe_kind, "recipe_label": str(recipe.get("label") or "")},
         )
-        if recipe_kind != "block_csv_preview":
-            _raise_if_current_block_csvs_accepted(project.project_dir, design)
+        # Reject locked Segment 5 mutations at admission as well as inside the
+        # worker. Returning a queued job for a known invalid request hides the
+        # Edit Blocks recovery action from the caller.
+        _raise_if_current_block_csvs_accepted(project.project_dir, design)
         segment_jobs = {
             "trial_sequence_batch": (2, _bake_trial_sequence_variants),
             "audiotactile_trial_batch": (3, _bake_audio_tactile_trial_files),
