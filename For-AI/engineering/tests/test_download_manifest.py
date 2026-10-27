@@ -3,6 +3,8 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SCRIPT_PATH = REPO_ROOT / "For-AI" / "engineering" / "release" / "tools" / "make_download_manifest.py"
@@ -88,4 +90,19 @@ def test_build_download_manifest_requires_payload(tmp_path: Path):
     except FileNotFoundError:
         return
     raise AssertionError("build_manifest accepted a missing payload")
+
+
+@pytest.mark.parametrize("url", [
+    "", "files/package.zip", "file:///private/package.zip",
+    "https://zenodo.org/records/REPLACE_WITH_RECORD/files/package.zip",
+    "https://zenodo.org/records/%3Crecord%3E/files/package.zip",
+    "https://zenodo.org/records/YOUR_RECORD_ID/files/package.zip",
+    "https://user:secret@example.test/package.zip",
+])
+def test_release_manifest_rejects_unusable_payload_urls(tmp_path: Path, url: str):
+    payload = tmp_path / "package.zip"
+    payload.write_bytes(b"package")
+    with pytest.raises(ValueError, match="payload URL"):
+        _load_module().build_manifest(payload=payload, payload_url=url,
+            version="0.1.0", source_tag="v0.1.0", source_commit="test", zenodo_doi="")
 

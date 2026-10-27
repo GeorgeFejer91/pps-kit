@@ -10,6 +10,7 @@ import subprocess
 import tomllib
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -105,6 +106,13 @@ def build_manifest(
     payload = payload.resolve()
     if not payload.is_file():
         raise FileNotFoundError(f"Payload does not exist: {payload}")
+    parsed_url = urlsplit(payload_url)
+    decoded_url = unquote(payload_url)
+    if (parsed_url.scheme not in {"http", "https"} or not parsed_url.hostname
+            or parsed_url.username or parsed_url.password or parsed_url.fragment
+            or any(marker in decoded_url.lower() for marker in ("replace_with", "your_record_id")) or "<" in decoded_url
+            or ">" in decoded_url or any(char.isspace() for char in decoded_url)):
+        raise ValueError("A complete, credential-free HTTP(S) payload URL is required; placeholders are not publishable.")
     inventory_payload: dict | None = None
     if package_inventory is not None:
         package_inventory = package_inventory.resolve()

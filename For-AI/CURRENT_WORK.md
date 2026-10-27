@@ -54,10 +54,17 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Native importer: seven contract/failure tests pass, plus a real browser-export
   test independently materializing nine embedded assets offline. The combined
   session-package/designer-core suites pass (35 tests; three opt-in tests skipped),
-  with strict Clippy. Clean installation and physical qualification remain open.
+  with strict Clippy. Independent import review found no blocking defect; disk
+  failure/mid-copy cancellation qualification remains. Release repairs pass 17
+  focused tests: obsolete distribution arguments and placeholder URLs fail
+  before build; downloader icon tooling is pinned and an actual smoke downloader
+  builds. Installation guides now distinguish V1 layouts from native candidates.
+  Clean installation and physical qualification remain open.
 - **Scientific coverage:** frozen 94-publication corpus, 125 study rows and 1,375
   compact contracts; 179 reported-complete and 40 derived-complete cells after
-  the latest primary-source batches. 71 inventories remain unassessed.
+  the latest primary-source batches. 70 inventories remain unassessed. The
+  Cuppini 2011 computational review has a publication boundary row, not a
+  fabricated human experiment; its 11 contracts are explicitly not applicable.
   Templates and reviewed evidence do not confer tested native qualification.
 - **Installed agent baseline:** updated For-AI, 23 GSD skills/35 converted roles,
   15 prefixed Superpowers skills and three Agents Inc companions. Existing
