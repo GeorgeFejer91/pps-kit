@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import importlib.util
 import json
 import subprocess
 import tempfile
@@ -32,8 +33,9 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.temporary_directory = tempfile.TemporaryDirectory()
         cls.output_dir = Path(cls.temporary_directory.name) / "matrix"
+        cls.public_output = Path(cls.temporary_directory.name) / "publication_study_reviews.v1.json"
         result = subprocess.run(
-            ["node", str(BUILDER), "--output", str(cls.output_dir)],
+            ["node", str(BUILDER), "--output", str(cls.output_dir), "--public-output", str(cls.public_output)],
             cwd=ROOT,
             check=True,
             capture_output=True,
@@ -753,11 +755,53 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             }.issubset(excluded)
         )
 
+    def test_public_projection_is_final_evidence_with_independent_template_links(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        evidence = read_csv(self.output_dir / "parsimonious_contract_evidence.csv")[1]
+        by_cell = {(row["study_row_id"], row["contract_key"]): row for row in evidence}
+        studies = {row["studyRowId"]: row for row in data["studies"]}
+        self.assertEqual(data["schema"], "pps-publication-study-reviews.v1")
+        self.assertEqual(data["scope"]["onlineActions"], ["prepare", "preview"])
+        self.assertEqual(data["counts"]["contracts"], len(evidence))
+        self.assertEqual(data["counts"]["parameterStatusCounts"], dict(Counter(row["evidence_status"] for row in evidence)))
+        self.assertEqual(data["scope"]["nativeQualification"], "not_assessed")
+        for study in studies.values():
+            self.assertEqual(len(study["contracts"]), 11)
+            self.assertEqual(study["nativeQualification"], "not_assessed")
+            for contract in study["contracts"]:
+                original = by_cell[(study["studyRowId"], contract["key"])]
+                self.assertEqual(contract["status"], original["evidence_status"])
+                self.assertEqual(contract["value"], original["paper_value"])
+                self.assertEqual(contract["compositeValue"], original["composite_record_value"])
+                self.assertTrue(contract["sourceUrl"].startswith("https://doi.org/10."))
+                self.assertNotIn("source_file", contract)
+                self.assertNotIn("toolkit_value_summary", contract)
+        for publication in data["publications"]:
+            children = [studies[key] for key in publication["studyIds"]]
+            self.assertEqual(publication["templateIds"], sorted({key for child in children for key in child["templateIds"]}))
+            self.assertEqual(publication["parameterStatusCounts"], dict(Counter(contract["status"] for child in children for contract in child["contracts"])))
+        # A linked template must not turn unreviewed evidence into completion.
+        self.assertTrue(any(row["templateIds"] and any(c["status"] not in {"reported_complete", "derived_complete", "explicitly_absent", "not_applicable"} for c in row["contracts"]) for row in studies.values()))
+        # Conversely, resolved paper evidence is still not native qualification.
+        self.assertTrue(any(all(c["status"] in {"reported_complete", "derived_complete", "explicitly_absent"} for c in row["contracts"]) for row in studies.values()))
+        self.assertEqual(self.public_output.read_bytes(), (ROOT / "apps/designer/frontend/publication_study_reviews.v1.json").read_bytes())
+
+    def test_public_projection_rejects_local_paths_but_preserves_source_urls(self) -> None:
+        spec = importlib.util.spec_from_file_location("compact_builder", BUILDER.with_name("build_parsimonious_publication_matrix.py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        for text in [r"C:\Users\private\paper.pdf", "artifacts/paper.pdf", "packages/runtime/a.py", "file:///home/private/paper.pdf", r"\\server\private\paper.pdf"]:
+            with self.assertRaises(ValueError):
+                module._public_text(text)
+        for text in ["https://doi.org/10.1016/j.cognition.2015.07.012", "Source https://publisher.example/artifacts/paper.pdf, Methods pp. 3–4", "10.1007/s00221-013-3532-2"]:
+            self.assertEqual(module._public_text(text), text)
+
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:
             second = Path(second_temp) / "matrix"
+            second_public = Path(second_temp) / "public.json"
             subprocess.run(
-                ["node", str(BUILDER), "--output", str(second)],
+                ["node", str(BUILDER), "--output", str(second), "--public-output", str(second_public)],
                 cwd=ROOT,
                 check=True,
                 capture_output=True,
@@ -774,6 +818,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
                 if path.is_file()
             )
             self.assertEqual(first_files, second_files)
+            self.assertEqual(self.public_output.read_bytes(), second_public.read_bytes())
             manifest = json.loads(
                 (self.output_dir / "generated_output_manifest.json").read_text(
                     encoding="utf-8"
