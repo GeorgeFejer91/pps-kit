@@ -1,0 +1,27 @@
+{
+  "schema": "pps-native-windows-runtime-lock.v1",
+  "architecture": "x64",
+  "platform": "Windows 10/11",
+  "origins": {
+    "vc2013": {
+      "version": "12.0.40664.0",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/10912041/cee5d6bca2ddbcd039da727bf4acb48a/vcredist_x64.exe",
+      "sha256": "a4bba7701e355ae29c403431f871a537897c363e215cafe706615e270984f17c",
+      "note": "Legacy runtime required by the pinned 3DTI SOFA dependency DLLs; extracted without installing. Microsoft no longer supports VC2013."
+    },
+    "vc14": {
+      "version": "14.44.35211.0",
+      "source": "Visual Studio Build Tools VC/Redist/MSVC/14.44.35112/x64/Microsoft.VC143.CRT",
+      "redistributable_sha256": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b",
+      "note": "DLLs and matching license from the installed Microsoft redistribution package."
+    }
+  },
+  "files": [
+    {"file":"msvcr120.dll","sha256":"753ac30c30aae62415cc225e3d057b8b6254afe280696e0a43f1a7c3132632a6","origin":"vc2013","kind":"dll","app_root":false},
+    {"file":"msvcp140.dll","sha256":"0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9","origin":"vc14","kind":"dll","app_root":true},
+    {"file":"vcruntime140.dll","sha256":"d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066","origin":"vc14","kind":"dll","app_root":true},
+    {"file":"vcruntime140_1.dll","sha256":"1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f","origin":"vc14","kind":"dll","app_root":true},
+    {"file":"VC2013-license.rtf","sha256":"8518f0420972c1dbe8a323ffc6f57863af0b80c6a3b27fd0c6fc9bdabb7e2d13","origin":"vc2013","kind":"license","app_root":false},
+    {"file":"VC14-license.rtf","sha256":"8099dc3cf9502c335da829e5c755948a12e3e6de490eb492a99deb673d883d8b","origin":"vc14","kind":"license","app_root":false}
+  ]
+}
