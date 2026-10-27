@@ -1,0 +1,4 @@
+interface:
+  display_name: "MobX Integration"
+  short_description: "Choose and integrate MobX with clear state ownership"
+  default_prompt: "Use $mobx-integration to assess MobX fit and integrate the smallest suitable state boundary."

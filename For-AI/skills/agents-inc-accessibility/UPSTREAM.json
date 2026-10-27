@@ -1,0 +1,21 @@
+{
+  "repository": "https://github.com/agents-inc/skills",
+  "revision": "4865dfd140628bd05693fed84b4b6703b4dbc9f5",
+  "source_path": "src/skills/web-accessibility-web-accessibility",
+  "license": "MIT",
+  "reviewed_on": "2026-10-19",
+  "adaptation": "Reviewed rewrite for Codex; selected guidance only. Original package downloaded with skill-installer; source instructions and examples were not activated wholesale.",
+  "source_file_sha256": {
+    "SKILL.md": "0a391a1cfb7ce1456d48536135d5eef0d4dd003f0963d09d38752b6754e6fd00",
+    "examples/color.md": "d3fe6aea28edc45f8c5c2c3237b4a1975121712dca07abf436aea9682a8b8a07",
+    "examples/core.md": "24c52eaf7fa48895c3fa91ce9c98009bbcad466679794bebc0f00ffed944cc56",
+    "examples/focus.md": "4ea68cbd9e69a26299993c9dfb63527b7605f98e87119bca058fa48efe1299db",
+    "examples/forms.md": "687b89d2e5d26b0cd42f65064ac42ff61bb119689abf1b1dbce1f113affd3c2a",
+    "examples/screen-reader.md": "3b924b00024b368cc713c8c6abffe2cf4d6cc1f63488d7c03f19933320196e08",
+    "examples/tables.md": "6902968cad2c457f5db61df16f4968a3b0943e4696c8a6e3dc8c1600e815a2dc",
+    "examples/testing.md": "c8055f1e972e7c1b41d632d0ef62c25bd04526b3b0c7f8357f7442e88df85f8b",
+    "examples/touch-targets.md": "63802eab95c2974f5f0089fd99d7e8c2b7d79299c4ec14bcb68a8de85a86340d",
+    "metadata.yaml": "fdf2cacf624785aa429ef161516f662d583de854708259faf116e20c1baf31bc",
+    "reference.md": "18d9e2d83af00ed57fcd194899ed371bbd2e362bcba0456fb7bed519349acef9"
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agents Inc Web Performance"
+  short_description: "Measure browser and WebView performance changes"
+  default_prompt: "Use $agents-inc-web-performance to identify the measured bottleneck and improve the smallest affected path."

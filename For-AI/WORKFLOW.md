@@ -58,7 +58,8 @@ which source revision an existing installer contains.
 
 An installed candidate is not qualified acquisition. Software/emulated tests,
 device route timing, tactile perception, collected responses, and published
-effect replication remain separate evidence layers. Preserve the qualified V1
-path while candidate V2 work proceeds. Defer signing, release assets, and
+effect replication remain separate evidence layers. Preserve the V1
+compatibility path while candidate V2 work proceeds; attach qualification only
+to a named profile/route with retrievable evidence. Defer signing, release assets, and
 public download promotion until the release task's actual authorization and
 qualification requirements are satisfied.

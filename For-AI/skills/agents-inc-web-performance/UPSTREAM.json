@@ -1,0 +1,17 @@
+{
+  "repository": "https://github.com/agents-inc/skills",
+  "revision": "4865dfd140628bd05693fed84b4b6703b4dbc9f5",
+  "source_path": "src/skills/web-performance-web-performance",
+  "license": "MIT",
+  "reviewed_on": "2026-10-19",
+  "adaptation": "Reviewed rewrite for Codex; selected guidance only. Original package downloaded with skill-installer; source instructions and examples were not activated wholesale.",
+  "source_file_sha256": {
+    "SKILL.md": "094c48b7b3c259cda5e8f743cc5b52a3c149bdcd43f8b384d7215ea902796e51",
+    "examples/code-splitting.md": "88e22c23e4582410fdd15cfad4f90cb50cb043e19c0e78df50fb493d3749cb2c",
+    "examples/core.md": "a7469cc66163462eda508aa27b167ecdfc965069bc0c1ebe2fcb84dcdaf62191",
+    "examples/image-optimization.md": "e6ea28f66b492fcb669643713f57dd1cde2f944034201980e580d1716b2805c6",
+    "examples/web-vitals.md": "8cb6cd49ce32d7613d83b10eca9bcf7176793f37f08a1f6f86968fa0975d1ba7",
+    "metadata.yaml": "3c9cb4317d0053ddc32cbe09fee97f9e97bc0eb0d2f8f93969c1a8ba8e08aaef",
+    "reference.md": "58f54ec18926d4fc59a3a0a1ee5495c7c76138a54f3e0ca2a366a931500d4865"
+  }
+}

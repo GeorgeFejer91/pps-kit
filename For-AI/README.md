@@ -27,7 +27,8 @@ For cross-domain work, select one owning domain and read the neighboring
 handoff contract. [SKILLS.md](SKILLS.md) maps skills to tasks;
 [WORKFLOW.md](WORKFLOW.md) separates preview, source, packaging, and release.
 [module_map.md](module_map.md) locates code without loading history.
-The skill index includes bundled RTK and focused/multi-phase workflow guides.
+The skill index records the installed GSD/Superpowers baseline and bundled
+RTK, fallback workflows, accessibility, performance and MobX suitability guides.
 <!-- for-ai-coding-workflows-route:end -->
 
 ## Shared boundaries
@@ -38,8 +39,9 @@ The skill index includes bundled RTK and focused/multi-phase workflow guides.
 - Designer and Runner ship independently with exactly one compatible Shared
   component. `.pps-profile`, prepared-experiment packages, Segment 0-6
   manifests, and scientific schemas remain stable handoffs.
-- Qualified V1 Python/PySide and candidate V2 Rust/Tauri have different evidence
-  states. Compilation or demos cannot promote V2 to research acquisition.
+- V1 Python/PySide compatibility and candidate V2 Rust/Tauri have different
+  evidence states. Qualification belongs to a recoverable, named route and
+  profile record; compilation or demos cannot establish research acquisition.
 - Browser controls request native actions. Scientific timing, privileged
   storage, and native participant execution stay with their native authority.
 - Keep participant data, recordings, credentials, downloaded papers, generated

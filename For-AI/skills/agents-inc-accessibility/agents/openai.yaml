@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agents Inc Accessibility"
+  short_description: "Accessible HTML controls and keyboard interactions"
+  default_prompt: "Use $agents-inc-accessibility to improve the touched HTML controls and record the applicable accessibility checks."

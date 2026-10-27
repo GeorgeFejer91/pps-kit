@@ -20,6 +20,10 @@ HTML work. Use browser automation for actual controls/rendered geometry.
 Load Tauri/Rust when changing that native boundary; add remote-control guidance
 for authorization, transport, or state sync. [SKILLS.md](../SKILLS.md) records
 sources and availability handling.
+Use `agents-inc-accessibility` with the same rendered interaction matrix, and
+`agents-inc-web-performance` for measured costs. The 2026-10-27 review found
+draft ownership, request fencing, persistence and bounded-count work; it did
+not justify adding MobX to either current frontend.
 
 ## Scoped implementation and completion
 

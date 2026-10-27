@@ -29,11 +29,14 @@ explicitly relevant task; preserve the configured device key when it applies.
 ## Shared project workflow
 
 At project entry, also read [For-AI/SKILLS.md](For-AI/SKILLS.md) for the required RTK, GSD Core,
-and Superpowers baseline, conditional Rust/Tauri/HTML routes, and Git worktree
-policy. Preserve this project's product and evidence contracts.
+and Superpowers baseline, conditional Rust/Tauri/HTML, accessibility,
+performance and MobX routes, and Git worktree policy. Preserve this project's
+product and evidence contracts; installing guidance does not adopt MobX.
 
 Read the durable project goal and resume its active checklist at session
 start. Before ending, update that same state with evidence, blockers, the
 next action, and observed Git/publication state. Keep the overall goal open
 until its own acceptance criteria pass.
+The completion review and multi-agent work packages are linked from
+`For-AI/CURRENT_WORK.md`; keep that file as the active checklist owner.
 <!-- for-ai:shared-skills:end -->

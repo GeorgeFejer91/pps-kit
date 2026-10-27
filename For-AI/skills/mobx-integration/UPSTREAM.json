@@ -1,0 +1,15 @@
+{
+  "repository": "https://github.com/agents-inc/skills",
+  "revision": "4865dfd140628bd05693fed84b4b6703b4dbc9f5",
+  "source_path": "src/skills/web-state-mobx",
+  "license": "MIT",
+  "reviewed_on": "2026-10-19",
+  "adaptation": "Reviewed rewrite for Codex; selected guidance only. Original package downloaded with skill-installer; source instructions and examples were not activated wholesale.",
+  "source_file_sha256": {
+    "SKILL.md": "d86d60d4bd13f2fab9210239cbd6bc2d2590d2587b7d39dc6b4c666336c7a597",
+    "examples/advanced.md": "e4a4e7ba2348e5c9093038cd292fc7f50b191d31ce60bfba9d0e3044113e1d2b",
+    "examples/architecture.md": "a57127160280b6754bbdb6d8d1c812ef8835d3f44ffde7776cc487e9e802b133",
+    "examples/core.md": "cc39ccf767c2ff917d2a173f881282ff5d96ab97332bd3ee473a148ee4a2d882",
+    "metadata.yaml": "32e75a20a30c8645464d20fe8c0e95bf97bcdbba5291e90d1d44368ba82b7ac0"
+  }
+}

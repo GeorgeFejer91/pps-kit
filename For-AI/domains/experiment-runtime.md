@@ -22,8 +22,9 @@ authentication, revisions, revocation, or transport. Read timing/performance
 references when those requirements are affected. No generic input forwarding
 or competing UI-owned experiment state.
 
-V1 Python/PySide is the qualified compatibility path. V2 has native output work
-in progress; inspect code instead of treating old notes as proof of support.
+V1 Python/PySide is the compatibility path. Qualification is profile/route
+specific and needs retrievable evidence. V2 has native output work in progress;
+inspect code instead of treating old notes as proof of support.
 Preserve generation fencing, bounded queues, native-only receipts, calibration,
 and path-free remote projections. Physical timing/behavior cannot be proved
 by compilation, mocks, browser clocks, or transport RTT.
