@@ -855,6 +855,71 @@ def _public_evidence_url(value: Any) -> str:
     return text
 
 
+def inventory_review_audit(
+    registry: dict[str, Any], study_index: list[dict[str, Any]], evidence_rows: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Count explicit inventory evidence separately from registry and parameter coverage."""
+    assessed_inventory = {
+        "primary_methods_reviewed", "retained_primary_methods_review",
+        "author_version_methods_reviewed_final_comparison_pending",
+    }
+    allowed = assessed_inventory | {
+        "abstract_or_metadata_inventory", "partial_methods_inventory",
+        "audited_source_access_gap", "inventory_evidence_not_classified", "not_registered",
+    }
+    entries = {row["network_node_id"]: row for row in registry["entries"]}
+    studies_by_node: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    evidence_by_study: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in study_index:
+        studies_by_node[row["network_node_id"]].append(row)
+    for row in evidence_rows:
+        evidence_by_study[row["study_row_id"]].append(row)
+    rows = []
+    for node, studies in sorted(studies_by_node.items()):
+        entry = entries.get(node, {})
+        status = entry.get("inventory_evidence_status", "inventory_evidence_not_classified" if entry else "not_registered")
+        if status not in allowed:
+            raise ValueError(f"Unknown inventory evidence status: {status}")
+        if status == "audited_source_access_gap" and not entry.get("retrieval_attempts"):
+            raise ValueError("Audited source-access gap requires actual retrieval attempts")
+        reviewed = 0
+        for study in studies:
+            cells = evidence_by_study[study["study_row_id"]]
+            if len(cells) == 11 and all(
+                cell["experiment_scoped_source_override"] == "yes"
+                and cell["evidence_status"] not in {"not_assessed", "composite_requires_split"}
+                for cell in cells
+            ):
+                reviewed += 1
+        all_reviewed = reviewed == len(studies)
+        audited = all_reviewed and status in assessed_inventory | {"audited_source_access_gap"}
+        rows.append({
+            "network_node_id": node,
+            "inventory_registered": "yes" if entry else "no",
+            "inventory_evidence_status": status,
+            "inventory_status": entry.get("inventory_status", "not_assessed"),
+            "study_row_count": len(studies),
+            "rows_with_eleven_source_dispositions": reviewed,
+            "all_rows_have_eleven_source_dispositions": "yes" if all_reviewed else "no",
+            "inventory_and_contracts_audited": "yes" if audited else "no",
+            "inventory_evidence_pointer": entry.get("evidence_pointer", ""),
+            "evidence_classified_on": entry.get("inventory_evidence_classified_on", ""),
+        })
+    counts = Counter(row["inventory_evidence_status"] for row in rows)
+    summary = {
+        "publications": len(rows),
+        "registeredInventories": sum(row["inventory_registered"] == "yes" for row in rows),
+        "methodsReviewedInventories": sum(counts[key] for key in assessed_inventory),
+        "auditedAccessBlockers": counts["audited_source_access_gap"],
+        "publicationsWithAllContractDispositions": sum(row["all_rows_have_eleven_source_dispositions"] == "yes" for row in rows),
+        "inventoryAndContractsAudited": sum(row["inventory_and_contracts_audited"] == "yes" for row in rows),
+        "remainingInventoryOrContractAudit": sum(row["inventory_and_contracts_audited"] == "no" for row in rows),
+        "inventoryEvidenceCounts": dict(sorted(counts.items())),
+        "interpretation": "Audited means inventory evidence or documented access blocker plus eleven explicit source dispositions per retained row. It does not mean all values are reported, final-version equivalence is proven, a template exists, or native hardware is qualified.",
+    }
+    return rows, summary
+
+
 def public_projection(
     study_index: list[dict[str, Any]], evidence_rows: list[dict[str, Any]], corpus_id: str,
     study_aliases: dict[str, list[str]],
@@ -1521,13 +1586,17 @@ def build(output_dir: Path, public_output: Path | None = None) -> dict[str, Any]
         ["status", "description", "default_review_action"],
     )
 
+    registry = json.loads(STUDY_REGISTRY_PATH.read_text(encoding="utf-8"))
+    inventory_rows, inventory_summary = inventory_review_audit(registry, study_index, evidence_rows)
+    _write_csv(output_dir / "publication_inventory_audit.csv", inventory_rows, list(inventory_rows[0]))
+
     if public_output is not None:
-        registry = json.loads(STUDY_REGISTRY_PATH.read_text(encoding="utf-8"))
         migrations = registry.get("study_row_migrations", [])
         aliases = {row["old_study_row_id"]: row["child_study_row_ids"] for row in migrations}
         if len(aliases) != len(migrations):
             raise ValueError("Duplicate superseded study-row identity")
         projection = public_projection(study_index, evidence_rows, registry["corpus_freeze"]["id"], aliases)
+        projection["inventoryAudit"] = inventory_summary
         public_output.parent.mkdir(parents=True, exist_ok=True)
         public_output.write_text(json.dumps(projection, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
 
@@ -1539,6 +1608,7 @@ def build(output_dir: Path, public_output: Path | None = None) -> dict[str, Any]
         "evidence_cell_count": len(evidence_rows),
         "review_queue_count": len(review_queue_rows),
         "status_counts": dict(sorted(Counter(row["evidence_status"] for row in evidence_rows).items())),
+        "inventory_audit": inventory_summary,
     }
 
 
