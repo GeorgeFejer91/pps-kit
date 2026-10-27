@@ -12,20 +12,20 @@
     "publications": 94,
     "studies": 124,
     "contracts": 1364,
-    "reportedComplete": 156,
+    "reportedComplete": 160,
     "derivedComplete": 38,
     "parameterStatusCounts": {
       "approximation_required": 24,
       "composite_requires_split": 132,
       "conflicting_evidence": 5,
       "derived_complete": 38,
-      "explicitly_absent": 14,
-      "low_confidence": 75,
+      "explicitly_absent": 15,
+      "low_confidence": 64,
       "not_applicable": 14,
       "not_assessed": 352,
       "not_reported": 22,
-      "partial": 244,
-      "reported_complete": 156,
+      "partial": 250,
+      "reported_complete": 160,
       "source_unavailable": 288
     }
   },
@@ -557,7 +557,9 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "low_confidence": 11
+        "explicitly_absent": 1,
+        "partial": 6,
+        "reported_complete": 4
       },
       "nativeQualification": "not_assessed"
     },
@@ -16114,102 +16116,166 @@
     {
       "studyRowId": "doi:10.1038/s41598-019-45224-w",
       "networkNodeId": "doi:10.1038/s41598-019-45224-w",
-      "label": "Enlarged representation of peripersonal space in pregnancy.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Enlarged representation of peripersonal space in pregnancy. (a)",
+      "experimentLabel": "Abdominal PPS task across three longitudinal sessions",
+      "inventoryStatus": "confirmed_longitudinal_audio_tactile_task",
+      "evidenceScope": "experiment_specific",
       "templateIds": [],
       "parameterStatusCounts": {
-        "low_confidence": 11
+        "explicitly_absent": 1,
+        "partial": 6,
+        "reported_complete": 4
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "low_confidence",
-          "value": "Stimulus type: Auto-mined candidates: pink noise; 44.1 kHz | Source provenance: Auto-mined candidates: samples of pink noise; pink-noise samples | Auditory conditions: Auto-mined candidates: approaching; rear; left | Gain envelope: Auto-mined candidates: 70 dB | Renderer or apparatus: Auto-mined candidates: loudspeaker(s); speaker(s); Arduino",
+          "status": "partial",
+          "value": "3000-ms pink noise, 44.1 kHz; Audacity-shaped reciprocal speaker fades; 55-70 dB SPL at ear.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 5, 1, 3 | source page/section(s) 5, 3, 6 | source page/section(s) 5, 6, 4 | source page/section(s) 6, 5, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "evidenceNote": "Original waveform/envelope asset and delegated protocol details not fully audited.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45224-w",
           "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "level_envelope_calibration": {
+              "status": "reported",
+              "value": "Exponential rise 55-70 dB SPL measured at ear; opposing near/far fades.",
+              "note": ""
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Audacity; near/far speakers; Arduino/LabView 8.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "reported",
+              "value": "Two physical speakers.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Pink noise, 44.1 kHz.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "low_confidence",
-          "value": "Trajectory path: Auto-mined candidates: near loudspeaker; far loudspeaker; towards body; away from body; approaching trajectory | Stimulus duration: Auto-mined candidates: duration relative to sound onset; 3000 ms; 300 ms; 800 ms; 1500 ms; 2200 ms; 2500 ms; 3 sec | Gain envelope: Auto-mined candidates: 70 dB | Renderer or apparatus: Auto-mined candidates: loudspeaker(s); speaker(s); Arduino",
+          "status": "partial",
+          "value": "Apparent approach: near speaker beside left hand; far speaker 1 m farther; hand aligned with stimulated abdomen.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 6, 5, 4 | source page/section(s) 5, 2, 6 | source page/section(s) 5, 1, 3 | source page/section(s) 6, 5, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "evidenceNote": "No constant physical speed inferred. Absolute geometry and Figure 2 visual orientation remain unresolved; publisher screenshot fetch failed.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45224-w",
           "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
+            "geometry"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Seated blindfolded; left arm on response box; hand aligned with abdomen.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "Level-cued far-to-near apparent approach.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3000-ms auditory interval.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "low_confidence",
-          "value": "Trial rows families: Auto-mined candidates: audio-tactile trials; unimodal tactile trials; catch trials | Task sequence rules: Auto-mined candidates: ignore sound; catch/no-target trials",
+          "status": "reported_complete",
+          "value": "Randomly intermingled looming audio-tactile targets and auditory-only catches.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 6, 5, 2",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45224-w",
-          "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Random trial order.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Auditory onset; optional delayed abdominal tap; speeded response to touch.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Audio-tactile targets; auditory-only catches.",
+              "note": ""
+            },
+            "within_trial_timing_or_placement": {
+              "status": "reported",
+              "value": "D1-D5 after sound onset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "low_confidence",
-          "value": "Task sequence rules: Auto-mined candidates: ignore sound; catch/no-target trials | Response window: Auto-mined candidates: button response; speeded response",
+          "status": "partial",
+          "value": "Left-hand keypress to abdominal touch; ignore sound.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 6, 5, 2 | source page/section(s) 6, 2, 5",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "evidenceNote": "No response deadline is inferred from sound duration; response-window/protocol-lineage review remains open.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45224-w",
           "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Press promptly when tapped.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Left-hand response-box keypress.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to tactile targets; ignore auditory distractor.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "low_confidence",
-          "value": "Iti jitter policy: Auto-mined candidates: silence interval; 3000 ms; 300 ms; 800 ms; 1500 ms; 2200 ms; 2500 ms; 3 sec",
+          "status": "partial",
+          "value": "No explicit ITI/jitter contract established by this main-Methods review.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 5, 3, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "evidenceNote": "Main text checked; supplementary/code and cited-protocol checks remain open. No not_reported or unavailable disposition assigned.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45224-w",
           "missingComponents": [
-            "policy_type",
             "timing_scope_and_anchor",
             "values_or_range"
           ],
@@ -16218,110 +16284,182 @@
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "low_confidence",
-          "value": "Soa table: Auto-mined candidates: 3000 ms; 300 ms; 800 ms; 1500 ms; 2200 ms; 2500 ms",
+          "status": "reported_complete",
+          "value": "D1-D5: +300, +800, +1500, +2200, +2500 ms after auditory onset.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 5, 6, 2",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45224-w",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Approaching sound only.",
+              "note": ""
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "300, 800, 1500, 2200, 2500 ms.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive tactile delay after auditory onset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "low_confidence",
-          "value": "Tactile stimulus: Auto-mined candidates: 300 ms; 2500 ms; 3000 ms; 800 ms; 1500 ms; 2200 ms",
+          "status": "partial",
+          "value": "Custom mechanical tapper attached to abdomen.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 6, 2, 5",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "evidenceNote": "Tap duration/waveform and amplitude/calibration remain open; no reuse of SOA values as tap duration.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45224-w",
           "missingComponents": [
-            "modality",
-            "body_site_and_side",
             "waveform_and_duration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Abdomen; side not specified.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Mechanical tapping.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "low_confidence",
-          "value": "Baseline strategy: Auto-mined candidates: unimodal tactile baseline; silence baseline window | Baseline timing: Auto-mined candidates: post-sound tactile baseline; 3000 ms; 300 ms; 800 ms; 1500 ms; 2200 ms; 2500 ms; 3 sec | Baseline count: Auto-mined candidates: 65 trials",
+          "status": "explicitly_absent",
+          "value": "Only experimental audio-tactile trials and auditory-only catches; no tactile-only baseline.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 6, 5, 3 | source page/section(s) 5, 6, 2 | source page/section(s) 6, 2, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "evidenceNote": "The earlier discussion of unimodal controls describes prior studies, not this task.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45224-w",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Baseline family explicitly omitted.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "explicitly_absent",
+              "value": "Tactile-only baselines omitted to limit fatigue/testing time.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Baseline family explicitly omitted.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Baseline family explicitly omitted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "low_confidence",
-          "value": "Catch trial type: Auto-mined candidates: 65 trials | Catch count: Auto-mined candidates: 65 trials",
+          "status": "reported_complete",
+          "value": "15 auditory-only catches per 65-trial session.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 6, 3, 5 | source page/section(s) 6, 2, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45224-w",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "15 catches randomly intermingled.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Sound without touch.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "15.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Respond only to touch; ignore sound.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "low_confidence",
-          "value": "Repetitions per tactile soa condition: Auto-mined candidates: 65 trials | Total trial count: Auto-mined candidates: 65 trials",
+          "status": "reported_complete",
+          "value": "10 targets per 5 delays = 50 targets; 15 catches; 65 trials per measurement session.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 6, 3, 2 | source page/section(s) 6, 2, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45224-w",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Repeated longitudinal sessions; no tactile-only baseline allocation.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five delays; approach only.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "10/delay; 50 targets + 15 catches = 65.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "low_confidence",
-          "value": "Blocked or random order: Auto-mined candidates: randomized/random order | Total trial count: Auto-mined candidates: 65 trials",
+          "status": "partial",
+          "value": "65 trials in random order; task approximately 7 minutes.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 3, 5, 6 | source page/section(s) 6, 2, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "evidenceNote": "The paper describes a session sequence, not an explicit block count/composition or counterbalancing rule; unresolved rather than defaulted to one block.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-019-45224-w",
           "missingComponents": [
             "block_count",
             "block_composition"
           ],
-          "components": {}
+          "components": {
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Random trial order.",
+              "note": ""
+            }
+          }
         }
       ]
     },
