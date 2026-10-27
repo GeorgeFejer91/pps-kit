@@ -397,6 +397,47 @@ fn participant_fixture() -> (Value, Value, Value) {
 }
 
 #[test]
+fn stationary_receipt_cannot_relabel_the_identical_moving_asset_or_stale_hash() {
+    let (mut assets, cue) = assets();
+    let (mut design, preview, variants) = fixture();
+    design["protocol"]["baseline_strategy"] = json!("stationary_burst");
+    design["noises"][0]["native_stationary_baseline_asset"] = json!("comparator");
+    assets.push(asset(
+        "comparator",
+        AssemblyAssetRole::StationaryBaseline,
+        8000,
+        2,
+        1600,
+        0.05,
+        -0.025,
+    ));
+    let cancel = AtomicBool::new(false);
+    assert!(matches!(
+        plan_assembly_preview(&design, &preview, &variants, &assets, &cue, &cancel),
+        Err(GenerationError::Invalid(
+            "assembly_stationary_comparator_contract"
+        ))
+    ));
+    assets.pop();
+    assets.push(asset(
+        "comparator",
+        AssemblyAssetRole::StationaryBaseline,
+        8000,
+        2,
+        1600,
+        0.03,
+        -0.02,
+    ));
+    design["noises"][0]["native_stationary_baseline_sha256"] = json!("0".repeat(64));
+    assert!(matches!(
+        plan_assembly_preview(&design, &preview, &variants, &assets, &cue, &cancel),
+        Err(GenerationError::Invalid(
+            "assembly_stationary_comparator_contract"
+        ))
+    ));
+}
+
+#[test]
 fn accepted_participant_order_keeps_separate_parts_and_verified_instruction_pcm() {
     let temp = Temp::new();
     let (assets, cue) = assets();

@@ -1105,7 +1105,7 @@ fn level_policy(
                 "Choose an explicit digital preservation or calibrated ramp policy.",
             )
         })?;
-    if policy["kind"] == "preserve" {
+    if policy["kind"] == "preserve" || policy["kind"] == "peak_normalize" {
         let level = serde_json::from_value::<LevelPolicy>(policy.clone()).map_err(|_| {
             error(
                 "invalid_level_policy",

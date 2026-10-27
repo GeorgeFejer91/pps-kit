@@ -34,6 +34,9 @@ Level modes are distinct:
 - `linear_db_ramp` holds endpoints, ramps linearly in dB, and scales to target RMS
   in the final active window. Distance attenuation is forbidden. A peak-ceiling
   conflict fails instead of flattening the ramp or lowering its target.
+- `peak_normalize` applies an explicit target digital peak after spatialization,
+  records its target and actual peak plus gain, and leaves tactile samples alone.
+  It fails on silence or a conflicting ceiling. It is not SPL calibration.
 
 QC always reports `physical_spl_qualified: false`. A caller may derive digital
 targets from an independently audited calibration policy; this crate does not
@@ -142,7 +145,7 @@ requires a source's explicit `native_stationary_baseline_asset` reference with
 the same rate and duration. A moving waveform is never reused as a stationary
 comparator. The complete actual 204-row browser fixture correctly reports the
 missing stationary comparator; its four selected audio assets and 100 ms cue
-are 44.1 kHz. That is a capability check, not successful full-study assembly.
+are 44.1 kHz. Its original premade assets alone cannot supply a stationary control.
 
 `accept_assembly_preview(preview, expected_design_hash, expected_preview_hash,
 revision)` creates a native-only accepted plan. `prepare_accepted_session(plan,
@@ -220,6 +223,45 @@ split identity. Stale/modified previews and cancelled work cannot return a
 publishable receipt. Set `PPS_KEEP_PARTICIPANT_FIXTURE=1` only for an explicit
 local test evidence run to retain that small synthetic file fixture.
 
+## Explicit native stationary controls
+
+`baseline::plan_stationary_baseline(design, source_label, BaselineGenerationOptIn)`
+returns a `StationaryBaselineGenerationPlan` whose `generation` field uses the
+same native ingredient/C++ pipeline. It selects one existing generated source,
+applies that source's saved trajectory timing, fixes geometry at its initial
+position, preserves its source profile, and derives the existing comparator seed
+from the first 32 bits of SHA256(`stationary-burst-baseline:{label}:{noise_type}`).
+The source generator is explicitly the new opted-in native algorithm. No legacy
+NumPy waveform parity or validation inherited from the moving condition is claimed.
+
+The existing explicit source loudness policy stays explicit. An absent/null
+policy maps the historical renderer's separate branch to direct-path attenuation
+followed by an explicit final digital peak of 0.90. The C++ contract itself still
+uses `normalization: none`; Rust performs and measures the named output policy.
+This digital peak is neither measured SPL nor perceptual loudness matching.
+Stationary here means fixed spatial geometry; an inherited linear-dB envelope
+still changes amplitude over time.
+
+`generated_stationary_baseline_entry` verifies actual stereo WAV and renderer
+evidence. `apply_generated_stationary_baseline` preserves the moving source and
+adds its comparator reference, SHA and provenance, returns the artifact entry,
+marks the design customized/unqualified, and invalidates segments 3–6 plus the
+accepted run package. Imported rendered waveforms cannot become generated dry
+sources. Assembly requires a native `StationaryBaseline` receipt with the same
+rate/duration and rejects an identical moving-file hash or stale comparator hash.
+The host owns revision fencing, native file authority and portable asset rebinding.
+
+The explicit `native_browser_stationary_controls_complete_two_part_preparation`
+test rendered both real Study 5 controls through C++ and then assembled the
+actual browser's full participant order using its nine selected premade assets.
+Both six-block parts passed the production verifier and every block compiled
+with the production scheduler: 408 rows, including 120 baseline rows, preserving
+every source-block trial-pool index. It passed in 173 s on 2026-10-27, with files
+and QC retained under ignored `artifacts/native-study5-participant-*`. This is
+customized, unqualified software evidence; it performs no audio-device access
+or original-study waveform replication claim. The earlier test of unchanged
+premade assets still correctly rejects missing stationary comparators.
+
 ## Verification
 
 `cargo test -p pps-designer-core` tests actual PCM, channels, silence, timing,
@@ -243,7 +285,7 @@ versus Cartesian waveform differences, passed in 67 s.
 Evidence remains in ignored `artifacts/`. No audio device is opened or qualified.
 
 Unavailable: legacy NumPy generation; resampled or compressed imported sources;
-additional trajectory/burst policies; ILD near-field correction; automatic
-stationary comparator generation; Runner instruction/group execution qualification;
+fixed-audio ingredient authoring; additional trajectory/burst policies; ILD near-field correction;
+Runner instruction/group execution qualification;
 physical calibration.
 This subset is not full catalogue replication.

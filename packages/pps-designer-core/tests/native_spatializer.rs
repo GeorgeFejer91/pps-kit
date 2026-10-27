@@ -521,3 +521,248 @@ fn native_prepared_pcm_controls_and_final_waveform_are_measured() {
     .unwrap();
     eprintln!("Native measured evidence: {}", directory.display());
 }
+
+#[test]
+#[ignore = "requires renderer and actual PPS_BROWSER_BLOCK_PLAN; writes about2GiB of offline two-part evidence"]
+fn native_browser_stationary_controls_complete_two_part_preparation() {
+    use pps_designer_core::{assembly::*, baseline::*};
+    use pps_runner_execution::{compile_verified_block_schedule, BlockScheduleOptions};
+    use pps_session_package::{verify_prepared_session, VerificationRequest};
+    let executable = PathBuf::from(std::env::var_os("PPS_TEST_RENDERER").unwrap());
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .canonicalize()
+        .unwrap();
+    let resource_root = root.join("packages/pps-resources");
+    let directory = root.join("artifacts").join(format!(
+        "native-study5-participant-{}-{}",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis()
+    ));
+    fs::create_dir(&directory).unwrap();
+    let capture: Value = serde_json::from_slice(
+        &fs::read(std::env::var("PPS_BROWSER_BLOCK_PLAN").unwrap()).unwrap(),
+    )
+    .unwrap();
+    let mut design = capture["design"].clone();
+    let cancel = AtomicBool::new(false);
+    let mut assets = Vec::new();
+    let mut baseline_reports = Vec::new();
+    for label in ["Pink frontal", "White frontal"] {
+        let plan = plan_stationary_baseline(
+            &design,
+            label,
+            &BaselineGenerationOptIn {
+                source_algorithm: SOURCE_ALGORITHM.into(),
+                accept_non_legacy_source_algorithm: true,
+            },
+        )
+        .unwrap();
+        assert_eq!(plan.generation.request.sample_rate_hz, 44100);
+        assert_eq!(plan.generation.request.duration_s, 4.0);
+        let prepared = prepare(&plan.generation.request, &cancel).unwrap();
+        let options=SpatializerOptions{hrtf_path:resource_root.join("assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa").to_str().unwrap().into(),hrtf_format:HrtfFormat::Sofa,
+            head_radius_m:plan.generation.renderer.head_radius_m,distance_attenuation:plan.generation.renderer.distance_attenuation,near_field:plan.generation.renderer.near_field,propagation_delay:plan.generation.renderer.propagation_delay};
+        let mut dry = Vec::new();
+        let config = write_spatializer_input(&prepared, &mut dry, &options, &cancel).unwrap();
+        let render_dir = directory.join(label.replace(' ', "-"));
+        assert!(execute(
+            &executable,
+            &render_dir,
+            &serde_json::to_value(config).unwrap(),
+            &dry
+        ));
+        let stereo = read_stereo_wav(
+            fs::File::open(render_dir.join("stereo.wav")).unwrap(),
+            44100,
+            176400,
+            &cancel,
+        )
+        .unwrap();
+        let generated = compose_spatial_output(prepared, stereo, &cancel).unwrap();
+        assert!((generated.level_qc.audio_peak_dbfs - 20.0 * 0.9_f64.log10()).abs() < 0.00001);
+        let mut wav = std::io::Cursor::new(Vec::new());
+        write_ingredient_wav(&mut wav, &generated, &cancel).unwrap();
+        let bytes = wav.into_inner();
+        let hash = format!("{:x}", Sha256::digest(&bytes));
+        let reference = format!("native-assets/{hash}.wav");
+        let report: Value =
+            serde_json::from_slice(&fs::read(render_dir.join("manifest.json")).unwrap()).unwrap();
+        let entry = generated_stationary_baseline_entry(
+            &plan, &reference, &bytes, &generated, &report, &cancel,
+        )
+        .unwrap();
+        let publication = apply_generated_stationary_baseline(&plan, &entry).unwrap();
+        fs::write(render_dir.join("baseline.wav"), &bytes).unwrap();
+        fs::write(
+            render_dir.join("publication.json"),
+            serde_json::to_vec_pretty(&publication).unwrap(),
+        )
+        .unwrap();
+        assets.push(
+            VerifiedAssemblyAsset::from_wav_bytes(
+                &reference,
+                &bytes,
+                &hash,
+                AssemblyAssetRole::StationaryBaseline,
+                &cancel,
+            )
+            .unwrap(),
+        );
+        baseline_reports.push(publication.asset);
+        design = publication.design;
+        eprintln!("Rendered real V2 stationary control: {label}");
+    }
+    let mut references = std::collections::BTreeMap::new();
+    let selected: std::collections::BTreeSet<_> = capture["variants"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .flat_map(|v| v["choices"].as_array().unwrap())
+        .filter(|choice| choice["kind"] == "audio")
+        .map(|choice| choice["label"].as_str().unwrap())
+        .collect();
+    for (collection, field, role) in [
+        (
+            "noises",
+            "prebaked_path",
+            AssemblyAssetRole::BinauralIngredient,
+        ),
+        ("prestimulus_files", "path", AssemblyAssetRole::Instruction),
+    ] {
+        for asset in design[collection].as_array().unwrap() {
+            if !selected.contains(asset["label"].as_str().unwrap()) {
+                continue;
+            }
+            references.insert(asset[field].as_str().unwrap().to_owned(), role);
+        }
+    }
+    for slot in design["study_profile_reference_parameters"]["dashboard_run_setup"]
+        ["instruction_profile"]["slots"]
+        .as_array()
+        .unwrap()
+    {
+        if slot["enabled"] == true {
+            references.insert(
+                slot["path"].as_str().unwrap().to_owned(),
+                AssemblyAssetRole::Instruction,
+            );
+        }
+    }
+    assert_eq!(references.len(), 9);
+    for (reference, role) in references {
+        assert!(reference.starts_with("assets/") && !reference.contains(".."));
+        let bytes = fs::read(resource_root.join(&reference)).unwrap();
+        let hash = format!("{:x}", Sha256::digest(&bytes));
+        assets.push(
+            VerifiedAssemblyAsset::from_wav_bytes(&reference, &bytes, &hash, role, &cancel)
+                .unwrap(),
+        );
+    }
+    let cue = fs::read(resource_root.join("assets/tactile/default_tactile_cue.wav")).unwrap();
+    let cue_hash = format!("{:x}", Sha256::digest(&cue));
+    let tactile = VerifiedAssemblyAsset::from_wav_bytes(
+        "bundled-tactile",
+        &cue,
+        &cue_hash,
+        AssemblyAssetRole::TactileCue,
+        &cancel,
+    )
+    .unwrap();
+    let source = plan_assembly_preview(
+        &design,
+        &capture["block_csv_preview"],
+        &capture["variants"],
+        &assets,
+        &tactile,
+        &cancel,
+    )
+    .unwrap();
+    let order = plan_run_order_preview(&source, &assets, &cancel).unwrap();
+    assert_eq!(order.preview["csv_rows"].as_array().unwrap().len(), 600);
+    let expected: Vec<usize> = order.preview["csv_rows"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|r| r["participant_index"] == 1)
+        .map(|r| r["source_block_index"].as_u64().unwrap() as usize)
+        .collect();
+    let (dh, sh, rh) = (
+        source.design_sha256.clone(),
+        source.preview_sha256.clone(),
+        order.run_order_sha256.clone(),
+    );
+    let accepted = accept_participant_assembly(source, order, &dh, &sh, &rh, 1).unwrap();
+    let staged = prepare_accepted_participant(
+        &accepted,
+        &assets,
+        &tactile,
+        &directory.join("participant"),
+        1,
+        "P001_native_v2_software_fixture",
+        &cancel,
+    )
+    .unwrap();
+    assert_eq!(staged.parts().len(), 2);
+    let mut trial_count = 0;
+    let mut baseline_count = 0;
+    for (part_index, part) in staged.parts().iter().enumerate() {
+        let verified = verify_prepared_session(
+            VerificationRequest::new(part.manifest_path()).with_participant_id("P001"),
+        )
+        .unwrap();
+        assert_eq!(verified.blocks().len(), 6);
+        assert_eq!(verified.summary().part_number, Some(part_index as i64 + 1));
+        for (block_index, block) in verified.blocks().iter().enumerate() {
+            let mut options = BlockScheduleOptions::new(block_index as i64 + 1);
+            options.sample_rate = 44100;
+            options.block_wav_path = Some(block.wav_path().to_owned());
+            let schedule = compile_verified_block_schedule(
+                block.manifest_path(),
+                block.manifest_sha256(),
+                options,
+            )
+            .unwrap();
+            assert_eq!(schedule.summary().trial_row_count, 34);
+            trial_count += schedule.summary().trial_row_count;
+            let mut csv = csv::Reader::from_path(block.manifest_path()).unwrap();
+            let header = csv.headers().unwrap().clone();
+            let source_index = header
+                .iter()
+                .position(|h| h == "Source_Block_Index")
+                .unwrap();
+            let family = header.iter().position(|h| h == "Family").unwrap();
+            let pool = header.iter().position(|h| h == "trial_pool_index").unwrap();
+            let expected_source = expected[part_index * 6 + block_index];
+            let mut pools = Vec::new();
+            for row in csv.records() {
+                let row = row.unwrap();
+                assert_eq!(row[source_index].parse::<usize>().unwrap(), expected_source);
+                baseline_count += usize::from(&row[family] == "baseline");
+                pools.push(row[pool].parse::<u64>().unwrap());
+            }
+            let original: Vec<u64> = capture["block_csv_preview"]["blocks"][expected_source - 1]
+                ["preview_rows"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|r| r["trial_pool_index"].as_u64().unwrap())
+                .collect();
+            assert_eq!(pools, original);
+        }
+        eprintln!(
+            "Verified real participant part{}:6blocks/204rows",
+            part_index + 1
+        );
+    }
+    assert_eq!(trial_count, 408);
+    assert_eq!(baseline_count, 120);
+    fs::write(directory.join("software-evidence.json"),serde_json::to_vec_pretty(&json!({"qualification":"customized_native_generation_unqualified","physical_timing_qualified":false,"legacy_numpy_seed_compatible":false,"part_count":2,"block_count":12,"trial_count":trial_count,"baseline_count":baseline_count,"source_assets":9,"generated_stationary_controls":baseline_reports,"group_manifest":staged.group_manifest_path()})).unwrap()).unwrap();
+    eprintln!(
+        "Full native customized software evidence: {}",
+        directory.display()
+    );
+}
