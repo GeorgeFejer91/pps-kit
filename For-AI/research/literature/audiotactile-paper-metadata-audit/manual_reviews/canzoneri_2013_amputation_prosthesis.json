@@ -2,14 +2,14 @@
   "schema": "pps-paper-metadata-manual-review.v1",
   "record_id": "canzoneri_2013_amputation_prosthesis",
   "citation_short": "Canzoneri et al. (2013b)",
-  "review_date": "2026-07-15",
+  "review_date": "2026-10-27",
   "manual_review_status": "manual_review_completed_open_access_pdf_no_supplement_found",
   "confidence_score": 0.86,
   "confidence_label": "high_confidence_extraction_with_source_count_caveat",
   "confidence_basis": "The open-access Scientific Reports HTML and PDF were reviewed for Experiment 2/3 audio-tactile methods, apparatus, tactile timing, trial counts, catch rows, condition structure, and expected result pattern. Core runnable audio-tactile parameters are reported, but one Methods sentence is internally inconsistent: 8 target stimuli per T1-T5 x IN/OUT cell implies 80 target rows, while the same sentence states 76 tactile-target trials.",
   "profile_recreation_assessment": {
-    "assessment": "possible_with_caveats_dynamic_upper_arm_prosthesis_context",
-    "reason": "The profile can recreate the reported dynamic IN/OUT pink-noise PPS task with T1-T5 timings, upper-arm tactile target context, 76 auditory-only catches, two blocks, and prosthesis/limb context retained as non-runnable analysis metadata. Exact original gain files/noise seed, voice-key calibration, participant-level electrical current values, and the source count inconsistency remain caveats."
+    "assessment": "source_inconsistency_requires_resolution",
+    "reason": "Eight targets x five delays x two directions gives 80, but primary Methods prints 76 targets plus 76 catches. No corrected total is accepted. Experiment 3 requires upper-arm AND hand conditions, two blocks each, with fixed upper-arm speaker coordinates. Original sound realization, electrical waveform/current and response timeline remain unresolved."
   },
   "source_checks": [
     {
@@ -29,6 +29,12 @@
       "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3789144/",
       "status": "blocked_by_recaptcha",
       "scope": "PMC route exists in template history but was not relied on because the browser route returned a reCAPTCHA page."
+    },
+    {
+      "source_type": "primary_full_text",
+      "source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+      "status": "reviewed",
+      "scope": "Whole-publication inventory; Experiment 1 tactile-only, Experiment 3 upper-arm/hand and four-block correction; target-count conflict confirmed."
     }
   ],
   "review_attempts": [
@@ -66,10 +72,10 @@
   "field_status_counts": {
     "not_applicable": 2,
     "not_reported_after_review": 1,
-    "reported": 15,
+    "reported": 12,
     "reported_absent": 2,
-    "reported_with_caveat": 4,
-    "source_inconsistency_caveat": 1
+    "reported_with_caveat": 6,
+    "source_inconsistency_caveat": 2
   },
   "segment_field_audit": {
     "segment_1_stimulus_reconstruction": {
@@ -81,11 +87,11 @@
         "evidence_note": "The sound type and 3000 ms duration are explicitly reported."
       },
       "trajectory_path": {
-        "status": "reported",
-        "value": "Near loudspeaker close to upper arm and far loudspeaker about 100 cm away; IN moves far-to-near, OUT near-to-far by intensity manipulation.",
-        "source_file": "https://www.nature.com/articles/srep02844.pdf",
-        "page_or_section": "PDF p.7, Methods",
-        "evidence_note": "Physical loudspeaker layout and motion impression are reported."
+        "status": "reported_with_caveat",
+        "value": "Near speaker beside upper arm; far speaker approximately 100 cm from near speaker. Fixed auditory coordinates across upper-arm/hand target conditions; 3000-ms sound with 1000-ms pre/post silence.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+        "page_or_section": "Primary Methods and Results Experiments 2-3",
+        "evidence_note": "Fresh experiment-specific review; compact children retain the complete scope and source gaps."
       },
       "stimulus_duration": {
         "status": "reported",
@@ -184,10 +190,10 @@
     "segment_3_tactile_soa_baseline": {
       "tactile_stimulus": {
         "status": "reported_with_caveat",
-        "value": "Electrical tactile stimulation on the dorsal surface of the upper arm via DS7A and Neuroline electrodes; above-threshold but no participant current table.",
-        "source_file": "https://www.nature.com/articles/srep02844.pdf",
-        "page_or_section": "PDF p.7, Methods",
-        "evidence_note": "The runner stores modality/apparatus context and uses mouse-click response proxy evidence."
+        "value": "Experiment 2: amputee healthy limb and stump with/without prosthesis, plus separate healthy controls. Experiment 3: upper arm AND hand, exact hand subsite unspecified.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+        "page_or_section": "Primary Methods and Results Experiments 2-3",
+        "evidence_note": "Fresh experiment-specific review; compact children retain the complete scope and source gaps."
       },
       "soa_table": {
         "status": "reported",
@@ -220,11 +226,11 @@
     },
     "segment_4_counts": {
       "repetitions_per_tactile_soa_condition": {
-        "status": "reported",
-        "value": "Eight target stimuli for each T1-T5 temporal delay for IN and OUT sounds.",
-        "source_file": "https://www.nature.com/articles/srep02844.pdf",
-        "page_or_section": "PDF p.7, Methods",
-        "evidence_note": "This implies 80 target rows."
+        "status": "source_inconsistency_caveat",
+        "value": "Eight targets x five delays x two directions gives 80, but primary Methods prints 76 targets plus 76 catches. No corrected total is accepted. Experiment 3 requires upper-arm AND hand conditions, two blocks each, with fixed upper-arm speaker coordinates. Original sound realization, electrical waveform/current and response timeline remain unresolved.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+        "page_or_section": "Primary Methods and Results Experiments 2-3",
+        "evidence_note": "Fresh experiment-specific review; compact children retain the complete scope and source gaps."
       },
       "catch_count": {
         "status": "reported",
@@ -234,18 +240,18 @@
         "evidence_note": "Catch count is explicit."
       },
       "block_count": {
-        "status": "reported",
-        "value": "Two blocks.",
-        "source_file": "https://www.nature.com/articles/srep02844.pdf",
-        "page_or_section": "PDF p.7, Methods",
-        "evidence_note": "The profile prepares two runnable block WAVs."
+        "status": "reported_with_caveat",
+        "value": "Shared PPS administration has two approximately eight-minute blocks. Experiment 3 specifies two blocks per upper-arm/hand condition, four total with counterbalanced condition order.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+        "page_or_section": "Primary Methods and Results Experiments 2-3",
+        "evidence_note": "Fresh experiment-specific review; compact children retain the complete scope and source gaps."
       },
       "total_trial_count": {
         "status": "source_inconsistency_caveat",
-        "value": "Runnable contract uses 156 rows: 80 target rows from 8 x 5 x 2 plus 76 catches. The PDF's literal 76-target total conflicts with the factorial statement.",
-        "source_file": "https://www.nature.com/articles/srep02844.pdf",
-        "page_or_section": "PDF p.7, Methods",
-        "evidence_note": "The source inconsistency is preserved in the template and validator report."
+        "value": "Eight targets x five delays x two directions gives 80, but primary Methods prints 76 targets plus 76 catches. No corrected total is accepted. Experiment 3 requires upper-arm AND hand conditions, two blocks each, with fixed upper-arm speaker coordinates. Original sound realization, electrical waveform/current and response timeline remain unresolved.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+        "page_or_section": "Primary Methods and Results Experiments 2-3",
+        "evidence_note": "Fresh experiment-specific review; compact children retain the complete scope and source gaps."
       },
       "baseline_count": {
         "status": "reported_absent",
@@ -267,7 +273,8 @@
     "The exact original pink-noise waveform/seed and gain curve file are not supplied.",
     "Participant-level electrical stimulation current/electrode calibration is not reported.",
     "Voice-key threshold and latency correction are not reported.",
-    "The toolkit validation is software runner evidence only, not collected amputee/prosthesis behavior or physical apparatus equivalence."
+    "The toolkit validation is software runner evidence only, not collected amputee/prosthesis behavior or physical apparatus equivalence.",
+    "Eight targets x five delays x two directions gives 80, but primary Methods prints 76 targets plus 76 catches. No corrected total is accepted. Experiment 3 requires upper-arm AND hand conditions, two blocks each, with fixed upper-arm speaker coordinates. Original sound realization, electrical waveform/current and response timeline remain unresolved."
   ],
-  "next_manual_action": "Use the runnable profile for software validation with the source count caveat retained; seek author clarification or raw scripts only if exact 76-target cell distribution is required."
+  "next_manual_action": "Resolve source count inconsistency and retain experiment-specific target/condition boundaries before claiming source-equivalent reconstruction."
 }

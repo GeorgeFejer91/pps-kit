@@ -41,16 +41,21 @@ inventories still require their source and compact-contract audits.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive these distinctions from explicit registry
 evidence categories and the finalized eleven-contract source dispositions.
-The current audit records 50 Methods-backed inventories (37 current primary
+The current audit records 51 Methods-backed inventories (38 current primary
 reviews, eleven retained primary reviews, and two identified author versions whose
-final comparison is pending), four abstract/metadata inventories, two partial
+final comparison is pending), four abstract/metadata inventories, one partial
 Methods inventories, five audited access blockers, and 33 unregistered publications.
-Only 48 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 46 still need inventory
+Only 49 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 45 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Canzoneri amputation/prosthesis (2013) now has a confirmed three-experiment
+inventory. Experiment 1 is tactile-only; Experiment 3 includes upper-arm and
+hand conditions with four blocks. Its 76-versus-80 target contradiction remains
+source-blocking while the existing approximation template/history is retained.
+
 Noel (2018) has separate face/trunk cohort protocols with directly printed slow
 and fast SOAs and 320 trials each; model velocities do not add acquisitions.
 Ferroni (2020) retains two primary-excerpt-confirmed cohorts with documented

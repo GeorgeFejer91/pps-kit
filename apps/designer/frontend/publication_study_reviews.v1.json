@@ -12,20 +12,20 @@
     "publications": 94,
     "studies": 146,
     "contracts": 1606,
-    "reportedComplete": 297,
+    "reportedComplete": 295,
     "derivedComplete": 63,
     "parameterStatusCounts": {
       "approximation_required": 34,
       "composite_requires_split": 146,
-      "conflicting_evidence": 43,
+      "conflicting_evidence": 45,
       "derived_complete": 63,
       "explicitly_absent": 22,
       "low_confidence": 10,
-      "not_applicable": 132,
-      "not_assessed": 220,
+      "not_applicable": 143,
+      "not_assessed": 209,
       "not_reported": 44,
       "partial": 356,
-      "reported_complete": 297,
+      "reported_complete": 295,
       "source_unavailable": 239
     }
   },
@@ -1133,22 +1133,22 @@
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 2,
-        "conflicting_evidence": 2,
+        "conflicting_evidence": 4,
         "explicitly_absent": 2,
-        "not_assessed": 11,
+        "not_applicable": 11,
         "not_reported": 2,
         "partial": 4,
-        "reported_complete": 10
+        "reported_complete": 8
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
         "registered": true,
-        "evidenceStatus": "partial_methods_inventory",
-        "inventoryStatus": "at_least_three_experiments",
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_three_experiments_with_tactile_only_boundary",
         "studyRowCount": 3,
-        "rowsWithElevenSourceDispositions": 2,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "rowsWithElevenSourceDispositions": 3,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -25342,235 +25342,371 @@
       "studyRowId": "doi:10.1038/srep02844::a",
       "networkNodeId": "doi:10.1038/srep02844",
       "label": "Amputation and prosthesis implantation shape body and peripersonal space representations. (a)",
-      "experimentLabel": "Experiment 1 — body-representation task; scope unverified",
-      "inventoryStatus": "at_least_three_experiments",
-      "evidenceScope": "none",
+      "experimentLabel": "Experiment 1 — tactile distance/body-representation judgment",
+      "inventoryStatus": "confirmed_three_experiments_with_tactile_only_boundary",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "not_applicable": 11
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "No auditory stimulus is used in the tactile-distance task. Do not copy the pink-noise stimulus from Experiments 2–3.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Main Methods > Experiment 1 tactile distance perception task; Results Experiment 1; overall experimental structure",
+          "evidenceNote": "Adjacent tactile body-representation assessment; direct audio–tactile PPS compact contracts are not applicable, while the tactile protocol remains documented context.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
-            "source_recipe_or_asset_provenance"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "No acoustic trajectory applies. The comparison is between manually applied pairs of skin contacts on the forehead and longitudinally along the upper arm.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Main Methods > Experiment 1 tactile distance perception task; Results Experiment 1; overall experimental structure",
+          "evidenceNote": "Adjacent tactile body-representation assessment; direct audio–tactile PPS compact contracts are not applicable, while the tactile protocol remains documented context.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Forehead pair is applied first, then an arm pair. Each manual application lasts approximately one second; the between-site interval is one second. Participants are blindfolded.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Main Methods > Experiment 1 tactile distance perception task; Results Experiment 1; overall experimental structure",
+          "evidenceNote": "Adjacent tactile body-representation assessment; direct audio–tactile PPS compact contracts are not applicable, while the tactile protocol remains documented context.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Untimed verbal two-alternative judgment of which pair felt farther apart: forehead or arm. This is not speeded tactile detection or PPS reaction time.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Main Methods > Experiment 1 tactile distance perception task; Results Experiment 1; overall experimental structure",
+          "evidenceNote": "Adjacent tactile body-representation assessment; direct audio–tactile PPS compact contracts are not applicable, while the tactile protocol remains documented context.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
-            "response_window_and_anchor"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "One-second inter-stimulus interval is reported between the forehead and arm contacts. No between-trial jitter or ITI policy is supplied.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Main Methods > Experiment 1 tactile distance perception task; Results Experiment 1; overall experimental structure",
+          "evidenceNote": "Adjacent tactile body-representation assessment; direct audio–tactile PPS compact contracts are not applicable, while the tactile protocol remains documented context.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "No auditory-to-tactile SOA applies. Two successive tactile presentations are compared.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Main Methods > Experiment 1 tactile distance perception task; Results Experiment 1; overall experimental structure",
+          "evidenceNote": "Adjacent tactile body-representation assessment; direct audio–tactile PPS compact contracts are not applicable, while the tactile protocol remains documented context.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Manual two-point stimulation uses subject-specific longitudinal arm two-point discrimination threshold, 1.5 times threshold and twice threshold. Threshold is established by a staircase. These are spatial distances, not electrical-current amplitudes.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Main Methods > Experiment 1 tactile distance perception task; Results Experiment 1; overall experimental structure",
+          "evidenceNote": "Adjacent tactile body-representation assessment; direct audio–tactile PPS compact contracts are not applicable, while the tactile protocol remains documented context.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Forehead is the reference body part. Healthy limb/control group are comparison contexts, not tactile-only baseline rows from an auditory task.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Main Methods > Experiment 1 tactile distance perception task; Results Experiment 1; overall experimental structure",
+          "evidenceNote": "Adjacent tactile body-representation assessment; direct audio–tactile PPS compact contracts are not applicable, while the tactile protocol remains documented context.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "No no-target catch family is described; subjects make an untimed comparison on presented contact pairs.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Main Methods > Experiment 1 tactile distance perception task; Results Experiment 1; overall experimental structure",
+          "evidenceNote": "Adjacent tactile body-representation assessment; direct audio–tactile PPS compact contracts are not applicable, while the tactile protocol remains documented context.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Methods reports a 36-trial task. Do not infer exact repetition allocation or multiply this into an undocumented total across the three patient conditions without retaining the interpretation.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Main Methods > Experiment 1 tactile distance perception task; Results Experiment 1; overall experimental structure",
+          "evidenceNote": "Adjacent tactile body-representation assessment; direct audio–tactile PPS compact contracts are not applicable, while the tactile protocol remains documented context.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Patients perform healthy limb, stump without prosthesis and stump with prosthesis conditions in blocks, counterbalanced between participants. Healthy controls receive the task on their right upper arm. Exact within-block pair order is not supplied.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Main Methods > Experiment 1 tactile distance perception task; Results Experiment 1; overall experimental structure",
+          "evidenceNote": "Adjacent tactile body-representation assessment; direct audio–tactile PPS compact contracts are not applicable, while the tactile protocol remains documented context.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "block_count",
-            "block_composition"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -25578,17 +25714,17 @@
       "studyRowId": "doi:10.1038/srep02844::b",
       "networkNodeId": "doi:10.1038/srep02844",
       "label": "Amputation and prosthesis implantation shape body and peripersonal space representations. (b)",
-      "experimentLabel": "Experiment 2 — audio-tactile PPS",
-      "inventoryStatus": "at_least_three_experiments",
+      "experimentLabel": "Experiment 2 — amputee and healthy-control audio-tactile PPS",
+      "inventoryStatus": "confirmed_three_experiments_with_tactile_only_boundary",
       "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
-        "conflicting_evidence": 1,
+        "conflicting_evidence": 2,
         "explicitly_absent": 1,
         "not_reported": 1,
         "partial": 2,
-        "reported_complete": 5
+        "reported_complete": 4
       },
       "nativeQualification": "not_assessed",
       "contracts": [
@@ -25598,13 +25734,13 @@
           "status": "approximation_required",
           "value": "3000-ms dynamic pink noise with exponentially rising IN and falling OUT intensity, rendered by near/far loudspeakers; original noise realization, seed and gain files are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Experiments 2-3 audio-tactile task; manual review Segment 1",
+          "pageOrSection": "Primary Methods and Results Experiment 2",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [
             "source_recipe_or_asset_provenance"
           ],
@@ -25630,35 +25766,35 @@
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
           "status": "reported_complete",
-          "value": "Two-speaker apparent motion relative to the upper arm: near loudspeaker beside the arm and far loudspeaker approximately 100 cm away; IN is far-to-near and OUT near-to-far over 3000 ms, with 1000-ms pre/post silence. No separate metric speed is reported.",
+          "value": "Near speaker beside upper arm; far speaker approximately 100 cm from the near speaker, not an exact body-relative endpoint. Speakers remain fixed relative to upper arm when the tactile site changes. IN/OUT apparent motion lasts 3000 ms, with 1000-ms pre/post silence; no independent metric velocity is reported.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segment 1",
+          "pageOrSection": "Primary Methods and Results Experiment 2",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [],
           "components": {
             "coordinate_frame_body_anchor": {
               "status": "reported",
-              "value": "Two-speaker apparent motion relative to the upper arm: near loudspeaker beside the arm and far loudspeaker approximately 100 cm away; IN is far-to-near and OUT near-to-far over 3000 ms, with 1000-ms pre/post silence. No separate metric speed is reported.",
+              "value": "Near speaker beside upper arm; far speaker approximately 100 cm from the near speaker, not an exact body-relative endpoint. Speakers remain fixed relative to upper arm when the tactile site changes. Healthy limb and stump with/without prosthesis in amputees; matching right-upper-arm region in separate healthy controls.",
               "note": ""
             },
             "geometry": {
               "status": "reported",
-              "value": "Two-speaker apparent motion relative to the upper arm: near loudspeaker beside the arm and far loudspeaker approximately 100 cm away; IN is far-to-near and OUT near-to-far over 3000 ms, with 1000-ms pre/post silence. No separate metric speed is reported.",
+              "value": "Near speaker beside upper arm; far speaker approximately 100 cm from the near speaker, not an exact body-relative endpoint. Speakers remain fixed relative to upper arm when the tactile site changes. IN/OUT apparent motion lasts 3000 ms, with 1000-ms pre/post silence; no independent metric velocity is reported.",
               "note": ""
             },
             "motion_mode": {
               "status": "reported",
-              "value": "Two-speaker apparent motion relative to the upper arm: near loudspeaker beside the arm and far loudspeaker approximately 100 cm away; IN is far-to-near and OUT near-to-far over 3000 ms, with 1000-ms pre/post silence. No separate metric speed is reported.",
+              "value": "Near speaker beside upper arm; far speaker approximately 100 cm from the near speaker, not an exact body-relative endpoint. Speakers remain fixed relative to upper arm when the tactile site changes. IN/OUT apparent motion lasts 3000 ms, with 1000-ms pre/post silence; no independent metric velocity is reported.",
               "note": ""
             },
             "timing_constraint": {
               "status": "reported",
-              "value": "Two-speaker apparent motion relative to the upper arm: near loudspeaker beside the arm and far loudspeaker approximately 100 cm away; IN is far-to-near and OUT near-to-far over 3000 ms, with 1000-ms pre/post silence. No separate metric speed is reported.",
+              "value": "Near speaker beside upper arm; far speaker approximately 100 cm from the near speaker, not an exact body-relative endpoint. Speakers remain fixed relative to upper arm when the tactile site changes. IN/OUT apparent motion lasts 3000 ms, with 1000-ms pre/post silence; no independent metric velocity is reported.",
               "note": ""
             }
           }
@@ -25667,25 +25803,25 @@
           "key": "trial_sequence",
           "label": "Trial sequence",
           "status": "reported_complete",
-          "value": "Random combination of IN/OUT audio-tactile target rows at T1-T5, randomly intermingled with auditory-only catches; trials divided equally into two approximately 8-min blocks.",
+          "value": "IN/OUT audio-tactile targets at five delays, randomly intermixed with auditory-only catches. The shared task uses two approximately eight-minute blocks; preserve repetition across patient/healthy-control conditions rather than treating every participant as one undifferentiated two-block run.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segment 2",
+          "pageOrSection": "Primary Methods and Results Experiment 2",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [],
           "components": {
             "ordered_elements_and_source_selection": {
               "status": "reported",
-              "value": "Random combination of IN/OUT audio-tactile target rows at T1-T5, randomly intermingled with auditory-only catches; trials divided equally into two approximately 8-min blocks.",
+              "value": "IN/OUT audio-tactile targets at five delays, randomly intermixed with auditory-only catches. The shared task uses two approximately eight-minute blocks; preserve repetition across patient/healthy-control conditions rather than treating every participant as one undifferentiated two-block run.",
               "note": ""
             },
             "trial_families": {
               "status": "reported",
-              "value": "Random combination of IN/OUT audio-tactile target rows at T1-T5, randomly intermingled with auditory-only catches; trials divided equally into two approximately 8-min blocks.",
+              "value": "IN/OUT audio-tactile targets at five delays, randomly intermixed with auditory-only catches. The shared task uses two approximately eight-minute blocks; preserve repetition across patient/healthy-control conditions rather than treating every participant as one undifferentiated two-block run.",
               "note": ""
             }
           }
@@ -25694,27 +25830,27 @@
           "key": "task_response",
           "label": "Task and response",
           "status": "partial",
-          "value": "Respond vocally as quickly as possible to upper-arm electrical targets, ignore sound and withhold on auditory-only catches; no numeric response/scoring window or voice-key latency rule is reported.",
+          "value": "Respond vocally to electrical touch; ignore sound and withhold on auditory-only catches. Healthy limb and stump with/without prosthesis in amputees; matching right-upper-arm region in separate healthy controls. No numeric response/scoring window or voice-key latency rule is supplied.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segment 2",
+          "pageOrSection": "Primary Methods and Results Experiment 2",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [
             "response_window_and_anchor"
           ],
           "components": {
             "response_mapping_or_expected_action": {
               "status": "reported",
-              "value": "Respond vocally as quickly as possible to upper-arm electrical targets, ignore sound and withhold on auditory-only catches; no numeric response/scoring window or voice-key latency rule is reported.",
+              "value": "Respond vocally to electrical touch; ignore sound and withhold on auditory-only catches. Healthy limb and stump with/without prosthesis in amputees; matching right-upper-arm region in separate healthy controls. No numeric response/scoring window or voice-key latency rule is supplied.",
               "note": ""
             },
             "response_mode_or_device": {
               "status": "reported",
-              "value": "Respond vocally as quickly as possible to upper-arm electrical targets, ignore sound and withhold on auditory-only catches; no numeric response/scoring window or voice-key latency rule is reported.",
+              "value": "Vocal response recorded with a voice key; exact latency correction is not reported.",
               "note": ""
             },
             "response_window_and_anchor": {
@@ -25724,7 +25860,7 @@
             },
             "target_and_nontarget_rule": {
               "status": "reported",
-              "value": "Respond vocally as quickly as possible to upper-arm electrical targets, ignore sound and withhold on auditory-only catches; no numeric response/scoring window or voice-key latency rule is reported.",
+              "value": "Respond vocally to electrical touch; ignore sound and withhold on auditory-only catches. Healthy limb and stump with/without prosthesis in amputees; matching right-upper-arm region in separate healthy controls. No numeric response/scoring window or voice-key latency rule is supplied.",
               "note": ""
             }
           }
@@ -25735,13 +25871,13 @@
           "status": "not_reported",
           "value": "No exact ITI, jitter value, range or distribution is reported for the Experiments 2-3 task.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segment 2",
+          "pageOrSection": "Primary Methods and Results Experiment 2",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
@@ -25771,13 +25907,13 @@
           "status": "reported_complete",
           "value": "Tactile onset after sound onset: T1=300, T2=800, T3=1500, T4=2200 and T5=2700 ms, crossed with IN and OUT direction.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segment 3",
+          "pageOrSection": "Primary Methods and Results Experiment 2",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [],
           "components": {
             "ordered_soa_values_or_derivable_distance_anchors": {
@@ -25796,32 +25932,32 @@
           "key": "tactile_target",
           "label": "Tactile target",
           "status": "partial",
-          "value": "Above-threshold electrical stimulation on the dorsal upper arm via Digitimer DS7A and Neuroline electrodes; participant currents and pulse waveform/duration are not reported in the tracked review.",
+          "value": "Above-threshold electrical stimulation via Digitimer DS7A and Neuroline electrodes. Healthy limb and stump with/without prosthesis in amputees; matching right-upper-arm region in separate healthy controls. Individual current and pulse waveform/duration remain unresolved.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segment 3",
+          "pageOrSection": "Primary Methods and Results Experiment 2",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [
             "waveform_and_duration"
           ],
           "components": {
             "body_site_and_side": {
               "status": "reported",
-              "value": "Above-threshold electrical stimulation on the dorsal upper arm via Digitimer DS7A and Neuroline electrodes; participant currents and pulse waveform/duration are not reported in the tracked review.",
+              "value": "Healthy limb and stump with/without prosthesis in amputees; matching right-upper-arm region in separate healthy controls.",
               "note": ""
             },
             "modality": {
               "status": "reported",
-              "value": "Above-threshold electrical stimulation on the dorsal upper arm via Digitimer DS7A and Neuroline electrodes; participant currents and pulse waveform/duration are not reported in the tracked review.",
+              "value": "Above-threshold electrical stimulation via Digitimer DS7A and Neuroline electrodes. Healthy limb and stump with/without prosthesis in amputees; matching right-upper-arm region in separate healthy controls. Individual current and pulse waveform/duration remain unresolved.",
               "note": ""
             },
             "waveform_and_duration": {
               "status": "not_reported",
-              "value": "",
+              "value": "Above-threshold electrical stimulation via Digitimer DS7A and Neuroline electrodes. Healthy limb and stump with/without prosthesis in amputees; matching right-upper-arm region in separate healthy controls. Individual current and pulse waveform/duration remain unresolved.",
               "note": ""
             }
           }
@@ -25832,13 +25968,13 @@
           "status": "explicitly_absent",
           "value": "No tactile-only baseline rows are reported; the task contains audio-tactile targets and auditory-only catches only (resolved baseline count 0).",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segments 3-4",
+          "pageOrSection": "Primary Methods and Results Experiment 2",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [],
           "components": {
             "allocation_rule": {
@@ -25869,13 +26005,13 @@
           "status": "reported_complete",
           "value": "Seventy-six auditory-only/no-tactile catches, randomly intermingled with targets and requiring no response.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segments 3-4",
-          "evidenceNote": "",
+          "pageOrSection": "Primary Methods and Results Experiment 2",
+          "evidenceNote": "The source explicitly gives 76 catches. This does not resolve the incompatible target count/half-target statement or establish a corrected total.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [],
           "components": {
             "allocation_rule": {
@@ -25904,32 +26040,32 @@
           "key": "repetition_allocation",
           "label": "Repetition allocation",
           "status": "conflicting_evidence",
-          "value": "The paper reports eight targets per T1-T5 delay for each IN/OUT direction, implying 80 targets, plus 76 catches (156 rows), but also literally reports 76 target trials. Preserve the conflict rather than choosing a total silently.",
+          "value": "Eight target repetitions x five delays x two directions implies 80 targets, but the source literally states 76 targets plus 76 catches and says half of trials contain touch. Neither 152 nor 156 is an accepted corrected total.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segment 4",
-          "evidenceNote": "Factorial arithmetic 8 x 5 x 2 = 80 conflicts with the source's literal 76-target total.",
+          "pageOrSection": "Primary Methods and Results Experiment 2",
+          "evidenceNote": "Fresh primary Methods confirms the conflict. Two equal blocks and approximate duration do not reconcile the count.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [
             "repetitions_or_exact_counts"
           ],
           "components": {
             "exceptions_or_overrides": {
               "status": "reported",
-              "value": "The paper reports eight targets per T1-T5 delay for each IN/OUT direction, implying 80 targets, plus 76 catches (156 rows), but also literally reports 76 target trials. Preserve the conflict rather than choosing a total silently.",
+              "value": "Eight target repetitions x five delays x two directions implies 80 targets, but the source literally states 76 targets plus 76 catches and says half of trials contain touch. Neither 152 nor 156 is an accepted corrected total.",
               "note": ""
             },
             "factor_dimensions": {
               "status": "reported",
-              "value": "The paper reports eight targets per T1-T5 delay for each IN/OUT direction, implying 80 targets, plus 76 catches (156 rows), but also literally reports 76 target trials. Preserve the conflict rather than choosing a total silently.",
+              "value": "Eight target repetitions x five delays x two directions implies 80 targets, but the source literally states 76 targets plus 76 catches and says half of trials contain touch. Neither 152 nor 156 is an accepted corrected total.",
               "note": ""
             },
             "repetitions_or_exact_counts": {
               "status": "conflicting_evidence",
-              "value": "The paper reports eight targets per T1-T5 delay for each IN/OUT direction, implying 80 targets, plus 76 catches (156 rows), but also literally reports 76 target trials. Preserve the conflict rather than choosing a total silently.",
+              "value": "Eight target repetitions x five delays x two directions implies 80 targets, but the source literally states 76 targets plus 76 catches and says half of trials contain touch. Neither 152 nor 156 is an accepted corrected total.",
               "note": ""
             }
           }
@@ -25937,26 +26073,38 @@
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "reported_complete",
-          "value": "Two approximately 8-min blocks, with the randomized target/catch pool divided equally between them.",
+          "status": "conflicting_evidence",
+          "value": "Two approximately eight-minute blocks in the shared PPS task, repeated across the stated amputee/control conditions; complete condition order remains unresolved.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segments 2 and 4",
-          "evidenceNote": "",
+          "pageOrSection": "Primary Methods and Results Experiment 2",
+          "evidenceNote": "An explicit block structure does not resolve the trial-allocation contradiction.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
-          "missingComponents": [],
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
+          "missingComponents": [
+            "resolved_block_composition"
+          ],
           "components": {
             "block_composition": {
-              "status": "reported",
-              "value": "Two approximately 8-min blocks, with the randomized target/catch pool divided equally between them.",
+              "status": "conflicting_evidence",
+              "value": "Targets/catches divided equally, but target arithmetic 80 conflicts with printed 76.",
               "note": ""
             },
             "block_count": {
+              "status": "not_reported",
+              "value": "Two task blocks per administration; exact condition-specific execution schedule unresolved.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "not_reported",
+              "value": "Exact patient/control condition sequence not completely specified.",
+              "note": ""
+            },
+            "within_block_randomization": {
               "status": "reported",
-              "value": "Two approximately 8-min blocks, with the randomized target/catch pool divided equally between them.",
+              "value": "Target/catch trials randomly intermixed.",
               "note": ""
             }
           }
@@ -25967,17 +26115,17 @@
       "studyRowId": "doi:10.1038/srep02844::c",
       "networkNodeId": "doi:10.1038/srep02844",
       "label": "Amputation and prosthesis implantation shape body and peripersonal space representations. (c)",
-      "experimentLabel": "Experiment 3 — audio-tactile PPS",
-      "inventoryStatus": "at_least_three_experiments",
+      "experimentLabel": "Experiment 3 — upper-arm versus hand audio-tactile PPS",
+      "inventoryStatus": "confirmed_three_experiments_with_tactile_only_boundary",
       "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
-        "conflicting_evidence": 1,
+        "conflicting_evidence": 2,
         "explicitly_absent": 1,
         "not_reported": 1,
         "partial": 2,
-        "reported_complete": 5
+        "reported_complete": 4
       },
       "nativeQualification": "not_assessed",
       "contracts": [
@@ -25987,13 +26135,13 @@
           "status": "approximation_required",
           "value": "3000-ms dynamic pink noise with exponentially rising IN and falling OUT intensity, rendered by near/far loudspeakers; original noise realization, seed and gain files are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Experiments 2-3 audio-tactile task; manual review Segment 1",
+          "pageOrSection": "Primary Methods and Results Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [
             "source_recipe_or_asset_provenance"
           ],
@@ -26019,35 +26167,35 @@
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
           "status": "reported_complete",
-          "value": "Two-speaker apparent motion relative to the upper arm: near loudspeaker beside the arm and far loudspeaker approximately 100 cm away; IN is far-to-near and OUT near-to-far over 3000 ms, with 1000-ms pre/post silence. No separate metric speed is reported.",
+          "value": "Near speaker beside upper arm; far speaker approximately 100 cm from the near speaker, not an exact body-relative endpoint. Speakers remain fixed relative to upper arm when the tactile site changes. IN/OUT apparent motion lasts 3000 ms, with 1000-ms pre/post silence; no independent metric velocity is reported.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segment 1",
+          "pageOrSection": "Primary Methods and Results Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [],
           "components": {
             "coordinate_frame_body_anchor": {
               "status": "reported",
-              "value": "Two-speaker apparent motion relative to the upper arm: near loudspeaker beside the arm and far loudspeaker approximately 100 cm away; IN is far-to-near and OUT near-to-far over 3000 ms, with 1000-ms pre/post silence. No separate metric speed is reported.",
+              "value": "Near speaker beside upper arm; far speaker approximately 100 cm from the near speaker, not an exact body-relative endpoint. Speakers remain fixed relative to upper arm when the tactile site changes. Upper arm and hand in separate conditions; exact hand subsite is not specified.",
               "note": ""
             },
             "geometry": {
               "status": "reported",
-              "value": "Two-speaker apparent motion relative to the upper arm: near loudspeaker beside the arm and far loudspeaker approximately 100 cm away; IN is far-to-near and OUT near-to-far over 3000 ms, with 1000-ms pre/post silence. No separate metric speed is reported.",
+              "value": "Near speaker beside upper arm; far speaker approximately 100 cm from the near speaker, not an exact body-relative endpoint. Speakers remain fixed relative to upper arm when the tactile site changes. IN/OUT apparent motion lasts 3000 ms, with 1000-ms pre/post silence; no independent metric velocity is reported.",
               "note": ""
             },
             "motion_mode": {
               "status": "reported",
-              "value": "Two-speaker apparent motion relative to the upper arm: near loudspeaker beside the arm and far loudspeaker approximately 100 cm away; IN is far-to-near and OUT near-to-far over 3000 ms, with 1000-ms pre/post silence. No separate metric speed is reported.",
+              "value": "Near speaker beside upper arm; far speaker approximately 100 cm from the near speaker, not an exact body-relative endpoint. Speakers remain fixed relative to upper arm when the tactile site changes. IN/OUT apparent motion lasts 3000 ms, with 1000-ms pre/post silence; no independent metric velocity is reported.",
               "note": ""
             },
             "timing_constraint": {
               "status": "reported",
-              "value": "Two-speaker apparent motion relative to the upper arm: near loudspeaker beside the arm and far loudspeaker approximately 100 cm away; IN is far-to-near and OUT near-to-far over 3000 ms, with 1000-ms pre/post silence. No separate metric speed is reported.",
+              "value": "Near speaker beside upper arm; far speaker approximately 100 cm from the near speaker, not an exact body-relative endpoint. Speakers remain fixed relative to upper arm when the tactile site changes. IN/OUT apparent motion lasts 3000 ms, with 1000-ms pre/post silence; no independent metric velocity is reported.",
               "note": ""
             }
           }
@@ -26056,25 +26204,25 @@
           "key": "trial_sequence",
           "label": "Trial sequence",
           "status": "reported_complete",
-          "value": "Random combination of IN/OUT audio-tactile target rows at T1-T5, randomly intermingled with auditory-only catches; trials divided equally into two approximately 8-min blocks.",
+          "value": "IN/OUT audio-tactile targets at five delays, randomly intermixed with auditory-only catches. Two blocks for each upper-arm/hand condition (four total), condition order counterbalanced.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segment 2",
+          "pageOrSection": "Primary Methods and Results Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [],
           "components": {
             "ordered_elements_and_source_selection": {
               "status": "reported",
-              "value": "Random combination of IN/OUT audio-tactile target rows at T1-T5, randomly intermingled with auditory-only catches; trials divided equally into two approximately 8-min blocks.",
+              "value": "IN/OUT audio-tactile targets at five delays, randomly intermixed with auditory-only catches. Two blocks for each upper-arm/hand condition (four total), condition order counterbalanced.",
               "note": ""
             },
             "trial_families": {
               "status": "reported",
-              "value": "Random combination of IN/OUT audio-tactile target rows at T1-T5, randomly intermingled with auditory-only catches; trials divided equally into two approximately 8-min blocks.",
+              "value": "IN/OUT audio-tactile targets at five delays, randomly intermixed with auditory-only catches. Two blocks for each upper-arm/hand condition (four total), condition order counterbalanced.",
               "note": ""
             }
           }
@@ -26083,27 +26231,27 @@
           "key": "task_response",
           "label": "Task and response",
           "status": "partial",
-          "value": "Respond vocally as quickly as possible to upper-arm electrical targets, ignore sound and withhold on auditory-only catches; no numeric response/scoring window or voice-key latency rule is reported.",
+          "value": "Respond vocally to electrical touch; ignore sound and withhold on auditory-only catches. Upper arm and hand in separate conditions; exact hand subsite is not specified. No numeric response/scoring window or voice-key latency rule is supplied.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segment 2",
+          "pageOrSection": "Primary Methods and Results Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [
             "response_window_and_anchor"
           ],
           "components": {
             "response_mapping_or_expected_action": {
               "status": "reported",
-              "value": "Respond vocally as quickly as possible to upper-arm electrical targets, ignore sound and withhold on auditory-only catches; no numeric response/scoring window or voice-key latency rule is reported.",
+              "value": "Respond vocally to electrical touch; ignore sound and withhold on auditory-only catches. Upper arm and hand in separate conditions; exact hand subsite is not specified. No numeric response/scoring window or voice-key latency rule is supplied.",
               "note": ""
             },
             "response_mode_or_device": {
               "status": "reported",
-              "value": "Respond vocally as quickly as possible to upper-arm electrical targets, ignore sound and withhold on auditory-only catches; no numeric response/scoring window or voice-key latency rule is reported.",
+              "value": "Vocal response recorded with a voice key; exact latency correction is not reported.",
               "note": ""
             },
             "response_window_and_anchor": {
@@ -26113,7 +26261,7 @@
             },
             "target_and_nontarget_rule": {
               "status": "reported",
-              "value": "Respond vocally as quickly as possible to upper-arm electrical targets, ignore sound and withhold on auditory-only catches; no numeric response/scoring window or voice-key latency rule is reported.",
+              "value": "Respond vocally to electrical touch; ignore sound and withhold on auditory-only catches. Upper arm and hand in separate conditions; exact hand subsite is not specified. No numeric response/scoring window or voice-key latency rule is supplied.",
               "note": ""
             }
           }
@@ -26124,13 +26272,13 @@
           "status": "not_reported",
           "value": "No exact ITI, jitter value, range or distribution is reported for the Experiments 2-3 task.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segment 2",
+          "pageOrSection": "Primary Methods and Results Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
@@ -26160,13 +26308,13 @@
           "status": "reported_complete",
           "value": "Tactile onset after sound onset: T1=300, T2=800, T3=1500, T4=2200 and T5=2700 ms, crossed with IN and OUT direction.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segment 3",
+          "pageOrSection": "Primary Methods and Results Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [],
           "components": {
             "ordered_soa_values_or_derivable_distance_anchors": {
@@ -26185,32 +26333,32 @@
           "key": "tactile_target",
           "label": "Tactile target",
           "status": "partial",
-          "value": "Above-threshold electrical stimulation on the dorsal upper arm via Digitimer DS7A and Neuroline electrodes; participant currents and pulse waveform/duration are not reported in the tracked review.",
+          "value": "Above-threshold electrical stimulation via Digitimer DS7A and Neuroline electrodes. Upper arm and hand in separate conditions; exact hand subsite is not specified. Individual current and pulse waveform/duration remain unresolved.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segment 3",
+          "pageOrSection": "Primary Methods and Results Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [
             "waveform_and_duration"
           ],
           "components": {
             "body_site_and_side": {
               "status": "reported",
-              "value": "Above-threshold electrical stimulation on the dorsal upper arm via Digitimer DS7A and Neuroline electrodes; participant currents and pulse waveform/duration are not reported in the tracked review.",
+              "value": "Upper arm and hand in separate conditions; exact hand subsite is not specified.",
               "note": ""
             },
             "modality": {
               "status": "reported",
-              "value": "Above-threshold electrical stimulation on the dorsal upper arm via Digitimer DS7A and Neuroline electrodes; participant currents and pulse waveform/duration are not reported in the tracked review.",
+              "value": "Above-threshold electrical stimulation via Digitimer DS7A and Neuroline electrodes. Upper arm and hand in separate conditions; exact hand subsite is not specified. Individual current and pulse waveform/duration remain unresolved.",
               "note": ""
             },
             "waveform_and_duration": {
               "status": "not_reported",
-              "value": "",
+              "value": "Above-threshold electrical stimulation via Digitimer DS7A and Neuroline electrodes. Upper arm and hand in separate conditions; exact hand subsite is not specified. Individual current and pulse waveform/duration remain unresolved.",
               "note": ""
             }
           }
@@ -26221,13 +26369,13 @@
           "status": "explicitly_absent",
           "value": "No tactile-only baseline rows are reported; the task contains audio-tactile targets and auditory-only catches only (resolved baseline count 0).",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segments 3-4",
+          "pageOrSection": "Primary Methods and Results Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [],
           "components": {
             "allocation_rule": {
@@ -26258,13 +26406,13 @@
           "status": "reported_complete",
           "value": "Seventy-six auditory-only/no-tactile catches, randomly intermingled with targets and requiring no response.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segments 3-4",
-          "evidenceNote": "",
+          "pageOrSection": "Primary Methods and Results Experiment 3",
+          "evidenceNote": "The source explicitly gives 76 catches. This does not resolve the incompatible target count/half-target statement or establish a corrected total.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [],
           "components": {
             "allocation_rule": {
@@ -26293,32 +26441,32 @@
           "key": "repetition_allocation",
           "label": "Repetition allocation",
           "status": "conflicting_evidence",
-          "value": "The paper reports eight targets per T1-T5 delay for each IN/OUT direction, implying 80 targets, plus 76 catches (156 rows), but also literally reports 76 target trials. Preserve the conflict rather than choosing a total silently.",
+          "value": "Eight target repetitions x five delays x two directions implies 80 targets, but the source literally states 76 targets plus 76 catches and says half of trials contain touch. Neither 152 nor 156 is an accepted corrected total.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segment 4",
-          "evidenceNote": "Factorial arithmetic 8 x 5 x 2 = 80 conflicts with the source's literal 76-target total.",
+          "pageOrSection": "Primary Methods and Results Experiment 3",
+          "evidenceNote": "Fresh primary Methods confirms the conflict. Two equal blocks and approximate duration do not reconcile the count.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
           "missingComponents": [
             "repetitions_or_exact_counts"
           ],
           "components": {
             "exceptions_or_overrides": {
               "status": "reported",
-              "value": "The paper reports eight targets per T1-T5 delay for each IN/OUT direction, implying 80 targets, plus 76 catches (156 rows), but also literally reports 76 target trials. Preserve the conflict rather than choosing a total silently.",
+              "value": "Eight target repetitions x five delays x two directions implies 80 targets, but the source literally states 76 targets plus 76 catches and says half of trials contain touch. Neither 152 nor 156 is an accepted corrected total.",
               "note": ""
             },
             "factor_dimensions": {
               "status": "reported",
-              "value": "The paper reports eight targets per T1-T5 delay for each IN/OUT direction, implying 80 targets, plus 76 catches (156 rows), but also literally reports 76 target trials. Preserve the conflict rather than choosing a total silently.",
+              "value": "Eight target repetitions x five delays x two directions implies 80 targets, but the source literally states 76 targets plus 76 catches and says half of trials contain touch. Neither 152 nor 156 is an accepted corrected total.",
               "note": ""
             },
             "repetitions_or_exact_counts": {
               "status": "conflicting_evidence",
-              "value": "The paper reports eight targets per T1-T5 delay for each IN/OUT direction, implying 80 targets, plus 76 catches (156 rows), but also literally reports 76 target trials. Preserve the conflict rather than choosing a total silently.",
+              "value": "Eight target repetitions x five delays x two directions implies 80 targets, but the source literally states 76 targets plus 76 catches and says half of trials contain touch. Neither 152 nor 156 is an accepted corrected total.",
               "note": ""
             }
           }
@@ -26326,26 +26474,38 @@
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "reported_complete",
-          "value": "Two approximately 8-min blocks, with the randomized target/catch pool divided equally between them.",
+          "status": "conflicting_evidence",
+          "value": "Two blocks per upper-arm/hand condition, four blocks total; condition order counterbalanced.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Methods; manual review Segments 2 and 4",
-          "evidenceNote": "",
+          "pageOrSection": "Primary Methods and Results Experiment 3",
+          "evidenceNote": "An explicit block structure does not resolve the trial-allocation contradiction.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/srep02844",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review_disaggregation",
-          "missingComponents": [],
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+          "sourceType": "primary_article_full_text",
+          "missingComponents": [
+            "resolved_block_composition"
+          ],
           "components": {
             "block_composition": {
-              "status": "reported",
-              "value": "Two approximately 8-min blocks, with the randomized target/catch pool divided equally between them.",
+              "status": "conflicting_evidence",
+              "value": "Targets/catches divided equally, but target arithmetic 80 conflicts with printed 76.",
               "note": ""
             },
             "block_count": {
               "status": "reported",
-              "value": "Two approximately 8-min blocks, with the randomized target/catch pool divided equally between them.",
+              "value": "Four blocks: two for upper arm and two for hand.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Upper-arm/hand condition order counterbalanced.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Target/catch trials randomly intermixed.",
               "note": ""
             }
           }
@@ -51293,18 +51453,18 @@
   "inventoryAudit": {
     "publications": 94,
     "registeredInventories": 61,
-    "methodsReviewedInventories": 50,
+    "methodsReviewedInventories": 51,
     "auditedAccessBlockers": 5,
-    "publicationsWithAllContractDispositions": 49,
-    "inventoryAndContractsAudited": 48,
-    "remainingInventoryOrContractAudit": 46,
+    "publicationsWithAllContractDispositions": 50,
+    "inventoryAndContractsAudited": 49,
+    "remainingInventoryOrContractAudit": 45,
     "inventoryEvidenceCounts": {
       "abstract_or_metadata_inventory": 4,
       "audited_source_access_gap": 5,
       "author_version_methods_reviewed_final_comparison_pending": 2,
       "not_registered": 33,
-      "partial_methods_inventory": 2,
-      "primary_methods_reviewed": 37,
+      "partial_methods_inventory": 1,
+      "primary_methods_reviewed": 38,
       "retained_primary_methods_review": 11
     },
     "interpretation": "Audited means inventory evidence or documented access blocker plus eleven explicit source dispositions per retained row. It does not mean all values are reported, final-version equivalence is proven, a template exists, or native hardware is qualified."

@@ -1312,6 +1312,24 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertIn("not one confirmed experiment", record["instance_count_basis"])
         self.assertGreaterEqual(len(record["retrieval_attempts"]), 2)
 
+    def test_amputation_inventory_preserves_body_targets_and_count_conflict(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        node = "doi:10.1038/srep02844"
+        studies = {row["studyRowId"]: row for row in data["studies"]}
+        self.assertEqual(studies[node + "::a"]["parameterStatusCounts"], {"not_applicable": 11})
+        for suffix in "bc":
+            cs = {row["key"]: row for row in studies[node + "::" + suffix]["contracts"]}
+            self.assertEqual(cs["repetition_allocation"]["status"], "conflicting_evidence")
+            self.assertIn("Neither 152 nor 156", cs["repetition_allocation"]["value"])
+            self.assertIn("from the near speaker", cs["trajectory_kinematics"]["value"])
+            self.assertEqual(cs["block_order_contract"]["status"], "conflicting_evidence")
+        cs = {row["key"]: row for row in studies[node + "::c"]["contracts"]}
+        self.assertIn("Upper arm and hand", cs["tactile_target"]["value"])
+        self.assertIn("four blocks", cs["block_order_contract"]["value"])
+        self.assertIn("counterbalanced", cs["block_order_contract"]["value"])
+        publication = next(row for row in data["publications"] if row["networkNodeId"] == node)
+        self.assertTrue(publication["inventoryAudit"]["inventoryAndContractsAudited"])
+
     def test_adaptation_model_batch_separates_acquisition_from_simulation(self) -> None:
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
         studies = {row["studyRowId"]: row for row in data["studies"]}
@@ -1418,7 +1436,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
         summary = data["inventoryAudit"]
         self.assertEqual(summary["registeredInventories"], 61)
-        self.assertEqual(summary["methodsReviewedInventories"], 50)
+        self.assertEqual(summary["methodsReviewedInventories"], 51)
         self.assertEqual(summary["auditedAccessBlockers"], 5)
         self.assertEqual(summary["inventoryEvidenceCounts"], dict(Counter(row["inventory_evidence_status"] for row in rows)))
         self.assertEqual(summary["inventoryAndContractsAudited"], sum(row["inventory_and_contracts_audited"] == "yes" for row in rows))
