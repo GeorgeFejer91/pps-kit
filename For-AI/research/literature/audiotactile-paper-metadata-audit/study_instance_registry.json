@@ -220,6 +220,33 @@
           "evidence_pointer": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306#sec002"
         }
       ]
+    },
+    {
+      "network_node_id": "doi:10.1038/s41598-019-45224-w",
+      "doi": "10.1038/s41598-019-45224-w",
+      "inventory_status": "confirmed_longitudinal_audio_tactile_task",
+      "instance_count_basis": "One abdomen-centred audio-tactile PPS task repeated across three measurement sessions in pregnant and non-pregnant groups; measurement occasions are not separate experiments. Other same-day experiments are mentioned without enough identity/method detail to add PPS instances.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6565702/fullTextXML::Methods/Procedure",
+      "review_date": "2026-10-27",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Abdominal PPS task across three longitudinal sessions",
+          "record_id": "pregnancy_2019",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Other experiments performed on the same day",
+          "disposition": "identity_and_scope_unassessed",
+          "basis": "Methods mentions other experiments but does not identify their modality or PPS relevance; no inferred extra audio-tactile row.",
+          "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6565702/fullTextXML::Methods/Procedure"
+        }
+      ]
     }
   ],
   "corpus_freeze": {

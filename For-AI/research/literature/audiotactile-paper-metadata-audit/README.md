@@ -32,6 +32,17 @@ figure image returned a fetch error. These attempts are recorded in the source
 review, and no unseen figure was used to finalize geometry. No new source was
 declared unavailable, and no physical route was qualified.
 
+The second batch reviews Cardini et al. (2019), DOI
+`10.1038/s41598-019-45224-w`, as one longitudinal task with three measurement
+occasions. Europe PMC's public article XML supplied the full Methods after the
+publisher's subsequent PDF/page requests failed. The source explicitly omits
+tactile-only baseline trials; automated candidates from discussion of earlier
+studies must not be inherited. Four contracts resolve as reported, one as
+explicitly absent, and six retain component gaps. Figure pixels, protocol-lineage
+and supplementary/code review remain open. Other unidentified same-day tasks
+remain an unassessed boundary. The unchanged 124 review rows now contain 76
+unassessed publication inventories; this count is not a completion claim.
+
 The public projection is rebuilt after the matrix resolver; see
 [`publication-network/README.md`](../publication-network/README.md#public-study-evidence).
 Paper evidence, linked templates and native qualification are independent.

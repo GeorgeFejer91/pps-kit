@@ -7007,6 +7007,251 @@
         "catch_trial_contract",
         "repetition_allocation"
       ]
+    },
+    {
+      "study_row_id": "doi:10.1038/s41598-019-45224-w",
+      "source_type": "primary_article_xml",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6565702/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "All eleven main-task contracts inspected in the primary article Methods. Remaining component gaps require figure, supplement/code or cited-protocol review; no source-access completion claim for those routes.",
+      "orientation_ledger": {
+        "participant_frame": "Seated blindfolded; left arm rests on response box; adjustable chair aligns hand and abdominal stimulation height.",
+        "apparatus_frame": "Near speaker on table beside hand; far speaker 1 m farther; both physically stationary.",
+        "body_mapping": "Apparent approach from reciprocal level fades; abdominal tactile anchor.",
+        "evidence_class": "text_and_caption_reported; Figure 2 pixels not verified",
+        "unresolved": "Exact body-relative azimuth/elevation and distance from speaker to abdominal site."
+      },
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.nature.com/articles/s41598-019-45224-w",
+          "outcome": "initial_article_metadata_readable; subsequent_methods_fetch_cookie_redirect_500"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.nature.com/articles/s41598-019-45224-w.pdf",
+          "outcome": "initial_pdf_text_readable; subsequent_methods_page_and_screenshot_fetch_cookie_redirect_500"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6565702/",
+          "outcome": "search_index_excerpts_readable; direct_page_browser_check"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6565702/fullTextXML",
+          "outcome": "web_reader_unavailable; direct_public_XML_request_succeeded; full_Methods_and_caption_inspected"
+        }
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "3000-ms pink noise, 44.1 kHz; Audacity-shaped reciprocal speaker fades; 55-70 dB SPL at ear.",
+          "page_or_section": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "Two physical speakers."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Pink noise, 44.1 kHz."
+            },
+            "level_envelope_calibration": {
+              "status": "reported",
+              "value": "Exponential rise 55-70 dB SPL measured at ear; opposing near/far fades."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Audacity; near/far speakers; Arduino/LabView 8."
+            }
+          },
+          "evidence_note": "Original waveform/envelope asset and delegated protocol details not fully audited."
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Apparent approach: near speaker beside left hand; far speaker 1 m farther; hand aligned with stimulated abdomen.",
+          "page_or_section": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Level-cued far-to-near apparent approach."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Seated blindfolded; left arm on response box; hand aligned with abdomen."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3000-ms auditory interval."
+            }
+          },
+          "evidence_note": "No constant physical speed inferred. Absolute geometry and Figure 2 visual orientation remain unresolved; publisher screenshot fetch failed."
+        },
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Randomly intermingled looming audio-tactile targets and auditory-only catches.",
+          "page_or_section": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Audio-tactile targets; auditory-only catches."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Auditory onset; optional delayed abdominal tap; speeded response to touch."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "reported",
+              "value": "D1-D5 after sound onset."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Random trial order."
+            }
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Left-hand keypress to abdominal touch; ignore sound.",
+          "page_or_section": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to tactile targets; ignore auditory distractor."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Left-hand response-box keypress."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Press promptly when tapped."
+            }
+          },
+          "evidence_note": "No response deadline is inferred from sound duration; response-window/protocol-lineage review remains open."
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "No explicit ITI/jitter contract established by this main-Methods review.",
+          "page_or_section": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "component_reviews": {},
+          "evidence_note": "Main text checked; supplementary/code and cited-protocol checks remain open. No not_reported or unavailable disposition assigned."
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "D1-D5: +300, +800, +1500, +2200, +2500 ms after auditory onset.",
+          "page_or_section": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive tactile delay after auditory onset."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "300, 800, 1500, 2200, 2500 ms."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Approaching sound only."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "Custom mechanical tapper attached to abdomen.",
+          "page_or_section": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Mechanical tapping."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Abdomen; side not specified."
+            }
+          },
+          "evidence_note": "Tap duration/waveform and amplitude/calibration remain open; no reuse of SOA values as tap duration."
+        },
+        "baseline_trial_contract": {
+          "status": "explicitly_absent",
+          "value": "Only experimental audio-tactile trials and auditory-only catches; no tactile-only baseline.",
+          "page_or_section": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "explicitly_absent",
+              "value": "Tactile-only baselines omitted to limit fatigue/testing time."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Baseline family explicitly omitted."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Baseline family explicitly omitted."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Baseline family explicitly omitted."
+            }
+          },
+          "evidence_note": "The earlier discussion of unimodal controls describes prior studies, not this task."
+        },
+        "catch_trial_contract": {
+          "status": "reported_complete",
+          "value": "15 auditory-only catches per 65-trial session.",
+          "page_or_section": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Sound without touch."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Respond only to touch; ignore sound."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "15 catches randomly intermingled."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "15."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "reported_complete",
+          "value": "10 targets per 5 delays = 50 targets; 15 catches; 65 trials per measurement session.",
+          "page_or_section": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five delays; approach only."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "10/delay; 50 targets + 15 catches = 65."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Repeated longitudinal sessions; no tactile-only baseline allocation."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "65 trials in random order; task approximately 7 minutes.",
+          "page_or_section": "Primary article Methods/Procedure and Figure 2 caption (publisher PDF pp.5-6; Europe PMC XML)",
+          "component_reviews": {
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Random trial order."
+            }
+          },
+          "evidence_note": "The paper describes a session sequence, not an explicit block count/composition or counterbalancing rule; unresolved rather than defaulted to one block."
+        }
+      }
     }
   ]
 }

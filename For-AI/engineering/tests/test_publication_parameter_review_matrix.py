@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 17)
+        self.assertEqual(len(registry["entries"]), 18)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 47)
+        self.assertEqual(registered_instance_count, 48)
         network = json.loads(
             (
                 ROOT
@@ -833,6 +833,26 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertIn("188", contracts["repetition_allocation"]["value"])
         self.assertEqual(study["parameterStatusCounts"], {"derived_complete": 1, "partial": 7, "reported_complete": 3})
         self.assertEqual(study["nativeQualification"], "not_assessed")
+
+    def test_pregnancy_review_does_not_inherit_prior_study_baselines(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        study = next(row for row in data["studies"] if row["studyRowId"] == "doi:10.1038/s41598-019-45224-w")
+        contracts = {row["key"]: row for row in study["contracts"]}
+        self.assertEqual(contracts["baseline_trial_contract"]["status"], "explicitly_absent")
+        self.assertIn("prior studies", contracts["baseline_trial_contract"]["evidenceNote"])
+        self.assertEqual(contracts["soa_schedule"]["status"], "reported_complete")
+        self.assertIn("+2500", contracts["soa_schedule"]["value"])
+        self.assertNotIn("+2700", contracts["soa_schedule"]["value"])
+        self.assertIn("15", contracts["catch_trial_contract"]["components"]["resolved_trial_count"]["value"])
+        self.assertIn("65", contracts["repetition_allocation"]["value"])
+        for key in ("tactile_target", "task_response", "jitter_iti_policy", "block_order_contract", "trajectory_kinematics"):
+            self.assertEqual(contracts[key]["status"], "partial")
+            self.assertTrue(contracts[key]["missingComponents"])
+        self.assertEqual(study["nativeQualification"], "not_assessed")
+        registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+        inventory = next(row for row in registry["entries"] if row["network_node_id"] == study["networkNodeId"])
+        self.assertEqual(len(inventory["instances"]), 1, "longitudinal occasions are not distinct experiment identities")
+        self.assertEqual(inventory["supporting_task_boundaries"][0]["disposition"], "identity_and_scope_unassessed")
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:
