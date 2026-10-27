@@ -26,10 +26,15 @@ internally consistent canonical DOI link and provider-backed citation metadata, 
 legacy-confirmed records plus the 4 later additions. A finite provider count of
 zero is valid metadata. Toolkit readiness is an encoding, not an inclusion gate.
 
-The detailed Toolkit assessment remains 15 runnable, 49 supported but parameter-
-incomplete, 29 not yet assessed, and 1 adjacent/scope-conflict publication. The
-map reduces that to two visual states: 15 implemented and 79 not implemented
-yet. The default deterministic force layout uses one continuous rule for every
+The legacy Toolkit assessment contains 16 records labelled runnable, 48 supported
+but parameter-incomplete, 29 not yet assessed, and 1 adjacent/scope-conflict
+publication. These are coarse template/encoding labels, not scientific parameter
+completion or native qualification. The 2026-10-27 regeneration incorporates the
+existing Canzoneri tool-use review (10.1007/s00221-013-3532-2; review dated
+2026-07-16): one additional reviewed publication and record, with two combined
+experiment orientation rows that still require experiment-specific checking.
+No citation nodes or edges were added. The legacy map reduces its status to
+16 implemented and 78 not implemented yet. The default deterministic force layout uses one continuous rule for every
 paper: citation neighbours attract, all nodes repel and share weak centering,
 and radius-aware collision separation keeps them distinct on a square canvas.
 The declared normalized edge-to-edge clearance is `0.015`. The 91-node main
