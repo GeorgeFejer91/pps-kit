@@ -278,7 +278,30 @@ fn participant_fixture(root: &TestDirectory, topup_marker: Option<Value>) -> Par
 fn group_receipt_requires_both_distinct_ordered_parts_and_shared_provenance() {
     let root = TestDirectory::new();
     let fixture = participant_fixture(&root, None);
-    let base: Value = serde_json::from_slice(&fs::read(&fixture.manifest_path).unwrap()).unwrap();
+    let mut base: Value =
+        serde_json::from_slice(&fs::read(&fixture.manifest_path).unwrap()).unwrap();
+    let hash_json =
+        |value: &Value| format!("{:x}", Sha256::digest(serde_json::to_vec(value).unwrap()));
+    let design = json!({"participant_count":1});
+    let design_hash = hash_json(&design);
+    let mut source = json!({"accepted":false,"blocks":[{"block_index":1,"block_label":"Prepared block","trial_count":2}]});
+    let source_hash = hash_json(&source);
+    source["accepted"] = json!(true);
+    let mut order = json!({"schema":"pps-native-run-order-preview.v1","accepted":false,"experiment_structure":"pre_post",
+    "parts_per_participant":2,"assembly_preview_sha256":source_hash,"design_sha256":design_hash,
+    "csv_rows":[
+        {"participant_id":"P001","phase_index":1,"participant_block_position":1,"source_block_index":1,"phase":"pre","phase_label":"Before","block_label":"Prepared block","trial_count":2},
+        {"participant_id":"P001","phase_index":2,"participant_block_position":1,"source_block_index":1,"phase":"post","phase_label":"After","block_label":"Prepared block","trial_count":2}
+    ]});
+    let order_hash = hash_json(&order);
+    order["accepted"] = json!(true);
+    write_json(
+        &fixture.run_setup_path,
+        &json!({"schema":"pps-native-run-setup.v1","participant_id":"P001","session_group_id":"group",
+        "approved_segment5":source,"approved_segment6":order,"approved_preview_sha256":source_hash,
+        "approved_run_order_sha256":order_hash,"design":design,"design_sha256":design_hash}),
+    );
+    base["source_run_setup_sha256"] = json!(sha256(&fixture.run_setup_path));
     let paths = [
         root.join("part_01/session_manifest.json"),
         root.join("part_02/session_manifest.json"),
@@ -300,7 +323,32 @@ fn group_receipt_requires_both_distinct_ordered_parts_and_shared_provenance() {
         part["session_dir"] = json!(dir);
         part["part_split_schema"] = json!("pps-runner-part-split.v1");
         part["sibling_part_manifest_paths"] = json!([paths[1 - index]]);
-        part["approved_run_order_sha256"] = json!("a".repeat(64));
+        part["approved_run_order_sha256"] = json!(order_hash);
+        part["approved_preview_sha256"] = json!(source_hash);
+        let metadata = part["blocks"][0]["metadata"].as_object_mut().unwrap();
+        for (key, value) in [
+            ("part_number", json!(index + 1)),
+            ("part_block_number", json!(1)),
+            ("global_block_index", json!(index + 1)),
+            ("source_block_index", json!(1)),
+            ("part_session_id", json!(id)),
+            ("session_group_id", json!("group")),
+            ("phase", json!(if index == 0 { "pre" } else { "post" })),
+            (
+                "phase_label",
+                json!(if index == 0 { "Before" } else { "After" }),
+            ),
+            (
+                "prepared_csv_sha256",
+                json!(sha256(&dir.join("blocks/block_01.csv"))),
+            ),
+            (
+                "prepared_wav_sha256",
+                json!(sha256(&dir.join("blocks/block_01.wav"))),
+            ),
+        ] {
+            metadata.insert(key.to_owned(), value);
+        }
         write_json(&paths[index], &part);
         entries.push(
             json!({"part_number":index+1,"part_session_id":id,"session_manifest_path":paths[index],
@@ -310,7 +358,7 @@ fn group_receipt_requires_both_distinct_ordered_parts_and_shared_provenance() {
     }
     let group = json!({"schema":"pps-run-session-group.v1","part_split_schema":"pps-runner-part-split.v1",
         "experiment_structure":"pre_post","parts_per_participant":2,"parts":entries,
-        "participant_id":"P001","session_group_id":"group","approved_run_order_sha256":"a".repeat(64),
+        "participant_id":"P001","session_group_id":"group","approved_run_order_sha256":order_hash,
         "source_run_setup_manifest_path":fixture.run_setup_path,"source_run_setup_sha256":sha256(&fixture.run_setup_path)});
     let group_path = root.join("session_group_manifest.json");
     write_json(&group_path, &group);
@@ -328,6 +376,44 @@ fn group_receipt_requires_both_distinct_ordered_parts_and_shared_provenance() {
         let mut changed = documents[1].clone();
         changed[field] = value;
         write_json(&paths[1], &changed);
+        assert!(
+            pps_session_package::verify_prepared_group(&group_path).is_err(),
+            "{field}"
+        );
+    }
+    write_json(&paths[1], &documents[1]);
+    // Matching declarations do not override the accepted run-setup digest.
+    let mut forged_group = group.clone();
+    forged_group["approved_run_order_sha256"] = json!("a".repeat(64));
+    for (path, original) in paths.iter().zip(&documents) {
+        let mut altered = original.clone();
+        altered["approved_run_order_sha256"] = json!("a".repeat(64));
+        write_json(path, &altered);
+    }
+    write_json(&group_path, &forged_group);
+    assert!(pps_session_package::verify_prepared_group(&group_path).is_err());
+    for (path, original) in paths.iter().zip(&documents) {
+        write_json(path, original);
+    }
+    // Directory uniqueness alone cannot protect distinct result identities.
+    let mut repeated = documents[1].clone();
+    repeated["session_id"] = documents[0]["session_id"].clone();
+    repeated["part_session_id"] = documents[0]["part_session_id"].clone();
+    let mut repeated_group = group.clone();
+    repeated_group["parts"][1]["part_session_id"] = documents[0]["part_session_id"].clone();
+    write_json(&paths[1], &repeated);
+    write_json(&group_path, &repeated_group);
+    assert!(pps_session_package::verify_prepared_group(&group_path).is_err());
+    write_json(&paths[1], &documents[1]);
+    for (field, value) in [
+        ("source_block_index", json!(2)),
+        ("phase", json!("pre")),
+        ("global_block_index", json!(1)),
+    ] {
+        let mut altered = documents[1].clone();
+        altered["blocks"][0]["metadata"][field] = value;
+        write_json(&paths[1], &altered);
+        write_json(&group_path, &group);
         assert!(
             pps_session_package::verify_prepared_group(&group_path).is_err(),
             "{field}"
