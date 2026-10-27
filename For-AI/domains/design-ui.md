@@ -115,3 +115,6 @@ group before exposing its folder; split runs hand off the group manifest.
 Stationary control generation preserves moving audio, uses explicit V2 opt-in,
 and invalidates later review. Preserve source hash/loudness/comparator metadata
 through form collection and embed comparator bytes separately in portable export.
+Native cache writes publish only fully written, synced assets; portable import
+cleans its temporary extraction and commits the registry after all verified copies
+succeed. Failure leaves the prior authoring authority intact and permits retry.

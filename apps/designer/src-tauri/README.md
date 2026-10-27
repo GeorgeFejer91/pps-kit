@@ -44,6 +44,12 @@ timing and loudness policy. They preserve moving audio and invalidate later
 review. Source form collection retains their independent hash/provenance; the
 portable exporter never replaces the moving source's browser asset identity.
 
+Audio-cache writes stage and sync bytes before exclusive publication under the
+content hash; a failed write leaves the final name available for retry. Portable
+imports remove their owned extraction tree after copying verified bytes, including
+on failure. Imported asset authority is committed only after all copies and
+cleanup succeed, preserving the earlier draft/registry on failure.
+
 ## Local verification
 
 The coordinator owns the root workspace member and lockfile. Rebuild the

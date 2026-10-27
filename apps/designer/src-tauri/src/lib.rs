@@ -5,10 +5,9 @@ mod service;
 use pps_designer_core::design::GenerationOptIn;
 use serde_json::Value;
 use service::{DesignerService, Shared};
-use std::{
-    path::PathBuf,
-    sync::{Arc, Mutex},
-};
+#[cfg(debug_assertions)]
+use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 use tauri::Manager;
 use tauri_plugin_dialog::DialogExt;
 
