@@ -2054,7 +2054,7 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract exact behavioral audio-tactile PPS timing, distances, response settings, and auditory trajectory; fMRI/BOLD endpoint is non-blocking for audiotactile recreation"
+            "Original sound assets/envelope implementation and perceived-distance mapping; online response deadlines; constant-current/constant-voltage terminology conflict; fMRI catch denominator and post-catch 1.55-ms versus one-TR unit conflict; across-task cohort cell/block counts. Main behavioral SOAs, 1000-ms ITI, 300-row count derivation and repeated-session schedule are source assessed."
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -2089,9 +2089,9 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract exact behavioral audio-tactile PPS timing, distances, response settings, and auditory trajectory; fMRI/BOLD endpoint is non-blocking for audiotactile recreation"
+        "Original sound assets/envelope implementation and perceived-distance mapping; online response deadlines; constant-current/constant-voltage terminology conflict; fMRI catch denominator and post-catch 1.55-ms versus one-TR unit conflict; across-task cohort cell/block counts. Main behavioral SOAs, 1000-ms ITI, 300-row count derivation and repeated-session schedule are source assessed."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract exact behavioral audio-tactile PPS timing, distances, response settings, and auditory trajectory; fMRI/BOLD endpoint is non-blocking for audiotactile recreation",
+      "next_required_action": "Extract or source the missing paper parameters: Original sound assets/envelope implementation and perceived-distance mapping; online response deadlines; constant-current/constant-voltage terminology conflict; fMRI catch denominator and post-catch 1.55-ms versus one-TR unit conflict; across-task cohort cell/block counts. Main behavioral SOAs, 1000-ms ITI, 300-row count derivation and repeated-session schedule are source assessed.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -4893,7 +4893,7 @@
           "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "Original stimulus recipe/assets and electrical waveform; current behavioral catch allocation; fMRI active/passive role wording conflict, ambiguous catch denominator and ITI selection distribution. Individual near/far SOA rule is reported, not a universal fixed pair."
+            "Original stimulus recipe/assets and electrical waveform; current behavioral catch allocation; fMRI active/passive role wording conflict, ambiguous catch denominator and ITI selection distribution. Individual near/far SOA rule is reported, not a universal fixed pair. Original Ferri 2015 differs in fMRI experimental repetitions (30 versus 48), runs (five versus eight), and first ITI (4.65 versus 4.56 s); protocol-version relationship remains unresolved."
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -4926,9 +4926,9 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "Original stimulus recipe/assets and electrical waveform; current behavioral catch allocation; fMRI active/passive role wording conflict, ambiguous catch denominator and ITI selection distribution. Individual near/far SOA rule is reported, not a universal fixed pair."
+        "Original stimulus recipe/assets and electrical waveform; current behavioral catch allocation; fMRI active/passive role wording conflict, ambiguous catch denominator and ITI selection distribution. Individual near/far SOA rule is reported, not a universal fixed pair. Original Ferri 2015 differs in fMRI experimental repetitions (30 versus 48), runs (five versus eight), and first ITI (4.65 versus 4.56 s); protocol-version relationship remains unresolved."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: Original stimulus recipe/assets and electrical waveform; current behavioral catch allocation; fMRI active/passive role wording conflict, ambiguous catch denominator and ITI selection distribution. Individual near/far SOA rule is reported, not a universal fixed pair.",
+      "next_required_action": "Extract or source the missing paper parameters: Original stimulus recipe/assets and electrical waveform; current behavioral catch allocation; fMRI active/passive role wording conflict, ambiguous catch denominator and ITI selection distribution. Individual near/far SOA rule is reported, not a universal fixed pair. Original Ferri 2015 differs in fMRI experimental repetitions (30 versus 48), runs (five versus eight), and first ITI (4.65 versus 4.56 s); protocol-version relationship remains unresolved.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",

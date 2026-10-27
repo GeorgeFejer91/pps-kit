@@ -2,9 +2,9 @@
 
 Generated 2026-10-27 from the tracked `pps-publication-citation-network.v3` asset, exact-DOI audit joins, manual-review overrides, current profile manifests, and the repository's code/schema surfaces.
 
-The primary paper-review deliverable is a **128-row × 11-contract categorical matrix** aligned to Toolkit Segments 1-5 and runtime: auditory stimulus; trajectory geometry plus kinematics; trial sequence; task/response behavior; jitter/ITI; SOA schedule; tactile target; baseline trials; catch trials; repetition allocation; and block composition/order. Every one of the 94 citation-network publications is represented, and a strict 94-row aggregate is supplied. The registered view has 128 rows because 42 publications have tracked experiment inventories (including single-task inventories).
+The primary paper-review deliverable is a **132-row × 11-contract categorical matrix** aligned to Toolkit Segments 1-5 and runtime: auditory stimulus; trajectory geometry plus kinematics; trial sequence; task/response behavior; jitter/ITI; SOA schedule; tactile target; baseline trials; catch trials; repetition allocation; and block composition/order. Every one of the 94 citation-network publications is represented, and a strict 94-row aggregate is supplied. The registered view has 132 rows because 43 publications have tracked experiment inventories (including single-task inventories).
 
-The exact **128-row × 115-input** current design/profile matrices remain the implementation crosswalk. The broader **128-row × 281-leaf** target matrix remains a scientific-method and validation-gap inventory—not claims about fields accepted by the current serializer. Publications without a registry entry remain one review unit and are explicitly marked `experiment_count_not_assessed`; do not infer that they contain only one experiment. Only 37 of 94 nodes have tracked abstract text, and 26 have neither abstract text nor an exact-DOI audit record, so 128 is an evidence-backed review-row count rather than an exhaustive true experiment count.
+The exact **132-row × 115-input** current design/profile matrices remain the implementation crosswalk. The broader **132-row × 281-leaf** target matrix remains a scientific-method and validation-gap inventory—not claims about fields accepted by the current serializer. Publications without a registry entry remain one review unit and are explicitly marked `experiment_count_not_assessed`; do not infer that they contain only one experiment. Only 37 of 94 nodes have tracked abstract text, and 26 have neither abstract text nor an exact-DOI audit record, so 132 is an evidence-backed review-row count rather than an exhaustive true experiment count.
 
 The compact matrix reports whether contract-level evidence is complete, derived, partial, absent, unavailable, unassessed, or still composite. A reported or derived completion is component-gated: every required final component must have experiment-scoped evidence. The normalized evidence ledger preserves final component states, the underlying coarse-parent evidence, short paper value, source/page pointer, derivation note, exact current input paths, and any attached template encoding. It never promotes a coarse 25-field audit parent, template value, or Toolkit default to complete publication evidence. Controlled vocabularies distinguish generated/imported/physical sources, motion modes, timing policies, baseline trial families, catch target roles, and exact versus unresolved allocation rules. The 281-leaf atomic matrix remains stricter: each constituent target leaf still requires separate verification.
 
@@ -16,7 +16,7 @@ annotations into a durable reviewed-data source before rebuilding.
 
 ## Primary Parsimonious Paper-Review Files
 
-- `study_instance_parsimonious_status_matrix.csv`: the primary compact have/missing table—128 registered study rows × 11 scientific emulation contracts.
+- `study_instance_parsimonious_status_matrix.csv`: the primary compact have/missing table—132 registered study rows × 11 scientific emulation contracts.
 - `study_instance_parsimonious_value_matrix.csv`: the same rows with short extracted paper values; composite-record evidence is visibly prefixed and never presented as experiment-specific.
 - `publication_parsimonious_status_matrix.csv`: strict 94-publication aggregate; differing child rows become `mixed_across_studies`.
 - `parsimonious_contract_evidence.csv`: normalized study × contract ledger with value, source/page, final and coarse component states, derivation, current-path crosswalk, and template encoding.
@@ -29,12 +29,12 @@ The compact status matrix is intentionally categorical. Detailed values stay in 
 
 ## Current-Toolkit Implementation Crosswalk Files
 
-- `study_instance_current_input_review_matrix.csv`: implementation-level evidence table—128 registered study/profile rows × 115 exact current serialized input columns.
+- `study_instance_current_input_review_matrix.csv`: implementation-level evidence table—132 registered study/profile rows × 115 exact current serialized input columns.
 - `publication_current_input_review_matrix.csv`: the same evidence-review states aggregated to the 94 citation-network publications.
-- `current_input_review_queue.csv`: normalized long manual-review queue for all 14720 current-input cells, including composite-evidence and untyped-object warnings.
+- `current_input_review_queue.csv`: normalized long manual-review queue for all 15180 current-input cells, including composite-evidence and untyped-object warnings.
 - `current_input_to_target_crosswalk.csv`: inverse mapping from every exact current input to the proposed target leaves and coarse audit parents used to seed its review status.
 - `current_input_review_status_legend.csv`: interpretation and required action for every current-evidence review category.
-- `study_instance_current_toolkit_input_matrix.csv`: 128 registered study rows × 115 exact inputs accepted by `design_from_dict` and emitted by `design_to_dict`.
+- `study_instance_current_toolkit_input_matrix.csv`: 132 registered study rows × 115 exact inputs accepted by `design_from_dict` and emitted by `design_to_dict`.
 - `publication_current_toolkit_input_matrix.csv`: the same current input paths aggregated to the 94 publication nodes.
 - `current_toolkit_input_dictionary.csv`: code-derived path, type, default, cardinality, parser, serializer, and source-line contract for every current input.
 - `current_toolkit_input_values.csv`: normalized experiment/variant-scoped profile values by study, profile, and exact input path.
@@ -45,7 +45,7 @@ These implementation matrices describe the exact current **design/profile serial
 
 ## Secondary Target Method/Validation-Gap Files
 
-- `study_instance_target_method_validation_gap_matrix.csv`: secondary 128-row scientific method/validation inventory; multi-experiment papers are labeled `(a)`, `(b)`, `(c)`, and so on.
+- `study_instance_target_method_validation_gap_matrix.csv`: secondary 132-row scientific method/validation inventory; multi-experiment papers are labeled `(a)`, `(b)`, `(c)`, and so on.
 - `publication_target_method_validation_gap_matrix.csv`: strict 94-node target aggregate; `mixed` points back to differing study-instance rows.
 - `target_method_validation_dictionary.csv`: all 281 proposed target method/validation paths, shapes, units, roles, repeating entities, coarse audit-parent mappings, and exact current-design crosswalk fields. Six leaves are explicitly validation/derived candidates rather than configuration inputs; older routing hints remain provisional.
 - `target_method_to_current_input_crosswalk.csv`: conservative mapping from every proposed target leaf to exact current `design.*` paths, an untyped object container, a partial proxy/derived value, or `not_in_current_design_serializer`.
@@ -72,13 +72,13 @@ These implementation matrices describe the exact current **design/profile serial
 |---|---:|
 | Focused publication nodes | 94 |
 | Citation links | 750 |
-| Evidence-backed registered study/profile rows | 128 |
+| Evidence-backed registered study/profile rows | 132 |
 | Parsimonious paper-facing contract columns | 11 |
-| Parsimonious study-contract evidence cells | 1408 |
+| Parsimonious study-contract evidence cells | 1452 |
 | Exact current serialized Toolkit input columns | 115 |
-| Current-input categorical review cells | 14720 |
+| Current-input categorical review cells | 15180 |
 | Proposed target method/validation columns | 281 |
-| Target-review categorical cells | 35968 |
+| Target-review categorical cells | 37092 |
 | Target leaves mapped to a current coarse audit parent | 220 |
 | Target leaves absent from the current 25-field audit | 61 |
 | Exact current paths absent from the proposed target inventory | 26 |
@@ -91,13 +91,13 @@ These implementation matrices describe the exact current **design/profile serial
 | Experiment-specific rows with a directly scoped orientation ledger | 4 |
 | Split rows inheriting a combined-record orientation ledger | 10 |
 | Automated visualization candidates needing visual verification | 173 |
-| Study-level visualization candidate rows after experiment splitting | 266 |
+| Study-level visualization candidate rows after experiment splitting | 294 |
 | Confirmed structured visualization rows | 0 |
 | Audit records outside focused network | 6 |
 
 Toolkit publication states: `adjacent_scope_conflict` 3, `not_assessed` 29, `runnable` 14, `supported_incomplete` 48.
 
-Study-instance evidence stages: `current_audit_without_manual_review` 59, `manual_review` 37, `no_exact_doi_audit_join` 32.
+Study-instance evidence stages: `current_audit_without_manual_review` 63, `manual_review` 37, `no_exact_doi_audit_join` 32.
 
 ## Multi-Experiment Publication Labels
 
@@ -114,6 +114,7 @@ Study-instance evidence stages: `current_audit_without_manual_review` 59, `manua
 | Motor properties of peripersonal space in humans. | 2 | doi:10.1371/journal.pone.0006582::a \| doi:10.1371/journal.pone.0006582::b |
 | The wheelchair as a full-body tool extending the peripersonal space. | 3 | doi:10.3389/fpsyg.2015.00639::a \| doi:10.3389/fpsyg.2015.00639::b \| doi:10.3389/fpsyg.2015.00639::c |
 | Peripersonal Space: An Index of Multisensory Body–Environment Interactions in Real, Virtual, and Mixed Realities | 2 | doi:10.3389/fict.2017.00031::a \| doi:10.3389/fict.2017.00031::b |
+| Intertrial Variability in the Premotor Cortex Accounts for Individual Differences in Peripersonal Space. | 5 | doi:10.1523/jneurosci.1696-15.2015::a \| doi:10.1523/jneurosci.1696-15.2015::b \| doi:10.1523/jneurosci.1696-15.2015::c \| doi:10.1523/jneurosci.1696-15.2015::d \| doi:10.1523/jneurosci.1696-15.2015::e |
 | Vestibular modulation of peripersonal space boundaries. | 3 | doi:10.1111/ejn.13872::a \| doi:10.1111/ejn.13872::b \| doi:10.1111/ejn.13872::c |
 | Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. | 4 | doi:10.1007/s00221-020-05771-5::a \| doi:10.1007/s00221-020-05771-5::b \| doi:10.1007/s00221-020-05771-5::c \| doi:10.1007/s00221-020-05771-5::d |
 | Spatial tuning of electrophysiological responses to multisensory stimuli reveals a primitive coding of the body boundaries in newborns | 2 | doi:10.1073/pnas.2024548118::a \| doi:10.1073/pnas.2024548118::b |
@@ -146,18 +147,18 @@ The suffix letters are review/display labels. Existing `record_id` and `profile_
 
 | Status | Cells |
 |---|---:|
-| `composite_parent_atomic_unreviewed` | 10120 |
+| `composite_parent_atomic_unreviewed` | 11220 |
 | `not_assessed` | 7040 |
-| `not_covered_by_current_audit` | 7808 |
+| `not_covered_by_current_audit` | 8052 |
 | `parent_caveated_atomic_unreviewed` | 9 |
 | `parent_derived_atomic_unreviewed` | 127 |
 | `parent_lineage_derived_atomic_unreviewed` | 7 |
-| `parent_low_confidence_atomic_unreviewed` | 1207 |
+| `parent_low_confidence_atomic_unreviewed` | 1033 |
 | `parent_not_applicable_atomic_unreviewed` | 262 |
 | `parent_reported_absent_atomic_unreviewed` | 6 |
 | `parent_reported_atomic_unreviewed` | 3099 |
 | `parent_reviewed_missing` | 224 |
-| `source_unavailable` | 6059 |
+| `source_unavailable` | 6013 |
 
 These totals distinguish four different kinds of unresolved work: no audit at all, unavailable/unextracted source evidence, a reviewed-but-missing coarse parent, and a brand-new atomic input not covered by the current audit.
 
@@ -177,9 +178,9 @@ These totals distinguish four different kinds of unresolved work: no audit at al
 | `target.trial_sequence.jitter_values_ms` | Trial sequence and task | 5 | 60 | 0 | `first_class_gui` |
 | `target.trial_sequence.post_sound_silence_ms` | Trial sequence and task | 5 | 60 | 0 | `backend_schema_only` |
 | `target.trial_sequence.pre_sound_silence_ms` | Trial sequence and task | 5 | 60 | 0 | `backend_schema_only` |
-| `target.block_design.block_count` | Block design | 4 | 64 | 0 | `first_class_gui` |
-| `target.rendering.distance_gain_policy` | Renderer, loudness, visual, and mixed-reality context | 4 | 63 | 0 | `backend_schema_only` |
-| `target.rendering.end_spl_db` | Renderer, loudness, visual, and mixed-reality context | 4 | 63 | 0 | `first_class_gui` |
+| `target.block_design.block_count` | Block design | 4 | 63 | 0 | `first_class_gui` |
+| `target.rendering.distance_gain_policy` | Renderer, loudness, visual, and mixed-reality context | 4 | 62 | 0 | `backend_schema_only` |
+| `target.rendering.end_spl_db` | Renderer, loudness, visual, and mixed-reality context | 4 | 62 | 0 | `first_class_gui` |
 
 ## Provisional Target Routing Hints
 

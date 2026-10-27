@@ -52,21 +52,21 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         summary = self.build_summary
         self.assertEqual(summary["publications"], 94)
         self.assertEqual(summary["networkEdges"], 750)
-        self.assertEqual(summary["studyInstances"], 128)
+        self.assertEqual(summary["studyInstances"], 132)
         self.assertEqual(summary["parsimoniousContractCount"], 11)
-        self.assertEqual(summary["parsimoniousReviewCells"], 1_408)
+        self.assertEqual(summary["parsimoniousReviewCells"], 1_452)
         self.assertEqual(summary["currentToolkitInputParameters"], 115)
-        self.assertEqual(summary["currentInputReviewCells"], 14_720)
+        self.assertEqual(summary["currentInputReviewCells"], 15_180)
         self.assertEqual(summary["currentInputsOutsideTargetInventory"], 26)
         self.assertEqual(summary["targetMethodValidationParameters"], 281)
         self.assertEqual(summary["targetConfigurationCandidates"], 275)
         self.assertEqual(summary["targetValidationLeaves"], 6)
-        self.assertEqual(summary["targetMethodReviewCells"], 35_968)
+        self.assertEqual(summary["targetMethodReviewCells"], 37_092)
         self.assertEqual(summary["structuredOrientationReviewRecords"], 8)
         self.assertEqual(summary["experimentSpecificOrientationRows"], 4)
         self.assertEqual(summary["combinedOrientationRows"], 10)
         self.assertEqual(summary["automatedVisualizationCandidates"], 173)
-        self.assertEqual(summary["studyVisualizationCandidateRows"], 266)
+        self.assertEqual(summary["studyVisualizationCandidateRows"], 294)
         self.assertEqual(summary["confirmedVisualizationRows"], 0)
         self.assertEqual(summary["publicationNodesWithAbstract"], 37)
         self.assertEqual(summary["publicationNodesWithoutAbstractOrAudit"], 26)
@@ -84,7 +84,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(len(paths), len(set(paths)))
         self.assertTrue(all(path.startswith("design.") for path in paths))
         self.assertEqual(matrix_header[-115:], paths)
-        self.assertEqual(len(rows), 128)
+        self.assertEqual(len(rows), 132)
         self.assertTrue(all(row[path] for row in rows for path in paths))
         self.assertIn("parser", dictionary_header)
         self.assertIn("serializer", dictionary_header)
@@ -100,11 +100,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         header, rows = read_csv(
             self.output_dir / "study_instance_current_input_review_matrix.csv"
         )
-        self.assertEqual(len(rows), 128)
+        self.assertEqual(len(rows), 132)
         self.assertEqual(header[-115:], paths)
         self.assertTrue(all(row[path] for row in rows for path in paths))
         _, queue = read_csv(self.output_dir / "current_input_review_queue.csv")
-        self.assertEqual(len(queue), 128 * 115)
+        self.assertEqual(len(queue), 132 * 115)
         self.assertEqual(
             len({(row["study_row_id"], row["current_toolkit_input_path"]) for row in queue}),
             len(queue),
@@ -135,7 +135,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(len(target_paths), len(set(target_paths)))
         self.assertTrue(all(path.startswith("target.") for path in target_paths))
         self.assertEqual(matrix_header[-281:], target_paths)
-        self.assertEqual(len(rows), 128)
+        self.assertEqual(len(rows), 132)
         self.assertTrue(all(row[path] for row in rows for path in target_paths))
         for field in (
             "current_design_binding_state",
@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 42)
+        self.assertEqual(len(registry["entries"]), 43)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 76)
+        self.assertEqual(registered_instance_count, 81)
         network = json.loads(
             (
                 ROOT
@@ -323,7 +323,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         header, rows = read_csv(
             self.output_dir / "study_instance_target_method_evidence_sidecar.csv"
         )
-        self.assertEqual(len(rows), 128 * 281)
+        self.assertEqual(len(rows), 132 * 281)
         for field in (
             "study_row_id",
             "network_node_id",
@@ -355,7 +355,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
 
     def test_orientation_and_visualization_reviews_remain_unconfounded(self) -> None:
         _, orientation = read_csv(self.output_dir / "study_orientation_review.csv")
-        self.assertEqual(len(orientation), 128)
+        self.assertEqual(len(orientation), 132)
         orientation_counts = Counter(
             row["orientation_review_status"] for row in orientation
         )
@@ -379,12 +379,15 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         visualization_counts = Counter(
             row["confirmation_status"] for row in visualizations
         )
-        self.assertEqual(visualization_counts["automated_candidate_unverified"], 105)
+        self.assertEqual(visualization_counts["automated_candidate_unverified"], 98)
         self.assertEqual(
             visualization_counts["record_level_candidate_requires_experiment_check"],
-            161,
+            196,
         )
         self.assertNotIn("confirmed", visualization_counts)
+        ferri = [row for row in visualizations if row["study_row_id"].startswith("doi:10.1523/jneurosci.1696-15.2015::")]
+        self.assertEqual(len(ferri), 35)  # Seven prior candidates now require assignment to five protocol variants.
+        self.assertEqual({row["confirmation_status"] for row in ferri}, {"record_level_candidate_requires_experiment_check"})
         ronga = [row for row in visualizations if row["study_row_id"].startswith("doi:10.1073/pnas.2024548118::")]
         self.assertEqual(len(ronga), 8)  # Four publication candidates for each cohort variant.
         self.assertEqual({row["confirmation_status"] for row in ronga}, {"record_level_candidate_requires_experiment_check"})
@@ -460,7 +463,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         header, rows = read_csv(
             self.output_dir / "study_instance_parsimonious_status_matrix.csv"
         )
-        self.assertEqual(len(rows), 128)
+        self.assertEqual(len(rows), 132)
         self.assertEqual(
             header[:-11],
             [
@@ -501,7 +504,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             "component_evidence_note_json",
         ):
             self.assertIn(field, evidence_header)
-        self.assertEqual(len(evidence), 128 * 11)
+        self.assertEqual(len(evidence), 132 * 11)
         self.assertEqual(
             len({(row["study_row_id"], row["contract_key"]) for row in evidence}),
             len(evidence),
@@ -685,7 +688,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
                 for row in evidence
                 if row["contract_key"] == contract_key
             )
-            self.assertEqual(summary_row["study_count"], "128")
+            self.assertEqual(summary_row["study_count"], "132")
             for status in summary_statuses:
                 self.assertEqual(int(summary_row[status]), counts[status])
             resolved = sum(
@@ -699,7 +702,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             self.assertEqual(int(summary_row["available_or_resolved_count"]), resolved)
             self.assertEqual(
                 float(summary_row["available_or_resolved_pct"]),
-                round(100 * resolved / 128, 1),
+                round(100 * resolved / 132, 1),
             )
 
         _, review_queue = read_csv(
@@ -1064,7 +1067,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             self.assertEqual(contracts["tactile_target"]["status"], "composite_requires_split")
             self.assertEqual(study["nativeQualification"], "not_assessed")
         self.assertEqual(len(data["publications"]), 94)
-        self.assertEqual(len(data["studies"]), 128)
+        self.assertEqual(len(data["studies"]), 132)
 
     def test_echolocation_assessment_keeps_training_and_manual_timing_separate(self) -> None:
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
@@ -1215,6 +1218,29 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             self.assertEqual(study["nativeQualification"], "not_assessed")
         self.assertTrue(phone["templateIds"])
         self.assertTrue(vr["templateIds"])
+
+    def test_original_fmri_inventory_separates_response_roles_and_reanalysis(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        studies = {row["studyRowId"]: row for row in data["studies"]}
+        parent = "doi:10.1523/jneurosci.1696-15.2015"
+        ids = [parent + "::" + suffix for suffix in "abcde"]
+        self.assertEqual(data["studyRowAliases"][parent], ids)
+        contracts = [{row["key"]: row for row in studies[key]["contracts"]} for key in ids]
+        self.assertIn("300", contracts[0]["repetition_allocation"]["value"])
+        self.assertIn("120", contracts[0]["catch_trial_contract"]["value"])
+        self.assertIn("600", contracts[2]["repetition_allocation"]["value"])
+        self.assertIn("left index", contracts[1]["catch_trial_contract"]["value"])
+        self.assertIn("positive response", contracts[1]["catch_trial_contract"]["value"])
+        self.assertIn("withhold", contracts[4]["catch_trial_contract"]["value"])
+        self.assertEqual(contracts[4]["repetition_allocation"]["status"], "partial")
+        self.assertEqual(contracts[1]["jitter_iti_policy"]["status"], "conflicting_evidence")
+        self.assertIn("1.55 ms", contracts[1]["jitter_iti_policy"]["value"])
+        reanalysis = {row["key"]: row for row in studies["doi:10.1038/s41598-021-00048-5::b"]["contracts"]}
+        self.assertEqual(reanalysis["repetition_allocation"]["status"], "conflicting_evidence")
+        self.assertIn("30", reanalysis["repetition_allocation"]["evidenceNote"])
+        self.assertEqual(reanalysis["block_order_contract"]["status"], "conflicting_evidence")
+        for key in ids:
+            self.assertEqual(studies[key]["nativeQualification"], "not_assessed")
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:

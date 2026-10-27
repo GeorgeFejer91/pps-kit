@@ -920,6 +920,88 @@
         "relationship": "partly_reused_healthy_control_data",
         "basis": "Main Participants section states that healthy-control data were partially reported in reference 32, Sorrentino et al. How ageing shapes body and space representations."
       }
+    },
+    {
+      "network_node_id": "doi:10.1523/jneurosci.1696-15.2015",
+      "doi": "10.1523/jneurosci.1696-15.2015",
+      "inventory_status": "confirmed_five_pps_protocol_instances_in_three_cohorts",
+      "instance_count_basis": "Primary Methods distinguishes main behavioral and fMRI protocols in one cohort, a new repeated-session cohort, and two randomized-order catch variants in another cohort. These five protocol instances are not five independent cohorts. A fourth cohort provides supporting sound localization validation.",
+      "evidence_pointer": "https://static1.squarespace.com/static/528facb6e4b0a18b7e9cde91/t/567541f969492e8da7dd7336/1450525177323/Intertrial%2BVariability%2Bin%2Bthe%2BPremotor%2BCortex%2BAccounts%2Bfor%2BIndividual%2BDifferences%2Bin%2BPeripersonal%2BSp.pdf::Materials and Methods pp. 2-3 of author-hosted article copy",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_behavioral_and_fmri_protocols_with_reproducibility_controls",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Main behavioral boundary estimation",
+          "record_id": "ferri_2015_jneurosci_itv",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "protocol_variant",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "b",
+          "experiment_label": "fMRI PPS with left-index attention targets",
+          "record_id": "ferri_2015_jneurosci_itv",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "protocol_variant",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "c",
+          "experiment_label": "Across-session reproducibility of the behavioral boundary",
+          "record_id": "ferri_2015_jneurosci_itv",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "d",
+          "experiment_label": "Across-task Experiment 1: sound-only catches",
+          "record_id": "ferri_2015_jneurosci_itv",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "e",
+          "experiment_label": "Across-task Experiment 2: left-index withhold catches",
+          "record_id": "ferri_2015_jneurosci_itv",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Sound localization validation",
+          "disposition": "perceptual_validation_not_independent_pps_boundary_task",
+          "basis": "A separate cohort gives verbal perceived sound-distance ratings from 1 to 100 at touch. Two randomly ordered speaker/seated and headphone/mock-scanner blocks each have 12 x 5 delays x 2 sounds = 120 trials, 240 overall. No tactile reaction-time boundary is measured.",
+          "evidence_pointer": "https://static1.squarespace.com/static/528facb6e4b0a18b7e9cde91/t/567541f969492e8da7dd7336/1450525177323/Intertrial%2BVariability%2Bin%2Bthe%2BPremotor%2BCortex%2BAccounts%2Bfor%2BIndividual%2BDifferences%2Bin%2BPeripersonal%2BSp.pdf::Sound localization task p. 3"
+        },
+        {
+          "label": "Passive auditory fMRI localizer",
+          "disposition": "auditory_only_imaging_localizer",
+          "basis": "Two six-minute runs contain 30 looming and 30 flat sounds overall, passively heard every 4.65, 6.2 or 7.75 s. This independently defines auditory ROIs and has no tactile target.",
+          "evidence_pointer": "https://static1.squarespace.com/static/528facb6e4b0a18b7e9cde91/t/567541f969492e8da7dd7336/1450525177323/Intertrial%2BVariability%2Bin%2Bthe%2BPremotor%2BCortex%2BAccounts%2Bfor%2BIndividual%2BDifferences%2Bin%2BPeripersonal%2BSp.pdf::fMRI session, Auditory task p. 3"
+        },
+        {
+          "label": "Individual electrical threshold preparation",
+          "disposition": "apparatus_calibration_not_pps_kit_qualification",
+          "basis": "Reported per-session threshold procedure tests ten pulses intermingled with five no-stimulation trials; this source procedure is not physical qualification of PPS Kit or another stimulator.",
+          "evidence_pointer": "https://static1.squarespace.com/static/528facb6e4b0a18b7e9cde91/t/567541f969492e8da7dd7336/1450525177323/Intertrial%2BVariability%2Bin%2Bthe%2BPremotor%2BCortex%2BAccounts%2Bfor%2BIndividual%2BDifferences%2Bin%2BPeripersonal%2BSp.pdf::Stimuli p. 2"
+        }
+      ],
+      "source_lineage": {
+        "network_node_id": "doi:10.1038/s41598-021-00048-5",
+        "relationship": "original_dataset_later_reanalyzed",
+        "basis": "Spadone 2021 identifies this dataset but restates incompatible fMRI repetition/run counts and one ITI value. Both versions remain explicit; no independent replication or automatic protocol equivalence is inferred."
+      },
+      "source_review_limit": "Fresh author-hosted primary article inspected. Preserve current/voltage terminology, a post-catch time-unit contradiction, ambiguous fMRI catch denominator and the later reanalysis differences. Across-task repetition counts are not silently inherited from the main cohort. Physical calibration remains unassessed."
     }
   ],
   "corpus_freeze": {
@@ -1264,6 +1346,19 @@
       "review_date": "2026-10-27",
       "reason": "The former placeholder combined the reused behavioral localizer and fMRI protocol. The children are linked reanalysis protocol variants, not new independent cohorts; neither alone is equivalent to the prior publication row.",
       "evidence_pointer": "https://www.nature.com/articles/s41598-021-00048-5.pdf::Methods pp. 9-10"
+    },
+    {
+      "old_study_row_id": "doi:10.1523/jneurosci.1696-15.2015",
+      "child_study_row_ids": [
+        "doi:10.1523/jneurosci.1696-15.2015::a",
+        "doi:10.1523/jneurosci.1696-15.2015::b",
+        "doi:10.1523/jneurosci.1696-15.2015::c",
+        "doi:10.1523/jneurosci.1696-15.2015::d",
+        "doi:10.1523/jneurosci.1696-15.2015::e"
+      ],
+      "review_date": "2026-10-27",
+      "reason": "Primary Methods separates main behavioral and fMRI protocols, same-task session reproducibility, and two catch-variant experiments. Five protocol rows represent three cohorts, not independent replications; supporting localization and passive auditory localizer remain disclosed context.",
+      "evidence_pointer": "https://static1.squarespace.com/static/528facb6e4b0a18b7e9cde91/t/567541f969492e8da7dd7336/1450525177323/Intertrial%2BVariability%2Bin%2Bthe%2BPremotor%2BCortex%2BAccounts%2Bfor%2BIndividual%2BDifferences%2Bin%2BPeripersonal%2BSp.pdf::Materials and Methods pp. 2-3"
     }
   ]
 }
