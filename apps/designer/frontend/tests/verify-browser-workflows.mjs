@@ -1,3 +1,4 @@
+import { verifySequenceScaling } from "./sequence-scaling-browser.mjs";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
@@ -221,6 +222,15 @@ try {
   assert.ok(report.text.scrollWidth <= report.text.width + 1);
   assert.ok(report.text.scrollHeight <= report.text.height + 1);
   assert.deepEqual(errors, []);
+
+  const scaling = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  scaling.on("pageerror", error => errors.push(error.message));
+  scaling.on("dialog", dialog => dialog.accept());
+  await scaling.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1`);
+  await verifySequenceScaling(scaling);
+  assert.deepEqual(errors, []);
+  report.checks.push("Exact 46656 variants and oversized drafts survive real hosted edit, save and restore");
+  await scaling.close();
 
   const companionPreview = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   companionPreview.on("pageerror", error => errors.push(error.message));
