@@ -10,22 +10,22 @@
   },
   "counts": {
     "publications": 94,
-    "studies": 150,
-    "contracts": 1650,
-    "reportedComplete": 301,
-    "derivedComplete": 77,
+    "studies": 151,
+    "contracts": 1661,
+    "reportedComplete": 300,
+    "derivedComplete": 79,
     "parameterStatusCounts": {
-      "approximation_required": 37,
+      "approximation_required": 38,
       "composite_requires_split": 69,
       "conflicting_evidence": 48,
-      "derived_complete": 77,
+      "derived_complete": 79,
       "explicitly_absent": 22,
       "low_confidence": 10,
-      "not_applicable": 198,
+      "not_applicable": 209,
       "not_assessed": 187,
       "not_reported": 57,
-      "partial": 409,
-      "reported_complete": 301,
+      "partial": 407,
+      "reported_complete": 300,
       "source_unavailable": 235
     }
   },
@@ -100,6 +100,10 @@
     "doi:10.1371/journal.pone.0006582": [
       "doi:10.1371/journal.pone.0006582::a",
       "doi:10.1371/journal.pone.0006582::b"
+    ],
+    "doi:10.1371/journal.pone.0044306": [
+      "doi:10.1371/journal.pone.0044306::a",
+      "doi:10.1371/journal.pone.0044306::b"
     ],
     "doi:10.1523/jneurosci.1696-15.2015": [
       "doi:10.1523/jneurosci.1696-15.2015::a",
@@ -1823,25 +1827,28 @@
     {
       "networkNodeId": "doi:10.1371/journal.pone.0044306",
       "studyIds": [
-        "doi:10.1371/journal.pone.0044306"
+        "doi:10.1371/journal.pone.0044306::a",
+        "doi:10.1371/journal.pone.0044306::b"
       ],
       "templateIds": [
         "canzoneri_2012_dynamic_sounds"
       ],
       "parameterStatusCounts": {
-        "derived_complete": 1,
-        "partial": 7,
-        "reported_complete": 3
+        "approximation_required": 1,
+        "derived_complete": 3,
+        "not_applicable": 11,
+        "partial": 5,
+        "reported_complete": 2
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
         "registered": true,
         "evidenceStatus": "primary_methods_reviewed",
-        "inventoryStatus": "confirmed_audio_tactile_pps_task_with_supporting_localizer",
-        "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "inventoryStatus": "confirmed_main_and_supporting_localization_control",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -46790,115 +46797,220 @@
       ]
     },
     {
-      "studyRowId": "doi:10.1371/journal.pone.0044306",
+      "studyRowId": "doi:10.1371/journal.pone.0044306::a",
       "networkNodeId": "doi:10.1371/journal.pone.0044306",
       "label": "Dynamic sounds capture the boundaries of peripersonal space representation in humans. (a)",
       "experimentLabel": "Main audio-tactile PPS task",
-      "inventoryStatus": "confirmed_audio_tactile_pps_task_with_supporting_localizer",
-      "evidenceScope": "experiment_specific",
+      "inventoryStatus": "confirmed_main_and_supporting_localization_control",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [
         "canzoneri_2012_dynamic_sounds"
       ],
       "parameterStatusCounts": {
-        "derived_complete": 1,
-        "partial": 7,
-        "reported_complete": 3
+        "approximation_required": 1,
+        "derived_complete": 3,
+        "partial": 5,
+        "reported_complete": 2
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "partial",
-          "value": "Stimulus type: Pink-noise auditory samples at 44.1 kHz. | Source provenance: SoundForge 4.5 shaped two identical pink-noise samples for the two loudspeakers; exact source audio file is not reported. | Auditory conditions: IN/approaching and OUT/receding sounds. | Gain envelope: IN: exponential rise 55 to 70 dB SPL; OUT: exponential fall 70 to 55 dB SPL; near/far speaker intensities mirror each other. | Renderer or apparatus: Two physical loudspeakers, SoundForge-generated pink-noise envelopes, audiometer SPL calibration, C.I.R.O. software control.",
+          "status": "approximation_required",
+          "value": "Pink noise at 44.1 kHz, 3000 ms, generated in SoundForge 4.5. Two identical samples have opposing near/far loudspeaker fades; ear-position levels span 55–70 dB SPL. Original waveform/seed, exact exponential envelope and room/speaker transfer are unavailable.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.2, Methods, Procedures and Materials | PDF pp.2-3, Methods, Procedures and Materials",
-          "evidenceNote": "Reported as pink-noise samples used for the dynamic auditory stimuli. | Software provenance is reported, but not the original WAV/noise seed. | Both conditions were used in the main audio-tactile task. | Measured at the subjects' ears; exact gain curve file is not provided. | Speaker make/model and room transfer function are not reported.",
+          "pageOrSection": "Published PDF pp. 2–3, Procedures and Materials; Figure 1 p. 4",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
           "missingComponents": [
-            "source_recipe_or_asset_provenance",
-            "level_envelope_calibration"
+            "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "55–70 dB SPL at ears and exponential intensity changes reported; exact numeric envelope/transfer absent.",
+              "note": ""
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two loudspeakers with opposing fades, not a moving physical source.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "reported",
+              "value": "Pink noise with two-speaker opposing fades.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "SoundForge 4.5 provenance and identical samples are named; exact file/seed/spectral realization not supplied.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Pink noise, 44.1 kHz, 3000 ms.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
           "status": "partial",
-          "value": "Trajectory path: Near speaker on table by the right hand; far speaker on floor about 100 cm from near speaker; IN far-to-near, OUT near-to-far. | Stimulus duration: Sound duration 3000 ms, preceded and followed by 1000 ms silence. | Stimulus speed: No explicit speed reported; nominal apparent path is about 100 cm over 3000 ms, roughly 0.33 m/s, under mirrored exponential intensity fades. | Trajectory count: Two auditory trajectories: IN approaching and OUT receding. | Gain envelope: IN: exponential rise 55 to 70 dB SPL; OUT: exponential fall 70 to 55 dB SPL; near/far speaker intensities mirror each other. | Renderer or apparatus: Two physical loudspeakers, SoundForge-generated pink-noise envelopes, audiometer SPL calibration, C.I.R.O. software control.",
+          "value": "IN/OUT apparent motion from two-speaker intensity fades. Right hand rests palm-down beside body; near speaker on table by hand, far speaker on floor approximately 100 cm from near speaker. Sound lasts 3 s. Full 3D geometry and perceived distance–time law are not established.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.2, Methods, Procedures and Materials | PDF p.3, Methods, Procedures and Materials | PDF pp.2-3, Methods, Procedures and Materials",
-          "evidenceNote": "Trajectory is physical-speaker/intensity-based on a frontal plane. | Trial begins with silence, then sound, then post-sound silence. | Derived from speaker separation and sound duration; perceived motion depends on intensity cues. | IN and OUT are mirrored intensity/timing conditions. | Measured at the subjects' ears; exact gain curve file is not provided. | Speaker make/model and room transfer function are not reported.",
-          "derivationNote": "Derived from speaker separation and sound duration; perceived motion depends on intensity cues.",
-          "reviewedOn": "2026-06-16",
+          "pageOrSection": "Published PDF pp. 2–3, Procedures and Materials; Figure 1 p. 4",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
           "missingComponents": [
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
+            "geometry"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Right hand resting palm-down on table beside body.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "Near speaker by hand on table, far on floor about 100 cm away; exact full coordinates unreported.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "Apparent approaching/receding motion through intensity modulation.",
+              "note": ""
+            },
+            "padding_or_holds": {
+              "status": "reported",
+              "value": "1000 ms silence before and after sound.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3 s sound. Nominal speaker separation divided by duration is not a measured constant perceived velocity.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "partial",
-          "value": "Trial rows families: IN and OUT audio-tactile target trials across T0-T6 plus auditory-only catch trials. | Task sequence rules: Participants said TAH to tactile targets as fast as possible while ignoring sounds; calibration repeated after omissions or catch false alarms. | Condition intermixing: Sound condition, tactile timing, and auditory-only catch trials were randomly combined/intermingled in the main experiment.",
+          "status": "derived_complete",
+          "value": "A 5000 ms nominal trial comprises 1000 ms silence, 3000 ms IN/OUT sound and 1000 ms silence. Touch may occur during sound or in pre/post silence; those control trials retain sound elsewhere. Auditory-only catches omit touch. Conditions and timings are randomly intermingled.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Methods, Procedures and Materials | PDF pp.2-3, Methods, Procedures and Materials",
-          "evidenceNote": "T0/T6 are tactile-only relative to sound timing but occur in trial structures with sound administration. | Calibration included 10 tactile stimuli intermingled with 5 catch trials. | The paper reports a random combination and random intermingling.",
-          "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "pageOrSection": "Published PDF pp. 2–3, Procedures and Materials; Figure 1 p. 4",
+          "evidenceNote": "",
+          "derivationNote": "1000 ms pre-sound + 3000 ms sound + 1000 ms post-sound = 5000 ms nominal timeline; no extra ITI or response window is inferred.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
-          "missingComponents": [
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
+          "missingComponents": [],
+          "components": {
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Random combination/intermingling of sound, timing and catches.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "1000 ms silence → 3000 ms sound → 1000 ms silence; sound retained in T0/T6 trials.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "IN/OUT targets at T0–T6 and auditory-only catches.",
+              "note": ""
+            },
+            "within_trial_timing_or_placement": {
+              "status": "derived",
+              "value": "1000 + 3000 + 1000 = 5000 ms nominal trial; response timeout not specified.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
           "status": "partial",
-          "value": "Task sequence rules: Participants said TAH to tactile targets as fast as possible while ignoring sounds; calibration repeated after omissions or catch false alarms.",
+          "value": "Say TAH as rapidly as possible to touch while ignoring sound; withhold when touch is absent. Voice-activated relay with C.I.R.O. records RT. No numeric response timeout or relay latency correction is reported.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.2-3, Methods, Procedures and Materials | PDF pp.2-3, Methods/Results; official PLOS HTML checked 2026-06-16",
-          "evidenceNote": "Calibration included 10 tactile stimuli intermingled with 5 catch trials. | Vocal response and voice relay are reported, but no explicit response timeout/window was found.",
+          "pageOrSection": "Published PDF pp. 2–3, Procedures and Materials; Figure 1 p. 4",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
           "missingComponents": [
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Vocal TAH response.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Voice-activated relay and C.I.R.O. software.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "RT relative to tactile target; no explicit online deadline/window.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond vocally to touch; ignore sounds; auditory-only catches require no response.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
           "status": "partial",
-          "value": "Iti jitter policy: Fixed 1000 ms silence before and after each 3000 ms sound; no variable ITI/jitter distribution reported.",
+          "value": "1000 ms silence precedes and follows each 3000 ms sound. These within-trial windows do not establish an additional inter-trial interval or jitter distribution.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Methods, Procedures and Materials",
-          "evidenceNote": "The report specifies fixed silence windows only.",
+          "pageOrSection": "Published PDF pp. 2–3, Procedures and Materials; Figure 1 p. 4",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
           "missingComponents": [
-            "timing_scope_and_anchor",
-            "values_or_range"
+            "policy_type"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "not_reported",
+              "value": "Additional between-trial interval/jitter policy not specified.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "Within-trial silence before auditory onset and after offset.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1000 ms pre-sound and 1000 ms post-sound; no extra ITI value supplied.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
@@ -46906,13 +47018,13 @@
           "status": "reported_complete",
           "value": "T1-T5: +300, +800, +1500, +2200, +2700 ms from auditory onset.",
           "compositeValue": "",
-          "pageOrSection": "Publisher HTML, Methods: Procedures and Materials (timing/allocation paragraphs; Figure 1 caption)",
+          "pageOrSection": "Published PDF pp. 2–3, Procedures and Materials; Figure 1 p. 4",
           "evidenceNote": "",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
-          "evidenceSourceUrl": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306",
-          "sourceType": "publisher_html",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
           "missingComponents": [],
           "components": {
             "ordered_soa_values_or_derivable_distance_anchors": {
@@ -46931,34 +47043,65 @@
           "key": "tactile_target",
           "label": "Tactile target",
           "status": "partial",
-          "value": "Tactile stimulus: Right-index electrical tactile pulse via DS7A Digitimer and Neuroline electrodes; single rectangular monophasic pulse, 100 us, individually set above threshold, 60-90 mA tested range.",
+          "value": "Hairy surface of right index finger receives a single rectangular monophasic electrical pulse through Neuroline electrodes and DS7A. Published p. 3 says 100 µsec, confirmed visually; extracted msec is wrong. Individually suprathreshold intensity, historical tested range 60–90 mA. Trigger/latency details remain unspecified.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.2-3, Methods, Procedures and Materials",
-          "evidenceNote": "The text reports a constant-current stimulator and constant-voltage pulse wording.",
+          "pageOrSection": "Published PDF pp. 2–3, Procedures and Materials; Figure 1 p. 4",
+          "evidenceNote": "The text names a constant-current stimulator and also uses constant-voltage pulse wording; retain this source ambiguity. The electrical 100 µs pulse is not a 100 ms vibrotactile/audio cue.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
           "missingComponents": [
             "waveform_and_duration",
             "intensity_or_calibration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Hairy surface of right index finger.",
+              "note": ""
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "Exact trigger/interface and measured timing latency absent.",
+              "note": ""
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "Individual clearly suprathreshold setting; tested range 60–90 mA is historical, not a software default.",
+              "note": ""
+            },
+            "intensity_or_calibration": {
+              "status": "reported",
+              "value": "Individual detection/suprathreshold calibration with 10 touches and 5 catches repeated as needed.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Electrical pulse via DS7A and Neuroline electrodes.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Single rectangular monophasic pulse, 100 µs (0.1 ms).",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
           "status": "derived_complete",
-          "value": "T0/T6: 300/4600 ms from trial start; 32 targets without concurrent sound.",
+          "value": "T0/T6 touch occurs at 300/4600 ms from trial start (−700/+3600 ms from sound onset), during silence before/after the same trial’s sound. The sound remains present at trial times 1000–4000 ms. 32 silence-window target trials, not 32 wholly silent trials.",
           "compositeValue": "",
-          "pageOrSection": "Publisher HTML, Methods: Procedures and Materials (timing/allocation paragraphs; Figure 1 caption)",
+          "pageOrSection": "Published PDF pp. 2–3, Procedures and Materials; Figure 1 p. 4",
           "evidenceNote": "",
           "derivationNote": "32 = 2 baseline timings × 2 sound contexts × 8; onset-relative times are -700 and +3600 ms.",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
-          "evidenceSourceUrl": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306",
-          "sourceType": "publisher_html",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
           "missingComponents": [],
           "components": {
             "allocation_rule": {
@@ -46968,7 +47111,7 @@
             },
             "family_or_explicit_none": {
               "status": "reported",
-              "value": "T0 and T6 tactile-only timing controls.",
+              "value": "Touch without concurrent sound during pre/post silence; retain IN/OUT sound elsewhere in the same trial.",
               "note": ""
             },
             "resolved_trial_count": {
@@ -46978,7 +47121,7 @@
             },
             "timing_and_anchor": {
               "status": "reported",
-              "value": "300 and 4600 ms from trial start; auditory onset at 1000 ms.",
+              "value": "T0/T6 at 300/4600 ms trial-relative; sound begins at 1000 ms and ends at 4000 ms.",
               "note": ""
             }
           }
@@ -46989,13 +47132,13 @@
           "status": "reported_complete",
           "value": "76 auditory-only catches intermingled with 112 targets.",
           "compositeValue": "",
-          "pageOrSection": "Publisher HTML, Methods: Procedures and Materials (timing/allocation paragraphs; Figure 1 caption)",
+          "pageOrSection": "Published PDF pp. 2–3, Procedures and Materials; Figure 1 p. 4",
           "evidenceNote": "",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
-          "evidenceSourceUrl": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306",
-          "sourceType": "publisher_html",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
           "missingComponents": [],
           "components": {
             "allocation_rule": {
@@ -47023,18 +47166,23 @@
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "reported_complete",
-          "value": "8 × 7 delays × 2 directions = 112 targets; 76 catches; 188 trials.",
+          "status": "derived_complete",
+          "value": "Eight repetitions × seven tactile timings × two sound contexts = 112 targets (80 during sound + 32 in pre/post silence), plus 76 auditory-only catches = 188 main trials. Calibration and the 80-trial localization control are separate.",
           "compositeValue": "",
-          "pageOrSection": "Publisher HTML, Methods: Procedures and Materials (timing/allocation paragraphs; Figure 1 caption)",
+          "pageOrSection": "Published PDF pp. 2–3, Procedures and Materials; Figure 1 p. 4",
           "evidenceNote": "",
-          "derivationNote": "",
+          "derivationNote": "8 repetitions × 7 timings × 2 directions = 112 targets; add 76 catches for 188. Split 5 during-sound and 2 silence-window timings gives 80 + 32 targets.",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
-          "evidenceSourceUrl": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306",
-          "sourceType": "publisher_html",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
           "missingComponents": [],
           "components": {
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "8 × 7 × 2 = 112; 8 × 5 × 2 = 80 AT; 8 × 2 × 2 = 32 silence-window targets; 112 + 76 = 188.",
+              "note": ""
+            },
             "exceptions_or_overrides": {
               "status": "reported",
               "value": "Catches separately allocated; calibration and localization task excluded.",
@@ -47056,20 +47204,422 @@
           "key": "block_order_contract",
           "label": "Block and order policy",
           "status": "partial",
-          "value": "Blocked or random order: Randomized/intermingled trials equally divided into two blocks of about 8 minutes each. | Block count: Two blocks, about 8 minutes each. | Condition intermixing: Sound condition, tactile timing, and auditory-only catch trials were randomly combined/intermingled in the main experiment. | Total trial count: One hundred eighty-eight main-task trials total: 112 tactile-target trials plus 76 auditory-only catch trials.",
+          "value": "188 main trials equally divided into two blocks of about eight minutes each, with randomized/intermingled sound/timing/catches. Equal division implies 94 rows per block; exact per-cell and catch distribution between blocks is unreported.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Methods, Procedures and Materials",
-          "evidenceNote": "No additional block-level condition separation is reported. | Trials were equally divided between the two blocks. | The paper reports a random combination and random intermingling. | Total is derived from explicitly reported target and catch counts.",
-          "derivationNote": "Total is derived from explicitly reported target and catch counts.",
-          "reviewedOn": "2026-06-16",
+          "pageOrSection": "Published PDF pp. 2–3, Procedures and Materials; Figure 1 p. 4",
+          "evidenceNote": "",
+          "derivationNote": "The source divides 188 trials equally between two blocks, implying 94 each. It does not identify exact condition-cell allocation within each block.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
           "missingComponents": [
-            "block_composition",
-            "block_order_or_counterbalancing"
+            "block_composition"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "not_reported",
+              "value": "94 rows per block inferred from 188/2; exact cell/catch allocation per block absent.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "reported",
+              "value": "Two equal blocks.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Two successive equal blocks; no condition-specific block ordering reported.",
+              "note": ""
+            },
+            "pool_repeat_or_distribution": {
+              "status": "derived",
+              "value": "188 / 2 = 94 trial rows per block.",
+              "note": ""
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "Exact run constraints and per-block distribution absent.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Random combination/intermingling; algorithm/seed unreported.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1371/journal.pone.0044306::b",
+      "networkNodeId": "doi:10.1371/journal.pone.0044306",
+      "label": "Dynamic sounds capture the boundaries of peripersonal space representation in humans. (b)",
+      "experimentLabel": "Sound-localization validation",
+      "inventoryStatus": "confirmed_main_and_supporting_localization_control",
+      "evidenceScope": "study_specific_source_review",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "not_applicable": 11
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "not_applicable",
+          "value": "Seven naive participants judge perceived sound location in 80 randomized IN/OUT trials. Forearm touch marks one of T1–T5; at trial end participants give a verbal distance rating from 1 (near) to 100 (far). This adjacent validation endpoint is not speeded tactile detection. Per-cell counts and overlap with the 17 main participants are unreported.",
+          "compositeValue": "",
+          "pageOrSection": "Published PDF p. 3 final Methods paragraph; Figure 1B p. 4",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "not_applicable",
+          "value": "Seven naive participants judge perceived sound location in 80 randomized IN/OUT trials. Forearm touch marks one of T1–T5; at trial end participants give a verbal distance rating from 1 (near) to 100 (far). This adjacent validation endpoint is not speeded tactile detection. Per-cell counts and overlap with the 17 main participants are unreported.",
+          "compositeValue": "",
+          "pageOrSection": "Published PDF p. 3 final Methods paragraph; Figure 1B p. 4",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "not_applicable",
+          "value": "Seven naive participants judge perceived sound location in 80 randomized IN/OUT trials. Forearm touch marks one of T1–T5; at trial end participants give a verbal distance rating from 1 (near) to 100 (far). This adjacent validation endpoint is not speeded tactile detection. Per-cell counts and overlap with the 17 main participants are unreported.",
+          "compositeValue": "",
+          "pageOrSection": "Published PDF p. 3 final Methods paragraph; Figure 1B p. 4",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "not_applicable",
+          "value": "Seven naive participants judge perceived sound location in 80 randomized IN/OUT trials. Forearm touch marks one of T1–T5; at trial end participants give a verbal distance rating from 1 (near) to 100 (far). This adjacent validation endpoint is not speeded tactile detection. Per-cell counts and overlap with the 17 main participants are unreported.",
+          "compositeValue": "",
+          "pageOrSection": "Published PDF p. 3 final Methods paragraph; Figure 1B p. 4",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "not_applicable",
+          "value": "Seven naive participants judge perceived sound location in 80 randomized IN/OUT trials. Forearm touch marks one of T1–T5; at trial end participants give a verbal distance rating from 1 (near) to 100 (far). This adjacent validation endpoint is not speeded tactile detection. Per-cell counts and overlap with the 17 main participants are unreported.",
+          "compositeValue": "",
+          "pageOrSection": "Published PDF p. 3 final Methods paragraph; Figure 1B p. 4",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "not_applicable",
+          "value": "Seven naive participants judge perceived sound location in 80 randomized IN/OUT trials. Forearm touch marks one of T1–T5; at trial end participants give a verbal distance rating from 1 (near) to 100 (far). This adjacent validation endpoint is not speeded tactile detection. Per-cell counts and overlap with the 17 main participants are unreported.",
+          "compositeValue": "",
+          "pageOrSection": "Published PDF p. 3 final Methods paragraph; Figure 1B p. 4",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "not_applicable",
+          "value": "Seven naive participants judge perceived sound location in 80 randomized IN/OUT trials. Forearm touch marks one of T1–T5; at trial end participants give a verbal distance rating from 1 (near) to 100 (far). This adjacent validation endpoint is not speeded tactile detection. Per-cell counts and overlap with the 17 main participants are unreported.",
+          "compositeValue": "",
+          "pageOrSection": "Published PDF p. 3 final Methods paragraph; Figure 1B p. 4",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "not_applicable",
+          "value": "Seven naive participants judge perceived sound location in 80 randomized IN/OUT trials. Forearm touch marks one of T1–T5; at trial end participants give a verbal distance rating from 1 (near) to 100 (far). This adjacent validation endpoint is not speeded tactile detection. Per-cell counts and overlap with the 17 main participants are unreported.",
+          "compositeValue": "",
+          "pageOrSection": "Published PDF p. 3 final Methods paragraph; Figure 1B p. 4",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "not_applicable",
+          "value": "Seven naive participants judge perceived sound location in 80 randomized IN/OUT trials. Forearm touch marks one of T1–T5; at trial end participants give a verbal distance rating from 1 (near) to 100 (far). This adjacent validation endpoint is not speeded tactile detection. Per-cell counts and overlap with the 17 main participants are unreported.",
+          "compositeValue": "",
+          "pageOrSection": "Published PDF p. 3 final Methods paragraph; Figure 1B p. 4",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "not_applicable",
+          "value": "Seven naive participants judge perceived sound location in 80 randomized IN/OUT trials. Forearm touch marks one of T1–T5; at trial end participants give a verbal distance rating from 1 (near) to 100 (far). This adjacent validation endpoint is not speeded tactile detection. Per-cell counts and overlap with the 17 main participants are unreported.",
+          "compositeValue": "",
+          "pageOrSection": "Published PDF p. 3 final Methods paragraph; Figure 1B p. 4",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "not_applicable",
+          "value": "Seven naive participants judge perceived sound location in 80 randomized IN/OUT trials. Forearm touch marks one of T1–T5; at trial end participants give a verbal distance rating from 1 (near) to 100 (far). This adjacent validation endpoint is not speeded tactile detection. Per-cell counts and overlap with the 17 main participants are unreported.",
+          "compositeValue": "",
+          "pageOrSection": "Published PDF p. 3 final Methods paragraph; Figure 1B p. 4",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1371/journal.pone.0044306",
+          "evidenceSourceUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "sourceType": "primary_published_article_full_methods",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Auditory location-rating control outside direct speeded tactile PPS contract.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -55801,9 +56351,9 @@
     "methodsReviewedInventories": 57,
     "auditedAccessBlockers": 8,
     "projectLineageReviews": 1,
-    "publicationsWithAllContractDispositions": 59,
-    "inventoryAndContractsAudited": 59,
-    "remainingInventoryOrContractAudit": 35,
+    "publicationsWithAllContractDispositions": 60,
+    "inventoryAndContractsAudited": 60,
+    "remainingInventoryOrContractAudit": 34,
     "inventoryEvidenceCounts": {
       "abstract_or_metadata_inventory": 1,
       "audited_source_access_gap": 8,

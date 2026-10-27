@@ -563,11 +563,11 @@
     {
       "network_node_id": "doi:10.1371/journal.pone.0044306",
       "doi": "10.1371/journal.pone.0044306",
-      "inventory_status": "confirmed_audio_tactile_pps_task_with_supporting_localizer",
+      "inventory_status": "confirmed_main_and_supporting_localization_control",
       "inventory_evidence_status": "primary_methods_reviewed",
       "inventory_evidence_classified_on": "2026-10-27",
-      "instance_count_basis": "Publisher Methods distinguishes the main tactile-detection PPS task from a separate sound-localization validation task. Only the main PPS task is a replication row here.",
-      "evidence_pointer": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306#sec002",
+      "instance_count_basis": "Whole published Methods confirms main PPS task with 17 participants and separate sound-localization validation with 7 naive participants. Cohort overlap is not explicit; do not count 24 unique people. The localizer is an adjacent rating protocol rather than a second speeded tactile PPS experiment.",
+      "evidence_pointer": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable::pp. 2–3, including final Methods paragraph",
       "review_date": "2026-10-27",
       "instances": [
         {
@@ -579,7 +579,18 @@
             "canzoneri_2012_dynamic_sounds"
           ],
           "toolkit_scope": "in_scope",
-          "disaggregation_status": "record_already_experiment_specific"
+          "disaggregation_status": "record_already_experiment_specific",
+          "cohort": "Main PPS task: 17 participants (16 female)."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "supporting_control",
+          "experiment_label": "Sound-localization validation",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_auditory_localization",
+          "disaggregation_status": "adjacent_protocol_source_reviewed",
+          "cohort": "Seven naive participants; overlap with main 17 unreported."
         }
       ],
       "supporting_task_boundaries": [
@@ -587,9 +598,18 @@
           "label": "Sound-localization validation",
           "disposition": "supporting_validation_context",
           "basis": "80-trial perceived-distance rating task with forearm touch; distinct from the main PPS tactile-reaction-time experiment.",
-          "evidence_pointer": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306#sec002"
+          "evidence_pointer": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306#sec002",
+          "study_row_id": "doi:10.1371/journal.pone.0044306::b"
         }
-      ]
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable",
+          "outcome": "Publisher version of record retrieved and complete Methods reviewed. Rendered p. 3 confirms 100 µsec pulse, controls and localization task. SHA256 ed1b94c46eed20c14a396f3a2b7cd0a78acae14833996e7fab38a0ce6b8cfaf9."
+        }
+      ],
+      "source_review_limit": "Exact source waveform/envelope, full physical/perceived geometry, response deadline, additional ITI and detailed per-block cell allocation remain unspecified. No separate supplementary Methods link found in current publisher article."
     },
     {
       "network_node_id": "doi:10.1038/s41598-019-45224-w",
@@ -3113,6 +3133,16 @@
       "review_date": "2026-10-27",
       "reason": "Accepted Methods separates prior AT assessment from adjacent full-body illusion within overlapping recruitment. Neither child alone equals the original publication placeholder.",
       "evidence_pointer": "https://ndownloader.figshare.com/files/42197946"
+    },
+    {
+      "old_study_row_id": "doi:10.1371/journal.pone.0044306",
+      "child_study_row_ids": [
+        "doi:10.1371/journal.pone.0044306::a",
+        "doi:10.1371/journal.pone.0044306::b"
+      ],
+      "review_date": "2026-10-27",
+      "reason": "Whole-publication inventory now includes the distinct supporting localization task. Main task remains child a; child b is adjacent validation. Old publication placeholder is not equivalent to either child alone.",
+      "evidence_pointer": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable"
     }
   ]
 }

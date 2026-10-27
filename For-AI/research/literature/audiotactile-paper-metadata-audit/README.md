@@ -33,7 +33,7 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 150 study/context rows,
+Current checkpoint (2026-10-27): 94 frozen publications, 151 study/context rows,
 59 registered publication inventories, eight access-audited publications,
 one audited project-lineage identity,
 and 26 publication inventories still unassessed. Registry presence alone
@@ -46,12 +46,17 @@ The current audit records 57 Methods-backed inventories (42 current primary
 reviews, eleven retained primary reviews, and four identified author versions whose
 final comparison is pending), one abstract/metadata inventory, one partial
 Methods inventories, eight audited access blockers, one project-lineage boundary, and 26 unregistered publications.
-Only 59 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 35 still need inventory
+Only 60 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 34 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Canzoneri (2012) now includes the 17-person main task and adjacent 7-person
+localization control, with overlap unreported. T0/T6 targets occur in the silence
+windows of trials that retain the same 3 s sound. The published pulse is 100 µs;
+no software cue or historical source review implies new physical calibration.
+
 Ferroni (2026) retains four abstract-confirmed experiment slots as a documented
 Methods access gap. Its 289 participants are a study-wide total; modality and
 cohort allocation are unresolved. A successful publisher API response contained
