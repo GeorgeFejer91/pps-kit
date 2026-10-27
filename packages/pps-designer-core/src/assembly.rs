@@ -723,6 +723,10 @@ fn validate_variants(
                         "assembly_stationary_comparator_required",
                     ))?;
                     if comparator.role != AssemblyAssetRole::StationaryBaseline
+                        || comparator.sha256 == asset.sha256
+                        || source
+                            .get("native_stationary_baseline_sha256")
+                            .is_some_and(|sha| sha.as_str() != Some(comparator.sha256.as_str()))
                         || comparator.rate != rate
                         || comparator.frames() != asset.frames()
                         || comparator
