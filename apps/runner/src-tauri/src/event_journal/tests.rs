@@ -80,6 +80,7 @@ fn queue_full_and_sequence_gaps_do_not_advance_admission_or_claim_durability() {
         interrupted: false,
         publication_enabled: false,
         pending_seal: None,
+        group_attempt: None,
     };
     let mut ledger = EventLedger::default();
     let first = prepared(&ledger, 1);
@@ -111,6 +112,7 @@ fn file_budget_and_large_batches_are_rejected_before_queue_admission() {
         interrupted: false,
         publication_enabled: false,
         pending_seal: None,
+        group_attempt: None,
     };
     let ledger = EventLedger::default();
     assert_eq!(
@@ -529,6 +531,7 @@ fn full_finish_queue_keeps_the_same_tail_retryable_without_accepting_more_record
         interrupted: false,
         publication_enabled: true,
         pending_seal: None,
+        group_attempt: None,
     };
     let ledger = scored_prefix(&mut journal);
     assert_eq!(journal.finish(4, 9, 3), Err(JournalError::QueueFull));

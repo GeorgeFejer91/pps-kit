@@ -910,7 +910,11 @@ impl AppRuntime {
             return Ok(());
         };
         let (source, journal) = tauri::async_runtime::spawn_blocking(move || {
-            let journal = NativeEventJournal::create(&source.receipt);
+            let journal = if source.group_attempt.is_some() {
+                NativeEventJournal::create_for_group(&source.receipt, source.group_attempt.as_ref())
+            } else {
+                NativeEventJournal::create(&source.receipt)
+            };
             (source, journal)
         })
         .await
