@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 29)
+        self.assertEqual(len(registry["entries"]), 32)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 61)
+        self.assertEqual(registered_instance_count, 64)
         network = json.loads(
             (
                 ROOT
@@ -1022,6 +1022,36 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         inventory = next(row for row in registry["entries"] if row["network_node_id"] == study["networkNodeId"])
         self.assertEqual(len(inventory["instances"]), 1)
         self.assertEqual(inventory["supporting_task_boundaries"][0]["disposition"], "supporting_localization_validation")
+
+    def test_static_tasks_preserve_response_roles_and_source_specific_timing(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        studies = {row["studyRowId"]: row for row in data["studies"]}
+        cane = studies["doi:10.1111/j.1467-9280.2007.01952.x"]
+        racket = studies["doi:10.1016/j.neuropsychologia.2017.07.018"]
+        crossed = studies["doi:10.1016/j.neuropsychologia.2009.07.025"]
+        cane_contracts = {row["key"]: row for row in cane["contracts"]}
+        racket_contracts = {row["key"]: row for row in racket["contracts"]}
+        crossed_contracts = {row["key"]: row for row in crossed["contracts"]}
+        self.assertIn("+5 ms", cane_contracts["soa_schedule"]["value"])
+        self.assertEqual(racket_contracts["soa_schedule"]["status"], "partial")
+        self.assertIn("unspecified", racket_contracts["soa_schedule"]["value"])
+        self.assertIn("60 strong", cane_contracts["catch_trial_contract"]["value"])
+        self.assertIn("30 paper-labelled", cane_contracts["catch_trial_contract"]["components"]["resolved_trial_count"]["value"])
+        self.assertEqual(cane_contracts["block_order_contract"]["status"], "partial")
+        self.assertIn("Novices", racket_contracts["block_order_contract"]["value"])
+        self.assertIn("personal-racket", racket_contracts["block_order_contract"]["value"])
+        self.assertIn("existing primary PDF critical review", racket_contracts["repetition_allocation"]["evidenceNote"])
+        self.assertIn("left hand in crossed posture", crossed_contracts["task_response"]["components"]["response_mapping_or_expected_action"]["value"])
+        self.assertEqual(crossed_contracts["task_response"]["status"], "partial")
+        self.assertIn("response_window_and_anchor", crossed_contracts["task_response"]["missingComponents"])
+        self.assertIn("not an online timeout", crossed_contracts["task_response"]["components"]["scoring_rule"]["value"])
+        self.assertEqual(crossed_contracts["catch_trial_contract"]["status"], "explicitly_absent")
+        self.assertIn("600", crossed_contracts["repetition_allocation"]["value"])
+        self.assertIn("Collignon", crossed["experimentLabel"])
+        self.assertEqual(len(racket["templateIds"]), 3)
+        self.assertEqual(len(crossed["templateIds"]), 2)
+        for study in (cane, racket, crossed):
+            self.assertEqual(study["nativeQualification"], "not_assessed")
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:

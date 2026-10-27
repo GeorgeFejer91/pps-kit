@@ -10236,6 +10236,522 @@
           }
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.1111/j.1467-9280.2007.01952.x",
+      "source_type": "existing_critical_primary_pdf_review",
+      "source_file": "https://doi.org/10.1111/j.1467-9280.2007.01952.x",
+      "review_date": "2026-10-27",
+      "review_scope": "Bounded static-task timing, response and trial-allocation normalization. Other contracts retain earlier evidence; no template or native-readiness promotion.",
+      "prior_review_pointer": "manual_reviews/serino_2007_blind_cane_users.json",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://journals.sagepub.com/doi/pdf/10.1111/j.1467-9280.2007.01952.x",
+          "outcome": "HTTP403_no_PDF"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://journals.sagepub.com/doi/10.1111/j.1467-9280.2007.01952.x",
+          "outcome": "restricted_access_abstract_read; no_current_Methods"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "manual_reviews/serino_2007_blind_cane_users.json",
+          "outcome": "existing_2026-06-16_critical_PDF_review_read; expected_local_PDF_absent"
+        }
+      ],
+      "reviewed_contract_keys": [
+        "trial_sequence",
+        "soa_schedule",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Weak tactile targets, strong tactile nontargets and sound-only catches paired with static near/far auditory locations.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "60 weak tactile targets,60 strong tactile nontargets,30 sound-only catches per described task."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Weak and strong tactile events paired with near or far sound; no touch on sound-only catches."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Near/far and trial families occur within each tool-condition task."
+            }
+          },
+          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. Respond only to weak tactile targets; strong tactile events are no-go, not additional response targets."
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "Near: source and tactile onset simultaneous. Far: source starts 5 ms before touch, so tactile-minus-source SOA is+5 ms.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Scheduled source onset; positive means tactile occurs later."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "Near 0 ms;far+5 ms."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Static near/far timing compensation for acoustic travel."
+            }
+          },
+          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. The 5-ms lead concerns physical source scheduling; it must not be represented as a moving-source delay ladder or a measured arrival-time offset."
+        },
+        "catch_trial_contract": {
+          "status": "reported_complete",
+          "value": "30 sound-only catches plus 60 strong tactile no-go trials;90 no-response rows in total.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Sound-only catches and separate strong tactile nontarget rows."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Respond only to weak touch; withhold for strong touch and sound-only trials."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "30 sound-only catches;30 strong near and 30 strong far nontargets."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "30 paper-labelled catches;90 no-response rows including 60 nontargets."
+            }
+          },
+          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. Do not relabel all 90 no-response rows as the paper catch count."
+        },
+        "repetition_allocation": {
+          "status": "reported_complete",
+          "value": "30 trials for each of 4 tactile-strength x sound-location cells, plus 30 sound-only catches:150 per described task.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Two tactile strengths x two static sound locations, plus catch family."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "30 per tactile-strength/location cell;30 sound-only catches."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "30 familiarization trials remain outside the experimental 150."
+            },
+            "derived_total_reconciliation": {
+              "status": "reported",
+              "value": "4 x 30 +30 =150."
+            }
+          },
+          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. "
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Cane and handle conditions for all participants; sighted participants additionally tested immediately and one day after cane training.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "Two tool-condition assessments for blind participants; four listed assessments for sighted participants."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "Described 150-trial task; repetition in every assessment is implied, not explicitly multiplied."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Initial cane/handle order counterbalanced; sighted follow-ups follow training."
+            }
+          },
+          "missing_required_components": [
+            "pool_repeat_or_distribution",
+            "within_block_randomization"
+          ],
+          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. Do not claim 300/600 group totals as directly reported; detailed within-task randomization remains unresolved."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.neuropsychologia.2017.07.018",
+      "source_type": "existing_critical_primary_pdf_review",
+      "source_file": "https://doi.org/10.1016/j.neuropsychologia.2017.07.018",
+      "review_date": "2026-10-27",
+      "review_scope": "Bounded static-task timing, response and trial-allocation normalization. Other contracts retain earlier evidence; no template or native-readiness promotion.",
+      "prior_review_pointer": "manual_reviews/biggio_2017_racket_tool_use.json",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://unige.iris.cineca.it/handle/11567/887804",
+          "outcome": "institutional_abstract_read; journal_PDF_explicitly_closed_access; no_copy_requested"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "manual_reviews/biggio_2017_racket_tool_use.json",
+          "outcome": "existing_2026-06-16_critical_PDF_review_read; expected_local_PDF_absent"
+        }
+      ],
+      "reviewed_contract_keys": [
+        "trial_sequence",
+        "soa_schedule",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Static near and far audio-tactile targets plus sound-only catches, randomized within each racket session.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Near targets,far targets,near sound-only catches,far sound-only catches."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Single static near/far sound paired with wrist stimulation for targets; sound alone for catches."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Target/catch and near/far rows randomly intermixed within session."
+            }
+          },
+          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. "
+        },
+        "soa_schedule": {
+          "status": "partial",
+          "value": "Near sound and touch begin together; far sound starts earlier by an unspecified amount.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Source onset scheduling relative to tactile onset."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Static near/far conditions with qualitative far acoustic-travel compensation."
+            }
+          },
+          "missing_required_components": [
+            "ordered_soa_values_or_derivable_distance_anchors"
+          ],
+          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. Do not import the 5-ms value from Serino 2007: Biggio does not give the exact far lead."
+        },
+        "catch_trial_contract": {
+          "status": "reported_complete",
+          "value": "30 sound-only catches per session:15 near and 15 far; withhold response.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only withhold catches."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No tactile target; no vocal response."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "15 near plus 15 far per session."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "30 per 90-trial session."
+            }
+          },
+          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. "
+        },
+        "repetition_allocation": {
+          "status": "reported_complete",
+          "value": "30 near targets +30 far targets +30 sound-only catches =90 trials per session.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Static near/far target locations plus near/far catches."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "30 targets per location and 15 catches per location."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Familiarization remains separate."
+            },
+            "derived_total_reconciliation": {
+              "status": "reported",
+              "value": "60 target+30 catch=90 per session; novice 180 and player 270 totals follow from group-specific sessions."
+            }
+          },
+          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. "
+        },
+        "block_order_contract": {
+          "status": "reported_complete",
+          "value": "Novices: no-racket/common-racket sessions. Tennis players: those two plus personal-racket; session order counterbalanced.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "Two sessions for novices;three for tennis players."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "90 trials per session."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "Same 90-trial design in each administered session."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Random order within session."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Session order counterbalanced."
+            }
+          },
+          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. Personal racket is not administered to novices; group totals are derived from 90 trials per session."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.neuropsychologia.2009.07.025",
+      "source_type": "primary_article_pdf",
+      "source_file": "https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "Bounded static-task timing, response and trial-allocation normalization. Other contracts retain earlier evidence; no template or native-readiness promotion.",
+      "prior_review_pointer": "manual_reviews/tajadura_jimenez_2009_visual_deprivation.json",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://cpplab.be/content/uploads/2024/10/CollignonNeuropsy09.pdf",
+          "outcome": "HTTP200_primary_article_PDF; Methods2.2-2.4_and_rendered_Figure1_inspected"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://pubmed.ncbi.nlm.nih.gov/19666035/",
+          "outcome": "DOI_title_and_Collignon_authorship_confirmed"
+        }
+      ],
+      "reviewed_contract_keys": [
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Auditory-only,tactile-only and congruent simultaneous audio-tactile targets on either external side.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "A,T,AT crossed with left/right external stimulus side."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "One 100-ms unisensory or simultaneous congruent bimodal event per trial."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Six side/modality cells randomly intermixed within each posture block."
+            }
+          },
+          "evidence_note": "Current primary Methods and rendered Figure 1 inspected. "
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Press the button on the external stimulus side; crossed hands reverse which anatomical hand presses that button.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Every A,T,AT trial requires left/right lateralization."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Two response keys; hand on each key follows the posture condition."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "External-right stimulus means external-right button, operated by left hand in crossed posture; converse for left."
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Analysis includes 150-1000-ms post-stimulus RTs and computes inverse efficiency; this is not an online timeout."
+            }
+          },
+          "missing_required_components": [
+            "response_window_and_anchor"
+          ],
+          "evidence_note": "Current primary Methods and rendered Figure 1 inspected. Online response deadline is unresolved. Figure 1 pixels confirm the external-side mapping."
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "Reported interstimulus interval mean 1950 ms, range 1200-2700 ms.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Variable interstimulus interval."
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "Interstimulus interval; exact event endpoint convention unresolved."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1200-2700 ms,mean 1950 ms."
+            }
+          },
+          "missing_required_components": [
+            "distribution"
+          ],
+          "evidence_note": "Current primary Methods and rendered Figure 1 inspected. Do not assume a uniform distribution from the mean/range or silently relabel ISI as an offset-to-onset ITI."
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "Simultaneous congruent audio-tactile targets:0-ms SOA on both external sides.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Auditory and tactile onset simultaneous."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "0 ms."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Static left/right side,not approach/recede."
+            }
+          },
+          "evidence_note": "Current primary Methods and rendered Figure 1 inspected. "
+        },
+        "baseline_trial_contract": {
+          "status": "reported_complete",
+          "value": "Per posture block:100 auditory-only and 100 tactile-only response targets serve unisensory comparison conditions.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Unisensory factorial controls used in race-model comparisons."
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Single 100-ms modality event; no separate baseline delay ladder."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "50 per side for each of the two unisensory modalities."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "200 unisensory control trials per block."
+            }
+          },
+          "evidence_note": "Current primary Methods and rendered Figure 1 inspected. These are response-target trials,not silent baseline rows or catches."
+        },
+        "catch_trial_contract": {
+          "status": "explicitly_absent",
+          "value": "No behavioral catch/no-go family in the exhaustive A/T/AT lateralization design.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "explicitly_absent",
+              "value": "No catch/no-go family."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "All modalities require left/right response; auditory-only is a target."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Zero additional catches."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "0."
+            }
+          },
+          "evidence_note": "Current primary Methods and rendered Figure 1 inspected. "
+        },
+        "repetition_allocation": {
+          "status": "reported_complete",
+          "value": "2 sides x 3 modalities x 50 repetitions =300 trials per posture block;600 across two test blocks.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "External side x auditory/tactile/bimodal modality x posture."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "50 per side/modality cell within each posture."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "21 practice trials before each block excluded from 600 test trials."
+            },
+            "derived_total_reconciliation": {
+              "status": "reported",
+              "value": "2 x 3 x 50 x 2 postures =600 test trials."
+            }
+          },
+          "evidence_note": "Current primary Methods and rendered Figure 1 inspected. "
+        },
+        "block_order_contract": {
+          "status": "reported_complete",
+          "value": "Two posture blocks,uncrossed and crossed,with counterbalanced order and a 10-minute pause.",
+          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "2."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "300 trials per block."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "Same 2-side x 3-modality x 50 allocation for each posture."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Random side/modality presentation."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Posture order counterbalanced between participants."
+            },
+            "sequence_constraints": {
+              "status": "reported",
+              "value": "10-minute pause between blocks;21 practice trials precede each block."
+            }
+          },
+          "evidence_note": "Current primary Methods and rendered Figure 1 inspected. "
+        }
+      }
     }
   ]
 }
