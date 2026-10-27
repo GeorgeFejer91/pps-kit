@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 47)
+        self.assertEqual(len(registry["entries"]), 48)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 89)
+        self.assertEqual(registered_instance_count, 90)
         network = json.loads(
             (
                 ROOT
@@ -1282,6 +1282,19 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             self.assertEqual(short["catch_trial_contract"]["status"], "not_reported")
             self.assertEqual(short["baseline_trial_contract"]["status"], "partial")
             self.assertEqual(short["repetition_allocation"]["status"], "partial")
+
+    def test_front_rear_short_probe_preserves_cue_and_catch_families(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        study = next(row for row in data["studies"] if row["studyRowId"] == "doi:10.1007/s00221-024-06782-2")
+        contracts = {row["key"]: row for row in study["contracts"]}
+        self.assertIn("+250,+500,+750", contracts["soa_schedule"]["value"])
+        self.assertIn("112", contracts["repetition_allocation"]["value"])
+        self.assertIn("warning", contracts["catch_trial_contract"]["value"])
+        self.assertIn("16", contracts["catch_trial_contract"]["value"])
+        self.assertEqual(contracts["baseline_trial_contract"]["status"], "partial")
+        self.assertIn("1250", contracts["baseline_trial_contract"]["value"])
+        self.assertEqual(contracts["jitter_iti_policy"]["status"], "partial")
+        self.assertIn("four", contracts["trajectory_kinematics"]["value"])
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:

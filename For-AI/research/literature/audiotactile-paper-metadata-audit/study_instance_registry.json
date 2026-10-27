@@ -1154,6 +1154,41 @@
         "basis": "Both primary reports give the same three social conditions, analyzed group sizes 26/29/26 and collaborative right-hemispace F(7,168)=2.24. This supports an overlap flag, not a definitive participant-level linkage or silent transfer of omitted parameters."
       },
       "source_review_limit": "Fresh publisher PDF and rendered Table 1 inspected. Retain reported delays/levels and social designs; the short report omits exact baseline anchors, catches, repetitions and blocks. Do not borrow 480-row counts or catches from the longer report without an explicit source linkage."
+    },
+    {
+      "network_node_id": "doi:10.1007/s00221-024-06782-2",
+      "doi": "10.1007/s00221-024-06782-2",
+      "inventory_status": "confirmed_one_pps_experiment_with_two_supporting_tasks",
+      "instance_count_basis": "Methods explicitly separates one main PPS measurement task from auditory distance perception and speed estimation. Front/rear directions, three starting distances and three touch times are factors within the same main experiment.",
+      "evidence_pointer": "https://muroran-it.repo.nii.ac.jp/record/2000223/files/Comparison%20of%20peripersonal%20space%20in%20front%20and%20rear%20spaces.pdf::Methods, manuscript pp. 7-11 (PDF pp. 8-12); Figure 1 p. 8",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_short_physical_speaker_probe_with_matched_baseline",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Front/rear PPS with one-second approaching probes",
+          "record_id": "teraoka_2024_front_rear",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Auditory distance perception",
+          "disposition": "auditory_only_perceptual_validation",
+          "basis": "Seventy-two trials (12 x 2 directions x 3 distances) collect verbal midpoint distance estimates; this is not tactile RT boundary measurement.",
+          "evidence_pointer": "https://muroran-it.repo.nii.ac.jp/record/2000223/files/Comparison%20of%20peripersonal%20space%20in%20front%20and%20rear%20spaces.pdf::Procedure, manuscript p. 10"
+        },
+        {
+          "label": "Auditory speed estimation",
+          "disposition": "auditory_only_perceptual_validation",
+          "basis": "A separate 144-trial task compares normal, fast and slow auditory speeds. It does not define another audio-tactile PPS experiment.",
+          "evidence_pointer": "https://muroran-it.repo.nii.ac.jp/record/2000223/files/Comparison%20of%20peripersonal%20space%20in%20front%20and%20rear%20spaces.pdf::Procedure, manuscript pp. 10-11"
+        }
+      ],
+      "source_review_limit": "Fresh institutional manuscript and rendered Figure 1 inspected. Keep physical four-speaker crossfades distinct from headphone rendering. Warning tone, probe onset and silent-baseline anchors are separate; the wording does not unambiguously anchor the one-second cue interval. No source calibration transfers to PPS Kit."
     }
   ],
   "corpus_freeze": {

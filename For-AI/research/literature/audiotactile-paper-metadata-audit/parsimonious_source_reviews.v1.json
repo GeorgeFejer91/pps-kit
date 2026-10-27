@@ -16703,6 +16703,263 @@
           "evidence_note": "Participants retain their assigned left/right seat; that fixed seating is not evidence of block counterbalancing."
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.1007/s00221-024-06782-2",
+      "source_type": "primary_author_manuscript",
+      "source_file": "https://muroran-it.repo.nii.ac.jp/record/2000223/files/Comparison%20of%20peripersonal%20space%20in%20front%20and%20rear%20spaces.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "Fresh main Methods and rendered physical-speaker figure; distinguish one PPS task from two auditory validation tasks and preserve warning/probe/baseline anchor ambiguity.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://muroran-it.repo.nii.ac.jp/record/2000223/files/Comparison%20of%20peripersonal%20space%20in%20front%20and%20rear%20spaces.pdf",
+          "outcome": "HTTP 200 institutional author manuscript, 35 PDF pages; main task Methods and rendered Figure 1 inspected."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "1000-ms pink-noise probe distributed over four successive loudspeakers using cosine windows, with 10-ms onset/offset ramps.",
+          "page_or_section": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "component_reviews": {
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Physical Aura Sound NSW1-205-A loudspeakers, Octave 6.2.0/Playrec, RME MADIface USB and Innosonix MA32/LP; nearest speaker reference 70 dB measured at head centre in participant absence."
+            }
+          },
+          "missing_required_components": [
+            "source_mode",
+            "source_recipe_or_asset_provenance"
+          ],
+          "evidence_note": "Rendered Figure 1 shows overlapping per-speaker envelopes, but exact noise realization, sample rate and complete cosine/crossfade coefficients are not reported. The source level measurement is not device qualification of PPS Kit."
+        },
+        "trajectory_kinematics": {
+          "status": "reported_complete",
+          "value": "Sequential crossfade over four physical speakers spans 48 cm in 1000 ms at stated 48 cm/s; front/rear blocks use three starting distances.",
+          "page_or_section": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Sequential physical-loudspeaker crossfade, not a literally moving loudspeaker."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Head-centred 0-degree front or 180-degree rear; speakers at chest height 110 cm."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Ten speakers at 48 to 192 cm in 16-cm increments. Probe starts 96,144 or 192 cm away and moves 48 cm toward the participant."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "1000-ms probe, reported 48 cm/s; sound burst/crossfade waveform is a separate incomplete contract."
+            }
+          },
+          "evidence_note": "Body orientation relative to the fixed apparatus distinguishes front/rear; maintain the head-distance versus chest tactile-site distinction."
+        },
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "500-ms 1000-Hz warning tone, stated one-second cue interval, then 1000-ms approaching probe with optional chest touch.",
+          "page_or_section": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Probe+touch, probe-absent matched tactile baselines, probe-without-touch catches, and warning-only catches."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Warning tone from all ten loudspeakers signals trial start; probe starts at one of three distances; tactile target follows selected probe-relative delay. Baseline omits the probe, and catch variants omit touch."
+            }
+          },
+          "evidence_note": "The exact onset-versus-offset anchor of the one-second cue interval is unresolved; do not silently add an extra 500 ms or equate warning onset with probe onset."
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Respond as quickly as possible to chest vibration using a numeric keypad; withhold on no-touch catches.",
+          "page_or_section": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Detect chest tactile target, not the warning or approaching sound."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Numeric keypad."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Keypress on tactile detection."
+            }
+          },
+          "missing_required_components": [
+            "response_window_and_anchor",
+            "specific_key_and_response_hand"
+          ],
+          "evidence_note": "No online deadline or exact response hand/key is stated. Statistical RT trimming is a separate analysis rule."
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "Random 1000-1500-ms ITI plus a stated one-second interval after the 500-ms warning tone; exact anchors and distribution unresolved.",
+          "page_or_section": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Random ITI range plus fixed cue-to-probe interval."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1000-1500 ms ITI; one-second warning/probe interval; 500-ms warning tone."
+            }
+          },
+          "missing_required_components": [
+            "timing_scope_and_anchor",
+            "distribution"
+          ],
+          "evidence_note": "Methods says after a one-second interval and gives baseline times after presentation of the tone, without distinguishing tone onset from completion. Preserve this ambiguity rather than manufacturing a unified clock."
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "Probe-onset anchored +250,+500,+750 ms, crossed with all three probe starting distances.",
+          "page_or_section": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive means touch after approaching probe onset, not after warning tone onset."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "+250,+500,+750 ms for each 96/144/192-cm starting-distance condition."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "reported_complete",
+          "value": "100-ms 300-Hz vibration to the chest using a 0.95-cm SHICOH C1034 actuator, well above detection threshold.",
+          "page_or_section": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile actuator C1034, SHICOH."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Chest."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "300 Hz for 100 ms; amplitude described as well above detection threshold."
+            }
+          },
+          "evidence_note": "The qualitative amplitude statement is not a reproducible absolute force/displacement calibration or safe substitute-device equivalence."
+        },
+        "baseline_trial_contract": {
+          "status": "partial",
+          "value": "24 probe-absent tactile baseline trials overall; printed 1250,1500,1750-ms times follow presentation of the warning tone.",
+          "page_or_section": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_soa_matched, with warning tone retained."
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "1250,1500,1750 ms after presentation of the pure tone; intended to match target times in probe trials."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Four repetitions at each of three times per direction block."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "12 per block, 24 across front/rear."
+            }
+          },
+          "missing_required_components": [
+            "warning_tone_onset_vs_offset_anchor"
+          ],
+          "evidence_note": "The warning lasts 500 ms, and the source does not disambiguate whether these times reference its onset or end. Baseline is probe-free, not fully auditory-free."
+        },
+        "catch_trial_contract": {
+          "status": "reported_complete",
+          "value": "16 no-touch catches overall: 12 with a probe and four warning-only trials.",
+          "page_or_section": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_probe_only_withhold plus warning_only_withhold"
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No tactile target in either catch variant; withhold response."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Per direction block, two catches at each of three probe distances plus two with no probe."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "Eight per block; sixteen across two direction blocks."
+            }
+          },
+          "evidence_note": "Warning-only catches still contain the initial 500-ms tone; do not treat them as empty silent trials."
+        },
+        "repetition_allocation": {
+          "status": "reported_complete",
+          "value": "112 total main trials: 72 probe+touch, 24 baseline and 16 catches; ten practice trials separate.",
+          "page_or_section": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "2 directions x 3 probe start distances x 3 touch SOAs, plus matched baseline/catch families."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "Per direction: 4 x 3 x 3 = 36 probe targets; 4 x 3 = 12 baselines; 8 catches; 56 rows total."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Ten practice trials precede the main task. Auditory-only perceptual validation tasks have separate counts."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Two direction blocks, one front and one rear, each 56 trials; within-block conditions randomized.",
+          "page_or_section": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "Two, one per direction."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "36 probe+touch, 12 baseline, 8 catch rows per block."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Conditions randomized within each block."
+            }
+          },
+          "missing_required_components": [
+            "direction_block_order"
+          ],
+          "evidence_note": "The inspected Methods does not specify counterbalancing or randomization of front/rear block order."
+        }
+      }
     }
   ]
 }

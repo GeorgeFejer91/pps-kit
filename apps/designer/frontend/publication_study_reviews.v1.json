@@ -12,7 +12,7 @@
     "publications": 94,
     "studies": 136,
     "contracts": 1496,
-    "reportedComplete": 272,
+    "reportedComplete": 278,
     "derivedComplete": 54,
     "parameterStatusCounts": {
       "approximation_required": 22,
@@ -20,13 +20,13 @@
       "conflicting_evidence": 25,
       "derived_complete": 54,
       "explicitly_absent": 19,
-      "low_confidence": 27,
+      "low_confidence": 22,
       "not_applicable": 77,
       "not_assessed": 297,
       "not_reported": 32,
-      "partial": 299,
-      "reported_complete": 272,
-      "source_unavailable": 226
+      "partial": 304,
+      "reported_complete": 278,
+      "source_unavailable": 220
     }
   },
   "statusLegend": {
@@ -181,8 +181,8 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "low_confidence": 5,
-        "source_unavailable": 6
+        "partial": 5,
+        "reported_complete": 6
       },
       "nativeQualification": "not_assessed"
     },
@@ -4732,215 +4732,349 @@
     {
       "studyRowId": "doi:10.1007/s00221-024-06782-2",
       "networkNodeId": "doi:10.1007/s00221-024-06782-2",
-      "label": "Comparison of peripersonal space in front and rear spaces.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Comparison of peripersonal space in front and rear spaces. (a)",
+      "experimentLabel": "Front/rear PPS with one-second approaching probes",
+      "inventoryStatus": "confirmed_one_pps_experiment_with_two_supporting_tasks",
+      "evidenceScope": "experiment_specific",
       "templateIds": [],
       "parameterStatusCounts": {
-        "low_confidence": 5,
-        "source_unavailable": 6
+        "partial": 5,
+        "reported_complete": 6
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "source_unavailable",
-          "value": "Auditory conditions: Auto-mined candidates: approaching; IN sound; front; rear",
+          "status": "partial",
+          "value": "1000-ms pink-noise probe distributed over four successive loudspeakers using cosine windows, with 10-ms onset/offset ramps.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) supplement",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "evidenceNote": "Rendered Figure 1 shows overlapping per-speaker envelopes, but exact noise realization, sample rate and complete cosine/crossfade coefficients are not reported. The source level measurement is not device qualification of PPS Kit.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-024-06782-2",
           "missingComponents": [
             "source_mode",
-            "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Physical Aura Sound NSW1-205-A loudspeakers, Octave 6.2.0/Playrec, RME MADIface USB and Innosonix MA32/LP; nearest speaker reference 70 dB measured at head centre in participant absence.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "low_confidence",
-          "value": "Trajectory path: Auto-mined candidates: approaching trajectory",
+          "status": "reported_complete",
+          "value": "Sequential crossfade over four physical speakers spans 48 cm in 1000 ms at stated 48 cm/s; front/rear blocks use three starting distances.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) supplement",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "evidenceNote": "Body orientation relative to the fixed apparatus distinguishes front/rear; maintain the head-distance versus chest tactile-site distinction.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-024-06782-2",
-          "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Head-centred 0-degree front or 180-degree rear; speakers at chest height 110 cm.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Ten speakers at 48 to 192 cm in 16-cm increments. Probe starts 96,144 or 192 cm away and moves 48 cm toward the participant.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "Sequential physical-loudspeaker crossfade, not a literally moving loudspeaker.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "1000-ms probe, reported 48 cm/s; sound burst/crossfade waveform is a separate incomplete contract.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "low_confidence",
-          "value": "Trial rows families: Auto-mined candidates: audio-tactile trials; baseline trials",
+          "status": "reported_complete",
+          "value": "500-ms 1000-Hz warning tone, stated one-second cue interval, then 1000-ms approaching probe with optional chest touch.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) supplement",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "evidenceNote": "The exact onset-versus-offset anchor of the one-second cue interval is unresolved; do not silently add an extra 500 ms or equate warning onset with probe onset.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-024-06782-2",
-          "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Warning tone from all ten loudspeakers signals trial start; probe starts at one of three distances; tactile target follows selected probe-relative delay. Baseline omits the probe, and catch variants omit touch.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Probe+touch, probe-absent matched tactile baselines, probe-without-touch catches, and warning-only catches.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "Respond as quickly as possible to chest vibration using a numeric keypad; withhold on no-touch catches.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "evidenceNote": "No online deadline or exact response hand/key is stated. Statistical RT trimming is a separate analysis rule.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-024-06782-2",
           "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
-            "response_window_and_anchor"
+            "response_window_and_anchor",
+            "specific_key_and_response_hand"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Keypress on tactile detection.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Numeric keypad.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Detect chest tactile target, not the warning or approaching sound.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "Random 1000-1500-ms ITI plus a stated one-second interval after the 500-ms warning tone; exact anchors and distribution unresolved.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "evidenceNote": "Methods says after a one-second interval and gives baseline times after presentation of the tone, without distinguishing tone onset from completion. Preserve this ambiguity rather than manufacturing a unified clock.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-024-06782-2",
           "missingComponents": [
-            "policy_type",
             "timing_scope_and_anchor",
-            "values_or_range"
+            "distribution"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Random ITI range plus fixed cue-to-probe interval.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1000-1500 ms ITI; one-second warning/probe interval; 500-ms warning tone.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "reported_complete",
+          "value": "Probe-onset anchored +250,+500,+750 ms, crossed with all three probe starting distances.",
           "compositeValue": "",
-          "pageOrSection": "",
+          "pageOrSection": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-024-06782-2",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "+250,+500,+750 ms for each 96/144/192-cm starting-distance condition.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive means touch after approaching probe onset, not after warning tone onset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "reported_complete",
+          "value": "100-ms 300-Hz vibration to the chest using a 0.95-cm SHICOH C1034 actuator, well above detection threshold.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "evidenceNote": "The qualitative amplitude statement is not a reproducible absolute force/displacement calibration or safe substitute-device equivalence.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-024-06782-2",
-          "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Chest.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile actuator C1034, SHICOH.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "300 Hz for 100 ms; amplitude described as well above detection threshold.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "low_confidence",
-          "value": "Baseline count: Auto-mined candidates: 6 trials",
+          "status": "partial",
+          "value": "24 probe-absent tactile baseline trials overall; printed 1250,1500,1750-ms times follow presentation of the warning tone.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) supplement",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "evidenceNote": "The warning lasts 500 ms, and the source does not disambiguate whether these times reference its onset or end. Baseline is probe-free, not fully auditory-free.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-024-06782-2",
           "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
+            "warning_tone_onset_vs_offset_anchor"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Four repetitions at each of three times per direction block.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_soa_matched, with warning tone retained.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "12 per block, 24 across front/rear.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "1250,1500,1750 ms after presentation of the pure tone; intended to match target times in probe trials.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "low_confidence",
-          "value": "Catch trial type: Auto-mined candidates: 6 trials | Catch count: Auto-mined candidates: 6 trials",
+          "status": "reported_complete",
+          "value": "16 no-touch catches overall: 12 with a probe and four warning-only trials.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) supplement",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "evidenceNote": "Warning-only catches still contain the initial 500-ms tone; do not treat them as empty silent trials.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-024-06782-2",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Per direction block, two catches at each of three probe distances plus two with no probe.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_probe_only_withhold plus warning_only_withhold",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "Eight per block; sixteen across two direction blocks.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No tactile target in either catch variant; withhold response.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "low_confidence",
-          "value": "Repetitions per tactile soa condition: Auto-mined candidates: 6 trials | Total trial count: Auto-mined candidates: 6 trials",
+          "status": "reported_complete",
+          "value": "112 total main trials: 72 probe+touch, 24 baseline and 16 catches; ten practice trials separate.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) supplement",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-024-06782-2",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Ten practice trials precede the main task. Auditory-only perceptual validation tasks have separate counts.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "2 directions x 3 probe start distances x 3 touch SOAs, plus matched baseline/catch families.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "Per direction: 4 x 3 x 3 = 36 probe targets; 4 x 3 = 12 baselines; 8 catches; 56 rows total.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "source_unavailable",
-          "value": "Total trial count: Auto-mined candidates: 6 trials",
+          "status": "partial",
+          "value": "Two direction blocks, one front and one rear, each 56 trials; within-block conditions randomized.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) supplement",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Methods, manuscript pp. 7-10 (PDF pp. 8-11); Figure 1 p. 8",
+          "evidenceNote": "The inspected Methods does not specify counterbalancing or randomization of front/rear block order.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-024-06782-2",
           "missingComponents": [
-            "block_count",
-            "block_composition"
+            "direction_block_order"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "36 probe+touch, 12 baseline, 8 catch rows per block.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "reported",
+              "value": "Two, one per direction.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Conditions randomized within each block.",
+              "note": ""
+            }
+          }
         }
       ]
     },

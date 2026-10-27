@@ -34,7 +34,7 @@ live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
 Current checkpoint (2026-10-27): 94 frozen publications, 128 study/context rows,
-47 registered publication inventories and 47 publication inventories still
+48 registered publication inventories and 46 publication inventories still
 unassessed. The earlier counts below describe individual historical checkpoints.
 Tonelli (2019) now separates neck PPS assessment from echolocation training,
 time-bisection training and distance validation; manual trial starts, endpoint
@@ -101,6 +101,11 @@ corrects the earlier 300-ms-shifted sound-onset delays; analysis inclusion and
 random timing are no longer overstated as an online window or uniform jitter.
 The separate short social report has three explicit experiment rows but possible
 overlap with the longer 2019 report; omitted counts/anchors are not borrowed.
+
+Teraoka (2024) adds one 112-row front/rear PPS experiment and discloses its two
+auditory-only validation tasks. Four-speaker crossfades, warning-only catches
+and probe-relative touch times stay distinct; cue/baseline clock ambiguity and
+physical output qualification remain unresolved.
 
 The first bounded source batch (2026-10-27) adds four experiment-scoped timing/count
 reviews for Canzoneri et al. (2012), DOI `10.1371/journal.pone.0044306`, from the
