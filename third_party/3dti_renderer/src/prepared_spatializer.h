@@ -32,11 +32,15 @@ std::string sha256_resource(const fs::path& path) {
     if (BCryptCreateHash(BCRYPT_SHA256_ALG_HANDLE, &hash, nullptr, 0, nullptr, 0, 0) < 0) { throw std::runtime_error("Resource hash creation failed."); }
     std::ifstream input(path, std::ios::binary);
     unsigned char bytes[65536];
+    std::size_t total = 0;
     bool ok = static_cast<bool>(input);
     while (ok && input) {
         input.read(reinterpret_cast<char*>(bytes), sizeof(bytes));
         const auto count = input.gcount();
-        if (count > 0) { ok = BCryptHashData(hash, bytes, static_cast<ULONG>(count), 0) >= 0; }
+        if (count > 0) {
+            total += static_cast<std::size_t>(count);
+            ok = total <= 512 * 1024 * 1024 && BCryptHashData(hash, bytes, static_cast<ULONG>(count), 0) >= 0;
+        }
     }
     unsigned char digest[32] = {};
     ok = ok && input.eof() && BCryptFinishHash(hash, digest, sizeof(digest), 0) >= 0;
@@ -114,7 +118,7 @@ PreparedMotion prepared_motion(const json& trajectory, double duration) {
     } else { throw std::runtime_error("Unsupported prepared motion."); }
     result.hold = trajectory.at("pre_hold_s").get<double>(); result.movement = trajectory.at("movement_duration_s").get<double>();
     if (!std::isfinite(result.hold) || !std::isfinite(result.movement) || result.hold < 0
-        || result.movement <= 0 || result.hold + result.movement > duration + 0.5 / 192000.0) {
+        || result.movement <= 0 || result.hold + result.movement > duration + 1e-12) {
         throw std::runtime_error("Invalid prepared motion timing.");
     }
     if (result.minimum_distance() < 0.01) {
@@ -133,7 +137,7 @@ void spatialize_prepared(const json& config, const Args& args) {
     }
     const auto& dry_config = config.at("dry_source");
     exact_keys(dry_config, {"path", "sha256", "algorithm"});
-    if (dry_config.at("path") != "dry.f32" || dry_config.at("algorithm") != "rand-0.8.8-std-rng-box-muller.v1") {
+    if (dry_config.at("path") != "dry.f32" || (dry_config.at("algorithm") != "rand-0.8.8-std-rng-box-muller.v1" && dry_config.at("algorithm") != "wav-pcm-dry.v1")) {
         throw std::runtime_error("Unsupported prepared source path or algorithm.");
     }
     const auto dry_path = args.config.parent_path() / "dry.f32";
@@ -146,7 +150,7 @@ void spatialize_prepared(const json& config, const Args& args) {
     }
     const auto input_hash = sha256_bytes(reinterpret_cast<const unsigned char*>(dry.data()), dry.size() * sizeof(float));
     if (input_hash != dry_config.at("sha256")) { throw std::runtime_error("Prepared PCM SHA-256 mismatch."); }
-    const auto motion = prepared_motion(config.at("trajectory"), static_cast<double>(frames) / rate);
+    const auto motion = prepared_motion(config.at("trajectory"), (static_cast<double>(frames) + 0.5) / rate);
     const auto& options = config.at("spatialization");
     exact_keys(options, {"distance_attenuation", "near_field", "propagation_delay", "far_distance_filter", "head_radius_m", "normalization", "output_channels"});
     if (options.at("normalization") != "none" || options.at("output_channels") != 2 || options.at("far_distance_filter") != false) {
