@@ -26,15 +26,17 @@ This file is the active checklist and handoff owner; replace state, do not appen
   tests using silent synthetic PCM. Native portable-profile extraction now verifies
   and rebinds embedded media offline. Immutable source-block and participant
   assembly now preserve ordered pre/post parts and instruction media; native
-  instruction/group execution and desktop integration remain incomplete.
+  instruction/group execution and full desktop preparation remain incomplete.
+  The native Designer host and explicit frontend adapter are now integrated;
+  actual WebView controls generate and preview through Rust/C++ without HTTP fallback.
   B1–B3/C1 fixes and the sanitized study projection are integrated
   on the review branch; mapper, catalogue and release work continue.
 - **Evidence:** the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md)
   identifies exact source and checks. Source, CI packages, installed behavior,
   physical timing, participant results and replication remain distinct gates.
   Neither installed application nor public downloads changed in this task.
-- **Next action:** integrate the verified Tauri host, connect native instructions
-  and all-part execution, generate explicit stationary comparators, then verify
+- **Next action:** connect native instructions and all-part execution, complete
+  the desktop preparation workflow, then verify
   the complete offline browser-profile journey and build native packages.
   Primary-source extraction continues independently. Pages assembly now includes
   referenced Study 5 instruction audio with its checked manifest hashes.
@@ -79,10 +81,20 @@ This file is the active checklist and handoff owner; replace state, do not appen
   pass. Both frontend toolchains now pin Vite 6.4.5 with repaired dependency
   advisories; Designer's locked install reports zero vulnerabilities. The latest
   catalogue integration passes 38 matrix/network checks.
+  The integrated native Designer passes seven host tests; thirteen frontend
+  tests and the complete existing real-browser workflow pass. All 29 canonical
+  Designer build files match Pages bytes. Runner now passes 152 desktop tests
+  with two opt-in callback checks skipped in that run; strict Clippy passes.
+  Group review additionally binds accepted design/Segment 5/6 digests, unique
+  part IDs, actual ordered block inventory and instruction settings. Portable
+  comparator import passes the distinct-primary/secondary identity regression.
+  The generation worker verified the complete actual browser fixture: two
+  six-block parts, 408 rows and 120 baselines with explicit native stationary
+  comparators. This is customized software evidence, not physical qualification.
   Clean installation remains open; new physical calibration is deferred by user.
-- **Scientific coverage:** frozen 94-publication corpus, 126 study rows and 1,386
-  compact contracts; 210 reported-complete and 44 derived-complete cells after
-  the latest primary-source batches. 62 inventories remain unassessed. A bounded
+- **Scientific coverage:** frozen 94-publication corpus, 127 study rows and 1,397
+  compact contracts; 218 reported-complete and 44 derived-complete cells after
+  the latest primary-source batches. 60 inventories remain unassessed. A bounded
   foundational-reference check found 11 of 12 selected antecedents in the frozen
   corpus; Occelli 2010 is recorded as an outside-map omission candidate, without
   silently changing membership or claiming exhaustiveness. The
@@ -105,6 +117,8 @@ This file is the active checklist and handoff owner; replace state, do not appen
   `codex/pps-rust-generation`, and `codex/pps-ui-desktop`. Verified checkpoints
   are pushed to review branches; public Pages/download promotion remains a
   separate verified gate. No installed/public product update is claimed yet.
+  The Designer preview identifier proposal is pending explicit confirmation;
+  this gates package identity, not source/verification work.
 
 ## Active completion checklist
 
