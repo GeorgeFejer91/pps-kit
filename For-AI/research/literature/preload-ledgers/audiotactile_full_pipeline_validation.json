@@ -4295,88 +4295,51 @@
       ]
     },
     {
-      "audiotactile_task_family": "audio-tactile PPS task with social-perception context",
-      "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-      ],
+      "audiotactile_task_family": "social visual\u2013tactile interaction; auditory PPS paradigm is citation ancestry",
+      "blocking_constraint_ids": [],
       "citation_short": "Social perception shapes multisensory PPS (2017)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "coverage_category": "adjacent_out_of_scope",
       "current_template_ids": [],
       "doi": "10.1016/j.cortex.2017.08.033",
       "expected_effect_direction": "moral_social_target_extends_pps_relative_to_immoral_person",
-      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome_status": "adjacent_out_of_scope",
       "full_emulated_pipeline_validated": false,
       "gates": {
         "expected_outcome_extraction": {
-          "evidence": "Structured expected effect direction is available.",
-          "expected_effect_direction": "moral_social_target_extends_pps_relative_to_immoral_person",
+          "evidence": "No expected outcome required for adjacent records.",
           "passed": true,
-          "source_basis": [
-            "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#social_perception_2017",
-            "Consensus MCP 2026-07-15 query: social perception shapes multisensory peripersonal space 2017 body image social cognition 2024 depersonalisation audio tactile"
-          ],
-          "status": "structured_expected_outcome_extracted"
+          "status": "not_applicable_adjacent_record"
         },
         "observed_emulated_expected_match": {
-          "evidence": "No observed emulated comparison exists for this record.",
-          "evidence_boundary": "",
-          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-          "passed": false,
-          "source_report": "",
-          "status": "no_observed_emulated_comparison"
+          "evidence": "No observed comparison required for adjacent records.",
+          "passed": true,
+          "status": "not_applicable_adjacent_record"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
-          "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "evidence": "No profile required for adjacent records.",
+          "passed": true,
+          "status": "not_applicable_adjacent_record"
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
-          ],
-          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
-          "missing_parameters": [
-            "extract the core audio-tactile PPS task parameters; social perception context is non-blocking"
-          ],
-          "paper_audit": {
-            "automated_evidence_status": "no_extracted_source",
-            "extraction_status": "pending_pdf",
-            "manual_review_confidence_label": "",
-            "manual_review_profile_recreation_assessment": "",
-            "manual_review_status": "",
-            "metadata_confidence_label": "source_unavailable",
-            "metadata_confidence_score": 0.0,
-            "pdf_status": "open_access_unavailable",
-            "supplement_status": "not_found"
-          },
-          "passed": false,
-          "status": "source_parameters_missing_or_unresolved"
+          "evidence": "Record is not an in-scope audiotactile PPS task.",
+          "passed": true,
+          "status": "not_applicable_adjacent_record"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
-          ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
-          "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "evidence": "No GUI/toolkit implementation required for adjacent records.",
+          "passed": true,
+          "status": "not_applicable_adjacent_record"
         },
         "wav_generation_and_runner_execution": {
-          "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
-          "passed": false,
-          "runnable_status": "not_yet_templated",
-          "source_report": "",
-          "status": "runner_execution_not_available_for_record"
+          "evidence": "No runner execution required for adjacent records.",
+          "passed": true,
+          "status": "not_applicable_adjacent_record"
         }
       },
       "known_parameter_validation_report": "",
-      "missing_publication_parameters": [
-        "extract the core audio-tactile PPS task parameters; social perception context is non-blocking"
-      ],
-      "next_required_action": "Extract or source the missing paper parameters: extract the core audio-tactile PPS task parameters; social perception context is non-blocking",
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "missing_publication_parameters": [],
+      "next_required_action": "No action unless this record is reclassified as an in-scope audiotactile PPS task.",
+      "observed_vs_expected_status": "adjacent_not_applicable",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
         "extraction_status": "pending_pdf",
@@ -4388,9 +4351,9 @@
         "pdf_status": "open_access_unavailable",
         "supplement_status": "not_found"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "adjacent_not_applicable",
       "record_id": "social_perception_2017",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "adjacent_not_applicable",
       "source_basis": [
         "openalex_audiotactile_pps_2026_06_13"
       ]
@@ -7625,54 +7588,54 @@
     "profile_recreation_status": "assets/preloads/profile_recreation_status.json"
   },
   "summary": {
-    "adjacent_not_applicable_record_count": 6,
+    "adjacent_not_applicable_record_count": 7,
     "full_emulated_pipeline_validated_record_count": 12,
     "gate_status_counts": {
       "expected_outcome_extraction": {
-        "not_applicable_adjacent_record": 6,
-        "structured_expected_outcome_extracted": 69
+        "not_applicable_adjacent_record": 7,
+        "structured_expected_outcome_extracted": 68
       },
       "observed_emulated_expected_match": {
         "emulated_observed_direction_matches_expected": 12,
-        "no_observed_emulated_comparison": 57,
-        "not_applicable_adjacent_record": 6
+        "no_observed_emulated_comparison": 56,
+        "not_applicable_adjacent_record": 7
       },
       "parsimonious_profile_saved": {
-        "not_applicable_adjacent_record": 6,
+        "not_applicable_adjacent_record": 7,
         "parsimonious_profile_complete": 13,
-        "profile_not_yet_created": 46,
+        "profile_not_yet_created": 45,
         "profile_scaffold_present_but_incomplete": 10
       },
       "source_parameter_extraction": {
         "minimum_source_parameters_captured": 13,
-        "not_applicable_adjacent_record": 6,
-        "source_parameters_missing_or_unresolved": 56
+        "not_applicable_adjacent_record": 7,
+        "source_parameters_missing_or_unresolved": 55
       },
       "toolkit_gui_implementation": {
-        "blocked_by_missing_profile_parameters": 51,
-        "not_applicable_adjacent_record": 6,
+        "blocked_by_missing_profile_parameters": 50,
+        "not_applicable_adjacent_record": 7,
         "segment_0_to_6_gui_toolkit_path_ready": 18
       },
       "wav_generation_and_runner_execution": {
-        "not_applicable_adjacent_record": 6,
-        "runner_execution_not_available_for_record": 57,
+        "not_applicable_adjacent_record": 7,
+        "runner_execution_not_available_for_record": 56,
         "wav_runner_mouse_click_emulation_available": 12
       }
     },
     "human_behavioral_observed_record_count": 0,
-    "in_scope_record_count": 69,
+    "in_scope_record_count": 68,
     "literature_record_count": 75,
     "physical_loopback_observed_record_count": 0,
     "pipeline_status_counts": {
-      "adjacent_not_applicable": 6,
+      "adjacent_not_applicable": 7,
       "full_emulated_source_to_runner_pipeline_validated": 12,
       "pipeline_incomplete": 1,
       "profile_present_but_source_parameters_missing": 10,
-      "source_parameters_missing_before_profile_creation": 46
+      "source_parameters_missing_before_profile_creation": 45
     },
     "primary_gap_counts": {
       "profile_present_but_source_parameters_missing": 10,
-      "source_parameters_missing_before_profile_creation": 46,
+      "source_parameters_missing_before_profile_creation": 45,
       "toolkit_structure_or_response_contract_missing": 0
     }
   }

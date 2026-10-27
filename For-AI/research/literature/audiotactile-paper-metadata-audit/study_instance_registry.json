@@ -2418,6 +2418,68 @@
         "version_scope": "Exact v1 and final main Methods reviewed. V2 metadata only; v2 body and final SI inaccessible.",
         "version_difference": "V1 p. 15 line 474 prints range 25.3–51 mA with mean 3.7 ± 0.7 mA; final reports 2.5–5.1 mA. Preserve v1 inconsistency, do not transfer it to final."
       }
+    },
+    {
+      "network_node_id": "doi:10.1016/j.cortex.2017.08.033",
+      "doi": "10.1016/j.cortex.2017.08.033",
+      "inventory_status": "minimum_two_visuotactile_experiments_full_inventory_access_blocked",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "framework_disposition": "adjacent_visuotactile_source_boundary",
+      "instance_count_basis": "Primary publisher indexed section headings identify Experiment 1 social visuo-tactile task validation and Experiment 2 social modulation. The auditory paradigm is cited ancestry, not the acquired modality. Two units are a confirmed minimum; full experiment/control inventory and cohort independence remain inaccessible.",
+      "evidence_pointer": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903::indexed Experiment 1 and Experiment 2 Methods headings",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "adjacent_experiment",
+          "experiment_label": "Experiment 1: social visuo-tactile task validation",
+          "record_id": "social_perception_2017",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_visuotactile",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "scope_evidence": "Explicit publisher heading; augmented-reality task with another person in a prerecorded corridor scene."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "adjacent_experiment",
+          "experiment_label": "Experiment 2: moral/immoral social context and object control",
+          "record_id": "social_perception_2017",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_visuotactile",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "scope_evidence": "Publisher states that Experiment 2 applies the validated social task and a non-social object condition. Classification relies on this described continuity; complete Methods unavailable."
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "outcome": "Section snippets available through search; direct full-page request HTTP 403. No full Methods obtained."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unitn.it/handle/11572/193412",
+          "outcome": "Lists a refereed author manuscript and restricted editorial PDF; manuscript download returned HTTP 403."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unitn.it/bitstream/11572/193412/1/Pellencin%2c%20Paladino%2c%20%26%20Serino_CORTEX-D-16-00891R2-4_x.pdf",
+          "outcome": "HTTP 403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://infoscience.epfl.ch/handle/20.500.14299/140555",
+          "outcome": "HTTP 429 on two bounded attempts"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://serval.unil.ch/notice/serval:BIB_02D00AC94D4D",
+          "outcome": "Web retrieval unavailable; no usable full text obtained"
+        }
+      ],
+      "source_review_limit": "Scope-based not-applicable cells do not establish complete Methods inventory or protocol replication. Do not inherit timing from later papers citing this task. Additional units may be present in inaccessible text. Accepted manuscript listed but unread; final publisher text limited to abstract and indexed section snippets.",
+      "supporting_measures": "Attitudes, identification and intention-to-interact measures accompany the social manipulation; no additional independent AT experiment is confirmed."
     }
   ],
   "corpus_freeze": {
@@ -2521,6 +2583,15 @@
       "evidence_pointer": "https://www.nature.com/articles/s41598-022-21469-w.pdf::Materials and methods pp. 2-3",
       "review_date": "2026-10-27"
     },
+    "additional_retained_scope_boundaries": [
+      {
+        "network_node_id": "doi:10.1016/j.cortex.2017.08.033",
+        "disposition": "primary_indexed_visuotactile_boundary_with_audited_methods_access_gap",
+        "basis": "Two publisher-indexed visual–tactile experiment headings; direct auditory acquisition is not established by citation ancestry. Full experiment/control inventory and cohort independence remain inaccessible. Frozen membership and citation edges retained.",
+        "evidence_pointer": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+        "review_date": "2026-10-27"
+      }
+    ],
     "identity_audit": {
       "reviewed_on": "2026-10-27",
       "status": "snapshot_identity_reconciled_with_explicit_exceptions",
@@ -2857,6 +2928,16 @@
       "review_date": "2026-10-27",
       "reason": "Partial primary Methods confirms two independent cohorts/experiments; full Methods remains access-blocked.",
       "evidence_pointer": "https://www.sciencedirect.com/science/article/pii/S0028393220302529"
+    },
+    {
+      "old_study_row_id": "doi:10.1016/j.cortex.2017.08.033",
+      "child_study_row_ids": [
+        "doi:10.1016/j.cortex.2017.08.033::a",
+        "doi:10.1016/j.cortex.2017.08.033::b"
+      ],
+      "review_date": "2026-10-27",
+      "reason": "Publisher indexed headings identify two visual–tactile experiments; full Methods inventory remains access-blocked. Neither child alone equals the old publication placeholder.",
+      "evidence_pointer": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903"
     }
   ]
 }

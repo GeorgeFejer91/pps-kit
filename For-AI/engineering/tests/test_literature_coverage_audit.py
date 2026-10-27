@@ -38,9 +38,9 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "covered_blocked_missing_publication_parameters": 10,
         "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 0,
-        "not_yet_templated_missing_publication_parameters": 46,
+        "not_yet_templated_missing_publication_parameters": 45,
         "candidate_needs_full_text_task_audit": 0,
-        "adjacent_out_of_scope": 6,
+        "adjacent_out_of_scope": 7,
     }
     assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 30
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
@@ -706,7 +706,9 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["ferri_2015_jneurosci_itv"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["autism_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["social_coding_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["social_perception_2017"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["social_perception_2017"]["coverage_category"] == "adjacent_out_of_scope"
+    assert "visual–tactile" in records["social_perception_2017"]["scope_review_basis"]
+    assert records["social_perception_2017"]["blocking_constraint_ids"] == []
     assert records["ferroni_2020_tool_observation"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["ferroni_2026_pps_plasticity"]["doi"] == "10.1016/j.neuropsychologia.2026.109490"
     assert records["ferroni_2026_pps_plasticity"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"

@@ -71,7 +71,6 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "serino_2015_toolless_sync_training",
     "smartphone_rt_methods_2025",
     "social_coding_2019",
-    "social_perception_2017",
     "spadone_2021_connectivity",
     "taffou_2014_cynophobic_rear_looming",
     "taffou_2021_auditory_roughness",
@@ -146,22 +145,26 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
     assert moving_sound["runnable_status"] == "adjacent_not_applicable"
     assert "MEP" in moving_sound["expected_outcome"]["observable_metric"]
     assert moving_sound["current_template_ids"] == []
+    social = records["social_perception_2017"]
+    assert social["expected_outcome_status"] == "adjacent_out_of_scope"
+    assert social["observed_vs_expected_status"] == "adjacent_not_applicable"
+    assert social["expected_outcome"]["primary_expected_effect"]
     assert outcome["summary"] == {
         "literature_record_count": 75,
-        "structured_expected_outcome_record_count": 69,
+        "structured_expected_outcome_record_count": 68,
         "pending_expected_outcome_record_count": 0,
-        "adjacent_or_out_of_scope_record_count": 6,
+        "adjacent_or_out_of_scope_record_count": 7,
         "runnable_profile_parameter_record_count": 13,
         "observed_behavioral_comparison_record_count": 0,
         "mouse_click_simulated_participant_like_comparison_record_count": 12,
         "synthetic_profile_contrast_comparison_record_count": 12,
         "parameter_run_evidence_only_record_count": 1,
-        "not_runnable_no_observed_comparison_record_count": 56,
-        "adjacent_not_applicable_record_count": 6,
+        "not_runnable_no_observed_comparison_record_count": 55,
+        "adjacent_not_applicable_record_count": 7,
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
-            "not_applicable_adjacent_out_of_scope": 6,
-            "not_yet_templated_missing_publication_parameters": 46,
+            "not_applicable_adjacent_out_of_scope": 7,
+            "not_yet_templated_missing_publication_parameters": 45,
             "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 12,
             "template_present_blocked_missing_publication_parameters": 10,
             "ready_profile_parameter_run_available_expected_contrast_unvalidated": 1,

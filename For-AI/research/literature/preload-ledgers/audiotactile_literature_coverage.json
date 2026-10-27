@@ -271,9 +271,9 @@
       "covered_blocked_missing_publication_parameters": 10,
       "covered_blocked_toolkit_structure": 0,
       "not_yet_templated_requires_toolkit_structure": 0,
-      "not_yet_templated_missing_publication_parameters": 46,
+      "not_yet_templated_missing_publication_parameters": 45,
       "candidate_needs_full_text_task_audit": 0,
-      "adjacent_out_of_scope": 6
+      "adjacent_out_of_scope": 7
     },
     "current_template_count": 30,
     "current_profile_check_pass_count": 25,
@@ -1731,15 +1731,16 @@
         "openalex_audiotactile_pps_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "audiotactile_task_family": "audio-tactile PPS task with social-perception context",
+      "coverage_category": "adjacent_out_of_scope",
+      "audiotactile_task_family": "social visual–tactile interaction; auditory PPS paradigm is citation ancestry",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-      ],
-      "missing_publication_parameters": [
-        "extract the core audio-tactile PPS task parameters; social perception context is non-blocking"
-      ]
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+      "scope_review_basis": "Publisher indexed Experiment 1/2 headings identify visual–tactile acquisition. Retain two minimum adjacent experiment units and a documented full-Methods access gap; do not infer direct auditory–tactile acquisition from the cited paradigm.",
+      "inventory_access_gap": "Trento openly listed manuscript HTTP 403; EPFL HTTP 429 on two attempts; final publisher full-page HTTP 403. Full experiment/control inventory and cohort independence unresolved.",
+      "retained_frozen_corpus_boundary": true
     },
     {
       "record_id": "lower_limb_pps_2017",

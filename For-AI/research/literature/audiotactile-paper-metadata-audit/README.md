@@ -33,10 +33,10 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 148 study/context rows,
-58 registered publication inventories, six access-audited publications,
+Current checkpoint (2026-10-27): 94 frozen publications, 149 study/context rows,
+58 registered publication inventories, seven access-audited publications,
 one audited project-lineage identity,
-and 29 publication inventories still unassessed. Registry presence alone
+and 28 publication inventories still unassessed. Registry presence alone
 does not certify a Methods-confirmed inventory: earlier abstract-based or partial
 inventories still require their source and compact-contract audits.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
@@ -45,13 +45,18 @@ evidence categories and the finalized eleven-contract source dispositions.
 The current audit records 55 Methods-backed inventories (42 current primary
 reviews, eleven retained primary reviews, and two identified author versions whose
 final comparison is pending), two abstract/metadata inventories, one partial
-Methods inventories, six audited access blockers, one project-lineage boundary, and 29 unregistered publications.
-Only 55 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 39 still need inventory
+Methods inventories, seven audited access blockers, one project-lineage boundary, and 28 unregistered publications.
+Only 56 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 38 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Pellencin (2017) is retained as a visual–tactile boundary: two numbered units
+identified in primary publisher headings, with a documented full-Methods access
+gap. Citation ancestry does not turn these tasks into auditory acquisition; the
+complete experiment/control inventory and cohort independence remain unresolved.
+
 Loescher final/v1 retain one shared 41-to-37 cohort and 300-trial stationary
 near/far acquisition. Audio follows touch by 40 ms (tactile-relative SOA −40 ms).
 The v1 current-range inconsistency and final correction remain version-specific;

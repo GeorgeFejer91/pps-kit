@@ -10,8 +10,8 @@
   },
   "counts": {
     "publications": 94,
-    "studies": 148,
-    "contracts": 1628,
+    "studies": 149,
+    "contracts": 1639,
     "reportedComplete": 298,
     "derivedComplete": 74,
     "parameterStatusCounts": {
@@ -21,12 +21,12 @@
       "derived_complete": 74,
       "explicitly_absent": 22,
       "low_confidence": 10,
-      "not_applicable": 165,
+      "not_applicable": 187,
       "not_assessed": 187,
       "not_reported": 53,
       "partial": 397,
       "reported_complete": 298,
-      "source_unavailable": 224
+      "source_unavailable": 213
     }
   },
   "statusLegend": {
@@ -49,6 +49,10 @@
       "doi:10.1007/s00426-020-01365-6::a",
       "doi:10.1007/s00426-020-01365-6::b",
       "doi:10.1007/s00426-020-01365-6::c"
+    ],
+    "doi:10.1016/j.cortex.2017.08.033": [
+      "doi:10.1016/j.cortex.2017.08.033::a",
+      "doi:10.1016/j.cortex.2017.08.033::b"
     ],
     "doi:10.1016/j.cortex.2021.08.004": [
       "doi:10.1016/j.cortex.2021.08.004::a",
@@ -443,21 +447,22 @@
     {
       "networkNodeId": "doi:10.1016/j.cortex.2017.08.033",
       "studyIds": [
-        "doi:10.1016/j.cortex.2017.08.033"
+        "doi:10.1016/j.cortex.2017.08.033::a",
+        "doi:10.1016/j.cortex.2017.08.033::b"
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "source_unavailable": 11
+        "not_applicable": 22
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
-        "registered": false,
-        "evidenceStatus": "not_registered",
-        "inventoryStatus": "not_assessed",
-        "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "registered": true,
+        "evidenceStatus": "audited_source_access_gap",
+        "inventoryStatus": "minimum_two_visuotactile_experiments_full_inventory_access_blocked",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -11068,238 +11073,746 @@
       ]
     },
     {
-      "studyRowId": "doi:10.1016/j.cortex.2017.08.033",
+      "studyRowId": "doi:10.1016/j.cortex.2017.08.033::a",
       "networkNodeId": "doi:10.1016/j.cortex.2017.08.033",
-      "label": "Social perception of others shapes one's own multisensory peripersonal space.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Social perception of others shapes one's own multisensory peripersonal space. (a)",
+      "experimentLabel": "Experiment 1: social visuo-tactile task validation",
+      "inventoryStatus": "minimum_two_visuotactile_experiments_full_inventory_access_blocked",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "source_unavailable": 11
+        "not_applicable": 11
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
-            "source_recipe_or_asset_provenance"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
-            "response_window_and_anchor"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "block_count",
-            "block_composition"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1016/j.cortex.2017.08.033::b",
+      "networkNodeId": "doi:10.1016/j.cortex.2017.08.033",
+      "label": "Social perception of others shapes one's own multisensory peripersonal space. (b)",
+      "experimentLabel": "Experiment 2: moral/immoral social context and object control",
+      "inventoryStatus": "minimum_two_visuotactile_experiments_full_inventory_access_blocked",
+      "evidenceScope": "study_specific_source_review",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "not_applicable": 11
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "evidenceNote": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.cortex.2017.08.033",
+          "evidenceSourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+          "sourceType": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -53734,18 +54247,18 @@
   ],
   "inventoryAudit": {
     "publications": 94,
-    "registeredInventories": 65,
+    "registeredInventories": 66,
     "methodsReviewedInventories": 55,
-    "auditedAccessBlockers": 6,
+    "auditedAccessBlockers": 7,
     "projectLineageReviews": 1,
-    "publicationsWithAllContractDispositions": 55,
-    "inventoryAndContractsAudited": 55,
-    "remainingInventoryOrContractAudit": 39,
+    "publicationsWithAllContractDispositions": 56,
+    "inventoryAndContractsAudited": 56,
+    "remainingInventoryOrContractAudit": 38,
     "inventoryEvidenceCounts": {
       "abstract_or_metadata_inventory": 2,
-      "audited_source_access_gap": 6,
+      "audited_source_access_gap": 7,
       "author_version_methods_reviewed_final_comparison_pending": 2,
-      "not_registered": 29,
+      "not_registered": 28,
       "partial_methods_inventory": 1,
       "primary_methods_reviewed": 42,
       "primary_project_lineage_reviewed": 1,
