@@ -10,6 +10,7 @@ use std::{
 
 #[path = "instruction.rs"]
 pub(crate) mod instruction;
+use crate::event_journal::group_results::{GroupPublication, VerifiedGroupResult};
 use instruction::NativeStage;
 
 use pps_brsp::{is_newer_sequence, PairingSecret};
@@ -30,7 +31,10 @@ use tokio::sync::{broadcast, oneshot};
 use std::path::PathBuf;
 
 use crate::{
-    event_journal::{JournalError, NativeEventJournal, NativeResultSeal},
+    event_journal::{
+        GroupAttemptContext, JournalError, NativeEventJournal, NativeResultCommit,
+        NativeResultSeal, PreparedJournalSource,
+    },
     latency_diagnostics::{AuthorityMailboxDiagnostics, LatencyStage, LatencyTrace},
     native_output::{
         NativeOutputAuthority, NativeOutputCleanupObservation, NativeOutputCommandError,
@@ -329,6 +333,10 @@ struct RetainedGroup {
     receipt: Arc<VerifiedPreparedGroup>,
     current_part: usize,
     completed_parts: usize,
+    attempt: GroupAttemptContext,
+    commits: Vec<NativeResultCommit>,
+    publication_status: &'static str,
+    completion: Option<VerifiedGroupResult>,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -339,6 +347,8 @@ pub(crate) struct NativeGroupStatus {
     pub current_part: usize,
     pub completed_parts: usize,
     pub experiment_complete: bool,
+    pub group_attempt_id: Option<String>,
+    pub publication_status: &'static str,
 }
 
 #[derive(Debug)]
@@ -411,6 +421,7 @@ struct OwnerState {
     remote_owner: Option<RemoteOwner>,
     retained_session: Option<RetainedPreparedSession>,
     retained_group: Option<RetainedGroup>,
+    group_publication: Option<(String, GroupPublication)>,
     compiled_execution: Option<CompiledPreparedExecution>,
     prepared_audio: Option<CachedPreparedAudio>,
     prepared_audio_reservation: Option<Arc<PreparedAudioSourceReceipt>>,
@@ -571,7 +582,7 @@ impl OwnerState {
         Ok(response_id)
     }
 
-    fn journal_source(&mut self) -> Result<Option<PreparedExecutionSource>, &'static str> {
+    fn journal_source(&mut self) -> Result<Option<PreparedJournalSource>, &'static str> {
         self.poll_event_journal();
         if self.evidence_unavailable {
             return Err("native_journal_unavailable");
@@ -590,12 +601,18 @@ impl OwnerState {
                 Err("native_journal_cleanup_pending")
             };
         }
-        self.inspection_source().map(Some)
+        Ok(Some(PreparedJournalSource {
+            execution: self.inspection_source()?,
+            group_attempt: self
+                .retained_group
+                .as_ref()
+                .map(|group| group.attempt.clone()),
+        }))
     }
 
     fn install_event_journal(
         &mut self,
-        source: PreparedExecutionSource,
+        source: PreparedJournalSource,
         journal: NativeEventJournal,
     ) -> Result<(), &'static str> {
         let retained = self
@@ -608,7 +625,11 @@ impl OwnerState {
         {
             return Err("prepared_package_replaced");
         }
-        if source.run_generation != self.run_generation {
+        if source.run_generation != self.run_generation
+            || journal.group_attempt() != source.group_attempt.as_ref()
+            || source.group_attempt.as_ref()
+                != self.retained_group.as_ref().map(|group| &group.attempt)
+        {
             return Err("prepared_run_replaced");
         }
         if self.evidence_unavailable || self.event_journal.is_some() || journal.failed() {
@@ -1084,6 +1105,7 @@ impl OwnerState {
             self.fail_stop_unavailable("native.journal.failed", "evidence_unavailable");
         }
         self.poll_native_finalization();
+        self.poll_group_publication();
         let retired_previous =
             self.event_journal
                 .as_ref()
@@ -1137,9 +1159,10 @@ impl OwnerState {
                 }
             }
         }
-        let Some(receipt) = journal.completion_receipt().filter(|_| journal.retired()) else {
+        let Some(commit) = journal.completion_commit().filter(|_| journal.retired()) else {
             return;
         };
+        let receipt = &commit.receipt;
         let current = self.retained_session.as_ref().is_some_and(|retained| {
             retained.generation == pending.package_generation
                 && retained.receipt.manifest_sha256() == receipt.package_manifest_sha256
@@ -1172,11 +1195,95 @@ impl OwnerState {
             .is_ok()
         {
             if let Some(group) = self.retained_group.as_mut() {
-                if group.completed_parts == group.current_part {
-                    group.completed_parts += 1;
+                if group.completed_parts == group.current_part
+                    && commit.group_attempt.as_ref() == Some(&group.attempt)
+                    && group.receipt.parts()[group.current_part].manifest_sha256()
+                        == commit.receipt.package_manifest_sha256
+                {
+                    group.commits.push(commit);
+                    group.completed_parts = group.commits.len();
+                } else {
+                    group.publication_status = "failed";
                 }
             }
         }
+    }
+
+    fn poll_group_publication(&mut self) {
+        if let Some((attempt, worker)) = &self.group_publication {
+            let Some(outcome) = worker.outcome() else {
+                return;
+            };
+            let attempt = attempt.clone();
+            self.group_publication = None;
+            let Some(group) = self
+                .retained_group
+                .as_mut()
+                .filter(|group| group.attempt.group_attempt_id == attempt)
+            else {
+                return;
+            };
+            match outcome {
+                Ok(receipt)
+                    if receipt.group_attempt_id == attempt
+                        && receipt.part_count == 2
+                        && group.completed_parts == 2 =>
+                {
+                    let stamp = self.clock.stamp();
+                    let mut candidate = self.core.clone();
+                    if candidate.snapshot().run.phase != RunnerPhase::Completed {
+                        self.fail_group_publication();
+                        return;
+                    }
+                    candidate.set_native_more_parts(false, stamp.clone());
+                    let mut event =
+                        Self::ledger_input("native.group-results.published", "native", &stamp);
+                    event.payload = serde_json::json!({"groupAttemptId":receipt.group_attempt_id,"manifestSha256":receipt.manifest_sha256,
+                        "partCount":receipt.part_count,"scoredTrialCount":receipt.scored_trial_count,"datasetRowCount":receipt.dataset_row_count,"timingQualification":"unqualified"});
+                    if self
+                        .commit_candidate(candidate, event, CommitPolicy::Ordinary, true)
+                        .is_ok()
+                    {
+                        let group = self.retained_group.as_mut().unwrap();
+                        group.publication_status = "complete";
+                        group.completion = Some(receipt);
+                    } else {
+                        self.fail_group_publication();
+                    }
+                }
+                _ => {
+                    self.fail_group_publication();
+                }
+            }
+        }
+        let Some(group) = self.retained_group.as_mut().filter(|group| {
+            group.completed_parts == 2 && group.publication_status == "not_started"
+        }) else {
+            return;
+        };
+        match GroupPublication::start(
+            Arc::clone(&group.receipt),
+            group.attempt.clone(),
+            group.commits.clone(),
+        ) {
+            Ok(worker) => {
+                group.publication_status = "publishing";
+                self.group_publication = Some((group.attempt.group_attempt_id.clone(), worker));
+            }
+            Err(_) => self.fail_group_publication(),
+        }
+    }
+
+    fn fail_group_publication(&mut self) {
+        if let Some(group) = self.retained_group.as_mut() {
+            group.publication_status = "failed";
+            group.completion = None;
+        }
+        let stamp = self.clock.stamp();
+        let mut candidate = self.core.clone();
+        candidate.set_native_more_parts(true, stamp.clone());
+        let event = Self::ledger_input("native.group-results.failed", "native", &stamp);
+        let _ = self.commit_candidate(candidate, event, CommitPolicy::Ordinary, true);
     }
 
     fn commit_evidence(
@@ -1863,10 +1970,7 @@ impl OwnerState {
         let stamp = self.clock.stamp();
         let mut candidate = self.core.clone();
         candidate.adopt_verified_package(package, stamp.clone())?;
-        candidate.set_native_more_parts(
-            verified.is_split_part() && verified.summary().part_number == Some(1),
-            stamp.clone(),
-        );
+        candidate.set_native_more_parts(verified.is_split_part(), stamp.clone());
         candidate.rotate_epoch(next_epoch, stamp.clone());
         candidate.set_controller_lease(None, None, stamp.clone());
         candidate.set_connection_state(
@@ -1889,6 +1993,9 @@ impl OwnerState {
             // Drain the former package's accepted prefix without blocking the
             // authority. A replacement writer cannot start until it retires.
             journal.close();
+        }
+        if let Some((_, worker)) = &self.group_publication {
+            worker.cancel();
         }
         self.retained_group = None;
         self.retained_session = Some(RetainedPreparedSession {
@@ -2820,6 +2927,7 @@ impl ExecutionOwner {
                     remote_owner: None,
                     retained_session: None,
                     retained_group: None,
+                    group_publication: None,
                     compiled_execution: None,
                     prepared_audio: None,
                     prepared_audio_reservation: None,
@@ -3157,10 +3265,18 @@ impl ExecutionOwner {
                 let first = group.parts().first().ok_or("prepared_group_empty")?.clone();
                 let snapshot =
                     state.adopt_verified_session(first, package, secret, session_id, epoch)?;
+                let attempt = GroupAttemptContext {
+                    group_attempt_id: pps_brsp::random_nonce(),
+                    selected_group_manifest_sha256: group.manifest().sha256().to_owned(),
+                };
                 state.retained_group = Some(RetainedGroup {
                     receipt: Arc::new(group),
                     current_part: 0,
                     completed_parts: 0,
+                    attempt,
+                    commits: Vec::with_capacity(2),
+                    publication_status: "not_started",
+                    completion: None,
                 });
                 Ok(snapshot)
             },
@@ -3178,7 +3294,9 @@ impl ExecutionOwner {
                     part_count: group.receipt.parts().len(),
                     current_part: group.current_part + 1,
                     completed_parts: group.completed_parts,
-                    experiment_complete: group.completed_parts == group.receipt.parts().len(),
+                    experiment_complete: group.completion.is_some(),
+                    group_attempt_id: Some(group.attempt.group_attempt_id.clone()),
+                    publication_status: group.publication_status,
                 },
                 None => NativeGroupStatus {
                     revision: state.core.revision(),
@@ -3186,6 +3304,8 @@ impl ExecutionOwner {
                     current_part: 0,
                     completed_parts: 0,
                     experiment_complete: false,
+                    group_attempt_id: None,
+                    publication_status: "not_started",
                 },
             },
         )
@@ -3251,6 +3371,8 @@ impl ExecutionOwner {
                     return Err("prepared_group_replaced");
                 }
                 let next = group.completed_parts;
+                let attempt = group.attempt.clone();
+                let commits = group.commits.clone();
                 let part = verified
                     .parts()
                     .get(next)
@@ -3262,6 +3384,10 @@ impl ExecutionOwner {
                     receipt: Arc::new(verified),
                     current_part: next,
                     completed_parts: next,
+                    attempt,
+                    commits,
+                    publication_status: "not_started",
+                    completion: None,
                 });
                 Ok(snapshot)
             },
@@ -3387,7 +3513,7 @@ impl ExecutionOwner {
 
     pub(crate) async fn journal_source(
         &self,
-    ) -> Result<Result<Option<PreparedExecutionSource>, &'static str>, OwnerSubmitError> {
+    ) -> Result<Result<Option<PreparedJournalSource>, &'static str>, OwnerSubmitError> {
         self.asynchronous(AdmissionClass::Normal, "journal_source", |state| {
             state.journal_source()
         })
@@ -3396,7 +3522,7 @@ impl ExecutionOwner {
 
     pub(crate) async fn install_event_journal(
         &self,
-        source: PreparedExecutionSource,
+        source: PreparedJournalSource,
         journal: NativeEventJournal,
     ) -> Result<Result<(), &'static str>, OwnerSubmitError> {
         self.asynchronous(

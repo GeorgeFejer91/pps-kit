@@ -277,8 +277,8 @@ fn software_callback_instructions_and_two_parts_preserve_gates_identity_and_resu
     );
     let second = run_software_part(&runtime, &control, 2, false);
     assert!(!second.iter().any(|gate| gate["mode"] == "continue-click"));
+    let progress = wait_group_publication(&runtime);
     assert!(runtime.snapshot().unwrap().run.complete);
-    let progress = tauri::async_runtime::block_on(runtime.native_group_status()).unwrap();
     assert_eq!(progress.completed_parts, 2);
     assert!(progress.experiment_complete);
     for (part, expected_id) in expected_parts.iter().enumerate() {
@@ -393,4 +393,147 @@ fn changed_instruction_bytes_cannot_enter_native_audio_cache() {
             .completed_parts,
         0
     );
+}
+
+fn wait_group_publication(runtime: &AppRuntime) -> crate::execution_owner::NativeGroupStatus {
+    let deadline = std::time::Instant::now() + Duration::from_secs(8);
+    loop {
+        let status = tauri::async_runtime::block_on(runtime.native_group_status()).unwrap();
+        if matches!(status.publication_status, "complete" | "failed") {
+            return status;
+        }
+        assert!(
+            std::time::Instant::now() < deadline,
+            "group publication timeout: {status:?}"
+        );
+        std::thread::sleep(Duration::from_millis(2));
+    }
+}
+
+fn group_test_runtime(
+    group: pps_session_package::VerifiedPreparedGroup,
+) -> (AppRuntime, Arc<FakeControl>) {
+    let control = Arc::new(FakeControl::default());
+    control.enable_software_callback();
+    let runtime = AppRuntime::with_native_output(fake_coordinator(&control));
+    tauri::async_runtime::block_on(runtime.adopt_verified_group_async(group)).unwrap();
+    runtime.dispatch_local(Action::SetupSubmit,serde_json::json!({"participant_code":"P001","age":30,"handedness":"right","gender":"other","name_sharing_opt_in":false,"part_labels":{"1":"Pre","2":"Post"}})).unwrap();
+    (runtime, control)
+}
+fn run_both_software_parts(runtime: &AppRuntime, control: &FakeControl) {
+    run_software_part(runtime, control, 1, false);
+    tauri::async_runtime::block_on(
+        runtime.advance_verified_group_part_async(runtime.snapshot().unwrap().revision),
+    )
+    .unwrap();
+    run_software_part(runtime, control, 2, false);
+}
+
+#[test]
+fn durable_group_publication_collision_preserves_files_and_never_claims_complete() {
+    let (root, group) = instruction_group_fixture();
+    let (runtime, control) = group_test_runtime(group);
+    let status = tauri::async_runtime::block_on(runtime.native_group_status()).unwrap();
+    let attempt = status.group_attempt_id.unwrap();
+    let final_path = root.join(format!("native_group_{attempt}.results.json"));
+    fs::write(&final_path, b"pre-existing sentinel").unwrap();
+    run_both_software_parts(&runtime, &control);
+    let status = wait_group_publication(&runtime);
+    assert_eq!(status.completed_parts, 2);
+    assert_eq!(status.publication_status, "failed");
+    assert!(!status.experiment_complete);
+    assert!(!runtime.snapshot().unwrap().run.complete);
+    assert_eq!(fs::read(final_path).unwrap(), b"pre-existing sentinel");
+}
+
+#[test]
+fn durable_group_reselection_cancels_pending_commit_and_never_adopts_old_parts() {
+    use crate::event_journal::group_results::pause_publication_for_test;
+    let (root, group) = instruction_group_fixture();
+    let (runtime, control) = group_test_runtime(group.clone());
+    let old_attempt = tauri::async_runtime::block_on(runtime.native_group_status())
+        .unwrap()
+        .group_attempt_id
+        .unwrap();
+    let reached = pause_publication_for_test(&old_attempt);
+    run_both_software_parts(&runtime, &control);
+    let deadline = std::time::Instant::now() + Duration::from_secs(8);
+    while !reached.load(Ordering::Acquire) {
+        assert!(std::time::Instant::now() < deadline);
+        std::thread::sleep(Duration::from_millis(2));
+    }
+    assert!(!runtime.snapshot().unwrap().run.complete);
+    assert!(!root
+        .join(format!("native_group_{old_attempt}.results.json"))
+        .exists());
+    tauri::async_runtime::block_on(runtime.adopt_verified_group_async(group)).unwrap();
+    let selected = tauri::async_runtime::block_on(runtime.native_group_status()).unwrap();
+    assert_ne!(
+        selected.group_attempt_id.as_deref(),
+        Some(old_attempt.as_str())
+    );
+    assert_eq!(selected.completed_parts, 0);
+    assert!(!selected.experiment_complete);
+    assert!(tauri::async_runtime::block_on(
+        runtime.advance_verified_group_part_async(selected.revision)
+    )
+    .is_err());
+    run_both_software_parts(&runtime, &control);
+    let status = wait_group_publication(&runtime);
+    assert!(status.experiment_complete);
+    assert!(!root
+        .join(format!("native_group_{old_attempt}.results.json"))
+        .exists());
+}
+
+#[test]
+fn durable_group_verifier_rejects_cross_attempt_part_substitution() {
+    use crate::event_journal::group_results::{
+        verify_published_group_result, verify_published_group_result_with_budget, GroupResultError,
+    };
+    let (root, group) = instruction_group_fixture();
+    let (runtime, control) = group_test_runtime(group.clone());
+    run_both_software_parts(&runtime, &control);
+    let first = wait_group_publication(&runtime);
+    assert!(first.experiment_complete);
+    let first_path = root.join(format!(
+        "native_group_{}.results.json",
+        first.group_attempt_id.unwrap()
+    ));
+    let first_bytes = fs::read(&first_path).unwrap();
+    let first_value: Value = serde_json::from_slice(&first_bytes).unwrap();
+    tauri::async_runtime::block_on(runtime.adopt_verified_group_async(group.clone())).unwrap();
+    run_both_software_parts(&runtime, &control);
+    let second = wait_group_publication(&runtime);
+    assert!(second.experiment_complete);
+    let second_path = root.join(format!(
+        "native_group_{}.results.json",
+        second.group_attempt_id.unwrap()
+    ));
+    let second_bytes = fs::read(&second_path).unwrap();
+    let mut mixed: Value = serde_json::from_slice(&second_bytes).unwrap();
+    let receipt = verify_published_group_result(&group, &second_path).unwrap();
+    assert_eq!(receipt.scored_trial_count, 4);
+    assert_eq!(receipt.dataset_row_count, 4);
+    let mut budget = 128 * 1024 * 1024;
+    verify_published_group_result_with_budget(&group, &second_path, &mut budget).unwrap();
+    let consumed = 128 * 1024 * 1024 - budget;
+    assert!(consumed > second_bytes.len());
+    let mut exact_budget = consumed;
+    verify_published_group_result_with_budget(&group, &second_path, &mut exact_budget).unwrap();
+    assert_eq!(exact_budget, 0);
+    assert!(matches!(
+        verify_published_group_result_with_budget(&group, &second_path, &mut exact_budget),
+        Err(GroupResultError::BudgetExceeded)
+    ));
+    let mut short_budget = consumed - 1;
+    assert!(matches!(
+        verify_published_group_result_with_budget(&group, &second_path, &mut short_budget),
+        Err(GroupResultError::BudgetExceeded)
+    ));
+    mixed["parts"][0] = first_value["parts"][0].clone();
+    fs::write(&second_path, serde_json::to_vec(&mixed).unwrap()).unwrap();
+    assert!(verify_published_group_result(&group, &second_path).is_err());
+    fs::write(&second_path, second_bytes).unwrap();
+    assert_eq!(fs::read(first_path).unwrap(), first_bytes);
 }

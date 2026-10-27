@@ -1365,7 +1365,7 @@ impl RunnerCore {
         if phase == RunnerPhase::Completed && self.native_more_parts {
             self.snapshot.run.state_label = "Part complete".to_owned();
             self.snapshot.run.progress_label =
-                "Part artifacts finalized; next part remains".to_owned();
+                "Part artifacts finalized; group completion remains".to_owned();
         }
         self.snapshot.active_block.running = phase == RunnerPhase::Running;
         self.snapshot.active_block.paused = phase == RunnerPhase::Paused;
