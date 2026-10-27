@@ -56,6 +56,24 @@ test("Pages assembly publishes only the canonical browser companion bytes", asyn
     }
     assert.equal((await readFile(join(output, "CNAME"), "utf8")).trim(), "ppskit.qzz.io");
 
+    // Both the default Study 5 instructions and the selectable alternate pair
+    // must work on Pages, including their authoritative SHA inventory.
+    for (const [variant, names] of [
+      ["original_study5", ["Inhale-2-3-4-hold_FIXED.wav", "Exhale-2-3-4-hold_FIXED.wav", "General_Instructions.wav", "Pre-Block_Instruction.wav", "Post-Block_Instruction.wav", "InterimMessage.wav", "FinishMessage.wav"]],
+      ["british_kokoro", ["Inhale-2-3-4-hold_FIXED.wav", "Exhale-2-3-4-hold_FIXED.wav"]],
+    ]) {
+      const relative = join("assets", "breathing", variant);
+      const sourceRoot = join(root, "packages", "pps-resources", relative);
+      const manifestBytes = await readFile(join(sourceRoot, "spoken_assets_manifest.json"));
+      assert.deepEqual(await readFile(join(output, relative, "spoken_assets_manifest.json")), manifestBytes);
+      const manifest = JSON.parse(manifestBytes);
+      for (const name of names) {
+        const staged = await readFile(join(output, relative, name));
+        assert.deepEqual(staged, await readFile(join(sourceRoot, name)));
+        assert.equal(sha256(staged), manifest.files[name].sha256);
+      }
+    }
+
     const sourceIndex = await readFile(join(runnerCompiled, "companion", "index.html"));
     const stagedIndex = await readFile(join(output, "experiment-runner", "index.html"));
     assert.deepEqual(stagedIndex, sourceIndex);
