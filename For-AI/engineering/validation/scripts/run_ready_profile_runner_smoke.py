@@ -16,6 +16,7 @@ import json
 import os
 import shutil
 import sys
+import threading
 import time
 from pathlib import Path
 from typing import Any
@@ -51,7 +52,12 @@ EVIDENCE_BOUNDARY = (
 
 
 class FastProfileSmokeAudioEngine:
-    """Callback-shaped fake engine for prepared profile block WAVs."""
+    """Software playback paced to the WAV clock, with no audio device output.
+
+    Keep the historical class name for existing harness callers. Collapsing
+    scheduled gaps lets an unanswered trial steal a later trial's mouse click;
+    this fake therefore preserves elapsed sample time, including silent tails.
+    """
 
     def __init__(self, *, max_clicks_per_block: int = 1, response_delay_s: float = 0.12):
         self.max_clicks_per_block = max(0, int(max_clicks_per_block))
@@ -66,6 +72,7 @@ class FastProfileSmokeAudioEngine:
         self._sample_rate = 44100
         self._clicks_this_block = 0
         self._stopped = False
+        self._stop_event = threading.Event()
 
     def set_tactile_callback(self, callback) -> None:
         self._on_tactile = callback
@@ -90,34 +97,38 @@ class FastProfileSmokeAudioEngine:
         if block_event_schedule is not None and audio_event_callback is not None:
             block_event_schedule.reset()
             for event in block_event_schedule.consume_buffer(0, frames_total + 1):
-                if self._stopped:
-                    break
+                scheduled_perf = self._block_start_perf + int(event.sample_index) / self._sample_rate
+                if not self._wait_until(scheduled_perf):
+                    return False
                 now = time.perf_counter()
                 payload = dict(event.payload)
-                payload.pop("sample_index", None)
-                payload.pop("planned_sample_index", None)
                 payload.update(
                     {
                         "event_type": event.event_type,
                         "sample_rate": self._sample_rate,
+                        "sample_index": int(event.sample_index),
                         "sample_offset_in_buffer": 0,
                         "scheduled_sample_index": int(event.sample_index),
                         "callback_perf_counter": now,
                         "stream_current_time": now,
-                        "stream_output_buffer_dac_time": now,
+                        "stream_output_buffer_dac_time": scheduled_perf,
                         "trigger_key": event.trigger_key,
                     }
                 )
-                if event.event_type == "audio_sample_zero":
-                    payload["sample_index"] = 0
                 audio_event_callback(payload)
                 if event.event_type == "tactile_onset" and self._clicks_this_block < self.max_clicks_per_block:
                     self._clicks_this_block += 1
                     if self._on_tactile is not None:
                         self._invoke_tactile_callback(payload)
+        if not self._wait_until(self._block_start_perf + frames_total / self._sample_rate):
+            return False
         if progress_callback is not None:
             progress_callback(float(info.duration))
         return not self._stopped
+
+    def _wait_until(self, deadline: float) -> bool:
+        delay_s = max(0.0, deadline - time.perf_counter())
+        return not self._stopped and not self._stop_event.wait(delay_s)
 
     def trigger_click(self, metadata=None, marker_gain=None) -> None:
         if self._audio_event_callback is None:
@@ -183,6 +194,7 @@ class FastProfileSmokeAudioEngine:
 
     def stop(self) -> None:
         self._stopped = True
+        self._stop_event.set()
 
     def pause(self) -> None:
         return None
