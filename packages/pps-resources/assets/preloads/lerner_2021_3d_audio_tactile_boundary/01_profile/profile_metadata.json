@@ -6,7 +6,7 @@
   "doi": "10.3389/frvir.2021.644214",
   "source_url": "https://www.frontiersin.org/journals/virtual-reality/articles/10.3389/frvir.2021.644214/full",
   "verification_status": "partial",
-  "notes": "3D Tune-In/Unity PPS mapping study. The preload catalog expands the paper's twelve virtual source directions into local auditory-only trajectory assets for the dynamic and flat pink-noise source types. The runnable profile captures the reported 144 audio-tactile condition rows; subject-specific body/head scaling and exact Unity/3D Tune-In rendering remain provenance caveats.",
+  "notes": "3D Tune-In/Unity PPS mapping study. The preload catalog expands the paper's twelve virtual source directions into local auditory-only trajectory assets for the dynamic and flat pink-noise source types. The runnable profile captures the reported 144 audio-tactile condition rows; subject-specific body/head scaling and exact Unity/3D Tune-In rendering remain provenance caveats. A 100-ms derived terminal margin contains the existing software cue; it is not a reported trial interval or evidence of full-protocol timing equivalence.",
   "reference_parameters": {
     "audio_engine": "3D Tune-In Toolkit in Unity",
     "directions_reported": 12,
@@ -138,7 +138,12 @@
       "subject-specific arm length scaling is represented by a 70 cm reference-arm conversion instead of live participant scaling",
       "the exact original Unity scene, 3D Tune-In runtime behavior, and MATLAB stimulus-generation scripts are not redistributed",
       "the article's 24-trials-per-block wording conflicts with the reported total trial count"
-    ]
+    ],
+    "software_trial_padding_ms": {
+      "pre": 0,
+      "post": 100
+    },
+    "software_trial_padding_basis": "Derived containment for the existing software timeline: pre=0 ms; post=max(0,max(SOA)+cue duration-source duration)=5500+100-5500=100 ms. Lerner et al. 2021, Audio Stimuli, The Tactile Stimuli and Procedure, pp.8-11: 5.5-s sound and 100-ms tactile cue. Source SOAs depend on individual arm-length distances; the existing evenly spaced software grid remains a source-conflicted proxy. A 100-ms terminal margin only contains the software last cue and does not resolve that conflict."
   },
   "provenance": [
     {
@@ -156,6 +161,10 @@
     {
       "field": "expected outcome",
       "source": "Results report individual 3D PPS boundary polyhedra and no systematic flat-versus-dynamic advantage; Table 2 gives 26 closer flat thresholds and 26 closer dynamic thresholds across valid subject/trajectory pairs."
+    },
+    {
+      "field": "software cue containment and source limitation",
+      "source": "Lerner et al. 2021, Audio Stimuli, The Tactile Stimuli and Procedure, pp.8-11: 5.5-s sound and 100-ms tactile cue. Source SOAs depend on individual arm-length distances; the existing evenly spaced software grid remains a source-conflicted proxy. A 100-ms terminal margin only contains the software last cue and does not resolve that conflict. DOI 10.3389/frvir.2021.644214."
     }
   ]
 }

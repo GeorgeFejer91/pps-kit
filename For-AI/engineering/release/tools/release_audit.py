@@ -362,7 +362,7 @@ def check_study_templates() -> list[str]:
         protocol = data.get("design", {}).get("protocol", {})
         if not protocol.get("soa_values_ms"):
             problems.append(f"{path.relative_to(REPO_ROOT)} missing protocol SOA values")
-        if not protocol.get("spatial_values_cm"):
+        if protocol.get("pair_spatial_values_with_soas", True) and not protocol.get("spatial_values_cm"):
             problems.append(f"{path.relative_to(REPO_ROOT)} missing protocol spatial values")
     return problems
 

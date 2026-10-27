@@ -65,7 +65,7 @@
         "segment": "3",
         "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
         "passed": true,
-        "field_count": 5,
+        "field_count": 6,
         "blocking_reasons": []
       },
       {
@@ -106,7 +106,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 17,
+      "value": 22,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -147,17 +147,20 @@
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "jitter_values_ms",
-      "status": "defaulted",
-      "value": [],
-      "note": "No explicit jitter box is encoded."
+      "status": "inferred",
+      "value": [
+        1000,
+        2700
+      ],
+      "note": "Derived software choice: pre=1000 ms as reported; post=min(reported 2700-3300 ms range)=2700 ms. The paper gives no sampling distribution, so this fixed lower-bound proxy does not reproduce its variable trial timing."
     },
     {
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "iti_jitter_policy",
-      "status": "defaulted",
-      "value": "no explicit Segment 2 ITI/jitter box",
-      "note": "No explicit ITI/jitter box is encoded; missing ITI/jitter is only a blocker when listed as a publication gap."
+      "status": "inferred",
+      "value": "derived software containment",
+      "note": "Derived software choice: pre=1000 ms as reported; post=min(reported 2700-3300 ms range)=2700 ms. The paper gives no sampling distribution, so this fixed lower-bound proxy does not reproduce its variable trial timing."
     },
     {
       "segment": "3",
@@ -176,6 +179,17 @@
     {
       "segment": "3",
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "tactile_cue_substitution",
+      "status": "defaulted",
+      "value": {
+        "reported_ms": 20,
+        "software_ms": 100
+      },
+      "note": "The shared audio-channel cue is a software substitution, not the reported physical stimulus."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "tactile_sites",
       "status": "reported",
       "value": [
@@ -188,7 +202,7 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "baseline_mode",
       "status": "reported",
-      "value": "tactile_only",
+      "value": "custom",
       "note": "Baseline strategy is encoded."
     },
     {
@@ -284,23 +298,23 @@
   "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
-      "profile_metadata": "assets/preloads/taffou_2014_cynophobic_rear_looming/01_profile/profile_metadata.json",
-      "profile_parameters_manifest": "assets/preloads/taffou_2014_cynophobic_rear_looming/01_profile/profile_parameters_manifest.json"
+      "profile_metadata": "packages/pps-resources/assets/preloads/taffou_2014_cynophobic_rear_looming/01_profile/profile_metadata.json",
+      "profile_parameters_manifest": "packages/pps-resources/assets/preloads/taffou_2014_cynophobic_rear_looming/01_profile/profile_parameters_manifest.json"
     },
     "02_looming_stimuli": {
-      "stimulus_sources": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/stimulus_sources.json",
-      "trajectory_inventory": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/trajectory_inventory.json",
+      "stimulus_sources": "packages/pps-resources/assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/stimulus_sources.json",
+      "trajectory_inventory": "packages/pps-resources/assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/trajectory_inventory.json",
       "asset_count": 4
     },
     "03_baseline_strategy": {
-      "baseline_strategy": "assets/preloads/taffou_2014_cynophobic_rear_looming/03_baseline_strategy/baseline_strategy.json"
+      "baseline_strategy": "packages/pps-resources/assets/preloads/taffou_2014_cynophobic_rear_looming/03_baseline_strategy/baseline_strategy.json"
     },
     "04_trial_designer": {
-      "trial_design": "assets/preloads/taffou_2014_cynophobic_rear_looming/04_trial_designer/trial_design.json",
+      "trial_design": "packages/pps-resources/assets/preloads/taffou_2014_cynophobic_rear_looming/04_trial_designer/trial_design.json",
       "trial_row_count": 1
     },
     "05_run_setup": {
-      "run_defaults": "assets/preloads/taffou_2014_cynophobic_rear_looming/05_run_setup/run_defaults.json",
+      "run_defaults": "packages/pps-resources/assets/preloads/taffou_2014_cynophobic_rear_looming/05_run_setup/run_defaults.json",
       "block_count": 8,
       "participant_count": 30
     },
@@ -322,6 +336,10 @@
     {
       "field": "SOAs/trials",
       "source": "Frontiers methods report T1-T5 at 0, 750, 1500, 2250, and 3000 ms from sound onset, 224 tactile trials and 32 catch trials."
+    },
+    {
+      "field": "trial envelope and cue substitution",
+      "source": "Taffou and Viaud-Delmon 2014, Main experiment pp.2-3, DOI 10.3389/fpsyt.2014.00122: 1000-ms pre-sound silence, 3000-ms sound, 2700-3300-ms post-sound silence, 20-ms 250-Hz vibration, baseline trial times 350/4650 ms. Shared 100-ms cue and fixed 2700-ms post margin are software substitutions."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."

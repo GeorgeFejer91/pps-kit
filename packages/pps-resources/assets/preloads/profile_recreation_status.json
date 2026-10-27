@@ -229,7 +229,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 5,
+            "field_count": 6,
             "blocking_reasons": []
           },
           {
@@ -1234,7 +1234,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 5,
+            "field_count": 6,
             "blocking_reasons": []
           },
           {
@@ -1301,7 +1301,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 5,
+            "field_count": 6,
             "blocking_reasons": []
           },
           {
@@ -2071,7 +2071,7 @@
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
             "passed": true,
-            "field_count": 5,
+            "field_count": 6,
             "blocking_reasons": []
           },
           {
@@ -2100,14 +2100,14 @@
     },
     {
       "template_id": "teneggi_2013_social_face_pps",
-      "title": "Teneggi 2013 social modulation face PPS",
+      "title": "Teneggi 2013 Experiment 3 cooperation PPS scaffold",
       "citation": "Teneggi, C., Canzoneri, E., di Pellegrino, G., & Serino, A. (2013). Social modulation of peripersonal space boundaries. Current Biology, 23(5), 406-411.",
       "doi": "10.1016/j.cub.2013.01.043",
       "verification_status": "partial",
       "publication_status": "published",
-      "profile_type": "face_audio_tactile_social_context",
+      "profile_type": "face_audio_tactile_social_context_exp3",
       "visible_variant_label": "",
-      "variant_display": "Teneggi 2013 social modulation face PPS",
+      "variant_display": "Teneggi 2013 Experiment 3 cooperation PPS scaffold",
       "primary_category": "missing_publication_parameters",
       "category_label": "Missing publication parameters",
       "runner_readiness": "blocked_missing_parameters",
@@ -2118,7 +2118,7 @@
       "finished_profile": false,
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
-      "missing_parameter_count": 1,
+      "missing_parameter_count": 4,
       "unsupported_structure_count": 0,
       "segment_0_to_4_profile_checks": {
         "gate": "segments_0_to_4",
@@ -2128,35 +2128,53 @@
             "segment": "0",
             "segment_label": "Segment 0 profile manifest and provenance",
             "passed": false,
-            "field_count": 6,
+            "field_count": 4,
             "blocking_reasons": [
               {
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
-                "reason": "exact distance/timing table from supplement"
+                "reason": "pre/post cooperative economic-game context with the same fair confederate is not implemented"
               }
             ]
           },
           {
             "segment": "1",
             "segment_label": "Segment 1 source/stimulus assets",
-            "passed": true,
-            "field_count": 3,
-            "blocking_reasons": []
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "exact original pink-noise intensity envelope and speaker transfer; premade Gaussian burst train is a source substitution"
+              }
+            ]
           },
           {
             "segment": "2",
             "segment_label": "Segment 2 trial rows and sequences",
-            "passed": true,
-            "field_count": 3,
-            "blocking_reasons": []
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Experiment 3 exact repetition, integer catch and block counts are unreported; preview counts are software defaults"
+              }
+            ]
           },
           {
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-            "passed": true,
-            "field_count": 5,
-            "blocking_reasons": []
+            "passed": false,
+            "field_count": 7,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "100-microsecond electrical pulse and voice-key response capture require external apparatus"
+              }
+            ]
           },
           {
             "segment": "4",
@@ -2169,9 +2187,24 @@
       },
       "missing_publication_parameters": [
         {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "Experiment 3 exact repetition, integer catch and block counts are unreported; preview counts are software defaults"
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "exact original pink-noise intensity envelope and speaker transfer; premade Gaussian burst train is a source substitution"
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "100-microsecond electrical pulse and voice-key response capture require external apparatus"
+        },
+        {
           "segment": "0",
           "parameter": "profile_gap",
-          "reason": "exact distance/timing table from supplement"
+          "reason": "pre/post cooperative economic-game context with the same fair confederate is not implemented"
         }
       ],
       "unsupported_toolkit_structures": [],

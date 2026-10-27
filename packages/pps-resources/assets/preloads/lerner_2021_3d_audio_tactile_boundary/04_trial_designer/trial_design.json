@@ -63,6 +63,17 @@
           ],
           "jitter_values_ms": [],
           "randomized": true
+        },
+        {
+          "element_id": "lerner_2021_3d_audio_tactile_boundary-cue-tail",
+          "kind": "jitter",
+          "label": "Derived tactile-cue tail",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            100
+          ],
+          "randomized": false
         }
       ]
     }

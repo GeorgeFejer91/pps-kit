@@ -38,25 +38,40 @@ This file is the active checklist and handoff owner; replace state, do not appen
   identifies exact source and checks. Source, CI packages, installed behavior,
   physical timing, participant results and replication remain distinct gates.
   V1 installations and public downloads remain unchanged. A separate local
-  Runner preview candidate was installed and its startup verified; complete
-  installed execution remains unverified.
-- **Next action:** resolve the legacy emulation harness's observed-vs-expected
-  failure, integrate remaining primary-source batches and finish hosted/native
-  wording. Rebuild candidates after the final source checkpoint. The first
-  Runner NSIS payload and installed native WebView startup pass without Python
-  or checkout paths on PATH; this is not a clean-Windows/full-journey result.
-  Package selection/preload through
+  Runner preview candidate was installed at `468c8241` and its installed bytes
+  match the audited NSIS payload. Startup was verified at earlier `b8e0e789`;
+  automatic approval review rejected the fresh launch check at the new revision
+  ("blocked by policy", without a more specific reason). No alternate launch
+  was attempted. Complete installed execution remains unverified.
+- **Next action:** finish the remaining source batches, verify the corrected
+  preset waveforms and integrated Standard suite, then rebuild canonical
+  frontend/Pages artifacts against the final public projection. Source review
+  and package identity remain separate gates. The first Runner NSIS payload and
+  installed native WebView startup passed without Python or checkout paths on
+  PATH; this is not a clean-Windows/full-journey result. Package selection through
   the Windows picker remains blocked by the native automation helper failing
   to initialize (kernel assets path not found); no substitute UI driver was used.
   Primary-source extraction continues independently. Pages assembly now includes
   referenced Study 5 instruction audio with its checked manifest hashes.
-- **Local validation:** the current Standard run completed with 666 passed,
-  ten skipped and two failed checks. Both retained old scientific eligibility
-  assumptions; the replacement positive fixture also exposed long Windows paths
-  silently yielding no manifest rows. That reader now reuses the Runner path
-  owner and enforces complete row counts; the emulation engine's remaining
-  response-timing/join failure is under investigation. Do not report Standard
-  as passing yet. The integrated Rust selection (Designer, Runner, Designer core
+- **Local validation:** the prior Standard run had 666 passed, ten skipped and
+  two stale scientific-eligibility failures. Their fixtures now follow reviewed
+  source eligibility. The corrected sample-paced Canzoneri response audit passes
+  three checks in 951.25 s, including complete planned/click/marker/analysis joins,
+  six distance/motion bins and extended Windows paths. The integrated Standard
+  rerun is in progress; do not report it as passing yet. Actual preset baking
+  exposed clipped/missing tactile cues: the writer and cached-manifest validator
+  now reject them. Reported silence and explicitly derived margins are encoded
+  in affected templates. Canzoneri and Taffou silence-window baselines retain
+  the sound elsewhere in the trial. Teneggi now targets Experiment 3 only and
+  stays blocked for undocumented counts and source substitutions. Serino hand
+  assets are regenerated as a versioned four-second continuous-pink Rust/3DTI
+  proxy with exact frames, channel/QC/hash evidence and explicit level choices.
+  Native FLOAT audio also exposed mixed-encoding FFmpeg stream-copy corruption;
+  incompatible streams now use the existing decoded concatenation path.
+  All 30 templates now pass actual cue-containment baking (29-profile rerun
+  plus the final native Serino/Taffou checks); 19 focused waveform, provenance
+  and release-audit checks pass. Independent runtime review verified the fixes.
+  The integrated Rust selection (Designer, Runner, Designer core
   and package verifier) passes 230 checks with 16 opt-in skips and strict Clippy.
   PCM cancellation now uses a deterministic writer-boundary check, replacing a
   five-second polling race; production cancellation behavior was unchanged.
@@ -86,20 +101,23 @@ This file is the active checklist and handoff owner; replace state, do not appen
   checks and actual nine-asset failure/retry evidence pass. The integrated mapper's
   source/version links and generated inventory counts pass actual Chromium checks
   at 320/768/1440 px with measured readable labels. Installed Runner startup is
-  verified at `b8e0e789`; later UI changes require a rebuilt package. Full installed
+  verified at `b8e0e789`; the `468c8241` rebuild is installed but its fresh launch
+  check was rejected by automatic approval review. Full installed
   interaction, clean-Windows prerequisites and deployed routes remain open. New physical calibration
   is deferred by the user, not reported as measured.
-- **Scientific coverage:** frozen 94-publication corpus, 141 study rows and 1,551
-  compact contracts. The generated inventory audit reports 58 registered entries,
-  47 Methods-backed inventories (with source-version limitations retained), four
-  audited access blockers and 36 unregistered publications. Only 44 publications
-  pass inventory/access plus all eleven source-disposition checks; 50 remain.
+- **Scientific coverage:** frozen 94-publication corpus; the latest integrated
+  projection has 150 study rows and 1,650 compact contracts. After the accepted
+  body-ownership and inaccessible-plasticity batches, 59 publications pass
+  inventory/access plus all eleven source-disposition checks; 35 remain.
+  There are 68 registered entries, 57 Methods-backed inventories, eight audited
+  access blockers and one project-lineage record, with source-version and
+  overlapping-cohort limitations retained.
   Abstract-only and partial inventories do not pass by registration alone.
   The mapper separates these states and links reviewed sources separately from
   publication DOI identity. Original Ferri 2015
   variants are separated and their conflicts with later reanalysis preserved.
-  Device-paper source conflicts reduce the legacy emulation-eligible records to
-  15; this is not a fresh all-profile execution result. The 18 GUI-ready records
+  Protocol/count conflicts leave 13 source-ready and 12 legacy emulation-eligible
+  records; this is not a fresh all-profile execution result. The 18 GUI-ready records
   remain separately labelled. A bounded foundational
   check found 11 of 12 selected antecedents; Occelli 2010 is an outside-map
   omission candidate. Do not silently change membership or claim exhaustiveness.

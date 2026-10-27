@@ -38,6 +38,7 @@ import run_ready_profile_runner_smoke as runner_smoke  # noqa: E402
 from peripersonal_space_toolkit.session_runner import (  # noqa: E402
     SessionCaptureOptions,
     SessionRunnerController,
+    _filesystem_path,
     load_run_package,
 )
 
@@ -283,6 +284,8 @@ def _run_template_context(
         }
     package = load_run_package(Path(str(materialized["session_manifest_path"])))
     package_rows = [_normalize_row(row) for block in package.blocks for row in _read_csv(block.manifest_path)]
+    if len(package_rows) != sum(block.trial_count for block in package.blocks):
+        raise RuntimeError("Prepared block manifests did not yield the complete trial inventory")
     planner = MouseClickResponsePlanner(
         record_id=record_id,
         context=context,
@@ -877,7 +880,9 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 
 def _read_csv(path: Path | str) -> list[dict[str, str]]:
-    path = Path(path)
+    # Prepared Segment 0–6 manifests can exceed MAX_PATH on Windows. Use the
+    # same filesystem path owner as the Runner instead of silently losing rows.
+    path = Path(_filesystem_path(path))
     if not path.is_file():
         return []
     with path.open(newline="", encoding="utf-8-sig") as handle:

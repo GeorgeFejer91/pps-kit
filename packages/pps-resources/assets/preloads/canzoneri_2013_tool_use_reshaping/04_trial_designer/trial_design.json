@@ -38,7 +38,7 @@
         "electrical_electrode_site": "hairy surface of the right forearm",
         "source_asset_equivalence": "procedural pink-noise proxy for unshared SoundForge files",
         "renderer_equivalence_boundary": "binaural virtual trajectory proxy for physical near/far loudspeaker intensity motion",
-        "iti_policy": "fixed 1000 ms pre-sound and 1000 ms post-sound silence reported; runner uses source-timing metadata plus toolkit block spacing",
+        "iti_policy": "fixed 1000 ms pre-sound and 1000 ms post-sound silence reported and explicitly encoded in this sequence; any additional intertrial timing is unresolved",
         "pre_sound_silence_ms": "1000",
         "post_sound_silence_ms": "1000",
         "auditory_trajectory_family": "two_speaker_dynamic_intensity_in_out",
@@ -48,6 +48,17 @@
         "tool_condition": "tool_use_pps_assessment"
       },
       "elements": [
+        {
+          "element_id": "canzoneri_2013_tool_use_reshaping-pre-sound",
+          "kind": "jitter",
+          "label": "Pre-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
+        },
         {
           "element_id": "canzoneri-tool-use-moving-sound",
           "kind": "looming_stimulus",
@@ -59,6 +70,17 @@
           ],
           "jitter_values_ms": [],
           "randomized": true
+        },
+        {
+          "element_id": "canzoneri_2013_tool_use_reshaping-post-sound",
+          "kind": "jitter",
+          "label": "Post-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
         }
       ]
     }

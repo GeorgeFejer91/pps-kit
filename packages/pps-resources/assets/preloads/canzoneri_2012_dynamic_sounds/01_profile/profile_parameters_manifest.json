@@ -54,7 +54,7 @@
         "segment": "3",
         "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
         "passed": true,
-        "field_count": 5,
+        "field_count": 6,
         "blocking_reasons": []
       },
       {
@@ -95,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 21,
+      "value": 24,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -136,17 +136,20 @@
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "jitter_values_ms",
-      "status": "defaulted",
-      "value": [],
-      "note": "No explicit jitter box is encoded."
+      "status": "reported",
+      "value": [
+        1000,
+        1000
+      ],
+      "note": "Explicit jitter values encoded."
     },
     {
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "iti_jitter_policy",
-      "status": "defaulted",
-      "value": "no explicit Segment 2 ITI/jitter box",
-      "note": "No explicit ITI/jitter box is encoded; missing ITI/jitter is only a blocker when listed as a publication gap."
+      "status": "reported",
+      "value": "jitter/iti box",
+      "note": "Segment 2 encodes explicit ITI/jitter timing values."
     },
     {
       "segment": "3",
@@ -165,6 +168,17 @@
     {
       "segment": "3",
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "tactile_cue_substitution",
+      "status": "defaulted",
+      "value": {
+        "reported_ms": 0.1,
+        "software_ms": 100
+      },
+      "note": "The shared audio-channel cue is a software substitution, not the reported physical stimulus."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "tactile_sites",
       "status": "reported",
       "value": [
@@ -177,7 +191,7 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "baseline_mode",
       "status": "reported",
-      "value": "tactile_only",
+      "value": "custom",
       "note": "Baseline strategy is encoded."
     },
     {
@@ -246,23 +260,23 @@
   "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
-      "profile_metadata": "assets/preloads/canzoneri_2012_dynamic_sounds/01_profile/profile_metadata.json",
-      "profile_parameters_manifest": "assets/preloads/canzoneri_2012_dynamic_sounds/01_profile/profile_parameters_manifest.json"
+      "profile_metadata": "packages/pps-resources/assets/preloads/canzoneri_2012_dynamic_sounds/01_profile/profile_metadata.json",
+      "profile_parameters_manifest": "packages/pps-resources/assets/preloads/canzoneri_2012_dynamic_sounds/01_profile/profile_parameters_manifest.json"
     },
     "02_looming_stimuli": {
-      "stimulus_sources": "assets/preloads/canzoneri_2012_dynamic_sounds/02_looming_stimuli/stimulus_sources.json",
-      "trajectory_inventory": "assets/preloads/canzoneri_2012_dynamic_sounds/02_looming_stimuli/trajectory_inventory.json",
+      "stimulus_sources": "packages/pps-resources/assets/preloads/canzoneri_2012_dynamic_sounds/02_looming_stimuli/stimulus_sources.json",
+      "trajectory_inventory": "packages/pps-resources/assets/preloads/canzoneri_2012_dynamic_sounds/02_looming_stimuli/trajectory_inventory.json",
       "asset_count": 2
     },
     "03_baseline_strategy": {
-      "baseline_strategy": "assets/preloads/canzoneri_2012_dynamic_sounds/03_baseline_strategy/baseline_strategy.json"
+      "baseline_strategy": "packages/pps-resources/assets/preloads/canzoneri_2012_dynamic_sounds/03_baseline_strategy/baseline_strategy.json"
     },
     "04_trial_designer": {
-      "trial_design": "assets/preloads/canzoneri_2012_dynamic_sounds/04_trial_designer/trial_design.json",
+      "trial_design": "packages/pps-resources/assets/preloads/canzoneri_2012_dynamic_sounds/04_trial_designer/trial_design.json",
       "trial_row_count": 1
     },
     "05_run_setup": {
-      "run_defaults": "assets/preloads/canzoneri_2012_dynamic_sounds/05_run_setup/run_defaults.json",
+      "run_defaults": "packages/pps-resources/assets/preloads/canzoneri_2012_dynamic_sounds/05_run_setup/run_defaults.json",
       "block_count": 2,
       "participant_count": 17
     },
@@ -277,6 +291,10 @@
     }
   },
   "provenance": [
+    {
+      "field": "trial sequence and tactile baselines",
+      "source": "PLOS ONE Methods, Procedures and Materials, paragraphs beginning 'For each trial' and 'Finally': 1000 ms silence before and after the 3000 ms sound; T0/T6 occur at 300/4600 ms from trial start, equivalent to -700/+3600 ms from sound onset. DOI 10.1371/journal.pone.0044306."
+    },
     {
       "field": "SOA values",
       "source": "PLOS ONE Methods report T1-T5 as 300, 800, 1500, 2200, and 2700 ms from sound onset."

@@ -162,3 +162,20 @@ policy, uses checked subtraction/addition from sound onset, and requires the
 complete cue within existing trial frames. It never inserts implicit padding.
 Actual cue PCM, signed CSV and verified schedule checks cover -700 ms after a
 1000-ms prefix, both trial boundaries, overflow and half-sample rounding.
+
+The compatibility trial writer also rejects complete cues outside actual WAV
+frames, including cached manifests. Explicit reported silence and derived
+software containment margins remain distinct in profile provenance. Canzoneri
+and Taffou pre/post-sound controls use the existing custom/audio-tactile baseline
+mode: the cue occurs in silence while the full trial retains its sound. Teneggi's
+template targets Experiment 3 only; its one-per-SOA preview does not supply
+unreported repetition, catch or block counts. It remains source-blocked.
+
+Native FLOAT sources cannot be FFmpeg stream-copied together with PCM silence.
+The fast path requires identical audio encoding and exact combined frame counts;
+mixed encodings use the existing decoded concatenation path. The Serino hand
+premade assets are a versioned Rust/3DTI continuous-pink proxy: four seconds at
+44.1 kHz, explicit seeds, digital peak 0.9 and inverse-square attenuation.
+Per-asset native generation sidecars bind renderer/resource/output hashes and QC.
+The derived onset origin, right-hand offset, level policy and separate 100-ms
+terminal trial margin do not establish source-envelope or physical equivalence.

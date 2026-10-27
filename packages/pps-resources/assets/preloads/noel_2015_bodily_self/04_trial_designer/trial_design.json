@@ -40,6 +40,17 @@
           ],
           "jitter_values_ms": [],
           "randomized": true
+        },
+        {
+          "element_id": "noel_2015_bodily_self-cue-tail",
+          "kind": "jitter",
+          "label": "Derived tactile-cue tail",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            100
+          ],
+          "randomized": false
         }
       ]
     }

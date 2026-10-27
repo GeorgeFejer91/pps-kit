@@ -95,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 3,
+      "value": 6,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -136,17 +136,19 @@
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "jitter_values_ms",
-      "status": "defaulted",
-      "value": [],
-      "note": "No explicit jitter box is encoded."
+      "status": "inferred",
+      "value": [
+        100
+      ],
+      "note": "Derived containment for the existing software timeline: pre=0 ms; post=max(0,max(SOA)+cue duration-source duration)=1140+100-1140=100 ms. Noel et al. 2015 Methods 2.3.2 and 2.4: the last reported sound-relative cue is 1140 ms and lasts 100 ms; exact sound offset is unreported. The current 1.14-s premade clip is a software choice. The reported 0.5-s inter-trial interval and 10-s FBI period after each triplet are separate protocol requirements, not demonstrated by this containment margin."
     },
     {
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "iti_jitter_policy",
-      "status": "defaulted",
-      "value": "no explicit Segment 2 ITI/jitter box",
-      "note": "No explicit ITI/jitter box is encoded; missing ITI/jitter is only a blocker when listed as a publication gap."
+      "status": "inferred",
+      "value": "derived software containment",
+      "note": "Derived containment for the existing software timeline: pre=0 ms; post=max(0,max(SOA)+cue duration-source duration)=1140+100-1140=100 ms. Noel et al. 2015 Methods 2.3.2 and 2.4: the last reported sound-relative cue is 1140 ms and lasts 100 ms; exact sound offset is unreported. The current 1.14-s premade clip is a software choice. The reported 0.5-s inter-trial interval and 10-s FBI period after each triplet are separate protocol requirements, not demonstrated by this containment margin."
     },
     {
       "segment": "3",
@@ -242,23 +244,23 @@
   "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
-      "profile_metadata": "assets/preloads/noel_2015_bodily_self/01_profile/profile_metadata.json",
-      "profile_parameters_manifest": "assets/preloads/noel_2015_bodily_self/01_profile/profile_parameters_manifest.json"
+      "profile_metadata": "packages/pps-resources/assets/preloads/noel_2015_bodily_self/01_profile/profile_metadata.json",
+      "profile_parameters_manifest": "packages/pps-resources/assets/preloads/noel_2015_bodily_self/01_profile/profile_parameters_manifest.json"
     },
     "02_looming_stimuli": {
-      "stimulus_sources": "assets/preloads/noel_2015_bodily_self/02_looming_stimuli/stimulus_sources.json",
-      "trajectory_inventory": "assets/preloads/noel_2015_bodily_self/02_looming_stimuli/trajectory_inventory.json",
+      "stimulus_sources": "packages/pps-resources/assets/preloads/noel_2015_bodily_self/02_looming_stimuli/stimulus_sources.json",
+      "trajectory_inventory": "packages/pps-resources/assets/preloads/noel_2015_bodily_self/02_looming_stimuli/trajectory_inventory.json",
       "asset_count": 1
     },
     "03_baseline_strategy": {
-      "baseline_strategy": "assets/preloads/noel_2015_bodily_self/03_baseline_strategy/baseline_strategy.json"
+      "baseline_strategy": "packages/pps-resources/assets/preloads/noel_2015_bodily_self/03_baseline_strategy/baseline_strategy.json"
     },
     "04_trial_designer": {
-      "trial_design": "assets/preloads/noel_2015_bodily_self/04_trial_designer/trial_design.json",
+      "trial_design": "packages/pps-resources/assets/preloads/noel_2015_bodily_self/04_trial_designer/trial_design.json",
       "trial_row_count": 1
     },
     "05_run_setup": {
-      "run_defaults": "assets/preloads/noel_2015_bodily_self/05_run_setup/run_defaults.json",
+      "run_defaults": "packages/pps-resources/assets/preloads/noel_2015_bodily_self/05_run_setup/run_defaults.json",
       "block_count": 2,
       "participant_count": 19
     },
@@ -284,6 +286,10 @@
     {
       "field": "stroking-condition blocks",
       "source": "Manual review records synchronous and asynchronous visuo-tactile stroking as separate counterbalanced blocks for the front-space chest-vibration experiment."
+    },
+    {
+      "field": "software cue containment and source limitation",
+      "source": "Noel et al. 2015 Methods 2.3.2 and 2.4: the last reported sound-relative cue is 1140 ms and lasts 100 ms; exact sound offset is unreported. The current 1.14-s premade clip is a software choice. The reported 0.5-s inter-trial interval and 10-s FBI period after each triplet are separate protocol requirements, not demonstrated by this containment margin. DOI 10.1016/j.cognition.2015.07.012."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."

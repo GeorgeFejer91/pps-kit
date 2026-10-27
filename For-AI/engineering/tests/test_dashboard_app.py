@@ -671,7 +671,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "study_templates/" in app_js
     assert "staticStateForTemplate" in app_js
     assert "DEFAULT_STUDY_TEMPLATE_ID = \"study5_box_breathing_pps\"" in app_js
-    assert "Loaded committed preload assets from GitHub" in app_js
+    assert "Premade audio is ready to prepare and preview" in app_js
     assert "Hosted mode can compose and export profiles" in app_js
     assert "Open Asset" in app_js
     assert "staticPreviewAssetForLabel" in app_js
@@ -3030,7 +3030,7 @@ def test_dashboard_sequence_bake_preserves_stereo_looming_after_mono_instruction
     custom = client.post("/api/templates/__custom__/load").json()
     sample_rate = 44100
     fixed_frames = 256
-    looming_frames = 512
+    looming_frames = 8820  # 200 ms contains the complete 100-ms tactile cue.
 
     custom["design"]["name"] = "Mono first stereo sequence"
     custom = client.post("/api/design", json={"design": custom["design"]}).json()
@@ -3140,7 +3140,7 @@ def test_dashboard_auditory_only_trials_are_stereo_response_trials(tmp_path: Pat
     client = _client(tmp_path)
     custom = client.post("/api/templates/__custom__/load").json()
     sample_rate = 44100
-    looming_frames = 256
+    looming_frames = 8820  # Keep the accompanying tactile trial physically complete.
     stereo_looming = np.column_stack(
         [
             np.linspace(0.05, 0.20, looming_frames, dtype=np.float32),
@@ -3873,7 +3873,7 @@ def test_dashboard_preserves_row_contract_fields_and_strip_soas_through_block_cs
     client = _client(tmp_path)
     custom = client.post("/api/templates/__custom__/load").json()
     sample_rate = 44100
-    frames = int(0.10 * sample_rate)
+    frames = int(0.20 * sample_rate)  # 5-ms SOA plus the complete 100-ms cue.
 
     near = _register_segment1_wav(
         client,

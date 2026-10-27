@@ -57,7 +57,7 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 | ferri_2015_ecological_looming_valence | B | blocked_missing_parameters | licensed ecological sounds; exact amplitude envelopes |
 | serino_2007_blind_cane_users | - | blocked_missing_parameters | exact white-noise source asset, seed, and spectral recipe; exact electrical tactile pulse duration, waveform, current, and electrode impedance calibration; exact ITI or jitter distribution and numeric response window |
 | taffou_2014_cynophobic_rear_looming | - | blocked_missing_parameters | exact dog/sheep source audio and Audacity amplitude/dynamic matching settings; LISTEN HRTF subject/filter identifier and renderer settings |
-| teneggi_2013_social_face_pps | - | blocked_missing_parameters | exact distance/timing table from supplement |
+| teneggi_2013_social_face_pps | - | blocked_missing_parameters | Experiment 3 exact repetition, integer catch and block counts are unreported; preview counts are software defaults; exact original pink-noise intensity envelope and speaker transfer; premade Gaussian burst train is a source substitution; 100-microsecond electrical pulse and voice-key response capture require external apparatus |
 
 ## Toolkit structural gap
 
