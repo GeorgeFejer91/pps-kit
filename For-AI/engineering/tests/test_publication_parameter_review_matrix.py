@@ -1477,6 +1477,15 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         index = read_csv(self.output_dir / "study_instance_index.csv")[1]
         self.assertEqual(next(row for row in index if row["study_row_id"] == ids[0])["parameter_evidence_scope"], "composite_requires_split")
 
+    def test_teneggi_template_association_is_experiment_three_only(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        studies = {row["studyRowId"]: row for row in data["studies"]}
+        node = "doi:10.1016/j.cub.2013.01.043"
+        self.assertEqual(studies[node + "::a"]["templateIds"], [])
+        self.assertEqual(studies[node + "::b"]["templateIds"], [])
+        self.assertEqual(studies[node + "::c"]["templateIds"], ["teneggi_2013_social_face_pps"])
+        self.assertEqual(studies[node + "::c"]["nativeQualification"], "not_assessed")
+
     def test_canzoneri_controls_retain_sound_and_localizer_is_adjacent(self) -> None:
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
         node = "doi:10.1371/journal.pone.0044306"

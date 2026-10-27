@@ -31,22 +31,22 @@ toolkit_implementation,1,KIT.S1.source_stimulus_inventory,Source stimulus invent
 toolkit_implementation,1,KIT.S1.trajectory_snapshots,Trajectory snapshots,94,74,0.7872340425531915,"{""encoded"":20,""no_profile"":74}",create_profile_after_evidence_review
 toolkit_implementation,1,KIT.S1.stimulus_duration,Stimulus duration,94,74,0.7872340425531915,"{""encoded"":20,""no_profile"":74}",create_profile_after_evidence_review
 toolkit_implementation,2,KIT.S2.trial_sequence_rows,Trial sequence rows,94,74,0.7872340425531915,"{""encoded"":20,""no_profile"":74}",create_profile_after_evidence_review
-toolkit_implementation,2,KIT.S2.jitter_values_ms,Jitter values,94,94,1,"{""defaulted"":20,""no_profile"":74}",create_profile_after_evidence_review
-toolkit_implementation,2,KIT.S2.iti_jitter_policy,ITI/jitter policy,94,94,1,"{""defaulted"":20,""no_profile"":74}",create_profile_after_evidence_review
-toolkit_implementation,3,KIT.S3.soa_values_ms,SOA values,94,74,0.7872340425531915,"{""encoded"":20,""no_profile"":74}",create_profile_after_evidence_review
+toolkit_implementation,2,KIT.S2.jitter_values_ms,Jitter values,94,91,0.9680851063829787,"{""defaulted"":11,""encoded"":3,""inferred"":5,""mixed"":1,""no_profile"":74}",create_profile_after_evidence_review
+toolkit_implementation,2,KIT.S2.iti_jitter_policy,ITI/jitter policy,94,91,0.9680851063829787,"{""defaulted"":11,""encoded"":3,""inferred"":5,""mixed"":1,""no_profile"":74}",create_profile_after_evidence_review
+toolkit_implementation,3,KIT.S3.soa_values_ms,SOA values,94,76,0.8085106382978723,"{""encoded"":18,""inferred"":1,""mixed"":1,""no_profile"":74}",create_profile_after_evidence_review
 toolkit_implementation,3,KIT.S3.tactile_sites,Tactile sites,94,74,0.7872340425531915,"{""encoded"":20,""no_profile"":74}",create_profile_after_evidence_review
 toolkit_implementation,3,KIT.S3.baseline_mode,Baseline mode,94,74,0.7872340425531915,"{""encoded"":20,""no_profile"":74}",create_profile_after_evidence_review
-toolkit_implementation,3,KIT.S3.baseline_count,Baseline count,94,80,0.851063829787234,"{""defaulted"":6,""encoded"":14,""no_profile"":74}",create_profile_after_evidence_review
-toolkit_implementation,3,KIT.S3.catch_mode,Catch mode,94,76,0.8085106382978723,"{""defaulted"":2,""encoded"":18,""no_profile"":74}",create_profile_after_evidence_review
-toolkit_implementation,4,KIT.S4.trial_pool_repetitions,Trial-pool repetitions,94,85,0.9042553191489362,"{""encoded"":9,""inferred"":11,""no_profile"":74}",create_profile_after_evidence_review
-toolkit_implementation,5,KIT.S5.block_count,Block count,94,74,0.7872340425531915,"{""encoded"":20,""no_profile"":74}",create_profile_after_evidence_review
+toolkit_implementation,3,KIT.S3.baseline_count,Baseline count,94,81,0.8617021276595744,"{""defaulted"":7,""encoded"":13,""no_profile"":74}",create_profile_after_evidence_review
+toolkit_implementation,3,KIT.S3.catch_mode,Catch mode,94,77,0.8191489361702128,"{""defaulted"":3,""encoded"":17,""no_profile"":74}",create_profile_after_evidence_review
+toolkit_implementation,4,KIT.S4.trial_pool_repetitions,Trial-pool repetitions,94,85,0.9042553191489362,"{""defaulted"":1,""encoded"":9,""inferred"":10,""no_profile"":74}",create_profile_after_evidence_review
+toolkit_implementation,5,KIT.S5.block_count,Block count,94,75,0.7978723404255319,"{""defaulted"":1,""encoded"":19,""no_profile"":74}",create_profile_after_evidence_review
 toolkit_implementation,5,KIT.S5.row_order_constraints,Row/order constraints,94,74,0.7872340425531915,"{""encoded"":20,""no_profile"":74}",create_profile_after_evidence_review
 toolkit_implementation,6,KIT.S6.participants,Legacy order-preview count,94,74,0.7872340425531915,"{""encoded"":20,""no_profile"":74}",create_profile_after_evidence_review
 toolkit_implementation,6,KIT.S6.experiment_parts,Experiment parts,94,94,1,"{""defaulted"":20,""no_profile"":74}",create_profile_after_evidence_review
 toolkit_implementation,0,KIT.S0.profile_gap,Segment 0 profile gap,94,78,0.8297872340425532,"{""gap_defaulted"":2,""gap_missing"":1,""mixed"":1,""no_profile"":74,""none"":16}",create_profile_after_evidence_review
-toolkit_implementation,1,KIT.S1.profile_gap,Segment 1 profile gap,94,77,0.8191489361702128,"{""gap_missing"":3,""no_profile"":74,""none"":17}",create_profile_after_evidence_review
-toolkit_implementation,2,KIT.S2.profile_gap,Segment 2 profile gap,94,75,0.7978723404255319,"{""gap_missing"":1,""no_profile"":74,""none"":19}",create_profile_after_evidence_review
-toolkit_implementation,3,KIT.S3.profile_gap,Segment 3 profile gap,94,75,0.7978723404255319,"{""gap_missing"":1,""no_profile"":74,""none"":19}",create_profile_after_evidence_review
+toolkit_implementation,1,KIT.S1.profile_gap,Segment 1 profile gap,94,78,0.8297872340425532,"{""gap_missing"":4,""no_profile"":74,""none"":16}",create_profile_after_evidence_review
+toolkit_implementation,2,KIT.S2.profile_gap,Segment 2 profile gap,94,76,0.8085106382978723,"{""gap_missing"":2,""no_profile"":74,""none"":18}",create_profile_after_evidence_review
+toolkit_implementation,3,KIT.S3.profile_gap,Segment 3 profile gap,94,76,0.8085106382978723,"{""gap_missing"":2,""no_profile"":74,""none"":18}",create_profile_after_evidence_review
 toolkit_implementation,4,KIT.S4.profile_gap,Segment 4 profile gap,94,74,0.7872340425531915,"{""no_profile"":74,""none"":20}",create_profile_after_evidence_review
 toolkit_implementation,5,KIT.S5.profile_gap,Segment 5 profile gap,94,75,0.7978723404255319,"{""gap_defaulted"":1,""no_profile"":74,""none"":19}",create_profile_after_evidence_review
 toolkit_implementation,6,KIT.S6.profile_gap,Segment 6 profile gap,94,77,0.8191489361702128,"{""gap_defaulted"":3,""no_profile"":74,""none"":17}",create_profile_after_evidence_review
