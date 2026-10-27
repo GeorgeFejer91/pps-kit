@@ -979,6 +979,73 @@ impl AppRuntime {
             .map_err(|_| "runtime_unavailable")?
     }
 
+    pub async fn adopt_verified_group_async(
+        &self,
+        verified: pps_session_package::VerifiedPreparedGroup,
+    ) -> Result<RunnerSnapshot, &'static str> {
+        let package =
+            verified_package_projection(verified.parts().first().ok_or("prepared_group_empty")?)?;
+        self.0
+            .authority
+            .adopt_verified_group(
+                verified,
+                package,
+                PairingSecret::generate(),
+                format!("session_{}", &random_nonce()[..18]),
+                u64::from(random_epoch()),
+            )
+            .await
+            .map_err(|_| "runtime_unavailable")?
+    }
+
+    pub async fn native_group_status(
+        &self,
+    ) -> Result<crate::execution_owner::NativeGroupStatus, &'static str> {
+        self.0
+            .authority
+            .group_status()
+            .await
+            .map_err(|_| "runtime_unavailable")
+    }
+
+    pub async fn advance_verified_group_part_async(
+        &self,
+        expected_revision: u64,
+    ) -> Result<RunnerSnapshot, &'static str> {
+        let source = self
+            .0
+            .authority
+            .group_advance_source(expected_revision)
+            .await
+            .map_err(|_| "runtime_unavailable")??;
+        let native_path = source.manifest().path().to_owned();
+        let verified = tauri::async_runtime::spawn_blocking(move || {
+            pps_session_package::verify_prepared_group(&native_path)
+        })
+        .await
+        .map_err(|_| "prepared_group_verification_failed")?
+        .map_err(|_| "prepared_group_verification_failed")?;
+        if source.as_ref() != &verified {
+            return Err("prepared_group_replaced");
+        }
+        // The V1 group has exactly two ordered parts; no UI path or part ID selects the successor.
+        let package =
+            verified_package_projection(verified.parts().get(1).ok_or("prepared_group_complete")?)?;
+        self.0
+            .authority
+            .advance_verified_group(
+                expected_revision,
+                source,
+                verified,
+                package,
+                PairingSecret::generate(),
+                format!("session_{}", &random_nonce()[..18]),
+                u64::from(random_epoch()),
+            )
+            .await
+            .map_err(|_| "runtime_unavailable")?
+    }
+
     pub async fn adopt_verified_session_async(
         &self,
         verified: VerifiedPreparedSession,
@@ -1524,6 +1591,7 @@ fn validate_owner_request(session_id: &str, owner_token: &str) -> Result<(), Rem
 #[cfg(test)]
 mod tests {
     use super::*;
+    include!("instruction_tests.rs");
     use crate::{
         latency_diagnostics::{LatencyStage, TraceOutcome},
         native_output::{
