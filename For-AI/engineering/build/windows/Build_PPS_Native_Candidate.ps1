@@ -73,6 +73,30 @@ try {
         signing='unsigned'; webview2='offlineInstaller'; python_runtime=$false }
     if ($ValidateOnly) { $Preflight | ConvertTo-Json -Depth 8; return }
     New-Item -ItemType Directory -Path $OutputDirectory | Out-Null
+    # CAB-extracted Microsoft notices can be read-only. Tauri preserves that
+    # attribute when copying resources, which otherwise breaks the next build.
+    # Normalize only our staging copies; preserve the pinned source inputs.
+    $StagedRuntime = Join-Path $OutputDirectory 'native-runtime'
+    New-Item -ItemType Directory -Path $StagedRuntime | Out-Null
+    foreach ($File in $RuntimeLock.files) {
+        $Copy = Join-Path $StagedRuntime $File.file
+        Copy-Item -LiteralPath (Join-Path $RuntimeDirectory $File.file) -Destination $Copy
+        (Get-Item -LiteralPath $Copy).IsReadOnly = $false
+        if ((Hash $Copy) -ne $File.sha256) { throw "Staged runtime mismatch: $($File.file)" }
+        # Repair an identical read-only build resource left by an older builder.
+        $RelativeTarget = if ($File.kind -eq 'license') { 'licenses/' + $File.file } else { $File.file }
+        $OldTarget = Join-Path $Root ('target/release/' + $RelativeTarget)
+        if (Test-Path -LiteralPath $OldTarget -PathType Leaf) {
+            $OldItem = Get-Item -LiteralPath $OldTarget
+            if ($OldItem.IsReadOnly) {
+                for ($Ancestor = $OldItem; $Ancestor.FullName -ne $Root; $Ancestor = Get-Item -LiteralPath (Split-Path -Parent $Ancestor.FullName)) {
+                    if ($Ancestor.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Refusing to modify a linked build resource.' }
+                }
+                if ((Hash $OldTarget) -ne $File.sha256) { throw "Read-only build resource differs from the lock: $RelativeTarget" }
+                $OldItem.IsReadOnly = $false
+            }
+        }
+    }
     foreach ($Frontend in @('apps/runner','apps/designer/frontend')) {
         Invoke-Npm @('--prefix', $Frontend, 'ci')
         Invoke-Npm @('--prefix', $Frontend, 'run', 'build')
@@ -88,7 +112,7 @@ try {
     foreach ($App in @(@{name='designer'; config=$Designer}, @{name='runner'; config=$Runner}) | Where-Object { $_.name -in $Apps }) {
         $Resources = @{}
         foreach ($File in $RuntimeLock.files) {
-            $InputFile = Join-Path $RuntimeDirectory $File.file
+            $InputFile = Join-Path $StagedRuntime $File.file
             if ($File.kind -eq 'license') { $Resources[$InputFile] = ('licenses/' + $File.file) }
             elseif ($File.app_root) { $Resources[$InputFile] = $File.file }
             if ($App.name -eq 'designer' -and $File.kind -eq 'dll') {
